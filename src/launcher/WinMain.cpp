@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * */
 
-#include <ML/Core/Config.hpp>
+#include <libmeme/Config.hpp>
 
 #ifdef ML_SYSTEM_WINDOWS
 

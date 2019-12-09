@@ -1,11 +1,11 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group "Vendor"
+group "vendor"
 project "glfw"
 	targetname 		"%{prj.name}"
-	location		"%{prj_dir}vendor/%{prj.name}/"
 	targetdir		"%{bin_lib}"
 	objdir			"%{bin_obj}"
+	location		"%{prj_dir}vendor/%{prj.name}/"
 	kind			"StaticLib"
 	language		"C++"
 	cppdialect 		"C++17"

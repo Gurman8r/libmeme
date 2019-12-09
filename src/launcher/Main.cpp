@@ -1,10 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <ML/Core/EventSystem.hpp>
-#include <ML/Editor/Editor.hpp>
-#include <ML/Engine/Engine.hpp>
-#include <ML/Core/Debug.hpp>
-#include <ML/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Editor/Editor.hpp>
+#include <libmeme/Engine/Engine.hpp>
+#include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/PerformanceTracker.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

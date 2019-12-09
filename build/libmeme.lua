@@ -1,11 +1,11 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group "ML"
+group "libmeme"
 project "libmeme"
 	targetname 		"%{prj.name}"
 	targetdir		"%{bin_lib}"
 	objdir			"%{bin_obj}"
-	location		"%{prj_dir}ML/%{prj.name}/"
+	location		"%{prj_dir}libmeme/%{prj.name}/"
 	kind			"SharedLib"
 	language		"C++"
 	cppdialect 		"C++17"
@@ -50,8 +50,8 @@ project "libmeme"
 		"%{sln_dir}build/%{prj.name}.lua",
 		"%{sln_dir}build/%{prj.name}.lua",
 		"%{sln_dir}assets/**.**", 
-		"%{sln_dir}include/ML/**.hpp",
-		"%{sln_dir}src/ML/**.cpp",
+		"%{sln_dir}include/libmeme/**.hpp",
+		"%{sln_dir}src/libmeme/**.cpp",
 		"%{sln_dir}tools/**.**",
 		"%{sln_dir}libmeme.ini", 
 		"%{sln_dir}premake5.lua",

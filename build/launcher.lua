@@ -1,11 +1,11 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group "ML"
-project "main"
+group "libmeme"
+project "launcher"
 	targetname 		"%{prj.name}"
 	targetdir		"%{bin_lib}"
 	objdir			"%{bin_obj}"
-	location		"%{prj_dir}%{prj.name}/"
+	location		"%{prj_dir}libmeme/%{prj.name}/"
 	debugdir 		"%{bin_out}"
 	language		"C++"
 	cppdialect 		"C++17"
