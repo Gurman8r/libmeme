@@ -12,7 +12,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type = typename mask8_t;
+		using base_type = typename mask16_t;
 		using self_type = typename WindowStyle;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,7 +26,8 @@ namespace ml
 			AutoIconify,
 			Floating,
 			Maximized,
-			DoubleBuffered,
+			Fullscreen,
+			VerticalSync,
 		};
 
 		static constexpr Flag Flag_values[] = {
@@ -37,7 +38,8 @@ namespace ml
 			Flag::AutoIconify,
 			Flag::Floating,
 			Flag::Maximized,
-			Flag::DoubleBuffered,
+			Flag::Fullscreen,
+			Flag::VerticalSync,
 		};
 
 		static constexpr C_String Flag_names[] = {
@@ -48,7 +50,8 @@ namespace ml
 			"AutoIconify",
 			"Floating",
 			"Maximized",
-			"Double Buffered"
+			"Fullscreen",
+			"VerticalSync",
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,9 +69,18 @@ namespace ml
 			bool autoIconify,
 			bool floating,
 			bool maximized, 
-			bool doubleBuffer
+			bool fullscreen,
+			bool vertical_sync
 		) : self_type{ base_type { {
-			resizable, visible, decorated, focused, autoIconify, floating, maximized, doubleBuffer
+			resizable, 
+			visible, 
+			decorated, 
+			focused, 
+			autoIconify, 
+			floating, 
+			maximized, 
+			fullscreen, 
+			vertical_sync
 		} } }
 		{
 		}
@@ -91,14 +103,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bool resizable()		const { return m_data[Resizable]; }
-		constexpr bool visible()		const { return m_data[Visible]; }
-		constexpr bool decorated()		const { return m_data[Decorated]; }
-		constexpr bool focused()		const { return m_data[Focused]; }
-		constexpr bool autoIconify()	const { return m_data[AutoIconify]; }
-		constexpr bool floating()		const { return m_data[Floating]; }
-		constexpr bool maximized()		const { return m_data[Maximized]; }
-		constexpr bool doubleBuffered()	const { return m_data[DoubleBuffered]; }
+		constexpr bool resizable()		const { return m_data[Flag::Resizable]; }
+		constexpr bool visible()		const { return m_data[Flag::Visible]; }
+		constexpr bool decorated()		const { return m_data[Flag::Decorated]; }
+		constexpr bool focused()		const { return m_data[Flag::Focused]; }
+		constexpr bool autoIconify()	const { return m_data[Flag::AutoIconify]; }
+		constexpr bool floating()		const { return m_data[Flag::Floating]; }
+		constexpr bool maximized()		const { return m_data[Flag::Maximized]; }
+		constexpr bool fullscreen()		const { return m_data[Flag::Fullscreen]; }
+		constexpr bool vertical_sync()	const { return m_data[Flag::VerticalSync]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -2,7 +2,7 @@
 #define _ML_KEY_CODE_HPP_
 
 #include <libmeme/Window/Export.hpp>
-#include <libmeme/Core/StandardLib.hpp>
+#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {

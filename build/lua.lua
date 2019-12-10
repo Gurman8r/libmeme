@@ -3,7 +3,7 @@
 group "vendor"
 project "lua"
 	targetname 		"%{prj.name}"
-	targetdir		"%{bin_lib}"
+	targetdir		"%{bin_lib}/%{cfg.platform}/%{cfg.buildcfg}/"
 	objdir			"%{bin_obj}"
 	location		"%{prj_dir}vendor/%{prj.name}/"
 	kind			"StaticLib"

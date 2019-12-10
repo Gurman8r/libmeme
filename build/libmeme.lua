@@ -1,9 +1,9 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group "libmeme"
+group ""
 project "libmeme"
 	targetname 		"%{prj.name}"
-	targetdir		"%{bin_lib}"
+	targetdir		"%{bin_lib}/%{cfg.platform}/%{cfg.buildcfg}/"
 	objdir			"%{bin_obj}"
 	location		"%{prj_dir}libmeme/%{prj.name}/"
 	kind			"SharedLib"
@@ -54,11 +54,12 @@ project "libmeme"
 		"%{sln_dir}src/libmeme/**.cpp",
 		"%{sln_dir}tools/**.**",
 		"%{sln_dir}libmeme.ini", 
+		"%{sln_dir}libmeme.py", 
 		"%{sln_dir}premake5.lua",
 		"%{sln_dir}README.md",
 	}
 	libdirs {
-		"%{bin_lib}", "%{bin_lib}%{cfg.buildcfg}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
+		"%{bin_lib}", "%{bin_lib}%{cfg.platform}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
@@ -67,11 +68,19 @@ project "libmeme"
 		"assimp", "IrrXML", "zlibstatic", "freetype",
 	}
 	
+	filter { "system:Windows" }
+		includedirs { "%{ext_dir}cpython/PC" }
+		links { "ws2_32" }
+		postbuildcommands {	
+			"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
+			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\assimp.dll %{bin_out}",
+		}
+	
 	filter { "system:Windows", "configurations:Debug" }
 		symbols "On"
 		links { "python39_d" }
 		postbuildcommands {	
-			"%{ml_copy} %{ext_bin}%{cfg.buildcfg}\\%{cfg.platform}\\python39_d.dll %{bin_out}",
+			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39_d.dll %{bin_out}",
 		}
 		linkoptions {
 			"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib"
@@ -81,21 +90,10 @@ project "libmeme"
 		optimize "Speed"
 		links { "python39" }
 		postbuildcommands {	
-			"%{ml_copy} %{ext_bin}%{cfg.buildcfg}\\%{cfg.platform}\\python39.dll %{bin_out}",
+			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39.dll %{bin_out}",
 		}
 		linkoptions {
 			"/NODEFAULTLIB:LIBCMT.lib"
 		}
-	
-	filter { "system:Windows" }
-		includedirs { "%{ext_dir}cpython/PC" }
-		links { "ws2_32" }
-		postbuildcommands {	
-			"%{ml_copy} %{bin_lib}%{prj.name}.dll %{bin_out}",
-			"%{ml_copy} %{ext_bin}OpenAL32.dll %{bin_out}",
-			"%{ml_copy} %{ext_bin}%{cfg.buildcfg}\\pdcurses.dll %{bin_out}",
-			"%{ml_copy} %{ext_bin}%{cfg.buildcfg}\\%{cfg.platform}\\assimp.dll %{bin_out}",
-		}
-		
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

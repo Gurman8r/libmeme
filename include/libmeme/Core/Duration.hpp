@@ -2,7 +2,6 @@
 #define _ML_DURATION_HPP_
 
 #include <libmeme/Core/Ratio.hpp>
-#include <libmeme/Core/StandardLib.hpp>
 
 namespace ml
 {

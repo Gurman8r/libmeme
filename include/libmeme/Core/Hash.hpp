@@ -1,7 +1,7 @@
 #ifndef _ML_HASH_HPP_
 #define _ML_HASH_HPP_
 
-#include <libmeme/Core/StandardLib.hpp>
+#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {
@@ -50,6 +50,29 @@ namespace ml
 		{
 			return (*this)(value, (N - 1));
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <
+			template <class, class> class Arr,
+			class Ch,
+			class Tr
+		> constexpr hash_t operator()(Arr<Ch, Tr> const & value) noexcept
+		{
+			return (*this)(value.data(), value.size());
+		}
+
+		template <
+			template <class, class, class> class Arr,
+			class Ch,
+			class Tr,
+			class Al
+		> constexpr hash_t operator()(Arr<Ch, Tr, Al> const & value) noexcept
+		{
+			return (*this)(value.data(), value.size());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr hash_t const & operator()() const noexcept
 		{

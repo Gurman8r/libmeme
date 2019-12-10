@@ -59,6 +59,12 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
+		class T
+	> static constexpr auto typeof_v{ typeof<T>{} };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <
 		class ... T
 	> inline ML_SERIALIZE(std::ostream & out, typeof<T...> const & value)
 	{

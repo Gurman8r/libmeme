@@ -2,7 +2,7 @@
 #define _ML_SIZE_OF_HPP_
 
 #include <libmeme/Core/Ratio.hpp>
-#include <libmeme/Core/String.hpp>
+#include <libmeme/Core/StringUtility.hpp>
 
 namespace ml
 {
@@ -69,9 +69,9 @@ namespace ml
 		constexpr uint64_t	size()		const { return m_size; }
 		constexpr C_String	name()		const { return m_name; }
 
-		inline String str() const
+		inline std::string str() const
 		{
-			return m_size ? ((String)std::to_string(m_size) + m_name) : m_name;
+			return m_size ? ((std::string)std::to_string(m_size) + m_name) : m_name;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

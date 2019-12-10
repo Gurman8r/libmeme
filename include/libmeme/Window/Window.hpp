@@ -1,6 +1,7 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
+#include <libmeme/Core/Core.hpp>
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
@@ -25,18 +26,18 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using CharFun			= typename void(*)(void * , uint32_t);
-		using CursorEnterFun	= typename void(*)(void * , int32_t);
-		using CursorPosFun		= typename void(*)(void * , float64_t, float64_t);
+		using CharFun			= typename void(*)(void *, uint32_t);
+		using CursorEnterFun	= typename void(*)(void *, int32_t);
+		using CursorPosFun		= typename void(*)(void *, float64_t, float64_t);
 		using ErrorFun			= typename void(*)(int32_t, C_String);
-		using FrameSizeFun		= typename void(*)(void * , int32_t, int32_t);
-		using KeyFun			= typename void(*)(void * , int32_t, int32_t, int32_t, int32_t);
-		using MouseFun			= typename void(*)(void * , int32_t, int32_t, int32_t);
-		using ScrollFun			= typename void(*)(void * , float64_t, float64_t);
-		using CloseFun			= typename void(*)(void * );
-		using FocusFun			= typename void(*)(void * , int32_t);
-		using PositionFun		= typename void(*)(void * , int32_t, int32_t);
-		using SizeFun			= typename void(*)(void * , int32_t, int32_t);
+		using FrameSizeFun		= typename void(*)(void *, int32_t, int32_t);
+		using KeyFun			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
+		using MouseFun			= typename void(*)(void *, int32_t, int32_t, int32_t);
+		using ScrollFun			= typename void(*)(void *, float64_t, float64_t);
+		using CloseFun			= typename void(*)(void *);
+		using FocusFun			= typename void(*)(void *, int32_t);
+		using PositionFun		= typename void(*)(void *, int32_t, int32_t);
+		using SizeFun			= typename void(*)(void *, int32_t, int32_t);
 		using ProcFun			= typename void *(*)(void);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,15 +49,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
-			String const & title, 
+			std::string const & title, 
 			VideoMode const & videoMode,
-			WindowStyle const & style,
+			WindowStyle const & settings,
 			ContextSettings const & context
 		);
-
-		virtual void installCallbacks();
-
-		virtual bool dispose();
 
 		virtual void onEvent(Event const & value) override;
 
@@ -65,7 +62,7 @@ namespace ml
 		Window & close();
 		
 		Window & destroy();
-		
+
 		Window & iconify();
 		
 		Window & makeContextCurrent();
@@ -80,7 +77,7 @@ namespace ml
 
 		Window & setCentered();
 		
-		Window & setClipboardString(String const & value);
+		Window & setClipboardString(std::string const & value);
 		
 		Window & setCursor(void * value);
 		
@@ -98,9 +95,11 @@ namespace ml
 		
 		Window & setSize(vec2u const & value);
 		
-		Window & setTitle(String const & value);
+		Window & setTitle(std::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool dispose();
 
 		bool isFocused() const;
 		
@@ -146,13 +145,13 @@ namespace ml
 
 		inline auto getShare() const -> void * { return m_share; }
 		
-		inline auto getSize() const -> vec2u const & { return getVideoMode().size; }
-		
+		inline auto getSize() const -> vec2u const & { return getVideo().size; }
+
 		inline auto getStyle() const -> WindowStyle const & { return m_style; }
 		
-		inline auto getTitle() const -> String const & { return m_title; }
+		inline auto getTitle() const -> std::string const & { return m_title; }
 		
-		inline auto getVideoMode() const -> VideoMode const & { return m_videoMode; }
+		inline auto getVideo() const -> VideoMode const & { return m_video; }
 		
 		inline auto getWidth() const -> uint32_t { return getSize()[0]; }
 
@@ -181,6 +180,8 @@ namespace ml
 		static void makeContextCurrent(void * value);
 
 		static void pollEvents();
+
+		static ErrorFun setErrorCallback(ErrorFun value);
 		
 		static void swapInterval(int32_t value);
 
@@ -191,7 +192,6 @@ namespace ml
 		CharFun			setCharCallback			(CharFun		value);
 		CursorEnterFun	setCursorEnterCallback	(CursorEnterFun value);
 		CursorPosFun	setCursorPosCallback	(CursorPosFun	value);
-		ErrorFun		setErrorCallback		(ErrorFun		value);
 		FrameSizeFun	setFrameSizeCallback	(FrameSizeFun	value);
 		KeyFun			setKeyCallback			(KeyFun			value);
 		MouseFun		setMouseCallback		(MouseFun		value);
@@ -204,17 +204,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		void * 		m_window;		//
-		void * 		m_monitor;		//
-		void * 		m_share;		//
-		ContextSettings	m_context;		//
-		WindowStyle		m_style;		//
-		VideoMode		m_videoMode;	//
-		String			m_title;		//
+		void * 			m_window;
+		void * 			m_monitor;
+		void * 			m_share;
+		ContextSettings	m_context;
+		WindowStyle		m_style;
+		VideoMode		m_video;
+		std::string		m_title;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */
 }
+
 #endif // !_ML_WINDOW_HPP_

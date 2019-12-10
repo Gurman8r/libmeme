@@ -51,20 +51,20 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Window::Window()
-		: m_window		{ nullptr }
-		, m_monitor		{ nullptr }
-		, m_share		{ nullptr }
-		, m_title		{}
-		, m_context		{}
-		, m_style		{}
-		, m_videoMode	{}
+		: m_window	{ nullptr }
+		, m_monitor	{ nullptr }
+		, m_share	{ nullptr }
+		, m_title	{}
+		, m_context	{}
+		, m_style	{}
+		, m_video	{}
 	{
-#ifdef ML_SYSTEM_WINDOWS
-		if (HWND window { GetConsoleWindow() })
+#if defined(ML_SYSTEM_WINDOWS)
+		if (HWND window{ ::GetConsoleWindow() })
 		{
-			if (HMENU menu { GetSystemMenu(window, false) })
+			if (HMENU menu{ ::GetSystemMenu(window, false) })
 			{
-				EnableMenuItem(menu, SC_CLOSE, MF_GRAYED);
+				::EnableMenuItem(menu, SC_CLOSE, MF_GRAYED);
 			}
 		}
 #endif
@@ -78,12 +78,12 @@ namespace ml
 	{
 		this->dispose();
 
-#ifdef ML_SYSTEM_WINDOWS
-		if (HWND window { GetConsoleWindow() })
+#if defined(ML_SYSTEM_WINDOWS)
+		if (HWND window{ ::GetConsoleWindow() })
 		{
-			if (HMENU menu { GetSystemMenu(window, false) })
+			if (HMENU menu{ ::GetSystemMenu(window, false) })
 			{
-				EnableMenuItem(menu, SC_CLOSE, MF_ENABLED);
+				::EnableMenuItem(menu, SC_CLOSE, MF_ENABLED);
 			}
 		}
 #endif
@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(String const & title, VideoMode const & videoMode, WindowStyle const & style, ContextSettings const & context)
+	bool Window::create(std::string const & title, VideoMode const & video, WindowStyle const & style, ContextSettings const & context)
 	{
 		if (m_window)
 		{
@@ -106,10 +106,9 @@ namespace ml
 
 		// Set Data
 		m_title		= title;
-		m_videoMode = videoMode;
+		m_video		= video;
 		m_context	= context;
 		m_style		= style;
-
 
 		glfwWindowHint(GLFW_CLIENT_API,				GLFW_OPENGL_API);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	m_context.major);
@@ -125,7 +124,7 @@ namespace ml
 		glfwWindowHint(GLFW_AUTO_ICONIFY,			m_style.autoIconify());
 		glfwWindowHint(GLFW_FLOATING,				m_style.floating());
 		glfwWindowHint(GLFW_MAXIMIZED,				m_style.maximized());
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_style.doubleBuffered());
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_style.vertical_sync());
 
 		glfwWindowHint(GLFW_OPENGL_PROFILE, 
 			(m_context.profile == 0
@@ -148,11 +147,13 @@ namespace ml
 		{
 			this->makeContextCurrent();
 
-			this->installCallbacks();
-
 			this->setCursorMode(Cursor::Mode::Normal);
 
-			if (this->getStyle().maximized())
+			if (m_style.fullscreen())
+			{
+				this->setFullscreen(true); // Fullscreen
+			}
+			else if (m_style.maximized())
 			{
 				this->maximize(); // Maximized
 			}
@@ -164,79 +165,6 @@ namespace ml
 			return true;
 		}
 		return false;
-	}
-
-	void Window::installCallbacks()
-	{
-		setCharCallback([](void *, uint32_t c)
-		{
-			ML_EventSystem.fireEvent<CharEvent>(c);
-		});
-
-		setCursorEnterCallback([](void *, int32_t entered)
-		{
-			ML_EventSystem.fireEvent<CursorEnterEvent>(entered);
-		});
-
-		setCursorPosCallback([](void *, float64_t x, float64_t y)
-		{
-			ML_EventSystem.fireEvent<CursorPosEvent>(x, y);
-		});
-
-		setErrorCallback([](int32_t code, C_String desc)
-		{
-#if (ML_DEBUG)
-			std::cerr << "GLFW Error " << code << ": \'" << desc << "\'" << '\n';
-#endif
-			ML_EventSystem.fireEvent<WindowErrorEvent>(code, desc);
-		});
-
-		setFrameSizeCallback([](void *, int32_t w, int32_t h)
-		{
-			ML_EventSystem.fireEvent<FrameSizeEvent>(w, h);
-		});
-
-		setKeyCallback([](void *, int32_t button, int32_t scan, int32_t action, int32_t mods)
-		{
-			ML_EventSystem.fireEvent<KeyEvent>(button, scan, action, mask8_t { {
-				(mods & ML_MOD_SHIFT),
-				(mods & ML_MOD_CTRL),
-				(mods & ML_MOD_ALT),
-				(mods & ML_MOD_SUPER),
-				(mods & ML_MOD_CAPSLOCK),
-				(mods & ML_MOD_NUMLOCK)
-			} });
-		});
-
-		setMouseCallback([](void *, int32_t button, int32_t action, int32_t mods)
-		{
-			ML_EventSystem.fireEvent<MouseEvent>(button, action, mods);
-		});
-		
-		setScrollCallback([](void *, float64_t x, float64_t y)
-		{
-			ML_EventSystem.fireEvent<ScrollEvent>(x, y);
-		});
-
-		setWindowCloseCallback([](void *)
-		{
-			ML_EventSystem.fireEvent<WindowCloseEvent>();
-		});
-
-		setWindowFocusCallback([](void *, int32_t focused)
-		{
-			ML_EventSystem.fireEvent<WindowFocusEvent>(focused);
-		});
-		
-		setWindowPosCallback([](void *, int32_t x, int32_t y)
-		{
-			ML_EventSystem.fireEvent<WindowPosEvent>(x, y);
-		});
-
-		setWindowSizeCallback([](void *, int32_t width, int32_t height)
-		{
-			ML_EventSystem.fireEvent<WindowSizeEvent>(width, height);
-		});
 	}
 
 	void Window::onEvent(Event const & value)
@@ -263,7 +191,7 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
-			m_videoMode.size = { (uint32_t)ev.width, (uint32_t)ev.height };
+			m_video.size = { (uint32_t)ev.width, (uint32_t)ev.height };
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		} break;
@@ -281,17 +209,6 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * */
 		} break;
 		}
-	}
-
-	bool Window::dispose()
-	{
-		this->destroy();
-
-		this->terminate();
-
-		m_window = m_monitor = m_share	= nullptr;
-
-		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -364,10 +281,10 @@ namespace ml
 
 	Window & Window::setCentered()
 	{
-		return setPosition((vec2i)(Window::getDesktopMode().size - this->getSize()) / 2);
+		return setPosition((vec2i)(getDesktopMode().size - this->getSize()) / 2);
 	}
 
-	Window & Window::setClipboardString(String const & value)
+	Window & Window::setClipboardString(std::string const & value)
 	{
 		if (m_window)
 		{
@@ -432,12 +349,12 @@ namespace ml
 		{
 			if (m_monitor = value)
 			{
-				if (auto v = glfwGetVideoMode(static_cast<GLFWmonitor *>(m_monitor)))
+				if (auto vm{ glfwGetVideoMode(static_cast<GLFWmonitor *>(m_monitor)) })
 				{
 					glfwSetWindowMonitor(
 						static_cast<GLFWwindow *>(m_window),
 						static_cast<GLFWmonitor *>(m_monitor),
-						0, 0, v->width, v->height,
+						0, 0, vm->width, vm->height,
 						GLFW_DONT_CARE
 					);
 				}
@@ -457,7 +374,7 @@ namespace ml
 
 	Window & Window::setSize(vec2u const & value)
 	{
-		m_videoMode.size = value;
+		m_video.size = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), getWidth(), getHeight());
@@ -465,7 +382,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::setTitle(String const & value)
+	Window & Window::setTitle(std::string const & value)
 	{
 		m_title = value;
 		if (m_window)
@@ -476,6 +393,17 @@ namespace ml
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool Window::dispose()
+	{
+		this->destroy();
+
+		this->terminate();
+
+		m_window = m_monitor = m_share = nullptr;
+
+		return true;
+	}
 
 	bool Window::isFocused() const
 	{
@@ -669,6 +597,14 @@ namespace ml
 		return glfwPollEvents();
 	}
 
+	Window::ErrorFun Window::setErrorCallback(ErrorFun value)
+	{
+		return (glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(value))
+			? value
+			: nullptr
+		);
+	}
+
 	void Window::swapInterval(int32_t value)
 	{
 		return glfwSwapInterval(value);
@@ -707,15 +643,6 @@ namespace ml
 			? glfwSetCursorPosCallback(
 				static_cast<GLFWwindow *>(m_window),
 				reinterpret_cast<GLFWcursorposfun>(value)) ? value : nullptr
-			: nullptr
-		);
-	}
-	
-	Window::ErrorFun Window::setErrorCallback(ErrorFun value)
-	{
-		return (m_window
-			? glfwSetErrorCallback(
-				reinterpret_cast<GLFWerrorfun>(value)) ? value : nullptr
 			: nullptr
 		);
 	}

@@ -15,14 +15,14 @@ workspace "libmeme_%{_ACTION}"
 		
 	
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
--- Global Paths
+-- Globals
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
 filter { "system:Unix", "system:Mac" }
 	sln_dir = "%{wks.location}/"
 	prj_dir = "%{sln_dir}proj/%{_ACTION}/"
 	bin_out = "%{sln_dir}bin/%{cfg.platform}/%{cfg.buildcfg}/"
-	bin_lib = "%{sln_dir}bin-lib/%{cfg.platform}/%{cfg.buildcfg}/"
+	bin_lib = "%{sln_dir}bin-lib/"
 	bin_obj = "%{sln_dir}bin-obj/"
 	ext_dir = "%{sln_dir}ext/"
 	ext_lib = "%{sln_dir}ext-lib/"
@@ -33,8 +33,8 @@ filter { "system:Unix", "system:Mac" }
 filter { "system:Windows" }
 	sln_dir = "%{wks.location}\\"
 	prj_dir = "%{sln_dir}proj\\%{_ACTION}\\"
-	bin_out = "%{sln_dir}bin\\%{cfg.buildcfg}\\%{cfg.platform}\\"
-	bin_lib = "%{sln_dir}bin-lib\\%{cfg.buildcfg}\\%{cfg.platform}\\"
+	bin_out = "%{sln_dir}bin\\%{cfg.platform}\\%{cfg.buildcfg}\\"
+	bin_lib = "%{sln_dir}bin-lib\\"
 	bin_obj = "%{sln_dir}bin-obj\\"
 	ext_dir = "%{sln_dir}ext\\"
 	ext_lib = "%{sln_dir}ext-lib\\"
@@ -53,6 +53,6 @@ dofile "./build/raknet.lua"
 dofile "./build/imgui.lua"
 
 dofile "./build/libmeme.lua"
-dofile "./build/launcher.lua"
+dofile "./build/main.lua"
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

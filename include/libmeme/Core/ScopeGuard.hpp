@@ -2,7 +2,7 @@
 #define _ML_SCOPE_GUARD_HPP_
 
 #include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/StandardLib.hpp>
+#include <libmeme/Core/Core.hpp>
 #include <libmeme/Core/NonCopyable.hpp>
 
 #define ML_SCOPE_EXIT \

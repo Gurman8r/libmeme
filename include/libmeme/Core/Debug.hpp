@@ -8,7 +8,7 @@
 #	define ML_ASSERT(expr) assert(expr)
 #endif
 
-#define ML_WARNING -1
+#define ML_WARNING	-1
 #define ML_FAILURE	 0
 #define ML_SUCCESS	+1
 
@@ -20,7 +20,7 @@
 #	if defined(ML_IMPL_BREAKPOINT_CUSTOM)
 #		define ML_BREAKPOINT ML_IMPL_BREAKPOINT_CUSTOM
 #	elif defined(ML_CC_MSC)
-#		define ML_BREAKPOINT __debugbreak()
+#		define ML_BREAKPOINT ::__debugbreak()
 #	else
 #		define ML_BREAKPOINT raise(SIGTRAP)
 #	endif
@@ -80,15 +80,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API FMT final
+	struct ML_CORE_API COL final
 	{
 		FG fg; BG bg;
 
-		constexpr FMT() : FMT{ FG::Normal, BG::Black } {}
-		constexpr FMT(FG fg) : FMT{ fg, BG::Black } {}
-		constexpr FMT(BG bg) : FMT{ FG::Normal, bg } {}
-		constexpr FMT(FMT const & copy) : FMT{ copy.fg, copy.bg } {}
-		constexpr FMT(FG fg, BG bg) : fg{ fg }, bg{ bg } {}
+		constexpr COL() : COL{ FG::Normal, BG::Black } {}
+		constexpr COL(FG fg) : COL{ fg, BG::Black } {}
+		constexpr COL(BG bg) : COL{ FG::Normal, bg } {}
+		constexpr COL(COL const & copy) : COL{ copy.fg, copy.bg } {}
+		constexpr COL(FG fg, BG bg) : fg{ fg }, bg{ bg } {}
 
 		constexpr uint16_t operator*() const
 		{
@@ -107,12 +107,22 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	constexpr FMT operator|(BG const & bg, FG const & fg)	{ return FMT { fg, bg }; }
-	constexpr FMT operator|(FG const & fg, BG const & bg)	{ return FMT { fg, bg }; }
+	constexpr COL operator|(BG const & bg, FG const & fg) { return COL { fg, bg }; }
+	
+	constexpr COL operator|(FG const & fg, BG const & bg) { return COL { fg, bg }; }
 
-	inline ML_SERIALIZE(std::ostream & out, FMT const & value)	{ return value(out); }
-	inline ML_SERIALIZE(std::ostream & out, FG const & value)	{ return out << FMT { value }; }
-	inline ML_SERIALIZE(std::ostream & out, BG const & value)	{ return out << FMT { value }; }
+	inline ML_SERIALIZE(std::ostream & out, COL const & value) { return value(out); }
+	
+	inline ML_SERIALIZE(std::ostream & out, FG const & value) { return out << COL { value }; }
+	
+	inline ML_SERIALIZE(std::ostream & out, BG const & value) { return out << COL { value }; }
+
+	/* * * * * * * * * * * * * * * * * * * * */
+
+	static inline std::ostream & endcol(std::ostream & out)
+	{
+		return out << COL{};
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
@@ -132,67 +142,69 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void * execute(String const & cmd);
-		static void * execute(String const & cmd, String const & file);
-		static void * execute(String const & cmd, String const & file, String const & args);
-		static void * execute(String const & cmd, String const & file, String const & args, String const & path);
-		static void * execute(String const & cmd, String const & file, String const & args, String const & path, int32_t flags);
+		static void * execute(
+			std::string const & command,
+			std::string const & file = {},
+			std::string const & args = {},
+			std::string const & path = {},
+			int32_t flags = 5
+		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline int32_t DebugLogger(
+		static inline int32_t logger_impl(
 			std::ostream & out,
 			int32_t exitCode,
-			FMT const & color,
-			String const & prefix,
-			String const & message
+			COL const & color,
+			std::string const & prefix,
+			std::string const & message
 		)
 		{
-			out << FMT()
+			out << COL()
 				<< FG::White << "[" << color << prefix << FG::White << "] "
-				<< FMT() << message
+				<< COL() << message
 				<< '\n';
 			return exitCode;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline int32_t logInfo(String const & message)
+		static inline int32_t logInfo(std::string const & message)
 		{
-			return DebugLogger(std::cout, ML_SUCCESS, FG::Green, ML_MSG_LOG, message);
+			return logger_impl(std::cout, ML_SUCCESS, FG::Green, ML_MSG_LOG, message);
 		}
 
-		static inline int32_t logError(String const & message)
+		static inline int32_t logError(std::string const & message)
 		{
-			return DebugLogger(std::cout, ML_FAILURE, FG::Red, ML_MSG_ERR, message);
+			return logger_impl(std::cout, ML_FAILURE, FG::Red, ML_MSG_ERR, message);
 		}
 
-		static inline int32_t logWarning(String const & message)
+		static inline int32_t logWarning(std::string const & message)
 		{
-			return DebugLogger(std::cout, ML_WARNING, FG::Yellow, ML_MSG_WRN, message);
+			return logger_impl(std::cout, ML_WARNING, FG::Yellow, ML_MSG_WRN, message);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <
 			class T, class ... Args
-		> static inline int32_t logInfo(String const & fmt, T const & arg0, Args && ... args)
+		> static inline int32_t logInfo(std::string const & fmt, T const & arg0, Args && ... args)
 		{
-			return Debug::logInfo(fmt.format(arg0, std::forward<Args>(args)...));
+			return Debug::logInfo(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
 		template <
 			class T, class ... Args
-		> static inline int32_t logError(String const & fmt, T const & arg0, Args && ... args)
+		> static inline int32_t logError(std::string const & fmt, T const & arg0, Args && ... args)
 		{
-			return Debug::logError(fmt.format(arg0, std::forward<Args>(args)...));
+			return Debug::logError(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
 		template <
 			class T, class ... Args
-		> static inline int32_t logWarning(String const & fmt, T const & arg0, Args && ... args)
+		> static inline int32_t logWarning(std::string const & fmt, T const & arg0, Args && ... args)
 		{
-			return Debug::logWarning(fmt.format(arg0, std::forward<Args>(args)...));
+			return Debug::logWarning(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

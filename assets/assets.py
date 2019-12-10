@@ -1,12 +1,4 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-#
-#   This script is called once after the window is created and after defaults are generated.
-#
-#   For more information see:
-#   https://github.com/Gurman8r/ML/blob/master/src/ML/Engine/Python.cpp
-#   https://github.com/Gurman8r/ML/blob/master/src/ML/Engine/ContentImporter.cpp
-#
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 import MEMELIB as ml
 

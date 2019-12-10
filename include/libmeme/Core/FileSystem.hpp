@@ -9,8 +9,6 @@
 #	include <dirent.h>
 #endif
 
-#define ML_FS ::ml::FileSystem::getInstance()
-
 #if defined(ML_SYSTEM_WINDOWS)
 #	define ML_MAX_PATH		260
 #	define ML_PATH_DELIM	"\\"
@@ -18,6 +16,8 @@
 #	define ML_MAX_PATH		255
 #	define ML_PATH_DELIM	"/"
 #endif
+
+#define ML_FS ::ml::FileSystem::getInstance()
 
 namespace ml
 {
@@ -27,23 +27,23 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Directory = typename std::unordered_map<char, std::vector<String>>;
+		using Directory = typename std::unordered_map<char, std::vector<std::string>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline String const & root() const
+		inline std::string const & root() const
 		{ 
 			return m_root;
 		}
 
-		inline String pathTo(String const & value) const
+		inline std::string pathTo(std::string const & value) const
 		{
 			return (m_root + ML_PATH_DELIM + value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool setPath(String const & value)
+		inline bool setPath(std::string const & value)
 		{
 			if (dirExists(value))
 			{
@@ -53,16 +53,16 @@ namespace ml
 			return false;
 		}
 
-		inline String getPath() const
+		inline std::string getPath() const
 		{
 			return std::filesystem::current_path().string();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool getDirContents(String const & dirName, std::vector<char> & value) const
+		inline bool getDirContents(std::string const & dirName, std::vector<char> & value) const
 		{
-			static String temp;
+			static std::string temp;
 			if (getDirContents(dirName, temp))
 			{
 				value.assign(temp.begin(), temp.end());
@@ -72,9 +72,9 @@ namespace ml
 			return false;
 		}
 
-		inline bool getDirContents(String const & dirName, String & value) const
+		inline bool getDirContents(std::string const & dirName, std::string & value) const
 		{
-			static SStream temp;
+			static std::stringstream temp;
 			if (getDirContents(dirName, temp))
 			{
 				value.assign(temp.str());
@@ -84,43 +84,43 @@ namespace ml
 			return false;
 		}
 
-		inline bool getDirContents(String const & dirName, SStream & value) const
+		inline bool getDirContents(std::string const & dirName, std::stringstream & value) const
 		{
-			value.str(String());
-			if(DIR * dir = opendir(dirName.c_str()))
+			value.str(std::string());
+			if(DIR * dir{ ::opendir(dirName.c_str()) })
 			{
-				while (dirent * e = readdir(dir))
+				while (dirent * ent{ ::readdir(dir) })
 				{
-					switch (e->d_type)
+					switch (ent->d_type)
 					{
-					case DT_DIR	: value << e->d_name << "/" << '\n'; break;
-					default		: value << e->d_name << " " << '\n'; break;
+					case DT_DIR	: value << ent->d_name << "/" << '\n'; break;
+					default		: value << ent->d_name << " " << '\n'; break;
 					}
 				}
-				closedir(dir);
+				::closedir(dir);
 				return true;
 			}
 			return false;
 		}
 
-		inline bool getDirContents(String const & dirName, Directory & value) const
+		inline bool getDirContents(std::string const & dirName, Directory & value) const
 		{
 			value.clear();
-			if (DIR * dir = opendir(dirName.c_str()))
+			if (DIR * dir{ ::opendir(dirName.c_str()) })
 			{
-				while (dirent * e = readdir(dir))
+				while (dirent * ent{ ::readdir(dir) })
 				{
 					char type;
-					switch (e->d_type)
+					switch (ent->d_type)
 					{
 					case DT_DIR: (type = '/'); break;
 					case DT_REG: (type = ' '); break;
 					case DT_LNK: (type = '@'); break;
 					default:	 (type = '*'); break;
 					}
-					value[type].push_back(e->d_name);
+					value[type].push_back(ent->d_name);
 				}
-				closedir(dir);
+				::closedir(dir);
 				return true;
 			}
 			return false;
@@ -128,7 +128,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool getFileContents(String const & filename, std::vector<char> & value) const
+		inline bool getFileContents(std::string const & filename, std::vector<char> & value) const
 		{
 			File file;
 			file.loadFromFile(filename);
@@ -136,7 +136,7 @@ namespace ml
 			return file;
 		}
 
-		inline bool getFileContents(String const & filename, String & value) const
+		inline bool getFileContents(std::string const & filename, std::string & value) const
 		{
 			File file;
 			file.loadFromFile(filename);
@@ -144,14 +144,14 @@ namespace ml
 			return file;
 		}
 
-		inline String getFileContents(String const & filename) const
+		inline std::string getFileContents(std::string const & filename) const
 		{
-			String temp;
+			std::string temp;
 			getFileContents(filename, temp);
 			return temp;
 		}
 
-		inline bool getFileContents(String const & filename, SStream & value) const
+		inline bool getFileContents(std::string const & filename, std::stringstream & value) const
 		{
 			File file;
 			file.loadFromFile(filename);
@@ -161,7 +161,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool dirExists(String const & name) const
+		inline bool dirExists(std::string const & name) const
 		{
 			struct stat info;
 			return 
@@ -169,46 +169,46 @@ namespace ml
 				(info.st_mode & S_IFDIR);
 		}
 
-		inline bool fileExists(String const & filename) const
+		inline bool fileExists(std::string const & filename) const
 		{
 			return (bool)(std::ifstream(filename));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-		inline String getFileType(String const & value) const
+		inline std::string getFileType(std::string const & value) const
 		{
 			size_t i;
 			return
-				((i = value.find_last_of('.')) != String::npos) ||
-				((i = value.find_last_of('/')) != String::npos) ||
-				((i = value.find_last_of('\\')) != String::npos)
-				? String(value.substr(i + 1, value.size() - i - 1))
+				((i = value.find_last_of('.')) != std::string::npos) ||
+				((i = value.find_last_of('/')) != std::string::npos) ||
+				((i = value.find_last_of('\\')) != std::string::npos)
+				? std::string(value.substr(i + 1, value.size() - i - 1))
 				: value;
 		}
 
-		inline String getFileName(String const & value) const
+		inline std::string getFileName(std::string const & value) const
 		{
 			size_t i;
 			return
-				((i = value.find_last_of('/')) != String::npos) ||
-				((i = value.find_last_of('\\')) != String::npos)
-				? String(value.substr(i + 1, value.size() - i - 1))
+				((i = value.find_last_of('/')) != std::string::npos) ||
+				((i = value.find_last_of('\\')) != std::string::npos)
+				? std::string(value.substr(i + 1, value.size() - i - 1))
 				: value;
 		}
 
-		inline String getFilePath(String const & value) const
+		inline std::string getFilePath(std::string const & value) const
 		{
 			size_t i;
 			return (
-				((i = value.find_last_of('/')) != String::npos) ||
-				((i = value.find_last_of('\\')) != String::npos)
-				? String(value.substr(0, i))
+				((i = value.find_last_of('/')) != std::string::npos) ||
+				((i = value.find_last_of('\\')) != std::string::npos)
+				? std::string(value.substr(0, i))
 				: value
 			);
 		}
 
-		inline size_t getFileSize(String const & value) const
+		inline size_t getFileSize(std::string const & value) const
 		{
 			std::ifstream stream;
 			return (stream = std::ifstream(value, std::ifstream::ate | std::ifstream::binary))
@@ -225,7 +225,7 @@ namespace ml
 		
 		~FileSystem() {}
 
-		String m_root;
+		std::string m_root;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

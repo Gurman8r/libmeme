@@ -2,7 +2,7 @@
 #define _ML_CONTEXT_HPP_
 
 #include <libmeme/Window/Export.hpp>
-#include <libmeme/Core/StandardLib.hpp>
+#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {
@@ -14,10 +14,7 @@ namespace ml
 
 		enum Profile : uint32_t
 		{
-			Any		= 0,
-			Core    = 1,
-			Compat	= 2,
-			Debug   = 3,
+			Any, Core, Compat, Debug
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

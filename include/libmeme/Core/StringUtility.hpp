@@ -1,43 +1,21 @@
 #ifndef _ML_STRING_UTILITY_HPP_
 #define _ML_STRING_UTILITY_HPP_
 
-#include <libmeme/Core/String.hpp>
+#include <libmeme/Core/TypeOf.hpp>
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
-
-	inline auto operator "" _s(C_String data, size_t size)
-	{
-		return String { data, size };
-	}
-
-	inline auto operator "" _s(CW_String data, size_t size)
-	{
-		return W_String { data, size };
-	}
-
-	inline auto operator "" _s(C16_String data, size_t size)
-	{
-		return U16_String { data, size };
-	}
-
-	inline auto operator "" _s(C32_String data, size_t size)
-	{
-		return U32_String { data, size };
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	namespace util
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline std::vector<String> tokenize(String value, String const & delim)
+		static inline std::vector<std::string> tokenize(std::string value, std::string const & delim)
 		{
-			std::vector<String> out;
+			std::vector<std::string> out;
 			size_t pos = 0;
-			while ((pos = value.find(delim)) != String::npos)
+			while ((pos = value.find(delim)) != std::string::npos)
 			{
 				out.push_back(value.substr(0, pos));
 				value.erase(0, pos + delim.length());
@@ -46,41 +24,87 @@ namespace ml
 			return out;
 		}
 
-		template <
-			class Arg0, class ... Args
-		> inline SStream sink(Arg0 const & arg0, Args && ... args)
-		{
-			SStream ss {}; ss << arg0 << '\n';
-			int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
-			return ss;
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <
 			class To, class From
-		> static inline BasicString<To> str_convert(const BasicString<From> & value)
+		> static inline std::basic_string<To> convert(const std::basic_string<From> & value)
 		{
-			BasicString<To> temp {};
+			std::basic_string<To> temp {};
 			temp.reserve(value.size());
 			for (From const & c : value)
 				temp.push_back(static_cast<To>(c));
 			return temp;
 		}
 
-		static inline String narrow(W_String const & value)
+		static inline std::string narrow(std::wstring const & value)
 		{ 
-			return str_convert<char>(value);
+			return convert<char>(value);
 		}
 
-		static inline W_String widen(String const & value)
+		static inline std::wstring widen(std::string const & value)
 		{ 
-			return str_convert<wchar_t>(value); 
+			return convert<wchar_t>(value); 
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool is_alpha(String const & value)
+		template <class Ch>
+		static inline bool is_whitespace(Ch c)
+		{
+			return
+				c == static_cast<Ch>(' ') ||
+				c == static_cast<Ch>('\n') ||
+				c == static_cast<Ch>('\t') ||
+				c == static_cast<Ch>('\r');
+		}
+
+		static inline std::string trim_front(std::string value)
+		{
+			while (!value.empty() && is_whitespace(value.front()))
+			{
+				value.erase(value.begin());
+			}
+			return value;
+		}
+
+		static inline std::string trim_back(std::string value)
+		{
+			while (!value.empty() && is_whitespace(value.back()))
+			{
+				value.pop_back();
+			}
+			return value;
+		}
+
+		static inline std::string trim(std::string value)
+		{
+			return trim_front(trim_back(value));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static inline std::string replace_all(std::string value, std::string const & toFind, std::string const & replaceWith)
+		{
+			if (!value.empty() && !toFind.empty())
+			{
+				for (size_t i = 0; (i = value.find(toFind, i)) != std::string::npos;)
+				{
+					value.replace(i, toFind.size(), replaceWith);
+					i += replaceWith.size();
+				}
+			}
+			return value;
+		}
+
+		static inline std::string remove_all(std::string value, std::string const & toRemove)
+		{
+			return replace_all(value, toRemove, {});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static inline bool is_alpha(std::string const & value)
 		{
 			if (value.empty()) return false;
 			std::locale loc {};
@@ -90,7 +114,7 @@ namespace ml
 			return true;
 		}
 
-		static inline bool is_alnum(String const & value)
+		static inline bool is_alnum(std::string const & value)
 		{
 			if (value.empty()) return false;
 			std::locale loc {};
@@ -100,7 +124,7 @@ namespace ml
 			return true;
 		}
 
-		static inline bool is_graph(String const & value)
+		static inline bool is_graph(std::string const & value)
 		{
 			if (value.empty()) return false;
 			std::locale loc {};
@@ -110,7 +134,7 @@ namespace ml
 			return true;
 		}
 
-		static inline bool is_print(String const & value)
+		static inline bool is_print(std::string const & value)
 		{
 			for (auto const & elem : value)
 				if (!std::isprint(elem))
@@ -118,7 +142,7 @@ namespace ml
 			return true;
 		}
 
-		static inline bool is_lower(String const & value)
+		static inline bool is_lower(std::string const & value)
 		{
 			for (auto const & elem : value)
 				if (!std::islower(elem))
@@ -126,7 +150,7 @@ namespace ml
 			return true;
 		}
 
-		static inline bool is_upper(String const & value)
+		static inline bool is_upper(std::string const & value)
 		{
 			for (auto const & elem : value)
 				if (!std::islower(elem))
@@ -136,7 +160,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline String to_lower(String value)
+		static inline std::string to_lower(std::string value)
 		{
 			std::locale loc {};
 			for (auto & elem : value)
@@ -144,7 +168,7 @@ namespace ml
 			return value;
 		}
 
-		static inline String to_upper(String value)
+		static inline std::string to_upper(std::string value)
 		{
 			std::locale loc {};
 			for (auto & elem : value)
@@ -154,9 +178,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool is_bool(String const & value)
+		static inline bool is_bool(std::string const & value)
 		{
-			switch (to_lower(value).hash())
+			
+			switch (Hash(to_lower(value)))
 			{
 			case Hash("1"):
 			case Hash("true"):
@@ -172,10 +197,10 @@ namespace ml
 			}
 		}
 
-		static inline bool is_integer(String const & value)
+		static inline bool is_integer(std::string const & value)
 		{
-			if (!value) return false; 
-			String::const_iterator it = value.cbegin();
+			if (value.empty()) return false; 
+			std::string::const_iterator it = value.cbegin();
 			if ((*it) == '-')
 			{ 
 				it++; 
@@ -187,15 +212,15 @@ namespace ml
 			return (it == value.cend());
 		}
 
-		static inline bool is_decimal(String const & value)
+		static inline bool is_decimal(std::string const & value)
 		{
-			if (!value) { return false; }
-			String::pointer endptr = nullptr;
+			if (value.empty()) { return false; }
+			std::string::pointer endptr = nullptr;
 			auto temp { std::strtod(value.c_str(), &endptr) };
 			return !(*endptr != '\0' || endptr == value);
 		}
 
-		static inline bool is_name(String const & value)
+		static inline bool is_name(std::string const & value)
 		{
 			if (!value.empty() && (std::isalpha(value.front()) || (value.front() == '_')))
 			{
@@ -217,9 +242,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool to_bool(String const & value, bool dv = 0)
+		static inline bool to_bool(std::string const & value, bool dv = 0)
 		{
-			switch (to_lower(value).hash())
+			switch (Hash(to_lower(value)))
 			{
 			case Hash("1"):
 			case Hash("true"):
@@ -237,67 +262,67 @@ namespace ml
 			}
 		}
 
-		static inline int32_t to_i8(String const & value, int8_t dv = 0)
+		static inline int32_t to_i8(std::string const & value, int8_t dv = 0)
 		{
 			try { return static_cast<int8_t>(std::stoi(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline int32_t to_i16(String const & value, int16_t dv = 0)
+		static inline int32_t to_i16(std::string const & value, int16_t dv = 0)
 		{
 			try { return static_cast<int16_t>(std::stoi(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline int32_t to_i32(String const & value, int32_t dv = 0)
+		static inline int32_t to_i32(std::string const & value, int32_t dv = 0)
 		{
 			try { return static_cast<int32_t>(std::stoi(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline int64_t to_i64(String const & value, int64_t dv = 0)
+		static inline int64_t to_i64(std::string const & value, int64_t dv = 0)
 		{
 			try { return static_cast<int64_t>(std::stoll(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline uint8_t to_u8(String const & value, uint8_t dv = 0)
+		static inline uint8_t to_u8(std::string const & value, uint8_t dv = 0)
 		{
 			try { return static_cast<uint8_t>(std::stoul(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline uint16_t to_u16(String const & value, uint16_t dv = 0)
+		static inline uint16_t to_u16(std::string const & value, uint16_t dv = 0)
 		{
 			try { return static_cast<uint16_t>(std::stoul(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline uint32_t to_u32(String const & value, uint32_t dv = 0)
+		static inline uint32_t to_u32(std::string const & value, uint32_t dv = 0)
 		{
 			try { return static_cast<uint32_t>(std::stoul(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline uint64_t to_u64(String const & value, uint64_t dv = 0)
+		static inline uint64_t to_u64(std::string const & value, uint64_t dv = 0)
 		{
 			try { return static_cast<uint64_t>(std::stoull(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline float32_t to_f32(String const & value, float32_t dv = 0)
+		static inline float32_t to_f32(std::string const & value, float32_t dv = 0)
 		{
 			try { return static_cast<float32_t>(std::stof(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline float64_t to_f64(String const & value, float64_t dv = 0)
+		static inline float64_t to_f64(std::string const & value, float64_t dv = 0)
 		{
 			try { return static_cast<float64_t>(std::stod(value)); }
 			catch (std::exception &) { return dv; }
 		}
 
-		static inline float80_t to_f80(String const & value, float80_t dv = 0)
+		static inline float80_t to_f80(std::string const & value, float80_t dv = 0)
 		{
 			try { return static_cast<float80_t>(std::stold(value)); }
 			catch (std::exception &) { return dv; }
@@ -305,63 +330,91 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline String to_string(String const & value) { return value; }
+		static inline std::string to_string(std::string const & value) { return value; }
 
-		static inline String to_string(int8_t value) { return std::to_string(value); }
+		static inline std::string to_string(int8_t value) { return std::to_string(value); }
 
-		static inline String to_string(int16_t value) { return std::to_string(value); }
+		static inline std::string to_string(int16_t value) { return std::to_string(value); }
 
-		static inline String to_string(int32_t value) { return std::to_string(value); }
+		static inline std::string to_string(int32_t value) { return std::to_string(value); }
 
-		static inline String to_string(int64_t value) { return std::to_string(value); }
+		static inline std::string to_string(int64_t value) { return std::to_string(value); }
 
-		static inline String to_string(uint8_t value) { return std::to_string(value); }
+		static inline std::string to_string(uint8_t value) { return std::to_string(value); }
 
-		static inline String to_string(uint16_t value) { return std::to_string(value); }
+		static inline std::string to_string(uint16_t value) { return std::to_string(value); }
 
-		static inline String to_string(uint32_t value) { return std::to_string(value); }
+		static inline std::string to_string(uint32_t value) { return std::to_string(value); }
 
-		static inline String to_string(uint64_t value) { return std::to_string(value); }
+		static inline std::string to_string(uint64_t value) { return std::to_string(value); }
 
-		static inline String to_string(float32_t value) { return std::to_string(value); }
+		static inline std::string to_string(float32_t value) { return std::to_string(value); }
 
-		static inline String to_string(float64_t value) { return std::to_string(value); }
+		static inline std::string to_string(float64_t value) { return std::to_string(value); }
 
-		static inline String to_string(float80_t value) { return std::to_string(value); }
+		static inline std::string to_string(float80_t value) { return std::to_string(value); }
 
-		template <class T> static inline String to_string(T const & value)
+		template <class T> static inline std::string to_string(T const & value)
 		{
-			SStream ss {}; 
-			ss << value; 
+			std::stringstream ss {}; 
+			ss << value;
 			return ss.str();
-		}
-
-		template <class T> static inline C_String to_cstring(T const & value)
-		{
-			return to_string<T>(value).c_str();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class S> static inline String format(String fmt, std::vector<S> const & args)
+		template <
+			class Arg0, class ... Args
+		> inline std::stringstream sink(Arg0 const & arg0, Args && ... args)
 		{
-			for (size_t i = 0, imax = args.size(); i < imax; i++)
+			std::stringstream ss{}; ss << arg0 << '\n';
+			int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
+			return ss;
+		}
+
+		static inline std::string format(std::string fmt, std::stringstream & ss)
+		{
+			for (size_t i = 0; ss.good(); i++)
 			{
-				fmt.replace_all(("{" + to_string(i) + "}"), args[i]);
+				std::string line;
+				if (std::getline(ss, line))
+				{
+					fmt = replace_all(fmt, ("{" + to_string(i) + "}"), line);
+				}
 			}
 			return fmt;
 		}
 
-		template <class T> static inline String to_hex(T const & value)
+		template <
+			class Arg0, class ... Args
+		> static inline std::string format(std::string fmt, Arg0 const & arg0, Args && ... args)
 		{
-			SStream ss {};
+			std::stringstream ss{ sink(arg0, std::forward<Args>(args)...) };
+			
+			return format(fmt, ss);
+		}
+
+		template <class S> static inline std::string format(std::string fmt, std::vector<S> const & args)
+		{
+			for (size_t i = 0, imax = args.size(); i < imax; i++)
+			{
+				fmt = replace_all(fmt, ("{" + to_string(i) + "}"), args[i]);
+			}
+			return fmt;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T> static inline std::string to_hex(T const & value)
+		{
+			std::stringstream ss {};
 			ss << std::hex << value;
 			return ss.str();
 		}
 
-		template <class T> static inline String to_oct(T const & value)
+		template <class T> static inline std::string to_oct(T const & value)
 		{
-			SStream ss {};
+			std::stringstream ss {};
 			ss << std::oct << value;
 			return ss.str();
 		}

@@ -10,15 +10,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::ostream & FMT::operator()(std::ostream & out) const
+	std::ostream & COL::operator()(std::ostream & out) const
 	{
 #ifdef ML_SYSTEM_WINDOWS
-		if (HANDLE handle { GetStdHandle(STD_OUTPUT_HANDLE) })
+		if (HANDLE handle { ::GetStdHandle(STD_OUTPUT_HANDLE) })
 		{
-			SetConsoleTextAttribute(handle, (*(*this)));
+			::SetConsoleTextAttribute(handle, (*(*this)));
 		}
 #else 
-		// Do the thing
+		// do the thing
 #endif
 		return out;
 	}
@@ -57,34 +57,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * Debug::execute(String const & cmd)
-	{
-		return execute(cmd, {});
-	}
-
-	void * Debug::execute(String const & cmd, String const & file)
-	{
-		return execute(cmd, file, {});
-	}
-
-	void * Debug::execute(String const & cmd, String const & file, String const & args)
-	{
-		return execute(cmd, file, args, {});
-	}
-
-	void * Debug::execute(String const & cmd, String const & file, String const & args, String const & path)
-	{
-		return execute(cmd, file, args, path, 5); // SW_SHOW
-	}
-
-	void * Debug::execute(String const & cmd, String const & file, String const & args, String const & path, int32_t flags)
+	void * Debug::execute(std::string const & command, std::string const & file, std::string const & args, std::string const & path, int32_t flags)
 	{
 #ifdef ML_SYSTEM_WINDOWS
-		return ShellExecuteA(
-			GetDesktopWindow(), cmd.c_str(), file.c_str(), args.c_str(), path.c_str(), flags
+		return ::ShellExecuteA(
+			::GetDesktopWindow(),
+			command.c_str(),
+			file.c_str(),
+			args.c_str(),
+			path.c_str(),
+			flags
 		);
 #else
-		return nullptr;
+		// do the thing
 #endif
 	}
 

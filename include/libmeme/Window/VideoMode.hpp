@@ -41,6 +41,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		constexpr auto width()  const -> uint32_t const & { return size[0]; }
+
 		constexpr auto height() const -> uint32_t const & { return size[1]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

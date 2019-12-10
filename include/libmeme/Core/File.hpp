@@ -2,7 +2,7 @@
 #define _ML_FILE_HPP_
 
 #include <libmeme/Core/MemoryTracker.hpp>
-#include <libmeme/Core/String.hpp>
+#include <libmeme/Core/StringUtility.hpp>
 
 namespace ml
 {
@@ -19,13 +19,14 @@ namespace ml
 		using sstream_type		= typename string_type::sstream_type;
 		using ifstream_type		= typename std::basic_ifstream<value_type>;
 		using ofstream_type		= typename std::basic_ofstream<value_type>;
-		using list_type			= typename std::vector<value_type>;
-		using iterator			= typename list_type::iterator;
-		using const_iterator	= typename list_type::const_iterator;
-		using pointer			= typename list_type::pointer;
-		using reference			= typename list_type::reference;
-		using const_pointer		= typename list_type::const_pointer;
-		using const_reference	= typename list_type::const_reference;
+		
+		using base_type			= typename std::vector<value_type>;
+		using iterator			= typename base_type::iterator;
+		using const_iterator	= typename base_type::const_iterator;
+		using pointer			= typename base_type::pointer;
+		using reference			= typename base_type::reference;
+		using const_pointer		= typename base_type::const_pointer;
+		using const_reference	= typename base_type::const_reference;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -41,7 +42,7 @@ namespace ml
 		{
 		}
 
-		BasicFile(list_type const & data) 
+		BasicFile(base_type const & data) 
 			: m_data(data)
 			, m_path() 
 		{
@@ -63,7 +64,7 @@ namespace ml
 			return empty();
 		}
 
-		inline bool loadFromFile(String const & filename)
+		inline bool loadFromFile(std::string const & filename)
 		{
 			if (ifstream_type file { (m_path = filename), std::ios_base::binary })
 			{
@@ -84,7 +85,7 @@ namespace ml
 			return !dispose();
 		}
 
-		inline bool saveToFile(String const & filename) const
+		inline bool saveToFile(std::string const & filename) const
 		{
 			if (ofstream_type file { filename, std::ios_base::binary })
 			{
@@ -122,27 +123,27 @@ namespace ml
 		inline auto at(size_t i) const	-> const_reference		{ return m_data[i]; }
 		inline auto at(size_t i)		-> value_type &			{ return m_data[i]; }
 		inline auto c_str()	const		-> const_pointer		{ return str().c_str(); }
-		inline auto data() const		-> list_type const &	{ return m_data; }
-		inline auto data()				-> list_type &			{ return m_data; }
+		inline auto data() const		-> base_type const &	{ return m_data; }
+		inline auto data()				-> base_type &			{ return m_data; }
 		inline auto empty() const		-> bool					{ return m_data.empty(); }
-		inline auto path() const		-> String const &		{ return m_path; }
+		inline auto path() const		-> std::string const &		{ return m_path; }
 		inline auto str() const			-> string_type			{ return string_type(begin(), end()); }
 		inline auto sstr() const		-> sstream_type			{ return sstream_type(str()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto begin()				-> iterator				{ return m_data.begin(); }
-		inline auto end()				-> iterator				{ return m_data.end(); }
-		inline auto begin() const		-> const_iterator		{ return m_data.begin(); }
-		inline auto end() const			-> const_iterator		{ return m_data.end(); }
-		inline auto cbegin() const		-> const_iterator		{ return m_data.cbegin(); }
-		inline auto cend() const		-> const_iterator		{ return m_data.cend(); }
+		inline auto begin()				-> base_type::iterator				{ return m_data.begin(); }
+		inline auto end()				-> base_type::iterator				{ return m_data.end(); }
+		inline auto begin()		const	-> base_type::const_iterator		{ return m_data.begin(); }
+		inline auto end()		const	-> base_type::const_iterator		{ return m_data.end(); }
+		inline auto cbegin()	const	-> base_type::const_iterator		{ return m_data.cbegin(); }
+		inline auto cend()		const	-> base_type::const_iterator		{ return m_data.cend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		String		m_path;
-		list_type	m_data;
+		std::string		m_path;
+		base_type	m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -150,6 +151,12 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	ML_USING File = typename BasicFile<char>;
+	
+	ML_USING W_File = typename BasicFile<wchar_t>;
+
+	ML_USING U16_File = typename Basic_File<char16_t>;
+
+	ML_USING U32_File = typename BasicFile<char32_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
