@@ -119,16 +119,15 @@ ml::int32_t main()
 	// Create Window
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	auto * window{ new RenderWindow{} };
+	RenderWindow window{};
 
 	Window::setErrorCallback([](auto code, auto desc)
 	{
 		ML_EventSystem.fireEvent<WindowErrorEvent>(code, desc);
 	});
 
-	if (!window->create("libmeme", video_mode, window_style, context_settings))
+	if (!window.create("libmeme", video_mode, window_style, context_settings))
 	{
-		delete window;
 		return Debug::logError("Failed creating window")
 			| Debug::pause(EXIT_FAILURE);
 	}
@@ -136,23 +135,23 @@ ml::int32_t main()
 	// Install Callbacks
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	window->setCharCallback([](auto, auto ch)
+	window.setCharCallback([](auto, auto ch)
 	{
 		ML_EventSystem.fireEvent<CharEvent>(ch);
 	});
-	window->setCursorEnterCallback([](auto, auto entered)
+	window.setCursorEnterCallback([](auto, auto entered)
 	{
 		ML_EventSystem.fireEvent<CursorEnterEvent>(entered);
 	});
-	window->setCursorPosCallback([](auto, auto x, auto y)
+	window.setCursorPosCallback([](auto, auto x, auto y)
 	{
 		ML_EventSystem.fireEvent<CursorPosEvent>(x, y);
 	});
-	window->setFrameSizeCallback([](auto, auto w, auto h)
+	window.setFrameSizeCallback([](auto, auto w, auto h)
 	{
 		ML_EventSystem.fireEvent<FrameSizeEvent>(w, h);
 	});
-	window->setKeyCallback([](auto, auto button, auto scan, auto action, auto mods)
+	window.setKeyCallback([](auto, auto button, auto scan, auto action, auto mods)
 	{
 		ML_EventSystem.fireEvent<KeyEvent>(button, scan, action, mask8_t{ {
 			(mods & ML_MOD_SHIFT),
@@ -163,27 +162,27 @@ ml::int32_t main()
 			(mods & ML_MOD_NUMLOCK)
 		} });
 	});
-	window->setMouseCallback([](auto, auto button, auto action, auto mods)
+	window.setMouseCallback([](auto, auto button, auto action, auto mods)
 	{
 		ML_EventSystem.fireEvent<MouseEvent>(button, action, mods);
 	});
-	window->setScrollCallback([](auto, auto x, auto y)
+	window.setScrollCallback([](auto, auto x, auto y)
 	{
 		ML_EventSystem.fireEvent<ScrollEvent>(x, y);
 	});
-	window->setWindowCloseCallback([](auto)
+	window.setWindowCloseCallback([](auto)
 	{
 		ML_EventSystem.fireEvent<WindowCloseEvent>();
 	});
-	window->setWindowFocusCallback([](auto, auto focused)
+	window.setWindowFocusCallback([](auto, auto focused)
 	{
 		ML_EventSystem.fireEvent<WindowFocusEvent>(focused);
 	});
-	window->setWindowPosCallback([](auto, auto x, auto y)
+	window.setWindowPosCallback([](auto, auto x, auto y)
 	{
 		ML_EventSystem.fireEvent<WindowPosEvent>(x, y);
 	});
-	window->setWindowSizeCallback([](auto, auto w, auto h)
+	window.setWindowSizeCallback([](auto, auto w, auto h)
 	{
 		ML_EventSystem.fireEvent<WindowSizeEvent>(w, h);
 	});
@@ -191,9 +190,9 @@ ml::int32_t main()
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	while (window->isOpen())
+	while (window.isOpen())
 	{
-		window->beginFrame();
+		window.beginFrame();
 		{
 			// do stuff, etc...
 			
@@ -203,13 +202,13 @@ ml::int32_t main()
 
 			ML_GL.clearColor(bg[0], bg[1], bg[2], bg[3]);
 		}
-		window->endFrame();
+		window.endFrame();
 	}
 
 	// Cleanup
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	delete window;
+	window.dispose();
 
 	return EXIT_SUCCESS;
 }
