@@ -267,6 +267,7 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("STEP_BEGIN");
+
 			Window::pollEvents();
 		}
 		// Update
