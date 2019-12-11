@@ -253,7 +253,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * */
 	if (!Editor::startup(state.window.getHandle()))
 	{
-		return Debug::logError("Failed initializing Window") | Debug::pause(1);
+		return Debug::logError("Failed initializing Editor") | Debug::pause(1);
 	}
 
 
