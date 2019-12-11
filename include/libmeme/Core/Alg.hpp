@@ -7,6 +7,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * */
 
+#define _ML_ALG _ML alg::
+
+/* * * * * * * * * * * * * * * * * * * * */
+
 namespace ml::alg
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -137,19 +141,19 @@ namespace ml::alg
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
-		class InIt, class OutIt
-	> static constexpr OutIt copy_unchecked(InIt first, InIt last, OutIt dest)
+		class Iter, class OutIt
+	> static constexpr OutIt copy_unchecked(Iter first, Iter last, OutIt dest)
 	{
 		while (first != last)
 		{
 			*(first++) = *(dest++);
 		}
-		return first;
+		return dest;
 	}
 
 	template <
-		class InIt, class OutIt
-	> static constexpr OutIt copy(InIt first, InIt last, OutIt dest)
+		class Iter, class OutIt
+	> static constexpr OutIt copy(Iter first, Iter last, OutIt dest)
 	{
 		return _ML alg::copy_unchecked(first, last, dest);
 	}
@@ -165,8 +169,8 @@ namespace ml::alg
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
-		class InIt, class T
-	> static constexpr InIt fill_unchecked(InIt first, InIt last, T value)
+		class Iter, class T
+	> static constexpr Iter fill_unchecked(Iter first, Iter last, T value)
 	{
 		while (first != last)
 		{
@@ -176,8 +180,8 @@ namespace ml::alg
 	}
 
 	template <
-		class InIt, class T
-	> static constexpr InIt fill(InIt first, InIt last, T value)
+		class Iter, class T
+	> static constexpr Iter fill(Iter first, Iter last, T value)
 	{
 		return _ML alg::fill_unchecked(first, last, value);
 	}
@@ -191,6 +195,28 @@ namespace ml::alg
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class>
+	static constexpr void swap(T & lhs, T & rhs) noexcept(_STD is_nothrow_move_constructible_v<T> && _STD is_nothrow_move_assignable_v<T>)
+	{
+		T temp = _STD move(lhs);
+		lhs = _STD move(rhs);
+		rhs = _STD move(temp);
+	}
+
+	template <class Iter, class Cmp>
+	static constexpr Iter find_if(Iter first, Iter last, Cmp compare)
+	{
+		while (first != last)
+		{
+			if (compare(*first))
+			{
+				return first;
+			}
+			++first;
+		}
+		return last;
+	}
 
 	template <
 		class T, size_t N

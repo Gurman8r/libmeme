@@ -62,6 +62,14 @@ namespace ml
 		class T
 	> static constexpr auto typeof_v{ typeof<T>{} };
 
+	template <
+		class T
+	> static constexpr auto hashof_v{ typeof_v<T>.hash() };
+
+	template <
+		class T
+	> static constexpr auto nameof_v{ typeof_v<T>.name() };
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <

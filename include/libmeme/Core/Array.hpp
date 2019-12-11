@@ -18,6 +18,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type		= typename T;
+		using size_type			= typename size_t;
 		using base_type			= typename value_type[Size];
 		using self_type			= typename Array<value_type, Size>;
 		using pointer			= typename value_type *;
@@ -43,6 +44,7 @@ namespace ml
 		constexpr auto cend()		const	-> const_iterator	{ return end(); }
 		constexpr auto data()				-> pointer			{ return m_data; }
 		constexpr auto data()		const	-> const_pointer	{ return m_data; }
+		constexpr auto empty()		const	-> bool				{ return m_size > 0; }
 		constexpr auto end()				-> iterator			{ return data() + size(); }
 		constexpr auto end()		const	-> const_iterator	{ return data() + size(); }
 		constexpr auto front()				-> reference		{ return (*begin()); }

@@ -21,7 +21,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderWindow::create(std::string const & title, VideoMode const & video, WindowStyle const & style, ContextSettings const & context)
+	bool RenderWindow::create(std::string const & title, Video const & video, Style const & style, Context const & context)
 	{
 		if (Window::create(title, video, style, context))
 		{
@@ -67,25 +67,6 @@ namespace ml
 				<< endcol << '\n';
 		} break;
 		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	RenderWindow & RenderWindow::beginFrame()
-	{
-		this->pollEvents();
-
-		return (*this);
-	}
-
-	RenderWindow & RenderWindow::endFrame()
-	{
-		if (this->getStyle().vertical_sync())
-		{
-			this->swapBuffers();
-		}
-		ML_GL.flush();
-		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

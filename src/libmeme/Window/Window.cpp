@@ -1,6 +1,6 @@
 #ifdef ML_IMPL_PLATFORM_GLFW
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Window/Window.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
@@ -8,7 +8,7 @@
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * */
 
 # include <glfw/glfw3.h>
 # ifdef ML_SYSTEM_WINDOWS
@@ -18,7 +18,7 @@
 #	include <Windows.h>
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * */
 
 #define GLFW_HAS_WINDOW_TOPMOST		(GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ GLFW_FLOATING
 #define GLFW_HAS_WINDOW_HOVERED		(GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ GLFW_HOVERED
@@ -29,7 +29,7 @@
 #define GLFW_HAS_FOCUS_ON_SHOW		(GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ GLFW_FOCUS_ON_SHOW
 #define GLFW_HAS_MONITOR_WORK_AREA	(GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) // 3.3+ glfwGetMonitorWorkarea
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -91,20 +91,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(std::string const & title, VideoMode const & video, WindowStyle const & style, ContextSettings const & context)
+	bool Window::create(std::string const & title, Video const & video, Style const & style, Context const & context)
 	{
 		if (m_window)
 		{
 			return Debug::logError("Window already initialized");
 		}
 
-		// Initialize
 		if (!glfwInit())
 		{
 			return Debug::logError("Failed initializing GLFW");
 		}
 
-		// Set Data
 		m_title		= title;
 		m_video		= video;
 		m_context	= context;
@@ -519,9 +517,9 @@ namespace ml
 		return glfwGetCurrentContext();
 	}
 
-	VideoMode const & Window::getDesktopMode()
+	Window::Video const & Window::getDesktopMode()
 	{
-		static VideoMode temp {};
+		static Video temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -529,7 +527,7 @@ namespace ml
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = VideoMode { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+			temp = Video { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
 #else
 			// do the thing
 #endif
@@ -537,9 +535,9 @@ namespace ml
 		return temp;
 	}
 
-	std::vector<VideoMode> const & Window::getFullscreenModes()
+	std::vector<Window::Video> const & Window::getFullscreenModes()
 	{
-		static std::vector<VideoMode> temp {};
+		static std::vector<Video> temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -548,7 +546,7 @@ namespace ml
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				VideoMode vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+				Video vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
 
 				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
 				{
@@ -729,7 +727,5 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif

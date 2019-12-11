@@ -147,7 +147,6 @@ namespace ml
 		static auto createProgram() -> uint32_t;
 		static auto createShader(uint32_t type) -> uint32_t;
 		static auto getProgramParameter(int32_t obj, uint32_t param) -> int32_t;
-		static auto getProgramiv(uint32_t program, uint32_t name) -> int32_t;
 		static auto getAttribLocation(uint32_t program, C_String name) -> int32_t;
 		static auto getUniformLocation(uint32_t program, C_String name) -> int32_t;
 

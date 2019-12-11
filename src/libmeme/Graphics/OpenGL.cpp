@@ -677,56 +677,77 @@ namespace ml
 	auto OpenGL::getProgramInfoLog(uint32_t obj) -> C_String
 	{
 		static char temp[512];
+#ifdef GL_ARB_shader_objects
 		glCheck(glGetInfoLogARB(obj, sizeof(temp), 0, temp));
+#else
+		glCheck(glGetProgramInfoLog(obj, sizeof(temp), 0, temp));
+#endif
 		return temp;
 	}
 
 	auto OpenGL::getProgramHandle(uint32_t name) -> uint32_t
 	{
 		uint32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetHandleARB(name));
+#else
+#	error FIXME
+#endif
 		return temp;
 	}
 
 	auto OpenGL::createProgram() -> uint32_t
 	{
 		uint32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(temp = glCreateProgramObjectARB());
+#else
+		glCheck(temp = glCreateProgram());
+#endif
 		return temp;
 	}
 
 	auto OpenGL::createShader(uint32_t type) -> uint32_t
 	{
 		uint32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(temp = glCreateShaderObjectARB(type));
+#else
+		glCheck(temp = glCreateShader(type));
+#endif
 		return temp;
 	}
 
 	auto OpenGL::getProgramParameter(int32_t obj, uint32_t param) -> int32_t
 	{
 		int32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(glGetObjectParameterivARB(obj, param, &temp));
-		return temp;
-	}
-
-	auto OpenGL::getProgramiv(uint32_t program, uint32_t name) -> int32_t
-	{
-		int32_t temp{ 0 };
-		glCheck(glGetProgramiv(program, name, &temp));
+#else
+		glCheck(glGetProgramiv(obj, param, &temp));
+#endif
 		return temp;
 	}
 	
 	auto OpenGL::getAttribLocation(uint32_t program, C_String name) -> int32_t
 	{
 		int32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetAttribLocationARB(program, name));
+#else
+		glCheck(temp = glGetAttribLocation(program, name));
+#endif
 		return temp;
 	}
 
 	auto OpenGL::getUniformLocation(uint32_t program, C_String name) -> int32_t
 	{
 		int32_t temp{ 0 };
+#ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetUniformLocationARB(program, name));
+#else
+		glCheck(temp = glGetUniformLocation(program, name));
+#endif
 		return temp;
 	}
 
@@ -734,22 +755,38 @@ namespace ml
 
 	void OpenGL::useProgram(uint32_t obj)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUseProgramObjectARB(obj));
+#else
+		glCheck(glUseProgram(obj));
+#endif
 	}
 
 	void OpenGL::deleteShader(uint32_t obj)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glDeleteObjectARB(obj));
+#else
+		glCheck(glDeleteShader(obj));
+#endif
 	}
 
 	void OpenGL::detachShader(uint32_t containerObj, uint32_t obj)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glDetachObjectARB(containerObj, obj));
+#else
+		glCheck(glDetachShader(containerObj, obj));
+#endif
 	}
 
 	void OpenGL::attachShader(uint32_t containerObj, uint32_t obj)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glAttachObjectARB(containerObj, obj));
+#else
+		glCheck(glAttachShader(containerObj, obj));
+#endif
 	}
 
 	void OpenGL::shaderSource(uint32_t obj, int32_t count, C_String const * src, int32_t const * length)
@@ -759,9 +796,12 @@ namespace ml
 
 	auto OpenGL::compileShader(uint32_t obj) -> int32_t
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glCompileShaderARB(obj));
-
-		return getProgramParameter(obj, GL::ObjectCompileStatus);
+#else
+		glCheck(glCompileShader(obj));
+#endif
+return getProgramParameter(obj, GL::ObjectCompileStatus);
 	}
 
 	auto OpenGL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
@@ -793,8 +833,11 @@ namespace ml
 
 	auto OpenGL::linkProgram(uint32_t obj) -> int32_t
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glLinkProgramARB(obj));
-
+#else
+		glCheck(glLinkProgram(obj));
+#endif
 		return getProgramParameter(obj, GL::ObjectLinkStatus);
 	}
 
@@ -802,97 +845,171 @@ namespace ml
 
 	void OpenGL::uniform1i(int32_t location, int32_t value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform1iARB(location, value));
+#else
+		glCheck(glUniform1i(location, value));
+#endif
 	}
 
 	void OpenGL::uniform2i(int32_t location, int32_t x, int32_t y)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform2iARB(location, x, y));
+#else
+		glCheck(glUniform2i(location, x, y));
+#endif
 	}
 
 	void OpenGL::uniform3i(int32_t location, int32_t x, int32_t y, int32_t z)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform3iARB(location, x, y, z));
+#else
+		glCheck(glUniform3i(location, x, y, z));
+#endif
 	}
 
 	void OpenGL::uniform4i(int32_t location, int32_t x, int32_t y, int32_t z, int32_t w)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform4iARB(location, x, y, z, w));
+#else
+		glCheck(glUniform4i(location, x, y, z, w));
+#endif
 	}
 
 	void OpenGL::uniform1iv(int32_t location, uint32_t count, int32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform1ivARB(location, count, value));
+#else
+		glCheck(glUniform1iv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform2iv(int32_t location, uint32_t count, int32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform2ivARB(location, count, value));
+#else
+		glCheck(glUniform2iv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform3iv(int32_t location, uint32_t count, int32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform3ivARB(location, count, value));
+#else
+		glCheck(glUniform3iv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform4iv(int32_t location, uint32_t count, int32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform4ivARB(location, count, value));
+#else
+		glCheck(glUniform4iv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform1f(int32_t location, float32_t value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform1fARB(location, value));
+#else
+		glCheck(glUniform1f(location, value));
+#endif
 	}
 
 	void OpenGL::uniform2f(int32_t location, float32_t x, float32_t y)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform2fARB(location, x, y));
+#else
+		glCheck(glUniform2f(location, x, y));
+#endif
 	}
 
 	void OpenGL::uniform3f(int32_t location, float32_t x, float32_t y, float32_t z)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform3fARB(location, x, y, z));
+#else
+		glCheck(glUniform3f(location, x, y, z));
+#endif
 	}
 
 	void OpenGL::uniform4f(int32_t location, float32_t x, float32_t y, float32_t z, float32_t w)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform4fARB(location, x, y, z, w));
+#else
+		glCheck(glUniform4f(location, x, y, z, w));
+#endif
 	}
 
 	void OpenGL::uniform1fv(int32_t location, uint32_t count, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform1fvARB(location, count, value));
+#else
+		glCheck(glUniform1fv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform2fv(int32_t location, uint32_t count, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform2fvARB(location, count, value));
+#else
+		glCheck(glUniform2fv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform3fv(int32_t location, uint32_t count, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform3fvARB(location, count, value));
+#else
+		glCheck(glUniform3fv(location, count, value));
+#endif
 	}
 
 	void OpenGL::uniform4fv(int32_t location, uint32_t count, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniform4fvARB(location, count, value));
+#else
+#endif
 	}
 
 	void OpenGL::uniformMatrix2fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix2fvARB(location, count, transpose, value));
+#else
+#endif
 	}
 
 	void OpenGL::uniformMatrix3fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix3fvARB(location, count, transpose, value));
+#else
+		glCheck(glUniformMatrix3fv(location, count, transpose, value));
+#endif
 	}
 
 	void OpenGL::uniformMatrix4fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
+#ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix4fvARB(location, count, transpose, value));
+#else
+		glCheck(glUniformMatrix4fv(location, count, transpose, value));
+#endif
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

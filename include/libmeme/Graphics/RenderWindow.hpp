@@ -20,18 +20,12 @@ namespace ml
 
 		virtual bool create(
 			std::string const & title,
-			VideoMode const & videoMode,
-			WindowStyle const & style,
-			ContextSettings const & context
+			Video const & videoMode,
+			Style const & style,
+			Context const & context
 		) override;
 
 		virtual void onEvent(Event const & value) override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		RenderWindow & beginFrame();
-
-		RenderWindow & endFrame();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

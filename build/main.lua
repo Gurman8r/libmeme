@@ -12,7 +12,7 @@ project "main"
 	staticruntime	"Off"
 	systemversion	"latest"
 	dependson {
-		"libmeme"
+		"libmeme",
 	}
 	defines {
 		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
@@ -25,11 +25,11 @@ project "main"
 		"%{sln_dir}src/%{prj.name}/**.**",
 	}
 	libdirs {
-		"%{bin_lib}", "%{bin_lib}%{cfg.buildcfg}/", "%{bin_lib}%{cfg.buildcfg}/%{cfg.platform}/",
-		"%{ext_lib}", "%{ext_lib}%{cfg.buildcfg}/", "%{ext_lib}%{cfg.buildcfg}/%{cfg.platform}/",
+		"%{bin_lib}", "%{bin_lib}%{cfg.platform}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
+		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"libmeme"
+		"libmeme", "imgui",
 	}
 	
 	filter { "configurations:Debug" }

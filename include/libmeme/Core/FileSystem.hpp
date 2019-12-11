@@ -1,7 +1,8 @@
 #ifndef _ML_FILE_SYSTEM_HPP_
 #define _ML_FILE_SYSTEM_HPP_
 
-#include <libmeme/Core/File.hpp>
+#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/StringUtility.hpp>
 
 # ifdef ML_SYSTEM_WINDOWS
 #	include <dirent/include/dirent.h>
@@ -130,33 +131,40 @@ namespace ml
 
 		inline bool getFileContents(std::string const & filename, std::vector<char> & value) const
 		{
-			File file;
-			file.loadFromFile(filename);
-			value = file.data();
-			return file;
+			value.clear();
+			if (std::ifstream in{ filename, std::ios_base::binary })
+			{
+				in.seekg(0, std::ios_base::end);
+				std::streamsize size;
+				if ((size = in.tellg()) > 0)
+				{
+					in.seekg(0, std::ios_base::beg);
+					value.resize(static_cast<size_t>(size));
+					in.read(&value[0], size);
+				}
+				in.close();
+			}
+			return !value.empty();
 		}
 
 		inline bool getFileContents(std::string const & filename, std::string & value) const
 		{
-			File file;
-			file.loadFromFile(filename);
-			value = file.str();
-			return file;
-		}
-
-		inline std::string getFileContents(std::string const & filename) const
-		{
-			std::string temp;
-			getFileContents(filename, temp);
-			return temp;
+			std::vector<char> temp{};
+			if (getFileContents(filename, temp))
+			{
+				value.assign(temp.begin(), temp.end());
+			}
+			return !value.empty();
 		}
 
 		inline bool getFileContents(std::string const & filename, std::stringstream & value) const
 		{
-			File file;
-			file.loadFromFile(filename);
-			value = file.sstr();
-			return file;
+			std::vector<char> temp{};
+			if (getFileContents(filename, temp))
+			{
+				value.str().assign(temp.begin(), temp.end());
+			}
+			return !value.str().empty();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

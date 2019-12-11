@@ -8,16 +8,16 @@
 #define ML_PerformanceTracker ::ml::PerformanceTracker::getInstance()
 
 #ifndef ML_DISABLE_BENCHMARKS
-#	define ML_BENCH(...) ML_ANON_T(ScopeTimer, ##__VA_ARGS__)
+#	define ML_BENCHMARK(...) ML_ANON_T(ScopeTimer, ##__VA_ARGS__)
 #else
-#	define ML_BENCH(...)
+#	define ML_BENCHMARK(...) ((void)0)
 #endif
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API PerformanceTracker final : public Singleton<PerformanceTracker>
+	class PerformanceTracker final : public Singleton<PerformanceTracker>
 	{
 		friend Singleton<PerformanceTracker>;
 
@@ -30,19 +30,19 @@ namespace ml
 		~PerformanceTracker() {}
 
 	public:
-		inline void endFrame()
+		inline void end_frame()
 		{
-			m_prev = m_curr;
+			m_prev.assign(m_curr.begin(), m_curr.end());
 
 			m_curr.clear();
 		}
 
 		inline void push_trace(C_String name, Duration const & duration)
 		{
-			m_curr.push_back({ name, duration });
+			m_curr.push_back(std::make_pair(name, duration));
 		}
 
-		inline auto const & lastFrame() const
+		inline auto const & previous() const
 		{
 			return m_prev;
 		}
@@ -50,7 +50,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API ScopeTimer final
+	struct ScopeTimer final
 	{
 		C_String name; Timer timer;
 

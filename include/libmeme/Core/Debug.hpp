@@ -30,7 +30,7 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum class FG : uint16_t
 	{
@@ -54,7 +54,7 @@ namespace ml
 		None = static_cast<uint16_t>(-1)
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum class BG : uint16_t
 	{
@@ -78,7 +78,7 @@ namespace ml
 		None = static_cast<uint16_t>(-1)
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_CORE_API COL final
 	{
@@ -105,7 +105,7 @@ namespace ml
 		std::ostream & operator()(std::ostream & out) const;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr COL operator|(BG const & bg, FG const & fg) { return COL { fg, bg }; }
 	
@@ -117,14 +117,14 @@ namespace ml
 	
 	inline ML_SERIALIZE(std::ostream & out, BG const & value) { return out << COL { value }; }
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static inline std::ostream & endcol(std::ostream & out)
 	{
 		return out << COL{};
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_CORE_API Debug final
 	{
@@ -210,7 +210,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_DEBUG_HPP_
