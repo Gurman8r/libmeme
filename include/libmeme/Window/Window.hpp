@@ -72,35 +72,17 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			constexpr bool operator==(Video const & other) const
-			{
-				return !((*this) < other) && !(other < (*this));
-			}
+			constexpr bool operator==(Video const & other) const { return !((*this) < other) && !(other < (*this)); }
 
-			constexpr bool operator!=(Video const & other) const
-			{
-				return !((*this) == other);
-			}
+			constexpr bool operator!=(Video const & other) const { return !((*this) == other); }
 
-			constexpr bool operator<(Video const & other) const
-			{
-				return (this->size < other.size) && (this->depth < other.depth);
-			}
+			constexpr bool operator<(Video const & other) const { return (this->size < other.size) && (this->depth < other.depth); }
 
-			constexpr bool operator>(Video const & other) const
-			{
-				return !((*this) < other);
-			}
+			constexpr bool operator>(Video const & other) const { return !((*this) < other); }
 
-			constexpr bool operator<=(Video const & other) const
-			{
-				return ((*this) == other) || ((*this) < other);
-			}
+			constexpr bool operator<=(Video const & other) const { return ((*this) == other) || ((*this) < other); }
 
-			constexpr bool operator>=(Video const & other) const
-			{
-				return ((*this) == other) || ((*this) > other);
-			}
+			constexpr bool operator>=(Video const & other) const { return ((*this) == other) || ((*this) > other); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -116,7 +98,7 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			enum Flag : size_t
+			enum Flag : uint32_t
 			{
 				Resizable,
 				Visible,
