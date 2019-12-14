@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API SharedLibrary : public Trackable, public NonCopyable
+	struct ML_ENGINE_API SharedLibrary final : public Trackable, public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
