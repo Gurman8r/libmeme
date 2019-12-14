@@ -24,11 +24,11 @@ namespace ml
 	{
 		if (!this->enabled)
 		{
-			ML_GL.disable(GL::AlphaTest);
+			GL::disable(GL::AlphaTest);
 		}
-		else if (ML_GL.enable(GL::AlphaTest, this->enabled))
+		else if (GL::enable(GL::AlphaTest, this->enabled))
 		{
-			ML_GL.alphaFunc(this->func, this->coeff);
+			GL::alphaFunc(this->func, this->coeff);
 		}
 		return (*this);
 	}
@@ -39,11 +39,11 @@ namespace ml
 	{
 		if (!this->enabled)
 		{
-			ML_GL.disable(GL::Blend);
+			GL::disable(GL::Blend);
 		}
-		else if (ML_GL.enable(GL::Blend, this->enabled))
+		else if (GL::enable(GL::Blend, this->enabled))
 		{
-			ML_GL.blendFuncSeparate(
+			GL::blendFuncSeparate(
 				this->sfactorRGB, this->sfactorAlpha,
 				this->dfactorRGB, this->dfactorAlpha
 			);
@@ -57,11 +57,11 @@ namespace ml
 	{
 		if (!this->enabled)
 		{
-			ML_GL.disable(GL::CullFace);
+			GL::disable(GL::CullFace);
 		}
-		else if (ML_GL.enable(GL::CullFace, this->enabled))
+		else if (GL::enable(GL::CullFace, this->enabled))
 		{
-			ML_GL.cullFace(this->mode);
+			GL::cullFace(this->mode);
 		}
 		return (*this);
 	}
@@ -72,13 +72,13 @@ namespace ml
 	{
 		if (!this->enabled)
 		{
-			ML_GL.disable(GL::DepthTest);
+			GL::disable(GL::DepthTest);
 		}
-		else if (ML_GL.enable(GL::DepthTest, this->enabled))
+		else if (GL::enable(GL::DepthTest, this->enabled))
 		{
-			ML_GL.depthFunc(this->func);
+			GL::depthFunc(this->func);
 
-			ML_GL.depthMask(this->mask);
+			GL::depthMask(this->mask);
 		}
 		return (*this);
 	}

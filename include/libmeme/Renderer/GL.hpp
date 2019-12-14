@@ -5,17 +5,12 @@
 
 #include <libmeme/Renderer/RenderAPI.hpp>
 #include <libmeme/Core/EnumInfo.hpp>
-#include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_GL ::ml::GL::getInstance()
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if (ML_DEBUG)
-# 	define glCheck(expr) do { expr; ML_GL.checkError(__FILE__, __LINE__, #expr); } while (0)
+# 	define glCheck(expr) do { expr; GL::checkError(__FILE__, __LINE__, #expr); } while (0)
 #else
 # 	define glCheck(expr) (expr)
 #endif
@@ -24,9 +19,7 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API GL final
-		: public Singleton<GL>
-		, public RenderAPI<GL>
+	struct ML_RENDERER_API GL final : public RenderAPI<GL>
 	{
 		// Errors
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -182,16 +175,17 @@ namespace ml
 		static void	uniformMatrix3fv(int32_t location, uint32_t count, bool transpose, float32_t const * value);
 		static void	uniformMatrix4fv(int32_t location, uint32_t count, bool transpose, float32_t const * value);
 
+		// Enums
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum Flag : uint32_t
 		{
-			CullFace = 0x0B44,		// GL_CULL_FACE
-			DepthTest = 0x0B71,		// GL_DEPTH_TEST
-			AlphaTest = 0x0BC0,		// GL_ALPHA_TEST
-			Blend = 0x0BE2,		// GL_BLEND
+			CullFace = 0x0B44,			// GL_CULL_FACE
+			DepthTest = 0x0B71,			// GL_DEPTH_TEST
+			AlphaTest = 0x0BC0,			// GL_ALPHA_TEST
+			Blend = 0x0BE2,				// GL_BLEND
 			Multisample = 0x809D,		// GL_MULTISAMPLE
-			FramebufferSRGB = 0x8DB9,		// GL_FRAMEBUFFER_SRGB
+			FramebufferSRGB = 0x8DB9,	// GL_FRAMEBUFFER_SRGB
 			ScissorTest = 0x0C11,		// GL_SCISSOR_TEST
 		};
 

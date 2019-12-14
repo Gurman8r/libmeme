@@ -4,21 +4,19 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 #include <libmeme/Renderer/Buffers.hpp>
 #include <libmeme/Editor/Editor.hpp>
-
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#ifdef ML_CC_MSC
-#	pragma comment(lib, "imgui.lib")
-#endif
+#include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Engine/EngineEvents.hpp>
+#include <libmeme/Engine/Plugin.hpp>
+#include <libmeme/Engine/SharedLibrary.hpp>
 
 
-// Testing
+// Tests
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 namespace ml::testing
 {
@@ -74,6 +72,46 @@ namespace ml::testing
 }
 
 
+// Shaders
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+constexpr ml::Shader shader_2d{ {
+R"(#version 460
+
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec3 a_normal;
+layout(location = 2) in vec2 a_texcoord;
+
+out Vertex { vec3 position; vec3 normal; vec2 texcoord; } vOut;
+
+uniform struct MVP { mat4 m, v, p; } u_mvp;
+
+void main()
+{
+	vOut.position = a_position;
+	vOut.normal = a_normal;
+	vOut.texcoord = a_texcoord;
+	mat4 mvp = (u_mvp.p * u_mvp.v * u_mvp.m);
+	gl_Position = mvp * vec4(vout.position, 1.0);
+}
+)",
+R"(#version 460
+
+in Vertex { vec3 position; vec3 normal; vec2 texcoord; } vIn;
+
+uniform struct MVP { mat4 m, v, p; } u_mvp;
+
+out vec4 gl_Color;
+
+uniform vec4 u_color;
+
+void main()
+{
+	gl_Color = u_color;
+}
+)"
+} };
+
+
 // Settings
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 namespace ml
@@ -107,6 +145,23 @@ namespace ml
 		false,						// Multisample
 		false						// sRGB Capable
 	} };
+
+	// State
+	static struct Monostate final
+	{
+		RenderWindow window{};
+
+		struct Time final
+		{
+			Timer main{ true };
+
+			Timer loop{ false };
+
+			float64_t delta{ 0.0 };
+
+		} time{};
+
+	} state{};
 }
 
 
@@ -120,33 +175,11 @@ ml::int32_t main()
 	ML_MemoryTracker;
 	ML_EventSystem;
 	ML_PerformanceTracker;
-	
-	// State
-	static struct Monostate final
-	{
-		RenderWindow window{};
 
-		struct Colors final
-		{
-			Color bg{ colors::magenta };
-
-		} colors{};
-
-		struct Time final
-		{
-			Timer main{ true };
-
-			Timer loop{ false };
-
-			float64_t delta{ 0.0 };
-
-		} time{};
-
-	} state{};
-
+	// Enter Event
+	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 
 	// Create Window
-	/* * * * * * * * * * * * * * * * * * * * */
 	if (!state.window.create(window_title.str(), window_video, window_style, window_context))
 	{
 		return Debug::logError("Failed initializing Window") | Debug::pause(1);
@@ -212,13 +245,24 @@ ml::int32_t main()
 		});
 	}
 
-
 	// Start Editor
-	/* * * * * * * * * * * * * * * * * * * * */
 	if (!Editor::startup(state.window.getHandle()))
 	{
 		return Debug::logError("Failed initializing Editor") | Debug::pause(1);
 	}
+
+	// Load Event
+	ML_EventSystem.fireEvent<LoadEvent>();
+
+	// Load Plugins
+	auto load_plugin = [](auto filename)
+	{
+		auto library{ new SharedLibrary{ ML_FS.pathTo(filename) } };
+		auto plugin{ library->callFunction<Plugin *>("ML_Plugin_Main") };
+		return _STD make_pair(library, plugin);
+	};
+	std::vector<std::pair<SharedLibrary *, Plugin *>> plugins;
+	plugins.push_back(load_plugin("demo.dll"));
 
 
 	// Loop
@@ -231,112 +275,48 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("STEP_BEGIN");
-
 			Window::pollEvents();
+			ML_EventSystem.fireEvent<BeginStepEvent>();
 		}
 		// Update
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tUPDATE");
-
-			// update stuff, etc...
+			ML_EventSystem.fireEvent<UpdateEvent>();
 		}
 		// Draw
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tDRAW");
-			
-			ML_GL.clear(
-				GL::DepthBufferBit |
-				GL::ColorBufferBit
-			);
-			
-			ML_GL.clearColor(
-				state.colors.bg[0],
-				state.colors.bg[1],
-				state.colors.bg[2],
-				state.colors.bg[3]
-			);
-
-			// draw stuff, etc...
+			ML_EventSystem.fireEvent<DrawEvent>();
 		}
 		// Begin Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
-
 			Editor::new_frame();
+			ML_EventSystem.fireEvent<BeginGuiEvent>();
 		}
 		// Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\t\tGUI");
-			
-			//Editor::show_about_window();
-			Editor::show_imgui_demo();
-			//Editor::show_user_guide();
-			//Editor::show_style_editor();
-
-			ImGui::PushID("libmeme");
-
-			// Profiler
-			ImGui::SetNextWindowSize({ 256, 256 }, ImGuiCond_Once);
-			if (ImGui::Begin("Profiler", nullptr, ImGuiWindowFlags_None))
-			{
-				if (auto const & prev{ ML_PerformanceTracker.previous() }; !prev.empty())
-				{
-					ImGui::Separator();
-					ImGui::Columns(2);
-
-					// Total Time
-					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3f", state.time.main.elapsed().count()); ImGui::NextColumn();
-
-					// Delta Time
-					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7f", state.time.delta); ImGui::NextColumn();
-
-					// Frame Rate
-					ImGui::Text("fps"); ImGui::NextColumn();
-					ImGui::Text("%.4f", ImGui::GetIO().Framerate); ImGui::NextColumn();
-
-					// Benchmarks
-					ImGui::Separator();
-					for (auto const & elem : prev)
-					{
-						ImGui::Text("%s", elem.first); ImGui::NextColumn();
-
-						ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
-					}
-					ImGui::Separator();
-
-					ImGui::Columns(1);
-				}
-			}
-			ImGui::End();
-
-			ImGui::PopID();
+			ML_EventSystem.fireEvent<GuiEvent>();
 		}
 		// End Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_END");
-
 			Editor::render_frame();
+			ML_EventSystem.fireEvent<EndGuiEvent>();
 		}
 		// End Step
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("STEP_END");
-
-			if (state.window.getStyle().vertical_sync())
-			{
-				state.window.swapBuffers(); // Vsync
-			}
-			else
-			{
-				ML_GL.flush(); // Uncapped
-			}
+			ML_EventSystem.fireEvent<EndStepEvent>();
+			if (state.window.getStyle().vertical_sync()) { state.window.swapBuffers(); } // Vsync
+			else { GL::flush(); } // Uncapped
 		}
 		ML_PerformanceTracker.end_frame();
 		state.time.delta = state.time.loop.stop().elapsed().count();
@@ -344,13 +324,20 @@ ml::int32_t main()
 
 
 	// Cleanup
-	/* * * * * * * * * * * * * * * * * * * * */
+	ML_EventSystem.fireEvent<UnloadEvent>();
+	
+	for (auto & pair : plugins)
 	{
-		Editor::shutdown();
-
-		state.window.dispose();
+		delete pair.second;
+		delete pair.first;
 	}
+	plugins.clear();
 
+	Editor::shutdown();
+	
+	state.window.dispose();
+	
+	ML_EventSystem.fireEvent<ExitEvent>();
 
 	// Goodbye!
 	return EXIT_SUCCESS;

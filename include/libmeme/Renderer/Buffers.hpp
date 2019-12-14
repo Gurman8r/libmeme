@@ -27,13 +27,13 @@ namespace ml
 			uint32_t mode;
 		};
 
-		constexpr explicit VAO(uint32_t handle, uint32_t mode)
+		constexpr explicit VAO(uint32_t handle, uint32_t mode) noexcept
 			: handle{ handle }
 			, mode{ mode }
 		{
 		}
 
-		constexpr VAO(uint32_t mode)
+		constexpr VAO(uint32_t mode) noexcept
 			: self_type{ NULL, mode }
 		{
 		}
@@ -52,7 +52,7 @@ namespace ml
 			uint32_t count;
 		};
 
-		constexpr explicit VBO(uint32_t handle, uint32_t usage, buffer_t data, uint32_t size, uint32_t count)
+		constexpr explicit VBO(uint32_t handle, uint32_t usage, buffer_t data, uint32_t size, uint32_t count) noexcept
 			: handle{ handle }
 			, usage{ usage }
 			, data{ data }
@@ -61,7 +61,7 @@ namespace ml
 		{
 		}
 
-		constexpr VBO(uint32_t usage, void * data, uint32_t size, uint32_t count)
+		constexpr VBO(uint32_t usage, void * data, uint32_t size, uint32_t count) noexcept
 			: self_type{ NULL, usage, data, size, count }
 		{
 		}
@@ -80,7 +80,7 @@ namespace ml
 			uint32_t count;
 		};
 
-		constexpr explicit IBO(uint32_t handle, uint32_t usage, uint32_t type, buffer_t data, uint32_t count)
+		constexpr explicit IBO(uint32_t handle, uint32_t usage, uint32_t type, buffer_t data, uint32_t count) noexcept
 			: handle{ handle }
 			, usage{ usage }
 			, type{ type }
@@ -89,7 +89,7 @@ namespace ml
 		{
 		}
 
-		constexpr IBO(uint32_t usage, uint32_t type, buffer_t data, uint32_t count)
+		constexpr IBO(uint32_t usage, uint32_t type, buffer_t data, uint32_t count) noexcept
 			: self_type{ NULL, usage, type, data, count }
 		{
 		}
@@ -105,13 +105,13 @@ namespace ml
 			vec2 size;
 		};
 
-		constexpr explicit FBO(uint32_t handle, vec2 const & size)
+		constexpr explicit FBO(uint32_t handle, vec2 const & size) noexcept
 			: handle{ handle }
 			, size{ size }
 		{
 		}
 
-		constexpr FBO(vec2 const & size)
+		constexpr FBO(vec2 const & size) noexcept
 			: self_type{ NULL, size }
 		{
 		}
@@ -128,15 +128,49 @@ namespace ml
 			uint32_t storage;
 		};
 
-		constexpr explicit RBO(uint32_t handle, vec2 const & size, uint32_t storage)
+		constexpr explicit RBO(uint32_t handle, vec2 const & size, uint32_t storage) noexcept
 			: handle{ handle }
 			, size{ size }
 			, storage{ storage }
 		{
 		}
 
-		constexpr RBO(vec2 const & size, uint32_t storage)
+		constexpr RBO(vec2 const & size, uint32_t storage) noexcept
 			: self_type{ NULL, size, storage }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct Shader final : public GraphicsBuffer<Shader>
+	{
+		struct Source final
+		{
+			std::string_view v, f, g;
+
+			constexpr Source() noexcept = default;
+		};
+
+		union
+		{
+			uint32_t handle;
+			Source source;
+		};
+
+		constexpr explicit Shader(uint32_t handle, Source const & source) noexcept
+			: handle{ handle }
+			, source{ source }
+		{
+		}
+
+		constexpr Shader(Source const & source) noexcept
+			: Shader{ NULL, source }
+		{
+		}
+
+		constexpr Shader() noexcept
+			: Shader{ NULL, Source{} }
 		{
 		}
 	};

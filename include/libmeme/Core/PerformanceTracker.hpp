@@ -17,17 +17,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class PerformanceTracker final : public Singleton<PerformanceTracker>
+	class ML_CORE_API PerformanceTracker final : public Singleton<PerformanceTracker>
 	{
 		friend Singleton<PerformanceTracker>;
 
 		std::vector<std::pair<C_String, Duration>> m_curr, m_prev;
 		
-		PerformanceTracker() : m_curr{}, m_prev{}
-		{
-		}
+		PerformanceTracker();
 		
-		~PerformanceTracker() {}
+		~PerformanceTracker();
 
 	public:
 		inline void end_frame()

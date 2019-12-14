@@ -25,18 +25,18 @@ namespace ml
 	{
 		if (Window::create(title, video, style, context))
 		{
-			if (!ML_GL.init())
+			if (!GL::init())
 			{
 				return Debug::logError("Failed initializing OpenGL");
 			}
 
-			ML_GL.validateVersion(m_context.major, m_context.minor);
+			GL::validateVersion(m_context.major, m_context.minor);
 
 			RenderStates{}(); // default states
 
-			ML_GL.enable(GL::Multisample, m_context.multisample);
+			GL::enable(GL::Multisample, m_context.multisample);
 
-			ML_GL.enable(GL::FramebufferSRGB, m_context.srgbCapable);
+			GL::enable(GL::FramebufferSRGB, m_context.srgbCapable);
 
 			return true;
 		}

@@ -110,7 +110,7 @@ namespace ml
 			Window::makeContextCurrent(backup_context);
 		}
 
-		ML_GL.flush();
+		GL::flush();
 	}
 
 	void Editor::shutdown()

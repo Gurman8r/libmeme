@@ -54,5 +54,7 @@ dofile "./build/imgui.lua"
 
 dofile "./build/libmeme.lua"
 dofile "./build/main.lua"
+
+dofile "./build/demo.lua"
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

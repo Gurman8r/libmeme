@@ -2,6 +2,7 @@
 #define _ML_PYTHON_HPP_
 
 #include <libmeme/Engine/Export.hpp>
+#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {
