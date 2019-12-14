@@ -17,6 +17,7 @@ project "raknet"
 		"_WINSOCK_DEPRECATED_NO_WARNINGS",
 	}
 	includedirs {
+		"%{sln_dir}include",
 		"%{ext_dir}RakNet/Source",
 	}
 	files {

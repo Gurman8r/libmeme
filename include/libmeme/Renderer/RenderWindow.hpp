@@ -1,14 +1,14 @@
 #ifndef _ML_RENDER_WINDOW_HPP_
 #define _ML_RENDER_WINDOW_HPP_
 
-#include <libmeme/Graphics/RenderTarget.hpp>
-#include <libmeme/Window/Window.hpp>
+#include <libmeme/Renderer/RenderTarget.hpp>
+#include <libmeme/Platform/Window.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API RenderWindow : public Window, public RenderTarget
+	struct ML_RENDERER_API RenderWindow : public Window, public RenderTarget
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,7 +20,7 @@ namespace ml
 
 		virtual bool create(
 			std::string const & title,
-			Video const & videoMode,
+			DisplayMode const & videoMode,
 			Style const & style,
 			Context const & context
 		) override;

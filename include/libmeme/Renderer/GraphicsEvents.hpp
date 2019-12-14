@@ -13,9 +13,9 @@ namespace ml
 
 	enum class GraphicsEventType
 	{
-		MIN_GRAPHICS_EVENT = Event::EV_GRAPHICS,
+		MIN_GRAPHICS_EVENT = Event::EV_RENDERER,
 
-		EV_OpenGLError, // OpenGL Error
+		EV_RenderError, // Render Error
 		EV_ShaderError, // Shader Error
 
 		MAX_GRAPHICS_EVENT
@@ -33,13 +33,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct OpenGLErrorEvent final : public GraphicsEvent<GraphicsEventType::EV_OpenGLError>
+	struct RenderErrorEvent final : public GraphicsEvent<GraphicsEventType::EV_RenderError>
 	{
 		const C_String file;
 		const uint32_t line;
 		const C_String expr;
 		const uint32_t code;
-		constexpr OpenGLErrorEvent(C_String file, uint32_t line, C_String expr, uint32_t code) noexcept
+		constexpr RenderErrorEvent(C_String file, uint32_t line, C_String expr, uint32_t code) noexcept
 			: file { file }
 			, line { line }
 			, expr { expr }

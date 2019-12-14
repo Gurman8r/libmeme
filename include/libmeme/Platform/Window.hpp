@@ -8,9 +8,9 @@
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-#include <libmeme/Window/Cursor.hpp>
-#include <libmeme/Window/KeyCode.hpp>
-#include <libmeme/Window/MouseButton.hpp>
+#include <libmeme/Platform/Cursor.hpp>
+#include <libmeme/Platform/KeyCode.hpp>
+#include <libmeme/Platform/MouseButton.hpp>
 
 #define ML_ASPECT(w, h) ((w != 0 && h != 0) ? ((float_t)w / (float_t)(h)) : 0.0f)
 #define ML_ASPECT_2(v)	ML_ASPECT(v[0], v[1])
@@ -19,23 +19,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_WINDOW_API Window : public Trackable, public NonCopyable, public EventListener
+	struct ML_PLATFORM_API Window : public Trackable, public NonCopyable, public EventListener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum API : uint32_t
-		{
-			Unknown, OpenGL, Vulkan, DirectX,
-		};
-
-		enum Profile : uint32_t
-		{
-			Any, Core, Compat, Debug,
-		};
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Video final
+		struct DisplayMode final
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,23 +34,23 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			constexpr explicit Video(vec2u const & size, uint32_t depth)
+			constexpr explicit DisplayMode(vec2u const & size, uint32_t depth)
 				: size{ size }, depth{ depth }
 			{
 			}
 
-			constexpr Video(uint32_t width, uint32_t height, uint32_t depth)
-				: Video{ { width, height }, depth }
+			constexpr DisplayMode(uint32_t width, uint32_t height, uint32_t depth)
+				: DisplayMode{ { width, height }, depth }
 			{
 			}
 
-			constexpr Video(Video const & copy)
-				: Video{ copy.size, copy.depth }
+			constexpr DisplayMode(DisplayMode const & copy)
+				: DisplayMode{ copy.size, copy.depth }
 			{
 			}
 
-			constexpr Video()
-				: Video{ { 0, 0 }, 0 }
+			constexpr DisplayMode()
+				: DisplayMode{ { 0, 0 }, 0 }
 			{
 			}
 
@@ -72,17 +62,17 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			constexpr bool operator==(Video const & other) const { return !((*this) < other) && !(other < (*this)); }
+			constexpr bool operator==(DisplayMode const & other) const { return !((*this) < other) && !(other < (*this)); }
 
-			constexpr bool operator!=(Video const & other) const { return !((*this) == other); }
+			constexpr bool operator!=(DisplayMode const & other) const { return !((*this) == other); }
 
-			constexpr bool operator<(Video const & other) const { return (this->size < other.size) && (this->depth < other.depth); }
+			constexpr bool operator<(DisplayMode const & other) const { return (this->size < other.size) && (this->depth < other.depth); }
 
-			constexpr bool operator>(Video const & other) const { return !((*this) < other); }
+			constexpr bool operator>(DisplayMode const & other) const { return !((*this) < other); }
 
-			constexpr bool operator<=(Video const & other) const { return ((*this) == other) || ((*this) < other); }
+			constexpr bool operator<=(DisplayMode const & other) const { return ((*this) == other) || ((*this) < other); }
 
-			constexpr bool operator>=(Video const & other) const { return ((*this) == other) || ((*this) > other); }
+			constexpr bool operator>=(DisplayMode const & other) const { return ((*this) == other) || ((*this) > other); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -182,6 +172,18 @@ namespace ml
 		struct Context final
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			enum API : uint32_t
+			{
+				Unknown, OpenGL, Vulkan, DirectX,
+			};
+
+			enum Profile : uint32_t
+			{
+				Any, Core, Compat, Debug,
+			};
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 			uint32_t	api			{ API::Unknown };
 			uint32_t	major		{ 1 };
@@ -193,26 +195,6 @@ namespace ml
 			bool		srgbCapable	{ false };
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			constexpr explicit Context(
-				uint32_t		api,
-				uint32_t		major,
-				uint32_t		minor,
-				uint32_t		profile,
-				uint32_t		depthBits,
-				uint32_t		stencilBits,
-				bool			multisample,
-				bool			srgbCapable
-			)	: api			{ api }
-				, major			{ major }
-				, minor			{ minor }
-				, profile		{ profile }
-				, depthBits		{ depthBits }
-				, stencilBits	{ stencilBits }
-				, multisample	{ multisample }
-				, srgbCapable	{ srgbCapable }
-			{
-			}
 
 			constexpr Context() = default;
 
@@ -245,7 +227,7 @@ namespace ml
 
 		virtual bool create(
 			std::string const & title, 
-			Video const & videoMode,
+			DisplayMode const & videoMode,
 			Style const & settings,
 			Context const & context
 		);
@@ -314,9 +296,9 @@ namespace ml
 
 		int32_t getKey(int32_t value) const;
 		
-		int32_t	getInputMode() const;
+		int32_t	getInputMode(int32_t value) const;
 		
-		int32_t	getMouseButton(int32_t button) const;
+		int32_t	getMouseButton(int32_t value) const;
 		
 		vec2i getPosition() const;
 		
@@ -340,13 +322,13 @@ namespace ml
 
 		inline auto getShare() const -> void * { return m_share; }
 		
-		inline auto getSize() const -> vec2u const & { return getVideo().size; }
+		inline auto getSize() const -> vec2u const & { return getDisplayMode().size; }
 
 		inline auto getStyle() const -> Style const & { return m_style; }
 		
 		inline auto getTitle() const -> std::string const & { return m_title; }
 		
-		inline auto getVideo() const -> Video const & { return m_video; }
+		inline auto getDisplayMode() const -> DisplayMode const & { return m_video; }
 		
 		inline auto getWidth() const -> uint32_t { return getSize()[0]; }
 
@@ -362,9 +344,9 @@ namespace ml
 
 		static void * getContextCurrent();
 
-		static Video const & getDesktopMode();
+		static DisplayMode const & getDesktopMode();
 		
-		static std::vector<Video> const & getFullscreenModes();
+		static std::vector<DisplayMode> const & getFullscreenModes();
 
 		static ProcFun getProcAddress(C_String value);
 		
@@ -404,7 +386,7 @@ namespace ml
 		void * 		m_share;
 		Context		m_context;
 		Style		m_style;
-		Video		m_video;
+		DisplayMode	m_video;
 		std::string	m_title;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

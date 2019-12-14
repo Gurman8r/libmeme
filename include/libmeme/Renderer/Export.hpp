@@ -8,11 +8,11 @@
 /* * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_STATIC)
-#	define ML_GRAPHICS_API
-#elif defined(ML_GRAPHICS_EXPORTS)
-#	define ML_GRAPHICS_API ML_API_EXPORT
+#	define ML_RENDERER_API
+#elif defined(ML_RENDERER_EXPORTS)
+#	define ML_RENDERER_API ML_API_EXPORT
 #else
-#	define ML_GRAPHICS_API ML_API_IMPORT
+#	define ML_RENDERER_API ML_API_IMPORT
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * */

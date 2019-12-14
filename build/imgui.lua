@@ -21,6 +21,7 @@ project "imgui"
 		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 	}
 	includedirs {
+		"%{sln_dir}include",
 		"%{ext_dir}",
 		"%{ext_dir}imgui",
 		"%{ext_dir}imgui/examples",

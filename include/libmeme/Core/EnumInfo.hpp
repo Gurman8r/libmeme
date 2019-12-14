@@ -3,6 +3,8 @@
 
 #include <libmeme/Core/Cx.hpp>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 namespace ml
 {
 	template <
@@ -112,5 +114,42 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// Macro Version
+#define ML_GEN_ENUM_INFO(TYPE)														\
+static constexpr bool value_at(int32_t i, TYPE & value)								\
+{																					\
+	return alg::value_at(i, value, TYPE##_values);									\
+}																					\
+static constexpr int32_t index_of(TYPE value)										\
+{																					\
+	return alg::index_of(value, TYPE##_values);										\
+}																					\
+static constexpr C_String name_of(TYPE value)										\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_names);							\
+}																					\
+static constexpr C_String raw_name_of(TYPE value)									\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_raw_names);						\
+}																					\
+static constexpr C_String desc_of(TYPE value)										\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_descriptions);						\
+}																					\
+static constexpr TYPE find_by_name(C_String value, TYPE dv = TYPE##_values[0])		\
+{																					\
+	int32_t i = alg::index_of(value, TYPE##_names);									\
+	return ((i != -1) ? TYPE##_values[i] : dv);										\
+}																					\
+static constexpr TYPE find_by_raw_name(C_String value, TYPE dv = TYPE##_values[0])	\
+{																					\
+	int32_t i = alg::index_of(value, TYPE##_raw_names);								\
+	return ((i != -1) ? TYPE##_values[i] : dv);										\
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_ENUM_INFO_HPP_

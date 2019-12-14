@@ -1,7 +1,7 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Window/Window.hpp>
-#include <libmeme/Graphics/OpenGL.hpp>
+#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Renderer/GL.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * */
 
@@ -33,21 +33,23 @@ namespace ml
 		auto & io{ ImGui::GetIO() };
 		auto & style{ ImGui::GetStyle() };
 
-		// ImGui Config
-		/* * * * * * * * * * * * * * * * * * * * */
+		// Config Flags
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		
+		// Viewports
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+
+		// Paths
 		io.LogFilename = nullptr;
 		io.IniFilename = nullptr;
 
-		// ImGui Style
-		/* * * * * * * * * * * * * * * * * * * * */
+		// Style
 		static const std::string imgui_style{ "Dark" };
 		switch (Hash(util::to_lower(imgui_style)))
 		{
@@ -56,6 +58,7 @@ namespace ml
 		case Hash("classic"): ImGui::StyleColorsClassic(); break;
 		}
 		
+		// Startup
 #ifdef ML_IMPL_PLATFORM_GLFW
 #	ifdef ML_IMPL_RENDERER_OPENGL
 		if (!ImGui_ImplGlfw_InitForOpenGL(static_cast<struct GLFWwindow *>(window), true))
@@ -79,11 +82,13 @@ namespace ml
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #else
+		// 
 #endif
 
 #ifdef ML_IMPL_PLATFORM_GLFW
 		ImGui_ImplGlfw_NewFrame();
 #else
+		// 
 #endif
 		ImGui::NewFrame();
 	}
@@ -95,6 +100,7 @@ namespace ml
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #else
+		// 
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -112,11 +118,13 @@ namespace ml
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #else
+		// 
 #endif
 
 #ifdef ML_IMPL_PLATFORM_GLFW
 		ImGui_ImplGlfw_Shutdown();
 #else
+		// 
 #endif
 	}
 

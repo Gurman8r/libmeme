@@ -1,7 +1,7 @@
 #ifndef _ML_BUFFERS_HPP_
 #define _ML_BUFFERS_HPP_
 
-#include <libmeme/Graphics/Export.hpp>
+#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/Handle.hpp>
 #include <libmeme/Core/Matrix.hpp>

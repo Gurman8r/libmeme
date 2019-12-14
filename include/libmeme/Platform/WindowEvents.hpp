@@ -5,8 +5,8 @@
 
 #include <libmeme/Core/Event.hpp>
 #include <libmeme/Core/BitMask.hpp>
-#include <libmeme/Window/KeyCode.hpp>
-#include <libmeme/Window/MouseButton.hpp>
+#include <libmeme/Platform/KeyCode.hpp>
+#include <libmeme/Platform/MouseButton.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,7 +35,7 @@ namespace ml
 
 	enum class WindowEventType
 	{
-		MIN_WINDOW_EVENT = Event::EV_WINDOW,
+		MIN_WINDOW_EVENT = Event::EV_PLATFORM,
 
 		EV_Char,				// Keyboard text input
 		EV_CursorEnter,			// Cursor enter/exit window

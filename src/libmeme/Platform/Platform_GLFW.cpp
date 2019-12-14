@@ -2,8 +2,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Window/Window.hpp>
-#include <libmeme/Window/WindowEvents.hpp>
+#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/Debug.hpp>
@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(std::string const & title, Video const & video, Style const & style, Context const & context)
+	bool Window::create(std::string const & title, DisplayMode const & video, Style const & style, Context const & context)
 	{
 		if (m_window)
 		{
@@ -240,7 +240,10 @@ namespace ml
 
 	Window & Window::makeContextCurrent()
 	{
-		makeContextCurrent(m_window);
+		if (m_window)
+		{
+			makeContextCurrent(m_window);
+		}
 		return (*this);
 	}
 	
@@ -327,7 +330,10 @@ namespace ml
 	{
 		if (m_window)
 		{
-			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 1, &map_glfw_image(w, h, pixels));
+			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 
+				1,
+				&map_glfw_image(w, h, pixels)
+			);
 		}
 		return (*this);
 	}
@@ -461,9 +467,9 @@ namespace ml
 		return (m_window ? glfwGetKey(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	int32_t Window::getInputMode() const
+	int32_t Window::getInputMode(int32_t value) const
 	{
-		return (m_window ? glfwGetInputMode(static_cast<GLFWwindow *>(m_window), GLFW_CURSOR) : 0);
+		return (m_window ? glfwGetInputMode(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
 	int32_t	Window::getMouseButton(int32_t value) const
@@ -517,9 +523,9 @@ namespace ml
 		return glfwGetCurrentContext();
 	}
 
-	Window::Video const & Window::getDesktopMode()
+	Window::DisplayMode const & Window::getDesktopMode()
 	{
-		static Video temp {};
+		static DisplayMode temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -527,7 +533,7 @@ namespace ml
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = Video { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+			temp = DisplayMode { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
 #else
 			// do the thing
 #endif
@@ -535,9 +541,9 @@ namespace ml
 		return temp;
 	}
 
-	std::vector<Window::Video> const & Window::getFullscreenModes()
+	std::vector<Window::DisplayMode> const & Window::getFullscreenModes()
 	{
-		static std::vector<Video> temp {};
+		static std::vector<DisplayMode> temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -546,7 +552,7 @@ namespace ml
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				Video vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+				DisplayMode vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
 
 				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
 				{

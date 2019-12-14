@@ -2,10 +2,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Graphics/OpenGL.hpp>
+#include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Graphics/GraphicsEvents.hpp>
+#include <libmeme/Renderer/GraphicsEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,16 +34,16 @@ namespace ml
 	// Errors
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::getError() -> uint32_t
+	auto GL::getError() -> uint32_t
 	{
 		return glGetError();
 	}
 
-	void OpenGL::checkError(C_String file, uint32_t line, C_String expr)
+	void GL::checkError(C_String file, uint32_t line, C_String expr)
 	{
 		if (const auto code{ getError() })
 		{
-			ML_EventSystem.fireEvent<OpenGLErrorEvent>(file, line, expr, code);
+			ML_EventSystem.fireEvent<RenderErrorEvent>(file, line, expr, code);
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace ml
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool OpenGL::init()
+	bool GL::init()
 	{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
@@ -65,7 +65,7 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::validateVersion(uint32_t & major, uint32_t & minor)
+	void GL::validateVersion(uint32_t & major, uint32_t & minor)
 	{
 		major = (uint32_t)getInt(GL::MajorVersion);
 		minor = (uint32_t)getInt(GL::MinorVersion);
@@ -112,18 +112,18 @@ namespace ml
 		}
 	}
 
-	
+
 	// Flags
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool OpenGL::isEnabled(uint32_t value)
+	bool GL::isEnabled(uint32_t value)
 	{
 		bool temp{ false };
 		glCheck(temp = glIsEnabled(value));
 		return temp;
 	}
 
-	bool OpenGL::enable(uint32_t value, bool cond)
+	bool GL::enable(uint32_t value, bool cond)
 	{
 		if (cond)
 		{
@@ -133,7 +133,7 @@ namespace ml
 		return true;
 	}
 
-	bool OpenGL::disable(uint32_t value, bool cond)
+	bool GL::disable(uint32_t value, bool cond)
 	{
 		if (cond)
 		{
@@ -147,49 +147,49 @@ namespace ml
 	// Getters
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::getString(uint32_t name) -> C_String
+	auto GL::getString(uint32_t name) -> C_String
 	{
 		C_String temp{ nullptr };
 		glCheck(temp = reinterpret_cast<C_String>(glGetString(name)));
 		return temp;
 	}
 
-	auto OpenGL::getString(uint32_t name, uint32_t index) -> C_String
+	auto GL::getString(uint32_t name, uint32_t index) -> C_String
 	{
 		C_String temp{ nullptr };
 		glCheck(temp = reinterpret_cast<C_String>(glGetStringi(name, index)));
 		return temp;
 	}
 
-	bool OpenGL::getBool(uint32_t name)
+	bool GL::getBool(uint32_t name)
 	{
 		uint8_t temp{ 0 };
 		glCheck(glGetBooleanv(name, &temp));
 		return (bool)temp;
 	}
 
-	auto OpenGL::getDouble(uint32_t name) -> float64_t
+	auto GL::getDouble(uint32_t name) -> float64_t
 	{
 		float64_t temp{ 0 };
 		glCheck(glGetDoublev(name, &temp));
 		return temp;
 	}
 
-	auto OpenGL::getFloat(uint32_t name) -> float32_t
+	auto GL::getFloat(uint32_t name) -> float32_t
 	{
 		float32_t temp{ 0 };
 		glCheck(glGetFloatv(name, &temp));
 		return temp;
 	}
 
-	auto OpenGL::getInt(uint32_t name) -> int32_t
+	auto GL::getInt(uint32_t name) -> int32_t
 	{
 		int32_t temp{ 0 };
 		glCheck(getIntv(name, &temp));
 		return temp;
 	}
 
-	auto OpenGL::getIntv(uint32_t name, int32_t * params) -> int32_t *
+	auto GL::getIntv(uint32_t name, int32_t * params) -> int32_t *
 	{
 		glCheck(glGetIntegerv(name, params));
 		return params;
@@ -199,57 +199,57 @@ namespace ml
 	// Functions
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void OpenGL::activeTexture(uint32_t value)
+	void GL::activeTexture(uint32_t value)
 	{
 		glCheck(glActiveTexture(value));
 	}
 
-	void OpenGL::alphaFunc(uint32_t func, float32_t value)
+	void GL::alphaFunc(uint32_t func, float32_t value)
 	{
 		glCheck(glAlphaFunc(func, value));
 	}
 
-	void OpenGL::blendFunc(uint32_t sFactor, uint32_t dFactor)
+	void GL::blendFunc(uint32_t sFactor, uint32_t dFactor)
 	{
 		glCheck(glBlendFunc(sFactor, dFactor));
 	}
 
-	void OpenGL::blendEquation(uint32_t equation)
+	void GL::blendEquation(uint32_t equation)
 	{
 		glCheck(glBlendEquation(equation));
 	}
 
-	void OpenGL::cullFace(uint32_t mode)
+	void GL::cullFace(uint32_t mode)
 	{
 		glCheck(glCullFace(mode));
 	}
 
-	void OpenGL::depthFunc(uint32_t cmp)
+	void GL::depthFunc(uint32_t cmp)
 	{
 		glCheck(glDepthFunc(cmp));
 	}
 
-	void OpenGL::depthMask(bool value)
+	void GL::depthMask(bool value)
 	{
 		glCheck(glDepthMask(value));
 	}
 
-	void OpenGL::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
+	void GL::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
 	{
 		glCheck(glViewport(x, y, w, h));
 	}
 
-	void OpenGL::blendEquationSeparate(uint32_t modeRGB, uint32_t modeAlpha)
+	void GL::blendEquationSeparate(uint32_t modeRGB, uint32_t modeAlpha)
 	{
 		glCheck(glBlendEquationSeparate(modeRGB, modeAlpha));
 	}
 
-	void OpenGL::blendFuncSeparate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
+	void GL::blendFuncSeparate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
 	{
 		glCheck(glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha));
 	}
 
-	void OpenGL::polygonMode(uint32_t face, uint32_t mode)
+	void GL::polygonMode(uint32_t face, uint32_t mode)
 	{
 		glCheck(glPolygonMode(face, mode));
 	}
@@ -258,27 +258,27 @@ namespace ml
 	// Drawing
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void OpenGL::clear(uint32_t mask)
+	void GL::clear(uint32_t mask)
 	{
 		glCheck(glClear(mask));
 	}
 
-	void OpenGL::clearColor(float32_t r, float32_t g, float32_t b, float32_t a)
+	void GL::clearColor(float32_t r, float32_t g, float32_t b, float32_t a)
 	{
 		glCheck(glClearColor(r, g, b, a));
 	}
 
-	void OpenGL::drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices)
+	void GL::drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices)
 	{
 		glCheck(glDrawElements(mode, count, type, indices));
 	}
 
-	void OpenGL::drawArrays(uint32_t mode, int32_t first, int32_t count)
+	void GL::drawArrays(uint32_t mode, int32_t first, int32_t count)
 	{
 		glCheck(glDrawArrays(mode, first, count));
 	}
 
-	void OpenGL::flush()
+	void GL::flush()
 	{
 		glCheck(glFlush());
 	}
@@ -288,71 +288,71 @@ namespace ml
 	// Buffers
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::genBuffer() -> uint32_t
+	auto GL::genBuffer() -> uint32_t
 	{
 		return genBuffers(1);
 	}
 
-	auto OpenGL::genBuffers(uint32_t count) -> uint32_t
+	auto GL::genBuffers(uint32_t count) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(glGenBuffers(count, &temp));
 		return temp;
 	}
 
-	auto OpenGL::genVertexArray() -> uint32_t
+	auto GL::genVertexArray() -> uint32_t
 	{
 		return genVertexArrays(1);
 	}
 
-	auto OpenGL::genVertexArrays(uint32_t count) -> uint32_t
+	auto GL::genVertexArrays(uint32_t count) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(glGenVertexArrays(count, &temp));
 		return temp;
 	}
 
-	void OpenGL::bindBuffer(uint32_t type, uint32_t buffer)
+	void GL::bindBuffer(uint32_t type, uint32_t buffer)
 	{
 		glCheck(glBindBuffer(type, buffer));
 	}
 
-	void OpenGL::bindVertexArray(uint32_t value)
+	void GL::bindVertexArray(uint32_t value)
 	{
 		glCheck(glBindVertexArray(value));
 	}
 
-	void OpenGL::bufferData(uint32_t type, uint32_t size, void * data, uint32_t usage)
+	void GL::bufferData(uint32_t type, uint32_t size, void * data, uint32_t usage)
 	{
 		glCheck(glBufferData(type, size, data, usage));
 	}
 
-	void OpenGL::bufferSubData(uint32_t target, int32_t offset, int32_t size, void * data)
+	void GL::bufferSubData(uint32_t target, int32_t offset, int32_t size, void * data)
 	{
 		glCheck(glBufferSubData(target, offset, size, data));
 	}
 
-	bool OpenGL::deleteBuffer(uint32_t const * value)
+	bool GL::deleteBuffer(uint32_t const * value)
 	{
 		return value ? ML_TRUE_EXPR(deleteBuffers(1, value)) : false;
 	}
 
-	void OpenGL::deleteBuffers(uint32_t count, uint32_t const * buffers)
+	void GL::deleteBuffers(uint32_t count, uint32_t const * buffers)
 	{
 		glCheck(glDeleteBuffers(count, buffers));
 	}
 
-	bool OpenGL::deleteVertexArray(uint32_t const * value)
+	bool GL::deleteVertexArray(uint32_t const * value)
 	{
 		return value ? ML_TRUE_EXPR(deleteVertexArrays(1, value)) : false;
 	}
 
-	void OpenGL::deleteVertexArrays(uint32_t count, uint32_t const * arrays)
+	void GL::deleteVertexArrays(uint32_t count, uint32_t const * arrays)
 	{
 		glCheck(glDeleteVertexArrays(count, arrays));
 	}
 
-	void OpenGL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
+	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
 	{
 		glCheck(glVertexAttribPointer(
 			index,
@@ -364,7 +364,7 @@ namespace ml
 		));
 	}
 
-	void OpenGL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
+	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
 	{
 #ifdef ML_CC_MSC
 #	pragma warning(push)
@@ -385,7 +385,7 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::enableVertexAttribArray(uint32_t index)
+	void GL::enableVertexAttribArray(uint32_t index)
 	{
 		glCheck(glEnableVertexAttribArray(index));
 	}
@@ -395,7 +395,7 @@ namespace ml
 	// Textures
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool OpenGL::edgeClampAvailable()
+	bool GL::edgeClampAvailable()
 	{
 		static bool checked{ false };
 		static bool temp{ false };
@@ -406,7 +406,7 @@ namespace ml
 		return temp;
 	}
 
-	bool OpenGL::textureSrgbAvailable()
+	bool GL::textureSrgbAvailable()
 	{
 		static bool checked{ false };
 		static bool temp{ false };
@@ -417,7 +417,7 @@ namespace ml
 		return temp;
 	}
 
-	bool OpenGL::nonPowerOfTwoAvailable()
+	bool GL::nonPowerOfTwoAvailable()
 	{
 		static bool checked{ false };
 		static bool temp{ false };
@@ -428,7 +428,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getMaxTextureUnits() -> int32_t
+	auto GL::getMaxTextureUnits() -> int32_t
 	{
 		static int32_t temp{ 0 };
 		static bool checked{ false };
@@ -439,7 +439,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getMaxTextureSize() -> uint32_t
+	auto GL::getMaxTextureSize() -> uint32_t
 	{
 		static uint32_t temp{ 0 };
 		static bool checked{ false };
@@ -450,7 +450,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getValidTextureSize(uint32_t value) -> uint32_t
+	auto GL::getValidTextureSize(uint32_t value) -> uint32_t
 	{
 		if (!nonPowerOfTwoAvailable())
 		{
@@ -466,69 +466,69 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::genTexture() -> uint32_t
+	auto GL::genTexture() -> uint32_t
 	{
 		return genTextures(1);
 	}
 
-	auto OpenGL::genTextures(uint32_t count) -> uint32_t
+	auto GL::genTextures(uint32_t count) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(glGenTextures(count, &temp));
 		return temp;
 	}
 
-	bool OpenGL::deleteTexture(uint32_t const * value)
+	bool GL::deleteTexture(uint32_t const * value)
 	{
 		return value ? ML_TRUE_EXPR(deleteTextures(1, value)) : false;
 	}
 
-	void OpenGL::deleteTextures(uint32_t count, uint32_t const * id)
+	void GL::deleteTextures(uint32_t count, uint32_t const * id)
 	{
 		glCheck(glDeleteTextures(count, id));
 	}
 
-	void OpenGL::bindTexture(uint32_t target, uint32_t id)
+	void GL::bindTexture(uint32_t target, uint32_t id)
 	{
 		glCheck(glBindTexture(target, id));
 	}
 
-	void OpenGL::texImage2D(uint32_t target, int32_t level, uint32_t internalFormat, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels)
+	void GL::texImage2D(uint32_t target, int32_t level, uint32_t internalFormat, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels)
 	{
 		glCheck(glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels));
 	}
 
-	void OpenGL::texSubImage2D(uint32_t target, int32_t level, int32_t xoffset, int32_t yoffset, int32_t width, int32_t height, uint32_t format, uint32_t type, void * pixels)
+	void GL::texSubImage2D(uint32_t target, int32_t level, int32_t xoffset, int32_t yoffset, int32_t width, int32_t height, uint32_t format, uint32_t type, void * pixels)
 	{
 		glCheck(glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels));
 	}
 
-	void OpenGL::texParameter(uint32_t target, uint32_t name, uint32_t param)
+	void GL::texParameter(uint32_t target, uint32_t name, uint32_t param)
 	{
 		glCheck(glTexParameteri(target, name, param));
 	}
 
-	void OpenGL::getTexImage(uint32_t target, int32_t level, uint32_t format, uint32_t type, void * pixels)
+	void GL::getTexImage(uint32_t target, int32_t level, uint32_t format, uint32_t type, void * pixels)
 	{
 		glCheck(glGetTexImage(target, level, format, type, pixels));
 	}
 
-	void OpenGL::generateMipmap(uint32_t target)
+	void GL::generateMipmap(uint32_t target)
 	{
 		glCheck(glGenerateMipmap(target));
 	}
 
-	void OpenGL::pixelStore(uint32_t name, int32_t param)
+	void GL::pixelStore(uint32_t name, int32_t param)
 	{
 		glCheck(glPixelStorei(name, param));
 	}
 
-	void OpenGL::scissor(int32_t x, int32_t y, int32_t width, int32_t height)
+	void GL::scissor(int32_t x, int32_t y, int32_t width, int32_t height)
 	{
 		glCheck(glScissor(x, y, width, height));
 	}
 
-	void OpenGL::bindSampler(uint32_t unit, int32_t sampler)
+	void GL::bindSampler(uint32_t unit, int32_t sampler)
 	{
 		glCheck(glBindSampler(unit, sampler));
 	}
@@ -537,7 +537,7 @@ namespace ml
 	// Framebuffers
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool OpenGL::framebuffersAvailable()
+	bool GL::framebuffersAvailable()
 	{
 		static bool checked{ false };
 		static bool temp{ false };
@@ -549,41 +549,41 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::genFramebuffer() -> uint32_t
+	auto GL::genFramebuffer() -> uint32_t
 	{
 		return genFramebuffers(1);
 	}
-	
-	auto OpenGL::genFramebuffers(uint32_t count) -> uint32_t
+
+	auto GL::genFramebuffers(uint32_t count) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(glGenFramebuffers(count, &temp));
 		return temp;
 	}
 
-	auto OpenGL::checkFramebufferStatus(uint32_t target) -> uint32_t
+	auto GL::checkFramebufferStatus(uint32_t target) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(temp = glCheckFramebufferStatus(target));
 		return temp;
 	}
 
-	void OpenGL::bindFramebuffer(uint32_t target, uint32_t framebuffer)
+	void GL::bindFramebuffer(uint32_t target, uint32_t framebuffer)
 	{
 		glCheck(glBindFramebuffer(target, framebuffer));
 	}
 
-	bool OpenGL::deleteFramebuffer(uint32_t const * value)
+	bool GL::deleteFramebuffer(uint32_t const * value)
 	{
 		return value ? ML_TRUE_EXPR(deleteFramebuffers(1, value)) : false;
 	}
 
-	void OpenGL::deleteFramebuffers(uint32_t count, uint32_t const * framebuffers)
+	void GL::deleteFramebuffers(uint32_t count, uint32_t const * framebuffers)
 	{
 		glCheck(glDeleteFramebuffers(count, framebuffers));
 	}
 
-	void OpenGL::blitFramebuffer(int32_t srcX0, int32_t srcY0, int32_t srcX1, int32_t srcY1, int32_t dstX0, int32_t dstY0, int32_t dstX1, int32_t dstY1, uint8_t mask, uint32_t filter)
+	void GL::blitFramebuffer(int32_t srcX0, int32_t srcY0, int32_t srcX1, int32_t srcY1, int32_t dstX0, int32_t dstY0, int32_t dstX1, int32_t dstY1, uint8_t mask, uint32_t filter)
 	{
 		glCheck(glBlitFramebuffer(
 			srcX0, srcY0, srcX1, srcY1,
@@ -593,7 +593,7 @@ namespace ml
 		));
 	}
 
-	void OpenGL::framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t texture, int32_t level)
+	void GL::framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t texture, int32_t level)
 	{
 		glCheck(glFramebufferTexture2D(target, attachment, textarget, texture, level));
 	}
@@ -602,39 +602,39 @@ namespace ml
 	// Renderbuffers
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::genRenderbuffer() -> uint32_t
+	auto GL::genRenderbuffer() -> uint32_t
 	{
 		return genRenderbuffers(1);
 	}
 
-	auto OpenGL::genRenderbuffers(uint32_t count) -> uint32_t
+	auto GL::genRenderbuffers(uint32_t count) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 		glCheck(glGenRenderbuffers(count, &temp));
 		return temp;
 	}
 
-	bool OpenGL::deleteRenderbuffer(uint32_t const * value)
+	bool GL::deleteRenderbuffer(uint32_t const * value)
 	{
 		return value ? ML_TRUE_EXPR(deleteRenderbuffers(1, value)) : false;
 	}
 
-	void OpenGL::deleteRenderbuffers(uint32_t count, uint32_t const * renderbuffers)
+	void GL::deleteRenderbuffers(uint32_t count, uint32_t const * renderbuffers)
 	{
 		glCheck(glDeleteRenderbuffers(count, renderbuffers));
 	}
 
-	void OpenGL::bindRenderbuffer(uint32_t target, uint32_t renderbuffer)
+	void GL::bindRenderbuffer(uint32_t target, uint32_t renderbuffer)
 	{
 		glCheck(glBindRenderbuffer(target, renderbuffer));
 	}
 
-	void OpenGL::renderbufferStorage(uint32_t target, uint32_t value, int32_t width, int32_t height)
+	void GL::renderbufferStorage(uint32_t target, uint32_t value, int32_t width, int32_t height)
 	{
 		glCheck(glRenderbufferStorage(target, value, width, height));
 	}
 
-	void OpenGL::framebufferRenderbuffer(uint32_t target, uint32_t attachment, uint32_t renderbuffertarget, uint32_t renderbuffer)
+	void GL::framebufferRenderbuffer(uint32_t target, uint32_t attachment, uint32_t renderbuffertarget, uint32_t renderbuffer)
 	{
 		glCheck(glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer));
 
@@ -644,7 +644,7 @@ namespace ml
 	// Shaders
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool OpenGL::shadersAvailable()
+	bool GL::shadersAvailable()
 	{
 		static bool checked{ false };
 		static bool available{ false };
@@ -660,7 +660,7 @@ namespace ml
 		return available;
 	}
 
-	bool OpenGL::geometryShadersAvailable()
+	bool GL::geometryShadersAvailable()
 	{
 		static bool available = false;
 		static bool checked{ false };
@@ -674,7 +674,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto OpenGL::getProgramInfoLog(uint32_t obj) -> C_String
+	auto GL::getProgramInfoLog(uint32_t obj) -> C_String
 	{
 		static char temp[512];
 #ifdef GL_ARB_shader_objects
@@ -685,7 +685,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getProgramHandle(uint32_t name) -> uint32_t
+	auto GL::getProgramHandle(uint32_t name) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -696,7 +696,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::createProgram() -> uint32_t
+	auto GL::createProgram() -> uint32_t
 	{
 		uint32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -707,7 +707,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::createShader(uint32_t type) -> uint32_t
+	auto GL::createShader(uint32_t type) -> uint32_t
 	{
 		uint32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -718,7 +718,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getProgramParameter(int32_t obj, uint32_t param) -> int32_t
+	auto GL::getProgramParameter(int32_t obj, uint32_t param) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -728,8 +728,8 @@ namespace ml
 #endif
 		return temp;
 	}
-	
-	auto OpenGL::getAttribLocation(uint32_t program, C_String name) -> int32_t
+
+	auto GL::getAttribLocation(uint32_t program, C_String name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -740,7 +740,7 @@ namespace ml
 		return temp;
 	}
 
-	auto OpenGL::getUniformLocation(uint32_t program, C_String name) -> int32_t
+	auto GL::getUniformLocation(uint32_t program, C_String name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -753,7 +753,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void OpenGL::useProgram(uint32_t obj)
+	void GL::useProgram(uint32_t obj)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUseProgramObjectARB(obj));
@@ -762,7 +762,7 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::deleteShader(uint32_t obj)
+	void GL::deleteShader(uint32_t obj)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glDeleteObjectARB(obj));
@@ -771,7 +771,7 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::detachShader(uint32_t containerObj, uint32_t obj)
+	void GL::detachShader(uint32_t containerObj, uint32_t obj)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glDetachObjectARB(containerObj, obj));
@@ -780,7 +780,7 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::attachShader(uint32_t containerObj, uint32_t obj)
+	void GL::attachShader(uint32_t containerObj, uint32_t obj)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glAttachObjectARB(containerObj, obj));
@@ -789,28 +789,28 @@ namespace ml
 #endif
 	}
 
-	void OpenGL::shaderSource(uint32_t obj, int32_t count, C_String const * src, int32_t const * length)
+	void GL::shaderSource(uint32_t obj, int32_t count, C_String const * src, int32_t const * length)
 	{
 		glCheck(glShaderSource(obj, count, &src[0], length));
 	}
 
-	auto OpenGL::compileShader(uint32_t obj) -> int32_t
+	auto GL::compileShader(uint32_t obj) -> int32_t
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glCompileShaderARB(obj));
 #else
 		glCheck(glCompileShader(obj));
 #endif
-return getProgramParameter(obj, GL::ObjectCompileStatus);
+		return getProgramParameter(obj, GL::ObjectCompileStatus);
 	}
 
-	auto OpenGL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
 	{
-		C_String log { nullptr };
+		C_String log{ nullptr };
 		return compileShader(obj, type, count, source, log);
 	}
 
-	auto OpenGL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source, C_String & log) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source, C_String & log) -> int32_t
 	{
 		log = nullptr;
 		if ((count < 1) || !source || !(*source))
@@ -831,7 +831,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 		return ML_FAILURE; // 0 (false)
 	}
 
-	auto OpenGL::linkProgram(uint32_t obj) -> int32_t
+	auto GL::linkProgram(uint32_t obj) -> int32_t
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glLinkProgramARB(obj));
@@ -843,7 +843,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void OpenGL::uniform1i(int32_t location, int32_t value)
+	void GL::uniform1i(int32_t location, int32_t value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform1iARB(location, value));
@@ -852,7 +852,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform2i(int32_t location, int32_t x, int32_t y)
+	void GL::uniform2i(int32_t location, int32_t x, int32_t y)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform2iARB(location, x, y));
@@ -861,7 +861,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform3i(int32_t location, int32_t x, int32_t y, int32_t z)
+	void GL::uniform3i(int32_t location, int32_t x, int32_t y, int32_t z)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform3iARB(location, x, y, z));
@@ -870,7 +870,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform4i(int32_t location, int32_t x, int32_t y, int32_t z, int32_t w)
+	void GL::uniform4i(int32_t location, int32_t x, int32_t y, int32_t z, int32_t w)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform4iARB(location, x, y, z, w));
@@ -879,7 +879,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform1iv(int32_t location, uint32_t count, int32_t const * value)
+	void GL::uniform1iv(int32_t location, uint32_t count, int32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform1ivARB(location, count, value));
@@ -888,7 +888,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform2iv(int32_t location, uint32_t count, int32_t const * value)
+	void GL::uniform2iv(int32_t location, uint32_t count, int32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform2ivARB(location, count, value));
@@ -897,7 +897,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform3iv(int32_t location, uint32_t count, int32_t const * value)
+	void GL::uniform3iv(int32_t location, uint32_t count, int32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform3ivARB(location, count, value));
@@ -906,7 +906,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform4iv(int32_t location, uint32_t count, int32_t const * value)
+	void GL::uniform4iv(int32_t location, uint32_t count, int32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform4ivARB(location, count, value));
@@ -915,7 +915,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform1f(int32_t location, float32_t value)
+	void GL::uniform1f(int32_t location, float32_t value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform1fARB(location, value));
@@ -924,7 +924,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform2f(int32_t location, float32_t x, float32_t y)
+	void GL::uniform2f(int32_t location, float32_t x, float32_t y)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform2fARB(location, x, y));
@@ -933,7 +933,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform3f(int32_t location, float32_t x, float32_t y, float32_t z)
+	void GL::uniform3f(int32_t location, float32_t x, float32_t y, float32_t z)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform3fARB(location, x, y, z));
@@ -942,7 +942,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform4f(int32_t location, float32_t x, float32_t y, float32_t z, float32_t w)
+	void GL::uniform4f(int32_t location, float32_t x, float32_t y, float32_t z, float32_t w)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform4fARB(location, x, y, z, w));
@@ -951,7 +951,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform1fv(int32_t location, uint32_t count, float32_t const * value)
+	void GL::uniform1fv(int32_t location, uint32_t count, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform1fvARB(location, count, value));
@@ -960,7 +960,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform2fv(int32_t location, uint32_t count, float32_t const * value)
+	void GL::uniform2fv(int32_t location, uint32_t count, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform2fvARB(location, count, value));
@@ -969,7 +969,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform3fv(int32_t location, uint32_t count, float32_t const * value)
+	void GL::uniform3fv(int32_t location, uint32_t count, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform3fvARB(location, count, value));
@@ -978,23 +978,25 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniform4fv(int32_t location, uint32_t count, float32_t const * value)
+	void GL::uniform4fv(int32_t location, uint32_t count, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniform4fvARB(location, count, value));
 #else
+		glCheck(glUniform4fv(location, count, value));
 #endif
 	}
 
-	void OpenGL::uniformMatrix2fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
+	void GL::uniformMatrix2fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix2fvARB(location, count, transpose, value));
 #else
+		glCheck(glUniformMatrix2fv(location, count, transpose, value));
 #endif
 	}
 
-	void OpenGL::uniformMatrix3fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
+	void GL::uniformMatrix3fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix3fvARB(location, count, transpose, value));
@@ -1003,7 +1005,7 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 #endif
 	}
 
-	void OpenGL::uniformMatrix4fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
+	void GL::uniformMatrix4fv(int32_t location, uint32_t count, bool transpose, float32_t const * value)
 	{
 #ifdef GL_ARB_shader_objects
 		glCheck(glUniformMatrix4fvARB(location, count, transpose, value));
@@ -1014,7 +1016,5 @@ return getProgramParameter(obj, GL::ObjectCompileStatus);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif

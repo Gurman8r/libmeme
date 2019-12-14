@@ -1,13 +1,13 @@
 #ifndef _ML_RENDER_TARGET_HPP_
 #define _ML_RENDER_TARGET_HPP_
 
-#include <libmeme/Graphics/Export.hpp>
+#include <libmeme/Renderer/Export.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API RenderTarget
+	struct ML_RENDERER_API RenderTarget
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

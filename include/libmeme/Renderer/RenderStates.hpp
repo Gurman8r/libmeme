@@ -3,14 +3,14 @@
 
 #include <libmeme/Core/Core.hpp>
 #include <libmeme/Core/Matrix.hpp>
-#include <libmeme/Graphics/Export.hpp>
-#include <libmeme/Graphics/GL.hpp>
+#include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Renderer/GL.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API AlphaState final
+	struct ML_RENDERER_API AlphaState final
 	{
 		bool enabled;
 		GL::Predicate func;
@@ -43,7 +43,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API BlendState final
+	struct ML_RENDERER_API BlendState final
 	{
 		bool enabled;
 		GL::Factor sfactorRGB;
@@ -85,7 +85,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API CullState final
+	struct ML_RENDERER_API CullState final
 	{
 		bool enabled;
 		GL::Face mode;
@@ -116,7 +116,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API DepthState final
+	struct ML_RENDERER_API DepthState final
 	{
 		bool enabled;
 		GL::Predicate func;
@@ -154,7 +154,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_GRAPHICS_API RenderStates final
+	struct ML_RENDERER_API RenderStates final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

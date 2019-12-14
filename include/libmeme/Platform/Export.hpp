@@ -8,11 +8,11 @@
 /* * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_STATIC)
-#	define ML_WINDOW_API
-#elif defined(ML_WINDOW_EXPORTS)
-#	define ML_WINDOW_API ML_API_EXPORT
+#	define ML_PLATFORM_API
+#elif defined(ML_PLATFORM_EXPORTS)
+#	define ML_PLATFORM_API ML_API_EXPORT
 #else
-#	define ML_WINDOW_API ML_API_IMPORT
+#	define ML_PLATFORM_API ML_API_IMPORT
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * */

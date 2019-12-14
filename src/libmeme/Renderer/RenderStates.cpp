@@ -1,5 +1,5 @@
-#include <libmeme/Graphics/RenderStates.hpp>
-#include <libmeme/Graphics/OpenGL.hpp>
+#include <libmeme/Renderer/RenderStates.hpp>
+#include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
 
 namespace ml

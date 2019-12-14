@@ -1,7 +1,7 @@
 #ifndef _ML_MOUSE_BUTTON_HPP_
 #define _ML_MOUSE_BUTTON_HPP_
 
-#include <libmeme/Window/Export.hpp>
+#include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Core.hpp>
 
 namespace ml

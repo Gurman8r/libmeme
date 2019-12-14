@@ -1,8 +1,8 @@
-#include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Graphics/OpenGL.hpp>
-#include <libmeme/Graphics/RenderStates.hpp>
-#include <libmeme/Graphics/GraphicsEvents.hpp>
-#include <libmeme/Window/WindowEvents.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/RenderStates.hpp>
+#include <libmeme/Renderer/GraphicsEvents.hpp>
+#include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Debug.hpp>
 
@@ -14,14 +14,14 @@ namespace ml
 		: Window{}
 		, RenderTarget{}
 	{
-		ML_EventSystem.addListener<OpenGLErrorEvent>(this);
+		ML_EventSystem.addListener<RenderErrorEvent>(this);
 	}
 
 	RenderWindow::~RenderWindow() {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderWindow::create(std::string const & title, Video const & video, Style const & style, Context const & context)
+	bool RenderWindow::create(std::string const & title, DisplayMode const & video, Style const & style, Context const & context)
 	{
 		if (Window::create(title, video, style, context))
 		{
@@ -32,7 +32,7 @@ namespace ml
 
 			ML_GL.validateVersion(m_context.major, m_context.minor);
 
-			RenderStates{}();
+			RenderStates{}(); // default states
 
 			ML_GL.enable(GL::Multisample, m_context.multisample);
 
@@ -48,7 +48,7 @@ namespace ml
 		Window::onEvent(value);
 		switch (*value)
 		{
-		case OpenGLErrorEvent::ID: if (auto ev = value.as<OpenGLErrorEvent>())
+		case RenderErrorEvent::ID: if (auto ev = value.as<RenderErrorEvent>())
 		{
 			// Error location
 			std::string filename{ ev.file };

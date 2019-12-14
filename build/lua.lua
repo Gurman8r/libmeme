@@ -14,6 +14,9 @@ project "lua"
 	defines {
 		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX", "MAKE_LIB",
 	}
+	includedirs{
+		"%{sln_dir}include",
+	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua",
 		"%{ext_dir}lua/lapi.h", "%{ext_dir}lua/lauxlib.h", "%{ext_dir}lua/lcode.h", "%{ext_dir}lua/lctype.h",

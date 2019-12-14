@@ -4,11 +4,11 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
-#include <libmeme/Window/WindowEvents.hpp>
-#include <libmeme/Graphics/Color.hpp>
-#include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Graphics/OpenGL.hpp>
-#include <libmeme/Graphics/Buffers.hpp>
+#include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/Color.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Renderer/Buffers.hpp>
 #include <libmeme/Editor/Editor.hpp>
 
 #include <imgui/imgui.h>
@@ -71,42 +71,6 @@ namespace ml::testing
 	);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	constexpr auto flag_info{ enum_info<GL::Flag>
-	{ {
-		GL::Flag::CullFace,
-		GL::Flag::DepthTest,
-		GL::Flag::AlphaTest,
-		GL::Flag::Blend,
-		GL::Flag::Multisample,
-		GL::Flag::FramebufferSRGB,
-		GL::Flag::ScissorTest,
-	},{
-		"GL_CULL_FACE",
-		"GL_DEPTH_TEST",
-		"GL_ALPHA_TEST",
-		"GL_BLEND",
-		"GL_MULTISAMPLE",
-		"GL_FRAMEBUFFER_SRGB",
-		"GL_SCISSOR_TEST",
-	},{
-		"Cull Face",
-		"Depth Test",
-		"Alpha Test",
-		"Blend",
-		"Multisample",
-		"Framebuffer sRGB",
-		"Scissor Test",
-	} } };
-
-	static_assert(flag_info.get_index(GL::Blend) == 3);
-	static_assert(flag_info.get_name(GL::Blend) == "GL_BLEND");
-	static_assert(flag_info.get_desc(GL::Blend) == "Blend");
-	static_assert(flag_info.find_by_index(3) == GL::Blend);
-	static_assert(flag_info.find_by_name("GL_BLEND") == GL::Blend);
-	static_assert(flag_info.find_by_desc("Blend") == GL::Blend);
-	
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 
@@ -115,33 +79,33 @@ namespace ml::testing
 namespace ml
 {
 	static constexpr auto const window_title{ StringView {
-		"libmeme"		// Title
+		"libmeme"					// Title
 	} };
-	static constexpr auto const window_video{ Window::Video {
-		1280,			// Width
-		720,			// Height
-		32				// Bits-per-Pixel
+	static constexpr auto const window_video{ Window::DisplayMode {
+		1280,						// Width
+		720,						// Height
+		32							// Bits-per-Pixel
 	} };
 	static constexpr auto const window_style{ Window::Style {
-		true,			// Resizable
-		true,			// Visible
-		true,			// Decorated
-		true,			// Focused
-		true,			// Auto Iconify
-		false,			// Floating
-		false,			// Maximized
-		false,			// Fullscreen
-		false,			// Vertical Sync
+		true,						// Resizable
+		true,						// Visible
+		true,						// Decorated
+		true,						// Focused
+		true,						// Auto Iconify
+		false,						// Floating
+		false,						// Maximized
+		false,						// Fullscreen
+		false,						// Vertical Sync
 	} };
 	static constexpr auto const window_context{ Window::Context {
-		Window::OpenGL,	// API
-		4,				// Major Version
-		6,				// Minor Version
-		Window::Compat,	// Profile
-		24,				// Depth Bits
-		8,				// Stencil Bits
-		false,			// Multisample
-		false			// sRGB Capable
+		Window::Context::OpenGL,	// API
+		4,							// Major Version
+		6,							// Minor Version
+		Window::Context::Compat,	// Profile
+		24,							// Depth Bits
+		8,							// Stencil Bits
+		false,						// Multisample
+		false						// sRGB Capable
 	} };
 }
 
@@ -313,28 +277,45 @@ ml::int32_t main()
 			//Editor::show_user_guide();
 			//Editor::show_style_editor();
 
-			// Benchmarks
+			ImGui::PushID("libmeme");
+
+			// Profiler
 			ImGui::SetNextWindowSize({ 256, 256 }, ImGuiCond_Once);
-			if (ImGui::Begin("Benchmarks", nullptr, ImGuiWindowFlags_None))
+			if (ImGui::Begin("Profiler", nullptr, ImGuiWindowFlags_None))
 			{
-				ImGui::Text("%.3f s", state.time.main.elapsed().count());
-				ImGui::Text("%.7f s/frame", state.time.delta);
-				ImGui::Text("%.4f fps", ImGui::GetIO().Framerate);
 				if (auto const & prev{ ML_PerformanceTracker.previous() }; !prev.empty())
 				{
 					ImGui::Separator();
 					ImGui::Columns(2);
+
+					// Total Time
+					ImGui::Text("total time"); ImGui::NextColumn();
+					ImGui::Text("%.3f", state.time.main.elapsed().count()); ImGui::NextColumn();
+
+					// Delta Time
+					ImGui::Text("delta time"); ImGui::NextColumn();
+					ImGui::Text("%.7f", state.time.delta); ImGui::NextColumn();
+
+					// Frame Rate
+					ImGui::Text("fps"); ImGui::NextColumn();
+					ImGui::Text("%.4f", ImGui::GetIO().Framerate); ImGui::NextColumn();
+
+					// Benchmarks
+					ImGui::Separator();
 					for (auto const & elem : prev)
 					{
-						ImGui::Text("%s", elem.first);
-						ImGui::NextColumn();
-						ImGui::Text("%.7fs", elem.second.count());
-						ImGui::NextColumn();
+						ImGui::Text("%s", elem.first); ImGui::NextColumn();
+
+						ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
 					}
+					ImGui::Separator();
+
 					ImGui::Columns(1);
 				}
 			}
 			ImGui::End();
+
+			ImGui::PopID();
 		}
 		// End Gui
 		/* * * * * * * * * * * * * * * * * * * * */

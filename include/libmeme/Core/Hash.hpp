@@ -55,8 +55,7 @@ namespace ml
 
 		template <
 			template <class, class> class Arr,
-			class Ch,
-			class Tr
+			class Ch, class Tr
 		> constexpr hash_t operator()(Arr<Ch, Tr> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
@@ -64,9 +63,7 @@ namespace ml
 
 		template <
 			template <class, class, class> class Arr,
-			class Ch,
-			class Tr,
-			class Al
+			class Ch, class Tr, class Al
 		> constexpr hash_t operator()(Arr<Ch, Tr, Al> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());

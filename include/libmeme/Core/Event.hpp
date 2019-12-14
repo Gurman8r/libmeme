@@ -4,6 +4,11 @@
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Core.hpp>
 
+// The number of events reserved for each sub-library
+#ifndef ML_MAX_LIBRARY_EVENTS
+#define ML_MAX_LIBRARY_EVENTS 64
+#endif
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
@@ -14,17 +19,16 @@ namespace ml
 
 		enum : int32_t
 		{
-			MAX_LIBRARY_EVENTS = 64, // The number of events reserved for each library
+			MAX_LIBRARY_EVENTS = ML_MAX_LIBRARY_EVENTS,
 			
 			EV_INVALID	= (-1),
-			EV_AUDIO	= (MAX_LIBRARY_EVENTS * 1),
-			EV_CORE		= (MAX_LIBRARY_EVENTS * 2),
-			EV_EDITOR	= (MAX_LIBRARY_EVENTS * 3),
-			EV_ENGINE	= (MAX_LIBRARY_EVENTS * 4),
-			EV_GRAPHICS = (MAX_LIBRARY_EVENTS * 5),
-			EV_NETWORK	= (MAX_LIBRARY_EVENTS * 6),
-			EV_WINDOW	= (MAX_LIBRARY_EVENTS * 7),
-			EV_CUSTOM	= (MAX_LIBRARY_EVENTS * 8),
+			EV_CORE		= (MAX_LIBRARY_EVENTS * 1),
+			EV_EDITOR	= (MAX_LIBRARY_EVENTS * 2),
+			EV_ENGINE	= (MAX_LIBRARY_EVENTS * 3),
+			EV_PLATFORM = (MAX_LIBRARY_EVENTS * 4),
+			EV_NETWORK	= (MAX_LIBRARY_EVENTS * 5),
+			EV_RENDERER	= (MAX_LIBRARY_EVENTS * 6),
+			EV_CUSTOM	= (MAX_LIBRARY_EVENTS * 7),
 		};
 
 		constexpr Event(int32_t value) noexcept : m_id{ value } {}
