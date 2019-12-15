@@ -8,7 +8,7 @@
 #	define ML_LOAD_FUN(inst, name) GetProcAddress(static_cast<HINSTANCE>(inst), name)
 #else
 #	define ML_LOAD_LIB(file) dlopen(file, RTLD_LOCAL | RTLD_LAZY)
-#	define ML_FREE_LIB(inst) (!(inst = nullptr))
+#	define ML_FREE_LIB(inst) (inst && !(inst = nullptr))
 #	define ML_LOAD_FUN(inst, name) dlsym(inst, name)
 #endif
 
@@ -22,7 +22,7 @@ namespace ml
 	{
 	}
 	
-	SharedLibrary::SharedLibrary(std::string const & filename)
+	SharedLibrary::SharedLibrary(_STD string const & filename)
 		: SharedLibrary{}
 	{
 		this->loadFromFile(filename);
@@ -50,7 +50,7 @@ namespace ml
 	{
 		if (this != _STD addressof(other))
 		{
-			std::swap(m_instance, other.m_instance);
+			_STD swap(m_instance, other.m_instance);
 
 			m_functions.swap(other.m_functions);
 		}
@@ -65,12 +65,12 @@ namespace ml
 		return ML_FREE_LIB(m_instance);
 	}
 
-	bool SharedLibrary::loadFromFile(std::string const & filename)
+	bool SharedLibrary::loadFromFile(_STD string const & filename)
 	{
 		return (m_instance = ML_LOAD_LIB(filename.c_str()));
 	}
 
-	void * SharedLibrary::loadFunction(std::string const & name)
+	void * SharedLibrary::loadFunction(_STD string const & name)
 	{
 		if (auto it{ m_functions.find(name) }; it != m_functions.end())
 		{

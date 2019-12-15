@@ -8,7 +8,6 @@
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
-#include <libmeme/Renderer/Buffers.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -72,46 +71,6 @@ namespace ml::testing
 }
 
 
-// Shaders
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-constexpr ml::Shader shader_2d{ {
-R"(#version 460
-
-layout(location = 0) in vec3 a_position;
-layout(location = 1) in vec3 a_normal;
-layout(location = 2) in vec2 a_texcoord;
-
-out Vertex { vec3 position; vec3 normal; vec2 texcoord; } vOut;
-
-uniform struct MVP { mat4 m, v, p; } u_mvp;
-
-void main()
-{
-	vOut.position = a_position;
-	vOut.normal = a_normal;
-	vOut.texcoord = a_texcoord;
-	mat4 mvp = (u_mvp.p * u_mvp.v * u_mvp.m);
-	gl_Position = mvp * vec4(vout.position, 1.0);
-}
-)",
-R"(#version 460
-
-in Vertex { vec3 position; vec3 normal; vec2 texcoord; } vIn;
-
-uniform struct MVP { mat4 m, v, p; } u_mvp;
-
-out vec4 gl_Color;
-
-uniform vec4 u_color;
-
-void main()
-{
-	gl_Color = u_color;
-}
-)"
-} };
-
-
 // Settings
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 namespace ml
@@ -171,10 +130,8 @@ ml::int32_t main()
 {
 	using namespace ml;
 
-	// Systems
-	ML_MemoryTracker;
-	ML_EventSystem;
-	ML_PerformanceTracker;
+	// Init Systems
+	ML_MemoryTracker; ML_EventSystem; ML_PerformanceTracker;
 
 	// Enter Event
 	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);

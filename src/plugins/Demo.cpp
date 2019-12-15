@@ -38,7 +38,7 @@ namespace ml
 				ImGui::PushID(ML_ADDRESSOF(this));
 				// Profiler
 				ImGui::SetNextWindowSize({ 256, 256 }, ImGuiCond_Once);
-				if (ImGui::Begin("Profiler", nullptr, ImGuiWindowFlags_None))
+				if (ImGui::Begin("Demo Profiler", nullptr, ImGuiWindowFlags_None))
 				{
 					if (auto const & prev{ ML_PerformanceTracker.previous() }; !prev.empty())
 					{
