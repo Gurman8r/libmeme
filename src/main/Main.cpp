@@ -112,8 +112,6 @@ namespace ml
 	} };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 
@@ -158,7 +156,8 @@ ml::int32_t main()
 
 	// Load Plugins
 	std::vector<std::pair<SharedLibrary *, Plugin *>> plugins;
-	auto load_plugin = [&plugins](auto && filename) {
+	auto load_plugin = [&plugins](auto && filename)
+	{
 		auto library{ new SharedLibrary{ filename } };
 		plugins.push_back(std::make_pair(
 			library, library->callFunction<Plugin *>("ML_Plugin_Main")

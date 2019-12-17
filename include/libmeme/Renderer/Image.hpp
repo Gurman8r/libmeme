@@ -50,19 +50,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & update(vec2s const & size, Color32 const & color);
+		Image & createFromColor(vec2s const & size, Color32 const & color);
 		
-		Image & update(Color32 const & color);
+		Image & createFromColor(Color32 const & color);
 		
-		Image & update(vec2s const & size, size_t channels, Color32 const & color);
+		Image & createFromColor(vec2s const & size, size_t channels, Color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & update(vec2s const & size, Pixels const & pixels);
+		Image & createFromPixels(vec2s const & size, Pixels const & pixels);
 		
-		Image & update(Pixels const & pixels);
+		Image & createFromPixels(Pixels const & pixels);
 		
-		Image & update(vec2s const & size, size_t channels, Pixels const & pixels);
+		Image & createFromPixels(vec2s const & size, size_t channels, Pixels const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

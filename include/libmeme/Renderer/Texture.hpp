@@ -3,7 +3,6 @@
 
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/Image.hpp>
-#include <libmeme/Renderer/GL.hpp>
 
 namespace ml
 {
@@ -59,7 +58,7 @@ namespace ml
 
 		uint32_t channels() const noexcept;
 
-		Image to_image() const;
+		Image copyToImage() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

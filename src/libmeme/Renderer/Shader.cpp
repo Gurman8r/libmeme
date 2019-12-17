@@ -10,7 +10,7 @@ namespace ml
 	{
 		union { uint32_t previous; uint32_t current; int32_t location; };
 
-		UniformBinder(Shader const * program, std::string const & name) noexcept
+		UniformBinder(Shader const * program, std::string const & name)
 			: previous	{ NULL }
 			, current	{ program ? program->m_handle : NULL }
 			, location	{ -1 }
@@ -28,7 +28,7 @@ namespace ml
 			}
 		}
 
-		~UniformBinder() noexcept
+		~UniformBinder()
 		{
 			if (current && (current != previous))
 			{
@@ -49,7 +49,7 @@ namespace ml
 
 	Shader::Shader()
 		: m_handle{ NULL }
-		, m_attributes{}
+		, m_attribs{}
 		, m_source{}
 		, m_textures{}
 		, m_uniforms{}
@@ -107,6 +107,9 @@ namespace ml
 		{
 			std::swap(m_handle, other.m_handle);
 			std::swap(m_source, other.m_source);
+			AttribCache{}.swap(m_attribs);
+			UniformCache{}.swap(m_uniforms);
+			TextureCache{}.swap(m_textures);
 		}
 	}
 
@@ -119,16 +122,15 @@ namespace ml
 
 	bool Shader::destroy()
 	{
-		m_attributes.clear();
+		m_attribs.clear();
 		m_uniforms.clear();
 		m_textures.clear();
+		
 		GL::useProgram(NULL);
 		if (m_handle)
 		{
 			GL::deleteShader(m_handle);
-			
 			m_handle = NULL;
-
 			GL::flush();
 		}
 		return !(m_handle);
@@ -379,14 +381,14 @@ namespace ml
 		{
 			return -1;
 		}
-		else if (auto const it{ m_attributes.find(name) }; it != m_attributes.end())
+		else if (auto const it{ m_attribs.find(Hash(name)) }; it != m_attribs.end())
 		{
 			return it->second;
 		}
 		else
 		{
-			return m_attributes.insert(std::make_pair(
-				name,
+			return m_attribs.insert(std::make_pair(
+				Hash(name),
 				GL::getAttribLocation(m_handle, name.c_str())
 			)).first->second;
 		}
@@ -398,14 +400,14 @@ namespace ml
 		{
 			return -1;
 		}
-		else if (auto const it{ m_uniforms.find(name) }; it != m_uniforms.end())
+		else if (auto const it{ m_uniforms.find(Hash(name)) }; it != m_uniforms.end())
 		{
 			return it->second;
 		}
 		else
 		{
 			return m_uniforms.insert(std::make_pair(
-				name,
+				Hash(name),
 				GL::getAttribLocation(m_handle, name.c_str())
 			)).first->second;
 		}

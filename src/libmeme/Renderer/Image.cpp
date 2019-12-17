@@ -85,7 +85,7 @@ namespace ml
 	Image::Image(Image const & copy)
 		: Image {}
 	{
-		update(copy.m_size, copy.m_channels, copy.m_pixels);
+		createFromPixels(copy.m_size, copy.m_channels, copy.m_pixels);
 	}
 
 	Image::~Image() {}
@@ -139,7 +139,7 @@ namespace ml
 			static_cast<int32_t>(req_comp)
 		) })
 		{
-			update({ data, data + capacity() });
+			createFromPixels({ data, data + capacity() });
 			
 			::stbi_image_free(data);
 			
@@ -150,17 +150,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::update(vec2s const & size, Color32 const & color)
+	Image & Image::createFromColor(vec2s const & size, Color32 const & color)
 	{
-		return update(size, channels(), color);
+		return createFromColor(size, channels(), color);
 	}
 
-	Image & Image::update(Color32 const & color)
+	Image & Image::createFromColor(Color32 const & color)
 	{
-		return update(size(), channels(), color);
+		return createFromColor(size(), channels(), color);
 	}
 	
-	Image & Image::update(vec2s const & size, size_t channels, Color32 const & color)
+	Image & Image::createFromColor(vec2s const & size, size_t channels, Color32 const & color)
 	{
 		if (size[0] && size[1] && channels)
 		{
@@ -184,23 +184,23 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Image & Image::update(vec2s const & size, Pixels const & pixels)
+	Image & Image::createFromPixels(vec2s const & size, Pixels const & pixels)
 	{
-		return update(size, m_channels, pixels);
+		return createFromPixels(size, m_channels, pixels);
 	}
 
-	Image & Image::update(Pixels const & pixels)
+	Image & Image::createFromPixels(Pixels const & pixels)
 	{
-		return update(m_size, m_channels, pixels);
+		return createFromPixels(m_size, m_channels, pixels);
 	}
 	
-	Image & Image::update(vec2s const & size, size_t channels, Pixels const & pixels)
+	Image & Image::createFromPixels(vec2s const & size, size_t channels, Pixels const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{
 			m_size = size;
 			m_channels = channels;
-			m_pixels.assign(pixels.begin(), pixels.end());
+			m_pixels = pixels;
 			return (*this);
 		}
 		dispose();
@@ -245,6 +245,8 @@ namespace ml
 		}
 		return (*this);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	uint32_t Image::getFormat() const
 	{

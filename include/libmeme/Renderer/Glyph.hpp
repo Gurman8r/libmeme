@@ -11,7 +11,7 @@ namespace ml
 
 		enum : size_t { Size = 6 };
 
-		Texture		texture { GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated };
+		Texture		texture	{}; // GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated };
 		FloatRect	bounds	{ FloatRect::zero() };
 		uint32_t	advance { 0 };
 

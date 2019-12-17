@@ -105,9 +105,9 @@ namespace ml
 
 		struct UniformBinder;
 
-		using AttribCache = std::map<std::string, int32_t>;
+		using AttribCache = std::map<hash_t, int32_t>;
 		
-		using UniformCache = std::map<std::string, int32_t>;
+		using UniformCache = std::map<hash_t, int32_t>;
 		
 		using TextureCache = std::map<struct Texture const *, int32_t>;
 
@@ -116,7 +116,7 @@ namespace ml
 			uint32_t m_handle;
 			Source m_source;
 			
-			mutable AttribCache m_attributes;
+			mutable AttribCache m_attribs;
 			mutable TextureCache m_textures;
 			mutable UniformCache m_uniforms;
 		};

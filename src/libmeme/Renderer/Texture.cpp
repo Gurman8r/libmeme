@@ -106,12 +106,11 @@ namespace ml
 
 	bool Texture::destroy()
 	{
+		bind(nullptr);
 		if (m_handle)
 		{
 			GL::deleteTexture(&m_handle);
-
 			m_handle = NULL;
-
 			GL::flush();
 		}
 		return !(m_handle);
@@ -146,6 +145,8 @@ namespace ml
 		}
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	uint32_t Texture::channels() const noexcept
 	{
 		switch (m_internalFormat)
@@ -157,7 +158,7 @@ namespace ml
 		return 0;
 	}
 
-	Image Texture::to_image() const
+	Image Texture::copyToImage() const
 	{
 		Image temp{ size(), channels() };
 		if (m_handle)

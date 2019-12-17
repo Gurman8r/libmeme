@@ -58,9 +58,9 @@ namespace ml
 			return std::holds_alternative<T>(data());
 		}
 
-		inline auto const & store(data_t const & value) noexcept
+		template <class T> inline auto const & store(T && value) noexcept
 		{
-			return (std::get<2>(m_storage) = value);
+			return (std::get<2>(m_storage) = std::forward<T>(value));
 		}
 
 		template <class T> inline decltype(auto) load() const
