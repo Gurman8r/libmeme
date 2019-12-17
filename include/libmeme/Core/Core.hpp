@@ -51,10 +51,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 # ifdef ML_CC_MSC
-#	define popen		_popen
-#	define pclose		_pclose
-#	define strdup		_strdup
-#	define snprintf		_snprintf
+#	define popen		::_popen
+#	define pclose		::_pclose
+#	define strdup		::_strdup
+#	define snprintf		::_snprintf
 #endif
 
 #define ML_ARGC			__argc
@@ -106,9 +106,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	Path		= typename std::filesystem::path;
-	ML_USING	File		= typename std::vector<char>;
-	ML_USING	Dir			= typename std::map<char, std::vector<Path>>;
+	ML_USING	path_t		= typename std::filesystem::path;
+	ML_USING	file_t		= typename std::vector<char>;
+	ML_USING	dir_t		= typename std::map<char, std::vector<path_t>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -26,7 +26,7 @@ namespace ml
 		explicit Texture(uint32_t sampler, uint32_t format, int32_t flags);
 		explicit Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
 		explicit Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
-		explicit Texture(Path const & filename);
+		explicit Texture(path_t const & filename);
 		Texture(Image const & image);
 		Texture(Texture const & copy);
 		Texture(Texture && copy) noexcept;
@@ -48,7 +48,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(Path const & filename);
+		bool loadFromFile(path_t const & filename);
 		
 		bool loadFromImage(Image const & image);
 

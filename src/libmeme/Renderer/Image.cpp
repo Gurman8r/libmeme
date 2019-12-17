@@ -66,17 +66,17 @@ namespace ml
 		}
 	}
 
-	Image::Image(Path const & filename)
+	Image::Image(path_t const & filename)
 		: Image{ filename, false }
 	{
 	}
 
-	Image::Image(Path const & filename, bool flip)
+	Image::Image(path_t const & filename, bool flip)
 		: Image { filename, flip, 0 }
 	{
 	}
 
-	Image::Image(Path const & filename, bool flip, size_t req_comp)
+	Image::Image(path_t const & filename, bool flip, size_t req_comp)
 		: Image {}
 	{
 		loadFromFile(filename, flip, req_comp);
@@ -117,17 +117,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Image::loadFromFile(Path const & filename)
+	bool Image::loadFromFile(path_t const & filename)
 	{
 		return loadFromFile(filename, true);
 	}
 
-	bool Image::loadFromFile(Path const & filename, bool flip)
+	bool Image::loadFromFile(path_t const & filename, bool flip)
 	{
 		return loadFromFile(filename, flip, 0);
 	}
 
-	bool Image::loadFromFile(Path const & filename, bool flip, size_t req_comp)
+	bool Image::loadFromFile(path_t const & filename, bool flip, size_t req_comp)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 

@@ -61,7 +61,7 @@ namespace ml
 		return ((!value.empty() && m_L) ? luaL_dostring(m_L, value.c_str()) : 0);
 	}
 
-	int32_t Lua::do_file(Path const & filename) const
+	int32_t Lua::do_file(path_t const & filename) const
 	{
 		if (auto o{ FS::read_file(filename) }; o && !o.value().empty())
 		{

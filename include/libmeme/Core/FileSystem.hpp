@@ -16,19 +16,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static Path current_path();
+		static path_t current_path();
 
-		static void current_path(Path const & value);
+		static void current_path(path_t const & value);
 
-		static Path path_to(Path const & value);
+		static path_t path_to(path_t const & value);
 
-		static Path const & root_path();
+		static path_t const & root_path();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static std::optional<Dir> read_dir(Path const & path);
+		static std::optional<dir_t> read_dir(path_t const & path);
 
-		static std::optional<File> read_file(Path const & path);
+		static std::optional<file_t> read_file(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -10,34 +10,34 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Path FS::current_path()
+	path_t FS::current_path()
 	{
 		return std::filesystem::current_path();
 	}
 
-	void FS::current_path(Path const & value)
+	void FS::current_path(path_t const & value)
 	{
 		return std::filesystem::current_path(value);
 	}
 
-	Path FS::path_to(Path const & value)
+	path_t FS::path_to(path_t const & value)
 	{
-		return Path{ root_path().string() + '/' + value.string() };
+		return path_t{ root_path().string() + '/' + value.string() };
 	}
 
-	Path const & FS::root_path()
+	path_t const & FS::root_path()
 	{
-		static Path const temp{ std::filesystem::current_path() };
+		static path_t const temp{ std::filesystem::current_path() };
 		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::optional<Dir> FS::read_dir(Path const & path)
+	std::optional<dir_t> FS::read_dir(path_t const & path)
 	{
 		if (::DIR * dir{ ::opendir(path.string().c_str()) })
 		{
-			Dir temp{};
+			dir_t temp{};
 			
 			while (::dirent * ent{ ::readdir(dir) })
 			{
@@ -49,7 +49,7 @@ namespace ml
 					case DT_LNK	: return '@';
 					default		: return '*';
 					}
-				})()].push_back(ent->d_name);
+				})()].push_back(path_t{ ent->d_name });
 			}
 			
 			return std::make_optional(temp);
@@ -57,11 +57,11 @@ namespace ml
 		return std::nullopt;
 	}
 
-	std::optional<File> FS::read_file(Path const & path)
+	std::optional<file_t> FS::read_file(path_t const & path)
 	{
 		if (std::ifstream in{ path, std::ios_base::binary })
 		{
-			File temp{};
+			file_t temp{};
 
 			in.seekg(0, std::ios_base::beg);
 

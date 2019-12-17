@@ -4,6 +4,7 @@
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/TypePack.hpp>
 
 namespace ml
 {
@@ -11,15 +12,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type_t = typename typeof<>;
-
-		using name_t = typename std::string;
-
-		using data_t = typename std::variant<
+		using allowed_types = typename detail::pack<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
 			mat2, mat3, mat4,
 			struct Texture *
+		>;
+
+		using type_t = typename typeof<>;
+
+		using name_t = typename std::string;
+
+		using data_t = typename detail::unpack_t<
+			std::variant, allowed_types::apply
 		>;
 
 		using storage_t = typename std::tuple<
@@ -71,6 +76,11 @@ namespace ml
 		template <class T> inline std::optional<T> evaluate() const
 		{
 			return holds<T>() ? std::make_optional(load<T>()) : std::nullopt;
+		}
+
+		template <class T> inline auto exchange(T && value)
+		{
+			return std::exchange(std::get<2>(m_storage), std::forward<T>(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -12,13 +12,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool init(Path const & name, Path const & home);
+		bool init(path_t const & name, path_t const & home);
 		
 		bool dispose();
 		
 		int32_t do_string(std::string const & value) const;
 		
-		int32_t do_file(Path const & filename) const;
+		int32_t do_file(path_t const & filename) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -29,8 +29,8 @@ namespace ml
 		~Python();
 
 		bool m_init{ false };
-		Path m_name{};
-		Path m_home{};
+		path_t m_name{};
+		path_t m_home{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -44,9 +44,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(Path const & v_file, Path const & f_file);
+		bool loadFromFile(path_t const & v_file, path_t const & f_file);
 		
-		bool loadFromFile(Path const & v_file, Path const g_file, Path const & f_file);
+		bool loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file);
 		
 		bool loadFromMemory(Source const & value);
 		

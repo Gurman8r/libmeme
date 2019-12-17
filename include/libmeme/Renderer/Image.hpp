@@ -28,9 +28,9 @@ namespace ml
 		Image(vec2s const & size, size_t channels);
 		Image(vec2s const & size, Pixels const & pixels);
 		Image(vec2s const & size, Pixels const & pixels, size_t channels);
-		explicit Image(Path const & path);
-		explicit Image(Path const & path, bool flip);
-		explicit Image(Path const & path, bool flip, size_t req_comp);
+		explicit Image(path_t const & path);
+		explicit Image(path_t const & path, bool flip);
+		explicit Image(path_t const & path, bool flip, size_t req_comp);
 		Image(Image const & copy);
 		~Image();
 
@@ -42,11 +42,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		bool loadFromFile(Path const & filename);
+		bool loadFromFile(path_t const & filename);
 		
-		bool loadFromFile(Path const & filename, bool flip);
+		bool loadFromFile(path_t const & filename, bool flip);
 		
-		bool loadFromFile(Path const & filename, bool flip, size_t req_comp);
+		bool loadFromFile(path_t const & filename, bool flip, size_t req_comp);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -33,7 +33,7 @@ namespace ml
 	{
 	}
 
-	Texture::Texture(Path const & filename)
+	Texture::Texture(path_t const & filename)
 		: Texture{}
 	{
 		loadFromFile(filename);
@@ -118,7 +118,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::loadFromFile(Path const & filename)
+	bool Texture::loadFromFile(path_t const & filename)
 	{
 		Image image;
 		return image.loadFromFile(filename) && loadFromImage(image);

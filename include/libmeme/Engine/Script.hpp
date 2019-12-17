@@ -12,13 +12,14 @@ namespace ml
 
 		enum class Language
 		{
-			Unknown, Python, Lua
+			Unknown, Python, Lua,
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Script();
-		explicit Script(std::string const & filename);
+		explicit Script(path_t const & filename);
+		explicit Script(Language language, std::string const & text);
 		Script(Script const & copy);
 		Script(Script && copy) noexcept;
 		~Script();
@@ -33,9 +34,22 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(std::string const & filename);
+		bool loadFromFile(path_t const & filename);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t execute();
+		
+		int32_t execute(std::vector<std::string> const & args);
+
+		template <class ... Args> inline int32_t operator()(Args && ... args)
+		{
+			return execute(std::forward<Args>(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline auto language() const noexcept -> Language { return m_language; }
 
 		inline auto text() const noexcept -> std::string const & { return m_text; }
 
@@ -44,6 +58,7 @@ namespace ml
 	private:
 		union
 		{
+			Language m_language;
 			std::string m_text;
 		};
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

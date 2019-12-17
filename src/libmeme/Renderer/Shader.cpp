@@ -138,7 +138,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::loadFromFile(Path const & v_file, Path const & f_file)
+	bool Shader::loadFromFile(path_t const & v_file, path_t const & f_file)
 	{
 		// Vertex
 		std::string vs{};
@@ -157,7 +157,7 @@ namespace ml
 		return loadFromMemory(vs, fs);
 	}
 
-	bool Shader::loadFromFile(Path const & v_file, Path const g_file, Path const & f_file)
+	bool Shader::loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file)
 	{
 		// Vertex
 		std::string vs{};
