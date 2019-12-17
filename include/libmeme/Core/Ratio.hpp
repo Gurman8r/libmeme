@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING_T_(int64_t Num, int64_t Den = 1) Ratio = typename _STD ratio<Num, Den>;
+	ML_USING_T_(int64_t Num, int64_t Den = 1) Ratio = typename std::ratio<Num, Den>;
 
 	ML_USING Atto	= typename Ratio<1LL, 1000000000000000000LL>;
 	ML_USING Femto	= typename Ratio<1LL, 1000000000000000LL>;

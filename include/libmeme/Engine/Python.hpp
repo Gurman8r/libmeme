@@ -2,32 +2,35 @@
 #define _ML_PYTHON_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/FileSystem.hpp>
-#include <libmeme/Core/StringUtility.hpp>
+#include <libmeme/Core/Singleton.hpp>
+
+#define ML_Python ::ml::Python::getInstance()
 
 namespace ml
 {
-	class ML_ENGINE_API Py final : public Singleton<Py>
+	struct ML_ENGINE_API Python final : public Singleton<Python>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		friend Singleton<Py>;
-
-		Py() {}
-		~Py() {}
+		bool init(Path const & name, Path const & home);
 		
-		bool m_init { false };
-		std::string	m_name {};
-		std::string	m_home {};
+		bool dispose();
+		
+		int32_t do_string(std::string const & value) const;
+		
+		int32_t do_file(Path const & filename) const;
 
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool	init(std::string const & name, std::string const & home);
-		bool	restart();
-		bool	dispose();
-		int32_t doString(std::string const & value) const;
-		int32_t doFile(std::string const & filename) const;
+	private:
+		friend Singleton<Python>;
+
+		Python();
+		~Python();
+
+		bool m_init{ false };
+		Path m_name{};
+		Path m_home{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

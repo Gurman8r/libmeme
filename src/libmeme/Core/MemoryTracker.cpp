@@ -21,21 +21,21 @@ namespace ml
 
 			std::cerr
 				<< std::left
-				<< FG::Green << std::setw(6) << "Index"
-				<< FG::Cyan << std::setw(sizeof(size_t) * 2) << "Size"
-				<< FG::Yellow << std::setw(sizeof(size_t) * 3) << "Address"
-				<< FG::Normal << std::setw(10) << "Type"
-				<< COL() << '\n';
+				<< std::setw(6) << "Index"
+				<< std::setw(sizeof(size_t) * 2) << "Size"
+				<< std::setw(sizeof(size_t) * 3) << "Address"
+				<< std::setw(10) << "Type"
+				<< '\n';
 
 			for (auto const & [ ptr, rec ] : m_records)
 			{
 				std::cerr
 					<< std::left
-					<< FG::Green << std::setw(6) << rec->index
-					<< FG::Cyan << std::setw(sizeof(size_t) * 2) << rec->size
-					<< FG::Yellow << std::setw(sizeof(size_t) * 3) << rec->value
-					<< FG::Normal << std::setw(10) << rec->get_rtti().name()
-					<< COL() << '\n';
+					<< std::setw(6) << rec->index
+					<< std::setw(sizeof(size_t) * 2) << rec->size
+					<< std::setw(sizeof(size_t) * 3) << rec->value
+					<< std::setw(10) << rec->get_rtti().name()
+					<< '\n';
 			}
 
 			Debug::pause(EXIT_FAILURE);

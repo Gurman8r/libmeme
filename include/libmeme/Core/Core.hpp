@@ -31,28 +31,19 @@
 #	include <cstddef>
 #	include <ctime>
 #	include <fstream>
-#	include <future>
 #	include <initializer_list>
 #	include <iomanip>
 #	include <iostream>
-#	include <iterator>
 #	include <limits>
 #	include <locale>
 #	include <map>
-#	include <mutex>
-#	include <queue>
 #	include <random>
-#	include <regex>
-#	include <stack>
-#	include <set>
 #	include <sstream>
 #	include <string>
-#	include <thread>
 #	include <type_traits>
 #	include <typeindex>
 #	include <typeinfo>
 #	include <unordered_map>
-#	include <unordered_set>
 #	include <utility>
 #	include <vector>
 #endif
@@ -98,6 +89,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_USING	bool_t		= typename bool;
 	ML_USING	byte_t		= typename uint8_t;
 	ML_USING	float_t		= typename float32_t;
 	ML_USING	hash_t		= typename uint64_t;
@@ -111,6 +103,12 @@ namespace ml
 	ML_USING	CW_String	= typename wchar_t const *;
 	ML_USING	C16_String	= typename char16_t const *;
 	ML_USING	C32_String	= typename char32_t const *;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_USING	Path		= typename std::filesystem::path;
+	ML_USING	File		= typename std::vector<char>;
+	ML_USING	Dir			= typename std::map<char, std::vector<Path>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

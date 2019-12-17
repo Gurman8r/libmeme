@@ -1,13 +1,13 @@
 #ifndef _ML_COLOR_HPP_
 #define _ML_COLOR_HPP_
 
-#include <libmeme/Core/Export.hpp>
+#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Core.hpp>
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace detail
 	{
@@ -39,7 +39,7 @@ namespace ml
 		}
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	template <class T> struct BasicColor final
 	{
@@ -119,45 +119,57 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_USING Color = BasicColor<float_t>;
 	ML_USING Color32 = BasicColor<byte_t>;
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T> inline ML_SERIALIZE(std::ostream & out, const BasicColor<T> & value)
 	{
 		return out << value.rgba();
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ... Args> static constexpr auto make_color(Args && ... args)
+	{
+		return Color{ std::forward<Args>(args)... };
+	}
+
+	template <class ... Args> static constexpr auto make_color32(Args && ... args)
+	{
+		return Color32{ std::forward<Args>(args)... };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace colors
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr Color clear		{ 0.0f, 0.0f, 0.0f, 0.0f };
-		static constexpr Color white		{ 1.0f, 1.0f, 1.0f, 1.0f };
-		static constexpr Color gray			{ 0.5f, 0.5f, 0.5f, 1.0f };
-		static constexpr Color black		{ 0.0f, 0.0f, 0.0f, 1.0f };
-		static constexpr Color red			{ 1.0f, 0.0f, 0.0f, 1.0f };
-		static constexpr Color green		{ 0.0f, 1.0f, 0.0f, 1.0f };
-		static constexpr Color blue			{ 0.0f, 0.0f, 1.0f, 1.0f };
-		static constexpr Color cyan			{ 0.0f, 1.0f, 1.0f, 1.0f };
-		static constexpr Color yellow		{ 1.0f, 1.0f, 0.0f, 1.0f };
-		static constexpr Color magenta		{ 1.0f, 0.0f, 1.0f, 1.0f };
-		static constexpr Color violet		{ 0.5f, 0.0f, 1.0f, 1.0f };
-		static constexpr Color lime			{ 0.5f, 1.0f, 0.0f, 1.0f };
-		static constexpr Color orange		{ 1.0f, 0.5f, 0.0f, 1.0f };
-		static constexpr Color fuchsia		{ 1.0f, 0.0f, 0.5f, 1.0f };
-		static constexpr Color aqua			{ 0.0f, 1.0f, 0.5f, 1.0f };
-		static constexpr Color azure		{ 0.0f, 0.5f, 1.0f, 1.0f };
+		static constexpr auto clear		= make_color(0.0f, 0.0f, 0.0f, 0.0f);
+		static constexpr auto white		= make_color(1.0f, 1.0f, 1.0f, 1.0f);
+		static constexpr auto gray		= make_color(0.5f, 0.5f, 0.5f, 1.0f);
+		static constexpr auto black		= make_color(0.0f, 0.0f, 0.0f, 1.0f);
+		static constexpr auto red		= make_color(1.0f, 0.0f, 0.0f, 1.0f);
+		static constexpr auto green		= make_color(0.0f, 1.0f, 0.0f, 1.0f);
+		static constexpr auto blue		= make_color(0.0f, 0.0f, 1.0f, 1.0f);
+		static constexpr auto cyan		= make_color(0.0f, 1.0f, 1.0f, 1.0f);
+		static constexpr auto yellow	= make_color(1.0f, 1.0f, 0.0f, 1.0f);
+		static constexpr auto magenta	= make_color(1.0f, 0.0f, 1.0f, 1.0f);
+		static constexpr auto violet	= make_color(0.5f, 0.0f, 1.0f, 1.0f);
+		static constexpr auto lime		= make_color(0.5f, 1.0f, 0.0f, 1.0f);
+		static constexpr auto orange	= make_color(1.0f, 0.5f, 0.0f, 1.0f);
+		static constexpr auto fuchsia	= make_color(1.0f, 0.0f, 0.5f, 1.0f);
+		static constexpr auto aqua		= make_color(0.0f, 1.0f, 0.5f, 1.0f);
+		static constexpr auto azure		= make_color(0.0f, 0.5f, 1.0f, 1.0f);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_COLOR_HPP_

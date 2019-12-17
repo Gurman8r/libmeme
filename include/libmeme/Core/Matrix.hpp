@@ -166,6 +166,7 @@ namespace ml
 	ML_USING	mat2u = tmat2<uint32_t>;
 	ML_USING	mat2f = tmat2<float32_t>;
 	ML_USING	mat2d = tmat2<float64_t>;
+	ML_USING	mat2s = tmat2<size_t>;
 	ML_USING	mat2 = mat2f;
 
 
@@ -177,6 +178,7 @@ namespace ml
 	ML_USING	mat3u = tmat3<uint32_t>;
 	ML_USING	mat3f = tmat3<float32_t>;
 	ML_USING	mat3d = tmat3<float64_t>;
+	ML_USING	mat3s = tmat3<size_t>;
 	ML_USING	mat3 = mat3f;
 
 
@@ -188,6 +190,7 @@ namespace ml
 	ML_USING	mat4u = tmat4<uint32_t>;
 	ML_USING	mat4f = tmat4<float32_t>;
 	ML_USING	mat4d = tmat4<float64_t>;
+	ML_USING	mat4s = tmat4<size_t>;
 	ML_USING	mat4 = mat4f;
 
 
@@ -199,6 +202,7 @@ namespace ml
 	ML_USING	vec2u = tvec2<uint32_t>;
 	ML_USING	vec2f = tvec2<float32_t>;
 	ML_USING	vec2d = tvec2<float64_t>;
+	ML_USING	vec2s = tvec2<size_t>;
 	ML_USING	vec2 = vec2f;
 
 
@@ -210,6 +214,7 @@ namespace ml
 	ML_USING	vec3u = tvec3<uint32_t>;
 	ML_USING	vec3f = tvec3<float32_t>;
 	ML_USING	vec3d = tvec3<float64_t>;
+	ML_USING	vec3s = tvec3<size_t>;
 	ML_USING	vec3 = vec3f;
 
 
@@ -221,6 +226,7 @@ namespace ml
 	ML_USING	vec4u = tvec4<uint32_t>;
 	ML_USING	vec4f = tvec4<float32_t>;
 	ML_USING	vec4d = tvec4<float64_t>;
+	ML_USING	vec4s = tvec4<size_t>;
 	ML_USING	vec4 = vec4f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

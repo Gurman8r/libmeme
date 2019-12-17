@@ -22,7 +22,7 @@ namespace ml
 	{
 	}
 	
-	SharedLibrary::SharedLibrary(_STD string const & filename)
+	SharedLibrary::SharedLibrary(std::string const & filename)
 		: SharedLibrary{}
 	{
 		this->loadFromFile(filename);
@@ -31,7 +31,7 @@ namespace ml
 	SharedLibrary::SharedLibrary(SharedLibrary && copy) noexcept
 		: SharedLibrary{}
 	{
-		this->swap(_STD move(copy));
+		this->swap(std::move(copy));
 	}
 
 	SharedLibrary::~SharedLibrary()
@@ -43,14 +43,14 @@ namespace ml
 
 	SharedLibrary & SharedLibrary::operator=(SharedLibrary && other) noexcept
 	{
-		return this->swap(_STD move(other));
+		return this->swap(std::move(other));
 	}
 
 	SharedLibrary & SharedLibrary::swap(SharedLibrary & other)
 	{
-		if (this != _STD addressof(other))
+		if (this != std::addressof(other))
 		{
-			_STD swap(m_instance, other.m_instance);
+			std::swap(m_instance, other.m_instance);
 
 			m_functions.swap(other.m_functions);
 		}
@@ -65,12 +65,12 @@ namespace ml
 		return ML_FREE_LIB(m_instance);
 	}
 
-	bool SharedLibrary::loadFromFile(_STD string const & filename)
+	bool SharedLibrary::loadFromFile(std::string const & filename)
 	{
 		return (m_instance = ML_LOAD_LIB(filename.c_str()));
 	}
 
-	void * SharedLibrary::loadFunction(_STD string const & name)
+	void * SharedLibrary::loadFunction(std::string const & name)
 	{
 		if (auto it{ m_functions.find(name) }; it != m_functions.end())
 		{
@@ -78,7 +78,7 @@ namespace ml
 		}
 		else if (void * ptr{ ML_LOAD_FUN(m_instance, name.c_str()) })
 		{
-			return m_functions.insert(_STD make_pair(name, ptr)).first->second;
+			return m_functions.insert(std::make_pair(name, ptr)).first->second;
 		}
 		else
 		{

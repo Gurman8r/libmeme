@@ -10,21 +10,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::ostream & COL::operator()(std::ostream & out) const
-	{
-#ifdef ML_SYSTEM_WINDOWS
-		if (HANDLE handle { ::GetStdHandle(STD_OUTPUT_HANDLE) })
-		{
-			::SetConsoleTextAttribute(handle, (*(*this)));
-		}
-#else 
-		// do the thing
-#endif
-		return out;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void Debug::exit(int32_t exitCode)
 	{
 		return std::exit(exitCode);

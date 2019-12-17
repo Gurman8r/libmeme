@@ -142,40 +142,6 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct Shader final : public GraphicsBuffer<Shader>
-	{
-		struct Source final
-		{
-			std::string_view v, f, g;
-
-			constexpr Source() noexcept = default;
-		};
-
-		union
-		{
-			uint32_t handle;
-			Source source;
-		};
-
-		constexpr explicit Shader(uint32_t handle, Source const & source) noexcept
-			: handle{ handle }
-			, source{ source }
-		{
-		}
-
-		constexpr Shader(Source const & source) noexcept
-			: Shader{ NULL, source }
-		{
-		}
-
-		constexpr Shader() noexcept
-			: Shader{ NULL, Source{} }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BUFFERS_HPP_

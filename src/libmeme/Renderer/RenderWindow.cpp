@@ -56,15 +56,15 @@ namespace ml
 
 			// Decode the error
 			std::cout
-				<< FG::Red << "An OpenGL call failed in \'" << ev.file << "\' (" << ev.line << ")"
-				<< FG::Yellow << "\nCode: "
-				<< FG::White << "\n\t" << ev.code
-				<< FG::Yellow << "\nExpression: "
-				<< FG::White << "\n\t" << ev.expr
-				<< FG::Yellow << "\nDescription:"
-				<< FG::White << "\n\t" << GL::name_of((GL::Err)ev.code)
-				<< FG::White << "\n\t" << GL::desc_of((GL::Err)ev.code)
-				<< endcol << '\n';
+				<< "An OpenGL call failed in \'" << ev.file << "\' (" << ev.line << ")"
+				<< "\nCode: "
+				<< "\n\t" << ev.code
+				<< "\nExpression: "
+				<< "\n\t" << ev.expr
+				<< "\nDescription:"
+				<< "\n\t" << GL::name_of((GL::Err)ev.code)
+				<< "\n\t" << GL::desc_of((GL::Err)ev.code)
+				<< '\n';
 		} break;
 		}
 	}

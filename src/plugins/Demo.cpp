@@ -11,7 +11,7 @@
 
 namespace ml
 {
-	struct Demo : public Plugin
+	struct Demo final : public Plugin
 	{
 		Demo() : Plugin{}
 		{

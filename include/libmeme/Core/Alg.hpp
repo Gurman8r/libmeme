@@ -1,6 +1,9 @@
 #ifndef _ML_ALG_HPP_
 #define _ML_ALG_HPP_
 
+// Sources:
+// https://github.com/lefticus/constexpr_all_the_things/
+
 #include <libmeme/Core/Pi.hpp>
 #include <libmeme/Core/Sqrt.hpp>
 #include <gcem/include/gcem.hpp>
@@ -124,7 +127,7 @@ namespace ml::alg
 			? (((*lBegin) == (*rBegin))
 				&& _ML alg::equals((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd))
-			);
+		);
 	}
 
 	template <
@@ -135,7 +138,7 @@ namespace ml::alg
 			? (((*lBegin) < (*rBegin))
 				&& _ML alg::less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd))
-			);
+		);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -197,11 +200,11 @@ namespace ml::alg
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class>
-	static constexpr void swap(T & lhs, T & rhs) noexcept(_STD is_nothrow_move_constructible_v<T> && _STD is_nothrow_move_assignable_v<T>)
+	static constexpr void swap(T & lhs, T & rhs) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_move_assignable_v<T>)
 	{
-		T temp = _STD move(lhs);
-		lhs = _STD move(rhs);
-		rhs = _STD move(temp);
+		T temp = std::move(lhs);
+		lhs = std::move(rhs);
+		rhs = std::move(temp);
 	}
 
 	template <class Iter, class Cmp>

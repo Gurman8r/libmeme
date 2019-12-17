@@ -83,7 +83,7 @@ namespace ml::cx
 			}
 		}
 
-		constexpr vector(_STD initializer_list<value_type> init)
+		constexpr vector(std::initializer_list<value_type> init)
 			: self_type{ init.begin(), init.end() }
 		{
 		}
@@ -92,7 +92,7 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t N, _STD enable_if_t<(_Cap != N), int> = 0>
+		template <size_t N, std::enable_if_t<(_Cap != N), int> = 0>
 		constexpr operator vector<value_type, N>() const
 		{
 			vector<value_type, N> temp{};
@@ -127,7 +127,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				throw _STD range_error("Index past end of vector");
+				throw std::range_error("Index past end of vector");
 			}
 			return m_data.at(index);
 		}
@@ -136,7 +136,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				throw _STD range_error("Index past end of vector");
+				throw std::range_error("Index past end of vector");
 			}
 			return m_data.at(index);
 		}
@@ -145,11 +145,11 @@ namespace ml::cx
 		{
 			if (m_size >= _Cap)
 			{
-				throw _STD range_error("Index out of range");
+				throw std::range_error("Index out of range");
 			}
 			else
 			{
-				m_data[m_size++] = _STD move(value);
+				m_data[m_size++] = std::move(value);
 			}
 		}
 
@@ -299,7 +299,7 @@ namespace ml::cx
 		{
 		}
 
-		constexpr map(_STD initializer_list<pair_type> init) noexcept
+		constexpr map(std::initializer_list<pair_type> init) noexcept
 			: self_type{ init.begin(), init.end() }
 		{
 		}

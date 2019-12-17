@@ -13,9 +13,9 @@ namespace ml::string_literals
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using namespace _STD string_literals;
+	using namespace std::string_literals;
 
-	using namespace _STD string_view_literals;
+	using namespace std::string_view_literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -279,95 +279,95 @@ namespace ml::util
 
 	static inline int32_t to_i8(std::string const & value, int8_t dv = 0)
 	{
-		try { return static_cast<int8_t>(_STD stoi(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<int8_t>(std::stoi(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline int32_t to_i16(std::string const & value, int16_t dv = 0)
 	{
-		try { return static_cast<int16_t>(_STD stoi(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<int16_t>(std::stoi(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline int32_t to_i32(std::string const & value, int32_t dv = 0)
 	{
-		try { return static_cast<int32_t>(_STD stoi(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<int32_t>(std::stoi(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline int64_t to_i64(std::string const & value, int64_t dv = 0)
 	{
-		try { return static_cast<int64_t>(_STD stoll(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<int64_t>(std::stoll(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline uint8_t to_u8(std::string const & value, uint8_t dv = 0)
 	{
-		try { return static_cast<uint8_t>(_STD stoul(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<uint8_t>(std::stoul(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline uint16_t to_u16(std::string const & value, uint16_t dv = 0)
 	{
-		try { return static_cast<uint16_t>(_STD stoul(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<uint16_t>(std::stoul(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline uint32_t to_u32(std::string const & value, uint32_t dv = 0)
 	{
-		try { return static_cast<uint32_t>(_STD stoul(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<uint32_t>(std::stoul(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline uint64_t to_u64(std::string const & value, uint64_t dv = 0)
 	{
-		try { return static_cast<uint64_t>(_STD stoull(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<uint64_t>(std::stoull(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline float32_t to_f32(std::string const & value, float32_t dv = 0)
 	{
-		try { return static_cast<float32_t>(_STD stof(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<float32_t>(std::stof(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline float64_t to_f64(std::string const & value, float64_t dv = 0)
 	{
-		try { return static_cast<float64_t>(_STD stod(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<float64_t>(std::stod(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	static inline float80_t to_f80(std::string const & value, float80_t dv = 0)
 	{
-		try { return static_cast<float80_t>(_STD stold(value)); }
-		catch (_STD invalid_argument &) { return dv; }
+		try { return static_cast<float80_t>(std::stold(value)); }
+		catch (std::invalid_argument &) { return dv; }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static inline std::string to_string(std::string const & value) { return value; }
 
-	static inline std::string to_string(int8_t value) { return _STD to_string(value); }
+	static inline std::string to_string(int8_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(int16_t value) { return _STD to_string(value); }
+	static inline std::string to_string(int16_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(int32_t value) { return _STD to_string(value); }
+	static inline std::string to_string(int32_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(int64_t value) { return _STD to_string(value); }
+	static inline std::string to_string(int64_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(uint8_t value) { return _STD to_string(value); }
+	static inline std::string to_string(uint8_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(uint16_t value) { return _STD to_string(value); }
+	static inline std::string to_string(uint16_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(uint32_t value) { return _STD to_string(value); }
+	static inline std::string to_string(uint32_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(uint64_t value) { return _STD to_string(value); }
+	static inline std::string to_string(uint64_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(float32_t value) { return _STD to_string(value); }
+	static inline std::string to_string(float32_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(float64_t value) { return _STD to_string(value); }
+	static inline std::string to_string(float64_t value) { return std::to_string(value); }
 
-	static inline std::string to_string(float80_t value) { return _STD to_string(value); }
+	static inline std::string to_string(float80_t value) { return std::to_string(value); }
 
 	template <class T> static inline std::string to_string(T const & value)
 	{

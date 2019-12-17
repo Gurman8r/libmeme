@@ -54,19 +54,37 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <
-			template <class, class> class Arr,
-			class Ch, class Tr
+			template <class, class> class Arr, class Ch, class Tr
 		> constexpr hash_t operator()(Arr<Ch, Tr> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
 		}
 
 		template <
-			template <class, class, class> class Arr,
-			class Ch, class Tr, class Al
+			template <class, class, class> class Arr, class Ch, class Tr, class Al
 		> constexpr hash_t operator()(Arr<Ch, Tr, Al> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
+		}
+
+		constexpr hash_t operator()(char const * value) noexcept
+		{
+			return (*this)(value, _ML_ALG strlen(value));
+		}
+
+		constexpr hash_t operator()(wchar_t const * value) noexcept
+		{
+			return (*this)(value, _ML_ALG strlen(value));
+		}
+
+		constexpr hash_t operator()(char16_t const * value) noexcept
+		{
+			return (*this)(value, _ML_ALG strlen(value));
+		}
+
+		constexpr hash_t operator()(char32_t const * value) noexcept
+		{
+			return (*this)(value, _ML_ALG strlen(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
