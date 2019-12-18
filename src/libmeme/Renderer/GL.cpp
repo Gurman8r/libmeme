@@ -67,8 +67,8 @@ namespace ml
 
 	void GL::validateVersion(uint32_t & major, uint32_t & minor)
 	{
-		major = (uint32_t)getInt(GL::MajorVersion);
-		minor = (uint32_t)getInt(GL::MinorVersion);
+		major = (uint32_t)getInteger(GL::MajorVersion);
+		minor = (uint32_t)getInteger(GL::MinorVersion);
 
 		if (getError() == GL::InvalidEnum)
 		{
@@ -182,14 +182,14 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getInt(uint32_t name) -> int32_t
+	auto GL::getInteger(uint32_t name) -> int32_t
 	{
 		int32_t temp{ 0 };
-		glCheck(getIntv(name, &temp));
+		glCheck(getInteger(name, &temp));
 		return temp;
 	}
 
-	auto GL::getIntv(uint32_t name, int32_t * params) -> int32_t *
+	auto GL::getInteger(uint32_t name, int32_t * params) -> int32_t *
 	{
 		glCheck(glGetIntegerv(name, params));
 		return params;
@@ -434,7 +434,7 @@ namespace ml
 		static bool checked{ false };
 		if (!checked && (checked = true))
 		{
-			temp = getInt(GL::MaxCombTexImgUnits);
+			temp = getInteger(GL::MaxCombTexImgUnits);
 		}
 		return temp;
 	}
@@ -445,7 +445,7 @@ namespace ml
 		static bool checked{ false };
 		if (!checked && (checked = true))
 		{
-			temp = (uint32_t)(getInt(GL::MaxTextureSize));
+			temp = (uint32_t)(getInteger(GL::MaxTextureSize));
 		}
 		return temp;
 	}
@@ -820,12 +820,16 @@ namespace ml
 		else if (obj = createShader(type))
 		{
 			shaderSource(obj, count, source, nullptr);
+			
 			if (!compileShader(obj))
 			{
 				log = getProgramInfoLog(obj);
+				
 				deleteShader(obj);
+				
 				return ML_FAILURE; // 0 (false)
 			}
+
 			return ML_SUCCESS; // +1 (true)
 		}
 		return ML_FAILURE; // 0 (false)

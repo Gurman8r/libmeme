@@ -26,6 +26,10 @@ namespace ml::detail
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
+		class ... Args
+	> using pack_t = typename pack<Args...>;
+
+	template <
 		template <class...> class To,
 		template <template <class...> class> class T
 	> using unpack_t = typename unpack<To, T>::type;

@@ -35,10 +35,14 @@ namespace ml
 
 	struct RenderErrorEvent final : public GraphicsEvent<GraphicsEventType::EV_RenderError>
 	{
-		const C_String file;
-		const uint32_t line;
-		const C_String expr;
-		const uint32_t code;
+		union
+		{
+			C_String const file;
+			uint32_t const line;
+			C_String const expr;
+			uint32_t const code;
+		};
+
 		constexpr RenderErrorEvent(C_String file, uint32_t line, C_String expr, uint32_t code) noexcept
 			: file { file }
 			, line { line }
@@ -52,10 +56,14 @@ namespace ml
 
 	struct ShaderErrorEvent final : public GraphicsEvent<GraphicsEventType::EV_ShaderError>
 	{
-		Shader const * const shader;
-		const uint32_t type;
-		const C_String error;
-		constexpr ShaderErrorEvent(Shader const * shader, uint32_t type, C_String error) noexcept
+		union
+		{
+			struct Shader const * const shader;
+			uint32_t const type;
+			C_String const error;
+		};
+
+		constexpr ShaderErrorEvent(struct Shader const * shader, uint32_t type, C_String error) noexcept
 			: shader{ shader }
 			, type	{ type }
 			, error { error } 

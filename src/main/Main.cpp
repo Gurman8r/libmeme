@@ -8,11 +8,6 @@
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
-#include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
-#include <libmeme/Renderer/Material.hpp>
-#include <libmeme/Renderer/Shader.hpp>
-#include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -22,6 +17,11 @@
 #include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/SharedLibrary.hpp>
 #include <libmeme/Renderer/Color.hpp>
+#include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Renderer/Material.hpp>
+#include <libmeme/Renderer/Shader.hpp>
+#include <libmeme/Renderer/Texture.hpp>
 
 // Unit Tests
 namespace ml::unit_tests
@@ -30,11 +30,12 @@ namespace ml::unit_tests
 
 	static_assert("Unit Tests"
 
-		&& sizeof(mat4b) == (sizeof(unsigned char) * 16)
-		&& sizeof(mat4u) == (sizeof(unsigned int) * 16)
-		&& sizeof(mat4i) == (sizeof(int) * 16)
-		&& sizeof(mat4f) == (sizeof(float) * 16)
-		&& sizeof(mat4d) == (sizeof(double) * 16)
+		&& sizeof(mat4b) == (sizeof(byte_t) * 16)
+		&& sizeof(mat4u) == (sizeof(uint32_t) * 16)
+		&& sizeof(mat4i) == (sizeof(int32_t) * 16)
+		&& sizeof(mat4f) == (sizeof(float32_t) * 16)
+		&& sizeof(mat4d) == (sizeof(float64_t) * 16)
+		&& sizeof(mat4s) == (sizeof(size_t) * 16)
 
 		&& nameof_v<bool> == "bool"
 		&& nameof_v<char> == "char"
@@ -78,7 +79,7 @@ namespace ml::unit_tests
 }
 
 
-// Settings
+// Window Settings
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -125,7 +126,7 @@ ml::int32_t main()
 	using namespace ml;
 
 	// Time
-	struct Time final
+	static struct Time final
 	{
 		Timer main{ true };
 		Timer loop{ false };
@@ -139,9 +140,6 @@ ml::int32_t main()
 	ML_PerformanceTracker;
 	ML_Lua.init();
 	ML_Python.init(ML_ARGV[0], "../../../");
-
-	auto a = make_uniform<mat4>("", mat4{});
-	auto c = a.exchange(mat4());
 
 	Script{ Script::Language::Python, "import LIBMEME as ml" }();
 
@@ -236,25 +234,27 @@ ml::int32_t main()
 	// Load Event
 	ML_EventSystem.fireEvent<LoadEvent>();
 
-	static std::vector<Image>		images{};
-	static std::vector<Texture>		textures{};
-	static std::vector<Shader>		shaders{};
-	static std::vector<Material>	materials{};
-
-	materials.push_back(make_material(
+	// Load Stuff
+	std::vector<Image>		img{};
+	std::vector<Texture>	tex{};
+	std::vector<Shader>		shd{};
+	std::vector<Material>	mtl{};
+	img.push_back(Image::Default);
+	tex.push_back(make_texture(img[0]));
+	mtl.push_back(make_material(
 		make_uniform<bool>("bool", true),
 		make_uniform<int>("int", 123),
 		make_uniform<float>("float", 4.56f),
-		make_uniform<vec2>("vec2", vec2{ 1, 2 }),
-		make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
-		make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
+		make_uniform<vec2>("vec2", { 1, 2 }),
+		make_uniform<vec3>("vec3", { 3, 4, 5 }),
+		make_uniform<vec4>("vec4", { 6, 7, 8, 9 }),
 		make_uniform<Color>("col", colors::magenta),
 		make_uniform<mat2>("mat2", mat2::identity()),
 		make_uniform<mat3>("mat3", mat3::identity()),
 		make_uniform<mat4>("mat4", mat4::identity()),
-		make_uniform<Texture *>("tex", nullptr)
+		make_uniform<Texture const *>("tex0", &tex[0])
 	));
-
+	
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * */
 	while (window.isOpen())
@@ -321,6 +321,12 @@ ml::int32_t main()
 		if (pair.first) { delete pair.first; }
 	}
 	plugins.clear();
+	{
+		img.clear();
+		tex.clear();
+		shd.clear();
+		mtl.clear();
+	}
 	Editor::shutdown();
 	window.dispose();
 	ML_Python.dispose();

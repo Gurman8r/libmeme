@@ -47,15 +47,15 @@ namespace ml
 
 						// Total Time
 						ImGui::Text("total time"); ImGui::NextColumn();
-						ImGui::Text("%.3f", ImGui::GetTime()); ImGui::NextColumn();
+						ImGui::Text("%.3fs", ImGui::GetTime()); ImGui::NextColumn();
 
 						// Delta Time
 						ImGui::Text("delta time"); ImGui::NextColumn();
-						ImGui::Text("%.7f", ImGui::GetIO().DeltaTime); ImGui::NextColumn();
+						ImGui::Text("%.7fs", ImGui::GetIO().DeltaTime); ImGui::NextColumn();
 
 						// Frame Rate
-						ImGui::Text("fps"); ImGui::NextColumn();
-						ImGui::Text("%.4f", ImGui::GetIO().Framerate); ImGui::NextColumn();
+						ImGui::Text("frame rate"); ImGui::NextColumn();
+						ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
 
 						// Benchmarks
 						ImGui::Separator();

@@ -25,53 +25,62 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Duration() : m_base { 0 } {}
+		constexpr Duration() noexcept
+			: m_base{ 0.0 }
+		{
+		}
 
-		constexpr Duration(float64_t value) : m_base { value } {}
+		constexpr Duration(float64_t value) noexcept
+			: m_base{ value }
+		{
+		}
 
-		constexpr Duration(Duration const & copy) : m_base { copy.m_base } {}
+		constexpr Duration(Duration const & other) noexcept
+			: m_base{ other.m_base }
+		{
+		}
 
 		template <
 			class R, class P = typename R::period
-		> constexpr Duration(const std::chrono::duration<R, P> & value)
-			: m_base { std::chrono::duration_cast<base_type>(value) }
+		> constexpr Duration(const std::chrono::duration<R, P> & value) noexcept
+			: m_base{ std::chrono::duration_cast<base_type>(value) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr base_type base() const { return m_base; }
+		constexpr base_type base() const noexcept { return m_base; }
 
-		constexpr float64_t count() const { return m_base.count(); }
+		constexpr float64_t count() const noexcept { return m_base.count(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Nanoseconds nanoseconds() const
+		constexpr Nanoseconds nanoseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Nanoseconds>(m_base);
 		}
 
-		constexpr Microseconds microseconds() const
+		constexpr Microseconds microseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Microseconds>(m_base);
 		}
 
-		constexpr Milliseconds milliseconds() const
+		constexpr Milliseconds milliseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Milliseconds>(m_base);
 		}
 
-		constexpr Seconds seconds() const
+		constexpr Seconds seconds() const noexcept
 		{
 			return std::chrono::duration_cast<Seconds>(m_base);
 		}
 
-		constexpr Minutes minutes() const
+		constexpr Minutes minutes() const noexcept
 		{
 			return std::chrono::duration_cast<Minutes>(m_base);
 		}
 
-		constexpr Hours hours() const
+		constexpr Hours hours() const noexcept
 		{
 			return std::chrono::duration_cast<Hours>(m_base);
 		}

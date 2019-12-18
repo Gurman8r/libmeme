@@ -303,11 +303,20 @@ namespace ml
 		return (*this);
 	}
 	
-	Window & Window::setCursorMode(const Cursor::Mode value)
+	Window & Window::setCursorMode(Cursor::Mode value)
 	{
 		if (m_window)
 		{
-			glfwSetInputMode(static_cast<GLFWwindow *>(m_window), GLFW_CURSOR, static_cast<int32_t>(value));
+			glfwSetInputMode(static_cast<GLFWwindow *>(m_window), GLFW_CURSOR, ([value]()
+			{
+				switch (value)
+				{
+				case Cursor::Mode::Normal: return GLFW_CURSOR_NORMAL;
+				case Cursor::Mode::Hidden: return GLFW_CURSOR_HIDDEN;
+				case Cursor::Mode::Disabled: return GLFW_CURSOR_DISABLED;
+				default: return GLFW_CURSOR_NORMAL;
+				}
+			})());
 		}
 		return (*this);
 	}
@@ -505,7 +514,21 @@ namespace ml
 
 	void * Window::createStandardCursor(Cursor::Shape value)
 	{
-		return glfwCreateStandardCursor((int32_t)value);
+		return glfwCreateStandardCursor(([value]()
+		{
+			switch (value)
+			{
+			case Cursor::Shape::Arrow: return GLFW_ARROW_CURSOR;
+			case Cursor::Shape::TextInput: return GLFW_IBEAM_CURSOR;
+			case Cursor::Shape::Crosshair: return GLFW_CROSSHAIR_CURSOR;
+			case Cursor::Shape::Hand: return GLFW_POINTING_HAND_CURSOR;
+			case Cursor::Shape::ResizeEW: return GLFW_RESIZE_EW_CURSOR;
+			case Cursor::Shape::ResizeNS: return GLFW_RESIZE_NS_CURSOR;
+			case Cursor::Shape::ResizeNESW: return GLFW_RESIZE_NESW_CURSOR;
+			case Cursor::Shape::ResizeNWSE: return GLFW_RESIZE_NWSE_CURSOR;
+			default: return GLFW_ARROW_CURSOR;
+			}
+		})());
 	}
 
 	bool Window::destroyCursor(void * value)

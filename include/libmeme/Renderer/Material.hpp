@@ -10,16 +10,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type				= typename Uniform;
 		using storage_t					= typename std::vector<Uniform>;
 		using iterator					= typename storage_t::iterator;
 		using const_iterator			= typename storage_t::const_iterator;
 		using reverse_iterator			= typename storage_t::reverse_iterator;
 		using const_reverse_iterator	= typename storage_t::const_reverse_iterator;
-		using pointer					= typename value_type *;
-		using reference					= typename value_type &;
-		using const_pointer				= typename value_type const *;
-		using const_reference			= typename value_type const &;
+		using pointer					= typename storage_t::pointer;
+		using reference					= typename storage_t::reference;
+		using const_pointer				= typename storage_t::const_pointer;
+		using const_reference			= typename storage_t::const_reference;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -144,8 +143,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private:
-		union { storage_t m_storage; };
+	private: storage_t m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

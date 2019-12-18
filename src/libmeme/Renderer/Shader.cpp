@@ -10,9 +10,9 @@ namespace ml
 	{
 		union { uint32_t previous; uint32_t current; int32_t location; };
 
-		UniformBinder(Shader const * program, std::string const & name)
+		UniformBinder(Shader & program, std::string const & name)
 			: previous	{ NULL }
-			, current	{ program ? program->m_handle : NULL }
+			, current	{ program ? program.handle() : NULL }
 			, location	{ -1 }
 		{
 			if (current)
@@ -24,7 +24,7 @@ namespace ml
 					GL::useProgram(current);
 				}
 
-				location = program->getUniformLocation(name);
+				location = program.get_uniform(name);
 			}
 		}
 
@@ -73,18 +73,18 @@ namespace ml
 		loadFromMemory(v, g, f);
 	}
 
-	Shader::Shader(Shader const & copy)
+	Shader::Shader(Shader const & other)
 		: Shader{}
 	{
 	}
 
-	Shader::Shader(Shader && copy) noexcept
+	Shader::Shader(Shader && other) noexcept
 		: Shader{}
 	{
-		swap(std::move(copy));
+		swap(std::move(other));
 	}
 
-	Shader::~Shader() {}
+	Shader::~Shader() { destroy(); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -111,29 +111,6 @@ namespace ml
 			UniformCache{}.swap(m_uniforms);
 			TextureCache{}.swap(m_textures);
 		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool Shader::create()
-	{
-		return !m_handle && (m_handle = GL::createProgram());
-	}
-
-	bool Shader::destroy()
-	{
-		m_attribs.clear();
-		m_uniforms.clear();
-		m_textures.clear();
-		
-		GL::useProgram(NULL);
-		if (m_handle)
-		{
-			GL::deleteShader(m_handle);
-			m_handle = NULL;
-			GL::flush();
-		}
-		return !(m_handle);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -183,7 +160,7 @@ namespace ml
 		return loadFromMemory(vs, gs, fs);
 	}
 
-	bool Shader::loadFromMemory(Source const & value)
+	bool Shader::loadFromSource(Source const & value)
 	{
 		return loadFromMemory(
 			std::string{ value.vs },
@@ -208,145 +185,30 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::set_uniform(Uniform const & value)
+	bool Shader::create()
 	{
-		if (value.name().empty()) { return false; }
-		switch (value.type().hash())
+		return !m_handle && (m_handle = GL::createProgram());
+	}
+
+	bool Shader::destroy()
+	{
+		m_attribs.clear();
+		m_uniforms.clear();
+		m_textures.clear();
+		
+		GL::useProgram(NULL);
+		
+		if (m_handle)
 		{
-		case hashof_v<bool_t>: if (auto const v{ value.evaluate<bool_t>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<int32_t>: if (auto const v{ value.evaluate<int32_t>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<float32_t>: if (auto const v{ value.evaluate<float32_t>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<vec2>: if (auto const v{ value.evaluate<vec2>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<vec3>: if (auto const v{ value.evaluate<vec3>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<vec4>: if (auto const v{ value.evaluate<vec4>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<Color>: if (auto const v{ value.evaluate<Color>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<mat2>: if (auto const v{ value.evaluate<mat2>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<mat3>: if (auto const v{ value.evaluate<mat3>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<mat4>: if (auto const v{ value.evaluate<mat4>() })
-			return set_uniform(value.name(), v.value());
-		
-		case hashof_v<Texture *>: if (auto const v{ value.evaluate<Texture *>() })
-			return set_uniform(value.name(), v.value());
+			GL::deleteShader(m_handle);
+			
+			m_handle = NULL;
+			
+			GL::flush();
 		}
-		return false;
+		
+		return !(m_handle);
 	}
-
-	bool Shader::set_uniform(std::string const & name, bool value)
-	{
-		return set_uniform(name, static_cast<int32_t>(value));
-	}
-
-	bool Shader::set_uniform(std::string const & name, int32_t value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniform1i(u.location, value); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, float32_t value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniform1f(u.location, value); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, vec2 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, vec3 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, vec4 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, Color const & value)
-	{
-		return set_uniform(name, value.rgba());
-	}
-
-	bool Shader::set_uniform(std::string const & name, mat2 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, mat3 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, mat4 const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
-		return u;
-	}
-
-	bool Shader::set_uniform(std::string const & name, Texture const * value)
-	{
-		return value ? set_uniform(name, (*value)) : false;
-	}
-
-	bool Shader::set_uniform(std::string const & name, Texture const & value)
-	{
-		UniformBinder u{ this, name };
-		if (u)
-		{
-			static auto const max_textures
-			{
-				static_cast<size_t>(GL::getMaxTextureUnits())
-			};
-
-			if (auto const it{ m_textures.find(&value) }; it != m_textures.cend())
-			{
-				it->second;
-			}
-			else if ((m_textures.size() + 1) < max_textures)
-			{
-				m_textures.insert(std::make_pair(std::addressof(value), u.location));
-			}
-			else
-			{
-				return false;
-			}
-		}
-		return u;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void Shader::bind(Shader const * value, bool bindTextures)
 	{
@@ -357,7 +219,7 @@ namespace ml
 			if (bindTextures)
 			{
 				uint32_t i{ 0 };
-				for (auto const & [ texture, location ] : value->m_textures)
+				for (auto const & [texture, location] : value->m_textures)
 				{
 					GL::uniform1i(texture->handle(), location);
 
@@ -375,40 +237,178 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Shader::getAttributeLocation(std::string const & name) const
+	bool Shader::set_uniform(Uniform const & value)
 	{
-		if (name.empty())
+		if (value.name().empty()) { return false; }
+		switch (value.type().hash())
 		{
-			return -1;
+		case hashof_v<bool>: if (auto const v{ value.get_if<bool>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<int32_t>: if (auto const v{ value.get_if<int32_t>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<float32_t>: if (auto const v{ value.get_if<float32_t>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<vec2>: if (auto const v{ value.get_if<vec2>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<vec3>: if (auto const v{ value.get_if<vec3>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<vec4>: if (auto const v{ value.get_if<vec4>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<Color>: if (auto const v{ value.get_if<Color>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<mat2>: if (auto const v{ value.get_if<mat2>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<mat3>: if (auto const v{ value.get_if<mat3>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<mat4>: if (auto const v{ value.get_if<mat4>() })
+			return set_uniform(value.name(), v.value());
+		
+		case hashof_v<Texture const *>: if (auto const v{ value.get_if<Texture const *>() })
+			return set_uniform(value.name(), v.value());
 		}
-		else if (auto const it{ m_attribs.find(Hash(name)) }; it != m_attribs.end())
+		return false;
+	}
+
+	bool Shader::set_uniform(std::string const & name, bool value)
+	{
+		return set_uniform(name, static_cast<int32_t>(value));
+	}
+
+	bool Shader::set_uniform(std::string const & name, int32_t value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniform1i(u.location, value); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, float32_t value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniform1f(u.location, value); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, vec2 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, vec3 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, vec4 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, Color const & value)
+	{
+		return set_uniform(name, value.rgba());
+	}
+
+	bool Shader::set_uniform(std::string const & name, mat2 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, mat3 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, mat4 const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, Texture const & value)
+	{
+		UniformBinder u{ (*this), name };
+		if (u)
+		{
+			static auto const max_textures
+			{
+				static_cast<size_t>(GL::getMaxTextureUnits())
+			};
+
+			if (auto const it{ m_textures.find(std::addressof(value)) }; it != m_textures.cend())
+			{
+				it->second;
+			}
+			else if ((m_textures.size() + 1) < max_textures)
+			{
+				m_textures.insert(std::make_pair(std::addressof(value), u.location));
+			}
+			else
+			{
+				return false;
+			}
+		}
+		return u;
+	}
+
+	bool Shader::set_uniform(std::string const & name, Texture const * value)
+	{
+		return value ? set_uniform(name, (*value)) : false;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t Shader::get_attribute(std::string const & value)
+	{
+		if (value.empty()) { return -1; }
+
+		hash_t const code{ Hash(value) };
+		
+		if (auto const it{ m_attribs.find(code) }; it != m_attribs.end())
 		{
 			return it->second;
 		}
 		else
 		{
 			return m_attribs.insert(std::make_pair(
-				Hash(name),
-				GL::getAttribLocation(m_handle, name.c_str())
+				code, GL::getAttribLocation(m_handle, value.c_str())
 			)).first->second;
 		}
 	}
 
-	int32_t Shader::getUniformLocation(std::string const & name) const
+	int32_t Shader::get_uniform(std::string const & value)
 	{
-		if (name.empty())
-		{
-			return -1;
-		}
-		else if (auto const it{ m_uniforms.find(Hash(name)) }; it != m_uniforms.end())
+		if (value.empty()) { return -1; }
+
+		hash_t const code{ Hash(value) };
+
+		if (auto const it{ m_uniforms.find(code) }; it != m_uniforms.end())
 		{
 			return it->second;
 		}
 		else
 		{
 			return m_uniforms.insert(std::make_pair(
-				Hash(name),
-				GL::getAttribLocation(m_handle, name.c_str())
+				code, GL::getAttribLocation(m_handle, value.c_str())
 			)).first->second;
 		}
 	}

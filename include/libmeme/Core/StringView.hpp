@@ -137,7 +137,7 @@ namespace ml
 
 	constexpr bool operator==(StringView const & lhs, StringView const & rhs)
 	{
-		return alg::equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return _ML_ALG equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	constexpr bool operator!=(StringView const & lhs, StringView const & rhs)
@@ -147,7 +147,7 @@ namespace ml
 
 	constexpr bool operator<(StringView const & lhs, StringView const & rhs)
 	{
-		return alg::less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return _ML_ALG less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	constexpr bool operator>(StringView const & lhs, StringView const & rhs)

@@ -256,7 +256,7 @@ namespace ml
 		
 		Window & setCursor(void * value);
 		
-		Window & setCursorMode(const Cursor::Mode value);
+		Window & setCursorMode(Cursor::Mode value);
 		
 		Window & setCursorPos(vec2i const & value);
 		

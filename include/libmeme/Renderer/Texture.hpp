@@ -23,13 +23,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Texture();
-		explicit Texture(uint32_t sampler, uint32_t format, int32_t flags);
-		explicit Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
-		explicit Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
-		explicit Texture(path_t const & filename);
+		Texture(uint32_t sampler);
+		Texture(uint32_t sampler, int32_t flags);
+		Texture(uint32_t sampler, uint32_t format, int32_t flags);
+		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
+		Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
+		Texture(path_t const & filename);
 		Texture(Image const & image);
-		Texture(Texture const & copy);
-		Texture(Texture && copy) noexcept;
+		Texture(Texture const & other);
+		Texture(Texture && other) noexcept;
 		~Texture();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,23 +44,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		bool loadFromFile(path_t const & filename);
+
+		bool loadFromImage(Image const & image);
+
+		bool loadFromMemory(vec2s const & size, Image::Pixels const & pixels);
+
+		bool loadFromMemory(uint32_t w, uint32_t h, byte_t const * pixels);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		bool create();
 
 		bool destroy();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool loadFromFile(path_t const & filename);
-		
-		bool loadFromImage(Image const & image);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(Texture const * value);
 
 		uint32_t channels() const noexcept;
 
 		Image copyToImage() const;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool set_repeated(bool value);
+		
+		bool set_smooth(bool value);
+		
+		bool set_mipmapped(bool value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,6 +93,12 @@ namespace ml
 		inline auto realSize() const noexcept -> vec2u const & { return m_realSize; }
 		
 		inline auto flags() const noexcept -> uint32_t { return m_flags; }
+
+		inline bool smooth() const noexcept { return m_flags & TextureFlags_Smooth; }
+
+		inline bool repeated() const noexcept { return m_flags & TextureFlags_Repeated; }
+
+		inline bool mipmapped() const noexcept { return m_flags & TextureFlags_Mipmapped; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

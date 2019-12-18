@@ -20,7 +20,7 @@ namespace ml::alg
 
 	template <class Ch> static constexpr size_t strlen(Ch const * value)
 	{
-		return ((*value) ? (1 + _ML alg::strlen(value + 1)) : 0);
+		return ((*value) ? (1 + _ML_ALG strlen(value + 1)) : 0);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,7 @@ namespace ml::alg
 
 	template <class T> static constexpr T abs(T const & value)
 	{
-		return ((_ML alg::sign(value) < (T)0)
+		return ((_ML_ALG sign(value) < (T)0)
 			? (value * (T)-1)
 			: value
 		);
@@ -45,7 +45,7 @@ namespace ml::alg
 
 	template <class T> static constexpr T fact(T const & value)
 	{
-		return ((value > (T)1) ? value * _ML alg::fact(value - (T)1) : (T)1);
+		return ((value > (T)1) ? value * _ML_ALG fact(value - (T)1) : (T)1);
 	}
 
 	template <
@@ -57,12 +57,12 @@ namespace ml::alg
 		return ((exp < E::zero)
 			? ((base == B::zero)
 				? limits<Base>::nan
-				: B::one / (base * _ML alg::pow(base, (-exp) - E::one)))
+				: B::one / (base * _ML_ALG pow(base, (-exp) - E::one)))
 			: ((exp == E::zero)
 				? B::one
 				: ((exp == E::one)
 					? base
-					: base * _ML alg::pow(base, exp - E::one)
+					: base * _ML_ALG pow(base, exp - E::one)
 					)));
 	}
 
@@ -84,7 +84,7 @@ namespace ml::alg
 		class T, class Tx, class Ty
 	> static constexpr auto clamp(T const & value, Tx const & lower, Ty const & upper)
 	{
-		return _ML alg::min(_ML alg::max(value, lower), upper);
+		return _ML_ALG min(_ML_ALG max(value, lower), upper);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -121,11 +121,11 @@ namespace ml::alg
 
 	template <
 		class LI, class RI
-	> static constexpr bool equals(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	> static constexpr bool equal(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return ((lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) == (*rBegin))
-				&& _ML alg::equals((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+				&& _ML_ALG equal((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd))
 		);
 	}
@@ -136,7 +136,7 @@ namespace ml::alg
 	{
 		return ((lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) < (*rBegin))
-				&& _ML alg::less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+				&& _ML_ALG less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd))
 		);
 	}
@@ -158,14 +158,14 @@ namespace ml::alg
 		class Iter, class OutIt
 	> static constexpr OutIt copy(Iter first, Iter last, OutIt dest)
 	{
-		return _ML alg::copy_unchecked(first, last, dest);
+		return _ML_ALG copy_unchecked(first, last, dest);
 	}
 
 	template <
 		template <class, size_t ...> class A, class T, size_t ... N
 	> static constexpr A<T, N...> & copy(A<T, N...> & lhs, const A<T, N...> & rhs)
 	{
-		_ML alg::copy(_ML alg::begin(lhs), _ML alg::end(lhs), _ML alg::begin(rhs));
+		_ML_ALG copy(_ML_ALG begin(lhs), _ML_ALG end(lhs), _ML_ALG begin(rhs));
 		return lhs;
 	}
 
@@ -186,14 +186,14 @@ namespace ml::alg
 		class Iter, class T
 	> static constexpr Iter fill(Iter first, Iter last, T value)
 	{
-		return _ML alg::fill_unchecked(first, last, value);
+		return _ML_ALG fill_unchecked(first, last, value);
 	}
 
 	template <
 		template <class, size_t ...> class A, class T, size_t ... N
 	> static constexpr A<T, N...> & fill(A<T, N...> & arr, T const & value)
 	{
-		_ML alg::fill(_ML alg::begin(arr), _ML alg::end(arr), value);
+		_ML_ALG fill(_ML_ALG begin(arr), _ML_ALG end(arr), value);
 		return arr;
 	}
 
@@ -252,7 +252,7 @@ namespace ml::alg
 	{
 		if (index < N)
 		{
-			value = _ML alg::value_at(index, arr);
+			value = _ML_ALG value_at(index, arr);
 			return true;
 		}
 		return false;
@@ -305,7 +305,7 @@ namespace ml::alg
 		template <class, size_t ...> class A, class T, size_t ... N
 	> static constexpr T magnitude(const A<T, N...> & value)
 	{
-		return sqrt<T> {}(_ML alg::sqr_magnitude<A, T, N...>(value));
+		return sqrt<T> {}(_ML_ALG sqr_magnitude<A, T, N...>(value));
 	}
 
 	template <
@@ -325,7 +325,7 @@ namespace ml::alg
 		template <class, size_t ...> class A, class T, size_t ... N
 	> static constexpr A<T, N...> normalize(const A<T, N...> & value)
 	{
-		return (value / _ML alg::magnitude<A, T, N...>(value));
+		return (value / _ML_ALG magnitude<A, T, N...>(value));
 	}
 
 	template <
@@ -348,7 +348,7 @@ namespace ml::alg
 		template <class, size_t, size_t> class M, class T
 	> static constexpr M<T, 4, 4> inverse(const M<T, 4, 4> & v)
 	{
-		const T det { _ML alg::determinant<M, T>(v) };
+		const T det { _ML_ALG determinant<M, T>(v) };
 		return ((det != (T)0)
 			? M<T, 4, 4> {	
 				+(v[15] * v[5] - v[7] * v[13]) / det,

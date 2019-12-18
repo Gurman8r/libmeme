@@ -93,12 +93,16 @@ namespace ml
 		inline auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
 		
 		inline auto channels() const noexcept -> size_t { return m_channels; }
+
+		inline auto data() noexcept -> byte_t * { return m_pixels.data(); }
 		
 		inline auto data() const noexcept -> byte_t const * { return m_pixels.data(); }
 		
 		inline bool empty() const noexcept { return m_pixels.empty(); }
 		
 		inline auto height() const noexcept -> size_t { return m_size[1]; }
+
+		inline auto pixels() noexcept -> Pixels & { return m_pixels; }
 		
 		inline auto pixels() const noexcept -> Pixels const & { return m_pixels; }
 		

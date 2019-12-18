@@ -155,7 +155,7 @@ namespace ml
 		class Tx, class Ty, size_t N
 	> constexpr bool operator==(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
 	{
-		return alg::equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return _ML_ALG equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <
@@ -169,7 +169,7 @@ namespace ml
 		class Tx, class Ty, size_t N
 	> constexpr bool operator<(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
 	{
-		return alg::less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return _ML_ALG less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <
@@ -191,27 +191,6 @@ namespace ml
 	> constexpr bool operator>=(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * */
-
-	namespace alg
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <
-			class T = typename uint32_t
-		> static constexpr Array<uint8_t, sizeof(T)> to_bytes(const T value)
-		{
-			Array<uint8_t, sizeof(T)> temp {};
-			for (T i = 0; i < sizeof(T); i++)
-			{
-				temp[i] = static_cast<uint8_t>(value >> (i * cast<T>::eight));
-			}
-			return temp;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * */

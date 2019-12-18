@@ -69,7 +69,8 @@ namespace ml
 
 	struct CharEvent final : public WindowEvent<WindowEventType::EV_Char>
 	{
-		const uint32_t value;
+		uint32_t const value;
+
 		constexpr CharEvent(uint32_t value) noexcept
 			: value{ value }
 		{
@@ -80,7 +81,8 @@ namespace ml
 
 	struct CursorEnterEvent final : public WindowEvent<WindowEventType::EV_CursorEnter>
 	{
-		const int32_t entered;
+		int32_t const entered;
+
 		constexpr CursorEnterEvent(int32_t entered) noexcept
 			: entered{ entered }
 		{
@@ -91,7 +93,12 @@ namespace ml
 
 	struct CursorPosEvent final : public WindowEvent<WindowEventType::EV_CursorPos>
 	{
-		const float64_t x, y;
+		union
+		{
+			float64_t const x;
+			float64_t const y;
+		};
+
 		constexpr CursorPosEvent(float64_t x, float64_t y) noexcept
 			: x{ x }
 			, y{ y }
@@ -103,11 +110,15 @@ namespace ml
 
 	struct KeyEvent final : public WindowEvent<WindowEventType::EV_Key>
 	{
-		using Mods = typename mask8_t;
-		const int32_t key, scan, action;
-		const Mods mods;
+		union
+		{
+			int32_t const key;
+			int32_t const scan;
+			int32_t const action;
+			const mask8_t mods;
+		};
 
-		constexpr KeyEvent(int32_t key, int32_t scan, int32_t action, Mods const & mods) noexcept
+		constexpr KeyEvent(int32_t key, int32_t scan, int32_t action, mask8_t const & mods) noexcept
 			: key{ key }
 			, scan{ scan }
 			, action{ action }
@@ -124,9 +135,9 @@ namespace ml
 		constexpr bool getDown	(int32_t k) const { return getKeyAction(k, ML_KEY_REPEAT); }
 		constexpr bool getUp	(int32_t k)	const { return getKeyAction(k, ML_KEY_RELEASE); }
 
-		constexpr bool getPress	(int32_t k, Mods const & m)	const { return getPress(k) && (mods == m); }
-		constexpr bool getDown	(int32_t k, Mods const & m) const { return getDown(k) && (mods == m); }
-		constexpr bool getUp	(int32_t k, Mods const & m)	const { return getUp(k) && (mods == m); }
+		constexpr bool getPress	(int32_t k, mask8_t const & m)	const { return getPress(k) && (mods == m); }
+		constexpr bool getDown	(int32_t k, mask8_t const & m) const { return getDown(k) && (mods == m); }
+		constexpr bool getUp	(int32_t k, mask8_t const & m)	const { return getUp(k) && (mods == m); }
 
 		constexpr bool isShift	(int32_t k)	const { return getPress(k, { { 1, 0, 0, 0 } }); }
 		constexpr bool isCtrl	(int32_t k)	const { return getPress(k, { { 0, 1, 0, 0 } }); }
@@ -147,7 +158,13 @@ namespace ml
 
 	struct MouseEvent final : public WindowEvent<WindowEventType::EV_Mouse>
 	{
-		const int32_t key, action, mods;
+		union
+		{
+			int32_t const key;
+			int32_t const action;
+			int32_t const mods;
+		};
+
 		constexpr MouseEvent(int32_t key, int32_t action, int32_t mods) noexcept
 			: key{ key }
 			, action{ action }
@@ -160,7 +177,12 @@ namespace ml
 
 	struct ScrollEvent final : public WindowEvent<WindowEventType::EV_Scroll>
 	{
-		const float64_t x, y;
+		union
+		{
+			float64_t const x;
+			float64_t const y;
+		};
+
 		constexpr ScrollEvent(float64_t x, float64_t y) noexcept
 			: x{ x }
 			, y{ y }
@@ -172,7 +194,12 @@ namespace ml
 
 	struct FrameSizeEvent final : public WindowEvent<WindowEventType::EV_FrameSize>
 	{
-		const int32_t width, height;
+		union
+		{
+			int32_t const width;
+			int32_t const height;
+		};
+
 		constexpr FrameSizeEvent(int32_t width, int32_t height) noexcept
 			: width{ width }
 			, height{ height }
@@ -191,8 +218,12 @@ namespace ml
 
 	struct WindowErrorEvent final : public WindowEvent<WindowEventType::EV_WindowError>
 	{
-		const int32_t code;
-		const C_String desc;
+		union
+		{
+			int32_t const code;
+			C_String const desc;
+		};
+
 		constexpr WindowErrorEvent(int32_t code, C_String desc) noexcept
 			: code{ code }
 			, desc{ desc }
@@ -204,7 +235,8 @@ namespace ml
 
 	struct WindowFocusEvent final : public WindowEvent<WindowEventType::EV_WindowFocus>
 	{
-		const int32_t focused;
+		int32_t const focused;
+		
 		constexpr WindowFocusEvent(int32_t focused) noexcept
 			: focused{ focused }
 		{
@@ -222,7 +254,12 @@ namespace ml
 
 	struct WindowPosEvent final : public WindowEvent<WindowEventType::EV_WindowPos>
 	{
-		const int32_t x, y;
+		union
+		{
+			int32_t const x;
+			int32_t const y;
+		};
+
 		constexpr WindowPosEvent(int32_t x, int32_t y) noexcept
 			: x{ x }
 			, y{ y }
@@ -234,7 +271,12 @@ namespace ml
 
 	struct WindowSizeEvent final : public WindowEvent<WindowEventType::EV_WindowSize>
 	{
-		const int32_t width, height;
+		union
+		{
+			int32_t const width;
+			int32_t const height;
+		};
+
 		constexpr WindowSizeEvent(int32_t width, int32_t height) noexcept
 			: width{ width }
 			, height{ height }
@@ -246,7 +288,8 @@ namespace ml
 
 	struct WindowFullscreenEvent final : public WindowEvent<WindowEventType::EV_WindowFullscreen>
 	{
-		const int32_t value;
+		int32_t const value;
+		
 		constexpr WindowFullscreenEvent(int32_t value) noexcept
 			: value{ value }
 		{

@@ -17,8 +17,6 @@ namespace ml
 
 		using type = typename detail::root_t<T>;
 
-		using self_type = typename pi<type>;
-
 		static constexpr auto value		{ static_cast<type>(3.14159265358979323846264338327L) };
 		static constexpr auto two		{ value * cast<type>::two };
 		static constexpr auto half		{ value * cast<type>::half };
@@ -29,7 +27,7 @@ namespace ml
 
 		constexpr pi() noexcept = default;
 
-		constexpr operator type const &() const { return self_type::value; }
+		constexpr operator type const &() const { return pi<type>::value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

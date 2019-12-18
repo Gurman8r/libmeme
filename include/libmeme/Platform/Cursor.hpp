@@ -18,7 +18,7 @@ namespace ml
 
 		enum class Mode : int32_t
 		{
-			Normal = 0x34001,
+			Normal,
 			Hidden,
 			Disabled,
 		};
@@ -42,14 +42,14 @@ namespace ml
 
 		enum class Shape : int32_t
 		{
-			Arrow = 0x36001,
+			Arrow,
 			TextInput,
 			Crosshair,
 			Hand,
 			ResizeEW,
 			ResizeNS,
-			ResizeNESW = Arrow,
-			ResizeNWSE = Arrow,
+			ResizeNESW,
+			ResizeNWSE,
 		};
 
 		static constexpr auto const Shapes{ enum_info<Shape>{

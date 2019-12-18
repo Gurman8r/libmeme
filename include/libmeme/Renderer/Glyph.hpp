@@ -9,22 +9,56 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Size = 6 };
+		using storage_t = typename std::tuple<Texture, FloatRect, uint32_t>;
 
-		Texture		texture	{}; // GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated };
-		FloatRect	bounds	{ FloatRect::zero() };
-		uint32_t	advance { 0 };
+		static constexpr const size_t count{ 6 };
 
-		Glyph() = default;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto bearing()	const -> vec2		{ return bounds.position(); }
-		inline auto size()		const -> vec2		{ return bounds.size(); }
-		inline auto x()			const -> float_t	{ return bearing()[0]; }
-		inline auto y()			const -> float_t	{ return bearing()[1]; }
-		inline auto width()		const -> float_t	{ return size()[0]; }
-		inline auto height()	const -> float_t	{ return size()[1]; }
-		inline auto offset()	const -> vec2		{ return { x(), -y() }; }
-		inline auto step()		const -> float_t	{ return (float_t)(advance >> Size); }
+		Glyph();
+		Glyph(storage_t const & storage);
+		Glyph(storage_t && storage) noexcept;
+		Glyph(Glyph const & other);
+		Glyph(Glyph && other) noexcept;
+		~Glyph();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Glyph operator=(Glyph const & other);
+
+		Glyph operator=(Glyph && other) noexcept;
+
+		void swap(Glyph & other);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline auto texture() const noexcept -> Texture const & { return std::get<0>(m_storage); }
+
+		inline auto bounds() const noexcept -> FloatRect const & { return std::get<1>(m_storage); }
+
+		inline auto advance() const noexcept -> uint32_t const & { return std::get<2>(m_storage); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline auto bearing() const noexcept -> vec2 { return bounds().position(); }
+		
+		inline auto size() const noexcept -> vec2 { return bounds().size(); }
+		
+		inline auto x() const noexcept -> float_t { return bearing()[0]; }
+		
+		inline auto y() const noexcept -> float_t { return bearing()[1]; }
+		
+		inline auto width() const noexcept -> float_t { return size()[0]; }
+		
+		inline auto height() const noexcept -> float_t { return size()[1]; }
+		
+		inline auto offset() const noexcept -> vec2 { return { x(), -y() }; }
+		
+		inline auto step() const noexcept -> float_t { return (float_t)(advance() >> count); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private: storage_t m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -33,7 +67,7 @@ namespace ml
 
 	template <class ... Args> static inline auto make_glyph(Args && ... args)
 	{
-		return Glyph{ std::forward<Args>(args)... };
+		return Glyph{ Glyph::storage_t{ std::forward<Args>(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

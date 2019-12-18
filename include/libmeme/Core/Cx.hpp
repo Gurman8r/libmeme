@@ -189,7 +189,7 @@ namespace ml::cx
 
 		constexpr bool operator<(self_type const & other) const
 		{
-			return alg::less(this->cbegin(), this->cend(), other.cbegin(), other.cend());
+			return _ML_ALG less(this->cbegin(), this->cend(), other.cbegin(), other.cend());
 		}
 
 		constexpr bool operator>(self_type const & other) const

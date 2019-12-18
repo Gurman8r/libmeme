@@ -195,7 +195,6 @@ namespace ml::util
 
 	static inline bool is_bool(std::string const & value)
 	{
-			
 		switch (Hash(to_lower(value)))
 		{
 		case Hash("1"):

@@ -4,25 +4,30 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Uniform::Uniform() : m_storage{}
+	Uniform::Uniform()
+		: m_storage{}
 	{
 	}
 
-	Uniform::Uniform(storage_t const & storage) : m_storage{ storage }
+	Uniform::Uniform(storage_t const & storage)
+		: m_storage{ storage }
 	{
 	}
 
-	Uniform::Uniform(storage_t && storage) noexcept : m_storage{ std::move(storage) }
+	Uniform::Uniform(storage_t && storage) noexcept
+		: m_storage{ std::move(storage) }
 	{
 	}
 
-	Uniform::Uniform(Uniform const & copy) : Uniform{ copy.m_storage }
+	Uniform::Uniform(Uniform const & other)
+		: Uniform{ other.m_storage }
 	{
 	}
 
-	Uniform::Uniform(Uniform && copy) noexcept : Uniform{}
+	Uniform::Uniform(Uniform && other) noexcept
+		: Uniform{}
 	{
-		swap(std::move(copy));
+		swap(std::move(other));
 	}
 
 	Uniform::~Uniform()

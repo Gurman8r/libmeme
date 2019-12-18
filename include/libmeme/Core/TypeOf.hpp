@@ -27,6 +27,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <
+		class T
+	> static constexpr auto const typeof_v{ typeof<T>{} };
+
+	template <
+		class T
+	> static constexpr hash_t const & hashof_v{ typeof_v<T>.hash() };
+
+	template <
+		class T
+	> static constexpr StringView const & nameof_v{ typeof_v<T>.name() };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <> struct typeof<> final
 	{
 		constexpr typeof() noexcept
@@ -44,8 +58,8 @@ namespace ml
 		{
 		}
 
-		template <class T> constexpr typeof(typeof<T> const & copy) noexcept
-			: m_name{ copy.name() }, m_hash{ copy.hash() }
+		template <class T> constexpr typeof(typeof<T> const & other) noexcept
+			: m_name{ other.name() }, m_hash{ other.hash() }
 		{
 		}
 
@@ -53,23 +67,9 @@ namespace ml
 
 		constexpr auto hash() const noexcept -> hash_t const & { return m_hash; }
 
-	private: StringView m_name; hash_t m_hash;
+	private: union { StringView m_name; hash_t m_hash; };
 	};
 	
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <
-		class T
-	> static constexpr auto typeof_v{ typeof<T>{} };
-
-	template <
-		class T
-	> static constexpr auto hashof_v{ typeof_v<T>.hash() };
-
-	template <
-		class T
-	> static constexpr auto nameof_v{ typeof_v<T>.name() };
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <

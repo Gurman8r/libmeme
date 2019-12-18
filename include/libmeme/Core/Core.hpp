@@ -21,16 +21,14 @@
 #endif
 
 #if defined(ML_HAS_CXX14)
-#	include <algorithm>
 #	include <array>
-#	include <atomic>
 #	include <cassert>
 #	include <cctype>
 #	include <chrono>
-#	include <csignal>
 #	include <cstddef>
 #	include <ctime>
 #	include <fstream>
+#	include <functional>
 #	include <initializer_list>
 #	include <iomanip>
 #	include <iostream>
@@ -39,10 +37,8 @@
 #	include <map>
 #	include <random>
 #	include <sstream>
-#	include <string>
 #	include <type_traits>
 #	include <typeindex>
-#	include <typeinfo>
 #	include <unordered_map>
 #	include <utility>
 #	include <vector>
@@ -50,16 +46,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-# ifdef ML_CC_MSC
-#	define popen		::_popen
-#	define pclose		::_pclose
-#	define strdup		::_strdup
-#	define snprintf		::_snprintf
-#endif
-
-#define ML_ARGC			__argc
-#define ML_ARGV			__argv
-#define ML_WARGV		__wargv
+#define ML_ARGC		__argc
+#define ML_ARGV		__argv
+#define ML_WARGV	__wargv
 
 #define ML_DESERIALIZE	::std::istream & operator >>
 #define ML_SERIALIZE	::std::ostream & operator <<
@@ -89,7 +78,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	bool_t		= typename bool;
 	ML_USING	byte_t		= typename uint8_t;
 	ML_USING	float_t		= typename float32_t;
 	ML_USING	hash_t		= typename uint64_t;

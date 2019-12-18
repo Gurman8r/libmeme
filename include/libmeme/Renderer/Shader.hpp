@@ -24,8 +24,8 @@ namespace ml
 		explicit Shader(Source const & source);
 		explicit Shader(std::string const & v, std::string const & f);
 		explicit Shader(std::string const & v, std::string const & g, std::string const & f);
-		Shader(Shader const & copy);
-		Shader(Shader && copy) noexcept;
+		Shader(Shader const & other);
+		Shader(Shader && other) noexcept;
 		~Shader();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,21 +38,23 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		bool loadFromFile(path_t const & v_file, path_t const & f_file);
+
+		bool loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file);
+
+		bool loadFromSource(Source const & value);
+
+		bool loadFromMemory(std::string const & v_src, std::string const & f_src);
+
+		bool loadFromMemory(std::string const & v_src, std::string const & g_src, std::string const & f_src);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		bool create();
 		
 		bool destroy();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool loadFromFile(path_t const & v_file, path_t const & f_file);
-		
-		bool loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file);
-		
-		bool loadFromMemory(Source const & value);
-		
-		bool loadFromMemory(std::string const & v_src, std::string const & f_src);
-		
-		bool loadFromMemory(std::string const & v_src, std::string const & g_src, std::string const & f_src);
+		static void bind(Shader const * value, bool bindTextures = true);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -84,10 +86,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(Shader const * value, bool bindTextures = true);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline operator bool() const noexcept { return m_handle; }
 
 		inline auto handle() const -> uint32_t const & { return m_handle; }
@@ -95,9 +93,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t getAttributeLocation(std::string const & name) const;
+		int32_t get_attribute(std::string const & value);
 
-		int32_t getUniformLocation(std::string const & name) const;
+		int32_t get_uniform(std::string const & value);
 
 		int32_t compile(C_String v_src, C_String g_src, C_String f_src);
 
@@ -113,12 +111,11 @@ namespace ml
 
 		union
 		{
-			uint32_t m_handle;
-			Source m_source;
-			
-			mutable AttribCache m_attribs;
-			mutable TextureCache m_textures;
-			mutable UniformCache m_uniforms;
+			uint32_t		m_handle;
+			Source			m_source;
+			AttribCache		m_attribs;
+			TextureCache	m_textures;
+			UniformCache	m_uniforms;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
