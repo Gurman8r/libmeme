@@ -127,12 +127,6 @@ ml::int32_t main()
 
 	using namespace ml;
 
-	auto foobar = new Material[2]{};
-	foobar[0] = Material{};
-	foobar[1] = Material{};
-	//delete[] foobar;
-	return 0;
-
 	auto m1 = make_material(
 		make_uniform<bool>("bool", true),
 		make_uniform<int>("int", 123),
@@ -145,10 +139,6 @@ ml::int32_t main()
 		make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
 		make_uniform<mat4>("mat4", []() { return mat4::identity(); })
 	);
-
-	static_assert(sizeof(Trackable *) == sizeof(Material *));
-
-	auto foo = ML_MemoryTracker.records().at(0);
 
 	// Time
 	static struct Time final
