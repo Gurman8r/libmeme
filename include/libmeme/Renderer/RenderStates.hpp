@@ -9,14 +9,11 @@ namespace ml
 
 	struct ML_RENDERER_API AlphaState final
 	{
-		union
-		{
-			bool enabled;
-			
-			GL::Predicate func;
-			
-			float_t coeff;
-		};
+		bool enabled;
+
+		GL::Predicate func;
+
+		float_t coeff;
 
 		explicit constexpr AlphaState(bool enabled, GL::Predicate func, float_t coeff) noexcept
 			: enabled{ enabled }
@@ -47,18 +44,15 @@ namespace ml
 
 	struct ML_RENDERER_API BlendState final
 	{
-		union
-		{
-			bool enabled;
-			
-			GL::Factor sfactorRGB;
-			
-			GL::Factor sfactorAlpha;
-			
-			GL::Factor dfactorRGB;
-			
-			GL::Factor dfactorAlpha;
-		};
+		bool enabled;
+
+		GL::Factor sfactorRGB;
+
+		GL::Factor sfactorAlpha;
+
+		GL::Factor dfactorRGB;
+
+		GL::Factor dfactorAlpha;
 
 		constexpr explicit BlendState(bool enabled, GL::Factor sfactorRGB, GL::Factor sfactorAlpha, GL::Factor dfactorRGB, GL::Factor dfactorAlpha) noexcept
 			: enabled{ enabled }
@@ -96,12 +90,9 @@ namespace ml
 
 	struct ML_RENDERER_API CullState final
 	{
-		union
-		{
-			bool enabled;
-			
-			GL::Face mode;
-		};
+		bool enabled;
+
+		GL::Face mode;
 
 		constexpr explicit CullState(bool enabled, GL::Face mode) noexcept
 			: enabled{ enabled }
@@ -131,14 +122,11 @@ namespace ml
 
 	struct ML_RENDERER_API DepthState final
 	{
-		union
-		{
-			bool enabled;
-			
-			GL::Predicate func;
-			
-			bool mask;
-		};
+		bool enabled;
+
+		GL::Predicate func;
+
+		bool mask;
 
 		constexpr explicit DepthState(bool enabled, GL::Predicate func, bool mask) noexcept
 			: enabled{ enabled }
@@ -187,26 +175,26 @@ namespace ml
 		}
 
 		constexpr RenderStates(
-			AlphaState const & alpha, 
-			BlendState const & blend, 
+			AlphaState const & alpha,
+			BlendState const & blend,
 			CullState const & cull,
 			DepthState const & depth
-		) noexcept : RenderStates { true, alpha, blend, cull, depth }
+		) noexcept : RenderStates{ true, alpha, blend, cull, depth }
 		{
 		}
 
 		constexpr RenderStates(RenderStates const & other) noexcept
-			: RenderStates { other.m_enabled, other.m_alpha, other.m_blend, other.m_cull, other.m_depth }
+			: RenderStates{ other.m_enabled, other.m_alpha, other.m_blend, other.m_cull, other.m_depth }
 		{
 		}
 
 		constexpr RenderStates(bool enabled) noexcept
-			: RenderStates { enabled, {}, {}, {}, {} }
+			: RenderStates{ enabled, {}, {}, {}, {} }
 		{
 		}
 
 		constexpr RenderStates() noexcept
-			: RenderStates { true }
+			: RenderStates{ true }
 		{
 		}
 
@@ -221,25 +209,22 @@ namespace ml
 
 		constexpr auto blend()			-> BlendState & { return m_blend; }
 		constexpr auto blend()	const	-> BlendState const & { return m_blend; }
-		
+
 		constexpr auto cull()			-> CullState & { return m_cull; }
 		constexpr auto cull()	const	-> CullState const & { return m_cull; }
-		
+
 		constexpr auto depth()			-> DepthState & { return m_depth; }
 		constexpr auto depth()	const	-> DepthState const & { return m_depth; }
-		
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union
-		{
-			bool		m_enabled;
-			AlphaState	m_alpha;
-			BlendState	m_blend;
-			CullState	m_cull;
-			DepthState	m_depth;
-		};
-	
+		bool		m_enabled;
+		AlphaState	m_alpha;
+		BlendState	m_blend;
+		CullState	m_cull;
+		DepthState	m_depth;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
