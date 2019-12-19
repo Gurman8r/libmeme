@@ -45,13 +45,8 @@ namespace ml
 	void * Debug::execute(std::string const & command, std::string const & file, std::string const & args, std::string const & path, int32_t flags)
 	{
 #ifdef ML_SYSTEM_WINDOWS
-		return ::ShellExecuteA(
-			::GetDesktopWindow(),
-			command.c_str(),
-			file.c_str(),
-			args.c_str(),
-			path.c_str(),
-			flags
+		return ::ShellExecuteA(::GetDesktopWindow(),
+			command.c_str(), file.c_str(), args.c_str(), path.c_str(), flags
 		);
 #else
 		// do the thing

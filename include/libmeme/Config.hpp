@@ -265,12 +265,15 @@
 #ifdef ML_CC_MSC
 #	define ML_ALWAYS_INLINE __forceinline
 #	define ML_NEVER_INLINE __declspec(noinline)
+#   define ML_NODISCARD [[nodiscard]]
 #elif defined(ML_CC_GCC) || defined(ML_CC_CLANG)
 #	define ML_ALWAYS_INLINE inline __attribute__((__always_inline__))
 #	define ML_NEVER_INLINE __attribute__((__noinline__))
+#   define ML_NODISCARD __attribute__((__nodiscard__))
 #else
 #	define ML_ALWAYS_INLINE
 #	define ML_NEVER_INLINE
+#   define ML_NODISCARD
 #endif
 
 // Export
@@ -300,6 +303,7 @@
 #	pragma warning(disable: 6282)	// incorrect operator
 #	pragma warning(disable: 6301)	// return value ignored
 #	pragma warning(disable: 26437)	// do not slice
+#	pragma warning(disable: 26444)	// avoid unnamed objecs with custom construction and destruction
 #	pragma warning(disable: 26451)	// arithmetic overflow
 #	pragma warning(disable: 26495)	// value may be uninitialized
 #	pragma warning(disable: 26812)	// unscoped enum

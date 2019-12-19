@@ -7,6 +7,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Core/Dense.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -37,42 +38,43 @@ namespace ml::unit_tests
 		&& sizeof(mat4d) == (sizeof(float64_t) * 16)
 		&& sizeof(mat4s) == (sizeof(size_t) * 16)
 
-		&& nameof_v<bool> == "bool"
-		&& nameof_v<char> == "char"
-		&& nameof_v<wchar_t> == "wchar_t"
-		&& nameof_v<char16_t> == "char16_t"
-		&& nameof_v<char32_t> == "char32_t"
-		&& nameof_v<C_String> == "const char*"
-		&& nameof_v<int8_t> == "signed char"
-		&& nameof_v<int16_t> == "short"
-		&& nameof_v<int32_t> == "int"
+		&& nameof_v<bool>			== "bool"
+		&& nameof_v<char>			== "char"
+		&& nameof_v<wchar_t>		== "wchar_t"
+		&& nameof_v<char16_t>		== "char16_t"
+		&& nameof_v<char32_t>		== "char32_t"
+		&& nameof_v<C_String>		== "const char*"
+		&& nameof_v<int8_t>			== "signed char"
+		&& nameof_v<int16_t>		== "short"
+		&& nameof_v<int32_t>		== "int"
 #ifdef ML_CC_MSC
-		&& nameof_v<int64_t> == "__int64"
+		&& nameof_v<int64_t>		== "__int64"
 #else
-		&& nameof_v<int64_t> == "long long"
+		&& nameof_v<int64_t>		== "long long"
 #endif
-		&& nameof_v<uint8_t> == "unsigned char"
-		&& nameof_v<uint16_t> == "unsigned short"
-		&& nameof_v<uint32_t> == "unsigned int"
+		&& nameof_v<uint8_t>		== "unsigned char"
+		&& nameof_v<uint16_t>		== "unsigned short"
+		&& nameof_v<uint32_t>		== "unsigned int"
 #ifdef ML_CC_MSC
-		&& nameof_v<uint64_t> == "unsigned __int64"
+		&& nameof_v<uint64_t>		== "unsigned __int64"
 #else
-		&& nameof_v<uint64_t> == "unsigned long long"
+		&& nameof_v<uint64_t>		== "unsigned long long"
 #endif
-		&& nameof_v<float32_t> == "float"
-		&& nameof_v<float64_t> == "double"
-		&& nameof_v<float80_t> == "long double"
-#ifdef ML_HAS_CONSTEXPR_17
-		&& nameof_v<std::string> == "std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
-		&& nameof_v<std::wstring> == "std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
-		&& nameof_v<std::u16string> == "std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
-		&& nameof_v<std::u32string> == "std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
-#else
-		&& nameof_v<std::string> == "std::string"
-		&& nameof_v<std::wstring> == "std::wstring"
-		&& nameof_v<std::u16string> == "std::u16string"
-		&& nameof_v<std::u32string> == "std::u32string"
-#endif
+		&& nameof_v<float32_t>		== "float"
+		&& nameof_v<float64_t>		== "double"
+		&& nameof_v<float80_t>		== "long double"
+
+		&& nameof_v<vec2>			== "struct ml::Matrix<float,2,1>"
+		&& nameof_v<vec3>			== "struct ml::Matrix<float,3,1>"
+		&& nameof_v<vec4>			== "struct ml::Matrix<float,4,1>"
+		&& nameof_v<mat2>			== "struct ml::Matrix<float,2,2>"
+		&& nameof_v<mat3>			== "struct ml::Matrix<float,3,3>"
+		&& nameof_v<mat4>			== "struct ml::Matrix<float,4,4>"
+
+		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
+		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
+		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
+		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
 	);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -87,12 +89,12 @@ namespace ml
 	static constexpr auto const window_title{ C_String {
 		"libmeme"					// Title
 	} };
-	static constexpr auto const window_video{ Window::DisplayMode {
+	static constexpr auto const window_video{ DisplayMode {
 		1280,						// Width
 		720,						// Height
 		32							// Bits-per-Pixel
 	} };
-	static constexpr auto const window_style{ Window::Style {
+	static constexpr auto const window_style{ WindowStyle {
 		true,						// Resizable
 		true,						// Visible
 		true,						// Decorated
@@ -103,11 +105,11 @@ namespace ml
 		false,						// Fullscreen
 		false,						// Vertical Sync
 	} };
-	static constexpr auto const window_context{ Window::Context {
-		Window::Context::OpenGL,	// API
+	static constexpr auto const window_context{ ContextSettings {
+		ContextSettings::OpenGL,	// API
 		4,							// Major Version
 		6,							// Minor Version
-		Window::Context::Compat,	// Profile
+		ContextSettings::Compat,	// Profile
 		24,							// Depth Bits
 		8,							// Stencil Bits
 		false,						// Multisample
@@ -125,6 +127,29 @@ ml::int32_t main()
 
 	using namespace ml;
 
+	auto foobar = new Material[2]{};
+	foobar[0] = Material{};
+	foobar[1] = Material{};
+	//delete[] foobar;
+	return 0;
+
+	auto m1 = make_material(
+		make_uniform<bool>("bool", true),
+		make_uniform<int>("int", 123),
+		make_uniform<float>("float", 4.56f),
+		make_uniform<vec2>("vec2", vec2{ 1, 2 }),
+		make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
+		make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
+		make_uniform<Color>("color", []() { return colors::magenta; }),
+		make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
+		make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
+		make_uniform<mat4>("mat4", []() { return mat4::identity(); })
+	);
+
+	static_assert(sizeof(Trackable *) == sizeof(Material *));
+
+	auto foo = ML_MemoryTracker.records().at(0);
+
 	// Time
 	static struct Time final
 	{
@@ -140,8 +165,6 @@ ml::int32_t main()
 	ML_PerformanceTracker;
 	ML_Lua.init();
 	ML_Python.init(ML_ARGV[0], "../../../");
-
-	Script{ Script::Language::Python, "import LIBMEME as ml" }();
 
 	// Load Plugins
 	std::vector<std::pair<SharedLibrary *, Plugin *>> plugins;
@@ -245,15 +268,16 @@ ml::int32_t main()
 		make_uniform<bool>("bool", true),
 		make_uniform<int>("int", 123),
 		make_uniform<float>("float", 4.56f),
-		make_uniform<vec2>("vec2", { 1, 2 }),
-		make_uniform<vec3>("vec3", { 3, 4, 5 }),
-		make_uniform<vec4>("vec4", { 6, 7, 8, 9 }),
-		make_uniform<Color>("col", colors::magenta),
-		make_uniform<mat2>("mat2", mat2::identity()),
-		make_uniform<mat3>("mat3", mat3::identity()),
-		make_uniform<mat4>("mat4", mat4::identity()),
+		make_uniform<vec2>("vec2", vec2{ 1, 2 }),
+		make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
+		make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
+		make_uniform<Color>("color", []() { return colors::magenta; }),
+		make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
+		make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
+		make_uniform<mat4>("mat4", []() { return mat4::identity(); }),
 		make_uniform<Texture const *>("tex0", &tex[0])
 	));
+
 	
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * */

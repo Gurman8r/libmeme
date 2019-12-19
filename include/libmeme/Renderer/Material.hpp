@@ -11,14 +11,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using storage_t					= typename std::vector<Uniform>;
-		using iterator					= typename storage_t::iterator;
-		using const_iterator			= typename storage_t::const_iterator;
-		using reverse_iterator			= typename storage_t::reverse_iterator;
-		using const_reverse_iterator	= typename storage_t::const_reverse_iterator;
 		using pointer					= typename storage_t::pointer;
 		using reference					= typename storage_t::reference;
 		using const_pointer				= typename storage_t::const_pointer;
 		using const_reference			= typename storage_t::const_reference;
+		using iterator					= typename storage_t::iterator;
+		using const_iterator			= typename storage_t::const_iterator;
+		using reverse_iterator			= typename storage_t::reverse_iterator;
+		using const_reverse_iterator	= typename storage_t::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -55,18 +55,24 @@ namespace ml
 
 		inline bool insert(Uniform && value)
 		{
-			if (value.name().empty()) { return false; }
-			if (auto const it{ find_by_name(value.name()) }; it == cend())
+			if (value.name().empty())
+			{
+				return false;
+			}
+			
+			if (!find_by_name(value.name()))
 			{
 				push_back(std::move(value));
+				
 				return true;
 			}
+			
 			return false;
 		}
 
-		template <class Pr> inline void sort(Pr && pred) noexcept
+		template <class Predicate> inline void sort(Predicate && pr) noexcept
 		{
-			return std::sort(begin(), end(), pred);
+			return std::sort(begin(), end(), pr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -76,39 +82,43 @@ namespace ml
 			return std::find(begin(), end(), value);
 		}
 
-		template <class T> inline iterator find(T const & value) const
+		template <class T> inline const_iterator find(T const & value) const
 		{
 			return std::find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Pr> inline iterator find_if(Pr && pr)
+		template <class Predicate> inline iterator find_if(Predicate && pr)
 		{
 			return std::find_if(begin(), end(), pr);
 		}
 
-		template <class Pr> inline const_iterator find_if(Pr && pr) const
+		template <class Predicate> inline const_iterator find_if(Predicate && pr) const
 		{
 			return std::find_if(cbegin(), cend(), pr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find_by_name(std::string const & name)
+		inline std::optional<Uniform> find_by_name(std::string const & name)
 		{
-			return (!name.empty()
-				? find_if([name](auto && u) { return (u.name() == name); })
-				: end()
-			);
+			if (name.empty()) { return std::nullopt; }
+			if (auto it{ find_if([name](auto && u) { return u.name() == name; }) }; it != end())
+			{
+				return std::make_optional(*it);
+			}
+			return std::nullopt;
 		}
 
-		inline const_iterator find_by_name(std::string const & name) const
+		inline std::optional<Uniform> find_by_name(std::string const & name) const
 		{
-			return (!name.empty()
-				? find_if([name](auto && u) { return (u.name() == name); })
-				: cend()
-			);
+			if (name.empty()) { return std::nullopt; }
+			if (auto it{ find_if([name](auto && u) { return u.name() == name; }) }; it != cend())
+			{
+				return std::make_optional(*it);
+			}
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -122,6 +132,10 @@ namespace ml
 		{
 			return m_storage[index];
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline auto storage() const noexcept -> storage_t const & { return m_storage; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -143,7 +157,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: storage_t m_storage;
+	private: union { storage_t m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

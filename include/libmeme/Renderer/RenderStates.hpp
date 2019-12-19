@@ -1,9 +1,6 @@
 #ifndef _ML_RENDER_STATES_HPP_
 #define _ML_RENDER_STATES_HPP_
 
-#include <libmeme/Core/Core.hpp>
-#include <libmeme/Core/Matrix.hpp>
-#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Renderer/GL.hpp>
 
 namespace ml
@@ -12,28 +9,33 @@ namespace ml
 
 	struct ML_RENDERER_API AlphaState final
 	{
-		bool enabled;
-		GL::Predicate func;
-		float_t coeff;
+		union
+		{
+			bool enabled;
+			
+			GL::Predicate func;
+			
+			float_t coeff;
+		};
 
-		explicit constexpr AlphaState(bool enabled, GL::Predicate func, float_t coeff)
+		explicit constexpr AlphaState(bool enabled, GL::Predicate func, float_t coeff) noexcept
 			: enabled{ enabled }
 			, func{ func }
 			, coeff{ coeff }
 		{
 		}
 
-		constexpr AlphaState(AlphaState const & copy)
-			: AlphaState{ copy.enabled, copy.func, copy.coeff }
+		constexpr AlphaState(AlphaState const & other) noexcept
+			: AlphaState{ other.enabled, other.func, other.coeff }
 		{
 		}
 
-		constexpr AlphaState(bool enabled)
+		constexpr AlphaState(bool enabled) noexcept
 			: AlphaState{ enabled, GL::Greater, 0.001f }
 		{
 		}
 
-		constexpr AlphaState()
+		constexpr AlphaState() noexcept
 			: AlphaState{ true }
 		{
 		}
@@ -45,13 +47,20 @@ namespace ml
 
 	struct ML_RENDERER_API BlendState final
 	{
-		bool enabled;
-		GL::Factor sfactorRGB;
-		GL::Factor sfactorAlpha;
-		GL::Factor dfactorRGB;
-		GL::Factor dfactorAlpha;
+		union
+		{
+			bool enabled;
+			
+			GL::Factor sfactorRGB;
+			
+			GL::Factor sfactorAlpha;
+			
+			GL::Factor dfactorRGB;
+			
+			GL::Factor dfactorAlpha;
+		};
 
-		constexpr explicit BlendState(bool enabled, GL::Factor sfactorRGB, GL::Factor sfactorAlpha, GL::Factor dfactorRGB, GL::Factor dfactorAlpha)
+		constexpr explicit BlendState(bool enabled, GL::Factor sfactorRGB, GL::Factor sfactorAlpha, GL::Factor dfactorRGB, GL::Factor dfactorAlpha) noexcept
 			: enabled{ enabled }
 			, sfactorRGB{ sfactorRGB }
 			, sfactorAlpha{ sfactorAlpha }
@@ -60,22 +69,22 @@ namespace ml
 		{
 		}
 
-		constexpr BlendState(BlendState const & copy)
-			: BlendState{ copy.enabled, copy.sfactorRGB, copy.sfactorAlpha, copy.dfactorRGB, copy.dfactorAlpha }
+		constexpr BlendState(BlendState const & other) noexcept
+			: BlendState{ other.enabled, other.sfactorRGB, other.sfactorAlpha, other.dfactorRGB, other.dfactorAlpha }
 		{
 		}
 
-		constexpr BlendState(bool enabled, GL::Factor rgb, GL::Factor alpha)
+		constexpr BlendState(bool enabled, GL::Factor rgb, GL::Factor alpha) noexcept
 			: BlendState{ enabled, rgb, alpha, rgb, alpha }
 		{
 		}
 
-		constexpr BlendState(bool enabled)
+		constexpr BlendState(bool enabled) noexcept
 			: BlendState{ enabled, GL::SrcAlpha, GL::OneMinusSrcAlpha }
 		{
 		}
 
-		constexpr BlendState()
+		constexpr BlendState() noexcept
 			: BlendState{ true }
 		{
 		}
@@ -87,26 +96,30 @@ namespace ml
 
 	struct ML_RENDERER_API CullState final
 	{
-		bool enabled;
-		GL::Face mode;
+		union
+		{
+			bool enabled;
+			
+			GL::Face mode;
+		};
 
-		constexpr explicit CullState(bool enabled, GL::Face mode)
+		constexpr explicit CullState(bool enabled, GL::Face mode) noexcept
 			: enabled{ enabled }
 			, mode{ mode }
 		{
 		}
 
-		constexpr CullState(CullState const & copy)
-			: CullState{ copy.enabled, copy.mode }
+		constexpr CullState(CullState const & other) noexcept
+			: CullState{ other.enabled, other.mode }
 		{
 		}
 
-		constexpr CullState(bool enabled)
+		constexpr CullState(bool enabled) noexcept
 			: CullState{ enabled, GL::Back }
 		{
 		}
 
-		constexpr CullState()
+		constexpr CullState() noexcept
 			: CullState{ true }
 		{
 		}
@@ -118,33 +131,38 @@ namespace ml
 
 	struct ML_RENDERER_API DepthState final
 	{
-		bool enabled;
-		GL::Predicate func;
-		bool mask;
+		union
+		{
+			bool enabled;
+			
+			GL::Predicate func;
+			
+			bool mask;
+		};
 
-		constexpr explicit DepthState(bool enabled, GL::Predicate func, bool mask)
+		constexpr explicit DepthState(bool enabled, GL::Predicate func, bool mask) noexcept
 			: enabled{ enabled }
 			, func{ func }
 			, mask{ mask }
 		{
 		}
 
-		constexpr DepthState(bool enabled, bool mask)
+		constexpr DepthState(bool enabled, bool mask) noexcept
 			: DepthState{ enabled, GL::Less, mask }
 		{
 		}
 
-		constexpr DepthState(DepthState const & copy)
-			: DepthState{ copy.enabled, copy.func, copy.mask }
+		constexpr DepthState(DepthState const & other) noexcept
+			: DepthState{ other.enabled, other.func, other.mask }
 		{
 		}
 
-		constexpr DepthState(bool enabled)
+		constexpr DepthState(bool enabled) noexcept
 			: DepthState{ enabled, GL::Less, true }
 		{
 		}
 
-		constexpr DepthState()
+		constexpr DepthState() noexcept
 			: DepthState{ true }
 		{
 		}
@@ -164,7 +182,7 @@ namespace ml
 			BlendState const & blend,
 			CullState const & cull,
 			DepthState const & depth
-		) : m_enabled{ enabled }, m_alpha{ alpha }, m_blend{ blend }, m_cull{ cull }, m_depth{ depth }
+		) noexcept : m_enabled{ enabled }, m_alpha{ alpha }, m_blend{ blend }, m_cull{ cull }, m_depth{ depth }
 		{
 		}
 
@@ -173,21 +191,21 @@ namespace ml
 			BlendState const & blend, 
 			CullState const & cull,
 			DepthState const & depth
-		) : RenderStates { true, alpha, blend, cull, depth }
+		) noexcept : RenderStates { true, alpha, blend, cull, depth }
 		{
 		}
 
-		constexpr RenderStates(RenderStates const & copy)
-			: RenderStates { copy.m_enabled, copy.m_alpha, copy.m_blend, copy.m_cull, copy.m_depth }
+		constexpr RenderStates(RenderStates const & other) noexcept
+			: RenderStates { other.m_enabled, other.m_alpha, other.m_blend, other.m_cull, other.m_depth }
 		{
 		}
 
-		constexpr RenderStates(bool enabled)
+		constexpr RenderStates(bool enabled) noexcept
 			: RenderStates { enabled, {}, {}, {}, {} }
 		{
 		}
 
-		constexpr RenderStates()
+		constexpr RenderStates() noexcept
 			: RenderStates { true }
 		{
 		}
@@ -213,11 +231,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool		m_enabled;
-		AlphaState	m_alpha;
-		BlendState	m_blend;
-		CullState	m_cull;
-		DepthState	m_depth;
+		union
+		{
+			bool		m_enabled;
+			AlphaState	m_alpha;
+			BlendState	m_blend;
+			CullState	m_cull;
+			DepthState	m_depth;
+		};
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

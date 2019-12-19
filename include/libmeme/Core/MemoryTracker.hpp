@@ -8,48 +8,66 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	// Allocation Record
+	struct ML_CORE_API AllocationRecord final : public NonCopyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using storage_t = typename std::tuple<size_t, size_t, struct Trackable *>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit AllocationRecord(storage_t && storage) noexcept;
+
+		~AllocationRecord() noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline decltype(auto) index() const noexcept { return std::get<0>(m_storage); }
+
+		inline decltype(auto) size() const noexcept { return std::get<1>(m_storage); }
+
+		inline decltype(auto) data() const noexcept { return std::get<2>(m_storage); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private: union { storage_t m_storage; };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+
+	// Memory Tracker
 	struct ML_CORE_API MemoryTracker final : public Singleton<MemoryTracker>
-	{	
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		struct Record final
-		{
-			size_t index;	// Index
-			size_t size;	// Size
-			void * value;	// Value
-
-			Record() = default;
-
-			std::type_info const & get_rtti() const;
-		};
-
+	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using RecordTable = typename std::map<void *, Record *>;
+		using records_t = typename std::map<void *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline auto current() const -> size_t { return m_current; }
 
-		inline auto records() const -> RecordTable const & { return m_records; }
+		inline auto records() const -> records_t const & { return m_records; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		friend Singleton<MemoryTracker>;
+
 		friend struct Trackable;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		MemoryTracker() = default;
+		MemoryTracker() noexcept;
+
 		~MemoryTracker();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		size_t		m_current{ 0 };
-		RecordTable	m_records{};
+		size_t m_current;
+
+		records_t m_records;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -60,17 +78,17 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
 
+	// Trackable
 	struct ML_CORE_API Trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~Trackable() {}
+		virtual ~Trackable() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::type_info const & get_rtti() const
+		inline std::type_info const & rtti() const noexcept
 		{
 			return typeid(*this);
 		}
@@ -100,7 +118,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_MEMORY_TRACKER_HPP_

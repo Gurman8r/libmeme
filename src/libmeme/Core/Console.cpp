@@ -5,11 +5,11 @@
 #else
 #endif
 
-namespace ml
+namespace ml::cio
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::ostream & console::COL::operator()(std::ostream & out) const
+	std::ostream & COL::operator()(std::ostream & out) const
 	{
 #ifdef ML_SYSTEM_WINDOWS
 		if (HANDLE handle{ ::GetStdHandle(STD_OUTPUT_HANDLE) })

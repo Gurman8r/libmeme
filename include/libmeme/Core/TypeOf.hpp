@@ -2,6 +2,7 @@
 #define _ML_TYPE_OF_HPP_
 
 #include <libmeme/Core/NameOf.hpp>
+#include <libmeme/Core/Hash.hpp>
 
 namespace ml
 {
@@ -15,14 +16,20 @@ namespace ml
 	{
 		constexpr typeof() noexcept = default;
 
-		static constexpr auto name() noexcept -> StringView const & { return m_name; }
+		static constexpr auto name() noexcept -> std::string_view const & { return m_name; }
 		
 		static constexpr auto hash() noexcept -> hash_t const & { return m_hash; }
 
 	private:
-		static constexpr StringView m_name{ nameof<>::filter(nameof<T>::value) };
+		static constexpr std::string_view m_name
+		{
+			nameof<>::filter_signature_type(nameof<T>::value)
+		};
 
-		static constexpr hash_t m_hash{ m_name.hash() };
+		static constexpr hash_t m_hash
+		{
+			Hash(m_name)
+		};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,11 +40,11 @@ namespace ml
 
 	template <
 		class T
-	> static constexpr hash_t const & hashof_v{ typeof_v<T>.hash() };
+	> static constexpr auto hashof_v{ typeof_v<T>.hash() };
 
 	template <
 		class T
-	> static constexpr StringView const & nameof_v{ typeof_v<T>.name() };
+	> static constexpr auto nameof_v{ typeof_v<T>.name() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -48,26 +55,16 @@ namespace ml
 		{
 		}
 
-		template <class T> constexpr typeof(T const &) noexcept
-			: typeof { typeof<T>{} }
-		{
-		}
-
-		template <class T> constexpr typeof(T const *) noexcept
-			: typeof { typeof<T const *>{} }
-		{
-		}
-
 		template <class T> constexpr typeof(typeof<T> const & other) noexcept
 			: m_name{ other.name() }, m_hash{ other.hash() }
 		{
 		}
 
-		constexpr auto name() const noexcept -> StringView const & { return m_name; }
+		constexpr auto name() const noexcept -> std::string_view const & { return m_name; }
 
 		constexpr auto hash() const noexcept -> hash_t const & { return m_hash; }
 
-	private: union { StringView m_name; hash_t m_hash; };
+	private: std::string_view m_name; hash_t m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

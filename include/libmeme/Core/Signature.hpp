@@ -9,29 +9,31 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/StringView.hpp>
+#include <libmeme/Core/Core.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define ML_SIGNATURE_VIEW "std::basic_string_view<char,struct std::char_traits<char> >"
+
 #if defined(ML_CC_MSC)
 #	define ML_SIGNATURE					__FUNCSIG__
-#	define ML_TYPE_SIGNATURE_PREFIX		"struct ml::StringView __cdecl ml::signature::type<"
+#	define ML_TYPE_SIGNATURE_PREFIX		"class " ML_SIGNATURE_VIEW " __cdecl ml::signature::type<"
 #	define ML_TYPE_SIGNATURE_SUFFIX		">(void)"
-#	define ML_VALUE_SIGNATURE_PREFIX	"struct ml::StringView __cdecl ml::signature::value<"
+#	define ML_VALUE_SIGNATURE_PREFIX	"class " ML_SIGNATURE_VIEW " __cdecl ml::signature::value<"
 #	define ML_VALUE_SIGNATURE_SEPARATOR	"; T Value = "
 #	define ML_VALUE_SIGNATURE_SUFFIX	">(void)"
 #elif defined(ML_CC_GCC)
 #	define ML_SIGNATURE					__PRETTY_FUNCTION__
-#	define ML_TYPE_SIGNATURE_PREFIX		"constexpr ml::StringView ml::signature::type() [with T = "
+#	define ML_TYPE_SIGNATURE_PREFIX		"constexpr " ML_SIGNATURE_VIEW " ml::signature::type() [with T = "
 #	define ML_TYPE_SIGNATURE_SUFFIX		"]"
-#	define ML_VALUE_SIGNATURE_PREFIX	"constexpr ml::StringView ml::signature::value() [with T = "
+#	define ML_VALUE_SIGNATURE_PREFIX	"constexpr " ML_SIGNATURE_VIEW " ml::signature::value() [with T = "
 #	define ML_VALUE_SIGNATURE_SEPARATOR	"; Value = "
 #	define ML_VALUE_SIGNATURE_SUFFIX	"]"
 #elif defined(ML_CC_CLANG)
 #	define ML_SIGNATURE					__PRETTY_FUNCTION__
-#	define ML_TYPE_SIGNATURE_PREFIX		"ml::StringView ml::signature::type() [T = "
+#	define ML_TYPE_SIGNATURE_PREFIX		"" ML_SIGNATURE_VIEW " ml::signature::type() [T = "
 #	define ML_TYPE_SIGNATURE_SUFFIX		"]"
-#	define ML_VALUE_SIGNATURE_PREFIX	"ml::StringView ml::signature::value() [T = "
+#	define ML_VALUE_SIGNATURE_PREFIX	"" ML_SIGNATURE_VIEW " ml::signature::value() [T = "
 #	define ML_VALUE_SIGNATUTE_SEPARATOR	"; Value = "
 #	define ML_VALUE_SIGNATURE_SUFFIX	"]"
 #else
@@ -40,36 +42,40 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml
+// Type Signature
+namespace ml::signature
 {
-	namespace signature
+	template <class T> static constexpr std::string_view type()
 	{
-#if defined(ML_HAS_CONSTEXPR_17)
-		namespace detail
+		return { ML_SIGNATURE };
+	}
+
+	namespace detail
+	{
+		static constexpr std::tuple<std::string_view, std::string_view> type
 		{
-			static constexpr std::tuple<StringView, StringView> type
-			{
-				ML_TYPE_SIGNATURE_PREFIX, 
-				ML_TYPE_SIGNATURE_SUFFIX
-			};
+			ML_TYPE_SIGNATURE_PREFIX,
+			ML_TYPE_SIGNATURE_SUFFIX
+		};
+	}
+}
 
-			static constexpr std::tuple<StringView, StringView, StringView> value
-			{
-				ML_VALUE_SIGNATURE_PREFIX,
-				ML_VALUE_SIGNATURE_SEPARATOR, 
-				ML_VALUE_SIGNATURE_SUFFIX
-			};
-		}
-#endif
-		template <class T> static constexpr StringView type()
-		{ 
-			return { ML_SIGNATURE };
-		}
+// Value Signature
+namespace ml::signature
+{
+	template <class T, T Value> static constexpr std::string_view value()
+	{
+		return { ML_SIGNATURE };
+	}
 
-		template <class T, T Value> static constexpr StringView value()
-		{ 
-			return { ML_SIGNATURE };
-		}
+	namespace detail
+	{
+		static constexpr std::tuple<std::string_view, std::string_view, std::string_view> value
+		{
+			ML_VALUE_SIGNATURE_PREFIX,
+			ML_VALUE_SIGNATURE_SEPARATOR,
+			ML_VALUE_SIGNATURE_SUFFIX
+		};
 	}
 }
 

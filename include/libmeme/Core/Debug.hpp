@@ -61,14 +61,14 @@ namespace ml
 		static inline int32_t logger_impl(
 			std::ostream & out,
 			int32_t exitCode,
-			console::COL const & color,
+			cio::COL const & color,
 			std::string const & prefix,
 			std::string const & message
 		)
 		{
-			out << endcol
-				<< console::FG::White << "[" << color << prefix << console::FG::White << "] "
-				<< endcol << message
+			out << cio::endcolor
+				<< cio::FG::White << "[" << color << prefix << cio::FG::White << "] "
+				<< cio::endcolor << message
 				<< '\n';
 			return exitCode;
 		}
@@ -77,17 +77,17 @@ namespace ml
 
 		template <class Str> static inline int32_t logInfo(Str && value)
 		{
-			return logger_impl(std::cout, ML_SUCCESS, console::FG::Green, ML_MSG_LOG, std::forward<Str>(value));
+			return logger_impl(std::cout, ML_SUCCESS, cio::FG::Green, ML_MSG_LOG, std::forward<Str>(value));
 		}
 
 		template <class Str> static inline int32_t logError(Str && value)
 		{
-			return logger_impl(std::cout, ML_FAILURE, console::FG::Red, ML_MSG_ERR, std::forward<Str>(value));
+			return logger_impl(std::cout, ML_FAILURE, cio::FG::Red, ML_MSG_ERR, std::forward<Str>(value));
 		}
 
 		template <class Str> static inline int32_t logWarning(Str && value)
 		{
-			return logger_impl(std::cout, ML_WARNING, console::FG::Yellow, ML_MSG_WRN, std::forward<Str>(value));
+			return logger_impl(std::cout, ML_WARNING, cio::FG::Yellow, ML_MSG_WRN, std::forward<Str>(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

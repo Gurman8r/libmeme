@@ -23,12 +23,6 @@ namespace ml::detail
 		using type = typename T<To>::type;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <
-		class ... Args
-	> using pack_t = typename pack<Args...>;
-
 	template <
 		template <class...> class To,
 		template <template <class...> class> class T

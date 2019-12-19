@@ -1,16 +1,30 @@
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/Debug.hpp>
 
+#ifndef ML_IMPL_NEW
+#define ML_IMPL_NEW ::std::malloc
+#endif
+
+#ifndef ML_IMPL_DELETE
+#define ML_IMPL_DELETE ::std::free
+#endif
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::type_info const & MemoryTracker::Record::get_rtti() const
+	AllocationRecord::AllocationRecord(storage_t && storage) noexcept
+		: m_storage{ std::forward<storage_t>(storage) }
 	{
-		return static_cast<Trackable const *>(value)->get_rtti();
 	}
 
+	AllocationRecord::~AllocationRecord() noexcept {}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	MemoryTracker::MemoryTracker() noexcept : m_current{ 0 }, m_records{}
+	{
+	}
 
 	MemoryTracker::~MemoryTracker()
 	{
@@ -19,26 +33,28 @@ namespace ml
 		{
 			Debug::logError("MEMORY LEAKS DETECTED");
 
-			std::cerr
-				<< std::left
+			static constexpr std::streamsize
+				size_size{ sizeof(size_t) * 2 },
+				addr_size{ sizeof(size_t) * 3 };
+
+			std::cerr << std::left
 				<< std::setw(6) << "Index"
-				<< std::setw(sizeof(size_t) * 2) << "Size"
-				<< std::setw(sizeof(size_t) * 3) << "Address"
-				<< std::setw(10) << "Type"
+				<< std::setw(size_size) << "Size"
+				<< std::setw(addr_size) << "Address"
+				//<< std::setw(10) << "Type"
 				<< '\n';
 
 			for (auto const & [ ptr, rec ] : m_records)
 			{
-				std::cerr
-					<< std::left
-					<< std::setw(6) << rec->index
-					<< std::setw(sizeof(size_t) * 2) << rec->size
-					<< std::setw(sizeof(size_t) * 3) << rec->value
-					<< std::setw(10) << rec->get_rtti().name()
+				std::cerr << std::left
+					<< std::setw(6) << rec->index()
+					<< std::setw(size_size) << rec->size()
+					<< std::setw(addr_size) << rec->data()
+					//<< std::setw(10) << rec->data()->rtti().name()
 					<< '\n';
 			}
 
-			Debug::pause(EXIT_FAILURE);
+			Debug::pause(1);
 		}
 #endif
 		ML_ASSERT("MEMORY LEAKS DETECTED" && m_records.empty());
@@ -48,23 +64,20 @@ namespace ml
 
 	void * MemoryTracker::allocate(size_t size)
 	{
-		auto value{ ML_IMPL_NEW(size) };
-		return m_records.insert({
-			value, ::new Record { m_current++, size, value }
-		}).first->second->value;
+		void * ptr { ML_IMPL_NEW(size) };
+		return m_records.insert({ ptr, ::new AllocationRecord{
+			std::make_tuple(m_current++, size, static_cast<Trackable *>(ptr))
+		} }).first->second->data();
 	}
 
 	void MemoryTracker::deallocate(void * value)
 	{
-		if (auto it{ m_records.find(value) }; it != m_records.end())
+		if (auto it{ m_records.find(value) }; it != m_records.end() && it->second)
 		{
-			// free the pointer
-			ML_IMPL_DELETE(it->second->value);
-			it->second->value = nullptr;
+			ML_IMPL_DELETE(it->second->data());
 
-			// erase the record
-			::delete it->second;
-			it->second = nullptr;
+			delete it->second;
+
 			m_records.erase(it);
 		}
 	}

@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(std::string const & title, DisplayMode const & video, Style const & style, Context const & context)
+	bool Window::create(std::string const & title, DisplayMode const & video, WindowStyle const & style, ContextSettings const & context)
 	{
 		if (m_window)
 		{
@@ -546,7 +546,7 @@ namespace ml
 		return glfwGetCurrentContext();
 	}
 
-	Window::DisplayMode const & Window::getDesktopMode()
+	DisplayMode const & Window::getDesktopMode()
 	{
 		static DisplayMode temp {};
 		static bool once { true };
@@ -564,7 +564,7 @@ namespace ml
 		return temp;
 	}
 
-	std::vector<Window::DisplayMode> const & Window::getFullscreenModes()
+	std::vector<DisplayMode> const & Window::getFullscreenModes()
 	{
 		static std::vector<DisplayMode> temp {};
 		static bool once { true };

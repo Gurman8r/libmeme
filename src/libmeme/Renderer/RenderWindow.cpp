@@ -21,7 +21,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderWindow::create(std::string const & title, DisplayMode const & video, Style const & style, Context const & context)
+	bool RenderWindow::create(std::string const & title, DisplayMode const & video, WindowStyle const & style, ContextSettings const & context)
 	{
 		if (Window::create(title, video, style, context))
 		{

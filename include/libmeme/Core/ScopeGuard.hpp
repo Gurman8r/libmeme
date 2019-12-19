@@ -13,44 +13,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... T> struct ScopeGuard;
-
-	template <> struct ScopeGuard<> final { ScopeGuard() = delete; };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <
-		class Fun
-	> struct ScopeGuard<Fun> final : public NonCopyable
+	template <class Fun> struct ScopeGuard final : public NonCopyable
 	{
-		Fun m_fun;
+		ScopeGuard(Fun && fun) : m_fun{ std::forward<Fun>(fun) } {}
 
-		explicit ScopeGuard(Fun && fun) : m_fun{ std::forward(fun) }
-		{
-		}
+		~ScopeGuard() { std::invoke(m_fun); }
 
-		~ScopeGuard()
-		{
-			m_fun();
-		}
+	private: Fun m_fun;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	namespace detail
+namespace ml::detail
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum class ScopeGuardOnExit {};
+
+	template <class Fun> inline ScopeGuard<Fun> operator+(ScopeGuardOnExit, Fun && fun)
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		enum class ScopeGuardOnExit {};
-
-		template <
-			class Fun
-		> inline ScopeGuard<Fun> operator+(ScopeGuardOnExit, Fun && fun)
-		{
-			return ScopeGuard<Fun>{ std::forward(fun) };
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		return ScopeGuard<Fun>{ std::forward(fun) };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

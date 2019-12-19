@@ -130,7 +130,11 @@ namespace ml
 
 	inline ML_SERIALIZE(std::ostream & out, StringView const & value)
 	{
-		return out << value.str();
+		for (size_t i = 0; i < value.size(); i++)
+		{
+			out << value.at(i);
+		}
+		return out;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

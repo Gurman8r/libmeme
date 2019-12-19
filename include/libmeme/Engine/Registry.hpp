@@ -7,12 +7,12 @@
 
 #define ML_Registry ::ml::Registry<>::getInstance()
 
-#define ML_REGISTER_EX(T, info, func)			\
-	static std::optional<std::any> func();					\
-	bool Registry<T>::s_registered {			\
-		ML_Registry.registrate<T>(info, func)	\
-	};											\
-	std::optional<std::any> func()
+#define ML_REGISTER_EX(T, info, factory)			\
+	static std::optional<std::any> factory();		\
+	bool Registry<T>::s_registered {				\
+		ML_Registry.registrate<T>(info, factory)	\
+	};												\
+	std::optional<std::any> factory()
 
 #define ML_REGISTER(T, info) \
 	ML_REGISTER_EX(T, info, ML_CONCAT(ML_FACTORY_, T))
@@ -37,40 +37,40 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Code = typename hash_t;
-		using Name = typename std::string;
-		using Info = typename std::string;
-		using Func = typename std::function<std::optional<std::any>()>;
+		using code_t = typename hash_t;
+		using name_t = typename std::string_view;
+		using info_t = typename std::string_view;
+		using func_t = typename std::function<std::optional<std::any>()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto codes() const -> const std::unordered_map<Name, Code> & { return m_codes; }
-		inline auto funcs() const -> const std::unordered_map<Name, Func> & { return m_funcs; }
-		inline auto infos() const -> const std::unordered_map<Name, Info> & { return m_infos; }
-		inline auto names() const -> const std::unordered_map<Code, Name> & { return m_names; }
+		inline auto codes() const -> const std::unordered_map<name_t, code_t> & { return m_codes; }
+		inline auto funcs() const -> const std::unordered_map<name_t, func_t> & { return m_funcs; }
+		inline auto infos() const -> const std::unordered_map<name_t, info_t> & { return m_infos; }
+		inline auto names() const -> const std::unordered_map<code_t, name_t> & { return m_names; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::optional<std::any> generate(Name const & name) const
+		inline std::optional<std::any> generate(name_t const & name) const
 		{
 			auto const func{ get_func(name) };
-			return func ? (*func)() : std::nullopt;
+			return func ? std::invoke(func.value()) : std::nullopt;
 		}
 
-		inline std::optional<std::any> generate(Code const & code) const
+		inline std::optional<std::any> generate(code_t const & code) const
 		{
 			auto const func{ get_func(code) };
-			return func ? (*func)() : std::nullopt;
+			return func ? std::invoke(func.value()) : std::nullopt;
 		}
 
-		template <class T> inline T * generate() const
+		template <class T> inline std::optional<std::any> generate() const
 		{
-			return static_cast<T *>(generate(typeof<T>::name()));
+			return generate(hashof_v<T>);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool registrate(Name const & name, Info const & info, Code const & code, Func const & func)
+		inline bool registrate(name_t const & name, info_t const & info, code_t const & code, func_t const & func)
 		{
 			if (m_funcs.find(name) == m_funcs.end())
 			{
@@ -83,49 +83,71 @@ namespace ml
 			return false;
 		}
 
-		template <class T, class F> inline bool registrate(Info const & info, F && func)
+		template <
+			class T, class Info, class Func
+		> inline bool registrate(Info && info, Func && func)
 		{
 			return registrate(
-				nameof_v<T>.str(), info, hashof_v<T>, std::forward<F>(func)
+				name_t{ nameof_v<T>.data(), nameof_v<T>.size() },
+				std::forward<Info>(info),
+				hashof_v<T>,
+				std::forward<Func>(func)
 			);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::optional<Code> get_code(Name const & name) const
+		inline std::optional<code_t> get_code(name_t const & name) const
 		{
-			auto const it{ m_codes.find(name) };
-			return (it != m_codes.end()) ? std::make_optional(it->second) : std::nullopt;
+			if (auto const it{ m_codes.find(name) }; it != m_codes.cend())
+			{
+				return std::make_optional(it->second);
+			}
+			return std::nullopt;
 		}
 
-		inline std::optional<Func> get_func(Name const & name) const
+		inline std::optional<func_t> get_func(name_t const & name) const
 		{
-			auto const it{ m_funcs.find(name) };
-			return (it != m_funcs.end()) ? std::make_optional(it->second) : std::nullopt;
+			if (auto const it{ m_funcs.find(name) }; it != m_funcs.cend())
+			{
+				return std::make_optional(it->second);
+			}
+			return std::nullopt;
 		}
 
-		inline std::optional<Func> get_func(Code code) const
+		inline std::optional<func_t> get_func(code_t code) const
 		{
-			auto const it{ m_names.find(code) };
-			return (it != m_names.end()) ? get_func(it->second) : std::nullopt;
+			if (auto const it{ m_names.find(code) }; it != m_names.cend())
+			{
+				return get_func(it->second);
+			}
+			return std::nullopt;
 		}
 
-		inline std::optional<Info> get_info(Name const & name) const
+		inline std::optional<info_t> get_info(name_t const & name) const
 		{
-			auto const it{ m_infos.find(name) };
-			return (it != m_infos.end()) ? std::make_optional(it->second) : std::nullopt;
+			if (auto const it{ m_infos.find(name) }; it != m_infos.cend())
+			{
+				return std::make_optional(it->second);
+			}
+			return std::nullopt;
 		}
 
-		inline std::optional<Info> get_info(Code code) const
+		inline std::optional<info_t> get_info(code_t code) const
 		{
-			auto const it{ m_names.find(code) };
-			return (it != m_names.end()) ? get_info(it->second) : std::nullopt;
+			if (auto const it{ m_names.find(code) }; it != m_names.cend())
+			{
+			}
+			return std::nullopt;
 		}
 
-		inline std::optional<Name> get_name(Code code) const
+		inline std::optional<name_t> get_name(code_t code) const
 		{
-			auto const it{ m_names.find(code) };
-			return (it != m_names.end()) ? std::make_optional(it->second) : std::nullopt;
+			if (auto const it{ m_names.find(code) }; it != m_names.cend())
+			{
+				return std::make_optional(it->second);
+			}
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -133,17 +155,17 @@ namespace ml
 	private:
 		friend Singleton<Registry<>>;
 
-		Registry()
-			: m_codes(), m_funcs(), m_infos(), m_names()
+		Registry() noexcept;
+
+		~Registry();
+
+		union
 		{
-		}
-
-		~Registry() {}
-
-		std::unordered_map<std::string, Code>	m_codes; // 
-		std::unordered_map<std::string, Func>	m_funcs; // 
-		std::unordered_map<std::string, std::string> m_infos; // 
-		std::unordered_map<Code, std::string> m_names; // 
+			std::unordered_map<name_t, code_t> m_codes;
+			std::unordered_map<name_t, func_t> m_funcs;
+			std::unordered_map<name_t, info_t> m_infos;
+			std::unordered_map<code_t, name_t> m_names;
+		};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */

@@ -8,24 +8,24 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_RENDERER_API RenderWindow : public Window, public RenderTarget
+	struct ML_RENDERER_API RenderWindow final : public Window, public RenderTarget
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		RenderWindow();
 
-		virtual ~RenderWindow();
+		~RenderWindow();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool create(
+		bool create(
 			std::string const & title,
 			DisplayMode const & videoMode,
-			Style const & style,
-			Context const & context
+			WindowStyle const & style,
+			ContextSettings const & context
 		) override;
 
-		virtual void onEvent(Event const & value) override;
+		void onEvent(Event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

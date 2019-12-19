@@ -15,11 +15,19 @@ namespace ml
 
 		using name_t = typename std::string;
 
-		using data_t = typename std::variant<
+		using var_t = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
 			mat2, mat3, mat4,
 			struct Texture const *
+		>;
+
+		using func_t = typename std::function<
+			var_t()
+		>;
+
+		using data_t = typename std::variant<
+			var_t, func_t
 		>;
 
 		using storage_t = typename std::tuple<
@@ -53,29 +61,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline bool holds() const noexcept
-		{
-			return std::holds_alternative<T>(data());
-		}
+		inline bool is_variable() const noexcept { return std::holds_alternative<var_t>(data()); }
 
-		template <class T> inline decltype(auto) load() const
-		{
-			return std::get<T>(data());
-		}
+		inline bool is_function() const noexcept { return std::holds_alternative<func_t>(data()); }
 
-		template <class T> inline decltype(auto) store(T && value) noexcept
-		{
-			return (std::get<2>(m_storage) = std::forward<T>(value));
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline std::optional<T> get_if() const
+		template <class T> inline std::optional<T> get() const
 		{
-			return holds<T>() ? std::make_optional(load<T>()) : std::nullopt;
+			if (is_variable())
+			{
+				auto const & temp{ std::get<var_t>(data()) };
+				return std::holds_alternative<T>(temp)
+					? std::make_optional<T>(std::get<T>(temp))
+					: std::nullopt;
+			}
+			else if (is_function())
+			{
+				auto const & temp{ std::invoke(std::get<func_t>(data())) };
+				return std::holds_alternative<T>(temp)
+					? std::make_optional<T>(std::get<T>(temp))
+					: std::nullopt;
+			}
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: storage_t m_storage;
+	private: union { storage_t m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -84,32 +97,17 @@ namespace ml
 
 	template <
 		class Type, class Name, class ... Data
-	> static inline auto make_uniform(Name && name, Data && ... args)
+	> static inline auto make_uniform(Name && name, Data && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
-			typeof_v<Type>,
-			std::forward<Name>(name),
-			std::forward<Data>(args)...
+			typeof_v<Type>, std::forward<Name>(name), std::forward<Data>(args)...
 		) };
 	}
 
-	template <
-		class Type, class Name
-	> static inline auto make_uniform(Name && name, Type && data)
+	template <class U> static inline auto make_uniform(U && value) noexcept
 	{
 		return Uniform{ std::make_tuple(
-			typeof_v<Type>,
-			std::forward<Name>(name),
-			std::forward<Type>(data)
-		) };
-	}
-
-	template <class U> static inline auto make_uniform(U && value)
-	{
-		return Uniform{ std::make_tuple(
-			value.type(),
-			value.name(),
-			value.data()
+			value.type(), value.name(), value.data()
 		) };
 	}
 
