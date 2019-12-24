@@ -45,7 +45,12 @@ namespace ml
 				img.emplace_back(make_image(FS::path_to("../../../assets/textures/doot.png")));
 				
 				tex.emplace_back(make_texture(img[0]));
-				
+
+				shd.emplace_back(make_shader(
+					FS::path_to("../../../assets/shaders/2D.vs.shader"),
+					FS::path_to("../../../assets/shaders/basic.fs.shader")
+				));
+
 				mtl.emplace_back(make_material(
 					make_uniform<bool>("bool", true),
 					make_uniform<int>("int", 123),
@@ -59,13 +64,6 @@ namespace ml
 					make_uniform<mat4>("mat4", []() { return mat4::identity(); }),
 					make_uniform<Texture const *>("tex0", &tex[0])
 				));
-
-				shd.emplace_back(make_shader(
-					FS::path_to("../../../assets/shaders/2D.vs.shader"),
-					FS::path_to("../../../assets/shaders/basic.fs.shader")
-				));
-				shd[0].set_uniform("u_texture0", &tex[0]);
-				shd[0].set_uniform("u_color", colors::magenta);
 
 			} break;
 			case DrawEvent::ID: if (auto ev{ value.as<DrawEvent>() })
@@ -81,7 +79,6 @@ namespace ml
 			case GuiEvent::ID: if (auto ev{ value.as<GuiEvent>() })
 			{
 				ImGui::PushID(ML_ADDRESSOF(this));
-				// Profiler
 				ImGui::SetNextWindowSize({ 512, 512 }, ImGuiCond_Once);
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
