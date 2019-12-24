@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	// fnv1a hash implementation
+	// constexpr fnv1a hash implementation
 	struct Hash final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,7 +23,10 @@ namespace ml
 		{
 		}
 
-		constexpr Hash() noexcept : m_value { 0 } {}
+		constexpr Hash() noexcept
+			: m_value{ 0 }
+		{
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -61,41 +64,22 @@ namespace ml
 		}
 
 		template <
-			template <class> class Arr, class Ch
-		> constexpr hash_t operator()(Arr<Ch> const & value) noexcept
-		{
-			return (*this)(value.data(), value.size());
-		}
-
-		template <
-			template <class, class> class Arr, class Ch, class Tr
-		> constexpr hash_t operator()(Arr<Ch, Tr> const & value) noexcept
-		{
-			return (*this)(value.data(), value.size());
-		}
-
-		template <
-			template <class, class, class> class Arr, class Ch, class Tr, class Al
-		> constexpr hash_t operator()(Arr<Ch, Tr, Al> const & value) noexcept
+			template <class ...> class Arr, class ... Ts
+		> constexpr hash_t operator()(Arr<Ts...> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr hash_t const & operator()() const noexcept
-		{
-			return m_value;
-		}
+		constexpr hash_t operator()() const noexcept { return m_value; }
 
-		constexpr operator hash_t const &() const noexcept
-		{
-			return (*this)();
-		}
+		constexpr operator hash_t() const noexcept { return (*this)(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: hash_t m_value;
+	private:
+		union { hash_t m_value; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -33,9 +33,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::optional<dir_t> FS::read_dir(path_t const & path)
+	std::optional<dir_t> FS::read_dir(std::string const & path)
 	{
-		if (::DIR * dir{ ::opendir(path.string().c_str()) })
+		if (::DIR * dir{ ::opendir(path.c_str()) })
 		{
 			dir_t temp{};
 			
@@ -57,20 +57,21 @@ namespace ml
 		return std::nullopt;
 	}
 
-	std::optional<file_t> FS::read_file(path_t const & path)
+	std::optional<file_t> FS::read_file(std::string const & path)
 	{
 		if (std::ifstream in{ path, std::ios_base::binary })
 		{
 			file_t temp{};
 
-			in.seekg(0, std::ios_base::beg);
-
-			if (std::streamsize size{ in.tellg() }; size > 0)
+			in.seekg(0, std::ios_base::end);
+			
+			std::streamsize size;
+			if ((size = in.tellg()) > 0)
 			{
 				in.seekg(0, std::ios_base::beg);
-
+				
 				temp.resize(static_cast<size_t>(size));
-
+				
 				in.read(&temp[0], size);
 			}
 

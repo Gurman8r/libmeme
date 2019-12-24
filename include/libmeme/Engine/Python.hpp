@@ -23,7 +23,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend Singleton<Python>;
+		friend struct Singleton<Python>;
 
 		Python();
 		~Python();

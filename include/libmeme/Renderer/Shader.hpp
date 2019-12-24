@@ -2,6 +2,7 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
+#include <libmeme/Core/Dense.hpp>
 
 namespace ml
 {
@@ -22,8 +23,8 @@ namespace ml
 
 		Shader();
 		explicit Shader(Source const & source);
-		explicit Shader(std::string const & v, std::string const & f);
-		explicit Shader(std::string const & v, std::string const & g, std::string const & f);
+		explicit Shader(path_t const & v, path_t const & f);
+		explicit Shader(path_t const & v, path_t const & g, path_t const & f);
 		Shader(Shader const & other);
 		Shader(Shader && other) noexcept;
 		~Shader();
@@ -33,7 +34,9 @@ namespace ml
 		Shader & operator=(Shader const & other);
 
 		Shader & operator=(Shader && other) noexcept;
-		
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void swap(Shader & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -103,20 +106,17 @@ namespace ml
 
 		struct UniformBinder;
 
-		using AttribCache = std::map<hash_t, int32_t>;
+		using AttribCache = dense_map<hash_t, int32_t>;
 		
-		using UniformCache = std::map<hash_t, int32_t>;
+		using UniformCache = dense_map<hash_t, int32_t>;
 		
-		using TextureCache = std::map<struct Texture const *, int32_t>;
+		using TextureCache = dense_map<struct Texture const *, int32_t>;
 
-		union
-		{
-			uint32_t		m_handle;
-			Source			m_source;
-			AttribCache		m_attribs;
-			TextureCache	m_textures;
-			UniformCache	m_uniforms;
-		};
+		uint32_t		m_handle;
+		Source			m_source;
+		AttribCache		m_attribs;
+		TextureCache	m_textures;
+		UniformCache	m_uniforms;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

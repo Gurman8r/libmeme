@@ -19,7 +19,7 @@ namespace ml
 
 	class ML_CORE_API PerformanceTracker final : public Singleton<PerformanceTracker>
 	{
-		friend Singleton<PerformanceTracker>;
+		friend struct Singleton<PerformanceTracker>;
 
 		std::vector<std::pair<C_String, Duration>> m_curr, m_prev;
 		

@@ -70,7 +70,7 @@ namespace ml
 	
 	bool Script::loadFromFile(path_t const & filename)
 	{
-		if (auto const o{ FS::read_file(filename) }; o && !o.value().empty())
+		if (auto const o{ FS::read_file(filename.string()) }; o && !o.value().empty())
 		{
 			m_text.assign(o.value().cbegin(), o.value().cend());
 		}

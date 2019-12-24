@@ -1,4 +1,3 @@
-#shader fragment
 #version 460 core
 
 // Input

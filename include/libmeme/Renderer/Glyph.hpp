@@ -32,6 +32,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline auto storage() noexcept -> storage_t & { return m_storage; }
+		
+		inline auto storage() const noexcept -> storage_t const & { return m_storage; }
+
 		inline auto texture() const noexcept -> Texture const & { return std::get<0>(m_storage); }
 
 		inline auto bounds() const noexcept -> FloatRect const & { return std::get<1>(m_storage); }

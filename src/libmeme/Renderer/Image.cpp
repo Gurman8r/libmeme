@@ -10,7 +10,7 @@ namespace ml
 
 	static inline Image generate_default_image()
 	{
-		Image img { vec2s{ 512, 512 }, 4 };
+		Image img { vec2u{ 512, 512 }, 3 };
 		for (size_t y = 0; y < img.height(); y++)
 		{
 			for (size_t x = 0; x < img.width(); x++)
@@ -28,31 +28,31 @@ namespace ml
 		return img;
 	}
 
-	const Image Image::Default { generate_default_image() };
+	Image const Image::Default{ generate_default_image() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Image::Image()
-		: Image { vec2s { NULL } }
+		: Image{ vec2u { NULL } }
 	{
 	}
 
-	Image::Image(vec2s const & size)
-		: Image { size, 4 }
+	Image::Image(vec2u const & size)
+		: Image{ size, 4 }
 	{
 	}
 
-	Image::Image(vec2s const & size, size_t channels) 
-		: Image { size, Pixels(), channels }
+	Image::Image(vec2u const & size, size_t channels) 
+		: Image{ size, Pixels(), channels }
 	{
 	}
 
-	Image::Image(vec2s const & size, Pixels const & pixels)
-		: Image { size, pixels, 4 }
+	Image::Image(vec2u const & size, Pixels const & pixels)
+		: Image{ size, pixels, 4 }
 	{
 	}
 
-	Image::Image(vec2s const & size, Pixels const & pixels, size_t channels)
+	Image::Image(vec2u const & size, Pixels const & pixels, size_t channels)
 		: m_size { size }
 		, m_pixels { pixels }
 		, m_channels { channels }
@@ -72,20 +72,20 @@ namespace ml
 	}
 
 	Image::Image(path_t const & filename, bool flip)
-		: Image { filename, flip, 0 }
+		: Image{ filename, flip, 0 }
 	{
 	}
 
 	Image::Image(path_t const & filename, bool flip, size_t req_comp)
-		: Image {}
+		: Image{}
 	{
 		loadFromFile(filename, flip, req_comp);
 	}
 
-	Image::Image(Image const & copy)
-		: Image {}
+	Image::Image(Image const & other)
+		: Image{}
 	{
-		createFromPixels(copy.m_size, copy.m_channels, copy.m_pixels);
+		createFromPixels(other.size(), other.channels(), other.pixels());
 	}
 
 	Image::~Image() {}
@@ -106,7 +106,7 @@ namespace ml
 
 	bool Image::dispose()
 	{
-		if (!m_pixels.empty()) { Pixels().swap(m_pixels); }
+		Pixels().swap(m_pixels);
 
 		m_size = { 0, 0 };
 		
@@ -150,7 +150,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::createFromColor(vec2s const & size, Color32 const & color)
+	Image & Image::createFromColor(vec2u const & size, Color32 const & color)
 	{
 		return createFromColor(size, channels(), color);
 	}
@@ -160,7 +160,7 @@ namespace ml
 		return createFromColor(size(), channels(), color);
 	}
 	
-	Image & Image::createFromColor(vec2s const & size, size_t channels, Color32 const & color)
+	Image & Image::createFromColor(vec2u const & size, size_t channels, Color32 const & color)
 	{
 		if (size[0] && size[1] && channels)
 		{
@@ -184,7 +184,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Image & Image::createFromPixels(vec2s const & size, Pixels const & pixels)
+	Image & Image::createFromPixels(vec2u const & size, Pixels const & pixels)
 	{
 		return createFromPixels(size, m_channels, pixels);
 	}
@@ -194,7 +194,7 @@ namespace ml
 		return createFromPixels(m_size, m_channels, pixels);
 	}
 	
-	Image & Image::createFromPixels(vec2s const & size, size_t channels, Pixels const & pixels)
+	Image & Image::createFromPixels(vec2u const & size, size_t channels, Pixels const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{
@@ -252,11 +252,11 @@ namespace ml
 	{
 		switch (channels())
 		{
-		case 1: return GL::Red;
-		case 3: return GL::RGB;
-		case 4: return GL::RGBA;
+		case 1	: return GL::Red;
+		case 3	: return GL::RGB;
+		case 4	:
+		default	: return GL::RGBA;
 		}
-		return (GL::Format)0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -275,7 +275,7 @@ namespace ml
 
 	std::optional<Color32> Image::getPixel(size_t x, size_t y) const
 	{
-		return getPixel(x + y * width());
+		return getPixel((x + y * m_size[0]) * m_channels);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -296,7 +296,7 @@ namespace ml
 
 	bool Image::setPixel(size_t x, size_t y, Color32 const & color)
 	{
-		return setPixel(x + y * width(), color);
+		return setPixel((x + y * m_size[0]) * m_channels, color);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

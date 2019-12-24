@@ -34,7 +34,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend Singleton<Random>;
+		friend struct Singleton<Random>;
 
 		Random() { std::srand((uint32_t)std::time(nullptr)); }
 

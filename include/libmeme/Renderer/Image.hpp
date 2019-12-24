@@ -19,19 +19,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static const Image Default;
+		static Image const Default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Image();
-		Image(vec2s const & size);
-		Image(vec2s const & size, size_t channels);
-		Image(vec2s const & size, Pixels const & pixels);
-		Image(vec2s const & size, Pixels const & pixels, size_t channels);
-		explicit Image(path_t const & path);
-		explicit Image(path_t const & path, bool flip);
-		explicit Image(path_t const & path, bool flip, size_t req_comp);
-		Image(Image const & copy);
+		Image(vec2u const & size);
+		Image(vec2u const & size, size_t channels);
+		Image(vec2u const & size, Pixels const & pixels);
+		Image(vec2u const & size, Pixels const & pixels, size_t channels);
+		Image(path_t const & path);
+		Image(path_t const & path, bool flip);
+		Image(path_t const & path, bool flip, size_t req_comp);
+		Image(Image const & other);
 		~Image();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,19 +50,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & createFromColor(vec2s const & size, Color32 const & color);
+		Image & createFromColor(vec2u const & size, Color32 const & color);
 		
 		Image & createFromColor(Color32 const & color);
 		
-		Image & createFromColor(vec2s const & size, size_t channels, Color32 const & color);
+		Image & createFromColor(vec2u const & size, size_t channels, Color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & createFromPixels(vec2s const & size, Pixels const & pixels);
+		Image & createFromPixels(vec2u const & size, Pixels const & pixels);
 		
 		Image & createFromPixels(Pixels const & pixels);
 		
-		Image & createFromPixels(vec2s const & size, size_t channels, Pixels const & pixels);
+		Image & createFromPixels(vec2u const & size, size_t channels, Pixels const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -106,7 +106,7 @@ namespace ml
 		
 		inline auto pixels() const noexcept -> Pixels const & { return m_pixels; }
 		
-		inline auto size() const noexcept -> vec2s const & { return m_size; }
+		inline auto size() const noexcept -> vec2u const & { return m_size; }
 		
 		inline auto width() const noexcept -> size_t { return m_size[0]; }
 
@@ -143,12 +143,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union
-		{
-			vec2s	m_size;		// 
-			Pixels	m_pixels;	// 
-			size_t	m_channels;	// 
-		};
+		vec2u	m_size;
+		Pixels	m_pixels;
+		size_t	m_channels;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

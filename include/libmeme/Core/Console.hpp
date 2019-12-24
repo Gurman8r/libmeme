@@ -58,7 +58,7 @@ namespace ml::cio
 
 	struct ML_CORE_API COL final
 	{
-		union { FG fg; BG bg; };
+		FG fg; BG bg;
 
 		constexpr COL(FG fg, BG bg) noexcept : fg{ fg }, bg{ bg } {}
 

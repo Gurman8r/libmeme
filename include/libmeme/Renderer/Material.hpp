@@ -25,8 +25,8 @@ namespace ml
 		Material();
 		Material(storage_t const & data);
 		Material(storage_t && data) noexcept;
-		Material(Material const & copy);
-		Material(Material && copy) noexcept;
+		Material(Material const & other);
+		Material(Material && other) noexcept;
 		~Material();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -34,6 +34,10 @@ namespace ml
 		Material & operator=(Material const & other);
 
 		Material & operator=(Material && other) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void assign(Material const & other);
 
 		void swap(Material & other) noexcept;
 
@@ -70,7 +74,7 @@ namespace ml
 			return false;
 		}
 
-		template <class Predicate> inline void sort(Predicate && pr) noexcept
+		template <class Pr> inline void sort(Pr && pr) noexcept
 		{
 			return std::sort(begin(), end(), pr);
 		}
@@ -89,12 +93,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Predicate> inline iterator find_if(Predicate && pr)
+		template <class Pr> inline iterator find_if(Pr && pr)
 		{
 			return std::find_if(begin(), end(), pr);
 		}
 
-		template <class Predicate> inline const_iterator find_if(Predicate && pr) const
+		template <class Pr> inline const_iterator find_if(Pr && pr) const
 		{
 			return std::find_if(cbegin(), cend(), pr);
 		}

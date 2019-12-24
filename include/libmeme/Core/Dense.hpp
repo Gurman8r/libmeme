@@ -5,7 +5,8 @@
 
 namespace ml
 {
-	template <class _Key, class _Val> struct dense_map final
+	// vector of pairs
+	template <class _Key, class _Val> struct dense_map
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -15,7 +16,6 @@ namespace ml
 		using value_type				= typename _STD pair<key_type, mapped_type>;
 		using storage_type				= typename _STD vector<value_type>;
 		using initializer_type			= typename _STD initializer_list<value_type>;
-
 		using allocator_type			= typename storage_type::allocator_type;
 		using difference_type			= typename storage_type::difference_type;
 		using size_type					= typename storage_type::size_type;
@@ -30,36 +30,31 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		dense_map() noexcept : m_storage{} {}
+		struct compare final
+		{
+			compare() noexcept = default;
 
-		~dense_map() noexcept {}
+			inline bool operator()(const_reference value, key_type const & key) noexcept
+			{
+				return value.first < key;
+			}
+
+			inline bool operator()(key_type const & key, const_reference value) noexcept
+			{
+				return key < value.first;
+			}
+
+			inline bool operator()(const_reference lhs, const_reference rhs) noexcept
+			{
+				return lhs.first < rhs.first;
+			}
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit dense_map(allocator_type const & al)
-			: m_storage{ al }
-		{
-		}
+		dense_map() noexcept : m_storage{} {}
 
-		explicit dense_map(size_type const count)
-			: m_storage{ count }
-		{
-		}
-
-		explicit dense_map(size_type const count, allocator_type const & al)
-			: m_storage{ count, al }
-		{
-		}
-
-		explicit dense_map(size_type const count, const_reference value)
-			: m_storage{ count, value, allocator_type{} }
-		{
-		}
-
-		explicit dense_map(size_type const count, const_reference value, allocator_type const & al)
-			: m_storage{ count, value, al }
-		{
-		}
+		~dense_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -102,8 +97,8 @@ namespace ml
 		{
 		}
 
-		dense_map(storage_type const & value, allocator_type const & al)
-			: m_storage{ value, al }
+		dense_map(storage_type const & value, allocator_type const & alloc)
+			: m_storage{ value, alloc }
 		{
 		}
 
@@ -112,37 +107,21 @@ namespace ml
 		{
 		}
 
-		dense_map(storage_type && value, allocator_type const & al) noexcept
-			: m_storage{ _STD move(value), al }
+		dense_map(storage_type && value, allocator_type const & alloc) noexcept
+			: m_storage{ _STD move(value), alloc }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		dense_map(self_type const & value)
-			: m_storage{}
+			: m_storage{ value.m_storage }
 		{
-			this->assign(value);
 		}
 
 		dense_map(self_type && value) noexcept
-			: m_storage{}
+			: m_storage{ _STD move(value.m_storage) }
 		{
-			this->swap(_STD move(value));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline mapped_type & operator[](key_type const & key)
-		{
-			if (auto it{ this->find(key) }; it != this->end())
-			{
-				return it->second;
-			}
-			else
-			{
-				return this->insert(_STD make_pair(key, mapped_type{}))->second;
-			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -153,15 +132,15 @@ namespace ml
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type const & value)
-		{
-			this->assign(value);
-			return (*this);
-		}
-
 		inline self_type & operator=(storage_type && value) noexcept
 		{
 			this->swap(_STD move(value));
+			return (*this);
+		}
+
+		inline self_type & operator=(self_type const & value)
+		{
+			this->assign(value);
 			return (*this);
 		}
 
@@ -179,11 +158,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void assign(size_type const count, mapped_type const & value)
-		{
-			m_storage.assign(count, value);
-		}
-
 		template <class It> inline void assign(It first, It last)
 		{
 			m_storage.assign(first, last);
@@ -198,7 +172,7 @@ namespace ml
 		{
 			if (_STD addressof(m_storage) != _STD addressof(value))
 			{
-				m_storage.assign(value.begin(), value.end());
+				m_storage.operator=(value);
 			}
 		}
 
@@ -206,7 +180,7 @@ namespace ml
 		{
 			if (this != _STD addressof(value))
 			{
-				this->assign(value.m_storage);
+				m_storage.operator=(value.m_storage);
 			}
 		}
 
@@ -230,6 +204,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline void clear() noexcept { return m_storage.clear(); }
+
+		inline void pop_back() noexcept { return m_storage.pop_back(); }
+
+		inline void reserve(size_type const size) { return m_storage.reserve(size); }
+
+		inline void resize(size_type const size) { return m_storage.resize(size); }
+
+		inline void sort() noexcept
+		{
+			return std::sort(this->begin(), this->end(), compare());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline iterator erase(const_iterator it)
+		{
+			return m_storage.erase(it);
+		}
+
+		inline iterator erase(const_iterator first, const_iterator last)
+		{
+			return m_storage.erase(first, last);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class Pr> inline iterator find_if(Pr pr) noexcept
 		{
 			return _STD find_if<iterator, Pr>(this->begin(), this->end(), pr);
@@ -242,52 +243,57 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(key_type const & value) noexcept
+		inline iterator find(key_type const & key) noexcept
 		{
-			return this->find_if([value](auto && elem) { return elem.first == value; });
+			return _STD upper_bound(this->begin(), this->end(), key, compare());
 		}
 
-		inline const_iterator find(key_type const & value) const noexcept
+		inline const_iterator find(key_type const & key) const noexcept
 		{
-			return this->find_if([value](auto && elem) { return elem.first == value; });
+			return _STD upper_bound(this->cbegin(), this->cend(), key, compare());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		inline _STD pair<iterator, bool> insert(const_reference value)
+		{
+			auto const it{ _STD equal_range(this->begin(), this->end(), value.first, compare()) };
+			if (it.first != it.second)
+			{
+				return _STD make_pair(it.second, false);
+			}
+			else
+			{
+				return _STD make_pair(m_storage.emplace(it.second, value), true);
+			}
+		}
+
+		inline _STD pair<iterator, bool> insert(value_type && value)
+		{
+			auto const it{ _STD equal_range(this->begin(), this->end(), value.first, compare()) };
+			if (it.first != it.second)
+			{
+				return _STD make_pair(it.second, false);
+			}
+			else
+			{
+				return _STD make_pair(m_storage.emplace(it.second, _STD move(value)), true);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args>
-		inline decltype(auto) emplace(const_iterator whereptr, Args && ... args)
+		inline mapped_type & operator[](key_type const & key)
 		{
-			return m_storage.emplace(whereptr, _STD forward<Args>(args)...);
-		}
-
-		template <class ... Args>
-		inline decltype(auto) emplace_back(Args && ... args)
-		{
-			return m_storage.emplace_back(_STD forward<Args>(args)...);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator insert(value_type const & value)
-		{
-			if (find(value.first) == this->end())
+			auto const it{ _STD equal_range(this->begin(), this->end(), key, compare()) };
+			if (it.first != it.second)
 			{
-				m_storage.push_back(value);
-
-				return (this->end() - 1);
+				return it.first->second;
 			}
-			return this->end();
-		}
-
-		inline iterator insert(value_type && value)
-		{
-			if (find(value.first) == this->end())
+			else
 			{
-				m_storage.push_back(_STD move(value));
-
-				return (this->end() - 1);
+				return m_storage.emplace(it.second, std::make_pair(key, mapped_type{}))->second;
 			}
-			return this->end();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -314,8 +320,6 @@ namespace ml
 
 		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
 
-		inline void clear() noexcept { return m_storage.clear(); }
-
 		inline auto data() noexcept -> pointer { return m_storage.data(); }
 
 		inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
@@ -326,8 +330,6 @@ namespace ml
 
 		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
 
-		inline auto erase(const_iterator it) -> iterator { return m_storage.erase(it); }
-
 		inline auto front() noexcept -> reference { return m_storage.front(); }
 
 		inline auto front() const noexcept -> const_reference { return m_storage.front(); }
@@ -335,8 +337,6 @@ namespace ml
 		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
 
 		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
-
-		inline void pop_back() noexcept { return m_storage.pop_back(); }
 		
 		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
 		
@@ -345,10 +345,6 @@ namespace ml
 		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 		
 		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
-
-		inline void reserve(size_type const size) { return m_storage.reserve(size); }
-
-		inline void resize(size_type const size) { return m_storage.resize(size); }
 
 		inline auto size() const noexcept -> size_type { return m_storage.size(); }
 

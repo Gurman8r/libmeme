@@ -2,11 +2,11 @@
 #include <libmeme/Core/Debug.hpp>
 
 #ifndef ML_IMPL_NEW
-#define ML_IMPL_NEW ::std::malloc
+#define ML_IMPL_NEW std::malloc
 #endif
 
 #ifndef ML_IMPL_DELETE
-#define ML_IMPL_DELETE ::std::free
+#define ML_IMPL_DELETE std::free
 #endif
 
 namespace ml
@@ -18,11 +18,15 @@ namespace ml
 	{
 	}
 
-	AllocationRecord::~AllocationRecord() noexcept {}
+	AllocationRecord::~AllocationRecord() noexcept
+	{
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	MemoryTracker::MemoryTracker() noexcept : m_current{ 0 }, m_records{}
+	MemoryTracker::MemoryTracker() noexcept
+		: m_current{ 0 }
+		, m_records{}
 	{
 	}
 
@@ -34,23 +38,22 @@ namespace ml
 			Debug::logError("MEMORY LEAKS DETECTED");
 
 			static constexpr std::streamsize
-				size_size{ sizeof(size_t) * 2 },
+				indx_size{ 6 },
+				size_size{ sizeof(size_t) },
 				addr_size{ sizeof(size_t) * 3 };
 
 			std::cerr << std::left
-				<< std::setw(6) << "Index"
+				<< std::setw(indx_size) << "Index"
 				<< std::setw(size_size) << "Size"
 				<< std::setw(addr_size) << "Address"
-				//<< std::setw(10) << "Type"
 				<< '\n';
 
-			for (auto const & [ ptr, rec ] : m_records)
+			for (auto const & [pointer, record] : m_records)
 			{
 				std::cerr << std::left
-					<< std::setw(6) << rec->index()
-					<< std::setw(size_size) << rec->size()
-					<< std::setw(addr_size) << rec->data()
-					//<< std::setw(10) << rec->data()->rtti().name()
+					<< std::setw(indx_size) << record->index()
+					<< std::setw(size_size) << record->size()
+					<< std::setw(addr_size) << record->data()
 					<< '\n';
 			}
 
@@ -62,20 +65,23 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * MemoryTracker::allocate(size_t size)
+	Trackable * MemoryTracker::create_allocation(size_t size)
 	{
-		void * ptr { ML_IMPL_NEW(size) };
-		return m_records.insert({ ptr, ::new AllocationRecord{
-			std::make_tuple(m_current++, size, static_cast<Trackable *>(ptr))
-		} }).first->second->data();
+		auto pointer{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
+		return m_records.emplace(std::make_pair(
+			pointer, 
+			::new AllocationRecord{ std::make_tuple(m_current++, size, pointer) }
+		)).first->second->data();
 	}
 
-	void MemoryTracker::deallocate(void * value)
+	void MemoryTracker::destroy_allocation(Trackable * value)
 	{
-		if (auto it{ m_records.find(value) }; it != m_records.end() && it->second)
+		if (auto it{ m_records.find(value) }; (it != m_records.end()) && it->second)
 		{
-			ML_IMPL_DELETE(it->second->data());
+			ML_IMPL_DELETE(static_cast<void *>(it->second->data()));
+
 			delete it->second;
+
 			m_records.erase(it);
 		}
 	}

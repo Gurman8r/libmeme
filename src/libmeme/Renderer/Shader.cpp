@@ -57,25 +57,26 @@ namespace ml
 	}
 
 	Shader::Shader(Source const & source)
-		: Shader{ source.vs, source.gs, source.fs }
+		: Shader{ (std::string)source.vs, source.gs, source.fs }
 	{
 	}
 
-	Shader::Shader(std::string const & v, std::string const & f)
+	Shader::Shader(path_t const & v, path_t const & f)
 		: Shader{}
 	{
-		loadFromMemory(v, f);
+		loadFromFile(v, f);
 	}
 
-	Shader::Shader(std::string const & v, std::string const & g, std::string const & f)
+	Shader::Shader(path_t const & v, path_t const & g, path_t const & f)
 		: Shader{}
 	{
-		loadFromMemory(v, g, f);
+		loadFromFile(v, g, f);
 	}
 
 	Shader::Shader(Shader const & other)
 		: Shader{}
 	{
+		loadFromSource(other.m_source);
 	}
 
 	Shader::Shader(Shader && other) noexcept
@@ -101,15 +102,18 @@ namespace ml
 		return (*this);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
 	void Shader::swap(Shader & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
 			std::swap(m_handle, other.m_handle);
 			std::swap(m_source, other.m_source);
-			AttribCache{}.swap(m_attribs);
-			UniformCache{}.swap(m_uniforms);
-			TextureCache{}.swap(m_textures);
+			std::swap(m_attribs, other.m_attribs);
+			std::swap(m_uniforms, other.m_uniforms);
+			std::swap(m_textures, other.m_textures);
 		}
 	}
 
@@ -119,16 +123,16 @@ namespace ml
 	{
 		// Vertex
 		std::string vs{};
-		if (auto const o{ FS::read_file(v_file) }; o && !o.value().empty())
+		if (auto o{ FS::read_file(v_file.string()) })
 		{
-			vs.assign(o.value().cbegin(), o.value().cend());
+			vs.assign(o->begin(), o->end());
 		}
 
 		// Fragment
 		std::string fs{};
-		if (auto const o{ FS::read_file(f_file) }; o && !o.value().empty())
+		if (auto o{ FS::read_file(f_file.string()) })
 		{
-			fs.assign(o.value().cbegin(), o.value().cend());
+			fs.assign(o->begin(), o->end());
 		}
 
 		return loadFromMemory(vs, fs);
@@ -138,23 +142,23 @@ namespace ml
 	{
 		// Vertex
 		std::string vs{};
-		if (auto const o{ FS::read_file(v_file) }; o && !o.value().empty())
+		if (auto const o{ FS::read_file(v_file.string()) })
 		{
-			vs.assign(o.value().cbegin(), o.value().cend());
+			vs.assign(o->cbegin(), o->cend());
 		}
 
 		// Geometry
 		std::string gs{};
-		if (auto const o{ FS::read_file(g_file) }; o && !o.value().empty())
+		if (auto const o{ FS::read_file(g_file.string()) })
 		{
-			gs.assign(o.value().cbegin(), o.value().cend());
+			gs.assign(o->cbegin(), o->cend());
 		}
 
 		// Fragment
 		std::string fs{};
-		if (auto const o{ FS::read_file(f_file) }; o && !o.value().empty())
+		if (auto const o{ FS::read_file(f_file.string()) })
 		{
-			fs.assign(o.value().cbegin(), o.value().cend());
+			fs.assign(o->cbegin(), o->cend());
 		}
 
 		return loadFromMemory(vs, gs, fs);

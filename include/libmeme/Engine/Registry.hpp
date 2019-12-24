@@ -153,7 +153,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend Singleton<Registry<>>;
+		friend struct Singleton<Registry<>>;
 
 		Registry() noexcept;
 

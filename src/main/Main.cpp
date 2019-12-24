@@ -1,12 +1,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/Random.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
-#include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Core/Dense.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
@@ -20,9 +18,6 @@
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
-#include <libmeme/Renderer/Material.hpp>
-#include <libmeme/Renderer/Shader.hpp>
-#include <libmeme/Renderer/Texture.hpp>
 
 // Unit Tests
 namespace ml::unit_tests
@@ -117,70 +112,9 @@ namespace ml
 	} };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-
-// Main
-ml::int32_t main()
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	using namespace ml;
-
-	auto m1 = make_material(
-		make_uniform<bool>("bool", true),
-		make_uniform<int>("int", 123),
-		make_uniform<float>("float", 4.56f),
-		make_uniform<vec2>("vec2", vec2{ 1, 2 }),
-		make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
-		make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
-		make_uniform<Color>("color", []() { return colors::magenta; }),
-		make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
-		make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
-		make_uniform<mat4>("mat4", []() { return mat4::identity(); })
-	);
-
-	// Time
-	static struct Time final
+	static void install_event_callbacks(Window & window)
 	{
-		Timer main{ true };
-		Timer loop{ false };
-		float64_t delta{ 0.0 };
-	} time{};
-	
-	// Init Systems
-	ML_MemoryTracker;
-	ML_Random;
-	ML_EventSystem;
-	ML_PerformanceTracker;
-	ML_Lua.init();
-	ML_Python.init(ML_ARGV[0], "../../../");
-
-	// Load Plugins
-	std::vector<std::pair<SharedLibrary *, Plugin *>> plugins;
-	auto load_plugin = [&plugins](auto && filename)
-	{
-		auto library{ new SharedLibrary{ filename } };
-		plugins.push_back(std::make_pair(
-			library,
-			library->callFunction<Plugin *>("ML_Plugin_Main")
-		));
-	};
-	load_plugin("demo.dll");
-
-	// Enter Event
-	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
-
-	// Create Window
-	RenderWindow window{};
-	if (!window.create(window_title, window_video, window_style, window_context))
-	{
-		return Debug::logError("Failed initializing Window") | Debug::pause(1);
-	}
-	else
-	{
-		// Install Callbacks
-		/* * * * * * * * * * * * * * * * * * * * */
 		window.setCharCallback([](auto, auto ch)
 		{
 			ML_EventSystem.fireEvent<CharEvent>(ch);
@@ -238,6 +172,57 @@ ml::int32_t main()
 		});
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+
+// Main
+ml::int32_t main()
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	using namespace ml;
+
+	// Time
+	static struct Time final
+	{
+		Timer main{ true }, loop{ false };
+
+		float64_t delta{ 0.0 };
+	} time{};
+	
+	// Init Systems
+	ML_MemoryTracker;
+	ML_EventSystem;
+	ML_PerformanceTracker;
+	ML_Lua.init();
+	ML_Python.init(ML_ARGV[0], "../../../");
+
+	// Enter Event
+	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
+
+	// Load Plugins
+	dense_map<SharedLibrary *, Plugin *> plugins;
+	auto load_plugin = [&plugins](auto && filename)
+	{
+		auto library{ new SharedLibrary{ filename } };
+		plugins.insert(std::make_pair(
+			library, library->callFunction<Plugin *>("ML_Plugin_Main")
+		));
+	};
+	load_plugin("demo.dll");
+
+	// Create Window
+	RenderWindow window{};
+	if (!window.create(window_title, window_video, window_style, window_context))
+	{
+		return Debug::logError("Failed initializing Window") | Debug::pause(1);
+	}
+	else
+	{
+		install_event_callbacks(window);
+	}
+
 	// Start Editor
 	if (!Editor::startup(window.getHandle()))
 	{
@@ -247,28 +232,6 @@ ml::int32_t main()
 	// Load Event
 	ML_EventSystem.fireEvent<LoadEvent>();
 
-	// Load Stuff
-	std::vector<Image>		img{};
-	std::vector<Texture>	tex{};
-	std::vector<Shader>		shd{};
-	std::vector<Material>	mtl{};
-	img.push_back(Image::Default);
-	tex.push_back(make_texture(img[0]));
-	mtl.push_back(make_material(
-		make_uniform<bool>("bool", true),
-		make_uniform<int>("int", 123),
-		make_uniform<float>("float", 4.56f),
-		make_uniform<vec2>("vec2", vec2{ 1, 2 }),
-		make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
-		make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
-		make_uniform<Color>("color", []() { return colors::magenta; }),
-		make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
-		make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
-		make_uniform<mat4>("mat4", []() { return mat4::identity(); }),
-		make_uniform<Texture const *>("tex0", &tex[0])
-	));
-
-	
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * */
 	while (window.isOpen())
@@ -329,23 +292,19 @@ ml::int32_t main()
 
 	// Cleanup
 	ML_EventSystem.fireEvent<UnloadEvent>();
+	Editor::shutdown();
+	window.dispose();
+	ML_Python.dispose();
+	ML_Lua.dispose();
+
+	// Exit
+	ML_EventSystem.fireEvent<ExitEvent>();
 	for (auto & pair : plugins)
 	{
 		if (pair.second) { delete pair.second; }
 		if (pair.first) { delete pair.first; }
 	}
 	plugins.clear();
-	{
-		img.clear();
-		tex.clear();
-		shd.clear();
-		mtl.clear();
-	}
-	Editor::shutdown();
-	window.dispose();
-	ML_Python.dispose();
-	ML_Lua.dispose();
-	ML_EventSystem.fireEvent<ExitEvent>();
 
 	// Goodbye!
 	return EXIT_SUCCESS;

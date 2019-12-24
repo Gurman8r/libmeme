@@ -9,40 +9,43 @@
 namespace ml
 {
 	// Allocation Record
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	struct ML_CORE_API AllocationRecord final : public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_t = typename std::tuple<size_t, size_t, struct Trackable *>;
+		using storage_t = typename _STD tuple<size_t, size_t, struct Trackable *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline decltype(auto) index() const noexcept { return _STD get<0>(m_storage); }
+
+		inline decltype(auto) size() const noexcept { return _STD get<1>(m_storage); }
+
+		inline decltype(auto) data() const noexcept { return _STD get<2>(m_storage); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		friend struct MemoryTracker;
+
+		union { storage_t m_storage; };
 
 		explicit AllocationRecord(storage_t && storage) noexcept;
 
 		~AllocationRecord() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline decltype(auto) index() const noexcept { return std::get<0>(m_storage); }
-
-		inline decltype(auto) size() const noexcept { return std::get<1>(m_storage); }
-
-		inline decltype(auto) data() const noexcept { return std::get<2>(m_storage); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private: union { storage_t m_storage; };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 
 	// Memory Tracker
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	struct ML_CORE_API MemoryTracker final : public Singleton<MemoryTracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename std::map<void *, AllocationRecord *>;
+		using records_t = typename _STD map<struct Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -53,7 +56,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend Singleton<MemoryTracker>;
+		friend struct Singleton<MemoryTracker>;
 
 		friend struct Trackable;
 
@@ -71,24 +74,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void * allocate(size_t size);
+		struct Trackable * create_allocation(size_t size);
 
-		void deallocate(void * value);
+		void destroy_allocation(struct Trackable * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 
 	// Trackable
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	struct ML_CORE_API Trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~Trackable() noexcept {}
+		virtual ~Trackable() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::type_info const & rtti() const noexcept
+		inline _STD type_info const & rtti() const noexcept
 		{
 			return typeid(*this);
 		}
@@ -97,22 +101,22 @@ namespace ml
 
 		inline void * operator new(size_t size)
 		{
-			return ML_MemoryTracker.allocate(size);
+			return ML_MemoryTracker.create_allocation(size);
 		}
 
 		inline void * operator new[](size_t size)
 		{
-			return ML_MemoryTracker.allocate(size);
+			return ML_MemoryTracker.create_allocation(size);
 		}
-
+		
 		inline void operator delete(void * value)
 		{
-			return ML_MemoryTracker.deallocate(value);
+			return ML_MemoryTracker.destroy_allocation(static_cast<Trackable *>(value));
 		}
 
 		inline void operator delete[](void * value)
 		{
-			return ML_MemoryTracker.deallocate(value);
+			return ML_MemoryTracker.destroy_allocation(static_cast<Trackable *>(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

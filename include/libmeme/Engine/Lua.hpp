@@ -31,7 +31,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend Singleton<Lua>;
+		friend struct Singleton<Lua>;
 
 		Lua();
 		~Lua();

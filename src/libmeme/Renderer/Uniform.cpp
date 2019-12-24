@@ -20,8 +20,9 @@ namespace ml
 	}
 
 	Uniform::Uniform(Uniform const & other)
-		: Uniform{ other.m_storage }
+		: Uniform{}
 	{
+		assign(other);
 	}
 
 	Uniform::Uniform(Uniform && other) noexcept
@@ -36,8 +37,7 @@ namespace ml
 
 	Uniform & Uniform::operator=(Uniform const & other)
 	{
-		Uniform temp{ other };
-		swap(temp);
+		assign(other);
 		return (*this);
 	}
 
@@ -45,6 +45,16 @@ namespace ml
 	{
 		swap(std::move(other));
 		return (*this);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void Uniform::assign(Uniform const & other)
+	{
+		if (this != std::addressof(other))
+		{
+			m_storage.operator=(other.m_storage);
+		}
 	}
 
 	void Uniform::swap(Uniform & other) noexcept

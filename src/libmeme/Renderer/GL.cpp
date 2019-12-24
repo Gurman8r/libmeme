@@ -43,7 +43,7 @@ namespace ml
 	{
 		if (const auto code{ getError() })
 		{
-			ML_EventSystem.fireEvent<RenderErrorEvent>(file, line, expr, code);
+			//ML_EventSystem.fireEvent<RenderErrorEvent>(file, line, expr, code);
 		}
 	}
 
@@ -812,7 +812,6 @@ namespace ml
 
 	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source, C_String & log) -> int32_t
 	{
-		log = nullptr;
 		if ((count < 1) || !source || !(*source))
 		{
 			return ML_WARNING; // -1 (true)

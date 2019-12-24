@@ -58,7 +58,7 @@ namespace ml
 
 	int32_t Python::do_file(path_t const & filename) const
 	{
-		if (auto o{ FS::read_file(filename) }; o && !o.value().empty())
+		if (auto o{ FS::read_file(filename.string()) }; o && !o.value().empty())
 		{
 			return do_string(std::string{ o.value().begin(), o.value().end() });
 		}

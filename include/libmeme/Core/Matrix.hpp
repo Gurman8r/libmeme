@@ -98,8 +98,8 @@ namespace ml
 			M<U, W, H> temp { 0 };
 			for (size_t i = 0; i < temp.size(); i++)
 			{
-				const size_t x { i % temp.width() };
-				const size_t y { i / temp.width() };
+				size_t const x{ i % temp.width() };
+				size_t const y { i / temp.width() };
 				temp[i] = ((y < Rows && x < Cols)
 					? static_cast<U>((*this)[y * Cols + x]) 
 					: static_cast<U>(0)

@@ -49,6 +49,10 @@ namespace ml
 
 		Uniform & operator=(Uniform && other) noexcept;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void assign(Uniform const & other);
+
 		void swap(Uniform & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,6 +96,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	inline ML_SERIALIZE(std::ostream & out, Uniform const & value)
+	{
+		return out
+			<< value.type().name() << " "
+			<< value.name() << " ";
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
