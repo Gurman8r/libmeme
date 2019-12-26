@@ -2,7 +2,7 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
-#include <libmeme/Core/Dense.hpp>
+#include <libmeme/Core/DenseMap.hpp>
 
 namespace ml
 {
@@ -14,10 +14,16 @@ namespace ml
 
 		struct Source final
 		{
-			C_String vs{ "" }, gs{ "" }, fs{ "" };
+			C_String vs{ nullptr }, gs{ nullptr }, fs{ nullptr };
 
 			constexpr Source() noexcept = default;
 		};
+
+		using AttribCache = typename dense_map<hash_t, int32_t>;
+
+		using UniformCache = typename dense_map<hash_t, int32_t>;
+
+		using TextureCache = typename dense_map<struct Texture const *, int32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,13 +53,13 @@ namespace ml
 
 		bool loadFromSource(Source const & value);
 
-		bool loadFromMemory(std::string const & v_src, std::string const & f_src);
+		bool loadFromMemory(std::string const & vs, std::string const & fs);
 
-		bool loadFromMemory(std::string const & v_src, std::string const & g_src, std::string const & f_src);
+		bool loadFromMemory(std::string const & vs, std::string const & gs, std::string const & fs);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool create();
+		bool generate();
 		
 		bool destroy();
 
@@ -91,7 +97,15 @@ namespace ml
 
 		inline operator bool() const noexcept { return m_handle; }
 
-		inline auto handle() const -> uint32_t const & { return m_handle; }
+		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
+
+		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+
+		inline auto attributes() const noexcept -> AttribCache const & { return m_attributes; }
+
+		inline auto textures() const noexcept -> TextureCache const & { return m_textures; }
+
+		inline auto uniforms() const noexcept -> UniformCache const & { return m_uniforms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -100,23 +114,19 @@ namespace ml
 
 		int32_t get_uniform(std::string const & value);
 
-		int32_t compile(C_String v_src, C_String g_src, C_String f_src);
+		int32_t compile(C_String vs, C_String gs, C_String fs);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		struct UniformBinder;
 
-		using AttribCache = dense_map<hash_t, int32_t>;
-		
-		using UniformCache = dense_map<hash_t, int32_t>;
-		
-		using TextureCache = dense_map<struct Texture const *, int32_t>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uint32_t		m_handle;
 		Source			m_source;
-		AttribCache		m_attribs;
-		TextureCache	m_textures;
+		AttribCache		m_attributes;
 		UniformCache	m_uniforms;
+		TextureCache	m_textures;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

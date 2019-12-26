@@ -8,31 +8,31 @@ namespace ml
 {
 	struct Shader::UniformBinder final
 	{
-		union { uint32_t previous; uint32_t current; int32_t location; };
+		union { uint32_t cached; uint32_t program; int32_t location; };
 
-		UniformBinder(Shader & program, std::string const & name)
-			: previous	{ NULL }
-			, current	{ program ? program.handle() : NULL }
+		explicit UniformBinder(Shader & shader, std::string const & name)
+			: cached	{ NULL }
+			, program	{ shader ? shader.handle() : NULL }
 			, location	{ -1 }
 		{
-			if (current)
+			if (program)
 			{
-				previous = GL::getProgramHandle(GL::ProgramObject);
+				cached = GL::getProgramHandle(GL::ProgramObject);
 
-				if (current != previous)
+				if (program != cached)
 				{
-					GL::useProgram(current);
+					GL::useProgram(program);
 				}
 
-				location = program.get_uniform(name);
+				location = shader.get_uniform(name);
 			}
 		}
 
 		~UniformBinder()
 		{
-			if (current && (current != previous))
+			if (program && (program != cached))
 			{
-				GL::useProgram(previous);
+				GL::useProgram(cached);
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace ml
 
 	Shader::Shader()
 		: m_handle{ NULL }
-		, m_attribs{}
+		, m_attributes{}
 		, m_source{}
 		, m_textures{}
 		, m_uniforms{}
@@ -104,16 +104,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 	void Shader::swap(Shader & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
 			std::swap(m_handle, other.m_handle);
+			
 			std::swap(m_source, other.m_source);
-			std::swap(m_attribs, other.m_attribs);
-			std::swap(m_uniforms, other.m_uniforms);
-			std::swap(m_textures, other.m_textures);
+			
+			m_attributes.swap(other.m_attributes);
+			
+			m_uniforms.swap(other.m_uniforms);
+			
+			m_textures.swap(other.m_textures);
 		}
 	}
 
@@ -121,45 +124,25 @@ namespace ml
 
 	bool Shader::loadFromFile(path_t const & v_file, path_t const & f_file)
 	{
-		// Vertex
-		std::string vs{};
-		if (auto o{ FS::read_file(v_file.string()) })
-		{
-			vs.assign(o->begin(), o->end());
-		}
+		// Read Vertex
+		std::string const vs{ FS::get_file_contents(v_file) };
 
-		// Fragment
-		std::string fs{};
-		if (auto o{ FS::read_file(f_file.string()) })
-		{
-			fs.assign(o->begin(), o->end());
-		}
+		// Read Fragment
+		std::string const fs{ FS::get_file_contents(f_file) };
 
 		return loadFromMemory(vs, fs);
 	}
 
 	bool Shader::loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file)
 	{
-		// Vertex
-		std::string vs{};
-		if (auto const o{ FS::read_file(v_file.string()) })
-		{
-			vs.assign(o->cbegin(), o->cend());
-		}
+		// Read Vertex
+		std::string const vs{ FS::get_file_contents(v_file) };
 
-		// Geometry
-		std::string gs{};
-		if (auto const o{ FS::read_file(g_file.string()) })
-		{
-			gs.assign(o->cbegin(), o->cend());
-		}
+		// Read Geometry
+		std::string const gs{ FS::get_file_contents(g_file) };
 
-		// Fragment
-		std::string fs{};
-		if (auto const o{ FS::read_file(f_file.string()) })
-		{
-			fs.assign(o->cbegin(), o->cend());
-		}
+		// Read Fragment
+		std::string const fs{ FS::get_file_contents(f_file) };
 
 		return loadFromMemory(vs, gs, fs);
 	}
@@ -173,34 +156,39 @@ namespace ml
 		);
 	}
 
-	bool Shader::loadFromMemory(std::string const & v_src, std::string const & f_src)
+	bool Shader::loadFromMemory(std::string const & vs, std::string const & fs)
 	{
-		return loadFromMemory(v_src, std::string{}, f_src);
+		return loadFromMemory(vs, std::string{}, fs);
 	}
 
-	bool Shader::loadFromMemory(std::string const & v_src, std::string const & g_src, std::string const & f_src)
+	bool Shader::loadFromMemory(std::string const & vs, std::string const & gs, std::string const & fs)
 	{
-		return (compile(
-			m_source.vs = (v_src.empty() ? nullptr : v_src.c_str()),
-			m_source.gs = (g_src.empty() ? nullptr : g_src.c_str()),
-			m_source.fs = (f_src.empty() ? nullptr : f_src.c_str())
-		) == EXIT_SUCCESS);
+		m_source = Source{
+			(vs.empty() ? nullptr : vs.c_str()),
+			(gs.empty() ? nullptr : gs.c_str()),
+			(fs.empty() ? nullptr : fs.c_str())
+		};
+		return (compile(m_source.vs, m_source.gs, m_source.fs) == EXIT_SUCCESS);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::create()
+	bool Shader::generate()
 	{
 		return !m_handle && (m_handle = GL::createProgram());
 	}
 
 	bool Shader::destroy()
 	{
-		m_attribs.clear();
-		m_uniforms.clear();
-		m_textures.clear();
+		m_source = { nullptr, nullptr, nullptr };
 		
-		GL::useProgram(NULL);
+		if (!m_attributes.empty()) { m_attributes.clear(); }
+		
+		if (!m_uniforms.empty()) { m_uniforms.clear(); }
+		
+		if (!m_textures.empty()) { m_textures.clear(); }
+		
+		Shader::bind(nullptr);
 		
 		if (m_handle)
 		{
@@ -223,13 +211,13 @@ namespace ml
 			if (bindTextures)
 			{
 				uint32_t i{ 0 };
-				for (auto const & [texture, location] : value->m_textures)
+				for (auto const & pair : value->m_textures)
 				{
-					GL::uniform1i(texture->handle(), location);
-
+					GL::uniform1i(pair.first->handle(), pair.second);
+					
 					GL::activeTexture(GL::Texture0 + (i++));
-
-					Texture::bind(texture);
+					
+					Texture::bind(pair.first);
 				}
 			}
 		}
@@ -246,37 +234,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_v<bool>: if (auto v{ value.get<bool>() })
+		case hashof_v<bool>: if (auto v{ value.load<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
+		case hashof_v<int32_t>: if (auto v{ value.load<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
+		case hashof_v<float_t>: if (auto v{ value.load<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
+		case hashof_v<vec2>: if (auto v{ value.load<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
+		case hashof_v<vec3>: if (auto v{ value.load<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
+		case hashof_v<vec4>: if (auto v{ value.load<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Color>: if (auto v{ value.get<Color>() })
+		case hashof_v<Color>: if (auto v{ value.load<Color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
+		case hashof_v<mat2>: if (auto v{ value.load<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
+		case hashof_v<mat3>: if (auto v{ value.load<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
+		case hashof_v<mat4>: if (auto v{ value.load<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture const *>: if (auto v{ value.get<Texture const *>() })
+		case hashof_v<Texture const *>: if (auto v{ value.load<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -385,15 +373,15 @@ namespace ml
 	{
 		if (value.empty()) { return -1; }
 
-		hash_t const code{ Hash(value) };
+		hash_t const code{ Hash{ value } };
 		
-		if (auto const it{ m_attribs.find(code) }; it != m_attribs.end())
+		if (auto const it{ m_attributes.find(code) }; it != m_attributes.end())
 		{
 			return it->second;
 		}
 		else
 		{
-			return m_attribs.insert(std::make_pair(
+			return m_attributes.insert(std::make_pair(
 				code, GL::getAttribLocation(m_handle, value.c_str())
 			)).first->second;
 		}
@@ -403,7 +391,7 @@ namespace ml
 	{
 		if (value.empty()) { return -1; }
 
-		hash_t const code{ Hash(value) };
+		hash_t const code{ Hash{ value } };
 
 		if (auto const it{ m_uniforms.find(code) }; it != m_uniforms.end())
 		{
@@ -417,7 +405,7 @@ namespace ml
 		}
 	}
 
-	int32_t Shader::compile(C_String v_src, C_String g_src, C_String f_src)
+	int32_t Shader::compile(C_String vs, C_String gs, C_String fs)
 	{
 		// Shaders Available
 		if (!GL::shadersAvailable())
@@ -426,67 +414,69 @@ namespace ml
 		}
 		
 		// Geometry Shaders Available
-		if (g_src && !GL::geometryShadersAvailable())
+		if (gs && !GL::geometryShadersAvailable())
 		{
 			return EXIT_FAILURE * 2;
 		}
 
-		// Create Program
-		if (!destroy() || !create())
+		// Destroy Program
+		if (!destroy())
 		{
 			return EXIT_FAILURE * 3;
 		}
 
+		// Generate Program
+		if (!generate())
+		{
+			return EXIT_FAILURE * 4;
+		}
+
 		// Compile Vertex
 		uint32_t v{ 0 };
-		switch (GL::compileShader(v, GL::VertexShader, 1, &v_src))
+		switch (GL::compileShader(v, GL::VertexShader, 1, &vs))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, v);
 			GL::deleteShader(v);
 			break;
 		case ML_FAILURE:
-			GL::deleteShader(m_handle);
-			GL::flush();
-			return EXIT_FAILURE * 4;
+			destroy();
+			return EXIT_FAILURE * 5;
 		}
 
 		// Compile Geometry
 		uint32_t g{ 0 };
-		switch (GL::compileShader(g, GL::GeometryShader, 1, &g_src))
+		switch (GL::compileShader(g, GL::GeometryShader, 1, &gs))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, g);
 			GL::deleteShader(g);
 			break;
 		case ML_FAILURE:
-			GL::deleteShader(m_handle);
-			GL::flush();
-			return EXIT_FAILURE * 5;
+			destroy();
+			return EXIT_FAILURE * 6;
 		}
 
 		// Compile Fragment
 		uint32_t f{ 0 };
-		switch (GL::compileShader(f, GL::FragmentShader, 1, &f_src))
+		switch (GL::compileShader(f, GL::FragmentShader, 1, &fs))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, f);
 			GL::deleteShader(f);
 			break;
 		case ML_FAILURE:
-			GL::deleteShader(m_handle);
-			GL::flush();
-			return EXIT_FAILURE * 6;
+			destroy();
+			return EXIT_FAILURE * 7;
 		}
 
 		// Link Program
 		if (!GL::linkProgram(m_handle))
 		{
 			C_String const log{ GL::getProgramInfoLog(m_handle) };
-			GL::deleteShader(m_handle);
 			Debug::logError(log);
-			GL::flush();
-			return EXIT_FAILURE * 7;
+			destroy();
+			return EXIT_FAILURE * 8;
 		}
 
 		GL::flush();

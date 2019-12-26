@@ -121,8 +121,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING Color = BasicColor<float_t>;
-	ML_USING Color32 = BasicColor<byte_t>;
+	ML_USING Color = typename BasicColor<float_t>;
+	
+	ML_USING Color32 = typename BasicColor<byte_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -69,7 +69,10 @@ namespace ml
 
 	struct CharEvent final : public WindowEvent<WindowEventType::EV_Char>
 	{
-		uint32_t const value;
+		union
+		{
+			uint32_t const value;
+		};
 
 		constexpr CharEvent(uint32_t value) noexcept
 			: value{ value }
@@ -81,7 +84,10 @@ namespace ml
 
 	struct CursorEnterEvent final : public WindowEvent<WindowEventType::EV_CursorEnter>
 	{
-		int32_t const entered;
+		union
+		{
+			int32_t const entered;
+		};
 
 		constexpr CursorEnterEvent(int32_t entered) noexcept
 			: entered{ entered }
@@ -235,7 +241,10 @@ namespace ml
 
 	struct WindowFocusEvent final : public WindowEvent<WindowEventType::EV_WindowFocus>
 	{
-		int32_t const focused;
+		union
+		{
+			int32_t const focused;
+		};
 		
 		constexpr WindowFocusEvent(int32_t focused) noexcept
 			: focused{ focused }
@@ -288,7 +297,10 @@ namespace ml
 
 	struct WindowFullscreenEvent final : public WindowEvent<WindowEventType::EV_WindowFullscreen>
 	{
-		int32_t const value;
+		union
+		{
+			int32_t const value;
+		};
 		
 		constexpr WindowFullscreenEvent(int32_t value) noexcept
 			: value{ value }

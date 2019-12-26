@@ -1,6 +1,6 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import MEMELIB as ml
+import LIBMEME as ml
 
 PATH = ml.prefs.get("Engine", "asset_path", "../../../assets")
 

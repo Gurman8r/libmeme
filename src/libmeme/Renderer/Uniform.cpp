@@ -20,15 +20,13 @@ namespace ml
 	}
 
 	Uniform::Uniform(Uniform const & other)
-		: Uniform{}
+		: m_storage{ other.m_storage }
 	{
-		assign(other);
 	}
 
 	Uniform::Uniform(Uniform && other) noexcept
-		: Uniform{}
+		: m_storage{ std::move(other.m_storage) }
 	{
-		swap(std::move(other));
 	}
 
 	Uniform::~Uniform() {}

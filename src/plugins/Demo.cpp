@@ -19,10 +19,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		std::vector<Image>		img{};
-		std::vector<Texture>	tex{};
-		std::vector<Shader>		shd{};
-		std::vector<Material>	mtl{};
+		std::vector<Image>		m_images	{};
+		std::vector<Texture>	m_textures	{};
+		std::vector<Shader>		m_shaders	{};
+		std::vector<Material>	m_materials	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,23 +38,29 @@ namespace ml
 
 		void onEvent(Event const & value) override
 		{
-			switch (*value)
+			switch (value.id())
 			{
-			case LoadEvent::ID: if (auto ev{ value.as<LoadEvent>() })
+			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
-				img.emplace_back(make_image(FS::path_to("../../../assets/textures/doot.png")));
-				
-				tex.emplace_back(make_texture(img[0]));
 
-				shd.emplace_back(make_shader(
+
+				m_images.emplace_back(make_image(
+					FS::path_to("../../../assets/textures/doot.png")
+				));
+				
+				m_textures.emplace_back(make_texture(
+					m_images[0]
+				));
+
+				m_shaders.emplace_back(make_shader(
 					FS::path_to("../../../assets/shaders/2D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
 				));
 
-				mtl.emplace_back(make_material(
+				m_materials.emplace_back(make_material(
 					make_uniform<bool>("bool", true),
-					make_uniform<int>("int", 123),
-					make_uniform<float>("float", 4.56f),
+					make_uniform<int32_t>("int", 123),
+					make_uniform<float_t>("float_t", 4.56f),
 					make_uniform<vec2>("vec2", vec2{ 1, 2 }),
 					make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
 					make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
@@ -62,11 +68,11 @@ namespace ml
 					make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
 					make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
 					make_uniform<mat4>("mat4", []() { return mat4::identity(); }),
-					make_uniform<Texture const *>("tex0", &tex[0])
+					make_uniform<Texture const *>("tex0", &m_textures[0])
 				));
 
 			} break;
-			case DrawEvent::ID: if (auto ev{ value.as<DrawEvent>() })
+			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(value) })
 			{
 				GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
 				GL::clearColor(
@@ -76,7 +82,7 @@ namespace ml
 					colors::magenta[3]
 				);
 			} break;
-			case GuiEvent::ID: if (auto ev{ value.as<GuiEvent>() })
+			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(value) })
 			{
 				ImGui::PushID(ML_ADDRESSOF(this));
 				ImGui::SetNextWindowSize({ 512, 512 }, ImGuiCond_Once);
@@ -111,38 +117,63 @@ namespace ml
 						ImGui::Columns(1);
 					}
 
-					auto & io{ ImGui::GetIO() };
-					ImTextureID my_tex_id = tex[0].address();
-					float my_tex_w = (float)tex[0].width();
-					float my_tex_h = (float)tex[0].height();
-					ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
-					ImVec2 pos = ImGui::GetCursorScreenPos();
-					ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
-					if (ImGui::IsItemHovered())
+					auto draw_texture_preview = [](auto & value)
 					{
-						ImGui::BeginTooltip();
-						float region_sz = 32.0f;
-						float region_x = io.MousePos.x - pos.x - region_sz * 0.5f; if (region_x < 0.0f) region_x = 0.0f; else if (region_x > my_tex_w - region_sz) region_x = my_tex_w - region_sz;
-						float region_y = io.MousePos.y - pos.y - region_sz * 0.5f; if (region_y < 0.0f) region_y = 0.0f; else if (region_y > my_tex_h - region_sz) region_y = my_tex_h - region_sz;
-						float zoom = 4.0f;
-						ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-						ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
-						ImVec2 uv0 = ImVec2((region_x) / my_tex_w, (region_y) / my_tex_h);
-						ImVec2 uv1 = ImVec2((region_x + region_sz) / my_tex_w, (region_y + region_sz) / my_tex_h);
-						ImGui::Image(my_tex_id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
-						ImGui::EndTooltip();
-					}
+						auto & io{ ImGui::GetIO() };
+						void * const tex_id{ value.address() };
+						float_t const tex_w{ (float_t)value.width() };
+						float_t const tex_h{ (float_t)value.height() };
+						ImGui::Text("%.0fx%.0f", tex_w, tex_h);
+						auto const pos{ ImGui::GetCursorScreenPos() };
+						ImGui::Image(
+							tex_id,
+							{ tex_w, tex_h },
+							{ 0, 0 },
+							{ 1, 1 },
+							{ 1.0f, 1.0f, 1.0f, 1.0f },
+							{ 1.0f, 1.0f, 1.0f, 0.5f }
+						);
+						if (ImGui::IsItemHovered())
+						{
+							float_t const region_zoom{ 4.0f };
+							float_t const region_size{ 32.0f };
 
+							ImGui::BeginTooltip();
+							
+							float_t region_x{ io.MousePos.x - pos.x - region_size * 0.5f };
+							if (region_x < 0.0f) region_x = 0.0f;
+							else if (region_x > (tex_w - region_size)) region_x = (tex_w - region_size);
+							
+							float_t region_y{ io.MousePos.y - pos.y - region_size * 0.5f };
+							if (region_y < 0.0f) region_y = 0.0f;
+							else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
+
+							ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
+							ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
+							ImGui::Image(
+								tex_id, 
+								{ region_size * region_zoom, region_size * region_zoom }, 
+								{ region_x / tex_w, region_y / tex_h },
+								{ (region_x + region_size) / tex_w, (region_y + region_size) / tex_h },
+								{ 1.0f, 1.0f, 1.0f, 1.0f },
+								{ 1.0f, 1.0f, 1.0f, 0.5f }
+							);
+
+							ImGui::EndTooltip();
+						}
+					};
+
+					draw_texture_preview(m_textures[0]);
 				}
 				ImGui::End();
 				ImGui::PopID();
 			} break;
-			case UnloadEvent::ID: if (auto ev{ value.as<UnloadEvent>() })
+			case UnloadEvent::ID: if (auto ev{ event_cast<UnloadEvent>(value) })
 			{
-				img.clear();
-				tex.clear();
-				shd.clear();
-				mtl.clear();
+				m_images.clear();
+				m_textures.clear();
+				m_shaders.clear();
+				m_materials.clear();
 			} break;
 			}
 		}
@@ -151,4 +182,7 @@ namespace ml
 	};
 }
 
-extern "C" ML_PLUGIN_API ml::Plugin * ML_Plugin_Main() { return new ml::Demo{}; }
+extern "C" ML_PLUGIN_API ml::Plugin * ML_Plugin_Main()
+{
+	return new ml::Demo{};
+}

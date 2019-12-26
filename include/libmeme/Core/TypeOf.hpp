@@ -14,21 +14,23 @@ namespace ml
 
 	template <class T> struct typeof<T> final
 	{
+		using name_t = typename std::string_view;
+
 		constexpr typeof() noexcept = default;
 
-		static constexpr auto name() noexcept -> std::string_view const & { return m_name; }
+		static constexpr auto name() noexcept -> name_t const & { return m_name; }
 		
 		static constexpr auto hash() noexcept -> hash_t const & { return m_hash; }
 
 	private:
-		static constexpr std::string_view m_name
+		static constexpr name_t m_name
 		{
 			nameof<>::filter_signature_type(nameof<T>::value)
 		};
 
 		static constexpr hash_t m_hash
 		{
-			Hash(m_name)
+			Hash{ m_name }
 		};
 	};
 
@@ -40,16 +42,18 @@ namespace ml
 
 	template <
 		class T
-	> static constexpr auto hashof_v{ typeof_v<T>.hash() };
+	> static constexpr auto const hashof_v{ typeof_v<T>.hash() };
 
 	template <
 		class T
-	> static constexpr auto nameof_v{ typeof_v<T>.name() };
+	> static constexpr auto const nameof_v{ typeof_v<T>.name() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct typeof<> final
 	{
+		using name_t = typename std::string_view;
+
 		constexpr typeof() noexcept
 			: m_name{ "" }, m_hash{ 0 }
 		{
@@ -60,11 +64,13 @@ namespace ml
 		{
 		}
 
-		constexpr auto name() const noexcept -> std::string_view const & { return m_name; }
+		constexpr auto name() const noexcept -> name_t const & { return m_name; }
 
 		constexpr auto hash() const noexcept -> hash_t const & { return m_hash; }
 
-	private: std::string_view m_name; hash_t m_hash;
+	private:
+		name_t m_name;
+		hash_t m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

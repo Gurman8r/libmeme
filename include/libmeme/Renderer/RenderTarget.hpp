@@ -1,7 +1,7 @@
 #ifndef _ML_RENDER_TARGET_HPP_
 #define _ML_RENDER_TARGET_HPP_
 
-#include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Renderer/Buffers.hpp>
 
 namespace ml
 {
@@ -11,13 +11,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderTarget() = default;
+		RenderTarget() noexcept = default;
 
 		virtual ~RenderTarget() {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// TODO
+		void draw(VAO const & vao, VBO const & vbo) const;
+
+		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

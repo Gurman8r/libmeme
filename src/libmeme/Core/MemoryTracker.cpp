@@ -48,12 +48,12 @@ namespace ml
 				<< std::setw(addr_size) << "Address"
 				<< '\n';
 
-			for (auto const & [pointer, record] : m_records)
+			for (auto const & [ptr, rec] : m_records)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << record->index()
-					<< std::setw(size_size) << record->size()
-					<< std::setw(addr_size) << record->data()
+					<< std::setw(indx_size) << rec->index()
+					<< std::setw(size_size) << rec->size()
+					<< std::setw(addr_size) << rec->data()
 					<< '\n';
 			}
 
@@ -67,10 +67,10 @@ namespace ml
 
 	Trackable * MemoryTracker::create_allocation(size_t size)
 	{
-		auto pointer{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
+		auto ptr{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
 		return m_records.emplace(std::make_pair(
-			pointer, 
-			::new AllocationRecord{ std::make_tuple(m_current++, size, pointer) }
+			ptr, 
+			::new AllocationRecord{ std::make_tuple(m_current++, size, ptr) }
 		)).first->second->data();
 	}
 

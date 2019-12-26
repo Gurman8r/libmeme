@@ -335,8 +335,8 @@ namespace ml::alg
 		A<T, N...> temp { 0 };
 		for (size_t i = 0; i < value.size(); i++)
 		{
-			const size_t y { i % value.width() };
-			const size_t x { i / value.width() };
+			size_t const y { i % value.width() };
+			size_t const x { i / value.width() };
 			temp[i] = value[y * value.width() + x];
 		}
 		return temp;

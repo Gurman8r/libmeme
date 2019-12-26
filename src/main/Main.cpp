@@ -5,10 +5,11 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
-#include <libmeme/Core/Dense.hpp>
+#include <libmeme/Core/DenseMap.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/Python.hpp>
@@ -195,6 +196,8 @@ ml::int32_t main()
 	ML_MemoryTracker;
 	ML_EventSystem;
 	ML_PerformanceTracker;
+	ML_Engine;
+	ML_Editor;
 	ML_Lua.init();
 	ML_Python.init(ML_ARGV[0], "../../../");
 
@@ -206,9 +209,7 @@ ml::int32_t main()
 	auto load_plugin = [&plugins](auto && filename)
 	{
 		auto library{ new SharedLibrary{ filename } };
-		plugins.insert(std::make_pair(
-			library, library->callFunction<Plugin *>("ML_Plugin_Main")
-		));
+		plugins.insert(_STD make_pair(library, library->invoke<Plugin *>("ML_Plugin_Main")));
 	};
 	load_plugin("demo.dll");
 
@@ -224,7 +225,7 @@ ml::int32_t main()
 	}
 
 	// Start Editor
-	if (!Editor::startup(window.getHandle()))
+	if (!ML_Editor.startup(window.getHandle()))
 	{
 		return Debug::logError("Failed initializing Editor") | Debug::pause(1);
 	}
@@ -292,7 +293,7 @@ ml::int32_t main()
 
 	// Cleanup
 	ML_EventSystem.fireEvent<UnloadEvent>();
-	Editor::shutdown();
+	ML_Editor.shutdown();
 	window.dispose();
 	ML_Python.dispose();
 	ML_Lua.dispose();

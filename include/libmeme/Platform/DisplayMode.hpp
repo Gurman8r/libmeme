@@ -9,7 +9,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2u	 size;
+		vec2u size;
+		
 		uint32_t depth;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -36,9 +37,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto width()  const -> uint32_t const & { return size[0]; }
+		constexpr auto width() const noexcept -> uint32_t const & { return size[0]; }
 
-		constexpr auto height() const -> uint32_t const & { return size[1]; }
+		constexpr auto height() const noexcept -> uint32_t const & { return size[1]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

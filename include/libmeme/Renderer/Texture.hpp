@@ -37,6 +37,8 @@ namespace ml
 
 		Texture & operator=(Texture const & other);
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void swap(Texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,6 +54,8 @@ namespace ml
 		bool generate();
 
 		bool destroy();
+
+		static void bind(Texture const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -95,8 +99,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(Texture const * value);
-
 		uint32_t channels() const noexcept;
 
 		Image copyToImage() const;
@@ -113,9 +115,9 @@ namespace ml
 
 		inline operator bool() const noexcept { return m_handle; }
 
-		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
-		inline auto handle() const noexcept -> uint32_t { return m_handle; }
+		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
 		
 		inline auto sampler() const noexcept -> uint32_t { return m_sampler; }
 		

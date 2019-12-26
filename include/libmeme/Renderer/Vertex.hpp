@@ -9,7 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_t = typename Array<float_t, 8>;
+		static constexpr size_t Size{ 8 };
+
+		using storage_t = typename Array<float_t, Size>;
 
 		storage_t m_storage{ 0 };
 
@@ -30,6 +32,31 @@ namespace ml
 		constexpr vec2 texcoord() const noexcept
 		{
 			return { m_storage[6], m_storage[7] };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr Vertex & position(vec3 const & value) noexcept
+		{
+			m_storage[0] = value[0];
+			m_storage[1] = value[1];
+			m_storage[2] = value[2];
+			return (*this);
+		}
+
+		constexpr Vertex & normal(vec3 const & value) noexcept
+		{
+			m_storage[3] = value[0];
+			m_storage[4] = value[1];
+			m_storage[5] = value[2];
+			return (*this);
+		}
+
+		constexpr Vertex & texcoord(vec2 const & value) noexcept
+		{
+			m_storage[6] = value[0];
+			m_storage[7] = value[1];
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -8,7 +8,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline Image generate_default_image()
+	Image const Image::Default{ ([]()
 	{
 		Image img { vec2u{ 512, 512 }, 3 };
 		for (size_t y = 0; y < img.height(); y++)
@@ -26,9 +26,7 @@ namespace ml
 			}
 		}
 		return img;
-	}
-
-	Image const Image::Default{ generate_default_image() };
+	})() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -57,7 +55,7 @@ namespace ml
 		, m_pixels { pixels }
 		, m_channels { channels }
 	{
-		if (const size_t c { capacity() })
+		if (size_t const c { capacity() })
 		{
 			if (m_pixels.empty() || (m_pixels.size() != c))
 			{
@@ -213,7 +211,7 @@ namespace ml
 	{
 		if (!empty())
 		{
-			const size_t cols { width() * channels() };
+			size_t const cols { width() * channels() };
 			for (size_t y = 0; y < height(); ++y)
 			{
 				iterator lhs { begin() + y * cols };
@@ -233,7 +231,7 @@ namespace ml
 	{
 		if (!empty())
 		{
-			const size_t cols { width() * channels() };
+			size_t const cols { width() * channels() };
 			iterator top { begin() };
 			iterator bot { end() - cols };
 			for (size_t y = 0; y < height() / 2; ++y)

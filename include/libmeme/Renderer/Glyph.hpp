@@ -9,9 +9,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_t = typename std::tuple<Texture, FloatRect, uint32_t>;
+		using storage_t = typename std::tuple<
+			Texture, FloatRect, uint32_t
+		>;
 
-		static constexpr const size_t count{ 6 };
+		static constexpr size_t const count{ 6 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -28,7 +30,11 @@ namespace ml
 
 		Glyph operator=(Glyph && other) noexcept;
 
-		void swap(Glyph & other);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void assign(Glyph const & other);
+
+		void swap(Glyph & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -62,7 +68,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: union { storage_t m_storage; };
+	private:
+		union { storage_t m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

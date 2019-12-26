@@ -39,9 +39,7 @@ namespace ml
 		{
 		}
 
-		template <
-			class U
-		> constexpr Quaternion(const tvec4<U> & copy)
+		template <class U> constexpr Quaternion(const tvec4<U> & copy)
 			: base_type(copy)
 		{
 		}

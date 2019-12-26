@@ -50,8 +50,8 @@
 #define ML_ARGV		__argv
 #define ML_WARGV	__wargv
 
-#define ML_DESERIALIZE	::std::istream & operator >>
-#define ML_SERIALIZE	::std::ostream & operator <<
+#define ML_DESERIALIZE	std::istream & operator >>
+#define ML_SERIALIZE	std::ostream & operator <<
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,9 +94,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	path_t		= typename _STD filesystem::path;
-	ML_USING	file_t		= typename _STD vector<char>;
-	ML_USING	dir_t		= typename _STD map<char, _STD vector<path_t>>;
+	ML_USING	path_t		= typename std::filesystem::path;
+	ML_USING	file_t		= typename std::vector<char>;
+	ML_USING	directory_t	= typename std::map<char, std::vector<path_t>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

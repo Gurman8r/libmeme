@@ -43,9 +43,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static auto getString(uint32_t name) -> C_String;
 		static auto getString(uint32_t name, uint32_t index) -> C_String;
-		static bool getBool(uint32_t name);
+		static auto getBool(uint32_t name) -> uint8_t;
+		static auto getBool(uint32_t name, uint8_t * params) -> uint8_t *;
 		static auto getDouble(uint32_t name) -> float64_t;
+		static auto getDouble(uint32_t name, float64_t * params) -> float64_t *;
 		static auto getFloat(uint32_t name)	-> float32_t;
+		static auto getFloat(uint32_t name, float32_t * params) -> float32_t *;
 		static auto getInteger(uint32_t name) -> int32_t;
 		static auto getInteger(uint32_t name, int32_t * params) -> int32_t *;
 
@@ -55,21 +58,16 @@ namespace ml
 		static void alphaFunc(uint32_t func, float32_t value);
 		static void blendFunc(uint32_t sFactor, uint32_t dFactor);
 		static void blendEquation(uint32_t equation);
+		static void clear(uint32_t mask);
+		static void clearColor(float32_t r, float32_t g, float32_t b, float32_t a);
 		static void cullFace(uint32_t value);
 		static void depthFunc(uint32_t value);
 		static void depthMask(bool value);
-		static void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
 		static void blendEquationSeparate(uint32_t modeRGB, uint32_t modeAlpha);
 		static void blendFuncSeparate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha);
-		static void polygonMode(uint32_t face, uint32_t mode);
-
-		// Drawing
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static void clear(uint32_t mask);
-		static void clearColor(float32_t r, float32_t g, float32_t b, float32_t a);
-		static void drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices);
-		static void drawArrays(uint32_t mode, int32_t first, int32_t count);
 		static void flush();
+		static void polygonMode(uint32_t face, uint32_t mode);
+		static void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
 
 		// Buffers
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -88,6 +86,8 @@ namespace ml
 		static void vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer);
 		static void vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width);
 		static void enableVertexAttribArray(uint32_t index);
+		static void drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices);
+		static void drawArrays(uint32_t mode, int32_t first, int32_t count);
 
 		// Textures
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1893,28 +1893,28 @@ namespace ml
 
 		template <class T> static constexpr T value_at(int32_t index, T dv = (T)0)
 		{
-			_ML GL::value_at(index, dv);
+			value_at(index, dv);
 			return dv;
 		}
 
 		template <class T> static constexpr int32_t index_of(T value)
 		{
-			return _ML GL::index_of(value);
+			return index_of(value);
 		}
 
 		template <class T> static constexpr C_String name_of(T value)
 		{
-			return _ML GL::name_of(value);
+			return name_of(value);
 		}
 
 		template <class T> static constexpr C_String raw_name_of(T value)
 		{
-			return _ML GL::raw_name_of(value);
+			return raw_name_of(value);
 		}
 
 		template <class T> static constexpr C_String desc_of(T value)
 		{
-			return _ML GL::desc_of(value);
+			return desc_of(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

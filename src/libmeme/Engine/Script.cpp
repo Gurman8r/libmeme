@@ -13,11 +13,11 @@ namespace ml
 	{
 	}
 	
-	Script::Script(path_t const & filename)
+	Script::Script(path_t const & path)
 		: m_language{ Language::Unknown }
 		, m_text{}
 	{
-		loadFromFile(filename);
+		loadFromFile(path);
 	}
 
 	Script::Script(Language language, std::string const & text)
@@ -26,27 +26,25 @@ namespace ml
 	{
 	}
 	
-	Script::Script(Script const & copy)
-		: m_language{ copy.m_language }
-		, m_text{ copy.m_text }
+	Script::Script(Script const & other)
+		: m_language{ other.m_language }
+		, m_text{ other.m_text }
 	{
 	}
 	
-	Script::Script(Script && copy) noexcept
-		: m_language{}
-		, m_text{}
+	Script::Script(Script && other) noexcept
+		: m_language{ std::move(other.m_language) }
+		, m_text{ std::move(other.m_text) }
 	{
-		swap(std::move(copy));
 	}
 	
 	Script::~Script() {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Script & Script::operator=(Script const & other) noexcept
+	Script & Script::operator=(Script const & other)
 	{
-		Script temp{ other };
-		swap(temp);
+		assign(other);
 		return (*this);
 	}
 	
@@ -55,8 +53,20 @@ namespace ml
 		swap(std::move(other));
 		return (*this);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	void Script::swap(Script & other)
+	void Script::assign(Script const & other)
+	{
+		if (this != std::addressof(other))
+		{
+			m_language = other.m_language;
+
+			m_text.operator=(other.m_text);
+		}
+	}
+
+	void Script::swap(Script & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -68,17 +78,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Script::loadFromFile(path_t const & filename)
+	bool Script::loadFromFile(path_t const & path)
 	{
-		if (auto const o{ FS::read_file(filename.string()) }; o && !o.value().empty())
-		{
-			m_text.assign(o.value().cbegin(), o.value().cend());
-		}
-		else
-		{
-			m_text.clear();
-		}
-		return !m_text.empty();
+		return !(m_text = FS::get_file_contents(path)).empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,11 +94,14 @@ namespace ml
 	{
 		switch (m_language)
 		{
-		case Language::Python: return ML_Python.do_string(m_text);
+		case Language::Python:
+			return ML_Python.do_string(m_text);
 		
-		case Language::Lua: return ML_Lua.do_string(m_text);
+		case Language::Lua:
+			return ML_Lua.do_string(m_text);
 		
-		default: return 0;
+		default:
+			return 0;
 		}
 	}
 

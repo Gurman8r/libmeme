@@ -7,28 +7,31 @@ namespace ml
 
 	EventListener * EventSystem::addListener(const int32_t type, EventListener * listener)
 	{
-		return ((listener)
-			? m_listeners.insert({ type, listener })->second
-			: nullptr
-		);
+		return listener ? m_listeners.insert(std::make_pair(type, listener))->second : nullptr;
 	}
-	
+
 	bool EventSystem::fireEvent(Event const & value)
 	{
 		if (!value) { return false; }
-		auto found{ m_listeners.equal_range(*value) };
+
+		auto found{ m_listeners.equal_range(value.id()) };
+
 		for (auto it = found.first; it != found.second; it++)
 		{
-			if (it->second) { it->second->onEvent(value); }
+			if (it->second)
+			{
+				it->second->onEvent(value);
+			}
 		}
+
 		return true;
 	}
-	
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool EventSystem::removeListener(int32_t const & type, EventListener * listener)
 	{
-		auto found { m_listeners.equal_range(type) };
+		auto found{ m_listeners.equal_range(type) };
 		for (auto it = found.first; it != found.second; it++)
 		{
 			if (it->second == listener)
@@ -39,10 +42,10 @@ namespace ml
 		}
 		return false;
 	}
-	
+
 	bool EventSystem::removeListenerFromAllEvents(EventListener * listener)
 	{
-		bool done { false };
+		bool done{ false };
 		while (!done)
 		{
 			done = true;
@@ -50,9 +53,8 @@ namespace ml
 			{
 				if (it->second == listener)
 				{
-					// break to prevent using invalidated iterator
 					m_listeners.erase(it);
-					done = false; 
+					done = false;
 					break;
 				}
 			}

@@ -50,13 +50,17 @@ namespace ml
 		if (m_L)
 		{
 			lua_close(m_L);
+			
 			m_L = nullptr;
+			
 			return true;
 		}
 		return false;
 	}
 
-	int32_t Lua::do_string(::std::string const & value) const
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t Lua::do_string(std::string const & value) const
 	{
 		return ((!value.empty() && m_L) ? luaL_dostring(m_L, value.c_str()) : 0);
 	}

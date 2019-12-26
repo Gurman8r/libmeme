@@ -10,11 +10,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderWindow::RenderWindow()
-		: Window{}
-		, RenderTarget{}
+	RenderWindow::RenderWindow() : Window{}, RenderTarget{}
 	{
-		ML_EventSystem.addListener<RenderErrorEvent>(this);
 	}
 
 	RenderWindow::~RenderWindow() {}
@@ -41,32 +38,6 @@ namespace ml
 			return true;
 		}
 		return Debug::logError("Failed initializing RenderWindow");
-	}
-
-	void RenderWindow::onEvent(Event const & value)
-	{
-		Window::onEvent(value);
-		switch (*value)
-		{
-		case RenderErrorEvent::ID: if (auto ev = value.as<RenderErrorEvent>())
-		{
-			// Error location
-			std::string filename{ ev.file };
-			filename = filename.substr(filename.find_last_of("\\/") + 1);
-
-			// Decode the error
-			std::cout
-				<< "An OpenGL call failed in \'" << ev.file << "\' (" << ev.line << ")"
-				<< "\nCode: "
-				<< "\n\t" << ev.code
-				<< "\nExpression: "
-				<< "\n\t" << ev.expr
-				<< "\nDescription:"
-				<< "\n\t" << GL::name_of((GL::Err)ev.code)
-				<< "\n\t" << GL::desc_of((GL::Err)ev.code)
-				<< '\n';
-		} break;
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

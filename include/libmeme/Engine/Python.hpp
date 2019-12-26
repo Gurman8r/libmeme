@@ -15,6 +15,8 @@ namespace ml
 		bool init(path_t const & name, path_t const & home);
 		
 		bool dispose();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		int32_t do_string(std::string const & value) const;
 		

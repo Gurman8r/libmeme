@@ -26,9 +26,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static std::optional<dir_t> read_dir(std::string const & path);
+		static std::optional<directory_t> read_dir(path_t const & path);
 
-		static std::optional<file_t> read_file(std::string const & path);
+		static std::optional<file_t> read_file(path_t const & path);
+
+		static std::string get_file_contents(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

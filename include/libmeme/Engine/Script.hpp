@@ -10,31 +10,32 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum class Language
-		{
-			Unknown, Python, Lua,
-		};
+		enum class Language { Unknown, Python, Lua };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Script();
-		explicit Script(path_t const & filename);
+		explicit Script(path_t const & path);
 		explicit Script(Language language, std::string const & text);
-		Script(Script const & copy);
-		Script(Script && copy) noexcept;
+		Script(Script const & other);
+		Script(Script && other) noexcept;
 		~Script();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Script & operator=(Script const & other) noexcept;
+		Script & operator=(Script const & other);
 
 		Script & operator=(Script && other) noexcept;
 
-		void swap(Script & other);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void assign(Script const & other);
+
+		void swap(Script & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & filename);
+		bool loadFromFile(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

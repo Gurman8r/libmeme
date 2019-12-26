@@ -71,7 +71,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline std::optional<T> get() const
+		template <class T> inline std::optional<T> load() const
 		{
 			if (is_variable())
 			{
@@ -90,9 +90,17 @@ namespace ml
 			return std::nullopt;
 		}
 
+		template <class T, class ... Args> inline decltype(auto) store(Args && ... args)
+		{
+			return (m_storage = std::make_tuple(
+				typeof_v<T>, name(), std::forward<Args>(args)...
+			));
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: union { storage_t m_storage; };
+	private:
+		union { storage_t m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

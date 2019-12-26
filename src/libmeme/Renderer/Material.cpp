@@ -21,15 +21,13 @@ namespace ml
 	}
 
 	Material::Material(Material const & other)
-		: Material{}
+		: m_storage{ other.m_storage }
 	{
-		assign(other);
 	}
 
 	Material::Material(Material && other) noexcept
-		: Material{}
+		: m_storage{ std::move(other.m_storage) }
 	{
-		swap(std::move(other));
 	}
 
 	Material::~Material() {}
@@ -38,8 +36,7 @@ namespace ml
 
 	Material & Material::operator=(Material const & other)
 	{
-		Material temp{ other };
-		swap(temp);
+		assign(other);
 		return (*this);
 	}
 
@@ -55,7 +52,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.operator=(other.m_storage);
+			m_storage = other.m_storage;
 		}
 	}
 

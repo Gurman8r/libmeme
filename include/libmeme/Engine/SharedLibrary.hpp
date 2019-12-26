@@ -37,7 +37,7 @@ namespace ml
 
 		template <
 			class Ret, class ... Args
-		> inline auto callFunction(std::string const & name, Args && ... args)
+		> inline auto invoke(std::string const & name, Args && ... args)
 		{
 			auto fun{ reinterpret_cast<Ret(*)(Args...)>(this->loadFunction(name)) };
 			return (fun ? fun(std::forward<Args>(args)...) : nullptr);

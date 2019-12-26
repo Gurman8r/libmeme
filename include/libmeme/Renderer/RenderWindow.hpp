@@ -25,8 +25,6 @@ namespace ml
 			ContextSettings const & context
 		) override;
 
-		void onEvent(Event const & value) override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 

@@ -48,8 +48,8 @@ namespace ml
 		};
 
 		constexpr EnterEvent(int32_t argc, C_String const * argv) noexcept
-			: argc { argc }
-			, argv { argv }
+			: argc{ argc }
+			, argv{ argv }
 		{
 		}
 	};
@@ -108,7 +108,10 @@ namespace ml
 
 	struct CommandEvent final : public EngineEvent<EngineEventType::EV_Command>
 	{
-		const C_String cmd;
+		union
+		{
+			C_String const cmd;
+		};
 
 		constexpr CommandEvent(C_String cmd) noexcept
 			: cmd{ cmd }

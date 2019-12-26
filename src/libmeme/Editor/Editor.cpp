@@ -24,6 +24,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	Editor::Editor()
+	{
+	}
+
+	Editor::~Editor()
+	{
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool Editor::startup(void * window)
 	{
 		// Create ImGui Context

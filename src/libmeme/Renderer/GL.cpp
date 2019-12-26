@@ -1,11 +1,10 @@
+
 #ifdef ML_IMPL_RENDERER_OPENGL
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Renderer/GraphicsEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -41,9 +40,22 @@ namespace ml
 
 	void GL::checkError(C_String file, uint32_t line, C_String expr)
 	{
-		if (const auto code{ getError() })
+		if (uint32_t const code{ getError() })
 		{
-			//ML_EventSystem.fireEvent<RenderErrorEvent>(file, line, expr, code);
+			std::string filename{ file };
+			filename = filename.substr(filename.find_last_of("\\/") + 1);
+
+			// Decode the error
+			std::cerr
+				<< "An OpenGL call failed in \'" << file << "\' (" << line << ")"
+				<< "\nCode: "
+				<< "\n\t" << code
+				<< "\nExpression: "
+				<< "\n\t" << expr
+				<< "\nDescription:"
+				<< "\n\t" << name_of((Err)code)
+				<< "\n\t" << desc_of((Err)code)
+				<< '\n';
 		}
 	}
 
@@ -128,6 +140,7 @@ namespace ml
 		if (cond)
 		{
 			glCheck(glEnable(value));
+
 			return isEnabled(value);
 		}
 		return true;
@@ -138,6 +151,7 @@ namespace ml
 		if (cond)
 		{
 			glCheck(glDisable(value));
+
 			return !isEnabled(value);
 		}
 		return true;
@@ -161,31 +175,49 @@ namespace ml
 		return temp;
 	}
 
-	bool GL::getBool(uint32_t name)
+	auto GL::getBool(uint32_t name) -> uint8_t
 	{
 		uint8_t temp{ 0 };
-		glCheck(glGetBooleanv(name, &temp));
-		return (bool)temp;
+		getBool(name, &temp);
+		return temp;
+	}
+
+	auto GL::getBool(uint32_t name, uint8_t * params) -> uint8_t *
+	{
+		glCheck(glGetBooleanv(name, params));
+		return params;
 	}
 
 	auto GL::getDouble(uint32_t name) -> float64_t
 	{
 		float64_t temp{ 0 };
-		glCheck(glGetDoublev(name, &temp));
+		getDouble(name, &temp);
 		return temp;
+	}
+
+	auto GL::getDouble(uint32_t name, float64_t * params) -> float64_t *
+	{
+		glCheck(glGetDoublev(name, params));
+		return params;
 	}
 
 	auto GL::getFloat(uint32_t name) -> float32_t
 	{
 		float32_t temp{ 0 };
-		glCheck(glGetFloatv(name, &temp));
+		getFloat(name, &temp);
 		return temp;
+	}
+
+	auto GL::getFloat(uint32_t name, float32_t * params) -> float32_t *
+	{
+		glCheck(glGetFloatv(name, params));
+		return params;
 	}
 
 	auto GL::getInteger(uint32_t name) -> int32_t
 	{
 		int32_t temp{ 0 };
-		glCheck(getInteger(name, &temp));
+		getInteger(name, &temp);
 		return temp;
 	}
 
@@ -219,6 +251,16 @@ namespace ml
 		glCheck(glBlendEquation(equation));
 	}
 
+	void GL::clear(uint32_t mask)
+	{
+		glCheck(glClear(mask));
+	}
+
+	void GL::clearColor(float32_t r, float32_t g, float32_t b, float32_t a)
+	{
+		glCheck(glClearColor(r, g, b, a));
+	}
+
 	void GL::cullFace(uint32_t mode)
 	{
 		glCheck(glCullFace(mode));
@@ -234,9 +276,9 @@ namespace ml
 		glCheck(glDepthMask(value));
 	}
 
-	void GL::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
+	void GL::flush()
 	{
-		glCheck(glViewport(x, y, w, h));
+		glCheck(glFlush());
 	}
 
 	void GL::blendEquationSeparate(uint32_t modeRGB, uint32_t modeAlpha)
@@ -254,33 +296,9 @@ namespace ml
 		glCheck(glPolygonMode(face, mode));
 	}
 
-
-	// Drawing
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void GL::clear(uint32_t mask)
+	void GL::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
 	{
-		glCheck(glClear(mask));
-	}
-
-	void GL::clearColor(float32_t r, float32_t g, float32_t b, float32_t a)
-	{
-		glCheck(glClearColor(r, g, b, a));
-	}
-
-	void GL::drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices)
-	{
-		glCheck(glDrawElements(mode, count, type, indices));
-	}
-
-	void GL::drawArrays(uint32_t mode, int32_t first, int32_t count)
-	{
-		glCheck(glDrawArrays(mode, first, count));
-	}
-
-	void GL::flush()
-	{
-		glCheck(glFlush());
+		glCheck(glViewport(x, y, w, h));
 	}
 
 
@@ -352,23 +370,11 @@ namespace ml
 		glCheck(glDeleteVertexArrays(count, arrays));
 	}
 
-	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
-	{
-		glCheck(glVertexAttribPointer(
-			index,
-			size,
-			type,
-			normalized,
-			stride,
-			pointer
-		));
-	}
-
 	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
 	{
 #ifdef ML_CC_MSC
 #	pragma warning(push)
-#	pragma warning(disable: 4312)
+#	pragma warning(disable: 4312)	// conversion from 'type1' to 'type2' of greater size
 #	pragma warning(disable: 26451)
 #endif
 		return vertexAttribPointer(
@@ -390,6 +396,28 @@ namespace ml
 		glCheck(glEnableVertexAttribArray(index));
 	}
 
+	void GL::drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices)
+	{
+		glCheck(glDrawElements(mode, count, type, indices));
+	}
+
+	void GL::drawArrays(uint32_t mode, int32_t first, int32_t count)
+	{
+		glCheck(glDrawArrays(mode, first, count));
+	}
+
+	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
+	{
+		glCheck(glVertexAttribPointer(
+			index,
+			size,
+			type,
+			normalized,
+			stride,
+			pointer
+		));
+	}
+
 
 
 	// Textures
@@ -397,35 +425,39 @@ namespace ml
 
 	bool GL::edgeClampAvailable()
 	{
+		static bool available{ false };
 		static bool checked{ false };
-		static bool temp{ false };
 		if (!checked && (checked = true))
 		{
-			temp = GL_EXT_texture_edge_clamp || GLEW_EXT_texture_edge_clamp;
+			available =
+				GL_EXT_texture_edge_clamp || 
+				GLEW_EXT_texture_edge_clamp;
 		}
-		return temp;
+		return available;
 	}
 
 	bool GL::textureSrgbAvailable()
 	{
+		static bool available{ false };
 		static bool checked{ false };
-		static bool temp{ false };
 		if (!checked && (checked = true))
 		{
-			temp = GL_EXT_texture_sRGB;
+			available = 
+				GL_EXT_texture_sRGB;
 		}
-		return temp;
+		return available;
 	}
 
 	bool GL::nonPowerOfTwoAvailable()
 	{
+		static bool available{ false };
 		static bool checked{ false };
-		static bool temp{ false };
 		if (!checked && (checked = true))
 		{
-			temp = GLEW_ARB_texture_non_power_of_two;
+			available =
+				GLEW_ARB_texture_non_power_of_two;
 		}
-		return temp;
+		return available;
 	}
 
 	auto GL::getMaxTextureUnits() -> int32_t
@@ -539,14 +571,15 @@ namespace ml
 
 	bool GL::framebuffersAvailable()
 	{
+		static bool available{ false };
 		static bool checked{ false };
-		static bool temp{ false };
-		if (!checked)
+		if (!checked && (checked = true))
 		{
-			checked = true;
-			temp = GL_EXT_framebuffer_object && GL_EXT_framebuffer_blit;
+			available = 
+				GL_EXT_framebuffer_object && 
+				GL_EXT_framebuffer_blit;
 		}
-		return temp;
+		return available;
 	}
 
 	auto GL::genFramebuffer() -> uint32_t
@@ -646,8 +679,8 @@ namespace ml
 
 	bool GL::shadersAvailable()
 	{
-		static bool checked{ false };
 		static bool available{ false };
+		static bool checked{ false };
 		if (!checked && (checked = true))
 		{
 			available =
@@ -662,12 +695,13 @@ namespace ml
 
 	bool GL::geometryShadersAvailable()
 	{
-		static bool available = false;
+		static bool available{ false };
 		static bool checked{ false };
 		if (!checked && (checked = true))
 		{
-			checked = true;
-			available = shadersAvailable() && GL_ARB_geometry_shader4;
+			available = 
+				shadersAvailable() && 
+				GL_ARB_geometry_shader4;
 		}
 		return available;
 	}
@@ -806,7 +840,7 @@ namespace ml
 
 	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
 	{
-		C_String log{ nullptr };
+		C_String log{ "" };
 		return compileShader(obj, type, count, source, log);
 	}
 
@@ -819,13 +853,13 @@ namespace ml
 		else if (obj = createShader(type))
 		{
 			shaderSource(obj, count, source, nullptr);
-			
+
 			if (!compileShader(obj))
 			{
 				log = getProgramInfoLog(obj);
-				
+
 				deleteShader(obj);
-				
+
 				return ML_FAILURE; // 0 (false)
 			}
 

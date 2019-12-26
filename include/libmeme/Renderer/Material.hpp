@@ -59,18 +59,12 @@ namespace ml
 
 		inline bool insert(Uniform && value)
 		{
-			if (value.name().empty())
-			{
-				return false;
-			}
-			
-			if (!find_by_name(value.name()))
+			if (!value.name().empty() && !find_by_name(value.name()))
 			{
 				push_back(std::move(value));
 				
 				return true;
 			}
-			
 			return false;
 		}
 
@@ -139,10 +133,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto storage() const noexcept -> storage_t const & { return m_storage; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline auto begin() noexcept -> iterator { return m_storage.begin(); }
 		inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
 		inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
@@ -161,7 +151,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: union { storage_t m_storage; };
+	private:
+		union { storage_t m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

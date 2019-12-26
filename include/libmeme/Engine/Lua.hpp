@@ -24,6 +24,8 @@ namespace ml
 
 		bool dispose();
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		int32_t do_string(std::string const & value) const;
 
 		int32_t do_file(path_t const & filename) const;

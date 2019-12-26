@@ -1,6 +1,6 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import MEMELIB as ml
+import LIBMEME as ml
 
 # Debug Mode
 if ml.config.is_debug():

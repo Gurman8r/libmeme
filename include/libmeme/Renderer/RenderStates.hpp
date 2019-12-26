@@ -170,7 +170,12 @@ namespace ml
 			BlendState const & blend,
 			CullState const & cull,
 			DepthState const & depth
-		) noexcept : m_enabled{ enabled }, m_alpha{ alpha }, m_blend{ blend }, m_cull{ cull }, m_depth{ depth }
+		) noexcept
+			: m_enabled{ enabled }
+			, m_alpha{ alpha }
+			, m_blend{ blend }
+			, m_cull{ cull }
+			, m_depth{ depth }
 		{
 		}
 
@@ -183,8 +188,13 @@ namespace ml
 		{
 		}
 
-		constexpr RenderStates(RenderStates const & other) noexcept
-			: RenderStates{ other.m_enabled, other.m_alpha, other.m_blend, other.m_cull, other.m_depth }
+		constexpr RenderStates(RenderStates const & other) noexcept : RenderStates{
+			other.m_enabled,
+			other.m_alpha,
+			other.m_blend,
+			other.m_cull,
+			other.m_depth
+		}
 		{
 		}
 

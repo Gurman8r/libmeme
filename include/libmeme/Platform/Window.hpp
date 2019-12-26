@@ -51,7 +51,9 @@ namespace ml
 			ContextSettings const & context
 		);
 
-		virtual void onEvent(Event const & value) override;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void onEvent(Event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

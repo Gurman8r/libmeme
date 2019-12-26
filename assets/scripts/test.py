@@ -1,5 +1,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
+import LIBMEME as ml
+
 if ml.window.is_open():
     ml.io.printl("Window Info")
     ml.io.printf(" - Title:    {0}\n", [ ml.window.get_title() ])

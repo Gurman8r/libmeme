@@ -1,5 +1,6 @@
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Core/Debug.hpp>
 
 namespace ml
@@ -138,13 +139,25 @@ namespace ml
 		if (m_handle)
 		{
 			GL::deleteTexture(&m_handle);
-
+			
 			m_handle = NULL;
-
+			
 			GL::flush();
 		}
 
 		return !(m_handle);
+	}
+
+	void Texture::bind(Texture const * value)
+	{
+		if (value)
+		{
+			GL::bindTexture(value->m_sampler, value->m_handle);
+		}
+		else
+		{
+			GL::bindTexture(GL::Texture2D, NULL);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -192,21 +205,20 @@ namespace ml
 					);
 				}
 
-				bind(this);
-
-				GL::texImage2D(
-					m_sampler,
-					m_level,
-					m_internalFormat,
-					m_size[0],
-					m_size[1],
-					0, // border: "This value must be 0" -khronos.org
-					m_colorFormat,
-					m_pixelType,
-					(void *)pixels
-				);
-				
-				bind(nullptr);
+				if (ML_BIND(Texture, (*this)))
+				{
+					GL::texImage2D(
+						m_sampler,
+						m_level,
+						m_internalFormat,
+						m_size[0],
+						m_size[1],
+						0, // border: "This value must be 0" -khronos.org
+						m_colorFormat,
+						m_pixelType,
+						(void *)pixels
+					);
+				}
 
 				set_repeated(repeated());
 				
@@ -281,10 +293,8 @@ namespace ml
 	{
 		if (w && h && pixels)
 		{
-			if (m_handle)
+			if (ML_BIND(Texture, (*this)))
 			{
-				bind(this);
-
 				GL::texSubImage2D(
 					m_sampler,
 					m_level,
@@ -293,8 +303,6 @@ namespace ml
 					m_pixelType,
 					(void *)pixels
 				);
-
-				bind(nullptr);
 			}
 			else
 			{
@@ -314,18 +322,6 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Texture::bind(Texture const * value)
-	{
-		if (value)
-		{
-			GL::bindTexture(value->m_sampler, value->m_handle);
-		}
-		else
-		{
-			GL::bindTexture(GL::Texture2D, NULL);
-		}
-	}
-
 	uint32_t Texture::channels() const noexcept
 	{
 		switch (m_internalFormat)
@@ -340,10 +336,8 @@ namespace ml
 	Image Texture::copyToImage() const
 	{
 		Image temp{ size(), channels() };
-		if (m_handle)
+		if (ML_BIND(Texture, (*this)))
 		{
-			Texture::bind(this);
-
 			GL::getTexImage(
 				GL::Texture2D,
 				m_level,
@@ -351,8 +345,6 @@ namespace ml
 				m_pixelType,
 				&temp[0]
 			);
-
-			Texture::bind(nullptr);
 		}
 		return temp;
 	}
@@ -361,14 +353,12 @@ namespace ml
 
 	bool Texture::set_repeated(bool value)
 	{
-		if (m_handle)
-		{
-			m_flags = value
-				? (m_flags & ~TextureFlags_Repeated)
-				: (m_flags | TextureFlags_Repeated);
+		m_flags = value
+			? (m_flags & ~TextureFlags_Repeated)
+			: (m_flags | TextureFlags_Repeated);
 
-			Texture::bind(this);
-			
+		if (ML_BIND(Texture, (*this)))
+		{
 			GL::texParameter(m_sampler, GL::TexWrapS, repeated()
 				? GL::Repeat
 				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
@@ -378,54 +368,46 @@ namespace ml
 				? GL::Repeat
 				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
 			);
-			
-			Texture::bind(nullptr);
 		}
 		return false;
 	}
 
 	bool Texture::set_smooth(bool value)
 	{
-		if (m_handle)
-		{
-			m_flags = value
-				? (m_flags & ~TextureFlags_Smooth)
-				: (m_flags | TextureFlags_Smooth);
+		m_flags = value
+			? (m_flags & ~TextureFlags_Smooth)
+			: (m_flags | TextureFlags_Smooth);
 
-			Texture::bind(this);
+		if (ML_BIND(Texture, (*this)))
+		{
+			GL::texParameter(m_sampler, GL::TexMagFilter,
+				smooth() ? GL::Linear : GL::Nearest
+			);
 
 			GL::texParameter(m_sampler, GL::TexMinFilter, mipmapped()
-				? (smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear)
-				: (smooth() ? GL::Linear : GL::Nearest)
+				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
+				: smooth() ? GL::Linear : GL::Nearest
 			);
-
-			GL::texParameter(m_sampler, GL::TexMagFilter, mipmapped()
-				? (smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear)
-				: (smooth() ? GL::Linear : GL::Nearest)
-			);
-
-			Texture::bind(nullptr);
 		}
 		return false;
 	}
 
 	bool Texture::set_mipmapped(bool value)
 	{
-		if (m_handle)
+		m_flags = value
+			? (m_flags & ~TextureFlags_Mipmapped)
+			: (m_flags | TextureFlags_Mipmapped);
+
+		if (ML_BIND(Texture, (*this)))
 		{
-			m_flags = value
-				? (m_flags & ~TextureFlags_Mipmapped)
-				: (m_flags | TextureFlags_Mipmapped);
-
-			Texture::bind(this);
-
-			if (mipmapped()) { GL::generateMipmap(m_sampler); }
+			if (value)
+			{
+				GL::generateMipmap(m_sampler);
+			}
 
 			GL::texParameter(m_sampler, GL::TexMagFilter,
-				(smooth() ? GL::Linear : GL::Nearest)
+				smooth() ? GL::Linear : GL::Nearest
 			);
-
-			Texture::bind(nullptr);
 		}
 		return false;
 	}

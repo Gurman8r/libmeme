@@ -165,19 +165,21 @@ namespace ml
 		return false;
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void Window::onEvent(Event const & value)
 	{
-		switch (*value)
+		switch (value.id())
 		{
-		case WindowErrorEvent::ID: if (auto ev{ value.as<WindowErrorEvent>() })
+		case WindowErrorEvent::ID: if (auto ev{ event_cast<WindowErrorEvent>(value) })
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
-			Debug::logError("[GLFW] {0}: \'{1}\'", ev.code, ev.desc);
+			Debug::logError("[GLFW] {0}: \'{1}\'", ev->code, ev->desc);
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		} break;
-		case WindowKillEvent::ID: if (auto ev{ value.as<WindowKillEvent>() })
+		case WindowKillEvent::ID: if (auto ev{ event_cast<WindowKillEvent>(value) })
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
@@ -185,22 +187,22 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		} break;
-		case WindowSizeEvent::ID: if (auto ev{ value.as<WindowSizeEvent>() })
+		case WindowSizeEvent::ID: if (auto ev{ event_cast<WindowSizeEvent>(value) })
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
-			m_video.size = { (uint32_t)ev.width, (uint32_t)ev.height };
+			m_video.size = { (uint32_t)ev->width, (uint32_t)ev->height };
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		} break;
-		case WindowFullscreenEvent::ID: if (auto ev{ value.as<WindowFullscreenEvent>() })
+		case WindowFullscreenEvent::ID: if (auto ev{ event_cast<WindowFullscreenEvent>(value) })
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
-			switch (ev.value)
+			switch (ev->value)
 			{
 				case  0:
-				case  1: this->setFullscreen(ev.value); break;
+				case  1: this->setFullscreen(ev->value); break;
 				case -1: this->setFullscreen(!this->isFullscreen()); break;
 			}
 
