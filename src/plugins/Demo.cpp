@@ -120,7 +120,7 @@ namespace ml
 
 				RenderStates{}();
 
-				if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false); 1)
+				if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false))
 				{
 					for (auto const & u : m_materials["3d"])
 					{
