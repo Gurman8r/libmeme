@@ -5,386 +5,340 @@
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// VAO
+	// Vertex Array Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool VAO::create(VAO * value, uint32_t mode)
+	void VertexArrayObject::bind(VertexArrayObject const * value)
 	{
-		if (value && !(*value))
-		{
-			value->m_handle = GL::genVertexArray();
-
-			std::get<0>(value->m_storage) = mode;
-
-			return true;
-		}
-		return false;
+		return value
+			? GL::bindVertexArray(value->m_handle)
+			: GL::bindVertexArray(NULL);
 	}
 
-	void VAO::bind(VAO const * value)
-	{
-		if (value && (*value))
-		{
-			GL::bindVertexArray(value->m_handle);
-		}
-		else
-		{
-			GL::bindVertexArray(NULL);
-		}
-	}
-
-	bool VAO::destroy(VAO * value)
-	{
-		if (value)
-		{
-			if (*value)
-			{
-				GL::deleteVertexArray(&value->m_handle);
-			}
-			
-			value->m_handle = NULL;
-			
-			return true;
-		}
-		return false;
-	}
-
-	VAO & VAO::create(uint32_t mode)
-	{
-		create(this, mode);
-		return (*this);
-	}
-
-	void VAO::bind() const
+	void VertexArrayObject::bind() const
 	{
 		return bind(this);
 	}
 
-	bool VAO::destroy()
+	void VertexArrayObject::unbind() const
 	{
-		return destroy(this);
+		return bind(nullptr);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	VertexArrayObject & VertexArrayObject::create(uint32_t mode)
+	{
+		if (!m_handle)
+		{
+			m_handle = GL::genVertexArray();
+
+			std::get<Mode>(m_storage) = mode;
+		}
+		return (*this);
+	}
+
+	VertexArrayObject & VertexArrayObject::destroy()
+	{
+		if (m_handle)
+		{
+			GL::deleteVertexArray(&m_handle);
+
+			m_handle = NULL;
+
+			GL::flush();
+		}
+		return (*this);
 	}
 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// VBO
+	// Vertex Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool VBO::create(VBO * value, uint32_t usage)
+	void VertexBufferObject::bind(VertexBufferObject const * value)
 	{
-		if (value && !(*value))
-		{
-			value->m_handle = GL::genBuffer();
-
-			std::get<0>(value->m_storage) = usage;
-
-			return true;
-		}
-		return false;
+		return value
+			? GL::bindBuffer(GL::ArrayBuffer, value->m_handle)
+			: GL::bindBuffer(GL::ArrayBuffer, NULL);
 	}
 
-	void VBO::bind(VBO const * value)
+	void VertexBufferObject::bind() const
 	{
-		if (value && (*value))
-		{
-			GL::bindBuffer(GL::ArrayBuffer, value->m_handle);
-		}
-		else
-		{
-			GL::bindBuffer(GL::ArrayBuffer, NULL);
-		}
+		return bind(this);
 	}
 
-	bool VBO::destroy(VBO * value)
+	void VertexBufferObject::unbind() const
 	{
-		if (value)
-		{
-			if (*value)
-			{
-				GL::deleteBuffer(&value->m_handle);
-			}
-			
-			value->m_handle = NULL;
-			
-			return true;
-		}
-		return false;
+		return bind(nullptr);
 	}
 
-	void VBO::update(VBO * value, buffer_t data, uint32_t size)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	VertexBufferObject & VertexBufferObject::create(uint32_t usage)
 	{
-		if (value && (*value))
+		if (!m_handle)
 		{
-			std::get<1>(value->m_storage) = data;
-			std::get<2>(value->m_storage) = size;
-			std::get<3>(value->m_storage) = size / Vertex::Size;
-			std::get<4>(value->m_storage) = 0;
+			m_handle = GL::genBuffer();
+
+			std::get<Usage>(m_storage) = usage;
+		}
+		return (*this);
+	}
+
+	VertexBufferObject & VertexBufferObject::destroy()
+	{
+		if (m_handle)
+		{
+			GL::deleteBuffer(&m_handle);
+
+			m_handle = NULL;
+
+			GL::flush();
+		}
+		return (*this);
+	}
+
+	VertexBufferObject & VertexBufferObject::update(buffer_t data, uint32_t size)
+	{
+		if (m_handle)
+		{
+			std::get<Data>(m_storage) = data;
+			std::get<Size>(m_storage) = size;
+			std::get<Count>(m_storage) = size / Vertex::Size;
+			std::get<Offset>(m_storage) = 0;
 
 			GL::bufferData(
 				GL::ArrayBuffer,
-				value->size() * sizeof(float_t),
-				const_cast<void *>(value->data()),
-				value->usage()
+				this->size() * sizeof(float_t),
+				const_cast<void *>(this->data()),
+				this->usage()
 			);
 		}
+		return (*this);
 	}
 
-	void VBO::update(VBO * value, buffer_t data, uint32_t size, uint32_t offset)
+	VertexBufferObject & VertexBufferObject::update(buffer_t data, uint32_t size, uint32_t offset)
 	{
-		if (value && (*value))
+		if (m_handle)
 		{
-			std::get<1>(value->m_storage) = data;
-			std::get<2>(value->m_storage) = size;
-			std::get<3>(value->m_storage) = size / Vertex::Size;
-			std::get<4>(value->m_storage) = offset;
+			std::get<Data>(m_storage) = data;
+			std::get<Size>(m_storage) = size;
+			std::get<Count>(m_storage) = size / Vertex::Size;
+			std::get<Offset>(m_storage) = offset;
 
 			GL::bufferSubData(
 				GL::ArrayBuffer,
-				value->offset(),
-				value->size() * sizeof(float_t),
-				const_cast<void *>(value->data())
+				this->offset(),
+				this->size() * sizeof(float_t),
+				const_cast<void *>(this->data())
 			);
 		}
-	}
-
-	VBO & VBO::create(uint32_t usage)
-	{
-		create(this, usage);
 		return (*this);
 	}
 
-	void VBO::bind() const
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	// Index Buffer Object
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void IndexBufferObject::bind(IndexBufferObject const * value)
+	{
+		return value
+			? GL::bindBuffer(GL::ElementArrayBuffer, value->m_handle)
+			: GL::bindBuffer(GL::ElementArrayBuffer, NULL);
+	}
+
+	void IndexBufferObject::bind() const
 	{
 		return bind(this);
 	}
 
-	bool VBO::destroy()
+	void IndexBufferObject::unbind() const
 	{
-		return destroy(this);
+		return bind(nullptr);
 	}
 
-	VBO & VBO::update(buffer_t data, uint32_t size)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	IndexBufferObject & IndexBufferObject::create(uint32_t usage, uint32_t type)
 	{
-		VBO::update(this, data, size);
+		if (!m_handle)
+		{
+			m_handle = GL::genBuffer();
+
+			std::get<Usage>(m_storage) = usage;
+
+			std::get<Type>(m_storage) = type;
+		}
 		return (*this);
 	}
 
-	VBO & VBO::update(buffer_t data, uint32_t size, uint32_t offset)
+	IndexBufferObject & IndexBufferObject::destroy()
 	{
-		VBO::update(this, data, size, offset);
+		if (m_handle)
+		{
+			GL::deleteBuffer(&m_handle);
+
+			m_handle = NULL;
+
+			GL::flush();
+		}
 		return (*this);
 	}
 
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// IBO
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool IBO::create(IBO * value, uint32_t usage, uint32_t type)
+	IndexBufferObject & IndexBufferObject::update(buffer_t data, uint32_t count)
 	{
-		if (value && !(*value))
+		if (m_handle)
 		{
-			value->m_handle = GL::genBuffer();
-
-			std::get<0>(value->m_storage) = usage;
-
-			std::get<1>(value->m_storage) = type;
-
-			return true;
-		}
-		return false;
-	}
-
-	void IBO::bind(IBO const * value)
-	{
-		if (value && (*value))
-		{
-			GL::bindBuffer(GL::ElementArrayBuffer, value->m_handle);
-		}
-		else
-		{
-			GL::bindBuffer(GL::ElementArrayBuffer, NULL);
-		}
-	}
-
-	bool IBO::destroy(IBO * value)
-	{
-		if (value)
-		{
-			if (*value)
-			{
-				GL::deleteBuffer(&value->m_handle);
-			}
-			
-			value->m_handle = NULL;
-			
-			return true;
-		}
-		return false;
-	}
-
-	void IBO::update(IBO * value, buffer_t data, uint32_t count)
-	{
-		if (value && (*value))
-		{
-			std::get<2>(value->m_storage) = data;
-			std::get<3>(value->m_storage) = count;
+			std::get<Data>(m_storage) = data;
+			std::get<Count>(m_storage) = count;
 
 			GL::bufferData(
 				GL::ElementArrayBuffer,
-				value->count() * sizeof(uint32_t),
-				const_cast<void *>(value->data()),
-				value->usage()
+				this->count() * sizeof(uint32_t),
+				const_cast<void *>(this->data()),
+				this->usage()
 			);
 		}
-	}
-
-	IBO & IBO::create(uint32_t usage, uint32_t type)
-	{
-		create(this, usage, type);
 		return (*this);
 	}
 
-	void IBO::bind() const
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	// Frame Buffer Object
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void FrameBufferObject::bind(FrameBufferObject const * value)
+	{
+		return value
+			? GL::bindFramebuffer(GL::Framebuffer, value->m_handle)
+			: GL::bindFramebuffer(GL::Framebuffer, NULL);
+	}
+
+	void FrameBufferObject::bind() const
 	{
 		return bind(this);
 	}
 
-	bool IBO::destroy()
+	void FrameBufferObject::unbind() const
 	{
-		return destroy(this);
+		return bind(nullptr);
 	}
 
-	IBO & IBO::update(buffer_t data, uint32_t count)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	FrameBufferObject & FrameBufferObject::create(vec2 const & size)
 	{
-		IBO::update(this, data, count);
+		if (!m_handle)
+		{
+			m_handle = GL::genFramebuffer();
+
+			std::get<Size>(m_storage) = size;
+		}
+		return (*this);
+	}
+
+	FrameBufferObject & FrameBufferObject::destroy()
+	{
+		if (m_handle)
+		{
+			GL::deleteFramebuffer(&m_handle);
+
+			m_handle = NULL;
+
+			GL::flush();
+		}
+		return (*this);
+	}
+
+	FrameBufferObject & FrameBufferObject::attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer)
+	{
+		if (m_handle)
+		{
+			std::get<BufferID>(m_storage) = std::make_pair(attachment, renderbuffer);
+
+			GL::framebufferRenderbuffer(
+				GL::Framebuffer, attachment,
+				GL::Renderbuffer, renderbuffer
+			);
+		}
+		return (*this);
+	}
+
+	FrameBufferObject & FrameBufferObject::attachTexture2D(uint32_t attachment, uint32_t texture, uint32_t level)
+	{
+		if (m_handle)
+		{
+			std::get<TextureID>(m_storage) = std::make_tuple(attachment, texture, level);
+
+			GL::framebufferTexture2D(
+				GL::Framebuffer, attachment,
+				GL::Texture2D, texture, level
+			);
+		}
 		return (*this);
 	}
 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// FBO
+	// Render Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool FBO::create(FBO * value, vec2 const & size)
+	void RenderBufferObject::bind(RenderBufferObject const * value)
 	{
-		if (value && !(*value))
-		{
-			value->m_handle = GL::genFramebuffer();
-
-			std::get<0>(value->m_storage) = size;
-
-			return true;
-		}
-		return false;
+		return value
+			? GL::bindRenderbuffer(GL::Renderbuffer, value->m_handle)
+			: GL::bindRenderbuffer(GL::Renderbuffer, NULL);
 	}
 
-	void FBO::bind(FBO const * value)
-	{
-		if (value && (*value))
-		{
-			GL::bindFramebuffer(GL::Renderbuffer, value->m_handle);
-		}
-		else
-		{
-			GL::bindRenderbuffer(GL::Renderbuffer, NULL);
-		}
-	}
-
-	bool FBO::destroy(FBO * value)
-	{
-		if (value)
-		{
-			if (*value)
-			{
-				GL::deleteFramebuffer(&value->m_handle);
-			}
-			
-			value->m_handle = NULL;
-			
-			return true;
-		}
-		return false;
-	}
-
-	FBO & FBO::create(vec2 const & size)
-	{
-		create(this, size);
-		return (*this);
-	}
-
-	void FBO::bind() const
+	void RenderBufferObject::bind() const
 	{
 		return bind(this);
 	}
 
-	bool FBO::destroy()
+	void RenderBufferObject::unbind() const
 	{
-		return destroy(this);
+		return bind(nullptr);
 	}
-
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// RBO
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RBO::create(RBO * value, vec2 const & size, uint32_t type)
+	RenderBufferObject & RenderBufferObject::create(vec2i const & size)
 	{
-		if (value && !(*value))
+		if (!m_handle)
 		{
-			value->m_handle = GL::genRenderbuffer();
+			m_handle = GL::genRenderbuffer();
 
-			std::get<0>(value->m_storage) = size;
-
-			std::get<1>(value->m_storage) = type;
-
-			return true;
+			std::get<Size>(m_storage) = size;
 		}
-		return false;
-	}
-
-	void RBO::bind(RBO const * value)
-	{
-		if (value && (*value))
-		{
-			GL::bindRenderbuffer(GL::Renderbuffer, value->m_handle);
-		}
-		else
-		{
-			GL::bindRenderbuffer(GL::Renderbuffer, NULL);
-		}
-	}
-
-	bool RBO::destroy(RBO * value)
-	{
-		if (value)
-		{
-			if (*value)
-			{
-				GL::deleteRenderbuffer(&value->m_handle);
-			}
-			
-			value->m_handle = NULL;
-			
-			return true;
-		}
-		return false;
-	}
-
-	RBO & RBO::create(vec2 const & size, uint32_t type)
-	{
-		create(this, size, type);
 		return (*this);
 	}
 
-	void RBO::bind() const
+	RenderBufferObject & RenderBufferObject::destroy()
 	{
-		return bind(this);
+		if (m_handle)
+		{
+			GL::deleteRenderbuffer(&m_handle);
+
+			m_handle = NULL;
+
+			GL::flush();
+		}
+		return (*this);
 	}
 
-	bool RBO::destroy()
+	RenderBufferObject & RenderBufferObject::update(uint32_t format)
 	{
-		return destroy(this);
+		if (m_handle)
+		{
+			std::get<Format>(m_storage) = format;
+
+			GL::renderbufferStorage(
+				GL::Renderbuffer, format, size()[0], size()[1]
+			);
+		}
+		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

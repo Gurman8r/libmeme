@@ -13,7 +13,7 @@ namespace ml
 	}
 
 	Texture::Texture(uint32_t sampler)
-		: Texture{ sampler, TextureFlags_Smooth | TextureFlags_Repeated | TextureFlags_Mipmapped }
+		: Texture{ sampler, TextureFlags_Smooth | TextureFlags_Repeated }
 	{
 	}
 
@@ -71,6 +71,12 @@ namespace ml
 		loadFromTexture(other);
 	}
 
+	Texture::Texture(Texture && other) noexcept
+		: Texture{}
+	{
+		swap(std::move(other));
+	}
+
 	Texture::~Texture() { destroy(); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -79,6 +85,12 @@ namespace ml
 	{
 		Texture temp{ other };
 		swap(temp);
+		return (*this);
+	}
+
+	Texture & Texture::operator=(Texture && other) noexcept
+	{
+		swap(std::move(other));
 		return (*this);
 	}
 
@@ -351,11 +363,30 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool Texture::set_mipmapped(bool value)
+	{
+		m_flags = value
+			? (m_flags | TextureFlags_Mipmapped)
+			: (m_flags & ~TextureFlags_Mipmapped);
+
+		if (ML_BIND(Texture, (*this)))
+		{
+			if (value) { GL::generateMipmap(m_sampler); }
+
+			GL::texParameter(m_sampler, GL::TexMagFilter, mipmapped()
+				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
+				: smooth() ? GL::Linear : GL::Nearest
+			);
+		}
+		GL::flush();
+		return false;
+	}
+
 	bool Texture::set_repeated(bool value)
 	{
 		m_flags = value
-			? (m_flags & ~TextureFlags_Repeated)
-			: (m_flags | TextureFlags_Repeated);
+			? (m_flags | TextureFlags_Repeated)
+			: (m_flags & ~TextureFlags_Repeated);
 
 		if (ML_BIND(Texture, (*this)))
 		{
@@ -376,8 +407,8 @@ namespace ml
 	bool Texture::set_smooth(bool value)
 	{
 		m_flags = value
-			? (m_flags & ~TextureFlags_Smooth)
-			: (m_flags | TextureFlags_Smooth);
+			? (m_flags | TextureFlags_Smooth)
+			: (m_flags & ~TextureFlags_Smooth);
 
 		if (ML_BIND(Texture, (*this)))
 		{
@@ -388,27 +419,6 @@ namespace ml
 			GL::texParameter(m_sampler, GL::TexMinFilter, mipmapped()
 				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
 				: smooth() ? GL::Linear : GL::Nearest
-			);
-		}
-		GL::flush();
-		return false;
-	}
-
-	bool Texture::set_mipmapped(bool value)
-	{
-		m_flags = value
-			? (m_flags & ~TextureFlags_Mipmapped)
-			: (m_flags | TextureFlags_Mipmapped);
-
-		if (ML_BIND(Texture, (*this)))
-		{
-			if (value)
-			{
-				GL::generateMipmap(m_sampler);
-			}
-
-			GL::texParameter(m_sampler, GL::TexMagFilter,
-				smooth() ? GL::Linear : GL::Nearest
 			);
 		}
 		GL::flush();

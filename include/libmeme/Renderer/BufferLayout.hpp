@@ -10,7 +10,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Element final
+		struct Attribute final
 		{
 			/* * * * * * * * * * * * * * * * * * * * */
 
@@ -22,18 +22,18 @@ namespace ml
 			uint32_t	offset		{ 0 };
 			uint32_t	width		{ 0 };
 
-			constexpr Element() noexcept = default;
-			constexpr Element(Element const &) noexcept = default;
-			constexpr Element(Element &&) noexcept = default;
+			constexpr Attribute() noexcept = default;
+			constexpr Attribute(Attribute const &) noexcept = default;
+			constexpr Attribute(Attribute &&) noexcept = default;
 
-			Element const & operator()() const;
+			Attribute const & operator()() const;
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename Element;
+		using value_type		= typename Attribute;
 		using self_type			= typename BufferLayout;
 		using initializer_type	= typename std::initializer_list<value_type>;
 		using pointer			= typename value_type *;
@@ -45,10 +45,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr const Element Default[] = {
-			Element { 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
-			Element { 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
-			Element { 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
+		static constexpr const Attribute Default[] = {
+			Attribute { 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
+			Attribute { 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
+			Attribute { 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -124,6 +124,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ... Args> static constexpr auto make_bufferlayout(Args && ... args)
+	{
+		return BufferLayout{ std::forward<Args>(args)... };
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

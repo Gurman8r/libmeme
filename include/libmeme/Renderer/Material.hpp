@@ -5,6 +5,7 @@
 
 namespace ml
 {
+	// collection of uniforms
 	struct ML_RENDERER_API Material final : public Trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

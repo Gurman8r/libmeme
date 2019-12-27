@@ -29,17 +29,22 @@ namespace ml
 	}
 
 	Glyph::Glyph(Glyph && other) noexcept
-		: m_storage{ std::move(other.m_storage) }
+		: m_storage{}
 	{
+		swap(std::move(other));
 	}
 
-	Glyph::~Glyph() {}
+	Glyph::~Glyph()
+	{
+		std::get<0>(m_storage).destroy();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Glyph Glyph::operator=(Glyph const & other)
 	{
-		assign(other);
+		Glyph temp{ other };
+		swap(temp);
 		return (*this);
 	}
 
@@ -49,21 +54,11 @@ namespace ml
 		return (*this);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void Glyph::assign(Glyph const & other)
-	{
-		if (this != std::addressof(other))
-		{
-			m_storage = other.m_storage;
-		}
-	}
-
 	void Glyph::swap(Glyph & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			std::swap(m_storage, other.m_storage);
 		}
 	}
 

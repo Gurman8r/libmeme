@@ -31,11 +31,14 @@ namespace ml
 		Texture(path_t const & filename);
 		Texture(Image const & image);
 		Texture(Texture const & other);
+		Texture(Texture && other) noexcept;
 		~Texture();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Texture & operator=(Texture const & other);
+
+		Texture & operator=(Texture && other) noexcept;
 
 		void swap(Texture & other) noexcept;
 
@@ -102,12 +105,12 @@ namespace ml
 		Image copyToImage() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		bool set_mipmapped(bool value);
 
 		bool set_repeated(bool value);
 		
 		bool set_smooth(bool value);
-		
-		bool set_mipmapped(bool value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

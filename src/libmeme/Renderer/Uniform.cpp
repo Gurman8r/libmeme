@@ -30,7 +30,9 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Uniform::~Uniform() {}
+	Uniform::~Uniform()
+	{
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,7 +53,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			std::swap(m_storage, other.m_storage);
 		}
 	}
 

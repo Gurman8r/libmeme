@@ -7,34 +7,30 @@
 
 namespace ml
 {
-	template <class T> struct GraphicsBuffer
+	// Base Graphics Object
+	template <class T> struct GraphicsObject
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = typename T;
-
-		using handle_t = typename uint32_t;
-
-		using address_t = typename void *;
-
-		using buffer_t = typename void const *;
+		using self_type	= typename T;
+		using handle_t	= typename uint32_t;
+		using address_t	= typename void *;
+		using buffer_t	= typename void const *;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit GraphicsBuffer(handle_t handle) noexcept
+		constexpr explicit GraphicsObject(handle_t handle) noexcept
 			: m_handle{ handle }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return m_handle; }
+		constexpr operator bool() const noexcept { return m_handle; }
 
-		inline auto address() const noexcept -> address_t { return ML_ADDRESSOF(m_handle); }
+		constexpr auto address() const noexcept -> address_t { return ML_ADDRESSOF(m_handle); }
 
-		inline auto handle() noexcept -> handle_t & { return m_handle; }
-
-		inline auto handle() const noexcept -> handle_t const & { return m_handle; }
+		constexpr auto handle() const noexcept -> handle_t const & { return m_handle; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,9 +40,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	struct ML_RENDERER_API VAO final : public GraphicsBuffer<VAO>
+
+	// Vertex Array Object
+	struct ML_RENDERER_API VertexArrayObject final : public GraphicsObject<VertexArrayObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { Mode };
 
 		using storage_t = typename std::tuple<
 			uint32_t
@@ -55,72 +55,70 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args>
-		explicit VAO(handle_t handle, Args && ... args) noexcept
-			: GraphicsBuffer{ handle }
+		constexpr explicit VertexArrayObject(handle_t handle, Args && ... args)
+			: GraphicsObject{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		VAO(self_type const & other)
+		constexpr VertexArrayObject(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		VAO(self_type && other) noexcept
+		constexpr VertexArrayObject(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		VAO()
+		constexpr VertexArrayObject()
 			: self_type{ NULL, 0 }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_handle, other.m_handle);
+				alg::swap(m_handle, other.m_handle);
 
-				m_storage.swap(other.m_storage);
+				alg::swap(m_storage, other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static bool create(VAO * value, uint32_t mode);
-
-		static void bind(VAO const * value);
-		
-		static bool destroy(VAO * value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		VAO & create(uint32_t mode);
+		static void bind(VertexArrayObject const * value);
 
 		void bind() const;
 
-		bool destroy();
+		void unbind() const;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		VertexArrayObject & create(uint32_t mode);
+
+		VertexArrayObject & destroy();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uint32_t mode() const noexcept { return std::get<0>(m_storage); }
+		constexpr decltype(auto) mode() const noexcept { return std::get<Mode>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -130,9 +128,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	struct ML_RENDERER_API VBO final : public GraphicsBuffer<VBO>
+
+	// Vertex Buffer Object
+	struct ML_RENDERER_API VertexBufferObject final : public GraphicsObject<VertexBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { Usage, Data, Size, Count, Offset };
 
 		using storage_t = typename std::tuple<
 			uint32_t, buffer_t, uint32_t, uint32_t, uint32_t
@@ -141,88 +143,82 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args>
-		explicit VBO(handle_t handle, Args && ... args)
-			: GraphicsBuffer{ handle }
+		constexpr explicit VertexBufferObject(handle_t handle, Args && ... args)
+			: GraphicsObject{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		VBO(self_type const & other)
+		constexpr VertexBufferObject(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		VBO(self_type && other) noexcept
+		constexpr VertexBufferObject(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		VBO()
+		constexpr VertexBufferObject()
 			: self_type{ NULL, 0, nullptr, 0, 0, 0 }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_handle, other.m_handle);
+				alg::swap(m_handle, other.m_handle);
 
-				m_storage.swap(other.m_storage);
+				alg::swap(m_storage, other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static bool create(VBO * value, uint32_t usage);
-
-		static void bind(VBO const * value);
-		
-		static bool destroy(VBO * value);
-
-		static void update(VBO * value, buffer_t data, uint32_t size);
-
-		static void update(VBO * value, buffer_t data, uint32_t size, uint32_t offset);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		VBO & create(uint32_t usage);
+		static void bind(VertexBufferObject const * value);
 
 		void bind() const;
 
-		bool destroy();
+		void unbind() const;
 
-		VBO & update(buffer_t data, uint32_t size);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		VertexBufferObject & create(uint32_t usage);
 
-		VBO & update(buffer_t data, uint32_t size, uint32_t offset);
+		VertexBufferObject & destroy();
+
+		VertexBufferObject & update(buffer_t data, uint32_t size);
+
+		VertexBufferObject & update(buffer_t data, uint32_t size, uint32_t offset);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uint32_t usage() const noexcept { return std::get<0>(m_storage); }
+		constexpr decltype(auto) usage() const noexcept { return std::get<Usage>(m_storage); }
 		
-		inline buffer_t data() const noexcept { return std::get<1>(m_storage); }
+		constexpr decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
 		
-		inline uint32_t size() const noexcept { return std::get<2>(m_storage); }
+		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
 
-		inline uint32_t count() const noexcept { return std::get<3>(m_storage); }
+		constexpr decltype(auto) count() const noexcept { return std::get<Count>(m_storage); }
 
-		inline uint32_t offset() const noexcept { return std::get<4>(m_storage); }
+		constexpr decltype(auto) offset() const noexcept { return std::get<Offset>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -232,9 +228,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	struct ML_RENDERER_API IBO final : public GraphicsBuffer<IBO>
+
+	// Index Buffer Object
+	struct ML_RENDERER_API IndexBufferObject final : public GraphicsObject<IndexBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { Usage, Type, Data, Count };
 
 		using storage_t = typename std::tuple<
 			uint32_t, uint32_t, buffer_t, uint32_t
@@ -243,82 +243,80 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args>
-		explicit IBO(handle_t handle, Args && ... args) noexcept
-			: GraphicsBuffer{ handle }
+		constexpr explicit IndexBufferObject(handle_t handle, Args && ... args)
+			: GraphicsObject{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		IBO(self_type const & other)
+		constexpr IndexBufferObject(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		IBO(self_type && other) noexcept
+		constexpr IndexBufferObject(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		IBO()
+		constexpr IndexBufferObject()
 			: self_type{ NULL, 0, 0, nullptr, 0 }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_handle, other.m_handle);
+				alg::swap(m_handle, other.m_handle);
 
-				m_storage.swap(other.m_storage);
+				alg::swap(m_storage, other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static bool create(IBO * value, uint32_t usage, uint32_t type);
-
-		static void bind(IBO const * value);
-		
-		static bool destroy(IBO * value);
-
-		static void update(IBO * value, buffer_t data, uint32_t count);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		IBO & create(uint32_t usage, uint32_t type);
+		static void bind(IndexBufferObject const * value);
 
 		void bind() const;
 
-		bool destroy();
-
-		IBO & update(buffer_t data, uint32_t count);
+		void unbind() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uint32_t usage() const noexcept { return std::get<0>(m_storage); }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uint32_t type() const noexcept { return std::get<1>(m_storage); }
+		IndexBufferObject & create(uint32_t usage, uint32_t type);
+
+		IndexBufferObject & destroy();
+
+		IndexBufferObject & update(buffer_t data, uint32_t count);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr decltype(auto) usage() const noexcept { return std::get<Usage>(m_storage); }
+
+		constexpr decltype(auto) type() const noexcept { return std::get<Type>(m_storage); }
 		
-		inline buffer_t data() const noexcept { return std::get<2>(m_storage); }
+		constexpr decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
 		
-		inline uint32_t count() const noexcept { return std::get<3>(m_storage); }
+		constexpr decltype(auto) count() const noexcept { return std::get<Count>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -328,83 +326,114 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	struct ML_RENDERER_API FBO final : public GraphicsBuffer<FBO>
+
+	// Frame Buffer Object
+	struct ML_RENDERER_API FrameBufferObject final : public GraphicsObject<FrameBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using BufAttachment = typename std::pair<
+			uint32_t,	// attachment
+			uint32_t	// handle
+		>;
+		
+		using TexAttachment = typename std::tuple<
+			uint32_t,	// attachment
+			uint32_t,	// handle
+			uint32_t	// level
+		>;
+
+		enum : size_t { Size, BufferID, TextureID };
+		
 		using storage_t = typename std::tuple<
-			vec2
+			vec2, BufAttachment, TexAttachment
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args>
-		explicit FBO(handle_t handle, Args && ... args) noexcept
-			: GraphicsBuffer{ handle }
+		constexpr explicit FrameBufferObject(handle_t handle, Args && ... args)
+			: GraphicsObject{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		FBO(self_type const & other)
+		constexpr FrameBufferObject(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		FBO(self_type && other) noexcept
+		constexpr FrameBufferObject(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		FBO()
-			: self_type{ NULL, vec2{ 0 } }
+		constexpr FrameBufferObject()
+			: self_type{ NULL, vec2{ 0 }, std::make_pair(0, 0), std::make_tuple(0, 0, 0) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_handle, other.m_handle);
+				alg::swap(m_handle, other.m_handle);
 
-				m_storage.swap(other.m_storage);
+				alg::swap(m_storage, other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static bool create(FBO * value, vec2 const & size);
-
-		static void bind(FBO const * value);
+		static void bind(FrameBufferObject const * value);
 		
-		static bool destroy(FBO * value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		FBO & create(vec2 const & size);
-
 		void bind() const;
 
-		bool destroy();
+		void unbind() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline vec2 size() const noexcept { return std::get<0>(m_storage); }
+		FrameBufferObject & create(vec2 const & size);
+
+		FrameBufferObject & destroy();
+
+		FrameBufferObject & attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer);
+
+		FrameBufferObject & attachTexture2D(uint32_t attachment, uint32_t texture, uint32_t level);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+
+		constexpr decltype(auto) buffer() const noexcept { return std::get<BufferID>(m_storage); }
+
+		constexpr decltype(auto) bufferAttachment() const noexcept { return buffer().first; }
+
+		constexpr decltype(auto) bufferHandle() const noexcept { return buffer().second; }
+
+		constexpr decltype(auto) texture() const noexcept { return std::get<TextureID>(m_storage); }
+
+		constexpr decltype(auto) textureAttachment() const noexcept { return std::get<0>(texture()); }
+
+		constexpr decltype(auto) textureHandle() const noexcept { return std::get<1>(texture()); }
+
+		constexpr decltype(auto) textureLevel() const noexcept { return std::get<2>(texture()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -414,85 +443,89 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	struct ML_RENDERER_API RBO final : public GraphicsBuffer<RBO>
+
+	// Render Buffer Object
+	struct ML_RENDERER_API RenderBufferObject final : public GraphicsObject<RenderBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum : size_t { Size, Format };
+
 		using storage_t = typename std::tuple<
-			vec2, uint32_t
+			vec2i, uint32_t, uint32_t
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args>
-		explicit RBO(handle_t handle, Args && ... args) noexcept
-			: GraphicsBuffer{ handle }
+		constexpr explicit RenderBufferObject(handle_t handle, Args && ... args)
+			: GraphicsObject{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		RBO(self_type const & other)
+		constexpr RenderBufferObject(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		RBO(self_type && other) noexcept
+		constexpr RenderBufferObject(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		RBO()
-			: self_type{ NULL, vec2{ 0 }, 0 }
+		constexpr RenderBufferObject()
+			: self_type{ NULL, vec2{ 0 }, 0, 0 }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_handle, other.m_handle);
+				alg::swap(m_handle, other.m_handle);
 
-				m_storage.swap(other.m_storage);
+				alg::swap(m_storage, other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		static bool create(RBO * value, vec2 const & size, uint32_t type);
 
-		static void bind(RBO const * value);
-		
-		static bool destroy(RBO * value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		RBO & create(vec2 const & size, uint32_t type);
+		static void bind(RenderBufferObject const * value);
 
 		void bind() const;
 
-		bool destroy();
+		void unbind() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline vec2 size() const noexcept { return std::get<0>(m_storage); }
+		RenderBufferObject & create(vec2i const & size);
 
-		inline uint32_t type() const noexcept { return std::get<1>(m_storage); }
+		RenderBufferObject & destroy();
+
+		RenderBufferObject & update(uint32_t format);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+
+		constexpr decltype(auto) format() const noexcept { return std::get<Format>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -501,6 +534,35 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ... Args> static constexpr auto make_vao(Args && ... args)
+	{
+		return VertexArrayObject{ std::forward<Args>(args)... };
+	}
+
+	template <class ... Args> static constexpr auto make_vbo(Args && ... args)
+	{
+		return VertexBufferObject{ std::forward<Args>(args)... };
+	}
+
+	template <class ... Args> static constexpr auto make_ibo(Args && ... args)
+	{
+		return IndexBufferObject{ std::forward<Args>(args)... };
+	}
+
+	template <class ... Args> static constexpr auto make_fbo(Args && ... args)
+	{
+		return FrameBufferObject{ std::forward<Args>(args)... };
+	}
+
+	template <class ... Args> static constexpr auto make_rbo(Args && ... args)
+	{
+		return RenderBufferObject{ std::forward<Args>(args)... };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BUFFERS_HPP_

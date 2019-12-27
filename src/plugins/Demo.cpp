@@ -13,7 +13,7 @@
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/Model.hpp>
 #include <libmeme/Renderer/Shader.hpp>
-#include <libmeme/Renderer/Texture.hpp>
+#include <libmeme/Renderer/RenderTexture.hpp>
 
 namespace ml
 {
@@ -26,6 +26,7 @@ namespace ml
 		dense_map<std::string, Shader>		m_shaders	{};
 		dense_map<std::string, Material>	m_materials	{};
 		dense_map<std::string, Model>		m_models	{};
+		std::vector<RenderTexture>			m_pipeline	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -92,15 +93,11 @@ namespace ml
 					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
 					make_uniform<Color	>("u_color",		colors::white),
 					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, -5.f }),
-					make_uniform<vec3	>("u_scale",		vec3{ 0.5f, 0.5f, 0.5f }),
+					make_uniform<vec3	>("u_scale",		vec3{ 1.f, 1.f, 1.f }),
 					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
 				}) });
 
-				m_models.insert({ "sphere32x24", make_model(
-					FS::path_to("../../../assets/meshes/sphere32x24.obj")
-				) });
-
-				m_models.insert({ "tri", make_model({ make_mesh(
+				m_models.insert({ "triangle", make_model(make_mesh(
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -109,11 +106,37 @@ namespace ml
 					{
 						0, 1, 2,
 					}
-				) }) });
+				)) });
+
+				m_models.insert({ "quad", make_model(make_mesh(
+					{
+						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
+						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
+						make_vertex({ -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
+						make_vertex({ -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f }),
+					},
+					{
+						0, 1, 3,
+						1, 2, 3,
+					}
+				)) });
+
+				m_models.insert({ "sphere32x24", make_model(
+					FS::path_to("../../../assets/meshes/sphere32x24.obj")
+				) });
+
+				m_pipeline.emplace_back(make_rendertexture(
+					vec2i{ 1280, 720 }
+				)).create();
 
 			} break;
 			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(value) })
 			{
+				if (ML_BIND_EX(RenderTexture, _r, m_pipeline[0]))
+				{
+					// WIP
+				}
+
 				static constexpr auto bg{ make_color(colors::magenta) };
 				GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
 				GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
@@ -166,52 +189,6 @@ namespace ml
 						ImGui::Columns(1);
 					}
 
-					auto draw_texture_preview = [](auto & value)
-					{
-						auto & io{ ImGui::GetIO() };
-						void * const tex_id{ value.address() };
-						float_t const tex_w{ (float_t)value.width() };
-						float_t const tex_h{ (float_t)value.height() };
-						ImGui::Text("%.0fx%.0f", tex_w, tex_h);
-						auto const pos{ ImGui::GetCursorScreenPos() };
-						ImGui::Image(
-							tex_id,
-							{ tex_w, tex_h },
-							{ 0, 0 },
-							{ 1, 1 },
-							{ 1.0f, 1.0f, 1.0f, 1.0f },
-							{ 1.0f, 1.0f, 1.0f, 0.5f }
-						);
-						if (ImGui::IsItemHovered())
-						{
-							float_t const region_zoom{ 4.0f };
-							float_t const region_size{ 32.0f };
-
-							ImGui::BeginTooltip();
-							
-							float_t region_x{ io.MousePos.x - pos.x - region_size * 0.5f };
-							if (region_x < 0.0f) region_x = 0.0f;
-							else if (region_x > (tex_w - region_size)) region_x = (tex_w - region_size);
-							
-							float_t region_y{ io.MousePos.y - pos.y - region_size * 0.5f };
-							if (region_y < 0.0f) region_y = 0.0f;
-							else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
-
-							ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-							ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
-							ImGui::Image(
-								tex_id, 
-								{ region_size * region_zoom, region_size * region_zoom }, 
-								{ region_x / tex_w, region_y / tex_h },
-								{ (region_x + region_size) / tex_w, (region_y + region_size) / tex_h },
-								{ 1.0f, 1.0f, 1.0f, 1.0f },
-								{ 1.0f, 1.0f, 1.0f, 0.5f }
-							);
-
-							ImGui::EndTooltip();
-						}
-					};
-
 					draw_texture_preview(m_textures["navball"]);
 				}
 				ImGui::End();
@@ -224,7 +201,57 @@ namespace ml
 				m_shaders.clear();
 				m_materials.clear();
 				m_models.clear();
+				m_pipeline.clear();
 			} break;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void draw_texture_preview(Texture const & value)
+		{
+			auto & io{ ImGui::GetIO() };
+			void * const tex_id{ value.address() };
+			float_t const tex_w{ (float_t)value.width() };
+			float_t const tex_h{ (float_t)value.height() };
+			ImGui::Text("ID: %u", value.handle());
+			ImGui::Text("%.0fx%.0f", tex_w, tex_h);
+			auto const pos{ ImGui::GetCursorScreenPos() };
+			ImGui::Image(
+				tex_id,
+				{ tex_w, tex_h },
+				{ 0, 0 },
+				{ 1, 1 },
+				{ 1.0f, 1.0f, 1.0f, 1.0f },
+				{ 1.0f, 1.0f, 1.0f, 0.5f }
+			);
+			if (ImGui::IsItemHovered())
+			{
+				float_t const region_zoom{ 4.0f };
+				float_t const region_size{ 32.0f };
+
+				ImGui::BeginTooltip();
+
+				float_t region_x{ io.MousePos.x - pos.x - region_size * 0.5f };
+				if (region_x < 0.0f) region_x = 0.0f;
+				else if (region_x > (tex_w - region_size)) region_x = (tex_w - region_size);
+
+				float_t region_y{ io.MousePos.y - pos.y - region_size * 0.5f };
+				if (region_y < 0.0f) region_y = 0.0f;
+				else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
+
+				ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
+				ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
+				ImGui::Image(
+					tex_id,
+					{ region_size * region_zoom, region_size * region_zoom },
+					{ region_x / tex_w, region_y / tex_h },
+					{ (region_x + region_size) / tex_w, (region_y + region_size) / tex_h },
+					{ 1.0f, 1.0f, 1.0f, 1.0f },
+					{ 1.0f, 1.0f, 1.0f, 0.5f }
+				);
+
+				ImGui::EndTooltip();
 			}
 		}
 

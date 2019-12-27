@@ -199,8 +199,8 @@ namespace ml::alg
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, class>
-	static constexpr void swap(T & lhs, T & rhs) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_move_assignable_v<T>)
+	template <class T>
+	static constexpr void swap(T & lhs, T & rhs) noexcept
 	{
 		T temp = std::move(lhs);
 		lhs = std::move(rhs);

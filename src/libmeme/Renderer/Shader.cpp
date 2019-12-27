@@ -78,7 +78,10 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Shader::~Shader() { destroy(); }
+	Shader::~Shader()
+	{
+		destroy();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -100,14 +103,10 @@ namespace ml
 		if (this != std::addressof(other))
 		{
 			std::swap(m_handle, other.m_handle);
-			
 			std::swap(m_source, other.m_source);
-			
-			m_attributes.swap(other.m_attributes);
-			
-			m_uniforms.swap(other.m_uniforms);
-			
-			m_textures.swap(other.m_textures);
+			std::swap(m_attributes, other.m_attributes);
+			std::swap(m_uniforms, other.m_uniforms);
+			std::swap(m_textures, other.m_textures);
 		}
 	}
 
@@ -171,14 +170,6 @@ namespace ml
 
 	bool Shader::destroy()
 	{
-		m_source = { nullptr, nullptr, nullptr };
-		
-		if (!m_attributes.empty()) { m_attributes.clear(); }
-		
-		if (!m_uniforms.empty()) { m_uniforms.clear(); }
-		
-		if (!m_textures.empty()) { m_textures.clear(); }
-		
 		Shader::bind(nullptr);
 		
 		if (m_handle)
@@ -186,6 +177,10 @@ namespace ml
 			GL::deleteShader(m_handle);
 			
 			m_handle = NULL;
+			m_source = { nullptr, nullptr, nullptr };
+			m_attributes.clear();
+			m_uniforms.clear();
+			m_textures.clear();
 			
 			GL::flush();
 		}

@@ -10,31 +10,33 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Mesh::Mesh() : m_storage{ std::make_tuple(
-		BufferLayout{}, VAO{}, VBO{}, IBO{}
+		make_bufferlayout(),
+		make_vao(),
+		make_vbo(),
+		make_ibo()
 	) }
 	{
 	}
 
 	Mesh::Mesh(vertices_t const & vertices)
-		: Mesh{}
+		: m_storage{}
 	{
 		loadFromMemory(vertices);
 	}
 
 	Mesh::Mesh(vertices_t const & vertices, indices_t const & indices)
-		: Mesh{}
+		: m_storage{}
 	{
 		loadFromMemory(vertices, indices);
 	}
 
 	Mesh::Mesh(Mesh const & other)
-		: Mesh{}
+		: m_storage{ other.m_storage }
 	{
-		assign(other);
 	}
 
 	Mesh::Mesh(Mesh && other) noexcept
-		: Mesh{}
+		: m_storage{}
 	{
 		swap(std::move(other));
 	}
@@ -48,7 +50,8 @@ namespace ml
 
 	Mesh & Mesh::operator=(Mesh const & other)
 	{
-		assign(other);
+		Mesh temp{ other };
+		swap(temp);
 		return (*this);
 	}
 
@@ -58,23 +61,15 @@ namespace ml
 		return (*this);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void Mesh::assign(Mesh const & other)
-	{
-		if (this != std::addressof(other))
-		{
-			m_storage = other.m_storage;
-		}
-	}
-
 	void Mesh::swap(Mesh & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			std::swap(m_storage, other.m_storage);
 		}
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void Mesh::destroy()
 	{
@@ -99,11 +94,11 @@ namespace ml
 	{
 		if (!vertices.empty() && !indices.empty())
 		{
-			if (ML_BIND(VAO, vao().create(GL::Triangles)))
+			if (ML_BIND(VertexArrayObject, vao().create(GL::Triangles)))
 			{
-				if (ML_BIND(VBO, vbo().create(GL::StaticDraw)))
+				if (ML_BIND(VertexBufferObject, vbo().create(GL::StaticDraw)))
 				{
-					if (ML_BIND(IBO, ibo().create(GL::StaticDraw, GL::UnsignedInt)))
+					if (ML_BIND(IndexBufferObject, ibo().create(GL::StaticDraw, GL::UnsignedInt)))
 					{
 						vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
 
@@ -123,9 +118,9 @@ namespace ml
 	{
 		if (!vertices.empty())
 		{
-			if (ML_BIND(VAO, vao().create(GL::Triangles)))
+			if (ML_BIND(VertexArrayObject, vao().create(GL::Triangles)))
 			{
-				if (ML_BIND(VBO, vbo().create(GL::StaticDraw)))
+				if (ML_BIND(VertexBufferObject, vbo().create(GL::StaticDraw)))
 				{
 					vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
 

@@ -9,6 +9,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum : size_t { Tex, Bounds, Advance };
+
 		using storage_t = typename std::tuple<
 			Texture, FloatRect, uint32_t
 		>;
@@ -30,23 +32,15 @@ namespace ml
 
 		Glyph operator=(Glyph && other) noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void assign(Glyph const & other);
-
 		void swap(Glyph & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto storage() noexcept -> storage_t & { return m_storage; }
-		
-		inline auto storage() const noexcept -> storage_t const & { return m_storage; }
+		inline auto texture() const noexcept -> Texture const & { return std::get<Tex>(m_storage); }
 
-		inline auto texture() const noexcept -> Texture const & { return std::get<0>(m_storage); }
+		inline auto bounds() const noexcept -> FloatRect const & { return std::get<Bounds>(m_storage); }
 
-		inline auto bounds() const noexcept -> FloatRect const & { return std::get<1>(m_storage); }
-
-		inline auto advance() const noexcept -> uint32_t const & { return std::get<2>(m_storage); }
+		inline auto advance() const noexcept -> uint32_t const & { return std::get<Advance>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

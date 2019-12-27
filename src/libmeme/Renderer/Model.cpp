@@ -54,6 +54,10 @@ namespace ml
 
 	Model::~Model()
 	{
+		for (auto & elem : m_storage)
+		{
+			elem.destroy();
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -107,7 +111,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			std::swap(m_storage, other.m_storage);
 		}
 	}
 

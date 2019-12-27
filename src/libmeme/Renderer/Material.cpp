@@ -31,7 +31,9 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Material::~Material() {}
+	Material::~Material()
+	{
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,7 +56,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			std::swap(m_storage, other.m_storage);
 		}
 	}
 

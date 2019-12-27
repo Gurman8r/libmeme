@@ -11,10 +11,6 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type_t = typename typeof<>;
-
-		using name_t = typename std::string;
-
 		using variable_t = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
@@ -26,9 +22,19 @@ namespace ml
 			variable_t()
 		>;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using type_t = typename typeof<>;
+
+		using name_t = typename std::string;
+
 		using data_t = typename std::variant<
 			variable_t, funcion_t
 		>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { Type, Name, Data };
 
 		using storage_t = typename std::tuple<
 			type_t, name_t, data_t
@@ -53,11 +59,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline type_t const & type() const noexcept { return std::get<0>(m_storage); }
+		inline type_t const & type() const noexcept { return std::get<Type>(m_storage); }
 
-		inline name_t const & name() const noexcept { return std::get<1>(m_storage); }
+		inline name_t const & name() const noexcept { return std::get<Name>(m_storage); }
 		
-		inline data_t const & data() const noexcept { return std::get<2>(m_storage); }
+		inline data_t const & data() const noexcept { return std::get<Data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,6 +77,8 @@ namespace ml
 			return std::holds_alternative<funcion_t>(data());
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline std::optional<variable_t> load() const
 		{
 			if (is_variable())
@@ -79,13 +87,22 @@ namespace ml
 			}
 			else if (is_function())
 			{
-				return std::make_optional(std::invoke(std::get<funcion_t>(data())));
+				if (auto const & f{ std::get<funcion_t>(data()) })
+				{
+					return std::make_optional(std::invoke(f));
+				}
 			}
-			else
-			{
-				return std::nullopt;
-			}
+			return std::nullopt;
 		}
+
+		template <class T, class ... Args> inline decltype(auto) store(Args && ... args)
+		{
+			return (m_storage = std::make_tuple(
+				typeof_v<T>, name(), std::forward<Args>(args)...
+			));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T> inline std::optional<T> get() const
 		{
@@ -97,13 +114,6 @@ namespace ml
 			{
 				return std::nullopt;
 			}
-		}
-
-		template <class Type, class ... Args> inline decltype(auto) set(Args && ... args)
-		{
-			return (m_storage = std::make_tuple(
-				typeof_v<Type>, name(), std::forward<Args>(args)...
-			));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -28,9 +28,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void draw(VAO const & vao, VBO const & vbo) const;
+		void draw(VertexArrayObject const & vao, VertexBufferObject const & vbo) const;
 
-		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
+		void draw(VertexArrayObject const & vao, VertexBufferObject const & vbo, IndexBufferObject const & ibo) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -5,6 +5,7 @@
 
 namespace ml
 {
+	// collection of meshes
 	struct ML_RENDERER_API Model final : public Trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

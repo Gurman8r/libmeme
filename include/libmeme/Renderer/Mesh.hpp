@@ -13,8 +13,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum : size_t { Layout, VAO, VBO, IBO };
+
 		using storage_t = typename std::tuple<
-			BufferLayout, VAO, VBO, IBO
+			BufferLayout,
+			VertexArrayObject,
+			VertexBufferObject,
+			IndexBufferObject
 		>;
 		
 		using contiguous_t = typename std::vector<float_t>;
@@ -33,12 +38,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Mesh & operator=(Mesh const & other);
+		
 		Mesh & operator=(Mesh && other) noexcept;
+
+		void swap(Mesh & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void assign(Mesh const & other);
-		void swap(Mesh & other) noexcept;
 		void destroy();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -54,25 +60,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline BufferLayout & layout() noexcept { return std::get<0>(m_storage); }
-		inline BufferLayout const & layout() const noexcept { return std::get<0>(m_storage); }
-		inline BufferLayout & layout(BufferLayout const & value) { return (std::get<0>(m_storage) = value); }
-		inline BufferLayout & layout(BufferLayout && value) noexcept { return (std::get<0>(m_storage) = std::move(value)); }
+		inline auto layout() noexcept		-> BufferLayout & { return std::get<Layout>(m_storage); }
+		inline auto layout() const noexcept -> BufferLayout const & { return std::get<Layout>(m_storage); }
 
-		inline VAO & vao() noexcept { return std::get<1>(m_storage); }
-		inline VAO const & vao() const noexcept { return std::get<1>(m_storage); }
-		inline VAO & vao(VAO const & value) { return (std::get<1>(m_storage) = value); }
-		inline VAO & vao(VAO && value) noexcept { return (std::get<1>(m_storage) = std::move(value)); }
+		inline auto vao() noexcept			-> VertexArrayObject & { return std::get<VAO>(m_storage); }
+		inline auto vao() const noexcept	-> VertexArrayObject const & { return std::get<VAO>(m_storage); }
 
-		inline VBO & vbo() noexcept { return std::get<2>(m_storage); }
-		inline VBO const & vbo() const noexcept { return std::get<2>(m_storage); }
-		inline VBO & vbo(VBO const & value) { return (std::get<2>(m_storage) = value); }
-		inline VBO & vbo(VBO && value) noexcept { return (std::get<2>(m_storage) = std::move(value)); }
+		inline auto vbo() noexcept			-> VertexBufferObject & { return std::get<VBO>(m_storage); }
+		inline auto vbo() const noexcept	-> VertexBufferObject const & { return std::get<VBO>(m_storage); }
 
-		inline IBO & ibo() noexcept { return std::get<3>(m_storage); }
-		inline IBO const & ibo() const noexcept { return std::get<3>(m_storage); }
-		inline IBO & ibo(IBO const & value) { return (std::get<3>(m_storage) = value); }
-		inline IBO & ibo(IBO && value) noexcept { return (std::get<3>(m_storage) = std::move(value)); }
+		inline auto ibo() noexcept			-> IndexBufferObject & { return std::get<IBO>(m_storage); }
+		inline auto ibo() const noexcept	-> IndexBufferObject const & { return std::get<IBO>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,6 +88,11 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static inline auto make_mesh(Mesh::vertices_t && v)
+	{
+		return Mesh{ std::move(v) };
+	}
 
 	static inline auto make_mesh(Mesh::vertices_t && v, Mesh::indices_t && i)
 	{
