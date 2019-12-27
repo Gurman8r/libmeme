@@ -91,15 +91,15 @@ namespace ml
 		32							// Bits-per-Pixel
 	} };
 	static constexpr auto const window_style{ WindowStyle {
-		true,						// Resizable
-		true,						// Visible
-		true,						// Decorated
-		true,						// Focused
-		true,						// Auto Iconify
-		false,						// Floating
-		false,						// Maximized
-		false,						// Fullscreen
-		false,						// Vertical Sync
+		1,							// Resizable
+		1,							// Visible
+		1,							// Decorated
+		1,							// Focused
+		1,							// Auto Iconify
+		0,							// Floating
+		0,							// Maximized
+		0,							// Fullscreen
+		1,							// Vertical Sync
 	} };
 	static constexpr auto const window_context{ ContextSettings {
 		ContextSettings::OpenGL,	// API
@@ -231,7 +231,7 @@ ml::int32_t main()
 	}
 
 	// Load Event
-	ML_EventSystem.fireEvent<LoadEvent>();
+	ML_EventSystem.fireEvent<LoadEvent>(window);
 
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * */
@@ -256,13 +256,13 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tDRAW");
-			ML_EventSystem.fireEvent<DrawEvent>();
+			ML_EventSystem.fireEvent<DrawEvent>(window);
 		}
 		// Begin Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
-			Editor::new_frame();
+			ML_Editor.new_frame();
 			ML_EventSystem.fireEvent<BeginGuiEvent>();
 		}
 		// Gui
@@ -275,7 +275,7 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_END");
-			Editor::render_frame();
+			ML_Editor.render_frame();
 			ML_EventSystem.fireEvent<EndGuiEvent>();
 		}
 		// End Step
@@ -283,8 +283,7 @@ ml::int32_t main()
 		{
 			ML_BENCHMARK("STEP_END");
 			ML_EventSystem.fireEvent<EndStepEvent>();
-			if (window.getStyle().vertical_sync()) { window.swapBuffers(); } // Vsync
-			else { GL::flush(); } // Uncapped
+			if (window.getStyle().vertical_sync()) { window.swapBuffers(); } // vsync
 		}
 		ML_PerformanceTracker.end_frame();
 		time.delta = time.loop.stop().elapsed().count();

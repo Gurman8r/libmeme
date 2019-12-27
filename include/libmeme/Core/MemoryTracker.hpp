@@ -14,7 +14,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_t = typename std::tuple<size_t, size_t, struct Trackable *>;
+		using storage_t = typename std::tuple<
+			size_t, size_t, struct Trackable *
+		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -29,7 +31,7 @@ namespace ml
 	private:
 		friend struct MemoryTracker;
 
-		union { storage_t m_storage; };
+		storage_t m_storage;
 
 		explicit AllocationRecord(storage_t && storage) noexcept;
 

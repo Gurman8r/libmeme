@@ -82,7 +82,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ev> static inline Ev const * event_cast(Event const & value)
+	template <class Ev> static constexpr decltype(auto) event_cast(Event const & value)
 	{
 		return (value.id() == Ev::ID) ? static_cast<Ev const *>(&value) : nullptr;
 	}

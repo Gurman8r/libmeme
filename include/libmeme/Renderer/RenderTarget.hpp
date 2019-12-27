@@ -12,8 +12,19 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		RenderTarget() noexcept = default;
+		virtual ~RenderTarget() = default;
 
-		virtual ~RenderTarget() {}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T> inline void draw(T const * value) const
+		{
+			T::draw((*this), value);
+		}
+
+		template <class T> inline void draw(T const & value) const
+		{
+			this->draw(&value);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

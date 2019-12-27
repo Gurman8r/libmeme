@@ -1,9 +1,6 @@
 #include <libmeme/Renderer/RenderWindow.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
-#include <libmeme/Renderer/GraphicsEvents.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
-#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Debug.hpp>
 
 namespace ml

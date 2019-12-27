@@ -1,7 +1,6 @@
 #ifndef _ML_MATERIAL_HPP_
 #define _ML_MATERIAL_HPP_
 
-#include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Renderer/Uniform.hpp>
 
 namespace ml
@@ -152,12 +151,17 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union { storage_t m_storage; };
+		storage_t m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static inline auto make_material(Material::storage_t && s)
+	{
+		return Material{ std::move(s) };
+	}
 
 	template <class ... Args> static inline auto make_material(Args && ... args)
 	{

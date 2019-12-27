@@ -84,12 +84,8 @@ namespace ml
 
 	std::string FS::get_file_contents(path_t const & path)
 	{
-		return ([path]() {
-			auto const o{ FS::read_file(path.string()) };
-			return o 
-				? std::string{ o->cbegin(), o->cend() } 
-				: std::string{};
-		})();
+		auto const o{ FS::read_file(path.string()) };
+		return o ? std::string{ o->cbegin(), o->cend() } : std::string{};
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

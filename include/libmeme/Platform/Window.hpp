@@ -22,6 +22,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct Icon final
+		{
+			int32_t width{ 0 };
+			
+			int32_t height{ 0 };
+			
+			byte_t * pixels{ nullptr };
+
+			constexpr Icon() noexcept = default;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		using CharFun			= typename void(*)(void *, uint32_t);
 		using CursorEnterFun	= typename void(*)(void *, int32_t);
 		using CursorPosFun		= typename void(*)(void *, float64_t, float64_t);
@@ -85,7 +98,7 @@ namespace ml
 		
 		Window & setFullscreen(bool value);
 		
-		Window & setIcon(uint32_t w, uint32_t h, byte_t const * pixels);
+		Window & setIcon(size_t w, size_t h, byte_t const * pixels);
 		
 		Window & setPosition(vec2i const & value);
 		
@@ -202,13 +215,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		void * 		m_window;
-		void * 		m_monitor;
-		void * 		m_share;
-		ContextSettings		m_context;
+		void * 			m_window;
+		void * 			m_monitor;
+		void * 			m_share;
+		ContextSettings	m_context;
 		WindowStyle		m_style;
-		DisplayMode	m_video;
-		std::string	m_title;
+		DisplayMode		m_video;
+		std::string		m_title;
+		Icon			m_icon;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

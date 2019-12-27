@@ -68,10 +68,10 @@ namespace ml
 			}
 		}
 #endif
-		ML_EventSystem.addListener(WindowErrorEvent::ID, this);
-		ML_EventSystem.addListener(WindowKillEvent::ID, this);
-		ML_EventSystem.addListener(WindowSizeEvent::ID, this);
-		ML_EventSystem.addListener(WindowFullscreenEvent::ID, this);
+		ML_EventSystem.addListener<WindowErrorEvent>(this);
+		ML_EventSystem.addListener<WindowKillEvent>(this);
+		ML_EventSystem.addListener<WindowSizeEvent>(this);
+		ML_EventSystem.addListener<WindowFullscreenEvent>(this);
 	}
 	
 	Window::~Window()
@@ -337,13 +337,17 @@ namespace ml
 		return setMonitor(value ? glfwGetPrimaryMonitor() : nullptr);
 	}
 
-	Window & Window::setIcon(uint32_t w, uint32_t h, byte_t const * pixels)
+	Window & Window::setIcon(size_t w, size_t h, byte_t const * pixels)
 	{
 		if (m_window)
 		{
-			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 
+			m_icon = {
+				static_cast<int32_t>(w), static_cast<int32_t>(h), const_cast<byte_t *>(pixels) 
+			};
+
+			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window),
 				1,
-				&map_glfw_image(w, h, pixels)
+				reinterpret_cast<GLFWimage *>(&m_icon)
 			);
 		}
 		return (*this);

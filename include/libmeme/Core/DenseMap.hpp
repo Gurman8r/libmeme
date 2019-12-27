@@ -41,17 +41,17 @@ namespace ml
 		{
 			constexpr compare_impl() noexcept = default;
 
-			constexpr bool operator()(const_reference lhs, key_type const & rhs) const noexcept
+			constexpr bool operator()(const_reference lhs, key_type const & rhs) const
 			{
 				return compare_type{}(lhs.first, rhs);
 			}
 
-			constexpr bool operator()(key_type const & lhs, const_reference rhs) const noexcept
+			constexpr bool operator()(key_type const & lhs, const_reference rhs) const
 			{
 				return compare_type{}(lhs, rhs.first);
 			}
 
-			constexpr bool operator()(const_reference lhs, const_reference rhs) const noexcept
+			constexpr bool operator()(const_reference lhs, const_reference rhs) const
 			{
 				return compare_type{}(lhs.first, rhs.first);
 			}
@@ -205,7 +205,7 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				swap(value.m_storage);
+				m_storage.swap(value.m_storage);
 			}
 		}
 
@@ -235,47 +235,53 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Comp> inline iterator find_if(Comp pr) noexcept
+		inline decltype(auto) find_range(key_type const & key)
 		{
-			return std::find_if<iterator, Comp>(begin(), end(), pr);
+			return std::equal_range(begin(), end(), key, compare_impl{});
 		}
 
-		template <class Comp> inline const_iterator find_if(Comp pr) const noexcept
+		inline decltype(auto) find_range(key_type const & key) const
 		{
-			return std::find_if<const_iterator, Comp>(cbegin(), cend(), pr);
+			return std::equal_range(cbegin(), cend(), key, compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline iterator find(key_type const & key)
 		{
-			return std::upper_bound(begin(), end(), key, compare_impl{});
+			if (auto const it{ find_range(key) }; it.first != it.second)
+			{
+				return it.second;
+			}
+			return end();
 		}
 
 		inline const_iterator find(key_type const & key) const
 		{
-			return std::upper_bound(cbegin(), cend(), key, compare_impl{});
+			if (auto const it{ find_range(key) }; it.first != it.second)
+			{
+				return it.second;
+			}
+			return cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline std::pair<iterator, bool> insert(const_reference value)
 		{
-			if (auto const it{ std::equal_range(begin(), end(), value.first, compare_impl{}) }
-			; it.first != it.second)
+			if (auto const it{ find_range(value.first) }; it.first != it.second)
 			{
 				return std::make_pair(it.second, false);
 			}
 			else
 			{
-				return std::make_pair(m_storage.emplace(it.second, value), true);
+				return std::make_pair(m_storage.insert(it.second, value), true);
 			}
 		}
 
 		inline std::pair<iterator, bool> insert(value_type && value)
 		{
-			if (auto const it{ std::equal_range(begin(), end(), value.first, compare_impl{}) }
-			; it.first != it.second)
+			if (auto const it{ find_range(value.first) }; it.first != it.second)
 			{
 				return std::make_pair(it.second, false);
 			}
@@ -289,8 +295,7 @@ namespace ml
 
 		inline mapped_type & operator[](key_type const & key)
 		{
-			if (auto const it{ std::equal_range(begin(), end(), value.first, compare_impl{}) }
-			; it.first != it.second)
+			if (auto const it{ find_range(key) }; it.first != it.second)
 			{
 				return it.first->second;
 			}

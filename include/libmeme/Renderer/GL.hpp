@@ -456,7 +456,7 @@ namespace ml
 			Renderer,						// GL_RENDERER
 			Version,						// GL_VERSION
 			Extensions,						// GL_EXTENSIONS
-			ShadingLanguageVersion = 0x8B8C,// GL_SHADING_LANGUAGE_VERSION			
+			ShadingLanguageVersion = 0x8B8C,// GL_SHADING_LANGUAGE_VERSION
 		};
 
 		static constexpr StringID StringID_values[] = {

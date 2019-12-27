@@ -15,19 +15,19 @@ namespace ml
 
 		using name_t = typename std::string;
 
-		using var_t = typename std::variant<
+		using variable_t = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
 			mat2, mat3, mat4,
 			struct Texture const *
 		>;
 
-		using func_t = typename std::function<
-			var_t()
+		using funcion_t = typename std::function<
+			variable_t()
 		>;
 
 		using data_t = typename std::variant<
-			var_t, func_t
+			variable_t, funcion_t
 		>;
 
 		using storage_t = typename std::tuple<
@@ -65,32 +65,45 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool is_variable() const noexcept { return std::holds_alternative<var_t>(data()); }
+		inline bool is_variable() const noexcept
+		{
+			return std::holds_alternative<variable_t>(data());
+		}
 
-		inline bool is_function() const noexcept { return std::holds_alternative<func_t>(data()); }
+		inline bool is_function() const noexcept
+		{
+			return std::holds_alternative<funcion_t>(data());
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T> inline std::optional<T> load() const
+		inline std::optional<variable_t> load() const
 		{
 			if (is_variable())
 			{
-				auto const & temp{ std::get<var_t>(data()) };
-				return std::holds_alternative<T>(temp)
-					? std::make_optional<T>(std::get<T>(temp))
-					: std::nullopt;
+				return std::make_optional(std::get<variable_t>(data()));
 			}
 			else if (is_function())
 			{
-				auto const & temp{ std::invoke(std::get<func_t>(data())) };
-				return std::holds_alternative<T>(temp)
-					? std::make_optional<T>(std::get<T>(temp))
-					: std::nullopt;
+				return std::make_optional(std::invoke(std::get<funcion_t>(data())));
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
-		template <class T, class ... Args> inline decltype(auto) store(Args && ... args)
+		template <class T> inline std::optional<T> get() const
+		{
+			if (std::optional<variable_t> v{ load() }; v && std::holds_alternative<T>(*v))
+			{
+				return std::make_optional<T>(std::get<T>(*v));
+			}
+			else
+			{
+				return std::nullopt;
+			}
+		}
+
+		template <class T, class ... Args> inline decltype(auto) set(Args && ... args)
 		{
 			return (m_storage = std::make_tuple(
 				typeof_v<T>, name(), std::forward<Args>(args)...
@@ -100,7 +113,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union { storage_t m_storage; };
+		storage_t m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -121,7 +134,7 @@ namespace ml
 	> static inline auto make_uniform(Name && name, Data && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
-			typeof_v<Type>, std::forward<Name>(name), std::forward<Data>(args)...
+			typeof_v<Type>, std::move(name), std::forward<Data>(args)...
 		) };
 	}
 

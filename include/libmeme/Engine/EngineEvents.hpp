@@ -41,11 +41,8 @@ namespace ml
 
 	struct EnterEvent final : public EngineEvent<EngineEventType::EV_Enter>
 	{
-		union
-		{
-			int32_t const argc;
-			C_String const * argv;
-		};
+		int32_t const argc;
+		C_String const * argv;
 
 		constexpr EnterEvent(int32_t argc, C_String const * argv) noexcept
 			: argc{ argc }
@@ -56,7 +53,12 @@ namespace ml
 
 	struct LoadEvent final : public EngineEvent<EngineEventType::EV_Load>
 	{
-		constexpr LoadEvent() {}
+		struct Window & window;
+
+		constexpr LoadEvent(struct Window & window)
+			: window{ window }
+		{
+		}
 	};
 
 	struct StartEvent final : public EngineEvent<EngineEventType::EV_Start>
@@ -80,7 +82,12 @@ namespace ml
 
 	struct DrawEvent final : public EngineEvent<EngineEventType::EV_Draw>
 	{
-		constexpr DrawEvent() {}
+		struct RenderWindow & window;
+
+		constexpr DrawEvent(struct RenderWindow & window)
+			: window{ window }
+		{
+		}
 	};
 
 	struct EndStepEvent final : public EngineEvent<EngineEventType::EV_EndStep>
@@ -108,10 +115,7 @@ namespace ml
 
 	struct CommandEvent final : public EngineEvent<EngineEventType::EV_Command>
 	{
-		union
-		{
-			C_String const cmd;
-		};
+		C_String const cmd;
 
 		constexpr CommandEvent(C_String cmd) noexcept
 			: cmd{ cmd }

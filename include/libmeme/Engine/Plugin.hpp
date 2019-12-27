@@ -13,7 +13,7 @@ namespace ml
 	{
 		Plugin() = default;
 
-		virtual ~Plugin() noexcept = default;
+		virtual ~Plugin() = default;
 
 		virtual void onEvent(Event const & value) override = 0;
 	};

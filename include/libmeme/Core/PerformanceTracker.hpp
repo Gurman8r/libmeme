@@ -35,9 +35,10 @@ namespace ml
 			m_curr.clear();
 		}
 
-		inline void push_trace(C_String name, Duration const & duration)
+		template <class ... Args>
+		inline decltype(auto) push_trace(Args && ... args)
 		{
-			m_curr.push_back(std::make_pair(name, duration));
+			return m_curr.emplace_back(std::make_pair(std::forward<Args>(args)...));
 		}
 
 		inline auto const & previous() const

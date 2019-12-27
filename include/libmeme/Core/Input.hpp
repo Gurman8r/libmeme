@@ -21,7 +21,7 @@ namespace ml
 
 		inline decltype(auto) operator()(std::istream & in) const
 		{
-			T temp {};
+			T temp{};
 			if (in.good()) { in >> temp; }
 			return temp;
 		}
@@ -63,14 +63,14 @@ namespace ml
 
 		inline decltype(auto) operator()(std::istream & in) const
 		{
-			std::string temp {};
+			std::string temp{};
 			if (in.good()) { in >> temp; }
 			return temp;
 		}
 
 		inline decltype(auto) operator()(std::istream & in, char delim)
 		{
-			std::string temp {};
+			std::string temp{};
 			std::getline(in, temp, delim);
 			return temp;
 		}

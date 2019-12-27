@@ -1,8 +1,8 @@
 #ifndef _ML_BUFFER_LAYOUT_HPP_
 #define _ML_BUFFER_LAYOUT_HPP_
 
-#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Renderer/Vertex.hpp>
+#include <libmeme/Renderer/GL.hpp>
 
 namespace ml
 {
@@ -35,6 +35,7 @@ namespace ml
 
 		using value_type		= typename Element;
 		using self_type			= typename BufferLayout;
+		using initializer_type	= typename std::initializer_list<value_type>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -44,19 +45,27 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static constexpr const Element Default[] = {
+			Element { 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
+			Element { 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
+			Element { 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr BufferLayout() noexcept
-			: self_type{ nullptr, nullptr }
+			: self_type{ Default }
 		{
 		}
 
 		template <size_t N>
-		constexpr BufferLayout(const value_type(&elements)[N]) noexcept
-			: self_type{ &elements[0], N }
+		constexpr BufferLayout(const value_type(&data)[N]) noexcept
+			: self_type{ &data[0], N }
 		{
 		}
 
 		constexpr BufferLayout(const_iterator first, const_iterator last) noexcept
-			: self_type { first, (size_t)(last - first) }
+			: self_type{ first, (size_t)(last - first) }
 		{
 		}
 
@@ -65,8 +74,8 @@ namespace ml
 		{
 		}
 
-		constexpr BufferLayout(const_pointer elements, size_t size) noexcept
-			: m_data{ elements }
+		constexpr BufferLayout(const_pointer data, size_t size) noexcept
+			: m_data{ data }
 			, m_size{ size }
 		{
 		}
@@ -115,6 +124,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BUFFER_LAYOUT_HPP_

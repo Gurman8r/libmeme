@@ -11,20 +11,18 @@ namespace ml
 		union { uint32_t cached; uint32_t program; int32_t location; };
 
 		explicit UniformBinder(Shader & shader, std::string const & name)
-			: cached	{ NULL }
+			: cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
 			, program	{ shader ? shader.handle() : NULL }
 			, location	{ -1 }
 		{
 			if (program)
 			{
-				cached = GL::getProgramHandle(GL::ProgramObject);
-
 				if (program != cached)
 				{
 					GL::useProgram(program);
 				}
 
-				location = shader.get_uniform(name);
+				location = shader.get_uniform_location(name);
 			}
 		}
 
@@ -204,20 +202,20 @@ namespace ml
 
 	void Shader::bind(Shader const * value, bool bindTextures)
 	{
-		if (value && value->m_handle)
+		if (value && (*value))
 		{
 			GL::useProgram(value->m_handle);
 
 			if (bindTextures)
 			{
-				uint32_t i{ 0 };
-				for (auto const & pair : value->m_textures)
+				uint32_t index{ 0 };
+				for (auto const & e : value->m_textures)
 				{
-					GL::uniform1i(pair.first->handle(), pair.second);
-					
-					GL::activeTexture(GL::Texture0 + (i++));
-					
-					Texture::bind(pair.first);
+					GL::uniform1i(e.first, index);
+
+					GL::activeTexture(GL::Texture0 + (index++));
+
+					Texture::bind(e.second);
 				}
 			}
 		}
@@ -227,6 +225,11 @@ namespace ml
 		}
 	}
 
+	void Shader::bind(bool bindTextures)
+	{
+		bind(this, bindTextures);
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool Shader::set_uniform(Uniform const & value)
@@ -234,37 +237,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_v<bool>: if (auto v{ value.load<bool>() })
+		case hashof_v<bool>: if (auto v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<int32_t>: if (auto v{ value.load<int32_t>() })
+		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<float_t>: if (auto v{ value.load<float_t>() })
+		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec2>: if (auto v{ value.load<vec2>() })
+		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec3>: if (auto v{ value.load<vec3>() })
+		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec4>: if (auto v{ value.load<vec4>() })
+		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Color>: if (auto v{ value.load<Color>() })
+		case hashof_v<Color>: if (auto v{ value.get<Color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat2>: if (auto v{ value.load<mat2>() })
+		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat3>: if (auto v{ value.load<mat3>() })
+		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat4>: if (auto v{ value.load<mat4>() })
+		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture const *>: if (auto v{ value.load<Texture const *>() })
+		case hashof_v<Texture const *>: if (auto v{ value.get<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -346,13 +349,13 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto const it{ m_textures.find(std::addressof(value)) }; it != m_textures.cend())
+			if (auto it{ m_textures.find(u.location) }; it != m_textures.cend())
 			{
-				it->second;
+				it->second = &value;
 			}
 			else if ((m_textures.size() + 1) < max_textures)
 			{
-				m_textures.insert(std::make_pair(std::addressof(value), u.location));
+				m_textures.insert({ u.location , &value });
 			}
 			else
 			{
@@ -369,40 +372,26 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Shader::get_attribute(std::string const & value)
+	int32_t Shader::get_attribute_location(std::string const & value)
 	{
-		if (value.empty()) { return -1; }
-
-		hash_t const code{ Hash{ value } };
-		
-		if (auto const it{ m_attributes.find(code) }; it != m_attributes.end())
+		if (auto const it{ m_attributes.find(value) }; it != m_attributes.end())
 		{
 			return it->second;
 		}
-		else
-		{
-			return m_attributes.insert(std::make_pair(
-				code, GL::getAttribLocation(m_handle, value.c_str())
-			)).first->second;
-		}
+		return m_attributes.insert(std::make_pair(
+			value, GL::getAttribLocation(m_handle, value.c_str())
+		)).first->second;
 	}
 
-	int32_t Shader::get_uniform(std::string const & value)
+	int32_t Shader::get_uniform_location(std::string const & value)
 	{
-		if (value.empty()) { return -1; }
-
-		hash_t const code{ Hash{ value } };
-
-		if (auto const it{ m_uniforms.find(code) }; it != m_uniforms.end())
+		if (auto const it{ m_uniforms.find(value) }; it != m_uniforms.end())
 		{
 			return it->second;
 		}
-		else
-		{
-			return m_uniforms.insert(std::make_pair(
-				code, GL::getAttribLocation(m_handle, value.c_str())
-			)).first->second;
-		}
+		return m_uniforms.insert(std::make_pair(
+			value, GL::getUniformLocation(m_handle, value.c_str())
+		)).first->second;
 	}
 
 	int32_t Shader::compile(C_String vs, C_String gs, C_String fs)

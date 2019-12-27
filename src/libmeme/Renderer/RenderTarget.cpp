@@ -13,7 +13,7 @@ namespace ml
 			if (ML_BIND(VBO, vbo))
 			{
 				GL::drawArrays(vao.mode(), 0, vbo.size());
-
+		
 				GL::flush();
 			}
 		}

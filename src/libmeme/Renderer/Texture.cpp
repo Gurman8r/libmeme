@@ -369,6 +369,7 @@ namespace ml
 				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
 			);
 		}
+		GL::flush();
 		return false;
 	}
 
@@ -389,6 +390,7 @@ namespace ml
 				: smooth() ? GL::Linear : GL::Nearest
 			);
 		}
+		GL::flush();
 		return false;
 	}
 
@@ -409,6 +411,7 @@ namespace ml
 				smooth() ? GL::Linear : GL::Nearest
 			);
 		}
+		GL::flush();
 		return false;
 	}
 

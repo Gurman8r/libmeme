@@ -7,9 +7,11 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
-#include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/RenderStates.hpp>
+#include <libmeme/Renderer/Binder.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
 #include <libmeme/Renderer/Color.hpp>
-#include <libmeme/Renderer/Material.hpp>
+#include <libmeme/Renderer/Model.hpp>
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/Texture.hpp>
 
@@ -19,10 +21,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		std::vector<Image>		m_images	{};
-		std::vector<Texture>	m_textures	{};
-		std::vector<Shader>		m_shaders	{};
-		std::vector<Material>	m_materials	{};
+		dense_map<std::string, Image>		m_images	{};
+		dense_map<std::string, Texture>		m_textures	{};
+		dense_map<std::string, Shader>		m_shaders	{};
+		dense_map<std::string, Material>	m_materials	{};
+		dense_map<std::string, Model>		m_models	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,6 +37,10 @@ namespace ml
 			ML_EventSystem.addListener<UnloadEvent>(this);
 		}
 
+		~Demo()
+		{
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void onEvent(Event const & value) override
@@ -42,45 +49,87 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
+				m_images.insert({ "img_icon", make_image(
+					FS::path_to("../../../assets/textures/icon.png")
+				) });
 
-
-				m_images.emplace_back(make_image(
-					FS::path_to("../../../assets/textures/doot.png")
-				));
+				if (auto const & img{ m_images["img_icon"] }; !img.empty())
+				{
+					ev->window.setIcon(img.width(), img.height(), img.data());
+				}
 				
-				m_textures.emplace_back(make_texture(
-					m_images[0]
-				));
+				m_textures.insert({ "tex_demo", make_texture(
+					make_image(FS::path_to("../../../assets/textures/navball.png"))
+				) });
 
-				m_shaders.emplace_back(make_shader(
+				m_shaders.insert({ "gl_2d", make_shader(
 					FS::path_to("../../../assets/shaders/2D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
-				));
+				) });
 
-				m_materials.emplace_back(make_material(
-					make_uniform<bool>("bool", true),
-					make_uniform<int32_t>("int", 123),
-					make_uniform<float_t>("float_t", 4.56f),
-					make_uniform<vec2>("vec2", vec2{ 1, 2 }),
-					make_uniform<vec3>("vec3", vec3{ 3, 4, 5 }),
-					make_uniform<vec4>("vec4", vec4{ 6, 7, 8, 9 }),
-					make_uniform<Color>("color", []() { return colors::magenta; }),
-					make_uniform<mat2>("mat2", []() { return mat2::identity(); }),
-					make_uniform<mat3>("mat3", []() { return mat3::identity(); }),
-					make_uniform<mat4>("mat4", []() { return mat4::identity(); }),
-					make_uniform<Texture const *>("tex0", &m_textures[0])
-				));
+				m_shaders.insert({ "gl_3d", make_shader(
+					FS::path_to("../../../assets/shaders/3D.vs.shader"),
+					FS::path_to("../../../assets/shaders/basic.fs.shader")
+				) });
+
+				m_materials.insert({ "mat_2d", make_material(
+					make_uniform<float_t		>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
+					make_uniform<Texture const *>("u_texture0",		&m_textures["tex_demo"]),
+					make_uniform<Color			>("u_color",		colors::white),
+					make_uniform<mat4			>("u_proj",			mat4::identity()),
+					make_uniform<mat4			>("u_view",			mat4::identity()),
+					make_uniform<mat4			>("u_model",		mat4::identity())
+				) });
+
+				m_materials.insert({ "mat_3d", make_material({
+					make_uniform<float_t		>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
+					make_uniform<vec3			>("u_camera.pos",	vec3{ 0, 0, 3.f }),
+					make_uniform<vec3			>("u_camera.dir",	vec3{ 0, 0, -1.f }),
+					make_uniform<float_t		>("u_camera.fov",	45.0f),
+					make_uniform<float_t		>("u_camera.near",	0.0001f),
+					make_uniform<float_t		>("u_camera.far",	1000.0f),
+					make_uniform<vec2			>("u_camera.view",	vec2{ 1280.f, 720.f }),
+					make_uniform<Texture const *>("u_texture0",		&m_textures["tex_demo"]),
+					make_uniform<Color			>("u_color",		colors::white),
+					make_uniform<vec3			>("u_position",		vec3{ 0.f, 0.f, -5.f }),
+					make_uniform<vec3			>("u_scale",		vec3{ 0.5f, 0.5f, 0.5f }),
+					make_uniform<vec4			>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
+				}) });
+
+				m_models.insert({ "obj_demo", make_model(
+					FS::path_to("../../../assets/meshes/sphere32x24.obj")
+				) });
+
+				m_models.insert({ "obj_test", make_model({ make_mesh(
+					{
+						Vertex { {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
+						Vertex { {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
+						Vertex { { -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
+					},
+					{
+						0, 1, 2,
+					}
+				) }) });
 
 			} break;
 			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(value) })
 			{
+				static constexpr auto bg{ make_color(colors::magenta) };
 				GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
-				GL::clearColor(
-					colors::magenta[0],
-					colors::magenta[1],
-					colors::magenta[2],
-					colors::magenta[3]
-				);
+				GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
+
+				RenderStates{}();
+
+				if (ML_BIND_EX(Shader, _s, m_shaders["gl_3d"], false); 1)
+				{
+					for (auto const & u : m_materials["mat_3d"])
+					{
+						_s->set_uniform(u);
+					}
+					_s->bind(true);
+					ev->window.draw(m_models["obj_demo"]);
+				}
+
 			} break;
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(value) })
 			{
@@ -163,7 +212,7 @@ namespace ml
 						}
 					};
 
-					draw_texture_preview(m_textures[0]);
+					draw_texture_preview(m_textures["tex_demo"]);
 				}
 				ImGui::End();
 				ImGui::PopID();
@@ -174,6 +223,7 @@ namespace ml
 				m_textures.clear();
 				m_shaders.clear();
 				m_materials.clear();
+				m_models.clear();
 			} break;
 			}
 		}

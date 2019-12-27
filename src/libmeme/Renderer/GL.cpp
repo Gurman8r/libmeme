@@ -40,7 +40,7 @@ namespace ml
 
 	void GL::checkError(C_String file, uint32_t line, C_String expr)
 	{
-		if (uint32_t const code{ getError() })
+		if (auto const code{ getError() })
 		{
 			std::string filename{ file };
 			filename = filename.substr(filename.find_last_of("\\/") + 1);
@@ -374,7 +374,7 @@ namespace ml
 	{
 #ifdef ML_CC_MSC
 #	pragma warning(push)
-#	pragma warning(disable: 4312)	// conversion from 'type1' to 'type2' of greater size
+#	pragma warning(disable: 4312) // conversion from 'type1' to 'type2' of greater size
 #	pragma warning(disable: 26451)
 #endif
 		return vertexAttribPointer(
@@ -391,6 +391,18 @@ namespace ml
 #endif
 	}
 
+	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
+	{
+		glCheck(glVertexAttribPointer(
+			index,
+			size,
+			type,
+			normalized,
+			stride,
+			pointer
+		));
+	}
+
 	void GL::enableVertexAttribArray(uint32_t index)
 	{
 		glCheck(glEnableVertexAttribArray(index));
@@ -404,18 +416,6 @@ namespace ml
 	void GL::drawArrays(uint32_t mode, int32_t first, int32_t count)
 	{
 		glCheck(glDrawArrays(mode, first, count));
-	}
-
-	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer)
-	{
-		glCheck(glVertexAttribPointer(
-			index,
-			size,
-			type,
-			normalized,
-			stride,
-			pointer
-		));
 	}
 
 
@@ -840,7 +840,7 @@ namespace ml
 
 	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
 	{
-		C_String log{ "" };
+		C_String log{ nullptr };
 		return compileShader(obj, type, count, source, log);
 	}
 

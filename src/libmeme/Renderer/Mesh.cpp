@@ -1,14 +1,7 @@
 #include <libmeme/Renderer/Mesh.hpp>
-#include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Core/FileSystem.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * */
-
-#include <assimp/Importer.hpp>
-#include <assimp/cimport.h>
-#include <assimp/postprocess.h>
-#include <assimp/material.h>
-#include <assimp/scene.h>
+#include <libmeme/Renderer/RenderTarget.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * */
 
@@ -17,32 +10,38 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Mesh::Mesh() : m_storage{ std::make_tuple(
-		BufferLayout{ {
-			{ 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
-			{ 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
-			{ 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) } }
-		}, VAO{}, VBO{}, IBO{}
+		BufferLayout{}, VAO{}, VBO{}, IBO{}
 	) }
 	{
 	}
 
-	Mesh::Mesh(path_t const & path)
+	Mesh::Mesh(vertices_t const & vertices)
 		: Mesh{}
 	{
+		loadFromMemory(vertices);
+	}
+
+	Mesh::Mesh(vertices_t const & vertices, indices_t const & indices)
+		: Mesh{}
+	{
+		loadFromMemory(vertices, indices);
 	}
 
 	Mesh::Mesh(Mesh const & other)
 		: Mesh{}
 	{
+		assign(other);
 	}
 
 	Mesh::Mesh(Mesh && other) noexcept
 		: Mesh{}
 	{
+		swap(std::move(other));
 	}
 
 	Mesh::~Mesh()
 	{
+		destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,7 +64,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-
+			m_storage = other.m_storage;
 		}
 	}
 
@@ -73,21 +72,90 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-
+			m_storage.swap(other.m_storage);
 		}
+	}
+
+	void Mesh::destroy()
+	{
+		vao().destroy();
+		vbo().destroy();
+		ibo().destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Mesh::loadFromFile(path_t const & path)
+	bool Mesh::loadFromMemory(vertices_t const & vertices, indices_t const & indices)
 	{
-		if (std::ifstream in{ path })
-		{
-			in.close();
+		return loadFromMemory(alg::contiguous(vertices), indices);
+	}
 
-			return true;
+	bool Mesh::loadFromMemory(vertices_t const & vertices)
+	{
+		return loadFromMemory(alg::contiguous(vertices));
+	}
+
+	bool Mesh::loadFromMemory(contiguous_t const & vertices, indices_t const & indices)
+	{
+		if (!vertices.empty() && !indices.empty())
+		{
+			if (ML_BIND(VAO, vao().create(GL::Triangles)))
+			{
+				if (ML_BIND(VBO, vbo().create(GL::StaticDraw)))
+				{
+					if (ML_BIND(IBO, ibo().create(GL::StaticDraw, GL::UnsignedInt)))
+					{
+						vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+
+						ibo().update((void *)indices.data(), (uint32_t)indices.size());
+
+						layout().bind();
+
+						return true;
+					}
+				}
+			}
 		}
 		return false;
+	}
+
+	bool Mesh::loadFromMemory(contiguous_t const & vertices)
+	{
+		if (!vertices.empty())
+		{
+			if (ML_BIND(VAO, vao().create(GL::Triangles)))
+			{
+				if (ML_BIND(VBO, vbo().create(GL::StaticDraw)))
+				{
+					vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+
+					layout().bind();
+
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void Mesh::draw(RenderTarget const & target, Mesh const * value)
+	{
+		if (value)
+		{
+			if (value->vao() && value->vbo())
+			{
+				if (value->ibo())
+				{
+					target.draw(value->vao(), value->vbo(), value->ibo());
+				}
+				else
+				{
+					target.draw(value->vao(), value->vbo());
+				}
+			}
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

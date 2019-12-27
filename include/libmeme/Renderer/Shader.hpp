@@ -19,11 +19,11 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename dense_map<hash_t, int32_t>;
+		using AttribCache = typename std::map<std::string, int32_t>;
 
-		using UniformCache = typename dense_map<hash_t, int32_t>;
+		using UniformCache = typename std::map<std::string, int32_t>;
 
-		using TextureCache = typename dense_map<struct Texture const *, int32_t>;
+		using TextureCache = typename std::map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -64,6 +64,8 @@ namespace ml
 		bool destroy();
 
 		static void bind(Shader const * value, bool bindTextures = true);
+
+		void bind(bool bindTextures = true);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -110,9 +112,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t get_attribute(std::string const & value);
+		int32_t get_attribute_location(std::string const & value);
 
-		int32_t get_uniform(std::string const & value);
+		int32_t get_uniform_location(std::string const & value);
 
 		int32_t compile(C_String vs, C_String gs, C_String fs);
 
