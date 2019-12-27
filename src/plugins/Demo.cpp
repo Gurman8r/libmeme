@@ -73,7 +73,7 @@ namespace ml
 				) });
 
 				m_materials.insert({ "2d", make_material(
-					make_uniform<float_t	>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
+					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
 					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
 					make_uniform<Color	>("u_color",		colors::white),
 					make_uniform<mat4	>("u_proj",			mat4::identity()),
