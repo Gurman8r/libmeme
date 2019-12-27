@@ -150,7 +150,7 @@ namespace ml
 
 	void Texture::bind(Texture const * value)
 	{
-		if (value)
+		if (value && (*value))
 		{
 			GL::bindTexture(value->m_sampler, value->m_handle);
 		}

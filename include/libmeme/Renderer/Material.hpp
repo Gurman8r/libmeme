@@ -34,10 +34,6 @@ namespace ml
 
 		Material & operator=(Material && other) noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void assign(Material const & other);
-
 		void swap(Material & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

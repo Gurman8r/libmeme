@@ -2,8 +2,8 @@
 #define _ML_UNIFORM_HPP_
 
 #include <libmeme/Renderer/Color.hpp>
-#include <libmeme/Core/TypeOf.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/TypeOf.hpp>
 
 namespace ml
 {
@@ -48,10 +48,6 @@ namespace ml
 		Uniform & operator=(Uniform const & other);
 
 		Uniform & operator=(Uniform && other) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void assign(Uniform const & other);
 
 		void swap(Uniform & other) noexcept;
 
@@ -103,10 +99,10 @@ namespace ml
 			}
 		}
 
-		template <class T, class ... Args> inline decltype(auto) set(Args && ... args)
+		template <class Type, class ... Args> inline decltype(auto) set(Args && ... args)
 		{
 			return (m_storage = std::make_tuple(
-				typeof_v<T>, name(), std::forward<Args>(args)...
+				typeof_v<Type>, name(), std::forward<Args>(args)...
 			));
 		}
 
@@ -130,11 +126,11 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
-		class Type, class Name, class ... Data
-	> static inline auto make_uniform(Name && name, Data && ... args) noexcept
+		class Type, class Name, class ... Args
+	> static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
-			typeof_v<Type>, std::move(name), std::forward<Data>(args)...
+			typeof_v<Type>, std::move(name), std::forward<Args>(args)...
 		) };
 	}
 

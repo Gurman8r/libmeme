@@ -8,21 +8,16 @@ namespace ml
 {
 	struct Shader::UniformBinder final
 	{
-		union { uint32_t cached; uint32_t program; int32_t location; };
+		union { uint32_t program; uint32_t cached; int32_t location; };
 
 		explicit UniformBinder(Shader & shader, std::string const & name)
-			: cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
-			, program	{ shader ? shader.handle() : NULL }
-			, location	{ -1 }
+			: program	{ shader ? shader.handle() : NULL }
+			, cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
+			, location	{ shader ? shader.get_uniform_location(name) : -1 }
 		{
-			if (program)
+			if (program && (program != cached))
 			{
-				if (program != cached)
-				{
-					GL::useProgram(program);
-				}
-
-				location = shader.get_uniform_location(name);
+				GL::useProgram(program);
 			}
 		}
 
@@ -99,8 +94,6 @@ namespace ml
 		swap(std::move(other));
 		return (*this);
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void Shader::swap(Shader & other) noexcept
 	{
@@ -267,7 +260,7 @@ namespace ml
 		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture const *>: if (auto v{ value.get<Texture const *>() })
+		case hashof_v<Texture>: if (auto v{ value.get<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -378,9 +371,14 @@ namespace ml
 		{
 			return it->second;
 		}
-		return m_attributes.insert(std::make_pair(
-			value, GL::getAttribLocation(m_handle, value.c_str())
-		)).first->second;
+		else if (auto const loc{ GL::getAttribLocation(m_handle, value.c_str()) }; loc != -1)
+		{
+			return m_attributes.insert({ value, loc }).first->second;
+		}
+		else
+		{
+			return loc;
+		}
 	}
 
 	int32_t Shader::get_uniform_location(std::string const & value)
@@ -389,9 +387,14 @@ namespace ml
 		{
 			return it->second;
 		}
-		return m_uniforms.insert(std::make_pair(
-			value, GL::getUniformLocation(m_handle, value.c_str())
-		)).first->second;
+		else if (auto const loc{ GL::getUniformLocation(m_handle, value.c_str()) }; loc != -1)
+		{
+			return m_uniforms.insert({ value, loc }).first->second;
+		}
+		else
+		{
+			return loc;
+		}
 	}
 
 	int32_t Shader::compile(C_String vs, C_String gs, C_String fs)

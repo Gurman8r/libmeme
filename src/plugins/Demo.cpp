@@ -49,62 +49,62 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
-				m_images.insert({ "img_icon", make_image(
+				m_images.insert({ "icon", make_image(
 					FS::path_to("../../../assets/textures/icon.png")
 				) });
 
-				if (auto const & img{ m_images["img_icon"] }; !img.empty())
+				if (auto const & img{ m_images["icon"] }; !img.empty())
 				{
 					ev->window.setIcon(img.width(), img.height(), img.data());
 				}
 				
-				m_textures.insert({ "tex_demo", make_texture(
+				m_textures.insert({ "navball", make_texture(
 					make_image(FS::path_to("../../../assets/textures/navball.png"))
 				) });
 
-				m_shaders.insert({ "gl_2d", make_shader(
+				m_shaders.insert({ "2d", make_shader(
 					FS::path_to("../../../assets/shaders/2D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
 				) });
 
-				m_shaders.insert({ "gl_3d", make_shader(
+				m_shaders.insert({ "3d", make_shader(
 					FS::path_to("../../../assets/shaders/3D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
 				) });
 
-				m_materials.insert({ "mat_2d", make_material(
-					make_uniform<float_t		>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
-					make_uniform<Texture const *>("u_texture0",		&m_textures["tex_demo"]),
-					make_uniform<Color			>("u_color",		colors::white),
-					make_uniform<mat4			>("u_proj",			mat4::identity()),
-					make_uniform<mat4			>("u_view",			mat4::identity()),
-					make_uniform<mat4			>("u_model",		mat4::identity())
+				m_materials.insert({ "2d", make_material(
+					make_uniform<float_t	>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
+					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
+					make_uniform<Color	>("u_color",		colors::white),
+					make_uniform<mat4	>("u_proj",			mat4::identity()),
+					make_uniform<mat4	>("u_view",			mat4::identity()),
+					make_uniform<mat4	>("u_model",		mat4::identity())
 				) });
 
-				m_materials.insert({ "mat_3d", make_material({
-					make_uniform<float_t		>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
-					make_uniform<vec3			>("u_camera.pos",	vec3{ 0, 0, 3.f }),
-					make_uniform<vec3			>("u_camera.dir",	vec3{ 0, 0, -1.f }),
-					make_uniform<float_t		>("u_camera.fov",	45.0f),
-					make_uniform<float_t		>("u_camera.near",	0.0001f),
-					make_uniform<float_t		>("u_camera.far",	1000.0f),
-					make_uniform<vec2			>("u_camera.view",	vec2{ 1280.f, 720.f }),
-					make_uniform<Texture const *>("u_texture0",		&m_textures["tex_demo"]),
-					make_uniform<Color			>("u_color",		colors::white),
-					make_uniform<vec3			>("u_position",		vec3{ 0.f, 0.f, -5.f }),
-					make_uniform<vec3			>("u_scale",		vec3{ 0.5f, 0.5f, 0.5f }),
-					make_uniform<vec4			>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
+				m_materials.insert({ "3d", make_material({
+					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
+					make_uniform<vec3	>("u_camera.pos",	vec3{ 0, 0, 3.f }),
+					make_uniform<vec3	>("u_camera.dir",	vec3{ 0, 0, -1.f }),
+					make_uniform<float_t>("u_camera.fov",	45.0f),
+					make_uniform<float_t>("u_camera.near",	0.0001f),
+					make_uniform<float_t>("u_camera.far",	1000.0f),
+					make_uniform<vec2	>("u_camera.view",	vec2{ 1280.f, 720.f }),
+					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
+					make_uniform<Color	>("u_color",		colors::white),
+					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, -5.f }),
+					make_uniform<vec3	>("u_scale",		vec3{ 0.5f, 0.5f, 0.5f }),
+					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
 				}) });
 
-				m_models.insert({ "obj_demo", make_model(
+				m_models.insert({ "sphere32x24", make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				) });
 
-				m_models.insert({ "obj_test", make_model({ make_mesh(
+				m_models.insert({ "tri", make_model({ make_mesh(
 					{
-						Vertex { {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
-						Vertex { {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
-						Vertex { { -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
+						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
+						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
+						make_vertex({ -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
 					},
 					{
 						0, 1, 2,
@@ -120,14 +120,14 @@ namespace ml
 
 				RenderStates{}();
 
-				if (ML_BIND_EX(Shader, _s, m_shaders["gl_3d"], false); 1)
+				if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false); 1)
 				{
-					for (auto const & u : m_materials["mat_3d"])
+					for (auto const & u : m_materials["3d"])
 					{
 						_s->set_uniform(u);
 					}
 					_s->bind(true);
-					ev->window.draw(m_models["obj_demo"]);
+					ev->window.draw(m_models["sphere32x24"]);
 				}
 
 			} break;
@@ -212,7 +212,7 @@ namespace ml
 						}
 					};
 
-					draw_texture_preview(m_textures["tex_demo"]);
+					draw_texture_preview(m_textures["navball"]);
 				}
 				ImGui::End();
 				ImGui::PopID();

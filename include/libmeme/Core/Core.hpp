@@ -37,7 +37,6 @@
 #	include <map>
 #	include <random>
 #	include <sstream>
-#	include <thread>
 #	include <type_traits>
 #	include <typeindex>
 #	include <unordered_map>

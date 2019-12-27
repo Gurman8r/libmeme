@@ -26,8 +26,9 @@ namespace ml
 	}
 
 	Material::Material(Material && other) noexcept
-		: m_storage{ std::move(other.m_storage) }
+		: m_storage{}
 	{
+		swap(std::move(other));
 	}
 
 	Material::~Material() {}
@@ -36,7 +37,8 @@ namespace ml
 
 	Material & Material::operator=(Material const & other)
 	{
-		assign(other);
+		Material temp{ other };
+		swap(temp);
 		return (*this);
 	}
 
@@ -47,14 +49,6 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void Material::assign(Material const & other)
-	{
-		if (this != std::addressof(other))
-		{
-			m_storage = other.m_storage;
-		}
-	}
 
 	void Material::swap(Material & other) noexcept
 	{
@@ -71,6 +65,8 @@ namespace ml
 		if (std::ifstream in{ filename })
 		{
 			in.close();
+
+			return true;
 		}
 		return false;
 	}
