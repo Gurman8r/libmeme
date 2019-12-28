@@ -36,7 +36,7 @@ namespace ml
 
 	Glyph::~Glyph()
 	{
-		std::get<0>(m_storage).destroy();
+		std::get<Tex>(m_storage).destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

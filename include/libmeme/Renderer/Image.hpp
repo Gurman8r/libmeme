@@ -4,6 +4,7 @@
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -32,21 +33,24 @@ namespace ml
 		Image(path_t const & path, bool flip);
 		Image(path_t const & path, bool flip, size_t req_comp);
 		Image(Image const & other);
+		Image(Image && other) noexcept;
 		~Image();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void swap(Image & other);
+		Image & operator=(Image const & other);
 
-		bool dispose();
+		Image & operator=(Image && other) noexcept;
+
+		void swap(Image & other);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		bool loadFromFile(path_t const & filename);
+		bool loadFromFile(path_t const & path);
 		
-		bool loadFromFile(path_t const & filename, bool flip);
+		bool loadFromFile(path_t const & path, bool flip);
 		
-		bool loadFromFile(path_t const & filename, bool flip, size_t req_comp);
+		bool loadFromFile(path_t const & path, bool flip, size_t req_comp);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -65,6 +69,8 @@ namespace ml
 		Image & createFromPixels(vec2u const & size, size_t channels, Pixels const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool dispose();
 		
 		Image & flipHorizontally();
 

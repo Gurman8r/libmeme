@@ -44,7 +44,7 @@ namespace ml
 		template <
 			class ... Args
 		> explicit Binder(const_reference value, Args && ... args)
-			: Binder{ (value ? &value : nullptr), std::forward<Args>(args)... }
+			: Binder{ value ? &value : nullptr, std::forward<Args>(args)... }
 		{
 		}
 

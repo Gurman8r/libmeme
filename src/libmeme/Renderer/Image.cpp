@@ -64,37 +64,60 @@ namespace ml
 		}
 	}
 
-	Image::Image(path_t const & filename)
-		: Image{ filename, false }
+	Image::Image(path_t const & path)
+		: Image{ path, false }
 	{
 	}
 
-	Image::Image(path_t const & filename, bool flip)
-		: Image{ filename, flip, 0 }
+	Image::Image(path_t const & path, bool flip)
+		: Image{ path, flip, 0 }
 	{
 	}
 
-	Image::Image(path_t const & filename, bool flip, size_t req_comp)
+	Image::Image(path_t const & path, bool flip, size_t req_comp)
 		: Image{}
 	{
-		loadFromFile(filename, flip, req_comp);
+		loadFromFile(path, flip, req_comp);
 	}
 
 	Image::Image(Image const & other)
-		: Image{}
+		: m_size{ other.m_size }
+		, m_pixels{ other.m_pixels }
+		, m_channels{ other.m_channels }
 	{
-		createFromPixels(other.size(), other.channels(), other.pixels());
 	}
 
-	Image::~Image() {}
+	Image::Image(Image && other) noexcept
+		: Image{}
+	{
+		swap(std::move(other));
+	}
+
+	Image::~Image()
+	{
+		dispose();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	Image & Image::operator=(Image const & other)
+	{
+		Image temp{ other };
+		swap(temp);
+		return (*this);
+	}
+
+	Image & Image::operator=(Image && other) noexcept
+	{
+		swap(std::move(other));
+		return (*this);
+	}
 
 	void Image::swap(Image & other)
 	{
 		if (this != std::addressof(other))
 		{
-			m_pixels.swap(other.m_pixels);
+			std::swap(m_pixels, other.m_pixels);
 			
 			std::swap(m_size, other.m_size);
 			
@@ -102,35 +125,24 @@ namespace ml
 		}
 	}
 
-	bool Image::dispose()
-	{
-		Pixels().swap(m_pixels);
-
-		m_size = { 0, 0 };
-		
-		m_channels = 0;
-		
-		return empty();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Image::loadFromFile(path_t const & filename)
+	bool Image::loadFromFile(path_t const & path)
 	{
-		return loadFromFile(filename, true);
+		return loadFromFile(path, true);
 	}
 
-	bool Image::loadFromFile(path_t const & filename, bool flip)
+	bool Image::loadFromFile(path_t const & path, bool flip)
 	{
-		return loadFromFile(filename, flip, 0);
+		return loadFromFile(path, flip, 0);
 	}
 
-	bool Image::loadFromFile(path_t const & filename, bool flip, size_t req_comp)
+	bool Image::loadFromFile(path_t const & path, bool flip, size_t req_comp)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 
 		if (byte_t * data{ ::stbi_load(
-			filename.string().c_str(),
+			path.string().c_str(),
 			reinterpret_cast<int32_t *>(&m_size[0]),
 			reinterpret_cast<int32_t *>(&m_size[1]),
 			reinterpret_cast<int32_t *>(&m_channels),
@@ -206,6 +218,17 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool Image::dispose()
+	{
+		Pixels().swap(m_pixels);
+
+		m_size = { 0, 0 };
+
+		m_channels = 0;
+
+		return empty();
+	}
 
 	Image & Image::flipHorizontally()
 	{

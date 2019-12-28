@@ -9,10 +9,8 @@
 
 namespace ml
 {
-	struct Plugin : public Trackable, public EventListener
+	struct Plugin : public Trackable, public EventListener, public NonCopyable
 	{
-		Plugin() = default;
-
 		virtual ~Plugin() = default;
 
 		virtual void onEvent(Event const & value) override = 0;

@@ -36,10 +36,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline auto texture() noexcept -> Texture & { return std::get<Tex>(m_storage); }
 		inline auto texture() const noexcept -> Texture const & { return std::get<Tex>(m_storage); }
 
+		inline auto bounds() noexcept -> FloatRect & { return std::get<Bounds>(m_storage); }
 		inline auto bounds() const noexcept -> FloatRect const & { return std::get<Bounds>(m_storage); }
 
+		inline auto advance() noexcept -> uint32_t & { return std::get<Advance>(m_storage); }
 		inline auto advance() const noexcept -> uint32_t const & { return std::get<Advance>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

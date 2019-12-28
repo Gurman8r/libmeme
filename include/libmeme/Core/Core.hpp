@@ -93,12 +93,6 @@ namespace ml
 	ML_USING	C32_String	= typename char32_t const *;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_USING	path_t		= typename std::filesystem::path;
-	ML_USING	file_t		= typename std::vector<char>;
-	ML_USING	directory_t	= typename std::map<char, std::vector<path_t>>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

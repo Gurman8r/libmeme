@@ -33,22 +33,22 @@ namespace ml
 	}
 
 	Texture::Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags)
-		: m_handle{ NULL }
-		, m_sampler{ sampler }
-		, m_level{ level }
-		, m_internalFormat{ internalFormat }
-		, m_colorFormat{ colorFormat }
-		, m_pixelType{ pixelType }
-		, m_size{ 0, 0 }
-		, m_realSize{ 0, 0 }
-		, m_flags{ flags }
+		: m_handle			{ NULL }
+		, m_sampler			{ sampler }
+		, m_level			{ level }
+		, m_internalFormat	{ internalFormat }
+		, m_colorFormat		{ colorFormat }
+		, m_pixelType		{ pixelType }
+		, m_size			{ 0, 0 }
+		, m_realSize		{ 0, 0 }
+		, m_flags			{ flags }
 	{
 	}
 
-	Texture::Texture(path_t const & filename)
+	Texture::Texture(path_t const & path)
 		: Texture{}
 	{
-		loadFromFile(filename);
+		loadFromFile(path);
 	}
 
 	Texture::Texture(Image const & image)
@@ -58,15 +58,15 @@ namespace ml
 	}
 
 	Texture::Texture(Texture const & other)
-		: m_handle{ NULL }
-		, m_sampler{ other.m_sampler }
-		, m_level{ other.m_level }
-		, m_internalFormat{ other.m_internalFormat }
-		, m_colorFormat{ other.m_colorFormat }
-		, m_pixelType{ other.m_pixelType }
-		, m_size{ 0, 0 }
-		, m_realSize{ 0, 0 }
-		, m_flags{ other.m_flags }
+		: m_handle			{ NULL }
+		, m_sampler			{ other.m_sampler }
+		, m_level			{ other.m_level }
+		, m_internalFormat	{ other.m_internalFormat }
+		, m_colorFormat		{ other.m_colorFormat }
+		, m_pixelType		{ other.m_pixelType }
+		, m_size			{ 0, 0 }
+		, m_realSize		{ 0, 0 }
+		, m_flags			{ other.m_flags }
 	{
 		loadFromTexture(other);
 	}
@@ -77,7 +77,10 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Texture::~Texture() { destroy(); }
+	Texture::~Texture()
+	{
+		destroy();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -112,10 +115,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::loadFromFile(path_t const & filename)
+	bool Texture::loadFromFile(path_t const & path)
 	{
 		Image image;
-		return image.loadFromFile(filename) && loadFromImage(image);
+		return image.loadFromFile(path) && loadFromImage(image);
 	}
 
 	bool Texture::loadFromImage(Image const & image)
@@ -146,7 +149,7 @@ namespace ml
 
 	bool Texture::destroy()
 	{
-		Texture::bind(nullptr);
+		unbind();
 
 		if (m_handle)
 		{
@@ -170,6 +173,16 @@ namespace ml
 		{
 			GL::bindTexture(GL::Texture2D, NULL);
 		}
+	}
+
+	void Texture::bind() const
+	{
+		bind(this);
+	}
+
+	void Texture::unbind() const
+	{
+		bind(nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

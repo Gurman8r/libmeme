@@ -17,6 +17,8 @@ namespace ml
 
 	void FS::current_path(path_t const & value)
 	{
+		static bool once{ 0 }; if (!once && (once = true)) { root_path(); }
+
 		return std::filesystem::current_path(value);
 	}
 

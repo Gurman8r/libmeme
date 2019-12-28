@@ -37,7 +37,7 @@ namespace ml
 
 	static GLFWimage const & map_glfw_image(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
-		static std::unordered_map<byte_t const *, GLFWimage> cache {};
+		static dense::map<byte_t const *, GLFWimage> cache {};
 		auto it { cache.find(pixels) };
 		if (it == cache.end())
 		{
@@ -341,13 +341,8 @@ namespace ml
 	{
 		if (m_window)
 		{
-			m_icon = {
-				static_cast<int32_t>(w), static_cast<int32_t>(h), const_cast<byte_t *>(pixels) 
-			};
-
 			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window),
-				1,
-				reinterpret_cast<GLFWimage *>(&m_icon)
+				1, &map_glfw_image(w, h, pixels)
 			);
 		}
 		return (*this);

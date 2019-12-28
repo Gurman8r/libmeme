@@ -42,12 +42,21 @@ namespace ml
 		using info_t = typename std::string_view;
 		using func_t = typename std::function<std::optional<std::any>()>;
 
+		enum : size_t { Codes, Funcs, Infos, Names };
+
+		using storage_t = typename std::tuple<
+			dense::map<name_t, code_t>,
+			dense::map<name_t, func_t>,
+			dense::map<name_t, info_t>,
+			dense::map<code_t, name_t>
+		>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto codes() const -> const std::unordered_map<name_t, code_t> & { return m_codes; }
-		inline auto funcs() const -> const std::unordered_map<name_t, func_t> & { return m_funcs; }
-		inline auto infos() const -> const std::unordered_map<name_t, info_t> & { return m_infos; }
-		inline auto names() const -> const std::unordered_map<code_t, name_t> & { return m_names; }
+		inline decltype(auto) codes() const noexcept { return std::get<Codes>(m_storage); }
+		inline decltype(auto) funcs() const noexcept { return std::get<Funcs>(m_storage); }
+		inline decltype(auto) infos() const noexcept { return std::get<Infos>(m_storage); }
+		inline decltype(auto) names() const noexcept { return std::get<Names>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -72,12 +81,12 @@ namespace ml
 
 		inline bool registrate(name_t const & name, info_t const & info, code_t const & code, func_t const & func)
 		{
-			if (m_funcs.find(name) == m_funcs.end())
+			if (funcs().find(name) == funcs().end())
 			{
-				m_codes.insert({ name, code });
-				m_names.insert({ code, name });
-				m_funcs.insert({ name, func });
-				m_infos.insert({ name, info });
+				std::get<Codes>(m_storage).insert({ name, code });
+				std::get<Funcs>(m_storage).insert({ name, func });
+				std::get<Infos>(m_storage).insert({ name, info });
+				std::get<Names>(m_storage).insert({ code, name });
 				return true;
 			}
 			return false;
@@ -88,7 +97,7 @@ namespace ml
 		> inline bool registrate(Info && info, Func && func)
 		{
 			return registrate(
-				name_t{ nameof_v<T>.data(), nameof_v<T>.size() },
+				nameof_v<T>,
 				std::forward<Info>(info),
 				hashof_v<T>,
 				std::forward<Func>(func)
@@ -99,7 +108,7 @@ namespace ml
 
 		inline std::optional<code_t> get_code(name_t const & name) const
 		{
-			if (auto const it{ m_codes.find(name) }; it != m_codes.cend())
+			if (auto const it{ codes().find(name) }; it != codes().cend())
 			{
 				return std::make_optional(it->second);
 			}
@@ -108,7 +117,7 @@ namespace ml
 
 		inline std::optional<func_t> get_func(name_t const & name) const
 		{
-			if (auto const it{ m_funcs.find(name) }; it != m_funcs.cend())
+			if (auto const it{ funcs().find(name) }; it != funcs().cend())
 			{
 				return std::make_optional(it->second);
 			}
@@ -117,7 +126,7 @@ namespace ml
 
 		inline std::optional<func_t> get_func(code_t code) const
 		{
-			if (auto const it{ m_names.find(code) }; it != m_names.cend())
+			if (auto const it{ names().find(code) }; it != names().cend())
 			{
 				return get_func(it->second);
 			}
@@ -126,24 +135,16 @@ namespace ml
 
 		inline std::optional<info_t> get_info(name_t const & name) const
 		{
-			if (auto const it{ m_infos.find(name) }; it != m_infos.cend())
+			if (auto const it{ infos().find(name) }; it != infos().cend())
 			{
 				return std::make_optional(it->second);
 			}
 			return std::nullopt;
 		}
 
-		inline std::optional<info_t> get_info(code_t code) const
-		{
-			if (auto const it{ m_names.find(code) }; it != m_names.cend())
-			{
-			}
-			return std::nullopt;
-		}
-
 		inline std::optional<name_t> get_name(code_t code) const
 		{
-			if (auto const it{ m_names.find(code) }; it != m_names.cend())
+			if (auto const it{ names().find(code) }; it != names().cend())
 			{
 				return std::make_optional(it->second);
 			}
@@ -159,13 +160,7 @@ namespace ml
 
 		~Registry();
 
-		union
-		{
-			std::unordered_map<name_t, code_t> m_codes;
-			std::unordered_map<name_t, func_t> m_funcs;
-			std::unordered_map<name_t, info_t> m_infos;
-			std::unordered_map<code_t, name_t> m_names;
-		};
+		storage_t m_storage;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */

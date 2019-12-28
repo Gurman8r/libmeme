@@ -3,14 +3,14 @@
 
 #include <libmeme/Core/Core.hpp>
 
-namespace ml
+namespace ml::dense
 {
 	// vector of pairs
 	template <class Key, class Value,
 		class Comp = std::less<Key>,
 		class Pair = std::pair<Key, Value>,
 		class Alloc = std::allocator<Pair>
-	> struct dense_map
+	> struct map
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,16 +20,18 @@ namespace ml
 		using value_type				= typename Pair;
 		using allocator_type			= typename Alloc;
 
-		using self_type					= typename _ML dense_map<Key, Value, Comp, Pair, Alloc>;
+		using self_type					= typename _ML dense::map<Key, Value, Comp, Pair, Alloc>;
 		using storage_type				= typename std::vector<value_type, allocator_type>;
 		using initializer_type			= typename std::initializer_list<value_type>;
 
+		using pointer					= typename value_type *;
+		using reference					= typename value_type &;
+		using const_pointer				= typename value_type const *;
+		using const_reference			= typename value_type const &;
+		using rvalue_reference			= typename value_type &&;
+		
 		using difference_type			= typename storage_type::difference_type;
 		using size_type					= typename storage_type::size_type;
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
 		using iterator					= typename storage_type::iterator;
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;
@@ -59,95 +61,56 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		dense_map() noexcept : m_storage{} {}
+		map() noexcept
+			: m_storage{}
+		{
+		}
 
-		~dense_map() noexcept {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		dense_map(initializer_type init)
+		map(initializer_type init)
 			: m_storage{ init }
 		{
+			sort();
 		}
 
-		dense_map(initializer_type init, std::input_iterator_tag)
-			: m_storage{ init, std::input_iterator_tag }
-		{
-		}
-
-		dense_map(initializer_type init, std::forward_iterator_tag)
-			: m_storage{ init, std::forward_iterator_tag }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class It> dense_map(It first, It last)
+		template <class It> map(It first, It last)
 			: m_storage{ first, last }
 		{
+			sort();
 		}
 
-		template <class It> dense_map(It first, It last, std::input_iterator_tag)
-			: m_storage{ first, last, std::input_iterator_tag }
-		{
-		}
-
-		template <class It> dense_map(It first, It last, std::forward_iterator_tag)
-			: m_storage{ first, last, std::forward_iterator_tag }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		dense_map(storage_type const & value)
-			: m_storage{ value }
-		{
-		}
-
-		dense_map(storage_type const & value, allocator_type const & alloc)
+		map(storage_type const & value, allocator_type const & alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
+			sort();
 		}
 
-		dense_map(storage_type && value) noexcept
-			: m_storage{ std::move(value) }
-		{
-		}
-
-		dense_map(storage_type && value, allocator_type const & alloc) noexcept
+		map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
+			sort();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		dense_map(self_type const & value)
+		map(self_type const & value)
 			: m_storage{ value.m_storage }
 		{
 		}
 
-		dense_map(self_type && value) noexcept
-			: m_storage{ std::move(value.m_storage) }
+		map(self_type && value) noexcept
+			: m_storage{}
+		{
+			swap(std::move(value));
+		}
+
+		~map() noexcept
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(storage_type const & value)
-		{
-			assign(value);
-			return (*this);
-		}
-
-		inline self_type & operator=(storage_type && value) noexcept
-		{
-			swap(std::move(value));
-			return (*this);
-		}
-
 		inline self_type & operator=(self_type const & value)
 		{
-			assign(value);
+			self_type temp{ value };
+			swap(temp);
 			return (*this);
 		}
 
@@ -157,55 +120,11 @@ namespace ml
 			return (*this);
 		}
 
-		inline self_type & operator=(initializer_type value)
-		{
-			assign(value);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class It> inline void assign(It first, It last)
-		{
-			m_storage.assign(first, last);
-		}
-
-		inline void assign(initializer_type init)
-		{
-			m_storage.assign(init);
-		}
-
-		inline void assign(storage_type const & value)
-		{
-			if (std::addressof(m_storage) != std::addressof(value))
-			{
-				m_storage = value;
-			}
-		}
-
-		inline void assign(self_type const & value)
-		{
-			if (this != std::addressof(value))
-			{
-				m_storage = value.m_storage;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline void swap(storage_type & value) noexcept
-		{
-			if (std::addressof(m_storage) != std::addressof(value))
-			{
-				m_storage.swap(value);
-			}
-		}
-
 		inline void swap(self_type & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
-				m_storage.swap(value.m_storage);
+				std::swap(m_storage, value.m_storage);
 			}
 		}
 
@@ -251,7 +170,7 @@ namespace ml
 		{
 			if (auto const it{ find_range(key) }; it.first != it.second)
 			{
-				return it.second;
+				return it.first;
 			}
 			return end();
 		}
@@ -260,7 +179,7 @@ namespace ml
 		{
 			if (auto const it{ find_range(key) }; it.first != it.second)
 			{
-				return it.second;
+				return it.first;
 			}
 			return cend();
 		}
@@ -275,11 +194,11 @@ namespace ml
 			}
 			else
 			{
-				return std::make_pair(m_storage.insert(it.second, value), true);
+				return std::make_pair(m_storage.emplace(it.second, value), true);
 			}
 		}
 
-		inline std::pair<iterator, bool> insert(value_type && value)
+		inline std::pair<iterator, bool> insert(rvalue_reference value)
 		{
 			if (auto const it{ find_range(value.first) }; it.first != it.second)
 			{
@@ -356,7 +275,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union { storage_type m_storage; };
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

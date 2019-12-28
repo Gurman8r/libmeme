@@ -2,6 +2,7 @@
 #define _ML_MATERIAL_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -39,7 +40,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & filename);
+		bool loadFromFile(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

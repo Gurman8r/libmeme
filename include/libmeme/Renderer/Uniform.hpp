@@ -18,7 +18,7 @@ namespace ml
 			struct Texture const *
 		>;
 
-		using funcion_t = typename std::function<
+		using function_t = typename std::function<
 			variable_t()
 		>;
 
@@ -29,7 +29,7 @@ namespace ml
 		using name_t = typename std::string;
 
 		using data_t = typename std::variant<
-			variable_t, funcion_t
+			variable_t, function_t
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -74,7 +74,7 @@ namespace ml
 
 		inline bool is_function() const noexcept
 		{
-			return std::holds_alternative<funcion_t>(data());
+			return std::holds_alternative<function_t>(data());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -87,7 +87,7 @@ namespace ml
 			}
 			else if (is_function())
 			{
-				if (auto const & f{ std::get<funcion_t>(data()) })
+				if (auto const & f{ std::get<function_t>(data()) })
 				{
 					return std::make_optional(std::invoke(f));
 				}

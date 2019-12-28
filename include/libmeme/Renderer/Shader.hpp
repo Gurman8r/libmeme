@@ -2,7 +2,7 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
-#include <libmeme/Core/DenseMap.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -19,18 +19,18 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename std::map<std::string, int32_t>;
+		using AttribCache = typename dense::map<std::string, int32_t>;
 
-		using UniformCache = typename std::map<std::string, int32_t>;
+		using UniformCache = typename dense::map<std::string, int32_t>;
 
-		using TextureCache = typename std::map<int32_t, struct Texture const *>;
+		using TextureCache = typename dense::map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Shader();
-		explicit Shader(Source const & source);
-		explicit Shader(path_t const & v, path_t const & f);
-		explicit Shader(path_t const & v, path_t const & g, path_t const & f);
+		Shader(Source const & source);
+		Shader(path_t const & v, path_t const & f);
+		Shader(path_t const & v, path_t const & g, path_t const & f);
 		Shader(Shader const & other);
 		Shader(Shader && other) noexcept;
 		~Shader();
@@ -63,7 +63,9 @@ namespace ml
 
 		static void bind(Shader const * value, bool bindTextures = true);
 
-		void bind(bool bindTextures = true);
+		void bind(bool bindTextures = true) const;
+
+		void unbind() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -97,9 +99,9 @@ namespace ml
 
 		inline operator bool() const noexcept { return m_handle; }
 
-		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
-
 		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+
+		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
 		inline auto attributes() const noexcept -> AttribCache const & { return m_attributes; }
 

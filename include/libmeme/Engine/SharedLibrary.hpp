@@ -3,6 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -10,12 +11,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Functions = typename std::map<std::string, void *>;
+		using Functions = typename dense::map<std::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		SharedLibrary();
-		explicit SharedLibrary(std::string const & filename);
+		SharedLibrary(path_t const & path);
 		SharedLibrary(SharedLibrary && copy) noexcept;
 		~SharedLibrary();
 
@@ -23,15 +24,13 @@ namespace ml
 
 		SharedLibrary & operator=(SharedLibrary && other) noexcept;
 
-		SharedLibrary & swap(SharedLibrary & other);
-
-		inline operator bool() const { return m_instance; }
+		void swap(SharedLibrary & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool dispose();
 
-		bool loadFromFile(std::string const & filename);
+		bool loadFromFile(path_t const & path);
 
 		void * loadFunction(std::string const & name);
 
@@ -39,11 +38,13 @@ namespace ml
 			class Ret, class ... Args
 		> inline auto invoke(std::string const & name, Args && ... args)
 		{
-			auto fun{ reinterpret_cast<Ret(*)(Args...)>(this->loadFunction(name)) };
+			auto fun{ reinterpret_cast<Ret(*)(Args...)>(loadFunction(name)) };
 			return (fun ? fun(std::forward<Args>(args)...) : nullptr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline operator bool() const { return m_instance; }
 
 		inline auto instance() const -> void * const & { return m_instance; }
 

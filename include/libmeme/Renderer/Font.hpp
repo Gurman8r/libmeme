@@ -9,8 +9,59 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using Page = typename dense::map<uint32_t, Glyph>;
+		
+		using PageTable = typename dense::map<uint32_t, Page>;
+
+		struct Info final
+		{
+			std::string family;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		Font();
+		Font(path_t const & path);
+		Font(Font const & other);
+		Font(Font && other) noexcept;
 		~Font();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Font & operator=(Font const & other);
+
+		Font & operator=(Font && other) noexcept;
+
+		void swap(Font & other) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool loadFromFile(path_t const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Glyph const & get_glyph(uint32_t c, uint32_t characterSize) const;
+
+		Page & get_page(uint32_t characterSize) const;
+
+		Glyph load_glyph(uint32_t c, uint32_t characterSize) const;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline auto info() const noexcept -> Info const & { return m_info; }
+
+		inline auto pages() noexcept -> PageTable & { return m_pages; }
+
+		inline auto pages() const noexcept -> PageTable const & { return m_pages; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		void *	m_library;
+		void *	m_face;
+		Info	m_info;
+
+		mutable PageTable m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

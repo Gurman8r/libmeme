@@ -28,7 +28,7 @@ namespace ml
 		Texture(uint32_t sampler, uint32_t format, int32_t flags);
 		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
 		Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
-		Texture(path_t const & filename);
+		Texture(path_t const & path);
 		Texture(Image const & image);
 		Texture(Texture const & other);
 		Texture(Texture && other) noexcept;
@@ -44,7 +44,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & filename);
+		bool loadFromFile(path_t const & path);
 
 		bool loadFromImage(Image const & image);
 
@@ -57,6 +57,10 @@ namespace ml
 		bool destroy();
 
 		static void bind(Texture const * value);
+
+		void bind() const;
+
+		void unbind() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -116,9 +120,9 @@ namespace ml
 
 		inline operator bool() const noexcept { return m_handle; }
 
-		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
-
 		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+
+		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 		
 		inline auto sampler() const noexcept -> uint32_t { return m_sampler; }
 		

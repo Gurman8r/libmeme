@@ -1,11 +1,13 @@
 #include <libmeme/Engine/Registry.hpp>
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Renderer/Material.hpp>
+#include <libmeme/Renderer/Shader.hpp>
+#include <libmeme/Renderer/Texture.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Registry<>::Registry() noexcept : m_codes{}, m_funcs{}, m_infos{}, m_names{}
+	Registry<>::Registry() noexcept : m_storage{}
 	{
 	}
 
@@ -13,9 +15,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_REGISTER(mat4, "primitive") { return std::make_optional(mat4::identity()); }
-
-	// etc...
+	ML_REGISTER(Material,	"") { return std::make_optional(make_material()); }
+	ML_REGISTER(Shader,		"") { return std::make_optional(make_shader()); }
+	ML_REGISTER(Texture,	"") { return std::make_optional(make_texture()); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

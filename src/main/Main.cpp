@@ -205,7 +205,7 @@ ml::int32_t main()
 	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 
 	// Load Plugins
-	dense_map<SharedLibrary *, Plugin *> plugins;
+	dense::map<SharedLibrary *, Plugin *> plugins;
 	auto load_plugin = [&plugins](auto && filename)
 	{
 		auto library{ new SharedLibrary{ filename } };

@@ -3,6 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 extern "C" {
 #include <lua/lua.h>
@@ -28,7 +29,7 @@ namespace ml
 
 		int32_t do_string(std::string const & value) const;
 
-		int32_t do_file(path_t const & filename) const;
+		int32_t do_file(path_t const & path) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

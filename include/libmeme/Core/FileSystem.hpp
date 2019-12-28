@@ -3,9 +3,17 @@
 
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
+#include <libmeme/Core/DenseMap.hpp>
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * */
+	ML_USING path_t = typename std::filesystem::path;
+
+	ML_USING file_t = typename std::vector<char>;
+
+	ML_USING directory_t = typename dense::map<char, std::vector<path_t>>;
+
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_CORE_API FS final

@@ -2,6 +2,7 @@
 #define _ML_MODEL_HPP_
 
 #include <libmeme/Renderer/Mesh.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -29,7 +30,7 @@ namespace ml
 
 		Model();
 		Model(initializer_type init);
-		explicit Model(path_t const & path);
+		Model(path_t const & path);
 		Model(storage_type const & storage);
 		Model(storage_type && storage) noexcept;
 		Model(Model const & other);
@@ -39,28 +40,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Model & operator=(Model const & other);
-		Model & operator=(storage_type const & storage);
+
 		Model & operator=(Model && other) noexcept;
-		Model & operator=(storage_type && storage) noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class It> inline void assign(It first, It last)
-		{
-			m_storage.assign(first, last);
-		}
-
-		void assign(initializer_type init);
-		
-		void assign(Model const & other);
-		
-		void assign(storage_type const & storage);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
 		void swap(Model & other) noexcept;
-		
-		void swap(storage_type & storage) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

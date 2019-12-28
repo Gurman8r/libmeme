@@ -62,9 +62,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Material::loadFromFile(path_t const & filename)
+	bool Material::loadFromFile(path_t const & path)
 	{
-		if (std::ifstream in{ filename })
+		if (std::ifstream in{ path })
 		{
 			in.close();
 

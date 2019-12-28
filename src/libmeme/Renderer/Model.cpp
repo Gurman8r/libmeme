@@ -48,8 +48,9 @@ namespace ml
 	}
 
 	Model::Model(Model && other) noexcept
-		: m_storage{ std::move(other.m_storage) }
+		: m_storage{}
 	{
+		swap(std::move(other));
 	}
 
 	Model::~Model()
@@ -64,13 +65,8 @@ namespace ml
 
 	Model & Model::operator=(Model const & other)
 	{
-		assign(other);
-		return (*this);
-	}
-
-	Model & Model::operator=(storage_type const & storage)
-	{
-		assign(storage);
+		Model temp{ other };
+		swap(temp);
 		return (*this);
 	}
 
@@ -80,43 +76,12 @@ namespace ml
 		return (*this);
 	}
 
-	Model & Model::operator=(storage_type && storage) noexcept
-	{
-		swap(std::move(storage));
-		return (*this);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void Model::assign(initializer_type init)
-	{
-		m_storage.assign(init);
-	}
-
-	void Model::assign(Model const & other)
-	{
-		if (this != std::addressof(other))
-		{
-			m_storage = other.m_storage;
-		}
-	}
-
-	void Model::assign(storage_type const & storage)
-	{
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void Model::swap(Model & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
 			std::swap(m_storage, other.m_storage);
 		}
-	}
-
-	void Model::swap(storage_type & storage) noexcept
-	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

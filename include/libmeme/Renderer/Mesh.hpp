@@ -3,12 +3,13 @@
 
 #include <libmeme/Renderer/Buffers.hpp>
 #include <libmeme/Renderer/BufferLayout.hpp>
-#include <libmeme/Renderer/Drawable.hpp>
 #include <libmeme/Renderer/Material.hpp>
 #include <libmeme/Renderer/Vertex.hpp>
 
 namespace ml
 {
+	struct RenderTarget;
+
 	struct ML_RENDERER_API Mesh final : public Trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,7 +24,9 @@ namespace ml
 		>;
 		
 		using contiguous_t = typename std::vector<float_t>;
+		
 		using vertices_t = typename std::vector<Vertex>;
+		
 		using indices_t = typename std::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,8 +53,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool loadFromMemory(vertices_t const & vertices, indices_t const & indices);
+		
 		bool loadFromMemory(vertices_t const & vertices);
+		
 		bool loadFromMemory(contiguous_t const & vertices, indices_t const & indices);
+
 		bool loadFromMemory(contiguous_t const & vertices);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

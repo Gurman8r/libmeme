@@ -2,7 +2,6 @@
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -177,12 +176,16 @@ namespace ml
 			GL::deleteShader(m_handle);
 			
 			m_handle = NULL;
-			m_source = { nullptr, nullptr, nullptr };
-			m_attributes.clear();
-			m_uniforms.clear();
-			m_textures.clear();
-			
+
 			GL::flush();
+			
+			m_source = { nullptr, nullptr, nullptr };
+			
+			m_attributes.clear();
+			
+			m_uniforms.clear();
+			
+			m_textures.clear();
 		}
 		
 		return !(m_handle);
@@ -213,9 +216,14 @@ namespace ml
 		}
 	}
 
-	void Shader::bind(bool bindTextures)
+	void Shader::bind(bool bindTextures) const
 	{
 		bind(this, bindTextures);
+	}
+
+	void Shader::unbind() const
+	{
+		bind(nullptr, false);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -337,7 +345,7 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto it{ m_textures.find(u.location) }; it != m_textures.cend())
+			if (auto it{ m_textures.find(u.location) }; it != m_textures.end())
 			{
 				it->second = &value;
 			}

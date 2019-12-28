@@ -3,6 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {

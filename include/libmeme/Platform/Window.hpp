@@ -22,19 +22,6 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Icon final
-		{
-			int32_t width{ 0 };
-			
-			int32_t height{ 0 };
-			
-			byte_t * pixels{ nullptr };
-
-			constexpr Icon() noexcept = default;
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using CharFun			= typename void(*)(void *, uint32_t);
 		using CursorEnterFun	= typename void(*)(void *, int32_t);
 		using CursorPosFun		= typename void(*)(void *, float64_t, float64_t);
@@ -222,7 +209,6 @@ namespace ml
 		WindowStyle		m_style;
 		DisplayMode		m_video;
 		std::string		m_title;
-		Icon			m_icon;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

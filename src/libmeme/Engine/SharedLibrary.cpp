@@ -22,39 +22,39 @@ namespace ml
 	{
 	}
 	
-	SharedLibrary::SharedLibrary(std::string const & filename)
+	SharedLibrary::SharedLibrary(path_t const & path)
 		: SharedLibrary{}
 	{
-		this->loadFromFile(filename);
+		loadFromFile(path);
 	}
 
 	SharedLibrary::SharedLibrary(SharedLibrary && copy) noexcept
 		: SharedLibrary{}
 	{
-		this->swap(std::move(copy));
+		swap(std::move(copy));
 	}
 
 	SharedLibrary::~SharedLibrary()
 	{
-		this->dispose();
+		dispose();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	SharedLibrary & SharedLibrary::operator=(SharedLibrary && other) noexcept
 	{
-		return this->swap(std::move(other));
+		swap(std::move(other));
+		return (*this);
 	}
 
-	SharedLibrary & SharedLibrary::swap(SharedLibrary & other)
+	void SharedLibrary::swap(SharedLibrary & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
 			std::swap(m_instance, other.m_instance);
 
-			m_functions.swap(other.m_functions);
+			std::swap(m_functions, other.m_functions);
 		}
-		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -62,12 +62,13 @@ namespace ml
 	bool SharedLibrary::dispose()
 	{
 		m_functions.clear();
+		
 		return ML_FREE_LIB(m_instance);
 	}
 
-	bool SharedLibrary::loadFromFile(std::string const & filename)
+	bool SharedLibrary::loadFromFile(path_t const & path)
 	{
-		return (m_instance = ML_LOAD_LIB(filename.c_str()));
+		return (m_instance = ML_LOAD_LIB(path.string().c_str()));
 	}
 
 	void * SharedLibrary::loadFunction(std::string const & name)

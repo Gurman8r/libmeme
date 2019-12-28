@@ -3,6 +3,7 @@
 
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/DenseMap.hpp>
 
 #define ML_MemoryTracker ::ml::MemoryTracker::getInstance()
 
@@ -14,17 +15,21 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum : size_t { Index, Size, Data };
+
 		using storage_t = typename std::tuple<
-			size_t, size_t, struct Trackable *
+			size_t,
+			size_t,
+			struct Trackable *
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) index() const noexcept { return std::get<0>(m_storage); }
+		inline decltype(auto) index() const noexcept { return std::get<Index>(m_storage); }
 
-		inline decltype(auto) size() const noexcept { return std::get<1>(m_storage); }
+		inline decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
 
-		inline decltype(auto) data() const noexcept { return std::get<2>(m_storage); }
+		inline decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,7 +52,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename std::map<struct Trackable *, AllocationRecord *>;
+		using records_t = typename dense::map<
+			struct Trackable *, AllocationRecord *
+		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

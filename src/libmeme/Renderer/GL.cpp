@@ -1,4 +1,3 @@
-
 #ifdef ML_IMPL_RENDERER_OPENGL
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,8 +41,8 @@ namespace ml
 	{
 		if (auto const code{ getError() })
 		{
-			std::string filename{ file };
-			filename = filename.substr(filename.find_last_of("\\/") + 1);
+			std::string path{ file };
+			path = path.substr(path.find_last_of("\\/") + 1);
 
 			// Decode the error
 			std::cerr

@@ -1,5 +1,5 @@
-#ifndef _ML_RENDERER_API_OPENGL_HPP_
-#define _ML_RENDERER_API_OPENGL_HPP_
+#ifndef _ML_GL_HPP_
+#define _ML_GL_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1957,4 +1957,4 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_API_OPENGL_HPP_
+#endif // !_ML_GL_HPP_
