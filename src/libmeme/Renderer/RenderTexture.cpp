@@ -23,7 +23,7 @@ namespace ml
 		, m_colorID	{ colorID }
 		, m_frameID	{ frameID }
 		, m_format	{ format }
-		, m_texture	{ make_texture() }
+		, m_texture	{ make_texture(GL::Texture2D) }
 	{
 	}
 
@@ -95,11 +95,10 @@ namespace ml
 
 				if (GL::checkFramebufferStatus(GL::Framebuffer))
 				{
-					m_texture.destroy();
-
-					m_texture.create(m_size);
-
-					m_fbo.attachTexture2D(m_colorID, m_texture.handle(), m_texture.level());
+					if (m_texture.destroy() && m_texture.create(m_size))
+					{
+						m_fbo.attachTexture2D(m_colorID, m_texture.handle(), m_texture.level());
+					}
 				}
 			}
 		}
@@ -131,7 +130,7 @@ namespace ml
 	{
 		if (value)
 		{
-			value->fbo().bind();
+			FrameBufferObject::bind(&value->fbo());
 		}
 		else
 		{

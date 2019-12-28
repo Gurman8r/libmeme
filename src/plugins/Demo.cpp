@@ -108,7 +108,7 @@ namespace ml
 					make_uniform<vec2	>("u_camera.view",	vec2{ 1280.f, 720.f }),
 					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
 					make_uniform<Color	>("u_color",		colors::white),
-					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, -5.f }),
+					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, 0.f }),
 					make_uniform<vec3	>("u_scale",		vec3{ 1.f, 1.f, 1.f }),
 					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
 				}) });
