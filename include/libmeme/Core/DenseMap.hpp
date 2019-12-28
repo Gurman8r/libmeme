@@ -130,18 +130,6 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void clear() noexcept { return m_storage.clear(); }
-
-		inline void pop_back() noexcept { return m_storage.pop_back(); }
-
-		inline void reserve(size_type const size) { return m_storage.reserve(size); }
-
-		inline void resize(size_type const size) { return m_storage.resize(size); }
-
-		inline void sort() noexcept { return std::sort(begin(), end(), compare_impl{}); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline iterator erase(const_iterator it)
 		{
 			return m_storage.erase(it);
@@ -154,21 +142,10 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) find_range(key_type const & key)
-		{
-			return std::equal_range(begin(), end(), key, compare_impl{});
-		}
-
-		inline decltype(auto) find_range(key_type const & key) const
-		{
-			return std::equal_range(cbegin(), cend(), key, compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline iterator find(key_type const & key)
 		{
-			if (auto const it{ find_range(key) }; it.first != it.second)
+			if (auto const it{ std::equal_range(begin(), end(), key, compare_impl{}) }
+			; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -177,7 +154,8 @@ namespace ml::dense
 
 		inline const_iterator find(key_type const & key) const
 		{
-			if (auto const it{ find_range(key) }; it.first != it.second)
+			if (auto const it{ std::equal_range(cbegin(), cend(), key, compare_impl{}) }
+			; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -188,7 +166,8 @@ namespace ml::dense
 
 		inline std::pair<iterator, bool> insert(const_reference value)
 		{
-			if (auto const it{ find_range(value.first) }; it.first != it.second)
+			if (auto const it{ std::equal_range(begin(), end(), value.first, compare_impl{}) }
+			; it.first != it.second)
 			{
 				return std::make_pair(it.second, false);
 			}
@@ -200,7 +179,8 @@ namespace ml::dense
 
 		inline std::pair<iterator, bool> insert(rvalue_reference value)
 		{
-			if (auto const it{ find_range(value.first) }; it.first != it.second)
+			if (auto const it{ std::equal_range(begin(), end(), value.first, compare_impl{}) }
+			; it.first != it.second)
 			{
 				return std::make_pair(it.second, false);
 			}
@@ -214,7 +194,8 @@ namespace ml::dense
 
 		inline mapped_type & operator[](key_type const & key)
 		{
-			if (auto const it{ find_range(key) }; it.first != it.second)
+			if (auto const it{ std::equal_range(begin(), end(), key, compare_impl{}) }
+			; it.first != it.second)
 			{
 				return it.first->second;
 			}
@@ -223,6 +204,18 @@ namespace ml::dense
 				return m_storage.emplace(it.second, std::make_pair(key, mapped_type{}))->second;
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline void clear() noexcept { return m_storage.clear(); }
+
+		inline void pop_back() noexcept { return m_storage.pop_back(); }
+
+		inline void reserve(size_type const size) { return m_storage.reserve(size); }
+
+		inline void resize(size_type const size) { return m_storage.resize(size); }
+
+		inline void sort() noexcept { return std::sort(begin(), end(), compare_impl{}); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
