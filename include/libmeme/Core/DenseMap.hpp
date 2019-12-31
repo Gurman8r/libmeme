@@ -16,8 +16,8 @@ namespace ml
 
 		using key_type					= typename Key;
 		using mapped_type				= typename Value;
-		using compare_type				= typename Comp;
 		using value_type				= typename Pair;
+		using compare_type				= typename Comp;
 		using allocator_type			= typename Alloc;
 
 		using self_type					= typename _ML dense_map<Key, Value, Comp, Pair, Alloc>;
@@ -199,7 +199,7 @@ namespace ml
 			}
 			else
 			{
-				return m_storage.emplace(it.second, std::make_pair(key, mapped_type{}))->second;
+				return m_storage.emplace(it.second, value_type{ key, mapped_type{} })->second;
 			}
 		}
 
@@ -207,11 +207,7 @@ namespace ml
 
 		inline void clear() noexcept { return m_storage.clear(); }
 
-		inline void pop_back() noexcept { return m_storage.pop_back(); }
-
 		inline void reserve(size_type const size) { return m_storage.reserve(size); }
-
-		inline void resize(size_type const size) { return m_storage.resize(size); }
 
 		inline void sort() noexcept { return std::sort(begin(), end(), compare_impl{}); }
 

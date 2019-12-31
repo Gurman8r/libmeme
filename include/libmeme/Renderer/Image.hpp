@@ -28,7 +28,7 @@ namespace ml
 		Image(vec2u const & size);
 		Image(vec2u const & size, size_t channels);
 		Image(vec2u const & size, Pixels const & pixels);
-		Image(vec2u const & size, Pixels const & pixels, size_t channels);
+		Image(vec2u const & size, size_t channels, Pixels const & pixels);
 		Image(path_t const & path);
 		Image(path_t const & path, bool flip);
 		Image(path_t const & path, bool flip, size_t req_comp);

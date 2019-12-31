@@ -47,7 +47,7 @@ namespace ml
 		Uniform(storage_t && storage) noexcept;
 		Uniform(Uniform const & other);
 		Uniform(Uniform && other) noexcept;
-		~Uniform();
+		~Uniform() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -95,7 +95,7 @@ namespace ml
 			return std::nullopt;
 		}
 
-		template <class T, class ... Args> inline decltype(auto) store(Args && ... args)
+		template <class T, class ... Args> inline storage_t const & store(Args && ... args)
 		{
 			return (m_storage = std::make_tuple(
 				typeof_v<T>, name(), std::forward<Args>(args)...

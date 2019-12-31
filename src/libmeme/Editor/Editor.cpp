@@ -130,6 +130,8 @@ namespace ml
 
 	void Editor::shutdown()
 	{
+		getInstance().~Editor();
+
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #else
@@ -141,8 +143,6 @@ namespace ml
 #else
 		// 
 #endif
-
-		getInstance().~Editor();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

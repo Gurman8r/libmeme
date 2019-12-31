@@ -53,7 +53,8 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
-				ML_Editor.mainMenuBar().addMenu("Plugins", [&]() {
+				ML_Editor.mainMenuBar().addMenu("Plugins", [&]()
+				{
 					ImGui::PushID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Demo"))
 					{
@@ -63,11 +64,9 @@ namespace ml
 					ImGui::PopID();
 				});
 
-				m_images.insert({ "icon", make_image(
+				if (auto const & img{ m_images.insert({ "icon", make_image(
 					FS::path_to("../../../assets/textures/icon.png")
-				) });
-
-				if (auto const & img{ m_images["icon"] }; !img.empty())
+				) }).first->second }; !img.empty())
 				{
 					ev->window.setIcon(img.width(), img.height(), img.data());
 				}
@@ -159,7 +158,7 @@ namespace ml
 			{
 				GL::clearColor(0, 0, 0, 1);
 				GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
-				GL::viewport(0, 0, 1280, 720);
+				GL::viewport(0, 0, ev->window.getFrameWidth(), ev->window.getFrameHeight());
 				RenderStates{}();
 
 				if (ML_BIND_EX(RenderTexture, _r, m_pipeline[0]))
@@ -167,8 +166,10 @@ namespace ml
 					constexpr auto bg{ colors::magenta };
 					GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
 					GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
-					GL::viewport(0, 0, 1280, 720);
-					RenderStates{}();
+					GL::viewport(0, 0, _r->size()[0], _r->size()[1]);
+					RenderStates{
+						{}, {}, CullState{ false }, {}
+					}();
 
 					if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false))
 					{
@@ -185,7 +186,7 @@ namespace ml
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(value) })
 			{
 				ImGui::PushID(ML_ADDRESSOF(this));
-				ImGui::SetNextWindowSize({ 640, 640  }, ImGuiCond_Once);
+				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					ImGui::Text("Active Allocations: %u", ML_MemoryTracker.records().size());
@@ -221,7 +222,7 @@ namespace ml
 
 					draw_texture_preview(m_pipeline[0].texture()); ImGui::Separator();
 
-					draw_texture_preview(m_textures["doot"]); ImGui::Separator();
+					//draw_texture_preview(m_textures["doot"]); ImGui::Separator();
 				}
 				ImGui::End();
 				ImGui::PopID();

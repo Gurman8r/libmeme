@@ -41,19 +41,19 @@ namespace ml
 	}
 
 	Image::Image(vec2u const & size, size_t channels) 
-		: Image{ size, Pixels(), channels }
+		: Image{ size, channels, Pixels() }
 	{
 	}
 
 	Image::Image(vec2u const & size, Pixels const & pixels)
-		: Image{ size, pixels, 4 }
+		: Image{ size, 4, pixels }
 	{
 	}
 
-	Image::Image(vec2u const & size, Pixels const & pixels, size_t channels)
-		: m_size { size }
-		, m_pixels { pixels }
-		, m_channels { channels }
+	Image::Image(vec2u const & size, size_t channels, Pixels const & pixels)
+		: m_size	{ size }
+		, m_channels{ channels }
+		, m_pixels	{ pixels }
 	{
 		if (size_t const c { capacity() })
 		{
@@ -81,9 +81,9 @@ namespace ml
 	}
 
 	Image::Image(Image const & other)
-		: m_size{ other.m_size }
-		, m_pixels{ other.m_pixels }
+		: m_size	{ other.m_size }
 		, m_channels{ other.m_channels }
+		, m_pixels	{ other.m_pixels }
 	{
 	}
 

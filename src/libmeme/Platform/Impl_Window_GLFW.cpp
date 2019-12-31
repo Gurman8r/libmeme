@@ -59,6 +59,11 @@ namespace ml
 		, m_style	{}
 		, m_video	{}
 	{
+		ML_EventSystem.addListener<WindowErrorEvent>(this);
+		ML_EventSystem.addListener<WindowKillEvent>(this);
+		ML_EventSystem.addListener<WindowSizeEvent>(this);
+		ML_EventSystem.addListener<WindowFullscreenEvent>(this);
+
 #if defined(ML_SYSTEM_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })
 		{
@@ -68,10 +73,6 @@ namespace ml
 			}
 		}
 #endif
-		ML_EventSystem.addListener<WindowErrorEvent>(this);
-		ML_EventSystem.addListener<WindowKillEvent>(this);
-		ML_EventSystem.addListener<WindowSizeEvent>(this);
-		ML_EventSystem.addListener<WindowFullscreenEvent>(this);
 	}
 	
 	Window::~Window()
