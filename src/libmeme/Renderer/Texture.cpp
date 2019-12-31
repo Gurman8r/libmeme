@@ -117,8 +117,7 @@ namespace ml
 
 	bool Texture::loadFromFile(path_t const & path)
 	{
-		Image image;
-		return image.loadFromFile(path) && loadFromImage(image);
+		return loadFromImage(make_image(path));
 	}
 
 	bool Texture::loadFromImage(Image const & image)

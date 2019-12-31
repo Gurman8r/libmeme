@@ -13,7 +13,7 @@ namespace ml
 
 	ML_USING file_t = typename std::vector<char>;
 
-	ML_USING directory_t = typename dense::map<char, std::vector<path_t>>;
+	ML_USING directory_t = typename dense_map<char, std::vector<path_t>>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 

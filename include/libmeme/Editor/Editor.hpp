@@ -1,8 +1,9 @@
 #ifndef _ML_EDITOR_HPP_
 #define _ML_EDITOR_HPP_
 
-#include <libmeme/Editor/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Editor/Dockspace.hpp>
+#include <libmeme/Editor/MainMenuBar.hpp>
 
 #define ML_Editor ::ml::Editor::getInstance()
 
@@ -32,12 +33,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline auto dockspace() noexcept -> Dockspace & { return m_dockspace; }
+		inline auto dockspace() const noexcept -> Dockspace const & { return m_dockspace; }
+
+		inline auto mainMenuBar() noexcept -> MainMenuBar & { return m_mainMenuBar; }
+		inline auto mainMenuBar() const noexcept -> MainMenuBar const & { return m_mainMenuBar; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		friend struct Singleton<Editor>;
 		
 		Editor();
-		
 		~Editor();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Dockspace m_dockspace;
+		MainMenuBar m_mainMenuBar;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

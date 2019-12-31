@@ -144,11 +144,14 @@ namespace ml
 		) };
 	}
 
-	template <class U> static inline auto make_uniform(U && value) noexcept
+	static inline auto make_uniform(Uniform const & value)
 	{
-		return Uniform{ std::make_tuple(
-			value.type(), value.name(), value.data()
-		) };
+		return Uniform{ value };
+	}
+
+	static inline auto make_uniform(Uniform && value) noexcept
+	{
+		return Uniform{ std::move(value) };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

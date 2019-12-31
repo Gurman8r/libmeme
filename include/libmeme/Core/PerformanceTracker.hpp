@@ -49,7 +49,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ScopeTimer final
+	struct ScopeTimer final : public NonCopyable
 	{
 		C_String name; Timer timer;
 

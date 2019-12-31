@@ -23,13 +23,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		dense::map<std::string, Font>		m_fonts		{};
-		dense::map<std::string, Image>		m_images	{};
-		dense::map<std::string, Material>	m_materials	{};
-		dense::map<std::string, Model>		m_models	{};
-		dense::map<std::string, Script>		m_scripts	{};
-		dense::map<std::string, Shader>		m_shaders	{};
-		dense::map<std::string, Texture>	m_textures	{};
+		dense_map<std::string, Font>		m_fonts		{};
+		dense_map<std::string, Image>		m_images	{};
+		dense_map<std::string, Material>	m_materials	{};
+		dense_map<std::string, Model>		m_models	{};
+		dense_map<std::string, Script>		m_scripts	{};
+		dense_map<std::string, Shader>		m_shaders	{};
+		dense_map<std::string, Texture>		m_textures	{};
 		std::vector<RenderTexture>			m_pipeline	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,14 +37,13 @@ namespace ml
 		Demo() : Plugin{}
 		{
 			ML_EventSystem.addListener<LoadEvent>(this);
+			ML_EventSystem.addListener<UpdateEvent>(this);
 			ML_EventSystem.addListener<DrawEvent>(this);
 			ML_EventSystem.addListener<GuiEvent>(this);
 			ML_EventSystem.addListener<UnloadEvent>(this);
 		}
 
-		~Demo()
-		{
-		}
+		~Demo() {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,6 +53,16 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
+				ML_Editor.mainMenuBar().addMenu("Plugins", [&]() {
+					ImGui::PushID(ML_ADDRESSOF(this));
+					if (ImGui::BeginMenu("Demo"))
+					{
+						ImGui::Text("Sample text.");
+						ImGui::EndMenu();
+					}
+					ImGui::PopID();
+				});
+
 				m_images.insert({ "icon", make_image(
 					FS::path_to("../../../assets/textures/icon.png")
 				) });
@@ -67,13 +76,13 @@ namespace ml
 					vec2i{ 1280, 720 }
 				)).create();
 
-				m_textures.insert({ "doot", make_texture(make_image(
+				m_textures.insert({ "doot", make_texture(
 					FS::path_to("../../../assets/textures/doot.png")
-				)) });
+				) });
 
-				m_textures.insert({ "navball", make_texture(make_image(
+				m_textures.insert({ "navball", make_texture(
 					FS::path_to("../../../assets/textures/navball.png")
-				)) });
+				) });
 
 				m_fonts.insert({ "consolas", make_font(
 					FS::path_to("../../../assets/fonts/consolas.ttf")
@@ -98,7 +107,7 @@ namespace ml
 					make_uniform<mat4	>("u_model",		mat4::identity())
 				) });
 
-				m_materials.insert({ "3d", make_material({
+				m_materials.insert({ "3d", make_material(
 					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
 					make_uniform<vec3	>("u_camera.pos",	vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_camera.dir",	vec3{ 0, 0, -1.f }),
@@ -111,7 +120,7 @@ namespace ml
 					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, 0.f }),
 					make_uniform<vec3	>("u_scale",		vec3{ 1.f, 1.f, 1.f }),
 					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
-				}) });
+				) });
 
 				m_models.insert({ "sphere32x24", make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
@@ -142,6 +151,10 @@ namespace ml
 				)) });
 
 			} break;
+			case UpdateEvent::ID: if (auto ev{ event_cast<UpdateEvent>(value) })
+			{
+				// update stuff
+			} break;
 			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(value) })
 			{
 				GL::clearColor(0, 0, 0, 1);
@@ -151,7 +164,7 @@ namespace ml
 
 				if (ML_BIND_EX(RenderTexture, _r, m_pipeline[0]))
 				{
-					constexpr auto bg{ make_color(colors::magenta) };
+					constexpr auto bg{ colors::magenta };
 					GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
 					GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
 					GL::viewport(0, 0, 1280, 720);

@@ -25,11 +25,14 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Editor::Editor()
+		: m_dockspace{}
+		, m_mainMenuBar{}
 	{
 	}
 
 	Editor::~Editor()
 	{
+		m_mainMenuBar.m_menus.clear();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -138,6 +141,8 @@ namespace ml
 #else
 		// 
 #endif
+
+		getInstance().~Editor();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

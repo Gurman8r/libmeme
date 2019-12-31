@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Page = typename dense::map<uint32_t, Glyph>;
+		using Page = typename dense_map<uint32_t, Glyph>;
 		
-		using PageTable = typename dense::map<uint32_t, Page>;
+		using PageTable = typename dense_map<uint32_t, Page>;
 
 		struct Info final
 		{

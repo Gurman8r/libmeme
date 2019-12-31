@@ -48,12 +48,12 @@ namespace ml
 				<< std::setw(addr_size) << "Address"
 				<< '\n';
 
-			for (auto const & [ptr, rec] : m_records)
+			for (auto const & pair : m_records)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << rec->index()
-					<< std::setw(size_size) << rec->size()
-					<< std::setw(addr_size) << rec->data()
+					<< std::setw(indx_size) << pair.second->index()
+					<< std::setw(size_size) << pair.second->size()
+					<< std::setw(addr_size) << pair.second->data()
 					<< '\n';
 			}
 

@@ -3,14 +3,14 @@
 
 #include <libmeme/Core/Core.hpp>
 
-namespace ml::dense
+namespace ml
 {
 	// vector of pairs
 	template <class Key, class Value,
 		class Comp = std::less<Key>,
 		class Pair = std::pair<Key, Value>,
 		class Alloc = std::allocator<Pair>
-	> struct map
+	> struct dense_map
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,7 +20,7 @@ namespace ml::dense
 		using value_type				= typename Pair;
 		using allocator_type			= typename Alloc;
 
-		using self_type					= typename _ML dense::map<Key, Value, Comp, Pair, Alloc>;
+		using self_type					= typename _ML dense_map<Key, Value, Comp, Pair, Alloc>;
 		using storage_type				= typename std::vector<value_type, allocator_type>;
 		using initializer_type			= typename std::initializer_list<value_type>;
 
@@ -61,49 +61,47 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		map() noexcept
+		dense_map() noexcept
 			: m_storage{}
 		{
 		}
 
-		map(initializer_type init)
+		dense_map(initializer_type init)
 			: m_storage{ init }
 		{
 			sort();
 		}
 
-		template <class It> map(It first, It last)
+		template <class It> dense_map(It first, It last)
 			: m_storage{ first, last }
 		{
 			sort();
 		}
 
-		map(storage_type const & value, allocator_type const & alloc = allocator_type{})
+		dense_map(storage_type const & value, allocator_type const & alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
 			sort();
 		}
 
-		map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
+		dense_map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
 			sort();
 		}
 
-		map(self_type const & value)
+		dense_map(self_type const & value)
 			: m_storage{ value.m_storage }
 		{
 		}
 
-		map(self_type && value) noexcept
+		dense_map(self_type && value) noexcept
 			: m_storage{}
 		{
 			swap(std::move(value));
 		}
 
-		~map() noexcept
-		{
-		}
+		~dense_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

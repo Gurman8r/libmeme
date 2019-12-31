@@ -10,7 +10,7 @@ namespace ml
 	
 	template <class T> struct Singleton : public NonCopyable
 	{
-		static inline T & getInstance()
+		static inline T & getInstance() noexcept
 		{
 			static T instance;
 			return instance;

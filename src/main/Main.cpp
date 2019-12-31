@@ -99,7 +99,7 @@ namespace ml
 		0,							// Floating
 		0,							// Maximized
 		0,							// Fullscreen
-		1,							// Vertical Sync
+		0,							// Vertical Sync
 	} };
 	static constexpr auto const window_context{ ContextSettings {
 		ContextSettings::OpenGL,	// API
@@ -205,7 +205,7 @@ ml::int32_t main()
 	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 
 	// Load Plugins
-	dense::map<SharedLibrary *, Plugin *> plugins;
+	dense_map<SharedLibrary *, Plugin *> plugins;
 	auto load_plugin = [&plugins](auto && filename)
 	{
 		auto library{ new SharedLibrary{ filename } };
@@ -269,6 +269,8 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\t\tGUI");
+			ML_Editor.mainMenuBar().render();
+			ML_Editor.dockspace().render();
 			ML_EventSystem.fireEvent<GuiEvent>();
 		}
 		// End Gui

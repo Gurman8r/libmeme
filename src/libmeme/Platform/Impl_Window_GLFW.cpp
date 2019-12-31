@@ -35,9 +35,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static GLFWimage const & map_glfw_image(uint32_t w, uint32_t h, byte_t const * pixels)
+	static GLFWimage const & map_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
-		static dense::map<byte_t const *, GLFWimage> cache {};
+		static dense_map<byte_t const *, GLFWimage> cache {};
 		auto it { cache.find(pixels) };
 		if (it == cache.end())
 		{

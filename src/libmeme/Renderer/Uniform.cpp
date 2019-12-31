@@ -30,9 +30,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Uniform::~Uniform()
-	{
-	}
+	Uniform::~Uniform() {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
