@@ -26,7 +26,7 @@ namespace ml::unit_tests
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static_assert(1 || "Unit Tests"
+	static_assert("Unit Tests"
 
 		&& sizeof(mat4b) == (sizeof(byte_t) * 16)
 		&& sizeof(mat4u) == (sizeof(uint32_t) * 16)

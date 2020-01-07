@@ -70,47 +70,6 @@ namespace ml::dense::detail
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Base
-namespace ml::dense::detail
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Traits
-	> struct map_base : public storage_base<Traits>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type				= typename Traits;
-		using self_type					= typename traits_type::self_type;
-		using key_type					= typename traits_type::key_type;
-		using mapped_type				= typename traits_type::mapped_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using compare_type				= typename traits_type::compare_type;
-		using compare_impl				= typename traits_type::compare_impl;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using base_type					= typename storage_base<traits_type>;
-		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
-		using value_type				= typename base_type::value_type;
-		using pointer					= typename base_type::pointer;
-		using reference					= typename base_type::reference;
-		using const_pointer				= typename base_type::const_pointer;
-		using const_reference			= typename base_type::const_reference;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
-		using iterator					= typename base_type::iterator;
-		using const_iterator			= typename base_type::const_iterator;
-		using reverse_iterator			= typename base_type::reverse_iterator;
-		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
 // Basic Map
 namespace ml::dense
 {
@@ -119,37 +78,35 @@ namespace ml::dense
 	template <class Key, class Value,
 		class Comp = std::less<Key>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct basic_map : public detail::map_base<
-		detail::map_traits<basic_map, Key, Value, Comp, Alloc, false>
-	>
+	> struct basic_map
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type = typename detail::map_base<
-			detail::map_traits<basic_map, Key, Value, Comp, Alloc, false>
+		using traits_type = typename detail::map_traits<
+			basic_map, Key, Value, Comp, Alloc, false
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_type					= typename base_type::key_type;
-		using mapped_type				= typename base_type::mapped_type;
-		using compare_type				= typename base_type::compare_type;
-		using allocator_type			= typename base_type::allocator_type;
-		using value_type				= typename base_type::value_type;
-		using compare_impl				= typename base_type::compare_impl;
-		using self_type					= typename base_type::self_type;
-		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
-		using pointer					= typename base_type::pointer;
-		using reference					= typename base_type::reference;
-		using const_pointer				= typename base_type::const_pointer;
-		using const_reference			= typename base_type::const_reference;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
-		using iterator					= typename base_type::iterator;
-		using const_iterator			= typename base_type::const_iterator;
-		using reverse_iterator			= typename base_type::reverse_iterator;
-		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+		using key_type					= typename traits_type::key_type;
+		using mapped_type				= typename traits_type::mapped_type;
+		using compare_type				= typename traits_type::compare_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using value_type				= typename traits_type::value_type;
+		using compare_impl				= typename traits_type::compare_impl;
+		using self_type					= typename traits_type::self_type;
+		using storage_type				= typename traits_type::storage_type;
+		using initializer_type			= typename traits_type::initializer_type;
+		using pointer					= typename traits_type::pointer;
+		using reference					= typename traits_type::reference;
+		using const_pointer				= typename traits_type::const_pointer;
+		using const_reference			= typename traits_type::const_reference;
+		using difference_type			= typename traits_type::difference_type;
+		using size_type					= typename traits_type::size_type;
+		using iterator					= typename traits_type::iterator;
+		using const_iterator			= typename traits_type::const_iterator;
+		using reverse_iterator			= typename traits_type::reverse_iterator;
+		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -162,28 +119,28 @@ namespace ml::dense
 			: m_storage{ init }
 		{
 			sort();
-			cull();
+			erase(std::unique(begin(), end(), compare_impl{}), end());
 		}
 
 		template <class It> basic_map(It first, It last)
 			: m_storage{ first, last }
 		{
 			sort();
-			cull();
+			erase(std::unique(begin(), end(), compare_impl{}), end());
 		}
 
 		basic_map(storage_type const & value, allocator_type const & alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
 			sort();
-			cull();
+			erase(std::unique(begin(), end(), compare_impl{}), end());
 		}
 
 		basic_map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
 			sort();
-			cull();
+			erase(std::unique(begin(), end(), compare_impl{}), end());
 		}
 
 		basic_map(self_type const & value)
@@ -328,11 +285,6 @@ namespace ml::dense
 			m_storage.clear();
 		}
 
-		inline void cull()
-		{
-			erase(std::unique(begin(), end(), compare_impl{}), end());
-		}
-
 		inline iterator erase(const_iterator it)
 		{
 			return m_storage.erase(it);
@@ -433,37 +385,35 @@ namespace ml::dense
 	template <class Key, class Value,
 		class Comp = std::less<Key>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct basic_multimap : public detail::map_base<
-		detail::map_traits<basic_map, Key, Value, Comp, Alloc, true>
-	>
+	> struct basic_multimap
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type = typename detail::map_base<
-			detail::map_traits<basic_map, Key, Value, Comp, Alloc, true>
+		using traits_type = typename detail::map_traits<
+			basic_multimap, Key, Value, Comp, Alloc, true
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_type					= typename base_type::key_type;
-		using mapped_type				= typename base_type::mapped_type;
-		using compare_type				= typename base_type::compare_type;
-		using value_type				= typename base_type::value_type;
-		using allocator_type			= typename base_type::allocator_type;
-		using compare_impl				= typename base_type::compare_impl;
-		using self_type					= typename base_type::self_type;
-		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
-		using pointer					= typename base_type::pointer;
-		using reference					= typename base_type::reference;
-		using const_pointer				= typename base_type::const_pointer;
-		using const_reference			= typename base_type::const_reference;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
-		using iterator					= typename base_type::iterator;
-		using const_iterator			= typename base_type::const_iterator;
-		using reverse_iterator			= typename base_type::reverse_iterator;
-		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+		using key_type					= typename traits_type::key_type;
+		using mapped_type				= typename traits_type::mapped_type;
+		using compare_type				= typename traits_type::compare_type;
+		using value_type				= typename traits_type::value_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using compare_impl				= typename traits_type::compare_impl;
+		using self_type					= typename traits_type::self_type;
+		using storage_type				= typename traits_type::storage_type;
+		using initializer_type			= typename traits_type::initializer_type;
+		using pointer					= typename traits_type::pointer;
+		using reference					= typename traits_type::reference;
+		using const_pointer				= typename traits_type::const_pointer;
+		using const_reference			= typename traits_type::const_reference;
+		using difference_type			= typename traits_type::difference_type;
+		using size_type					= typename traits_type::size_type;
+		using iterator					= typename traits_type::iterator;
+		using const_iterator			= typename traits_type::const_iterator;
+		using reverse_iterator			= typename traits_type::reverse_iterator;
+		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -476,28 +426,24 @@ namespace ml::dense
 			: m_storage{ init }
 		{
 			sort();
-			cull();
 		}
 
 		template <class It> basic_multimap(It first, It last)
 			: m_storage{ first, last }
 		{
 			sort();
-			cull();
 		}
 
 		basic_multimap(storage_type const & value, allocator_type alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
 			sort();
-			cull();
 		}
 
 		basic_multimap(storage_type && value, allocator_type alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
 			sort();
-			cull();
 		}
 
 		basic_multimap(self_type const & other)
@@ -607,11 +553,6 @@ namespace ml::dense
 		inline void clear() noexcept
 		{
 			m_storage.clear();
-		}
-
-		inline void cull()
-		{
-			erase(std::unique(begin(), end(), compare_impl{}), end());
 		}
 
 		inline iterator erase(iterator value)
