@@ -118,8 +118,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		static constexpr size_t size() { return 0; }
+		
 		constexpr reference operator[](size_t) { return m_data[0]; }
+		
 		constexpr const_reference operator[](size_t) const { m_data[0]; }
+		
 		template <class U> constexpr operator std::array<U, 0>() const { return {}; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

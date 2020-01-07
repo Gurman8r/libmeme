@@ -40,21 +40,30 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void exit(int32_t exitCode);
-		
-		static int32_t clear();
-		
-		static int32_t pause(int32_t exitCode);
+		static inline int32_t clear()
+		{
+#if (ML_DEBUG)
+#	ifdef ML_SYSTEM_WINDOWS
+			return std::system("cls");
+#	else
+			return std::system("clear");
+#	endif
+#else
+			return 0;
+#endif
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void * execute(
-			std::string const & command,
-			std::string const & file = {},
-			std::string const & args = {},
-			std::string const & path = {},
-			int32_t flags = 5
-		);
+		static inline int32_t pause(int32_t exitCode)
+		{
+#if (ML_DEBUG)
+#	ifdef ML_SYSTEM_WINDOWS
+			std::system("pause");
+#	else
+			std::cin.get();
+#	endif
+#endif
+			return exitCode;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

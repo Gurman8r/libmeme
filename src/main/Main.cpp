@@ -6,6 +6,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/DenseMap.hpp>
+#include <libmeme/Core/DenseSet.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -25,7 +26,7 @@ namespace ml::unit_tests
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static_assert("Unit Tests"
+	static_assert(1 || "Unit Tests"
 
 		&& sizeof(mat4b) == (sizeof(byte_t) * 16)
 		&& sizeof(mat4u) == (sizeof(uint32_t) * 16)
@@ -205,11 +206,11 @@ ml::int32_t main()
 	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 
 	// Load Plugins
-	dense_map<SharedLibrary *, Plugin *> plugins;
-	auto load_plugin = [&plugins](auto && filename)
+	dense::map<SharedLibrary *, Plugin *> plugins;
+	auto load_plugin = [&plugins](auto && path)
 	{
-		auto library{ new SharedLibrary{ filename } };
-		plugins.insert(_STD make_pair(library, library->invoke<Plugin *>("ML_Plugin_Main")));
+		auto library{ new SharedLibrary{ path } };
+		plugins.insert({ library, library->invoke<Plugin *>("ML_Plugin_Main") });
 	};
 	load_plugin("demo.dll");
 
@@ -303,8 +304,8 @@ ml::int32_t main()
 	ML_EventSystem.fireEvent<ExitEvent>();
 	for (auto & pair : plugins)
 	{
-		if (pair.second) { delete pair.second; }
-		if (pair.first) { delete pair.first; }
+		delete pair.second;
+		delete pair.first;
 	}
 	plugins.clear();
 

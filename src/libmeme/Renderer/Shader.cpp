@@ -49,8 +49,9 @@ namespace ml
 	}
 
 	Shader::Shader(Source const & source)
-		: Shader{ (std::string)source.vs, source.gs, source.fs }
+		: Shader{}
 	{
+		loadFromSource(source);
 	}
 
 	Shader::Shader(path_t const & v, path_t const & f)
@@ -276,35 +277,35 @@ namespace ml
 
 	bool Shader::set_uniform(std::string const & name, int32_t value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, float32_t value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec2 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec3 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec4 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
@@ -316,28 +317,28 @@ namespace ml
 
 	bool Shader::set_uniform(std::string const & name, mat2 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat3 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat4 const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, Texture const & value)
 	{
-		UniformBinder u{ (*this), name };
+		UniformBinder const u{ (*this), name };
 		if (u)
 		{
 			static auto const max_textures

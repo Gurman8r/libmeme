@@ -41,8 +41,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool good() const noexcept { return m_good; }
-
 		inline bool open() const noexcept { return m_open; }
 
 		inline auto & menus() noexcept { return m_menus; }

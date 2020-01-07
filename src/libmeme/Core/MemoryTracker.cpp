@@ -13,8 +13,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	AllocationRecord::AllocationRecord(storage_t && storage) noexcept
-		: m_storage{ std::forward<storage_t>(storage) }
+	AllocationRecord::AllocationRecord(storage_type && storage) noexcept
+		: m_storage{ std::move(storage) }
 	{
 	}
 
@@ -67,8 +67,7 @@ namespace ml
 
 	Trackable * MemoryTracker::create_allocation(size_t size)
 	{
-		auto ptr{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
-
+		auto * const ptr{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
 		return m_records.insert(std::make_pair(
 			ptr, ::new AllocationRecord{ std::make_tuple(m_current++, size, ptr) }
 		)).first->second->data();
@@ -78,10 +77,11 @@ namespace ml
 	{
 		if (auto it{ m_records.find(value) }; it != m_records.end())
 		{
-			ML_IMPL_DELETE(it->second->data());
-
+			if (auto ptr{ it->second->data() })
+			{
+				ML_IMPL_DELETE(ptr);
+			}
 			::delete it->second;
-
 			m_records.erase(it);
 		}
 	}

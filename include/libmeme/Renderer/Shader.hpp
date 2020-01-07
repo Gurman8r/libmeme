@@ -19,11 +19,11 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename dense_map<std::string, int32_t>;
+		using AttribCache = typename dense::map<std::string, int32_t>;
 
-		using UniformCache = typename dense_map<std::string, int32_t>;
+		using UniformCache = typename dense::map<std::string, int32_t>;
 
-		using TextureCache = typename dense_map<int32_t, struct Texture const *>;
+		using TextureCache = typename dense::map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

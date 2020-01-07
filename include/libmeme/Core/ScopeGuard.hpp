@@ -33,7 +33,7 @@ namespace ml::detail
 
 	template <class Fun> inline ScopeGuard<Fun> operator+(ScopeGuardOnExit, Fun && fun)
 	{
-		return ScopeGuard<Fun>{ std::forward(fun) };
+		return ScopeGuard<Fun>{ std::forward<Fun>(fun) };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

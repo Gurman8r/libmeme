@@ -33,11 +33,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto dockspace() noexcept -> Dockspace & { return m_dockspace; }
-		inline auto dockspace() const noexcept -> Dockspace const & { return m_dockspace; }
+		inline auto & dockspace() noexcept { return m_dockspace; }
 
-		inline auto mainMenuBar() noexcept -> MainMenuBar & { return m_mainMenuBar; }
-		inline auto mainMenuBar() const noexcept -> MainMenuBar const & { return m_mainMenuBar; }
+		inline auto & mainMenuBar() noexcept { return m_mainMenuBar; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

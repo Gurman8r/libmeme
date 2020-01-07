@@ -67,6 +67,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline size_t index() const noexcept
+		{
+			return data().index();
+		}
+
 		inline bool is_variable() const noexcept
 		{
 			return std::holds_alternative<variable_t>(data());
@@ -110,10 +115,7 @@ namespace ml
 			{
 				return std::make_optional<T>(std::get<T>(*v));
 			}
-			else
-			{
-				return std::nullopt;
-			}
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

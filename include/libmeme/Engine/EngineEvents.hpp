@@ -11,16 +11,15 @@ namespace ml
 	{
 		MIN_ENGINE_EVENT = Event::EV_ENGINE,
 
-		EV_Enter,
-		EV_Load,
-		EV_Start,
-		EV_BeginStep,
-		EV_Update,
-		EV_Draw,
-		EV_EndStep,
-		EV_Unload,
-		EV_Exit,
-		EV_Command,
+		EV_Enter,		// 
+		EV_Load,		// 
+		EV_BeginStep,	// 
+		EV_Update,		// 
+		EV_Draw,		// 
+		EV_EndStep,		// 
+		EV_Unload,		// 
+		EV_Exit,		// 
+		EV_Command,		// 
 
 		MAX_ENGINE_EVENT
 	};
@@ -59,11 +58,6 @@ namespace ml
 			: window{ window }
 		{
 		}
-	};
-
-	struct StartEvent final : public EngineEvent<EngineEventType::EV_Start>
-	{
-		constexpr StartEvent() {}
 	};
 
 

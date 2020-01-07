@@ -21,15 +21,14 @@ namespace ml::alg::impl
 
 		constexpr type operator()(type value) const
 		{
-			return sqrt()(cast<type>::one, cast<type>::three, value);
+			return sqrt<type>{}(cast<type>::one, cast<type>::three, value);
 		}
 
 		constexpr type operator()(type value, type curr, type prev) const
 		{
-			return ((value <= prev)
-				? sqrt()(value + curr, curr + cast<type>::two, prev)
-				: ((curr >> cast<type>::one) - cast<type>::one)
-				);
+			return (value <= prev)
+				? sqrt<type>{}(value + curr, curr + cast<type>::two, prev)
+				: (curr >> cast<type>::one) - cast<type>::one;
 		}
 	};
 
@@ -43,18 +42,16 @@ namespace ml::alg::impl
 
 		constexpr type operator()(type value, type curr, type prev) const
 		{
-			return ((curr == prev)
+			return (curr == prev)
 				? curr
-				: sqrt()(value, cast<type>::half * (curr + value / curr), curr)
-				);
+				: sqrt<type>{}(value, cast<type>::half * (curr + value / curr), curr);
 		}
 
 		constexpr type operator()(type value) const
 		{
-			return ((value >= cast<type>::zero && value < limits<type>::infinity)
-				? sqrt()(value, value, cast<type>::zero)
-				: limits<type>::nan
-				);
+			return (value >= cast<type>::zero && value < limits<type>::infinity)
+				? sqrt<type>{}(value, value, cast<type>::zero)
+				: limits<type>::nan;
 		}
 	};
 

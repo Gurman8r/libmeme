@@ -25,6 +25,19 @@ namespace ml::alg
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class To, class From, class = std::enable_if_t<
+		sizeof(To) == sizeof(From) &&
+		std::is_trivially_copyable_v<From> &&
+		std::is_trivially_copyable_v<To>
+	>> static To bit_cast(From const & src) noexcept
+	{
+		To dst;
+		std::memcpy(&dst, &src, sizeof(To));
+		return dst;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class T> static constexpr int32_t sign(T const & value)
 	{
 		return ((value == (T)0)
@@ -68,21 +81,21 @@ namespace ml::alg
 
 	template <
 		class Tx, class Ty
-	> static constexpr auto const & min(Tx const & lhs, Ty const & rhs)
+	> static constexpr decltype(auto) min(Tx const & lhs, Ty const & rhs)
 	{
 		return (lhs <= rhs) ? lhs : rhs;
 	}
 
 	template <
 		class Tx, class Ty
-	> static constexpr auto const & max(const Tx lhs, Ty const & rhs)
+	> static constexpr decltype(auto) max(Tx const & lhs, Ty const & rhs)
 	{
 		return (lhs >= rhs) ? lhs : rhs;
 	}
 
 	template <
 		class T, class Tx, class Ty
-	> static constexpr auto clamp(T const & value, Tx const & lower, Ty const & upper)
+	> static constexpr decltype(auto) clamp(T const & value, Tx const & lower, Ty const & upper)
 	{
 		return _ML_ALG min(_ML_ALG max(value, lower), upper);
 	}
@@ -305,7 +318,7 @@ namespace ml::alg
 		template <class, size_t ...> class A, class T, size_t ... N
 	> static constexpr T magnitude(const A<T, N...> & value)
 	{
-		return sqrt<T> {}(_ML_ALG sqr_magnitude<A, T, N...>(value));
+		return sqrt<T>{}(_ML_ALG sqr_magnitude<A, T, N...>(value));
 	}
 
 	template <

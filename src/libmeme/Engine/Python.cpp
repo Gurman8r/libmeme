@@ -8,10 +8,6 @@
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 
-#include <Python.h>
-#include <pybind11/embed.h>
-#include <pybind11/stl.h>
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -109,7 +105,7 @@ namespace ml
 		pybind11::class_<ml_py_io>(m, "io")
 			.def_static("clear", []() { Debug::clear(); })
 			.def_static("command", [](str_t s) { ML_EventSystem.fireEvent<CommandEvent>(s.c_str()); })
-			.def_static("exit", []() { Debug::exit(0); })
+			.def_static("exit", []() { std::exit(0); })
 			.def_static("pause", []() { Debug::pause(0); })
 			.def_static("print", [](str_t s) { std::cout << s; })
 			.def_static("printf", [](str_t s, list_t const & l) { std::cout << util::format(s, l); })

@@ -69,10 +69,7 @@ namespace ml
 
 	struct CharEvent final : public WindowEvent<WindowEventType::EV_Char>
 	{
-		union
-		{
-			uint32_t const value;
-		};
+		uint32_t const value;
 
 		constexpr CharEvent(uint32_t value) noexcept
 			: value{ value }
@@ -84,10 +81,7 @@ namespace ml
 
 	struct CursorEnterEvent final : public WindowEvent<WindowEventType::EV_CursorEnter>
 	{
-		union
-		{
-			int32_t const entered;
-		};
+		int32_t const entered;
 
 		constexpr CursorEnterEvent(int32_t entered) noexcept
 			: entered{ entered }
@@ -99,11 +93,8 @@ namespace ml
 
 	struct CursorPosEvent final : public WindowEvent<WindowEventType::EV_CursorPos>
 	{
-		union
-		{
-			float64_t const x;
-			float64_t const y;
-		};
+		float64_t const x;
+		float64_t const y;
 
 		constexpr CursorPosEvent(float64_t x, float64_t y) noexcept
 			: x{ x }
@@ -116,13 +107,10 @@ namespace ml
 
 	struct KeyEvent final : public WindowEvent<WindowEventType::EV_Key>
 	{
-		union
-		{
-			int32_t const key;
-			int32_t const scan;
-			int32_t const action;
-			const mask8_t mods;
-		};
+		int32_t const key;
+		int32_t const scan;
+		int32_t const action;
+		const mask8_t mods;
 
 		constexpr KeyEvent(int32_t key, int32_t scan, int32_t action, mask8_t const & mods) noexcept
 			: key{ key }
@@ -164,12 +152,9 @@ namespace ml
 
 	struct MouseEvent final : public WindowEvent<WindowEventType::EV_Mouse>
 	{
-		union
-		{
-			int32_t const key;
-			int32_t const action;
-			int32_t const mods;
-		};
+		int32_t const key;
+		int32_t const action;
+		int32_t const mods;
 
 		constexpr MouseEvent(int32_t key, int32_t action, int32_t mods) noexcept
 			: key{ key }
@@ -183,11 +168,8 @@ namespace ml
 
 	struct ScrollEvent final : public WindowEvent<WindowEventType::EV_Scroll>
 	{
-		union
-		{
-			float64_t const x;
-			float64_t const y;
-		};
+		float64_t const x;
+		float64_t const y;
 
 		constexpr ScrollEvent(float64_t x, float64_t y) noexcept
 			: x{ x }
@@ -200,11 +182,8 @@ namespace ml
 
 	struct FrameSizeEvent final : public WindowEvent<WindowEventType::EV_FrameSize>
 	{
-		union
-		{
-			int32_t const width;
-			int32_t const height;
-		};
+		int32_t const width;
+		int32_t const height;
 
 		constexpr FrameSizeEvent(int32_t width, int32_t height) noexcept
 			: width{ width }
@@ -224,11 +203,8 @@ namespace ml
 
 	struct WindowErrorEvent final : public WindowEvent<WindowEventType::EV_WindowError>
 	{
-		union
-		{
-			int32_t const code;
-			C_String const desc;
-		};
+		int32_t const code;
+		C_String const desc;
 
 		constexpr WindowErrorEvent(int32_t code, C_String desc) noexcept
 			: code{ code }
@@ -241,10 +217,7 @@ namespace ml
 
 	struct WindowFocusEvent final : public WindowEvent<WindowEventType::EV_WindowFocus>
 	{
-		union
-		{
-			int32_t const focused;
-		};
+		int32_t const focused;
 		
 		constexpr WindowFocusEvent(int32_t focused) noexcept
 			: focused{ focused }
@@ -263,11 +236,8 @@ namespace ml
 
 	struct WindowPosEvent final : public WindowEvent<WindowEventType::EV_WindowPos>
 	{
-		union
-		{
-			int32_t const x;
-			int32_t const y;
-		};
+		int32_t const x;
+		int32_t const y;
 
 		constexpr WindowPosEvent(int32_t x, int32_t y) noexcept
 			: x{ x }
@@ -280,11 +250,8 @@ namespace ml
 
 	struct WindowSizeEvent final : public WindowEvent<WindowEventType::EV_WindowSize>
 	{
-		union
-		{
-			int32_t const width;
-			int32_t const height;
-		};
+		int32_t const width;
+		int32_t const height;
 
 		constexpr WindowSizeEvent(int32_t width, int32_t height) noexcept
 			: width{ width }
@@ -297,10 +264,7 @@ namespace ml
 
 	struct WindowFullscreenEvent final : public WindowEvent<WindowEventType::EV_WindowFullscreen>
 	{
-		union
-		{
-			int32_t const value;
-		};
+		int32_t const value;
 		
 		constexpr WindowFullscreenEvent(int32_t value) noexcept
 			: value{ value }

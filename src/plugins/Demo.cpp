@@ -23,13 +23,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		dense_map<std::string, Font>		m_fonts		{};
-		dense_map<std::string, Image>		m_images	{};
-		dense_map<std::string, Material>	m_materials	{};
-		dense_map<std::string, Model>		m_models	{};
-		dense_map<std::string, Script>		m_scripts	{};
-		dense_map<std::string, Shader>		m_shaders	{};
-		dense_map<std::string, Texture>		m_textures	{};
+		dense::map<std::string, Font>		m_fonts		{};
+		dense::map<std::string, Image>		m_images	{};
+		dense::map<std::string, Material>	m_materials	{};
+		dense::map<std::string, Model>		m_models	{};
+		dense::map<std::string, Script>		m_scripts	{};
+		dense::map<std::string, Shader>		m_shaders	{};
+		dense::map<std::string, Texture>	m_textures	{};
 		std::vector<RenderTexture>			m_pipeline	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,8 +42,6 @@ namespace ml
 			ML_EventSystem.addListener<GuiEvent>(this);
 			ML_EventSystem.addListener<UnloadEvent>(this);
 		}
-
-		~Demo() {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

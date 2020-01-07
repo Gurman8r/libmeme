@@ -17,7 +17,7 @@ namespace ml
 
 		enum : size_t { Index, Size, Data };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			size_t,
 			size_t,
 			struct Trackable *
@@ -36,9 +36,9 @@ namespace ml
 	private:
 		friend struct MemoryTracker;
 
-		storage_t m_storage;
+		storage_type m_storage;
 
-		explicit AllocationRecord(storage_t && storage) noexcept;
+		explicit AllocationRecord(storage_type && storage) noexcept;
 
 		~AllocationRecord() noexcept;
 
@@ -52,7 +52,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename dense_map<
+		using records_t = typename dense::map<
 			struct Trackable *, AllocationRecord *
 		>;
 

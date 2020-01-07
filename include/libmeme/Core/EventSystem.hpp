@@ -3,6 +3,7 @@
 
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/DenseMap.hpp>
 
 #define ML_EventSystem ::ml::EventSystem::getInstance()
 
@@ -46,7 +47,7 @@ namespace ml
 		friend struct Singleton<EventSystem>;
 		EventSystem() {}
 		~EventSystem() {}
-		std::multimap<int32_t, EventListener *> m_listeners;
+		dense::multimap<int32_t, EventListener *> m_listeners;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

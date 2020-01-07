@@ -19,7 +19,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args> constexpr Hash(Args && ... args) noexcept
-			: m_value { (*this)(std::forward<Args>(args)...) }
+			: m_value{ (*this)(std::forward<Args>(args)...) }
 		{
 		}
 

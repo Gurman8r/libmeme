@@ -7,19 +7,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_HAS_CXX20)
-#	include <concepts>
-#	include <ranges>
-#endif
-
-#if defined(ML_HAS_CXX17)
-#	include <any>
-#	include <filesystem>
-#	include <optional>
-#	include <string_view>
-#	include <variant>
-#endif
-
 #if defined(ML_HAS_CXX14)
 #	include <array>
 #	include <cassert>
@@ -34,14 +21,25 @@
 #	include <iostream>
 #	include <limits>
 #	include <locale>
-#	include <map>
 #	include <random>
 #	include <sstream>
 #	include <type_traits>
 #	include <typeindex>
-#	include <unordered_map>
 #	include <utility>
 #	include <vector>
+#endif
+
+#if defined(ML_HAS_CXX17)
+#	include <any>
+#	include <filesystem>
+#	include <optional>
+#	include <string_view>
+#	include <variant>
+#endif
+
+#if defined(ML_HAS_CXX20)
+#	include <concepts>
+#	include <ranges>
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
