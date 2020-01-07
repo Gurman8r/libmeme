@@ -77,10 +77,7 @@ namespace ml
 	{
 		if (auto it{ m_records.find(value) }; it != m_records.end())
 		{
-			if (auto ptr{ it->second->data() })
-			{
-				ML_IMPL_DELETE(ptr);
-			}
+			ML_IMPL_DELETE(it->second->data());
 			::delete it->second;
 			m_records.erase(it);
 		}

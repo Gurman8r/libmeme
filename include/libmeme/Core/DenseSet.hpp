@@ -4,13 +4,13 @@
 #include <libmeme/Core/Dense.hpp>
 
 // Traits
-namespace ml::dense::detail
+namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class...> class Derived,
 		class Elem, class Comp, class Alloc, bool Multi
-	> struct set_traits : public storage_traits<Elem, Alloc>
+	> struct set_traits : public _ML_DENSE storage_traits<Elem, Alloc>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -18,7 +18,7 @@ namespace ml::dense::detail
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type					= typename storage_traits<Elem, Alloc>;
+		using base_type					= typename _ML_DENSE storage_traits<Elem, Alloc>;
 		using self_type					= typename Derived<Elem, Comp, Alloc>;
 		using compare_type				= typename Comp;
 		using storage_type				= typename base_type::storage_type;
@@ -70,18 +70,18 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename _ML_DENSE detail::set_traits<
+		using traits_type = typename _ML_DENSE set_traits<
 			basic_set, Elem, Comp, Alloc, false
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename traits_type::self_type;
-		using value_type				= typename traits_type::value_type;
 		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
 		using compare_impl				= typename traits_type::compare_impl;
 		using self_type					= typename traits_type::self_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using value_type				= typename traits_type::value_type;
 		using storage_type				= typename traits_type::storage_type;
 		using initializer_type			= typename traits_type::initializer_type;
 		using pointer					= typename traits_type::pointer;
@@ -155,6 +155,14 @@ namespace ml::dense
 		{
 			swap(std::move(other));
 			return (*this);
+		}
+
+		inline void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_storage, other.m_storage);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -247,41 +255,6 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void clear() noexcept
-		{
-			m_storage.clear();
-		}
-
-		inline iterator erase(iterator value)
-		{
-			return m_storage.erase(value);
-		}
-
-		inline iterator erase(iterator first, iterator last)
-		{
-			return m_storage.erase(first, last);
-		}
-
-		inline void reserve(size_type const value)
-		{
-			m_storage.reserve(value);
-		}
-
-		inline void shrink_to_fit()
-		{
-			m_storage.shrink_to_fit();
-		}
-
-		inline void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				std::swap(m_storage, other.m_storage);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline auto back() noexcept -> reference { return m_storage.back(); }
 
 		inline auto back() const noexcept -> const_reference { return m_storage.back(); }
@@ -296,6 +269,8 @@ namespace ml::dense
 
 		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
+		inline void clear() noexcept { return m_storage.clear(); }
+
 		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
 		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
@@ -309,6 +284,10 @@ namespace ml::dense
 		inline auto end() noexcept -> iterator { return m_storage.end(); }
 
 		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+
+		inline auto erase(iterator value) -> iterator { return m_storage.erase(value); }
+
+		inline auto erase(iterator first, iterator last) -> iterator { return m_storage.erase(first, last); }
 
 		inline auto front() noexcept -> reference { return m_storage.front(); }
 
@@ -325,6 +304,10 @@ namespace ml::dense
 		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 
 		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
+
+		inline void reserve(size_type const value) { return m_storage.reserve(value); }
+
+		inline void shrink_to_fit() { return m_storage.shrink_to_fit(); }
 
 		inline auto size() const noexcept -> size_type { return m_storage.size(); }
 
@@ -358,18 +341,18 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename _ML_DENSE detail::set_traits<
+		using traits_type = typename _ML_DENSE set_traits<
 			basic_multiset, Elem, Comp, Alloc, true
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename traits_type::self_type;
-		using value_type				= typename traits_type::value_type;
 		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
 		using compare_impl				= typename traits_type::compare_impl;
 		using self_type					= typename traits_type::self_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using value_type				= typename traits_type::value_type;
 		using storage_type				= typename traits_type::storage_type;
 		using initializer_type			= typename traits_type::initializer_type;
 		using pointer					= typename traits_type::pointer;
@@ -440,6 +423,14 @@ namespace ml::dense
 		{
 			swap(std::move(other));
 			return (*this);
+		}
+
+		inline void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_storage, other.m_storage);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -518,41 +509,6 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void clear() noexcept
-		{
-			m_storage.clear();
-		}
-
-		inline iterator erase(iterator value)
-		{
-			return m_storage.erase(value);
-		}
-
-		inline iterator erase(iterator first, iterator last)
-		{
-			return m_storage.erase(first, last);
-		}
-
-		inline void reserve(size_type const value)
-		{
-			m_storage.reserve(value);
-		}
-
-		inline void shrink_to_fit()
-		{
-			m_storage.shrink_to_fit();
-		}
-
-		inline void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				std::swap(m_storage, other.m_storage);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline auto back() noexcept -> reference { return m_storage.back(); }
 
 		inline auto back() const noexcept -> const_reference { return m_storage.back(); }
@@ -567,6 +523,8 @@ namespace ml::dense
 
 		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
+		inline void clear() noexcept { return m_storage.clear(); }
+
 		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
 		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
@@ -580,6 +538,10 @@ namespace ml::dense
 		inline auto end() noexcept -> iterator { return m_storage.end(); }
 
 		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+
+		inline auto erase(iterator value) -> iterator { return m_storage.erase(value); }
+
+		inline auto erase(iterator first, iterator last) -> iterator { return m_storage.erase(first, last); }
 
 		inline auto front() noexcept -> reference { return m_storage.front(); }
 
@@ -596,6 +558,10 @@ namespace ml::dense
 		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 
 		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
+
+		inline void reserve(size_type const value) { return m_storage.reserve(value); }
+
+		inline void shrink_to_fit() { return m_storage.shrink_to_fit(); }
 
 		inline auto size() const noexcept -> size_type { return m_storage.size(); }
 

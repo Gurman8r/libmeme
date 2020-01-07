@@ -5,7 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventListener * EventSystem::addListener(const int32_t type, EventListener * listener)
+	EventListener * EventSystem::addListener(int32_t type, EventListener * listener)
 	{
 		return listener ? m_listeners.insert(std::make_pair(type, listener))->second : nullptr;
 	}
@@ -29,7 +29,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool EventSystem::removeListener(int32_t const & type, EventListener * listener)
+	bool EventSystem::removeListener(int32_t type, EventListener * listener)
 	{
 		auto found{ m_listeners.equal_range(type) };
 		for (auto it = found.first; it != found.second; it++)

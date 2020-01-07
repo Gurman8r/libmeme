@@ -6,7 +6,7 @@
 #define _ML_DENSE _ML dense::
 
 // Traits
-namespace ml::dense::detail
+namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
