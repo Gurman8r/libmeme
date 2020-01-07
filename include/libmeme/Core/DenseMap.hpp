@@ -82,7 +82,7 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename detail::map_traits<
+		using traits_type = typename _ML_DENSE detail::map_traits<
 			basic_map, Key, Value, Comp, Alloc, false
 		>;
 
@@ -389,7 +389,7 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename detail::map_traits<
+		using traits_type = typename _ML_DENSE detail::map_traits<
 			basic_multimap, Key, Value, Comp, Alloc, true
 		>;
 

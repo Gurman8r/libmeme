@@ -70,7 +70,7 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename detail::set_traits<
+		using traits_type = typename _ML_DENSE detail::set_traits<
 			basic_set, Elem, Comp, Alloc, false
 		>;
 
@@ -357,7 +357,7 @@ namespace ml::dense
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type = typename detail::set_traits<
+		using traits_type = typename _ML_DENSE detail::set_traits<
 			basic_multiset, Elem, Comp, Alloc, true
 		>;
 
