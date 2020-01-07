@@ -118,29 +118,25 @@ namespace ml::dense
 		basic_map(initializer_type init)
 			: m_storage{ init }
 		{
-			sort();
-			erase(std::unique(begin(), end(), compare_impl{}), end());
+			setup_internal();
 		}
 
 		template <class It> basic_map(It first, It last)
 			: m_storage{ first, last }
 		{
-			sort();
-			erase(std::unique(begin(), end(), compare_impl{}), end());
+			setup_internal();
 		}
 
 		basic_map(storage_type const & value, allocator_type const & alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
-			sort();
-			erase(std::unique(begin(), end(), compare_impl{}), end());
+			setup_internal();
 		}
 
 		basic_map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
-			sort();
-			erase(std::unique(begin(), end(), compare_impl{}), end());
+			setup_internal();
 		}
 
 		basic_map(self_type const & value)
@@ -305,11 +301,6 @@ namespace ml::dense
 			m_storage.shrink_to_fit();
 		}
 
-		inline void sort() noexcept
-		{
-			std::sort(begin(), end(), compare_impl{});
-		}
-
 		inline void swap(self_type & value) noexcept
 		{
 			if (this != std::addressof(value))
@@ -371,6 +362,13 @@ namespace ml::dense
 	private:
 		storage_type m_storage;
 
+		inline void setup_internal()
+		{
+			std::sort(begin(), end(), compare_impl{});
+
+			erase(std::unique(begin(), end(), compare_impl{}), end());
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
@@ -425,25 +423,25 @@ namespace ml::dense
 		basic_multimap(initializer_type init)
 			: m_storage{ init }
 		{
-			sort();
+			setup_internal();
 		}
 
 		template <class It> basic_multimap(It first, It last)
 			: m_storage{ first, last }
 		{
-			sort();
+			setup_internal();
 		}
 
 		basic_multimap(storage_type const & value, allocator_type alloc = allocator_type{})
 			: m_storage{ value, alloc }
 		{
-			sort();
+			setup_internal();
 		}
 
 		basic_multimap(storage_type && value, allocator_type alloc = allocator_type{}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
-			sort();
+			setup_internal();
 		}
 
 		basic_multimap(self_type const & other)
@@ -575,11 +573,6 @@ namespace ml::dense
 			m_storage.shrink_to_fit();
 		}
 
-		inline void sort() noexcept
-		{
-			std::sort(begin(), end(), compare_impl{});
-		}
-
 		inline void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
@@ -640,6 +633,11 @@ namespace ml::dense
 
 	private:
 		storage_type m_storage;
+
+		inline void setup_internal()
+		{
+			std::sort(begin(), end(), compare_impl{});
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
