@@ -3,26 +3,39 @@
 
 #include <libmeme/Core/Dense.hpp>
 
-// Traits
-namespace ml::dense
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class...> class Derived,
+	// Basic Map Traits
+	template <template <class ...> class Derived,
 		class Key, class Value, class Comp, class Alloc, bool Multi
-	> struct map_traits : public _ML_DENSE storage_traits<std::pair<Key, Value>, Alloc>
+	> struct basic_map_traits : public _ML_DENSE basic_storage_traits<
+		std::pair<Key, Value>, Alloc
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		using derived_type = typename Derived<Key, Value, Comp, Alloc>;
 
-		static_assert(std::is_same_v<std::pair<Key, Value>, Alloc::value_type>);
+		friend derived_type;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type					= typename _ML_DENSE storage_traits<std::pair<Key, Value>, Alloc>;
-		using self_type					= typename Derived<Key, Value, Comp, Alloc>;
-		using key_type					= typename Key;
-		using mapped_type				= typename Value;
-		using compare_type				= typename Comp;
+		using base_type = typename _ML_DENSE basic_storage_traits<std::pair<Key, Value>, Alloc>;
+
+		using key_type = typename Key;
+
+		using mapped_type = typename Value;
+
+		using compare_type = typename Comp;
+
+		using search_type = typename Key const &;
+
+		static constexpr bool multi{ Multi };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
 		using initializer_type			= typename base_type::initializer_type;
@@ -40,22 +53,19 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr bool multi{ Multi };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct compare_impl
+	private:
+		struct compare_impl final
 		{
 			constexpr compare_impl() noexcept = default;
 
-			constexpr bool operator()(const_reference lhs, key_type const & rhs) const noexcept
-			{
-				return compare_type{}(lhs.first, rhs);
-			}
-
-			constexpr bool operator()(key_type const & lhs, const_reference rhs) const noexcept
+			constexpr bool operator()(search_type lhs, const_reference rhs) const noexcept
 			{
 				return compare_type{}(lhs, rhs.first);
+			}
+
+			constexpr bool operator()(const_reference lhs, search_type rhs) const noexcept
+			{
+				return compare_type{}(lhs.first, rhs);
 			}
 
 			constexpr bool operator()(const_reference lhs, const_reference rhs) const noexcept
@@ -65,157 +75,184 @@ namespace ml::dense
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct sort_impl final
+		{
+			explicit sort_impl(derived_type & value) noexcept { (*this)(value); }
+
+			constexpr sort_impl() noexcept = default;
+
+			inline void operator()(derived_type & value) const noexcept
+			{
+				std::sort(value.begin(), value.end(), compare_impl{});
+
+				if constexpr (!multi)
+				{
+					value.erase(
+						std::unique(value.begin(), value.end()), value.end(), compare_impl{}
+					);
+				}
+			}
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-// Basic Map
-namespace ml::dense
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Key, class Value,
-		class Comp = std::less<Key>,
-		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct basic_map
+	// Basic Ordered Map
+	template <
+		class Key,
+		class Value,
+		class Comp = std::less<Value>,
+		class Alloc = std::allocator<Value>
+	> struct basic_ordered_map : public _ML_DENSE basic_storage<
+		basic_map_traits<basic_ordered_map, Key, Value, Comp, Alloc, false>
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type = typename _ML_DENSE map_traits<
-			basic_map, Key, Value, Comp, Alloc, false
+	
+		using traits_type = typename basic_map_traits<
+			basic_ordered_map, Key, Value, Comp, Alloc, false
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using self_type					= typename traits_type::derived_type;
 		using key_type					= typename traits_type::key_type;
 		using mapped_type				= typename traits_type::mapped_type;
-		using compare_type				= typename traits_type::compare_type;
 		using compare_impl				= typename traits_type::compare_impl;
-		using self_type					= typename traits_type::self_type;
-		using value_type				= typename traits_type::value_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using storage_type				= typename traits_type::storage_type;
-		using initializer_type			= typename traits_type::initializer_type;
-		using pointer					= typename traits_type::pointer;
-		using reference					= typename traits_type::reference;
-		using const_pointer				= typename traits_type::const_pointer;
-		using const_reference			= typename traits_type::const_reference;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
-		using iterator					= typename traits_type::iterator;
-		using const_iterator			= typename traits_type::const_iterator;
-		using reverse_iterator			= typename traits_type::reverse_iterator;
-		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
+		using search_type				= typename traits_type::search_type;
+		using base_type					= typename _ML_DENSE basic_storage<traits_type>;
+		using allocator_type			= typename base_type::allocator_type;
+		using storage_type				= typename base_type::storage_type;
+		using initializer_type			= typename base_type::initializer_type;
+		using value_type				= typename base_type::value_type;
+		using pointer					= typename base_type::pointer;
+		using reference					= typename base_type::reference;
+		using const_pointer				= typename base_type::const_pointer;
+		using const_reference			= typename base_type::const_reference;
+		using difference_type			= typename base_type::difference_type;
+		using size_type					= typename base_type::size_type;
+		using iterator					= typename base_type::iterator;
+		using const_iterator			= typename base_type::const_iterator;
+		using reverse_iterator			= typename base_type::reverse_iterator;
+		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+	
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+		basic_ordered_map() noexcept
+			: base_type{ m_storage }, m_storage{}
+		{
+		}
+
+		basic_ordered_map(initializer_type init)
+			: base_type{ m_storage }, m_storage{ init }
+		{
+			traits_type::sort_impl{ *this };
+		}
+
+		template <class It> basic_ordered_map(It first, It last)
+			: base_type{ m_storage }, m_storage{ first, last }
+		{
+			traits_type::sort_impl{ *this };
+		}
+
+		explicit basic_ordered_map(allocator_type const & alloc)
+			: base_type{ m_storage }, m_storage{ alloc }
+		{
+			traits_type::sort_impl{ *this };
+		}
+	
+		explicit basic_ordered_map(storage_type const & value, allocator_type const & alloc)
+			: base_type{ m_storage }, m_storage{ value, alloc }
+		{
+			traits_type::sort_impl{ *this };
+		}
+	
+		explicit basic_ordered_map(storage_type && value, allocator_type const & alloc) noexcept
+			: base_type{ m_storage }, m_storage{ std::move(value), alloc }
+		{
+			traits_type::sort_impl{ *this };
+		}
+	
+		basic_ordered_map(self_type const & other, allocator_type const & alloc = {})
+			: base_type{ m_storage }, m_storage{ other.m_storage, alloc }
+		{
+		}
+	
+		basic_ordered_map(self_type && other) noexcept
+			: base_type{ m_storage }, m_storage{}
+		{
+			swap(std::move(other));
+		}
+
+		~basic_ordered_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		basic_map() noexcept
-			: m_storage{}
+	
+		inline self_type & operator=(self_type const & other)
 		{
-		}
-
-		basic_map(initializer_type init)
-			: m_storage{ init }
-		{
-			setup_internal();
-		}
-
-		template <class It> basic_map(It first, It last)
-			: m_storage{ first, last }
-		{
-			setup_internal();
-		}
-
-		basic_map(storage_type const & value, allocator_type const & alloc = allocator_type{})
-			: m_storage{ value, alloc }
-		{
-			setup_internal();
-		}
-
-		basic_map(storage_type && value, allocator_type const & alloc = allocator_type{}) noexcept
-			: m_storage{ std::move(value), alloc }
-		{
-			setup_internal();
-		}
-
-		basic_map(self_type const & value)
-			: m_storage{ value.m_storage }
-		{
-		}
-
-		basic_map(self_type && value) noexcept
-			: m_storage{}
-		{
-			swap(std::move(value));
-		}
-
-		~basic_map() noexcept {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline self_type & operator=(self_type const & value)
-		{
-			self_type temp{ value };
+			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && value) noexcept
+		inline self_type & operator=(self_type && other) noexcept
 		{
-			swap(std::move(value));
+			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & value) noexcept
+		inline void swap(self_type & other) noexcept
 		{
-			if (this != std::addressof(value))
+			if (this != std::addressof(other))
 			{
-				std::swap(m_storage, value.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator lower_bound(key_type const & key)
+		inline iterator lower_bound(search_type value)
 		{
-			return std::lower_bound(begin(), end(), key, compare_impl{});
+			return std::lower_bound(begin(), end(), value, compare_impl{});
 		}
 
-		inline const_iterator lower_bound(key_type const & key) const
+		inline const_iterator lower_bound(search_type value) const
 		{
-			return std::lower_bound(cbegin(), cend(), key, compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator upper_bound(key_type const & key)
-		{
-			return std::upper_bound(begin(), end(), key, compare_impl{});
-		}
-
-		inline const_iterator upper_bound(key_type const & key) const
-		{
-			return std::upper_bound(cbegin(), cend(), key, compare_impl{});
+			return std::lower_bound(cbegin(), cend(), value, compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::pair<iterator, iterator> equal_range(key_type const & key)
+		inline iterator upper_bound(search_type value)
 		{
-			return std::equal_range(begin(), end(), key, compare_impl{});
+			return std::upper_bound(begin(), end(), value, compare_impl{});
 		}
 
-		inline std::pair<const_iterator, const_iterator> equal_range(key_type const & key) const
+		inline const_iterator upper_bound(search_type value) const
 		{
-			return std::equal_range(cbegin(), cend(), key, compare_impl{});
+			return std::upper_bound(cbegin(), cend(), value, compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(key_type const & key)
+		inline std::pair<iterator, iterator> equal_range(search_type value)
 		{
-			if (auto const it{ equal_range(key) }; it.first != it.second)
+			return std::equal_range(begin(), end(), value, compare_impl{});
+		}
+
+		inline std::pair<const_iterator, const_iterator> equal_range(search_type value) const
+		{
+			return std::equal_range(cbegin(), cend(), value, compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline iterator find(search_type value)
+		{
+			if (auto const it{ equal_range(value) }; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -225,9 +262,9 @@ namespace ml::dense
 			}
 		}
 
-		inline const_iterator find(key_type const & key) const
+		inline const_iterator find(search_type value) const
 		{
-			if (auto const it{ equal_range(key) }; it.first != it.second)
+			if (auto const it{ equal_range(value) }; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -265,7 +302,7 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline mapped_type & at(key_type const & key)
+		inline mapped_type & at(search_type key)
 		{
 			if (auto const it{ equal_range(key) }; it.first != it.second)
 			{
@@ -277,179 +314,120 @@ namespace ml::dense
 			}
 		}
 
-		inline mapped_type & operator[](key_type const & key)
+		inline mapped_type & operator[](search_type key)
 		{
 			return at(key);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto back() noexcept -> reference { return m_storage.back(); }
-
-		inline auto back() const noexcept -> const_reference { return m_storage.back(); }
-
-		inline auto begin() noexcept -> iterator { return m_storage.begin(); }
-
-		inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
-
-		inline auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
-
-		inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
-
-		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
-
-		inline void clear() noexcept { return m_storage.clear(); }
-
-		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
-
-		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
-
-		inline auto data() noexcept -> pointer { return m_storage.data(); }
-
-		inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
-
-		inline bool empty() const noexcept { return m_storage.empty(); }
-
-		inline auto end() noexcept -> iterator { return m_storage.end(); }
-
-		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
-
-		inline auto erase(iterator value) -> iterator { return m_storage.erase(value); }
-
-		inline auto erase(iterator first, iterator last) -> iterator { return m_storage.erase(first, last); }
-
-		inline auto front() noexcept -> reference { return m_storage.front(); }
-
-		inline auto front() const noexcept -> const_reference { return m_storage.front(); }
-
-		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
-
-		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
-
-		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
-
-		inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
-
-		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
-
-		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
-
-		inline void reserve(size_type const value) { return m_storage.reserve(value); }
-
-		inline void shrink_to_fit() { return m_storage.shrink_to_fit(); }
-
-		inline auto size() const noexcept -> size_type { return m_storage.size(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
 		storage_type m_storage;
-
-		inline void setup_internal()
-		{
-			std::sort(begin(), end(), compare_impl{});
-
-			erase(std::unique(begin(), end(), compare_impl{}), end());
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-// Basic Multimap
-namespace ml::dense
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Key, class Value,
-		class Comp = std::less<Key>,
-		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct basic_multimap
+	// Basic Ordered Multimap
+	template <
+		class Key,
+		class Value,
+		class Comp = std::less<Value>,
+		class Alloc = std::allocator<Value>
+	> struct basic_ordered_multimap : public _ML_DENSE basic_storage<
+		basic_map_traits<basic_ordered_multimap, Key, Value, Comp, Alloc, true>
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type = typename _ML_DENSE map_traits<
-			basic_multimap, Key, Value, Comp, Alloc, true
+	
+		using traits_type = typename basic_map_traits<
+			basic_ordered_multimap, Key, Value, Comp, Alloc, true
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using self_type					= typename traits_type::derived_type;
 		using key_type					= typename traits_type::key_type;
 		using mapped_type				= typename traits_type::mapped_type;
-		using compare_type				= typename traits_type::compare_type;
 		using compare_impl				= typename traits_type::compare_impl;
-		using self_type					= typename traits_type::self_type;
-		using value_type				= typename traits_type::value_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using storage_type				= typename traits_type::storage_type;
-		using initializer_type			= typename traits_type::initializer_type;
-		using pointer					= typename traits_type::pointer;
-		using reference					= typename traits_type::reference;
-		using const_pointer				= typename traits_type::const_pointer;
-		using const_reference			= typename traits_type::const_reference;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
-		using iterator					= typename traits_type::iterator;
-		using const_iterator			= typename traits_type::const_iterator;
-		using reverse_iterator			= typename traits_type::reverse_iterator;
-		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
-
+		using search_type				= typename traits_type::search_type;
+		using base_type					= typename _ML_DENSE basic_storage<traits_type>;
+		using allocator_type			= typename base_type::allocator_type;
+		using storage_type				= typename base_type::storage_type;
+		using initializer_type			= typename base_type::initializer_type;
+		using value_type				= typename base_type::value_type;
+		using pointer					= typename base_type::pointer;
+		using reference					= typename base_type::reference;
+		using const_pointer				= typename base_type::const_pointer;
+		using const_reference			= typename base_type::const_reference;
+		using difference_type			= typename base_type::difference_type;
+		using size_type					= typename base_type::size_type;
+		using iterator					= typename base_type::iterator;
+		using const_iterator			= typename base_type::const_iterator;
+		using reverse_iterator			= typename base_type::reverse_iterator;
+		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		basic_multimap() noexcept
-			: m_storage{}
+	
+		basic_ordered_multimap() noexcept
+			: base_type{ m_storage }, m_storage{}
 		{
 		}
 
-		basic_multimap(initializer_type init)
-			: m_storage{ init }
+		basic_ordered_multimap(initializer_type init)
+			: base_type{ m_storage }, m_storage{ init }
 		{
-			setup_internal();
+			traits_type::sort_impl{ *this };
 		}
 
-		template <class It> basic_multimap(It first, It last)
-			: m_storage{ first, last }
+		template <class It> basic_ordered_multimap(It first, It last)
+			: base_type{ m_storage }, m_storage{ first, last }
 		{
-			setup_internal();
+			traits_type::sort_impl{ *this };
 		}
 
-		basic_multimap(storage_type const & value, allocator_type alloc = allocator_type{})
-			: m_storage{ value, alloc }
+		explicit basic_ordered_multimap(allocator_type const & alloc)
+			: base_type{ m_storage }, m_storage{ alloc }
 		{
-			setup_internal();
+			traits_type::sort_impl{ *this };
 		}
-
-		basic_multimap(storage_type && value, allocator_type alloc = allocator_type{}) noexcept
-			: m_storage{ std::move(value), alloc }
+	
+		explicit basic_ordered_multimap(storage_type const & value, allocator_type const & alloc)
+			: base_type{ m_storage }, m_storage{ value, alloc }
 		{
-			setup_internal();
+			traits_type::sort_impl{ *this };
 		}
-
-		basic_multimap(self_type const & other)
-			: m_storage{}
+	
+		explicit basic_ordered_multimap(storage_type && value, allocator_type const & alloc) noexcept
+			: base_type{ m_storage }, m_storage{ std::move(value), alloc }
+		{
+			traits_type::sort_impl{ *this };
+		}
+	
+		basic_ordered_multimap(self_type const & other, allocator_type const & alloc = {})
+			: base_type{ m_storage }, m_storage{ other.m_storage, alloc }
 		{
 		}
-
-		basic_multimap(self_type && other) noexcept
-			: m_storage{}
+	
+		basic_ordered_multimap(self_type && other) noexcept
+			: base_type{ m_storage }, m_storage{}
 		{
 			swap(std::move(other));
 		}
 
-		~basic_multimap() noexcept {}
+		~basic_ordered_multimap() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline basic_multimap & operator=(self_type const & other)
+	
+		inline self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline basic_multimap & operator=(self_type && other) noexcept
+		inline self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
@@ -459,51 +437,51 @@ namespace ml::dense
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator lower_bound(key_type const & key)
+		inline iterator lower_bound(search_type value)
 		{
-			return std::lower_bound(begin(), end(), key, compare_impl{});
+			return std::lower_bound(begin(), end(), value, compare_impl{});
 		}
 
-		inline const_iterator lower_bound(key_type const & key) const
+		inline const_iterator lower_bound(search_type value) const
 		{
-			return std::lower_bound(cbegin(), cend(), key, compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator upper_bound(key_type const & key)
-		{
-			return std::upper_bound(begin(), end(), key, compare_impl{});
-		}
-
-		inline const_iterator upper_bound(key_type const & key) const
-		{
-			return std::upper_bound(cbegin(), cend(), key, compare_impl{});
+			return std::lower_bound(cbegin(), cend(), value, compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::pair<iterator, iterator> equal_range(key_type const & key)
+		inline iterator upper_bound(search_type value)
 		{
-			return std::equal_range(begin(), end(), key, compare_impl{});
+			return std::upper_bound(begin(), end(), value, compare_impl{});
 		}
 
-		inline std::pair<const_iterator, const_iterator> equal_range(key_type const & key) const
+		inline const_iterator upper_bound(search_type value) const
 		{
-			return std::equal_range(cbegin(), cend(), key, compare_impl{});
+			return std::upper_bound(cbegin(), cend(), value, compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(key_type const & key)
+		inline std::pair<iterator, iterator> equal_range(search_type value)
 		{
-			if (auto const it{ equal_range(key) }; it.first != it.second)
+			return std::equal_range(begin(), end(), value, compare_impl{});
+		}
+
+		inline std::pair<const_iterator, const_iterator> equal_range(search_type value) const
+		{
+			return std::equal_range(cbegin(), cend(), value, compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline iterator find(search_type value)
+		{
+			if (auto const it{ equal_range(value) }; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -513,9 +491,9 @@ namespace ml::dense
 			}
 		}
 
-		inline const_iterator find(key_type const & key) const
+		inline const_iterator find(search_type value) const
 		{
-			if (auto const it{ equal_range(key) }; it.first != it.second)
+			if (auto const it{ equal_range(value) }; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -529,107 +507,38 @@ namespace ml::dense
 
 		inline iterator insert(const_reference value)
 		{
-			return m_storage.emplace(upper_bound(value.first), value);
+			return m_storage.emplace(equal_range(value.first).second, value);
 		}
 
 		inline iterator insert(value_type && value)
 		{
-			return m_storage.emplace(upper_bound(value.first), std::move(value));
+			return m_storage.emplace(equal_range(value.first).second, std::move(value));
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline auto back() noexcept -> reference { return m_storage.back(); }
-
-		inline auto back() const noexcept -> const_reference { return m_storage.back(); }
-
-		inline auto begin() noexcept -> iterator { return m_storage.begin(); }
-
-		inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
-
-		inline auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
-
-		inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
-
-		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
-
-		inline void clear() noexcept { return m_storage.clear(); }
-
-		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
-
-		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
-
-		inline auto data() noexcept -> pointer { return m_storage.data(); }
-
-		inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
-
-		inline bool empty() const noexcept { return m_storage.empty(); }
-
-		inline auto end() noexcept -> iterator { return m_storage.end(); }
-
-		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
-
-		inline auto erase(iterator value) -> iterator { return m_storage.erase(value); }
-
-		inline auto erase(iterator first, iterator last) -> iterator { return m_storage.erase(first, last); }
-
-		inline auto front() noexcept -> reference { return m_storage.front(); }
-
-		inline auto front() const noexcept -> const_reference { return m_storage.front(); }
-
-		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
-
-		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
-
-		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
-
-		inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
-
-		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
-
-		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
-
-		inline void reserve(size_type const value) { return m_storage.reserve(value); }
-
-		inline void shrink_to_fit() { return m_storage.shrink_to_fit(); }
-
-		inline auto size() const noexcept -> size_type { return m_storage.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		storage_type m_storage;
 
-		inline void setup_internal()
-		{
-			std::sort(begin(), end(), compare_impl{});
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-// Typedefs
-namespace ml::dense
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// Map
+	// Ordered Map
 	template <class Key, class Value
-	> ML_USING map = typename _ML_DENSE basic_map<
-		Key, Value,
+	> ML_USING ordered_map = typename basic_ordered_map<
+		Key,
+		Value,
 		std::less<Key>,
 		std::allocator<std::pair<Key, Value>>
 	>;
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// Multimap
+	// Ordered Multimap
 	template <class Key, class Value
-	> ML_USING multimap = typename _ML_DENSE basic_multimap<
-		Key, Value,
+	> ML_USING ordered_multimap = typename basic_ordered_multimap<
+		Key,
+		Value,
 		std::less<Key>,
 		std::allocator<std::pair<Key, Value>>
 	>;

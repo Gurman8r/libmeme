@@ -1,14 +1,16 @@
 #include <libmeme/Editor/Dockspace.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
+#include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Core/EventSystem.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Dockspace::Dockspace()
-		: m_good		{ false }
-		, m_open		{ false }
+		: m_open		{ true }
+		, m_good		{ false }
 		, m_nodes		{}
 		, m_border		{ 0.0f }
 		, m_padding		{ 0.f, 0.f }
@@ -28,6 +30,11 @@ namespace ml
 	Dockspace::~Dockspace() {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool Dockspace::dispose()
+	{
+		return false;
+	}
 
 	bool Dockspace::render()
 	{
@@ -60,7 +67,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(ML_Editor.mainMenuBar().open() ? ImGuiWindowFlags_MenuBar : 0)
+					(Editor::mainMenuBar().open() ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -79,7 +86,7 @@ namespace ml
 				m_nodes[LeftDn] = split_node(m_nodes[Left], ImGuiDir_Down, 0.25f, &m_nodes[Left]);
 				m_nodes[RightDn] = split_node(m_nodes[Right], ImGuiDir_Down, 0.25f, &m_nodes[Right]);
 
-				//ML_EventSystem.fireEvent<DockspaceEvent>(*this);
+				ML_EventSystem.fireEvent<DockspaceEvent>(*this);
 
 				end_builder(m_nodes[Root]);
 			};
@@ -95,10 +102,10 @@ namespace ml
 					ImGuiDockNodeFlags_PassthruCentralNode |
 					ImGuiDockNodeFlags_AutoHideTabBar
 				);
+				ImGui::End();
+				ImGui::PopID();
+				ImGui::PopID();
 			}
-			ImGui::End();
-			ImGui::PopID();
-			ImGui::PopID();
 			return m_good;
 		})();
 	}

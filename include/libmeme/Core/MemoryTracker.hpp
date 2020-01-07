@@ -52,7 +52,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename dense::map<
+		using records_t = typename ordered_map<
 			struct Trackable *, AllocationRecord *
 		>;
 

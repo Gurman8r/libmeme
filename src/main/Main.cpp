@@ -185,6 +185,33 @@ ml::int32_t main()
 
 	using namespace ml;
 
+	auto test_set = [](auto & value)
+	{
+		value.insert(1);
+		value.upper_bound(0);
+		value.lower_bound(1);
+		value.equal_range(0);
+		value.find(0);
+		value.back();
+		value.erase(value.begin());
+	};
+
+	auto test_map = [](auto & value)
+	{
+		value.insert(std::make_pair(1, ""));
+		value.upper_bound(0);
+		value.lower_bound(1);
+		value.equal_range(0);
+		value.find(0);
+		value.back();
+		value.erase(value.begin());
+	};
+
+	ordered_set<int> a; test_set(a);
+	ordered_multiset<int> b; test_set(b);
+	ordered_map<int, std::string> c; test_map(c);
+	ordered_multimap<int, std::string> d; test_map(d);
+
 	// Time
 	static struct Time final
 	{
@@ -197,8 +224,6 @@ ml::int32_t main()
 	ML_MemoryTracker;
 	ML_EventSystem;
 	ML_PerformanceTracker;
-	ML_Engine;
-	ML_Editor;
 	ML_Lua.init();
 	ML_Python.init(ML_ARGV[0], "../../../");
 
@@ -206,7 +231,7 @@ ml::int32_t main()
 	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 
 	// Load Plugins
-	dense::map<SharedLibrary *, Plugin *> plugins;
+	ordered_map<SharedLibrary *, Plugin *> plugins;
 	auto load_plugin = [&plugins](auto && path)
 	{
 		auto library{ new SharedLibrary{ path } };
@@ -226,7 +251,7 @@ ml::int32_t main()
 	}
 
 	// Start Editor
-	if (!ML_Editor.startup(window.getHandle()))
+	if (!Editor::startup(window.getHandle()))
 	{
 		return Debug::logError("Failed initializing Editor") | Debug::pause(1);
 	}
@@ -263,22 +288,22 @@ ml::int32_t main()
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
-			ML_Editor.new_frame();
+			Editor::new_frame();
 			ML_EventSystem.fireEvent<BeginGuiEvent>();
 		}
 		// Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\t\tGUI");
-			ML_Editor.mainMenuBar().render();
-			ML_Editor.dockspace().render();
+			Editor::mainMenuBar().render();
+			Editor::dockspace().render();
 			ML_EventSystem.fireEvent<GuiEvent>();
 		}
 		// End Gui
 		/* * * * * * * * * * * * * * * * * * * * */
 		{
 			ML_BENCHMARK("\tGUI_END");
-			ML_Editor.render_frame();
+			Editor::render_frame();
 			ML_EventSystem.fireEvent<EndGuiEvent>();
 		}
 		// End Step
@@ -295,7 +320,7 @@ ml::int32_t main()
 
 	// Cleanup
 	ML_EventSystem.fireEvent<UnloadEvent>();
-	ML_Editor.shutdown();
+	Editor::shutdown();
 	window.dispose();
 	ML_Python.dispose();
 	ML_Lua.dispose();

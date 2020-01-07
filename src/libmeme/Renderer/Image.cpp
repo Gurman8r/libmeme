@@ -55,12 +55,9 @@ namespace ml
 		, m_channels{ channels }
 		, m_pixels	{ pixels }
 	{
-		if (size_t const c { capacity() })
+		if (size_t const c{ capacity() }; m_pixels.empty() || (m_pixels.size() != c))
 		{
-			if (m_pixels.empty() || (m_pixels.size() != c))
-			{
-				m_pixels.resize(c);
-			}
+			m_pixels.resize(c);
 		}
 	}
 

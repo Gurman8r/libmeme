@@ -5,12 +5,14 @@
 #include <libmeme/Editor/Dockspace.hpp>
 #include <libmeme/Editor/MainMenuBar.hpp>
 
-#define ML_Editor ::ml::Editor::getInstance()
-
 namespace ml
 {
-	struct ML_EDITOR_API Editor final : public Singleton<Editor>
+	struct ML_EDITOR_API Editor final
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Editor() = delete;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static bool startup(void * window);
@@ -33,22 +35,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto & dockspace() noexcept { return m_dockspace; }
+		static inline auto & dockspace() noexcept { return s_dockspace; }
 
-		inline auto & mainMenuBar() noexcept { return m_mainMenuBar; }
+		static inline auto & mainMenuBar() noexcept { return s_mainMenuBar; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<Editor>;
-		
-		Editor();
-		~Editor();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		Dockspace m_dockspace;
-		MainMenuBar m_mainMenuBar;
+		static Dockspace s_dockspace;
+		static MainMenuBar s_mainMenuBar;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

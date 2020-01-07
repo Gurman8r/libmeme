@@ -1,13 +1,15 @@
 #include <libmeme/Editor/MainMenuBar.hpp>
 #include <libmeme/Editor/ImGui.hpp>
+#include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Core/EventSystem.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	MainMenuBar::MainMenuBar()
-		: m_good	{ false }
-		, m_open	{ true }
+		: m_open	{ true }
+		, m_good	{ false }
 		, m_menus	{}
 	{
 	}
@@ -18,6 +20,12 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool MainMenuBar::dispose()
+	{
+		m_menus.clear();
+		return m_menus.empty();
+	}
 
 	bool MainMenuBar::render()
 	{
@@ -49,9 +57,12 @@ namespace ml
 		return ([&, this]()
 		{
 			// End Draw
-			ImGui::EndMainMenuBar();
-			ImGui::PopID();
-			ImGui::PopID();
+			if (m_good)
+			{
+				ImGui::EndMainMenuBar();
+				ImGui::PopID();
+				ImGui::PopID();
+			}
 			return m_good;
 		})();
 	}

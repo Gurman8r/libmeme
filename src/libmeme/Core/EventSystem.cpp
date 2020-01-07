@@ -5,26 +5,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	EventSystem::EventSystem() {}
+
+	EventSystem::~EventSystem() {}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	EventListener * EventSystem::addListener(int32_t type, EventListener * listener)
 	{
-		return listener ? m_listeners.insert(std::make_pair(type, listener))->second : nullptr;
+		return listener
+			? m_listeners.insert(std::make_pair(type, listener))->second
+			: nullptr;
 	}
 
-	bool EventSystem::fireEvent(Event const & value)
+	void EventSystem::fireEvent(Event const & value)
 	{
-		if (!value) { return false; }
-
 		auto found{ m_listeners.equal_range(value.id()) };
 
 		for (auto it = found.first; it != found.second; it++)
 		{
-			if (it->second)
-			{
-				it->second->onEvent(value);
-			}
+			if (it->second) { it->second->onEvent(value); }
 		}
-
-		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

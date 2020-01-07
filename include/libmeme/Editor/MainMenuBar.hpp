@@ -17,6 +17,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
+		bool dispose();
+
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,10 +55,8 @@ namespace ml
 		friend struct Editor;
 
 		MainMenuBar();
-
+		
 		~MainMenuBar();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool m_good;
 		bool m_open;

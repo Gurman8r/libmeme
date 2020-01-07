@@ -18,12 +18,15 @@ namespace ml
 			Root,
 			Left, LeftUp, LeftDn,
 			Right, RightUp, RightDn,
+			MAX_DOCK_NODE
 		};
 		
 		static constexpr auto dockspace_title{ "libmeme##editor##dockspace" };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
+		bool dispose();
+
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,6 +45,11 @@ namespace ml
 
 		inline auto nodes() const noexcept -> nodes_t const & { return m_nodes; }
 
+		inline uint32_t get_node(const int32_t i) const
+		{
+			return (((uint32_t)i >= Root) && ((uint32_t)i < MAX_DOCK_NODE)) ? m_nodes[i] : Root;
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
@@ -51,10 +59,8 @@ namespace ml
 
 		~Dockspace();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool		m_good;			//
 		bool		m_open;			//
+		bool		m_good;			//
 		nodes_t		m_nodes;		//
 		float_t		m_border;		//
 		vec2		m_padding;		//

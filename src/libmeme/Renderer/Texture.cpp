@@ -377,31 +377,34 @@ namespace ml
 
 	bool Texture::set_mipmapped(bool value)
 	{
-		m_flags = value
-			? (m_flags | TextureFlags_Mipmapped)
-			: (m_flags & ~TextureFlags_Mipmapped);
-
 		if (ML_BIND(Texture, (*this)))
 		{
-			if (value) { GL::generateMipmap(m_sampler); }
+			m_flags = value
+				? (m_flags | TextureFlags_Mipmapped)
+				: (m_flags & ~TextureFlags_Mipmapped);
+
+			if (mipmapped()) { GL::generateMipmap(m_sampler); }
 
 			GL::texParameter(m_sampler, GL::TexMagFilter, mipmapped()
 				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
 				: smooth() ? GL::Linear : GL::Nearest
 			);
+
+			GL::flush();
+
+			return true;
 		}
-		GL::flush();
 		return false;
 	}
 
 	bool Texture::set_repeated(bool value)
 	{
-		m_flags = value
-			? (m_flags | TextureFlags_Repeated)
-			: (m_flags & ~TextureFlags_Repeated);
-
 		if (ML_BIND(Texture, (*this)))
 		{
+			m_flags = value
+				? (m_flags | TextureFlags_Repeated)
+				: (m_flags & ~TextureFlags_Repeated);
+
 			GL::texParameter(m_sampler, GL::TexWrapS, repeated()
 				? GL::Repeat
 				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
@@ -411,19 +414,22 @@ namespace ml
 				? GL::Repeat
 				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
 			);
+
+			GL::flush();
+
+			return true;
 		}
-		GL::flush();
 		return false;
 	}
 
 	bool Texture::set_smooth(bool value)
 	{
-		m_flags = value
-			? (m_flags | TextureFlags_Smooth)
-			: (m_flags & ~TextureFlags_Smooth);
-
 		if (ML_BIND(Texture, (*this)))
 		{
+			m_flags = value
+				? (m_flags | TextureFlags_Smooth)
+				: (m_flags & ~TextureFlags_Smooth);
+
 			GL::texParameter(m_sampler, GL::TexMagFilter,
 				smooth() ? GL::Linear : GL::Nearest
 			);
@@ -432,8 +438,11 @@ namespace ml
 				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
 				: smooth() ? GL::Linear : GL::Nearest
 			);
+
+			GL::flush();
+
+			return true;
 		}
-		GL::flush();
 		return false;
 	}
 

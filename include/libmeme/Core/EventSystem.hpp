@@ -21,7 +21,7 @@ namespace ml
 		
 		EventListener * addListener(int32_t type, EventListener * listener);
 		
-		bool fireEvent(Event const & value);
+		void fireEvent(Event const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,7 +36,7 @@ namespace ml
 			return addListener(Ev::ID, listener);
 		}
 
-		template <class Ev, class ... Args> inline bool fireEvent(Args && ... args)
+		template <class Ev, class ... Args> inline void fireEvent(Args && ... args)
 		{
 			return fireEvent(Ev{ std::forward<Args>(args)... });
 		}
@@ -45,9 +45,12 @@ namespace ml
 
 	private:
 		friend struct Singleton<EventSystem>;
-		EventSystem() {}
-		~EventSystem() {}
-		dense::multimap<int32_t, EventListener *> m_listeners;
+		
+		EventSystem();
+		
+		~EventSystem();
+		
+		ordered_multimap<int32_t, EventListener *> m_listeners;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -15,6 +15,9 @@ namespace ml
 		EV_Gui,
 		EV_EndGui,
 
+		EV_Dockspace,
+		EV_MainMenuBar,
+
 		MAX_EDITOR_EVENT
 	};
 
@@ -43,6 +46,28 @@ namespace ml
 	struct EndGuiEvent final : public EditorEvent<EditorEventType::EV_EndGui>
 	{
 		constexpr EndGuiEvent() {}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct DockspaceEvent final : public EditorEvent<EditorEventType::EV_Dockspace>
+	{
+		struct Dockspace & dockspace;
+
+		constexpr DockspaceEvent(struct Dockspace & dockspace)
+			: dockspace{ dockspace }
+		{
+		}
+	};
+
+	struct MainMenuBarEvent final : public EditorEvent<EditorEventType::EV_MainMenuBar>
+	{
+		struct MainMenuBar & mainMenuBar;
+
+		constexpr MainMenuBarEvent(struct MainMenuBar & mainMenuBar)
+			: mainMenuBar{ mainMenuBar }
+		{
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

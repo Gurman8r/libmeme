@@ -4,27 +4,20 @@
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_Engine ::ml::Engine::getInstance()
-
 namespace ml
 {
-	struct ML_ENGINE_API Engine final : public Singleton<Engine>
+	struct ML_ENGINE_API Engine final
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Engine() = delete;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void begin_loop();
 
 		static void end_loop();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend struct Singleton<Engine>;
-
-		Engine();
-
-		~Engine();
-
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

@@ -24,16 +24,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Editor::Editor()
-		: m_dockspace{}
-		, m_mainMenuBar{}
-	{
-	}
-
-	Editor::~Editor()
-	{
-		m_mainMenuBar.m_menus.clear();
-	}
+	Dockspace Editor::s_dockspace{};
+	
+	MainMenuBar Editor::s_mainMenuBar{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -130,7 +123,9 @@ namespace ml
 
 	void Editor::shutdown()
 	{
-		getInstance().~Editor();
+		s_dockspace.dispose();
+
+		s_mainMenuBar.dispose();
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();

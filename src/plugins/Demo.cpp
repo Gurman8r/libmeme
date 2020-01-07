@@ -23,13 +23,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		dense::map<std::string, Font>		m_fonts		{};
-		dense::map<std::string, Image>		m_images	{};
-		dense::map<std::string, Material>	m_materials	{};
-		dense::map<std::string, Model>		m_models	{};
-		dense::map<std::string, Script>		m_scripts	{};
-		dense::map<std::string, Shader>		m_shaders	{};
-		dense::map<std::string, Texture>	m_textures	{};
+		ordered_map<std::string, Font>		m_fonts		{};
+		ordered_map<std::string, Image>		m_images	{};
+		ordered_map<std::string, Material>	m_materials	{};
+		ordered_map<std::string, Model>		m_models	{};
+		ordered_map<std::string, Script>	m_scripts	{};
+		ordered_map<std::string, Shader>	m_shaders	{};
+		ordered_map<std::string, Texture>	m_textures	{};
 		std::vector<RenderTexture>			m_pipeline	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,6 +40,7 @@ namespace ml
 			ML_EventSystem.addListener<UpdateEvent>(this);
 			ML_EventSystem.addListener<DrawEvent>(this);
 			ML_EventSystem.addListener<GuiEvent>(this);
+			ML_EventSystem.addListener<DockspaceEvent>(this);
 			ML_EventSystem.addListener<UnloadEvent>(this);
 		}
 
@@ -51,7 +52,7 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(value) })
 			{
-				ML_Editor.mainMenuBar().addMenu("Plugins", [&]()
+				Editor::mainMenuBar().addMenu("Plugins", [&]()
 				{
 					ImGui::PushID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Demo"))
@@ -220,10 +221,15 @@ namespace ml
 
 					draw_texture_preview(m_pipeline[0].texture()); ImGui::Separator();
 
-					//draw_texture_preview(m_textures["doot"]); ImGui::Separator();
+					draw_texture_preview(m_textures["doot"]); ImGui::Separator();
 				}
 				ImGui::End();
 				ImGui::PopID();
+			} break;
+			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(value) })
+			{
+				auto & d{ ev->dockspace };
+				d.dock_window("libmeme demo", d.get_node(d.Root));
 			} break;
 			case UnloadEvent::ID: if (auto ev{ event_cast<UnloadEvent>(value) })
 			{
