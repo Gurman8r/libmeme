@@ -1,6 +1,3 @@
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -21,12 +18,12 @@
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
-// Unit Tests
-namespace ml::unit_tests
+// Tests
+namespace ml::tests
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static_assert("Unit Tests"
+	static_assert("Tests"
 
 		&& sizeof(mat4b) == (sizeof(byte_t) * 16)
 		&& sizeof(mat4u) == (sizeof(uint32_t) * 16)

@@ -128,14 +128,7 @@ namespace ml
 
 	void RenderTexture::bind(RenderTexture const * value)
 	{
-		if (value)
-		{
-			FrameBufferObject::bind(&value->fbo());
-		}
-		else
-		{
-			FrameBufferObject::bind(nullptr);
-		}
+		FrameBufferObject::bind(value ? &value->fbo() : nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

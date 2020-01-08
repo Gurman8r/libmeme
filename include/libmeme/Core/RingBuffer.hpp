@@ -1,7 +1,7 @@
 #ifndef _ML_RING_BUFFER_HPP_
 #define _ML_RING_BUFFER_HPP_
 
-#include <libmeme/Core/DenseMap.hpp>
+#include <libmeme/Core/Dense.hpp>
 
 // WIP
 

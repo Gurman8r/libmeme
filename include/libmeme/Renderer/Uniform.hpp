@@ -100,13 +100,6 @@ namespace ml
 			return std::nullopt;
 		}
 
-		template <class T, class ... Args> inline storage_t const & store(Args && ... args)
-		{
-			return (m_storage = std::make_tuple(
-				typeof_v<T>, name(), std::forward<Args>(args)...
-			));
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T> inline std::optional<T> get() const

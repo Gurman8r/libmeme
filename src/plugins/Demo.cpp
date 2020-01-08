@@ -39,8 +39,8 @@ namespace ml
 			ML_EventSystem.addListener<LoadEvent>(this);
 			ML_EventSystem.addListener<UpdateEvent>(this);
 			ML_EventSystem.addListener<DrawEvent>(this);
-			ML_EventSystem.addListener<GuiEvent>(this);
 			ML_EventSystem.addListener<DockspaceEvent>(this);
+			ML_EventSystem.addListener<GuiEvent>(this);
 			ML_EventSystem.addListener<UnloadEvent>(this);
 		}
 
@@ -182,6 +182,11 @@ namespace ml
 				}
 
 			} break;
+			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(value) })
+			{
+				auto & d{ ev->dockspace };
+				d.dock_window("libmeme demo", d.get_node(d.Root));
+			} break;
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(value) })
 			{
 				ImGui::PushID(ML_ADDRESSOF(this));
@@ -225,11 +230,6 @@ namespace ml
 				}
 				ImGui::End();
 				ImGui::PopID();
-			} break;
-			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(value) })
-			{
-				auto & d{ ev->dockspace };
-				d.dock_window("libmeme demo", d.get_node(d.Root));
 			} break;
 			case UnloadEvent::ID: if (auto ev{ event_cast<UnloadEvent>(value) })
 			{

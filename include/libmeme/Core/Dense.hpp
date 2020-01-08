@@ -5,19 +5,20 @@
 
 #define _ML_DENSE _ML dense::
 
-// Basic Storage Traits
 namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Elem, class Alloc
-	> struct basic_storage_traits
+	// Basic Dense Container Traits
+	template <class Elem, class Alloc, class Comp
+	> struct basic_container_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type				= typename std::vector<Elem, Alloc>;
-		using value_type				= typename storage_type::value_type;
-		using allocator_type			= typename storage_type::allocator_type;
+		using value_type				= typename Elem;
+		using allocator_type			= typename Alloc;
+		using compare_type				= typename Comp;
+		using storage_type				= typename std::vector<value_type, allocator_type>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -38,21 +39,22 @@ namespace ml::dense
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Basic Storage
 namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
+	// Basic Dense Container
 	template <class Traits
-	> struct basic_storage
+	> struct basic_container
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using traits_type				= typename Traits;
-		using self_type					= typename basic_storage<traits_type>;
+		using self_type					= typename basic_container<traits_type>;
+		using value_type				= typename traits_type::value_type;
+		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
 		using storage_type				= typename traits_type::storage_type;
-		using value_type				= typename traits_type::value_type;
 		using pointer					= typename traits_type::pointer;
 		using reference					= typename traits_type::reference;
 		using const_pointer				= typename traits_type::const_pointer;
@@ -69,77 +71,77 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_storage() noexcept
+		basic_container() noexcept
 			: m_storage{}
 		{
 		}
 
-		explicit basic_storage(allocator_type const & alloc)
+		explicit basic_container(allocator_type const & alloc)
 			: m_storage{ alloc }
 		{
 		}
 
-		explicit basic_storage(size_type const count, allocator_type const & alloc = {})
+		explicit basic_container(size_type const count, allocator_type const & alloc = {})
 			: m_storage{ count, alloc }
 		{
 		}
 
-		basic_storage(size_type const count, const_reference value, allocator_type const & alloc = {})
+		basic_container(size_type const count, const_reference value, allocator_type const & alloc = {})
 			: m_storage{ count, value, alloc }
 		{
 		}
 
-		template <class It> basic_storage(It first, It last)
+		template <class It> basic_container(It first, It last)
 			: m_storage{ first, last }
 		{
 		}
 
-		basic_storage(initializer_type init)
+		basic_container(initializer_type init)
 			: m_storage{ init }
 		{
 		}
 
-		explicit basic_storage(storage_type const & value)
+		explicit basic_container(storage_type const & value)
 			: m_storage{ value }
 		{
 		}
 
-		explicit basic_storage(storage_type && value) noexcept
+		explicit basic_container(storage_type && value) noexcept
 			: m_storage{ std::move(value) }
 		{
 		}
 
-		explicit basic_storage(storage_type const & value, allocator_type const & alloc)
+		explicit basic_container(storage_type const & value, allocator_type const & alloc)
 			: m_storage{ value, alloc }
 		{
 		}
 
-		explicit basic_storage(storage_type && value, allocator_type const & alloc) noexcept
+		explicit basic_container(storage_type && value, allocator_type const & alloc) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
 		}
 
-		basic_storage(self_type const & other)
+		basic_container(self_type const & other)
 			: m_storage{ other.m_storage }
 		{
 		}
 
-		basic_storage(self_type && other) noexcept
+		basic_container(self_type && other) noexcept
 			: m_storage{ std::move(other.m_storage) }
 		{
 		}
 
-		basic_storage(self_type const & other, allocator_type const & alloc)
+		basic_container(self_type const & other, allocator_type const & alloc)
 			: m_storage{ other.m_storage, alloc }
 		{
 		}
 
-		basic_storage(self_type && other, allocator_type const & alloc) noexcept
+		basic_container(self_type && other, allocator_type const & alloc) noexcept
 			: m_storage{ std::move(other.m_storage), alloc }
 		{
 		}
 
-		~basic_storage() noexcept {}
+		~basic_container() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -192,14 +194,6 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> inline iterator emplace(const_iterator location, Args && ... args)
-		{
-			return m_storage.emplace(location, std::forward<Args>(args)...);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline iterator erase(iterator location)
 		{
 			return m_storage.erase(location);
@@ -208,6 +202,81 @@ namespace ml::dense
 		inline iterator erase(iterator first, iterator last)
 		{
 			return m_storage.erase(first, last);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline void sort() noexcept
+		{
+			return sort(begin(), end());
+		}
+
+		inline void sort(iterator first, iterator last) noexcept
+		{
+			return std::sort(first, last, compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline bool binary_search(U && u) const
+		{
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator_pair equal_range(U && u)
+		{
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator_pair equal_range(U && u) const
+		{
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator lower_bound(U && u)
+		{
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator lower_bound(U && u) const
+		{
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator upper_bound(U && u)
+		{
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return end();
+		}
+
+		template <class U> inline const_iterator find(U && u) const
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -260,7 +329,7 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private:
+	protected:
 		union { storage_type m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -17,7 +17,7 @@ namespace ml
 
 	template <class T> struct input<T> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::istream & in) const
 		{
@@ -42,7 +42,7 @@ namespace ml
 
 	template <class To, class From> struct input<To, From> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, To dv = To { 0 }) const
 		{
@@ -59,7 +59,7 @@ namespace ml
 
 	template <> struct input<std::string> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::istream & in) const
 		{
@@ -80,7 +80,7 @@ namespace ml
 
 	template <> struct input<bool> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str) const
 		{
@@ -97,7 +97,7 @@ namespace ml
 
 	template <> struct input<int8_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, int8_t dv = 0) const
 		{
@@ -114,7 +114,7 @@ namespace ml
 
 	template <> struct input<int16_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, int16_t dv = 0) const
 		{
@@ -131,7 +131,7 @@ namespace ml
 
 	template <> struct input<int32_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, int32_t dv = 0) const
 		{
@@ -148,7 +148,7 @@ namespace ml
 
 	template <> struct input<int64_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, int64_t dv = 0) const
 		{
@@ -165,7 +165,7 @@ namespace ml
 
 	template <> struct input<uint8_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, uint8_t dv = 0) const
 		{
@@ -182,7 +182,7 @@ namespace ml
 
 	template <> struct input<uint16_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, uint16_t dv = 0) const
 		{
@@ -199,7 +199,7 @@ namespace ml
 
 	template <> struct input<uint32_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, uint32_t dv = 0) const
 		{
@@ -216,7 +216,7 @@ namespace ml
 
 	template <> struct input<uint64_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, uint64_t dv = 0) const
 		{
@@ -233,7 +233,7 @@ namespace ml
 
 	template <> struct input<float32_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, float32_t dv = 0) const
 		{
@@ -250,7 +250,7 @@ namespace ml
 
 	template <> struct input<float64_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, float64_t dv = 0) const
 		{
@@ -267,7 +267,7 @@ namespace ml
 
 	template <> struct input<float80_t> final
 	{
-		input() = default;
+		input() noexcept = default;
 
 		inline decltype(auto) operator()(std::string const & str, float80_t dv = 0) const
 		{

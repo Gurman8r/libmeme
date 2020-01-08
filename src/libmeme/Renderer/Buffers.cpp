@@ -10,9 +10,7 @@ namespace ml
 
 	void VertexArrayObject::bind(VertexArrayObject const * value)
 	{
-		return value
-			? GL::bindVertexArray(value->m_handle)
-			: GL::bindVertexArray(NULL);
+		GL::bindVertexArray(value ? value->m_handle : NULL);
 	}
 
 	void VertexArrayObject::bind() const
@@ -58,9 +56,7 @@ namespace ml
 
 	void VertexBufferObject::bind(VertexBufferObject const * value)
 	{
-		return value
-			? GL::bindBuffer(GL::ArrayBuffer, value->m_handle)
-			: GL::bindBuffer(GL::ArrayBuffer, NULL);
+		GL::bindBuffer(GL::ArrayBuffer, value ? value->m_handle : NULL);
 	}
 
 	void VertexBufferObject::bind() const
@@ -144,9 +140,7 @@ namespace ml
 
 	void IndexBufferObject::bind(IndexBufferObject const * value)
 	{
-		return value
-			? GL::bindBuffer(GL::ElementArrayBuffer, value->m_handle)
-			: GL::bindBuffer(GL::ElementArrayBuffer, NULL);
+		GL::bindBuffer(GL::ElementArrayBuffer, value ? value->m_handle : NULL);
 	}
 
 	void IndexBufferObject::bind() const
@@ -211,9 +205,7 @@ namespace ml
 
 	void FrameBufferObject::bind(FrameBufferObject const * value)
 	{
-		return value
-			? GL::bindFramebuffer(GL::Framebuffer, value->m_handle)
-			: GL::bindFramebuffer(GL::Framebuffer, NULL);
+		GL::bindFramebuffer(GL::Framebuffer, value ? value->m_handle : NULL);
 	}
 
 	void FrameBufferObject::bind() const
@@ -287,9 +279,7 @@ namespace ml
 
 	void RenderBufferObject::bind(RenderBufferObject const * value)
 	{
-		return value
-			? GL::bindRenderbuffer(GL::Renderbuffer, value->m_handle)
-			: GL::bindRenderbuffer(GL::Renderbuffer, NULL);
+		GL::bindRenderbuffer(GL::Renderbuffer, value ? value->m_handle : NULL);
 	}
 
 	void RenderBufferObject::bind() const

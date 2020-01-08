@@ -22,7 +22,7 @@
 #	elif defined(ML_CC_MSC)
 #		define ML_BREAKPOINT ::__debugbreak()
 #	else
-#		define ML_BREAKPOINT raise(SIGTRAP)
+#		define ML_BREAKPOINT ::raise(SIGTRAP)
 #	endif
 #else
 #	define ML_BREAKPOINT

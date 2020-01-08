@@ -21,6 +21,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using self_type = typename Duration;
 		using base_type = typename std::chrono::duration<float64_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,16 +36,61 @@ namespace ml
 		{
 		}
 
-		constexpr Duration(Duration const & other) noexcept
+		constexpr explicit Duration(base_type const & other)
+			: m_base{ other }
+		{
+		}
+
+		constexpr explicit Duration(base_type && other) noexcept
+			: m_base{ std::move(other) }
+		{
+		}
+
+		template <class R, class P = typename R::period
+		> constexpr Duration(std::chrono::duration<R, P> const & value)
+			: m_base{ std::chrono::duration_cast<base_type>(value) }
+		{
+		}
+
+		template <class R, class P = typename R::period
+		> constexpr Duration(std::chrono::duration<R, P> && value) noexcept
+			: m_base{ std::chrono::duration_cast<base_type>(std::move(value)) }
+		{
+		}
+
+		constexpr Duration(self_type const & other)
 			: m_base{ other.m_base }
 		{
 		}
 
-		template <
-			class R, class P = typename R::period
-		> constexpr Duration(const std::chrono::duration<R, P> & value) noexcept
-			: m_base{ std::chrono::duration_cast<base_type>(value) }
+		constexpr Duration(self_type && other) noexcept
+			: m_base{ std::move(other.m_base) }
 		{
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr self_type & operator=(self_type const & other)
+		{
+			Duration temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		constexpr self_type & operator=(self_type && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
+
+		constexpr void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				base_type temp = std::move(m_base);
+				m_base = std::move(other.m_base);
+				other.m_base = std::move(m_base);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,39 +101,40 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Nanoseconds nanoseconds() const noexcept
+		constexpr decltype(auto) nanoseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Nanoseconds>(m_base);
 		}
 
-		constexpr Microseconds microseconds() const noexcept
+		constexpr decltype(auto) microseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Microseconds>(m_base);
 		}
 
-		constexpr Milliseconds milliseconds() const noexcept
+		constexpr decltype(auto) milliseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Milliseconds>(m_base);
 		}
 
-		constexpr Seconds seconds() const noexcept
+		constexpr decltype(auto) seconds() const noexcept
 		{
 			return std::chrono::duration_cast<Seconds>(m_base);
 		}
 
-		constexpr Minutes minutes() const noexcept
+		constexpr decltype(auto) minutes() const noexcept
 		{
 			return std::chrono::duration_cast<Minutes>(m_base);
 		}
 
-		constexpr Hours hours() const noexcept
+		constexpr decltype(auto) hours() const noexcept
 		{
 			return std::chrono::duration_cast<Hours>(m_base);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: base_type m_base;
+	private:
+		union { base_type m_base; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

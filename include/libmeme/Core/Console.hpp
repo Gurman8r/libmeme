@@ -70,7 +70,7 @@ namespace ml::cio
 
 		constexpr COL(COL && other) noexcept : COL{ std::move(other.fg), std::move(other.bg) } {}
 
-		constexpr COL() : COL{ FG::Normal, BG::Black } {}
+		constexpr COL() noexcept : COL{ FG::Normal, BG::Black } {}
 
 		constexpr uint16_t operator()() const noexcept
 		{

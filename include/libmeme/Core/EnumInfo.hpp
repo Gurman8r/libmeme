@@ -7,27 +7,25 @@
 
 namespace ml
 {
-	template <
-		class _Enum,
-		size_t _Cap = 32
+	template <class E, size_t Size = 32
 	> struct enum_info
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static_assert(std::is_enum_v<_Enum>, "Type must be an enum");
+		static_assert(std::is_enum_v<E>, "Type must be an enum");
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using enum_type = typename _Enum;
+		using enum_type = typename E;
 		using name_type = typename std::string_view;
 		using desc_type = typename std::string_view;
-		using self_type = typename enum_info<enum_type, _Cap>;
+		using self_type = typename enum_info<enum_type, Size>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Enums = typename cx::map<enum_type, size_t, _Cap>;
-		using Names = typename cx::map<enum_type, name_type, _Cap>;
-		using Descs = typename cx::map<enum_type, desc_type, _Cap>;
+		using Enums = typename cx::map<enum_type, size_t, Size>;
+		using Names = typename cx::map<enum_type, name_type, Size>;
+		using Descs = typename cx::map<enum_type, desc_type, Size>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -40,9 +38,9 @@ namespace ml
 		constexpr enum_info() noexcept = default;
 
 		constexpr explicit enum_info(
-			cx::vector<enum_type, _Cap> && enums, 
-			cx::vector<name_type, _Cap> && names, 
-			cx::vector<desc_type, _Cap> && descs
+			cx::vector<enum_type, Size> && enums, 
+			cx::vector<name_type, Size> && names, 
+			cx::vector<desc_type, Size> && descs
 		)	: enums{}, names{}, descs{}
 		{
 			for (size_t i = 0; i < enums.size(); i++)

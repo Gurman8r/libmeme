@@ -67,15 +67,16 @@ namespace ml
 
 	Trackable * MemoryTracker::create_allocation(size_t size)
 	{
-		auto * const ptr{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
-		return m_records.insert(std::make_pair(
-			ptr, ::new AllocationRecord{ std::make_tuple(m_current++, size, ptr) }
-		)).first->second->data();
+		return ([&, this](auto * const ptr) {
+			return m_records.insert(std::make_pair(
+				ptr, ::new AllocationRecord{ std::make_tuple(m_current++, size, ptr) }
+			)).first->second->data();
+		})(static_cast<Trackable *>(ML_IMPL_NEW(size)));
 	}
 
 	void MemoryTracker::destroy_allocation(Trackable * value)
 	{
-		if (auto it{ m_records.find(value) }; it != m_records.end())
+		if (auto const it{ m_records.find(value) }; it != m_records.end())
 		{
 			ML_IMPL_DELETE(it->second->data());
 			::delete it->second;

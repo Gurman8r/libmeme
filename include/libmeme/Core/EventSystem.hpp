@@ -31,7 +31,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Ev> inline auto addListener(EventListener * listener)
+		template <class Ev> inline EventListener * addListener(EventListener * listener)
 		{
 			return addListener(Ev::ID, listener);
 		}
