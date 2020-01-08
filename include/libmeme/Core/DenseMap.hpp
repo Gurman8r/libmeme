@@ -156,6 +156,26 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class U> inline iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return end();
+		}
+
+		template <class U> inline const_iterator find(U && u) const
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return cend();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline std::pair<iterator, bool> insert(const_reference value)
 		{
 			if (auto const it{ equal_range(value) }; it.first != it.second)
