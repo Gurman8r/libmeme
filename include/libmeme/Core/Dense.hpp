@@ -246,8 +246,6 @@ namespace ml::dense
 
 		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
 
-		inline auto get_storage() const noexcept -> storage_type const & { return m_storage; }
-
 		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
 
 		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
