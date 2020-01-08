@@ -3,38 +3,29 @@
 
 #include <libmeme/Core/Dense.hpp>
 
-namespace ml
+// Basic Set Traits
+namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// Basic Set Traits
 	template <template <class ...> class Derived,
 		class Value, class Comp, class Alloc, bool Multi
-	> struct basic_set_traits : public _ML_DENSE basic_storage_traits<
-		Value, Alloc
-	>
+	> struct basic_set_traits : public basic_storage_traits<Value, Alloc>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
+
+		using base_type = typename basic_storage_traits<Value, Alloc>;
+
 		using derived_type = typename Derived<Value, Comp, Alloc>;
 
-		friend derived_type;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using base_type = typename _ML_DENSE basic_storage_traits<Value, Alloc>;
-
 		using compare_type = typename Comp;
-
-		using search_type = typename Value const &;
 
 		static constexpr bool multi{ Multi };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
+
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
 		using value_type				= typename base_type::value_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
@@ -46,15 +37,17 @@ namespace ml
 		using const_iterator			= typename base_type::const_iterator;
 		using reverse_iterator			= typename base_type::reverse_iterator;
 		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+		using initializer_type			= typename base_type::initializer_type;
+		using iterator_pair				= typename base_type::iterator_pair;
+		using const_iterator_pair		= typename base_type::const_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private:
-		struct compare_impl final
+		struct compare_impl
 		{
 			constexpr compare_impl() noexcept = default;
 
-			constexpr bool operator()(search_type lhs, const_reference rhs) const noexcept
+			constexpr bool operator()(const_reference lhs, const_reference rhs) const noexcept
 			{
 				return compare_type{}(lhs, rhs);
 			}
@@ -62,10 +55,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct sort_impl final
+		struct sort_impl
 		{
-			explicit sort_impl(derived_type & value) noexcept { (*this)(value); }
-
 			constexpr sort_impl() noexcept = default;
 
 			inline void operator()(derived_type & value) const noexcept
@@ -74,9 +65,7 @@ namespace ml
 
 				if constexpr (!multi)
 				{
-					value.erase(
-						std::unique(value.begin(), value.end()), value.end(), compare_impl{}
-					);
+					value.erase(std::unique(value.begin(), value.end()), value.end(), compare_impl{});
 				}
 			}
 		};
@@ -85,31 +74,33 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	// Basic Ordered Set
-	template <
-		class Value,
+// Basic Ordered Set
+namespace ml::dense
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	template <class Value,
 		class Comp = std::less<Value>,
 		class Alloc = std::allocator<Value>
-	> struct basic_ordered_set : public _ML_DENSE basic_storage<
-		basic_set_traits<basic_ordered_set, Value, Comp, Alloc, false>
-	>
+	> struct basic_ordered_set : public basic_storage<basic_set_traits<
+		basic_ordered_set, Value, Comp, Alloc, false
+	>>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-		using traits_type = typename basic_set_traits<
-			basic_ordered_set, Value, Comp, Alloc, false
+		using traits_type = basic_set_traits<basic_ordered_set,
+			Value, Comp, Alloc, false
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using base_type					= typename basic_storage<traits_type>;
 		using self_type					= typename traits_type::derived_type;
 		using compare_impl				= typename traits_type::compare_impl;
-		using search_type				= typename traits_type::search_type;
-		using base_type					= typename _ML_DENSE basic_storage<traits_type>;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
 		using value_type				= typename base_type::value_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
@@ -121,56 +112,56 @@ namespace ml
 		using const_iterator			= typename base_type::const_iterator;
 		using reverse_iterator			= typename base_type::reverse_iterator;
 		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
+		using initializer_type			= typename base_type::initializer_type;
+		using iterator_pair				= typename base_type::iterator_pair;
+		using const_iterator_pair		= typename base_type::const_iterator_pair;
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 		basic_ordered_set() noexcept
-			: base_type{ m_storage }, m_storage{}
+			: base_type{}
 		{
 		}
 
 		basic_ordered_set(initializer_type init)
-			: base_type{ m_storage }, m_storage{ init }
+			: base_type{ init }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 
 		template <class It> basic_ordered_set(It first, It last)
-			: base_type{ m_storage }, m_storage{ first, last }
+			: base_type{ first, last }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 
 		explicit basic_ordered_set(allocator_type const & alloc)
-			: base_type{ m_storage }, m_storage{ alloc }
+			: base_type{ alloc }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 	
-		explicit basic_ordered_set(storage_type const & value, allocator_type const & alloc)
-			: base_type{ m_storage }, m_storage{ value, alloc }
+		explicit basic_ordered_set(storage_type const & value, allocator_type const & alloc = {})
+			: base_type{ value, alloc }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 	
-		explicit basic_ordered_set(storage_type && value, allocator_type const & alloc) noexcept
-			: base_type{ m_storage }, m_storage{ std::move(value), alloc }
+		explicit basic_ordered_set(storage_type && value, allocator_type const & alloc = {}) noexcept
+			: base_type{ std::move(value), alloc }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 	
 		basic_ordered_set(self_type const & other, allocator_type const & alloc = {})
-			: base_type{ m_storage }, m_storage{ other.m_storage, alloc }
+			: base_type{ other, alloc }
 		{
 		}
 	
-		basic_ordered_set(self_type && other) noexcept
-			: base_type{ m_storage }, m_storage{}
+		basic_ordered_set(self_type && other, allocator_type const & alloc = {}) noexcept
+			: base_type{ std::move(other), alloc }
 		{
-			swap(std::move(other));
 		}
-
-		~basic_ordered_set() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -187,74 +178,67 @@ namespace ml
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline bool binary_search(U && u) const
 		{
-			if (this != std::addressof(other))
-			{
-				m_storage.swap(other.m_storage);
-			}
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator lower_bound(search_type value)
+		template <class U> inline iterator_pair equal_range(U && u)
 		{
-			return std::lower_bound(begin(), end(), value, compare_impl{});
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		inline const_iterator lower_bound(search_type value) const
+		template <class U> inline const_iterator_pair equal_range(U && u) const
 		{
-			return std::lower_bound(cbegin(), cend(), value, compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator upper_bound(search_type value)
-		{
-			return std::upper_bound(begin(), end(), value, compare_impl{});
-		}
-
-		inline const_iterator upper_bound(search_type value) const
-		{
-			return std::upper_bound(cbegin(), cend(), value, compare_impl{});
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::pair<iterator, iterator> equal_range(search_type value)
+		template <class U> inline iterator lower_bound(U && u)
 		{
-			return std::equal_range(begin(), end(), value, compare_impl{});
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		inline std::pair<const_iterator, const_iterator> equal_range(search_type value) const
+		template <class U> inline const_iterator lower_bound(U && u) const
 		{
-			return std::equal_range(cbegin(), cend(), value, compare_impl{});
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(search_type value)
+		template <class U> inline iterator upper_bound(U && u)
 		{
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_impl{});
+		}
+
+		template <class U> inline const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline  iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
-			else
-			{
-				return end();
-			}
+			return end();
 		}
 
-		inline const_iterator find(search_type value) const
+		template <class U> inline  const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
-			else
-			{
-				return cend();
-			}
+			return cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -267,56 +251,53 @@ namespace ml
 			}
 			else
 			{
-				return std::make_pair(m_storage.emplace(it.second, value), true);
+				return std::make_pair(emplace(it.second, value), true);
 			}
 		}
 
 		inline std::pair<iterator, bool> insert(value_type && value)
 		{
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			if (auto const it{ equal_range(std::move(value)) }; it.first != it.second)
 			{
 				return std::make_pair(it.second, false);
 			}
 			else
 			{
-				return std::make_pair(m_storage.emplace(it.second, std::move(value)), true);
+				return std::make_pair(emplace(it.second, std::move(value)), true);
 			}
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	// Basic Ordered Multiset
-	template <
-		class Value,
+// Basic Ordered Multiset
+namespace ml::dense
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Value,
 		class Comp = std::less<Value>,
 		class Alloc = std::allocator<Value>
-	> struct basic_ordered_multiset : public _ML_DENSE basic_storage<
-		basic_set_traits<basic_ordered_multiset, Value, Comp, Alloc, true>
-	>
+	> struct basic_ordered_multiset : public basic_storage<basic_set_traits<
+		basic_ordered_multiset, Value, Comp, Alloc, true
+	>>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-		using traits_type = typename basic_set_traits<
-			basic_ordered_multiset, Value, Comp, Alloc, true
+		using traits_type = basic_set_traits<basic_ordered_multiset,
+			Value, Comp, Alloc, true
 		>;
-		
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
+
+		using base_type					= typename basic_storage<traits_type>;
 		using self_type					= typename traits_type::derived_type;
 		using compare_impl				= typename traits_type::compare_impl;
-		using search_type				= typename traits_type::search_type;
-		using base_type					= typename _ML_DENSE basic_storage<traits_type>;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
-		using initializer_type			= typename base_type::initializer_type;
 		using value_type				= typename base_type::value_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
@@ -328,55 +309,55 @@ namespace ml
 		using const_iterator			= typename base_type::const_iterator;
 		using reverse_iterator			= typename base_type::reverse_iterator;
 		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
-	
+		using initializer_type			= typename base_type::initializer_type;
+		using iterator_pair				= typename base_type::iterator_pair;
+		using const_iterator_pair		= typename base_type::const_iterator_pair;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 		basic_ordered_multiset() noexcept
-			: base_type{ m_storage }, m_storage{}
+			: base_type{}
 		{
 		}
 
 		basic_ordered_multiset(initializer_type init)
-			: base_type{ m_storage }, m_storage{ init }
+			: base_type{ init }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 
 		template <class It> basic_ordered_multiset(It first, It last)
-			: base_type{ m_storage }, m_storage{ first, last }
+			: base_type{ first, last }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 
 		explicit basic_ordered_multiset(allocator_type const & alloc)
-			: base_type{ m_storage }, m_storage{ alloc }
+			: base_type{ alloc }
 		{
 		}
 	
-		explicit basic_ordered_multiset(storage_type const & value, allocator_type const & alloc)
-			: base_type{ m_storage }, m_storage{ value, alloc }
+		explicit basic_ordered_multiset(storage_type const & value, allocator_type const & alloc = {})
+			: base_type{ value, alloc }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 	
-		explicit basic_ordered_multiset(storage_type && value, allocator_type const & alloc) noexcept
-			: base_type{ m_storage }, m_storage{ std::move(value), alloc }
+		explicit basic_ordered_multiset(storage_type && value, allocator_type const & alloc = {}) noexcept
+			: base_type{ std::move(value), alloc }
 		{
-			traits_type::sort_impl{ *this };
+			traits_type::sort_impl{}(*this);
 		}
 	
 		basic_ordered_multiset(self_type const & other, allocator_type const & alloc = {})
-			: base_type{ m_storage }, m_storage{ other.m_storage, alloc }
+			: base_type{ other, alloc }
 		{
 		}
 	
-		basic_ordered_multiset(self_type && other) noexcept
-			: base_type{ m_storage }, m_storage{}
+		basic_ordered_multiset(self_type && other, allocator_type const & alloc = {}) noexcept
+			: base_type{ std::move(other), alloc }
 		{
-			swap(std::move(other));
 		}
-
-		~basic_ordered_multiset() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -393,101 +374,95 @@ namespace ml
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline bool binary_search(U && u) const
 		{
-			if (this != std::addressof(other))
-			{
-				m_storage.swap(other.m_storage);
-			}
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator lower_bound(search_type value)
+		template <class U> inline iterator_pair equal_range(U && u)
 		{
-			return std::lower_bound(begin(), end(), value, compare_impl{});
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		inline const_iterator lower_bound(search_type value) const
+		template <class U> inline const_iterator_pair equal_range(U && u) const
 		{
-			return std::lower_bound(cbegin(), cend(), value, compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator upper_bound(search_type value)
-		{
-			return std::upper_bound(begin(), end(), value, compare_impl{});
-		}
-
-		inline const_iterator upper_bound(search_type value) const
-		{
-			return std::upper_bound(cbegin(), cend(), value, compare_impl{});
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::pair<iterator, iterator> equal_range(search_type value)
+		template <class U> inline iterator lower_bound(U && u)
 		{
-			return std::equal_range(begin(), end(), value, compare_impl{});
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		inline std::pair<const_iterator, const_iterator> equal_range(search_type value) const
+		template <class U> inline const_iterator lower_bound(U && u) const
 		{
-			return std::equal_range(cbegin(), cend(), value, compare_impl{});
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(search_type value)
+		template <class U> inline iterator upper_bound(U && u)
 		{
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_impl{});
+		}
+
+		template <class U> inline const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline  iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
-			else
-			{
-				return end();
-			}
+			return end();
 		}
 
-		inline const_iterator find(search_type value) const
+		template <class U> inline  const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
-			else
-			{
-				return cend();
-			}
+			return cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline iterator insert(const_reference value)
 		{
-			return m_storage.emplace(equal_range(value).second, value);
+			return emplace(upper_bound(value), value);
 		}
 
 		inline iterator insert(value_type && value)
 		{
-			return m_storage.emplace(equal_range(value).second, std::move(value));
+			return emplace(upper_bound(std::move(value)), std::move(value));
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// Usings
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// Ordered Set
 	template <class Value
-	> ML_USING ordered_set = basic_ordered_set<
+	> ML_USING ordered_set = _ML_DENSE basic_ordered_set<
 		Value,
 		std::less<Value>,
 		std::allocator<Value>
@@ -495,7 +470,7 @@ namespace ml
 
 	// Ordered Multiset
 	template <class Value
-	> ML_USING ordered_multiset = basic_ordered_multiset<
+	> ML_USING ordered_multiset = _ML_DENSE basic_ordered_multiset<
 		Value,
 		std::less<Value>,
 		std::allocator<Value>

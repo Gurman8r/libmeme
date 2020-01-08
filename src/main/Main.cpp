@@ -178,39 +178,28 @@ namespace ml
 }
 
 
+// Test
+namespace ml::dense
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Elem, class Comp, class Alloc
+	> struct basic_sorted_storage : public basic_storage<basic_storage_traits<
+		Elem, Alloc
+	>>
+	{
+		
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 // Main
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using namespace ml;
-
-	auto test_set = [](auto & value)
-	{
-		value.insert(1);
-		value.upper_bound(0);
-		value.lower_bound(1);
-		value.equal_range(0);
-		value.find(0);
-		value.back();
-		value.erase(value.begin());
-	};
-
-	auto test_map = [](auto & value)
-	{
-		value.insert(std::make_pair(1, ""));
-		value.upper_bound(0);
-		value.lower_bound(1);
-		value.equal_range(0);
-		value.find(0);
-		value.back();
-		value.erase(value.begin());
-	};
-
-	ordered_set<int> a; test_set(a);
-	ordered_multiset<int> b; test_set(b);
-	ordered_map<int, std::string> c; test_map(c);
-	ordered_multimap<int, std::string> d; test_map(d);
 
 	// Time
 	static struct Time final

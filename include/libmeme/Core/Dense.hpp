@@ -5,26 +5,19 @@
 
 #define _ML_DENSE _ML dense::
 
+// Basic Storage Traits
 namespace ml::dense
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// Storage Traits
 	template <class Elem, class Alloc
 	> struct basic_storage_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(std::is_same_v<Elem, Alloc::value_type>,
-			"type mismatch: Elem != Alloc::value_type"
-		);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using value_type				= typename Elem;
-		using allocator_type			= typename Alloc;
-		using storage_type				= typename std::vector<value_type, allocator_type>;
-		using initializer_type			= typename std::initializer_list<value_type>;
+		using storage_type				= typename std::vector<Elem, Alloc>;
+		using value_type				= typename storage_type::value_type;
+		using allocator_type			= typename storage_type::allocator_type;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -35,22 +28,30 @@ namespace ml::dense
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;
 		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+		using initializer_type			= typename std::initializer_list<value_type>;
+		using iterator_pair				= typename std::pair<iterator, iterator>;
+		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	// Basic Storage
+// Basic Storage
+namespace ml::dense
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
 	template <class Traits
 	> struct basic_storage
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using traits_type				= typename Traits;
+		using self_type					= typename basic_storage<traits_type>;
 		using allocator_type			= typename traits_type::allocator_type;
 		using storage_type				= typename traits_type::storage_type;
-		using initializer_type			= typename traits_type::initializer_type;
 		using value_type				= typename traits_type::value_type;
 		using pointer					= typename traits_type::pointer;
 		using reference					= typename traits_type::reference;
@@ -62,15 +63,152 @@ namespace ml::dense
 		using const_iterator			= typename traits_type::const_iterator;
 		using reverse_iterator			= typename traits_type::reverse_iterator;
 		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
+		using initializer_type			= typename traits_type::initializer_type;
+		using iterator_pair				= typename traits_type::iterator_pair;
+		using const_iterator_pair		= typename traits_type::const_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit basic_storage(storage_type & storage) noexcept
-			: m_storage{ storage }
+		basic_storage() noexcept
+			: m_storage{}
+		{
+		}
+
+		explicit basic_storage(allocator_type const & alloc)
+			: m_storage{ alloc }
+		{
+		}
+
+		explicit basic_storage(size_type const count, allocator_type const & alloc = {})
+			: m_storage{ count, alloc }
+		{
+		}
+
+		basic_storage(size_type const count, const_reference value, allocator_type const & alloc = {})
+			: m_storage{ count, value, alloc }
+		{
+		}
+
+		template <class It> basic_storage(It first, It last)
+			: m_storage{ first, last }
+		{
+		}
+
+		basic_storage(initializer_type init)
+			: m_storage{ init }
+		{
+		}
+
+		explicit basic_storage(storage_type const & value)
+			: m_storage{ value }
+		{
+		}
+
+		explicit basic_storage(storage_type && value) noexcept
+			: m_storage{ std::move(value) }
+		{
+		}
+
+		explicit basic_storage(storage_type const & value, allocator_type const & alloc)
+			: m_storage{ value, alloc }
+		{
+		}
+
+		explicit basic_storage(storage_type && value, allocator_type const & alloc) noexcept
+			: m_storage{ std::move(value), alloc }
+		{
+		}
+
+		basic_storage(self_type const & other)
+			: m_storage{ other.m_storage }
+		{
+		}
+
+		basic_storage(self_type && other) noexcept
+			: m_storage{ std::move(other.m_storage) }
+		{
+		}
+
+		basic_storage(self_type const & other, allocator_type const & alloc)
+			: m_storage{ other.m_storage, alloc }
+		{
+		}
+
+		basic_storage(self_type && other, allocator_type const & alloc) noexcept
+			: m_storage{ std::move(other.m_storage), alloc }
 		{
 		}
 
 		~basic_storage() noexcept {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+		inline self_type & operator=(self_type const & other)
+		{
+			self_type temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		inline self_type & operator=(self_type && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
+
+		inline self_type & operator=(initializer_type init)
+		{
+			self_type temp{ init };
+			swap(temp);
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline void clear() noexcept
+		{
+			return m_storage.clear();
+		}
+
+		inline void reserve(size_type const count)
+		{
+			return m_storage.reserve(count);
+		}
+
+		inline void resize(size_type const count)
+		{
+			return m_storage.resize(count);
+		}
+
+		inline void shrink_to_fit()
+		{
+			return m_storage.shrink_to_fit();
+		}
+
+		inline void swap(self_type & other) noexcept
+		{
+			return m_storage.swap(other.m_storage);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class ... Args
+		> inline iterator emplace(const_iterator location, Args && ... args)
+		{
+			return m_storage.emplace(location, std::forward<Args>(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline iterator erase(iterator location)
+		{
+			return m_storage.erase(location);
+		}
+
+		inline iterator erase(iterator first, iterator last)
+		{
+			return m_storage.erase(first, last);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -88,8 +226,6 @@ namespace ml::dense
 
 		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
-		inline void clear() noexcept { return m_storage.clear(); }
-
 		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
 		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
@@ -104,15 +240,13 @@ namespace ml::dense
 
 		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
 
-		inline auto erase(iterator value) -> iterator { return m_storage.erase(value); }
-
-		inline auto erase(iterator first, iterator last) -> iterator { return m_storage.erase(first, last); }
-
 		inline auto front() noexcept -> reference { return m_storage.front(); }
 
 		inline auto front() const noexcept -> const_reference { return m_storage.front(); }
 
 		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
+
+		inline auto get_storage() const noexcept -> storage_type const & { return m_storage; }
 
 		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
 
@@ -124,16 +258,12 @@ namespace ml::dense
 
 		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
 
-		inline void reserve(size_type const value) { return m_storage.reserve(value); }
-
-		inline void shrink_to_fit() { return m_storage.shrink_to_fit(); }
-
 		inline auto size() const noexcept -> size_type { return m_storage.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type & m_storage;
+		union { storage_type m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

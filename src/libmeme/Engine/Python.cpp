@@ -73,11 +73,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using str_t = typename std::string;
-	using list_t = typename std::vector<str_t>;
-	using dict_t = typename std::map<str_t, str_t>;
-	using table_t = typename std::vector<dict_t>;
-	using coord_t = typename std::array<float_t, 2>;
+	using str_t = typename _STD string;
+	using list_t = typename _STD vector<str_t>;
+	using dict_t = typename _STD map<str_t, str_t>;
+	using table_t = typename _STD vector<dict_t>;
+	using coord_t = typename _STD array<float_t, 2>;
+	using rect_t = typename _STD array<float_t, 4>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -85,34 +86,34 @@ namespace ml
 	{
 		struct ml_py_config final {};
 		pybind11::class_<ml_py_config>(m, "config")
-			.def_static("architecture", []() { return ML_ARCHITECTURE; })
-			.def_static("args", []() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
-			.def_static("compiler_name", []() { return ML_CC_NAME; })
+			.def_static("architecture",		[]() { return ML_ARCHITECTURE; })
+			.def_static("args",				[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("compiler_name",	[]() { return ML_CC_NAME; })
 			.def_static("compiler_version", []() { return ML_CC_VER; })
-			.def_static("configuration", []() { return ML_CONFIGURATION; })
-			.def_static("cpp_version", []() { return ML_CPP; })
-			.def_static("is_debug", []() { return ML_DEBUG; })
-			.def_static("platform_target", []() { return ML_PLATFORM_TARGET; })
-			.def_static("project_author", []() { return ML_PROJECT_AUTH; })
-			.def_static("project_date", []() { return ML_PROJECT_DATE; })
-			.def_static("project_name", []() { return ML_PROJECT_NAME; })
-			.def_static("project_time", []() { return ML_PROJECT_TIME; })
-			.def_static("project_url", []() { return ML_PROJECT_URL; })
-			.def_static("project_version", []() { return ML_PROJECT_VER; })
-			.def_static("system_name", []() { return ML_SYSTEM_NAME; });
+			.def_static("configuration",	[]() { return ML_CONFIGURATION; })
+			.def_static("cpp_version",		[]() { return ML_CPP; })
+			.def_static("is_debug",			[]() { return ML_DEBUG; })
+			.def_static("platform_target",	[]() { return ML_PLATFORM_TARGET; })
+			.def_static("project_author",	[]() { return ML_PROJECT_AUTH; })
+			.def_static("project_date",		[]() { return ML_PROJECT_DATE; })
+			.def_static("project_name",		[]() { return ML_PROJECT_NAME; })
+			.def_static("project_time",		[]() { return ML_PROJECT_TIME; })
+			.def_static("project_url",		[]() { return ML_PROJECT_URL; })
+			.def_static("project_version",	[]() { return ML_PROJECT_VER; })
+			.def_static("system_name",		[]() { return ML_SYSTEM_NAME; });
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("clear", []() { Debug::clear(); })
-			.def_static("command", [](str_t s) { ML_EventSystem.fireEvent<CommandEvent>(s.c_str()); })
-			.def_static("exit", []() { std::exit(0); })
-			.def_static("pause", []() { Debug::pause(0); })
-			.def_static("print", [](str_t s) { std::cout << s; })
-			.def_static("printf", [](str_t s, list_t const & l) { std::cout << util::format(s, l); })
-			.def_static("printl", [](str_t s) { std::cout << s << '\n'; })
-			.def_static("log", [](str_t s) { Debug::logInfo(s); })
-			.def_static("warning", [](str_t s) { Debug::logWarning(s); })
-			.def_static("error", [](str_t s) { Debug::logError(s); });
+			.def_static("clear",	[]() { Debug::clear(); })
+			.def_static("command",	[](str_t const & s) { ML_EventSystem.fireEvent<CommandEvent>(s.c_str()); })
+			.def_static("exit",		[]() { std::exit(0); })
+			.def_static("pause",	[]() { Debug::pause(0); })
+			.def_static("print",	[](str_t const & s) { std::cout << s; })
+			.def_static("printf",	[](str_t const & s, list_t const & l) { std::cout << util::format(s, l); })
+			.def_static("printl",	[](str_t const & s) { std::cout << s << '\n'; })
+			.def_static("log",		[](str_t const & s) { Debug::logInfo(s); })
+			.def_static("warning",	[](str_t const & s) { Debug::logWarning(s); })
+			.def_static("error",	[](str_t const & s) { Debug::logError(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

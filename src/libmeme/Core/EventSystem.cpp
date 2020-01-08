@@ -21,7 +21,6 @@ namespace ml
 	void EventSystem::fireEvent(Event const & value)
 	{
 		auto found{ m_listeners.equal_range(value.id()) };
-
 		for (auto it = found.first; it != found.second; it++)
 		{
 			if (it->second) { it->second->onEvent(value); }

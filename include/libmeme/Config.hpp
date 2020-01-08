@@ -7,7 +7,7 @@
 
 #define ML_PROJECT_AUTH	"Melody Gurman"
 #define ML_PROJECT_NAME	"libmeme"
-#define ML_PROJECT_VER	"0.0.1"
+#define ML_PROJECT_VER  "00.00.01"
 #define ML_PROJECT_URL	"https://www.github.com/Gurman8r/libmeme"
 #define ML_PROJECT_DATE	__DATE__
 #define ML_PROJECT_TIME	__TIME__
