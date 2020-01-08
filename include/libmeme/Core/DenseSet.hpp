@@ -178,63 +178,70 @@ namespace ml::dense
 			return (*this);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Other> inline bool binary_search(Other && u) const
+		inline self_type & operator=(initializer_type init)
 		{
-			return std::binary_search(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			self_type temp{ init };
+			swap(temp);
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> iterator_pair equal_range(Other && u)
+		template <class U> inline bool binary_search(U && u) const
 		{
-			return std::equal_range(begin(), end(), std::forward<Other>(u), compare_impl{});
-		}
-
-		template <class Other> const_iterator_pair equal_range(Other && u) const
-		{
-			return std::equal_range(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> iterator lower_bound(Other && u)
+		template <class U> iterator_pair equal_range(U && u)
 		{
-			return std::lower_bound(begin(), end(), std::forward<Other>(u), compare_impl{});
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		template <class Other> const_iterator lower_bound(Other && u) const
+		template <class U> const_iterator_pair equal_range(U && u) const
 		{
-			return std::lower_bound(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Other> iterator upper_bound(Other && u)
-		{
-			return std::upper_bound(begin(), end(), std::forward<Other>(u), compare_impl{});
-		}
-
-		template <class Other> const_iterator upper_bound(Other && u) const
-		{
-			return std::upper_bound(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> inline iterator find(Other && u)
+		template <class U> iterator lower_bound(U && u)
 		{
-			if (auto const it{ equal_range(std::forward<Other>(u)) }; it.first != it.second)
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_impl{});
+		}
+
+		template <class U> const_iterator lower_bound(U && u) const
+		{
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> iterator upper_bound(U && u)
+		{
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_impl{});
+		}
+
+		template <class U> const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
 			return end();
 		}
 
-		template <class Other> inline const_iterator find(Other && u) const
+		template <class U> inline const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(std::forward<Other>(u)) }; it.first != it.second)
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -383,61 +390,61 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> inline bool binary_search(Other && u) const
+		template <class U> inline bool binary_search(U && u) const
 		{
-			return std::binary_search(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> iterator_pair equal_range(Other && u)
+		template <class U> iterator_pair equal_range(U && u)
 		{
-			return std::equal_range(begin(), end(), std::forward<Other>(u), compare_impl{});
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		template <class Other> const_iterator_pair equal_range(Other && u) const
+		template <class U> const_iterator_pair equal_range(U && u) const
 		{
-			return std::equal_range(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Other> iterator lower_bound(Other && u)
-		{
-			return std::lower_bound(begin(), end(), std::forward<Other>(u), compare_impl{});
-		}
-
-		template <class Other> const_iterator lower_bound(Other && u) const
-		{
-			return std::lower_bound(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> iterator upper_bound(Other && u)
+		template <class U> iterator lower_bound(U && u)
 		{
-			return std::upper_bound(begin(), end(), std::forward<Other>(u), compare_impl{});
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_impl{});
 		}
 
-		template <class Other> const_iterator upper_bound(Other && u) const
+		template <class U> const_iterator lower_bound(U && u) const
 		{
-			return std::upper_bound(cbegin(), cend(), std::forward<Other>(u), compare_impl{});
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other> inline iterator find(Other && u)
+		template <class U> iterator upper_bound(U && u)
 		{
-			if (auto const it{ equal_range(std::forward<Other>(u)) }; it.first != it.second)
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_impl{});
+		}
+
+		template <class U> const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_impl{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}
 			return end();
 		}
 
-		template <class Other> inline const_iterator find(Other && u) const
+		template <class U> inline const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(std::forward<Other>(u)) }; it.first != it.second)
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
 			{
 				return it.first;
 			}

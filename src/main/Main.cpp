@@ -178,22 +178,6 @@ namespace ml
 }
 
 
-// Test
-namespace ml::dense
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Elem, class Comp, class Alloc
-	> struct basic_sorted_storage : public basic_storage<basic_storage_traits<
-		Elem, Alloc
-	>>
-	{
-		
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
 // Main
 ml::int32_t main()
 {
