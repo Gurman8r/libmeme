@@ -52,9 +52,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename ordered_map<
-			struct Trackable *, AllocationRecord *
-		>;
+		using records_t = typename ordered_map<struct Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -101,10 +99,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::type_info const & rtti() const noexcept
-		{
-			return typeid(*this);
-		}
+		inline std::type_info const & rtti() const noexcept { return typeid(*this); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
