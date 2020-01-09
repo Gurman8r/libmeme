@@ -10,7 +10,7 @@ namespace ml::dense
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// Basic Dense Container Traits
-	template <class Elem, class Alloc, class Comp
+	template <class Elem, class Alloc, class Comp = void
 	> struct basic_container_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -141,7 +141,7 @@ namespace ml::dense
 		{
 		}
 
-		~basic_container() noexcept {}
+		virtual ~basic_container() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -202,61 +202,6 @@ namespace ml::dense
 		inline iterator erase(iterator first, iterator last)
 		{
 			return m_storage.erase(first, last);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline void sort() noexcept
-		{
-			return sort(begin(), end());
-		}
-
-		inline void sort(iterator first, iterator last) noexcept
-		{
-			return std::sort(first, last, compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline bool binary_search(U && u) const
-		{
-			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline iterator_pair equal_range(U && u)
-		{
-			return std::equal_range(begin(), end(), std::forward<U>(u), compare_type{});
-		}
-
-		template <class U> inline const_iterator_pair equal_range(U && u) const
-		{
-			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline iterator lower_bound(U && u)
-		{
-			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_type{});
-		}
-
-		template <class U> inline const_iterator lower_bound(U && u) const
-		{
-			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline iterator upper_bound(U && u)
-		{
-			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_type{});
-		}
-
-		template <class U> inline const_iterator upper_bound(U && u) const
-		{
-			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

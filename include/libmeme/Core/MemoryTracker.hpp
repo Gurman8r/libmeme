@@ -83,9 +83,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Trackable * create_allocation(size_t size);
+		struct Trackable * make_allocation(size_t size);
 
-		void destroy_allocation(struct Trackable * value);
+		void free_allocation(struct Trackable * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -110,22 +110,22 @@ namespace ml
 
 		inline void * operator new(size_t size)
 		{
-			return ML_MemoryTracker.create_allocation(size);
+			return ML_MemoryTracker.make_allocation(size);
 		}
 
 		inline void * operator new[](size_t size)
 		{
-			return ML_MemoryTracker.create_allocation(size);
+			return ML_MemoryTracker.make_allocation(size);
 		}
 		
 		inline void operator delete(void * value)
 		{
-			return ML_MemoryTracker.destroy_allocation(static_cast<Trackable *>(value));
+			return ML_MemoryTracker.free_allocation(static_cast<Trackable *>(value));
 		}
 
 		inline void operator delete[](void * value)
 		{
-			return ML_MemoryTracker.destroy_allocation(static_cast<Trackable *>(value));
+			return ML_MemoryTracker.free_allocation(static_cast<Trackable *>(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

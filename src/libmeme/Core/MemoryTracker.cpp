@@ -65,7 +65,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Trackable * MemoryTracker::create_allocation(size_t size)
+	Trackable * MemoryTracker::make_allocation(size_t size)
 	{
 		return ([&, this](auto * const ptr) {
 			return m_records.insert(std::make_pair(
@@ -74,12 +74,14 @@ namespace ml
 		})(static_cast<Trackable *>(ML_IMPL_NEW(size)));
 	}
 
-	void MemoryTracker::destroy_allocation(Trackable * value)
+	void MemoryTracker::free_allocation(Trackable * value)
 	{
 		if (auto const it{ m_records.find(value) }; it != m_records.end())
 		{
 			ML_IMPL_DELETE(it->second->data());
+			
 			::delete it->second;
+			
 			m_records.erase(it);
 		}
 	}

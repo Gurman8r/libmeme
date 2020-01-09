@@ -9,9 +9,7 @@ namespace ml::dense
 
 	// Basic Dense Map Traits
 	template <class Key, class Value, class Comp, class Alloc, bool Multi
-	> struct basic_map_traits : public basic_container_traits<
-		std::pair<Key, Value>, Alloc, Comp
-	>
+	> struct basic_map_traits : public basic_container_traits<std::pair<Key, Value>, Alloc, Comp>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,31 +92,28 @@ namespace ml::dense
 		basic_ordered_map(initializer_type init)
 			: base_type{ init }
 		{
-			sort(); erase(std::unique(begin(), end(), compare_type{}), end());
+			std::sort(begin(), end(), compare_type{});
+			erase(std::unique(begin(), end(), compare_type{}), end());
 		}
 
 		template <class It> basic_ordered_map(It first, It last)
 			: base_type{ first, last }
 		{
-			sort(); erase(std::unique(begin(), end(), compare_type{}), end());
+			std::sort(begin(), end(), compare_type{});
+			erase(std::unique(begin(), end(), compare_type{}), end());
 		}
 
-		explicit basic_ordered_map(allocator_type const & alloc)
-			: base_type{ alloc }
-		{
-			sort(); erase(std::unique(begin(), end(), compare_type{}), end());
-		}
-	
 		explicit basic_ordered_map(storage_type const & value, allocator_type const & alloc = {})
 			: base_type{ value, alloc }
 		{
-			sort(); erase(std::unique(begin(), end(), compare_type{}), end());
+			std::sort(begin(), end(), compare_type{});
+			erase(std::unique(begin(), end(), compare_type{}), end());
 		}
 	
 		explicit basic_ordered_map(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(value), alloc }
 		{
-			sort();
+			std::sort(begin(), end(), compare_type{});
 			erase(std::unique(begin(), end(), compare_type{}), end());
 		}
 	
@@ -152,6 +147,49 @@ namespace ml::dense
 			self_type temp{ init };
 			swap(temp);
 			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline bool binary_search(U && u) const
+		{
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator_pair equal_range(U && u)
+		{
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator_pair equal_range(U && u) const
+		{
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator lower_bound(U && u)
+		{
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator lower_bound(U && u) const
+		{
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator upper_bound(U && u)
+		{
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -270,31 +308,25 @@ namespace ml::dense
 		basic_ordered_multimap(initializer_type init)
 			: base_type{ init }
 		{
-			sort();
+			std::sort(begin(), end(), compare_type{})
 		}
 
 		template <class It> basic_ordered_multimap(It first, It last)
 			: base_type{ first, last }
 		{
-			sort();
+			std::sort(begin(), end(), compare_type{})
 		}
 
-		explicit basic_ordered_multimap(allocator_type const & alloc)
-			: base_type{ alloc }
-		{
-			sort();
-		}
-	
 		explicit basic_ordered_multimap(storage_type const & value, allocator_type const & alloc = {})
 			: base_type{ value, alloc }
 		{
-			sort();
+			std::sort(begin(), end(), compare_type{})
 		}
 	
 		explicit basic_ordered_multimap(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(value), alloc }
 		{
-			sort();
+			std::sort(begin(), end(), compare_type{})
 		}
 	
 		basic_ordered_multimap(self_type const & other, allocator_type const & alloc = {})
@@ -331,6 +363,69 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class U> inline bool binary_search(U && u) const
+		{
+			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator_pair equal_range(U && u)
+		{
+			return std::equal_range(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator_pair equal_range(U && u) const
+		{
+			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator lower_bound(U && u)
+		{
+			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator lower_bound(U && u) const
+		{
+			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator upper_bound(U && u)
+		{
+			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_type{});
+		}
+
+		template <class U> inline const_iterator upper_bound(U && u) const
+		{
+			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U> inline iterator find(U && u)
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return end();
+		}
+
+		template <class U> inline const_iterator find(U && u) const
+		{
+			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return cend();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline iterator insert(const_reference value)
 		{
 			return m_storage.emplace(upper_bound(value), value);
@@ -347,35 +442,31 @@ namespace ml::dense
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Usings
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace impl
+	// Key Compare
+	template <
+		template <class> class Comp,
+		template <class, class> class Pair, class Key, class Val
+	> struct key_compare final
 	{
-		// Key Compare
-		template <
-			template <class> class Comp,
-			template <class, class> class Pair, class Key, class Val
-		> struct key_compare final
+		constexpr bool operator()(Key const & lhs, Pair<Key, Val> const & rhs) const
 		{
-			constexpr bool operator()(Key const & lhs, Pair<Key, Val> const & rhs) const
-			{
-				return Comp<Key>{}(lhs, rhs.first);
-			}
+			return Comp<Key>{}(lhs, rhs.first);
+		}
 
-			constexpr bool operator()(Pair<Key, Val> const & lhs, Key const & rhs) const
-			{
-				return Comp<Key>{}(lhs.first, rhs);
-			}
+		constexpr bool operator()(Pair<Key, Val> const & lhs, Key const & rhs) const
+		{
+			return Comp<Key>{}(lhs.first, rhs);
+		}
 
-			constexpr bool operator()(Pair<Key, Val> const & lhs, Pair<Key, Val> const & rhs) const
-			{
-				return Comp<Key>{}(lhs.first, rhs.first);
-			}
-		};
-	}
+		constexpr bool operator()(Pair<Key, Val> const & lhs, Pair<Key, Val> const & rhs) const
+		{
+			return Comp<Key>{}(lhs.first, rhs.first);
+		}
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -384,7 +475,7 @@ namespace ml
 	> ML_USING ordered_map = typename _ML_DENSE basic_ordered_map<
 		Key,
 		Value,
-		impl::key_compare<std::less, std::pair, Key, Value>,
+		key_compare<std::less, std::pair, Key, Value>,
 		std::allocator<std::pair<Key, Value>>
 	>;
 
@@ -393,7 +484,7 @@ namespace ml
 	> ML_USING ordered_multimap = typename _ML_DENSE basic_ordered_multimap<
 		Key,
 		Value,
-		impl::key_compare<std::less, std::pair, Key, Value>,
+		key_compare<std::less, std::pair, Key, Value>,
 		std::allocator<std::pair<Key, Value>>
 	>;
 
