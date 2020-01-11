@@ -15,32 +15,28 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Index, Size, Data };
+		enum : size_t { ID_Index, ID_Size, ID_Data };
 
-		using storage_type = typename std::tuple<
-			size_t,
-			size_t,
-			struct Trackable *
-		>;
+		using storage_type = typename std::tuple<size_t, size_t, struct Trackable *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) index() const noexcept { return std::get<Index>(m_storage); }
+		inline decltype(auto) index() const noexcept { return std::get<ID_Index>(m_storage); }
 
-		inline decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+		inline decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		inline decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
+		inline decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		friend struct MemoryTracker;
 
-		storage_type m_storage;
-
 		explicit AllocationRecord(storage_type && storage) noexcept;
 
 		~AllocationRecord() noexcept;
+
+		union { storage_type m_storage; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -52,13 +48,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using records_t = typename ordered_map<struct Trackable *, AllocationRecord *>;
+		using storage_type = typename ordered_map<struct Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline auto current() const -> size_t { return m_current; }
 
-		inline auto records() const -> records_t const & { return m_records; }
+		inline auto records() const -> storage_type const & { return m_records; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -77,7 +73,7 @@ namespace ml
 
 		size_t m_current;
 
-		records_t m_records;
+		storage_type m_records;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

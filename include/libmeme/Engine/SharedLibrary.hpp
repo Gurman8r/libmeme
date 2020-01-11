@@ -11,13 +11,16 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Functions = typename ordered_map<std::string, void *>;
+		using functions_t = typename ordered_map<std::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		SharedLibrary();
-		SharedLibrary(path_t const & path);
+		SharedLibrary() noexcept;
+		
+		explicit SharedLibrary(path_t const & path);
+		
 		SharedLibrary(SharedLibrary && copy) noexcept;
+		
 		~SharedLibrary();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,33 +31,44 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool dispose();
+		bool open(path_t const & path);
 
-		bool loadFromFile(path_t const & path);
+		bool close();
 
-		void * loadFunction(std::string const & name);
+		void * load_function(std::string const & name);
 
-		template <
-			class Ret, class ... Args
-		> inline auto invoke(std::string const & name, Args && ... args)
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Ret, class ... Args
+		> inline decltype(auto) load_function(std::string const & name)
 		{
-			auto fun{ reinterpret_cast<Ret(*)(Args...)>(loadFunction(name)) };
-			return (fun ? fun(std::forward<Args>(args)...) : nullptr);
+			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
+		}
+
+		template <class Ret, class ... Args
+		> inline decltype(auto) call_function(std::string const & name, Args && ... args)
+		{
+			return std::invoke(load_function<Ret, Args...>(name), std::forward<Args>(args)...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const { return m_instance; }
+		inline operator bool() const noexcept { return good(); }
 
-		inline auto instance() const -> void * const & { return m_instance; }
+		inline auto address() const noexcept { return std::addressof(m_instance); }
 
-		inline auto functions() const -> Functions const & { return m_functions; }
+		inline bool good() const noexcept { return m_instance; }
+
+		inline auto instance() const noexcept -> void * const & { return m_instance; }
+
+		inline auto functions() const noexcept -> functions_t const & { return m_functions; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		void * m_instance;
-		Functions m_functions;
+
+		functions_t m_functions;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

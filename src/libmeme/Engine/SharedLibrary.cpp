@@ -3,20 +3,15 @@
 
 #ifdef ML_SYSTEM_WINDOWS
 #	include <Windows.h>
-#	define ML_LOAD_LIB(file) LoadLibraryA(file)
-#	define ML_FREE_LIB(inst) FreeLibrary(static_cast<HINSTANCE>(inst))
-#	define ML_LOAD_FUN(inst, name) GetProcAddress(static_cast<HINSTANCE>(inst), name)
 #else
-#	define ML_LOAD_LIB(file) dlopen(file, RTLD_LOCAL | RTLD_LAZY)
-#	define ML_FREE_LIB(inst) (inst && !(inst = nullptr))
-#	define ML_LOAD_FUN(inst, name) dlsym(inst, name)
+// https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #endif
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	SharedLibrary::SharedLibrary()
+	SharedLibrary::SharedLibrary() noexcept
 		: m_instance{ nullptr }
 		, m_functions{}
 	{
@@ -25,7 +20,7 @@ namespace ml
 	SharedLibrary::SharedLibrary(path_t const & path)
 		: SharedLibrary{}
 	{
-		loadFromFile(path);
+		open(path);
 	}
 
 	SharedLibrary::SharedLibrary(SharedLibrary && copy) noexcept
@@ -36,7 +31,7 @@ namespace ml
 
 	SharedLibrary::~SharedLibrary()
 	{
-		dispose();
+		close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -59,32 +54,51 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool SharedLibrary::dispose()
+	bool SharedLibrary::open(path_t const & path)
 	{
-		m_functions.clear();
-		
-		return ML_FREE_LIB(m_instance);
+		if (!good())
+		{
+#ifdef ML_SYSTEM_WINDOWS
+			return (m_instance = ::LoadLibraryA(path.string().c_str()));
+#else
+			return (m_instance = nullptr);
+#endif
+		}
+		return false;
 	}
 
-	bool SharedLibrary::loadFromFile(path_t const & path)
+	bool SharedLibrary::close()
 	{
-		return (m_instance = ML_LOAD_LIB(path.string().c_str()));
+		if (good())
+		{
+			m_functions.clear();
+
+#ifdef ML_SYSTEM_WINDOWS
+			return ::FreeLibrary(static_cast<HINSTANCE>(m_instance));
+#else
+			return (m_instance = nullptr);
+#endif
+		}
+		return false;
 	}
 
-	void * SharedLibrary::loadFunction(std::string const & name)
+	void * SharedLibrary::load_function(std::string const & name)
 	{
-		if (auto it{ m_functions.find(name) }; it != m_functions.end())
+		if (auto const it{ m_functions.find(name) }; it != m_functions.end())
 		{
 			return it->second;
 		}
-		else if (void * ptr{ ML_LOAD_FUN(m_instance, name.c_str()) })
+		else if (m_instance)
 		{
-			return m_functions.insert(std::make_pair(name, ptr)).first->second;
+			return m_functions.insert(std::make_pair(name,
+#ifdef ML_SYSTEM_WINDOWS
+				::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
+#else
+				nullptr
+#endif
+			)).first->second;
 		}
-		else
-		{
-			return nullptr;
-		}
+		return nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

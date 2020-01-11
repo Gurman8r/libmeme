@@ -5,19 +5,15 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
-
 	template <class ... T> struct limits;
 
 	template <> struct limits<> final { limits() = delete; };
-
-	/* * * * * * * * * * * * * * * * * * * * */
 
 	template <class T> struct limits<T> final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type = typename detail::root_t<T>;
+		using type = typename T;
 
 		using self_type = typename limits<type>;
 
@@ -32,8 +28,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_LIMITS_HPP_

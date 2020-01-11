@@ -9,22 +9,23 @@ namespace ml::dense
 
 	// Basic Dense Map Traits
 	template <class Key, class Value, class Comp, class Alloc, bool Multi
-	> struct basic_map_traits : public basic_container_traits<std::pair<Key, Value>, Alloc, Comp>
+	> struct basic_map_traits : public basic_container_traits<std::pair<Key, Value>, Alloc>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type = typename basic_container_traits<std::pair<Key, Value>, Alloc, Comp>;
+		using base_type = typename basic_container_traits<std::pair<Key, Value>, Alloc>;
 		
 		using key_type = typename Key;
 		
 		using mapped_type = typename Value;
+
+		using compare_type = typename Comp;
 		
 		static constexpr bool multi{ Multi };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using value_type				= typename base_type::value_type;
-		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
 		using pointer					= typename base_type::pointer;
@@ -64,8 +65,8 @@ namespace ml::dense
 		using base_type					= typename basic_container<traits_type>;
 		using key_type					= typename traits_type::key_type;
 		using mapped_type				= typename traits_type::mapped_type;
+		using compare_type				= typename traits_type::compare_type;
 		using value_type				= typename base_type::value_type;
-		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
 		using pointer					= typename base_type::pointer;
@@ -151,7 +152,7 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline bool binary_search(U && u) const
+		template <class U> inline bool contains(U && u) const
 		{
 			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
 		}
@@ -196,20 +197,14 @@ namespace ml::dense
 
 		template <class U> inline iterator find(U && u)
 		{
-			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
-			{
-				return it.first;
-			}
-			return end();
+			auto const it{ equal_range(std::forward<U>(u)) };
+			return (it.first != it.second) ? it.first : end();
 		}
 
 		template <class U> inline const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
-			{
-				return it.first;
-			}
-			return cend();
+			auto const it{ equal_range(std::forward<U>(u)) };
+			return (it.first != it.second) ? it.first : cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -280,8 +275,8 @@ namespace ml::dense
 		using base_type					= typename basic_container<traits_type>;
 		using key_type					= typename traits_type::key_type;
 		using mapped_type				= typename traits_type::mapped_type;
+		using compare_type				= typename traits_type::compare_type;
 		using value_type				= typename base_type::value_type;
-		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
 		using pointer					= typename base_type::pointer;
@@ -308,25 +303,25 @@ namespace ml::dense
 		basic_ordered_multimap(initializer_type init)
 			: base_type{ init }
 		{
-			std::sort(begin(), end(), compare_type{})
+			std::sort(begin(), end(), compare_type{});
 		}
 
 		template <class It> basic_ordered_multimap(It first, It last)
 			: base_type{ first, last }
 		{
-			std::sort(begin(), end(), compare_type{})
+			std::sort(begin(), end(), compare_type{});
 		}
 
 		explicit basic_ordered_multimap(storage_type const & value, allocator_type const & alloc = {})
 			: base_type{ value, alloc }
 		{
-			std::sort(begin(), end(), compare_type{})
+			std::sort(begin(), end(), compare_type{});
 		}
 	
 		explicit basic_ordered_multimap(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(value), alloc }
 		{
-			std::sort(begin(), end(), compare_type{})
+			std::sort(begin(), end(), compare_type{});
 		}
 	
 		basic_ordered_multimap(self_type const & other, allocator_type const & alloc = {})
@@ -363,7 +358,7 @@ namespace ml::dense
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline bool binary_search(U && u) const
+		template <class U> inline bool contains(U && u) const
 		{
 			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
 		}
@@ -408,20 +403,14 @@ namespace ml::dense
 
 		template <class U> inline iterator find(U && u)
 		{
-			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
-			{
-				return it.first;
-			}
-			return end();
+			auto const it{ equal_range(std::forward<U>(u)) };
+			return (it.first != it.second) ? it.first : end();
 		}
 
 		template <class U> inline const_iterator find(U && u) const
 		{
-			if (auto const it{ equal_range(std::forward<U>(u)) }; it.first != it.second)
-			{
-				return it.first;
-			}
-			return cend();
+			auto const it{ equal_range(std::forward<U>(u)) };
+			return (it.first != it.second) ? it.first : cend();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -450,7 +439,7 @@ namespace ml
 	template <
 		template <class> class Comp,
 		template <class, class> class Pair, class Key, class Val
-	> struct key_compare final
+	> struct key_compare
 	{
 		constexpr bool operator()(Key const & lhs, Pair<Key, Val> const & rhs) const
 		{

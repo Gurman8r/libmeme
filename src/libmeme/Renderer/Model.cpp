@@ -102,24 +102,27 @@ namespace ml
 	{
 		if (!m_storage.empty()) { m_storage.clear(); }
 
+		// Read File
 		Assimp::Importer ai;
 		if (aiScene const * scene{ ai.ReadFile(path.string().c_str(), flags) })
 		{
-			// Meshes
+			// Iterate Meshes
 			for (aiMesh ** m = &scene->mMeshes[0]; m != &scene->mMeshes[scene->mNumMeshes]; m++)
 			{
+				// Vertices
 				std::vector<Vertex> verts;
 
-				// Faces
+				// Iterate Faces
 				for (aiFace * f = &(*m)->mFaces[0]; f != &(*m)->mFaces[(*m)->mNumFaces]; f++)
 				{
-					// Indices
+					// Iterate Indices
 					for (uint32_t * i = &f->mIndices[0]; i != &f->mIndices[f->mNumIndices]; i++)
 					{
 						auto const * vp{ (*m)->mVertices ? &(*m)->mVertices[*i] : nullptr };
 						auto const * vn{ (*m)->mNormals ? &(*m)->mNormals[*i] : nullptr };
 						auto const * uv{ (*m)->HasTextureCoords(0) ? &(*m)->mTextureCoords[0][*i] : nullptr };
 
+						// Make Vertex
 						verts.emplace_back(make_vertex(
 							vp ? vec3{ vp->x, vp->y, vp->z } : vec3::zero(),
 							vn ? vec3{ vn->x, vn->y, vn->z } : vec3::one(),
@@ -128,6 +131,7 @@ namespace ml
 					}
 				}
 
+				// Make Mesh
 				m_storage.emplace_back(make_mesh(verts));
 			}
 		}

@@ -10,134 +10,134 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size matrix
-	template <class T, size_t X, size_t Y> struct Matrix
+	template <class T, size_t Width, size_t Height> struct Matrix
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(0 < (X * Y), "size negative or zero");
+		static_assert(0 < (Width * Height), "size negative or zero");
 		
 		static_assert(std::is_trivial_v<T>, "type must be trivial");
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Cols = X, Rows = Y, Size = Cols * Rows };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using value_type		= typename T;
-		using self_type			= typename Matrix<value_type, Cols, Rows>;
-		using base_type			= typename Array<value_type, Size>;
-		using pointer			= typename base_type::pointer;
-		using reference			= typename base_type::reference;
-		using const_pointer		= typename base_type::const_pointer;
-		using const_reference	= typename base_type::const_reference;
-		using iterator			= typename base_type::iterator;
-		using const_iterator	= typename base_type::const_iterator;
+		using self_type			= typename Matrix<value_type, Width, Height>;
+		using storage_type		= typename Array<value_type, Width * Height>;
+		using size_type			= typename storage_type::size_type;
+		using difference_type	= typename storage_type::difference_type;
+		using pointer			= typename storage_type::pointer;
+		using reference			= typename storage_type::reference;
+		using const_pointer		= typename storage_type::const_pointer;
+		using const_reference	= typename storage_type::const_reference;
+		using iterator			= typename storage_type::iterator;
+		using const_iterator	= typename storage_type::const_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		base_type m_data; // aggregate initializer
+		storage_type m_data; // aggregate initializer
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t cols()		{ return self_type::Cols; }
-		static constexpr size_t height()	{ return rows(); }
-		static constexpr size_t rows()		{ return self_type::Rows; }
-		static constexpr size_t size()		{ return self_type::Size; }
-		static constexpr size_t width()		{ return cols(); }
+		constexpr operator storage_type & () noexcept { return m_data; }
+
+		constexpr operator storage_type const & () const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_t i)			-> reference		{ return m_data.at(i); }
-		constexpr auto at(size_t i) const	-> const_reference	{ return m_data.at(i); }
-		constexpr auto back()				-> reference		{ return m_data.back(); }
-		constexpr auto back()		const	-> const_reference	{ return m_data.back(); }
-		constexpr auto begin()				-> iterator			{ return m_data.begin(); }
-		constexpr auto begin()		const	-> const_iterator	{ return m_data.begin(); }
-		constexpr auto cbegin()		const	-> const_iterator	{ return m_data.cbegin(); }
-		constexpr auto cend()		const	-> const_iterator	{ return m_data.cend(); }
-		constexpr auto data()				-> pointer			{ return m_data.data(); }
-		constexpr auto data()		const	-> const_pointer	{ return m_data.data(); }
-		constexpr auto end()				-> iterator			{ return m_data.end(); }
-		constexpr auto end()		const	-> const_iterator	{ return m_data.end(); }
-		constexpr auto front()				-> reference		{ return m_data.front(); }
-		constexpr auto front()		const	-> const_reference	{ return m_data.front(); }
-		constexpr auto hash()		const	-> hash_t			{ return m_data.hash(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr reference operator[](size_t i)
+		template <template <class, size_t, size_t> class M,
+			class U, size_t W, size_t H,
+			class = std::enable_if_t<!std::is_same_v<M<U, W, H>, self_type>>
+		> constexpr operator M<U, W, H>() const noexcept
 		{
-			return m_data[i];
-		}
-
-		constexpr const_reference operator[](size_t i) const
-		{ 
-			return m_data[i];
-		}
-
-		constexpr operator base_type &()
-		{
-			return m_data;
-		}
-
-		constexpr operator base_type const &() const 
-		{
-			return m_data; 
-		}
-
-		template <class U> constexpr operator std::array<U, Size>() const
-		{ 
-			return (std::array<U, Size>)(base_type)(*this);
-		}
-
-		template <
-			template <class, size_t, size_t> class M, class U, size_t W, size_t H
-		> constexpr operator M<U, W, H>() const
-		{
-			M<U, W, H> temp { 0 };
+			auto temp{ M<U, W, H>::zero() };
 			for (size_t i = 0; i < temp.size(); i++)
 			{
-				size_t const x{ i % temp.width() };
-				size_t const y { i / temp.width() };
-				temp[i] = ((y < Rows && x < Cols)
-					? static_cast<U>((*this)[y * Cols + x]) 
-					: static_cast<U>(0)
-				);
+				size_t const x{ i % temp.width() }, y{ i / temp.width() };
+
+				temp[i] = (y < Height && x < Width) ? (U)at(y * Width + x) : (U)0;
 			}
 			return temp;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr self_type zero()
+		constexpr reference operator[](size_t const i) { return m_data[i]; }
+
+		constexpr const_reference operator[](size_t const i) const { return m_data[i]; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto at(size_t const i) -> reference { return m_data.at(i); }
+		
+		constexpr auto at(size_t const i) const -> const_reference { return m_data.at(i); }
+		
+		constexpr auto back() noexcept -> reference { return m_data.back(); }
+		
+		constexpr auto back() const noexcept -> const_reference { return m_data.back(); }
+		
+		constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
+		
+		constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
+		
+		constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
+		
+		constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+
+		constexpr auto cols() const noexcept -> size_t { return Width; }
+		
+		constexpr auto data() noexcept -> pointer { return m_data.data(); }
+		
+		constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+
+		constexpr bool empty() const noexcept { return false; }
+		
+		constexpr auto end() noexcept -> iterator { return m_data.end(); }
+		
+		constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
+		
+		constexpr auto front() noexcept -> reference { return m_data.front(); }
+		
+		constexpr auto front() const noexcept -> const_reference { return m_data.front(); }
+
+		constexpr auto height() const noexcept { return Height; }
+
+		constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
+
+		constexpr auto rows() const noexcept -> size_t { return Height; }
+
+		constexpr auto size() const noexcept -> size_t { return m_data.size(); }
+
+		constexpr auto width() const noexcept -> size_t { return Width; }
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr self_type zero() noexcept
 		{
-			return self_type { 0 };
+			return self_type{ 0 };
 		}
 
-		static constexpr self_type one()
+		static constexpr self_type one() noexcept
 		{
-			self_type temp { 0 };
-			for (auto & elem : temp)  { elem = static_cast<value_type>(1); }
+			auto temp{ zero() };
+			for (auto & elem : temp) { elem = static_cast<value_type>(1); }
 			return temp;
 		}
 
-		static constexpr self_type fill(value_type value)
+		static constexpr self_type fill(value_type value) noexcept
 		{
-			self_type temp { 0 };
+			auto temp{ zero() };
 			for (auto & elem : temp) { temp = value; }
 			return temp;
 		}
 
-		static constexpr self_type identity()
+		static constexpr self_type identity() noexcept
 		{
-			self_type temp { 0 };
+			auto temp{ zero() };
 			for (size_t i = 0; i < temp.size(); i++)
 			{
-				temp[i] = (((i / temp.width()) == (i % temp.width())) 
-					? static_cast<value_type>(1) 
-					: static_cast<value_type>(0)
-				);
+				temp[i] = ((i / temp.width()) == (i % temp.width()))
+					? static_cast<value_type>(1)
+					: static_cast<value_type>(0);
 			}
 			return temp;
 		}
@@ -154,8 +154,8 @@ namespace ml
 {
 	// MATRIX NxN
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_T_(class T, size_t N) tmatn = Matrix<T, N, N>;
-	ML_USING_T_(class T, size_t N) tvecn = Matrix<T, N, 1>;
+	ML_USING_VA(class T, size_t N) tmatn = Matrix<T, N, N>;
+	ML_USING_VA(class T, size_t N) tvecn = Matrix<T, N, 1>;
 
 
 	// MATRIX 2x2
@@ -238,19 +238,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class T, size_t X, size_t Y
+	template <class T, size_t X, size_t Y
 	> inline ML_SERIALIZE(std::ostream & out, Matrix<T, X, Y> const & value)
 	{
 		for (auto const & elem : value)
 		{
-			out << elem << " ";
+			out << elem << ' ';
 		}
 		return out;
 	}
 
-	template <
-		class T, size_t X, size_t Y
+	template <class T, size_t X, size_t Y
 	> inline ML_DESERIALIZE(std::istream & in, Matrix<T, X, Y> & value)
 	{
 		for (auto & elem : value)
@@ -262,19 +260,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t X, size_t Y
+	template <class Tx, class Ty, size_t X, size_t Y
 	> constexpr bool operator==(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
 	{
 		return (lhs.m_data == rhs.m_data);
 	}
 
-	template <
-		class Tx, class Ty, size_t X, size_t Y
+	template <class Tx, class Ty, size_t X, size_t Y
 	> constexpr bool operator!=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
 	{
 		return (lhs.m_data != rhs.m_data);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
 		class Tx, class Ty, size_t X, size_t Y
@@ -283,22 +281,19 @@ namespace ml
 		return (lhs.m_data < rhs.m_data);
 	}
 
-	template <
-		class Tx, class Ty, size_t X, size_t Y
+	template <class Tx, class Ty, size_t X, size_t Y
 	> constexpr bool operator<=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
 	{
 		return (lhs.m_data <= rhs.m_data);
 	}
 
-	template <
-		class Tx, class Ty, size_t X, size_t Y
+	template <class Tx, class Ty, size_t X, size_t Y
 	> constexpr bool operator>(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
 	{
 		return (lhs.m_data > rhs.m_data);
 	}
 
-	template <
-		class Tx, class Ty, size_t X, size_t Y
+	template <class Tx, class Ty, size_t X, size_t Y
 	> constexpr bool operator>=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
 	{
 		return (lhs.m_data >= rhs.m_data);
@@ -306,8 +301,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator+=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -318,8 +312,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator-=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -330,8 +323,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator*=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -342,8 +334,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator/=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -356,50 +347,45 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator+(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp += rhs;
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator-(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp -= rhs;
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator*(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp *= rhs;
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator/(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp /= rhs;
 		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator+=(tvecn<Tx, N> & lhs, Ty const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -410,8 +396,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator-=(tvecn<Tx, N> & lhs, Ty const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -422,8 +407,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator*=(tvecn<Tx, N> & lhs, Ty const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -434,8 +418,7 @@ namespace ml
 		return lhs;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator/=(tvecn<Tx, N> & lhs, Ty const & rhs)
 		-> tvecn<Tx, N> &
 	{
@@ -453,53 +436,48 @@ namespace ml
 	> constexpr auto operator+(tvecn<Tx, N> const & lhs, Ty const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp += static_cast<Tx>(rhs);
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator-(tvecn<Tx, N> const & lhs, Ty const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp -= static_cast<Tx>(rhs);
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator*(tvecn<Tx, N> const & lhs, Ty const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp *= static_cast<Tx>(rhs);
 		return temp;
 	}
 
-	template <
-		class Tx, class Ty, size_t N
+	template <class Tx, class Ty, size_t N
 	> constexpr auto operator/(tvecn<Tx, N> const & lhs, Ty const & rhs)
 		-> tvecn<Tx, N>
 	{
-		tvecn<Tx, N> temp { lhs };
+		tvecn<Tx, N> temp{ lhs };
 		temp /= static_cast<Tx>(rhs);
 		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class T,  size_t X, size_t Y
+	template <class T,  size_t X, size_t Y
 	> constexpr auto operator-(Matrix<T, X, Y> const & lhs)
 		-> Matrix<T, X, Y>
 	{
 		return (lhs * static_cast<T>(-1));
 	}
 
-	template <
-		class T,  size_t X, size_t Y
+	template <class T,  size_t X, size_t Y
 	> constexpr auto operator+(Matrix<T, X, Y> const & lhs)
 		-> Matrix<T, X, Y>
 	{

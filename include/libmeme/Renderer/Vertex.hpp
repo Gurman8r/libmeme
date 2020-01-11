@@ -11,9 +11,9 @@ namespace ml
 
 		static constexpr size_t Size{ 8 };
 
-		using storage_t = typename Array<float_t, Size>;
+		using storage_type = typename Array<float_t, Size>;
 
-		storage_t m_storage{ 0 };
+		storage_type m_storage{ 0 };
 
 		constexpr explicit Vertex(vec3 const & p, vec3 const & n, vec2 const & t) : m_storage{
 			p[0], p[1], p[2], n[0], n[1], n[2], t[0], t[1]
@@ -30,22 +30,49 @@ namespace ml
 			}
 		}
 
+		constexpr Vertex(storage_type const & storage)
+			: m_storage{ storage }
+		{
+		}
+
+		constexpr Vertex(storage_type && storage) noexcept
+			: m_storage{ std::move(storage) }
+		{
+		}
+
 		constexpr Vertex(Vertex const & other)
 			: m_storage{ other.m_storage }
 		{
 		}
 
-		constexpr Vertex(storage_t const & storage)
-			: m_storage{ storage }
+		constexpr Vertex(Vertex && other) noexcept
+			: m_storage{}
 		{
+			swap(std::move(other));
 		}
 
-		constexpr Vertex(storage_t && storage) noexcept
-			: m_storage{ std::move(storage) }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Vertex & operator=(Vertex const & other)
 		{
+			Vertex temp{ other };
+			swap(temp);
+			return (*this);
 		}
 
-		constexpr Vertex() noexcept = default;
+		Vertex & operator=(Vertex && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
+
+		constexpr void swap(Vertex & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				alg::swap(m_storage, other.m_storage);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -105,7 +132,7 @@ namespace ml
 		return Vertex{ std::move(p), std::move(n), std::move(t) };
 	}
 
-	static constexpr auto make_vertex(Vertex::storage_t && s)
+	static constexpr auto make_vertex(Vertex::storage_type && s)
 	{
 		return Vertex{ std::move(s) };
 	}

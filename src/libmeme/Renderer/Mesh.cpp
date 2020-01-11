@@ -94,11 +94,11 @@ namespace ml
 	{
 		if (!vertices.empty() && !indices.empty())
 		{
-			if (ML_BIND(VertexArrayObject, vao().create(GL::Triangles)))
+			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
 			{
-				if (ML_BIND(VertexBufferObject, vbo().create(GL::StaticDraw)))
+				if (ML_BIND(VertexBufferObject, vbo().generate(GL::StaticDraw)))
 				{
-					if (ML_BIND(IndexBufferObject, ibo().create(GL::StaticDraw, GL::UnsignedInt)))
+					if (ML_BIND(IndexBufferObject, ibo().generate(GL::StaticDraw, GL::UnsignedInt)))
 					{
 						vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
 
@@ -118,9 +118,9 @@ namespace ml
 	{
 		if (!vertices.empty())
 		{
-			if (ML_BIND(VertexArrayObject, vao().create(GL::Triangles)))
+			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
 			{
-				if (ML_BIND(VertexBufferObject, vbo().create(GL::StaticDraw)))
+				if (ML_BIND(VertexBufferObject, vbo().generate(GL::StaticDraw)))
 				{
 					vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
 

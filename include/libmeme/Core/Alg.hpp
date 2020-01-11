@@ -322,8 +322,7 @@ namespace ml::alg
 	}
 
 	template <
-		template <class, size_t, size_t> class M,
-		class T
+		template <class, size_t, size_t> class M, class T
 	> static constexpr M<T, 2, 1> scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
 	{
 		const M<T, 2, 1>

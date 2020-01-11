@@ -35,7 +35,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static GLFWimage const & map_glfw_image(size_t w, size_t h, byte_t const * pixels)
+	static GLFWimage const & make_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
 		static ordered_map<byte_t const *, GLFWimage> cache {};
 		auto it { cache.find(pixels) };
@@ -274,7 +274,7 @@ namespace ml
 
 	Window & Window::swapBuffers()
 	{
-		if (m_window)
+		if (m_window && getStyle().vertical_sync())
 		{
 			glfwSwapBuffers(static_cast<GLFWwindow *>(m_window));
 		}
@@ -343,7 +343,7 @@ namespace ml
 		if (m_window)
 		{
 			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window),
-				1, &map_glfw_image(w, h, pixels)
+				1, &make_glfw_image(w, h, pixels)
 			);
 		}
 		return (*this);
@@ -511,7 +511,7 @@ namespace ml
 
 	void * Window::createCustomCursor(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
-		return glfwCreateCursor(&map_glfw_image(w, h, pixels), w, h);
+		return glfwCreateCursor(&make_glfw_image(w, h, pixels), w, h);
 	}
 
 	void * Window::createStandardCursor(Cursor::Shape value)

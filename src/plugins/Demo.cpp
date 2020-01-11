@@ -247,7 +247,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw_texture_preview(Texture const & value, vec2 maxSize = { 512, 512 })
+		static void draw_texture_preview(Texture const & value, vec2 const & maxSize = { 512, 512 })
 		{
 			auto & io{ ImGui::GetIO() };
 			void * const tex_id{ value.address() };
@@ -257,8 +257,7 @@ namespace ml
 			ImGui::Text("ID: %u", value.handle());
 			ImGui::Text("%.0fx%.0f (%ux%u)", tex_w, tex_h, value.width(), value.height());
 			auto const pos{ ImGui::GetCursorScreenPos() };
-			ImGui::Image(
-				tex_id,
+			ImGui::Image(tex_id,
 				{ tex_w, tex_h },
 				{ 0, 0 },
 				{ 1, 1 },
@@ -282,8 +281,7 @@ namespace ml
 
 				ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
 				ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
-				ImGui::Image(
-					tex_id,
+				ImGui::Image(tex_id,
 					{ region_size * region_zoom, region_size * region_zoom },
 					{ region_x / tex_w, region_y / tex_h },
 					{ (region_x + region_size) / tex_w, (region_y + region_size) / tex_h },

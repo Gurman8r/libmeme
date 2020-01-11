@@ -43,7 +43,7 @@ namespace ml
 		int32_t const argc;
 		C_String const * argv;
 
-		constexpr EnterEvent(int32_t argc, C_String const * argv) noexcept
+		constexpr EnterEvent(int32_t const argc, C_String const * argv) noexcept
 			: argc{ argc }
 			, argv{ argv }
 		{

@@ -21,24 +21,26 @@ namespace ml
 	{
 		friend struct Singleton<PerformanceTracker>;
 
+		friend struct ScopeTimer;
+
 		std::vector<std::pair<C_String, Duration>> m_curr, m_prev;
 		
 		PerformanceTracker();
 		
 		~PerformanceTracker();
 
-	public:
-		inline void end_frame()
-		{
-			m_prev.assign(m_curr.begin(), m_curr.end());
-
-			m_curr.clear();
-		}
-
-		template <class ... Args>
-		inline decltype(auto) push_trace(Args && ... args)
+		template <class ... Args
+		> inline decltype(auto) push_trace(Args && ... args)
 		{
 			return m_curr.emplace_back(std::make_pair(std::forward<Args>(args)...));
+		}
+
+	public:
+		inline void swap()
+		{
+			m_prev.swap(m_curr);
+
+			m_curr.clear();
 		}
 
 		inline auto const & previous() const

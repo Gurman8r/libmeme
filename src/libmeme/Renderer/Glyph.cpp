@@ -5,10 +5,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Glyph::Glyph() : Glyph{ std::make_tuple(
-		make_texture(GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated),
+	Glyph::Glyph() : Glyph{ std::make_tuple(make_texture(
+		GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated),
 		FloatRect::zero(),
-		0
+		0U
 	) }
 	{
 	}
@@ -36,7 +36,7 @@ namespace ml
 
 	Glyph::~Glyph()
 	{
-		std::get<Tex>(m_storage).destroy();
+		texture().destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -5,17 +5,11 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... T> struct pi;
-
-	template <> struct pi<> final { pi() = delete; };
-
-	template <class T> struct pi<T> final
+	template <class T> struct pi final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type = typename detail::root_t<T>;
+		using type = typename T;
 
 		static constexpr auto value		{ static_cast<type>(3.14159265358979323846264338327L) };
 		static constexpr auto two		{ value * cast<type>::two };
@@ -31,8 +25,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_PI_HPP_

@@ -46,7 +46,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Mode };
+		enum : size_t { ID_Mode };
 
 		using storage_t = typename std::tuple<
 			uint32_t
@@ -106,19 +106,19 @@ namespace ml
 		
 		static void bind(VertexArrayObject const * value);
 
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		VertexArrayObject & create(uint32_t mode);
+		VertexArrayObject & generate(uint32_t mode);
 
 		VertexArrayObject & destroy();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) mode() const noexcept { return std::get<Mode>(m_storage); }
+		constexpr decltype(auto) mode() const noexcept { return std::get<ID_Mode>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -134,7 +134,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Usage, Data, Size, Count, Offset };
+		enum : size_t { ID_Usage, ID_Data, ID_Size, ID_Count, ID_Offset };
 
 		using storage_t = typename std::tuple<
 			uint32_t, buffer_t, uint32_t, uint32_t, uint32_t
@@ -194,13 +194,13 @@ namespace ml
 		
 		static void bind(VertexBufferObject const * value);
 
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		VertexBufferObject & create(uint32_t usage);
+		VertexBufferObject & generate(uint32_t usage);
 
 		VertexBufferObject & destroy();
 
@@ -210,15 +210,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) usage() const noexcept { return std::get<Usage>(m_storage); }
+		constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
 		
-		constexpr decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
+		constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 		
-		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) count() const noexcept { return std::get<Count>(m_storage); }
+		constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
 
-		constexpr decltype(auto) offset() const noexcept { return std::get<Offset>(m_storage); }
+		constexpr decltype(auto) offset() const noexcept { return std::get<ID_Offset>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -234,7 +234,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Usage, Type, Data, Count };
+		enum : size_t { ID_Usage, ID_Type, ID_Data, ID_Count };
 
 		using storage_t = typename std::tuple<
 			uint32_t, uint32_t, buffer_t, uint32_t
@@ -294,15 +294,15 @@ namespace ml
 		
 		static void bind(IndexBufferObject const * value);
 
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		IndexBufferObject & create(uint32_t usage, uint32_t type);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		IndexBufferObject & generate(uint32_t usage, uint32_t type);
 
 		IndexBufferObject & destroy();
 
@@ -310,13 +310,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) usage() const noexcept { return std::get<Usage>(m_storage); }
+		constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
 
-		constexpr decltype(auto) type() const noexcept { return std::get<Type>(m_storage); }
+		constexpr decltype(auto) type() const noexcept { return std::get<ID_Type>(m_storage); }
 		
-		constexpr decltype(auto) data() const noexcept { return std::get<Data>(m_storage); }
+		constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 		
-		constexpr decltype(auto) count() const noexcept { return std::get<Count>(m_storage); }
+		constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -343,7 +343,7 @@ namespace ml
 			uint32_t	// level
 		>;
 
-		enum : size_t { Size, BufferID, TextureID };
+		enum : size_t { ID_Size, ID_Buffer, ID_Texture };
 		
 		using storage_t = typename std::tuple<
 			vec2, BufAttachment, TexAttachment
@@ -403,13 +403,13 @@ namespace ml
 		
 		static void bind(FrameBufferObject const * value);
 		
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		FrameBufferObject & create(vec2 const & size);
+		FrameBufferObject & generate(vec2 const & size);
 
 		FrameBufferObject & destroy();
 
@@ -419,15 +419,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) buffer() const noexcept { return std::get<BufferID>(m_storage); }
+		constexpr decltype(auto) buffer() const noexcept { return std::get<ID_Buffer>(m_storage); }
 
 		constexpr decltype(auto) bufferAttachment() const noexcept { return buffer().first; }
 
 		constexpr decltype(auto) bufferHandle() const noexcept { return buffer().second; }
 
-		constexpr decltype(auto) texture() const noexcept { return std::get<TextureID>(m_storage); }
+		constexpr decltype(auto) texture() const noexcept { return std::get<ID_Texture>(m_storage); }
 
 		constexpr decltype(auto) textureAttachment() const noexcept { return std::get<0>(texture()); }
 
@@ -449,7 +449,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Size, Format };
+		enum : size_t { ID_Size, ID_Format };
 
 		using storage_t = typename std::tuple<
 			vec2i, uint32_t, uint32_t
@@ -509,13 +509,13 @@ namespace ml
 
 		static void bind(RenderBufferObject const * value);
 
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderBufferObject & create(vec2i const & size);
+		RenderBufferObject & generate(vec2i const & size);
 
 		RenderBufferObject & destroy();
 
@@ -523,9 +523,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) size() const noexcept { return std::get<Size>(m_storage); }
+		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) format() const noexcept { return std::get<Format>(m_storage); }
+		constexpr decltype(auto) format() const noexcept { return std::get<ID_Format>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -537,29 +537,37 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_USING VAO = typename VertexArrayObject;
+	ML_USING VBO = typename VertexBufferObject;
+	ML_USING IBO = typename IndexBufferObject;
+	ML_USING FBO = typename FrameBufferObject;
+	ML_USING RBO = typename RenderBufferObject;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class ... Args> static constexpr auto make_vao(Args && ... args)
 	{
-		return VertexArrayObject{ std::forward<Args>(args)... };
+		return VAO{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args> static constexpr auto make_vbo(Args && ... args)
 	{
-		return VertexBufferObject{ std::forward<Args>(args)... };
+		return VBO{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args> static constexpr auto make_ibo(Args && ... args)
 	{
-		return IndexBufferObject{ std::forward<Args>(args)... };
+		return IBO{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args> static constexpr auto make_fbo(Args && ... args)
 	{
-		return FrameBufferObject{ std::forward<Args>(args)... };
+		return FBO{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args> static constexpr auto make_rbo(Args && ... args)
 	{
-		return RenderBufferObject{ std::forward<Args>(args)... };
+		return RBO{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

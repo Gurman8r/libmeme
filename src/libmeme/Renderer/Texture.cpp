@@ -57,16 +57,14 @@ namespace ml
 		loadFromImage(image);
 	}
 
-	Texture::Texture(Texture const & other)
-		: m_handle			{ NULL }
-		, m_sampler			{ other.m_sampler }
-		, m_level			{ other.m_level }
-		, m_internalFormat	{ other.m_internalFormat }
-		, m_colorFormat		{ other.m_colorFormat }
-		, m_pixelType		{ other.m_pixelType }
-		, m_size			{ 0, 0 }
-		, m_realSize		{ 0, 0 }
-		, m_flags			{ other.m_flags }
+	Texture::Texture(Texture const & other) : Texture{
+		other.m_sampler,
+		other.m_level,
+		other.m_internalFormat,
+		other.m_colorFormat,
+		other.m_pixelType,
+		other.m_flags
+	}
 	{
 		loadFromTexture(other);
 	}

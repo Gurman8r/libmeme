@@ -8,7 +8,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_HAS_CXX14)
-#	include <array>
 #	include <cassert>
 #	include <cctype>
 #	include <chrono>
@@ -21,7 +20,6 @@
 #	include <iostream>
 #	include <limits>
 #	include <locale>
-#	include <random>
 #	include <sstream>
 #	include <type_traits>
 #	include <typeindex>

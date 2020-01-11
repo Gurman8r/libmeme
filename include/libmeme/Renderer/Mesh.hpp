@@ -14,20 +14,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Layout, VAO, VBO, IBO };
+		enum : size_t { ID_Layout, ID_VAO, ID_VBO, ID_IBO };
 
-		using storage_t = typename std::tuple<
-			BufferLayout,
-			VertexArrayObject,
-			VertexBufferObject,
-			IndexBufferObject
-		>;
-		
-		using contiguous_t = typename std::vector<float_t>;
-		
-		using vertices_t = typename std::vector<Vertex>;
-		
-		using indices_t = typename std::vector<uint32_t>;
+		using storage_t		= typename std::tuple<BufferLayout, VAO, VBO, IBO>;
+		using contiguous_t	= typename std::vector<float_t>;
+		using vertices_t	= typename std::vector<Vertex>;
+		using indices_t		= typename std::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -66,17 +58,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto layout() noexcept		-> BufferLayout & { return std::get<Layout>(m_storage); }
-		inline auto layout() const noexcept -> BufferLayout const & { return std::get<Layout>(m_storage); }
+		inline decltype(auto) layout() noexcept { return std::get<ID_Layout>(m_storage); }
+		
+		inline decltype(auto) layout() const noexcept { return std::get<ID_Layout>(m_storage); }
 
-		inline auto vao() noexcept			-> VertexArrayObject & { return std::get<VAO>(m_storage); }
-		inline auto vao() const noexcept	-> VertexArrayObject const & { return std::get<VAO>(m_storage); }
+		
+		inline decltype(auto) vao() noexcept { return std::get<ID_VAO>(m_storage); }
+		
+		inline decltype(auto) vao() const noexcept { return std::get<ID_VAO>(m_storage); }
 
-		inline auto vbo() noexcept			-> VertexBufferObject & { return std::get<VBO>(m_storage); }
-		inline auto vbo() const noexcept	-> VertexBufferObject const & { return std::get<VBO>(m_storage); }
 
-		inline auto ibo() noexcept			-> IndexBufferObject & { return std::get<IBO>(m_storage); }
-		inline auto ibo() const noexcept	-> IndexBufferObject const & { return std::get<IBO>(m_storage); }
+		inline decltype(auto) vbo() noexcept { return std::get<ID_VBO>(m_storage); }
+		
+		inline decltype(auto) vbo() const noexcept { return std::get<ID_VBO>(m_storage); }
+
+
+		inline decltype(auto) ibo() noexcept { return std::get<ID_IBO>(m_storage); }
+		
+		inline decltype(auto) ibo() const noexcept { return std::get<ID_IBO>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

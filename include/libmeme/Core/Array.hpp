@@ -6,21 +6,18 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size array
-	template <class T, size_t N> struct Array
+	template <class T, size_t Size> struct Array
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Size = N };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using value_type		= typename T;
-		using size_type			= typename size_t;
-		using base_type			= typename value_type[Size];
 		using self_type			= typename Array<value_type, Size>;
+		using storage_type		= typename value_type[Size];
+		using size_type			= typename size_t;
+		using difference_type	= typename ptrdiff_t;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -30,62 +27,79 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		base_type m_data; // aggregate initializer
+		storage_type m_data; // aggregate initializer
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_t i)			-> reference		{ return *(m_data + i); }
-		constexpr auto at(size_t i) const	-> const_reference	{ return *(m_data + i); }
-		constexpr auto back()				-> reference		{ return (*end()); }
-		constexpr auto back()		const	-> const_reference	{ return (*cend()); }
-		constexpr auto begin()				-> iterator			{ return data(); }
-		constexpr auto begin()		const	-> const_iterator	{ return data(); }
-		constexpr auto cbegin()		const	-> const_iterator	{ return begin(); }
-		constexpr auto cend()		const	-> const_iterator	{ return end(); }
-		constexpr auto data()				-> pointer			{ return m_data; }
-		constexpr auto data()		const	-> const_pointer	{ return m_data; }
-		constexpr auto empty()		const	-> bool				{ return m_size > 0; }
-		constexpr auto end()				-> iterator			{ return data() + size(); }
-		constexpr auto end()		const	-> const_iterator	{ return data() + size(); }
-		constexpr auto front()				-> reference		{ return (*begin()); }
-		constexpr auto front()		const	-> const_reference	{ return (*cbegin()); }
-		constexpr auto hash()		const	-> hash_t			{ return Hash(data(), size()); }
-		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static constexpr size_t size() { return self_type::Size; }
-
-		constexpr reference operator[](size_t i) { return at(i); }
-		
-		constexpr const_reference operator[](size_t i) const { return at(i); }
-
-		template <class U> constexpr operator std::array<U, Size>() const
+		constexpr reference operator[](size_t i)
 		{
-			std::array<U, Size> temp { 0 };
-			for (size_t i = 0; i < temp.size(); i++)
+			if (Size <= i)
 			{
-				temp[i] = static_cast<U>(m_data[i]);
+				throw std::out_of_range("array subscript out of range");
 			}
-			return temp;
+			return m_data[i];
+		}
+
+		constexpr const_reference operator[](size_t i) const
+		{
+			if (Size <= i)
+			{
+				throw std::out_of_range("array subscript out of range");
+			}
+			return m_data[i];
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto at(size_t const i) -> reference { return operator[](i); }
+		
+		constexpr auto at(size_type const i) const -> const_reference { return operator[](i); }
+		
+		constexpr auto back() noexcept -> reference { return (*end()); }
+		
+		constexpr auto back() const noexcept -> const_reference { return (*cend()); }
+		
+		constexpr auto begin() noexcept -> iterator { return data(); }
+		
+		constexpr auto begin() const noexcept -> const_iterator { return data(); }
+		
+		constexpr auto cbegin() const noexcept -> const_iterator { return begin(); }
+		
+		constexpr auto cend() const	noexcept -> const_iterator { return end(); }
+		
+		constexpr auto data() noexcept -> pointer { return m_data; }
+		
+		constexpr auto data() const noexcept -> const_pointer { return m_data; }
+		
+		constexpr bool empty() const noexcept { return false; }
+		
+		constexpr auto end() noexcept -> iterator { return data() + size(); }
+		
+		constexpr auto end() const noexcept -> const_iterator { return data() + size(); }
+		
+		constexpr auto front() noexcept -> reference { return (*begin()); }
+		
+		constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
+
+		constexpr auto max_size() const noexcept -> size_t { return Size; }
+
+		constexpr auto size() const noexcept -> size_t { return Size; }
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// zero size array
 	template <class T> struct Array<T, 0>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		enum : size_t { Size = 0 };
-		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
 		using value_type		= typename T;
-		using base_type			= typename value_type[1];
 		using self_type			= typename Array<value_type, 0>;
+		using storage_type		= typename value_type[1];
+		using size_type			= typename size_t;
+		using difference_type	= typename ptrdiff_t;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -95,44 +109,57 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		base_type m_data;
+		storage_type m_data; // aggregate initializer
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		constexpr auto at(size_t)			-> reference		{ return m_data[0]; }
-		constexpr auto at(size_t)	const	-> const_reference	{ return m_data[0]; }
-		constexpr auto back()				-> reference		{ return m_data[0]; }
-		constexpr auto back()		const	-> const_reference	{ return m_data[0]; }
-		constexpr auto begin()				-> iterator			{ return &m_data[0]; }
-		constexpr auto begin()		const	-> const_iterator	{ return &m_data[0]; }
-		constexpr auto cbegin()		const	-> const_iterator	{ return &m_data[0]; }
-		constexpr auto cend()		const	-> const_iterator	{ return &m_data[0]; }
-		constexpr auto data()				-> pointer			{ return &m_data[0]; }
-		constexpr auto data()		const	-> const_pointer	{ return &m_data[0]; }
-		constexpr auto end()				-> iterator			{ return &m_data[0]; }
-		constexpr auto end()		const	-> const_iterator	{ return &m_data[0]; }
-		constexpr auto front()				-> reference		{ return m_data[0]; }
-		constexpr auto front()		const	-> const_reference	{ return m_data[0]; }
-		constexpr auto hash()		const	-> hash_t			{ return 0; }
-		
+
+		constexpr reference operator[](size_t const) { return m_data[0]; }
+
+		constexpr const_reference operator[](size_t const) const { m_data[0]; }
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static constexpr size_t size() { return 0; }
+		constexpr auto at(size_t const) -> reference { return m_data[0]; }
 		
-		constexpr reference operator[](size_t) { return m_data[0]; }
+		constexpr auto at(size_t const) const -> const_reference { return m_data[0]; }
 		
-		constexpr const_reference operator[](size_t) const { m_data[0]; }
+		constexpr auto back() noexcept -> reference { return m_data[0]; }
 		
-		template <class U> constexpr operator std::array<U, 0>() const { return {}; }
+		constexpr auto back() const noexcept -> const_reference { return m_data[0]; }
+		
+		constexpr auto begin() noexcept -> iterator { return &m_data[0]; }
+		
+		constexpr auto begin() const noexcept -> const_iterator { return &m_data[0]; }
+		
+		constexpr auto cbegin() const noexcept -> const_iterator { return &m_data[0]; }
+		
+		constexpr auto cend() const noexcept -> const_iterator { return &m_data[0]; }
+		
+		constexpr auto data() noexcept -> pointer { return &m_data[0]; }
+		
+		constexpr auto data() const noexcept -> const_pointer { return &m_data[0]; }
+
+		constexpr bool empty() const noexcept { return true; }
+		
+		constexpr auto end() noexcept -> iterator { return &m_data[0]; }
+		
+		constexpr auto end() const noexcept -> const_iterator { return &m_data[0]; }
+		
+		constexpr auto front() noexcept -> reference { return m_data[0]; }
+		
+		constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
+
+		constexpr auto max_size() const noexcept -> size_t { return 0; }
+
+		constexpr auto size() const noexcept -> size_t { return 0; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class T, size_t N
-	> inline ML_SERIALIZE(std::ostream & out, const Array<T, N> & value)
+	template <class T, size_t Size
+	> inline ML_SERIALIZE(std::ostream & out, Array<T, Size> const & value)
 	{
 		for (auto const & elem : value)
 		{
@@ -141,9 +168,8 @@ namespace ml
 		return out;
 	}
 
-	template <
-		class T, size_t N
-	> inline ML_DESERIALIZE(std::istream & in, Array<T, N> & value)
+	template <class T, size_t Size
+	> inline ML_DESERIALIZE(std::istream & in, Array<T, Size> & value)
 	{
 		for (auto & elem : value)
 		{
@@ -152,51 +178,45 @@ namespace ml
 		return in;
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator==(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator==(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return _ML_ALG equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator!=(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator!=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator<(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator<(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return _ML_ALG less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator<=(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator<=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return (lhs < rhs) || (lhs == rhs);
 	}
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator>(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator>(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return !(lhs < rhs) && (lhs != rhs);
 	}
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr bool operator>=(const Array<Tx, N> & lhs, const Array<Ty, N> & rhs)
+	template <class Tx, class Ty, size_t Size
+	> constexpr bool operator>=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

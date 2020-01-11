@@ -246,11 +246,11 @@
 
 // Typedefs
 #define ML_USING				using
-#define ML_USING_T_(...)		template <##__VA_ARGS__> ML_USING
-#define ML_USING_X				ML_USING_T_(class X)
-#define ML_USING_XY				ML_USING_T_(class X, class Y)
-#define ML_USING_XYZ			ML_USING_T_(class X, class Y, class Z)
-#define ML_USING_Ts				ML_USING_T_(class ... Ts)
+#define ML_USING_VA(...)		template <##__VA_ARGS__> ML_USING
+#define ML_USING_X				ML_USING_VA(class X)
+#define ML_USING_XY				ML_USING_VA(class X, class Y)
+#define ML_USING_XYZ			ML_USING_VA(class X, class Y, class Z)
+#define ML_USING_Ts				ML_USING_VA(class ... Ts)
 
 // Anonymous ( _str_# )
 #ifdef __COUNTER__

@@ -84,9 +84,9 @@ namespace ml
 	{
 		if (!m_fbo && !m_rbo && ((m_size[0] != 0) && (m_size[1] != 0)))
 		{
-			if (ML_BIND(FrameBufferObject, m_fbo.create(m_size)))
+			if (ML_BIND(FrameBufferObject, m_fbo.generate(m_size)))
 			{
-				if (ML_BIND(RenderBufferObject, m_rbo.create(m_size)))
+				if (ML_BIND(RenderBufferObject, m_rbo.generate(m_size)))
 				{
 					m_rbo.update(m_format);
 

@@ -13,25 +13,13 @@ namespace ml
 		GL::bindVertexArray(value ? value->m_handle : NULL);
 	}
 
-	void VertexArrayObject::bind() const
-	{
-		return bind(this);
-	}
-
-	void VertexArrayObject::unbind() const
-	{
-		return bind(nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	VertexArrayObject & VertexArrayObject::create(uint32_t mode)
+	VertexArrayObject & VertexArrayObject::generate(uint32_t mode)
 	{
 		if (!m_handle)
 		{
 			m_handle = GL::genVertexArray();
 
-			std::get<Mode>(m_storage) = mode;
+			std::get<ID_Mode>(m_storage) = mode;
 		}
 		return (*this);
 	}
@@ -59,25 +47,13 @@ namespace ml
 		GL::bindBuffer(GL::ArrayBuffer, value ? value->m_handle : NULL);
 	}
 
-	void VertexBufferObject::bind() const
-	{
-		return bind(this);
-	}
-
-	void VertexBufferObject::unbind() const
-	{
-		return bind(nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	VertexBufferObject & VertexBufferObject::create(uint32_t usage)
+	VertexBufferObject & VertexBufferObject::generate(uint32_t usage)
 	{
 		if (!m_handle)
 		{
 			m_handle = GL::genBuffer();
 
-			std::get<Usage>(m_storage) = usage;
+			std::get<ID_Usage>(m_storage) = usage;
 		}
 		return (*this);
 	}
@@ -99,10 +75,13 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<Data>(m_storage) = data;
-			std::get<Size>(m_storage) = size;
-			std::get<Count>(m_storage) = size / Vertex::Size;
-			std::get<Offset>(m_storage) = 0;
+			std::get<ID_Data>(m_storage) = data;
+			
+			std::get<ID_Size>(m_storage) = size;
+			
+			std::get<ID_Count>(m_storage) = size / Vertex::Size;
+			
+			std::get<ID_Offset>(m_storage) = 0;
 
 			GL::bufferData(
 				GL::ArrayBuffer,
@@ -118,10 +97,13 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<Data>(m_storage) = data;
-			std::get<Size>(m_storage) = size;
-			std::get<Count>(m_storage) = size / Vertex::Size;
-			std::get<Offset>(m_storage) = offset;
+			std::get<ID_Data>(m_storage) = data;
+			
+			std::get<ID_Size>(m_storage) = size;
+			
+			std::get<ID_Count>(m_storage) = size / Vertex::Size;
+			
+			std::get<ID_Offset>(m_storage) = offset;
 
 			GL::bufferSubData(
 				GL::ArrayBuffer,
@@ -143,27 +125,15 @@ namespace ml
 		GL::bindBuffer(GL::ElementArrayBuffer, value ? value->m_handle : NULL);
 	}
 
-	void IndexBufferObject::bind() const
-	{
-		return bind(this);
-	}
-
-	void IndexBufferObject::unbind() const
-	{
-		return bind(nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	IndexBufferObject & IndexBufferObject::create(uint32_t usage, uint32_t type)
+	IndexBufferObject & IndexBufferObject::generate(uint32_t usage, uint32_t type)
 	{
 		if (!m_handle)
 		{
 			m_handle = GL::genBuffer();
 
-			std::get<Usage>(m_storage) = usage;
+			std::get<ID_Usage>(m_storage) = usage;
 
-			std::get<Type>(m_storage) = type;
+			std::get<ID_Type>(m_storage) = type;
 		}
 		return (*this);
 	}
@@ -185,8 +155,9 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<Data>(m_storage) = data;
-			std::get<Count>(m_storage) = count;
+			std::get<ID_Data>(m_storage) = data;
+			
+			std::get<ID_Count>(m_storage) = count;
 
 			GL::bufferData(
 				GL::ElementArrayBuffer,
@@ -208,25 +179,13 @@ namespace ml
 		GL::bindFramebuffer(GL::Framebuffer, value ? value->m_handle : NULL);
 	}
 
-	void FrameBufferObject::bind() const
-	{
-		return bind(this);
-	}
-
-	void FrameBufferObject::unbind() const
-	{
-		return bind(nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	FrameBufferObject & FrameBufferObject::create(vec2 const & size)
+	FrameBufferObject & FrameBufferObject::generate(vec2 const & size)
 	{
 		if (!m_handle)
 		{
 			m_handle = GL::genFramebuffer();
 
-			std::get<Size>(m_storage) = size;
+			std::get<ID_Size>(m_storage) = size;
 		}
 		return (*this);
 	}
@@ -248,11 +207,11 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<BufferID>(m_storage) = std::make_pair(attachment, renderbuffer);
+			std::get<ID_Buffer>(m_storage) = std::make_pair(attachment, renderbuffer);
 
 			GL::framebufferRenderbuffer(
-				GL::Framebuffer, attachment,
-				GL::Renderbuffer, renderbuffer
+				GL::Framebuffer, this->bufferAttachment(),
+				GL::Renderbuffer, this->bufferHandle()
 			);
 		}
 		return (*this);
@@ -262,11 +221,11 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<TextureID>(m_storage) = std::make_tuple(attachment, texture, level);
+			std::get<ID_Texture>(m_storage) = std::make_tuple(attachment, texture, level);
 
 			GL::framebufferTexture2D(
-				GL::Framebuffer, attachment,
-				GL::Texture2D, texture, level
+				GL::Framebuffer, this->textureAttachment(),
+				GL::Texture2D, this->textureHandle(), this->textureLevel()
 			);
 		}
 		return (*this);
@@ -282,25 +241,13 @@ namespace ml
 		GL::bindRenderbuffer(GL::Renderbuffer, value ? value->m_handle : NULL);
 	}
 
-	void RenderBufferObject::bind() const
-	{
-		return bind(this);
-	}
-
-	void RenderBufferObject::unbind() const
-	{
-		return bind(nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	RenderBufferObject & RenderBufferObject::create(vec2i const & size)
+	RenderBufferObject & RenderBufferObject::generate(vec2i const & size)
 	{
 		if (!m_handle)
 		{
 			m_handle = GL::genRenderbuffer();
 
-			std::get<Size>(m_storage) = size;
+			std::get<ID_Size>(m_storage) = size;
 		}
 		return (*this);
 	}
@@ -322,7 +269,7 @@ namespace ml
 	{
 		if (m_handle)
 		{
-			std::get<Format>(m_storage) = format;
+			std::get<ID_Format>(m_storage) = format;
 
 			GL::renderbufferStorage(
 				GL::Renderbuffer, format, size()[0], size()[1]

@@ -2,11 +2,11 @@
 #include <libmeme/Core/Debug.hpp>
 
 #ifndef ML_IMPL_NEW
-#define ML_IMPL_NEW std::malloc
+#define ML_IMPL_NEW malloc
 #endif
 
 #ifndef ML_IMPL_DELETE
-#define ML_IMPL_DELETE std::free
+#define ML_IMPL_DELETE free
 #endif
 
 namespace ml
@@ -67,11 +67,10 @@ namespace ml
 
 	Trackable * MemoryTracker::make_allocation(size_t size)
 	{
-		return ([&, this](auto * const ptr) {
-			return m_records.insert(std::make_pair(
-				ptr, ::new AllocationRecord{ std::make_tuple(m_current++, size, ptr) }
-			)).first->second->data();
-		})(static_cast<Trackable *>(ML_IMPL_NEW(size)));
+		auto temp{ static_cast<Trackable * const>(ML_IMPL_NEW(size)) };
+		return m_records.insert(std::make_pair(
+			temp, ::new AllocationRecord{ std::make_tuple(m_current++, size, temp) }
+		)).first->second->data();
 	}
 
 	void MemoryTracker::free_allocation(Trackable * value)

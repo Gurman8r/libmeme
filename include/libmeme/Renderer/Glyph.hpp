@@ -9,11 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Tex, Bounds, Advance };
+		enum : size_t { ID_Texture, ID_Bounds, ID_Advance };
 
-		using storage_t = typename std::tuple<
-			Texture, FloatRect, uint32_t
-		>;
+		using storage_t = typename std::tuple<Texture, FloatRect, uint32_t>;
 
 		static constexpr size_t const count{ 6 };
 
@@ -36,14 +34,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto texture() noexcept -> Texture & { return std::get<Tex>(m_storage); }
-		inline auto texture() const noexcept -> Texture const & { return std::get<Tex>(m_storage); }
+		inline decltype(auto) texture() noexcept		{ return std::get<ID_Texture>(m_storage); }
+		inline decltype(auto) texture() const noexcept	{ return std::get<ID_Texture>(m_storage); }
 
-		inline auto bounds() noexcept -> FloatRect & { return std::get<Bounds>(m_storage); }
-		inline auto bounds() const noexcept -> FloatRect const & { return std::get<Bounds>(m_storage); }
+		inline decltype(auto) bounds() noexcept			{ return std::get<ID_Bounds>(m_storage); }
+		inline decltype(auto) bounds() const noexcept	{ return std::get<ID_Bounds>(m_storage); }
 
-		inline auto advance() noexcept -> uint32_t & { return std::get<Advance>(m_storage); }
-		inline auto advance() const noexcept -> uint32_t const & { return std::get<Advance>(m_storage); }
+		inline decltype(auto) advance() noexcept		{ return std::get<ID_Advance>(m_storage); }
+		inline decltype(auto) advance() const noexcept	{ return std::get<ID_Advance>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

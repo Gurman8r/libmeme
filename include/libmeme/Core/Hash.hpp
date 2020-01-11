@@ -30,8 +30,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <
-			class T
+		template <class T
 		> constexpr hash_t operator()(T const * arr, hash_t size, hash_t seed) noexcept
 		{
 			return ((size > 0)
@@ -40,15 +39,13 @@ namespace ml
 			);
 		}
 
-		template <
-			class T
+		template <class T
 		> constexpr hash_t operator()(T const * arr, hash_t size) noexcept
 		{
 			return (*this)(arr, size, fnv1a_basis);
 		}
 
-		template <
-			class T, hash_t N
+		template <class T, hash_t N
 		> constexpr hash_t operator()(const T(&value)[N]) noexcept
 		{
 			return (*this)(value, (N - 1));
@@ -56,15 +53,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <
-			class Arr
+		template <class Arr
 		> constexpr hash_t operator()(Arr const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
 		}
 
-		template <
-			template <class ...> class Arr, class ... Ts
+		template <template <class...> class Arr, class ... Ts
 		> constexpr hash_t operator()(Arr<Ts...> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());

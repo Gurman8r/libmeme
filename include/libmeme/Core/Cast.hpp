@@ -1,7 +1,7 @@
 #ifndef _ML_CAST_HPP_
 #define _ML_CAST_HPP_
 
-#include <libmeme/Core/RootOf.hpp>
+#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {
@@ -15,13 +15,14 @@ namespace ml
 
 	template <class T> struct cast<T> final
 	{
-		using type = typename detail::root_t<T>;
+		using type = typename T;
 
 		constexpr cast() noexcept = default;
 
-		template <class U> constexpr auto operator()(U value) const noexcept
+		template <class U
+		> constexpr decltype(auto) operator()(U && u) const noexcept
 		{
-			return static_cast<type>(value);
+			return static_cast<type>(std::forward<U>(u));
 		}
 		
 		static constexpr type minus_one		{ static_cast<type>( -1) };

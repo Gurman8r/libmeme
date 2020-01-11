@@ -28,17 +28,13 @@ namespace ml
 
 		using name_t = typename std::string;
 
-		using data_t = typename std::variant<
-			variable_t, function_t
-		>;
+		using data_t = typename std::variant<variable_t, function_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { Type, Name, Data };
+		enum : size_t { ID_Type, ID_Name, ID_Data };
 
-		using storage_t = typename std::tuple<
-			type_t, name_t, data_t
-		>;
+		using storage_t = typename std::tuple<type_t, name_t, data_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -59,11 +55,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline type_t const & type() const noexcept { return std::get<Type>(m_storage); }
+		inline type_t const & type() const noexcept { return std::get<ID_Type>(m_storage); }
 
-		inline name_t const & name() const noexcept { return std::get<Name>(m_storage); }
+		inline name_t const & name() const noexcept { return std::get<ID_Name>(m_storage); }
 		
-		inline data_t const & data() const noexcept { return std::get<Data>(m_storage); }
+		inline data_t const & data() const noexcept { return std::get<ID_Data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -130,8 +126,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Type, class Name, class ... Args
+	template <class Type, class Name, class ... Args
 	> static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(

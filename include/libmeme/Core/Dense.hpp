@@ -10,14 +10,13 @@ namespace ml::dense
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// Basic Dense Container Traits
-	template <class Elem, class Alloc, class Comp = void
+	template <class Elem, class Alloc
 	> struct basic_container_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type				= typename Elem;
 		using allocator_type			= typename Alloc;
-		using compare_type				= typename Comp;
 		using storage_type				= typename std::vector<value_type, allocator_type>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
@@ -52,7 +51,6 @@ namespace ml::dense
 		using traits_type				= typename Traits;
 		using self_type					= typename basic_container<traits_type>;
 		using value_type				= typename traits_type::value_type;
-		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
 		using storage_type				= typename traits_type::storage_type;
 		using pointer					= typename traits_type::pointer;
@@ -255,7 +253,7 @@ namespace ml::dense
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		union { storage_type m_storage; };
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

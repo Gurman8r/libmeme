@@ -3,7 +3,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/DenseMap.hpp>
-#include <libmeme/Core/DenseSet.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -175,6 +175,99 @@ namespace ml
 }
 
 
+// Plugin Loader
+namespace ml
+{
+	struct PluginLoader final : public Trackable, public NonCopyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		PluginLoader() noexcept : m_files{}, m_plugins{}
+		{
+		}
+
+		~PluginLoader()
+		{
+			for (auto & elem : m_plugins)
+			{
+				delete elem.second;
+				delete elem.first;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class P = path_t> inline decltype(auto) load(P && path)
+		{
+			if (auto const file{ m_files.insert(std::forward<P>(path)) }; file.second)
+			{
+				if (auto * const library{ new SharedLibrary{ *file.first } }; library->good())
+				{
+					if (auto * const plugin{ library->call_function<Plugin *>("ML_Plugin_Main") })
+					{
+						return m_plugins.insert({ library, plugin }).first;
+					}
+				}
+				else
+				{
+					delete library;
+				}
+			}
+			return m_plugins.end();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		ds::set<path_t> m_files;
+
+		ordered_map<SharedLibrary *, Plugin *> m_plugins;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+
+// Flat Map
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static void test_flat_map()
+	{
+		ds::map<int, std::string> m;
+		m = { { 0, "0" }, { 1, "1" }, { 2, "2" } };
+		
+		m.at(0);
+		m.index_of(m.begin());
+		
+		m.begin()->first; m.begin()->second;
+		m.end()->first; m.end()->second;
+		m.cbegin()->first; m.cbegin()->second;
+		(*m.cbegin()).first; (*m.cbegin()).second;
+		
+		auto r = m.begin().operator*();
+		auto p = m.begin().operator->();
+		auto cr = (*m.cbegin());
+
+		auto b = m._begin();
+		decltype(m)::const_iterator iter{ m._begin(), &m };
+
+		// test const loops
+		([](auto const & m) {
+			for (auto e : m) {}
+			for (auto const e : m) {}
+			for (auto const & e : m) {}
+			for (auto [key, value] : m) {}
+			for (auto const [key, value] : m) {}
+			for (auto it = m.begin(); it != m.end(); it++) {}
+			for (auto it = m.cbegin(); it != m.cend(); it++) {}
+		})(m);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 // Main
 ml::int32_t main()
 {
@@ -182,127 +275,109 @@ ml::int32_t main()
 
 	using namespace ml;
 
-	// Time
+	test_flat_map();
+
 	static struct Time final
 	{
 		Timer main{ true }, loop{ false };
 
 		float64_t delta{ 0.0 };
-	} time{};
-	
-	// Init Systems
-	ML_MemoryTracker;
-	ML_EventSystem;
-	ML_PerformanceTracker;
-	ML_Lua.init();
-	ML_Python.init(ML_ARGV[0], "../../../");
-
-	// Enter Event
-	ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
-
-	// Load Plugins
-	ordered_map<SharedLibrary *, Plugin *> plugins;
-	auto load_plugin = [&plugins](auto && path)
-	{
-		auto library{ new SharedLibrary{ path } };
-		plugins.insert({ library, library->invoke<Plugin *>("ML_Plugin_Main") });
-	};
-	load_plugin("demo.dll");
-
-	// Create Window
-	RenderWindow window{};
-	if (!window.create(window_title, window_video, window_style, window_context))
-	{
-		return Debug::logError("Failed initializing Window") | Debug::pause(1);
 	}
-	else
+	time{};
+
+	/* Enter */ ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
 	{
-		install_event_callbacks(window);
+		// Setup Scripting
+		ML_Lua.init();
+		ML_Python.init(ML_ARGV[0], "../../../");
+
+		// Load Plugins
+		PluginLoader plugins{};
+		plugins.load("demo.dll");
+
+		// Create Window
+		RenderWindow window{};
+		if (!window.create(window_title, window_video, window_style, window_context))
+		{
+			return Debug::logError("Failed initializing Window") | Debug::pause(1);
+		}
+		else
+		{
+			install_event_callbacks(window);
+		}
+
+		// Start Editor
+		if (!Editor::startup(window.getHandle()))
+		{
+			return Debug::logError("Failed initializing Editor") | Debug::pause(1);
+		}
+
+		/* Load */ ML_EventSystem.fireEvent<LoadEvent>(window);
+
+		// Main Loop
+		while (window.isOpen())
+		{
+			time.loop.start();
+
+			// Begin Step
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("STEP_BEGIN");
+				Window::pollEvents();
+				ML_EventSystem.fireEvent<BeginStepEvent>();
+			}
+			// Update
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("\tUPDATE");
+				ML_EventSystem.fireEvent<UpdateEvent>();
+			}
+			// Draw
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("\tDRAW");
+				ML_EventSystem.fireEvent<DrawEvent>(window);
+			}
+			// Begin Gui
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("\tGUI_BEGIN");
+				Editor::new_frame();
+				ML_EventSystem.fireEvent<BeginGuiEvent>();
+			}
+			// Gui
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("\t\tGUI");
+				Editor::mainMenuBar().render();
+				Editor::dockspace().render();
+				ML_EventSystem.fireEvent<GuiEvent>();
+			}
+			// End Gui
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("\tGUI_END");
+				Editor::render_frame();
+				ML_EventSystem.fireEvent<EndGuiEvent>();
+			}
+			// End Step
+			/* * * * * * * * * * * * * * * * * * * * */
+			{
+				ML_BENCHMARK("STEP_END");
+				ML_EventSystem.fireEvent<EndStepEvent>();
+				window.swapBuffers();
+			}
+			ML_PerformanceTracker.swap();
+			time.delta = time.loop.stop().elapsed().count();
+		}
+
+		// Cleanup
+		ML_EventSystem.fireEvent<UnloadEvent>();
+		ML_Python.dispose();
+		ML_Lua.dispose();
+		Editor::shutdown();
 	}
-
-	// Start Editor
-	if (!Editor::startup(window.getHandle()))
-	{
-		return Debug::logError("Failed initializing Editor") | Debug::pause(1);
-	}
-
-	// Load Event
-	ML_EventSystem.fireEvent<LoadEvent>(window);
-
-	// Loop
-	/* * * * * * * * * * * * * * * * * * * * */
-	while (window.isOpen())
-	{
-		time.loop.start();
-		
-		// Begin Step
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("STEP_BEGIN");
-			Window::pollEvents();
-			ML_EventSystem.fireEvent<BeginStepEvent>();
-		}
-		// Update
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("\tUPDATE");
-			ML_EventSystem.fireEvent<UpdateEvent>();
-		}
-		// Draw
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("\tDRAW");
-			ML_EventSystem.fireEvent<DrawEvent>(window);
-		}
-		// Begin Gui
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("\tGUI_BEGIN");
-			Editor::new_frame();
-			ML_EventSystem.fireEvent<BeginGuiEvent>();
-		}
-		// Gui
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("\t\tGUI");
-			Editor::mainMenuBar().render();
-			Editor::dockspace().render();
-			ML_EventSystem.fireEvent<GuiEvent>();
-		}
-		// End Gui
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("\tGUI_END");
-			Editor::render_frame();
-			ML_EventSystem.fireEvent<EndGuiEvent>();
-		}
-		// End Step
-		/* * * * * * * * * * * * * * * * * * * * */
-		{
-			ML_BENCHMARK("STEP_END");
-			ML_EventSystem.fireEvent<EndStepEvent>();
-			if (window.getStyle().vertical_sync()) { window.swapBuffers(); } // vsync
-		}
-		ML_PerformanceTracker.end_frame();
-		time.delta = time.loop.stop().elapsed().count();
-	}
-
-
-	// Cleanup
-	ML_EventSystem.fireEvent<UnloadEvent>();
-	Editor::shutdown();
-	window.dispose();
-	ML_Python.dispose();
-	ML_Lua.dispose();
-
-	// Exit
-	ML_EventSystem.fireEvent<ExitEvent>();
-	for (auto & pair : plugins)
-	{
-		delete pair.second;
-		delete pair.first;
-	}
-	plugins.clear();
+	/* Exit */ ML_EventSystem.fireEvent<ExitEvent>();
 
 	// Goodbye!
 	return EXIT_SUCCESS;
