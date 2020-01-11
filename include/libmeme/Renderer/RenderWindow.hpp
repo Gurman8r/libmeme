@@ -16,14 +16,14 @@ namespace ml
 
 		~RenderWindow();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		bool create(
 			std::string const & title,
-			DisplayMode const & videoMode,
-			WindowStyle const & style,
+			DisplayMode const & display,
+			WindowSettings const & style,
 			ContextSettings const & context
 		) override;
+
+		using Window::onEvent;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -28,17 +28,11 @@ namespace ml
 
 		Script & operator=(Script && other) noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void assign(Script const & other);
-
 		void swap(Script & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool loadFromFile(path_t const & path);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		int32_t execute();
 		

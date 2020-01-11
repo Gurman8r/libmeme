@@ -13,11 +13,9 @@ namespace ml
 
 	RenderWindow::~RenderWindow() {}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool RenderWindow::create(std::string const & title, DisplayMode const & video, WindowStyle const & style, ContextSettings const & context)
+	bool RenderWindow::create(std::string const & title, DisplayMode const & display, WindowSettings const & style, ContextSettings const & context)
 	{
-		if (!Window::create(title, video, style, context))
+		if (!Window::create(title, display, style, context))
 		{
 			return Debug::logError("Failed initializing RenderWindow");
 		}

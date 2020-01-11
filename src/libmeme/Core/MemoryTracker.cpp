@@ -67,7 +67,7 @@ namespace ml
 
 	Trackable * MemoryTracker::make_allocation(size_t size)
 	{
-		auto temp{ static_cast<Trackable * const>(ML_IMPL_NEW(size)) };
+		auto temp{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
 		return m_records.insert(std::make_pair(
 			temp, ::new AllocationRecord{ std::make_tuple(m_current++, size, temp) }
 		)).first->second->data();

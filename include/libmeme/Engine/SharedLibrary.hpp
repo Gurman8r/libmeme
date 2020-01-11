@@ -11,7 +11,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using functions_t = typename ordered_map<std::string, void *>;
+		using functions_t = typename pair_map<std::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

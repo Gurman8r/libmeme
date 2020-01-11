@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Page = typename ordered_map<uint32_t, Glyph>;
+		using Page = typename pair_map<uint32_t, Glyph>;
 		
-		using PageTable = typename ordered_map<uint32_t, Page>;
+		using PageTable = typename pair_map<uint32_t, Page>;
 
 		struct Info final
 		{

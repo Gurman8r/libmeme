@@ -13,13 +13,12 @@ namespace ml
 
 		EV_Enter,		// 
 		EV_Load,		// 
-		EV_BeginStep,	// 
+		EV_BeginLoop,	// 
 		EV_Update,		// 
 		EV_Draw,		// 
-		EV_EndStep,		// 
+		EV_EndLoop,		// 
 		EV_Unload,		// 
 		EV_Exit,		// 
-		EV_Command,		// 
 
 		MAX_ENGINE_EVENT
 	};
@@ -52,21 +51,16 @@ namespace ml
 
 	struct LoadEvent final : public EngineEvent<EngineEventType::EV_Load>
 	{
-		struct Window & window;
-
-		constexpr LoadEvent(struct Window & window)
-			: window{ window }
-		{
-		}
+		constexpr LoadEvent() {}
 	};
 
 
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct BeginStepEvent final : public EngineEvent<EngineEventType::EV_BeginStep>
+	struct BeginLoopEvent final : public EngineEvent<EngineEventType::EV_BeginLoop>
 	{
-		constexpr BeginStepEvent() {}
+		constexpr BeginLoopEvent() {}
 	};
 
 	struct UpdateEvent final : public EngineEvent<EngineEventType::EV_Update>
@@ -76,17 +70,12 @@ namespace ml
 
 	struct DrawEvent final : public EngineEvent<EngineEventType::EV_Draw>
 	{
-		struct RenderWindow & window;
-
-		constexpr DrawEvent(struct RenderWindow & window)
-			: window{ window }
-		{
-		}
+		constexpr DrawEvent() {}
 	};
 
-	struct EndStepEvent final : public EngineEvent<EngineEventType::EV_EndStep>
+	struct EndLoopEvent final : public EngineEvent<EngineEventType::EV_EndLoop>
 	{
-		constexpr EndStepEvent() {}
+		constexpr EndLoopEvent() {}
 	};
 
 
@@ -101,20 +90,6 @@ namespace ml
 	struct ExitEvent final : public EngineEvent<EngineEventType::EV_Exit>
 	{
 		constexpr ExitEvent() {}
-	};
-
-
-	// Utility
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct CommandEvent final : public EngineEvent<EngineEventType::EV_Command>
-	{
-		C_String const cmd;
-
-		constexpr CommandEvent(C_String cmd) noexcept
-			: cmd{ cmd }
-		{
-		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

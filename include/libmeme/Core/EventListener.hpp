@@ -5,20 +5,18 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
-
 	struct Event;
-
-	/* * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_CORE_API EventListener
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~EventListener();
 
 		virtual void onEvent(Event const & value) = 0;
-	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
 }
 
 #endif // !_ML_EVENT_LISTENER_HPP_

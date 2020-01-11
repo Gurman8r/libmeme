@@ -9,7 +9,7 @@
 #include <libmeme/Platform/DisplayMode.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
-#include <libmeme/Platform/WindowStyle.hpp>
+#include <libmeme/Platform/WindowSettings.hpp>
 
 #define ML_ASPECT(w, h) ((w != 0 && h != 0) ? ((float_t)w / (float_t)(h)) : 0.0f)
 #define ML_ASPECT_2(v)	ML_ASPECT(v[0], v[1])
@@ -46,14 +46,14 @@ namespace ml
 
 		virtual bool create(
 			std::string const & title, 
-			DisplayMode const & videoMode,
-			WindowStyle const & settings,
+			DisplayMode const & display,
+			WindowSettings const & settings,
 			ContextSettings const & context
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void onEvent(Event const & value) override;
+		virtual void onEvent(Event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,141 +63,138 @@ namespace ml
 
 		Window & iconify();
 		
-		Window & makeContextCurrent();
+		Window & make_context_current();
 		
 		Window & maximize();
 		
 		Window & restore();
 		
-		Window & swapBuffers();
+		Window & swap_buffers();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Window & setCentered();
+		Window & set_centered();
 		
-		Window & setClipboardString(std::string const & value);
+		Window & set_clipboard(std::string const & value);
 		
-		Window & setCursor(void * value);
+		Window & set_cursor(void * value);
 		
-		Window & setCursorMode(Cursor::Mode value);
+		Window & set_cursor_mode(Cursor::Mode value);
 		
-		Window & setCursorPos(vec2i const & value);
+		Window & set_cursor_pos(vec2i const & value);
 		
-		Window & setFullscreen(bool value);
+		Window & set_fullscreen(bool value);
 		
-		Window & setIcon(size_t w, size_t h, byte_t const * pixels);
+		Window & set_icon(size_t w, size_t h, byte_t const * pixels);
 		
-		Window & setPosition(vec2i const & value);
+		Window & set_position(vec2i const & value);
 		
-		Window & setMonitor(void * value);
+		Window & set_monitor(void * value);
 		
-		Window & setSize(vec2u const & value);
+		Window & set_size(vec2u const & value);
 		
-		Window & setTitle(std::string const & value);
+		Window & set_title(std::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool dispose();
+		bool is_focused() const;
+		
+		bool is_fullscreen() const;
+		
+		bool is_open() const;
+		
+		int32_t	get_attribute(int32_t value) const;
+		
+		C_String get_clipboard() const;
+		
+		vec2 get_cursor_pos() const;
+		
+		vec2i get_frame_size() const;
+		
+		void * get_handle() const;
 
-		bool isFocused() const;
+		int32_t get_key(int32_t value) const;
 		
-		bool isFullscreen() const;
+		int32_t	get_input_mode(int32_t value) const;
 		
-		bool isOpen() const;
+		int32_t	get_mouse_button(int32_t value) const;
 		
-		int32_t	getAttribute(int32_t value) const;
+		vec2i get_position() const;
 		
-		C_String getClipboardString() const;
-		
-		vec2 getCursorPos() const;
-		
-		vec2i getFrameSize() const;
-		
-		void * getHandle() const;
-
-		int32_t getKey(int32_t value) const;
-		
-		int32_t	getInputMode(int32_t value) const;
-		
-		int32_t	getMouseButton(int32_t value) const;
-		
-		vec2i getPosition() const;
-		
-		void * getRawHandle() const;
+		void * get_raw_handle() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto getAspect() const -> float_t { return ML_ASPECT_2(getSize()); };
+		inline auto get_aspect() const -> float_t { return ML_ASPECT_2(get_size()); };
 		
-		inline auto getContext() const -> ContextSettings const & { return m_context; }
+		inline auto get_context() const -> ContextSettings const & { return m_context; }
 		
-		inline auto getFrameAspect() const -> float_t { return ML_ASPECT_2(getFrameSize()); };
+		inline auto get_frame_aspect() const -> float_t { return ML_ASPECT_2(get_frame_size()); };
 		
-		inline auto getFrameHeight() const -> int32_t { return getFrameSize()[1]; }
+		inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
 		
-		inline auto getFrameWidth()	const -> int32_t { return getFrameSize()[0]; }
+		inline auto get_frame_width() const -> int32_t { return get_frame_size()[0]; }
 		
-		inline auto getHeight()	const -> uint32_t { return getSize()[1]; }
+		inline auto get_height() const -> uint32_t { return get_size()[1]; }
 		
-		inline auto getMonitor() const -> void * { return m_monitor; }
+		inline auto get_monitor() const -> void * { return m_monitor; }
 
-		inline auto getShare() const -> void * { return m_share; }
+		inline auto get_share() const -> void * { return m_share; }
 		
-		inline auto getSize() const -> vec2u const & { return getDisplayMode().size; }
+		inline auto get_size() const -> vec2u const & { return get_display_mode().size; }
 
-		inline auto getStyle() const -> WindowStyle const & { return m_style; }
+		inline auto get_settings() const -> WindowSettings const & { return m_settings; }
 		
-		inline auto getTitle() const -> std::string const & { return m_title; }
+		inline auto get_title() const -> std::string const & { return m_title; }
 		
-		inline auto getDisplayMode() const -> DisplayMode const & { return m_video; }
+		inline auto get_display_mode() const -> DisplayMode const & { return m_video; }
 		
-		inline auto getWidth() const -> uint32_t { return getSize()[0]; }
+		inline auto get_width() const -> uint32_t { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void * createCustomCursor(uint32_t w, uint32_t h, byte_t const * pixels);
+		static void * create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
 		
-		static void * createStandardCursor(Cursor::Shape value);
+		static void * create_standard_cursor(Cursor::Shape value);
 		
-		static bool	destroyCursor(void * value);
+		static bool	destroy_cursor(void * value);
 
-		static int32_t extensionSupported(C_String value);
+		static int32_t extension_supported(C_String value);
 
-		static void * getContextCurrent();
+		static void * get_context_current();
 
-		static DisplayMode const & getDesktopMode();
+		static DisplayMode const & get_desktop_mode();
 		
-		static std::vector<DisplayMode> const & getFullscreenModes();
+		static std::vector<DisplayMode> const & get_fullscreen_modes();
 
-		static ProcFun getProcAddress(C_String value);
+		static ProcFun get_proc_address(C_String value);
 		
-		static std::vector<void *> const & getMonitors();
+		static std::vector<void *> const & get_monitors();
 
-		static float64_t getTime();
+		static float64_t get_time();
 
-		static void makeContextCurrent(void * value);
+		static void make_context_current(void * value);
 
-		static void pollEvents();
-
-		static ErrorFun setErrorCallback(ErrorFun value);
+		static void poll_events();
 		
-		static void swapInterval(int32_t value);
+		static void swap_interval(int32_t value);
 
 		static void terminate();
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		CharFun			setCharCallback			(CharFun		value);
-		CursorEnterFun	setCursorEnterCallback	(CursorEnterFun value);
-		CursorPosFun	setCursorPosCallback	(CursorPosFun	value);
-		FrameSizeFun	setFrameSizeCallback	(FrameSizeFun	value);
-		KeyFun			setKeyCallback			(KeyFun			value);
-		MouseFun		setMouseCallback		(MouseFun		value);
-		ScrollFun		setScrollCallback		(ScrollFun		value);
-		CloseFun		setWindowCloseCallback	(CloseFun		value);
-		FocusFun		setWindowFocusCallback	(FocusFun		value);
-		PositionFun		setWindowPosCallback	(PositionFun	value);
-		SizeFun			setWindowSizeCallback	(SizeFun		value);
+
+		static ErrorFun set_error_callback			(ErrorFun		value);
+		CharFun			set_char_callback			(CharFun		value);
+		CursorEnterFun	set_cursor_enter_callback	(CursorEnterFun value);
+		CursorPosFun	set_cursor_pos_callback		(CursorPosFun	value);
+		FrameSizeFun	set_frame_size_callback		(FrameSizeFun	value);
+		KeyFun			set_key_callback			(KeyFun			value);
+		MouseFun		set_mouse_callback			(MouseFun		value);
+		ScrollFun		set_scroll_callback			(ScrollFun		value);
+		CloseFun		set_window_close_callback	(CloseFun		value);
+		FocusFun		set_window_focus_callback	(FocusFun		value);
+		PositionFun		set_window_pos_callback		(PositionFun	value);
+		SizeFun			set_window_size_callback	(SizeFun		value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -206,7 +203,7 @@ namespace ml
 		void * 			m_monitor;
 		void * 			m_share;
 		ContextSettings	m_context;
-		WindowStyle		m_style;
+		WindowSettings	m_settings;
 		DisplayMode		m_video;
 		std::string		m_title;
 

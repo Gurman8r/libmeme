@@ -1,17 +1,16 @@
-#ifndef _ML_WINDOW_STYLE_HPP_
-#define _ML_WINDOW_STYLE_HPP_
+#ifndef _ML_WINDOW_SETTINGS_HPP_
+#define _ML_WINDOW_SETTINGS_HPP_
 
 #include <libmeme/Core/BitMask.hpp>
 #include <libmeme/Core/EnumInfo.hpp>
 
 namespace ml
 {
-	struct WindowStyle final
+	struct WindowSettings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using base_type = typename mask16_t;
-		using self_type = typename WindowStyle;
+		using storage_type = typename mask16_t;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -45,11 +44,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr explicit WindowStyle(
+		constexpr explicit WindowSettings(
 			bool resizable, bool visible, bool decorated, bool focused,
 			bool autoIconify, bool floating, bool maximized, 
 			bool fullscreen, bool vertical_sync
-		) : self_type{ base_type { {
+		) : WindowSettings{ storage_type { {
 			resizable, visible, decorated, focused, 
 			autoIconify, floating, maximized, 
 			fullscreen, vertical_sync
@@ -57,23 +56,23 @@ namespace ml
 		{
 		}
 
-		constexpr WindowStyle(WindowStyle const & copy)
-			: self_type{ copy.m_data }
+		constexpr WindowSettings(WindowSettings const & copy)
+			: WindowSettings{ copy.m_data }
 		{
 		}
 
-		constexpr WindowStyle(base_type const & data)
+		constexpr WindowSettings(storage_type const & data)
 			: m_data{ data }
 		{
 		}
 
-		constexpr WindowStyle() noexcept = default;
+		constexpr WindowSettings() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto data() const -> base_type const & { return m_data; }
+		constexpr auto data() const -> storage_type const & { return m_data; }
 		
-		constexpr auto data() -> base_type & { return m_data; }
+		constexpr auto data() -> storage_type & { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -85,14 +84,15 @@ namespace ml
 		constexpr bool floating()		const { return m_data[Flag::Floating]; }
 		constexpr bool maximized()		const { return m_data[Flag::Maximized]; }
 		constexpr bool fullscreen()		const { return m_data[Flag::Fullscreen]; }
-		constexpr bool vertical_sync()	const { return m_data[Flag::VerticalSync]; }
+		constexpr bool vsync()			const { return m_data[Flag::VerticalSync]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: base_type m_data{};
+	private:
+		storage_type m_data{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
-#endif // !_ML_WINDOW_STYLE_HPP_
+#endif // !_ML_WINDOW_SETTINGS_HPP_

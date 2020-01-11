@@ -7,9 +7,9 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// FLAT SET TRAITS
+	// BASIC FLAT SET TRAITS
 	template <class Elem, class Comp, class Alloc, bool Multi
-	> struct flat_set_traits
+	> struct basic_flat_set_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -319,13 +319,13 @@ namespace ml::ds
 	// FLAT SET - sorted vector of unique elements
 	template <class Elem, class Comp, class Alloc
 	> struct flat_set final : public basic_flat_set<
-		flat_set_traits<Elem, Comp, Alloc, false>
+		basic_flat_set_traits<Elem, Comp, Alloc, false>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_set<Elem, Comp, Alloc>;
-		using base_type					= typename basic_flat_set<flat_set_traits<Elem, Comp, Alloc, false>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<Elem, Comp, Alloc, false>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -452,13 +452,13 @@ namespace ml::ds
 	// FLAT MULTISET - sorted vector of elements
 	template <class Elem, class Comp, class Alloc
 	> struct flat_multiset final : public basic_flat_set<
-		flat_set_traits<Elem, Comp, Alloc, true>
+		basic_flat_set_traits<Elem, Comp, Alloc, true>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_multiset<Elem, Comp, Alloc>;
-		using base_type					= typename basic_flat_set<flat_set_traits<Elem, Comp, Alloc, true>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<Elem, Comp, Alloc, true>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -570,14 +570,14 @@ namespace ml::ds
 	template <class Elem,
 		class Comp = std::less<Elem>,
 		class Alloc = std::allocator<Elem>
-	> ML_USING set = _ML ds::flat_set<Elem, Comp, Alloc>;
+	> ML_USING set = _ML_DS flat_set<Elem, Comp, Alloc>;
 
 
 	// MULTISET
 	template <class Elem,
 		class Comp = std::less<Elem>,
 		class Alloc = std::allocator<Elem>
-	> ML_USING multiset = _ML ds::flat_multiset<Elem, Comp, Alloc>;
+	> ML_USING multiset = _ML_DS flat_multiset<Elem, Comp, Alloc>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

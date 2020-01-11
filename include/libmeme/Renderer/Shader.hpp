@@ -19,11 +19,11 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename ordered_map<std::string, int32_t>;
+		using AttribCache = typename pair_map<std::string, int32_t>;
 
-		using UniformCache = typename ordered_map<std::string, int32_t>;
+		using UniformCache = typename pair_map<std::string, int32_t>;
 
-		using TextureCache = typename ordered_map<int32_t, struct Texture const *>;
+		using TextureCache = typename pair_map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

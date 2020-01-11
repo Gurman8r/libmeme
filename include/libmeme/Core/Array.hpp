@@ -35,7 +35,7 @@ namespace ml
 		{
 			if (Size <= i)
 			{
-				throw std::out_of_range("array subscript out of range");
+				ML_THROW std::out_of_range("array subscript out of range");
 			}
 			return m_data[i];
 		}
@@ -44,7 +44,7 @@ namespace ml
 		{
 			if (Size <= i)
 			{
-				throw std::out_of_range("array subscript out of range");
+				ML_THROW std::out_of_range("array subscript out of range");
 			}
 			return m_data[i];
 		}

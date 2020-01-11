@@ -1,9 +1,10 @@
 #include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Core/EventHandler.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/DenseMap.hpp>
-#include <libmeme/Core/FlatMap.hpp>
+#include <libmeme/Core/FlatSet.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -75,7 +76,7 @@ namespace ml::tests
 }
 
 
-// Window Settings
+// Window Options
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -83,12 +84,12 @@ namespace ml
 	static constexpr auto const window_title{ C_String {
 		"libmeme"					// Title
 	} };
-	static constexpr auto const window_video{ DisplayMode {
+	static constexpr auto const window_mode{ DisplayMode {
 		1280,						// Width
 		720,						// Height
 		32							// Bits-per-Pixel
 	} };
-	static constexpr auto const window_style{ WindowStyle {
+	static constexpr auto const window_settings{ WindowSettings {
 		1,							// Resizable
 		1,							// Visible
 		1,							// Decorated
@@ -109,67 +110,6 @@ namespace ml
 		false,						// Multisample
 		false						// sRGB Capable
 	} };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static void install_event_callbacks(Window & window)
-	{
-		window.setCharCallback([](auto, auto ch)
-		{
-			ML_EventSystem.fireEvent<CharEvent>(ch);
-		});
-		window.setCursorEnterCallback([](auto, auto entered)
-		{
-			ML_EventSystem.fireEvent<CursorEnterEvent>(entered);
-		});
-		window.setCursorPosCallback([](auto, auto x, auto y)
-		{
-			ML_EventSystem.fireEvent<CursorPosEvent>(x, y);
-		});
-		window.setErrorCallback([](auto code, auto desc)
-		{
-			ML_EventSystem.fireEvent<WindowErrorEvent>(code, desc);
-		});
-		window.setFrameSizeCallback([](auto, auto w, auto h)
-		{
-			ML_EventSystem.fireEvent<FrameSizeEvent>(w, h);
-		});
-		window.setKeyCallback([](auto, auto button, auto scan, auto action, auto mods)
-		{
-			ML_EventSystem.fireEvent<KeyEvent>(button, scan, action, mask8_t{ {
-				(mods & ML_MOD_SHIFT),
-				(mods & ML_MOD_CTRL),
-				(mods & ML_MOD_ALT),
-				(mods & ML_MOD_SUPER),
-				(mods & ML_MOD_CAPSLOCK),
-				(mods & ML_MOD_NUMLOCK)
-			} });
-		});
-		window.setMouseCallback([](auto, auto button, auto action, auto mods)
-		{
-			ML_EventSystem.fireEvent<MouseEvent>(button, action, mods);
-		});
-		window.setScrollCallback([](auto, auto x, auto y)
-		{
-			ML_EventSystem.fireEvent<ScrollEvent>(x, y);
-		});
-		window.setWindowCloseCallback([](auto)
-		{
-			ML_EventSystem.fireEvent<WindowCloseEvent>();
-		});
-		window.setWindowFocusCallback([](auto, auto focused)
-		{
-			ML_EventSystem.fireEvent<WindowFocusEvent>(focused);
-		});
-		window.setWindowPosCallback([](auto, auto x, auto y)
-		{
-			ML_EventSystem.fireEvent<WindowPosEvent>(x, y);
-		});
-		window.setWindowSizeCallback([](auto, auto w, auto h)
-		{
-			ML_EventSystem.fireEvent<WindowSizeEvent>(w, h);
-		});
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -221,52 +161,12 @@ namespace ml
 	private:
 		ds::set<path_t> m_files;
 
-		ordered_map<SharedLibrary *, Plugin *> m_plugins;
+		pair_map<SharedLibrary *, Plugin *> m_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
-
-// Flat Map
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static void test_flat_map()
-	{
-		ds::map<int, std::string> m;
-		m = { { 0, "0" }, { 1, "1" }, { 2, "2" } };
-		
-		m.at(0);
-		m.index_of(m.begin());
-		
-		m.begin()->first; m.begin()->second;
-		m.end()->first; m.end()->second;
-		m.cbegin()->first; m.cbegin()->second;
-		(*m.cbegin()).first; (*m.cbegin()).second;
-		
-		auto r = m.begin().operator*();
-		auto p = m.begin().operator->();
-		auto cr = (*m.cbegin());
-
-		auto b = m._begin();
-		decltype(m)::const_iterator iter{ m._begin(), &m };
-
-		// test const loops
-		([](auto const & m) {
-			for (auto e : m) {}
-			for (auto const e : m) {}
-			for (auto const & e : m) {}
-			for (auto [key, value] : m) {}
-			for (auto const [key, value] : m) {}
-			for (auto it = m.begin(); it != m.end(); it++) {}
-			for (auto it = m.cbegin(); it != m.cend(); it++) {}
-		})(m);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
 // Main
 ml::int32_t main()
@@ -275,8 +175,7 @@ ml::int32_t main()
 
 	using namespace ml;
 
-	test_flat_map();
-
+	// Timers
 	static struct Time final
 	{
 		Timer main{ true }, loop{ false };
@@ -285,65 +184,76 @@ ml::int32_t main()
 	}
 	time{};
 
-	/* Enter */ ML_EventSystem.fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
+	EventHandler::Bank bank;
+	bank.addListener<EnterEvent>([](Event const & value)
 	{
-		// Setup Scripting
-		ML_Lua.init();
-		ML_Python.init(ML_ARGV[0], "../../../");
+		if (auto const ev = value.as<EnterEvent>())
+		{
+			for (int32_t i = 0; i < ev->argc; ++i)
+			{
+				printf("%s\n", ev->argv[i]);
+			}
+		}
+	});
+
+	// Enter
+	EventSystem::fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
+	{
+		// Startup Engine
+		if (!Engine::startup(ML_ARGV[0], "../../../"))
+		{
+			return Debug::logError("Failed initializing Engine") | Debug::pause(1);
+		}
 
 		// Load Plugins
 		PluginLoader plugins{};
 		plugins.load("demo.dll");
 
 		// Create Window
-		RenderWindow window{};
-		if (!window.create(window_title, window_video, window_style, window_context))
+		if (!Engine::create_window({ window_title, window_mode, window_settings, window_context }))
 		{
 			return Debug::logError("Failed initializing Window") | Debug::pause(1);
 		}
-		else
-		{
-			install_event_callbacks(window);
-		}
 
-		// Start Editor
-		if (!Editor::startup(window.getHandle()))
+		// Startup Editor
+		if (!Editor::startup(Engine::window().get_handle()))
 		{
 			return Debug::logError("Failed initializing Editor") | Debug::pause(1);
 		}
 
-		/* Load */ ML_EventSystem.fireEvent<LoadEvent>(window);
+		// Load
+		EventSystem::fireEvent<LoadEvent>();
 
 		// Main Loop
-		while (window.isOpen())
+		while (Engine::running())
 		{
 			time.loop.start();
 
-			// Begin Step
+			// Begin Loop
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
-				ML_BENCHMARK("STEP_BEGIN");
-				Window::pollEvents();
-				ML_EventSystem.fireEvent<BeginStepEvent>();
+				ML_BENCHMARK("LOOP_BEGIN");
+				Engine::begin_loop();
+				EventSystem::fireEvent<BeginLoopEvent>();
 			}
 			// Update
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tUPDATE");
-				ML_EventSystem.fireEvent<UpdateEvent>();
+				EventSystem::fireEvent<UpdateEvent>();
 			}
 			// Draw
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tDRAW");
-				ML_EventSystem.fireEvent<DrawEvent>(window);
+				EventSystem::fireEvent<DrawEvent>();
 			}
 			// Begin Gui
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_BEGIN");
 				Editor::new_frame();
-				ML_EventSystem.fireEvent<BeginGuiEvent>();
+				EventSystem::fireEvent<BeginGuiEvent>();
 			}
 			// Gui
 			/* * * * * * * * * * * * * * * * * * * * */
@@ -351,33 +261,33 @@ ml::int32_t main()
 				ML_BENCHMARK("\t\tGUI");
 				Editor::mainMenuBar().render();
 				Editor::dockspace().render();
-				ML_EventSystem.fireEvent<GuiEvent>();
+				EventSystem::fireEvent<GuiEvent>();
 			}
 			// End Gui
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_END");
 				Editor::render_frame();
-				ML_EventSystem.fireEvent<EndGuiEvent>();
+				EventSystem::fireEvent<EndGuiEvent>();
 			}
-			// End Step
+			// End Loop
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
-				ML_BENCHMARK("STEP_END");
-				ML_EventSystem.fireEvent<EndStepEvent>();
-				window.swapBuffers();
+				ML_BENCHMARK("LOOP_END");
+				EventSystem::fireEvent<EndLoopEvent>();
+				Engine::end_loop();
 			}
 			ML_PerformanceTracker.swap();
 			time.delta = time.loop.stop().elapsed().count();
 		}
 
-		// Cleanup
-		ML_EventSystem.fireEvent<UnloadEvent>();
-		ML_Python.dispose();
-		ML_Lua.dispose();
+		// Unload
+		EventSystem::fireEvent<UnloadEvent>();
 		Editor::shutdown();
+		Engine::shutdown();
 	}
-	/* Exit */ ML_EventSystem.fireEvent<ExitEvent>();
+	// Exit
+	EventSystem::fireEvent<ExitEvent>();
 
 	// Goodbye!
 	return EXIT_SUCCESS;

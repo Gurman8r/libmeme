@@ -6,31 +6,33 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Lua::Lua() {}
-
-	Lua::~Lua() {}
+	lua_State * Lua::m_L{ nullptr };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Lua::init()
+	bool Lua::startup()
 	{
+		// My Print
 		auto my_print{ ([](lua_State * L)
 		{
 			for (int32_t i = 1, imax = lua_gettop(L); i <= imax; ++i)
+			{
 				std::cout << lua_tostring(L, i);
+			}
 			return EXIT_SUCCESS;
 		}) };
 
+		// Lib
 		static const struct luaL_Reg lib[] =
 		{
 			{ "print", my_print },
 			{ nullptr, nullptr }
 		};
 
-		return init(true, lib);
+		return startup(true, lib);
 	}
 
-	bool Lua::init(bool openLibs, luaL_Reg const * userLib)
+	bool Lua::startup(bool openLibs, luaL_Reg const * userLib)
 	{
 		if (!m_L && (m_L = luaL_newstate()))
 		{
@@ -45,7 +47,7 @@ namespace ml
 		return m_L;
 	}
 
-	bool Lua::dispose()
+	bool Lua::shutdown()
 	{
 		if (m_L)
 		{
@@ -60,16 +62,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Lua::do_string(std::string const & value) const
+	int32_t Lua::do_string(std::string const & value)
 	{
 		return ((!value.empty() && m_L) ? luaL_dostring(m_L, value.c_str()) : 0);
 	}
 
-	int32_t Lua::do_file(path_t const & path) const
+	int32_t Lua::do_file(path_t const & path)
 	{
-		if (auto o{ FS::read_file(path.string()) }; o && !o.value().empty())
+		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
-			return do_string(std::string{ o.value().begin(), o.value().end() });
+			return do_string(std::string{ o->begin(), o->end() });
 		}
 		return 0;
 	}

@@ -5,35 +5,32 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FileSystem.hpp>
 
-#define ML_Python ::ml::Python::getInstance()
-
 namespace ml
 {
-	struct ML_ENGINE_API Python final : public Singleton<Python>
+	struct ML_ENGINE_API Python final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool init(path_t const & name, path_t const & home);
+		Python() = delete;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool startup(path_t const & name, path_t const & home);
 		
-		bool dispose();
+		static bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		int32_t do_string(std::string const & value) const;
+		static int32_t do_string(std::string const & value);
 		
-		int32_t do_file(path_t const & path) const;
+		static int32_t do_file(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<Python>;
-
-		Python();
-		~Python();
-
-		bool m_init{ false };
-		path_t m_name{};
-		path_t m_home{};
+		static bool		m_init;
+		static path_t	m_name;
+		static path_t	m_home;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

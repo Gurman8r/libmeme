@@ -5,38 +5,42 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/DenseMap.hpp>
 
-#define ML_EventSystem ::ml::EventSystem::getInstance()
-
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
-
 	struct Event;
 
-	/* * * * * * * * * * * * * * * * * * * * */
-
-	struct ML_CORE_API EventSystem final : public Singleton<EventSystem>
+	struct ML_CORE_API EventSystem final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		EventListener * addListener(int32_t type, EventListener * listener);
-		
-		void fireEvent(Event const & value);
+
+		EventSystem() = delete;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool removeListener(int32_t type, EventListener * listener);
+		using listener_map = typename pair_multimap<int32_t, EventListener *>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		bool removeListenerFromAllEvents(EventListener * listener);
+		static EventListener * addListener(int32_t type, EventListener * listener);
+		
+		static void fireEvent(Event const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Ev> inline EventListener * addListener(EventListener * listener)
+		static bool removeListener(int32_t type, EventListener * listener);
+		
+		static bool removeListenerFromAllEvents(EventListener * listener);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Ev
+		> static inline EventListener * addListener(EventListener * listener)
 		{
 			return addListener(Ev::ID, listener);
 		}
 
-		template <class Ev, class ... Args> inline void fireEvent(Args && ... args)
+		template <class Ev, class ... Args
+		> static inline void fireEvent(Args && ... args)
 		{
 			return fireEvent(Ev{ std::forward<Args>(args)... });
 		}
@@ -44,18 +48,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<EventSystem>;
-		
-		EventSystem();
-		
-		~EventSystem();
-		
-		ordered_multimap<int32_t, EventListener *> m_listeners;
+		static listener_map m_listeners;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_EVENT_SYSTEM_HPP_

@@ -21,18 +21,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uint32_t	api{ API::Unknown };
-		uint32_t	major{ 1 };
-		uint32_t	minor{ 1 };
-		uint32_t	profile{ Profile::Compat };
-		uint32_t	depthBits{ 32 };
-		uint32_t	stencilBits{ 8 };
-		bool		multisample{ false };
-		bool		srgbCapable{ false };
+		uint32_t	api			{ API::Unknown };
+		uint32_t	major		{ 1 };
+		uint32_t	minor		{ 1 };
+		uint32_t	profile		{ Profile::Compat };
+		uint32_t	depthBits	{ 32 };
+		uint32_t	stencilBits	{ 8 };
+		bool		multisample	{ false };
+		bool		srgbCapable	{ false };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr ContextSettings() = default;
+		constexpr ContextSettings() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

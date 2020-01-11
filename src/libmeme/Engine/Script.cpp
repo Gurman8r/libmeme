@@ -44,7 +44,8 @@ namespace ml
 	
 	Script & Script::operator=(Script const & other)
 	{
-		assign(other);
+		Script temp{ other };
+		swap(temp);
 		return (*this);
 	}
 	
@@ -52,18 +53,6 @@ namespace ml
 	{
 		swap(std::move(other));
 		return (*this);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-	void Script::assign(Script const & other)
-	{
-		if (this != std::addressof(other))
-		{
-			m_language = other.m_language;
-
-			m_text.operator=(other.m_text);
-		}
 	}
 
 	void Script::swap(Script & other) noexcept
@@ -77,13 +66,11 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
+
 	bool Script::loadFromFile(path_t const & path)
 	{
 		return !(m_text = FS::get_file_contents(path)).empty();
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int32_t Script::execute()
 	{
@@ -94,14 +81,11 @@ namespace ml
 	{
 		switch (m_language)
 		{
-		case Language::Python:
-			return ML_Python.do_string(m_text);
+		case Language::Python: return Python::do_string(m_text);
 		
-		case Language::Lua:
-			return ML_Lua.do_string(m_text);
+		case Language::Lua: return Lua::do_string(m_text);
 		
-		default:
-			return 0;
+		default: return 0;
 		}
 	}
 

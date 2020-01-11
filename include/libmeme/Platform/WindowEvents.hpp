@@ -139,7 +139,7 @@ namespace ml
 		constexpr bool isSuper	(int32_t k)	const { return getPress(k, { { 0, 0, 0, 1 } }); }
 
 		constexpr bool isNew	() const { return isCtrl(KeyCode::N); }
-		constexpr bool isOpen	() const { return isCtrl(KeyCode::O); }
+		constexpr bool is_open	() const { return isCtrl(KeyCode::O); }
 		constexpr bool isSave	() const { return isCtrl(KeyCode::S) || getPress(KeyCode::S, { { 1, 1, 0, 0 } }); }
 		constexpr bool isUndo	() const { return isCtrl(KeyCode::Z); }
 		constexpr bool isRedo	() const { return isCtrl(KeyCode::Y) || getPress(KeyCode::Z, { { 1, 1, 0, 0 } }); }

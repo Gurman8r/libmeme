@@ -12,13 +12,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Python::Python() {}
-
-	Python::~Python() {}
+	bool	Python::m_init{ false };
+	path_t	Python::m_name{};
+	path_t	Python::m_home{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Python::init(path_t const & name, path_t const & home)
+	bool Python::startup(path_t const & name, path_t const & home)
 	{
 		m_name = name;
 		m_home = home;
@@ -37,7 +37,7 @@ namespace ml
 		return false;
 	}
 
-	bool Python::dispose()
+	bool Python::shutdown()
 	{
 		if (m_init)
 		{
@@ -52,16 +52,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Python::do_string(std::string const & value) const
+	int32_t Python::do_string(std::string const & value)
 	{
 		return ((!value.empty() && m_init) ? PyRun_SimpleString(value.c_str()) : 0);
 	}
 
-	int32_t Python::do_file(path_t const & path) const
+	int32_t Python::do_file(path_t const & path)
 	{
-		if (auto o{ FS::read_file(path.string()) }; o && !o.value().empty())
+		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
-			return do_string(std::string{ o.value().begin(), o.value().end() });
+			return do_string(std::string{ o->begin(), o->end() });
 		}
 		return 0;
 	}
@@ -85,7 +85,7 @@ namespace ml
 	PYBIND11_EMBEDDED_MODULE(LIBMEME, m)
 	{
 		struct ml_py_config final {};
-		pybind11::class_<ml_py_config>(m, "config")
+		pybind11::class_<ml_py_config>(m, "cfg")
 			.def_static("architecture",		[]() { return ML_ARCHITECTURE; })
 			.def_static("args",				[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
 			.def_static("compiler_name",	[]() { return ML_CC_NAME; })
@@ -104,16 +104,15 @@ namespace ml
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("clear",	[]() { Debug::clear(); })
-			.def_static("command",	[](str_t const & s) { ML_EventSystem.fireEvent<CommandEvent>(s.c_str()); })
-			.def_static("exit",		[]() { std::exit(0); })
-			.def_static("pause",	[]() { Debug::pause(0); })
+			.def_static("clear",	[]() { return Debug::clear(); })
+			.def_static("exit",		[]() { return std::exit(0); })
+			.def_static("pause",	[]() { return Debug::pause(0); })
 			.def_static("print",	[](str_t const & s) { std::cout << s; })
 			.def_static("printf",	[](str_t const & s, list_t const & l) { std::cout << util::format(s, l); })
 			.def_static("printl",	[](str_t const & s) { std::cout << s << '\n'; })
-			.def_static("log",		[](str_t const & s) { Debug::logInfo(s); })
-			.def_static("warning",	[](str_t const & s) { Debug::logWarning(s); })
-			.def_static("error",	[](str_t const & s) { Debug::logError(s); });
+			.def_static("log",		[](str_t const & s) { return Debug::logInfo(s); })
+			.def_static("warning",	[](str_t const & s) { return Debug::logWarning(s); })
+			.def_static("error",	[](str_t const & s) { return Debug::logError(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

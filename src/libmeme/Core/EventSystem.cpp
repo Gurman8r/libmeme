@@ -5,9 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventSystem::EventSystem() : m_listeners{} {}
-
-	EventSystem::~EventSystem() {}
+	EventSystem::listener_map EventSystem::m_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

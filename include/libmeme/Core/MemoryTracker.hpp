@@ -48,7 +48,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type = typename ordered_map<struct Trackable *, AllocationRecord *>;
+		using storage_type = typename pair_map<struct Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

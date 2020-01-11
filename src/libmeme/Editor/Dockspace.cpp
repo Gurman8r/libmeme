@@ -86,7 +86,7 @@ namespace ml
 				m_nodes[LeftDn] = split_node(m_nodes[Left], ImGuiDir_Down, 0.25f, &m_nodes[Left]);
 				m_nodes[RightDn] = split_node(m_nodes[Right], ImGuiDir_Down, 0.25f, &m_nodes[Right]);
 
-				ML_EventSystem.fireEvent<DockspaceEvent>(*this);
+				EventSystem::fireEvent<DockspaceEvent>(*this);
 
 				end_builder(m_nodes[Root]);
 			};

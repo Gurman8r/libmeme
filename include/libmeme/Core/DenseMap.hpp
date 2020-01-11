@@ -461,7 +461,7 @@ namespace ml
 
 	// Ordered Map
 	template <class Key, class Value
-	> ML_USING ordered_map = typename _ML_DENSE basic_ordered_map<
+	> ML_USING pair_map = typename _ML_DENSE basic_ordered_map<
 		Key,
 		Value,
 		key_compare<std::less, std::pair, Key, Value>,
@@ -470,7 +470,7 @@ namespace ml
 
 	// Ordered Multimap
 	template <class Key, class Value
-	> ML_USING ordered_multimap = typename _ML_DENSE basic_ordered_multimap<
+	> ML_USING pair_multimap = typename _ML_DENSE basic_ordered_multimap<
 		Key,
 		Value,
 		key_compare<std::less, std::pair, Key, Value>,

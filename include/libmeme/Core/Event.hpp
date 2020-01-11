@@ -13,6 +13,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class Ev
+	> static constexpr decltype(auto) event_cast(struct Event const * value) noexcept
+	{
+		return (value && (value->id() == Ev::ID)) 
+			? std::make_optional(*static_cast<Ev const *>(value))
+			: std::nullopt;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct Event
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,7 +43,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Event(int32_t value) noexcept : m_id{ value }
+		constexpr Event(int32_t const value) noexcept : m_id{ value }
 		{
 		}
 
@@ -48,6 +58,11 @@ namespace ml
 			return (m_id > EV_INVALID);
 		}
 
+		template <class Ev> constexpr decltype(auto) as() const noexcept
+		{
+			return event_cast<Ev>(this);
+		}
+
 		constexpr int32_t const & id() const noexcept
 		{
 			return m_id;
@@ -55,7 +70,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: int32_t const m_id;
+	private:
+		int32_t const m_id;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -79,13 +95,6 @@ namespace ml
 		{
 		}
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Ev> static constexpr decltype(auto) event_cast(Event const & value)
-	{
-		return (value.id() == Ev::ID) ? static_cast<Ev const *>(&value) : nullptr;
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

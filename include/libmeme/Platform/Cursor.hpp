@@ -78,8 +78,8 @@ namespace ml
 			"Hand cursor shape",
 			"Horizontal resize cursor shape",
 			"Vertical resize cursor shape",
-			"The bottom-left resize cursor shape",
-			"The bottom-right resize cursor shape",
+			"Bottom-left resize cursor shape",
+			"Bottom-right resize cursor shape",
 		} } };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

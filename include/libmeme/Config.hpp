@@ -231,10 +231,12 @@
 #	define ML_CONFIGURATION	"Release"
 #endif
 
-// Utility
-#define _ML						::ml::
-#define _ML_BEGIN 				namespace ml {
-#define _ML_END 				}
+// Namespace
+#define _ML			::ml::
+#define _ML_BEGIN 	namespace ml {
+#define _ML_END 	}
+
+// Utils
 #define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)
 #define ML_ARRAYSIZE(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_CONCAT_IMPL(a, b)	a##b
@@ -244,13 +246,16 @@
 #define ML_TRUE_EXPR(expr)		(([&](){ expr; return true; })())
 #define ML_FALSE_EXPR(expr)		(([&](){ expr; return false; })())
 
+// Exceptions
+#define ML_THROW throw
+
 // Typedefs
-#define ML_USING				using
-#define ML_USING_VA(...)		template <##__VA_ARGS__> ML_USING
-#define ML_USING_X				ML_USING_VA(class X)
-#define ML_USING_XY				ML_USING_VA(class X, class Y)
-#define ML_USING_XYZ			ML_USING_VA(class X, class Y, class Z)
-#define ML_USING_Ts				ML_USING_VA(class ... Ts)
+#define ML_USING			using
+#define ML_USING_VA(...)	template <##__VA_ARGS__> ML_USING
+#define ML_USING_X			ML_USING_VA(class X)
+#define ML_USING_XY			ML_USING_VA(class X, class Y)
+#define ML_USING_XYZ		ML_USING_VA(class X, class Y, class Z)
+#define ML_USING_Ts			ML_USING_VA(class ... Ts)
 
 // Anonymous ( _str_# )
 #ifdef __COUNTER__

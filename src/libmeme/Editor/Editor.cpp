@@ -112,10 +112,10 @@ namespace ml
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ Window::getContextCurrent() };
+			auto backup_context{ Window::get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			Window::makeContextCurrent(backup_context);
+			Window::make_context_current(backup_context);
 		}
 
 		GL::flush();

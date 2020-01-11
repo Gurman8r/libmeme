@@ -9,31 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2u size;
+		vec2u size{ 0, 0 };
 		
-		uint32_t depth;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr explicit DisplayMode(vec2u const & size, uint32_t depth)
-			: size{ size }, depth{ depth }
-		{
-		}
-
-		constexpr DisplayMode(uint32_t width, uint32_t height, uint32_t depth)
-			: DisplayMode{ { width, height }, depth }
-		{
-		}
-
-		constexpr DisplayMode(DisplayMode const & copy)
-			: DisplayMode{ copy.size, copy.depth }
-		{
-		}
-
-		constexpr DisplayMode()
-			: DisplayMode{ { 0, 0 }, 0 }
-		{
-		}
+		uint32_t depth{ 0 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

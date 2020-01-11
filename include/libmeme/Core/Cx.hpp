@@ -127,7 +127,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				throw std::range_error("Index past end of vector");
+				ML_THROW std::range_error("Index past end of vector");
 			}
 			return m_data.at(index);
 		}
@@ -136,7 +136,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				throw std::range_error("Index past end of vector");
+				ML_THROW std::range_error("Index past end of vector");
 			}
 			return m_data.at(index);
 		}
@@ -145,7 +145,7 @@ namespace ml::cx
 		{
 			if (m_size >= _Cap)
 			{
-				throw std::range_error("Index out of range");
+				ML_THROW std::range_error("Index out of range");
 			}
 			else
 			{

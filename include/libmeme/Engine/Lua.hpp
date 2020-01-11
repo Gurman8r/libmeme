@@ -5,41 +5,39 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FileSystem.hpp>
 
-extern "C" {
+extern "C"
+{
 #include <lua/lua.h>
 #include <lua/lualib.h>
 #include <lua/lauxlib.h>
 }
 
-#define ML_Lua ::ml::Lua::getInstance()
-
 namespace ml
 {
-	struct ML_ENGINE_API Lua final : public Singleton<Lua>
+	struct ML_ENGINE_API Lua final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool init();
-
-		bool init(bool openLibs, luaL_Reg const * userLib);
-
-		bool dispose();
+		Lua() = delete;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t do_string(std::string const & value) const;
+		static bool startup();
 
-		int32_t do_file(path_t const & path) const;
+		static bool startup(bool openLibs, luaL_Reg const * userLib);
+
+		static bool shutdown();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static int32_t do_string(std::string const & value);
+
+		static int32_t do_file(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<Lua>;
-
-		Lua();
-		~Lua();
-
-		lua_State * m_L{ nullptr };
+		static lua_State * m_L;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
