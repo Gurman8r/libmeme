@@ -19,11 +19,11 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename pair_map<std::string, int32_t>;
+		using AttribCache = typename ds::pair_map<std::string, int32_t>;
 
-		using UniformCache = typename pair_map<std::string, int32_t>;
+		using UniformCache = typename ds::pair_map<std::string, int32_t>;
 
-		using TextureCache = typename pair_map<int32_t, struct Texture const *>;
+		using TextureCache = typename ds::pair_map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -45,15 +45,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & v_file, path_t const & f_file);
+		bool load_from_file(path_t const & v_file, path_t const & f_file);
 
-		bool loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file);
+		bool load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file);
 
-		bool loadFromSource(Source const & value);
+		bool load_from_source(Source const & value);
 
-		bool loadFromMemory(std::string const & vs, std::string const & fs);
+		bool load_from_memory(std::string const & vs, std::string const & fs);
 
-		bool loadFromMemory(std::string const & vs, std::string const & gs, std::string const & fs);
+		bool load_from_memory(std::string const & vs, std::string const & gs, std::string const & fs);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

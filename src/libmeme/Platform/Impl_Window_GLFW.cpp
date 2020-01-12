@@ -37,7 +37,7 @@ namespace ml
 
 	static GLFWimage const & make_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
-		static pair_map<byte_t const *, GLFWimage> cache {};
+		static ds::pair_map<byte_t const *, GLFWimage> cache {};
 		auto it { cache.find(pixels) };
 		if (it == cache.end())
 		{
@@ -75,10 +75,6 @@ namespace ml
 	
 	Window::~Window()
 	{
-		this->destroy();
-
-		this->terminate();
-
 #if defined(ML_SYSTEM_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })
 		{

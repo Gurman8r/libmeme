@@ -24,14 +24,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		std::vector<RenderTexture>		m_pipeline	{};
-		pair_map<std::string, Font>		m_fonts		{};
-		pair_map<std::string, Image>	m_images	{};
-		pair_map<std::string, Material>	m_materials	{};
-		pair_map<std::string, Model>	m_models	{};
-		pair_map<std::string, Script>	m_scripts	{};
-		pair_map<std::string, Shader>	m_shaders	{};
-		pair_map<std::string, Texture>	m_textures	{};
+		std::vector<RenderTexture>			m_pipeline	{};
+		ds::pair_map<std::string, Font>		m_fonts		{};
+		ds::pair_map<std::string, Image>	m_images	{};
+		ds::pair_map<std::string, Material>	m_materials	{};
+		ds::pair_map<std::string, Model>	m_models	{};
+		ds::pair_map<std::string, Script>	m_scripts	{};
+		ds::pair_map<std::string, Shader>	m_shaders	{};
+		ds::pair_map<std::string, Texture>	m_textures	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -179,9 +179,7 @@ namespace ml
 					GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
 					GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
 					GL::viewport(0, 0, _r->size()[0], _r->size()[1]);
-					RenderStates{
-						{}, {}, CullState{ false }, {}
-					}();
+					CullState{ false }();
 
 					if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false))
 					{

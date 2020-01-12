@@ -44,13 +44,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromMemory(vertices_t const & vertices, indices_t const & indices);
+		bool load_from_memory(vertices_t const & vertices, indices_t const & indices);
 		
-		bool loadFromMemory(vertices_t const & vertices);
+		bool load_from_memory(vertices_t const & vertices);
 		
-		bool loadFromMemory(contiguous_t const & vertices, indices_t const & indices);
+		bool load_from_memory(contiguous_t const & vertices, indices_t const & indices);
 
-		bool loadFromMemory(contiguous_t const & vertices);
+		bool load_from_memory(contiguous_t const & vertices);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -10,10 +10,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Mesh::Mesh() : m_storage{ std::make_tuple(
-		make_bufferlayout(),
-		make_vao(),
-		make_vbo(),
-		make_ibo()
+		make_bufferlayout(), make_vao(), make_vbo(), make_ibo()
 	) }
 	{
 	}
@@ -21,13 +18,13 @@ namespace ml
 	Mesh::Mesh(vertices_t const & vertices)
 		: m_storage{}
 	{
-		loadFromMemory(vertices);
+		load_from_memory(vertices);
 	}
 
 	Mesh::Mesh(vertices_t const & vertices, indices_t const & indices)
 		: m_storage{}
 	{
-		loadFromMemory(vertices, indices);
+		load_from_memory(vertices, indices);
 	}
 
 	Mesh::Mesh(Mesh const & other)
@@ -80,17 +77,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Mesh::loadFromMemory(vertices_t const & vertices, indices_t const & indices)
+	bool Mesh::load_from_memory(vertices_t const & vertices, indices_t const & indices)
 	{
-		return loadFromMemory(alg::contiguous(vertices), indices);
+		return load_from_memory(alg::contiguous(vertices), indices);
 	}
 
-	bool Mesh::loadFromMemory(vertices_t const & vertices)
+	bool Mesh::load_from_memory(vertices_t const & vertices)
 	{
-		return loadFromMemory(alg::contiguous(vertices));
+		return load_from_memory(alg::contiguous(vertices));
 	}
 
-	bool Mesh::loadFromMemory(contiguous_t const & vertices, indices_t const & indices)
+	bool Mesh::load_from_memory(contiguous_t const & vertices, indices_t const & indices)
 	{
 		if (!vertices.empty() && !indices.empty())
 		{
@@ -114,7 +111,7 @@ namespace ml
 		return false;
 	}
 
-	bool Mesh::loadFromMemory(contiguous_t const & vertices)
+	bool Mesh::load_from_memory(contiguous_t const & vertices)
 	{
 		if (!vertices.empty())
 		{
@@ -137,18 +134,17 @@ namespace ml
 
 	void Mesh::draw(RenderTarget const & target, Mesh const * value)
 	{
-		if (value)
+		if (!value) { return; }
+
+		if (value->vao() && value->vbo())
 		{
-			if (value->vao() && value->vbo())
+			if (value->ibo())
 			{
-				if (value->ibo())
-				{
-					target.draw(value->vao(), value->vbo(), value->ibo());
-				}
-				else
-				{
-					target.draw(value->vao(), value->vbo());
-				}
+				target.draw(value->vao(), value->vbo(), value->ibo());
+			}
+			else
+			{
+				target.draw(value->vao(), value->vbo());
 			}
 		}
 	}

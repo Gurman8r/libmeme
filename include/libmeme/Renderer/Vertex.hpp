@@ -146,22 +146,17 @@ namespace ml
 
 	namespace alg
 	{
-		static inline std::vector<float_t> const & contiguous(std::vector<Vertex> const & vertices)
+		static inline std::vector<float_t> contiguous(std::vector<Vertex> const & vertices)
 		{
-			static std::vector<float_t> temp;
-			if (const size_t imax{ vertices.size() * Vertex::Size })
+			std::vector<float_t> temp;
+			
+			temp.resize(vertices.size() * Vertex::Size);
+			
+			for (size_t i = 0, imax = temp.size(); i < imax; i++)
 			{
-				temp.resize(imax);
-
-				for (size_t i = 0; i < imax; i++)
-				{
-					temp[i] = vertices[i / Vertex::Size][i % Vertex::Size];
-				}
+				temp[i] = vertices[i / Vertex::Size][i % Vertex::Size];
 			}
-			else if (!temp.empty())
-			{
-				temp.clear();
-			}
+			
 			return temp;
 		}
 	}

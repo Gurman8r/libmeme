@@ -51,25 +51,25 @@ namespace ml
 	Shader::Shader(Source const & source)
 		: Shader{}
 	{
-		loadFromSource(source);
+		load_from_source(source);
 	}
 
 	Shader::Shader(path_t const & v, path_t const & f)
 		: Shader{}
 	{
-		loadFromFile(v, f);
+		load_from_file(v, f);
 	}
 
 	Shader::Shader(path_t const & v, path_t const & g, path_t const & f)
 		: Shader{}
 	{
-		loadFromFile(v, g, f);
+		load_from_file(v, g, f);
 	}
 
 	Shader::Shader(Shader const & other)
 		: Shader{}
 	{
-		loadFromSource(other.m_source);
+		load_from_source(other.m_source);
 	}
 
 	Shader::Shader(Shader && other) noexcept
@@ -112,7 +112,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::loadFromFile(path_t const & v_file, path_t const & f_file)
+	bool Shader::load_from_file(path_t const & v_file, path_t const & f_file)
 	{
 		// Read Vertex
 		std::string const vs{ FS::get_file_contents(v_file) };
@@ -120,10 +120,10 @@ namespace ml
 		// Read Fragment
 		std::string const fs{ FS::get_file_contents(f_file) };
 
-		return loadFromMemory(vs, fs);
+		return load_from_memory(vs, fs);
 	}
 
-	bool Shader::loadFromFile(path_t const & v_file, path_t const g_file, path_t const & f_file)
+	bool Shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
 	{
 		// Read Vertex
 		std::string const vs{ FS::get_file_contents(v_file) };
@@ -134,24 +134,24 @@ namespace ml
 		// Read Fragment
 		std::string const fs{ FS::get_file_contents(f_file) };
 
-		return loadFromMemory(vs, gs, fs);
+		return load_from_memory(vs, gs, fs);
 	}
 
-	bool Shader::loadFromSource(Source const & value)
+	bool Shader::load_from_source(Source const & value)
 	{
-		return loadFromMemory(
+		return load_from_memory(
 			std::string{ value.vs },
 			std::string{ value.gs },
 			std::string{ value.fs }
 		);
 	}
 
-	bool Shader::loadFromMemory(std::string const & vs, std::string const & fs)
+	bool Shader::load_from_memory(std::string const & vs, std::string const & fs)
 	{
-		return loadFromMemory(vs, std::string{}, fs);
+		return load_from_memory(vs, std::string{}, fs);
 	}
 
-	bool Shader::loadFromMemory(std::string const & vs, std::string const & gs, std::string const & fs)
+	bool Shader::load_from_memory(std::string const & vs, std::string const & gs, std::string const & fs)
 	{
 		m_source = Source{
 			(vs.empty() ? nullptr : vs.c_str()),

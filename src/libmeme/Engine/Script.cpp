@@ -17,7 +17,13 @@ namespace ml
 		: m_language{ Language::Unknown }
 		, m_text{}
 	{
-		loadFromFile(path);
+		load_from_file(path);
+	}
+
+	Script::Script(Language language)
+		: m_language{ language }
+		, m_text{}
+	{
 	}
 
 	Script::Script(Language language, std::string const & text)
@@ -67,7 +73,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Script::loadFromFile(path_t const & path)
+	bool Script::load_from_file(path_t const & path)
 	{
 		return !(m_text = FS::get_file_contents(path)).empty();
 	}

@@ -3,7 +3,7 @@
 
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/Singleton.hpp>
-#include <libmeme/Core/DenseMap.hpp>
+#include <libmeme/Core/DS.hpp>
 
 namespace ml
 {
@@ -17,10 +17,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using listener_map = typename pair_multimap<int32_t, EventListener *>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
 		static EventListener * add_listener(int32_t type, EventListener * listener);
 		
 		static void fire_event(Event const & value);
@@ -48,7 +44,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static listener_map m_listeners;
+		static ds::pair_multimap<int32_t, EventListener *> m_listeners;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

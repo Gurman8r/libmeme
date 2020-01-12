@@ -111,6 +111,18 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <> struct nameof<int64_t>
+	{
+		static constexpr auto value{ "long long" }; // __int64
+	};
+
+	template <> struct nameof<uint64_t>
+	{
+		static constexpr auto value{ "unsigned long long" }; // unsigned __int64
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_NAMEOF_HPP_

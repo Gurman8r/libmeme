@@ -27,7 +27,7 @@ namespace ml
 	Font::Font(path_t const & path)
 		: Font{}
 	{
-		loadFromFile(path);
+		load_from_file(path);
 	}
 
 	Font::Font(Font const & other)
@@ -80,7 +80,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Font::loadFromFile(path_t const & path)
+	bool Font::load_from_file(path_t const & path)
 	{
 		if (m_library) return false;
 

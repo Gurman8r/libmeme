@@ -3,7 +3,7 @@
 
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
-#include <libmeme/Core/DenseMap.hpp>
+#include <libmeme/Core/DS.hpp>
 
 #define ML_MemoryTracker ::ml::MemoryTracker::getInstance()
 
@@ -48,7 +48,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type = typename pair_map<struct Trackable *, AllocationRecord *>;
+		using storage_type = typename ds::pair_map<struct Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -12,7 +12,7 @@
 #include <libmeme/Platform/WindowSettings.hpp>
 
 #define ML_ASPECT(w, h) ((w != 0 && h != 0) ? ((float_t)w / (float_t)(h)) : 0.0f)
-#define ML_ASPECT_2(v)	ML_ASPECT(v[0], v[1])
+#define ML_ASPECT2(v)	ML_ASPECT(v[0], v[1])
 
 namespace ml
 {
@@ -125,11 +125,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto get_aspect() const -> float_t { return ML_ASPECT_2(get_size()); };
+		inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
 		
 		inline auto get_context() const -> ContextSettings const & { return m_context; }
 		
-		inline auto get_frame_aspect() const -> float_t { return ML_ASPECT_2(get_frame_size()); };
+		inline auto get_frame_aspect() const -> float_t { return ML_ASPECT2(get_frame_size()); };
 		
 		inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
 		

@@ -106,6 +106,10 @@ namespace ml
 
 	void Engine::shutdown()
 	{
+		s_window.destroy();
+
+		s_window.terminate();
+
 		Python::shutdown();
 
 		Lua::shutdown();

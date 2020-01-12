@@ -47,9 +47,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & path);
+		bool load_from_file(path_t const & path);
 
-		bool loadFromFile(path_t const & path, uint32_t flags);
+		bool load_from_file(path_t const & path, uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

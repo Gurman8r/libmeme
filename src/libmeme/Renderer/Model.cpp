@@ -29,7 +29,7 @@ namespace ml
 	Model::Model(path_t const & path)
 		: m_storage{}
 	{
-		loadFromFile(path);
+		load_from_file(path);
 	}
 
 	Model::Model(storage_type const & storage)
@@ -86,9 +86,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Model::loadFromFile(path_t const & path)
+	bool Model::load_from_file(path_t const & path)
 	{
-		return loadFromFile(path,
+		return load_from_file(path,
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
@@ -98,7 +98,7 @@ namespace ml
 		);
 	}
 
-	bool Model::loadFromFile(path_t const & path, uint32_t flags)
+	bool Model::load_from_file(path_t const & path, uint32_t flags)
 	{
 		if (!m_storage.empty()) { m_storage.clear(); }
 
@@ -142,12 +142,11 @@ namespace ml
 
 	void Model::draw(RenderTarget const & target, Model const * value)
 	{
-		if (value)
+		if (!value) { return; }
+
+		for (auto const & elem : (*value))
 		{
-			for (auto const & elem : (*value))
-			{
-				target.draw(elem);
-			}
+			target.draw(elem);
 		}
 	}
 

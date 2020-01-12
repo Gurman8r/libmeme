@@ -74,7 +74,7 @@ namespace ml
 	Image::Image(path_t const & path, bool flip, size_t req_comp)
 		: Image{}
 	{
-		loadFromFile(path, flip, req_comp);
+		load_from_file(path, flip, req_comp);
 	}
 
 	Image::Image(Image const & other)
@@ -124,17 +124,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Image::loadFromFile(path_t const & path)
+	bool Image::load_from_file(path_t const & path)
 	{
-		return loadFromFile(path, true);
+		return load_from_file(path, true);
 	}
 
-	bool Image::loadFromFile(path_t const & path, bool flip)
+	bool Image::load_from_file(path_t const & path, bool flip)
 	{
-		return loadFromFile(path, flip, 0);
+		return load_from_file(path, flip, 0);
 	}
 
-	bool Image::loadFromFile(path_t const & path, bool flip, size_t req_comp)
+	bool Image::load_from_file(path_t const & path, bool flip, size_t req_comp)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 

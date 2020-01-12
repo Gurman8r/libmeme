@@ -48,7 +48,7 @@ namespace ml
 	Texture::Texture(path_t const & path)
 		: Texture{}
 	{
-		loadFromFile(path);
+		load_from_file(path);
 	}
 
 	Texture::Texture(Image const & image)
@@ -113,7 +113,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::loadFromFile(path_t const & path)
+	bool Texture::load_from_file(path_t const & path)
 	{
 		return loadFromImage(make_image(path));
 	}

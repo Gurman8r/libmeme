@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Page = typename pair_map<uint32_t, Glyph>;
+		using Page = typename ds::pair_map<uint32_t, Glyph>;
 		
-		using PageTable = typename pair_map<uint32_t, Page>;
+		using PageTable = typename ds::pair_map<uint32_t, Page>;
 
 		struct Info final
 		{
@@ -36,7 +36,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool loadFromFile(path_t const & path);
+		bool load_from_file(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

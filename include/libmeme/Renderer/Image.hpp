@@ -46,11 +46,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		bool loadFromFile(path_t const & path);
+		bool load_from_file(path_t const & path);
 		
-		bool loadFromFile(path_t const & path, bool flip);
+		bool load_from_file(path_t const & path, bool flip);
 		
-		bool loadFromFile(path_t const & path, bool flip, size_t req_comp);
+		bool load_from_file(path_t const & path, bool flip, size_t req_comp);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
