@@ -1,11 +1,7 @@
 #ifndef _ML_PERFORMANCE_TRACKER_HPP_
 #define _ML_PERFORMANCE_TRACKER_HPP_
 
-#include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/Timer.hpp>
-
-#define ML_PerformanceTracker ::ml::PerformanceTracker::getInstance()
 
 #ifndef ML_DISABLE_BENCHMARKS
 #	define ML_BENCHMARK(...) ML_ANON_T(ScopeTimer, ##__VA_ARGS__)
@@ -17,35 +13,29 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API PerformanceTracker final : public Singleton<PerformanceTracker>
+	class ML_CORE_API PerformanceTracker final
 	{
-		friend struct Singleton<PerformanceTracker>;
-
 		friend struct ScopeTimer;
-
-		std::vector<std::pair<C_String, Duration>> m_curr, m_prev;
 		
-		PerformanceTracker();
-		
-		~PerformanceTracker();
+		using buffer_type = typename std::vector<std::pair<C_String, Duration>>;
 
-		template <class ... Args
-		> inline decltype(auto) push_trace(Args && ... args)
-		{
-			return m_curr.emplace_back(std::make_pair(std::forward<Args>(args)...));
-		}
+		static buffer_type m_curr;
+
+		static buffer_type m_prev;
 
 	public:
-		inline void swap()
+		static inline auto const & previous() noexcept
+		{
+			return m_prev;
+		}
+
+		static inline void swap() noexcept
 		{
 			m_prev.swap(m_curr);
 
 			m_curr.clear();
-		}
 
-		inline auto const & previous() const
-		{
-			return m_prev;
+			m_curr.reserve(m_prev.size());
 		}
 	};
 
@@ -55,13 +45,13 @@ namespace ml
 	{
 		C_String name; Timer timer;
 
-		ScopeTimer(C_String name) : name{ name }, timer { true }
+		ScopeTimer(C_String name) noexcept : name{ name }, timer { true }
 		{
 		}
 
-		~ScopeTimer()
+		~ScopeTimer() noexcept
 		{
-			ML_PerformanceTracker.push_trace(name, timer.stop().elapsed());
+			PerformanceTracker::m_curr.emplace_back(name, timer.stop().elapsed());
 		}
 	};
 

@@ -5,9 +5,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventListener * EventHandler::Bank::addListener(int32_t const id, EventHandler * value)
+	EventListener * EventHandler::Pool::add_listener(int32_t const id, EventHandler * value)
 	{
-		return EventSystem::addListener(id, value);
+		return EventSystem::add_listener(id, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -28,10 +28,6 @@ namespace ml
 
 		static bool startup(path_t const & name, path_t const & home);
 
-		static void shutdown();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static bool create_window(CreateWindowSettings const & settings);
 
 		static bool running();
@@ -39,6 +35,8 @@ namespace ml
 		static void begin_loop();
 
 		static void end_loop();
+
+		static void shutdown();
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -23,7 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) addMenu(std::string const & name, menu_t const & value)
+		inline decltype(auto) add_menu(std::string const & name, menu_t const & value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{

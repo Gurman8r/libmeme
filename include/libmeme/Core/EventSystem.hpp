@@ -21,28 +21,28 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static EventListener * addListener(int32_t type, EventListener * listener);
+		static EventListener * add_listener(int32_t type, EventListener * listener);
 		
-		static void fireEvent(Event const & value);
+		static void fire_event(Event const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool removeListener(int32_t type, EventListener * listener);
+		static bool remove_listener(int32_t type, EventListener * listener);
 		
-		static bool removeListenerFromAllEvents(EventListener * listener);
+		static bool remove_listener(EventListener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline EventListener * addListener(EventListener * listener)
+		> static inline EventListener * add_listener(EventListener * listener)
 		{
-			return addListener(Ev::ID, listener);
+			return add_listener(Ev::ID, listener);
 		}
 
 		template <class Ev, class ... Args
-		> static inline void fireEvent(Args && ... args)
+		> static inline void fire_event(Args && ... args)
 		{
-			return fireEvent(Ev{ std::forward<Args>(args)... });
+			return fire_event(Ev{ std::forward<Args>(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

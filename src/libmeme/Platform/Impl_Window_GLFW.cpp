@@ -59,8 +59,8 @@ namespace ml
 		, m_settings	{}
 		, m_video	{}
 	{
-		EventSystem::addListener<WindowKillEvent>(this);
-		EventSystem::addListener<WindowFullscreenEvent>(this);
+		EventSystem::add_listener<WindowKillEvent>(this);
+		EventSystem::add_listener<WindowFullscreenEvent>(this);
 
 #if defined(ML_SYSTEM_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })

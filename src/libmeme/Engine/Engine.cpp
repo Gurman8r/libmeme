@@ -12,27 +12,27 @@ namespace ml
 	{
 		window.set_char_callback([](auto, auto ch)
 		{
-			EventSystem::fireEvent<CharEvent>(ch);
+			EventSystem::fire_event<CharEvent>(ch);
 		});
 		window.set_cursor_enter_callback([](auto, auto entered)
 		{
-			EventSystem::fireEvent<CursorEnterEvent>(entered);
+			EventSystem::fire_event<CursorEnterEvent>(entered);
 		});
 		window.set_cursor_pos_callback([](auto, auto x, auto y)
 		{
-			EventSystem::fireEvent<CursorPosEvent>(x, y);
+			EventSystem::fire_event<CursorPosEvent>(x, y);
 		});
 		window.set_error_callback([](auto code, auto desc)
 		{
-			EventSystem::fireEvent<WindowErrorEvent>(code, desc);
+			EventSystem::fire_event<WindowErrorEvent>(code, desc);
 		});
 		window.set_frame_size_callback([](auto, auto w, auto h)
 		{
-			EventSystem::fireEvent<FrameSizeEvent>(w, h);
+			EventSystem::fire_event<FrameSizeEvent>(w, h);
 		});
 		window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
 		{
-			EventSystem::fireEvent<KeyEvent>(button, scan, action, mask8_t{ {
+			EventSystem::fire_event<KeyEvent>(button, scan, action, mask8_t{ {
 				(mods & ML_MOD_SHIFT),
 				(mods & ML_MOD_CTRL),
 				(mods & ML_MOD_ALT),
@@ -43,42 +43,33 @@ namespace ml
 		});
 		window.set_mouse_callback([](auto, auto button, auto action, auto mods)
 		{
-			EventSystem::fireEvent<MouseEvent>(button, action, mods);
+			EventSystem::fire_event<MouseEvent>(button, action, mods);
 		});
 		window.set_scroll_callback([](auto, auto x, auto y)
 		{
-			EventSystem::fireEvent<ScrollEvent>(x, y);
+			EventSystem::fire_event<ScrollEvent>(x, y);
 		});
 		window.set_window_close_callback([](auto)
 		{
-			EventSystem::fireEvent<WindowCloseEvent>();
+			EventSystem::fire_event<WindowCloseEvent>();
 		});
 		window.set_window_focus_callback([](auto, auto focused)
 		{
-			EventSystem::fireEvent<WindowFocusEvent>(focused);
+			EventSystem::fire_event<WindowFocusEvent>(focused);
 		});
 		window.set_window_pos_callback([](auto, auto x, auto y)
 		{
-			EventSystem::fireEvent<WindowPosEvent>(x, y);
+			EventSystem::fire_event<WindowPosEvent>(x, y);
 		});
 		window.set_window_size_callback([](auto, auto w, auto h)
 		{
-			EventSystem::fireEvent<WindowSizeEvent>(w, h);
+			EventSystem::fire_event<WindowSizeEvent>(w, h);
 		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	RenderWindow Engine::s_window{};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void Engine::shutdown()
-	{
-		Python::shutdown();
-
-		Lua::shutdown();
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -111,6 +102,13 @@ namespace ml
 	void Engine::end_loop()
 	{
 		s_window.swap_buffers();
+	}
+
+	void Engine::shutdown()
+	{
+		Python::shutdown();
+
+		Lua::shutdown();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

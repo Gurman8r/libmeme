@@ -67,7 +67,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(Editor::mainMenuBar().open() ? ImGuiWindowFlags_MenuBar : 0)
+					(Editor::main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -86,7 +86,7 @@ namespace ml
 				m_nodes[LeftDn] = split_node(m_nodes[Left], ImGuiDir_Down, 0.25f, &m_nodes[Left]);
 				m_nodes[RightDn] = split_node(m_nodes[Right], ImGuiDir_Down, 0.25f, &m_nodes[Right]);
 
-				EventSystem::fireEvent<DockspaceEvent>(*this);
+				EventSystem::fire_event<DockspaceEvent>(*this);
 
 				end_builder(m_nodes[Root]);
 			};

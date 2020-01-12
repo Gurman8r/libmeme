@@ -13,12 +13,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ev
-	> static constexpr decltype(auto) event_cast(struct Event const * value) noexcept
+	template <class Ev> static constexpr auto event_cast(struct Event const * value) noexcept
 	{
-		return (value && (value->id() == Ev::ID)) 
-			? std::make_optional(*static_cast<Ev const *>(value))
-			: std::nullopt;
+		return (value && (value->id() == Ev::ID)) ? static_cast<Ev const *>(value) : nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

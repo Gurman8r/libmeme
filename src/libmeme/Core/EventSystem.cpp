@@ -9,14 +9,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventListener * EventSystem::addListener(int32_t type, EventListener * listener)
+	EventListener * EventSystem::add_listener(int32_t type, EventListener * listener)
 	{
 		return listener
 			? m_listeners.insert(std::make_pair(type, listener))->second
 			: nullptr;
 	}
 
-	void EventSystem::fireEvent(Event const & value)
+	void EventSystem::fire_event(Event const & value)
 	{
 		auto found{ m_listeners.equal_range(value.id()) };
 		for (auto it = found.first; it != found.second; it++)
@@ -27,7 +27,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool EventSystem::removeListener(int32_t type, EventListener * listener)
+	bool EventSystem::remove_listener(int32_t type, EventListener * listener)
 	{
 		auto found{ m_listeners.equal_range(type) };
 		for (auto it = found.first; it != found.second; it++)
@@ -41,7 +41,7 @@ namespace ml
 		return false;
 	}
 
-	bool EventSystem::removeListenerFromAllEvents(EventListener * listener)
+	bool EventSystem::remove_listener(EventListener * listener)
 	{
 		bool done{ false };
 		while (!done)

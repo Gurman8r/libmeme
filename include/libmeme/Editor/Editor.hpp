@@ -37,7 +37,7 @@ namespace ml
 
 		static inline auto & dockspace() noexcept { return s_dockspace; }
 
-		static inline auto & mainMenuBar() noexcept { return s_mainMenuBar; }
+		static inline auto & main_menu() noexcept { return s_mainMenuBar; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

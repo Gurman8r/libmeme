@@ -7,7 +7,7 @@ namespace ml
 
 	EventListener::~EventListener()
 	{
-		EventSystem::removeListenerFromAllEvents(this);
+		EventSystem::remove_listener(this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

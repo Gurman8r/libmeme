@@ -184,8 +184,9 @@ ml::int32_t main()
 	}
 	time{};
 
-	EventHandler::Bank bank;
-	bank.addListener<EnterEvent>([](Event const & value)
+	// Testing
+	EventHandler::Pool flow;
+	flow.add_listener<EnterEvent>([](Event const & value)
 	{
 		if (auto const ev = value.as<EnterEvent>())
 		{
@@ -197,7 +198,7 @@ ml::int32_t main()
 	});
 
 	// Enter
-	EventSystem::fireEvent<EnterEvent>(ML_ARGC, ML_ARGV);
+	EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
 	{
 		// Startup Engine
 		if (!Engine::startup(ML_ARGV[0], "../../../"))
@@ -222,7 +223,7 @@ ml::int32_t main()
 		}
 
 		// Load
-		EventSystem::fireEvent<LoadEvent>();
+		EventSystem::fire_event<LoadEvent>();
 
 		// Main Loop
 		while (Engine::running())
@@ -234,60 +235,60 @@ ml::int32_t main()
 			{
 				ML_BENCHMARK("LOOP_BEGIN");
 				Engine::begin_loop();
-				EventSystem::fireEvent<BeginLoopEvent>();
+				EventSystem::fire_event<BeginLoopEvent>();
 			}
 			// Update
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tUPDATE");
-				EventSystem::fireEvent<UpdateEvent>();
+				EventSystem::fire_event<UpdateEvent>();
 			}
 			// Draw
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tDRAW");
-				EventSystem::fireEvent<DrawEvent>();
+				EventSystem::fire_event<DrawEvent>();
 			}
 			// Begin Gui
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_BEGIN");
 				Editor::new_frame();
-				EventSystem::fireEvent<BeginGuiEvent>();
+				EventSystem::fire_event<BeginGuiEvent>();
 			}
 			// Gui
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\t\tGUI");
-				Editor::mainMenuBar().render();
+				Editor::main_menu().render();
 				Editor::dockspace().render();
-				EventSystem::fireEvent<GuiEvent>();
+				EventSystem::fire_event<GuiEvent>();
 			}
 			// End Gui
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_END");
 				Editor::render_frame();
-				EventSystem::fireEvent<EndGuiEvent>();
+				EventSystem::fire_event<EndGuiEvent>();
 			}
 			// End Loop
 			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("LOOP_END");
-				EventSystem::fireEvent<EndLoopEvent>();
+				EventSystem::fire_event<EndLoopEvent>();
 				Engine::end_loop();
 			}
-			ML_PerformanceTracker.swap();
+			PerformanceTracker::swap();
 			time.delta = time.loop.stop().elapsed().count();
 		}
 
 		// Unload
-		EventSystem::fireEvent<UnloadEvent>();
+		EventSystem::fire_event<UnloadEvent>();
 		Editor::shutdown();
 		Engine::shutdown();
 	}
 	// Exit
-	EventSystem::fireEvent<ExitEvent>();
+	EventSystem::fire_event<ExitEvent>();
 
 	// Goodbye!
 	return EXIT_SUCCESS;

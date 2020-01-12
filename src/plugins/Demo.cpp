@@ -24,6 +24,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		std::vector<RenderTexture>		m_pipeline	{};
 		pair_map<std::string, Font>		m_fonts		{};
 		pair_map<std::string, Image>	m_images	{};
 		pair_map<std::string, Material>	m_materials	{};
@@ -31,18 +32,17 @@ namespace ml
 		pair_map<std::string, Script>	m_scripts	{};
 		pair_map<std::string, Shader>	m_shaders	{};
 		pair_map<std::string, Texture>	m_textures	{};
-		std::vector<RenderTexture>		m_pipeline	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Demo() : Plugin{}
 		{
-			EventSystem::addListener<LoadEvent>(this);
-			EventSystem::addListener<UpdateEvent>(this);
-			EventSystem::addListener<DrawEvent>(this);
-			EventSystem::addListener<DockspaceEvent>(this);
-			EventSystem::addListener<GuiEvent>(this);
-			EventSystem::addListener<UnloadEvent>(this);
+			EventSystem::add_listener<LoadEvent>(this);
+			EventSystem::add_listener<UpdateEvent>(this);
+			EventSystem::add_listener<DrawEvent>(this);
+			EventSystem::add_listener<DockspaceEvent>(this);
+			EventSystem::add_listener<GuiEvent>(this);
+			EventSystem::add_listener<UnloadEvent>(this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,7 +53,7 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(&value) })
 			{
-				Editor::mainMenuBar().addMenu("File", [&]()
+				Editor::main_menu().add_menu("File", [&]()
 				{
 					ImGui::PushID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
@@ -62,17 +62,8 @@ namespace ml
 					}
 					ImGui::PopID();
 				});
-				Editor::mainMenuBar().addMenu("Plugins", [&]()
-				{
-					ImGui::PushID(ML_ADDRESSOF(this));
-					if (ImGui::BeginMenu("Demo"))
-					{
-						ImGui::Text("Sample text.");
-						ImGui::EndMenu();
-					}
-					ImGui::PopID();
-				});
-				Editor::mainMenuBar().addMenu("Options", [&]()
+
+				Editor::main_menu().add_menu("Options", [&]()
 				{
 					ImGui::PushID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Window"))
@@ -87,14 +78,14 @@ namespace ml
 					ImGui::PopID();
 				});
 
+				m_pipeline.emplace_back(make_rendertexture(vec2i{ 1280, 720 })).create();
+
 				if (auto const & img{ m_images["icon"] = make_image(
 					FS::path_to("../../../assets/textures/icon.png")
 				) }; !img.empty())
 				{
 					Engine::window().set_icon(img.width(), img.height(), img.data());
 				}
-
-				m_pipeline.emplace_back(make_rendertexture(vec2i{ 1280, 720 })).create();
 
 				m_textures["doot"] = make_texture(
 					FS::path_to("../../../assets/textures/doot.png")
@@ -233,7 +224,7 @@ namespace ml
 					ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
 
 					// Benchmarks
-					if (auto const & prev{ ML_PerformanceTracker.previous() }; !prev.empty())
+					if (auto const & prev{ PerformanceTracker::previous() }; !prev.empty())
 					{
 						ImGui::Separator();
 						for (auto const & elem : prev)

@@ -12,16 +12,16 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_CORE_API Bank final : public Trackable, public NonCopyable
+		struct ML_CORE_API Pool final : public Trackable, public NonCopyable
 		{
-			Bank() noexcept : m_handlers{} {}
+			Pool() noexcept : m_handlers{} {}
 
-			EventListener * addListener(int32_t const id, EventHandler * value);
+			EventListener * add_listener(int32_t const id, EventHandler * value);
 
 			template <class Ev, class ... Args
-			> inline EventListener * addListener(Args && ... args)
+			> inline EventListener * add_listener(Args && ... args)
 			{
-				return addListener(Ev::ID, &m_handlers.emplace_back(std::forward<Args>(args)...));
+				return add_listener(Ev::ID, &m_handlers.emplace_back(std::forward<Args>(args)...));
 			}
 
 		private:
