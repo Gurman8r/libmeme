@@ -22,7 +22,7 @@ namespace ml
 
 		using value_type		= typename T;
 		using self_type			= typename Matrix<value_type, Width, Height>;
-		using storage_type		= typename Array<value_type, Width * Height>;
+		using storage_type		= typename array<value_type, Width * Height>;
 		using size_type			= typename storage_type::size_type;
 		using difference_type	= typename storage_type::difference_type;
 		using pointer			= typename storage_type::pointer;
@@ -44,32 +44,37 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <template <class, size_t, size_t> class M,
-			class U, size_t W, size_t H,
-			class = std::enable_if_t<!std::is_same_v<M<U, W, H>, self_type>>
+		template <template <class, size_t, size_t> class M, class U, size_t W, size_t H
 		> constexpr operator M<U, W, H>() const noexcept
 		{
-			auto temp{ M<U, W, H>::zero() };
-			for (size_t i = 0; i < temp.size(); i++)
+			if constexpr (std::is_same_v<M<U, W, H>, self_type>)
 			{
-				size_t const x{ i % temp.width() }, y{ i / temp.width() };
-
-				temp[i] = (y < Height && x < Width) ? (U)at(y * Width + x) : (U)0;
+				return (*this);
 			}
-			return temp;
+			else
+			{
+				auto temp{ M<U, W, H>::zero() };
+				for (size_t i = 0; i < temp.size(); i++)
+				{
+					size_t const x{ i % temp.width() }, y{ i / temp.width() };
+
+					temp[i] = (y < Height && x < Width) ? (U)at(y * Width + x) : (U)0;
+				}
+				return temp;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_t const i) { return m_data[i]; }
+		constexpr reference operator[](size_type const i) { return m_data[i]; }
 
-		constexpr const_reference operator[](size_t const i) const { return m_data[i]; }
+		constexpr const_reference operator[](size_type const i) const { return m_data[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_t const i) -> reference { return m_data.at(i); }
+		constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
 		
-		constexpr auto at(size_t const i) const -> const_reference { return m_data.at(i); }
+		constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
 		
 		constexpr auto back() noexcept -> reference { return m_data.back(); }
 		

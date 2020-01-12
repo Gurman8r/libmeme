@@ -146,7 +146,7 @@ namespace ml
 			static_cast<int32_t>(req_comp)
 		) })
 		{
-			createFromPixels({ data, data + capacity() });
+			create_from_pixels({ data, data + capacity() });
 			
 			::stbi_image_free(data);
 			
@@ -157,17 +157,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::createFromColor(vec2u const & size, Color32 const & color)
+	Image & Image::create_from_color(vec2u const & size, Color32 const & color)
 	{
-		return createFromColor(size, channels(), color);
+		return create_from_color(size, channels(), color);
 	}
 
-	Image & Image::createFromColor(Color32 const & color)
+	Image & Image::create_from_color(Color32 const & color)
 	{
-		return createFromColor(size(), channels(), color);
+		return create_from_color(size(), channels(), color);
 	}
 	
-	Image & Image::createFromColor(vec2u const & size, size_t channels, Color32 const & color)
+	Image & Image::create_from_color(vec2u const & size, size_t channels, Color32 const & color)
 	{
 		if (size[0] && size[1] && channels)
 		{
@@ -191,17 +191,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Image & Image::createFromPixels(vec2u const & size, Pixels const & pixels)
+	Image & Image::create_from_pixels(vec2u const & size, Pixels const & pixels)
 	{
-		return createFromPixels(size, m_channels, pixels);
+		return create_from_pixels(size, m_channels, pixels);
 	}
 
-	Image & Image::createFromPixels(Pixels const & pixels)
+	Image & Image::create_from_pixels(Pixels const & pixels)
 	{
-		return createFromPixels(m_size, m_channels, pixels);
+		return create_from_pixels(m_size, m_channels, pixels);
 	}
 	
-	Image & Image::createFromPixels(vec2u const & size, size_t channels, Pixels const & pixels)
+	Image & Image::create_from_pixels(vec2u const & size, size_t channels, Pixels const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{

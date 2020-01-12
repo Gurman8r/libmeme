@@ -78,7 +78,7 @@ namespace ml
 					ImGui::PopID();
 				});
 
-				m_pipeline.emplace_back(make_rendertexture(vec2i{ 1280, 720 })).create();
+				m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })).create();
 
 				if (auto const & img{ m_images["icon"] = make_image(
 					FS::path_to("../../../assets/textures/icon.png")

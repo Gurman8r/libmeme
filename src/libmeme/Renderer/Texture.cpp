@@ -54,7 +54,7 @@ namespace ml
 	Texture::Texture(Image const & image)
 		: Texture{}
 	{
-		loadFromImage(image);
+		load_from_image(image);
 	}
 
 	Texture::Texture(Texture const & other) : Texture{
@@ -66,7 +66,7 @@ namespace ml
 		other.m_flags
 	}
 	{
-		loadFromTexture(other);
+		load_from_texture(other);
 	}
 
 	Texture::Texture(Texture && other) noexcept
@@ -115,10 +115,10 @@ namespace ml
 
 	bool Texture::load_from_file(path_t const & path)
 	{
-		return loadFromImage(make_image(path));
+		return load_from_image(make_image(path));
 	}
 
-	bool Texture::loadFromImage(Image const & image)
+	bool Texture::load_from_image(Image const & image)
 	{
 		if (!image.channels()) { return false; }
 
@@ -127,11 +127,11 @@ namespace ml
 		return create(image.size()) && update(image);
 	}
 
-	bool Texture::loadFromTexture(Texture const & other)
+	bool Texture::load_from_texture(Texture const & other)
 	{
 		return (other.handle()
 			? (create(other.size())
-				? update(other.copyToImage())
+				? update(other.copy_to_image())
 				: Debug::logError("Failed to copy texture, failed to create new texture"))
 			: false
 		);
@@ -259,17 +259,17 @@ namespace ml
 	
 	bool Texture::update(Texture const & other, UintRect const & area)
 	{
-		return update(other.copyToImage(), area);
+		return update(other.copy_to_image(), area);
 	}
 
 	bool Texture::update(Texture const & other, vec2u const & position, vec2u const & size)
 	{
-		return update(other.copyToImage(), position, size);
+		return update(other.copy_to_image(), position, size);
 	}
 
 	bool Texture::update(Texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	{
-		return update(other.copyToImage(), x, y, w, h);
+		return update(other.copy_to_image(), x, y, w, h);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * */
@@ -355,7 +355,7 @@ namespace ml
 		}
 	}
 
-	Image Texture::copyToImage() const
+	Image Texture::copy_to_image() const
 	{
 		Image temp{ size(), channels() };
 		if (ML_BIND(Texture, (*this)))

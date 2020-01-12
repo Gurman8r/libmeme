@@ -54,19 +54,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & createFromColor(vec2u const & size, Color32 const & color);
+		Image & create_from_color(vec2u const & size, Color32 const & color);
 		
-		Image & createFromColor(Color32 const & color);
+		Image & create_from_color(Color32 const & color);
 		
-		Image & createFromColor(vec2u const & size, size_t channels, Color32 const & color);
+		Image & create_from_color(vec2u const & size, size_t channels, Color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & createFromPixels(vec2u const & size, Pixels const & pixels);
+		Image & create_from_pixels(vec2u const & size, Pixels const & pixels);
 		
-		Image & createFromPixels(Pixels const & pixels);
+		Image & create_from_pixels(Pixels const & pixels);
 		
-		Image & createFromPixels(vec2u const & size, size_t channels, Pixels const & pixels);
+		Image & create_from_pixels(vec2u const & size, size_t channels, Pixels const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

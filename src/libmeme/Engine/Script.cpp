@@ -20,12 +20,6 @@ namespace ml
 		load_from_file(path);
 	}
 
-	Script::Script(Language language)
-		: m_language{ language }
-		, m_text{}
-	{
-	}
-
 	Script::Script(Language language, std::string const & text)
 		: m_language{ language }
 		, m_text{ text }

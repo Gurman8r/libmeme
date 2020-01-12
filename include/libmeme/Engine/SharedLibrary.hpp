@@ -59,8 +59,6 @@ namespace ml
 
 		inline bool good() const noexcept { return m_instance; }
 
-		inline auto instance() const noexcept -> void * const & { return m_instance; }
-
 		inline auto functions() const noexcept -> functions_t const & { return m_functions; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

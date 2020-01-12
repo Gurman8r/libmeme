@@ -17,12 +17,10 @@ namespace ml
 	{
 		using type = typename T;
 
-		constexpr cast() noexcept = default;
-
-		template <class U
-		> constexpr decltype(auto) operator()(U && u) const noexcept
+		template <class ... Args
+		> constexpr decltype(auto) operator()(Args && ... args) const noexcept
 		{
-			return static_cast<type>(std::forward<U>(u));
+			return static_cast<type>(std::forward<Args>(args)...);
 		}
 		
 		static constexpr type minus_one		{ static_cast<type>( -1) };

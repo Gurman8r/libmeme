@@ -31,7 +31,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_t i)
+		constexpr reference operator[](size_type const i)
 		{
 			if (Size <= i)
 			{
@@ -40,7 +40,7 @@ namespace ml
 			return m_data[i];
 		}
 
-		constexpr const_reference operator[](size_t i) const
+		constexpr const_reference operator[](size_type const i) const
 		{
 			if (Size <= i)
 			{
@@ -51,7 +51,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_t const i) -> reference { return operator[](i); }
+		constexpr auto at(size_type const i) -> reference { return operator[](i); }
 		
 		constexpr auto at(size_type const i) const -> const_reference { return operator[](i); }
 		
@@ -158,8 +158,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class T, size_t ... N
+	> ML_USING array = Array<T, N...>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class T, size_t Size
-	> inline ML_SERIALIZE(std::ostream & out, Array<T, Size> const & value)
+	> inline ML_SERIALIZE(std::ostream & out, array<T, Size> const & value)
 	{
 		for (auto const & elem : value)
 		{
@@ -169,7 +174,7 @@ namespace ml
 	}
 
 	template <class T, size_t Size
-	> inline ML_DESERIALIZE(std::istream & in, Array<T, Size> & value)
+	> inline ML_DESERIALIZE(std::istream & in, array<T, Size> & value)
 	{
 		for (auto & elem : value)
 		{
@@ -181,37 +186,37 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator==(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator==(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return _ML_ALG equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator!=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator!=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator<(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator<(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return _ML_ALG less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator<=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator<=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return (lhs < rhs) || (lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator>(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator>(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return !(lhs < rhs) && (lhs != rhs);
 	}
 
 	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator>=(Array<Tx, Size> const & lhs, Array<Ty, Size> const & rhs)
+	> constexpr bool operator>=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
 	}

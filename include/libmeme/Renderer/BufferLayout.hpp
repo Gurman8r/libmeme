@@ -45,10 +45,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr const Attribute Default[] = {
-			Attribute { 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
-			Attribute { 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
-			Attribute { 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
+		static constexpr const value_type Default[] = {
+			{ 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
+			{ 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
+			{ 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -127,7 +127,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static constexpr auto make_bufferlayout(Args && ... args)
+	template <class ... Args> static constexpr auto make_buffer_layout(Args && ... args)
 	{
 		return BufferLayout{ std::forward<Args>(args)... };
 	}

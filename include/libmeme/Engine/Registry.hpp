@@ -44,7 +44,7 @@ namespace ml
 
 		enum : size_t { Codes, Funcs, Infos, Names };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			ds::pair_map<name_t, code_t>,
 			ds::pair_map<name_t, func_t>,
 			ds::pair_map<name_t, info_t>,
@@ -160,7 +160,7 @@ namespace ml
 
 		~Registry();
 
-		storage_t m_storage;
+		storage_type m_storage;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */

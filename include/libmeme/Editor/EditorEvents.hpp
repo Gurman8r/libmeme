@@ -60,16 +60,6 @@ namespace ml
 		}
 	};
 
-	struct MainMenuBarEvent final : public EditorEvent<EditorEventType::EV_MainMenuBar>
-	{
-		struct MainMenuBar & mainMenuBar;
-
-		constexpr MainMenuBarEvent(struct MainMenuBar & mainMenuBar)
-			: mainMenuBar{ mainMenuBar }
-		{
-		}
-	};
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

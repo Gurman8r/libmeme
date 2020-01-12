@@ -46,9 +46,9 @@ namespace ml
 
 		bool load_from_file(path_t const & path);
 
-		bool loadFromImage(Image const & image);
+		bool load_from_image(Image const & image);
 
-		bool loadFromTexture(Texture const & other);
+		bool load_from_texture(Texture const & other);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,7 +106,7 @@ namespace ml
 
 		uint32_t channels() const noexcept;
 
-		Image copyToImage() const;
+		Image copy_to_image() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

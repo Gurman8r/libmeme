@@ -13,12 +13,12 @@ namespace ml
 	{
 	}
 
-	Glyph::Glyph(storage_t const & storage)
+	Glyph::Glyph(storage_type const & storage)
 		: m_storage{ storage }
 	{
 	}
 
-	Glyph::Glyph(storage_t && storage) noexcept
+	Glyph::Glyph(storage_type && storage) noexcept
 		: m_storage{ std::move(storage) }
 	{
 	}

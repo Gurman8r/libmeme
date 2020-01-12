@@ -16,7 +16,7 @@ namespace ml
 
 		enum : size_t { ID_Layout, ID_VAO, ID_VBO, ID_IBO };
 
-		using storage_t		= typename std::tuple<BufferLayout, VAO, VBO, IBO>;
+		using storage_type	= typename std::tuple<BufferLayout, VAO, VBO, IBO>;
 		using contiguous_t	= typename std::vector<float_t>;
 		using vertices_t	= typename std::vector<Vertex>;
 		using indices_t		= typename std::vector<uint32_t>;
@@ -87,7 +87,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

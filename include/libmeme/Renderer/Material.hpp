@@ -11,21 +11,21 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_t					= typename std::vector<Uniform>;
-		using pointer					= typename storage_t::pointer;
-		using reference					= typename storage_t::reference;
-		using const_pointer				= typename storage_t::const_pointer;
-		using const_reference			= typename storage_t::const_reference;
-		using iterator					= typename storage_t::iterator;
-		using const_iterator			= typename storage_t::const_iterator;
-		using reverse_iterator			= typename storage_t::reverse_iterator;
-		using const_reverse_iterator	= typename storage_t::const_reverse_iterator;
+		using storage_type				= typename std::vector<Uniform>;
+		using pointer					= typename storage_type::pointer;
+		using reference					= typename storage_type::reference;
+		using const_pointer				= typename storage_type::const_pointer;
+		using const_reference			= typename storage_type::const_reference;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Material();
-		Material(storage_t const & data);
-		Material(storage_t && data) noexcept;
+		Material(storage_type const & data);
+		Material(storage_type && data) noexcept;
 		Material(Material const & other);
 		Material(Material && other) noexcept;
 		~Material();
@@ -46,12 +46,12 @@ namespace ml
 
 		inline void clear() noexcept
 		{
-			return m_storage.clear();
+			m_storage.clear();
 		}
 
-		inline void push_back(Uniform && value)
+		inline Uniform push_back(Uniform && value)
 		{
-			return m_storage.push_back(std::move(value));
+			return m_storage.emplace_back(std::move(value));
 		}
 
 		inline bool insert(Uniform && value)
@@ -67,7 +67,7 @@ namespace ml
 
 		template <class Pr> inline void sort(Pr && pr) noexcept
 		{
-			return std::sort(begin(), end(), pr);
+			std::sort(begin(), end(), pr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -149,21 +149,21 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline auto make_material(Material::storage_t && s)
+	static inline auto make_material(Material::storage_type && s)
 	{
 		return Material{ std::move(s) };
 	}
 
 	template <class ... Args> static inline auto make_material(Args && ... args)
 	{
-		return Material{ Material::storage_t{ std::forward<Args>(args)... } };
+		return Material{ Material::storage_type{ std::forward<Args>(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

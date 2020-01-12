@@ -158,15 +158,6 @@ ml::int32_t main()
 
 	using namespace ml;
 
-	// Timers
-	static struct Time final
-	{
-		Timer main{ true }, loop{ false };
-
-		float64_t delta{ 0.0 };
-	}
-	time{};
-
 	// Testing
 	EventHandler::Pool flow;
 	flow.add_listener<EnterEvent>([](Event const & value)
@@ -179,6 +170,15 @@ ml::int32_t main()
 			}
 		}
 	});
+
+	// Timers
+	static struct Time final
+	{
+		Timer main{ true }, loop{ false };
+
+		float64_t delta{ 0.0 };
+	}
+	time{};
 
 	{
 		// Enter
@@ -215,33 +215,28 @@ ml::int32_t main()
 			time.loop.start();
 
 			// Begin Loop
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("LOOP_BEGIN");
 				Engine::begin_loop();
 				EventSystem::fire_event<BeginLoopEvent>();
 			}
 			// Update
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tUPDATE");
 				EventSystem::fire_event<UpdateEvent>();
 			}
 			// Draw
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tDRAW");
 				EventSystem::fire_event<DrawEvent>();
 			}
 			// Begin Gui
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_BEGIN");
 				Editor::new_frame();
 				EventSystem::fire_event<BeginGuiEvent>();
 			}
 			// Gui
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\t\tGUI");
 				Editor::main_menu().render();
@@ -249,20 +244,19 @@ ml::int32_t main()
 				EventSystem::fire_event<GuiEvent>();
 			}
 			// End Gui
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("\tGUI_END");
 				Editor::render_frame();
 				EventSystem::fire_event<EndGuiEvent>();
 			}
 			// End Loop
-			/* * * * * * * * * * * * * * * * * * * * */
 			{
 				ML_BENCHMARK("LOOP_END");
 				EventSystem::fire_event<EndLoopEvent>();
 				Engine::end_loop();
 			}
 			PerformanceTracker::swap();
+			
 			time.delta = time.loop.stop().elapsed().count();
 		}
 
@@ -274,7 +268,6 @@ ml::int32_t main()
 		// Exit
 		EventSystem::fire_event<ExitEvent>();
 	}
-
 
 	// Goodbye!
 	return EXIT_SUCCESS;

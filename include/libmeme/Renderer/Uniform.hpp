@@ -34,13 +34,13 @@ namespace ml
 
 		enum : size_t { ID_Type, ID_Name, ID_Data };
 
-		using storage_t = typename std::tuple<type_t, name_t, data_t>;
+		using storage_type = typename std::tuple<type_t, name_t, data_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Uniform();
-		Uniform(storage_t const & storage);
-		Uniform(storage_t && storage) noexcept;
+		Uniform(storage_type const & storage);
+		Uniform(storage_type && storage) noexcept;
 		Uniform(Uniform const & other);
 		Uniform(Uniform && other) noexcept;
 		~Uniform() noexcept;
@@ -110,7 +110,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -17,7 +17,6 @@ namespace ml
 
 		Script();
 		explicit Script(path_t const & path);
-		explicit Script(Language language);
 		explicit Script(Language language, std::string const & text);
 		Script(Script const & other);
 		Script(Script && other) noexcept;
@@ -46,22 +45,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto language() noexcept -> Language & { return m_language; }
-
 		inline auto language() const noexcept -> Language { return m_language; }
-
-		inline auto text() noexcept -> std::string & { return m_text; }
 
 		inline auto text() const noexcept -> std::string const & { return m_text; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union
-		{
-			Language m_language;
-			std::string m_text;
-		};
+		Language m_language;
+
+		std::string m_text;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

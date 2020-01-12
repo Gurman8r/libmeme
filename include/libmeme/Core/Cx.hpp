@@ -4,7 +4,7 @@
 // Source:
 // https://github.com/lefticus/constexpr_all_the_things
 
-#include <libmeme/Core/Array.hpp>
+#include <libmeme/Core/array.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
 #define _ML_CX _ML cx::
@@ -63,7 +63,7 @@ namespace ml::cx
 
 		using value_type		= typename _Val;
 		using self_type			= typename vector<value_type, _Cap>;
-		using base_type			= typename Array<value_type, _Cap>;
+		using base_type			= typename array<value_type, _Cap>;
 		using size_type			= typename base_type::size_type;
 		using pointer			= typename base_type::pointer;
 		using reference			= typename base_type::reference;

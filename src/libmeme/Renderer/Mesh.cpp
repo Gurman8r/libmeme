@@ -10,7 +10,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Mesh::Mesh() : m_storage{ std::make_tuple(
-		make_bufferlayout(), make_vao(), make_vbo(), make_ibo()
+		make_buffer_layout(), make_vao(), make_vbo(), make_ibo()
 	) }
 	{
 	}

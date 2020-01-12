@@ -11,7 +11,7 @@ namespace ml
 
 		static constexpr size_t Size{ 8 };
 
-		using storage_type = typename Array<float_t, Size>;
+		using storage_type = typename array<float_t, Size>;
 
 		storage_type m_storage{ 0 };
 

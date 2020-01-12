@@ -20,7 +20,7 @@ namespace ml
 
 		using value_type		= typename T;
 		using self_type			= typename BitMask<value_type>;
-		using array_type		= typename Array<bool, Size>;
+		using storage_type		= typename array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -38,8 +38,8 @@ namespace ml
 		{
 		}
 
-		constexpr BitMask(array_type const & value) noexcept
-			: m_value{ from_bits<array_type, T, value.size()>(value) }
+		constexpr BitMask(storage_type const & value) noexcept
+			: m_value{ from_bits<storage_type, T, value.size()>(value) }
 		{
 		}
 
@@ -61,7 +61,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto bits() const -> array_type { return to_bits(*this); }
+		constexpr auto bits() const -> storage_type { return to_bits(*this); }
 
 		constexpr auto data() const -> const_reference { return m_value; }
 
@@ -107,9 +107,9 @@ namespace ml
 			return temp;
 		}
 
-		static constexpr array_type to_bits(self_type const & value)
+		static constexpr storage_type to_bits(self_type const & value)
 		{
-			array_type temp{ 0 };
+			storage_type temp{ 0 };
 			for (size_t i = 0; i < Size; i++)
 			{
 				temp[i] = ML_BITREAD(value.m_value, i);

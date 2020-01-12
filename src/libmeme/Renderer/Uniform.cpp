@@ -9,12 +9,12 @@ namespace ml
 	{
 	}
 
-	Uniform::Uniform(storage_t const & storage)
+	Uniform::Uniform(storage_type const & storage)
 		: m_storage{ storage }
 	{
 	}
 
-	Uniform::Uniform(storage_t && storage) noexcept
+	Uniform::Uniform(storage_type && storage) noexcept
 		: m_storage{ std::move(storage) }
 	{
 	}

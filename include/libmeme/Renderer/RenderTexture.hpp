@@ -42,10 +42,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept
-		{
-			return fbo() && rbo();
-		}
+		inline operator bool() const noexcept { return fbo() && rbo(); }
 
 		inline auto fbo() const noexcept -> FrameBufferObject const & { return m_fbo; }
 
@@ -77,7 +74,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static inline auto make_rendertexture(Args && ... args)
+	template <class ... Args> static inline auto make_render_texture(Args && ... args)
 	{
 		return RenderTexture{ std::forward<Args>(args)... };
 	}

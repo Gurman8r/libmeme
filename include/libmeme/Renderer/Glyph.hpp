@@ -11,15 +11,15 @@ namespace ml
 
 		enum : size_t { ID_Texture, ID_Bounds, ID_Advance };
 
-		using storage_t = typename std::tuple<Texture, FloatRect, uint32_t>;
+		using storage_type = typename std::tuple<Texture, FloatRect, uint32_t>;
 
 		static constexpr size_t const count{ 6 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Glyph();
-		Glyph(storage_t const & storage);
-		Glyph(storage_t && storage) noexcept;
+		Glyph(storage_type const & storage);
+		Glyph(storage_type && storage) noexcept;
 		Glyph(Glyph const & other);
 		Glyph(Glyph && other) noexcept;
 		~Glyph();
@@ -64,7 +64,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -73,7 +73,7 @@ namespace ml
 
 	template <class ... Args> static inline auto make_glyph(Args && ... args)
 	{
-		return Glyph{ Glyph::storage_t{ std::forward<Args>(args)... } };
+		return Glyph{ Glyph::storage_type{ std::forward<Args>(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

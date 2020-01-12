@@ -14,7 +14,6 @@ namespace ml
 
 		using self_type	= typename T;
 		using handle_t	= typename uint32_t;
-		using address_t	= typename void *;
 		using buffer_t	= typename void const *;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,7 +27,7 @@ namespace ml
 
 		constexpr operator bool() const noexcept { return m_handle; }
 
-		constexpr auto address() const noexcept -> address_t { return ML_ADDRESSOF(m_handle); }
+		constexpr auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
 
 		constexpr auto handle() const noexcept -> handle_t const & { return m_handle; }
 
@@ -48,7 +47,7 @@ namespace ml
 
 		enum : size_t { ID_Mode };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			uint32_t
 		>;
 
@@ -123,7 +122,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -136,7 +135,7 @@ namespace ml
 
 		enum : size_t { ID_Usage, ID_Data, ID_Size, ID_Count, ID_Offset };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			uint32_t, buffer_t, uint32_t, uint32_t, uint32_t
 		>;
 
@@ -223,7 +222,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -236,7 +235,7 @@ namespace ml
 
 		enum : size_t { ID_Usage, ID_Type, ID_Data, ID_Count };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			uint32_t, uint32_t, buffer_t, uint32_t
 		>;
 
@@ -321,7 +320,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -345,7 +344,7 @@ namespace ml
 
 		enum : size_t { ID_Size, ID_Buffer, ID_Texture };
 		
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			vec2, BufAttachment, TexAttachment
 		>;
 
@@ -438,7 +437,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -451,7 +450,7 @@ namespace ml
 
 		enum : size_t { ID_Size, ID_Format };
 
-		using storage_t = typename std::tuple<
+		using storage_type = typename std::tuple<
 			vec2i, uint32_t, uint32_t
 		>;
 
@@ -530,7 +529,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_t m_storage;
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

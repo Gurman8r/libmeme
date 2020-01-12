@@ -10,12 +10,12 @@ namespace ml
 	{
 	}
 
-	Material::Material(storage_t const & data)
+	Material::Material(storage_type const & data)
 		: m_storage{ data }
 	{
 	}
 
-	Material::Material(storage_t && data) noexcept
+	Material::Material(storage_type && data) noexcept
 		: m_storage{ std::move(data) }
 	{
 	}
