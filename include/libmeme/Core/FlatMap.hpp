@@ -8,15 +8,15 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Key, class Value, class Comp = std::less<Key>
+	template <class Key, class Value, class Compare = std::less<Key>
 	> struct flat_map
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type						= typename _ML_DS flat_map<Key, Value, Comp>;
+		using self_type						= typename _ML_DS flat_map<Key, Value, Compare>;
 		using key_type						= typename Key;
 		using value_type					= typename Value;
-		using compare_type					= typename Comp;
+		using compare_type					= typename Compare;
 
 		using pair_type						= typename std::pair<key_type, value_type>;
 		using initializer_type				= typename std::initializer_list<pair_type>;
@@ -213,8 +213,8 @@ namespace ml::ds
 			}
 		}
 
-		template <class K, class ... Args
-		> inline std::pair<iterator_pair, bool> emplace(K && key, Args && ... args)
+		template <class Key, class ... Args
+		> inline std::pair<iterator_pair, bool> emplace(Key && key, Args && ... args)
 		{
 			if (auto const k{ m_keys.insert(std::move(key)) }; !k.second)
 			{
