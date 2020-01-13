@@ -3,7 +3,7 @@
 
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/Singleton.hpp>
-#include <libmeme/Core/DS.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 
 namespace ml
 {
@@ -23,9 +23,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool remove_listener(int32_t type, EventListener * listener);
+		static void remove_listener(int32_t type, EventListener * listener);
 		
-		static bool remove_listener(EventListener * listener);
+		static void remove_listener(EventListener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,7 +44,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static ds::pair_multimap<int32_t, EventListener *> m_listeners;
+		static ds::flat_map<int32_t, ds::flat_set<EventListener *>> m_listeners;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

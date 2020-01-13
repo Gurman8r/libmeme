@@ -11,53 +11,54 @@ namespace ml
 
 	EventListener * EventSystem::add_listener(int32_t type, EventListener * listener)
 	{
-		return listener
-			? m_listeners.insert(std::make_pair(type, listener))->second
-			: nullptr;
+		return (*m_listeners[type].insert(listener).first);
 	}
 
 	void EventSystem::fire_event(Event const & value)
 	{
-		auto found{ m_listeners.equal_range(value.id()) };
-		for (auto it = found.first; it != found.second; it++)
+		for (auto const & listener : m_listeners[value.id()])
 		{
-			if (it->second) { it->second->onEvent(value); }
+			listener->onEvent(value);
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool EventSystem::remove_listener(int32_t type, EventListener * listener)
+	void EventSystem::remove_listener(int32_t type, EventListener * listener)
 	{
-		auto found{ m_listeners.equal_range(type) };
-		for (auto it = found.first; it != found.second; it++)
+		if (auto vec = m_listeners.find(type); vec != m_listeners.values().end())
 		{
-			if (it->second == listener)
+			for (auto it = vec->begin(); it != vec->end(); ++it)
 			{
-				m_listeners.erase(it);
-				return true;
+				if ((*it) == listener)
+				{
+					vec->erase(it);
+					return;
+				}
 			}
 		}
-		return false;
 	}
 
-	bool EventSystem::remove_listener(EventListener * listener)
+	void EventSystem::remove_listener(EventListener * listener)
 	{
 		bool done{ false };
 		while (!done)
 		{
 			done = true;
-			for (auto it = m_listeners.begin(); it != m_listeners.end(); it++)
+			m_listeners.for_each([&done, listener](auto, auto & vec)
 			{
-				if (it->second == listener)
+				for (auto it = vec.begin(); it != vec.end(); ++it)
 				{
-					m_listeners.erase(it);
-					done = false;
-					break;
+					if ((*it) == listener)
+					{
+						vec.erase(it);
+						done = false;
+						break;
+					}
 				}
-			}
+			});
+
 		}
-		return done;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

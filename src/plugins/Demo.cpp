@@ -1,6 +1,6 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -25,13 +25,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		std::vector<RenderTexture>			m_pipeline	{};
-		ds::pair_map<std::string, Font>		m_fonts		{};
-		ds::pair_map<std::string, Image>	m_images	{};
-		ds::pair_map<std::string, Material>	m_materials	{};
-		ds::pair_map<std::string, Model>	m_models	{};
-		ds::pair_map<std::string, Script>	m_scripts	{};
-		ds::pair_map<std::string, Shader>	m_shaders	{};
-		ds::pair_map<std::string, Texture>	m_textures	{};
+		ds::flat_map<std::string, Font>		m_fonts		{};
+		ds::flat_map<std::string, Image>	m_images	{};
+		ds::flat_map<std::string, Material>	m_materials	{};
+		ds::flat_map<std::string, Model>	m_models	{};
+		ds::flat_map<std::string, Script>	m_scripts	{};
+		ds::flat_map<std::string, Shader>	m_shaders	{};
+		ds::flat_map<std::string, Texture>	m_textures	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
