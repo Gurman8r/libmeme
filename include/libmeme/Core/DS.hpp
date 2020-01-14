@@ -238,16 +238,14 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline iterator find(U && u)
+		inline iterator find(const_reference value)
 		{
-			auto const it{ equal_range(std::forward<U>(u)) };
-			return (it.first != it.second) ? it.first : end();
+			return std::find(begin(), end(), value);
 		}
 
-		template <class U> inline const_iterator find(U && u) const
+		inline const_iterator find(const_reference value) const
 		{
-			auto const it{ equal_range(std::forward<U>(u)) };
-			return (it.first != it.second) ? it.first : cend();
+			return std::find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

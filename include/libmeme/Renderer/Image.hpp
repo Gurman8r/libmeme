@@ -72,9 +72,9 @@ namespace ml
 
 		bool dispose();
 		
-		Image & flipHorizontally();
+		Image & flip_vertically();
 
-		Image & flipVertically();
+		Image & flip_horizontally();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -82,15 +82,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		std::optional<Color32> getPixel(size_t index) const;
+		std::optional<Color32> get_pixel(size_t index) const;
 		
-		std::optional<Color32> getPixel(size_t x, size_t y) const;
+		std::optional<Color32> get_pixel(size_t x, size_t y) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool setPixel(size_t index, Color32 const & color);
+		bool set_pixel(size_t index, Color32 const & color);
 		
-		bool setPixel(size_t x, size_t y, Color32 const & color);
+		bool set_pixel(size_t x, size_t y, Color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

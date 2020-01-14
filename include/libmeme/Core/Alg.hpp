@@ -25,19 +25,6 @@ namespace ml::alg
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class To, class From, class = std::enable_if_t<
-		sizeof(To) == sizeof(From) &&
-		std::is_trivially_copyable_v<From> &&
-		std::is_trivially_copyable_v<To>
-	>> static To bit_cast(From const & src) noexcept
-	{
-		To dst;
-		std::memcpy(&dst, &src, sizeof(To));
-		return dst;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class T> static constexpr int32_t sign(T const & value)
 	{
 		return ((value == (T)0)

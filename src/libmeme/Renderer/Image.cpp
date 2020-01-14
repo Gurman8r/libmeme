@@ -15,7 +15,7 @@ namespace ml
 		{
 			for (size_t x = 0; x < img.width(); x++)
 			{
-				img.setPixel(x, y,
+				img.set_pixel(x, y,
 					(((y < img.height() / 2) && (x < img.width() / 2)) ||
 					((y >= img.height() / 2) && (x >= img.width() / 2))
 						? Color(Color(0.1f).rgb(), 1.0)
@@ -227,7 +227,7 @@ namespace ml
 		return empty();
 	}
 
-	Image & Image::flipHorizontally()
+	Image & Image::flip_vertically()
 	{
 		if (!empty())
 		{
@@ -247,7 +247,7 @@ namespace ml
 		return (*this);
 	}
 
-	Image & Image::flipVertically()
+	Image & Image::flip_horizontally()
 	{
 		if (!empty())
 		{
@@ -279,7 +279,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	std::optional<Color32> Image::getPixel(size_t index) const
+	std::optional<Color32> Image::get_pixel(size_t index) const
 	{
 		return (index < capacity())
 			? std::make_optional(make_color32(
@@ -291,14 +291,14 @@ namespace ml
 			: std::nullopt;
 	}
 
-	std::optional<Color32> Image::getPixel(size_t x, size_t y) const
+	std::optional<Color32> Image::get_pixel(size_t x, size_t y) const
 	{
-		return getPixel((x + y * m_size[0]) * m_channels);
+		return get_pixel((x + y * m_size[0]) * m_channels);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Image::setPixel(size_t index, Color32 const & color)
+	bool Image::set_pixel(size_t index, Color32 const & color)
 	{
 		if (index < capacity())
 		{
@@ -312,9 +312,9 @@ namespace ml
 		return false;
 	}
 
-	bool Image::setPixel(size_t x, size_t y, Color32 const & color)
+	bool Image::set_pixel(size_t x, size_t y, Color32 const & color)
 	{
-		return setPixel((x + y * m_size[0]) * m_channels, color);
+		return set_pixel((x + y * m_size[0]) * m_channels, color);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

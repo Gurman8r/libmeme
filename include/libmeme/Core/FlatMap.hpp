@@ -147,9 +147,22 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto keys() const noexcept -> key_storage const & { return m_keys; }
+		inline value_type & at(key_type const & key)
+		{
+			if (auto const v{ find(key) }; v == m_values.end())
+			{
+				return (*insert(key, value_type{}).first.second);
+			}
+			else
+			{
+				return (*v);
+			}
+		}
 
-		inline auto values() const noexcept -> value_storage const & { return m_values; }
+		inline value_type & operator[](key_type const & key)
+		{
+			return at(key);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -160,69 +173,69 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline value_iterator value_at(const_key_iterator key)
-		{
-			return (key != m_keys.end())
-				? std::next(m_values.begin(), std::distance(m_keys.cbegin(), key))
-				: m_values.end();
-		}
-
-		inline const_value_iterator value_at(const_key_iterator key) const
-		{
-			return (key != m_keys.end())
-				? std::next(m_values.begin(), std::distance(m_keys.cbegin(), key))
-				: m_values.end();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline value_iterator find(U && key)
-		{
-			return value_at(m_keys.find(std::forward<U>(key)));
-		}
-
-		template <class U> inline const_value_iterator find(U && key) const
-		{
-			return value_at(m_keys.find(std::forward<U>(key)));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline iterator_pair erase(key_iterator location)
 		{
-			return { m_keys.erase(location), m_values.erase(value_at(location)) };
+			return { m_keys.erase(location), m_values.erase(get(location)) };
 		}
 
 		inline iterator_pair erase(key_iterator first, key_iterator last)
 		{
-			return { m_keys.erase(first, last), m_values.erase(value_at(first), value_at(last)) };
+			return { m_keys.erase(first, last), m_values.erase(get(first), get(last)) };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline value_iterator find(key_type const & key)
+		{
+			return get(m_keys.find(key));
+		}
+
+		inline const_value_iterator find(key_type const & key) const
+		{
+			return get(m_keys.find(key));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline value_iterator get(const_key_iterator key)
+		{
+			return (key == m_keys.end())
+				? m_values.end()
+				: std::next(m_values.begin(), std::distance(m_keys.cbegin(), key));
+		}
+
+		inline const_value_iterator get(const_key_iterator key) const
+		{
+			return (key == m_keys.end())
+				? m_values.cend()
+				: std::next(m_values.cbegin(), std::distance(m_keys.cbegin(), key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline std::pair<iterator_pair, bool> emplace(key_type const & key, Args && ... args)
+		> inline std::pair<iterator_pair, bool> insert(key_type const & key, Args && ... args)
 		{
-			if (auto const k{ m_keys.insert(key) }; !k.second)
+			if (auto const k{ m_keys.insert(key) }; k.second)
 			{
-				return { { k.first, value_at(k.first) }, false };
+				return { { k.first, m_values.emplace(get(k.first), std::forward<Args>(args)...) }, true };
 			}
 			else
 			{
-				return { { k.first, m_values.emplace(value_at(k.first), std::forward<Args>(args)...) }, true };
+				return { { k.first, get(k.first) }, false };
 			}
 		}
 
 		template <class Key, class ... Args
-		> inline std::pair<iterator_pair, bool> emplace(Key && key, Args && ... args)
+		> inline std::pair<iterator_pair, bool> insert(Key && key, Args && ... args)
 		{
-			if (auto const k{ m_keys.insert(std::move(key)) }; !k.second)
+			if (auto const k{ m_keys.insert(std::move(key)) }; k.second)
 			{
-				return { { k.first, value_at(k.first) }, false };
+				return { { k.first, m_values.emplace(get(k.first), std::forward<Args>(args)...) }, true };
 			}
 			else
 			{
-				return { { k.first, m_values.emplace(value_at(k.first), std::forward<Args>(args)...) }, true };
+				return { { k.first, get(k.first) }, false };
 			}
 		}
 
@@ -230,31 +243,12 @@ namespace ml::ds
 
 		inline std::pair<iterator_pair, bool> insert(pair_type const & value)
 		{
-			return emplace(value.first, value.second);
+			return insert(value.first, value.second);
 		}
 
 		inline std::pair<iterator_pair, bool> insert(pair_type && value)
 		{
-			return emplace(std::move(value.first), std::move(value.second));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline value_type & at(key_type const & key)
-		{
-			if (auto const v{ find(key) }; v != m_values.end())
-			{
-				return (*v);
-			}
-			else
-			{
-				return (*emplace(key, value_type{}).first.second);
-			}
-		}
-
-		inline value_type & operator[](key_type const & key)
-		{
-			return at(key);
+			return insert(std::move(value.first), std::move(value.second));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -266,7 +260,7 @@ namespace ml::ds
 			{
 				for (; first != last; ++first)
 				{
-					std::invoke(fn, *first, *value_at(first));
+					std::invoke(fn, *first, *get(first));
 				}
 			}
 			return (*this);
@@ -293,7 +287,7 @@ namespace ml::ds
 			{
 				for (; first != last; ++first)
 				{
-					std::invoke(fn, *first, *value_at(first));
+					std::invoke(fn, *first, *get(first));
 				}
 			}
 			return (*this);
@@ -319,7 +313,7 @@ namespace ml::ds
 			if (!empty() && (0 < count))
 			{
 				do {
-					std::invoke(fn, *first, *value_at(first));
+					std::invoke(fn, *first, *get(first));
 					--count;
 					++first;
 				} while (0 < count);
@@ -341,7 +335,7 @@ namespace ml::ds
 			if (!empty() && (0 < count))
 			{
 				do {
-					std::invoke(fn, *first, *value_at(first));
+					std::invoke(fn, *first, *get(first));
 					--count;
 					++first;
 				} while (0 < count);
@@ -357,7 +351,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	protected:
+		inline auto keys() const noexcept -> key_storage const & { return m_keys; }
+
+		inline auto values() const noexcept -> value_storage const & { return m_values; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		key_storage m_keys;
 
 		value_storage m_values;

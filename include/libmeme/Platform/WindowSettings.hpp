@@ -35,7 +35,7 @@ namespace ml
 		}, {
 			"Resizable", "Visible", "Decorated", "Focused",
 			"AutoIconify", "Floating", "Maximized",
-			"Fullscreen", "VerticalSync",
+			"Fullscreen", "Vertical Sync",
 		}, {
 			"Resizable", "Visible", "Decorated", "Focused",
 			"Auto Iconify", "Floating", "Maximized",
