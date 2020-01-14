@@ -64,7 +64,10 @@ namespace ml
 			return (m_instance = nullptr);
 #endif
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	bool SharedLibrary::close()
@@ -79,26 +82,32 @@ namespace ml
 			return (m_instance = nullptr);
 #endif
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	void * SharedLibrary::load_function(std::string const & name)
 	{
-		if (auto const it{ m_functions.find(name) }; it != m_functions.end())
+		if (auto const it{ m_functions.find(name) })
 		{
-			return it->second;
+			return (**it);
 		}
 		else if (m_instance)
 		{
-			return m_functions.insert(std::make_pair(name,
+			return (*m_functions.try_emplace(name,
 #ifdef ML_SYSTEM_WINDOWS
 				::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
 #else
 				nullptr
 #endif
-			)).first->second;
+			).first.second);
 		}
-		return nullptr;
+		else
+		{
+			return nullptr;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

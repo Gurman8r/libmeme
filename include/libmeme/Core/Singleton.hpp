@@ -2,7 +2,6 @@
 #define _ML_SINGLETON_HPP_
 
 #include <libmeme/Core/NonCopyable.hpp>
-#include <libmeme/Core/Core.hpp>
 
 namespace ml
 {

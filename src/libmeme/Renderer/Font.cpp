@@ -139,23 +139,16 @@ namespace ml
 
 	Glyph const & Font::get_glyph(uint32_t c, uint32_t characterSize) const
 	{
-		Page & page{ get_page(characterSize) };
-		auto it{ page.find(c) };
-		if (it == page.end())
+		glyph_page & page{ m_pages[characterSize] };
+		
+		if (auto it{ page.find(c) })
 		{
-			it = page.insert({ c, load_glyph(c, characterSize) }).first;
+			return (**it);
 		}
-		return it->second;
-	}
-
-	Font::Page & Font::get_page(uint32_t characterSize) const
-	{
-		auto it{ m_pages.find(characterSize) };
-		if (it == m_pages.end())
+		else
 		{
-			it = m_pages.insert({ characterSize, Page {} }).first;
+			return (*page.try_emplace(c, load_glyph(c, characterSize)).first.second);
 		}
-		return it->second;
 	}
 
 	Glyph Font::load_glyph(uint32_t c, uint32_t characterSize) const

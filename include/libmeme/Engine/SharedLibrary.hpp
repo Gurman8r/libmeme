@@ -11,7 +11,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using functions_t = typename ds::pair_map<std::string, void *>;
+		using functions_t = typename ds::flat_map<std::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,6 +63,23 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline bool operator==(SharedLibrary const & other) const
+		{
+			return (m_instance == other.m_instance);
+		}
+
+		inline bool operator!=(SharedLibrary const & other) const
+		{
+			return !(*this == other);
+		}
+
+		inline bool operator<(SharedLibrary const & other) const
+		{
+			return (m_instance < other.m_instance);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		void * m_instance;
 
@@ -70,6 +87,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ... Args> static inline auto make_shared_library(Args && ... args)
+	{
+		return SharedLibrary{ std::forward<Args>(args)... };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_SHARED_LIBRARY_HPP_

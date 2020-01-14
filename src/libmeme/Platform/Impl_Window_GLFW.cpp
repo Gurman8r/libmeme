@@ -13,9 +13,9 @@
 # include <glfw/glfw3.h>
 # ifdef ML_SYSTEM_WINDOWS
 #	undef APIENTRY
+#	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
-#	include <Windows.h>
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * */
@@ -37,15 +37,18 @@ namespace ml
 
 	static GLFWimage const & make_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
-		static ds::pair_map<byte_t const *, GLFWimage> cache {};
-		auto it { cache.find(pixels) };
-		if (it == cache.end())
+		static ds::flat_map<byte_t const *, GLFWimage> cache {};
+
+		if (auto const it{ cache.find(pixels) })
 		{
-			it = cache.insert({
-				pixels, GLFWimage { (int32_t)w, (int32_t)h, (uint8_t *)pixels }
-			}).first;
+			return (**it);
 		}
-		return it->second;
+		else
+		{
+			return (*cache.try_emplace(
+				pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
+			).first.second);
+		}
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

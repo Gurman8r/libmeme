@@ -3,7 +3,6 @@
 
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-#include <libmeme/Core/DS.hpp>
 
 namespace ml
 {
@@ -13,7 +12,7 @@ namespace ml
 
 	ML_USING file_t = typename std::vector<char>;
 
-	ML_USING directory_t = typename ds::pair_map<char, std::vector<path_t>>;
+	ML_USING directory_t = typename ds::flat_map<char, std::vector<path_t>>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 

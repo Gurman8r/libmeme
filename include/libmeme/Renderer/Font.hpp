@@ -9,14 +9,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Page = typename ds::pair_map<uint32_t, Glyph>;
+		using glyph_page = typename ds::flat_map<uint32_t, Glyph>;
 		
-		using PageTable = typename ds::pair_map<uint32_t, Page>;
+		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
 
-		struct Info final
-		{
-			std::string family;
-		};
+		struct Info { std::string family; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -42,17 +39,15 @@ namespace ml
 
 		Glyph const & get_glyph(uint32_t c, uint32_t characterSize) const;
 
-		Page & get_page(uint32_t characterSize) const;
-
 		Glyph load_glyph(uint32_t c, uint32_t characterSize) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline auto info() const noexcept -> Info const & { return m_info; }
 
-		inline auto pages() noexcept -> PageTable & { return m_pages; }
+		inline auto pages() noexcept -> page_table & { return m_pages; }
 
-		inline auto pages() const noexcept -> PageTable const & { return m_pages; }
+		inline auto pages() const noexcept -> page_table const & { return m_pages; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -61,7 +56,7 @@ namespace ml
 		void *	m_face;
 		Info	m_info;
 
-		mutable PageTable m_pages;
+		mutable page_table m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

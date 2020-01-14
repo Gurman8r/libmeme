@@ -42,21 +42,23 @@ namespace ml
 		using info_t = typename std::string_view;
 		using func_t = typename std::function<std::optional<std::any>()>;
 
-		enum : size_t { Codes, Funcs, Infos, Names };
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { ID_Codes, ID_Funcs, ID_Infos, ID_Names };
 
 		using storage_type = typename std::tuple<
-			ds::pair_map<name_t, code_t>,
-			ds::pair_map<name_t, func_t>,
-			ds::pair_map<name_t, info_t>,
-			ds::pair_map<code_t, name_t>
+			ds::flat_map<name_t, code_t>, // Codes
+			ds::flat_map<name_t, func_t>, // Funcs
+			ds::flat_map<name_t, info_t>, // Infos
+			ds::flat_map<code_t, name_t>  // Names
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) codes() const noexcept { return std::get<Codes>(m_storage); }
-		inline decltype(auto) funcs() const noexcept { return std::get<Funcs>(m_storage); }
-		inline decltype(auto) infos() const noexcept { return std::get<Infos>(m_storage); }
-		inline decltype(auto) names() const noexcept { return std::get<Names>(m_storage); }
+		inline decltype(auto) codes() const noexcept { return std::get<ID_Codes>(m_storage); }
+		inline decltype(auto) funcs() const noexcept { return std::get<ID_Funcs>(m_storage); }
+		inline decltype(auto) infos() const noexcept { return std::get<ID_Infos>(m_storage); }
+		inline decltype(auto) names() const noexcept { return std::get<ID_Names>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,26 +83,19 @@ namespace ml
 
 		inline bool registrate(name_t const & name, info_t const & info, code_t const & code, func_t const & func)
 		{
-			if (funcs().find(name) == funcs().end())
-			{
-				std::get<Codes>(m_storage).insert({ name, code });
-				std::get<Funcs>(m_storage).insert({ name, func });
-				std::get<Infos>(m_storage).insert({ name, info });
-				std::get<Names>(m_storage).insert({ code, name });
-				return true;
-			}
-			return false;
+			if (funcs().contains(name)) { return false; }
+			std::get<ID_Codes>(m_storage).try_emplace(name, code);
+			std::get<ID_Funcs>(m_storage).try_emplace(name, func);
+			std::get<ID_Infos>(m_storage).try_emplace(name, info);
+			std::get<ID_Names>(m_storage).try_emplace(code, name);
+			return true;
 		}
 
-		template <
-			class T, class Info, class Func
+		template <class T, class Info, class Func
 		> inline bool registrate(Info && info, Func && func)
 		{
 			return registrate(
-				nameof_v<T>,
-				std::forward<Info>(info),
-				hashof_v<T>,
-				std::forward<Func>(func)
+				nameof_v<T>, std::forward<Info>(info), hashof_v<T>, std::forward<Func>(func)
 			);
 		}
 
@@ -108,47 +103,62 @@ namespace ml
 
 		inline std::optional<code_t> get_code(name_t const & name) const
 		{
-			if (auto const it{ codes().find(name) }; it != codes().cend())
+			if (auto const it{ codes().find(name) })
 			{
-				return std::make_optional(it->second);
+				return std::make_optional(**it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		inline std::optional<func_t> get_func(name_t const & name) const
 		{
-			if (auto const it{ funcs().find(name) }; it != funcs().cend())
+			if (auto const it{ funcs().find(name) })
 			{
-				return std::make_optional(it->second);
+				return std::make_optional(**it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		inline std::optional<func_t> get_func(code_t code) const
 		{
-			if (auto const it{ names().find(code) }; it != names().cend())
+			if (auto const it{ names().find(code) })
 			{
-				return get_func(it->second);
+				return get_func(**it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		inline std::optional<info_t> get_info(name_t const & name) const
 		{
-			if (auto const it{ infos().find(name) }; it != infos().cend())
+			if (auto const it{ infos().find(name) })
 			{
-				return std::make_optional(it->second);
+				return std::make_optional(**it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		inline std::optional<name_t> get_name(code_t code) const
 		{
-			if (auto const it{ names().find(code) }; it != names().cend())
+			if (auto const it{ names().find(code) })
 			{
-				return std::make_optional(it->second);
+				return std::make_optional(**it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -13,17 +13,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API PerformanceTracker final
+	struct ML_CORE_API PerformanceTracker final
 	{
-		friend struct ScopeTimer;
-		
-		using buffer_type = typename std::vector<std::pair<C_String, Duration>>;
-
-		static buffer_type m_curr;
-
-		static buffer_type m_prev;
-
-	public:
 		static inline auto const & previous() noexcept
 		{
 			return m_prev;
@@ -37,6 +28,15 @@ namespace ml
 
 			m_curr.reserve(m_prev.size());
 		}
+
+	private:
+		friend struct ScopeTimer;
+
+		using buffer_type = typename std::vector<std::pair<C_String, Duration>>;
+
+		static buffer_type m_curr;
+
+		static buffer_type m_prev;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

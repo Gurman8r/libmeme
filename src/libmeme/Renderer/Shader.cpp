@@ -201,14 +201,14 @@ namespace ml
 			if (bindTextures)
 			{
 				uint32_t index{ 0 };
-				for (auto const & e : value->m_textures)
+				value->m_textures.for_each([&index](int32_t id, auto const & tex)
 				{
-					GL::uniform1i(e.first, index);
-
+					GL::uniform1i(id, index);
+					
 					GL::activeTexture(GL::Texture0 + (index++));
-
-					Texture::bind(e.second);
-				}
+					
+					Texture::bind(tex);
+				});
 			}
 		}
 		else
@@ -346,17 +346,17 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto it{ m_textures.find(u.location) }; it != m_textures.end())
+			if (auto it{ m_textures.find(u.location) })
 			{
-				it->second = &value;
+				(**it) = &value;
 			}
 			else if ((m_textures.size() + 1) < max_textures)
 			{
-				m_textures.insert({ u.location , &value });
+				m_textures.try_emplace(u.location, &value);
 			}
 			else
 			{
-				return false;
+				return 0;
 			}
 		}
 		return u;
@@ -371,33 +371,33 @@ namespace ml
 
 	int32_t Shader::get_attribute_location(std::string const & value)
 	{
-		if (auto const it{ m_attributes.find(value) }; it != m_attributes.end())
+		if (auto const it{ m_attributes.find(value) })
 		{
-			return it->second;
+			return (**it);
 		}
 		else if (auto const loc{ GL::getAttribLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return m_attributes.insert({ value, loc }).first->second;
+			return (*m_attributes.try_emplace(value, loc).first.second);
 		}
 		else
 		{
-			return loc;
+			return -1;
 		}
 	}
 
 	int32_t Shader::get_uniform_location(std::string const & value)
 	{
-		if (auto const it{ m_uniforms.find(value) }; it != m_uniforms.end())
+		if (auto const it{ m_uniforms.find(value) })
 		{
-			return it->second;
+			return (**it);
 		}
 		else if (auto const loc{ GL::getUniformLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return m_uniforms.insert({ value, loc }).first->second;
+			return (*m_uniforms.try_emplace(value, loc).first.second);
 		}
 		else
 		{
-			return loc;
+			return -1;
 		}
 	}
 

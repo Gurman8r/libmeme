@@ -19,11 +19,11 @@ namespace ml
 			constexpr Source() noexcept = default;
 		};
 
-		using AttribCache = typename ds::pair_map<std::string, int32_t>;
+		using AttribCache = typename ds::flat_map<std::string, int32_t>;
 
-		using UniformCache = typename ds::pair_map<std::string, int32_t>;
+		using UniformCache = typename ds::flat_map<std::string, int32_t>;
 
-		using TextureCache = typename ds::pair_map<int32_t, struct Texture const *>;
+		using TextureCache = typename ds::flat_map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

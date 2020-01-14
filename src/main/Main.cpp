@@ -3,7 +3,7 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
-#include <libmeme/Core/DS.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -109,34 +109,28 @@ namespace ml
 
 		~PluginLoader()
 		{
-			for (auto & elem : m_plugins)
+			m_plugins.for_each([](auto &, auto & plugin)
 			{
-				delete elem.second;
-				delete elem.first;
-			}
+				delete plugin;
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class P = path_t> inline decltype(auto) load(P && path)
+		template <class P = path_t> inline Plugin * load(P && path)
 		{
 			if (auto const file{ m_filenames.insert(std::forward<P>(path)) }; file.second)
 			{
-				if (auto * const library{ new SharedLibrary{ *file.first } }; library->good())
+				if (auto library{ make_shared_library(*file.first) })
 				{
-					if (auto * const plugin{ library->call_function<Plugin *>("ML_Plugin_Main") })
+					if (auto const plugin{ library.call_function<Plugin *>("ML_Plugin_Main") })
 					{
-						return m_plugins.insert({ library, plugin }).first;
+						return (*m_plugins.try_emplace(std::move(library), plugin).first.second);
 					}
 				}
-				else
-				{
-					delete library;
-
-					m_filenames.erase(file.first);
-				}
+				m_filenames.erase(file.first);
 			}
-			return m_plugins.end();
+			return nullptr;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -144,7 +138,7 @@ namespace ml
 	private:
 		ds::flat_set<path_t> m_filenames;
 
-		ds::pair_map<SharedLibrary *, Plugin *> m_plugins;
+		ds::flat_map<SharedLibrary, Plugin *> m_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

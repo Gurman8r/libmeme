@@ -11,14 +11,19 @@ namespace ml
 
 	EventListener * EventSystem::add_listener(int32_t type, EventListener * listener)
 	{
-		return (*m_listeners[type].insert(listener).first);
+		return ((type != Event::EV_INVALID) && listener)
+			? (*m_listeners[type].insert(listener).first)
+			: nullptr;
 	}
 
 	void EventSystem::fire_event(Event const & value)
 	{
-		for (auto const & listener : m_listeners[value.id()])
+		if (auto const it{ m_listeners.find(value.id()) })
 		{
-			listener->onEvent(value);
+			for (auto const & listener : (**it))
+			{
+				listener->onEvent(value);
+			}
 		}
 	}
 
@@ -26,13 +31,13 @@ namespace ml
 
 	void EventSystem::remove_listener(int32_t type, EventListener * listener)
 	{
-		if (auto vec = m_listeners.find(type); vec != m_listeners.values().end())
+		if (auto vec{ m_listeners.find(type) })
 		{
-			for (auto it = vec->begin(); it != vec->end(); ++it)
+			for (auto it = (*vec)->begin(); it != (*vec)->end(); ++it)
 			{
 				if ((*it) == listener)
 				{
-					vec->erase(it);
+					(*vec)->erase(it);
 					return;
 				}
 			}

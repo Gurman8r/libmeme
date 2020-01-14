@@ -43,15 +43,15 @@ namespace ml
 			
 			while (::dirent * ent{ ::readdir(dir) })
 			{
-				temp[([ent]() {
+				temp.at(([ent]() {
 					switch (ent->d_type)
 					{
-					case DT_DIR	: return '/';
-					case DT_REG	: return ' ';
-					case DT_LNK	: return '@';
-					default		: return '*';
+					case DT_DIR: return '/';
+					case DT_REG: return ' ';
+					case DT_LNK: return '@';
+					default: return '*';
 					}
-				})()].push_back(path_t{ ent->d_name });
+				})()).push_back(path_t{ ent->d_name });
 			}
 			
 			return std::make_optional(temp);

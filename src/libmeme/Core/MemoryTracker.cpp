@@ -18,10 +18,6 @@ namespace ml
 	{
 	}
 
-	AllocationRecord::~AllocationRecord() noexcept
-	{
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	MemoryTracker::MemoryTracker() noexcept
@@ -48,14 +44,14 @@ namespace ml
 				<< std::setw(addr_size) << "Address"
 				<< '\n';
 
-			for (auto const & pair : m_records)
+			m_records.for_each([&](auto, auto const & rec)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << pair.second->index()
-					<< std::setw(size_size) << pair.second->size()
-					<< std::setw(addr_size) << pair.second->data()
+					<< std::setw(indx_size) << rec->index()
+					<< std::setw(size_size) << rec->size()
+					<< std::setw(addr_size) << rec->data()
 					<< '\n';
-			}
+			});
 
 			Debug::pause(1);
 		}
@@ -65,23 +61,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Trackable * MemoryTracker::make_allocation(size_t size)
+	Trackable * MemoryTracker::make_allocation(size_t size, int32_t flags)
 	{
-		auto temp{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
-		return m_records.insert(std::make_pair(
-			temp, ::new AllocationRecord{ std::make_tuple(m_current++, size, temp) }
-		)).first->second->data();
+		return ([&, this, temp = ::new (ML_IMPL_NEW(size)) Trackable]() {
+			return (*m_records.try_emplace(temp, ::new AllocationRecord{
+				std::make_tuple(m_current++, size, flags, temp) }
+			).first.second)->data();
+		})();
 	}
 
-	void MemoryTracker::free_allocation(Trackable * value)
+	void MemoryTracker::free_allocation(Trackable * value, int32_t flags)
 	{
-		if (auto const it{ m_records.find(value) }; it != m_records.end())
+		if (auto const it{ m_records.find(value) })
 		{
-			ML_IMPL_DELETE(it->second->data());
-			
-			::delete it->second;
-			
-			m_records.erase(it);
+			ML_IMPL_DELETE(value);
+
+			::delete (**it);
+
+			m_records.erase(m_records.get_key(*it));
 		}
 	}
 
