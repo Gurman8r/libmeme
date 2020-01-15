@@ -20,7 +20,7 @@ namespace ml
 	{
 		if (auto const it{ m_listeners.find(value.id()) })
 		{
-			for (auto const & listener : (**it))
+			for (auto const & listener : (*it->second))
 			{
 				listener->onEvent(value);
 			}
@@ -31,13 +31,14 @@ namespace ml
 
 	void EventSystem::remove_listener(int32_t type, EventListener * listener)
 	{
-		if (auto vec{ m_listeners.find(type) })
+		if (auto v{ m_listeners.find(type) })
 		{
-			for (auto it = (*vec)->begin(); it != (*vec)->end(); ++it)
+			for (auto it = (*v->second).begin(); it != (*v->second).end(); ++it)
 			{
 				if ((*it) == listener)
 				{
-					(*vec)->erase(it);
+					(*v->second).erase(it);
+					
 					return;
 				}
 			}
@@ -50,13 +51,13 @@ namespace ml
 		while (!done)
 		{
 			done = true;
-			m_listeners.for_each([&done, listener](auto, auto & vec)
+			m_listeners.for_each([&done, listener](auto, auto & v)
 			{
-				for (auto it = vec.begin(); it != vec.end(); ++it)
+				for (auto it = v.begin(); it != v.end(); ++it)
 				{
 					if ((*it) == listener)
 					{
-						vec.erase(it);
+						v.erase(it);
 						done = false;
 						break;
 					}

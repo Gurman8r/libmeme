@@ -41,7 +41,7 @@ namespace ml
 
 		explicit AllocationRecord(storage_type && storage) noexcept;
 
-		union { storage_type m_storage; };
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

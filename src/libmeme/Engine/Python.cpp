@@ -94,12 +94,12 @@ namespace ml
 			.def_static("cpp_version",		[]() { return ML_CPP; })
 			.def_static("is_debug",			[]() { return ML_DEBUG; })
 			.def_static("platform_target",	[]() { return ML_PLATFORM_TARGET; })
-			.def_static("project_author",	[]() { return ML_PROJECT_AUTH; })
-			.def_static("project_date",		[]() { return ML_PROJECT_DATE; })
-			.def_static("project_name",		[]() { return ML_PROJECT_NAME; })
-			.def_static("project_time",		[]() { return ML_PROJECT_TIME; })
-			.def_static("project_url",		[]() { return ML_PROJECT_URL; })
-			.def_static("project_version",	[]() { return ML_PROJECT_VER; })
+			.def_static("project_author",	[]() { return ML__AUTHOR; })
+			.def_static("project_date",		[]() { return ML__DATE; })
+			.def_static("project_name",		[]() { return ML__NAME; })
+			.def_static("project_time",		[]() { return ML__TIME; })
+			.def_static("project_url",		[]() { return ML__URL; })
+			.def_static("project_version",	[]() { return ML__VERSION; })
 			.def_static("system_name",		[]() { return ML_SYSTEM_NAME; });
 
 		struct ml_py_io final {};

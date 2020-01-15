@@ -55,6 +55,11 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	using namespace std::string_literals;
+	using namespace std::string_view_literals;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	ML_USING	int8_t		= typename ML_INT8;
 	ML_USING	int16_t		= typename ML_INT16;
 	ML_USING	int32_t		= typename ML_INT32;

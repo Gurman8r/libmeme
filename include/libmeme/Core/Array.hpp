@@ -31,7 +31,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_type const i)
+		constexpr reference at(size_type const i)
 		{
 			if (Size <= i)
 			{
@@ -40,7 +40,7 @@ namespace ml
 			return m_data[i];
 		}
 
-		constexpr const_reference operator[](size_type const i) const
+		constexpr const_reference at(size_type const i) const
 		{
 			if (Size <= i)
 			{
@@ -51,9 +51,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_type const i) -> reference { return operator[](i); }
+		constexpr auto operator[](size_type const i) -> reference { return at(i); }
 		
-		constexpr auto at(size_type const i) const -> const_reference { return operator[](i); }
+		constexpr auto operator[](size_type const i) const -> const_reference { return at(i); }
 		
 		constexpr auto back() noexcept -> reference { return (*end()); }
 		

@@ -53,17 +53,6 @@ namespace ml
 					ImGui::EndMenu();
 				}
 			}
-			//m_test.for_each([](auto & name, auto & menu)
-			//{
-			//	if (!menu.empty() && ImGui::BeginMenu(name.c_str()))
-			//	{
-			//		for (auto & func : menu)
-			//		{
-			//			if (func) { std::invoke(func); }
-			//		}
-			//		ImGui::EndMenu();
-			//	}
-			//});
 		}
 		return ([&, this]()
 		{

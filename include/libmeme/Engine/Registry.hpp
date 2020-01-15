@@ -84,10 +84,10 @@ namespace ml
 		inline bool registrate(name_t const & name, info_t const & info, code_t const & code, func_t const & func)
 		{
 			if (funcs().contains(name)) { return false; }
-			std::get<ID_Codes>(m_storage).try_emplace(name, code);
-			std::get<ID_Funcs>(m_storage).try_emplace(name, func);
-			std::get<ID_Infos>(m_storage).try_emplace(name, info);
-			std::get<ID_Names>(m_storage).try_emplace(code, name);
+			std::get<ID_Codes>(m_storage).insert(name, code);
+			std::get<ID_Funcs>(m_storage).insert(name, func);
+			std::get<ID_Infos>(m_storage).insert(name, info);
+			std::get<ID_Names>(m_storage).insert(code, name);
 			return true;
 		}
 
@@ -105,7 +105,7 @@ namespace ml
 		{
 			if (auto const it{ codes().find(name) })
 			{
-				return std::make_optional(**it);
+				return std::make_optional(*it->second);
 			}
 			else
 			{
@@ -117,7 +117,7 @@ namespace ml
 		{
 			if (auto const it{ funcs().find(name) })
 			{
-				return std::make_optional(**it);
+				return std::make_optional(*it->second);
 			}
 			else
 			{
@@ -129,7 +129,7 @@ namespace ml
 		{
 			if (auto const it{ names().find(code) })
 			{
-				return get_func(**it);
+				return get_func(*it->second);
 			}
 			else
 			{
@@ -141,7 +141,7 @@ namespace ml
 		{
 			if (auto const it{ infos().find(name) })
 			{
-				return std::make_optional(**it);
+				return std::make_optional(*it->second);
 			}
 			else
 			{
@@ -153,7 +153,7 @@ namespace ml
 		{
 			if (auto const it{ names().find(code) })
 			{
-				return std::make_optional(**it);
+				return std::make_optional(*it->second);
 			}
 			else
 			{

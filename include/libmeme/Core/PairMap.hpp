@@ -101,14 +101,11 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr bool multi{ traits_type::multi };
+		basic_pair_map() noexcept : m_storage{} {}
+
+		~basic_pair_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		basic_pair_map() noexcept
-			: m_storage{}
-		{
-		}
 
 		template <class It> basic_pair_map(It first, It last)
 			: m_storage{ first, last }
@@ -120,6 +117,8 @@ namespace ml::ds
 		{
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		explicit basic_pair_map(storage_type const & value)
 			: m_storage{ value }
 		{
@@ -129,6 +128,8 @@ namespace ml::ds
 			: m_storage{ std::move(value) }
 		{
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit basic_pair_map(storage_type const & value, allocator_type const & alloc)
 			: m_storage{ value, alloc }
@@ -140,6 +141,8 @@ namespace ml::ds
 		{
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		basic_pair_map(self_type const & other)
 			: m_storage{ other.m_storage }
 		{
@@ -150,6 +153,8 @@ namespace ml::ds
 		{
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		basic_pair_map(self_type const & other, allocator_type const & alloc)
 			: m_storage{ other.m_storage, alloc }
 		{
@@ -159,8 +164,6 @@ namespace ml::ds
 			: m_storage{ std::move(other.m_storage), alloc }
 		{
 		}
-
-		virtual ~basic_pair_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -225,106 +228,106 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline bool contains(U && u) const
+		ML_NODISCARD inline bool contains(key_type const & key) const
 		{
-			return std::binary_search(cbegin(), cend(), std::forward<U>(u), compare_type{});
+			return std::binary_search(cbegin(), cend(), key, compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline iterator_pair equal_range(U && u)
+		ML_NODISCARD inline iterator_pair equal_range(key_type const & key)
 		{
-			return std::equal_range(begin(), end(), std::forward<U>(u), compare_type{});
+			return std::equal_range(begin(), end(), key, compare_type{});
 		}
 
-		template <class U> inline const_iterator_pair equal_range(U && u) const
+		ML_NODISCARD inline const_iterator_pair equal_range(key_type const & key) const
 		{
-			return std::equal_range(cbegin(), cend(), std::forward<U>(u), compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U> inline iterator lower_bound(U && u)
-		{
-			return std::lower_bound(begin(), end(), std::forward<U>(u), compare_type{});
-		}
-
-		template <class U> inline const_iterator lower_bound(U && u) const
-		{
-			return std::lower_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+			return std::equal_range(cbegin(), cend(), key, compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U> inline iterator upper_bound(U && u)
+		ML_NODISCARD inline iterator lower_bound(key_type const & key)
 		{
-			return std::upper_bound(begin(), end(), std::forward<U>(u), compare_type{});
+			return std::lower_bound(begin(), end(), key, compare_type{});
 		}
 
-		template <class U> inline const_iterator upper_bound(U && u) const
+		ML_NODISCARD inline const_iterator lower_bound(key_type const & key) const
 		{
-			return std::upper_bound(cbegin(), cend(), std::forward<U>(u), compare_type{});
+			return std::lower_bound(cbegin(), cend(), key, compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator find(const_reference value)
+		ML_NODISCARD inline iterator upper_bound(key_type const & key)
+		{
+			return std::upper_bound(begin(), end(), key, compare_type{});
+		}
+
+		ML_NODISCARD inline const_iterator upper_bound(key_type const & key) const
+		{
+			return std::upper_bound(cbegin(), cend(), key, compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline iterator find(const_reference value)
 		{
 			return std::find(begin(), end(), value);
 		}
 
-		inline const_iterator find(const_reference value) const
+		ML_NODISCARD inline const_iterator find(const_reference value) const
 		{
 			return std::find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto back() noexcept -> reference { return m_storage.back(); }
+		ML_NODISCARD inline auto back() noexcept -> reference { return m_storage.back(); }
 
-		inline auto back() const noexcept -> const_reference { return m_storage.back(); }
+		ML_NODISCARD inline auto back() const noexcept -> const_reference { return m_storage.back(); }
 
-		inline auto begin() noexcept -> iterator { return m_storage.begin(); }
+		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
 
-		inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
+		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
 
-		inline auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
+		ML_NODISCARD inline auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
 
-		inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
+		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
 
-		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
+		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
-		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
+		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
-		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
+		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
 
-		inline auto data() noexcept -> pointer { return m_storage.data(); }
+		ML_NODISCARD inline auto data() noexcept -> pointer { return m_storage.data(); }
 
-		inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
+		ML_NODISCARD inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
 
-		inline bool empty() const noexcept { return m_storage.empty(); }
+		ML_NODISCARD inline bool empty() const noexcept { return m_storage.empty(); }
 
-		inline auto end() noexcept -> iterator { return m_storage.end(); }
+		ML_NODISCARD inline auto end() noexcept -> iterator { return m_storage.end(); }
 
-		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
 
-		inline auto front() noexcept -> reference { return m_storage.front(); }
+		ML_NODISCARD inline auto front() noexcept -> reference { return m_storage.front(); }
 
-		inline auto front() const noexcept -> const_reference { return m_storage.front(); }
+		ML_NODISCARD inline auto front() const noexcept -> const_reference { return m_storage.front(); }
 
-		inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
+		ML_NODISCARD inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
 
-		inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
+		ML_NODISCARD inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
 
-		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
 
-		inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
 
-		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 
-		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
 
-		inline auto size() const noexcept -> size_type { return m_storage.size(); }
+		ML_NODISCARD inline auto size() const noexcept -> size_type { return m_storage.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -369,41 +372,72 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pair_map() noexcept
-			: base_type{}
-		{
-		}
+		pair_map() noexcept : base_type{} {}
+
+		~pair_map() noexcept {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		pair_map(initializer_type init)
 			: base_type{ init }
 		{
-			sort_internal();
+			sort();
 		}
 
 		template <class It> pair_map(It first, It last)
 			: base_type{ first, last }
 		{
-			sort_internal();
+			sort();
 		}
 
-		explicit pair_map(storage_type const & other, allocator_type const & alloc = {})
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit pair_map(storage_type const & other)
+			: base_type{ other }
+		{
+			sort();
+		}
+
+		explicit pair_map(storage_type && other) noexcept
+			: base_type{ std::move(other) }
+		{
+			sort();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit pair_map(storage_type const & other, allocator_type const & alloc)
 			: base_type{ other, alloc }
 		{
-			sort_internal();
+			sort();
 		}
 
-		explicit pair_map(storage_type && other, allocator_type const & alloc = {}) noexcept
+		explicit pair_map(storage_type && other, allocator_type const & alloc) noexcept
 			: base_type{ std::move(other), alloc }
 		{
-			sort_internal();
+			sort();
 		}
 
-		pair_map(self_type const & other, allocator_type const & alloc = {})
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pair_map(self_type const & other)
+			: base_type{ other.m_storage }
+		{
+		}
+
+		pair_map(self_type && other) noexcept
+			: base_type{ std::move(other.m_storage) }
+		{
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pair_map(self_type const & other, allocator_type const & alloc)
 			: base_type{ other.m_storage, alloc }
 		{
 		}
 
-		pair_map(self_type && other, allocator_type const & alloc = {}) noexcept
+		pair_map(self_type && other, allocator_type const & alloc) noexcept
 			: base_type{ std::move(other.m_storage), alloc }
 		{
 		}
@@ -458,7 +492,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline mapped_type & at(key_type const & key)
+		ML_NODISCARD inline mapped_type & at(key_type const & key)
 		{
 			if (auto const it{ equal_range(key) }; it.first != it.second)
 			{
@@ -470,19 +504,38 @@ namespace ml::ds
 			}
 		}
 
-		inline mapped_type & operator[](key_type const & key)
+		ML_NODISCARD inline mapped_type & at(key_type && key)
+		{
+			if (auto const it{ equal_range(std::move(key)) }; it.first != it.second)
+			{
+				return it.first->second;
+			}
+			else
+			{
+				return m_storage.emplace(it.second, value_type{ std::move(key), mapped_type{} })->second;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline mapped_type & operator[](key_type const & key)
 		{
 			return at(key);
+		}
+
+		ML_NODISCARD inline mapped_type & operator[](key_type && key)
+		{
+			return at(std::move(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		inline void sort_internal()
+		inline void sort()
 		{
-			std::sort(begin(), end(), compare_type{});
+			std::sort(base_type::begin(), base_type::end(), compare_type{});
 
-			erase(std::unique(begin(), end(), compare_type{}), end());
+			base_type::erase(std::unique(base_type::begin(), base_type::end(), compare_type{}), base_type::end());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -525,41 +578,72 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pair_multimap() noexcept
-			: base_type{}
-		{
-		}
+		pair_multimap() noexcept : base_type{} {}
+
+		~pair_multimap() noexcept {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		pair_multimap(initializer_type init)
 			: base_type{ init }
 		{
-			sort_internal();
+			sort();
 		}
 
 		template <class It> pair_multimap(It first, It last)
 			: base_type{ first, last }
 		{
-			sort_internal();
+			sort();
 		}
 
-		explicit pair_multimap(storage_type const & other, allocator_type const & alloc = {})
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit pair_multimap(storage_type const & other)
+			: base_type{ other }
+		{
+			sort();
+		}
+
+		explicit pair_multimap(storage_type && other) noexcept
+			: base_type{ std::move(other) }
+		{
+			sort();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit pair_multimap(storage_type const & other, allocator_type const & alloc)
 			: base_type{ other, alloc }
 		{
-			sort_internal();
+			sort();
 		}
 
-		explicit pair_multimap(storage_type && other, allocator_type const & alloc = {}) noexcept
+		explicit pair_multimap(storage_type && other, allocator_type const & alloc) noexcept
 			: base_type{ std::move(other), alloc }
 		{
-			sort_internal();
+			sort();
 		}
 
-		pair_multimap(self_type const & other, allocator_type const & alloc = {})
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pair_multimap(self_type const & other)
+			: base_type{ other.m_storage }
+		{
+		}
+
+		pair_multimap(self_type && other) noexcept
+			: base_type{ std::move(other.m_storage) }
+		{
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pair_multimap(self_type const & other, allocator_type const & alloc)
 			: base_type{ other.m_storage, alloc }
 		{
 		}
 
-		pair_multimap(self_type && other, allocator_type const & alloc = {}) noexcept
+		pair_multimap(self_type && other, allocator_type const & alloc) noexcept
 			: base_type{ std::move(other.m_storage), alloc }
 		{
 		}
@@ -601,9 +685,9 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		inline void sort_internal()
+		inline void sort() noexcept
 		{
-			std::sort(begin(), end(), compare_type{});
+			std::sort(base_type::begin(), base_type::end(), compare_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

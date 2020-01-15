@@ -109,7 +109,7 @@ namespace ml
 
 		~PluginLoader()
 		{
-			m_plugins.for_each([](auto &, auto & plugin)
+			m_plugins.for_each([](auto const &, auto & plugin)
 			{
 				delete plugin;
 			});
@@ -125,7 +125,7 @@ namespace ml
 				{
 					if (auto const plugin{ library.call_function<Plugin *>("ML_Plugin_Main") })
 					{
-						return (*m_plugins.try_emplace(std::move(library), plugin).first.second);
+						return (*m_plugins.insert(std::move(library), plugin).first.second);
 					}
 				}
 				m_filenames.erase(file.first);

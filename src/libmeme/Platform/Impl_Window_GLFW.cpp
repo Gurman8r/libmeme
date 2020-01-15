@@ -41,11 +41,11 @@ namespace ml
 
 		if (auto const it{ cache.find(pixels) })
 		{
-			return (**it);
+			return (*it->second);
 		}
 		else
 		{
-			return (*cache.try_emplace(
+			return (*cache.insert(
 				pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
 			).first.second);
 		}

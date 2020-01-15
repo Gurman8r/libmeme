@@ -3,24 +3,7 @@
 
 #include <libmeme/Core/TypeOf.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
-
 #define _ML_UTIL _ML util::
-
-/* * * * * * * * * * * * * * * * * * * * */
-
-namespace ml::string_literals
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	using namespace std::string_literals;
-
-	using namespace std::string_view_literals;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::util
 {
@@ -122,9 +105,9 @@ namespace ml::util
 	static inline bool is_alpha(std::string const & value)
 	{
 		if (value.empty()) return false;
-		std::locale loc {};
+		std::locale location {};
 		for (auto const & elem : value)
-			if (!std::isalpha(elem, loc))
+			if (!std::isalpha(elem, location))
 				return false;
 		return true;
 	}
@@ -132,9 +115,9 @@ namespace ml::util
 	static inline bool is_alnum(std::string const & value)
 	{
 		if (value.empty()) return false;
-		std::locale loc {};
+		std::locale location {};
 		for (auto const & elem : value)
-			if (!std::isalnum(elem, loc))
+			if (!std::isalnum(elem, location))
 				return false;
 		return true;
 	}
@@ -142,9 +125,9 @@ namespace ml::util
 	static inline bool is_graph(std::string const & value)
 	{
 		if (value.empty()) return false;
-		std::locale loc {};
+		std::locale location {};
 		for (auto const & elem : value)
-			if (!std::isgraph(elem, loc))
+			if (!std::isgraph(elem, location))
 				return false;
 		return true;
 	}
@@ -177,17 +160,17 @@ namespace ml::util
 
 	static inline std::string to_lower(std::string value)
 	{
-		std::locale loc {};
+		std::locale location {};
 		for (auto & elem : value)
-			elem = std::tolower(elem, loc);
+			elem = std::tolower(elem, location);
 		return value;
 	}
 
 	static inline std::string to_upper(std::string value)
 	{
-		std::locale loc {};
+		std::locale location {};
 		for (auto & elem : value)
-			elem = std::toupper(elem, loc);
+			elem = std::toupper(elem, location);
 		return value;
 	}
 

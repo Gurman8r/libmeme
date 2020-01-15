@@ -7,12 +7,12 @@ namespace ml
 {
 	struct Shader::UniformBinder final
 	{
-		union { uint32_t program; uint32_t cached; int32_t location; };
+		union { uint32_t program; uint32_t cached; int32_t loc; };
 
 		explicit UniformBinder(Shader & shader, std::string const & name)
 			: program	{ shader ? shader.handle() : NULL }
 			, cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
-			, location	{ shader ? shader.get_uniform_location(name) : -1 }
+			, loc	{ shader ? shader.get_uniform_location(name) : -1 }
 		{
 			if (program && (program != cached))
 			{
@@ -30,7 +30,7 @@ namespace ml
 
 		inline operator bool() const noexcept
 		{
-			return (location != -1);
+			return (loc != -1);
 		}
 	};
 }
@@ -201,9 +201,9 @@ namespace ml
 			if (bindTextures)
 			{
 				uint32_t index{ 0 };
-				value->m_textures.for_each([&index](int32_t id, auto const & tex)
+				value->m_textures.for_each([&index](int32_t loc, auto const & tex)
 				{
-					GL::uniform1i(id, index);
+					GL::uniform1i(loc, index);
 					
 					GL::activeTexture(GL::Texture0 + (index++));
 					
@@ -278,35 +278,35 @@ namespace ml
 	bool Shader::set_uniform(std::string const & name, int32_t value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform1i(u.location, value); }
+		if (u) { GL::uniform1i(u.loc, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, float32_t value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform1f(u.location, value); }
+		if (u) { GL::uniform1f(u.loc, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
+		if (u) { GL::uniform2f(u.loc, value[0], value[1]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
+		if (u) { GL::uniform3f(u.loc, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
+		if (u) { GL::uniform4f(u.loc, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
 
@@ -318,21 +318,21 @@ namespace ml
 	bool Shader::set_uniform(std::string const & name, mat2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix2fv(u.loc, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix3fv(u.loc, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix4fv(u.loc, 1, false, value.data()); }
 		return u;
 	}
 
@@ -346,17 +346,17 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto it{ m_textures.find(u.location) })
+			if (auto it{ m_textures.find(u.loc) })
 			{
-				(**it) = &value;
+				(*it->second) = &value;
 			}
 			else if ((m_textures.size() + 1) < max_textures)
 			{
-				m_textures.try_emplace(u.location, &value);
+				m_textures.insert(u.loc, &value);
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		return u;
@@ -373,11 +373,11 @@ namespace ml
 	{
 		if (auto const it{ m_attributes.find(value) })
 		{
-			return (**it);
+			return (*it->second);
 		}
 		else if (auto const loc{ GL::getAttribLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return (*m_attributes.try_emplace(value, loc).first.second);
+			return (*m_attributes.insert(value, loc).first.second);
 		}
 		else
 		{
@@ -389,11 +389,11 @@ namespace ml
 	{
 		if (auto const it{ m_uniforms.find(value) })
 		{
-			return (**it);
+			return (*it->second);
 		}
 		else if (auto const loc{ GL::getUniformLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return (*m_uniforms.try_emplace(value, loc).first.second);
+			return (*m_uniforms.insert(value, loc).first.second);
 		}
 		else
 		{

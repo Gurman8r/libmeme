@@ -92,11 +92,11 @@ namespace ml
 	{
 		if (auto const it{ m_functions.find(name) })
 		{
-			return (**it);
+			return (*it->second);
 		}
 		else if (m_instance)
 		{
-			return (*m_functions.try_emplace(name,
+			return (*m_functions.insert(name,
 #ifdef ML_SYSTEM_WINDOWS
 				::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
 #else

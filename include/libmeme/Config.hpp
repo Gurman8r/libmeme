@@ -4,18 +4,16 @@
 
 // Project Information
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#define ML_PROJECT_AUTH	"Melody Gurman"
-#define ML_PROJECT_NAME	"libmeme"
-#define ML_PROJECT_VER  "00.00.01"
-#define ML_PROJECT_URL	"https://www.github.com/Gurman8r/libmeme"
-#define ML_PROJECT_DATE	__DATE__
-#define ML_PROJECT_TIME	__TIME__
+#define ML__AUTHOR	    "Melody Gurman"
+#define ML__NAME	    "libmeme"
+#define ML__VERSION     "00.00.01"
+#define ML__URL	        "https://www.github.com/Gurman8r/libmeme"
+#define ML__DATE	    __DATE__
+#define ML__TIME	    __TIME__
 
 
 // Language
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if defined(__cplusplus)
 #	if defined(_MSVC_LANG)
 #		define ML_CPP _MSVC_LANG
@@ -38,28 +36,9 @@
 #	error This system does not support C++.
 #endif
 
-#if defined(__cpp_constexpr)
-#	define ML_CPP_CONSTEXPR __cpp_constexpr
-#	if (ML_CPP_CONSTEXPR >= 201907L)
-#		define ML_HAS_CONSTEXPR_20	// trivial default initialization and asm-declaration in constexpr functions
-#	endif
-#	if (ML_CPP_CONSTEXPR >= 201603L)
-#		define ML_HAS_CONSTEXPR_17	// constexpr lambda
-#	endif
-#	if (ML_CPP_CONSTEXPR >= 201304L)
-#		define ML_HAS_CONSTEXPR_14	// relaxing constraints on constexpr functions / constexpr member functions and implicit const
-#	endif
-#	if (ML_CPP_CONSTEXPR >= 200704L)
-#		define ML_HAS_CONSTEXPR_11	// constexpr
-#	endif
-#else
-#	error This compiler does not support constexpr.
-#endif
 
-
-// System
+// Operating System
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if defined(_WIN32) || defined(_WIN64) \
   || defined(WIN32) || defined(WIN64) \
   || defined(__MINGW32__) || defined(__MINGW64__)
@@ -85,9 +64,8 @@
 #endif
 
 
-// Platform / Architecture
+// Architecture
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
 #	define ML_X64
 #	define ML_ARCHITECTURE 64
@@ -123,7 +101,6 @@
 
 // Compiler
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if defined(_MSC_VER)
 #	define ML_CC_MSC _MSC_VER
 #	define ML_CC_VER ML_CC_MSC
@@ -185,7 +162,6 @@
 
 // Types
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #if defined(ML_CC_MSC)
 #	define	ML_INT8		signed __int8
 #	define	ML_INT16	signed __int16
@@ -219,10 +195,8 @@
 #endif
 
 
-// Preprocessor
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // Build
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(_DEBUG)
 #	define ML_DEBUG			1
 #	define ML_CONFIGURATION	"Debug"
@@ -231,12 +205,16 @@
 #	define ML_CONFIGURATION	"Release"
 #endif
 
+
 // Namespace
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define _ML			::ml::
 #define _ML_BEGIN 	namespace ml {
 #define _ML_END 	}
 
-// Utils
+
+// Misc
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)
 #define ML_ARRAYSIZE(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_CONCAT_IMPL(a, b)	a##b
@@ -245,43 +223,56 @@
 #define ML_STRINGIFY(str)		ML_TOSTRING(str)
 #define ML_TRUE_EXPR(expr)		(([&](){ expr; return true; })())
 #define ML_FALSE_EXPR(expr)		(([&](){ expr; return false; })())
+#define ML_THROW                throw
+#define ML_USING			    using
+#define ML_USING_VA(...)	    template <##__VA_ARGS__> ML_USING
+#define ML_USING_X			    ML_USING_VA(class X)
+#define ML_USING_XY			    ML_USING_VA(class X, class Y)
+#define ML_USING_XYZ		    ML_USING_VA(class X, class Y, class Z)
+#define ML_USING_Ts			    ML_USING_VA(class ... Ts)
 
-// Exceptions
-#define ML_THROW throw
 
-// Typedefs
-#define ML_USING			using
-#define ML_USING_VA(...)	template <##__VA_ARGS__> ML_USING
-#define ML_USING_X			ML_USING_VA(class X)
-#define ML_USING_XY			ML_USING_VA(class X, class Y)
-#define ML_USING_XYZ		ML_USING_VA(class X, class Y, class Z)
-#define ML_USING_Ts			ML_USING_VA(class ... Ts)
-
-// Anonymous ( _str_# )
-#ifdef __COUNTER__
-#	define ML_ANON(str) ML_CONCAT(_, ML_CONCAT(str, ML_CONCAT(_, __COUNTER__)))
-#else
-#	define ML_ANON(str) ML_CONCAT(_, ML_CONCAT(str, ML_CONCAT(_, __LINE__)))
-#endif
-
-#define ML_ANON_T(T, ...) auto ML_ANON(T) { T { ##__VA_ARGS__ } }
-
-// Inlining
-#ifdef ML_CC_MSC
-#	define ML_ALWAYS_INLINE __forceinline
-#	define ML_NEVER_INLINE __declspec(noinline)
+// No Discard
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifndef ML_NO_NODISCARD
 #   define ML_NODISCARD [[nodiscard]]
-#elif defined(ML_CC_GCC) || defined(ML_CC_CLANG)
-#	define ML_ALWAYS_INLINE inline __attribute__((__always_inline__))
-#	define ML_NEVER_INLINE __attribute__((__noinline__))
-#   define ML_NODISCARD __attribute__((__nodiscard__))
 #else
-#	define ML_ALWAYS_INLINE
-#	define ML_NEVER_INLINE
 #   define ML_NODISCARD
 #endif
 
+
+// Anonymous
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#if defined(__COUNTER__)
+#	define ML_ANON(str) ML_CONCAT(_, ML_CONCAT(str, ML_CONCAT(_, __COUNTER__)))
+#elif defined(__LINE__)
+#	define ML_ANON(str) ML_CONCAT(_, ML_CONCAT(str, ML_CONCAT(_, __LINE__)))
+#else
+#	define ML_ANON(str)
+#endif
+
+#ifdef ML_ANON
+#   define ML_ANON_T(T, ...) auto ML_ANON(T) { T{ ##__VA_ARGS__ } }
+#endif
+
+
+
+// Inlining
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifdef ML_CC_MSC
+#	define ML_ALWAYS_INLINE __forceinline
+#	define ML_NEVER_INLINE __declspec(noinline)
+#elif defined(ML_CC_GCC) || defined(ML_CC_CLANG)
+#	define ML_ALWAYS_INLINE inline __attribute__((__always_inline__))
+#	define ML_NEVER_INLINE __attribute__((__noinline__))
+#else
+#	define ML_ALWAYS_INLINE
+#	define ML_NEVER_INLINE
+#endif
+
+
 // Export
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #ifdef ML_CC_MSC
 #	define ML_API_EXPORT __declspec(dllexport)
 #	define ML_API_IMPORT __declspec(dllimport)
@@ -296,7 +287,6 @@
 
 // Warnings
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #ifdef ML_CC_MSC
 #	pragma warning(disable: 4031)	// second formal parameter list longer than the first list
 #	pragma warning(disable: 4067)	// unexpected tokens following preprocessor directive - expected a newline

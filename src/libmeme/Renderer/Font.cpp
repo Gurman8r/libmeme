@@ -143,11 +143,11 @@ namespace ml
 		
 		if (auto it{ page.find(c) })
 		{
-			return (**it);
+			return (*it->second);
 		}
 		else
 		{
-			return (*page.try_emplace(c, load_glyph(c, characterSize)).first.second);
+			return (*page.insert(c, load_glyph(c, characterSize)).first.second);
 		}
 	}
 
