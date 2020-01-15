@@ -42,21 +42,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return fbo() && rbo(); }
+		ML_NODISCARD inline operator bool() const noexcept { return fbo() && rbo(); }
 
-		inline auto fbo() const noexcept -> FrameBufferObject const & { return m_fbo; }
+		ML_NODISCARD inline auto fbo() const noexcept -> FrameBufferObject const & { return m_fbo; }
 
-		inline auto rbo() const noexcept -> RenderBufferObject const & { return m_rbo; }
+		ML_NODISCARD inline auto rbo() const noexcept -> RenderBufferObject const & { return m_rbo; }
 
-		inline auto size() const noexcept -> vec2i const & { return m_size; }
+		ML_NODISCARD inline auto size() const noexcept -> vec2i const & { return m_size; }
 
-		inline auto colorID() const noexcept -> uint32_t { return m_colorID; }
+		ML_NODISCARD inline auto colorID() const noexcept -> uint32_t { return m_colorID; }
 
-		inline auto frameID() const noexcept -> uint32_t { return m_frameID; }
+		ML_NODISCARD inline auto frameID() const noexcept -> uint32_t { return m_frameID; }
 
-		inline auto format() const noexcept -> uint32_t { return m_format; }
+		ML_NODISCARD inline auto format() const noexcept -> uint32_t { return m_format; }
 
-		inline auto texture() const noexcept -> Texture const & { return m_texture; }
+		ML_NODISCARD inline auto texture() const noexcept -> Texture const & { return m_texture; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -74,7 +74,8 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static inline auto make_render_texture(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_render_texture(Args && ... args)
 	{
 		return RenderTexture{ std::forward<Args>(args)... };
 	}

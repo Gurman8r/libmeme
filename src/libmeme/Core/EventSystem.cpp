@@ -11,7 +11,7 @@ namespace ml
 
 	EventListener * EventSystem::add_listener(int32_t type, EventListener * listener)
 	{
-		return ((type != Event::EV_INVALID) && listener)
+		return (listener && (type != Event::EV_INVALID))
 			? (*m_listeners[type].insert(listener).first)
 			: nullptr;
 	}

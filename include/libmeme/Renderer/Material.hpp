@@ -49,9 +49,15 @@ namespace ml
 			m_storage.clear();
 		}
 
-		inline Uniform push_back(Uniform && value)
+		template <class ... Args
+		> inline Uniform & emplace_back(Args && ... args)
 		{
-			return m_storage.emplace_back(std::move(value));
+			return m_storage.emplace_back(std::forward<Args>(args)...);
+		}
+
+		inline void push_back(Uniform && value)
+		{
+			emplace_back(std::move(value));
 		}
 
 		inline bool insert(Uniform && value)
@@ -65,86 +71,81 @@ namespace ml
 			return false;
 		}
 
-		template <class Pr> inline void sort(Pr && pr) noexcept
-		{
-			std::sort(begin(), end(), pr);
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline iterator find(T const & value)
+		template <class T
+		> ML_NODISCARD inline iterator find(T const & value)
 		{
 			return std::find(begin(), end(), value);
 		}
 
-		template <class T> inline const_iterator find(T const & value) const
+		template <class T
+		> ML_NODISCARD inline const_iterator find(T const & value) const
 		{
 			return std::find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Pr> inline iterator find_if(Pr && pr)
-		{
-			return std::find_if(begin(), end(), pr);
-		}
-
-		template <class Pr> inline const_iterator find_if(Pr && pr) const
-		{
-			return std::find_if(cbegin(), cend(), pr);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline std::optional<Uniform> find_by_name(std::string const & name)
+		ML_NODISCARD inline std::optional<Uniform> find_by_name(std::string const & name)
 		{
 			if (name.empty()) { return std::nullopt; }
-			if (auto it{ find_if([name](auto && u) { return u.name() == name; }) }; it != end())
+			if (auto const it{ std::find_if(begin(), end(), [name](auto && u) {
+				return u.name() == name;
+			}) }; it != end())
 			{
 				return std::make_optional(*it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
-		inline std::optional<Uniform> find_by_name(std::string const & name) const
+		ML_NODISCARD inline std::optional<Uniform> find_by_name(std::string const & name) const
 		{
 			if (name.empty()) { return std::nullopt; }
-			if (auto it{ find_if([name](auto && u) { return u.name() == name; }) }; it != cend())
+			if (auto const it{ std::find_if(begin(), end(), [name](auto && u) {
+				return u.name() == name;
+			}) }; it != cend())
 			{
 				return std::make_optional(*it);
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline reference operator[](size_t index) noexcept
-		{
-			return m_storage[index];
-		}
+		ML_NODISCARD inline auto operator[](size_t index) -> reference { return m_storage[index]; }
 
-		inline const_reference operator[](size_t index) const noexcept
-		{
-			return m_storage[index];
-		}
+		ML_NODISCARD inline auto operator[](size_t index) const -> const_reference { return m_storage[index]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
+		
+		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
+		
+		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
+		
+		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
-		inline auto begin() noexcept -> iterator { return m_storage.begin(); }
-		inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
-		inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
+		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
-		inline auto end() noexcept -> iterator { return m_storage.end(); }
-		inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
-		inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
+		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
 
-		inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
-		inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
-		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
+		ML_NODISCARD inline auto end() noexcept -> iterator { return m_storage.end(); }
 
-		inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
-		inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
-		inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
+		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+
+		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
+		
+		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
+
+		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
+		
+		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -156,12 +157,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline auto make_material(Material::storage_type && s)
+	ML_NODISCARD static inline auto make_material(Material::storage_type && s)
 	{
 		return Material{ std::move(s) };
 	}
 
-	template <class ... Args> static inline auto make_material(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_material(Args && ... args)
 	{
 		return Material{ Material::storage_type{ std::forward<Args>(args)... } };
 	}

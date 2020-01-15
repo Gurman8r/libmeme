@@ -97,17 +97,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return m_handle; }
+		ML_NODISCARD inline operator bool() const noexcept { return m_handle; }
 
-		inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
 
-		inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
+		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
-		inline auto attributes() const noexcept -> AttribCache const & { return m_attributes; }
+		ML_NODISCARD inline auto attributes() const noexcept -> AttribCache const & { return m_attributes; }
 
-		inline auto textures() const noexcept -> TextureCache const & { return m_textures; }
+		ML_NODISCARD inline auto textures() const noexcept -> TextureCache const & { return m_textures; }
 
-		inline auto uniforms() const noexcept -> UniformCache const & { return m_uniforms; }
+		ML_NODISCARD inline auto uniforms() const noexcept -> UniformCache const & { return m_uniforms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -135,7 +135,8 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static inline auto make_shader(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_shader(Args && ... args)
 	{
 		return Shader{ std::forward<Args>(args)... };
 	}

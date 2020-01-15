@@ -18,35 +18,27 @@ namespace ml
 
 		constexpr typeof() noexcept = default;
 
-		static constexpr auto name() noexcept -> name_t const & { return m_name; }
-		
-		static constexpr auto hash() noexcept -> hash_t const & { return m_hash; }
-
-	private:
-		static constexpr name_t m_name
+		ML_NODISCARD static constexpr name_t name() noexcept
 		{
-			nameof<>::filter_signature_type(nameof<T>::value)
-		};
+			return nameof<>::filter_signature_type(nameof<T>::value);
+		}
 
-		static constexpr hash_t m_hash
+		ML_NODISCARD static constexpr hash_t hash() noexcept
 		{
-			Hash{ m_name }
-		};
+			return Hash(name());
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class T
-	> static constexpr auto const typeof_v{ typeof<T>{} };
+	template <class T
+	> static constexpr auto typeof_v{ typeof<T>{} };
 
-	template <
-		class T
-	> static constexpr auto const & hashof_v{ typeof_v<T>.hash() };
+	template <class T
+	> static constexpr auto hashof_v{ typeof_v<T>.hash() };
 
-	template <
-		class T
-	> static constexpr auto const & nameof_v{ typeof_v<T>.name() };
+	template <class T
+	> static constexpr auto nameof_v{ typeof_v<T>.name() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -64,9 +56,15 @@ namespace ml
 		{
 		}
 
-		constexpr auto name() const noexcept -> name_t const & { return m_name; }
+		ML_NODISCARD constexpr name_t name() const noexcept
+		{
+			return m_name;
+		}
 
-		constexpr auto hash() const noexcept -> hash_t const & { return m_hash; }
+		ML_NODISCARD constexpr hash_t hash() const noexcept
+		{
+			return m_hash;
+		}
 
 	private:
 		name_t m_name;

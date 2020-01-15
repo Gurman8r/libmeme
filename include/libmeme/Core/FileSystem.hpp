@@ -24,21 +24,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static path_t current_path();
-
 		static void current_path(path_t const & value);
 
-		static path_t path_to(path_t const & value);
+		ML_NODISCARD static path_t current_path();
 
-		static path_t const & root_path();
+		ML_NODISCARD static path_t path_to(path_t const & value);
+
+		ML_NODISCARD static path_t const & root_path();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static std::optional<directory_t> read_dir(path_t const & path);
+		ML_NODISCARD static std::optional<directory_t> read_dir(path_t const & path);
 
-		static std::optional<file_t> read_file(path_t const & path);
+		ML_NODISCARD static std::optional<file_t> read_file(path_t const & path);
 
-		static std::string get_file_contents(path_t const & path);
+		ML_NODISCARD static std::string get_file_contents(path_t const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static path_t s_root;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

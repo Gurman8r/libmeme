@@ -4,6 +4,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/FlatMap.hpp>
+#include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -13,7 +14,6 @@
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Engine/Lua.hpp>
 #include <libmeme/Engine/Script.hpp>
-#include <libmeme/Engine/SharedLibrary.hpp>
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
@@ -62,35 +62,35 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static constexpr auto const window_title{ C_String {
-		"libmeme"					// Title
-	} };
-	static constexpr auto const window_mode{ DisplayMode {
-		1280,						// Width
-		720,						// Height
-		32							// Bits-per-Pixel
-	} };
-	static constexpr auto const window_settings{ WindowSettings {
-		1,							// Resizable
-		1,							// Visible
-		1,							// Decorated
-		1,							// Focused
-		1,							// Auto Iconify
-		0,							// Floating
-		0,							// Maximized
-		0,							// Fullscreen
-		0,							// Vertical Sync
-	} };
-	static constexpr auto const window_context{ ContextSettings {
-		ContextSettings::OpenGL,	// API
-		4,							// Major Version
-		6,							// Minor Version
-		ContextSettings::Compat,	// Profile
-		24,							// Depth Bits
-		8,							// Stencil Bits
-		false,						// Multisample
-		false						// sRGB Capable
-	} };
+	static constexpr auto const window_title{
+		"libmeme"				// Title
+	};
+	static constexpr auto const window_mode{ make_display_mode(vec2u{
+		1280,					// Width
+		720 },					// Height
+		32						// Bits-per-Pixel
+	) };
+	static constexpr auto const window_settings{ make_window_settings(
+		true,					// Resizable
+		true,					// Visible
+		true,					// Decorated
+		true,					// Focused
+		true,					// Auto Iconify
+		false,					// Floating
+		false,					// Maximized
+		false,					// Fullscreen
+		false					// Vertical Sync
+	) };
+	static constexpr auto const window_context{ make_context_settings(
+		ContextSettings::OpenGL,// Client API
+		4,						// Major Version
+		6,						// Minor Version
+		ContextSettings::Compat,// Profile
+		24,						// Depth Bits
+		8,						// Stencil Bits
+		false,					// Multisample
+		false					// sRGB Capable
+	) };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -154,7 +154,7 @@ ml::int32_t main()
 
 	// Testing
 	EventHandler::Pool flow;
-	flow.add_listener<EnterEvent>([](Event const & value)
+	flow.add_listener<EnterEvent>([&](Event const & value)
 	{
 		if (auto const ev = value.as<EnterEvent>())
 		{

@@ -18,23 +18,63 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Timer(bool startMe = false) noexcept;
+		Timer(bool startMe) noexcept
+			: m_running{ startMe }
+			, m_previous{ Clock::now() }
+			, m_current{ m_previous }
+			, m_elapsed{ 0.0 }
+		{
+		}
 
-		Timer(Timer const & other) noexcept;
+		Timer(Timer const & other) noexcept
+			: m_running{ other.m_running }
+			, m_previous{ other.m_previous }
+			, m_current{ other.m_current }
+			, m_elapsed{ other.m_elapsed }
+		{
+		}
 
-		~Timer() noexcept;
+		~Timer() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Duration const & elapsed() const noexcept;
+		inline Timer & start() noexcept
+		{
+			if (!m_running)
+			{
+				m_previous = m_current = Clock::now();
 
-		Timer & start() noexcept;
+				m_elapsed = 0.0;
 
-		Timer & stop() noexcept;
+				m_running = true;
+			}
+			return (*this);
+		}
+
+		inline Timer & stop() noexcept
+		{
+			if (m_running)
+			{
+				m_current = Clock::now();
+
+				m_elapsed = (m_current - m_previous);
+
+				m_running = false;
+			}
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool running() const noexcept { return m_running; }
+		ML_NODISCARD inline Duration const & elapsed() const noexcept
+		{
+			return m_running ? (m_elapsed = (Clock::now() - m_previous)) : m_elapsed;
+		}
+
+		ML_NODISCARD inline bool running() const noexcept
+		{
+			return m_running;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

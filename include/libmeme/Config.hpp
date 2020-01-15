@@ -234,10 +234,12 @@
 
 // No Discard
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef ML_NO_NODISCARD
+#ifndef __has_cpp_attribute
+#    define ML_NODISCARD
+#elif __has_cpp_attribute(nodiscard) >= 201603L
 #   define ML_NODISCARD [[nodiscard]]
 #else
-#   define ML_NODISCARD
+#    define ML_NODISCARD
 #endif
 
 

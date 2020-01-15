@@ -59,7 +59,7 @@ namespace ml
 		, m_share	{ nullptr }
 		, m_title	{}
 		, m_context	{}
-		, m_settings	{}
+		, m_settings{}
 		, m_video	{}
 	{
 		EventSystem::add_listener<WindowKillEvent>(this);
@@ -268,7 +268,7 @@ namespace ml
 
 	Window & Window::set_centered()
 	{
-		return set_position((vec2i)(get_desktop_mode().size - this->get_size()) / 2);
+		return set_position((vec2i)(get_desktop_mode().size() - this->get_size()) / 2);
 	}
 
 	Window & Window::set_clipboard(std::string const & value)
@@ -377,7 +377,7 @@ namespace ml
 
 	Window & Window::set_size(vec2u const & value)
 	{
-		m_video.size = value;
+		m_video.size() = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
@@ -510,11 +510,6 @@ namespace ml
 		})());
 	}
 
-	bool Window::destroy_cursor(void * value)
-	{
-		return (value ? ML_TRUE_EXPR(glfwDestroyCursor(static_cast<GLFWcursor *>(value))) : false);
-	}
-
 	int32_t Window::extension_supported(C_String value)
 	{
 		return glfwExtensionSupported(value);
@@ -535,7 +530,7 @@ namespace ml
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = DisplayMode { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+			temp = make_display_mode(vec2u{ dm.dmPelsWidth, dm.dmPelsHeight }, dm.dmBitsPerPel);
 #else
 			// do the thing
 #endif
@@ -554,8 +549,7 @@ namespace ml
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				DisplayMode vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
-
+				auto vm = make_display_mode(vec2u{ dm.dmPelsWidth, dm.dmPelsHeight }, dm.dmBitsPerPel);
 				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
 				{
 					temp.push_back(vm);
@@ -591,6 +585,13 @@ namespace ml
 	float64_t Window::get_time()
 	{
 		return glfwGetTime();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool Window::destroy_cursor(void * value)
+	{
+		return (value ? ML_TRUE_EXPR(glfwDestroyCursor(static_cast<GLFWcursor *>(value))) : false);
 	}
 
 	void Window::make_context_current(void * value)

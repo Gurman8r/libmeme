@@ -105,25 +105,39 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto back()			-> reference		{ return *(m_data.begin() + m_size); }
-		constexpr auto back()	const	-> const_reference	{ return *(m_data.begin() + m_size); }
-		constexpr auto begin()			-> iterator			{ return m_data.begin(); }
-		constexpr auto begin()	const	-> const_iterator	{ return m_data.begin(); }
-		constexpr auto cbegin()	const	-> const_iterator	{ return m_data.cbegin(); }
-		constexpr auto cend()	const	-> const_iterator	{ return m_data.cend(); }
-		constexpr auto data()			-> pointer			{ return m_data.data(); }
-		constexpr auto data()	const	-> const_pointer	{ return m_data.data(); }
-		constexpr auto empty()	const	-> bool				{ return m_data.empty(); }
-		constexpr auto end()			-> iterator			{ return m_data.end(); }
-		constexpr auto end()	const	-> const_iterator	{ return m_data.end(); }
-		constexpr auto front()			-> reference		{ return m_data.front(); }
-		constexpr auto front()	const	-> const_reference	{ return m_data.front(); }
-		constexpr auto hash()	const	-> hash_t			{ return m_data.hash(); }
-		constexpr auto size()	const	-> size_t			{ return m_size; }
+		ML_NODISCARD constexpr auto back() -> reference { return *(m_data.begin() + m_size); }
+		
+		ML_NODISCARD constexpr auto back() const -> const_reference { return *(m_data.begin() + m_size); }
+		
+		ML_NODISCARD constexpr auto begin() -> iterator { return m_data.begin(); }
+		
+		ML_NODISCARD constexpr auto begin() const -> const_iterator { return m_data.begin(); }
+		
+		ML_NODISCARD constexpr auto cbegin() const -> const_iterator { return m_data.cbegin(); }
+		
+		ML_NODISCARD constexpr auto cend() const -> const_iterator { return m_data.cend(); }
+		
+		ML_NODISCARD constexpr auto data() -> pointer { return m_data.data(); }
+		
+		ML_NODISCARD constexpr auto data() const -> const_pointer { return m_data.data(); }
+		
+		ML_NODISCARD constexpr auto empty() const -> bool { return m_data.empty(); }
+		
+		ML_NODISCARD constexpr auto end() -> iterator { return m_data.end(); }
+		
+		ML_NODISCARD constexpr auto end() const -> const_iterator { return m_data.end(); }
+		
+		ML_NODISCARD constexpr auto front() -> reference { return m_data.front(); }
+		
+		ML_NODISCARD constexpr auto front() const -> const_reference { return m_data.front(); }
+		
+		ML_NODISCARD constexpr auto hash() const -> hash_t { return m_data.hash(); }
+		
+		ML_NODISCARD constexpr auto size() const -> size_t { return m_size; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference at(size_t index)
+		ML_NODISCARD constexpr reference at(size_t index)
 		{
 			if (index >= m_size)
 			{
@@ -132,7 +146,7 @@ namespace ml::cx
 			return m_data.at(index);
 		}
 		
-		constexpr const_reference at(size_t index) const
+		ML_NODISCARD constexpr const_reference at(size_t index) const
 		{
 			if (index >= m_size)
 			{
@@ -155,13 +169,13 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fun>
-		constexpr const_iterator find_if(Fun && fun) const
+		template <class Fun
+		> ML_NODISCARD constexpr const_iterator find_if(Fun && fun) const
 		{
 			return _ML_ALG find_if(cbegin(), cend(), fun);
 		}
 
-		constexpr const_iterator find(value_type const & value) const
+		ML_NODISCARD constexpr const_iterator find(value_type const & value) const
 		{
 			return this->find_if([&](auto && elem)
 			{
@@ -171,38 +185,38 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_t i) { return at(i); }
+		ML_NODISCARD constexpr reference operator[](size_t i) { return at(i); }
 
-		constexpr const_reference operator[](size_t i) const { return at(i); }
+		ML_NODISCARD constexpr const_reference operator[](size_t i) const { return at(i); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bool operator==(self_type const & other) const
+		ML_NODISCARD constexpr bool operator==(self_type const & other) const
 		{
 			return !((*this) < other) && !(other < (*this));
 		}
 
-		constexpr bool operator!=(self_type const & other) const
+		ML_NODISCARD constexpr bool operator!=(self_type const & other) const
 		{
 			return !((*this) == other);
 		}
 
-		constexpr bool operator<(self_type const & other) const
+		ML_NODISCARD constexpr bool operator<(self_type const & other) const
 		{
 			return _ML_ALG less(this->cbegin(), this->cend(), other.cbegin(), other.cend());
 		}
 
-		constexpr bool operator>(self_type const & other) const
+		ML_NODISCARD constexpr bool operator>(self_type const & other) const
 		{
 			return !((*this) < other);
 		}
 
-		constexpr bool operator<=(self_type const & other) const
+		ML_NODISCARD constexpr bool operator<=(self_type const & other) const
 		{
 			return ((*this) == other) || ((*this) < other);
 		}
 
-		constexpr bool operator>=(self_type const & other) const
+		ML_NODISCARD constexpr bool operator>=(self_type const & other) const
 		{
 			return ((*this) == other) || ((*this) > other);
 		}
@@ -308,21 +322,35 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto back()			-> reference		{ return m_data.back(); }
-		constexpr auto back()	const	-> const_reference	{ return m_data.back(); }
-		constexpr auto begin()			-> iterator			{ return m_data.begin(); }
-		constexpr auto begin()	const	-> const_iterator	{ return m_data.begin(); }
-		constexpr auto cbegin()	const	-> const_iterator	{ return m_data.cbegin(); }
-		constexpr auto cend()	const	-> const_iterator	{ return m_data.cend(); }
-		constexpr auto data()			-> pointer			{ return m_data.data(); }
-		constexpr auto data()	const	-> const_pointer	{ return m_data.data(); }
-		constexpr auto empty()	const	-> bool				{ return m_data.empty(); }
-		constexpr auto end()			-> iterator			{ return m_data.end(); }
-		constexpr auto end()	const	-> const_iterator	{ return m_data.end(); }
-		constexpr auto front()			-> reference		{ return m_data.front(); }
-		constexpr auto front()	const	-> const_reference	{ return m_data.front(); }
-		constexpr auto hash()	const	-> hash_t			{ return m_data.hash(); }
-		constexpr auto size()	const	-> size_t			{ return m_data.size(); }
+		ML_NODISCARD constexpr auto back() -> reference { return *(m_data.begin() + m_size); }
+
+		ML_NODISCARD constexpr auto back() const -> const_reference { return *(m_data.begin() + m_size); }
+
+		ML_NODISCARD constexpr auto begin() -> iterator { return m_data.begin(); }
+
+		ML_NODISCARD constexpr auto begin() const -> const_iterator { return m_data.begin(); }
+
+		ML_NODISCARD constexpr auto cbegin() const -> const_iterator { return m_data.cbegin(); }
+
+		ML_NODISCARD constexpr auto cend() const -> const_iterator { return m_data.cend(); }
+
+		ML_NODISCARD constexpr auto data() -> pointer { return m_data.data(); }
+
+		ML_NODISCARD constexpr auto data() const -> const_pointer { return m_data.data(); }
+
+		ML_NODISCARD constexpr auto empty() const -> bool { return m_data.empty(); }
+
+		ML_NODISCARD constexpr auto end() -> iterator { return m_data.end(); }
+
+		ML_NODISCARD constexpr auto end() const -> const_iterator { return m_data.end(); }
+
+		ML_NODISCARD constexpr auto front() -> reference { return m_data.front(); }
+
+		ML_NODISCARD constexpr auto front() const -> const_reference { return m_data.front(); }
+
+		ML_NODISCARD constexpr auto hash() const -> hash_t { return m_data.hash(); }
+
+		ML_NODISCARD constexpr auto size() const -> size_t { return m_data.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -333,13 +361,13 @@ namespace ml::cx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fun>
-		constexpr const_iterator find_if(Fun && fun) const
+		template <class Fun
+		> ML_NODISCARD constexpr const_iterator find_if(Fun && fun) const
 		{
 			return _ML_ALG find_if(this->cbegin(), this->cend(), fun);
 		}
 
-		constexpr const_iterator find_by_key(key_type const & key) const
+		ML_NODISCARD constexpr const_iterator find_by_key(key_type const & key) const
 		{
 			return this->find_if([&](auto && elem)
 			{
@@ -347,7 +375,7 @@ namespace ml::cx
 			});
 		}
 
-		constexpr const_iterator find_by_value(value_type const & value) const
+		ML_NODISCARD constexpr const_iterator find_by_value(value_type const & value) const
 		{
 			return this->find_if([&](auto && elem)
 			{
@@ -355,7 +383,7 @@ namespace ml::cx
 			});
 		}
 
-		constexpr const_iterator find(key_type const & key) const
+		ML_NODISCARD constexpr const_iterator find(key_type const & key) const
 		{
 			return this->find_by_key(key);
 		}

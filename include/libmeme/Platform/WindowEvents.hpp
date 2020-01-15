@@ -4,7 +4,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Core/Event.hpp>
-#include <libmeme/Core/BitMask.hpp>
+#include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
 

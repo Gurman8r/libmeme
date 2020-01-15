@@ -1891,28 +1891,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> static constexpr T value_at(int32_t index, T dv = (T)0)
+		template <class T
+		> static constexpr T value_at(int32_t index, T dv = (T)0)
 		{
 			value_at(index, dv);
 			return dv;
 		}
 
-		template <class T> static constexpr int32_t index_of(T value)
+		template <class T
+		> static constexpr int32_t index_of(T value)
 		{
 			return index_of(value);
 		}
 
-		template <class T> static constexpr C_String name_of(T value)
+		template <class T
+		> static constexpr C_String name_of(T value)
 		{
 			return name_of(value);
 		}
 
-		template <class T> static constexpr C_String raw_name_of(T value)
+		template <class T
+		> static constexpr C_String raw_name_of(T value)
 		{
 			return raw_name_of(value);
 		}
 
-		template <class T> static constexpr C_String desc_of(T value)
+		template <class T
+		> static constexpr C_String desc_of(T value)
 		{
 			return desc_of(value);
 		}

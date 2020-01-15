@@ -25,11 +25,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr operator bool() const noexcept { return m_handle; }
+		ML_NODISCARD constexpr operator bool() const noexcept { return m_handle; }
 
-		constexpr auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+		ML_NODISCARD constexpr auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
 
-		constexpr auto handle() const noexcept -> handle_t const & { return m_handle; }
+		ML_NODISCARD constexpr auto handle() const noexcept -> handle_t const & { return m_handle; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -117,7 +117,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) mode() const noexcept { return std::get<ID_Mode>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) mode() const noexcept { return std::get<ID_Mode>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -209,15 +209,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
 		
-		constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 		
-		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
 
-		constexpr decltype(auto) offset() const noexcept { return std::get<ID_Offset>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) offset() const noexcept { return std::get<ID_Offset>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -309,13 +309,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) usage() const noexcept { return std::get<ID_Usage>(m_storage); }
 
-		constexpr decltype(auto) type() const noexcept { return std::get<ID_Type>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) type() const noexcept { return std::get<ID_Type>(m_storage); }
 		
-		constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 		
-		constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) count() const noexcept { return std::get<ID_Count>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -418,21 +418,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) buffer() const noexcept { return std::get<ID_Buffer>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) buffer() const noexcept { return std::get<ID_Buffer>(m_storage); }
 
-		constexpr decltype(auto) bufferAttachment() const noexcept { return buffer().first; }
+		ML_NODISCARD constexpr decltype(auto) bufferAttachment() const noexcept { return buffer().first; }
 
-		constexpr decltype(auto) bufferHandle() const noexcept { return buffer().second; }
+		ML_NODISCARD constexpr decltype(auto) bufferHandle() const noexcept { return buffer().second; }
 
-		constexpr decltype(auto) texture() const noexcept { return std::get<ID_Texture>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) texture() const noexcept { return std::get<ID_Texture>(m_storage); }
 
-		constexpr decltype(auto) textureAttachment() const noexcept { return std::get<0>(texture()); }
+		ML_NODISCARD constexpr decltype(auto) textureAttachment() const noexcept { return std::get<0>(texture()); }
 
-		constexpr decltype(auto) textureHandle() const noexcept { return std::get<1>(texture()); }
+		ML_NODISCARD constexpr decltype(auto) textureHandle() const noexcept { return std::get<1>(texture()); }
 
-		constexpr decltype(auto) textureLevel() const noexcept { return std::get<2>(texture()); }
+		ML_NODISCARD constexpr decltype(auto) textureLevel() const noexcept { return std::get<2>(texture()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -522,9 +522,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		constexpr decltype(auto) format() const noexcept { return std::get<ID_Format>(m_storage); }
+		ML_NODISCARD constexpr decltype(auto) format() const noexcept { return std::get<ID_Format>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

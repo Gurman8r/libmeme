@@ -1,13 +1,13 @@
 #ifndef _ML_SHARED_LIBRARY_HPP_
 #define _ML_SHARED_LIBRARY_HPP_
 
-#include <libmeme/Engine/Export.hpp>
+#include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API SharedLibrary final : public Trackable, public NonCopyable
+	struct ML_PLATFORM_API SharedLibrary final : public Trackable, public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

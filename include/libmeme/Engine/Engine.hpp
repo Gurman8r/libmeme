@@ -40,7 +40,7 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline auto & window() { return s_window; }
+		ML_NODISCARD static inline auto & window() { return s_window; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
