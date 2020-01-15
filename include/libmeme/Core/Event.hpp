@@ -13,8 +13,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ev
-	> ML_NODISCARD constexpr auto event_cast(struct Event const * value) noexcept
+	template <class Ev> static constexpr auto event_cast(struct Event const * value) noexcept
 	{
 		return (value && (value->id() == Ev::ID)) ? static_cast<Ev const *>(value) : nullptr;
 	}
@@ -51,18 +50,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator bool() const noexcept
+		constexpr operator bool() const noexcept
 		{
 			return (m_id > EV_INVALID);
 		}
 
-		template <class Ev
-		> ML_NODISCARD constexpr decltype(auto) as() const noexcept
+		template <class Ev> constexpr decltype(auto) as() const noexcept
 		{
 			return event_cast<Ev>(this);
 		}
 
-		ML_NODISCARD constexpr int32_t const & id() const noexcept
+		constexpr int32_t const & id() const noexcept
 		{
 			return m_id;
 		}

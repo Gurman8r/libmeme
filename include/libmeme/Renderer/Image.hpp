@@ -78,13 +78,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD uint32_t getFormat() const;
+		uint32_t getFormat() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD std::optional<Color32> get_pixel(size_t index) const;
+		std::optional<Color32> get_pixel(size_t index) const;
 		
-		ML_NODISCARD std::optional<Color32> get_pixel(size_t x, size_t y) const;
+		std::optional<Color32> get_pixel(size_t x, size_t y) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,65 +94,57 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto bounds() const noexcept -> UintRect { return UintRect { { 0, 0 }, size() }; }
+		inline auto bounds() const noexcept -> UintRect { return UintRect { { 0, 0 }, size() }; }
 		
-		ML_NODISCARD inline auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
+		inline auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
 		
-		ML_NODISCARD inline auto channels() const noexcept -> size_t { return m_channels; }
+		inline auto channels() const noexcept -> size_t { return m_channels; }
 
-		ML_NODISCARD inline auto data() noexcept -> byte_t * { return m_pixels.data(); }
+		inline auto data() noexcept -> byte_t * { return m_pixels.data(); }
 		
-		ML_NODISCARD inline auto data() const noexcept -> byte_t const * { return m_pixels.data(); }
+		inline auto data() const noexcept -> byte_t const * { return m_pixels.data(); }
 		
-		ML_NODISCARD inline bool empty() const noexcept { return m_pixels.empty(); }
+		inline bool empty() const noexcept { return m_pixels.empty(); }
 		
-		ML_NODISCARD inline auto height() const noexcept -> size_t { return m_size[1]; }
+		inline auto height() const noexcept -> size_t { return m_size[1]; }
 
-		ML_NODISCARD inline auto pixels() noexcept -> Pixels & { return m_pixels; }
+		inline auto pixels() noexcept -> Pixels & { return m_pixels; }
 		
-		ML_NODISCARD inline auto pixels() const noexcept -> Pixels const & { return m_pixels; }
+		inline auto pixels() const noexcept -> Pixels const & { return m_pixels; }
 		
-		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
+		inline auto size() const noexcept -> vec2u const & { return m_size; }
 		
-		ML_NODISCARD inline auto width() const noexcept -> size_t { return m_size[0]; }
+		inline auto width() const noexcept -> size_t { return m_size[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline byte_t const & operator[](size_t i) const
+		inline byte_t const & operator[](size_t i) const
 		{
 			return m_pixels.at(i);
 		}
 
-		ML_NODISCARD inline byte_t & operator[](size_t i)
+		inline byte_t & operator[](size_t i)
 		{
 			return m_pixels.at(i);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_pixels.begin(); }
-		
-		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_pixels.begin(); }
-		
-		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_pixels.cbegin(); }
+		inline auto begin() noexcept -> iterator { return m_pixels.begin(); }
+		inline auto begin() const noexcept -> const_iterator { return m_pixels.begin(); }
+		inline auto cbegin() const noexcept -> const_iterator { return m_pixels.cbegin(); }
 
-		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_pixels.cend(); }
+		inline auto end() noexcept -> iterator { return m_pixels.end(); }
+		inline auto end() const noexcept -> const_iterator { return m_pixels.end(); }
+		inline auto cend() const noexcept -> const_iterator { return m_pixels.cend(); }
 
-		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_pixels.crbegin(); }
+		inline auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
+		inline auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
+		inline auto crbegin() const noexcept -> const_reverse_iterator { return m_pixels.crbegin(); }
 
-		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_pixels.crend(); }
-
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_pixels.end(); }
-		
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_pixels.end(); }
-
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
-		
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
-
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
-		
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
+		inline auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
+		inline auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
+		inline auto crend() const noexcept -> const_reverse_iterator { return m_pixels.crend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -166,8 +158,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static inline auto make_image(Args && ... args)
+	template <class ... Args> static inline auto make_image(Args && ... args)
 	{
 		return Image{ std::forward<Args>(args)... };
 	}

@@ -46,9 +46,9 @@ namespace ml
 			{
 				if (!pair.second.empty() && ImGui::BeginMenu(pair.first.c_str()))
 				{
-					for (auto & fn : pair.second)
+					for (auto & func : pair.second)
 					{
-						std::invoke(fn);
+						if (func) { func(); }
 					}
 					ImGui::EndMenu();
 				}

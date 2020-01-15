@@ -214,27 +214,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto alpha() -> AlphaState & { return m_alpha; }
+		constexpr auto alpha()			-> AlphaState & { return m_alpha; }
+		constexpr auto alpha()	const	-> AlphaState const & { return m_alpha; }
 
-		ML_NODISCARD constexpr auto alpha() const -> AlphaState const & { return m_alpha; }
+		constexpr auto blend()			-> BlendState & { return m_blend; }
+		constexpr auto blend()	const	-> BlendState const & { return m_blend; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		constexpr auto cull()			-> CullState & { return m_cull; }
+		constexpr auto cull()	const	-> CullState const & { return m_cull; }
 
-		ML_NODISCARD constexpr auto blend() -> BlendState & { return m_blend; }
-
-		ML_NODISCARD constexpr auto blend() const -> BlendState const & { return m_blend; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr auto cull() -> CullState & { return m_cull; }
-
-		ML_NODISCARD constexpr auto cull() const -> CullState const & { return m_cull; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr auto depth() -> DepthState & { return m_depth; }
-		
-		ML_NODISCARD constexpr auto depth() const -> DepthState const & { return m_depth; }
+		constexpr auto depth()			-> DepthState & { return m_depth; }
+		constexpr auto depth()	const	-> DepthState const & { return m_depth; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -37,7 +37,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr std::string_view trim_front(std::string_view const & value)
+		static constexpr std::string_view trim_front(std::string_view const & value)
 		{
 			return ((!value.empty() && (value.front() == ' ' || value.front() == '\t'))
 				? trim_front(value.substr(1))
@@ -45,7 +45,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view trim_back(std::string_view const & value)
+		static constexpr std::string_view trim_back(std::string_view const & value)
 		{
 			return ((value.size() && (value.back() == ' ' || value.back() == '\t'))
 				? trim_back(value.substr(0, value.size() - 1))
@@ -53,12 +53,12 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view trim(std::string_view const & value)
+		static constexpr std::string_view trim(std::string_view const & value)
 		{
 			return trim_front(trim_back(value));
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_prefix(std::string_view const & value, std::string_view const & pre)
+		static constexpr std::string_view filter_prefix(std::string_view const & value, std::string_view const & pre)
 		{
 			return ((value.size() >= pre.size() && (value.substr(0, pre.size()) == pre))
 				? value.substr(pre.size())
@@ -66,7 +66,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_suffix(std::string_view const & value, std::string_view const & suf)
+		static constexpr std::string_view filter_suffix(std::string_view const & value, std::string_view const & suf)
 		{
 			return ((value.size() >= suf.size()) && ((value.substr(value.size() - suf.size(), suf.size()) == suf))
 				? value.substr(0, (value.size() - suf.size()))
@@ -74,7 +74,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_signature_type(std::string_view const & value)
+		static constexpr std::string_view filter_signature_type(std::string_view const & value)
 		{
 			return filter_suffix(filter_prefix(value, 
 				std::get<0>(signature::detail::type)),
@@ -82,27 +82,27 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_namespace(std::string_view const & value)
+		static constexpr std::string_view filter_namespace(std::string_view const & value)
 		{
 			return value.substr(value.find_first_of(':') + 2);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_struct(std::string_view const & value)
+		static constexpr std::string_view filter_struct(std::string_view const & value)
 		{
 			return filter_prefix(value, "struct ");
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_class(std::string_view const & value)
+		static constexpr std::string_view filter_class(std::string_view const & value)
 		{
 			return filter_prefix(value, "class ");
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_constexpr(std::string_view const & value)
+		static constexpr std::string_view filter_constexpr(std::string_view const & value)
 		{
 			return filter_prefix(value, "constexpr ");
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_const(std::string_view const & value)
+		static constexpr std::string_view filter_const(std::string_view const & value)
 		{
 			return filter_prefix(value, "const ");
 		}

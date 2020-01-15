@@ -1,5 +1,5 @@
-#ifndef _ML_BIT_SET_HPP_
-#define _ML_BIT_SET_HPP_
+#ifndef _ML_BITMASK_HPP_
+#define _ML_BITMASK_HPP_
 
 #include <libmeme/Core/Array.hpp>
 
@@ -12,15 +12,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct BitSet final
+	template <class T> struct BitMask final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { Size = sizeof(T) * 8 };
 
 		using value_type		= typename T;
-		using self_type			= typename BitSet<value_type>;
-		using array_type		= typename array<bool, Size>;
+		using self_type			= typename BitMask<value_type>;
+		using storage_type		= typename array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -28,58 +28,31 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitSet() noexcept
-			: m_data{ 0 }
+		constexpr BitMask() noexcept
+			: m_value{ 0 }
 		{
 		}
 
-		constexpr BitSet(value_type const value) noexcept
-			: m_data{ value }
+		constexpr BitMask(const value_type value) noexcept
+			: m_value{ value }
 		{
 		}
 
-		constexpr BitSet(array_type const & value) noexcept
-			: m_data{ from_bits<array_type, T, value.size()>(value) }
+		constexpr BitMask(storage_type const & value) noexcept
+			: m_value{ from_bits<storage_type, T, value.size()>(value) }
 		{
 		}
 
-		template <class U, size_t N
-		> constexpr BitSet(const U(&value)[N]) noexcept
-			: m_data{ from_bits<const U(&)[N], U, N>(value) }
+		template <
+			class U, size_t N
+		> constexpr BitMask(const U(&value)[N]) noexcept
+			: m_value{ from_bits<const U(&)[N], U, N>(value) }
 		{
 		}
 
-		constexpr BitSet(self_type const & other)
-			: m_data{ other.m_data }
+		constexpr BitMask(self_type const & copy) noexcept
+			: m_value{ copy.m_value }
 		{
-		}
-
-		constexpr BitSet(self_type && other) noexcept
-			: m_data{ std::move(other.m_data) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline self_type & operator=(self_type const & other)
-		{
-			self_type temp{ other };
-			this->swap(temp);
-			return (*this);
-		}
-
-		inline self_type & operator=(self_type && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		constexpr void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				alg::swap(m_data, other.m_data);
-			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -88,27 +61,27 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto bits() const -> array_type { return to_bits(*this); }
+		constexpr auto bits() const -> storage_type { return to_bits(*this); }
 
-		constexpr auto data() const -> const_reference { return m_data; }
+		constexpr auto data() const -> const_reference { return m_value; }
 
-		constexpr auto data() -> reference { return m_data; }
+		constexpr auto data() -> reference { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr operator const_reference() const { return m_data; }
+		constexpr operator const_reference() const { return m_value; }
 
 		constexpr bool operator[](size_t i) const { return this->read(i); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bool read(size_t i) const { return ML_BITREAD(m_data, i); }
+		constexpr bool read(size_t i) const { return ML_BITREAD(m_value, i); }
 
-		constexpr self_type & clear(size_t i) { ML_BITCLEAR(m_data, i); return (*this); }
+		constexpr self_type & clear(size_t i) { ML_BITCLEAR(m_value, i); return (*this); }
 
-		constexpr self_type & set(size_t i) { ML_BITSET(m_data, i); return (*this); }
+		constexpr self_type & set(size_t i) { ML_BITSET(m_value, i); return (*this); }
 
-		constexpr self_type & write(size_t i, bool value) { ML_BITWRITE(m_data, i, value); return (*this); }
+		constexpr self_type & write(size_t i, bool value) { ML_BITWRITE(m_value, i, value); return (*this); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -134,41 +107,40 @@ namespace ml
 			return temp;
 		}
 
-		static constexpr array_type to_bits(self_type const & value)
+		static constexpr storage_type to_bits(self_type const & value)
 		{
-			array_type temp{ 0 };
+			storage_type temp{ 0 };
 			for (size_t i = 0; i < Size; i++)
 			{
-				temp[i] = ML_BITREAD(value.m_data, i);
+				temp[i] = ML_BITREAD(value.m_value, i);
 			}
 			return temp;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private:
-		value_type m_data;
+	private: value_type m_value;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING mask8_t = typename BitSet<uint8_t>;
-	ML_USING mask16_t = typename BitSet<uint16_t>;
-	ML_USING mask32_t = typename BitSet<uint32_t>;
-	ML_USING mask64_t = typename BitSet<uint64_t>;
+	ML_USING mask8_t = typename BitMask<uint8_t>;
+	ML_USING mask16_t = typename BitMask<uint16_t>;
+	ML_USING mask32_t = typename BitMask<uint32_t>;
+	ML_USING mask64_t = typename BitMask<uint64_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	template <class T>
-	inline ML_SERIALIZE(std::ostream & out, const BitSet<T> & value)
+	inline ML_SERIALIZE(std::ostream & out, const BitMask<T> & value)
 	{
 		return out << value.bits();
 	}
 
 	template <class T>
-	inline ML_DESERIALIZE(std::istream & in, BitSet<T> & value)
+	inline ML_DESERIALIZE(std::istream & in, BitMask<T> & value)
 	{
 		return in.good() ? (in >> value.data()) : in;
 	}
@@ -176,4 +148,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_BIT_SET
+#endif // !_ML_BITSET_HPP_

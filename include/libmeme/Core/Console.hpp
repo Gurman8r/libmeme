@@ -72,7 +72,7 @@ namespace ml::cio
 
 		constexpr COL() noexcept : COL{ FG::Normal, BG::Black } {}
 
-		ML_NODISCARD constexpr uint16_t operator()() const noexcept
+		constexpr uint16_t operator()() const noexcept
 		{
 			return ((fg != FG::None) && (bg != BG::None)
 				? ((uint16_t)fg | (uint16_t)bg)

@@ -18,103 +18,48 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Glyph();
-
-		explicit Glyph(storage_type const & storage)
-			: m_storage{ storage }
-		{
-		}
-
-		explicit Glyph(storage_type && storage) noexcept
-			: m_storage{ std::move(storage) }
-		{
-		}
-
-		Glyph(Glyph const & other)
-			: m_storage{ other.m_storage }
-		{
-		}
-
-		Glyph(Glyph && other) noexcept
-			: m_storage{ std::move(other.m_storage) }
-		{
-		}
+		Glyph(storage_type const & storage);
+		Glyph(storage_type && storage) noexcept;
+		Glyph(Glyph const & other);
+		Glyph(Glyph && other) noexcept;
+		~Glyph();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline Glyph & operator=(Glyph const & other)
-		{
-			Glyph temp{ other };
-			swap(temp);
-			return (*this);
-		}
+		Glyph operator=(Glyph const & other);
 
-		inline Glyph & operator=(Glyph && other) noexcept
-		{
-			swap(std::move(other));
-			return (*this);
-		}
+		Glyph operator=(Glyph && other) noexcept;
 
-		inline void swap(Glyph & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_storage.swap(other.m_storage);
-			}
-		}
+		void swap(Glyph & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) texture() noexcept
-		{
-			return std::get<ID_Texture>(m_storage);
-		}
+		inline decltype(auto) texture() noexcept		{ return std::get<ID_Texture>(m_storage); }
+		inline decltype(auto) texture() const noexcept	{ return std::get<ID_Texture>(m_storage); }
 
-		ML_NODISCARD inline decltype(auto) texture() const noexcept
-		{
-			return std::get<ID_Texture>(m_storage);
-		}
+		inline decltype(auto) bounds() noexcept			{ return std::get<ID_Bounds>(m_storage); }
+		inline decltype(auto) bounds() const noexcept	{ return std::get<ID_Bounds>(m_storage); }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline decltype(auto) bounds() noexcept
-		{
-			return std::get<ID_Bounds>(m_storage);
-		}
-
-		ML_NODISCARD inline decltype(auto) bounds() const noexcept
-		{
-			return std::get<ID_Bounds>(m_storage);
-		}
+		inline decltype(auto) advance() noexcept		{ return std::get<ID_Advance>(m_storage); }
+		inline decltype(auto) advance() const noexcept	{ return std::get<ID_Advance>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) advance() noexcept
-		{
-			return std::get<ID_Advance>(m_storage);
-		}
-
-		ML_NODISCARD inline decltype(auto) advance() const noexcept
-		{
-			return std::get<ID_Advance>(m_storage);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto bearing() const noexcept -> vec2 { return bounds().position(); }
+		inline auto bearing() const noexcept -> vec2 { return bounds().position(); }
 		
-		ML_NODISCARD inline auto size() const noexcept -> vec2 { return bounds().size(); }
+		inline auto size() const noexcept -> vec2 { return bounds().size(); }
 		
-		ML_NODISCARD inline auto x() const noexcept -> float_t { return bearing()[0]; }
+		inline auto x() const noexcept -> float_t { return bearing()[0]; }
 		
-		ML_NODISCARD inline auto y() const noexcept -> float_t { return bearing()[1]; }
+		inline auto y() const noexcept -> float_t { return bearing()[1]; }
 		
-		ML_NODISCARD inline auto width() const noexcept -> float_t { return size()[0]; }
+		inline auto width() const noexcept -> float_t { return size()[0]; }
 		
-		ML_NODISCARD inline auto height() const noexcept -> float_t { return size()[1]; }
+		inline auto height() const noexcept -> float_t { return size()[1]; }
 		
-		ML_NODISCARD inline auto offset() const noexcept -> vec2 { return { x(), -y() }; }
+		inline auto offset() const noexcept -> vec2 { return { x(), -y() }; }
 		
-		ML_NODISCARD inline auto step() const noexcept -> float_t { return (float_t)(advance() >> count); }
+		inline auto step() const noexcept -> float_t { return (float_t)(advance() >> count); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -126,10 +71,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
+	template <class ... Args> static inline auto make_glyph(Args && ... args)
 	{
-		return Glyph{ std::forward<Args>(args)... };
+		return Glyph{ Glyph::storage_type{ std::forward<Args>(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

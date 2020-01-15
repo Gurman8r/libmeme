@@ -45,8 +45,7 @@
 // Type Signature
 namespace ml::signature
 {
-	template <class T
-	> ML_NODISCARD constexpr std::string_view type()
+	template <class T> static constexpr std::string_view type()
 	{
 		return { ML_SIGNATURE };
 	}
@@ -64,8 +63,7 @@ namespace ml::signature
 // Value Signature
 namespace ml::signature
 {
-	template <class T, T Value
-	> ML_NODISCARD constexpr std::string_view value()
+	template <class T, T Value> static constexpr std::string_view value()
 	{
 		return { ML_SIGNATURE };
 	}

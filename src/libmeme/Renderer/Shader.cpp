@@ -234,37 +234,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_v<bool>: if (auto v{ value.cast<bool>() })
+		case hashof_v<bool>: if (auto v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<int32_t>: if (auto v{ value.cast<int32_t>() })
+		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<float_t>: if (auto v{ value.cast<float_t>() })
+		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec2>: if (auto v{ value.cast<vec2>() })
+		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec3>: if (auto v{ value.cast<vec3>() })
+		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec4>: if (auto v{ value.cast<vec4>() })
+		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Color>: if (auto v{ value.cast<Color>() })
+		case hashof_v<Color>: if (auto v{ value.get<Color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat2>: if (auto v{ value.cast<mat2>() })
+		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat3>: if (auto v{ value.cast<mat3>() })
+		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat4>: if (auto v{ value.cast<mat4>() })
+		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture>: if (auto v{ value.cast<Texture const *>() })
+		case hashof_v<Texture>: if (auto v{ value.get<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;

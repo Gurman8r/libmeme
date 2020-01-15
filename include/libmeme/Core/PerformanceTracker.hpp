@@ -15,7 +15,7 @@ namespace ml
 
 	struct ML_CORE_API PerformanceTracker final
 	{
-		ML_NODISCARD static inline auto const & previous() noexcept
+		static inline auto const & previous() noexcept
 		{
 			return m_prev;
 		}

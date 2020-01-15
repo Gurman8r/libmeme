@@ -31,7 +31,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD constexpr hash_t operator()(T const * arr, hash_t size, hash_t seed) noexcept
+		> constexpr hash_t operator()(T const * arr, hash_t size, hash_t seed) noexcept
 		{
 			return ((size > 0)
 				? (*this)((arr + 1), (size - 1), (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
@@ -40,13 +40,13 @@ namespace ml
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr hash_t operator()(T const * arr, hash_t size) noexcept
+		> constexpr hash_t operator()(T const * arr, hash_t size) noexcept
 		{
 			return (*this)(arr, size, fnv1a_basis);
 		}
 
 		template <class T, hash_t N
-		> ML_NODISCARD constexpr hash_t operator()(const T(&value)[N]) noexcept
+		> constexpr hash_t operator()(const T(&value)[N]) noexcept
 		{
 			return (*this)(value, (N - 1));
 		}
@@ -54,22 +54,22 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Arr
-		> ML_NODISCARD constexpr hash_t operator()(Arr const & value) noexcept
+		> constexpr hash_t operator()(Arr const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
 		}
 
 		template <template <class...> class Arr, class ... Ts
-		> ML_NODISCARD constexpr hash_t operator()(Arr<Ts...> const & value) noexcept
+		> constexpr hash_t operator()(Arr<Ts...> const & value) noexcept
 		{
 			return (*this)(value.data(), value.size());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr hash_t operator()() const noexcept { return m_value; }
+		constexpr hash_t operator()() const noexcept { return m_value; }
 
-		ML_NODISCARD constexpr operator hash_t() const noexcept { return (*this)(); }
+		constexpr operator hash_t() const noexcept { return (*this)(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

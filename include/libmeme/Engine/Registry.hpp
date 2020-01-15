@@ -55,13 +55,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) codes() const noexcept { return std::get<ID_Codes>(m_storage); }
-		
-		ML_NODISCARD inline decltype(auto) funcs() const noexcept { return std::get<ID_Funcs>(m_storage); }
-		
-		ML_NODISCARD inline decltype(auto) infos() const noexcept { return std::get<ID_Infos>(m_storage); }
-		
-		ML_NODISCARD inline decltype(auto) names() const noexcept { return std::get<ID_Names>(m_storage); }
+		inline decltype(auto) codes() const noexcept { return std::get<ID_Codes>(m_storage); }
+		inline decltype(auto) funcs() const noexcept { return std::get<ID_Funcs>(m_storage); }
+		inline decltype(auto) infos() const noexcept { return std::get<ID_Infos>(m_storage); }
+		inline decltype(auto) names() const noexcept { return std::get<ID_Names>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,14 +68,13 @@ namespace ml
 			return func ? std::invoke(func.value()) : std::nullopt;
 		}
 
-		ML_NODISCARD inline std::optional<std::any> generate(code_t const & code) const
+		inline std::optional<std::any> generate(code_t const & code) const
 		{
 			auto const func{ get_func(code) };
 			return func ? std::invoke(func.value()) : std::nullopt;
 		}
 
-		template <class T
-		> ML_NODISCARD inline std::optional<std::any> generate() const
+		template <class T> inline std::optional<std::any> generate() const
 		{
 			return generate(hashof_v<T>);
 		}
@@ -105,7 +101,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::optional<code_t> get_code(name_t const & name) const
+		inline std::optional<code_t> get_code(name_t const & name) const
 		{
 			if (auto const it{ codes().find(name) })
 			{
@@ -117,7 +113,7 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline std::optional<func_t> get_func(name_t const & name) const
+		inline std::optional<func_t> get_func(name_t const & name) const
 		{
 			if (auto const it{ funcs().find(name) })
 			{
@@ -129,7 +125,7 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline std::optional<func_t> get_func(code_t code) const
+		inline std::optional<func_t> get_func(code_t code) const
 		{
 			if (auto const it{ names().find(code) })
 			{
@@ -141,7 +137,7 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline std::optional<info_t> get_info(name_t const & name) const
+		inline std::optional<info_t> get_info(name_t const & name) const
 		{
 			if (auto const it{ infos().find(name) })
 			{
@@ -153,7 +149,7 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline std::optional<name_t> get_name(code_t code) const
+		inline std::optional<name_t> get_name(code_t code) const
 		{
 			if (auto const it{ names().find(code) })
 			{

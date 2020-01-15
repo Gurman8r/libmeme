@@ -35,6 +35,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr enum_info() noexcept = default;
+
 		constexpr explicit enum_info(
 			cx::vector<enum_type, Size> && enums, 
 			cx::vector<name_type, Size> && names, 
@@ -49,11 +51,9 @@ namespace ml
 			}
 		}
 
-		constexpr enum_info() noexcept = default;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr std::optional<enum_type> find_by_index(size_t value) const
+		constexpr std::optional<enum_type> find_by_index(size_t value) const
 		{
 			auto const it{ this->enums.find_by_value(value) };
 			return ((it != this->enums.cend())
@@ -62,7 +62,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD constexpr std::optional<enum_type> find_by_name(name_type const & value) const
+		constexpr std::optional<enum_type> find_by_name(name_type const & value) const
 		{
 			auto const it{ this->names.find_by_value(value) };
 			return ((it != this->names.cend())
@@ -71,7 +71,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD constexpr std::optional<enum_type> find_by_desc(desc_type const & value) const
+		constexpr std::optional<enum_type> find_by_desc(desc_type const & value) const
 		{
 			auto const it{ this->descs.find_by_value(value) };
 			return ((it != this->descs.cend())
@@ -82,7 +82,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr std::optional<size_t> get_index(enum_type value) const
+		constexpr std::optional<size_t> get_index(enum_type value) const
 		{
 			auto const it{ this->enums.find_by_key(value) };
 			return ((it != this->enums.cend()) 
@@ -91,7 +91,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD constexpr std::optional<name_type> get_name(enum_type value) const
+		constexpr std::optional<name_type> get_name(enum_type value) const
 		{
 			auto const it{ this->names.find_by_key(value) };
 			return ((it != this->names.cend())
@@ -100,7 +100,7 @@ namespace ml
 			);
 		}
 
-		ML_NODISCARD constexpr std::optional<desc_type> get_desc(enum_type value) const
+		constexpr std::optional<desc_type> get_desc(enum_type value) const
 		{
 			auto const it{ this->descs.find_by_key(value) };
 			return ((it != this->descs.cend())
@@ -116,36 +116,36 @@ namespace ml
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Macro Version
-#define ML_GEN_ENUM_INFO(TYPE)																	\
-ML_NODISCARD static constexpr bool value_at(int32_t i, TYPE & value)							\
-{																								\
-	return alg::value_at(i, value, TYPE##_values);												\
-}																								\
-ML_NODISCARD static constexpr int32_t index_of(TYPE value)										\
-{																								\
-	return alg::index_of(value, TYPE##_values);													\
-}																								\
-ML_NODISCARD static constexpr C_String name_of(TYPE value)										\
-{																								\
-	return alg::at_index(index_of(value), TYPE##_names);										\
-}																								\
-ML_NODISCARD static constexpr C_String raw_name_of(TYPE value)									\
-{																								\
-	return alg::at_index(index_of(value), TYPE##_raw_names);									\
-}																								\
-ML_NODISCARD static constexpr C_String desc_of(TYPE value)										\
-{																								\
-	return alg::at_index(index_of(value), TYPE##_descriptions);									\
-}																								\
-ML_NODISCARD static constexpr TYPE find_by_name(C_String value, TYPE dv = TYPE##_values[0])		\
-{																								\
-	int32_t i = alg::index_of(value, TYPE##_names);												\
-	return ((i != -1) ? TYPE##_values[i] : dv);													\
-}																								\
-ML_NODISCARD static constexpr TYPE find_by_raw_name(C_String value, TYPE dv = TYPE##_values[0])	\
-{																								\
-	int32_t i = alg::index_of(value, TYPE##_raw_names);											\
-	return ((i != -1) ? TYPE##_values[i] : dv);													\
+#define ML_GEN_ENUM_INFO(TYPE)														\
+static constexpr bool value_at(int32_t i, TYPE & value)								\
+{																					\
+	return alg::value_at(i, value, TYPE##_values);									\
+}																					\
+static constexpr int32_t index_of(TYPE value)										\
+{																					\
+	return alg::index_of(value, TYPE##_values);										\
+}																					\
+static constexpr C_String name_of(TYPE value)										\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_names);							\
+}																					\
+static constexpr C_String raw_name_of(TYPE value)									\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_raw_names);						\
+}																					\
+static constexpr C_String desc_of(TYPE value)										\
+{																					\
+	return alg::at_index(index_of(value), TYPE##_descriptions);						\
+}																					\
+static constexpr TYPE find_by_name(C_String value, TYPE dv = TYPE##_values[0])		\
+{																					\
+	int32_t i = alg::index_of(value, TYPE##_names);									\
+	return ((i != -1) ? TYPE##_values[i] : dv);										\
+}																					\
+static constexpr TYPE find_by_raw_name(C_String value, TYPE dv = TYPE##_values[0])	\
+{																					\
+	int32_t i = alg::index_of(value, TYPE##_raw_names);								\
+	return ((i != -1) ? TYPE##_values[i] : dv);										\
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

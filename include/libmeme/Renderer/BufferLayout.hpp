@@ -58,8 +58,8 @@ namespace ml
 		{
 		}
 
-		template <size_t N
-		> constexpr BufferLayout(const value_type(&data)[N]) noexcept
+		template <size_t N>
+		constexpr BufferLayout(const value_type(&data)[N]) noexcept
 			: self_type{ &data[0], N }
 		{
 		}
@@ -93,34 +93,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_t const i) const -> const_reference { return *(cbegin() + i); }
-		
-		ML_NODISCARD constexpr auto back() const -> const_reference { return (*(cend() - 1)); }
-		
-		ML_NODISCARD constexpr auto begin() const -> const_iterator { return m_data; }
-		
-		ML_NODISCARD constexpr auto cbegin() const -> const_iterator { return m_data; }
-		
-		ML_NODISCARD constexpr auto cend() const -> const_iterator { return m_data + m_size; }
-		
-		ML_NODISCARD constexpr auto data() const -> const_pointer { return m_data; }
-		
-		ML_NODISCARD constexpr auto empty() const -> bool { return (m_size == 0); }
-		
-		ML_NODISCARD constexpr auto end() const -> const_iterator { return m_data + m_size; }
-		
-		ML_NODISCARD constexpr auto front() const -> const_reference { return (*cbegin()); }
-		
-		ML_NODISCARD constexpr auto size() const -> size_t { return m_size; }
+		constexpr auto at(size_t i) const -> const_reference	{ return *(cbegin() + i); }
+		constexpr auto back()		const -> const_reference	{ return (*(cend() - 1)); }
+		constexpr auto begin()		const -> const_iterator		{ return m_data; }
+		constexpr auto cbegin()		const -> const_iterator		{ return m_data; }
+		constexpr auto cend()		const -> const_iterator		{ return m_data + m_size; }
+		constexpr auto data()		const -> const_pointer		{ return m_data; }
+		constexpr auto empty()		const -> bool				{ return (m_size == 0); }
+		constexpr auto end()		const -> const_iterator		{ return m_data + m_size; }
+		constexpr auto front()		const -> const_reference	{ return (*cbegin()); }
+		constexpr auto size()		const -> size_t				{ return m_size; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator bool() const
+		constexpr operator bool() const
 		{
 			return !empty();
 		}
 
-		ML_NODISCARD constexpr const_reference operator[](size_t i) const
+		constexpr const_reference operator[](size_t i) const
 		{
 			return at(i);
 		}
@@ -136,8 +127,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD constexpr auto make_buffer_layout(Args && ... args)
+	template <class ... Args> static constexpr auto make_buffer_layout(Args && ... args)
 	{
 		return BufferLayout{ std::forward<Args>(args)... };
 	}

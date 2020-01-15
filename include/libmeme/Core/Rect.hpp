@@ -61,43 +61,27 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto left() const -> value_type { return (*this)[0]; }
-		
-		ML_NODISCARD constexpr auto top() const -> value_type { return (*this)[1]; }
-		
-		ML_NODISCARD constexpr auto width() const -> value_type { return (*this)[2]; }
-		
-		ML_NODISCARD constexpr auto height() const -> value_type { return (*this)[3]; }
-		
-		ML_NODISCARD constexpr auto bot() const -> value_type { return (top() + height()); }
-		
-		ML_NODISCARD constexpr auto right() const -> value_type { return (left() + width()); }
-		
-		ML_NODISCARD constexpr auto position() const -> coord_type { return { left(), top() }; }
-		
-		ML_NODISCARD constexpr auto size() const -> coord_type { return { width(), height() }; }
-		
-		ML_NODISCARD constexpr auto center() const -> coord_type { return (position() + (size() / (T)2)); }
+		constexpr auto left()		const -> value_type { return (*this)[0]; }
+		constexpr auto top()		const -> value_type { return (*this)[1]; }
+		constexpr auto width()		const -> value_type { return (*this)[2]; }
+		constexpr auto height()		const -> value_type { return (*this)[3]; }
+		constexpr auto bot()		const -> value_type { return (top() + height()); }
+		constexpr auto right()		const -> value_type { return (left() + width()); }
+		constexpr auto position()	const -> coord_type { return { left(), top() }; }
+		constexpr auto size()		const -> coord_type { return { width(), height() }; }
+		constexpr auto center()		const -> coord_type { return (position() + (size() / (T)2)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto left(value_type value) -> self_type & { return set(0, value); }
-		
-		ML_NODISCARD constexpr auto top(value_type value) -> self_type & { return set(1, value); }
-		
-		ML_NODISCARD constexpr auto width(value_type value) -> self_type & { return set(2, value); }
-		
-		ML_NODISCARD constexpr auto height(value_type value) -> self_type & { return set(3, value); }
-		
-		ML_NODISCARD constexpr auto bot(value_type value) -> self_type & { return height(value - top()); }
-		
-		ML_NODISCARD constexpr auto right(value_type value) -> self_type & { return width(value - left()); }
-		
-		ML_NODISCARD constexpr auto position(coord_type const & value) -> self_type & { return left(value[0]).top(value[1]); }
-		
-		ML_NODISCARD constexpr auto size(coord_type const & value) -> self_type & { return width(value[0]).height(value[1]); }
-		
-		ML_NODISCARD constexpr auto center(coord_type const & value) -> self_type & { return position(value - (size() / (T)2)); }
+		constexpr auto left		(value_type value)			-> self_type & { return set(0, value); }
+		constexpr auto top		(value_type value)			-> self_type & { return set(1, value); }
+		constexpr auto width	(value_type value)			-> self_type & { return set(2, value); }
+		constexpr auto height	(value_type value)			-> self_type & { return set(3, value); }
+		constexpr auto bot		(value_type value)			-> self_type & { return height(value - top()); }
+		constexpr auto right	(value_type value)			-> self_type & { return width(value - left()); }
+		constexpr auto position	(coord_type const & value)	-> self_type & { return left(value[0]).top(value[1]); }
+		constexpr auto size		(coord_type const & value)	-> self_type & { return width(value[0]).height(value[1]); }
+		constexpr auto center	(coord_type const & value)	-> self_type & { return position(value - (size() / (T)2)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -105,10 +89,8 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	ML_USING FloatRect = Rect<float_t>;
-	
-	ML_USING IntRect = Rect<int32_t>;
-	
-	ML_USING UintRect = Rect<uint32_t>;
+	ML_USING IntRect	= Rect<int32_t>;
+	ML_USING UintRect	= Rect<uint32_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 }

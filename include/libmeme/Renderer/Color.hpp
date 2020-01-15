@@ -11,13 +11,14 @@ namespace ml
 
 	namespace detail
 	{
-		template <class To, class From
-		> ML_NODISCARD constexpr tvec4<To> color_cast(const tvec4<From> & value)
+		template <
+			class To, class From
+		> static constexpr tvec4<To> color_cast(const tvec4<From> & value)
 		{
 			return (tvec4<To>)value;
 		}
 
-		ML_NODISCARD constexpr vec4b color_cast(vec4f const & value)
+		static constexpr vec4b color_cast(vec4f const & value)
 		{
 			return {
 				static_cast<byte_t>(value[0] * 255.f),
@@ -27,7 +28,7 @@ namespace ml
 			};
 		}
 
-		ML_NODISCARD constexpr vec4f color_cast(vec4b const & value)
+		static constexpr vec4f color_cast(vec4b const & value)
 		{
 			return {
 				static_cast<float_t>(value[0]) / 255.f,
@@ -92,29 +93,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator rgba_t &() { return m_value; }
+		inline operator rgba_t &() { return m_value; }
 
-		ML_NODISCARD constexpr operator rgba_t const &() const { return m_value; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr type & operator[](size_t i) { return m_value[i]; }
-
-		ML_NODISCARD constexpr type const & operator[](size_t i) const { return m_value[i]; }
+		constexpr operator rgba_t const &() const { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto r() const -> type const &	{ return m_value[0]; }
-		
-		ML_NODISCARD constexpr auto g() const -> type const &	{ return m_value[1]; }
-		
-		ML_NODISCARD constexpr auto b() const -> type const &	{ return m_value[2]; }
-		
-		ML_NODISCARD constexpr auto a() const -> type const &	{ return m_value[3]; }
-		
-		ML_NODISCARD constexpr auto rgb() const -> const rgb_t	{ return (rgb_t)m_value; }
-		
-		ML_NODISCARD constexpr auto rgba() const -> rgba_t const & { return m_value; }
+		inline type & operator[](size_t i) { return m_value[i]; }
+
+		constexpr type const & operator[](size_t i) const { return m_value[i]; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto r()		const -> type const &	{ return m_value[0]; }
+		constexpr auto g()		const -> type const &	{ return m_value[1]; }
+		constexpr auto b()		const -> type const &	{ return m_value[2]; }
+		constexpr auto a()		const -> type const &	{ return m_value[3]; }
+		constexpr auto rgb()	const -> const rgb_t	{ return (rgb_t)m_value; }
+		constexpr auto rgba()	const -> rgba_t const & { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -138,14 +134,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD constexpr auto make_color(Args && ... args)
+	template <class ... Args> static constexpr auto make_color(Args && ... args)
 	{
 		return Color{ std::forward<Args>(args)... };
 	}
 
-	template <class ... Args
-	> ML_NODISCARD constexpr auto make_color32(Args && ... args)
+	template <class ... Args> static constexpr auto make_color32(Args && ... args)
 	{
 		return Color32{ std::forward<Args>(args)... };
 	}

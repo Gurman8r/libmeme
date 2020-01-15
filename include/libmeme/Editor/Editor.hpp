@@ -35,9 +35,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto & dockspace() noexcept { return s_dockspace; }
+		static inline auto & dockspace() noexcept { return s_dockspace; }
 
-		ML_NODISCARD static inline auto & main_menu() noexcept { return s_mainMenuBar; }
+		static inline auto & main_menu() noexcept { return s_mainMenuBar; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

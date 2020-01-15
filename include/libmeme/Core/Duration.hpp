@@ -22,21 +22,19 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type = typename Duration;
-
 		using base_type = typename std::chrono::duration<float64_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Duration() noexcept : m_base{} {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		constexpr Duration() noexcept
+			: m_base{ 0.0 }
+		{
+		}
 
 		constexpr Duration(float64_t value) noexcept
 			: m_base{ value }
 		{
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr explicit Duration(base_type const & other)
 			: m_base{ other }
@@ -47,8 +45,6 @@ namespace ml
 			: m_base{ std::move(other) }
 		{
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class R, class P = typename R::period
 		> constexpr Duration(std::chrono::duration<R, P> const & value)
@@ -61,8 +57,6 @@ namespace ml
 			: m_base{ std::chrono::duration_cast<base_type>(std::move(value)) }
 		{
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr Duration(self_type const & other)
 			: m_base{ other.m_base }
@@ -101,44 +95,38 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr base_type base() const noexcept
-		{
-			return m_base;
-		}
+		constexpr base_type base() const noexcept { return m_base; }
 
-		ML_NODISCARD constexpr float64_t count() const noexcept
-		{
-			return m_base.count();
-		}
+		constexpr float64_t count() const noexcept { return m_base.count(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto nanoseconds() const noexcept
+		constexpr decltype(auto) nanoseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Nanoseconds>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto microseconds() const noexcept
+		constexpr decltype(auto) microseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Microseconds>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto milliseconds() const noexcept
+		constexpr decltype(auto) milliseconds() const noexcept
 		{
 			return std::chrono::duration_cast<Milliseconds>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto seconds() const noexcept
+		constexpr decltype(auto) seconds() const noexcept
 		{
 			return std::chrono::duration_cast<Seconds>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto minutes() const noexcept
+		constexpr decltype(auto) minutes() const noexcept
 		{
 			return std::chrono::duration_cast<Minutes>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto hours() const noexcept
+		constexpr decltype(auto) hours() const noexcept
 		{
 			return std::chrono::duration_cast<Hours>(m_base);
 		}

@@ -37,17 +37,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD Glyph const & get_glyph(uint32_t c, uint32_t characterSize) const;
+		Glyph const & get_glyph(uint32_t c, uint32_t characterSize) const;
 
-		ML_NODISCARD Glyph load_glyph(uint32_t c, uint32_t characterSize) const;
+		Glyph load_glyph(uint32_t c, uint32_t characterSize) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto info() const noexcept -> Info const & { return m_info; }
+		inline auto info() const noexcept -> Info const & { return m_info; }
 
-		ML_NODISCARD inline auto pages() noexcept -> page_table & { return m_pages; }
+		inline auto pages() noexcept -> page_table & { return m_pages; }
 
-		ML_NODISCARD inline auto pages() const noexcept -> page_table const & { return m_pages; }
+		inline auto pages() const noexcept -> page_table const & { return m_pages; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,8 +63,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static inline auto make_font(Args && ... args)
+	template <class ... Args> static inline auto make_font(Args && ... args)
 	{
 		return Font{ std::forward<Args>(args)... };
 	}

@@ -26,13 +26,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) index() const noexcept { return std::get<ID_Index>(m_storage); }
+		inline decltype(auto) index() const noexcept { return std::get<ID_Index>(m_storage); }
 
-		ML_NODISCARD inline decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
+		inline decltype(auto) size() const noexcept { return std::get<ID_Size>(m_storage); }
 
-		ML_NODISCARD inline decltype(auto) flags() const noexcept { return std::get<ID_Flags>(m_storage); }
+		inline decltype(auto) flags() const noexcept { return std::get<ID_Flags>(m_storage); }
 
-		ML_NODISCARD inline decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
+		inline decltype(auto) data() const noexcept { return std::get<ID_Data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -59,9 +59,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto current() const -> size_t { return m_current; }
+		inline auto current() const -> size_t { return m_current; }
 
-		ML_NODISCARD inline auto records() const -> storage_type const & { return m_records; }
+		inline auto records() const -> storage_type const & { return m_records; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

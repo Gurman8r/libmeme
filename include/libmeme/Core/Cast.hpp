@@ -18,7 +18,7 @@ namespace ml
 		using type = typename T;
 
 		template <class ... Args
-		> ML_NODISCARD constexpr decltype(auto) operator()(Args && ... args) const noexcept
+		> constexpr decltype(auto) operator()(Args && ... args) const noexcept
 		{
 			return static_cast<type>(std::forward<Args>(args)...);
 		}

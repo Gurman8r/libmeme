@@ -9,7 +9,7 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::vector<std::string> tokenize(std::string value, std::string const & delim)
+	static inline std::vector<std::string> tokenize(std::string value, std::string const & delim)
 	{
 		std::vector<std::string> out;
 		size_t pos = 0;
@@ -24,8 +24,9 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class To, class From
-	> ML_NODISCARD static inline std::basic_string<To> convert(const std::basic_string<From> & value)
+	template <
+		class To, class From
+	> static inline std::basic_string<To> convert(const std::basic_string<From> & value)
 	{
 		std::basic_string<To> temp {};
 		temp.reserve(value.size());
@@ -34,20 +35,20 @@ namespace ml::util
 		return temp;
 	}
 
-	ML_NODISCARD static inline std::string narrow(std::wstring const & value)
+	static inline std::string narrow(std::wstring const & value)
 	{ 
 		return convert<char>(value);
 	}
 
-	ML_NODISCARD static inline std::wstring widen(std::string const & value)
+	static inline std::wstring widen(std::string const & value)
 	{ 
 		return convert<wchar_t>(value); 
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch
-	> ML_NODISCARD static inline bool is_whitespace(Ch c)
+	template <class Ch>
+	static inline bool is_whitespace(Ch c)
 	{
 		return
 			c == static_cast<Ch>(' ') ||
@@ -56,7 +57,7 @@ namespace ml::util
 			c == static_cast<Ch>('\r');
 	}
 
-	ML_NODISCARD static inline std::string trim_front(std::string value)
+	static inline std::string trim_front(std::string value)
 	{
 		while (!value.empty() && is_whitespace(value.front()))
 		{
@@ -65,7 +66,7 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string trim_back(std::string value)
+	static inline std::string trim_back(std::string value)
 	{
 		while (!value.empty() && is_whitespace(value.back()))
 		{
@@ -74,14 +75,14 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string trim(std::string value)
+	static inline std::string trim(std::string value)
 	{
 		return trim_front(trim_back(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string replace_all(std::string value, std::string const & toFind, std::string const & replaceWith)
+	static inline std::string replace_all(std::string value, std::string const & toFind, std::string const & replaceWith)
 	{
 		if (!value.empty() && !toFind.empty())
 		{
@@ -94,14 +95,14 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string remove_all(std::string value, std::string const & toRemove)
+	static inline std::string remove_all(std::string value, std::string const & toRemove)
 	{
 		return replace_all(value, toRemove, {});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_alpha(std::string const & value)
+	static inline bool is_alpha(std::string const & value)
 	{
 		if (value.empty()) return false;
 		std::locale location {};
@@ -111,7 +112,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_alnum(std::string const & value)
+	static inline bool is_alnum(std::string const & value)
 	{
 		if (value.empty()) return false;
 		std::locale location {};
@@ -121,7 +122,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_graph(std::string const & value)
+	static inline bool is_graph(std::string const & value)
 	{
 		if (value.empty()) return false;
 		std::locale location {};
@@ -131,7 +132,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_print(std::string const & value)
+	static inline bool is_print(std::string const & value)
 	{
 		for (auto const & elem : value)
 			if (!std::isprint(elem))
@@ -139,7 +140,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_lower(std::string const & value)
+	static inline bool is_lower(std::string const & value)
 	{
 		for (auto const & elem : value)
 			if (!std::islower(elem))
@@ -147,7 +148,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_upper(std::string const & value)
+	static inline bool is_upper(std::string const & value)
 	{
 		for (auto const & elem : value)
 			if (!std::islower(elem))
@@ -157,7 +158,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string to_lower(std::string value)
+	static inline std::string to_lower(std::string value)
 	{
 		std::locale location {};
 		for (auto & elem : value)
@@ -165,7 +166,7 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string to_upper(std::string value)
+	static inline std::string to_upper(std::string value)
 	{
 		std::locale location {};
 		for (auto & elem : value)
@@ -175,7 +176,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_bool(std::string const & value)
+	static inline bool is_bool(std::string const & value)
 	{
 		switch (Hash(to_lower(value)))
 		{
@@ -193,7 +194,7 @@ namespace ml::util
 		}
 	}
 
-	ML_NODISCARD static inline bool is_integer(std::string const & value)
+	static inline bool is_integer(std::string const & value)
 	{
 		if (value.empty()) return false; 
 		std::string::const_iterator it = value.cbegin();
@@ -208,7 +209,7 @@ namespace ml::util
 		return (it == value.cend());
 	}
 
-	ML_NODISCARD static inline bool is_decimal(std::string const & value)
+	static inline bool is_decimal(std::string const & value)
 	{
 		if (value.empty()) { return false; }
 		std::string::pointer endptr = nullptr;
@@ -216,7 +217,7 @@ namespace ml::util
 		return !(*endptr != '\0' || endptr == value);
 	}
 
-	ML_NODISCARD static inline bool is_name(std::string const & value)
+	static inline bool is_name(std::string const & value)
 	{
 		if (!value.empty() && (std::isalpha(value.front()) || (value.front() == '_')))
 		{
@@ -238,7 +239,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool to_bool(std::string const & value, bool dv = 0)
+	static inline bool to_bool(std::string const & value, bool dv = 0)
 	{
 		switch (Hash(to_lower(value)))
 		{
@@ -258,67 +259,67 @@ namespace ml::util
 		}
 	}
 
-	ML_NODISCARD static inline int32_t to_i8(std::string const & value, int8_t dv = 0)
+	static inline int32_t to_i8(std::string const & value, int8_t dv = 0)
 	{
 		try { return static_cast<int8_t>(std::stoi(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int32_t to_i16(std::string const & value, int16_t dv = 0)
+	static inline int32_t to_i16(std::string const & value, int16_t dv = 0)
 	{
 		try { return static_cast<int16_t>(std::stoi(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int32_t to_i32(std::string const & value, int32_t dv = 0)
+	static inline int32_t to_i32(std::string const & value, int32_t dv = 0)
 	{
 		try { return static_cast<int32_t>(std::stoi(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int64_t to_i64(std::string const & value, int64_t dv = 0)
+	static inline int64_t to_i64(std::string const & value, int64_t dv = 0)
 	{
 		try { return static_cast<int64_t>(std::stoll(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint8_t to_u8(std::string const & value, uint8_t dv = 0)
+	static inline uint8_t to_u8(std::string const & value, uint8_t dv = 0)
 	{
 		try { return static_cast<uint8_t>(std::stoul(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint16_t to_u16(std::string const & value, uint16_t dv = 0)
+	static inline uint16_t to_u16(std::string const & value, uint16_t dv = 0)
 	{
 		try { return static_cast<uint16_t>(std::stoul(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint32_t to_u32(std::string const & value, uint32_t dv = 0)
+	static inline uint32_t to_u32(std::string const & value, uint32_t dv = 0)
 	{
 		try { return static_cast<uint32_t>(std::stoul(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint64_t to_u64(std::string const & value, uint64_t dv = 0)
+	static inline uint64_t to_u64(std::string const & value, uint64_t dv = 0)
 	{
 		try { return static_cast<uint64_t>(std::stoull(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float32_t to_f32(std::string const & value, float32_t dv = 0)
+	static inline float32_t to_f32(std::string const & value, float32_t dv = 0)
 	{
 		try { return static_cast<float32_t>(std::stof(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float64_t to_f64(std::string const & value, float64_t dv = 0)
+	static inline float64_t to_f64(std::string const & value, float64_t dv = 0)
 	{
 		try { return static_cast<float64_t>(std::stod(value)); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float80_t to_f80(std::string const & value, float80_t dv = 0)
+	static inline float80_t to_f80(std::string const & value, float80_t dv = 0)
 	{
 		try { return static_cast<float80_t>(std::stold(value)); }
 		catch (std::invalid_argument &) { return dv; }
@@ -326,31 +327,31 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string to_string(std::string const & value) { return value; }
+	static inline std::string to_string(std::string const & value) { return value; }
 
-	ML_NODISCARD static inline std::string to_string(int8_t value) { return std::to_string(value); }
+	static inline std::string to_string(int8_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(int16_t value) { return std::to_string(value); }
+	static inline std::string to_string(int16_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(int32_t value) { return std::to_string(value); }
+	static inline std::string to_string(int32_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(int64_t value) { return std::to_string(value); }
+	static inline std::string to_string(int64_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(uint8_t value) { return std::to_string(value); }
+	static inline std::string to_string(uint8_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(uint16_t value) { return std::to_string(value); }
+	static inline std::string to_string(uint16_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(uint32_t value) { return std::to_string(value); }
+	static inline std::string to_string(uint32_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(uint64_t value) { return std::to_string(value); }
+	static inline std::string to_string(uint64_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(float32_t value) { return std::to_string(value); }
+	static inline std::string to_string(float32_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(float64_t value) { return std::to_string(value); }
+	static inline std::string to_string(float64_t value) { return std::to_string(value); }
 
-	ML_NODISCARD static inline std::string to_string(float80_t value) { return std::to_string(value); }
+	static inline std::string to_string(float80_t value) { return std::to_string(value); }
 
-	template <class T> ML_NODISCARD static inline std::string to_string(T const & value)
+	template <class T> static inline std::string to_string(T const & value)
 	{
 		std::stringstream ss {}; 
 		ss << value;
@@ -359,7 +360,8 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Arg0, class ... Args
+	template <
+		class Arg0, class ... Args
 	> inline std::stringstream sink(Arg0 const & arg0, Args && ... args)
 	{
 		std::stringstream ss{};
@@ -369,7 +371,7 @@ namespace ml::util
 		return ss;
 	}
 
-	ML_NODISCARD static inline std::string format(std::string fmt, std::stringstream & ss)
+	static inline std::string format(std::string fmt, std::stringstream & ss)
 	{
 		for (size_t i = 0; ss.good(); i++)
 		{
@@ -382,15 +384,16 @@ namespace ml::util
 		return fmt;
 	}
 
-	template <class Arg0, class ... Args
-	> ML_NODISCARD static inline std::string format(std::string fmt, Arg0 const & arg0, Args && ... args)
+	template <
+		class Arg0, class ... Args
+	> static inline std::string format(std::string fmt, Arg0 const & arg0, Args && ... args)
 	{
 		std::stringstream ss{ _ML_UTIL sink(arg0, std::forward<Args>(args)...) };
 			
 		return _ML_UTIL format(fmt, ss);
 	}
 
-	template <class S> ML_NODISCARD static inline std::string format(std::string fmt, std::vector<S> const & args)
+	template <class S> static inline std::string format(std::string fmt, std::vector<S> const & args)
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; i++)
 		{
@@ -401,16 +404,14 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T
-	> ML_NODISCARD static inline std::string to_hex(T const & value)
+	template <class T> static inline std::string to_hex(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::hex << value;
 		return ss.str();
 	}
 
-	template <class T
-	> ML_NODISCARD static inline std::string to_oct(T const & value)
+	template <class T> static inline std::string to_oct(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::oct << value;

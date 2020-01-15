@@ -38,134 +38,73 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform() noexcept : m_storage{} {}
-
-		~Uniform() noexcept {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit Uniform(storage_type const & value)
-			: m_storage{ value }
-		{
-		}
-
-		explicit Uniform(storage_type && value) noexcept
-			: m_storage{ std::move(value) }
-		{
-		}
+		Uniform();
+		Uniform(storage_type const & storage);
+		Uniform(storage_type && storage) noexcept;
+		Uniform(Uniform const & other);
+		Uniform(Uniform && other) noexcept;
+		~Uniform() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform(Uniform const & other)
-			: Uniform{ other.m_storage }
-		{
-		}
+		Uniform & operator=(Uniform const & other);
 
-		Uniform(Uniform && other) noexcept
-			: Uniform{ std::move(other.m_storage) }
-		{
-		}
+		Uniform & operator=(Uniform && other) noexcept;
+
+		void swap(Uniform & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline Uniform & operator=(Uniform const & other)
+		inline type_t const & type() const noexcept { return std::get<ID_Type>(m_storage); }
+
+		inline name_t const & name() const noexcept { return std::get<ID_Name>(m_storage); }
+		
+		inline data_t const & data() const noexcept { return std::get<ID_Data>(m_storage); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline size_t index() const noexcept
 		{
-			Uniform temp{ other };
-			this->swap(temp);
-			return (*this);
+			return data().index();
 		}
 
-		inline Uniform & operator=(Uniform && other) noexcept
+		inline bool is_variable() const noexcept
 		{
-			this->swap(std::move(other));
-			return (*this);
+			return std::holds_alternative<variable_t>(data());
 		}
 
-		inline void swap(Uniform & other) noexcept
+		inline bool is_function() const noexcept
 		{
-			if (this != std::addressof(other))
-			{
-				m_storage.swap(other.m_storage);
-			}
+			return std::holds_alternative<function_t>(data());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline type_t const & type() const noexcept
+		inline std::optional<variable_t> load() const
 		{
-			return std::get<ID_Type>(m_storage);
-		}
-
-		ML_NODISCARD inline name_t const & name() const noexcept
-		{
-			return std::get<ID_Name>(m_storage);
-		}
-
-		ML_NODISCARD inline data_t const & data() const noexcept
-		{
-			return std::get<ID_Data>(m_storage);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline bool is_variable() const noexcept
-		{
-			return std::holds_alternative<variable_t>(this->data());
-		}
-
-		ML_NODISCARD inline bool is_function() const noexcept
-		{
-			return std::holds_alternative<function_t>(this->data());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline std::optional<variable_t> load() const
-		{
-			if (this->is_variable())
+			if (is_variable())
 			{
 				return std::make_optional(std::get<variable_t>(data()));
 			}
-			else if (this->is_function())
+			else if (is_function())
 			{
-				return std::make_optional(std::invoke(std::get<function_t>(data())));
+				if (auto const & f{ std::get<function_t>(data()) })
+				{
+					return std::make_optional(std::invoke(f));
+				}
 			}
-			else
-			{
-				return std::nullopt;
-			}
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T
-		> ML_NODISCARD inline std::optional<T> cast() const
+		template <class T> inline std::optional<T> get() const
 		{
-			if (std::optional<variable_t> v{ this->load() }; v && std::holds_alternative<T>(*v))
+			if (std::optional<variable_t> v{ load() }; v && std::holds_alternative<T>(*v))
 			{
 				return std::make_optional<T>(std::get<T>(*v));
 			}
-			else
-			{
-				return std::nullopt;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline bool operator==(Uniform const & other) const noexcept
-		{
-			return (type() == other.type()) && (name() == other.name());
-		}
-
-		ML_NODISCARD inline bool operator!=(Uniform const & other) const noexcept
-		{
-			return !(*this == other);
-		}
-
-		ML_NODISCARD inline bool operator<(Uniform const & other) const noexcept
-		{
-			return (type() < other.type()) || (name() < other.name());
+			return std::nullopt;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -188,19 +127,19 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Type, class Name, class ... Args
-	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
+	> static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
 			typeof_v<Type>, std::move(name), std::forward<Args>(args)...
 		) };
 	}
 
-	ML_NODISCARD static inline auto make_uniform(Uniform const & value)
+	static inline auto make_uniform(Uniform const & value)
 	{
 		return Uniform{ value };
 	}
 
-	ML_NODISCARD static inline auto make_uniform(Uniform && value) noexcept
+	static inline auto make_uniform(Uniform && value) noexcept
 	{
 		return Uniform{ std::move(value) };
 	}

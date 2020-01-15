@@ -10,32 +10,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	path_t FS::s_root{};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void FS::current_path(path_t const & value)
-	{
-		return std::filesystem::current_path(value);
-	}
-
 	path_t FS::current_path()
 	{
 		return std::filesystem::current_path();
 	}
 
+	void FS::current_path(path_t const & value)
+	{
+		static bool once{ 0 }; if (!once && (once = true)) { root_path(); }
+
+		return std::filesystem::current_path(value);
+	}
+
 	path_t FS::path_to(path_t const & value)
 	{
-		return path_t{ s_root.string() + '/' + value.string() };
+		return path_t{ root_path().string() + '/' + value.string() };
 	}
 
 	path_t const & FS::root_path()
 	{
-		static bool once{ 0 }; if (!once && (once = true))
-		{
-			s_root = std::filesystem::current_path();
-		}
-		return s_root;
+		static path_t const temp{ std::filesystem::current_path() };
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -45,9 +45,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto language() const noexcept -> Language { return m_language; }
+		inline auto language() const noexcept -> Language { return m_language; }
 
-		ML_NODISCARD inline auto text() const noexcept -> std::string const & { return m_text; }
+		inline auto text() const noexcept -> std::string const & { return m_text; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

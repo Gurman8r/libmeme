@@ -19,8 +19,7 @@ namespace ml::ds
 		
 		using compare_type = typename Compare;
 
-		template <class T
-		> using allocator_type = typename Alloc<T>;
+		ML_USING_X allocator_type = typename Alloc<X>;
 
 		static constexpr bool multi{ Multi };
 
