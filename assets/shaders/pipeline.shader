@@ -55,13 +55,13 @@ vec4 drawKernel(in mat3 kernel)
     );
 
     vec3 samples[9];
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 9; ++i)
     {
         samples[i] = vec3(texture(u_texture0, V.texcoord.st + offsets[i]));
     }
 
     vec3 color = vec3(0.0);
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 9; ++i)
     {
         color += samples[i] * kernel[i / 3][i % 3];
     }

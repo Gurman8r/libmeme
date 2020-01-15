@@ -47,18 +47,29 @@ namespace ml
 		template <template <class, size_t, size_t> class M, class U, size_t W, size_t H
 		> constexpr operator M<U, W, H>() const noexcept
 		{
-			if constexpr (std::is_same_v<M<U, W, H>, self_type>)
+			using out_type = M<U, W, H>;
+			if constexpr (std::is_same_v<out_type, self_type>)
 			{
 				return (*this);
 			}
+			else if constexpr (W == Width && H == Height)
+			{
+				auto temp{ out_type::zero() };
+				for (size_t i = 0; i < temp.size(); ++i)
+				{
+					temp[i] = static_cast<U>(at(i));
+				}
+				return temp;
+			}
 			else
 			{
-				auto temp{ M<U, W, H>::zero() };
-				for (size_t i = 0; i < temp.size(); i++)
+				auto temp{ out_type::zero() };
+				for (size_t i = 0; i < temp.size(); ++i)
 				{
 					size_t const x{ i % temp.width() }, y{ i / temp.width() };
-
-					temp[i] = (y < Height && x < Width) ? (U)at(y * Width + x) : (U)0;
+					temp[i] = (y < Height && x < Width)
+						? static_cast<U>(at(y * Width + x))
+						: static_cast<U>(0);
 				}
 				return temp;
 			}
@@ -66,79 +77,77 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_type const i) { return m_data[i]; }
+		ML_NODISCARD constexpr auto operator[](size_type const i) -> reference { return m_data[i]; }
 
-		constexpr const_reference operator[](size_type const i) const { return m_data[i]; }
+		ML_NODISCARD constexpr auto operator[](size_type const i) const -> const_reference { return m_data[i]; }
 
+		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
+		
+		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
+		
+		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data.back(); }
+		
+		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data.back(); }
+		
+		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
+		
+		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
+		
+		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
+		
+		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+
+		ML_NODISCARD constexpr auto cols() const noexcept -> size_t { return Width; }
+		
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
+		
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+
+		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+		
+		ML_NODISCARD constexpr auto end() noexcept -> iterator { return m_data.end(); }
+		
+		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
+		
+		ML_NODISCARD constexpr auto front() noexcept -> reference { return m_data.front(); }
+		
+		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return m_data.front(); }
+
+		ML_NODISCARD constexpr auto height() const noexcept { return Height; }
+
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
+
+		ML_NODISCARD constexpr auto rows() const noexcept -> size_t { return Height; }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
+
+		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return Width; }
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
-		
-		constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
-		
-		constexpr auto back() noexcept -> reference { return m_data.back(); }
-		
-		constexpr auto back() const noexcept -> const_reference { return m_data.back(); }
-		
-		constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
-		
-		constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
-		
-		constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
-		
-		constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
-
-		constexpr auto cols() const noexcept -> size_t { return Width; }
-		
-		constexpr auto data() noexcept -> pointer { return m_data.data(); }
-		
-		constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
-
-		constexpr bool empty() const noexcept { return false; }
-		
-		constexpr auto end() noexcept -> iterator { return m_data.end(); }
-		
-		constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
-		
-		constexpr auto front() noexcept -> reference { return m_data.front(); }
-		
-		constexpr auto front() const noexcept -> const_reference { return m_data.front(); }
-
-		constexpr auto height() const noexcept { return Height; }
-
-		constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
-
-		constexpr auto rows() const noexcept -> size_t { return Height; }
-
-		constexpr auto size() const noexcept -> size_t { return m_data.size(); }
-
-		constexpr auto width() const noexcept -> size_t { return Width; }
-		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static constexpr self_type zero() noexcept
+		ML_NODISCARD static constexpr self_type zero() noexcept
 		{
 			return self_type{ 0 };
 		}
 
-		static constexpr self_type one() noexcept
+		ML_NODISCARD static constexpr self_type one() noexcept
 		{
 			auto temp{ zero() };
 			for (auto & elem : temp) { elem = static_cast<value_type>(1); }
 			return temp;
 		}
 
-		static constexpr self_type fill(value_type value) noexcept
+		ML_NODISCARD static constexpr self_type fill(value_type value) noexcept
 		{
 			auto temp{ zero() };
 			for (auto & elem : temp) { temp = value; }
 			return temp;
 		}
 
-		static constexpr self_type identity() noexcept
+		ML_NODISCARD static constexpr self_type identity() noexcept
 		{
 			auto temp{ zero() };
-			for (size_t i = 0; i < temp.size(); i++)
+			for (size_t i = 0; i < temp.size(); ++i)
 			{
 				temp[i] = ((i / temp.width()) == (i % temp.width()))
 					? static_cast<value_type>(1)
@@ -266,51 +275,64 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator==(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	> ML_NODISCARD constexpr bool operator==(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data == rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator!=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	> ML_NODISCARD constexpr bool operator!=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data != rhs.m_data);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <
-		class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator<(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	template <class Tx, class Ty, size_t X, size_t Y
+	> ML_NODISCARD constexpr bool operator<(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data < rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator<=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	> ML_NODISCARD constexpr bool operator<=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data <= rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator>(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	> ML_NODISCARD constexpr bool operator>(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data > rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t X, size_t Y
-	> constexpr bool operator>=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs)
+	> ML_NODISCARD constexpr bool operator>=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
 	{
 		return (lhs.m_data >= rhs.m_data);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class T, size_t N
+	> ML_NODISCARD constexpr auto operator-(tvecn<T, N> const & lhs) noexcept
+		-> tvecn<T, N>
+	{
+		return (lhs * static_cast<T>(-1));
+	}
+
+	template <class T, size_t N
+	> ML_NODISCARD constexpr auto operator+(tvecn<T, N> const & lhs) noexcept
+		-> tvecn<T, N>
+	{
+		return -(-(lhs));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator+=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator+=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
-		for (size_t i = 0; i < lhs.size(); i++)
+		for (size_t i = 0; i < lhs.size(); ++i)
 		{
 			lhs[i] = (lhs[i] + static_cast<Tx>(rhs[i]));
 		}
@@ -318,10 +340,10 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator-=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator-=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
-		for (size_t i = 0; i < lhs.size(); i++)
+		for (size_t i = 0; i < lhs.size(); ++i)
 		{
 			lhs[i] = (lhs[i] - static_cast<Tx>(rhs[i]));
 		}
@@ -329,10 +351,10 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator*=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator*=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
-		for (size_t i = 0; i < lhs.size(); i++)
+		for (size_t i = 0; i < lhs.size(); ++i)
 		{
 			lhs[i] = (lhs[i] * static_cast<Tx>(rhs[i]));
 		}
@@ -340,10 +362,10 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator/=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator/=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
-		for (size_t i = 0; i < lhs.size(); i++)
+		for (size_t i = 0; i < lhs.size(); ++i)
 		{
 			lhs[i] = (lhs[i] / static_cast<Tx>(rhs[i]));
 		}
@@ -353,45 +375,41 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator+(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator+(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp += rhs;
-		return temp;
+		return temp += rhs;
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator-(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator-(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp -= rhs;
-		return temp;
+		return temp -= rhs;
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator*(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator*(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp *= rhs;
-		return temp;
+		return temp *= rhs;
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator/(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs)
+	> ML_NODISCARD constexpr auto operator/(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp /= rhs;
-		return temp;
+		return temp /= rhs;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator+=(tvecn<Tx, N> & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator+=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
 		for (auto & elem : lhs)
@@ -402,7 +420,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator-=(tvecn<Tx, N> & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator-=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
 		for (auto & elem : lhs)
@@ -413,7 +431,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator*=(tvecn<Tx, N> & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator*=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
 		for (auto & elem : lhs)
@@ -424,7 +442,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator/=(tvecn<Tx, N> & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator/=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N> &
 	{
 		for (auto & elem : lhs)
@@ -436,57 +454,36 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class Tx, class Ty, size_t N
-	> constexpr auto operator+(tvecn<Tx, N> const & lhs, Ty const & rhs)
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator+(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp += static_cast<Tx>(rhs);
-		return temp;
+		return temp += static_cast<Tx>(rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator-(tvecn<Tx, N> const & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator-(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp -= static_cast<Tx>(rhs);
-		return temp;
+		return temp -= static_cast<Tx>(rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator*(tvecn<Tx, N> const & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator*(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp *= static_cast<Tx>(rhs);
-		return temp;
+		return temp *= static_cast<Tx>(rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr auto operator/(tvecn<Tx, N> const & lhs, Ty const & rhs)
+	> ML_NODISCARD constexpr auto operator/(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
 		-> tvecn<Tx, N>
 	{
 		tvecn<Tx, N> temp{ lhs };
-		temp /= static_cast<Tx>(rhs);
-		return temp;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T,  size_t X, size_t Y
-	> constexpr auto operator-(Matrix<T, X, Y> const & lhs)
-		-> Matrix<T, X, Y>
-	{
-		return (lhs * static_cast<T>(-1));
-	}
-
-	template <class T,  size_t X, size_t Y
-	> constexpr auto operator+(Matrix<T, X, Y> const & lhs)
-		-> Matrix<T, X, Y>
-	{
-		return -(-(lhs));
+		return temp /= static_cast<Tx>(rhs);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

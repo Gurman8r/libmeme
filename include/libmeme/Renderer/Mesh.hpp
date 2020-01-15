@@ -58,24 +58,51 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) layout() noexcept { return std::get<ID_Layout>(m_storage); }
-		
-		inline decltype(auto) layout() const noexcept { return std::get<ID_Layout>(m_storage); }
+		ML_NODISCARD inline decltype(auto) layout() noexcept
+		{
+			return std::get<ID_Layout>(m_storage);
+		}
 
-		
-		inline decltype(auto) vao() noexcept { return std::get<ID_VAO>(m_storage); }
-		
-		inline decltype(auto) vao() const noexcept { return std::get<ID_VAO>(m_storage); }
+		ML_NODISCARD inline decltype(auto) layout() const noexcept
+		{
+			return std::get<ID_Layout>(m_storage);
+		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) vbo() noexcept { return std::get<ID_VBO>(m_storage); }
-		
-		inline decltype(auto) vbo() const noexcept { return std::get<ID_VBO>(m_storage); }
+		ML_NODISCARD inline decltype(auto) vao() noexcept
+		{
+			return std::get<ID_VAO>(m_storage);
+		}
 
+		ML_NODISCARD inline decltype(auto) vao() const noexcept
+		{
+			return std::get<ID_VAO>(m_storage);
+		}
 
-		inline decltype(auto) ibo() noexcept { return std::get<ID_IBO>(m_storage); }
-		
-		inline decltype(auto) ibo() const noexcept { return std::get<ID_IBO>(m_storage); }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline decltype(auto) vbo() noexcept
+		{
+			return std::get<ID_VBO>(m_storage);
+		}
+
+		ML_NODISCARD inline decltype(auto) vbo() const noexcept
+		{
+			return std::get<ID_VBO>(m_storage);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline decltype(auto) ibo() noexcept
+		{
+			return std::get<ID_IBO>(m_storage);
+		}
+
+		ML_NODISCARD inline decltype(auto) ibo() const noexcept
+		{
+			return std::get<ID_IBO>(m_storage);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,17 +121,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline auto make_mesh(Mesh::vertices_t && v)
+	ML_NODISCARD static inline auto make_mesh(Mesh::vertices_t && v)
 	{
 		return Mesh{ std::move(v) };
 	}
 
-	static inline auto make_mesh(Mesh::vertices_t && v, Mesh::indices_t && i)
+	ML_NODISCARD static inline auto make_mesh(Mesh::vertices_t && v, Mesh::indices_t && i)
 	{
 		return Mesh{ std::move(v), std::move(i) };
 	}
 
-	template <class ... Args> static inline auto make_mesh(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_mesh(Args && ... args)
 	{
 		return Mesh{ std::forward<Args>(args)... };
 	}

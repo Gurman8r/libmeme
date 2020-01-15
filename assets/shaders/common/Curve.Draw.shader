@@ -4,7 +4,7 @@ void drawLine(in vec4 a, in vec4 b, const int samples, const float dt)
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = lerp(a, b, t);
 		EmitVertex();
@@ -26,7 +26,7 @@ void drawBezierCurve0(in vec4 a, const int samples, const float dt)
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleBezier0(a, t);
 		EmitVertex();
@@ -39,7 +39,7 @@ void drawBezierCurve1(in vec4 a, in vec4 b, const int samples, const float dt)
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleBezier1(a, b, t);
 		EmitVertex();
@@ -52,7 +52,7 @@ void drawBezierCurve2(in vec4 a, in vec4 b, in vec4 c, const int samples, const 
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleBezier2(a, b, c, t);
 		EmitVertex();
@@ -65,7 +65,7 @@ void drawBezierCurve3(in vec4 a, in vec4 b, in vec4 c, in vec4 d, const int samp
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleBezier3(a, b, c, d, t);
 		EmitVertex();
@@ -78,7 +78,7 @@ void drawCatmullRomSplineSegment(in vec4 pPrev, in vec4 a, in vec4 b, in vec4 pN
 {
 	int i = 0;
 	float t = 0.0;
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleCatmullRom(pPrev, a, b, pNext, t);
 		EmitVertex();
@@ -92,7 +92,7 @@ void drawCubicHermiteSplineSegment(in vec4 a, in vec4 m0, in vec4 b, in vec4 m1,
 	int i = 0;
 	float t = 0.0;
 
-	for (i = 0; i <= samples; i++)
+	for (i = 0; i <= samples; ++i)
 	{
 		gl_Position = sampleCubicHermite(a, m0, b, m1, t);
 		EmitVertex();

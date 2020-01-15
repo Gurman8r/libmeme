@@ -78,7 +78,7 @@ vec4 raymarch(vec3 org, vec3 dir)
     vec3  p = org;
     bool glowed = false;
 
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < 64; ++i)
     {
         d = scene(p) + eps;
         p += d * dir;

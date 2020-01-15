@@ -69,12 +69,12 @@ namespace ml
 #	ifdef ML_IMPL_RENDERER_OPENGL
 		if (!ImGui_ImplGlfw_InitForOpenGL(static_cast<struct GLFWwindow *>(window), true))
 		{
-			return Debug::logError("Failed initializing ImGui Platform");
+			return Debug::log_error("Failed initializing ImGui Platform");
 		}
 
 		if (!ImGui_ImplOpenGL3_Init("#version 130"))
 		{
-			return Debug::logError("Failed initializing ImGui Renderer");
+			return Debug::log_error("Failed initializing ImGui Renderer");
 		}
 #	else
 		// 

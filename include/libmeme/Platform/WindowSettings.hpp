@@ -70,21 +70,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto data() const -> storage_type const & { return m_data; }
+		ML_NODISCARD constexpr auto data() const -> storage_type const & { return m_data; }
 		
-		constexpr auto data() -> storage_type & { return m_data; }
+		ML_NODISCARD constexpr auto data() -> storage_type & { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bool resizable()		const { return m_data[Flag::Resizable]; }
-		constexpr bool visible()		const { return m_data[Flag::Visible]; }
-		constexpr bool decorated()		const { return m_data[Flag::Decorated]; }
-		constexpr bool focused()		const { return m_data[Flag::Focused]; }
-		constexpr bool autoIconify()	const { return m_data[Flag::AutoIconify]; }
-		constexpr bool floating()		const { return m_data[Flag::Floating]; }
-		constexpr bool maximized()		const { return m_data[Flag::Maximized]; }
-		constexpr bool fullscreen()		const { return m_data[Flag::Fullscreen]; }
-		constexpr bool vsync()			const { return m_data[Flag::VerticalSync]; }
+		ML_NODISCARD constexpr bool resizable() const { return m_data[Flag::Resizable]; }
+		
+		ML_NODISCARD constexpr bool visible() const { return m_data[Flag::Visible]; }
+		
+		ML_NODISCARD constexpr bool decorated() const { return m_data[Flag::Decorated]; }
+		
+		ML_NODISCARD constexpr bool focused() const { return m_data[Flag::Focused]; }
+		
+		ML_NODISCARD constexpr bool autoIconify() const { return m_data[Flag::AutoIconify]; }
+		
+		ML_NODISCARD constexpr bool floating() const { return m_data[Flag::Floating]; }
+		
+		ML_NODISCARD constexpr bool maximized() const { return m_data[Flag::Maximized]; }
+		
+		ML_NODISCARD constexpr bool fullscreen() const { return m_data[Flag::Fullscreen]; }
+		
+		ML_NODISCARD constexpr bool vsync() const { return m_data[Flag::VerticalSync]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

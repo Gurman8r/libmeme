@@ -3,7 +3,7 @@
 group "plugins"
 project "demo"
 	targetname 		"%{prj.name}"
-	targetdir		"%{bin_lib}"
+	targetdir		"%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/"
 	objdir			"%{bin_obj}"
 	location		"%{prj_dir}plugins/%{prj.name}/"
 	kind			"SharedLib"
@@ -39,6 +39,6 @@ project "demo"
 		optimize "Speed"
 	
 	filter { "system:Windows" }
-		postbuildcommands { "%{ml_copy} %{bin_lib}%{prj.name}.dll %{bin_out}" }
+		postbuildcommands { "%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}" }
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

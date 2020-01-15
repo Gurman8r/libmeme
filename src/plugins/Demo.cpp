@@ -237,7 +237,7 @@ namespace ml
 
 					draw_texture_preview(m_pipeline[0].texture()); ImGui::Separator();
 
-					draw_texture_preview(m_textures["doot"]); ImGui::Separator();
+					//draw_texture_preview(m_textures["doot"]); ImGui::Separator();
 				}
 				ImGui::End();
 				ImGui::PopID();

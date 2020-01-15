@@ -96,7 +96,7 @@ namespace ml::cx
 		constexpr operator vector<value_type, N>() const
 		{
 			vector<value_type, N> temp{};
-			for (size_t i = 0, imax = (m_size < N ? m_size : N); i < imax; i++)
+			for (size_t i = 0, imax = (m_size < N ? m_size : N); i < imax; ++i)
 			{
 				temp.push_back(this->at(i));
 			}
@@ -259,7 +259,7 @@ namespace ml::cx
 	};
 
 	template <class First, class Second>
-	static constexpr auto make_pair(First first, Second second) noexcept
+	ML_NODISCARD static constexpr auto make_pair(First first, Second second) noexcept
 	{
 		return pair<First, Second>{ first, second };
 	}

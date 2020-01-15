@@ -30,7 +30,7 @@ namespace ml
 
 		static constexpr hash_t m_hash
 		{
-			Hash{ m_name }
+			Hash(m_name)
 		};
 	};
 

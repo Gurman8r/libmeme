@@ -43,7 +43,7 @@ namespace ml
 			cx::vector<desc_type, Size> && descs
 		)	: enums{}, names{}, descs{}
 		{
-			for (size_t i = 0; i < enums.size(); i++)
+			for (size_t i = 0; i < enums.size(); ++i)
 			{
 				this->enums.push_back(cx::make_pair(enums[i], i));
 				this->names.push_back(cx::make_pair(enums[i], names[i]));
@@ -53,7 +53,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr std::optional<enum_type> find_by_index(size_t value) const
+		ML_NODISCARD constexpr std::optional<enum_type> find_by_index(size_t value) const
 		{
 			auto const it{ this->enums.find_by_value(value) };
 			return ((it != this->enums.cend())
@@ -62,7 +62,7 @@ namespace ml
 			);
 		}
 
-		constexpr std::optional<enum_type> find_by_name(name_type const & value) const
+		ML_NODISCARD constexpr std::optional<enum_type> find_by_name(name_type const & value) const
 		{
 			auto const it{ this->names.find_by_value(value) };
 			return ((it != this->names.cend())
@@ -71,7 +71,7 @@ namespace ml
 			);
 		}
 
-		constexpr std::optional<enum_type> find_by_desc(desc_type const & value) const
+		ML_NODISCARD constexpr std::optional<enum_type> find_by_desc(desc_type const & value) const
 		{
 			auto const it{ this->descs.find_by_value(value) };
 			return ((it != this->descs.cend())
@@ -82,7 +82,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr std::optional<size_t> get_index(enum_type value) const
+		ML_NODISCARD constexpr std::optional<size_t> get_index(enum_type value) const
 		{
 			auto const it{ this->enums.find_by_key(value) };
 			return ((it != this->enums.cend()) 
@@ -91,7 +91,7 @@ namespace ml
 			);
 		}
 
-		constexpr std::optional<name_type> get_name(enum_type value) const
+		ML_NODISCARD constexpr std::optional<name_type> get_name(enum_type value) const
 		{
 			auto const it{ this->names.find_by_key(value) };
 			return ((it != this->names.cend())
@@ -100,7 +100,7 @@ namespace ml
 			);
 		}
 
-		constexpr std::optional<desc_type> get_desc(enum_type value) const
+		ML_NODISCARD constexpr std::optional<desc_type> get_desc(enum_type value) const
 		{
 			auto const it{ this->descs.find_by_key(value) };
 			return ((it != this->descs.cend())

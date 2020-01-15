@@ -59,7 +59,7 @@ namespace ml
 		, m_share	{ nullptr }
 		, m_title	{}
 		, m_context	{}
-		, m_settings	{}
+		, m_settings{}
 		, m_video	{}
 	{
 		EventSystem::add_listener<WindowKillEvent>(this);
@@ -95,12 +95,12 @@ namespace ml
 	{
 		if (m_window)
 		{
-			return Debug::logError("Window already initialized");
+			return Debug::log_error("Window already initialized");
 		}
 
 		if (!glfwInit())
 		{
-			return Debug::logError("Failed initializing GLFW");
+			return Debug::log_error("Failed initializing GLFW");
 		}
 
 		m_title		= title;
@@ -257,7 +257,7 @@ namespace ml
 
 	Window & Window::swap_buffers()
 	{
-		if (m_window && get_settings().vsync())
+		if (m_window && m_settings.vsync())
 		{
 			glfwSwapBuffers(static_cast<GLFWwindow *>(m_window));
 		}
@@ -268,7 +268,7 @@ namespace ml
 
 	Window & Window::set_centered()
 	{
-		return set_position((vec2i)(get_desktop_mode().size - this->get_size()) / 2);
+		return set_position((vec2i)(get_desktop_mode().size() - this->get_size()) / 2);
 	}
 
 	Window & Window::set_clipboard(std::string const & value)
@@ -377,7 +377,7 @@ namespace ml
 
 	Window & Window::set_size(vec2u const & value)
 	{
-		m_video.size = value;
+		m_video.size() = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
@@ -486,6 +486,33 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	void Window::destroy_cursor(void * value)
+	{
+		return glfwDestroyCursor(static_cast<GLFWcursor *>(value));
+	}
+
+	void Window::make_context_current(void * value)
+	{
+		return glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
+	}
+
+	void Window::poll_events()
+	{
+		return glfwPollEvents();
+	}
+
+	void Window::swap_interval(int32_t value)
+	{
+		return glfwSwapInterval(value);
+	}
+
+	void Window::terminate()
+	{
+		return glfwTerminate();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void * Window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
 		return glfwCreateCursor(&make_glfw_image(w, h, pixels), w, h);
@@ -510,11 +537,6 @@ namespace ml
 		})());
 	}
 
-	bool Window::destroy_cursor(void * value)
-	{
-		return (value ? ML_TRUE_EXPR(glfwDestroyCursor(static_cast<GLFWcursor *>(value))) : false);
-	}
-
 	int32_t Window::extension_supported(C_String value)
 	{
 		return glfwExtensionSupported(value);
@@ -535,7 +557,11 @@ namespace ml
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = DisplayMode { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+			temp = DisplayMode{ std::make_tuple(vec2u{
+				dm.dmPelsWidth,
+				dm.dmPelsHeight },
+				dm.dmBitsPerPel
+			) };
 #else
 			// do the thing
 #endif
@@ -554,7 +580,11 @@ namespace ml
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				DisplayMode vm { dm.dmPelsWidth, dm.dmPelsHeight, dm.dmBitsPerPel };
+				auto vm{ DisplayMode{ std::make_tuple(vec2u{
+					dm.dmPelsWidth,
+					dm.dmPelsHeight },
+					dm.dmBitsPerPel
+				) } };
 
 				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
 				{
@@ -568,9 +598,9 @@ namespace ml
 		return temp;
 	}
 
-	Window::ProcFun Window::get_proc_address(C_String value)
+	Window::proc_fn Window::get_proc_address(C_String value)
 	{
-		return reinterpret_cast<Window::ProcFun>(glfwGetProcAddress(value));
+		return reinterpret_cast<Window::proc_fn>(glfwGetProcAddress(value));
 	}
 
 	std::vector<void *> const & Window::get_monitors()
@@ -580,7 +610,7 @@ namespace ml
 		{
 			int32_t count { 0 };
 			GLFWmonitor ** m { glfwGetMonitors(&count) };
-			for (size_t i = 0, imax = (size_t)count; i < imax; i++)
+			for (size_t i = 0, imax = (size_t)count; i < imax; ++i)
 			{
 				temp.push_back(m[i]);
 			}
@@ -593,29 +623,9 @@ namespace ml
 		return glfwGetTime();
 	}
 
-	void Window::make_context_current(void * value)
-	{
-		return glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
-	}
-
-	void Window::poll_events()
-	{
-		return glfwPollEvents();
-	}
-
-	void Window::swap_interval(int32_t value)
-	{
-		return glfwSwapInterval(value);
-	}
-
-	void Window::terminate()
-	{
-		return glfwTerminate();
-	}
-	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window::ErrorFun Window::set_error_callback(ErrorFun value)
+	Window::error_fn Window::set_error_callback(error_fn value)
 	{
 		return (glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(value))
 			? value
@@ -623,7 +633,7 @@ namespace ml
 			);
 	}
 
-	Window::CharFun Window::set_char_callback(CharFun value)
+	Window::char_fn Window::set_char_callback(char_fn value)
 	{
 		return (m_window
 			? glfwSetCharCallback(
@@ -633,7 +643,7 @@ namespace ml
 		);
 	}
 	
-	Window::CursorEnterFun Window::set_cursor_enter_callback(CursorEnterFun value)
+	Window::cursor_enter_fn Window::set_cursor_enter_callback(cursor_enter_fn value)
 	{
 		return (m_window
 			? glfwSetCursorEnterCallback(
@@ -643,7 +653,7 @@ namespace ml
 		);
 	}
 	
-	Window::CursorPosFun Window::set_cursor_pos_callback(CursorPosFun value)
+	Window::cursor_pos_fn Window::set_cursor_pos_callback(cursor_pos_fn value)
 	{
 		return (m_window
 			? glfwSetCursorPosCallback(
@@ -653,7 +663,7 @@ namespace ml
 		);
 	}
 
-	Window::FrameSizeFun Window::set_frame_size_callback(FrameSizeFun value)
+	Window::frame_size_fn Window::set_frame_size_callback(frame_size_fn value)
 	{
 		return (m_window
 			? glfwSetFramebufferSizeCallback(
@@ -663,7 +673,7 @@ namespace ml
 		);
 	}
 	
-	Window::KeyFun Window::set_key_callback(KeyFun value)
+	Window::key_fn Window::set_key_callback(key_fn value)
 	{
 		return (m_window
 			? glfwSetKeyCallback(
@@ -673,7 +683,7 @@ namespace ml
 		);
 	}
 	
-	Window::MouseFun Window::set_mouse_callback(MouseFun value)
+	Window::mouse_fn Window::set_mouse_callback(mouse_fn value)
 	{
 		return (m_window
 			? glfwSetMouseButtonCallback(
@@ -683,7 +693,7 @@ namespace ml
 		);
 	}
 	
-	Window::ScrollFun Window::set_scroll_callback(ScrollFun value)
+	Window::scroll_fn Window::set_scroll_callback(scroll_fn value)
 	{
 		return (m_window
 			? glfwSetScrollCallback(
@@ -693,7 +703,7 @@ namespace ml
 		);
 	}
 	
-	Window::CloseFun Window::set_window_close_callback(CloseFun value)
+	Window::close_fn Window::set_window_close_callback(close_fn value)
 	{
 		return (m_window
 			? glfwSetWindowCloseCallback(
@@ -703,7 +713,7 @@ namespace ml
 		);
 	}
 	
-	Window::FocusFun Window::set_window_focus_callback(FocusFun value)
+	Window::focus_fn Window::set_window_focus_callback(focus_fn value)
 	{
 		return (m_window
 			? glfwSetWindowFocusCallback(
@@ -713,7 +723,7 @@ namespace ml
 		);
 	}
 	
-	Window::PositionFun Window::set_window_pos_callback(PositionFun value)
+	Window::position_fn Window::set_window_pos_callback(position_fn value)
 	{
 		return (m_window
 			? glfwSetWindowPosCallback(
@@ -723,7 +733,7 @@ namespace ml
 		);
 	}
 	
-	Window::SizeFun Window::set_window_size_callback(SizeFun value)
+	Window::size_fn Window::set_window_size_callback(size_fn value)
 	{
 		return (m_window
 			? glfwSetWindowSizeCallback(

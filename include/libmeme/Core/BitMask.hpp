@@ -57,60 +57,96 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto size() { return self_type::Size; }
+		ML_NODISCARD static constexpr auto size()
+		{
+			return self_type::Size;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto bits() const -> storage_type { return to_bits(*this); }
+		ML_NODISCARD constexpr auto bits() const -> storage_type { return to_bits(*this); }
 
-		constexpr auto data() const -> const_reference { return m_value; }
+		ML_NODISCARD constexpr auto data() const -> const_reference { return m_value; }
 
-		constexpr auto data() -> reference { return m_value; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr operator const_reference() const { return m_value; }
-
-		constexpr bool operator[](size_t i) const { return this->read(i); }
+		ML_NODISCARD constexpr auto data() -> reference { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bool read(size_t i) const { return ML_BITREAD(m_value, i); }
+		ML_NODISCARD constexpr operator const_reference() const
+		{
+			return m_value;
+		}
 
-		constexpr self_type & clear(size_t i) { ML_BITCLEAR(m_value, i); return (*this); }
-
-		constexpr self_type & set(size_t i) { ML_BITSET(m_value, i); return (*this); }
-
-		constexpr self_type & write(size_t i, bool value) { ML_BITWRITE(m_value, i, value); return (*this); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> constexpr bool read() const { return this->read(I); }
-
-		template <size_t I> constexpr self_type & clear() { return this->clear(I); }
-
-		template <size_t I> constexpr self_type & set() { return this->set(I); }
-
-		template <size_t I> constexpr self_type & write(bool value) { return this->write(I, value); }
+		ML_NODISCARD constexpr bool operator[](size_t i) const
+		{
+			return this->read(i);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <
-			class In, class U, size_t N
-		> static constexpr value_type from_bits(In const & value)
+		ML_NODISCARD constexpr bool read(size_t i) const
+		{
+			return ML_BITREAD(m_value, i);
+		}
+
+		constexpr self_type & clear(size_t i)
+		{
+			ML_BITCLEAR(m_value, i); return (*this);
+		}
+
+		constexpr self_type & set(size_t i)
+		{
+			ML_BITSET(m_value, i); return (*this);
+		}
+
+		constexpr self_type & write(size_t i, bool value)
+		{
+			ML_BITWRITE(m_value, i, value); return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I
+		> ML_NODISCARD constexpr bool read() const
+		{
+			return this->read(I);
+		}
+
+		template <size_t I
+		> constexpr self_type & clear()
+		{
+			return this->clear(I);
+		}
+
+		template <size_t I
+		> constexpr self_type & set()
+		{
+			return this->set(I);
+		}
+
+		template <size_t I
+		> constexpr self_type & write(bool value)
+		{
+			return this->write(I, value);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class In, class U, size_t N
+		> ML_NODISCARD static constexpr value_type from_bits(In const & value)
 		{
 			value_type temp{ 0 };
-			for (size_t i = 0; i < N; i++)
+			for (size_t i = 0; i < N; ++i)
 			{
 				ML_BITWRITE(temp, i, value[i]);
 			}
 			return temp;
 		}
 
-		static constexpr storage_type to_bits(self_type const & value)
+		ML_NODISCARD static constexpr storage_type to_bits(self_type const & value)
 		{
 			storage_type temp{ 0 };
-			for (size_t i = 0; i < Size; i++)
+			for (size_t i = 0; i < Size; ++i)
 			{
 				temp[i] = ML_BITREAD(value.m_value, i);
 			}

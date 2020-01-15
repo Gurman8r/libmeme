@@ -31,7 +31,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference at(size_type const i)
+		ML_NODISCARD constexpr reference operator[](size_type const i)
 		{
 			if (Size <= i)
 			{
@@ -40,7 +40,7 @@ namespace ml
 			return m_data[i];
 		}
 
-		constexpr const_reference at(size_type const i) const
+		ML_NODISCARD constexpr const_reference operator[](size_type const i) const
 		{
 			if (Size <= i)
 			{
@@ -51,39 +51,39 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto operator[](size_type const i) -> reference { return at(i); }
-		
-		constexpr auto operator[](size_type const i) const -> const_reference { return at(i); }
-		
-		constexpr auto back() noexcept -> reference { return (*end()); }
-		
-		constexpr auto back() const noexcept -> const_reference { return (*cend()); }
-		
-		constexpr auto begin() noexcept -> iterator { return data(); }
-		
-		constexpr auto begin() const noexcept -> const_iterator { return data(); }
-		
-		constexpr auto cbegin() const noexcept -> const_iterator { return begin(); }
-		
-		constexpr auto cend() const	noexcept -> const_iterator { return end(); }
-		
-		constexpr auto data() noexcept -> pointer { return m_data; }
-		
-		constexpr auto data() const noexcept -> const_pointer { return m_data; }
-		
-		constexpr bool empty() const noexcept { return false; }
-		
-		constexpr auto end() noexcept -> iterator { return data() + size(); }
-		
-		constexpr auto end() const noexcept -> const_iterator { return data() + size(); }
-		
-		constexpr auto front() noexcept -> reference { return (*begin()); }
-		
-		constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
+		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return operator[](i); }
 
-		constexpr auto max_size() const noexcept -> size_t { return Size; }
+		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return operator[](i); }
+		
+		ML_NODISCARD constexpr auto back() noexcept -> reference { return (*end()); }
+		
+		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return (*cend()); }
+		
+		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return data(); }
+		
+		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return data(); }
+		
+		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return begin(); }
+		
+		ML_NODISCARD constexpr auto cend() const	noexcept -> const_iterator { return end(); }
+		
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data; }
+		
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data; }
+		
+		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+		
+		ML_NODISCARD constexpr auto end() noexcept -> iterator { return data() + size(); }
+		
+		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return data() + size(); }
+		
+		ML_NODISCARD constexpr auto front() noexcept -> reference { return (*begin()); }
+		
+		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
 
-		constexpr auto size() const noexcept -> size_t { return Size; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return Size; }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return Size; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -113,45 +113,43 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr reference operator[](size_t const) { return m_data[0]; }
+		ML_NODISCARD constexpr reference operator[](size_t const) { return m_data[0]; }
 
-		constexpr const_reference operator[](size_t const) const { m_data[0]; }
+		ML_NODISCARD constexpr const_reference operator[](size_t const) const { m_data[0]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD constexpr auto at(size_t const) -> reference { return m_data[0]; }
 		
-		constexpr auto at(size_t const) -> reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto at(size_t const) const -> const_reference { return m_data[0]; }
 		
-		constexpr auto at(size_t const) const -> const_reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data[0]; }
 		
-		constexpr auto back() noexcept -> reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data[0]; }
 		
-		constexpr auto back() const noexcept -> const_reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return &m_data[0]; }
 		
-		constexpr auto begin() noexcept -> iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return &m_data[0]; }
 		
-		constexpr auto begin() const noexcept -> const_iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return &m_data[0]; }
 		
-		constexpr auto cbegin() const noexcept -> const_iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return &m_data[0]; }
 		
-		constexpr auto cend() const noexcept -> const_iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return &m_data[0]; }
 		
-		constexpr auto data() noexcept -> pointer { return &m_data[0]; }
-		
-		constexpr auto data() const noexcept -> const_pointer { return &m_data[0]; }
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return &m_data[0]; }
 
-		constexpr bool empty() const noexcept { return true; }
+		ML_NODISCARD constexpr bool empty() const noexcept { return true; }
 		
-		constexpr auto end() noexcept -> iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto end() noexcept -> iterator { return &m_data[0]; }
 		
-		constexpr auto end() const noexcept -> const_iterator { return &m_data[0]; }
+		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return &m_data[0]; }
 		
-		constexpr auto front() noexcept -> reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto front() noexcept -> reference { return m_data[0]; }
 		
-		constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
+		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
 
-		constexpr auto max_size() const noexcept -> size_t { return 0; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return 0; }
 
-		constexpr auto size() const noexcept -> size_t { return 0; }
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return 0; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -188,7 +186,7 @@ namespace ml
 	template <class Tx, class Ty, size_t Size
 	> constexpr bool operator==(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
 	{
-		return _ML_ALG equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return _ML_ALG equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t Size

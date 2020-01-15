@@ -87,39 +87,39 @@ namespace ml
 			{
 				major = version[0] - '0';
 				minor = version[2] - '0';
-				Debug::logWarning("Using OpenGL Version: {0}.{1}", major, minor);
+				Debug::log_warning("Using OpenGL Version: {0}.{1}", major, minor);
 			}
 			else
 			{
 				major = 1;
 				minor = 1;
-				Debug::logWarning("Can't get the version number, assuming 1.1");
+				Debug::log_warning("Can't get the version number, assuming 1.1");
 			}
 		}
 
 		if (!shadersAvailable())
 		{
-			Debug::logError("Shaders are not available on your system.");
+			Debug::log_error("Shaders are not available on your system.");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			Debug::logError("Geometry shaders are not available on your system.");
+			Debug::log_error("Geometry shaders are not available on your system.");
 		}
 
 		if (!framebuffersAvailable())
 		{
-			Debug::logWarning("Framebuffers Unavailable");
+			Debug::log_warning("Framebuffers Unavailable");
 		}
 
 		if (!edgeClampAvailable())
 		{
-			Debug::logWarning("Texture Edge Clamp Unavailable");
+			Debug::log_warning("Texture Edge Clamp Unavailable");
 		}
 
 		if (!textureSrgbAvailable())
 		{
-			Debug::logWarning("Texture sRGB Unavailable");
+			Debug::log_warning("Texture sRGB Unavailable");
 		}
 	}
 

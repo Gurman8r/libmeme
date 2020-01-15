@@ -83,7 +83,7 @@ float fbm(vec3 x)
 {
     float r = 0.0;
     float w = 1.0, s = 1.0;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; ++i)
     {
         w *= 0.25;
         s *= 3.;
@@ -250,7 +250,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     float distC = tr.dist, f = 0., st = .9;
 
-    for (float i = 0.; i < 24.; i++)
+    for (float i = 0.; i < 24.; ++i)
     {
         rro = ro - rd * distC;
         f += fbm(rro * vec3(.1, .1, .1) * .3) * .1;

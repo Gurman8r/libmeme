@@ -470,7 +470,7 @@ namespace ml
 		if (!GL::linkProgram(m_handle))
 		{
 			C_String const log{ GL::getProgramInfoLog(m_handle) };
-			Debug::logError(log);
+			Debug::log_error(log);
 			destroy();
 			return EXIT_FAILURE * 8;
 		}

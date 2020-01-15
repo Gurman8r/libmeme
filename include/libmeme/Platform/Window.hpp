@@ -22,19 +22,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using CharFun			= typename void(*)(void *, uint32_t);
-		using CursorEnterFun	= typename void(*)(void *, int32_t);
-		using CursorPosFun		= typename void(*)(void *, float64_t, float64_t);
-		using ErrorFun			= typename void(*)(int32_t, C_String);
-		using FrameSizeFun		= typename void(*)(void *, int32_t, int32_t);
-		using KeyFun			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
-		using MouseFun			= typename void(*)(void *, int32_t, int32_t, int32_t);
-		using ScrollFun			= typename void(*)(void *, float64_t, float64_t);
-		using CloseFun			= typename void(*)(void *);
-		using FocusFun			= typename void(*)(void *, int32_t);
-		using PositionFun		= typename void(*)(void *, int32_t, int32_t);
-		using SizeFun			= typename void(*)(void *, int32_t, int32_t);
-		using ProcFun			= typename void *(*)(void);
+		using char_fn			= typename void(*)(void *, uint32_t);
+		using close_fn			= typename void(*)(void *);
+		using cursor_enter_fn	= typename void(*)(void *, int32_t);
+		using cursor_pos_fn		= typename void(*)(void *, float64_t, float64_t);
+		using error_fn			= typename void(*)(int32_t, C_String);
+		using focus_fn			= typename void(*)(void *, int32_t);
+		using frame_size_fn		= typename void(*)(void *, int32_t, int32_t);
+		using key_fn			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
+		using mouse_fn			= typename void(*)(void *, int32_t, int32_t, int32_t);
+		using position_fn		= typename void(*)(void *, int32_t, int32_t);
+		using proc_fn			= typename void *(*)(void);
+		using scroll_fn			= typename void(*)(void *, float64_t, float64_t);
+		using size_fn			= typename void(*)(void *, int32_t, int32_t);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -97,104 +97,106 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool is_focused() const;
+		ML_NODISCARD bool is_focused() const;
 		
-		bool is_fullscreen() const;
+		ML_NODISCARD bool is_fullscreen() const;
 		
-		bool is_open() const;
+		ML_NODISCARD bool is_open() const;
 		
-		int32_t	get_attribute(int32_t value) const;
+		ML_NODISCARD int32_t	get_attribute(int32_t value) const;
 		
-		C_String get_clipboard() const;
+		ML_NODISCARD C_String get_clipboard() const;
 		
-		vec2 get_cursor_pos() const;
+		ML_NODISCARD vec2 get_cursor_pos() const;
 		
-		vec2i get_frame_size() const;
+		ML_NODISCARD vec2i get_frame_size() const;
 		
-		void * get_handle() const;
+		ML_NODISCARD void * get_handle() const;
 
-		int32_t get_key(int32_t value) const;
+		ML_NODISCARD int32_t get_key(int32_t value) const;
 		
-		int32_t	get_input_mode(int32_t value) const;
+		ML_NODISCARD int32_t get_input_mode(int32_t value) const;
 		
-		int32_t	get_mouse_button(int32_t value) const;
+		ML_NODISCARD int32_t get_mouse_button(int32_t value) const;
 		
-		vec2i get_position() const;
+		ML_NODISCARD vec2i get_position() const;
 		
-		void * get_raw_handle() const;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
-		
-		inline auto get_context() const -> ContextSettings const & { return m_context; }
-		
-		inline auto get_frame_aspect() const -> float_t { return ML_ASPECT2(get_frame_size()); };
-		
-		inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
-		
-		inline auto get_frame_width() const -> int32_t { return get_frame_size()[0]; }
-		
-		inline auto get_height() const -> uint32_t { return get_size()[1]; }
-		
-		inline auto get_monitor() const -> void * { return m_monitor; }
-
-		inline auto get_share() const -> void * { return m_share; }
-		
-		inline auto get_size() const -> vec2u const & { return get_display_mode().size; }
-
-		inline auto get_settings() const -> WindowSettings const & { return m_settings; }
-		
-		inline auto get_title() const -> std::string const & { return m_title; }
-		
-		inline auto get_display_mode() const -> DisplayMode const & { return m_video; }
-		
-		inline auto get_width() const -> uint32_t { return get_size()[0]; }
+		ML_NODISCARD void * get_raw_handle() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void * create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
-		
-		static void * create_standard_cursor(Cursor::Shape value);
-		
-		static bool	destroy_cursor(void * value);
-
-		static int32_t extension_supported(C_String value);
-
-		static void * get_context_current();
-
-		static DisplayMode const & get_desktop_mode();
-		
-		static std::vector<DisplayMode> const & get_fullscreen_modes();
-
-		static ProcFun get_proc_address(C_String value);
-		
-		static std::vector<void *> const & get_monitors();
-
-		static float64_t get_time();
+		static void	destroy_cursor(void * value);
 
 		static void make_context_current(void * value);
 
 		static void poll_events();
-		
+
 		static void swap_interval(int32_t value);
 
 		static void terminate();
-		
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static ErrorFun set_error_callback			(ErrorFun		value);
-		CharFun			set_char_callback			(CharFun		value);
-		CursorEnterFun	set_cursor_enter_callback	(CursorEnterFun value);
-		CursorPosFun	set_cursor_pos_callback		(CursorPosFun	value);
-		FrameSizeFun	set_frame_size_callback		(FrameSizeFun	value);
-		KeyFun			set_key_callback			(KeyFun			value);
-		MouseFun		set_mouse_callback			(MouseFun		value);
-		ScrollFun		set_scroll_callback			(ScrollFun		value);
-		CloseFun		set_window_close_callback	(CloseFun		value);
-		FocusFun		set_window_focus_callback	(FocusFun		value);
-		PositionFun		set_window_pos_callback		(PositionFun	value);
-		SizeFun			set_window_size_callback	(SizeFun		value);
+		ML_NODISCARD static void * create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
+		
+		ML_NODISCARD static void * create_standard_cursor(Cursor::Shape value);
+
+		ML_NODISCARD static int32_t extension_supported(C_String value);
+
+		ML_NODISCARD static void * get_context_current();
+
+		ML_NODISCARD static DisplayMode const & get_desktop_mode();
+		
+		ML_NODISCARD static std::vector<DisplayMode> const & get_fullscreen_modes();
+
+		ML_NODISCARD static proc_fn get_proc_address(C_String value);
+		
+		ML_NODISCARD static std::vector<void *> const & get_monitors();
+
+		ML_NODISCARD static float64_t get_time();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static error_fn set_error_callback			(error_fn value);
+		char_fn			set_char_callback			(char_fn value);
+		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn value);
+		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn value);
+		frame_size_fn	set_frame_size_callback		(frame_size_fn value);
+		key_fn			set_key_callback			(key_fn value);
+		mouse_fn		set_mouse_callback			(mouse_fn value);
+		scroll_fn		set_scroll_callback			(scroll_fn value);
+		close_fn		set_window_close_callback	(close_fn value);
+		focus_fn		set_window_focus_callback	(focus_fn value);
+		position_fn		set_window_pos_callback		(position_fn value);
+		size_fn			set_window_size_callback	(size_fn value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
+
+		ML_NODISCARD inline auto get_context() const -> ContextSettings const & { return m_context; }
+
+		ML_NODISCARD inline auto get_frame_aspect() const -> float_t { return ML_ASPECT2(get_frame_size()); };
+
+		ML_NODISCARD inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
+
+		ML_NODISCARD inline auto get_frame_width() const -> int32_t { return get_frame_size()[0]; }
+
+		ML_NODISCARD inline auto get_height() const -> uint32_t { return get_size()[1]; }
+
+		ML_NODISCARD inline auto get_monitor() const -> void * { return m_monitor; }
+
+		ML_NODISCARD inline auto get_share() const -> void * { return m_share; }
+
+		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_display_mode().size(); }
+
+		ML_NODISCARD inline auto get_settings() const -> WindowSettings const & { return m_settings; }
+
+		ML_NODISCARD inline auto get_title() const -> std::string const & { return m_title; }
+
+		ML_NODISCARD inline auto get_display_mode() const -> DisplayMode const & { return m_video; }
+
+		ML_NODISCARD inline auto get_width() const -> uint32_t { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -134,12 +134,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static constexpr auto make_color(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static constexpr auto make_color(Args && ... args)
 	{
 		return Color{ std::forward<Args>(args)... };
 	}
 
-	template <class ... Args> static constexpr auto make_color32(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static constexpr auto make_color32(Args && ... args)
 	{
 		return Color32{ std::forward<Args>(args)... };
 	}

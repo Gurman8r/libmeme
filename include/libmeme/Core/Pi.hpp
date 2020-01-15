@@ -19,9 +19,10 @@ namespace ml
 		static constexpr auto deg2rad	{ value / cast<type>::one_eighty };
 		static constexpr auto rad2deg	{ cast<type>::one_eighty / value };
 
-		constexpr pi() noexcept = default;
-
-		constexpr operator type const &() const { return pi<type>::value; }
+		ML_NODISCARD constexpr operator type const &() const
+		{
+			return pi<type>::value;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

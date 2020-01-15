@@ -73,7 +73,7 @@ float Layer(vec2 uv)
     }
 
     float t = u_time * 20.;
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 9; ++i)
     {
         m += Line(gv, p[4], p[i]);
 

@@ -34,14 +34,39 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) texture() noexcept		{ return std::get<ID_Texture>(m_storage); }
-		inline decltype(auto) texture() const noexcept	{ return std::get<ID_Texture>(m_storage); }
+		ML_NODISCARD inline decltype(auto) texture() noexcept
+		{
+			return std::get<ID_Texture>(m_storage);
+		}
 
-		inline decltype(auto) bounds() noexcept			{ return std::get<ID_Bounds>(m_storage); }
-		inline decltype(auto) bounds() const noexcept	{ return std::get<ID_Bounds>(m_storage); }
+		ML_NODISCARD inline decltype(auto) texture() const noexcept
+		{
+			return std::get<ID_Texture>(m_storage);
+		}
 
-		inline decltype(auto) advance() noexcept		{ return std::get<ID_Advance>(m_storage); }
-		inline decltype(auto) advance() const noexcept	{ return std::get<ID_Advance>(m_storage); }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline decltype(auto) bounds() noexcept
+		{
+			return std::get<ID_Bounds>(m_storage);
+		}
+
+		ML_NODISCARD inline decltype(auto) bounds() const noexcept
+		{
+			return std::get<ID_Bounds>(m_storage);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline decltype(auto) advance() noexcept
+		{
+			return std::get<ID_Advance>(m_storage);
+		}
+
+		ML_NODISCARD inline decltype(auto) advance() const noexcept
+		{
+			return std::get<ID_Advance>(m_storage);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,7 +96,8 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args> static inline auto make_glyph(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
 	{
 		return Glyph{ Glyph::storage_type{ std::forward<Args>(args)... } };
 	}

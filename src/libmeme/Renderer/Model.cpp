@@ -116,7 +116,7 @@ namespace ml
 				for (aiFace * f = &(*m)->mFaces[0]; f != &(*m)->mFaces[(*m)->mNumFaces]; f++)
 				{
 					// Iterate Indices
-					for (uint32_t * i = &f->mIndices[0]; i != &f->mIndices[f->mNumIndices]; i++)
+					for (uint32_t * i = &f->mIndices[0]; i != &f->mIndices[f->mNumIndices]; ++i)
 					{
 						auto const * vp{ (*m)->mVertices ? &(*m)->mVertices[*i] : nullptr };
 						auto const * vn{ (*m)->mNormals ? &(*m)->mNormals[*i] : nullptr };

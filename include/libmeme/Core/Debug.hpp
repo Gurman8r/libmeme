@@ -1,7 +1,7 @@
 #ifndef _ML_DEBUG_HPP_
 #define _ML_DEBUG_HPP_
 
-#include <libmeme/Core/Console.hpp>
+#include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
 # ifndef ML_ASSERT
@@ -67,59 +67,45 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline int32_t logger_impl(
-			std::ostream & out,
-			int32_t exitCode,
-			cio::COL const & color,
-			std::string const & prefix,
-			std::string const & message
-		)
+		template <class Str
+		> static inline int32_t log_info(Str && value)
 		{
-			out << cio::endcolor
-				<< cio::FG::White << "[" << color << prefix << cio::FG::White << "] "
-				<< cio::endcolor << message
-				<< '\n';
-			return exitCode;
+			std::cout << "[" << ML_MSG_LOG << "] " << std::forward<Str>(value) << "\n";
+			return ML_SUCCESS;
+		}
+
+		template <class Str
+		> static inline int32_t log_error(Str && value)
+		{
+			std::cout << "[" << ML_MSG_ERR << "] " << std::forward<Str>(value) << "\n";
+			return ML_FAILURE;
+		}
+
+		template <class Str
+		> static inline int32_t log_warning(Str && value)
+		{
+			std::cout << "[" << ML_MSG_WRN << "] " << std::forward<Str>(value) << "\n";
+			return ML_WARNING;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Str> static inline int32_t logInfo(Str && value)
+		template <class Fmt, class Arg0, class ... Args
+		> static inline int32_t log_info(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return logger_impl(std::cout, ML_SUCCESS, cio::FG::Green, ML_MSG_LOG, std::forward<Str>(value));
+			return Debug::log_info(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
-		template <class Str> static inline int32_t logError(Str && value)
+		template <class Fmt, class Arg0, class ... Args
+		> static inline int32_t log_error(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return logger_impl(std::cout, ML_FAILURE, cio::FG::Red, ML_MSG_ERR, std::forward<Str>(value));
+			return Debug::log_error(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
-		template <class Str> static inline int32_t logWarning(Str && value)
+		template <class Fmt, class Arg0, class ... Args
+		> static inline int32_t log_warning(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return logger_impl(std::cout, ML_WARNING, cio::FG::Yellow, ML_MSG_WRN, std::forward<Str>(value));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <
-			class Fmt, class Arg0, class ... Args
-		> static inline int32_t logInfo(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return Debug::logInfo(util::format(fmt, arg0, std::forward<Args>(args)...));
-		}
-
-		template <
-			class Fmt, class Arg0, class ... Args
-		> static inline int32_t logError(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return Debug::logError(util::format(fmt, arg0, std::forward<Args>(args)...));
-		}
-
-		template <
-			class Fmt, class Arg0, class ... Args
-		> static inline int32_t logWarning(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return Debug::logWarning(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return Debug::log_warning(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -55,32 +55,41 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline type_t const & type() const noexcept { return std::get<ID_Type>(m_storage); }
+		ML_NODISCARD inline type_t const & type() const noexcept
+		{
+			return std::get<ID_Type>(m_storage);
+		}
 
-		inline name_t const & name() const noexcept { return std::get<ID_Name>(m_storage); }
-		
-		inline data_t const & data() const noexcept { return std::get<ID_Data>(m_storage); }
+		ML_NODISCARD inline name_t const & name() const noexcept
+		{
+			return std::get<ID_Name>(m_storage);
+		}
+
+		ML_NODISCARD inline data_t const & data() const noexcept
+		{
+			return std::get<ID_Data>(m_storage);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline size_t index() const noexcept
+		ML_NODISCARD inline size_t index() const noexcept
 		{
 			return data().index();
 		}
 
-		inline bool is_variable() const noexcept
+		ML_NODISCARD inline bool is_variable() const noexcept
 		{
 			return std::holds_alternative<variable_t>(data());
 		}
 
-		inline bool is_function() const noexcept
+		ML_NODISCARD inline bool is_function() const noexcept
 		{
 			return std::holds_alternative<function_t>(data());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::optional<variable_t> load() const
+		ML_NODISCARD inline std::optional<variable_t> load() const
 		{
 			if (is_variable())
 			{
@@ -98,7 +107,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline std::optional<T> get() const
+		template <class T
+		> ML_NODISCARD inline std::optional<T> get() const
 		{
 			if (std::optional<variable_t> v{ load() }; v && std::holds_alternative<T>(*v))
 			{
@@ -127,19 +137,19 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Type, class Name, class ... Args
-	> static inline auto make_uniform(Name && name, Args && ... args) noexcept
+	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
 			typeof_v<Type>, std::move(name), std::forward<Args>(args)...
 		) };
 	}
 
-	static inline auto make_uniform(Uniform const & value)
+	ML_NODISCARD static inline auto make_uniform(Uniform const & value)
 	{
 		return Uniform{ value };
 	}
 
-	static inline auto make_uniform(Uniform && value) noexcept
+	ML_NODISCARD static inline auto make_uniform(Uniform && value) noexcept
 	{
 		return Uniform{ std::move(value) };
 	}

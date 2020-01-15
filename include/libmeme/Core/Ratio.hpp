@@ -30,9 +30,8 @@ namespace ml
 
 	namespace alg
 	{
-		template <
-			class T, int64_t Num, int64_t Den
-		> static constexpr T ratio_cast(T value, const Ratio<Num, Den> & r)
+		template <class T, int64_t Num, int64_t Den
+		> ML_NODISCARD static constexpr T ratio_cast(T value, const Ratio<Num, Den> & r)
 		{
 			using TT = cast<T>;
 			const T num { TT {}(r.num) };

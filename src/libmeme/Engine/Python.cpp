@@ -69,7 +69,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-namespace ml
+namespace ml::impl::python
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -110,9 +110,9 @@ namespace ml
 			.def_static("print",	[](str_t const & s) { std::cout << s; })
 			.def_static("printf",	[](str_t const & s, list_t const & l) { std::cout << util::format(s, l); })
 			.def_static("printl",	[](str_t const & s) { std::cout << s << '\n'; })
-			.def_static("log",		[](str_t const & s) { return Debug::logInfo(s); })
-			.def_static("warning",	[](str_t const & s) { return Debug::logWarning(s); })
-			.def_static("error",	[](str_t const & s) { return Debug::logError(s); });
+			.def_static("log",		[](str_t const & s) { return Debug::log_info(s); })
+			.def_static("warning",	[](str_t const & s) { return Debug::log_warning(s); })
+			.def_static("error",	[](str_t const & s) { return Debug::log_error(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

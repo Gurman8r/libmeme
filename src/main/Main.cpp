@@ -5,6 +5,7 @@
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Engine/Engine.hpp>
@@ -13,7 +14,6 @@
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Engine/Lua.hpp>
 #include <libmeme/Engine/Script.hpp>
-#include <libmeme/Engine/SharedLibrary.hpp>
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
@@ -62,34 +62,34 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static constexpr auto const window_title{ C_String {
-		"libmeme"					// Title
+	static constexpr auto const window_title{
+		"libmeme"sv				// Title
+	};
+	static constexpr auto const window_mode{ DisplayMode{ std::make_tuple(vec2{
+		1280,					// Width
+		720 },					// Height
+		32						// Bits-per-Pixel
+	) } };
+	static constexpr auto const window_settings{ WindowSettings{
+		true,					// Resizable
+		true,					// Visible
+		true,					// Decorated
+		true,					// Focused
+		true,					// Auto Iconify
+		false,					// Floating
+		false,					// Maximized
+		false,					// Fullscreen
+		false,					// Vertical Sync
 	} };
-	static constexpr auto const window_mode{ DisplayMode {
-		1280,						// Width
-		720,						// Height
-		32							// Bits-per-Pixel
-	} };
-	static constexpr auto const window_settings{ WindowSettings {
-		1,							// Resizable
-		1,							// Visible
-		1,							// Decorated
-		1,							// Focused
-		1,							// Auto Iconify
-		0,							// Floating
-		0,							// Maximized
-		0,							// Fullscreen
-		0,							// Vertical Sync
-	} };
-	static constexpr auto const window_context{ ContextSettings {
-		ContextSettings::OpenGL,	// API
-		4,							// Major Version
-		6,							// Minor Version
-		ContextSettings::Compat,	// Profile
-		24,							// Depth Bits
-		8,							// Stencil Bits
-		false,						// Multisample
-		false						// sRGB Capable
+	static constexpr auto const window_context{ ContextSettings{
+		ContextSettings::OpenGL,// API
+		4,						// Major Version
+		6,						// Minor Version
+		ContextSettings::Compat,// Profile
+		24,						// Depth Bits
+		8,						// Stencil Bits
+		false,					// Multisample
+		false					// sRGB Capable
 	} };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,9 +117,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class P = path_t> inline Plugin * load(P && path)
+		inline Plugin * load(path_t && path)
 		{
-			if (auto const file{ m_filenames.insert(std::forward<P>(path)) }; file.second)
+			if (auto const file{ m_filenames.insert(std::move(path)) }; file.second)
 			{
 				if (auto library{ make_shared_library(*file.first) })
 				{
@@ -152,19 +152,6 @@ ml::int32_t main()
 
 	using namespace ml;
 
-	// Testing
-	EventHandler::Pool flow;
-	flow.add_listener<EnterEvent>([](Event const & value)
-	{
-		if (auto const ev = value.as<EnterEvent>())
-		{
-			for (int32_t i = 0; i < ev->argc; ++i)
-			{
-				printf("%s\n", ev->argv[i]);
-			}
-		}
-	});
-
 	// Timers
 	static struct Time final
 	{
@@ -173,15 +160,27 @@ ml::int32_t main()
 		float64_t delta{ 0.0 };
 	}
 	time{};
-
 	{
+		// Testing
+		EventHandler::Pool flow;
+		flow.add_listener<EnterEvent>([](Event const & value)
+		{
+			if (auto const ev = value.as<EnterEvent>())
+			{
+				for (int32_t i = 0; i < ev->argc; ++i)
+				{
+					printf("%s\n", ev->argv[i]);
+				}
+			}
+		});
+
 		// Enter
 		EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
 		
 		// Startup Engine
 		if (!Engine::startup(ML_ARGV[0], "../../../"))
 		{
-			return Debug::logError("Failed initializing Engine") | Debug::pause(1);
+			return Debug::log_error("Failed initializing Engine") | Debug::pause(1);
 		}
 
 		// Load Plugins
@@ -189,15 +188,15 @@ ml::int32_t main()
 		plugins.load("demo.dll");
 
 		// Create Window
-		if (!Engine::create_window({ window_title, window_mode, window_settings, window_context }))
+		if (!Engine::create_window({ std::string{window_title}, window_mode, window_settings, window_context }))
 		{
-			return Debug::logError("Failed initializing Window") | Debug::pause(1);
+			return Debug::log_error("Failed initializing Window") | Debug::pause(1);
 		}
 
 		// Startup Editor
 		if (!Editor::startup(Engine::window().get_handle()))
 		{
-			return Debug::logError("Failed initializing Editor") | Debug::pause(1);
+			return Debug::log_error("Failed initializing Editor") | Debug::pause(1);
 		}
 
 		// Load

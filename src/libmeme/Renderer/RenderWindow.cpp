@@ -17,12 +17,12 @@ namespace ml
 	{
 		if (!Window::create(title, display, style, context))
 		{
-			return Debug::logError("Failed initializing RenderWindow");
+			return Debug::log_error("Failed initializing RenderWindow");
 		}
 
 		if (!GL::init())
 		{
-			return Debug::logError("Failed initializing OpenGL");
+			return Debug::log_error("Failed initializing OpenGL");
 		}
 
 		GL::validateVersion(m_context.major, m_context.minor);

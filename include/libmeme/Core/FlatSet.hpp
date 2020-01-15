@@ -256,17 +256,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline reference at(size_type const i) { return m_storage.at(i); }
+		ML_NODISCARD inline auto operator[](size_type const i) -> reference { return m_storage[i]; }
 
-		ML_NODISCARD inline const_reference at(size_type const i) const { return m_storage.at(i); }
+		ML_NODISCARD inline auto operator[](size_type const i) const -> const_reference { return m_storage[i]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD inline auto at(size_type const i) -> reference { return m_storage.at(i); }
 
-		ML_NODISCARD inline reference operator[](size_type const i) { return m_storage[i]; }
-
-		ML_NODISCARD inline const_reference operator[](size_type const i) const { return m_storage[i]; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD inline auto at(size_type const i) const -> const_reference { return m_storage.at(i); }
 
 		ML_NODISCARD inline auto back() noexcept -> reference { return m_storage.back(); }
 
@@ -316,6 +312,10 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	protected:
 		storage_type m_storage;
 
@@ -326,7 +326,9 @@ namespace ml::ds
 
 	// FLAT SET - sorted vector of unique elements
 	template <class Elem, class Compare = std::less<Elem>, class Alloc = std::allocator<Elem>
-	> struct flat_set : basic_flat_set<basic_flat_set_traits<Elem, Compare, Alloc, false>>
+	> struct flat_set : basic_flat_set<
+		basic_flat_set_traits<Elem, Compare, Alloc, false>
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

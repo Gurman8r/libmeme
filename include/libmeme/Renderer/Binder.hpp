@@ -55,15 +55,30 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return m_value; }
+		ML_NODISCARD inline operator bool() const noexcept
+		{
+			return m_value;
+		}
 
-		inline operator pointer() noexcept { return const_cast<pointer>(m_value); }
+		ML_NODISCARD inline operator pointer() noexcept
+		{
+			return const_cast<pointer>(m_value);
+		}
 
-		inline operator const_pointer() const noexcept { return m_value; }
+		ML_NODISCARD inline operator const_pointer() const noexcept
+		{
+			return m_value;
+		}
 
-		inline pointer operator->() noexcept { return const_cast<pointer>(m_value); }
+		ML_NODISCARD inline pointer operator->() noexcept
+		{
+			return const_cast<pointer>(m_value);
+		}
 
-		inline const_pointer operator->() const noexcept { return m_value; }
+		ML_NODISCARD inline const_pointer operator->() const noexcept
+		{
+			return m_value;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

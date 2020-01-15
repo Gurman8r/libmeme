@@ -299,18 +299,14 @@ namespace ml::ds
 
 		inline iterator_pair erase(key_iterator loc)
 		{
-			return {
-				m_storage.first.erase(loc),
-				m_storage.second.erase(this->get(loc))
-			};
+			auto const temp{ m_storage.second.erase(this->get(loc)) };
+			return { m_storage.first.erase(loc), temp };
 		}
 
 		inline iterator_pair erase(key_iterator first, key_iterator last)
 		{
-			return {
-				m_storage.first.erase(first, last),
-				m_storage.second.erase(this->get(first), this->get(last))
-			};
+			auto const temp{ m_storage.second.erase(this->get(first), this->get(last)) };
+			return { m_storage.first.erase(first, last), temp };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -449,7 +445,9 @@ namespace ml::ds
 
 	// Flat Map
 	template <class Key, class Value, class Compare = std::less<Key>, template <class> class Alloc = std::allocator
-	> struct flat_map : basic_flat_map<basic_flat_map_traits<Key, Value, Compare, Alloc, false>>
+	> struct flat_map : basic_flat_map<
+		basic_flat_map_traits<Key, Value, Compare, Alloc, false>
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

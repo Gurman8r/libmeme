@@ -82,17 +82,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr vec3 position() const noexcept
+		ML_NODISCARD constexpr vec3 position() const noexcept
 		{
 			return { m_storage[0], m_storage[1], m_storage[2] };
 		}
 
-		constexpr vec3 normal() const noexcept
+		ML_NODISCARD constexpr vec3 normal() const noexcept
 		{
 			return { m_storage[3], m_storage[4], m_storage[5] };
 		}
 
-		constexpr vec2 texcoord() const noexcept
+		ML_NODISCARD constexpr vec2 texcoord() const noexcept
 		{
 			return { m_storage[6], m_storage[7] };
 		}
@@ -127,17 +127,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static constexpr auto make_vertex(vec3 && p, vec3 && n, vec2 && t)
+	ML_NODISCARD static constexpr auto make_vertex(vec3 && p, vec3 && n, vec2 && t)
 	{
 		return Vertex{ std::move(p), std::move(n), std::move(t) };
 	}
 
-	static constexpr auto make_vertex(Vertex::storage_type && s)
+	ML_NODISCARD static constexpr auto make_vertex(Vertex::storage_type && s)
 	{
 		return Vertex{ std::move(s) };
 	}
 
-	template <class ... Args> static constexpr auto make_vertex(Args && ... args)
+	template <class ... Args
+	> ML_NODISCARD static constexpr auto make_vertex(Args && ... args)
 	{
 		return Vertex{ std::forward<Args>(args)... };
 	}
@@ -146,13 +147,13 @@ namespace ml
 
 	namespace alg
 	{
-		static inline std::vector<float_t> contiguous(std::vector<Vertex> const & vertices)
+		ML_NODISCARD static inline std::vector<float_t> contiguous(std::vector<Vertex> const & vertices)
 		{
 			std::vector<float_t> temp;
 			
 			temp.resize(vertices.size() * Vertex::Size);
 			
-			for (size_t i = 0, imax = temp.size(); i < imax; i++)
+			for (size_t i = 0, imax = temp.size(); i < imax; ++i)
 			{
 				temp[i] = vertices[i / Vertex::Size][i % Vertex::Size];
 			}
