@@ -80,7 +80,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			std::swap(m_storage, other.m_storage);
+			m_storage.swap(other.m_storage);
 		}
 	}
 

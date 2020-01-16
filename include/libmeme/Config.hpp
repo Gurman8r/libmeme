@@ -286,13 +286,8 @@
 #	define ML_ANON(expr) ML_CONCAT(_anon_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
 #elif defined(__LINE__)
 #	define ML_ANON(expr) ML_CONCAT(_anon_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
-#else
-#   define ML_ANON(expr)
 #endif
-
-#ifdef ML_ANON
-#   define ML_ANON_T(T, ...) auto ML_ANON(T) { T{ ##__VA_ARGS__ } }
-#endif
+#define ML_ANON_T(T, ...) auto ML_ANON(T) { T{ ##__VA_ARGS__ } }
 
 
 // Inlining
@@ -334,6 +329,7 @@
 #	pragma warning(disable: 4309)	// truncation of constant value
 #	pragma warning(disable: 4723)	// potential divide by zero
 #	pragma warning(disable: 6282)	// incorrect operator
+#	pragma warning(disable: 26437)	// do not slice
 #	pragma warning(disable: 26444)	// avoid unnamed objecs with custom construction and destruction
 #	pragma warning(disable: 26451)	// arithmetic overflow
 #	pragma warning(disable: 26495)	// value may be uninitialized

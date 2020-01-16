@@ -206,7 +206,6 @@ ml::int32_t main()
 		while (Engine::running())
 		{
 			time.loop.stop().start();
-
 			// Begin Loop
 			{
 				ML_BENCHMARK("LOOP_BEGIN");
@@ -249,7 +248,6 @@ ml::int32_t main()
 				EventSystem::fire_event<EndLoopEvent>();
 			}
 			PerformanceTracker::swap();
-
 			time.delta = time.loop.elapsed().count();
 		}
 

@@ -2,24 +2,22 @@
 #define _ML_SCOPE_GUARD_HPP_
 
 #include <libmeme/Common.hpp>
-#include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/NonCopyable.hpp>
 
-#define ML_SCOPE_EXIT \
-	auto ML_ANON(ML_SCOPE_EXIT_STATE) \
-	= ::ml::detail::ScopeGuardOnExit() + [&]() noexcept
+#define ML_SCOPE_EXIT auto ML_ANON(ML_SCOPE_GUARD_ON_EXIT) \
+	= ::ml::detail::scope_guard_on_exit() + [&]() noexcept
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Fun> struct ScopeGuard final : public NonCopyable
+	template <class Fn
+	> struct scope_guard
 	{
-		ScopeGuard(Fun && fun) : m_fun{ std::forward<Fun>(fun) } {}
+		scope_guard(Fn && fun) noexcept : m_fn{ std::forward<Fn>(fun) } {}
 
-		~ScopeGuard() { std::invoke(m_fun); }
+		~scope_guard() { std::invoke(m_fn); }
 
-	private: Fun m_fun;
+	private: Fn m_fn;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -29,11 +27,12 @@ namespace ml::detail
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum class ScopeGuardOnExit {};
+	enum class scope_guard_on_exit {};
 
-	template <class Fun> inline ScopeGuard<Fun> operator+(ScopeGuardOnExit, Fun && fun)
+	template <class Fn
+	> inline scope_guard<Fn> operator+(scope_guard_on_exit, Fn && fun)
 	{
-		return ScopeGuard<Fun>{ std::forward<Fun>(fun) };
+		return scope_guard<Fn>{ std::forward<Fn>(fun) };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

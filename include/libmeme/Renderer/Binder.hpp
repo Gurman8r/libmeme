@@ -33,16 +33,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <
-			class ... Args
+		template <class ... Args
 		> explicit Binder(const_pointer value, Args && ... args)
 			: m_value{ value }
 		{
 			T::bind(m_value, std::forward<Args>(args)...);
 		}
 
-		template <
-			class ... Args
+		template <class ... Args
 		> explicit Binder(const_reference value, Args && ... args)
 			: Binder{ value ? &value : nullptr, std::forward<Args>(args)... }
 		{
