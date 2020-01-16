@@ -281,8 +281,7 @@ namespace ml
 			vec2 const tex_sz{ alg::scale_to_fit((vec2)value.size(), maxSize) };
 			float_t const tex_w{ tex_sz[0] };
 			float_t const tex_h{ tex_sz[1] };
-			ImGui::Text("ID: %u", value.handle());
-			ImGui::Text("%.0fx%.0f (%ux%u)", tex_w, tex_h, value.width(), value.height());
+			ImGui::Text("%u: %ux%u (%.0fx%.0f)", value.handle(), value.width(), value.height(), tex_w, tex_h);
 			auto const pos{ ImGui::GetCursorScreenPos() };
 			ImGui::Image(tex_id,
 				{ tex_w, tex_h },
