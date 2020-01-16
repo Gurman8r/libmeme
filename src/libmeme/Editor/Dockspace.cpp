@@ -137,7 +137,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t Dockspace::dock_window(C_String name, uint32_t id)
+	uint32_t Dockspace::dock_window(C_string name, uint32_t id)
 	{
 		if (name && id)
 		{

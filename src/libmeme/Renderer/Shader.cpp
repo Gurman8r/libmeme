@@ -234,37 +234,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_v<bool>: if (auto v{ value.get<bool>() })
+		case hashof_t<bool>: if (auto v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
+		case hashof_t<int32_t>: if (auto v{ value.get<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
+		case hashof_t<float_t>: if (auto v{ value.get<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
+		case hashof_t<vec2>: if (auto v{ value.get<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
+		case hashof_t<vec3>: if (auto v{ value.get<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
+		case hashof_t<vec4>: if (auto v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Color>: if (auto v{ value.get<Color>() })
+		case hashof_t<Color>: if (auto v{ value.get<Color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
+		case hashof_t<mat2>: if (auto v{ value.get<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
+		case hashof_t<mat3>: if (auto v{ value.get<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
+		case hashof_t<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture>: if (auto v{ value.get<Texture const *>() })
+		case hashof_t<Texture>: if (auto v{ value.get<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -401,7 +401,7 @@ namespace ml
 		}
 	}
 
-	int32_t Shader::compile(C_String vs, C_String gs, C_String fs)
+	int32_t Shader::compile(C_string vs, C_string gs, C_string fs)
 	{
 		// Shaders Available
 		if (!GL::shadersAvailable())
@@ -469,7 +469,7 @@ namespace ml
 		// Link Program
 		if (!GL::linkProgram(m_handle))
 		{
-			C_String const log{ GL::getProgramInfoLog(m_handle) };
+			C_string const log{ GL::getProgramInfoLog(m_handle) };
 			Debug::log_error(log);
 			destroy();
 			return EXIT_FAILURE * 8;

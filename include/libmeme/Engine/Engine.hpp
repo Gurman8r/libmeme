@@ -3,7 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Timer.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
 namespace ml
@@ -16,6 +16,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct StartupSettings
+		{
+			path_t program_name;
+			path_t library_path;
+		};
+
 		struct CreateWindowSettings
 		{
 			std::string		title;
@@ -26,7 +32,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(path_t const & name, path_t const & home);
+		static bool startup(StartupSettings const & settings);
 
 		static bool create_window(CreateWindowSettings const & settings);
 
@@ -40,7 +46,10 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline auto & window() { return s_window; }
+		ML_NODISCARD static inline RenderWindow & window()
+		{
+			return s_window;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

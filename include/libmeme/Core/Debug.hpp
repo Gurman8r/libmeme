@@ -16,10 +16,10 @@
 #define ML_MSG_WRN "warn"
 #define ML_MSG_ERR "error"
 
-#if (ML_DEBUG)
+#if ML_DEBUG
 #	if defined(ML_IMPL_BREAKPOINT_CUSTOM)
 #		define ML_BREAKPOINT ML_IMPL_BREAKPOINT_CUSTOM
-#	elif defined(ML_CC_MSC)
+#	elif defined(ML_CC_MSVC)
 #		define ML_BREAKPOINT ::__debugbreak()
 #	else
 #		define ML_BREAKPOINT ::raise(SIGTRAP)
@@ -42,8 +42,8 @@ namespace ml
 
 		static inline int32_t clear()
 		{
-#if (ML_DEBUG)
-#	ifdef ML_SYSTEM_WINDOWS
+#if ML_DEBUG
+#	ifdef ML_OS_WINDOWS
 			return std::system("cls");
 #	else
 			return std::system("clear");
@@ -55,8 +55,8 @@ namespace ml
 
 		static inline int32_t pause(int32_t exitCode)
 		{
-#if (ML_DEBUG)
-#	ifdef ML_SYSTEM_WINDOWS
+#if ML_DEBUG
+#	ifdef ML_OS_WINDOWS
 			std::system("pause");
 #	else
 			std::cin.get();

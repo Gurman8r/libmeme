@@ -3,7 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
 extern "C"
 {

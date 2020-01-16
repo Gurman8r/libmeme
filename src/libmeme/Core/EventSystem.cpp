@@ -9,11 +9,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventListener * EventSystem::add_listener(int32_t type, EventListener * listener)
+	bool EventSystem::add_listener(int32_t type, EventListener * listener)
 	{
-		return ((type != Event::EV_INVALID) && listener)
-			? (*m_listeners[type].insert(listener).first)
-			: nullptr;
+		return (listener && (type > Event::EV_INVALID))
+			&& (m_listeners[type].insert(listener).second);
 	}
 
 	void EventSystem::fire_event(Event const & value)

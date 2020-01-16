@@ -1,5 +1,5 @@
-#ifndef _ML_BITMASK_HPP_
-#define _ML_BITMASK_HPP_
+#ifndef _ML_BIT_SET_HPP_
+#define _ML_BIT_SET_HPP_
 
 #include <libmeme/Core/Array.hpp>
 
@@ -12,14 +12,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct BitMask final
+	template <class T> struct BitSet final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { Size = sizeof(T) * 8 };
 
 		using value_type		= typename T;
-		using self_type			= typename BitMask<value_type>;
+		using self_type			= typename BitSet<value_type>;
 		using storage_type		= typename array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
@@ -28,63 +28,60 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitMask() noexcept
-			: m_value{ 0 }
-		{
-		}
-
-		constexpr BitMask(const value_type value) noexcept
+		constexpr BitSet(const value_type value) noexcept
 			: m_value{ value }
 		{
 		}
 
-		constexpr BitMask(storage_type const & value) noexcept
-			: m_value{ from_bits<storage_type, T, value.size()>(value) }
+		constexpr BitSet(self_type const & copy) noexcept
+			: self_type{ copy.m_value }
+		{
+		}
+
+		constexpr BitSet(storage_type const & value)
+			: self_type{ from_bits<storage_type, T, value.size()>(value) }
 		{
 		}
 
 		template <
 			class U, size_t N
-		> constexpr BitMask(const U(&value)[N]) noexcept
-			: m_value{ from_bits<const U(&)[N], U, N>(value) }
+		> constexpr BitSet(const U(&value)[N])
+			: self_type{ from_bits<const U(&)[N], U, N>(value) }
 		{
 		}
 
-		constexpr BitMask(self_type const & copy) noexcept
-			: m_value{ copy.m_value }
-		{
-		}
+		constexpr BitSet() noexcept : self_type{ 0 } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto size()
+		ML_NODISCARD static constexpr auto size() noexcept
 		{
 			return self_type::Size;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto bits() const -> storage_type { return to_bits(*this); }
+		ML_NODISCARD constexpr auto bits() const noexcept -> storage_type { return to_bits(*this); }
 
-		ML_NODISCARD constexpr auto data() const -> const_reference { return m_value; }
+		ML_NODISCARD constexpr auto data() const noexcept -> const_reference { return m_value; }
 
-		ML_NODISCARD constexpr auto data() -> reference { return m_value; }
+		ML_NODISCARD constexpr auto data() noexcept -> reference { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator const_reference() const
+		ML_NODISCARD constexpr operator const_reference() const noexcept
 		{
 			return m_value;
 		}
 
-		ML_NODISCARD constexpr bool operator[](size_t i) const
+		ML_NODISCARD constexpr bool operator[](size_t i) const noexcept
 		{
 			return this->read(i);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr bool read(size_t i) const
+		ML_NODISCARD constexpr bool read(size_t i) const noexcept
 		{
 			return ML_BITREAD(m_value, i);
 		}
@@ -107,7 +104,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I
-		> ML_NODISCARD constexpr bool read() const
+		> ML_NODISCARD constexpr bool read() const noexcept
 		{
 			return this->read(I);
 		}
@@ -155,28 +152,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: value_type m_value;
+	private:
+		value_type m_value;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING mask8_t = typename BitMask<uint8_t>;
-	ML_USING mask16_t = typename BitMask<uint16_t>;
-	ML_USING mask32_t = typename BitMask<uint32_t>;
-	ML_USING mask64_t = typename BitMask<uint64_t>;
+	ML_USING mask8_t = typename BitSet<uint8_t>;
+	ML_USING mask16_t = typename BitSet<uint16_t>;
+	ML_USING mask32_t = typename BitSet<uint32_t>;
+	ML_USING mask64_t = typename BitSet<uint64_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
 	template <class T>
-	inline ML_SERIALIZE(std::ostream & out, const BitMask<T> & value)
+	inline ML_SERIALIZE(std::ostream & out, const BitSet<T> & value)
 	{
 		return out << value.bits();
 	}
 
 	template <class T>
-	inline ML_DESERIALIZE(std::istream & in, BitMask<T> & value)
+	inline ML_DESERIALIZE(std::istream & in, BitSet<T> & value)
 	{
 		return in.good() ? (in >> value.data()) : in;
 	}
@@ -184,4 +182,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_BITSET_HPP_
+#endif // !_ML_BIT_SET_HPP_

@@ -26,7 +26,7 @@ namespace ml
 		using close_fn			= typename void(*)(void *);
 		using cursor_enter_fn	= typename void(*)(void *, int32_t);
 		using cursor_pos_fn		= typename void(*)(void *, float64_t, float64_t);
-		using error_fn			= typename void(*)(int32_t, C_String);
+		using error_fn			= typename void(*)(int32_t, C_string);
 		using focus_fn			= typename void(*)(void *, int32_t);
 		using frame_size_fn		= typename void(*)(void *, int32_t, int32_t);
 		using key_fn			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
@@ -105,7 +105,7 @@ namespace ml
 		
 		ML_NODISCARD int32_t	get_attribute(int32_t value) const;
 		
-		ML_NODISCARD C_String get_clipboard() const;
+		ML_NODISCARD C_string get_clipboard() const;
 		
 		ML_NODISCARD vec2 get_cursor_pos() const;
 		
@@ -141,7 +141,7 @@ namespace ml
 		
 		ML_NODISCARD static void * create_standard_cursor(Cursor::Shape value);
 
-		ML_NODISCARD static int32_t extension_supported(C_String value);
+		ML_NODISCARD static int32_t extension_supported(C_string value);
 
 		ML_NODISCARD static void * get_context_current();
 
@@ -149,7 +149,7 @@ namespace ml
 		
 		ML_NODISCARD static std::vector<DisplayMode> const & get_fullscreen_modes();
 
-		ML_NODISCARD static proc_fn get_proc_address(C_String value);
+		ML_NODISCARD static proc_fn get_proc_address(C_string value);
 		
 		ML_NODISCARD static std::vector<void *> const & get_monitors();
 
@@ -188,7 +188,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_share() const -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_display_mode().size(); }
+		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_display_mode().resolution(); }
 
 		ML_NODISCARD inline auto get_settings() const -> WindowSettings const & { return m_settings; }
 

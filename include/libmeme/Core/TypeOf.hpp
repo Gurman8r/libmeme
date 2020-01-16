@@ -2,7 +2,6 @@
 #define _ML_TYPE_OF_HPP_
 
 #include <libmeme/Core/NameOf.hpp>
-#include <libmeme/Core/Hash.hpp>
 
 namespace ml
 {
@@ -14,46 +13,42 @@ namespace ml
 
 	template <class T> struct typeof<T> final
 	{
-		using name_t = typename std::string_view;
-
 		constexpr typeof() noexcept = default;
 
-		static constexpr auto name() noexcept -> name_t const & { return m_name; }
-		
-		static constexpr auto hash() noexcept -> hash_t const & { return m_hash; }
+		static constexpr auto name() noexcept -> std::string_view const &
+		{
+			return m_name;
+		}
+
+		static constexpr auto hash() noexcept -> size_t const &
+		{
+			return m_hash;
+		}
 
 	private:
-		static constexpr name_t m_name
+		static constexpr std::string_view m_name
 		{
-			nameof<>::filter_signature_type(nameof<T>::value)
+			nameof<>::filter_type(nameof<T>::value)
 		};
 
-		static constexpr hash_t m_hash
+		static constexpr size_t m_hash
 		{
-			Hash(m_name)
+			hashof(m_name)
 		};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class T
-	> static constexpr auto const typeof_v{ typeof<T>{} };
+	template <class T
+	> static constexpr auto const nameof_t{ typeof<T>{}.name() };
 
-	template <
-		class T
-	> static constexpr auto const & hashof_v{ typeof_v<T>.hash() };
-
-	template <
-		class T
-	> static constexpr auto const & nameof_v{ typeof_v<T>.name() };
+	template <class T
+	> static constexpr auto const hashof_t{ typeof<T>{}.hash() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct typeof<> final
 	{
-		using name_t = typename std::string_view;
-
 		constexpr typeof() noexcept
 			: m_name{ "" }, m_hash{ 0 }
 		{
@@ -64,13 +59,19 @@ namespace ml
 		{
 		}
 
-		constexpr auto name() const noexcept -> name_t const & { return m_name; }
+		constexpr auto name() const noexcept -> std::string_view const &
+		{
+			return m_name;
+		}
 
-		constexpr auto hash() const noexcept -> hash_t const & { return m_hash; }
+		constexpr auto hash() const noexcept -> size_t const &
+		{
+			return m_hash;
+		}
 
 	private:
-		name_t m_name;
-		hash_t m_hash;
+		std::string_view m_name;
+		size_t m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

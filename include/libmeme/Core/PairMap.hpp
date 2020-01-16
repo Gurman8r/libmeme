@@ -1,9 +1,9 @@
 #ifndef _ML_PAIR_MAP_HPP_
 #define _ML_PAIR_MAP_HPP_
 
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
-namespace ml::ds
+namespace ml::detail
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -29,6 +29,11 @@ namespace ml::ds
 		}
 	};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+namespace ml::ds
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// BASIC PAIR MAP TRAITS
@@ -339,7 +344,7 @@ namespace ml::ds
 
 	// PAIR MAP
 	template <class Key, class Value,
-		class Comp = key_compare<std::less, std::pair, Key, Value>,
+		class Comp = detail::key_compare<std::less, std::pair, Key, Value>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
 	> struct pair_map final : public basic_pair_map<
 		basic_pair_map_traits<Key, Value, Comp, Alloc, false>
@@ -545,7 +550,7 @@ namespace ml::ds
 
 	// PAIR MULTISET
 	template <class Key, class Value,
-		class Comp = key_compare<std::less, std::pair, Key, Value>,
+		class Comp = detail::key_compare<std::less, std::pair, Key, Value>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
 	> struct pair_multimap final : public basic_pair_map<
 		basic_pair_map_traits<Key, Value, Comp, Alloc, true>

@@ -1,6 +1,5 @@
 #include <libmeme/Engine/Lua.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {

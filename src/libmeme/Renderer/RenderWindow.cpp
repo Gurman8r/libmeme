@@ -31,7 +31,7 @@ namespace ml
 
 		GL::enable(GL::Multisample, m_context.multisample);
 
-		GL::enable(GL::FramebufferSRGB, m_context.srgbCapable);
+		GL::enable(GL::FramebufferSRGB, m_context.sRGBCapable);
 
 		return true;
 	}

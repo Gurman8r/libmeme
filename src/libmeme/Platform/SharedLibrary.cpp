@@ -1,7 +1,7 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 #	include <Windows.h>
 #else
 // https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
@@ -58,7 +58,7 @@ namespace ml
 	{
 		if (!good())
 		{
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 			return (m_instance = ::LoadLibraryA(path.string().c_str()));
 #else
 			return (m_instance = nullptr);
@@ -76,7 +76,7 @@ namespace ml
 		{
 			m_functions.clear();
 
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 			return ::FreeLibrary(static_cast<HINSTANCE>(m_instance));
 #else
 			return (m_instance = nullptr);
@@ -90,19 +90,22 @@ namespace ml
 
 	void * SharedLibrary::load_function(std::string const & name)
 	{
-		if (auto const it{ m_functions.find(name) })
+		if (good())
 		{
-			return (*it->second);
-		}
-		else if (m_instance)
-		{
-			return (*m_functions.insert(name,
-#ifdef ML_SYSTEM_WINDOWS
-				::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
+			if (auto const it{ m_functions.find(name) })
+			{
+				return (*it->second);
+			}
+			else
+			{
+				return (*m_functions.insert(name,
+#ifdef ML_OS_WINDOWS
+					::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
 #else
-				nullptr
+					nullptr
 #endif
-			).first.second);
+				).first.second);
+			}
 		}
 		else
 		{

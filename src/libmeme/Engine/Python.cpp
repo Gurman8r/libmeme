@@ -1,7 +1,6 @@
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 
 #include <Python.h>
@@ -69,16 +68,16 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-namespace ml::impl::python
+namespace ml::python::embedded
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using str_t = typename _STD string;
-	using list_t = typename _STD vector<str_t>;
-	using dict_t = typename _STD map<str_t, str_t>;
-	using table_t = typename _STD vector<dict_t>;
-	using coord_t = typename _STD array<float_t, 2>;
-	using rect_t = typename _STD array<float_t, 4>;
+	using py_str_t		= typename std::string;
+	using py_list_t		= typename std::vector<py_str_t>;
+	using py_dict_t		= typename std::map<py_str_t, py_str_t>;
+	using py_table_t	= typename std::vector<py_dict_t>;
+	using py_vec2_t		= typename std::array<float_t, 2>;
+	using py_rect_t		= typename std::array<float_t, 4>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -86,12 +85,12 @@ namespace ml::impl::python
 	{
 		struct ml_py_config final {};
 		pybind11::class_<ml_py_config>(m, "cfg")
-			.def_static("architecture",		[]() { return ML_ARCHITECTURE; })
-			.def_static("args",				[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("args",				[]() { return py_list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("architecture",		[]() { return ML_ARCH; })
 			.def_static("compiler_name",	[]() { return ML_CC_NAME; })
 			.def_static("compiler_version", []() { return ML_CC_VER; })
 			.def_static("configuration",	[]() { return ML_CONFIGURATION; })
-			.def_static("cpp_version",		[]() { return ML_CPP; })
+			.def_static("cpp_version",		[]() { return ML_LANG; })
 			.def_static("is_debug",			[]() { return ML_DEBUG; })
 			.def_static("platform_target",	[]() { return ML_PLATFORM_TARGET; })
 			.def_static("project_author",	[]() { return ML__AUTHOR; })
@@ -100,19 +99,19 @@ namespace ml::impl::python
 			.def_static("project_time",		[]() { return ML__TIME; })
 			.def_static("project_url",		[]() { return ML__URL; })
 			.def_static("project_version",	[]() { return ML__VERSION; })
-			.def_static("system_name",		[]() { return ML_SYSTEM_NAME; });
+			.def_static("system_name",		[]() { return ML_OS_NAME; });
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
 			.def_static("clear",	[]() { return Debug::clear(); })
 			.def_static("exit",		[]() { return std::exit(0); })
 			.def_static("pause",	[]() { return Debug::pause(0); })
-			.def_static("print",	[](str_t const & s) { std::cout << s; })
-			.def_static("printf",	[](str_t const & s, list_t const & l) { std::cout << util::format(s, l); })
-			.def_static("printl",	[](str_t const & s) { std::cout << s << '\n'; })
-			.def_static("log",		[](str_t const & s) { return Debug::log_info(s); })
-			.def_static("warning",	[](str_t const & s) { return Debug::log_warning(s); })
-			.def_static("error",	[](str_t const & s) { return Debug::log_error(s); });
+			.def_static("print",	[](py_str_t const & s) { std::cout << s; })
+			.def_static("printf",	[](py_str_t const & s, py_list_t const & l) { std::cout << util::format(s, l); })
+			.def_static("printl",	[](py_str_t const & s) { std::cout << s << '\n'; })
+			.def_static("log",		[](py_str_t const & s) { return Debug::log_info(s); })
+			.def_static("warning",	[](py_str_t const & s) { return Debug::log_warning(s); })
+			.def_static("error",	[](py_str_t const & s) { return Debug::log_error(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

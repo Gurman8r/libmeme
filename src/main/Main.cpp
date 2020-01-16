@@ -1,10 +1,8 @@
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Core/EventHandler.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Cx.hpp>
 #include <libmeme/Core/FlatMap.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -24,38 +22,42 @@ namespace ml::tests
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static_assert("Tests"
-		&& nameof_v<bool>			== "bool"
-		&& nameof_v<char>			== "char"
-		&& nameof_v<wchar_t>		== "wchar_t"
-		&& nameof_v<char16_t>		== "char16_t"
-		&& nameof_v<char32_t>		== "char32_t"
-		&& nameof_v<C_String>		== "const char*"
-		&& nameof_v<int8_t>			== "signed char"
-		&& nameof_v<int16_t>		== "short"
-		&& nameof_v<int32_t>		== "int"
-		&& nameof_v<int64_t>		== "long long"
-		&& nameof_v<uint8_t>		== "unsigned char"
-		&& nameof_v<uint16_t>		== "unsigned short"
-		&& nameof_v<uint32_t>		== "unsigned int"
-		&& nameof_v<uint64_t>		== "unsigned long long"
-		&& nameof_v<float32_t>		== "float"
-		&& nameof_v<float64_t>		== "double"
-		&& nameof_v<float80_t>		== "long double"
-		&& nameof_v<vec2>			== "struct ml::Matrix<float,2,1>"
-		&& nameof_v<vec3>			== "struct ml::Matrix<float,3,1>"
-		&& nameof_v<vec4>			== "struct ml::Matrix<float,4,1>"
-		&& nameof_v<mat2>			== "struct ml::Matrix<float,2,2>"
-		&& nameof_v<mat3>			== "struct ml::Matrix<float,3,3>"
-		&& nameof_v<mat4>			== "struct ml::Matrix<float,4,4>"
-		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
-		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
-		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
-		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
+		&& nameof_t<bool>			== "bool"
+		&& nameof_t<int8_t>			== "signed char"
+		&& nameof_t<int16_t>		== "short"
+		&& nameof_t<int32_t>		== "int"
+		&& nameof_t<int64_t>		== "long long"
+		&& nameof_t<uint8_t>		== "unsigned char"
+		&& nameof_t<uint16_t>		== "unsigned short"
+		&& nameof_t<uint32_t>		== "unsigned int"
+		&& nameof_t<uint64_t>		== "unsigned long long"
+		&& nameof_t<float32_t>		== "float"
+		&& nameof_t<float64_t>		== "double"
+		&& nameof_t<float80_t>		== "long double"
+		&& nameof_t<char>			== "char"
+		&& nameof_t<wchar_t>		== "wchar_t"
+		&& nameof_t<char16_t>		== "char16_t"
+		&& nameof_t<char32_t>		== "char32_t"
+		&& nameof_t<C_string>		== "const char*"
+		&& nameof_t<C_wstring>		== "const wchar_t*"
+		&& nameof_t<C_u16string>	== "const char16_t*"
+		&& nameof_t<C_u32string>	== "const char32_t*"
+		&& nameof_t<vec2>			== "struct ml::Matrix<float,2,1>"
+		&& nameof_t<vec3>			== "struct ml::Matrix<float,3,1>"
+		&& nameof_t<vec4>			== "struct ml::Matrix<float,4,1>"
+		&& nameof_t<mat2>			== "struct ml::Matrix<float,2,2>"
+		&& nameof_t<mat3>			== "struct ml::Matrix<float,3,3>"
+		&& nameof_t<mat4>			== "struct ml::Matrix<float,4,4>"
+		&& nameof_t<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
+		&& nameof_t<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
+		&& nameof_t<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
+		&& nameof_t<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
 	);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Window Options
 namespace ml
@@ -63,42 +65,44 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static constexpr auto const window_title{
-		"libmeme"sv				// Title
+		"libmeme"sv			// Title
 	};
-	static constexpr auto const window_mode{ DisplayMode{ std::make_tuple(vec2{
-		1280,					// Width
-		720 },					// Height
-		32						// Bits-per-Pixel
-	) } };
-	static constexpr auto const window_settings{ WindowSettings{
-		true,					// Resizable
-		true,					// Visible
-		true,					// Decorated
-		true,					// Focused
-		true,					// Auto Iconify
-		false,					// Floating
-		false,					// Maximized
-		false,					// Fullscreen
-		false,					// Vertical Sync
+	static constexpr auto const window_video{ DisplayMode{
+		vec2u{ 1280, 720 },	// Size
+		32u					// Bits-per-Pixel
+	} };
+	static constexpr auto const window_style{ WindowSettings{
+		true,				// Resizable
+		true,				// Visible
+		true,				// Decorated
+		true,				// Focused
+		true,				// Auto Iconify
+		false,				// Floating
+		false,				// Maximized
+		false,				// Fullscreen
+		false				// Vertical Sync
 	} };
 	static constexpr auto const window_context{ ContextSettings{
-		ContextSettings::OpenGL,// API
-		4,						// Major Version
-		6,						// Minor Version
-		ContextSettings::Compat,// Profile
-		24,						// Depth Bits
-		8,						// Stencil Bits
-		false,					// Multisample
-		false					// sRGB Capable
+		Client_API::OpenGL,	// API
+		4,					// Major Version
+		6,					// Minor Version
+		Client_API::Compat,	// Profile
+		24,					// Depth Bits
+		8,					// Stencil Bits
+		false,				// Multisample
+		false				// sRGB Capable
 	} };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Plugin Loader
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct PluginLoader final : public Trackable, public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,7 +121,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline Plugin * load(path_t && path)
+		inline Plugin * operator()(path_t && path)
 		{
 			if (auto const file{ m_filenames.insert(std::move(path)) }; file.second)
 			{
@@ -142,8 +146,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Main
 ml::int32_t main()
@@ -161,51 +168,44 @@ ml::int32_t main()
 	}
 	time{};
 	{
-		// Testing
-		EventHandler::Pool flow;
-		flow.add_listener<EnterEvent>([](Event const & value)
-		{
-			if (auto const ev = value.as<EnterEvent>())
-			{
-				for (int32_t i = 0; i < ev->argc; ++i)
-				{
-					printf("%s\n", ev->argv[i]);
-				}
-			}
-		});
+		// Load Plugins
+		PluginLoader plugin_loader{};
+		plugin_loader("demo.dll");
 
-		// Enter
-		EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
-		
 		// Startup Engine
-		if (!Engine::startup(ML_ARGV[0], "../../../"))
+		if (!Engine::startup(
+			{ ML_ARGV[0], "../../../" }
+		))
 		{
 			return Debug::log_error("Failed initializing Engine") | Debug::pause(1);
 		}
 
-		// Load Plugins
-		PluginLoader plugins{};
-		plugins.load("demo.dll");
+		// Enter Event
+		EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
 
 		// Create Window
-		if (!Engine::create_window({ std::string{window_title}, window_mode, window_settings, window_context }))
+		if (!Engine::create_window(
+			{ std::string{ window_title }, window_video, window_style, window_context }
+		))
 		{
 			return Debug::log_error("Failed initializing Window") | Debug::pause(1);
 		}
 
 		// Startup Editor
-		if (!Editor::startup(Engine::window().get_handle()))
+		if (!Editor::startup(
+			{ Engine::window().get_handle(), true }
+		))
 		{
 			return Debug::log_error("Failed initializing Editor") | Debug::pause(1);
 		}
 
-		// Load
+		// Load Event
 		EventSystem::fire_event<LoadEvent>();
 
 		// Main Loop
 		while (Engine::running())
 		{
-			time.loop.start();
+			time.loop.stop().start();
 
 			// Begin Loop
 			{
@@ -227,13 +227,13 @@ ml::int32_t main()
 			{
 				ML_BENCHMARK("\tGUI_BEGIN");
 				Editor::new_frame();
+				Editor::main_menu().render();
+				Editor::dockspace().render();
 				EventSystem::fire_event<BeginGuiEvent>();
 			}
 			// Gui
 			{
 				ML_BENCHMARK("\t\tGUI");
-				Editor::main_menu().render();
-				Editor::dockspace().render();
 				EventSystem::fire_event<GuiEvent>();
 			}
 			// End Gui
@@ -245,20 +245,20 @@ ml::int32_t main()
 			// End Loop
 			{
 				ML_BENCHMARK("LOOP_END");
-				EventSystem::fire_event<EndLoopEvent>();
 				Engine::end_loop();
+				EventSystem::fire_event<EndLoopEvent>();
 			}
 			PerformanceTracker::swap();
-			
-			time.delta = time.loop.stop().elapsed().count();
+
+			time.delta = time.loop.elapsed().count();
 		}
 
-		// Unload
+		// Unload Event
 		EventSystem::fire_event<UnloadEvent>();
 		Editor::shutdown();
 		Engine::shutdown();
-		
-		// Exit
+
+		// Exit Event
 		EventSystem::fire_event<ExitEvent>();
 	}
 
@@ -267,3 +267,5 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

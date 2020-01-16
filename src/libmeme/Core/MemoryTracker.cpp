@@ -20,21 +20,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	MemoryTracker::MemoryTracker() noexcept
-		: m_current{ 0 }
-		, m_records{}
-	{
-	}
+	MemoryTracker::MemoryTracker() noexcept : m_current{ 0 }, m_records{} {}
 
 	MemoryTracker::~MemoryTracker()
 	{
-#if (ML_DEBUG)
+#if ML_DEBUG
 		if (!m_records.empty())
 		{
 			Debug::log_error("MEMORY LEAKS DETECTED");
 
 			static constexpr std::streamsize
-				indx_size{ 6 },
+				indx_size{ 8 },
 				size_size{ sizeof(size_t) },
 				addr_size{ sizeof(size_t) * 3 };
 
@@ -69,15 +65,15 @@ namespace ml
 		).first.second)->data();
 	}
 
-	void MemoryTracker::free_allocation(Trackable * value, int32_t flags)
+	void MemoryTracker::free_allocation(void * value, int32_t flags)
 	{
-		if (auto const it{ m_records.find(value) })
+		if (auto const it{ m_records.find(static_cast<Trackable *>(value)) })
 		{
-			ML_IMPL_DELETE(value);
+			ML_IMPL_DELETE(value); // free the allocation
 
-			::delete (*it->second);
+			::delete (*it->second); // delete the record
 			
-			m_records.erase(it->first);
+			m_records.erase(it->first); // erase the entry
 		}
 	}
 

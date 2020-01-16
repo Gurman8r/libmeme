@@ -37,13 +37,13 @@ namespace ml
 	{
 		union
 		{
-			C_String const file;
+			C_string const file;
 			uint32_t const line;
-			C_String const expr;
+			C_string const expr;
 			uint32_t const code;
 		};
 
-		constexpr RenderErrorEvent(C_String file, uint32_t line, C_String expr, uint32_t code) noexcept
+		constexpr RenderErrorEvent(C_string file, uint32_t line, C_string expr, uint32_t code) noexcept
 			: file { file }
 			, line { line }
 			, expr { expr }
@@ -60,10 +60,10 @@ namespace ml
 		{
 			struct Shader const * const shader;
 			uint32_t const type;
-			C_String const error;
+			C_string const error;
 		};
 
-		constexpr ShaderErrorEvent(struct Shader const * shader, uint32_t type, C_String error) noexcept
+		constexpr ShaderErrorEvent(struct Shader const * shader, uint32_t type, C_string error) noexcept
 			: shader{ shader }
 			, type	{ type }
 			, error { error } 

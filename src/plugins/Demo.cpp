@@ -8,7 +8,7 @@
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
@@ -137,7 +137,7 @@ namespace ml
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);
 
-				m_models["triangle"] = make_model(make_mesh(
+				m_models["triangle"] = make_model(make_mesh( // buggy
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -148,7 +148,7 @@ namespace ml
 					}
 				));
 
-				m_models["quad"] = make_model(make_mesh(
+				m_models["quad"] = make_model(make_mesh( // buggy
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
 						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),

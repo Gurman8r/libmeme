@@ -9,7 +9,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if (ML_DEBUG)
+#if ML_DEBUG
 # 	define glCheck(expr) do { expr; GL::checkError(__FILE__, __LINE__, #expr); } while (0)
 #else
 # 	define glCheck(expr) (expr)
@@ -26,12 +26,12 @@ namespace ml
 		// Errors
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static auto getError() -> uint32_t;
-		static void checkError(C_String file, uint32_t line, C_String expr);
+		static void checkError(C_string file, uint32_t line, C_string expr);
 
 		// Initialization
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static bool init();
-		static void validateVersion(uint32_t & major, uint32_t & minor);
+		static void validateVersion(int32_t & major, int32_t & minor);
 
 		// Flags
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,8 +41,8 @@ namespace ml
 		
 		// Getters
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static auto getString(uint32_t name) -> C_String;
-		static auto getString(uint32_t name, uint32_t index) -> C_String;
+		static auto getString(uint32_t name) -> C_string;
+		static auto getString(uint32_t name, uint32_t index) -> C_string;
 		static auto getBool(uint32_t name) -> uint8_t;
 		static auto getBool(uint32_t name, uint8_t * params) -> uint8_t *;
 		static auto getDouble(uint32_t name) -> float64_t;
@@ -139,22 +139,22 @@ namespace ml
 		static bool shadersAvailable();
 		static bool geometryShadersAvailable();
 
-		static auto getProgramInfoLog(uint32_t obj) -> C_String;
+		static auto getProgramInfoLog(uint32_t obj) -> C_string;
 		static auto getProgramHandle(uint32_t name) -> uint32_t;
 		static auto createProgram() -> uint32_t;
 		static auto createShader(uint32_t type) -> uint32_t;
 		static auto getProgramParameter(int32_t obj, uint32_t param) -> int32_t;
-		static auto getAttribLocation(uint32_t program, C_String name) -> int32_t;
-		static auto getUniformLocation(uint32_t program, C_String name) -> int32_t;
+		static auto getAttribLocation(uint32_t program, C_string name) -> int32_t;
+		static auto getUniformLocation(uint32_t program, C_string name) -> int32_t;
 
 		static void useProgram(uint32_t obj);
 		static void deleteShader(uint32_t obj);
 		static void detachShader(uint32_t containerObj, uint32_t obj);
 		static void attachShader(uint32_t containerObj, uint32_t obj);
-		static void shaderSource(uint32_t obj, int32_t count, C_String const * src, int32_t const * length);
+		static void shaderSource(uint32_t obj, int32_t count, C_string const * src, int32_t const * length);
 		static auto compileShader(uint32_t obj) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source, C_String & log) -> int32_t;
+		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source) -> int32_t;
+		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source, C_string & log) -> int32_t;
 		static auto linkProgram(uint32_t obj) -> int32_t;
 
 		static void uniform1i(int32_t location, int32_t value);
@@ -201,7 +201,7 @@ namespace ml
 			Flag::ScissorTest,
 		};
 
-		static constexpr C_String Flag_names[] = {
+		static constexpr C_string Flag_names[] = {
 			"Cull Face",
 			"Depth Test",
 			"Alpha Test",
@@ -211,7 +211,7 @@ namespace ml
 			"Scissor Test",
 		};
 
-		static constexpr C_String Flag_raw_names[] = {
+		static constexpr C_string Flag_raw_names[] = {
 			"GL_CULL_FACE",
 			"GL_DEPTH_TEST",
 			"GL_ALPHA_TEST",
@@ -221,7 +221,7 @@ namespace ml
 			"GL_SCISSOR_TEST",
 		};
 
-		static constexpr C_String Flag_descriptions[] = {
+		static constexpr C_string Flag_descriptions[] = {
 			"If enabled, cull polygons based on their winding in window coordinates",
 			"If enabled, do depth comparisons and update the depth buffer",
 			"If enabled, discard fragments depending on the outcome of a comparison between an incoming fragment's alpha value and a constant reference value",
@@ -246,19 +246,19 @@ namespace ml
 			Sampler::TextureCubeMap,
 		};
 
-		static constexpr C_String Sampler_names[] = {
+		static constexpr C_string Sampler_names[] = {
 			"Texture 2D",
 			"Texture 3D",
 			"Texture Cube Map",
 		};
 
-		static constexpr C_String Sampler_raw_names[] = {
+		static constexpr C_string Sampler_raw_names[] = {
 			"GL_TEXTURE_2D",
 			"GL_TEXTURE_3D",
 			"GL_TEXTURE_CUBE_MAP",
 		};
 
-		static constexpr C_String Sampler_descriptions[] = {
+		static constexpr C_string Sampler_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -303,7 +303,7 @@ namespace ml
 			Target::ActiveTexture,
 		};
 
-		static constexpr C_String Target_names[] = {
+		static constexpr C_string Target_names[] = {
 			"Array Buffer",
 			"Element Array Buffer",
 			"Array Buffer Binding",
@@ -321,7 +321,7 @@ namespace ml
 			"Active Texture",
 		};
 
-		static constexpr C_String Target_raw_names[] = {
+		static constexpr C_string Target_raw_names[] = {
 			"GL_ARRAY_BUFFER",
 			"GL_ELEMENT_ARRAY_BUFFER",
 			"GL_ARRAY_BUFFER_BINDING",
@@ -339,7 +339,7 @@ namespace ml
 			"GL_ACTIVE_TEXTURE",
 		};
 
-		static constexpr C_String Target_descriptions[] = {
+		static constexpr C_string Target_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -372,19 +372,19 @@ namespace ml
 			Usage::DynamicDraw,
 		};
 
-		static constexpr C_String Usage_names[] = {
+		static constexpr C_string Usage_names[] = {
 			"Stream Draw",
 			"Static Draw",
 			"Dynamic Draw",
 		};
 
-		static constexpr C_String Usage_raw_names[] = {
+		static constexpr C_string Usage_raw_names[] = {
 			"GL_STREAM_DRAW",
 			"GL_STATIC_DRAW",
 			"GL_DYNAMIC_DRAW",
 		};
 
-		static constexpr C_String Usage_descriptions[] = {
+		static constexpr C_string Usage_descriptions[] = {
 			"The data will be modified once and used at most a few times",
 			"The data will be modified once and used many times",
 			"The data will be modified repeatedly and used many times",
@@ -415,7 +415,7 @@ namespace ml
 			Err::InvalidFramebufferOperation,
 		};
 
-		static constexpr C_String Err_names[] = {
+		static constexpr C_string Err_names[] = {
 			"No Error",
 			"Invalid Enum",
 			"Invalid Value",
@@ -426,7 +426,7 @@ namespace ml
 			"Invalid Framebuffer Operation",
 		};
 
-		static constexpr C_String Err_raw_names[] = {
+		static constexpr C_string Err_raw_names[] = {
 			"GL_NO_ERROR",
 			"GL_INVALID_ENUM",
 			"GL_INVALID_VALUE",
@@ -437,7 +437,7 @@ namespace ml
 			"GL_INVALID_FRAMEBUFFER_OPERATION",
 		};
 
-		static constexpr C_String Err_descriptions[] = {
+		static constexpr C_string Err_descriptions[] = {
 			"No Error Description",
 			"An unacceptable value has been specified for an enumerated argument",
 			"A numeric argument is out of range",
@@ -467,7 +467,7 @@ namespace ml
 			StringID::ShadingLanguageVersion,
 		};
 
-		static constexpr C_String StringID_names[] = {
+		static constexpr C_string StringID_names[] = {
 			"Vendor",
 			"Renderer",
 			"Version",
@@ -475,7 +475,7 @@ namespace ml
 			"Shading Language Version",
 		};
 
-		static constexpr C_String StringID_raw_names[] = {
+		static constexpr C_string StringID_raw_names[] = {
 			"GL_VENDOR",
 			"GL_RENDERER",
 			"GL_VERSION",
@@ -483,7 +483,7 @@ namespace ml
 			"GL_SHADING_LANGUAGE_VERSION",
 		};
 
-		static constexpr C_String StringID_descriptions[] = {
+		static constexpr C_string StringID_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -534,7 +534,7 @@ namespace ml
 			IntID::BlendSourceAlpha,
 		};
 
-		static constexpr C_String IntID_names[] = {
+		static constexpr C_string IntID_names[] = {
 			"Major Version",
 			"Minor Version",
 			"Num Extensions",
@@ -554,7 +554,7 @@ namespace ml
 			"Blend Source Alpha",
 		};
 
-		static constexpr C_String IntID_raw_names[] = {
+		static constexpr C_string IntID_raw_names[] = {
 			"GL_MAJOR_VERSION",
 			"GL_MINOR_VERSION",
 			"GL_NUM_EXTENSIONS",
@@ -574,7 +574,7 @@ namespace ml
 			"GL_BLEND_SRC_ALPHA",
 		};
 
-		static constexpr C_String IntID_descriptions[] = {
+		static constexpr C_string IntID_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -609,19 +609,19 @@ namespace ml
 			Clip::ClipOrigin,
 		};
 
-		static constexpr C_String Clip_names[] = {
+		static constexpr C_string Clip_names[] = {
 			"Lower Left",
 			"Upper Left",
 			"Clip Origin",
 		};
 
-		static constexpr C_String Clip_raw_names[] = {
+		static constexpr C_string Clip_raw_names[] = {
 			"GL_LOWER_LEFT",
 			"GL_UPPER_LEFT",
 			"GL_CLIP_ORIGIN",
 		};
 
-		static constexpr C_String Clip_descriptions[] = {
+		static constexpr C_string Clip_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -644,21 +644,21 @@ namespace ml
 			Status::FramebufferComplete,
 		};
 
-		static constexpr C_String Status_names[] = {
+		static constexpr C_string Status_names[] = {
 			"Object Delete Status",
 			"Object Compile Status",
 			"Object Link Status",
 			"Framebuffer Complete",
 		};
 
-		static constexpr C_String Status_raw_names[] = {
+		static constexpr C_string Status_raw_names[] = {
 			"GL_OBJECT_DELETE_STATUS_ARB",
 			"GL_OBJECT_COMPILE_STATUS_ARB",
 			"GL_OBJECT_LINK_STATUS_ARB",
 			"GL_FRAMEBUFFER_COMPLETE",
 		};
 
-		static constexpr C_String Status_descriptions[] = {
+		static constexpr C_string Status_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -680,19 +680,19 @@ namespace ml
 			ShaderType::GeometryShader,
 		};
 
-		static constexpr C_String ShaderType_names[] = {
+		static constexpr C_string ShaderType_names[] = {
 			"Fragment Shader",
 			"Vertex Shader",
 			"Geometry Shader",
 		};
 
-		static constexpr C_String ShaderType_raw_names[] = {
+		static constexpr C_string ShaderType_raw_names[] = {
 			"GL_FRAGMENT_SHADER",
 			"GL_VERTEX_SHADER",
 			"GL_GEOMETRY_SHADER",
 		};
 
-		static constexpr C_String ShaderType_descriptions[] = {
+		static constexpr C_string ShaderType_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -723,7 +723,7 @@ namespace ml
 			Mode::Fill,
 		};
 
-		static constexpr C_String Mode_names[] = {
+		static constexpr C_string Mode_names[] = {
 			"Points",
 			"Lines",
 			"Line Loop",
@@ -734,7 +734,7 @@ namespace ml
 			"Fill",
 		};
 
-		static constexpr C_String Mode_raw_names[] = {
+		static constexpr C_string Mode_raw_names[] = {
 			"GL_POINTS",
 			"GL_LINES",
 			"GL_LINE_LOOP",
@@ -745,7 +745,7 @@ namespace ml
 			"GL_FILL",
 		};
 
-		static constexpr C_String Mode_descriptions[] = {
+		static constexpr C_string Mode_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -773,21 +773,21 @@ namespace ml
 			Equation::FuncAdd,
 		};
 
-		static constexpr C_String Equation_names[] = {
+		static constexpr C_string Equation_names[] = {
 			"Multiply",
 			"Add",
 			"Subtract",
 			"Func Add",
 		};
 
-		static constexpr C_String Equation_raw_names[] = {
+		static constexpr C_string Equation_raw_names[] = {
 			"GL_MULT",
 			"GL_ADD",
 			"GL_SUBTRACT",
 			"GL_FUNC_ADD",
 		};
 
-		static constexpr C_String Equation_descriptions[] = {
+		static constexpr C_string Equation_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -819,7 +819,7 @@ namespace ml
 			Predicate::Always,
 		};
 
-		static constexpr C_String Predicate_names[] = {
+		static constexpr C_string Predicate_names[] = {
 			"Never",
 			"Less",
 			"Equal",
@@ -830,7 +830,7 @@ namespace ml
 			"Always",
 		};
 
-		static constexpr C_String Predicate_raw_names[] = {
+		static constexpr C_string Predicate_raw_names[] = {
 			"GL_NEVER",
 			"GL_LESS",
 			"GL_EQUAL",
@@ -841,7 +841,7 @@ namespace ml
 			"GL_ALWAYS",
 		};
 
-		static constexpr C_String Predicate_descriptions[] = {
+		static constexpr C_string Predicate_descriptions[] = {
 			"Never passes",
 			"Passes if the incoming value is less than the stored value",
 			"Passes if the incoming value is equal to the stored value",
@@ -883,7 +883,7 @@ namespace ml
 			Factor::SrcAlphaSaturate,
 		};
 
-		static constexpr C_String Factor_names[] = {
+		static constexpr C_string Factor_names[] = {
 			"Zero",
 			"One",
 			"Source Color",
@@ -897,7 +897,7 @@ namespace ml
 			"Source Alpha Saturate",
 		};
 
-		static constexpr C_String Factor_raw_names[] = {
+		static constexpr C_string Factor_raw_names[] = {
 			"GL_ZERO",
 			"GL_ONE",
 			"GL_SRC_COLOR",
@@ -911,7 +911,7 @@ namespace ml
 			"GL_SRC_ALPHA_SATURATE",
 		};
 
-		static constexpr C_String Factor_descriptions[] = {
+		static constexpr C_string Factor_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -950,7 +950,7 @@ namespace ml
 			Face::FrontAndBack,
 		};
 
-		static constexpr C_String Face_names[] = {
+		static constexpr C_string Face_names[] = {
 			"Front / Left",
 			"Front / Right",
 			"Back / Left",
@@ -962,7 +962,7 @@ namespace ml
 			"Front & Back",
 		};
 
-		static constexpr C_String Face_raw_names[] = {
+		static constexpr C_string Face_raw_names[] = {
 			"GL_FRONT_LEFT",
 			"GL_FRONT_RIGHT",
 			"GL_BACK_LEFT",
@@ -974,7 +974,7 @@ namespace ml
 			"GL_FRONT_AND_BACK",
 		};
 
-		static constexpr C_String Face_descriptions[] = {
+		static constexpr C_string Face_descriptions[] = {
 			"Front & Left Face Culling",
 			"Front & Right Face Culling",
 			"Back & Left Face Culling",
@@ -1011,7 +1011,7 @@ namespace ml
 			Type::HalfFloat,
 		};
 
-		static constexpr C_String Type_names[] = {
+		static constexpr C_string Type_names[] = {
 			"Byte",
 			"Unsigned Byte",
 			"Short",
@@ -1022,7 +1022,7 @@ namespace ml
 			"Half Float",
 		};
 
-		static constexpr C_String Type_raw_names[] = {
+		static constexpr C_string Type_raw_names[] = {
 			"GL_BYTE",
 			"GL_UNSIGNED_BYTE",
 			"GL_SHORT",
@@ -1033,7 +1033,7 @@ namespace ml
 			"GL_HALF_FLOAT",
 		};
 
-		static constexpr C_String Type_descriptions[] = {
+		static constexpr C_string Type_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1089,7 +1089,7 @@ namespace ml
 			Format::Depth24_Stencil8,
 		};
 
-		static constexpr C_String Format_names[] = {
+		static constexpr C_string Format_names[] = {
 			"Red",
 			"Green",
 			"Blue",
@@ -1109,7 +1109,7 @@ namespace ml
 			"Depth 24 / Stencil 8",
 		};
 
-		static constexpr C_String Format_raw_names[] = {
+		static constexpr C_string Format_raw_names[] = {
 			"GL_RED",
 			"GL_GREEN",
 			"GL_BLUE",
@@ -1129,7 +1129,7 @@ namespace ml
 			"GL_DEPTH24_STENCIL8",
 		};
 
-		static constexpr C_String Format_descriptions[] = {
+		static constexpr C_string Format_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1180,7 +1180,7 @@ namespace ml
 			GL::FrameID::DepthStencil,
 		};
 
-		static constexpr C_String FrameID_names[] = {
+		static constexpr C_string FrameID_names[] = {
 			"Color Encoding",
 			"Component Type",
 			"Red Size",
@@ -1194,7 +1194,7 @@ namespace ml
 			"Depth Stencil",
 		};
 
-		static constexpr C_String FrameID_raw_names[] = {
+		static constexpr C_string FrameID_raw_names[] = {
 			"GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING",
 			"GL_FRAMEBUFFER_ATTACHMENT_COMPONENT_TYPE",
 			"GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE",
@@ -1208,7 +1208,7 @@ namespace ml
 			"GL_DEPTH_STENCIL_ATTACHMENT",
 		};
 
-		static constexpr C_String FrameID_descriptions[] = {
+		static constexpr C_string FrameID_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1279,7 +1279,7 @@ namespace ml
 			TexParam::CubeMap_Negative_Z,
 		};
 
-		static constexpr C_String TexParam_names[] = {
+		static constexpr C_string TexParam_names[] = {
 			"Nearest",
 			"Linear",
 			"Nearest Mipmap Nearest",
@@ -1306,7 +1306,7 @@ namespace ml
 			"CubeMap Negative Z",
 		};
 
-		static constexpr C_String TexParam_raw_names[] = {
+		static constexpr C_string TexParam_raw_names[] = {
 			"GL_NEAREST",
 			"GL_LINEAR",
 			"GL_NEAREST_MIPMAP_NEAREST",
@@ -1333,7 +1333,7 @@ namespace ml
 			"GL_TEXTURE_CUBE_MAP_NEGATIVE_Z",
 		};
 
-		static constexpr C_String TexParam_descriptions[] = {
+		static constexpr C_string TexParam_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1394,7 +1394,7 @@ namespace ml
 			Pack::PackAlignment,
 		};
 
-		static constexpr C_String Pack_names[] = {
+		static constexpr C_string Pack_names[] = {
 			"Unpack Swap Bytes",
 			"Unpack Lsb First",
 			"Unpack Row Length",
@@ -1409,7 +1409,7 @@ namespace ml
 			"Pack Alignment",
 		};
 
-		static constexpr C_String Pack_raw_names[] = {
+		static constexpr C_string Pack_raw_names[] = {
 			"GL_UNPACK_SWAP_BYTES",
 			"GL_UNPACK_LSB_FIRST",
 			"GL_UNPACK_ROW_LENGTH",
@@ -1424,7 +1424,7 @@ namespace ml
 			"GL_PACK_ALIGNMENT",
 		};
 
-		static constexpr C_String Pack_descriptions[] = {
+		static constexpr C_string Pack_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1480,7 +1480,7 @@ namespace ml
 			ColorID::ColorAttachment15,
 		};
 
-		static constexpr C_String ColorID_names[] = {
+		static constexpr C_string ColorID_names[] = {
 			"Color Attachment 0",
 			"Color Attachment 1",
 			"Color Attachment 2",
@@ -1499,7 +1499,7 @@ namespace ml
 			"Color Attachment 15",
 		};
 
-		static constexpr C_String ColorID_raw_names[] = {
+		static constexpr C_string ColorID_raw_names[] = {
 			"GL_COLOR_ATTACHMENT0",
 			"GL_COLOR_ATTACHMENT1",
 			"GL_COLOR_ATTACHMENT2",
@@ -1518,7 +1518,7 @@ namespace ml
 			"GL_COLOR_ATTACHMENT15",
 		};
 
-		static constexpr C_String ColorID_descriptions[] = {
+		static constexpr C_string ColorID_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1610,7 +1610,7 @@ namespace ml
 			TexID::Texture31,
 		};
 
-		static constexpr C_String TexID_names[] = {
+		static constexpr C_string TexID_names[] = {
 			"Texture 0",
 			"Texture 1",
 			"Texture 2",
@@ -1645,7 +1645,7 @@ namespace ml
 			"Texture 31",
 		};
 
-		static constexpr C_String TexID_raw_names[] = {
+		static constexpr C_string TexID_raw_names[] = {
 			"GL_TEXTURE0",
 			"GL_TEXTURE1",
 			"GL_TEXTURE2",
@@ -1680,7 +1680,7 @@ namespace ml
 			"GL_TEXTURE31",
 		};
 
-		static constexpr C_String TexID_descriptions[] = {
+		static constexpr C_string TexID_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1756,7 +1756,7 @@ namespace ml
 			DrawBuffer::DrawBuffer15,
 		};
 
-		static constexpr C_String DrawBuffer_names[] = {
+		static constexpr C_string DrawBuffer_names[] = {
 			"Draw Buffer 0",
 			"Draw Buffer 1",
 			"Draw Buffer 2",
@@ -1775,7 +1775,7 @@ namespace ml
 			"Draw Buffer 15",
 		};
 
-		static constexpr C_String DrawBuffer_raw_names[] = {
+		static constexpr C_string DrawBuffer_raw_names[] = {
 			"GL_DRAW_BUFFER0",
 			"GL_DRAW_BUFFER1",
 			"GL_DRAW_BUFFER2",
@@ -1794,7 +1794,7 @@ namespace ml
 			"GL_DRAW_BUFFER15",
 		};
 
-		static constexpr C_String DrawBuffer_descriptions[] = {
+		static constexpr C_string DrawBuffer_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1835,7 +1835,7 @@ namespace ml
 			Mask::ColorBufferBit,
 		};
 
-		static constexpr C_String Mask_names[] = {
+		static constexpr C_string Mask_names[] = {
 			"Context Core Profile Bit",
 			"Context Compat Profile Bit",
 			"Context Flag Debug Bit",
@@ -1844,7 +1844,7 @@ namespace ml
 			"Color Buffer Bit",
 		};
 
-		static constexpr C_String Mask_raw_names[] = {
+		static constexpr C_string Mask_raw_names[] = {
 			"GL_CONTEXT_CORE_PROFILE_BIT",
 			"GL_CONTEXT_COMPATIBILITY_PROFILE_BIT",
 			"GL_CONTEXT_FLAG_DEBUG_BIT",
@@ -1853,7 +1853,7 @@ namespace ml
 			"GL_COLOR_BUFFER_BIT",
 		};
 
-		static constexpr C_String Mask_descriptions[] = {
+		static constexpr C_string Mask_descriptions[] = {
 			"No Description",
 			"No Description",
 			"No Description",
@@ -1902,17 +1902,17 @@ namespace ml
 			return index_of(value);
 		}
 
-		template <class T> static constexpr C_String name_of(T value)
+		template <class T> static constexpr C_string name_of(T value)
 		{
 			return name_of(value);
 		}
 
-		template <class T> static constexpr C_String raw_name_of(T value)
+		template <class T> static constexpr C_string raw_name_of(T value)
 		{
 			return raw_name_of(value);
 		}
 
-		template <class T> static constexpr C_String desc_of(T value)
+		template <class T> static constexpr C_string desc_of(T value)
 		{
 			return desc_of(value);
 		}

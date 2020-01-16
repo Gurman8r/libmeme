@@ -9,23 +9,22 @@ project "libmeme"
 	kind			"SharedLib"
 	language		"C++"
 	cppdialect 		"C++17"
+	rtti			"Off"
 	staticruntime	"Off"
 	systemversion	"latest"
 	dependson {
 		"glfw", "imgui", "lua", "raknet",
 	}
 	defines {
-		"ML_AUDIO_EXPORTS",
 		"ML_CORE_EXPORTS",
 		"ML_EDITOR_EXPORTS",
 		"ML_ENGINE_EXPORTS",
-		"ML_RENDERER_EXPORTS",
 		"ML_NETWORK_EXPORTS",
 		"ML_PLATFORM_EXPORTS",
+		"ML_RENDERER_EXPORTS",
 		"ML_INI_FILENAME=\"../../../libmeme.ini\"",
 		"ML_IMPL_NEW=std::malloc",
 		"ML_IMPL_DELETE=std::free",
-		"ML_IMPL_PLATFORM_GLFW",
 		"ML_IMPL_RENDERER_OPENGL",
 		"ML_IMPL_OPENGL_LOADER_GLEW",
 		"GLEW_STATIC",

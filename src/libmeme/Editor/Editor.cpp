@@ -7,11 +7,7 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
-
-#ifdef ML_IMPL_PLATFORM_GLFW
-#	include <imgui/examples/imgui_impl_glfw.h>
-#else
-#endif
+#include <imgui/examples/imgui_impl_glfw.h>
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 #	include <imgui/examples/imgui_impl_opengl3.h>
@@ -30,7 +26,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Editor::startup(void * window)
+	bool Editor::startup(StartupSettings const & settings)
 	{
 		// Create ImGui Context
 		/* * * * * * * * * * * * * * * * * * * * */
@@ -57,30 +53,26 @@ namespace ml
 
 		// Style
 		static const std::string imgui_style{ "Dark" };
-		switch (Hash(util::to_lower(imgui_style)))
+		switch (hashof(util::to_lower(imgui_style)))
 		{
-		case Hash("light"): ImGui::StyleColorsLight(); break;
-		case Hash("dark"): ImGui::StyleColorsDark(); break;
-		case Hash("classic"): ImGui::StyleColorsClassic(); break;
+		case hashof("light"): ImGui::StyleColorsLight(); break;
+		case hashof("dark"): ImGui::StyleColorsDark(); break;
+		case hashof("classic"): ImGui::StyleColorsClassic(); break;
 		}
 		
-		// Startup
-#ifdef ML_IMPL_PLATFORM_GLFW
-#	ifdef ML_IMPL_RENDERER_OPENGL
-		if (!ImGui_ImplGlfw_InitForOpenGL(static_cast<struct GLFWwindow *>(window), true))
+		// Init Platform
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)settings.window, settings.install_callbacks))
 		{
-			return Debug::log_error("Failed initializing ImGui Platform");
+			return Debug::log_error("Failed initializing ImGui platform");
 		}
 
+		// Init Renderer
+#ifdef ML_IMPL_RENDERER_OPENGL
 		if (!ImGui_ImplOpenGL3_Init("#version 130"))
 		{
-			return Debug::log_error("Failed initializing ImGui Renderer");
+			return Debug::log_error("Failed initializing ImGui renderer");
 		}
-#	else
-		// 
-#	endif
 #else
-		// 
 #endif
 		return true;
 	}
@@ -90,14 +82,8 @@ namespace ml
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #else
-		// 
 #endif
-
-#ifdef ML_IMPL_PLATFORM_GLFW
 		ImGui_ImplGlfw_NewFrame();
-#else
-		// 
-#endif
 		ImGui::NewFrame();
 	}
 
@@ -108,7 +94,6 @@ namespace ml
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #else
-		// 
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -124,20 +109,13 @@ namespace ml
 	void Editor::shutdown()
 	{
 		s_dockspace.dispose();
-
 		s_mainMenuBar.dispose();
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #else
-		// 
 #endif
-
-#ifdef ML_IMPL_PLATFORM_GLFW
 		ImGui_ImplGlfw_Shutdown();
-#else
-		// 
-#endif
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

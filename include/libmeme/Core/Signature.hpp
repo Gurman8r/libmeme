@@ -9,13 +9,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define ML_SIGNATURE_VIEW "std::basic_string_view<char,struct std::char_traits<char> >"
 
-#if defined(ML_CC_MSC)
+#if defined(ML_CC_MSVC)
 #	define ML_SIGNATURE					__FUNCSIG__
 #	define ML_TYPE_SIGNATURE_PREFIX		"class " ML_SIGNATURE_VIEW " __cdecl ml::signature::type<"
 #	define ML_TYPE_SIGNATURE_SUFFIX		">(void)"

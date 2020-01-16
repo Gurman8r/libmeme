@@ -15,7 +15,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(void * window);
+		struct StartupSettings
+		{
+			void *	window;
+			bool	install_callbacks;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool startup(StartupSettings const & settings);
 
 		static void new_frame();
 

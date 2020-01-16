@@ -37,74 +37,62 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr std::string_view trim_front(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_prefix(std::string_view const & s, std::string_view const & pre)
 		{
-			return ((!value.empty() && (value.front() == ' ' || value.front() == '\t'))
-				? trim_front(value.substr(1))
-				: value
+			return ((s.size() >= pre.size() && (s.substr(0, pre.size()) == pre))
+				? s.substr(pre.size())
+				: s
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view trim_back(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_suffix(std::string_view const & s, std::string_view const & suf)
 		{
-			return ((value.size() && (value.back() == ' ' || value.back() == '\t'))
-				? trim_back(value.substr(0, value.size() - 1))
-				: value
+			return ((s.size() >= suf.size()) && ((s.substr(s.size() - suf.size(), suf.size()) == suf))
+				? s.substr(0, (s.size() - suf.size()))
+				: s
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view trim(std::string_view const & value)
-		{
-			return trim_front(trim_back(value));
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr std::string_view filter_prefix(std::string_view const & value, std::string_view const & pre)
+		ML_NODISCARD static constexpr std::string_view filter_type(std::string_view const & s)
 		{
-			return ((value.size() >= pre.size() && (value.substr(0, pre.size()) == pre))
-				? value.substr(pre.size())
-				: value
-			);
-		}
-
-		ML_NODISCARD static constexpr std::string_view filter_suffix(std::string_view const & value, std::string_view const & suf)
-		{
-			return ((value.size() >= suf.size()) && ((value.substr(value.size() - suf.size(), suf.size()) == suf))
-				? value.substr(0, (value.size() - suf.size()))
-				: value
-			);
-		}
-
-		ML_NODISCARD static constexpr std::string_view filter_signature_type(std::string_view const & value)
-		{
-			return filter_suffix(filter_prefix(value, 
+			return filter_suffix(filter_prefix(s, 
 				std::get<0>(signature::detail::type)),
 				std::get<1>(signature::detail::type)
 			);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_namespace(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_value(std::string_view const & s)
 		{
-			return value.substr(value.find_first_of(':') + 2);
+			return s; // NYI
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_struct(std::string_view const & value)
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static constexpr std::string_view filter_namespace(std::string_view const & s)
 		{
-			return filter_prefix(value, "struct ");
+			return s.substr(s.find_first_of(':') + 2);
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_class(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_struct(std::string_view const & s)
 		{
-			return filter_prefix(value, "class ");
+			return filter_prefix(s, "struct ");
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_constexpr(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_class(std::string_view const & s)
 		{
-			return filter_prefix(value, "constexpr ");
+			return filter_prefix(s, "class ");
 		}
 
-		ML_NODISCARD static constexpr std::string_view filter_const(std::string_view const & value)
+		ML_NODISCARD static constexpr std::string_view filter_constexpr(std::string_view const & s)
 		{
-			return filter_prefix(value, "const ");
+			return filter_prefix(s, "constexpr ");
+		}
+
+		ML_NODISCARD static constexpr std::string_view filter_const(std::string_view const & s)
+		{
+			return filter_prefix(s, "const ");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -112,15 +100,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <> struct nameof<int64_t>
+#ifdef ML_CC_MSVC
+	template <> struct nameof<int64_t> final
 	{
-		static constexpr auto value{ "long long" }; // __int64
+		static constexpr auto value{ "long long"sv };
 	};
 
-	template <> struct nameof<uint64_t>
+	template <> struct nameof<uint64_t> final
 	{
-		static constexpr auto value{ "unsigned long long" }; // unsigned __int64
+		static constexpr auto value{ "unsigned long long"sv };
 	};
+#endif
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

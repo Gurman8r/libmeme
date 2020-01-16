@@ -1,7 +1,7 @@
 #ifndef _ML_BINDER_HPP_
 #define _ML_BINDER_HPP_
 
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 #include <libmeme/Core/NonCopyable.hpp>
 
 // Named Binder

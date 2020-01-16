@@ -1,8 +1,8 @@
 #ifndef _ML_SCOPE_GUARD_HPP_
 #define _ML_SCOPE_GUARD_HPP_
 
+#include <libmeme/Common.hpp>
 #include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/Core.hpp>
 #include <libmeme/Core/NonCopyable.hpp>
 
 #define ML_SCOPE_EXIT \

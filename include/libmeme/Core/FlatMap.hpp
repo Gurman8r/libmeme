@@ -7,21 +7,26 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// Basic Flat Map Traits
-	template <class Key, class Value, class Compare, template <class> class Alloc, bool Multi
+	// BASIC FLAT MAP TRAITS
+	template <class _Kty,			// key type
+		class _Ty,					// value type
+		class _Pr,					// key comparator predicate type
+		template <class> class _Al,	// allocator type (same for key and value)
+		bool _Mfl					// true if multiple equivalent keys are permitted (wip)
 	> struct basic_flat_map_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_type = typename Key;
+		using key_type = typename _Kty;
 		
-		using value_type = typename Value;
+		using value_type = typename _Ty;
 		
-		using compare_type = typename Compare;
+		using compare_type = typename _Pr;
 
-		ML_USING_X allocator_type = typename Alloc<X>;
+		template <class T
+		> using allocator_type = typename _Al<T>;
 
-		static constexpr bool multi{ Multi };
+		static constexpr bool multi{ _Mfl };
 
 		using difference_type = typename ptrdiff_t;
 		
@@ -56,7 +61,7 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// Basic Flat Map
+	// BASIC FLAT MAP
 	template <class Traits
 	> struct basic_flat_map
 	{
@@ -365,7 +370,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type const & for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
+		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
 		{
 			if (!empty())
 			{
@@ -374,17 +379,17 @@ namespace ml::ds
 					std::invoke(fn, *first, *this->get(first));
 				}
 			}
-			return (*this);
+			return first;
 		}
 
 		template <class Fn
-		> inline self_type const & for_each(const_key_iterator first, Fn fn) const
+		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
 		{
 			return this->for_each(first, m_storage.first.end(), fn);
 		}
 
 		template <class Fn
-		> inline self_type const & for_each(Fn fn) const
+		> inline const_key_iterator for_each(Fn fn) const
 		{
 			return this->for_each(m_storage.first.begin(), fn);
 		}
@@ -392,7 +397,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type & for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
+		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
 		{
 			if (!empty() && (0 < count))
 			{
@@ -402,11 +407,11 @@ namespace ml::ds
 					++first;
 				} while (0 < count);
 			}
-			return (*this);
+			return first;
 		}
 
 		template <class Fn
-		> inline self_type & for_each_n(ptrdiff_t count, Fn fn)
+		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn)
 		{
 			return this->for_each_n(m_storage.first.begin(), count, fn);
 		}
@@ -414,7 +419,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type const & for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
+		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
 		{
 			if (!empty() && (0 < count))
 			{
@@ -424,13 +429,30 @@ namespace ml::ds
 					++first;
 				} while (0 < count);
 			}
-			return (*this);
+			return first;
 		}
 
 		template <class Fn
-		> inline self_type const & for_each_n(ptrdiff_t count, Fn fn) const
+		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
 		{
 			return this->for_each_n(m_storage.first.begin(), count, fn);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool operator==(self_type const & other) const
+		{
+			return (m_storage == other.m_storage);
+		}
+
+		ML_NODISCARD inline bool operator!=(self_type const & other) const
+		{
+			return (m_storage != other.m_storage);
+		}
+
+		ML_NODISCARD inline bool operator<(self_type const & other) const
+		{
+			return (m_storage < other.m_storage);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -443,16 +465,18 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// Flat Map
-	template <class Key, class Value, class Compare = std::less<Key>, template <class> class Alloc = std::allocator
+	// FLAT MAP
+	template <class _Kty, class _Ty,
+		class _Pr = std::less<_Kty>,
+		template <class> class _Al = std::allocator
 	> struct flat_map : basic_flat_map<
-		basic_flat_map_traits<Key, Value, Compare, Alloc, false>
+		basic_flat_map_traits<_Kty, _Ty, _Pr, _Al, false>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type						= typename flat_map<Key, Value, Compare>;
-		using traits_type					= typename basic_flat_map_traits<Key, Value, Compare, Alloc, false>;
+		using self_type						= typename flat_map<_Kty, _Ty, _Pr>;
+		using traits_type					= typename basic_flat_map_traits<_Kty, _Ty, _Pr, _Al, false>;
 		using base_type						= typename basic_flat_map<traits_type>;
 		using key_type						= typename base_type::key_type;
 		using value_type					= typename base_type::value_type;
@@ -560,8 +584,8 @@ namespace ml::ds
 			}
 		}
 
-		template <class Key, class ... Args
-		> inline std::pair<iterator_pair, bool> insert(Key && key, Args && ... args)
+		template <class ... Args
+		> inline std::pair<iterator_pair, bool> insert(key_type && key, Args && ... args)
 		{
 			if (auto const k{ m_storage.first.insert(std::move(key)) }; k.second)
 			{

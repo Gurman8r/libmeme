@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static EventListener * add_listener(int32_t type, EventListener * listener);
+		static bool add_listener(int32_t type, EventListener * listener);
 		
 		static void fire_event(Event const & value);
 
@@ -30,7 +30,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline EventListener * add_listener(EventListener * listener)
+		> static inline bool add_listener(EventListener * listener)
 		{
 			return add_listener(Ev::ID, listener);
 		}

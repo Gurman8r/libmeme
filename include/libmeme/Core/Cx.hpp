@@ -18,7 +18,7 @@ namespace ml::cx
 	{
 		using self_type = typename static_string;
 		using elem_type = typename char;
-		using data_type = typename C_String;
+		using data_type = typename C_string;
 		using size_type = typename size_t;
 
 		constexpr static_string() noexcept
@@ -118,7 +118,7 @@ namespace ml::cx
 		constexpr auto end()	const	-> const_iterator	{ return m_data.end(); }
 		constexpr auto front()			-> reference		{ return m_data.front(); }
 		constexpr auto front()	const	-> const_reference	{ return m_data.front(); }
-		constexpr auto hash()	const	-> hash_t			{ return m_data.hash(); }
+		constexpr auto hash()	const	-> size_t			{ return m_data.hash(); }
 		constexpr auto size()	const	-> size_t			{ return m_size; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -127,7 +127,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				ML_THROW std::range_error("Index past end of vector");
+				ML_THROW(std::range_error("Index past end of vector"));
 			}
 			return m_data.at(index);
 		}
@@ -136,7 +136,7 @@ namespace ml::cx
 		{
 			if (index >= m_size)
 			{
-				ML_THROW std::range_error("Index past end of vector");
+				ML_THROW(std::range_error("Index past end of vector"));
 			}
 			return m_data.at(index);
 		}
@@ -145,7 +145,7 @@ namespace ml::cx
 		{
 			if (m_size >= _Cap)
 			{
-				ML_THROW std::range_error("Index out of range");
+				ML_THROW(std::range_error("Index out of range"));
 			}
 			else
 			{
@@ -321,7 +321,7 @@ namespace ml::cx
 		constexpr auto end()	const	-> const_iterator	{ return m_data.end(); }
 		constexpr auto front()			-> reference		{ return m_data.front(); }
 		constexpr auto front()	const	-> const_reference	{ return m_data.front(); }
-		constexpr auto hash()	const	-> hash_t			{ return m_data.hash(); }
+		constexpr auto hash()	const	-> size_t			{ return m_data.hash(); }
 		constexpr auto size()	const	-> size_t			{ return m_data.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

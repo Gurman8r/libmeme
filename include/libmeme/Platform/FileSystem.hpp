@@ -1,6 +1,7 @@
 #ifndef _ML_FILE_SYSTEM_HPP_
 #define _ML_FILE_SYSTEM_HPP_
 
+#include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
@@ -16,7 +17,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API FS final
+	struct ML_PLATFORM_API FS final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,13 +25,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static path_t current_path();
+		ML_NODISCARD static path_t current_path();
 
-		static void current_path(path_t const & value);
+		ML_NODISCARD static void current_path(path_t const & value);
 
-		static path_t path_to(path_t const & value);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static path_t const & root_path();
+		ML_NODISCARD static path_t path_to(path_t const & value);
+
+		ML_NODISCARD static path_t const & root_path();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -39,6 +42,11 @@ namespace ml
 		ML_NODISCARD static std::optional<file_t> read_file(path_t const & path);
 
 		ML_NODISCARD static std::string get_file_contents(path_t const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static path_t s_root;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

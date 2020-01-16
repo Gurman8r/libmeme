@@ -2,8 +2,8 @@
 #define _ML_SHARED_LIBRARY_HPP_
 
 #include <libmeme/Platform/Export.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
-#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -53,27 +53,39 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return good(); }
+		ML_NODISCARD inline operator bool() const noexcept
+		{
+			return good();
+		}
 
-		inline auto address() const noexcept { return std::addressof(m_instance); }
+		ML_NODISCARD inline decltype(auto) address() const noexcept
+		{
+			return std::addressof(m_instance);
+		}
 
-		inline bool good() const noexcept { return m_instance; }
+		ML_NODISCARD inline bool good() const noexcept
+		{
+			return m_instance;
+		}
 
-		inline auto functions() const noexcept -> functions_t const & { return m_functions; }
+		ML_NODISCARD inline functions_t const & functions() const noexcept
+		{
+			return m_functions;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool operator==(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator==(SharedLibrary const & other) const
 		{
-			return (m_instance == other.m_instance);
+			return !(*this < other) && !(other < *this);
 		}
 
-		inline bool operator!=(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator!=(SharedLibrary const & other) const
 		{
 			return !(*this == other);
 		}
 
-		inline bool operator<(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator<(SharedLibrary const & other) const
 		{
 			return (m_instance < other.m_instance);
 		}

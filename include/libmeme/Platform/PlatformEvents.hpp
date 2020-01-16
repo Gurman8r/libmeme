@@ -1,10 +1,10 @@
-#ifndef _ML_WINDOW_EVENTS_HPP_
-#define _ML_WINDOW_EVENTS_HPP_
+#ifndef _ML_PLATFORM_EVENTS_HPP_
+#define _ML_PLATFORM_EVENTS_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Core/Event.hpp>
-#include <libmeme/Core/BitMask.hpp>
+#include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
 
@@ -33,7 +33,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum class WindowEventType
+	enum class PlatformEventType
 	{
 		MIN_WINDOW_EVENT = Event::EV_PLATFORM,
 
@@ -56,18 +56,18 @@ namespace ml
 	};
 
 	static_assert(
-		(int32_t)WindowEventType::MAX_WINDOW_EVENT < 
-		(int32_t)WindowEventType::MIN_WINDOW_EVENT + Event::MAX_LIBRARY_EVENTS,
+		(int32_t)PlatformEventType::MAX_WINDOW_EVENT < 
+		(int32_t)PlatformEventType::MIN_WINDOW_EVENT + Event::MAX_LIBRARY_EVENTS,
 		"too many library event types specified in " __FILE__
 	);
 
-	template <WindowEventType ID> struct WindowEvent : public T_Event<WindowEventType, ID>
+	template <PlatformEventType ID> struct PlatformEvent : public T_Event<PlatformEventType, ID>
 	{
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct CharEvent final : public WindowEvent<WindowEventType::EV_Char>
+	struct CharEvent final : public PlatformEvent<PlatformEventType::EV_Char>
 	{
 		uint32_t const value;
 
@@ -79,7 +79,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct CursorEnterEvent final : public WindowEvent<WindowEventType::EV_CursorEnter>
+	struct CursorEnterEvent final : public PlatformEvent<PlatformEventType::EV_CursorEnter>
 	{
 		int32_t const entered;
 
@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct CursorPosEvent final : public WindowEvent<WindowEventType::EV_CursorPos>
+	struct CursorPosEvent final : public PlatformEvent<PlatformEventType::EV_CursorPos>
 	{
 		float64_t const x;
 		float64_t const y;
@@ -105,7 +105,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct KeyEvent final : public WindowEvent<WindowEventType::EV_Key>
+	struct KeyEvent final : public PlatformEvent<PlatformEventType::EV_Key>
 	{
 		int32_t const key;
 		int32_t const scan;
@@ -150,7 +150,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct MouseEvent final : public WindowEvent<WindowEventType::EV_Mouse>
+	struct MouseEvent final : public PlatformEvent<PlatformEventType::EV_Mouse>
 	{
 		int32_t const key;
 		int32_t const action;
@@ -166,7 +166,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ScrollEvent final : public WindowEvent<WindowEventType::EV_Scroll>
+	struct ScrollEvent final : public PlatformEvent<PlatformEventType::EV_Scroll>
 	{
 		float64_t const x;
 		float64_t const y;
@@ -180,7 +180,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct FrameSizeEvent final : public WindowEvent<WindowEventType::EV_FrameSize>
+	struct FrameSizeEvent final : public PlatformEvent<PlatformEventType::EV_FrameSize>
 	{
 		int32_t const width;
 		int32_t const height;
@@ -194,19 +194,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowCloseEvent final : public WindowEvent<WindowEventType::EV_WindowClose>
+	struct WindowCloseEvent final : public PlatformEvent<PlatformEventType::EV_WindowClose>
 	{
 		WindowCloseEvent() {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowErrorEvent final : public WindowEvent<WindowEventType::EV_WindowError>
+	struct WindowErrorEvent final : public PlatformEvent<PlatformEventType::EV_WindowError>
 	{
 		int32_t const code;
-		C_String const desc;
+		C_string const desc;
 
-		constexpr WindowErrorEvent(int32_t code, C_String desc) noexcept
+		constexpr WindowErrorEvent(int32_t code, C_string desc) noexcept
 			: code{ code }
 			, desc{ desc }
 		{
@@ -215,7 +215,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowFocusEvent final : public WindowEvent<WindowEventType::EV_WindowFocus>
+	struct WindowFocusEvent final : public PlatformEvent<PlatformEventType::EV_WindowFocus>
 	{
 		int32_t const focused;
 		
@@ -227,14 +227,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowKillEvent final : public WindowEvent<WindowEventType::EV_WindowKill>
+	struct WindowKillEvent final : public PlatformEvent<PlatformEventType::EV_WindowKill>
 	{
 		constexpr WindowKillEvent() {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowPosEvent final : public WindowEvent<WindowEventType::EV_WindowPos>
+	struct WindowPosEvent final : public PlatformEvent<PlatformEventType::EV_WindowPos>
 	{
 		int32_t const x;
 		int32_t const y;
@@ -248,7 +248,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowSizeEvent final : public WindowEvent<WindowEventType::EV_WindowSize>
+	struct WindowSizeEvent final : public PlatformEvent<PlatformEventType::EV_WindowSize>
 	{
 		int32_t const width;
 		int32_t const height;
@@ -262,7 +262,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowFullscreenEvent final : public WindowEvent<WindowEventType::EV_WindowFullscreen>
+	struct WindowFullscreenEvent final : public PlatformEvent<PlatformEventType::EV_WindowFullscreen>
 	{
 		int32_t const value;
 		
@@ -275,4 +275,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_WINDOW_EVENTS_HPP_
+#endif // !_ML_PLATFORM_EVENTS_HPP_

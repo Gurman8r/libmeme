@@ -2,7 +2,7 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {
@@ -14,7 +14,7 @@ namespace ml
 
 		struct Source final
 		{
-			C_String vs{ nullptr }, gs{ nullptr }, fs{ nullptr };
+			C_string vs{ nullptr }, gs{ nullptr }, fs{ nullptr };
 
 			constexpr Source() noexcept = default;
 		};
@@ -116,7 +116,7 @@ namespace ml
 
 		int32_t get_uniform_location(std::string const & value);
 
-		int32_t compile(C_String vs, C_String gs, C_String fs);
+		int32_t compile(C_string vs, C_string gs, C_string fs);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -1,6 +1,6 @@
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 #	include <dirent/include/dirent.h>
 #else
 #	include <dirent.h>
@@ -8,6 +8,8 @@
 
 namespace ml
 {
+	path_t FS::s_root{};
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	path_t FS::current_path()
@@ -17,20 +19,27 @@ namespace ml
 
 	void FS::current_path(path_t const & value)
 	{
-		static bool once{ 0 }; if (!once && (once = true)) { root_path(); }
-
+		if (s_root.empty())
+		{
+			s_root = current_path();
+		}
 		return std::filesystem::current_path(value);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	path_t FS::path_to(path_t const & value)
 	{
-		return path_t{ root_path().string() + '/' + value.string() };
+		return path_t{ root_path().string() + "/"s + value.string() };
 	}
 
 	path_t const & FS::root_path()
 	{
-		static path_t const temp{ std::filesystem::current_path() };
-		return temp;
+		if (s_root.empty())
+		{
+			s_root = current_path();
+		}
+		return s_root;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,20 +49,18 @@ namespace ml
 		if (::DIR * dir{ ::opendir(path.string().c_str()) })
 		{
 			directory_t temp{};
-			
 			while (::dirent * ent{ ::readdir(dir) })
 			{
 				temp.at(([ent]() {
 					switch (ent->d_type)
 					{
-					case DT_DIR: return '/';
-					case DT_REG: return ' ';
-					case DT_LNK: return '@';
-					default: return '*';
+					case DT_DIR	: return '/';
+					case DT_REG	: return ' ';
+					case DT_LNK	: return '@';
+					default		: return '*';
 					}
-				})()).push_back(path_t{ ent->d_name });
+				})()).emplace_back(path_t{ ent->d_name });
 			}
-			
 			return std::make_optional(temp);
 		}
 		return std::nullopt;
@@ -64,21 +71,15 @@ namespace ml
 		if (std::ifstream in{ path, std::ios_base::binary })
 		{
 			file_t temp{};
-
 			in.seekg(0, std::ios_base::end);
-			
 			std::streamsize size;
 			if ((size = in.tellg()) > 0)
 			{
 				in.seekg(0, std::ios_base::beg);
-				
 				temp.resize(static_cast<size_t>(size));
-				
 				in.read(&temp[0], size);
 			}
-
 			in.close();
-
 			return std::make_optional(temp);
 		}
 		return std::nullopt;
@@ -86,8 +87,14 @@ namespace ml
 
 	std::string FS::get_file_contents(path_t const & path)
 	{
-		auto const o{ FS::read_file(path.string()) };
-		return o ? std::string{ o->cbegin(), o->cend() } : std::string{};
+		if (auto const o{ FS::read_file(path.string()) })
+		{
+			return std::string{ o->cbegin(), o->cend() };
+		}
+		else
+		{
+			return std::string{};
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1,34 +1,33 @@
 #ifndef _ML_CONTEXT_SETTINGS_HPP_
 #define _ML_CONTEXT_SETTINGS_HPP_
 
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct Client_API final
+	{
+		enum API { Unknown, OpenGL, Vulkan, DirectX };
+
+		enum Profile { Any, Core, Compat, Debug };
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct ContextSettings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum API : uint32_t
-		{
-			Unknown, OpenGL, Vulkan, DirectX,
-		};
-
-		enum Profile : uint32_t
-		{
-			Any, Core, Compat, Debug,
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		uint32_t	api			{ API::Unknown };
-		uint32_t	major		{ 1 };
-		uint32_t	minor		{ 1 };
-		uint32_t	profile		{ Profile::Compat };
-		uint32_t	depthBits	{ 32 };
-		uint32_t	stencilBits	{ 8 };
+		int32_t		api			{ Client_API::Unknown };
+		int32_t		major		{ 0 };
+		int32_t		minor		{ 0 };
+		int32_t		profile		{ Client_API::Any };
+		int32_t		depthBits	{ 0 };
+		int32_t		stencilBits	{ 0 };
 		bool		multisample	{ false };
-		bool		srgbCapable	{ false };
+		bool		sRGBCapable	{ false };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,6 +35,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ... Args
+	> ML_NODISCARD static constexpr auto make_context_settings(Args && ... args)
+	{
+		return ContextSettings{ std::forward<Args>(args)... };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_CONTEXT_SETTINGS_HPP_

@@ -3,7 +3,7 @@
 
 #include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml
 {

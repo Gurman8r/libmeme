@@ -10,6 +10,7 @@ project "main"
 	language		"C++"
 	cppdialect 		"C++17"
 	staticruntime	"Off"
+	rtti			"Off"
 	systemversion	"latest"
 	dependson {
 		"libmeme",
@@ -33,12 +34,12 @@ project "main"
 	}
 	
 	filter { "configurations:Debug" }
+		kind "ConsoleApp"
 		symbols "On"
-		kind	"ConsoleApp"
 	
 	filter { "configurations:Release" } 
+		kind "WindowedApp"
 		optimize "Speed"
-		kind	"WindowedApp"
 	
 	filter { "system:Windows" }
 		postbuildcommands { "%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.exe %{bin_out}" }

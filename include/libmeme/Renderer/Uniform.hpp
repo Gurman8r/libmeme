@@ -38,20 +38,56 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform();
-		Uniform(storage_type const & storage);
-		Uniform(storage_type && storage) noexcept;
-		Uniform(Uniform const & other);
-		Uniform(Uniform && other) noexcept;
-		~Uniform() noexcept;
+		Uniform() noexcept : m_storage{} {}
+
+		~Uniform() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform & operator=(Uniform const & other);
+		explicit Uniform(storage_type const & storage)
+			: m_storage{ storage }
+		{
+		}
 
-		Uniform & operator=(Uniform && other) noexcept;
+		explicit Uniform(storage_type && storage) noexcept
+			: m_storage{ std::move(storage) }
+		{
+		}
 
-		void swap(Uniform & other) noexcept;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Uniform(Uniform const & other)
+			: m_storage{ other.m_storage }
+		{
+		}
+
+		Uniform(Uniform && other) noexcept
+			: m_storage{ std::move(other.m_storage) }
+		{
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline Uniform & operator=(Uniform const & other)
+		{
+			Uniform temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		inline Uniform & operator=(Uniform && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
+
+		inline void swap(Uniform & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				alg::swap(m_storage, other.m_storage);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,11 +107,6 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline size_t index() const noexcept
-		{
-			return data().index();
-		}
 
 		ML_NODISCARD inline bool is_variable() const noexcept
 		{
@@ -99,7 +130,7 @@ namespace ml
 			{
 				if (auto const & f{ std::get<function_t>(data()) })
 				{
-					return std::make_optional(std::invoke(f));
+					return std::make_optional(std::invoke(std::get<function_t>(data())));
 				}
 			}
 			return std::nullopt;
@@ -114,7 +145,10 @@ namespace ml
 			{
 				return std::make_optional<T>(std::get<T>(*v));
 			}
-			return std::nullopt;
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -140,7 +174,7 @@ namespace ml
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return Uniform{ std::make_tuple(
-			typeof_v<Type>, std::move(name), std::forward<Args>(args)...
+			typeof<Type>{}, std::move(name), std::forward<Args>(args)...
 		) };
 	}
 

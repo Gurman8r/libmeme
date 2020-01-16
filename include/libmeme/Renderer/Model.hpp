@@ -2,7 +2,7 @@
 #define _ML_MODEL_HPP_
 
 #include <libmeme/Renderer/Mesh.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {

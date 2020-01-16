@@ -2,7 +2,7 @@
 #define _ML_MATERIAL_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {

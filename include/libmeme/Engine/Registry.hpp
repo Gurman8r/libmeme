@@ -37,7 +37,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using code_t = typename hash_t;
+		using code_t = typename size_t;
 		using name_t = typename std::string_view;
 		using info_t = typename std::string_view;
 		using func_t = typename std::function<std::optional<std::any>()>;
@@ -76,7 +76,7 @@ namespace ml
 
 		template <class T> inline std::optional<std::any> generate() const
 		{
-			return generate(hashof_v<T>);
+			return generate(hashof_t<T>);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,7 +95,7 @@ namespace ml
 		> inline bool registrate(Info && info, Func && func)
 		{
 			return registrate(
-				nameof_v<T>, std::forward<Info>(info), hashof_v<T>, std::forward<Func>(func)
+				nameof_t<T>, std::forward<Info>(info), hashof_t<T>, std::forward<Func>(func)
 			);
 		}
 

@@ -8,7 +8,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API Timer final : public Trackable
+	struct ML_CORE_API Timer final : public Trackable, public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -18,23 +18,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Timer(bool startMe) noexcept
-			: m_running{ startMe }
+		Timer(bool startMe = false) noexcept
+			: m_running	{ startMe }
 			, m_previous{ Clock::now() }
-			, m_current{ m_previous }
-			, m_elapsed{ 0.0 }
+			, m_current	{ m_previous }
+			, m_elapsed	{ 0.0 }
 		{
 		}
-
-		Timer(Timer const & other) noexcept
-			: m_running{ other.m_running }
-			, m_previous{ other.m_previous }
-			, m_current{ other.m_current }
-			, m_elapsed{ other.m_elapsed }
-		{
-		}
-
-		~Timer() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

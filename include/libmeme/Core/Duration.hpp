@@ -1,21 +1,21 @@
 #ifndef _ML_DURATION_HPP_
 #define _ML_DURATION_HPP_
 
-#include <libmeme/Core/Ratio.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using Nanoseconds	= typename std::chrono::duration<float64_t, Nano>;
-	using Microseconds	= typename std::chrono::duration<float64_t, Micro>;
-	using Milliseconds	= typename std::chrono::duration<float64_t, Milli>;
-	using Seconds		= typename std::chrono::duration<float64_t, Ratio<1>>;
-	using Minutes		= typename std::chrono::duration<float64_t, Ratio<60>>;
-	using Hours			= typename std::chrono::duration<float64_t, Ratio<60 * 60>>;
-	using Days			= typename std::chrono::duration<float64_t, Ratio<60 * 60 * 24>>;
+	using nanoseconds_t		= typename std::chrono::duration<float64_t, nano_t>;
+	using microseconds_t	= typename std::chrono::duration<float64_t, micro_t>;
+	using milliseconds_t	= typename std::chrono::duration<float64_t, milli_t>;
+	using seconds_t			= typename std::chrono::duration<float64_t, ratio_t<1>>;
+	using minutes_t			= typename std::chrono::duration<float64_t, ratio_t<60>>;
+	using hours_t			= typename std::chrono::duration<float64_t, ratio_t<60 * 60>>;
+	using days_t			= typename std::chrono::duration<float64_t, ratio_t<60 * 60 * 24>>;
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct Duration final
 	{
@@ -31,7 +31,7 @@ namespace ml
 		{
 		}
 
-		constexpr Duration(float64_t value) noexcept
+		constexpr Duration(float64_t const value) noexcept
 			: m_base{ value }
 		{
 		}
@@ -103,32 +103,32 @@ namespace ml
 
 		ML_NODISCARD constexpr auto nanoseconds() const noexcept
 		{
-			return std::chrono::duration_cast<Nanoseconds>(m_base);
+			return std::chrono::duration_cast<nanoseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto microseconds() const noexcept
 		{
-			return std::chrono::duration_cast<Microseconds>(m_base);
+			return std::chrono::duration_cast<microseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto milliseconds() const noexcept
 		{
-			return std::chrono::duration_cast<Milliseconds>(m_base);
+			return std::chrono::duration_cast<milliseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto seconds() const noexcept
 		{
-			return std::chrono::duration_cast<Seconds>(m_base);
+			return std::chrono::duration_cast<seconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto minutes() const noexcept
 		{
-			return std::chrono::duration_cast<Minutes>(m_base);
+			return std::chrono::duration_cast<minutes_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto hours() const noexcept
 		{
-			return std::chrono::duration_cast<Hours>(m_base);
+			return std::chrono::duration_cast<hours_t>(m_base);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -139,22 +139,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
-
-	inline ML_SERIALIZE(std::ostream & out, Duration const & dur)
-	{
-		const auto hr { (intmax_t)dur.hours().count() };
-		const auto m { (intmax_t)dur.minutes().count() };
-		const auto s { (intmax_t)dur.seconds().count() };
-		const auto ms { (intmax_t)dur.milliseconds().count() };
-		return out
-			<< (((hr % 24) / 10) % 10) << ((hr % 24) % 10) << ':'
-			<< (((m % 60) / 10) % 10) << ((m % 60) % 10) << ':'
-			<< (((s % 60) / 10) % 10) << ((s % 60) % 10) << ':'
-			<< ((ms % 1000) / 100) << ((ms % 100) / 10);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_DURATION_HPP_

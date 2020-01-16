@@ -10,7 +10,7 @@
 #if defined(ML_IMPL_OPENGL_ES2)
 #	include <GLES2/gl2.h>
 #elif defined(ML_IMPL_OPENGL_ES3)
-#	if defined(ML_SYSTEM_APPLE && (TARGET_OS_IOS || TARGET_OS_TV))
+#	if defined(ML_OS_APPLE && (TARGET_OS_IOS || TARGET_OS_TV))
 #		include <OpenGLES/ES3/gl.h>
 #	else
 #		include <GLES3/gl3.h>
@@ -37,7 +37,7 @@ namespace ml
 		return glGetError();
 	}
 
-	void GL::checkError(C_String file, uint32_t line, C_String expr)
+	void GL::checkError(C_string file, uint32_t line, C_string expr)
 	{
 		if (auto const code{ getError() })
 		{
@@ -76,10 +76,10 @@ namespace ml
 #endif
 	}
 
-	void GL::validateVersion(uint32_t & major, uint32_t & minor)
+	void GL::validateVersion(int32_t & major, int32_t & minor)
 	{
-		major = (uint32_t)getInteger(GL::MajorVersion);
-		minor = (uint32_t)getInteger(GL::MinorVersion);
+		major = getInteger(GL::MajorVersion);
+		minor = getInteger(GL::MinorVersion);
 
 		if (getError() == GL::InvalidEnum)
 		{
@@ -160,17 +160,17 @@ namespace ml
 	// Getters
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto GL::getString(uint32_t name) -> C_String
+	auto GL::getString(uint32_t name) -> C_string
 	{
-		C_String temp{ nullptr };
-		glCheck(temp = reinterpret_cast<C_String>(glGetString(name)));
+		C_string temp{ nullptr };
+		glCheck(temp = reinterpret_cast<C_string>(glGetString(name)));
 		return temp;
 	}
 
-	auto GL::getString(uint32_t name, uint32_t index) -> C_String
+	auto GL::getString(uint32_t name, uint32_t index) -> C_string
 	{
-		C_String temp{ nullptr };
-		glCheck(temp = reinterpret_cast<C_String>(glGetStringi(name, index)));
+		C_string temp{ nullptr };
+		glCheck(temp = reinterpret_cast<C_string>(glGetStringi(name, index)));
 		return temp;
 	}
 
@@ -351,7 +351,11 @@ namespace ml
 
 	bool GL::deleteBuffer(uint32_t const * value)
 	{
-		return value ? ML_TRUE_EXPR(deleteBuffers(1, value)) : false;
+		if (value)
+		{
+			deleteBuffers(1, value);
+		}
+		return false;
 	}
 
 	void GL::deleteBuffers(uint32_t count, uint32_t const * buffers)
@@ -361,7 +365,11 @@ namespace ml
 
 	bool GL::deleteVertexArray(uint32_t const * value)
 	{
-		return value ? ML_TRUE_EXPR(deleteVertexArrays(1, value)) : false;
+		if (value)
+		{
+			deleteVertexArrays(1, value);
+		}
+		return value;
 	}
 
 	void GL::deleteVertexArrays(uint32_t count, uint32_t const * arrays)
@@ -371,7 +379,7 @@ namespace ml
 
 	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
 	{
-#ifdef ML_CC_MSC
+#ifdef ML_CC_MSVC
 #	pragma warning(push)
 #	pragma warning(disable: 4312) // conversion from 'type1' to 'type2' of greater size
 #	pragma warning(disable: 26451)
@@ -385,7 +393,7 @@ namespace ml
 			// causes a warning in 64-bit
 			reinterpret_cast<void *>(offset * width)
 		);
-#ifdef ML_CC_MSC
+#ifdef ML_CC_MSVC
 #	pragma warning(pop)
 #endif
 	}
@@ -511,7 +519,11 @@ namespace ml
 
 	bool GL::deleteTexture(uint32_t const * value)
 	{
-		return value ? ML_TRUE_EXPR(deleteTextures(1, value)) : false;
+		if (value)
+		{
+			deleteTextures(1, value);
+		}
+		return false;
 	}
 
 	void GL::deleteTextures(uint32_t count, uint32_t const * id)
@@ -607,7 +619,11 @@ namespace ml
 
 	bool GL::deleteFramebuffer(uint32_t const * value)
 	{
-		return value ? ML_TRUE_EXPR(deleteFramebuffers(1, value)) : false;
+		if (value)
+		{
+			deleteFramebuffers(1, value);
+		}
+		return false;
 	}
 
 	void GL::deleteFramebuffers(uint32_t count, uint32_t const * framebuffers)
@@ -648,7 +664,11 @@ namespace ml
 
 	bool GL::deleteRenderbuffer(uint32_t const * value)
 	{
-		return value ? ML_TRUE_EXPR(deleteRenderbuffers(1, value)) : false;
+		if (value)
+		{
+			deleteRenderbuffers(1, value);
+		}
+		return false;
 	}
 
 	void GL::deleteRenderbuffers(uint32_t count, uint32_t const * renderbuffers)
@@ -707,7 +727,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto GL::getProgramInfoLog(uint32_t obj) -> C_String
+	auto GL::getProgramInfoLog(uint32_t obj) -> C_string
 	{
 		static char temp[512];
 #ifdef GL_ARB_shader_objects
@@ -762,7 +782,7 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getAttribLocation(uint32_t program, C_String name) -> int32_t
+	auto GL::getAttribLocation(uint32_t program, C_string name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -773,7 +793,7 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getUniformLocation(uint32_t program, C_String name) -> int32_t
+	auto GL::getUniformLocation(uint32_t program, C_string name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -822,7 +842,7 @@ namespace ml
 #endif
 	}
 
-	void GL::shaderSource(uint32_t obj, int32_t count, C_String const * src, int32_t const * length)
+	void GL::shaderSource(uint32_t obj, int32_t count, C_string const * src, int32_t const * length)
 	{
 		glCheck(glShaderSource(obj, count, &src[0], length));
 	}
@@ -837,13 +857,13 @@ namespace ml
 		return getProgramParameter(obj, GL::ObjectCompileStatus);
 	}
 
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source) -> int32_t
 	{
-		C_String log{ nullptr };
+		C_string log{ nullptr };
 		return compileShader(obj, type, count, source, log);
 	}
 
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_String const * source, C_String & log) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source, C_string & log) -> int32_t
 	{
 		if ((count < 1) || !source || !(*source))
 		{

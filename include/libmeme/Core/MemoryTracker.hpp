@@ -9,6 +9,8 @@
 
 namespace ml
 {
+	struct Trackable;
+
 	// Allocation Record
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	struct ML_CORE_API AllocationRecord final : public NonCopyable
@@ -18,10 +20,10 @@ namespace ml
 		enum : size_t { ID_Index, ID_Size, ID_Flags, ID_Data };
 
 		using storage_type = typename std::tuple<
-			size_t,				// index
-			size_t,				// size
-			int32_t,			// flags
-			struct Trackable *	// data
+			size_t,		// index
+			size_t,		// size
+			int32_t,	// flags
+			Trackable *	// data
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,15 +67,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type = typename ds::flat_map<
-			struct Trackable *, AllocationRecord *
-		>;
+		using storage_type = typename ds::flat_map<Trackable *, AllocationRecord *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto current() const -> size_t { return m_current; }
+		ML_NODISCARD inline size_t current() { return m_current; }
 
-		ML_NODISCARD inline auto records() const -> storage_type const & { return m_records; }
+		ML_NODISCARD inline auto const & records() { return m_records; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -92,25 +92,13 @@ namespace ml
 
 		size_t m_current;
 
-		storage_type m_records;
+		ds::flat_map<Trackable *, AllocationRecord *> m_records;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Trackable * make_allocation(size_t size, int32_t flags);
+		Trackable * make_allocation(size_t size, int32_t flags);
 
-		void free_allocation(struct Trackable * value, int32_t flags);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <int32_t Flags> inline auto make_allocation(size_t size)
-		{
-			return make_allocation(size, Flags);
-		}
-
-		template <int32_t Flags> inline auto free_allocation(struct Trackable * value)
-		{
-			return free_allocation(value, Flags);
-		}
+		void free_allocation(void * value, int32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -126,31 +114,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::type_info const & rtti() const noexcept
-		{
-			return typeid(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline void * operator new(size_t size)
 		{
-			return ML_MemoryTracker.make_allocation<0>(size);
+			return ML_MemoryTracker.make_allocation(size, 0);
 		}
 
 		inline void * operator new[](size_t size)
 		{
-			return ML_MemoryTracker.make_allocation<1>(size);
+			return ML_MemoryTracker.make_allocation(size, 1);
 		}
 		
 		inline void operator delete(void * value)
 		{
-			return ML_MemoryTracker.free_allocation<0>(static_cast<Trackable *>(value));
+			return ML_MemoryTracker.free_allocation(value, 0);
 		}
 
 		inline void operator delete[](void * value)
 		{
-			return ML_MemoryTracker.free_allocation<1>(static_cast<Trackable *>(value));
+			return ML_MemoryTracker.free_allocation(value, 1);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

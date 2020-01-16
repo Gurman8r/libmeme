@@ -1,9 +1,7 @@
 #ifndef _ML_STRING_UTILITY_HPP_
 #define _ML_STRING_UTILITY_HPP_
 
-#include <libmeme/Core/TypeOf.hpp>
-
-#define _ML_UTIL _ML util::
+#include <libmeme/Common.hpp>
 
 namespace ml::util
 {
@@ -177,16 +175,16 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_bool(std::string const & value)
 	{
-		switch (Hash(to_lower(value)))
+		switch (hashof(to_lower(value)))
 		{
-		case Hash("1"):
-		case Hash("true"):
-		case Hash("on"):
-		case Hash("yes"):
-		case Hash("0"):
-		case Hash("false"):
-		case Hash("off"):
-		case Hash("no"):
+		case hashof("1"):
+		case hashof("true"):
+		case hashof("on"):
+		case hashof("yes"):
+		case hashof("0"):
+		case hashof("false"):
+		case hashof("off"):
+		case hashof("no"):
 			return true;
 
 		default: return false;
@@ -240,18 +238,18 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool to_bool(std::string const & value, bool dv = 0)
 	{
-		switch (Hash(to_lower(value)))
+		switch (hashof(to_lower(value)))
 		{
-		case Hash("1"):
-		case Hash("true"):
-		case Hash("on"):
-		case Hash("yes"):
+		case hashof("1"):
+		case hashof("true"):
+		case hashof("on"):
+		case hashof("yes"):
 			return true;
 
-		case Hash("0"):
-		case Hash("false"):
-		case Hash("off"):
-		case Hash("no"):
+		case hashof("0"):
+		case hashof("false"):
+		case hashof("off"):
+		case hashof("no"):
 			return false;
 			
 		default:

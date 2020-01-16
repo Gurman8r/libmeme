@@ -1,21 +1,19 @@
-#ifdef ML_IMPL_PLATFORM_GLFW
-
-/* * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Platform/Window.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/Debug.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * */
 
-# include <glfw/glfw3.h>
-# ifdef ML_SYSTEM_WINDOWS
+#include <glfw/glfw3.h>
+
+#ifdef ML_OS_WINDOWS
 #	undef APIENTRY
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
+#else
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * */
@@ -35,20 +33,20 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static GLFWimage const & make_glfw_image(size_t w, size_t h, byte_t const * pixels)
+	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
-		static ds::flat_map<byte_t const *, GLFWimage> cache {};
-
-		if (auto const it{ cache.find(pixels) })
+		static ds::flat_map<void const *, GLFWimage> cache{};
+		if (w && h && pixels)
 		{
-			return (*it->second);
-		}
-		else
-		{
-			return (*cache.insert(
+			if (auto const it{ cache.find(pixels) })
+			{
+				return &(*it->second);
+			}
+			return &(*cache.insert(
 				pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
 			).first.second);
 		}
+		return nullptr;
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,7 +63,7 @@ namespace ml
 		EventSystem::add_listener<WindowKillEvent>(this);
 		EventSystem::add_listener<WindowFullscreenEvent>(this);
 
-#if defined(ML_SYSTEM_WINDOWS)
+#if defined(ML_OS_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })
 		{
 			if (HMENU menu{ ::GetSystemMenu(window, false) })
@@ -78,7 +76,7 @@ namespace ml
 	
 	Window::~Window()
 	{
-#if defined(ML_SYSTEM_WINDOWS)
+#if defined(ML_OS_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })
 		{
 			if (HMENU menu{ ::GetSystemMenu(window, false) })
@@ -113,8 +111,7 @@ namespace ml
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	m_context.minor);
 		glfwWindowHint(GLFW_DEPTH_BITS,				m_context.depthBits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			m_context.stencilBits);
-		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_context.srgbCapable);
-
+		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_context.sRGBCapable);
 		glfwWindowHint(GLFW_RESIZABLE,				m_settings.resizable());
 		glfwWindowHint(GLFW_VISIBLE,				m_settings.visible());
 		glfwWindowHint(GLFW_DECORATED,				m_settings.decorated());
@@ -124,15 +121,15 @@ namespace ml
 		glfwWindowHint(GLFW_MAXIMIZED,				m_settings.maximized());
 		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_settings.vsync());
 
-		glfwWindowHint(GLFW_OPENGL_PROFILE, 
-			(m_context.profile == 0
-				? GLFW_OPENGL_DEBUG_CONTEXT
-				: (m_context.profile == 1
-					? GLFW_OPENGL_CORE_PROFILE
-					: (m_context.profile == 2
-						? GLFW_OPENGL_COMPAT_PROFILE
-						: GLFW_OPENGL_ANY_PROFILE
-						))));
+		glfwWindowHint(GLFW_OPENGL_PROFILE, ([&, this]() {
+			switch (m_context.profile)
+			{
+			case Client_API::Core	: return GLFW_OPENGL_CORE_PROFILE;
+			case Client_API::Compat: return GLFW_OPENGL_COMPAT_PROFILE;
+			case Client_API::Debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case Client_API::Any	: default: return GLFW_OPENGL_ANY_PROFILE;
+			}
+		})());
 		
 		// Create Window
 		if (m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
@@ -268,7 +265,7 @@ namespace ml
 
 	Window & Window::set_centered()
 	{
-		return set_position((vec2i)(get_desktop_mode().size() - this->get_size()) / 2);
+		return set_position((vec2i)(get_desktop_mode().resolution() - this->get_size()) / 2);
 	}
 
 	Window & Window::set_clipboard(std::string const & value)
@@ -326,7 +323,7 @@ namespace ml
 		if (m_window)
 		{
 			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window),
-				1, &make_glfw_image(w, h, pixels)
+				1, make_glfw_image(w, h, pixels)
 			);
 		}
 		return (*this);
@@ -377,7 +374,7 @@ namespace ml
 
 	Window & Window::set_size(vec2u const & value)
 	{
-		m_video.size() = value;
+		m_video.resolution() = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
@@ -417,7 +414,7 @@ namespace ml
 		return (m_window ? glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	C_String Window::get_clipboard() const
+	C_string Window::get_clipboard() const
 	{
 		return (m_window 
 			? glfwGetClipboardString(static_cast<GLFWwindow *>(m_window)) 
@@ -477,7 +474,7 @@ namespace ml
 
 	void * Window::get_raw_handle() const
 	{
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 		return glfwGetWin32Window(static_cast<GLFWwindow *>(m_window));
 #else
 		return m_window;
@@ -515,7 +512,7 @@ namespace ml
 
 	void * Window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
-		return glfwCreateCursor(&make_glfw_image(w, h, pixels), w, h);
+		return glfwCreateCursor(make_glfw_image(w, h, pixels), w, h);
 	}
 
 	void * Window::create_standard_cursor(Cursor::Shape value)
@@ -537,7 +534,7 @@ namespace ml
 		})());
 	}
 
-	int32_t Window::extension_supported(C_String value)
+	int32_t Window::extension_supported(C_string value)
 	{
 		return glfwExtensionSupported(value);
 	}
@@ -553,7 +550,7 @@ namespace ml
 		static bool once { true };
 		if (once && !(once = false))
 		{
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
@@ -575,7 +572,7 @@ namespace ml
 		static bool once { true };
 		if (once && !(once = false))
 		{
-#ifdef ML_SYSTEM_WINDOWS
+#ifdef ML_OS_WINDOWS
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
@@ -598,7 +595,7 @@ namespace ml
 		return temp;
 	}
 
-	Window::proc_fn Window::get_proc_address(C_String value)
+	Window::proc_fn Window::get_proc_address(C_string value)
 	{
 		return reinterpret_cast<Window::proc_fn>(glfwGetProcAddress(value));
 	}
@@ -745,5 +742,3 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-#endif

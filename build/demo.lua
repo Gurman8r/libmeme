@@ -10,6 +10,7 @@ project "demo"
 	language		"C++"
 	cppdialect 		"C++17"
 	staticruntime	"Off"
+	rtti			"Off"
 	systemversion	"latest"
 	dependson {
 		"main"

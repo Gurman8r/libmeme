@@ -4,7 +4,7 @@
 #include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {
@@ -123,20 +123,28 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_pixels.begin(); }
+		
 		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_pixels.begin(); }
+		
 		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_pixels.cbegin(); }
 
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_pixels.end(); }
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_pixels.end(); }
 		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_pixels.cend(); }
 
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
 		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_pixels.crbegin(); }
 
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
 		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_pixels.crend(); }
+
+		ML_NODISCARD inline auto end() noexcept -> iterator { return m_pixels.end(); }
+		
+		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_pixels.end(); }
+
+		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
+		
+		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
+
+		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
+		
+		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

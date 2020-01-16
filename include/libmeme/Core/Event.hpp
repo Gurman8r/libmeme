@@ -2,7 +2,7 @@
 #define _ML_EVENT_HPP_
 
 #include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
 // The number of events reserved for each sub-library
 #ifndef ML_MAX_LIBRARY_EVENTS

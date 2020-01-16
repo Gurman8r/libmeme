@@ -1,29 +1,34 @@
 #ifndef _ML_FLAT_SET_HPP_
 #define _ML_FLAT_SET_HPP_
 
-#include <libmeme/Core/Core.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// BASIC FLAT SET TRAITS
-	template <class Elem, class Compare, class Alloc, bool Multi
+	template <class _Ty,	// value type
+		class _Pr,			// comparator predicate type
+		class _Al,			// allocator type
+		bool _Mfl			// true if multiple equivalent keys are permitted
 	> struct basic_flat_set_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type = typename Elem;
+		using value_type = typename _Ty;
 		
-		using compare_type = typename Compare;
+		using compare_type = typename _Pr;
 		
-		using allocator_type = typename Alloc;
+		using allocator_type = typename _Al;
 
-		static constexpr bool multi{ Multi };
+		static constexpr bool multi{ _Mfl };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using storage_type				= typename std::vector<value_type, allocator_type>;
+		using difference_type			= typename storage_type::difference_type;
+		using size_type					= typename storage_type::size_type;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -55,12 +60,12 @@ namespace ml::ds
 		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
 		using storage_type				= typename traits_type::storage_type;
+		using difference_type			= typename traits_type::difference_type;
+		using size_type					= typename traits_type::size_type;
 		using pointer					= typename traits_type::pointer;
 		using reference					= typename traits_type::reference;
 		using const_pointer				= typename traits_type::const_pointer;
 		using const_reference			= typename traits_type::const_reference;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
 		using iterator					= typename traits_type::iterator;
 		using const_iterator			= typename traits_type::const_iterator;
 		using reverse_iterator			= typename traits_type::reverse_iterator;
@@ -312,7 +317,20 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline bool operator==(self_type const & other) const
+		{
+			return (m_storage == other.m_storage);
+		}
 
+		ML_NODISCARD inline bool operator!=(self_type const & other) const
+		{
+			return (m_storage != other.m_storage);
+		}
+
+		ML_NODISCARD inline bool operator<(self_type const & other) const
+		{
+			return (m_storage < other.m_storage);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -325,26 +343,28 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT SET - sorted vector of unique elements
-	template <class Elem, class Compare = std::less<Elem>, class Alloc = std::allocator<Elem>
+	template <class Value,
+		class Compare = std::less<Value>,
+		class Alloc = std::allocator<Value>
 	> struct flat_set : basic_flat_set<
-		basic_flat_set_traits<Elem, Compare, Alloc, false>
+		basic_flat_set_traits<Value, Compare, Alloc, false>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type					= typename flat_set<Elem, Compare, Alloc>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<Elem, Compare, Alloc, false>>;
+		using self_type					= typename flat_set<Value, Compare, Alloc>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<Value, Compare, Alloc, false>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
+		using difference_type			= typename base_type::difference_type;
+		using size_type					= typename base_type::size_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
 		using const_pointer				= typename base_type::const_pointer;
 		using const_reference			= typename base_type::const_reference;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
 		using iterator					= typename base_type::iterator;
 		using const_iterator			= typename base_type::const_iterator;
 		using reverse_iterator			= typename base_type::reverse_iterator;
@@ -494,26 +514,28 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MULTISET - sorted vector of elements
-	template <class Elem, class Compare = std::less<Elem>, class Alloc = std::allocator<Elem>
+	template <class Value,
+		class Compare = std::less<Value>,
+		class Alloc = std::allocator<Value>
 	> struct flat_multiset : basic_flat_set<
-		basic_flat_set_traits<Elem, Compare, Alloc, true>
+		basic_flat_set_traits<Value, Compare, Alloc, true>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type					= typename flat_multiset<Elem, Compare, Alloc>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<Elem, Compare, Alloc, true>>;
+		using self_type					= typename flat_multiset<Value, Compare, Alloc>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<Value, Compare, Alloc, true>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
 		using storage_type				= typename base_type::storage_type;
+		using difference_type			= typename base_type::difference_type;
+		using size_type					= typename base_type::size_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
 		using const_pointer				= typename base_type::const_pointer;
 		using const_reference			= typename base_type::const_reference;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
 		using iterator					= typename base_type::iterator;
 		using const_iterator			= typename base_type::const_iterator;
 		using reverse_iterator			= typename base_type::reverse_iterator;

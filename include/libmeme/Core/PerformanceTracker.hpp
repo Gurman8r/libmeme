@@ -32,7 +32,7 @@ namespace ml
 	private:
 		friend struct ScopeTimer;
 
-		using buffer_type = typename std::vector<std::pair<C_String, Duration>>;
+		using buffer_type = typename std::vector<std::pair<C_string, Duration>>;
 
 		static buffer_type m_curr;
 
@@ -43,9 +43,9 @@ namespace ml
 
 	struct ScopeTimer final : public NonCopyable
 	{
-		C_String name; Timer timer;
+		C_string name; Timer timer;
 
-		ScopeTimer(C_String name) noexcept : name{ name }, timer { true }
+		ScopeTimer(C_string name) noexcept : name{ name }, timer { true }
 		{
 		}
 

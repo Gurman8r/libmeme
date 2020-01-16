@@ -2,7 +2,6 @@
 #define _ML_ARRAY_HPP_
 
 #include <libmeme/Core/Alg.hpp>
-#include <libmeme/Core/Hash.hpp>
 
 namespace ml
 {
@@ -35,7 +34,7 @@ namespace ml
 		{
 			if (Size <= i)
 			{
-				ML_THROW std::out_of_range("array subscript out of range");
+				ML_THROW(std::out_of_range("array subscript out of range"));
 			}
 			return m_data[i];
 		}
@@ -44,7 +43,7 @@ namespace ml
 		{
 			if (Size <= i)
 			{
-				ML_THROW std::out_of_range("array subscript out of range");
+				ML_THROW(std::out_of_range("array subscript out of range"));
 			}
 			return m_data[i];
 		}
@@ -65,7 +64,7 @@ namespace ml
 		
 		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return begin(); }
 		
-		ML_NODISCARD constexpr auto cend() const	noexcept -> const_iterator { return end(); }
+		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return end(); }
 		
 		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data; }
 		
