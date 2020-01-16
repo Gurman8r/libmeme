@@ -6,7 +6,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * */
 
-#define _ML_ALG _ML alg::
+#define _ML_ALG ::ml::alg::
 
 /* * * * * * * * * * * * * * * * * * * * */
 
@@ -193,11 +193,11 @@ namespace ml::alg
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct sqrt final : public _ML alg::impl::sqrt<T>
+	template <class T> struct sqrt final : public ::ml::alg::impl::sqrt<T>
 	{
 		ML_NODISCARD constexpr T operator()(T value) const
 		{
-			return _ML alg::impl::sqrt<T>{}(value);
+			return ::ml::alg::impl::sqrt<T>{}(value);
 		}
 	};
 

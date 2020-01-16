@@ -24,6 +24,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		bool m_show_imgui_demo{ false };
+
 		std::vector<RenderTexture>			m_pipeline	{};
 		ds::flat_map<std::string, Font>		m_fonts		{};
 		ds::flat_map<std::string, Image>	m_images	{};
@@ -53,19 +55,27 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(&value) })
 			{
-				Editor::main_menu().add_menu("File", [&]()
+				// File Menu
+				Editor::main_menu().add_menu("File", [&, this]()
 				{
-					ImGui::PushID(ML_ADDRESSOF(this));
+					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
 					{
 						Engine::window().close();
 					}
-					ImGui::PopID();
 				});
 
-				Editor::main_menu().add_menu("Options", [&]()
+				// View Menu
+				Editor::main_menu().add_menu("View", [&, this]()
 				{
-					ImGui::PushID(ML_ADDRESSOF(this));
+					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+					ImGui::MenuItem("ImGui Demo", "", &m_show_imgui_demo);
+				});
+
+				// Option Menu
+				Editor::main_menu().add_menu("Option", [&, this]()
+				{
+					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Window"))
 					{
 						bool fullscreen{ Engine::window().is_fullscreen() };
@@ -75,11 +85,12 @@ namespace ml
 						}
 						ImGui::EndMenu();
 					}
-					ImGui::PopID();
 				});
 
+				// Pipeline
 				m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })).create();
 
+				// Images
 				if (auto const & img{ m_images["icon"] = make_image(
 					FS::path_to("../../../assets/textures/icon.png")
 				) }; !img.empty())
@@ -87,28 +98,30 @@ namespace ml
 					Engine::window().set_icon(img.width(), img.height(), img.data());
 				}
 
+				// Textures
 				m_textures["doot"] = make_texture(
 					FS::path_to("../../../assets/textures/doot.png")
 				);
-
 				m_textures["navball"] = make_texture(
 					FS::path_to("../../../assets/textures/navball.png")
 				);
 
+				// Fonts
 				m_fonts["consolas"] = make_font(
 					FS::path_to("../../../assets/fonts/consolas.ttf")
 				);
 
+				// Shaders
 				m_shaders["2d"] = make_shader(
 					FS::path_to("../../../assets/shaders/2D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
 				);
-
 				m_shaders["3d"] = make_shader(
 					FS::path_to("../../../assets/shaders/3D.vs.shader"),
 					FS::path_to("../../../assets/shaders/basic.fs.shader")
 				);
 
+				// Materials
 				m_materials["2d"] = make_material(
 					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
 					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
@@ -117,7 +130,6 @@ namespace ml
 					make_uniform<mat4	>("u_view",			mat4::identity()),
 					make_uniform<mat4	>("u_model",		mat4::identity())
 				);
-
 				m_materials["3d"] = make_material(
 					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
 					make_uniform<vec3	>("u_camera.pos",	vec3{ 0, 0, 3.f }),
@@ -133,10 +145,10 @@ namespace ml
 					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
 				);
 
+				// Models
 				m_models["sphere32x24"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);
-
 				m_models["triangle"] = make_model(make_mesh( // buggy
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
@@ -147,7 +159,6 @@ namespace ml
 						0, 1, 2,
 					}
 				));
-
 				m_models["quad"] = make_model(make_mesh( // buggy
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
@@ -200,11 +211,19 @@ namespace ml
 			} break;
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(&value) })
 			{
-				ImGui::PushID(ML_ADDRESSOF(this));
+				ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+
+				// ImGui Demo
+				if (m_show_imgui_demo)
+				{
+					Editor::show_imgui_demo(&m_show_imgui_demo);
+				}
+
 				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
-					ImGui::Text("Active Allocations: %u", ML_MemoryTracker.records().size());
+					// Memory
+					ImGui::Text("Manual Allocations: %u", ML_MemoryTracker.records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);
@@ -235,12 +254,9 @@ namespace ml
 					ImGui::Separator();
 					ImGui::Columns(1);
 
-					draw_texture_preview(m_pipeline[0].texture()); ImGui::Separator();
-
-					//draw_texture_preview(m_textures["doot"]); ImGui::Separator();
+					draw_texture_preview(m_pipeline[0].texture(), { 640, 480 }); ImGui::Separator();
 				}
 				ImGui::End();
-				ImGui::PopID();
 			} break;
 			case UnloadEvent::ID: if (auto ev{ event_cast<UnloadEvent>(&value) })
 			{

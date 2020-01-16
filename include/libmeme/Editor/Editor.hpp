@@ -1,9 +1,16 @@
 #ifndef _ML_EDITOR_HPP_
 #define _ML_EDITOR_HPP_
 
+#include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Editor/Dockspace.hpp>
 #include <libmeme/Editor/MainMenuBar.hpp>
+
+#ifdef IMGUI_VERSION
+#	define ML_ImGui_PushPopID(id) ImGui::PushID(id); ML_SCOPE_EXIT{ ImGui::PopID(); };
+#	else
+#	define ML_ImGui_PushPopID(id)
+#endif
 
 namespace ml
 {

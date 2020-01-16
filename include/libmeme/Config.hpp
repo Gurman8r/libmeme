@@ -235,13 +235,6 @@
 #endif
 
 
-// Namespace
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define _ML			::ml::
-#define _ML_BEGIN 	namespace ml {
-#define _ML_END 	}
-
-
 // Preprocessor
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)

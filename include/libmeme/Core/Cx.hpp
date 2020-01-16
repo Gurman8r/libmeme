@@ -7,7 +7,7 @@
 #include <libmeme/Core/array.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
-#define _ML_CX _ML cx::
+#define _ML_CX ::ml::cx::
 
 namespace ml::cx
 {

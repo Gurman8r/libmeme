@@ -13,7 +13,6 @@
 #	include <chrono>
 #	include <fstream>
 #	include <functional>
-#	include <initializer_list>
 #	include <iostream>
 #	include <locale>
 #	include <sstream>
@@ -91,8 +90,8 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING_VA(int64_t Num, int64_t Den = 1) ratio_t = ::std::ratio<Num, Den>;
-
+	template <intmax_t Num, intmax_t Den = 1
+	> ML_USING ratio_t	= typename ::std::ratio<Num, Den>;
 	ML_USING atto_t		= typename ratio_t<1LL, 1000000000000000000LL>;
 	ML_USING femto_t	= typename ratio_t<1LL, 1000000000000000LL>;
 	ML_USING pico_t		= typename ratio_t<1LL, 1000000000000LL>;
