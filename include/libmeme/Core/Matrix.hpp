@@ -10,19 +10,22 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size matrix
-	template <class T, size_t Width, size_t Height> struct Matrix
+	template <class _Ty,	// value type
+		size_t _Width,		// width / columns
+		size_t _Height		// height / rows
+	> struct matrix
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(0 < (Width * Height), "size negative or zero");
+		static_assert(0 < (_Width * _Height), "size negative or zero");
 		
-		static_assert(std::is_trivial_v<T>, "type must be trivial");
+		static_assert(std::is_trivial_v<_Ty>, "type must be trivial");
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename T;
-		using self_type			= typename Matrix<value_type, Width, Height>;
-		using storage_type		= typename array<value_type, Width * Height>;
+		using value_type		= typename _Ty;
+		using self_type			= typename matrix<value_type, _Width, _Height>;
+		using storage_type		= typename array<value_type, _Width * _Height>;
 		using size_type			= typename storage_type::size_type;
 		using difference_type	= typename storage_type::difference_type;
 		using pointer			= typename storage_type::pointer;
@@ -38,23 +41,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr operator storage_type & () noexcept { return m_data; }
-
-		constexpr operator storage_type const & () const noexcept { return m_data; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <template <class, size_t, size_t> class M, class U, size_t W, size_t H
-		> constexpr operator M<U, W, H>() const noexcept
+		ML_NODISCARD constexpr operator storage_type & () noexcept
 		{
-			using out_type = M<U, W, H>;
-			if constexpr (std::is_same_v<out_type, self_type>)
+			return m_data;
+		}
+
+		ML_NODISCARD constexpr operator storage_type const & () const noexcept
+		{
+			return m_data;
+		}
+
+		template <class U, size_t W, size_t H
+		> ML_NODISCARD constexpr operator matrix<U, W, H>() const noexcept
+		{
+			if constexpr (std::is_same_v<matrix<U, W, H>, self_type>)
 			{
 				return (*this);
 			}
-			else if constexpr (W == Width && H == Height)
+			else if constexpr (W == _Width && H == _Height)
 			{
-				auto temp{ out_type::zero() };
+				auto temp{ matrix<U, W, H>::zero() };
 				for (size_t i = 0; i < temp.size(); ++i)
 				{
 					temp[i] = static_cast<U>(at(i));
@@ -63,16 +69,28 @@ namespace ml
 			}
 			else
 			{
-				auto temp{ out_type::zero() };
+				auto temp{ matrix<U, W, H>::zero() };
 				for (size_t i = 0; i < temp.size(); ++i)
 				{
 					size_t const x{ i % temp.width() }, y{ i / temp.width() };
-					temp[i] = (y < Height && x < Width)
-						? static_cast<U>(at(y * Width + x))
+					temp[i] = (y < _Height && x < _Width)
+						? static_cast<U>(at(y * _Width + x))
 						: static_cast<U>(0);
 				}
 				return temp;
 			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr reference at(size_type const x, size_type const y)
+		{
+			return this->at(y * _Width + x);
+		}
+
+		ML_NODISCARD constexpr const_reference at(size_type const x, size_type const y) const
+		{
+			return this->at(y * _Width + x);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,7 +102,7 @@ namespace ml
 		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
 		
 		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
-		
+
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data.back(); }
 		
 		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data.back(); }
@@ -97,8 +115,6 @@ namespace ml
 		
 		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
 
-		ML_NODISCARD constexpr auto cols() const noexcept -> size_t { return Width; }
-		
 		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
 		
 		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
@@ -113,15 +129,13 @@ namespace ml
 		
 		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return m_data.front(); }
 
-		ML_NODISCARD constexpr auto height() const noexcept { return Height; }
+		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _Height; }
 
 		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
 
-		ML_NODISCARD constexpr auto rows() const noexcept -> size_t { return Height; }
-
 		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
 
-		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return Width; }
+		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _Width; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -133,14 +147,8 @@ namespace ml
 		ML_NODISCARD static constexpr self_type one() noexcept
 		{
 			auto temp{ zero() };
-			for (auto & elem : temp) { elem = static_cast<value_type>(1); }
-			return temp;
-		}
-
-		ML_NODISCARD static constexpr self_type fill(value_type value) noexcept
-		{
-			auto temp{ zero() };
-			for (auto & elem : temp) { temp = value; }
+			for (auto & elem : temp)
+				elem = util::cast<value_type>::one;
 			return temp;
 		}
 
@@ -148,11 +156,9 @@ namespace ml
 		{
 			auto temp{ zero() };
 			for (size_t i = 0; i < temp.size(); ++i)
-			{
-				temp[i] = ((i / temp.width()) == (i % temp.width()))
-					? static_cast<value_type>(1)
-					: static_cast<value_type>(0);
-			}
+				temp[i] = (i / temp.width()) == (i % temp.width())
+					? util::cast<value_type>::one
+					: util::cast<value_type>::zero;
 			return temp;
 		}
 
@@ -168,8 +174,8 @@ namespace ml
 {
 	// MATRIX NxN
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_VA(class T, size_t N) tmatn = Matrix<T, N, N>;
-	ML_USING_VA(class T, size_t N) tvecn = Matrix<T, N, 1>;
+	ML_USING_VA(class T, size_t N) tmatn = matrix<T, N, N>;
+	ML_USING_VA(class T, size_t N) tvecn = matrix<T, N, 1>;
 
 
 	// MATRIX 2x2
@@ -253,79 +259,66 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t X, size_t Y
-	> inline ML_SERIALIZE(std::ostream & out, Matrix<T, X, Y> const & value)
+	> inline ML_SERIALIZE(std::ostream & out, matrix<T, X, Y> const & value)
 	{
 		for (auto const & elem : value)
-		{
 			out << elem << ' ';
-		}
 		return out;
 	}
 
 	template <class T, size_t X, size_t Y
-	> inline ML_DESERIALIZE(std::istream & in, Matrix<T, X, Y> & value)
+	> inline ML_DESERIALIZE(std::istream & in, matrix<T, X, Y> & value)
 	{
 		for (auto & elem : value)
-		{
-			if (in.good()) { in >> elem; }
-		}
+			if (in.good())
+				in >> elem;
 		return in;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator==(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator==(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data == rhs.m_data);
 	}
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator!=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator!=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data != rhs.m_data);
 	}
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator<(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator<(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data < rhs.m_data);
 	}
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator<=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator<=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data <= rhs.m_data);
 	}
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator>(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator>(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data > rhs.m_data);
 	}
 
-	template <class Tx, class Ty, size_t X, size_t Y
-	> ML_NODISCARD constexpr bool operator>=(Matrix<Tx, X, Y> const & lhs, Matrix<Ty, X, Y> const & rhs) noexcept
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr bool operator>=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data >= rhs.m_data);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	template <class T, size_t N
-	> ML_NODISCARD constexpr auto operator-(tvecn<T, N> const & lhs) noexcept
-		-> tvecn<T, N>
-	{
-		return (lhs * static_cast<T>(-1));
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr auto operator+(tvecn<T, N> const & lhs) noexcept
-		-> tvecn<T, N>
-	{
-		return -(-(lhs));
-	}
-
+namespace ml
+{
+	// Vector Arithmetic Operators
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t N
@@ -484,6 +477,22 @@ namespace ml
 	{
 		tvecn<Tx, N> temp{ lhs };
 		return temp /= static_cast<Tx>(rhs);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, size_t N
+	> ML_NODISCARD constexpr auto operator-(tvecn<T, N> const & lhs) noexcept
+		-> tvecn<T, N>
+	{
+		return (lhs * static_cast<T>(-1));
+	}
+
+	template <class T, size_t N
+	> ML_NODISCARD constexpr auto operator+(tvecn<T, N> const & lhs) noexcept
+		-> tvecn<T, N>
+	{
+		return -(-(lhs));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

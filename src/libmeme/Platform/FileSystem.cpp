@@ -8,6 +8,8 @@
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	path_t FS::s_root{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,8 +53,8 @@ namespace ml
 			directory_t temp{};
 			while (::dirent * ent{ ::readdir(dir) })
 			{
-				temp.at(([ent]() {
-					switch (ent->d_type)
+				temp.at(([type = ent->d_type]() {
+					switch (type)
 					{
 					case DT_DIR	: return '/';
 					case DT_REG	: return ' ';

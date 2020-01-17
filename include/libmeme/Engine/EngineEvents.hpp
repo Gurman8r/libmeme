@@ -65,12 +65,26 @@ namespace ml
 
 	struct UpdateEvent final : public EngineEvent<EngineEventType::EV_Update>
 	{
-		constexpr UpdateEvent() {}
+		float64_t const total_time;
+		float64_t const delta_time;
+
+		constexpr UpdateEvent(float64_t total_time, float64_t delta_time)
+			: total_time{ total_time }
+			, delta_time{ delta_time }
+		{
+		}
 	};
 
 	struct DrawEvent final : public EngineEvent<EngineEventType::EV_Draw>
 	{
-		constexpr DrawEvent() {}
+		float64_t const total_time;
+		float64_t const delta_time;
+
+		constexpr DrawEvent(float64_t total_time, float64_t delta_time)
+			: total_time{ total_time }
+			, delta_time{ delta_time }
+		{
+		}
 	};
 
 	struct EndLoopEvent final : public EngineEvent<EngineEventType::EV_EndLoop>

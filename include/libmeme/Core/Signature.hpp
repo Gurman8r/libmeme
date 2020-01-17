@@ -1,15 +1,13 @@
 #ifndef _ML_SIGNATURE_HPP_
 #define _ML_SIGNATURE_HPP_
 
+#include <libmeme/Common.hpp>
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Based on CTTI
 // https://github.com/Manu343726/ctti
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/pretty_function.hpp
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#include <libmeme/Common.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -3,10 +3,10 @@
 
 #include <libmeme/Core/Array.hpp>
 
-#define ML_BITREAD(value, bit)		((value >> bit) & 1)
-#define ML_BITSET(value, bit)		(value |= (1 << bit))
-#define ML_BITCLEAR(value, bit)		(value &= ~(1 << bit))
-#define ML_BITWRITE(value, bit, b)	(b ? ML_BITSET(value, bit) : ML_BITCLEAR(value, bit))
+#define ML_bitread(value, index)		((value >> index) & 1)
+#define ML_bitset(value, index)			(value |= (1 << index))
+#define ML_bitclear(value, index)		(value &= ~(1 << index))
+#define ML_bitwrite(value, index, b)	(b ? ML_bitset(value, index) : ML_bitclear(value, index))
 
 namespace ml
 {
@@ -20,7 +20,7 @@ namespace ml
 
 		using value_type		= typename T;
 		using self_type			= typename BitSet<value_type>;
-		using storage_type		= typename array<bool, Size>;
+		using array_type		= typename array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;
@@ -28,44 +28,57 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitSet(const value_type value) noexcept
-			: m_value{ value }
-		{
-		}
-
-		constexpr BitSet(self_type const & copy) noexcept
-			: self_type{ copy.m_value }
-		{
-		}
-
-		constexpr BitSet(storage_type const & value)
-			: self_type{ from_bits<storage_type, T, value.size()>(value) }
-		{
-		}
-
-		template <
-			class U, size_t N
-		> constexpr BitSet(const U(&value)[N])
-			: self_type{ from_bits<const U(&)[N], U, N>(value) }
-		{
-		}
+		constexpr BitSet(value_type const value) noexcept : m_value{ value } {}
 
 		constexpr BitSet() noexcept : self_type{ 0 } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto size() noexcept
+		constexpr BitSet(self_type const & other)
+			: self_type{ other.m_value }
 		{
-			return self_type::Size;
+		}
+
+		constexpr BitSet(self_type && other) noexcept
+			: self_type{ std::move(other.m_value) }
+		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto bits() const noexcept -> storage_type { return to_bits(*this); }
+		constexpr BitSet(array_type const & value)
+			: self_type{ from_bits<array_type, T, value.size()>(value) }
+		{
+		}
 
-		ML_NODISCARD constexpr auto data() const noexcept -> const_reference { return m_value; }
+		template <class U, size_t N
+		> constexpr BitSet(const U(&value)[N])
+			: self_type{ from_bits<const U(&)[N], U, N>(value) }
+		{
+		}
 
-		ML_NODISCARD constexpr auto data() noexcept -> reference { return m_value; }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr self_type & operator=(self_type const & other)
+		{
+			self_type temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		constexpr self_type & operator=(self_type && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
+
+		constexpr void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				util::swap(m_value, other.m_value);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,71 +94,96 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr bool read(size_t i) const noexcept
+		ML_NODISCARD constexpr array_type bits() const noexcept
 		{
-			return ML_BITREAD(m_value, i);
+			return self_type::to_bits(*this);
 		}
 
-		constexpr self_type & clear(size_t i)
+		ML_NODISCARD constexpr const_reference data() const noexcept
 		{
-			ML_BITCLEAR(m_value, i); return (*this);
+			return m_value;
 		}
 
-		constexpr self_type & set(size_t i)
+		ML_NODISCARD constexpr reference data() noexcept
 		{
-			ML_BITSET(m_value, i); return (*this);
+			return m_value;
 		}
 
-		constexpr self_type & write(size_t i, bool value)
+		ML_NODISCARD constexpr size_t size() const noexcept
 		{
-			ML_BITWRITE(m_value, i, value); return (*this);
+			return self_type::Size;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I
+		ML_NODISCARD constexpr bool read(size_t index) const noexcept
+		{
+			return ML_bitread(m_value, index);
+		}
+
+		constexpr self_type & clear(size_t index)
+		{
+			ML_bitclear(m_value, index);
+			return (*this);
+		}
+
+		constexpr self_type & set(size_t index)
+		{
+			ML_bitset(m_value, index);
+			return (*this);
+		}
+
+		constexpr self_type & write(size_t index, bool value)
+		{
+			ML_bitwrite(m_value, index, value);
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t Index
 		> ML_NODISCARD constexpr bool read() const noexcept
 		{
-			return this->read(I);
+			return this->read(Index);
 		}
 
-		template <size_t I
+		template <size_t Index
 		> constexpr self_type & clear()
 		{
-			return this->clear(I);
+			return this->clear(Index);
 		}
 
-		template <size_t I
+		template <size_t Index
 		> constexpr self_type & set()
 		{
-			return this->set(I);
+			return this->set(Index);
 		}
 
-		template <size_t I
+		template <size_t Index
 		> constexpr self_type & write(bool value)
 		{
-			return this->write(I, value);
+			return this->write(Index, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class In, class U, size_t N
-		> ML_NODISCARD static constexpr value_type from_bits(In const & value)
+		template <class Arr, class U, size_t N
+		> ML_NODISCARD static constexpr value_type from_bits(Arr const & value)
 		{
 			value_type temp{ 0 };
 			for (size_t i = 0; i < N; ++i)
 			{
-				ML_BITWRITE(temp, i, value[i]);
+				ML_bitwrite(temp, i, value[i]);
 			}
 			return temp;
 		}
 
-		ML_NODISCARD static constexpr storage_type to_bits(self_type const & value)
+		ML_NODISCARD static constexpr array_type to_bits(self_type const & value)
 		{
-			storage_type temp{ 0 };
+			array_type temp{ 0 };
 			for (size_t i = 0; i < Size; ++i)
 			{
-				temp[i] = ML_BITREAD(value.m_value, i);
+				temp[i] = ML_bitread(value.m_value, i);
 			}
 			return temp;
 		}

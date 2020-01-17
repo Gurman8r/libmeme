@@ -13,7 +13,11 @@ namespace ml
 		
 		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
 
-		struct Info { std::string family; };
+		struct Info
+		{
+			std::string family;
+			std::locale locale;
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

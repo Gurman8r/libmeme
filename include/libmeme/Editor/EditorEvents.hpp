@@ -40,7 +40,14 @@ namespace ml
 
 	struct GuiEvent final : public EditorEvent<EditorEventType::EV_Gui>
 	{
-		constexpr GuiEvent() {}
+		float64_t const total_time;
+		float64_t const delta_time;
+
+		constexpr GuiEvent(float64_t total_time, float64_t delta_time)
+			: total_time{ total_time }
+			, delta_time{ delta_time }
+		{
+		}
 	};
 
 	struct EndGuiEvent final : public EditorEvent<EditorEventType::EV_EndGui>

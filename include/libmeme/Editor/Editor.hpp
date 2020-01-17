@@ -7,9 +7,9 @@
 #include <libmeme/Editor/MainMenuBar.hpp>
 
 #ifdef IMGUI_VERSION
-#	define ML_ImGui_PushPopID(id) ImGui::PushID(id); ML_SCOPE_EXIT{ ImGui::PopID(); };
+#	define ML_ImGui_ScopeID(id) ImGui::PushID(id); ML_SCOPE_EXIT{ ImGui::PopID(); };
 #	else
-#	define ML_ImGui_PushPopID(id)
+#	define ML_ImGui_ScopeID(id)
 #endif
 
 namespace ml
@@ -22,15 +22,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct StartupSettings
+		struct EditorSettings final
 		{
-			void *	window;
+			void *	window_handle;
 			bool	install_callbacks;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(StartupSettings const & settings);
+		static bool startup(EditorSettings const & es);
 
 		static void new_frame();
 

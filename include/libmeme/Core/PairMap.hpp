@@ -55,23 +55,6 @@ namespace ml::ds
 		static constexpr bool multi{ Multi };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using storage_type				= typename std::vector<value_type, allocator_type>;
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
-		using difference_type			= typename storage_type::difference_type;
-		using size_type					= typename storage_type::size_type;
-		using iterator					= typename storage_type::iterator;
-		using const_iterator			= typename storage_type::const_iterator;
-		using reverse_iterator			= typename storage_type::reverse_iterator;
-		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
-		using initializer_type			= typename std::initializer_list<value_type>;
-		using iterator_pair				= typename std::pair<iterator, iterator>;
-		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -89,20 +72,20 @@ namespace ml::ds
 		using value_type				= typename traits_type::value_type;
 		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
-		using storage_type				= typename traits_type::storage_type;
-		using pointer					= typename traits_type::pointer;
-		using reference					= typename traits_type::reference;
-		using const_pointer				= typename traits_type::const_pointer;
-		using const_reference			= typename traits_type::const_reference;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
-		using iterator					= typename traits_type::iterator;
-		using const_iterator			= typename traits_type::const_iterator;
-		using reverse_iterator			= typename traits_type::reverse_iterator;
-		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
-		using initializer_type			= typename traits_type::initializer_type;
-		using iterator_pair				= typename traits_type::iterator_pair;
-		using const_iterator_pair		= typename traits_type::const_iterator_pair;
+		using storage_type				= typename std::vector<value_type, allocator_type>;
+		using pointer					= typename storage_type::pointer;
+		using reference					= typename storage_type::reference;
+		using const_pointer				= typename storage_type::const_pointer;
+		using const_reference			= typename storage_type::const_reference;
+		using difference_type			= typename storage_type::difference_type;
+		using size_type					= typename storage_type::size_type;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+		using initializer_type			= typename std::initializer_list<value_type>;
+		using iterator_pair				= typename std::pair<iterator, iterator>;
+		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -346,7 +329,7 @@ namespace ml::ds
 	template <class Key, class Value,
 		class Comp = detail::key_compare<std::less, std::pair, Key, Value>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct pair_map final : public basic_pair_map<
+	> struct pair_map : basic_pair_map<
 		basic_pair_map_traits<Key, Value, Comp, Alloc, false>
 	>
 	{
@@ -552,7 +535,7 @@ namespace ml::ds
 	template <class Key, class Value,
 		class Comp = detail::key_compare<std::less, std::pair, Key, Value>,
 		class Alloc = std::allocator<std::pair<Key, Value>>
-	> struct pair_multimap final : public basic_pair_map<
+	> struct pair_multimap : basic_pair_map<
 		basic_pair_map_traits<Key, Value, Comp, Alloc, true>
 	>
 	{

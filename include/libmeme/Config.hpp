@@ -90,30 +90,30 @@
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
 #	define ML_X64 1
 #	define ML_ARCH 64
-#	define ML_PLATFORM_TARGET "x64"
+#	define ML_ARCH_NAME "x64"
 #elif defined(__i386__) || defined(_M_IX86)
-#	define ML_X86
+#	define ML_X86 1
 #	define ML_ARCH 32
-#	define ML_PLATFORM_TARGET "x86"
+#	define ML_ARCH_NAME "x86"
 #elif defined(__arm__) || defined(_M_ARM) || defined(__aarch64__)
 #	if defined(__aarch64__)
 #		define ML_ARM64 1
 #		define ML_ARCH 64
-#		define ML_PLATFORM_TARGET "arm64"
+#		define ML_ARCH_NAME "arm64"
 #	else
 #		define ML_ARM32 1
 #		define ML_ARCH 32
-#		define ML_PLATFORM_TARGET "arm32"
+#		define ML_ARCH_NAME "arm32"
 #	endif
 #elif defined(ppc) || defined(_M_PPC) || defined(__ppc64__)
 #	if defined(__ppc64__)
 #		define ML_PPC64 1
 #		define ML_ARCH 64
-#		define ML_PLATFORM_TARGET "ppc64"
+#		define ML_ARCH_NAME "ppc64"
 #	else
 #		define ML_PPC32 1
 #		define ML_ARCH 32
-#		define ML_PLATFORM_TARGET "ppc32"
+#		define ML_ARCH_NAME "ppc32"
 #	endif
 #else
 #	error Unable to detect platform architecture.
@@ -235,7 +235,7 @@
 #endif
 
 
-// Preprocessor
+// Misc
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)
 #define ML_ARRAYSIZE(arr)		(sizeof(arr) / sizeof(*arr))
@@ -243,6 +243,7 @@
 #define ML_CONCAT(a, b)			ML_CONCAT_IMPL(a, b)
 #define ML_TOSTRING(str)		#str
 #define ML_STRINGIFY(str)		ML_TOSTRING(str)
+#define ML_THROW                throw
 
 
 // Usings
@@ -255,18 +256,14 @@
 #define ML_USING_Ts			    ML_USING_VA(class ... Ts)
 
 
-// Throwing
+// Exceptions
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if !defined(ML_NO_THROW) && !defined(ML_THROW)
-#   define ML_THROW(except) throw except
-#else
-#   define ML_THROW(except)
-#endif
+
 
 
 // No-Discard
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if (ML_CPP_ATTRIBUTE(nodiscard) >= 201603L)
+#if ML_CPP_ATTRIBUTE(nodiscard) >= 201603L
 #   define ML_NODISCARD [[nodiscard]]
 #else
 #   define ML_NODISCARD
@@ -276,11 +273,11 @@
 // Anonymous
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__COUNTER__)
-#	define ML_ANON(expr) ML_CONCAT(_anon_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
+#	define ML_ANONYMOUS(expr) ML_CONCAT(_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
 #elif defined(__LINE__)
-#	define ML_ANON(expr) ML_CONCAT(_anon_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
+#	define ML_ANONYMOUS(expr) ML_CONCAT(_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
 #endif
-#define ML_ANON_T(T, ...) auto ML_ANON(T) { T{ ##__VA_ARGS__ } }
+#define ML_ANONYMOUS_T(T, ...) auto ML_ANONYMOUS(T) { T{ ##__VA_ARGS__ } }
 
 
 // Inlining

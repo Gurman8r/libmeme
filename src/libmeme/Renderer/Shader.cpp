@@ -7,12 +7,12 @@ namespace ml
 {
 	struct Shader::UniformBinder final
 	{
-		union { uint32_t program; uint32_t cached; int32_t loc; };
+		union { uint32_t program; uint32_t cached; int32_t location; };
 
 		explicit UniformBinder(Shader & shader, std::string const & name)
 			: program	{ shader ? shader.handle() : NULL }
 			, cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
-			, loc	{ shader ? shader.get_uniform_location(name) : -1 }
+			, location	{ shader ? shader.get_uniform_location(name) : -1 }
 		{
 			if (program && (program != cached))
 			{
@@ -30,7 +30,7 @@ namespace ml
 
 		inline operator bool() const noexcept
 		{
-			return (loc != -1);
+			return (location != -1);
 		}
 	};
 }
@@ -234,37 +234,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_t<bool>: if (auto v{ value.get<bool>() })
+		case hashof_v<bool>: if (auto v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<int32_t>: if (auto v{ value.get<int32_t>() })
+		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<float_t>: if (auto v{ value.get<float_t>() })
+		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<vec2>: if (auto v{ value.get<vec2>() })
+		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<vec3>: if (auto v{ value.get<vec3>() })
+		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<vec4>: if (auto v{ value.get<vec4>() })
+		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<Color>: if (auto v{ value.get<Color>() })
+		case hashof_v<Color>: if (auto v{ value.get<Color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<mat2>: if (auto v{ value.get<mat2>() })
+		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<mat3>: if (auto v{ value.get<mat3>() })
+		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<mat4>: if (auto v{ value.get<mat4>() })
+		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_t<Texture>: if (auto v{ value.get<Texture const *>() })
+		case hashof_v<Texture>: if (auto v{ value.get<Texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -278,35 +278,35 @@ namespace ml
 	bool Shader::set_uniform(std::string const & name, int32_t value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform1i(u.loc, value); }
+		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, float32_t value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform1f(u.loc, value); }
+		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform2f(u.loc, value[0], value[1]); }
+		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform3f(u.loc, value[0], value[1], value[2]); }
+		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, vec4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniform4f(u.loc, value[0], value[1], value[2], value[3]); }
+		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
 
@@ -318,21 +318,21 @@ namespace ml
 	bool Shader::set_uniform(std::string const & name, mat2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix2fv(u.loc, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix3fv(u.loc, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool Shader::set_uniform(std::string const & name, mat4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
-		if (u) { GL::uniformMatrix4fv(u.loc, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
@@ -346,13 +346,13 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto it{ m_textures.find(u.loc) })
+			if (auto it{ m_textures.find(u.location) })
 			{
 				(*it->second) = &value;
 			}
 			else if ((m_textures.size() + 1) < max_textures)
 			{
-				m_textures.insert(u.loc, &value);
+				m_textures.insert(u.location, &value);
 			}
 			else
 			{
@@ -470,7 +470,7 @@ namespace ml
 		if (!GL::linkProgram(m_handle))
 		{
 			C_string const log{ GL::getProgramInfoLog(m_handle) };
-			Debug::log_error(log);
+			debug::log_error(log);
 			destroy();
 			return EXIT_FAILURE * 8;
 		}

@@ -1,8 +1,6 @@
 #ifndef _ML_CURSOR_HPP_
 #define _ML_CURSOR_HPP_
 
-#include <libmeme/Platform/Export.hpp>
-
 namespace ml
 {
 	struct Cursor final

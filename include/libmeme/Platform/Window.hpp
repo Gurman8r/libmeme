@@ -1,24 +1,51 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
 #include <libmeme/Platform/Cursor.hpp>
-#include <libmeme/Platform/DisplayMode.hpp>
+#include <libmeme/Platform/VideoMode.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
-#include <libmeme/Platform/WindowSettings.hpp>
-
-#define ML_ASPECT(w, h) ((w != 0 && h != 0) ? ((float_t)w / (float_t)(h)) : 0.0f)
-#define ML_ASPECT2(v)	ML_ASPECT(v[0], v[1])
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API Window : public Trackable, public NonCopyable, public EventListener
+	enum WindowFlags_ : int32_t
+	{
+		WindowFlags_None,
+		WindowFlags_Resizable		= (1 << 0),
+		WindowFlags_Visible			= (1 << 1),
+		WindowFlags_Decorated		= (1 << 2),
+		WindowFlags_Focused			= (1 << 3),
+		WindowFlags_AutoIconify		= (1 << 4),
+		WindowFlags_Floating		= (1 << 5),
+		WindowFlags_Maximized		= (1 << 6),
+		WindowFlags_Fullscreen		= (1 << 7),
+		WindowFlags_DoubleBuffered	= (1 << 8),
+
+		// Resizable / Visible / Decorated / Focused / Auto Iconify
+		WindowFlags_Default = 0
+			| WindowFlags_Resizable
+			| WindowFlags_Visible
+			| WindowFlags_Decorated
+			| WindowFlags_Focused
+			| WindowFlags_AutoIconify,
+
+		// Resizable / Decorated / Focused / Auto Iconify / Maximized
+		WindowFlags_DefaultMaximized = 0
+			| WindowFlags_Resizable
+			| WindowFlags_Decorated
+			| WindowFlags_Focused
+			| WindowFlags_AutoIconify
+			| WindowFlags_Maximized,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct ML_PLATFORM_API Window : public Trackable, public NonCopyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -46,14 +73,10 @@ namespace ml
 
 		virtual bool create(
 			std::string const & title, 
-			DisplayMode const & display,
-			WindowSettings const & settings,
-			ContextSettings const & context
+			VideoMode const & display,
+			ContextSettings const & context,
+			int32_t flags
 		);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual void onEvent(Event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -103,7 +126,7 @@ namespace ml
 		
 		ML_NODISCARD bool is_open() const;
 		
-		ML_NODISCARD int32_t	get_attribute(int32_t value) const;
+		ML_NODISCARD int32_t get_attribute(int32_t value) const;
 		
 		ML_NODISCARD C_string get_clipboard() const;
 		
@@ -145,9 +168,9 @@ namespace ml
 
 		ML_NODISCARD static void * get_context_current();
 
-		ML_NODISCARD static DisplayMode const & get_desktop_mode();
+		ML_NODISCARD static VideoMode const & get_desktop_mode();
 		
-		ML_NODISCARD static std::vector<DisplayMode> const & get_fullscreen_modes();
+		ML_NODISCARD static std::vector<VideoMode> const & get_fullscreen_modes();
 
 		ML_NODISCARD static proc_fn get_proc_address(C_string value);
 		
@@ -188,13 +211,13 @@ namespace ml
 
 		ML_NODISCARD inline auto get_share() const -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_display_mode().resolution(); }
+		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_video_mode().resolution; }
 
-		ML_NODISCARD inline auto get_settings() const -> WindowSettings const & { return m_settings; }
+		ML_NODISCARD inline auto get_flags() const -> int32_t const & { return m_flags; }
 
 		ML_NODISCARD inline auto get_title() const -> std::string const & { return m_title; }
 
-		ML_NODISCARD inline auto get_display_mode() const -> DisplayMode const & { return m_video; }
+		ML_NODISCARD inline auto get_video_mode() const -> VideoMode const & { return m_video; }
 
 		ML_NODISCARD inline auto get_width() const -> uint32_t { return get_size()[0]; }
 
@@ -204,15 +227,15 @@ namespace ml
 		void * 			m_window;
 		void * 			m_monitor;
 		void * 			m_share;
-		ContextSettings	m_context;
-		WindowSettings	m_settings;
-		DisplayMode		m_video;
 		std::string		m_title;
+		VideoMode		m_video;
+		ContextSettings	m_context;
+		int32_t			m_flags;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_WINDOW_HPP_

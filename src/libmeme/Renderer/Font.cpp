@@ -87,7 +87,7 @@ namespace ml
 		FT_Library library;
 		if (FT_Init_FreeType(&library) != 0)
 		{
-			return Debug::log_error(
+			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to open FreeType)",
 				path
 			);
@@ -98,7 +98,7 @@ namespace ml
 		FT_Face face;
 		if (FT_New_Face(static_cast<FT_Library>(m_library), path.string().c_str(), 0, &face) != 0)
 		{
-			return Debug::log_error(
+			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to create the font face)",
 				path
 			);
@@ -109,7 +109,7 @@ namespace ml
 		if (FT_Stroker_New(static_cast<FT_Library>(m_library), &stroker) != 0)
 		{
 			FT_Done_Face(face);
-			return Debug::log_error(
+			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to create the stroker)",
 				path
 			);
@@ -120,7 +120,7 @@ namespace ml
 		{
 			FT_Stroker_Done(stroker);
 			FT_Done_Face(face);
-			return Debug::log_error(
+			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to set the Unicode character set)",
 				path
 			);
@@ -170,7 +170,7 @@ namespace ml
 		// Load character glyph 
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
 		{
-			Debug::log_warning("Failed loading Glyph \'{0}\'", (char)c);
+			debug::log_warning("Failed loading Glyph \'{0}\'", (char)c);
 			return glyph;
 		}
 
@@ -184,11 +184,11 @@ namespace ml
 		glyph.advance() = (uint32_t)face->glyph->advance.x;
 
 		// Only load a texture for characters requiring a graphic
-		if ((c != ' ') && std::isgraph(c))
+		if ((c != ' ') && std::isgraph(c, m_info.locale))
 		{
 			if (!glyph.texture().create(face->glyph->bitmap.buffer, (vec2u)glyph.size()))
 			{
-				Debug::log_warning("Failed Loading Glyph Texture: \'{0}\'", (char)c);
+				debug::log_warning("Failed Loading Glyph Texture: \'{0}\'", (char)c);
 			}
 		}
 

@@ -1,16 +1,13 @@
 #ifndef _ML_KEY_CODE_HPP_
 #define _ML_KEY_CODE_HPP_
 
-#include <libmeme/Platform/Export.hpp>
-#include <libmeme/Common.hpp>
-
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct KeyCode final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		enum : int32_t
+		enum
 		{
 			INVALID_KEY_CODE = -1,
 
@@ -138,9 +135,9 @@ namespace ml
 			MAX_KEYCODE,
 			MIN_KEYCODE = Space,
 		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_KEY_CODE_HPP_

@@ -10,7 +10,7 @@
 
 // Anonymous Binder
 #define ML_BIND(T, value, ...) \
-	ML_BIND_EX(T, ML_ANON(ML_CONCAT(Binder, T)), value, ##__VA_ARGS__)
+	ML_BIND_EX(T, ML_ANONYMOUS(ML_CONCAT(Binder, T)), value, ##__VA_ARGS__)
 
 namespace ml
 {

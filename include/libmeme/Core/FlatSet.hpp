@@ -11,7 +11,7 @@ namespace ml::ds
 	template <class _Ty,	// value type
 		class _Pr,			// comparator predicate type
 		class _Al,			// allocator type
-		bool _Mfl			// true if multiple equivalent keys are permitted
+		bool _Multi			// true if multiple equivalent keys are permitted
 	> struct basic_flat_set_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,26 +22,11 @@ namespace ml::ds
 		
 		using allocator_type = typename _Al;
 
-		static constexpr bool multi{ _Mfl };
+		static constexpr bool multi{ _Multi };
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using difference_type = typename ptrdiff_t;
 
-		using storage_type				= typename std::vector<value_type, allocator_type>;
-		using difference_type			= typename storage_type::difference_type;
-		using size_type					= typename storage_type::size_type;
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
-		using difference_type			= typename storage_type::difference_type;
-		using size_type					= typename storage_type::size_type;
-		using iterator					= typename storage_type::iterator;
-		using const_iterator			= typename storage_type::const_iterator;
-		using reverse_iterator			= typename storage_type::reverse_iterator;
-		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
-		using initializer_type			= typename std::initializer_list<value_type>;
-		using iterator_pair				= typename std::pair<iterator, iterator>;
-		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
+		using size_type = typename size_t;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -49,30 +34,31 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// BASIC FLAT SET
-	template <class Traits
+	template <class _Traits
 	> struct basic_flat_set
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type				= typename Traits;
+		using traits_type				= typename _Traits;
 		using self_type					= typename basic_flat_set<traits_type>;
 		using value_type				= typename traits_type::value_type;
 		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
-		using storage_type				= typename traits_type::storage_type;
 		using difference_type			= typename traits_type::difference_type;
 		using size_type					= typename traits_type::size_type;
-		using pointer					= typename traits_type::pointer;
-		using reference					= typename traits_type::reference;
-		using const_pointer				= typename traits_type::const_pointer;
-		using const_reference			= typename traits_type::const_reference;
-		using iterator					= typename traits_type::iterator;
-		using const_iterator			= typename traits_type::const_iterator;
-		using reverse_iterator			= typename traits_type::reverse_iterator;
-		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
-		using initializer_type			= typename traits_type::initializer_type;
-		using iterator_pair				= typename traits_type::iterator_pair;
-		using const_iterator_pair		= typename traits_type::const_iterator_pair;
+
+		using storage_type				= typename std::vector<value_type, allocator_type>;
+		using pointer					= typename storage_type::pointer;
+		using reference					= typename storage_type::reference;
+		using const_pointer				= typename storage_type::const_pointer;
+		using const_reference			= typename storage_type::const_reference;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+		using initializer_type			= typename std::initializer_list<value_type>;
+		using iterator_pair				= typename std::pair<iterator, iterator>;
+		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -332,6 +318,21 @@ namespace ml::ds
 			return (m_storage < other.m_storage);
 		}
 
+		ML_NODISCARD inline bool operator>(self_type const & other) const
+		{
+			return (m_storage > other.m_storage);
+		}
+
+		ML_NODISCARD inline bool operator<=(self_type const & other) const
+		{
+			return (m_storage <= other.m_storage);
+		}
+
+		ML_NODISCARD inline bool operator>=(self_type const & other) const
+		{
+			return (m_storage >= other.m_storage);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
@@ -358,9 +359,10 @@ namespace ml::ds
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
-		using storage_type				= typename base_type::storage_type;
 		using difference_type			= typename base_type::difference_type;
 		using size_type					= typename base_type::size_type;
+
+		using storage_type				= typename base_type::storage_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
 		using const_pointer				= typename base_type::const_pointer;
@@ -529,9 +531,10 @@ namespace ml::ds
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
 		using allocator_type			= typename base_type::allocator_type;
-		using storage_type				= typename base_type::storage_type;
 		using difference_type			= typename base_type::difference_type;
 		using size_type					= typename base_type::size_type;
+
+		using storage_type				= typename base_type::storage_type;
 		using pointer					= typename base_type::pointer;
 		using reference					= typename base_type::reference;
 		using const_pointer				= typename base_type::const_pointer;

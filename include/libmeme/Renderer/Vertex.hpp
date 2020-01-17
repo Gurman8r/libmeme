@@ -70,7 +70,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_storage, other.m_storage);
+				util::swap(m_storage, other.m_storage);
 			}
 		}
 
@@ -144,22 +144,21 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	namespace alg
+namespace ml::util
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_NODISCARD static inline std::vector<float_t> contiguous(std::vector<Vertex> const & vertices)
 	{
-		ML_NODISCARD static inline std::vector<float_t> contiguous(std::vector<Vertex> const & vertices)
+		std::vector<float_t> temp;
+		temp.resize(vertices.size() * Vertex::Size);
+		for (size_t i = 0, imax = temp.size(); i < imax; ++i)
 		{
-			std::vector<float_t> temp;
-			
-			temp.resize(vertices.size() * Vertex::Size);
-			
-			for (size_t i = 0, imax = temp.size(); i < imax; ++i)
-			{
-				temp[i] = vertices[i / Vertex::Size][i % Vertex::Size];
-			}
-			
-			return temp;
+			temp[i] = vertices[i / Vertex::Size][i % Vertex::Size];
 		}
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

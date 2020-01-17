@@ -7,13 +7,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using nanoseconds_t		= typename std::chrono::duration<float64_t, nano_t>;
-	using microseconds_t	= typename std::chrono::duration<float64_t, micro_t>;
-	using milliseconds_t	= typename std::chrono::duration<float64_t, milli_t>;
-	using seconds_t			= typename std::chrono::duration<float64_t, ratio_t<1>>;
-	using minutes_t			= typename std::chrono::duration<float64_t, ratio_t<60>>;
-	using hours_t			= typename std::chrono::duration<float64_t, ratio_t<60 * 60>>;
-	using days_t			= typename std::chrono::duration<float64_t, ratio_t<60 * 60 * 24>>;
+	using nanoseconds_t		= typename chrono::duration<float64_t, std::nano>;
+	using microseconds_t	= typename chrono::duration<float64_t, std::micro>;
+	using milliseconds_t	= typename chrono::duration<float64_t, std::milli>;
+	using seconds_t			= typename chrono::duration<float64_t, std::ratio<1>>;
+	using minutes_t			= typename chrono::duration<float64_t, std::ratio<60>>;
+	using hours_t			= typename chrono::duration<float64_t, std::ratio<60 * 60>>;
+	using days_t			= typename chrono::duration<float64_t, std::ratio<60 * 60 * 24>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -22,7 +22,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type = typename Duration;
-		using base_type = typename std::chrono::duration<float64_t>;
+		using base_type = typename chrono::duration<float64_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,14 +47,14 @@ namespace ml
 		}
 
 		template <class R, class P = typename R::period
-		> constexpr Duration(std::chrono::duration<R, P> const & value)
-			: m_base{ std::chrono::duration_cast<base_type>(value) }
+		> constexpr Duration(chrono::duration<R, P> const & value)
+			: m_base{ chrono::duration_cast<base_type>(value) }
 		{
 		}
 
 		template <class R, class P = typename R::period
-		> constexpr Duration(std::chrono::duration<R, P> && value) noexcept
-			: m_base{ std::chrono::duration_cast<base_type>(std::move(value)) }
+		> constexpr Duration(chrono::duration<R, P> && value) noexcept
+			: m_base{ chrono::duration_cast<base_type>(std::move(value)) }
 		{
 		}
 
@@ -103,32 +103,32 @@ namespace ml
 
 		ML_NODISCARD constexpr auto nanoseconds() const noexcept
 		{
-			return std::chrono::duration_cast<nanoseconds_t>(m_base);
+			return chrono::duration_cast<nanoseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto microseconds() const noexcept
 		{
-			return std::chrono::duration_cast<microseconds_t>(m_base);
+			return chrono::duration_cast<microseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto milliseconds() const noexcept
 		{
-			return std::chrono::duration_cast<milliseconds_t>(m_base);
+			return chrono::duration_cast<milliseconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto seconds() const noexcept
 		{
-			return std::chrono::duration_cast<seconds_t>(m_base);
+			return chrono::duration_cast<seconds_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto minutes() const noexcept
 		{
-			return std::chrono::duration_cast<minutes_t>(m_base);
+			return chrono::duration_cast<minutes_t>(m_base);
 		}
 
 		ML_NODISCARD constexpr auto hours() const noexcept
 		{
-			return std::chrono::duration_cast<hours_t>(m_base);
+			return chrono::duration_cast<hours_t>(m_base);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

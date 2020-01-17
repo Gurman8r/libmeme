@@ -1,29 +1,27 @@
 #ifndef _ML_RENDER_WINDOW_HPP_
 #define _ML_RENDER_WINDOW_HPP_
 
-#include <libmeme/Renderer/RenderTarget.hpp>
 #include <libmeme/Platform/Window.hpp>
+#include <libmeme/Renderer/RenderTarget.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_RENDERER_API RenderWindow final : public Window, public RenderTarget
+	struct ML_RENDERER_API RenderWindow : public Window, public RenderTarget
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		RenderWindow();
 
-		~RenderWindow();
+		virtual ~RenderWindow();
 
-		bool create(
+		virtual bool create(
 			std::string const & title,
-			DisplayMode const & display,
-			WindowSettings const & style,
-			ContextSettings const & context
+			VideoMode const & display,
+			ContextSettings const & context,
+			int32_t flags
 		) override;
-
-		using Window::onEvent;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

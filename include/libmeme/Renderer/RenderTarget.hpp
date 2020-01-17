@@ -2,6 +2,7 @@
 #define _ML_RENDER_TARGET_HPP_
 
 #include <libmeme/Renderer/Buffers.hpp>
+#include <libmeme/Renderer/Color.hpp>
 
 namespace ml
 {

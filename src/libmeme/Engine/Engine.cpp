@@ -1,27 +1,87 @@
 #include <libmeme/Engine/Engine.hpp>
+#include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Engine/Lua.hpp>
-#include <libmeme/Platform/PlatformEvents.hpp>
+#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Platform/PlatformEvents.hpp>
+#include <libmeme/Platform/SharedLibrary.hpp>
+#include <libmeme/Renderer/RenderStates.hpp>
+
+namespace ml
+{
+	struct Engine::PluginLoader : public Trackable, public NonCopyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		PluginLoader() noexcept {};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline bool load_plugin(path_t const & path)
+		{
+			if (auto const it{ m_files.insert(path) }; it.second)
+			{
+				if (auto lib{ make_shared_library(*it.first) })
+				{
+					if (auto const plugin{ lib.call_function<Plugin *>("ML_Plugin_Main") })
+					{
+						return (*m_libs.insert(std::move(lib), plugin).first.second);
+					}
+				}
+				m_files.erase(it.first);
+			}
+			return false;
+		}
+
+		inline void clear_plugins()
+		{
+			m_files.clear();
+			m_libs.for_each([](auto const &, auto & p) { delete p; });
+			m_libs.clear();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		ds::flat_set<path_t> m_files;
+		ds::flat_map<SharedLibrary, Plugin *> m_libs;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderWindow Engine::s_window{};
+	decltype(Engine::s_window)	Engine::s_window	{};
+	decltype(Engine::s_time)	Engine::s_time		{};
+	decltype(Engine::s_plugins) Engine::s_plugins	{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Engine::startup(StartupSettings const & settings)
+	bool Engine::startup(EngineSettings const & es)
 	{
-		Lua::startup();
-		Python::startup(settings.program_name, settings.library_path);
+		if (!Lua::startup())
+			return debug::log_error("Failed initializing Lua");
+
+		if (!Python::startup(es.program_name, es.library_path))
+			return debug::log_error("Failed initializing Python");
+		
 		return true;
 	}
 
-	bool Engine::create_window(CreateWindowSettings const & settings)
+	bool Engine::init_window(WindowSettings const & ws)
 	{
-		if (s_window.create(settings.title, settings.display, settings.style, settings.context))
+		if (!s_window.create(ws.title, ws.display, ws.context, ws.flags))
+		{
+			return debug::log_error("");
+		}
+
+		if (ws.install_callbacks)
 		{
 			s_window.set_char_callback([](auto, auto ch)
 			{
@@ -78,10 +138,9 @@ namespace ml
 			{
 				EventSystem::fire_event<WindowSizeEvent>(w, h);
 			});
-
-			return true;
 		}
-		return false;
+
+		return true;
 	}
 
 	bool Engine::running()
@@ -89,9 +148,39 @@ namespace ml
 		return s_window.is_open();
 	}
 
+	void Engine::shutdown()
+	{
+		s_plugins.clear_plugins();
+
+		s_window.destroy();
+		s_window.terminate();
+
+		Python::shutdown();
+		Lua::shutdown();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void Engine::begin_loop()
 	{
+		s_time.total = s_time.main.elapsed().count();
+		s_time.delta = s_time.loop.elapsed().count();
+		s_time.loop.stop().start();
+
 		s_window.poll_events();
+	}
+
+	void Engine::begin_draw()
+	{
+		GL::clearColor(0, 0, 0, 1);
+
+		GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
+		
+		GL::viewport(0, 0, s_window.get_frame_width(), s_window.get_frame_height());
+		
+		constexpr RenderStates states{ // default states
+			{}, {}, {}, {}
+		}; states();
 	}
 
 	void Engine::end_loop()
@@ -99,15 +188,11 @@ namespace ml
 		s_window.swap_buffers();
 	}
 
-	void Engine::shutdown()
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t Engine::load_plugin(path_t const & path)
 	{
-		s_window.destroy();
-
-		s_window.terminate();
-
-		Python::shutdown();
-
-		Lua::shutdown();
+		return s_plugins.load_plugin(path);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

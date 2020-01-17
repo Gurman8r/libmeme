@@ -1,20 +1,22 @@
 #ifndef _ML_ARRAY_HPP_
 #define _ML_ARRAY_HPP_
 
-#include <libmeme/Core/Alg.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size array
-	template <class T, size_t Size> struct Array
+	template <class _Ty,	// value type
+		size_t _Size		// element count
+	> struct array
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename T;
-		using self_type			= typename Array<value_type, Size>;
-		using storage_type		= typename value_type[Size];
+		using value_type		= typename _Ty;
+		using self_type			= typename array<value_type, _Size>;
+		using storage_type		= typename value_type[_Size];
 		using size_type			= typename size_t;
 		using difference_type	= typename ptrdiff_t;
 		using pointer			= typename value_type *;
@@ -32,18 +34,18 @@ namespace ml
 
 		ML_NODISCARD constexpr reference operator[](size_type const i)
 		{
-			if (Size <= i)
+			if (_Size <= i)
 			{
-				ML_THROW(std::out_of_range("array subscript out of range"));
+				ML_THROW std::out_of_range("ml::array subscript out of range");
 			}
 			return m_data[i];
 		}
 
 		ML_NODISCARD constexpr const_reference operator[](size_type const i) const
 		{
-			if (Size <= i)
+			if (_Size <= i)
 			{
-				ML_THROW(std::out_of_range("array subscript out of range"));
+				ML_THROW std::out_of_range("ml::array subscript out of range");
 			}
 			return m_data[i];
 		}
@@ -80,9 +82,9 @@ namespace ml
 		
 		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return Size; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return _Size; }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return Size; }
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return _Size; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -90,12 +92,12 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// zero size array
-	template <class T> struct Array<T, 0>
+	template <class _Ty> struct array<_Ty, 0>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		using value_type		= typename T;
-		using self_type			= typename Array<value_type, 0>;
+		using value_type		= typename _Ty;
+		using self_type			= typename array<value_type, 0>;
 		using storage_type		= typename value_type[1];
 		using size_type			= typename size_t;
 		using difference_type	= typename ptrdiff_t;
@@ -155,65 +157,38 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, size_t ... N
-	> ML_USING array = Array<T, N...>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, size_t Size
-	> inline ML_SERIALIZE(std::ostream & out, array<T, Size> const & value)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator==(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
-		for (auto const & elem : value)
-		{
-			out << elem << " ";
-		}
-		return out;
+		return util::equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <class T, size_t Size
-	> inline ML_DESERIALIZE(std::istream & in, array<T, Size> & value)
-	{
-		for (auto & elem : value)
-		{
-			if (in.good()) in >> elem;
-		}
-		return in;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator==(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
-	{
-		return _ML_ALG equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
-	}
-
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator!=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator!=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator<(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator<(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
-		return _ML_ALG less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return util::less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator<=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator<=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return (lhs < rhs) || (lhs == rhs);
 	}
 
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator>(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator>(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return !(lhs < rhs) && (lhs != rhs);
 	}
 
-	template <class Tx, class Ty, size_t Size
-	> constexpr bool operator>=(array<Tx, Size> const & lhs, array<Ty, Size> const & rhs)
+	template <class Tx, class Ty, size_t N
+	> constexpr bool operator>=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
 	}

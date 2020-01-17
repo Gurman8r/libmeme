@@ -27,8 +27,9 @@ namespace ml
 
 	template <class T> struct ML_ENGINE_API Registry<T> final
 	{
-	private: Registry() = delete;
-	protected: static bool s_registered;
+		Registry() = delete;
+
+	private: static bool s_registered;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * */
@@ -76,7 +77,7 @@ namespace ml
 
 		template <class T> inline std::optional<std::any> generate() const
 		{
-			return generate(hashof_t<T>);
+			return generate(hashof_v<T>);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,7 +96,7 @@ namespace ml
 		> inline bool registrate(Info && info, Func && func)
 		{
 			return registrate(
-				nameof_t<T>, std::forward<Info>(info), hashof_t<T>, std::forward<Func>(func)
+				nameof_v<T>, std::forward<Info>(info), hashof_v<T>, std::forward<Func>(func)
 			);
 		}
 
@@ -167,8 +168,6 @@ namespace ml
 		friend struct Singleton<Registry<>>;
 
 		Registry() noexcept;
-
-		~Registry();
 
 		storage_type m_storage;
 	};

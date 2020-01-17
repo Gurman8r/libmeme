@@ -26,7 +26,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Editor::startup(StartupSettings const & settings)
+	bool Editor::startup(EditorSettings const & es)
 	{
 		// Create ImGui Context
 		/* * * * * * * * * * * * * * * * * * * * */
@@ -53,24 +53,23 @@ namespace ml
 
 		// Style
 		static const std::string imgui_style{ "Dark" };
-		switch (hashof(util::to_lower(imgui_style)))
+		switch (util::hash(util::to_lower(imgui_style)))
 		{
-		case hashof("light"): ImGui::StyleColorsLight(); break;
-		case hashof("dark"): ImGui::StyleColorsDark(); break;
-		case hashof("classic"): ImGui::StyleColorsClassic(); break;
-		}
-		
-		// Init Platform
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)settings.window, settings.install_callbacks))
-		{
-			return Debug::log_error("Failed initializing ImGui platform");
+		case util::hash("light"): ImGui::StyleColorsLight(); break;
+		case util::hash("dark"): ImGui::StyleColorsDark(); break;
+		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
 		}
 
-		// Init Renderer
+		// Init Platform/Renderer
 #ifdef ML_IMPL_RENDERER_OPENGL
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)es.window_handle, es.install_callbacks))
+		{
+			return debug::log_error("Failed initializing ImGui platform");
+		}
+
 		if (!ImGui_ImplOpenGL3_Init("#version 130"))
 		{
-			return Debug::log_error("Failed initializing ImGui renderer");
+			return debug::log_error("Failed initializing ImGui renderer");
 		}
 #else
 #endif

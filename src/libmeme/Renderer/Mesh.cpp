@@ -79,12 +79,12 @@ namespace ml
 
 	bool Mesh::load_from_memory(vertices_t const & vertices, indices_t const & indices)
 	{
-		return load_from_memory(alg::contiguous(vertices), indices);
+		return load_from_memory(util::contiguous(vertices), indices);
 	}
 
 	bool Mesh::load_from_memory(vertices_t const & vertices)
 	{
-		return load_from_memory(alg::contiguous(vertices));
+		return load_from_memory(util::contiguous(vertices));
 	}
 
 	bool Mesh::load_from_memory(contiguous_t const & vertices, indices_t const & indices)
@@ -93,20 +93,23 @@ namespace ml
 		{
 			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
 			{
-				if (ML_BIND(VertexBufferObject, vbo().generate(GL::StaticDraw)))
+				if (ML_BIND_EX(VertexBufferObject, _vb, vbo().generate(GL::StaticDraw)))
 				{
-					if (ML_BIND(IndexBufferObject, ibo().generate(GL::StaticDraw, GL::UnsignedInt)))
+					if (ML_BIND_EX(IndexBufferObject, _ib, ibo().generate(GL::StaticDraw, GL::UnsignedInt)))
 					{
-						vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+						_vb->update((void *)vertices.data(), (uint32_t)vertices.size());
 
-						ibo().update((void *)indices.data(), (uint32_t)indices.size());
+						_ib->update((void *)indices.data(), (uint32_t)indices.size());
 
 						layout().bind();
 
 						return true;
 					}
+					ibo().destroy();
 				}
+				vbo().destroy();
 			}
+			vao().destroy();
 		}
 		return false;
 	}
@@ -117,15 +120,17 @@ namespace ml
 		{
 			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
 			{
-				if (ML_BIND(VertexBufferObject, vbo().generate(GL::StaticDraw)))
+				if (ML_BIND_EX(VertexBufferObject, _vb, vbo().generate(GL::StaticDraw)))
 				{
-					vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+					_vb->update((void *)vertices.data(), (uint32_t)vertices.size());
 
 					layout().bind();
 
 					return true;
 				}
+				vbo().destroy();
 			}
+			vao().destroy();
 		}
 		return false;
 	}

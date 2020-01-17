@@ -43,18 +43,18 @@ namespace ml
 		{
 			std::string path{ file };
 			path = path.substr(path.find_last_of("\\/") + 1);
-
-			// Decode the error
+			C_string const err_name{ GL::name_of((GL::Err)code) };
+			C_string const err_desc{ GL::desc_of((GL::Err)code) };
 			std::cerr
-				<< "An OpenGL call failed in \'" << file << "\' (" << line << ")"
-				<< "\nCode: "
-				<< "\n\t" << code
-				<< "\nExpression: "
-				<< "\n\t" << expr
-				<< "\nDescription:"
-				<< "\n\t" << name_of((Err)code)
-				<< "\n\t" << desc_of((Err)code)
-				<< '\n';
+				<< "An OpenGL call failed in \'" << file << "\' (" << line << ")\n"
+				<< "Code:\n"
+				<< "\t" << code << "\n"
+				<< "Expression:\n"
+				<< "\t" << expr << "\n"
+				<< "Description:\n"
+				<< "\t" << err_name << "\n"
+				<< "\t" << err_desc << "\n"
+				;
 		}
 	}
 
@@ -87,39 +87,39 @@ namespace ml
 			{
 				major = version[0] - '0';
 				minor = version[2] - '0';
-				Debug::log_warning("Using OpenGL Version: {0}.{1}", major, minor);
+				debug::log_warning("Using OpenGL Version: {0}.{1}", major, minor);
 			}
 			else
 			{
 				major = 1;
 				minor = 1;
-				Debug::log_warning("Can't get the version number, assuming 1.1");
+				debug::log_warning("Can't get the version number, assuming 1.1");
 			}
 		}
 
 		if (!shadersAvailable())
 		{
-			Debug::log_error("Shaders are not available on your system.");
+			debug::log_error("Shaders are not available on your system.");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			Debug::log_error("Geometry shaders are not available on your system.");
+			debug::log_error("Geometry shaders are not available on your system.");
 		}
 
 		if (!framebuffersAvailable())
 		{
-			Debug::log_warning("Framebuffers Unavailable");
+			debug::log_warning("Framebuffers Unavailable");
 		}
 
 		if (!edgeClampAvailable())
 		{
-			Debug::log_warning("Texture Edge Clamp Unavailable");
+			debug::log_warning("Texture Edge Clamp Unavailable");
 		}
 
 		if (!textureSrgbAvailable())
 		{
-			Debug::log_warning("Texture sRGB Unavailable");
+			debug::log_warning("Texture sRGB Unavailable");
 		}
 	}
 

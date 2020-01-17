@@ -92,7 +92,7 @@ namespace ml::python::embedded
 			.def_static("configuration",	[]() { return ML_CONFIGURATION; })
 			.def_static("cpp_version",		[]() { return ML_LANG; })
 			.def_static("is_debug",			[]() { return ML_DEBUG; })
-			.def_static("platform_target",	[]() { return ML_PLATFORM_TARGET; })
+			.def_static("platform_target",	[]() { return ML_ARCH_NAME; })
 			.def_static("project_author",	[]() { return ML__AUTHOR; })
 			.def_static("project_date",		[]() { return ML__DATE; })
 			.def_static("project_name",		[]() { return ML__NAME; })
@@ -103,15 +103,15 @@ namespace ml::python::embedded
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("clear",	[]() { return Debug::clear(); })
+			.def_static("clear",	[]() { return debug::clear(); })
 			.def_static("exit",		[]() { return std::exit(0); })
-			.def_static("pause",	[]() { return Debug::pause(0); })
+			.def_static("pause",	[]() { return debug::pause(0); })
 			.def_static("print",	[](py_str_t const & s) { std::cout << s; })
 			.def_static("printf",	[](py_str_t const & s, py_list_t const & l) { std::cout << util::format(s, l); })
 			.def_static("printl",	[](py_str_t const & s) { std::cout << s << '\n'; })
-			.def_static("log",		[](py_str_t const & s) { return Debug::log_info(s); })
-			.def_static("warning",	[](py_str_t const & s) { return Debug::log_warning(s); })
-			.def_static("error",	[](py_str_t const & s) { return Debug::log_error(s); });
+			.def_static("log",		[](py_str_t const & s) { return debug::log_info(s); })
+			.def_static("warning",	[](py_str_t const & s) { return debug::log_warning(s); })
+			.def_static("error",	[](py_str_t const & s) { return debug::log_error(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

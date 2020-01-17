@@ -4,7 +4,7 @@
 #include <libmeme/Core/Timer.hpp>
 
 #ifndef ML_DISABLE_BENCHMARKS
-#	define ML_BENCHMARK(...) ML_ANON_T(ScopeTimer, ##__VA_ARGS__)
+#	define ML_BENCHMARK(...) ML_ANONYMOUS_T(ScopeTimer, ##__VA_ARGS__)
 #else
 #	define ML_BENCHMARK(...) ((void)0)
 #endif

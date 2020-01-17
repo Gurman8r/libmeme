@@ -55,10 +55,12 @@ namespace ml
 			{
 			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(&value) })
 			{
+				// load stuff, etc...
+				
 				// File Menu
 				Editor::main_menu().add_menu("File", [&, this]()
 				{
-					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
 					{
 						Engine::window().close();
@@ -68,14 +70,14 @@ namespace ml
 				// View Menu
 				Editor::main_menu().add_menu("View", [&, this]()
 				{
-					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					ImGui::MenuItem("ImGui Demo", "", &m_show_imgui_demo);
 				});
 
 				// Option Menu
 				Editor::main_menu().add_menu("Option", [&, this]()
 				{
-					ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Window"))
 					{
 						bool fullscreen{ Engine::window().is_fullscreen() };
@@ -149,7 +151,7 @@ namespace ml
 				m_models["sphere32x24"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);
-				m_models["triangle"] = make_model(make_mesh( // buggy
+				m_models["triangle"] = make_model(make_mesh(
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -159,7 +161,7 @@ namespace ml
 						0, 1, 2,
 					}
 				));
-				m_models["quad"] = make_model(make_mesh( // buggy
+				m_models["quad"] = make_model(make_mesh(
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
 						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -175,14 +177,17 @@ namespace ml
 			} break;
 			case UpdateEvent::ID: if (auto ev{ event_cast<UpdateEvent>(&value) })
 			{
-				// update stuff
+				// update stuff, etc...
+				
+				Engine::window().set_title("libmeme"s
+					+ " | "s + util::to_string(ev->total_time)
+					+ " | "s + util::to_string(ev->delta_time)
+				);
+				
 			} break;
 			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(&value) })
 			{
-				GL::clearColor(0, 0, 0, 1);
-				GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
-				GL::viewport(0, 0, Engine::window().get_frame_width(), Engine::window().get_frame_height());
-				RenderStates{}();
+				// draw stuff, etc...
 
 				if (ML_BIND_EX(RenderTexture, _r, m_pipeline[0]))
 				{
@@ -190,7 +195,9 @@ namespace ml
 					GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
 					GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
 					GL::viewport(0, 0, _r->size()[0], _r->size()[1]);
-					CullState{ false }();
+					constexpr RenderStates states{
+						{}, {}, CullState{ false }, {}
+					}; states();
 
 					if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false))
 					{
@@ -211,7 +218,7 @@ namespace ml
 			} break;
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(&value) })
 			{
-				ML_ImGui_PushPopID(ML_ADDRESSOF(this));
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
 				// ImGui Demo
 				if (m_show_imgui_demo)
@@ -230,11 +237,11 @@ namespace ml
 
 					// Total Time
 					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3fs", ImGui::GetTime()); ImGui::NextColumn();
+					ImGui::Text("%.3fs", ev->total_time); ImGui::NextColumn();
 
 					// Delta Time
 					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", ImGui::GetIO().DeltaTime); ImGui::NextColumn();
+					ImGui::Text("%.7fs", ev->delta_time); ImGui::NextColumn();
 
 					// Frame Rate
 					ImGui::Text("frame rate"); ImGui::NextColumn();
@@ -278,7 +285,7 @@ namespace ml
 		{
 			auto & io{ ImGui::GetIO() };
 			void * const tex_id{ value.address() };
-			vec2 const tex_sz{ alg::scale_to_fit((vec2)value.size(), maxSize) };
+			vec2 const tex_sz{ util::scale_to_fit((vec2)value.size(), maxSize) };
 			float_t const tex_w{ tex_sz[0] };
 			float_t const tex_h{ tex_sz[1] };
 			ImGui::Text("%u: %ux%u (%.0fx%.0f)", value.handle(), value.width(), value.height(), tex_w, tex_h);

@@ -1,7 +1,7 @@
 #ifndef _ML_STRING_UTILITY_HPP_
 #define _ML_STRING_UTILITY_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml::util
 {
@@ -102,9 +102,9 @@ namespace ml::util
 	ML_NODISCARD static inline bool is_alpha(std::string const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale location {};
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isalpha(elem, location))
+			if (!std::isalpha(elem, loc))
 				return false;
 		return true;
 	}
@@ -112,9 +112,9 @@ namespace ml::util
 	ML_NODISCARD static inline bool is_alnum(std::string const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale location {};
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isalnum(elem, location))
+			if (!std::isalnum(elem, loc))
 				return false;
 		return true;
 	}
@@ -122,33 +122,39 @@ namespace ml::util
 	ML_NODISCARD static inline bool is_graph(std::string const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale location {};
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isgraph(elem, location))
+			if (!std::isgraph(elem, loc))
 				return false;
 		return true;
 	}
 
 	ML_NODISCARD static inline bool is_print(std::string const & value) noexcept
 	{
+		if (value.empty()) return false;
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isprint(elem))
+			if (!std::isprint(elem, loc))
 				return false;
 		return true;
 	}
 
 	ML_NODISCARD static inline bool is_lower(std::string const & value) noexcept
 	{
+		if (value.empty()) return false;
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::islower(elem))
+			if (!std::islower(elem, loc))
 				return false;
 		return true;
 	}
 
 	ML_NODISCARD static inline bool is_upper(std::string const & value) noexcept
 	{
+		if (value.empty()) return false;
+		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::islower(elem))
+			if (!std::islower(elem, loc))
 				return false;
 		return true;
 	}
@@ -157,17 +163,17 @@ namespace ml::util
 
 	ML_NODISCARD static inline std::string to_lower(std::string value) noexcept
 	{
-		std::locale location {};
+		std::locale loc{};
 		for (auto & elem : value)
-			elem = std::tolower(elem, location);
+			elem = std::tolower(elem, loc);
 		return value;
 	}
 
 	ML_NODISCARD static inline std::string to_upper(std::string value) noexcept
 	{
-		std::locale location {};
+		std::locale loc{};
 		for (auto & elem : value)
-			elem = std::toupper(elem, location);
+			elem = std::toupper(elem, loc);
 		return value;
 	}
 
@@ -175,16 +181,16 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_bool(std::string const & value) noexcept
 	{
-		switch (hashof(to_lower(value)))
+		switch (_ML_UTIL hash(to_lower(value)))
 		{
-		case hashof("1"):
-		case hashof("true"):
-		case hashof("on"):
-		case hashof("yes"):
-		case hashof("0"):
-		case hashof("false"):
-		case hashof("off"):
-		case hashof("no"):
+		case _ML_UTIL hash("1"):
+		case _ML_UTIL hash("true"):
+		case _ML_UTIL hash("on"):
+		case _ML_UTIL hash("yes"):
+		case _ML_UTIL hash("0"):
+		case _ML_UTIL hash("false"):
+		case _ML_UTIL hash("off"):
+		case _ML_UTIL hash("no"):
 			return true;
 
 		default: return false;
@@ -194,12 +200,13 @@ namespace ml::util
 	ML_NODISCARD static inline bool is_integer(std::string const & value) noexcept
 	{
 		if (value.empty()) return false; 
+		std::locale loc{};
 		std::string::const_iterator it = value.cbegin();
 		if ((*it) == '-')
 		{ 
 			it++; 
 		}
-		while (it != value.cend() && std::isdigit(*it))
+		while (it != value.cend() && std::isdigit(*it, loc))
 		{
 			++it;
 		}
@@ -208,7 +215,7 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_decimal(std::string const & value) noexcept
 	{
-		if (value.empty()) { return false; }
+		if (value.empty()) return false;
 		std::string::pointer endptr = nullptr;
 		auto temp { std::strtod(value.c_str(), &endptr) };
 		return !(*endptr != '\0' || endptr == value);
@@ -216,7 +223,9 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_name(std::string const & value) noexcept
 	{
-		if (!value.empty() && (std::isalpha(value.front()) || (value.front() == '_')))
+		if (value.empty()) return false;
+		std::locale loc{};
+		if (std::isalpha(value.front(), loc) || (value.front() == '_'))
 		{
 			for (size_t i = 1; i < value.size(); ++i)
 			{
@@ -224,7 +233,7 @@ namespace ml::util
 				{
 					continue;
 				}
-				else if (!std::isalnum(value[i]))
+				else if (!std::isalnum(value[i], loc))
 				{
 					return false;
 				}
@@ -238,18 +247,18 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool to_bool(std::string const & value, bool dv = 0) noexcept
 	{
-		switch (hashof(to_lower(value)))
+		switch (_ML_UTIL hash(to_lower(value)))
 		{
-		case hashof("1"):
-		case hashof("true"):
-		case hashof("on"):
-		case hashof("yes"):
+		case _ML_UTIL hash("1"):
+		case _ML_UTIL hash("true"):
+		case _ML_UTIL hash("on"):
+		case _ML_UTIL hash("yes"):
 			return true;
 
-		case hashof("0"):
-		case hashof("false"):
-		case hashof("off"):
-		case hashof("no"):
+		case _ML_UTIL hash("0"):
+		case _ML_UTIL hash("false"):
+		case _ML_UTIL hash("off"):
+		case _ML_UTIL hash("no"):
 			return false;
 			
 		default:

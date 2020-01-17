@@ -85,7 +85,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_storage, other.m_storage);
+				util::swap(m_storage, other.m_storage);
 			}
 		}
 
@@ -122,16 +122,16 @@ namespace ml
 
 		ML_NODISCARD inline std::optional<variable_t> load() const
 		{
-			if (is_variable())
+			if (is_function())
+			{
+				if (auto const & fn{ std::get<function_t>(data()) })
+				{
+					return std::make_optional(std::invoke(fn));
+				}
+			}
+			else if (is_variable())
 			{
 				return std::make_optional(std::get<variable_t>(data()));
-			}
-			else if (is_function())
-			{
-				if (auto const & f{ std::get<function_t>(data()) })
-				{
-					return std::make_optional(std::invoke(std::get<function_t>(data())));
-				}
 			}
 			return std::nullopt;
 		}
@@ -149,6 +149,40 @@ namespace ml
 			{
 				return std::nullopt;
 			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool operator==(Uniform const & other)
+		{
+			return (type() == other.type())
+				&& (name() == other.name());
+		}
+
+		ML_NODISCARD inline bool operator!=(Uniform const & other)
+		{
+			return !(*this == other);
+		}
+
+		ML_NODISCARD inline bool operator<(Uniform const & other)
+		{
+			return (type() < other.type())
+				&& (name() < other.name());
+		}
+
+		ML_NODISCARD inline bool operator>(Uniform const & other)
+		{
+			return !(*this < other);
+		}
+
+		ML_NODISCARD inline bool operator<=(Uniform const & other)
+		{
+			return (*this < other) || (*this == other);
+		}
+
+		ML_NODISCARD inline bool operator>=(Uniform const & other)
+		{
+			return (*this > other) || (*this == other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

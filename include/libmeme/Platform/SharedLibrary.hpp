@@ -90,6 +90,21 @@ namespace ml
 			return (m_instance < other.m_instance);
 		}
 
+		ML_NODISCARD inline bool operator>(SharedLibrary const & other) const
+		{
+			return !(*this < other);
+		}
+
+		ML_NODISCARD inline bool operator<=(SharedLibrary const & other) const
+		{
+			return (*this < other) || (*this == other);
+		}
+
+		ML_NODISCARD inline bool operator>=(SharedLibrary const & other) const
+		{
+			return (*this > other) || (*this == other);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:

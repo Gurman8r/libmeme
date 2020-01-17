@@ -95,9 +95,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_handle, other.m_handle);
+				util::swap(m_handle, other.m_handle);
 
-				alg::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
@@ -186,9 +186,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_handle, other.m_handle);
+				util::swap(m_handle, other.m_handle);
 
-				alg::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
@@ -301,9 +301,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_handle, other.m_handle);
+				util::swap(m_handle, other.m_handle);
 
-				alg::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
@@ -422,9 +422,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_handle, other.m_handle);
+				util::swap(m_handle, other.m_handle);
 
-				alg::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
@@ -552,9 +552,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				alg::swap(m_handle, other.m_handle);
+				util::swap(m_handle, other.m_handle);
 
-				alg::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 

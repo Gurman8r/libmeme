@@ -24,7 +24,7 @@ namespace ml
 
 		ML_NODISCARD inline decltype(auto) operator()(std::string const & str) const
 		{
-			std::stringstream ss { str };
+			std::stringstream ss{ str };
 			return (*this)(ss);
 		}
 

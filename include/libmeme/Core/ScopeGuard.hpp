@@ -3,10 +3,10 @@
 
 #include <libmeme/Common.hpp>
 
-#define ML_SCOPE_EXIT auto ML_ANON(ML_SCOPE_EXIT) \
+#define ML_SCOPE_EXIT auto ML_ANONYMOUS(ML_SCOPE_EXIT) \
 	= ::ml::detail::scope_guard_on_exit() + [&]() noexcept
 
-namespace ml
+namespace ml::detail
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,11 +20,6 @@ namespace ml
 	private: Fn m_fn;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-namespace ml::detail
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum class scope_guard_on_exit {};

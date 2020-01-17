@@ -16,45 +16,65 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct StartupSettings
+		struct EngineSettings final
 		{
 			path_t program_name;
 			path_t library_path;
 		};
 
-		struct CreateWindowSettings
+		struct WindowSettings final
 		{
-			std::string		title;
-			DisplayMode		display;
-			WindowSettings	style;
+			C_string		title;
+			VideoMode		display;
 			ContextSettings context;
+			int32_t			flags;
+			bool			install_callbacks;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(StartupSettings const & settings);
+		struct Time final
+		{
+			Timer		main{ true },	loop{ false };
+			float64_t	total{ 0. },	delta{ 0. };
+		};
 
-		static bool create_window(CreateWindowSettings const & settings);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool startup(EngineSettings const & es);
+
+		static bool init_window(WindowSettings const & ws);
 
 		static bool running();
 
+		static void shutdown();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		static void begin_loop();
+
+		static void begin_draw();
 
 		static void end_loop();
 
-		static void shutdown();
-		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline RenderWindow & window()
-		{
-			return s_window;
-		}
+		static int32_t load_plugin(path_t const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static inline auto const & time() noexcept { return s_time; }
+
+		ML_NODISCARD static inline auto & window() { return s_window; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		static Time s_time;
 		static RenderWindow s_window;
+
+		struct PluginLoader;
+		static PluginLoader s_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

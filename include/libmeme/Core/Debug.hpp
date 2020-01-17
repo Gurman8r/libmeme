@@ -1,12 +1,7 @@
 #ifndef _ML_DEBUG_HPP_
 #define _ML_DEBUG_HPP_
 
-#include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-
-# ifndef ML_ASSERT
-#	define ML_ASSERT(expr) assert(expr)
-#endif
 
 #define ML_WARNING	-1
 #define ML_FAILURE	 0
@@ -32,12 +27,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API Debug final
+	namespace debug
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		Debug() = delete;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static inline int32_t clear()
@@ -48,12 +39,11 @@ namespace ml
 #	else
 			return std::system("clear");
 #	endif
-#else
-			return 0;
 #endif
+			return 0;
 		}
 
-		static inline int32_t pause(int32_t exitCode)
+		static inline int32_t pause(int32_t exit_code)
 		{
 #if ML_DEBUG
 #	ifdef ML_OS_WINDOWS
@@ -62,7 +52,7 @@ namespace ml
 			std::cin.get();
 #	endif
 #endif
-			return exitCode;
+			return exit_code;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -93,19 +83,19 @@ namespace ml
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_info(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return Debug::log_info(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_info(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_error(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return Debug::log_error(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_error(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_warning(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return Debug::log_warning(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_warning(util::format(fmt, arg0, std::forward<Args>(args)...));
 		}
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

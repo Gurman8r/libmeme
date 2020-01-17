@@ -11,8 +11,6 @@ namespace ml
 	{
 	}
 
-	Registry<>::~Registry() {}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_REGISTER(Material,	"") { return std::make_optional(make_material()); }
