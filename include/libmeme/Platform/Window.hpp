@@ -1,7 +1,6 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Core/EventListener.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
 #include <libmeme/Platform/Cursor.hpp>
