@@ -22,7 +22,6 @@ namespace ml
 		Glyph(storage_type && storage) noexcept;
 		Glyph(Glyph const & other);
 		Glyph(Glyph && other) noexcept;
-		~Glyph();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

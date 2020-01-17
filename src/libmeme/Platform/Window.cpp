@@ -51,7 +51,7 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window::Window()
+	Window::Window() noexcept
 		: m_window	{ nullptr }
 		, m_monitor	{ nullptr }
 		, m_share	{ nullptr }
@@ -71,7 +71,7 @@ namespace ml
 #endif
 	}
 	
-	Window::~Window()
+	Window::~Window() noexcept
 	{
 #if defined(ML_OS_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })

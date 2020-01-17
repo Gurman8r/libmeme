@@ -79,8 +79,6 @@ namespace ml::ds
 
 		basic_flat_map() noexcept : m_storage{} {}
 
-		~basic_flat_map() noexcept {}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit basic_flat_map(storage_type const & value)
@@ -483,8 +481,6 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		flat_map() noexcept : base_type{} {}
-
-		~flat_map() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

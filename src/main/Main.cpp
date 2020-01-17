@@ -1,20 +1,10 @@
-#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/TypeOf.hpp>
-#include <libmeme/Core/FlatMap.hpp>
-#include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Editor/Editor.hpp>
-#include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/Python.hpp>
-#include <libmeme/Engine/Lua.hpp>
-#include <libmeme/Engine/Script.hpp>
-#include <libmeme/Renderer/Color.hpp>
-#include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Editor/Editor.hpp>
+#include <libmeme/Editor/EditorEvents.hpp>
 
 // Window Options
 namespace ml
@@ -63,9 +53,6 @@ ml::int32_t main()
 	// Enter Event
 	EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
 
-	// Load Plugins
-	Engine::load_plugin("demo.dll");
-
 	// Create Window
 	if (!Engine::init_window(window_settings))
 	{
@@ -77,6 +64,9 @@ ml::int32_t main()
 	{
 		return debug::log_error("Failed initializing Editor") | debug::pause(1);
 	}
+
+	// Load Plugins
+	Engine::load_plugin("demo.dll");
 
 	// Load Event
 	EventSystem::fire_event<LoadEvent>();

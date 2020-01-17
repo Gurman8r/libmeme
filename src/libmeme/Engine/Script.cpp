@@ -37,8 +37,6 @@ namespace ml
 	{
 	}
 	
-	Script::~Script() {}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	Script & Script::operator=(Script const & other)

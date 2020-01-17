@@ -40,8 +40,6 @@ namespace ml
 
 		Uniform() noexcept : m_storage{} {}
 
-		~Uniform() noexcept {}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit Uniform(storage_type const & storage)

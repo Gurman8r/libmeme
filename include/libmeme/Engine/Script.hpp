@@ -20,7 +20,6 @@ namespace ml
 		explicit Script(Language language, std::string const & text);
 		Script(Script const & other);
 		Script(Script && other) noexcept;
-		~Script();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

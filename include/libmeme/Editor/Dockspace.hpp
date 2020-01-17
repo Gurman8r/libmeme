@@ -57,8 +57,6 @@ namespace ml
 
 		Dockspace();
 
-		~Dockspace();
-
 		bool		m_open;			//
 		bool		m_good;			//
 		nodes_t		m_nodes;		//

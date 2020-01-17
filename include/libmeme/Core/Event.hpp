@@ -4,9 +4,8 @@
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Common.hpp>
 
-// The number of events reserved for each sub-library
-#ifndef ML_MAX_LIBRARY_EVENTS
-#define ML_MAX_LIBRARY_EVENTS 64
+#ifndef ML_IMPL_MAX_LIBRARY_EVENTS
+#define ML_IMPL_MAX_LIBRARY_EVENTS 64
 #endif
 
 namespace ml
@@ -27,7 +26,8 @@ namespace ml
 
 		enum : int32_t
 		{
-			MAX_LIBRARY_EVENTS = ML_MAX_LIBRARY_EVENTS,
+			// The number of events reserved for each sub-library
+			MAX_LIBRARY_EVENTS = ML_IMPL_MAX_LIBRARY_EVENTS,
 
 			EV_INVALID	= -1,
 			EV_CORE		= (MAX_LIBRARY_EVENTS * 1),

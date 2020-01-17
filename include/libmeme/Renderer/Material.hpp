@@ -28,7 +28,6 @@ namespace ml
 		Material(storage_type && data) noexcept;
 		Material(Material const & other);
 		Material(Material && other) noexcept;
-		~Material();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

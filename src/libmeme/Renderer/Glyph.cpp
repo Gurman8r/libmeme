@@ -34,11 +34,6 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Glyph::~Glyph()
-	{
-		texture().destroy();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Glyph Glyph::operator=(Glyph const & other)

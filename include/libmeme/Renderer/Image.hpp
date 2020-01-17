@@ -34,7 +34,6 @@ namespace ml
 		Image(path_t const & path, bool flip, size_t req_comp);
 		Image(Image const & other);
 		Image(Image && other) noexcept;
-		~Image();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

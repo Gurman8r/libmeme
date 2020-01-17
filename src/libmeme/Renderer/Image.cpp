@@ -90,11 +90,6 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Image::~Image()
-	{
-		dispose();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Image & Image::operator=(Image const & other)

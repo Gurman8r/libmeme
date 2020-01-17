@@ -31,10 +31,6 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Material::~Material()
-	{
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Material & Material::operator=(Material const & other)

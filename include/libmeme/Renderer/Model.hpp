@@ -35,7 +35,6 @@ namespace ml
 		Model(storage_type && storage) noexcept;
 		Model(Model const & other);
 		Model(Model && other) noexcept;
-		~Model();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -12,9 +12,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderWindow();
+		RenderWindow() noexcept;
 
-		virtual ~RenderWindow();
+		virtual ~RenderWindow() noexcept = default;
 
 		virtual bool create(
 			std::string const & title,

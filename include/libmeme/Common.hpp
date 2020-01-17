@@ -28,7 +28,6 @@
 #	include <variant>
 #endif
 
-
 #if ML_HAS_CXX20
 #	include <concepts>
 #	include <format>

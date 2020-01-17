@@ -7,11 +7,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderWindow::RenderWindow() : Window{}, RenderTarget{}
+	RenderWindow::RenderWindow() noexcept : Window{}, RenderTarget{}
 	{
 	}
-
-	RenderWindow::~RenderWindow() {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -27,8 +27,6 @@ namespace ml
 		m_nodes.push_back(6);
 	}
 
-	Dockspace::~Dockspace() {}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool Dockspace::dispose()

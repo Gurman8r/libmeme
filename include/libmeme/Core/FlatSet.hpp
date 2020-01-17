@@ -64,8 +64,6 @@ namespace ml::ds
 
 		basic_flat_set() noexcept : m_storage{} {}
 
-		~basic_flat_set() noexcept {}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class It> basic_flat_set(It first, It last)
@@ -378,8 +376,6 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		flat_set() noexcept : base_type{} {}
-
-		~flat_set() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

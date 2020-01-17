@@ -4,9 +4,9 @@
 #include <libmeme/Core/Timer.hpp>
 
 #ifndef ML_DISABLE_BENCHMARKS
-#	define ML_BENCHMARK(...) ML_ANONYMOUS_T(ScopeTimer, ##__VA_ARGS__)
+#	define ML_BENCHMARK(name) ML_ANONYMOUS_T(ScopeTimer, name)
 #else
-#	define ML_BENCHMARK(...) ((void)0)
+#	define ML_BENCHMARK(name)
 #endif
 
 namespace ml

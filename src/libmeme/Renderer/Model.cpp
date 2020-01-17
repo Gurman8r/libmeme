@@ -53,14 +53,6 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Model::~Model()
-	{
-		for (auto & elem : m_storage)
-		{
-			elem.destroy();
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Model & Model::operator=(Model const & other)
