@@ -13,7 +13,7 @@ project "libmeme"
 	staticruntime	"Off"
 	systemversion	"latest"
 	dependson {
-		"glfw", "imgui", "lua", "raknet",
+		"glfw", "imgui", "lua", --"raknet",
 	}
 	defines {
 		"ML_CORE_EXPORTS",
@@ -62,7 +62,7 @@ project "libmeme"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"lua", "raknet", "imgui", "glfw",
+		"lua", "imgui", "glfw", --"raknet",
 		"opengl32", "glew32s", 
 		"assimp", "IrrXML", "zlibstatic", "freetype",
 	}

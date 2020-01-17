@@ -10,11 +10,16 @@
 
 namespace ml
 {
-	struct Engine::PluginLoader : public Trackable, public NonCopyable
+	struct Engine::PluginLoader final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		PluginLoader() noexcept {};
+		PluginLoader() noexcept {}
+
+		~PluginLoader()
+		{
+			m_libs.for_each([](auto const &, auto & p) { delete p; });
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,8 +49,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ds::flat_set<path_t> m_files;
-		ds::flat_map<SharedLibrary, Plugin *> m_libs;
+		ds::flat_set<path_t> m_files{};
+		ds::flat_map<SharedLibrary, Plugin *> m_libs{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -77,9 +82,7 @@ namespace ml
 	bool Engine::init_window(WindowSettings const & ws)
 	{
 		if (!s_window.create(ws.title, ws.display, ws.context, ws.flags))
-		{
-			return debug::log_error("");
-		}
+			return false;
 
 		if (ws.install_callbacks)
 		{
@@ -153,9 +156,11 @@ namespace ml
 		s_plugins.clear_plugins();
 
 		s_window.destroy();
-		s_window.terminate();
+		
+		Window::terminate();
 
 		Python::shutdown();
+		
 		Lua::shutdown();
 	}
 
@@ -164,10 +169,12 @@ namespace ml
 	void Engine::begin_loop()
 	{
 		s_time.total = s_time.main.elapsed().count();
+		
 		s_time.delta = s_time.loop.elapsed().count();
+		
 		s_time.loop.stop().start();
 
-		s_window.poll_events();
+		Window::poll_events();
 	}
 
 	void Engine::begin_draw()
@@ -193,6 +200,11 @@ namespace ml
 	int32_t Engine::load_plugin(path_t const & path)
 	{
 		return s_plugins.load_plugin(path);
+	}
+
+	int32_t Engine::load_plugin(path_t && path)
+	{
+		return s_plugins.load_plugin(std::move(path)); // fixme
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -61,6 +61,8 @@ namespace ml
 
 		static int32_t load_plugin(path_t const & path);
 
+		static int32_t load_plugin(path_t && path);
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static inline auto const & time() noexcept { return s_time; }

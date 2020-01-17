@@ -15,7 +15,7 @@ uniform struct Camera
     float   near;   // Near Clipping Distance
     float   far;    // Far Clipping Distance
     vec2    view;   // Display Size
-} u_camera;
+} u_cam;
 
 uniform float u_time;
 uniform vec4 u_rotation;
@@ -62,14 +62,14 @@ void main()
 {
     // Model Matrix
     mat4 m = angle_axis(u_rotation.xyz, u_rotation.w * u_time);
-    m[3] = vec4(u_camera.pos, 1);
+    m[3] = vec4(u_cam.pos, 1);
 
     // View Matrix
-    mat4 v = look_at(u_camera.pos - vec3(0, 0, 0.1), m[3].xyz, vec3(0.0, 1.0, 0.0));
+    mat4 v = look_at(u_cam.pos - vec3(0, 0, 0.1), m[3].xyz, vec3(0.0, 1.0, 0.0));
 
     // Projection Matrix
     mat4 p = perspective(
-        u_camera.fov, (u_camera.view.x / u_camera.view.y), u_camera.near, u_camera.far
+        u_cam.fov, (u_cam.view.x / u_cam.view.y), u_cam.near, u_cam.far
     );
 
     // Output

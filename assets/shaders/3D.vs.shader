@@ -14,12 +14,13 @@ uniform struct Camera
     float   near;   // Near Clipping Distance
     float   far;    // Far Clipping Distance
     vec2    view;   // Display Size
-} u_camera;
+} u_cam;
 
 uniform float   u_time;     // Total Time
-uniform vec3    u_position; // Model Position
-uniform vec3    u_scale;    // Model Scale
-uniform vec4    u_rotation; // Model Rotation
+uniform float   u_delta;    // Delta Time
+uniform vec3    u_position; // Position
+uniform vec3    u_scale;    // Scale
+uniform vec4    u_rotation; // Rotation
 
 mat4 transform(vec3 pos, vec4 rot)
 {
@@ -66,11 +67,11 @@ void main()
     mat4 m = transform(u_position, vec4(u_rotation.xyz, u_rotation.w * u_time));
 
     // View Matrix
-    mat4 v = look_at(u_camera.pos, u_camera.dir);
+    mat4 v = look_at(u_cam.pos, u_cam.dir);
 
     // Projection Matrix
     mat4 p = perspective(
-        u_camera.fov, (u_camera.view.x / u_camera.view.y), u_camera.near, u_camera.far
+        u_cam.fov, (u_cam.view.x / u_cam.view.y), u_cam.near, u_cam.far
     );
 
     // Output

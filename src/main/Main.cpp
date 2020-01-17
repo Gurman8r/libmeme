@@ -55,97 +55,96 @@ ml::int32_t main()
 	using namespace ml;
 
 	// Startup Engine
-	if (Engine::startup({ ML_ARGV[0], "../../../" }))
-	{
-		// Enter Event
-		EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
-
-		// Load Plugins
-		Engine::load_plugin("demo.dll");
-
-		// Create Window
-		if (!Engine::init_window(window_settings))
-		{
-			return debug::log_error("Failed initializing Window") | debug::pause(1);
-		}
-
-		// Startup Editor
-		if (!Editor::startup({ Engine::window().get_handle(), true }))
-		{
-			return debug::log_error("Failed initializing Editor") | debug::pause(1);
-		}
-
-		// Load Event
-		EventSystem::fire_event<LoadEvent>();
-
-		// Main Loop
-		while (Engine::running())
-		{
-			static auto const & tt = Engine::time().total;
-			static auto const & dt = Engine::time().delta;
-
-			// Begin Loop
-			{
-				ML_BENCHMARK("LOOP_BEGIN");
-				Engine::begin_loop();
-				EventSystem::fire_event<BeginLoopEvent>();
-			}
-			// Update
-			{
-				ML_BENCHMARK("\tUPDATE");
-				EventSystem::fire_event<UpdateEvent>(tt, dt);
-			}
-			// Draw
-			{
-				ML_BENCHMARK("\tDRAW");
-				Engine::begin_draw();
-				EventSystem::fire_event<DrawEvent>(tt, dt);
-			}
-			// Begin Gui
-			{
-				ML_BENCHMARK("\tGUI_BEGIN");
-				Editor::new_frame();
-				EventSystem::fire_event<BeginGuiEvent>();
-			}
-			// Gui
-			{
-				ML_BENCHMARK("\t\tGUI");
-				Editor::main_menu().render();
-				Editor::dockspace().render();
-				EventSystem::fire_event<GuiEvent>(tt, dt);
-			}
-			// End Gui
-			{
-				ML_BENCHMARK("\tGUI_END");
-				Editor::render_frame();
-				EventSystem::fire_event<EndGuiEvent>();
-			}
-			// End Loop
-			{
-				ML_BENCHMARK("LOOP_END");
-				Engine::end_loop();
-				EventSystem::fire_event<EndLoopEvent>();
-			}
-			PerformanceTracker::swap();
-		}
-
-		// Unload Event
-		EventSystem::fire_event<UnloadEvent>();
-
-		// Shutdown
-		Editor::shutdown();
-		Engine::shutdown();
-
-		// Exit Event
-		EventSystem::fire_event<ExitEvent>();
-
-		// Goodbye!
-		return EXIT_SUCCESS;
-	}
-	else
+	if (!Engine::startup({ ML_ARGV[0], "../../../" }))
 	{
 		return debug::log_error("Failed initializing Engine") | debug::pause(1);
 	}
+
+	// Enter Event
+	EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
+
+	// Load Plugins
+	Engine::load_plugin("demo.dll");
+
+	// Create Window
+	if (!Engine::init_window(window_settings))
+	{
+		return debug::log_error("Failed initializing Window") | debug::pause(1);
+	}
+
+	// Startup Editor
+	if (!Editor::startup({ Engine::window().get_handle(), true }))
+	{
+		return debug::log_error("Failed initializing Editor") | debug::pause(1);
+	}
+
+	// Load Event
+	EventSystem::fire_event<LoadEvent>();
+
+	// Main Loop
+	while (Engine::running())
+	{
+		static float64_t const // Timers
+			& tt = Engine::time().total,
+			& dt = Engine::time().delta;
+
+		// Begin Loop
+		{
+			ML_BENCHMARK("LOOP_BEGIN");
+			Engine::begin_loop();
+			EventSystem::fire_event<BeginLoopEvent>();
+		}
+		// Update
+		{
+			ML_BENCHMARK("\tUPDATE");
+			EventSystem::fire_event<UpdateEvent>(tt, dt);
+		}
+		// Draw
+		{
+			ML_BENCHMARK("\tDRAW");
+			Engine::begin_draw();
+			EventSystem::fire_event<DrawEvent>(tt, dt);
+		}
+		// Begin Gui
+		{
+			ML_BENCHMARK("\tGUI_BEGIN");
+			Editor::new_frame();
+			EventSystem::fire_event<BeginGuiEvent>();
+		}
+		// Gui
+		{
+			ML_BENCHMARK("\t\tGUI");
+			Editor::main_menu().render();
+			Editor::dockspace().render();
+			EventSystem::fire_event<GuiEvent>(tt, dt);
+		}
+		// End Gui
+		{
+			ML_BENCHMARK("\tGUI_END");
+			Editor::render_frame();
+			EventSystem::fire_event<EndGuiEvent>();
+		}
+		// End Loop
+		{
+			ML_BENCHMARK("LOOP_END");
+			Engine::end_loop();
+			EventSystem::fire_event<EndLoopEvent>();
+		}
+		PerformanceTracker::swap();
+	}
+
+	// Unload Event
+	EventSystem::fire_event<UnloadEvent>();
+
+	// Shutdown
+	Editor::shutdown();
+	Engine::shutdown();
+
+	// Exit Event
+	EventSystem::fire_event<ExitEvent>();
+
+	// Goodbye!
+	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

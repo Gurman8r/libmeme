@@ -13,7 +13,7 @@ uniform struct Camera
     float   near;   // Near Clipping Distance
     float   far;    // Far Clipping Distance
     vec2    view;   // Display Size
-} u_camera;
+} u_cam;
 
 uniform vec4        u_color;        // Main Color
 uniform vec3        u_lightPos;     // Light Position
@@ -36,7 +36,7 @@ void main()
     vec4  diffuse = u_diffuse * diff_amt * texture(u_texture0, V.texcoord);
 
     // Specular
-    vec3  spec_nml = normalize(u_camera.pos - V.position);
+    vec3  spec_nml = normalize(u_cam.pos - V.position);
     vec3  spec_dir = reflect(-diff_dir, diff_nml);
     float spec_amt = pow(max(dot(spec_nml, spec_dir), 0.0), u_shininess);
     vec4  specular = u_specular * spec_amt * texture(u_texture1, V.texcoord).r;

@@ -125,26 +125,28 @@ namespace ml
 
 				// Materials
 				m_materials["2d"] = make_material(
-					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
-					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
-					make_uniform<Color	>("u_color",		colors::white),
-					make_uniform<mat4	>("u_proj",			mat4::identity()),
-					make_uniform<mat4	>("u_view",			mat4::identity()),
-					make_uniform<mat4	>("u_model",		mat4::identity())
+					make_uniform<float_t>("u_time",		[]() { return (float_t)Engine::time().total; }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)Engine::time().delta; }),
+					make_uniform<Texture>("u_texture0",	&m_textures["navball"]),
+					make_uniform<Color	>("u_color",	colors::white),
+					make_uniform<mat4	>("u_proj",		mat4::identity()),
+					make_uniform<mat4	>("u_view",		mat4::identity()),
+					make_uniform<mat4	>("u_model",	mat4::identity())
 				);
 				m_materials["3d"] = make_material(
-					make_uniform<float_t>("u_time",			[]() { return (float_t)ImGui::GetTime(); }),
-					make_uniform<vec3	>("u_camera.pos",	vec3{ 0, 0, 3.f }),
-					make_uniform<vec3	>("u_camera.dir",	vec3{ 0, 0, -1.f }),
-					make_uniform<float_t>("u_camera.fov",	45.0f),
-					make_uniform<float_t>("u_camera.near",	0.0001f),
-					make_uniform<float_t>("u_camera.far",	1000.0f),
-					make_uniform<vec2	>("u_camera.view",	vec2{ 1280.f, 720.f }),
-					make_uniform<Texture>("u_texture0",		&m_textures["navball"]),
-					make_uniform<Color	>("u_color",		colors::white),
-					make_uniform<vec3	>("u_position",		vec3{ 0.f, 0.f, 0.f }),
-					make_uniform<vec3	>("u_scale",		vec3{ 1.f, 1.f, 1.f }),
-					make_uniform<vec4	>("u_rotation",		vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
+					make_uniform<float_t>("u_time",		[]() { return (float_t)Engine::time().total; }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)Engine::time().delta; }),
+					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
+					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
+					make_uniform<float_t>("u_cam.fov",	45.0f),
+					make_uniform<float_t>("u_cam.near",	0.0001f),
+					make_uniform<float_t>("u_cam.far",	1000.0f),
+					make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
+					make_uniform<Texture>("u_texture0",	&m_textures["navball"]),
+					make_uniform<Color	>("u_color",	colors::white),
+					make_uniform<vec3	>("u_position",	vec3{ 0.f, 0.f, 0.f }),
+					make_uniform<vec3	>("u_scale",	vec3{ 1.f, 1.f, 1.f }),
+					make_uniform<vec4	>("u_rotation",	vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
 				);
 
 				// Models
