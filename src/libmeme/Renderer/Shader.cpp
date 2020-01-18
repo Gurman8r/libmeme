@@ -39,41 +39,46 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Shader::Shader()
-		: m_handle{ NULL }
-		, m_attributes{}
-		, m_source{}
-		, m_textures{}
-		, m_uniforms{}
+	Shader::Shader(allocator_type const & alloc)
+		: m_handle		{ NULL }
+		, m_source		{}
+		, m_attributes	{ alloc }
+		, m_textures	{ alloc }
+		, m_uniforms	{ alloc }
 	{
 	}
 
-	Shader::Shader(Source const & source)
-		: Shader{}
+	Shader::Shader()
+		: Shader{ allocator_type{} }
+	{
+	}
+
+	Shader::Shader(Source const & source, allocator_type const & alloc)
+		: Shader{ alloc }
 	{
 		load_from_source(source);
 	}
 
-	Shader::Shader(path_t const & v, path_t const & f)
-		: Shader{}
+	Shader::Shader(path_t const & v, path_t const & f, allocator_type const & alloc)
+		: Shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	Shader::Shader(path_t const & v, path_t const & g, path_t const & f)
-		: Shader{}
+	Shader::Shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc)
+		: Shader{ alloc }
 	{
 		load_from_file(v, g, f);
 	}
 
-	Shader::Shader(Shader const & other)
-		: Shader{}
+	Shader::Shader(Shader const & other, allocator_type const & alloc)
+		: Shader{ alloc }
 	{
 		load_from_source(other.m_source);
 	}
 
-	Shader::Shader(Shader && other) noexcept
-		: Shader{}
+	Shader::Shader(Shader && other, allocator_type const & alloc) noexcept
+		: Shader{ alloc }
 	{
 		swap(std::move(other));
 	}
@@ -194,7 +199,7 @@ namespace ml
 
 	void Shader::bind(Shader const * value, bool bindTextures)
 	{
-		if (value && (*value))
+		if (value && value->m_handle)
 		{
 			GL::useProgram(value->m_handle);
 
@@ -215,16 +220,6 @@ namespace ml
 		{
 			GL::useProgram(NULL);
 		}
-	}
-
-	void Shader::bind(bool bindTextures) const
-	{
-		bind(this, bindTextures);
-	}
-
-	void Shader::unbind() const
-	{
-		bind(nullptr, false);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

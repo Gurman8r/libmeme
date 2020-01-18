@@ -1,6 +1,7 @@
 #include <libmeme/Renderer/Model.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderTarget.hpp>
+#include <libmeme/Core/Debug.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * */
 
@@ -21,34 +22,39 @@ namespace ml
 	{
 	}
 
-	Model::Model(initializer_type init)
-		: m_storage{ init }
+	Model::Model(allocator_type const & alloc)
+		: m_storage{ alloc }
 	{
 	}
 
-	Model::Model(path_t const & path)
-		: m_storage{}
+	Model::Model(initializer_type init, allocator_type const & alloc)
+		: m_storage{ init, alloc }
+	{
+	}
+
+	Model::Model(path_t const & path, allocator_type const & alloc)
+		: m_storage{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	Model::Model(storage_type const & storage)
-		: m_storage{ storage }
+	Model::Model(storage_type const & storage, allocator_type const & alloc)
+		: m_storage{ storage, alloc }
 	{
 	}
 
-	Model::Model(storage_type && storage) noexcept
-		: m_storage{ std::move(storage) }
+	Model::Model(storage_type && storage, allocator_type const & alloc) noexcept
+		: m_storage{ std::move(storage), alloc }
 	{
 	}
 
-	Model::Model(Model const & other)
-		: m_storage{ other.m_storage }
+	Model::Model(Model const & other, allocator_type const & alloc)
+		: m_storage{ other.m_storage, alloc }
 	{
 	}
 
-	Model::Model(Model && other) noexcept
-		: m_storage{}
+	Model::Model(Model && other, allocator_type const & alloc) noexcept
+		: m_storage{ alloc }
 	{
 		swap(std::move(other));
 	}
@@ -92,41 +98,58 @@ namespace ml
 
 	bool Model::load_from_file(path_t const & path, uint32_t flags)
 	{
+		// open scene
+		Assimp::Importer _ai;
+		aiScene const * scene{ _ai.ReadFile(path.string().c_str(), flags) };
+		if (!scene)
+		{
+			return debug::log_error("Failed reading aiScene from file");
+		}
+		
+		// cleanup
 		if (!m_storage.empty()) { m_storage.clear(); }
 
-		// Read File
-		Assimp::Importer ai;
-		if (aiScene const * scene{ ai.ReadFile(path.string().c_str(), flags) })
+		// for each mesh
+		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const & mesh)
 		{
-			// Iterate Meshes
-			for (aiMesh ** m = &scene->mMeshes[0]; m != &scene->mMeshes[scene->mNumMeshes]; m++)
+			// vertices
+			pmr::vector<vertex> verts;
+
+			// for each face
+			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)
 			{
-				// Vertices
-				std::vector<Vertex> verts;
+				// reserve space
+				verts.reserve(verts.size() +
+					std::distance(&face.mIndices[0], &face.mIndices[face.mNumIndices])
+				);
 
-				// Iterate Faces
-				for (aiFace * f = &(*m)->mFaces[0]; f != &(*m)->mFaces[(*m)->mNumFaces]; f++)
+				// for each index
+				std::for_each(&face.mIndices[0], &face.mIndices[face.mNumIndices], [&](uint32_t const & i)
 				{
-					// Iterate Indices
-					for (uint32_t * i = &f->mIndices[0]; i != &f->mIndices[f->mNumIndices]; ++i)
-					{
-						auto const * vp{ (*m)->mVertices ? &(*m)->mVertices[*i] : nullptr };
-						auto const * vn{ (*m)->mNormals ? &(*m)->mNormals[*i] : nullptr };
-						auto const * uv{ (*m)->HasTextureCoords(0) ? &(*m)->mTextureCoords[0][*i] : nullptr };
+					auto const vp{ // position
+						mesh->mVertices ? &mesh->mVertices[i] : nullptr
+					};
+					auto const vn{ // normal
+						mesh->mNormals ? &mesh->mNormals[i] : nullptr
+					};
+					auto const uv{ // texcoord
+						mesh->HasTextureCoords(0) ? &mesh->mTextureCoords[0][i] : nullptr
+					};
 
-						// Make Vertex
-						verts.emplace_back(make_vertex(
-							vp ? vec3{ vp->x, vp->y, vp->z } : vec3::zero(),
-							vn ? vec3{ vn->x, vn->y, vn->z } : vec3::one(),
-							uv ? vec2{ uv->x, uv->y } : vec2::one()
-						));
-					}
-				}
+					// make vertex
+					verts.emplace_back(make_vertex(
+						vp ? vec3{ vp->x, vp->y, vp->z } : vec3{ 0 },
+						vn ? vec3{ vn->x, vn->y, vn->z } : vec3{ 0 },
+						uv ? vec2{ uv->x, uv->y } : vec2{ 0 }
+					));
+				});
+			});
 
-				// Make Mesh
-				m_storage.emplace_back(make_mesh(verts));
-			}
-		}
+			// make mesh
+			verts.shrink_to_fit();
+			m_storage.emplace_back(make_mesh(verts));
+		});
+
 		return !m_storage.empty();
 	}
 

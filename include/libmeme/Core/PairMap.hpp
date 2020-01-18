@@ -72,7 +72,7 @@ namespace ml::ds
 		using value_type				= typename traits_type::value_type;
 		using compare_type				= typename traits_type::compare_type;
 		using allocator_type			= typename traits_type::allocator_type;
-		using storage_type				= typename std::vector<value_type, allocator_type>;
+		using storage_type				= typename pmr::vector<value_type, allocator_type>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;

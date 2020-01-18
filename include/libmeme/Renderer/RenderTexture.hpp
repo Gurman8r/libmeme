@@ -40,15 +40,27 @@ namespace ml
 
 		static void bind(RenderTexture const * value);
 
+		inline void bind() const { return bind(this); }
+
+		inline void unbind() const { return bind(nullptr); }
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return fbo() && rbo(); }
+		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo; }
+
+		ML_NODISCARD inline operator bool() const noexcept { return good(); }
 
 		ML_NODISCARD inline auto fbo() const noexcept -> FrameBufferObject const & { return m_fbo; }
 
 		ML_NODISCARD inline auto rbo() const noexcept -> RenderBufferObject const & { return m_rbo; }
 
 		ML_NODISCARD inline auto size() const noexcept -> vec2i const & { return m_size; }
+
+		ML_NODISCARD inline auto width() const noexcept -> int32_t { return m_size[0]; }
+
+		ML_NODISCARD inline auto height() const noexcept -> int32_t { return m_size[1]; }
+
+		ML_NODISCARD inline auto bounds() const noexcept -> IntRect { return IntRect{ 0, 0, width(), height() }; }
 
 		ML_NODISCARD inline auto colorID() const noexcept -> uint32_t { return m_colorID; }
 

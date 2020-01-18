@@ -548,9 +548,9 @@ namespace ml
 		return temp;
 	}
 
-	std::vector<VideoMode> const & Window::get_fullscreen_modes()
+	pmr::vector<VideoMode> const & Window::get_fullscreen_modes()
 	{
-		static std::vector<VideoMode> temp {};
+		static pmr::vector<VideoMode> temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -582,9 +582,9 @@ namespace ml
 		return reinterpret_cast<Window::proc_fn>(glfwGetProcAddress(value));
 	}
 
-	std::vector<void *> const & Window::get_monitors()
+	pmr::vector<void *> const & Window::get_monitors()
 	{
-		static std::vector<void *> temp {};
+		static pmr::vector<void *> temp {};
 		if (temp.empty())
 		{
 			int32_t count { 0 };

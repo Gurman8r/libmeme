@@ -18,21 +18,20 @@ namespace ml
 
 			constexpr Source() noexcept = default;
 		};
-
-		using AttribCache = typename ds::flat_map<std::string, int32_t>;
-
-		using UniformCache = typename ds::flat_map<std::string, int32_t>;
-
-		using TextureCache = typename ds::flat_map<int32_t, struct Texture const *>;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using attribute_cache	= typename ds::flat_map<std::string, int32_t>;
+		using uniform_cache		= typename ds::flat_map<std::string, int32_t>;
+		using texture_cache		= typename ds::flat_map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Shader();
-		Shader(Source const & source);
-		Shader(path_t const & v, path_t const & f);
-		Shader(path_t const & v, path_t const & g, path_t const & f);
-		Shader(Shader const & other);
-		Shader(Shader && other) noexcept;
+		explicit Shader(allocator_type const & alloc);
+		Shader(Source const & source, allocator_type const & alloc = {});
+		Shader(path_t const & v, path_t const & f, allocator_type const & alloc = {});
+		Shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc = {});
+		Shader(Shader const & other, allocator_type const & alloc = {});
+		Shader(Shader && other, allocator_type const & alloc = {}) noexcept;
 		~Shader();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -63,9 +62,9 @@ namespace ml
 
 		static void bind(Shader const * value, bool bindTextures = true);
 
-		void bind(bool bindTextures = true) const;
+		inline void bind(bool bindTextures = true) const { bind(this, bindTextures); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr, false); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -103,11 +102,11 @@ namespace ml
 
 		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
-		ML_NODISCARD inline auto attributes() const noexcept -> AttribCache const & { return m_attributes; }
+		ML_NODISCARD inline auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
 
-		ML_NODISCARD inline auto textures() const noexcept -> TextureCache const & { return m_textures; }
+		ML_NODISCARD inline auto textures() const noexcept -> texture_cache const & { return m_textures; }
 
-		ML_NODISCARD inline auto uniforms() const noexcept -> UniformCache const & { return m_uniforms; }
+		ML_NODISCARD inline auto uniforms() const noexcept -> uniform_cache const & { return m_uniforms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -126,9 +125,9 @@ namespace ml
 
 		uint32_t		m_handle;
 		Source			m_source;
-		AttribCache		m_attributes;
-		UniformCache	m_uniforms;
-		TextureCache	m_textures;
+		attribute_cache		m_attributes;
+		uniform_cache	m_uniforms;
+		texture_cache	m_textures;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

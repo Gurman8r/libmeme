@@ -23,10 +23,12 @@ namespace ml
 			uint32_t	width		{ 0 };
 
 			constexpr Attribute() noexcept = default;
-			constexpr Attribute(Attribute const &) noexcept = default;
+			constexpr Attribute(Attribute const &) = default;
 			constexpr Attribute(Attribute &&) noexcept = default;
+			constexpr Attribute & operator=(Attribute const &) = default;
+			constexpr Attribute & operator=(Attribute &&) noexcept = default;
 
-			Attribute const & operator()() const;
+			Attribute const & operator()() const noexcept;
 
 			/* * * * * * * * * * * * * * * * * * * * */
 		};
@@ -46,9 +48,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static constexpr const value_type Default[] = {
-			{ 0, 3, GL::Float, false, Vertex::Size, 0, sizeof(float_t) },
-			{ 1, 3, GL::Float, false, Vertex::Size, 3, sizeof(float_t) },
-			{ 2, 2, GL::Float, false, Vertex::Size, 6, sizeof(float_t) },
+			{ 0, 3, GL::Float, false, vertex::size, 0, sizeof(float_t) },
+			{ 1, 3, GL::Float, false, vertex::size, 3, sizeof(float_t) },
+			{ 2, 2, GL::Float, false, vertex::size, 6, sizeof(float_t) },
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -58,8 +60,8 @@ namespace ml
 		{
 		}
 
-		template <size_t N>
-		constexpr BufferLayout(const value_type(&data)[N]) noexcept
+		template <size_t N
+		> constexpr BufferLayout(const value_type(&data)[N]) noexcept
 			: self_type{ &data[0], N }
 		{
 		}
@@ -82,7 +84,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type const & bind() const
+		inline self_type const & apply() const noexcept
 		{
 			for (auto const & elem : (*this))
 			{

@@ -12,7 +12,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Pixels					= typename std::vector<byte_t>;
+		using Pixels					= typename pmr::vector<byte_t>;
 		using iterator					= typename Pixels::iterator;
 		using const_iterator			= typename Pixels::const_iterator;
 		using reverse_iterator			= typename Pixels::reverse_iterator;

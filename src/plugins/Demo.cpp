@@ -26,14 +26,14 @@ namespace ml
 
 		bool m_show_imgui_demo{ false };
 
-		std::vector<RenderTexture>			m_pipeline	{};
-		ds::flat_map<std::string, Font>		m_fonts		{};
-		ds::flat_map<std::string, Image>	m_images	{};
-		ds::flat_map<std::string, Material>	m_materials	{};
-		ds::flat_map<std::string, Model>	m_models	{};
-		ds::flat_map<std::string, Script>	m_scripts	{};
-		ds::flat_map<std::string, Shader>	m_shaders	{};
-		ds::flat_map<std::string, Texture>	m_textures	{};
+		pmr::vector<RenderTexture>			m_pipeline	{};
+		ds::flat_map<pmr::string, Font>		m_fonts		{};
+		ds::flat_map<pmr::string, Image>	m_images	{};
+		ds::flat_map<pmr::string, Material>	m_materials	{};
+		ds::flat_map<pmr::string, Model>	m_models	{};
+		ds::flat_map<pmr::string, Script>	m_scripts	{};
+		ds::flat_map<pmr::string, Shader>	m_shaders	{};
+		ds::flat_map<pmr::string, Texture>	m_textures	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -190,25 +190,26 @@ namespace ml
 			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(&value) })
 			{
 				// draw stuff, etc...
+				if (m_pipeline.empty())
+					return;
 
-				if (ML_BIND_EX(RenderTexture, _r, m_pipeline[0]))
+				if (RenderTexture const & rt{ m_pipeline.at(0) })
 				{
-					constexpr auto bg{ colors::magenta };
-					GL::clearColor(bg[0], bg[1], bg[2], bg[3]);
-					GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
-					GL::viewport(0, 0, _r->size()[0], _r->size()[1]);
+					ML_BIND_SCOPE_M(rt);
+					rt.clear_color(colors::magenta);
+					rt.viewport(rt.bounds());
+
 					constexpr RenderStates states{
 						{}, {}, CullState{ false }, {}
 					}; states();
-
-					if (ML_BIND_EX(Shader, _s, m_shaders["3d"], false))
+					
+					if (Shader & sh{ m_shaders["3d"] })
 					{
-						for (auto const & u : m_materials["3d"])
-						{
-							_s->set_uniform(u);
-						}
-						_s->bind(true);
-						_r->draw(m_models["sphere32x24"]);
+						ML_BIND_SCOPE_M(sh, false);
+						for (Uniform const & u : m_materials["3d"])
+							sh.set_uniform(u);
+						sh.bind(true);
+						rt.draw(m_models["sphere32x24"]);
 					}
 				}
 
@@ -334,5 +335,7 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::Plugin * ML_Plugin_Main()
 {
-	return new ml::Demo{};
+	static ml::Plugin * temp{ nullptr };
+	if (!temp) { temp = new ml::Demo{}; }
+	return temp;
 }

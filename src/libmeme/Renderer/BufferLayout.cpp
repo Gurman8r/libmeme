@@ -5,7 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	BufferLayout::Attribute const & BufferLayout::Attribute::operator()() const
+	BufferLayout::Attribute const & BufferLayout::Attribute::operator()() const noexcept
 	{
 		GL::vertexAttribPointer(index, size, type, normalize, stride, offset, width);
 		GL::enableVertexAttribArray(index);

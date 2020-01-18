@@ -100,14 +100,6 @@ namespace ml
 		static constexpr auto value{ nameof<>::filter_type(signature::type<T>()) };
 	};
 
-	template <class T
-	> static constexpr auto nameof_v{ nameof<T>::value };
-
-	template <class T
-	> static constexpr auto const hashof_v{ util::hash(nameof_v<T>) };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #ifdef ML_CC_MSVC
 	template <> struct nameof<int64_t> final
 	{
@@ -119,6 +111,14 @@ namespace ml
 		static constexpr auto value{ "unsigned long long"sv }; // unsigned __int64
 	};
 #endif
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T
+	> static constexpr auto nameof_v{ nameof<T>::value };
+
+	template <class T
+	> static constexpr auto const hashof_v{ util::hash(nameof_v<T>) };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

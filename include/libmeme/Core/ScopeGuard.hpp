@@ -1,9 +1,9 @@
 #ifndef _ML_SCOPE_GUARD_HPP_
 #define _ML_SCOPE_GUARD_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Config.hpp>
 
-#define ML_SCOPE_EXIT auto ML_ANONYMOUS(ML_SCOPE_EXIT) \
+#define ML_SCOPE_EXIT auto ML_ANONYMOUS(scope_guard_on_exit) \
 	= ::ml::detail::scope_guard_on_exit() + [&]() noexcept
 
 namespace ml::detail
@@ -11,13 +11,13 @@ namespace ml::detail
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Fn
-	> struct scope_guard
+	> struct scope_guard final
 	{
 		scope_guard(Fn fn) noexcept : m_fn{ fn } {}
 
-		~scope_guard() noexcept { std::invoke(m_fn); }
+		~scope_guard() noexcept { m_fn(); }
 
-	private: Fn m_fn;
+	private: Fn const m_fn;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

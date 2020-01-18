@@ -12,9 +12,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type				= typename Mesh;
-		using storage_type				= typename std::vector<value_type>;
+		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
+		using storage_type				= typename pmr::vector<value_type>;
 		using initializer_type			= typename std::initializer_list<value_type>;
-		using allocator_type			= typename storage_type::allocator_type;
 		using difference_type			= typename storage_type::difference_type;
 		using size_type					= typename storage_type::size_type;
 		using pointer					= typename storage_type::pointer;
@@ -29,12 +29,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Model();
-		Model(initializer_type init);
-		Model(path_t const & path);
-		Model(storage_type const & storage);
-		Model(storage_type && storage) noexcept;
-		Model(Model const & other);
-		Model(Model && other) noexcept;
+		explicit Model(allocator_type const & alloc);
+		Model(initializer_type init, allocator_type const & alloc = {});
+		Model(path_t const & path, allocator_type const & alloc = {});
+		Model(storage_type const & storage, allocator_type const & alloc = {});
+		Model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
+		Model(Model const & other, allocator_type const & alloc = {});
+		Model(Model && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

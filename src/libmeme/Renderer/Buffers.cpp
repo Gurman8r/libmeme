@@ -79,7 +79,7 @@ namespace ml
 			
 			std::get<ID_Size>(m_storage) = size;
 			
-			std::get<ID_Count>(m_storage) = size / Vertex::Size;
+			std::get<ID_Count>(m_storage) = size / vertex::size;
 			
 			std::get<ID_Offset>(m_storage) = 0;
 
@@ -101,7 +101,7 @@ namespace ml
 			
 			std::get<ID_Size>(m_storage) = size;
 			
-			std::get<ID_Count>(m_storage) = size / Vertex::Size;
+			std::get<ID_Count>(m_storage) = size / vertex::size;
 			
 			std::get<ID_Offset>(m_storage) = offset;
 

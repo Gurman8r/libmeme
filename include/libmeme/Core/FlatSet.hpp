@@ -10,7 +10,6 @@ namespace ml::ds
 	// BASIC FLAT SET TRAITS
 	template <class _Ty,	// value type
 		class _Pr,			// comparator predicate type
-		class _Al,			// allocator type
 		bool _Multi			// true if multiple equivalent keys are permitted
 	> struct basic_flat_set_traits
 	{
@@ -20,7 +19,7 @@ namespace ml::ds
 		
 		using compare_type = typename _Pr;
 		
-		using allocator_type = typename _Al;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		static constexpr bool multi{ _Multi };
 
@@ -47,7 +46,7 @@ namespace ml::ds
 		using difference_type			= typename traits_type::difference_type;
 		using size_type					= typename traits_type::size_type;
 
-		using storage_type				= typename std::vector<value_type, allocator_type>;
+		using storage_type				= typename pmr::vector<value_type>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -62,64 +61,43 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_flat_set() noexcept : m_storage{} {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class It> basic_flat_set(It first, It last)
-			: m_storage{ first, last }
+		basic_flat_set() noexcept
+			: m_storage{}
 		{
 		}
 
-		basic_flat_set(initializer_type init)
-			: m_storage{ init }
+		explicit basic_flat_set(allocator_type const & alloc) noexcept
+			: m_storage{ alloc }
 		{
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit basic_flat_set(storage_type const & value)
-			: m_storage{ value }
+		basic_flat_set(initializer_type init, allocator_type const & alloc = {})
+			: m_storage{ init, alloc }
 		{
 		}
 
-		explicit basic_flat_set(storage_type && value) noexcept
-			: m_storage{ std::move(value) }
+		template <class It
+		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
+			: m_storage{ first, last, alloc }
 		{
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit basic_flat_set(storage_type const & value, allocator_type const & alloc)
+		explicit basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
 			: m_storage{ value, alloc }
 		{
 		}
 
-		explicit basic_flat_set(storage_type && value, allocator_type const & alloc) noexcept
+		explicit basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		basic_flat_set(self_type const & other)
-			: m_storage{ other.m_storage }
-		{
-		}
-
-		basic_flat_set(self_type && other) noexcept
-			: m_storage{ std::move(other.m_storage) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		basic_flat_set(self_type const & other, allocator_type const & alloc)
+		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
 			: m_storage{ other.m_storage, alloc }
 		{
 		}
 
-		basic_flat_set(self_type && other, allocator_type const & alloc) noexcept
+		basic_flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
 			: m_storage{ std::move(other.m_storage), alloc }
 		{
 		}
@@ -342,17 +320,13 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT SET - sorted vector of unique elements
-	template <class Value,
-		class Compare = std::less<Value>,
-		class Alloc = std::allocator<Value>
-	> struct flat_set : basic_flat_set<
-		basic_flat_set_traits<Value, Compare, Alloc, false>
-	>
+	template <class _Ty, class _Pr = std::less<_Ty>
+	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false>>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type					= typename flat_set<Value, Compare, Alloc>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<Value, Compare, Alloc, false>>;
+		using self_type					= typename flat_set<_Ty, _Pr>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -375,70 +349,47 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		flat_set() noexcept : base_type{} {}
+		flat_set() noexcept
+			: base_type{}
+		{
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		explicit flat_set(allocator_type const & alloc) noexcept
+			: base_type{ alloc }
+		{
+		}
 
-		flat_set(initializer_type init)
-			: base_type{ init }
+		flat_set(initializer_type init, allocator_type const & alloc = {})
+			: base_type{ init, alloc }
 		{
 			this->sort();
 		}
 
-		template <class It> flat_set(It first, It last)
-			: base_type{ first, last }
+		template <class It
+		> flat_set(It first, It last, allocator_type const & alloc = {})
+			: base_type{ first, last, alloc }
 		{
 			this->sort();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit flat_set(storage_type const & storage)
-			: base_type{ storage }
-		{
-			this->sort();
-		}
-
-		explicit flat_set(storage_type && storage) noexcept
-			: base_type{ std::move(storage) }
-		{
-			this->sort();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit flat_set(storage_type const & storage, allocator_type const & alloc)
+		explicit flat_set(storage_type const & storage, allocator_type const & alloc = {})
 			: base_type{ storage, alloc }
 		{
 			this->sort();
 		}
 
-		explicit flat_set(storage_type && storage, allocator_type const & alloc) noexcept
+		explicit flat_set(storage_type && storage, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(storage), alloc }
 		{
 			this->sort();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_set(self_type const & other)
-			: base_type{ other }
-		{
-		}
-
-		flat_set(self_type && other) noexcept
-			: base_type{ std::move(other) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_set(self_type const & other, allocator_type const & alloc)
+		flat_set(self_type const & other, allocator_type const & alloc = {})
 			: base_type{ other, alloc }
 		{
 		}
 
-		flat_set(self_type && other, allocator_type const & alloc) noexcept
+		flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(other), alloc }
 		{
 		}
@@ -512,17 +463,15 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MULTISET - sorted vector of elements
-	template <class Value,
-		class Compare = std::less<Value>,
-		class Alloc = std::allocator<Value>
+	template <class _Ty, class _Pr = std::less<_Ty>
 	> struct flat_multiset : basic_flat_set<
-		basic_flat_set_traits<Value, Compare, Alloc, true>
+		basic_flat_set_traits<_Ty, _Pr, true>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type					= typename flat_multiset<Value, Compare, Alloc>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<Value, Compare, Alloc, true>>;
+		using self_type					= typename flat_multiset<_Ty, _Pr>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -545,70 +494,47 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		flat_multiset() noexcept : base_type{} {}
+		flat_multiset() noexcept
+			: base_type{}
+		{
+		}
 
-		~flat_multiset() noexcept {}
+		explicit flat_multiset(allocator_type const & alloc) noexcept
+			: base_type{ alloc }
+		{
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_multiset(initializer_type init)
-			: base_type{ init }
+		flat_multiset(initializer_type init, allocator_type const & alloc = {})
+			: base_type{ init, alloc }
 		{
 			this->sort();
 		}
 
-		template <class It> flat_multiset(It first, It last)
-			: base_type{ first, last }
+		template <class It
+		> flat_multiset(It first, It last, allocator_type const & alloc = {})
+			: base_type{ first, last, alloc }
 		{
 			this->sort();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit flat_multiset(storage_type const & storage)
+		explicit flat_multiset(storage_type const & storage, allocator_type const & alloc = {})
 			: base_type{ storage, alloc }
 		{
 			this->sort();
 		}
 
-		explicit flat_multiset(storage_type && storage) noexcept
-			: base_type{ std::move(storage) }
-		{
-			this->sort();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		explicit flat_multiset(storage_type const & storage, allocator_type const & alloc)
-			: base_type{ storage, alloc }
-		{
-			this->sort();
-		}
-
-		explicit flat_multiset(storage_type && storage, allocator_type const & alloc) noexcept
+		explicit flat_multiset(storage_type && storage, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(storage), alloc }
 		{
 			this->sort();
 		}
 
-		flat_multiset(self_type const & other)
-			: base_type{ other }
-		{
-		}
-
-		flat_multiset(self_type && other) noexcept
-			: base_type{ std::move(other) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_multiset(self_type const & other, allocator_type const & alloc)
+		flat_multiset(self_type const & other, allocator_type const & alloc = {})
 			: base_type{ other, alloc }
 		{
 		}
 
-		flat_multiset(self_type && other, allocator_type const & alloc) noexcept
+		flat_multiset(self_type && other, allocator_type const & alloc = {}) noexcept
 			: base_type{ std::move(other), alloc }
 		{
 		}

@@ -17,9 +17,9 @@ namespace ml
 		enum : size_t { ID_Layout, ID_VAO, ID_VBO, ID_IBO };
 
 		using storage_type	= typename std::tuple<BufferLayout, VAO, VBO, IBO>;
-		using contiguous_t	= typename std::vector<float_t>;
-		using vertices_t	= typename std::vector<Vertex>;
-		using indices_t		= typename std::vector<uint32_t>;
+		using contiguous_t	= typename pmr::vector<float_t>;
+		using vertices_t	= typename pmr::vector<vertex>;
+		using indices_t		= typename pmr::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,9 +106,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept
+		inline bool good() const noexcept
 		{
 			return (vao() && vbo()) || (vao() && vbo() && ibo());
+		}
+
+		inline operator bool() const noexcept
+		{
+			return good();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

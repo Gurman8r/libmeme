@@ -11,7 +11,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using nodes_t = typename std::vector<uint32_t>;
+		using nodes_t = typename pmr::vector<uint32_t>;
 		
 		enum NodeID : uint32_t
 		{

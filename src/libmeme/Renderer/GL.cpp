@@ -62,7 +62,7 @@ namespace ml
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool GL::init()
+	bool GL::startup()
 	{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
@@ -99,12 +99,12 @@ namespace ml
 
 		if (!shadersAvailable())
 		{
-			debug::log_error("Shaders are not available on your system.");
+			debug::log_error("Shaders are not temp on your system.");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			debug::log_error("Geometry shaders are not available on your system.");
+			debug::log_error("Geometry shaders are not temp on your system.");
 		}
 
 		if (!framebuffersAvailable())
@@ -432,75 +432,48 @@ namespace ml
 
 	bool GL::edgeClampAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available =
-				GL_EXT_texture_edge_clamp || 
-				GLEW_EXT_texture_edge_clamp;
-		}
-		return available;
+		static bool temp{ false };
+		ML_ONCE_CALL temp 
+			= GL_EXT_texture_edge_clamp
+			|| GLEW_EXT_texture_edge_clamp;
+		return temp;
 	}
 
 	bool GL::textureSrgbAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available = 
-				GL_EXT_texture_sRGB;
-		}
-		return available;
+		static bool temp{ false };
+		ML_ONCE_CALL temp
+			= GL_EXT_texture_sRGB;
+		return temp;
 	}
 
 	bool GL::nonPowerOfTwoAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available =
-				GLEW_ARB_texture_non_power_of_two;
-		}
-		return available;
+		static bool temp{ false };
+		ML_ONCE_CALL temp 
+			= GLEW_ARB_texture_non_power_of_two;
+		return temp;
 	}
 
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
 		static int32_t temp{ 0 };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			temp = getInteger(GL::MaxCombTexImgUnits);
-		}
+		ML_ONCE_CALL temp
+			= getInteger(GL::MaxCombTexImgUnits);
 		return temp;
 	}
 
 	auto GL::getMaxTextureSize() -> uint32_t
 	{
 		static uint32_t temp{ 0 };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			temp = (uint32_t)(getInteger(GL::MaxTextureSize));
-		}
+		ML_ONCE_CALL temp
+			= (uint32_t)getInteger(GL::MaxTextureSize);
 		return temp;
 	}
 
 	auto GL::getValidTextureSize(uint32_t value) -> uint32_t
 	{
-		if (!nonPowerOfTwoAvailable())
-		{
-			uint32_t powerOfTwo = 1;
-			while (powerOfTwo < value)
-			{
-				powerOfTwo *= 2;
-			}
-			return powerOfTwo;
-		}
-		return value;
+		return nonPowerOfTwoAvailable() ? value : util::power_of_2(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -582,15 +555,11 @@ namespace ml
 
 	bool GL::framebuffersAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available = 
-				GL_EXT_framebuffer_object && 
-				GL_EXT_framebuffer_blit;
-		}
-		return available;
+		static bool temp{ false };
+		ML_ONCE_CALL temp
+			= GL_EXT_framebuffer_object
+			&& GL_EXT_framebuffer_blit;
+		return temp;
 	}
 
 	auto GL::genFramebuffer() -> uint32_t
@@ -698,31 +667,23 @@ namespace ml
 
 	bool GL::shadersAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available =
+		static bool temp{ false };
+		ML_ONCE_CALL temp =
 				GL_ARB_multitexture &&
 				GL_ARB_shading_language_100 &&
 				GL_ARB_shader_objects &&
 				GL_ARB_vertex_shader &&
 				GL_ARB_fragment_shader;
-		}
-		return available;
+		return temp;
 	}
 
 	bool GL::geometryShadersAvailable()
 	{
-		static bool available{ false };
-		static bool checked{ false };
-		if (!checked && (checked = true))
-		{
-			available = 
-				shadersAvailable() && 
-				GL_ARB_geometry_shader4;
-		}
-		return available;
+		static bool temp{ false };
+		ML_ONCE_CALL temp
+			= shadersAvailable()
+			&& GL_ARB_geometry_shader4;
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -20,7 +20,7 @@ namespace ml
 			return debug::log_error("Failed initializing RenderWindow");
 		}
 
-		if (!GL::init())
+		if (!GL::startup())
 		{
 			return debug::log_error("Failed initializing OpenGL");
 		}

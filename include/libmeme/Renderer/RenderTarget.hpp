@@ -3,6 +3,7 @@
 
 #include <libmeme/Renderer/Buffers.hpp>
 #include <libmeme/Renderer/Color.hpp>
+#include <libmeme/Core/Rect.hpp>
 
 namespace ml
 {
@@ -12,25 +13,31 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~RenderTarget() = default;
+		virtual ~RenderTarget() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void clear_color(Color const & color) const;
+
+		void clear_color(Color const & color, uint32_t flags) const;
+
+		void clear_flags(uint32_t flags) const;
+		
+		void draw(VAO const & vao, VBO const & vbo) const;
+
+		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
+
 		template <class T> inline void draw(T const * value) const
 		{
-			T::draw((*this), value);
+			T::draw(*this, value);
 		}
 
 		template <class T> inline void draw(T const & value) const
 		{
 			this->draw(&value);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void draw(VertexArrayObject const & vao, VertexBufferObject const & vbo) const;
-
-		void draw(VertexArrayObject const & vao, VertexBufferObject const & vbo, IndexBufferObject const & ibo) const;
+		
+		void viewport(IntRect const & bounds) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

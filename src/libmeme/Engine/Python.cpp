@@ -23,9 +23,9 @@ namespace ml
 		m_home = home;
 		if (!m_init && !m_name.empty() && !m_home.empty())
 		{
-			Py_SetProgramName(util::widen(m_name.string()).c_str());
+			Py_SetProgramName(m_name.c_str());
 
-			Py_SetPythonHome(util::widen(m_home.string()).c_str());
+			Py_SetPythonHome(m_home.c_str());
 
 			Py_InitializeEx(Py_DontWriteBytecodeFlag);
 
@@ -107,7 +107,6 @@ namespace ml::python::embedded
 			.def_static("exit",		[]() { return std::exit(0); })
 			.def_static("pause",	[]() { return debug::pause(0); })
 			.def_static("print",	[](py_str_t const & s) { std::cout << s; })
-			.def_static("printf",	[](py_str_t const & s, py_list_t const & l) { std::cout << util::format(s, l); })
 			.def_static("printl",	[](py_str_t const & s) { std::cout << s << '\n'; })
 			.def_static("log",		[](py_str_t const & s) { return debug::log_info(s); })
 			.def_static("warning",	[](py_str_t const & s) { return debug::log_warning(s); })

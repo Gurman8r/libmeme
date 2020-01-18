@@ -2,8 +2,7 @@
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Platform/FileSystem.hpp>
 #include <libmeme/Renderer/RenderTarget.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * */
+#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
@@ -89,68 +88,115 @@ namespace ml
 
 	bool Mesh::load_from_memory(contiguous_t const & vertices, indices_t const & indices)
 	{
-		if (!vertices.empty() && !indices.empty())
+		// already created
+		if (good())
 		{
-			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
-			{
-				if (ML_BIND_EX(VertexBufferObject, _vb, vbo().generate(GL::StaticDraw)))
-				{
-					if (ML_BIND_EX(IndexBufferObject, _ib, ibo().generate(GL::StaticDraw, GL::UnsignedInt)))
-					{
-						_vb->update((void *)vertices.data(), (uint32_t)vertices.size());
-
-						_ib->update((void *)indices.data(), (uint32_t)indices.size());
-
-						layout().bind();
-
-						return true;
-					}
-					ibo().destroy();
-				}
-				vbo().destroy();
-			}
-			vao().destroy();
+			return debug::log_error("mesh is already created");
 		}
-		return false;
+
+		// no vertices
+		if (vertices.empty())
+		{
+			return debug::log_error("no verticies provided to mesh");
+		}
+
+		// no indices
+		if (indices.empty())
+		{
+			return load_from_memory(vertices);
+		}
+
+		// create vao
+		if (!vao().generate(GL::Triangles))
+		{
+			destroy();
+			return debug::log_error("mesh failed creating VAO");
+		}
+
+		// create vbo
+		if (!vbo().generate(GL::StaticDraw))
+		{
+			destroy();
+			return debug::log_error("mesh failed creating VBO");
+		}
+
+		// create ibo
+		if (!ibo().generate(GL::StaticDraw, GL::UnsignedInt))
+		{
+			destroy();
+			return debug::log_error("mesh failed creating IBO");
+		}
+		
+		// bind buffers
+		ML_BIND_SCOPE_M(vao());
+		ML_BIND_SCOPE_M(vbo());
+		ML_BIND_SCOPE_M(ibo());
+		
+		// update buffers
+		vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+		ibo().update((void *)indices.data(), (uint32_t)indices.size());
+		
+		// apply layout
+		layout().apply();
+		
+		return true;
 	}
 
 	bool Mesh::load_from_memory(contiguous_t const & vertices)
 	{
-		if (!vertices.empty())
+		// already created
+		if (good())
 		{
-			if (ML_BIND(VertexArrayObject, vao().generate(GL::Triangles)))
-			{
-				if (ML_BIND_EX(VertexBufferObject, _vb, vbo().generate(GL::StaticDraw)))
-				{
-					_vb->update((void *)vertices.data(), (uint32_t)vertices.size());
-
-					layout().bind();
-
-					return true;
-				}
-				vbo().destroy();
-			}
-			vao().destroy();
+			return debug::log_error("mesh is already created");
 		}
-		return false;
+
+		// no vertices
+		if (vertices.empty())
+		{
+			return debug::log_error("no vertices provided to mesh");
+		}
+
+		// create vao
+		if (!vao().generate(GL::Triangles))
+		{
+			destroy();
+			return debug::log_error("mesh failed creating VAO");
+		}
+
+		// create vbo
+		if (!vbo().generate(GL::StaticDraw))
+		{
+			destroy();
+			return debug::log_error("mesh failed creating VBO");
+		}
+
+		// bind buffers
+		ML_BIND_SCOPE_M(vao());
+		ML_BIND_SCOPE_M(vbo());
+
+		// update buffers
+		vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+		
+		// apply layout
+		layout().apply();
+
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void Mesh::draw(RenderTarget const & target, Mesh const * value)
 	{
-		if (!value) { return; }
+		if (!value || !value->vao() || !value->vbo())
+			return;
 
-		if (value->vao() && value->vbo())
+		if (value->ibo())
 		{
-			if (value->ibo())
-			{
-				target.draw(value->vao(), value->vbo(), value->ibo());
-			}
-			else
-			{
-				target.draw(value->vao(), value->vbo());
-			}
+			target.draw(value->vao(), value->vbo(), value->ibo());
+		}
+		else
+		{
+			target.draw(value->vao(), value->vbo());
 		}
 	}
 

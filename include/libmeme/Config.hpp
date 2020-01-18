@@ -235,18 +235,31 @@
 #endif
 
 
-// Misc
+// Misc Utilities
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#define _ML                     ::ml::
 #define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)
 #define ML_ARRAYSIZE(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_THROW                throw
 #define ML_CONCAT_IMPL(a, b)	a##b
 #define ML_CONCAT(a, b)			ML_CONCAT_IMPL(a, b)
 #define ML_TOSTRING(str)		#str
 #define ML_STRINGIFY(str)		ML_TOSTRING(str)
-#define ML_THROW                throw
 
 
-// Usings
+// Anonymous Variables
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#if defined(__COUNTER__)
+#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
+#elif defined(__LINE__)
+#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
+#endif
+
+#define ML_ONCE_CALL_IMPL(once) static bool once{ false }; if (!once && (once = true))
+#define ML_ONCE_CALL            ML_ONCE_CALL_IMPL(ML_ANONYMOUS(once))
+
+
+// Typedefs
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML_USING			    using
 #define ML_USING_VA(...)	    template <##__VA_ARGS__> ML_USING
@@ -256,11 +269,6 @@
 #define ML_USING_Ts			    ML_USING_VA(class ... Ts)
 
 
-// Exceptions
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
-
 // No-Discard
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if ML_CPP_ATTRIBUTE(nodiscard) >= 201603L
@@ -268,16 +276,6 @@
 #else
 #   define ML_NODISCARD
 #endif
-
-
-// Anonymous
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if defined(__COUNTER__)
-#	define ML_ANONYMOUS(expr) ML_CONCAT(_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
-#elif defined(__LINE__)
-#	define ML_ANONYMOUS(expr) ML_CONCAT(_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
-#endif
-#define ML_ANONYMOUS_T(T, ...) auto ML_ANONYMOUS(T) { T{ ##__VA_ARGS__ } }
 
 
 // Inlining

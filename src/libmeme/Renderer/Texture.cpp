@@ -3,34 +3,48 @@
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-namespace ml
+namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Texture::Texture()
-		: Texture{ GL::Texture2D }
+	static void set_mipmapped(bool value, uint32_t sampler, bool smooth)
 	{
+		if (value) GL::generateMipmap(sampler);
+		GL::texParameter(sampler, GL::TexMagFilter, value
+			? smooth ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
+			: smooth ? GL::Linear : GL::Nearest
+		);
 	}
 
-	Texture::Texture(uint32_t sampler)
-		: Texture{ sampler, TextureFlags_Smooth | TextureFlags_Repeated }
+	static void set_repeated(bool value, uint32_t sampler)
 	{
+		GL::texParameter(sampler, GL::TexWrapS, value
+			? GL::Repeat
+			: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
+		);
+		GL::texParameter(sampler, GL::TexWrapT, value
+			? GL::Repeat
+			: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
+		);
 	}
 
-	Texture::Texture(uint32_t sampler, int32_t flags)
-		: Texture{ sampler, GL::RGBA, flags }
+	static void set_smooth(bool value, uint32_t sampler, bool mipmapped)
 	{
+		GL::texParameter(sampler, GL::TexMagFilter,
+			value ? GL::Linear : GL::Nearest
+		);
+		GL::texParameter(sampler, GL::TexMinFilter, mipmapped
+			? value ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
+			: value ? GL::Linear : GL::Nearest
+		);
 	}
 
-	Texture::Texture(uint32_t sampler, uint32_t format, int32_t flags)
-		: Texture{ sampler, 0, format, format, GL::UnsignedByte, flags }
-	{
-	}
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	Texture::Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags)
-		: Texture{ sampler, 0, internalFormat, colorFormat, GL::UnsignedByte, flags }
-	{
-	}
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Texture::Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags)
 		: m_handle			{ NULL }
@@ -42,6 +56,33 @@ namespace ml
 		, m_size			{ 0, 0 }
 		, m_realSize		{ 0, 0 }
 		, m_flags			{ flags }
+	{
+	}
+
+	Texture::Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags)
+		: Texture{ sampler, 0, internalFormat, colorFormat, GL::UnsignedByte, flags }
+	{
+	}
+
+	Texture::Texture(uint32_t sampler, uint32_t format, int32_t flags)
+		: Texture{ sampler, 0, format, format, GL::UnsignedByte, flags }
+	{
+	}
+
+	Texture::Texture(uint32_t sampler, int32_t flags)
+		: Texture{ sampler, GL::RGBA, flags }
+	{
+	}
+
+	Texture::Texture(uint32_t sampler)
+		: Texture{ sampler, TextureFlags_Default }
+	{
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	Texture::Texture()
+		: Texture{ GL::Texture2D }
 	{
 	}
 
@@ -75,10 +116,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Texture::~Texture()
-	{
-		destroy();
-	}
+	Texture::~Texture() { destroy(); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -129,12 +167,11 @@ namespace ml
 
 	bool Texture::load_from_texture(Texture const & other)
 	{
-		return (other.handle()
-			? (create(other.size())
+		return other.handle()
+			? create(other.size())
 				? update(other.copy_to_image())
-				: debug::log_error("Failed to copy texture, failed to create new texture"))
-			: false
-		);
+				: debug::log_error("Failed to copy texture, failed to create new texture")
+			: false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -162,7 +199,7 @@ namespace ml
 
 	void Texture::bind(Texture const * value)
 	{
-		if (value && (*value))
+		if (value && value->m_handle)
 		{
 			GL::bindTexture(value->m_sampler, value->m_handle);
 		}
@@ -170,16 +207,6 @@ namespace ml
 		{
 			GL::bindTexture(GL::Texture2D, NULL);
 		}
-	}
-
-	void Texture::bind() const
-	{
-		bind(this);
-	}
-
-	void Texture::unbind() const
-	{
-		bind(nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -206,53 +233,57 @@ namespace ml
 
 	bool Texture::create(byte_t const * pixels, uint32_t w, uint32_t h)
 	{
-		if (w && h)
+		// 
+		if (!w || !h)
 		{
-			if (destroy() && generate())
-			{
-				m_size = { w, h };
-				m_realSize = {
-					GL::getValidTextureSize(m_size[0]),
-					GL::getValidTextureSize(m_size[1])
-				};
-
-				static const uint32_t max_size{ GL::getMaxTextureSize() };
-
-				if ((m_realSize[0] > max_size) || (m_realSize[1] > max_size))
-				{
-					return debug::log_error(
-						"Failed creating texture, size is too large {0} max is {1}",
-						m_realSize, 
-						vec2u { max_size , max_size }
-					);
-				}
-
-				if (ML_BIND(Texture, (*this)))
-				{
-					GL::texImage2D(
-						m_sampler,
-						m_level,
-						m_internalFormat,
-						m_size[0],
-						m_size[1],
-						0, // border: "This value must be 0" -khronos.org
-						m_colorFormat,
-						m_pixelType,
-						(void *)pixels
-					);
-				}
-
-				set_repeated(repeated());
-				
-				set_smooth(smooth());
-				
-				set_mipmapped(mipmapped());
-				
-				return true;
-			}
-			return debug::log_error("Failed creating texture, failed setting handle.");
+			return debug::log_error("texture size cannot be zero");
 		}
-		return debug::log_error("Failed creating texture, invalid size: {0} x {1}", w, h);
+
+		// failed creating handle
+		if (!destroy() || !generate())
+		{
+			return debug::log_error("texture failed generating handle");
+		}
+
+		m_size = { w, h };
+		m_realSize = {
+			GL::getValidTextureSize(m_size[0]),
+			GL::getValidTextureSize(m_size[1])
+		};
+
+		// check size
+		static const auto max_size{ GL::getMaxTextureSize() };
+		if ((m_realSize[0] > max_size) || (m_realSize[1] > max_size))
+		{
+			return debug::log_error("texture size is too large ({0}) max is: {1}",
+				m_realSize, vec2u{ max_size , max_size }
+			);
+		}
+
+		// create
+		{
+			ML_BIND_SCOPE_M((*this));
+
+			GL::texImage2D(
+				m_sampler,
+				m_level,
+				m_internalFormat,
+				m_size[0],
+				m_size[1],
+				0, // border: "This value must be 0" -khronos.org
+				m_colorFormat,
+				m_pixelType,
+				(void *)pixels
+			);
+
+			impl::set_repeated(repeated(), m_sampler);
+			
+			impl::set_smooth(smooth(), m_sampler, mipmapped());
+			
+			impl::set_mipmapped(mipmapped(), m_sampler, smooth());
+		}
+		GL::flush();
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -313,35 +344,96 @@ namespace ml
 
 	bool Texture::update(byte_t const * pixels, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	{
-		if (w && h && pixels)
+		if (!w || !h || !pixels)
 		{
-			if (ML_BIND(Texture, (*this)))
-			{
-				GL::texSubImage2D(
-					m_sampler,
-					m_level,
-					x, y, w, h,
-					m_internalFormat,
-					m_pixelType,
-					(void *)pixels
-				);
-			}
-			else
-			{
-				return debug::log_error("Failed updating texture, failed updating handle.");
-			}
-			
-			set_repeated(repeated());
-			
-			set_smooth(smooth());
-			
-			set_mipmapped(mipmapped());
-			
-			return true;
+			return debug::log_error("Failed updating texture, invalid size: {0}", vec2u{ w, h });
 		}
-		return debug::log_error("Failed updating texture, invalid size: {0}", vec2u { w, h });
+
+		// update
+		{
+			ML_BIND_SCOPE_M((*this));
+
+			GL::texSubImage2D(
+				m_sampler,
+				m_level,
+				x, y, w, h,
+				m_internalFormat,
+				m_pixelType,
+				(void *)pixels
+			);
+
+			impl::set_repeated(repeated(), m_sampler);
+
+			impl::set_smooth(smooth(), m_sampler, mipmapped());
+
+			impl::set_mipmapped(mipmapped(), m_sampler, smooth());
+		}
+		GL::flush();
+		return true;
 	}
 	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool Texture::set_mipmapped(bool value)
+	{
+		if (!m_handle)
+		{
+			return false;
+		}
+		else
+		{
+			m_flags = value
+				? (m_flags | TextureFlags_Mipmapped)
+				: (m_flags & ~TextureFlags_Mipmapped);
+
+			ML_BIND_SCOPE_M((*this));
+
+			impl::set_mipmapped(value, m_sampler, smooth());
+		}
+		GL::flush();
+		return true;
+	}
+
+	bool Texture::set_repeated(bool value)
+	{
+		if (!m_handle)
+		{
+			return false;
+		}
+		else
+		{
+			m_flags = value
+				? (m_flags | TextureFlags_Repeated)
+				: (m_flags & ~TextureFlags_Repeated);
+
+			ML_BIND_SCOPE_M((*this));
+
+			impl::set_repeated(value, m_sampler);
+		}
+		GL::flush();
+		return true;
+	}
+
+	bool Texture::set_smooth(bool value)
+	{
+		if (!m_handle)
+		{
+			return false;
+		}
+		else
+		{
+			m_flags = value
+				? (m_flags | TextureFlags_Smooth)
+				: (m_flags & ~TextureFlags_Smooth);
+
+			ML_BIND_SCOPE_M((*this));
+
+			impl::set_smooth(value, m_sampler, mipmapped());
+		}
+		GL::flush();
+		return true;
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	uint32_t Texture::channels() const noexcept
@@ -351,97 +443,27 @@ namespace ml
 		case GL::Red: return 1;
 		case GL::RGB: return 3;
 		case GL::RGBA: return 4;
-		default: return 0;
 		}
+		return 0;
 	}
 
 	Image Texture::copy_to_image() const
 	{
+		if (m_handle) return Image{};
+
 		Image temp{ size(), channels() };
-		if (ML_BIND(Texture, (*this)))
-		{
-			GL::getTexImage(
-				GL::Texture2D,
-				m_level,
-				m_internalFormat,
-				m_pixelType,
-				&temp[0]
-			);
-		}
+		
+		ML_BIND_SCOPE_M((*this));
+		
+		GL::getTexImage(
+			GL::Texture2D,
+			m_level,
+			m_internalFormat,
+			m_pixelType,
+			&temp[0]
+		);
+
 		return temp;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool Texture::set_mipmapped(bool value)
-	{
-		if (ML_BIND(Texture, (*this)))
-		{
-			m_flags = value
-				? (m_flags | TextureFlags_Mipmapped)
-				: (m_flags & ~TextureFlags_Mipmapped);
-
-			if (mipmapped()) { GL::generateMipmap(m_sampler); }
-
-			GL::texParameter(m_sampler, GL::TexMagFilter, mipmapped()
-				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
-				: smooth() ? GL::Linear : GL::Nearest
-			);
-
-			GL::flush();
-
-			return true;
-		}
-		return false;
-	}
-
-	bool Texture::set_repeated(bool value)
-	{
-		if (ML_BIND(Texture, (*this)))
-		{
-			m_flags = value
-				? (m_flags | TextureFlags_Repeated)
-				: (m_flags & ~TextureFlags_Repeated);
-
-			GL::texParameter(m_sampler, GL::TexWrapS, repeated()
-				? GL::Repeat
-				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
-			);
-
-			GL::texParameter(m_sampler, GL::TexWrapT, repeated()
-				? GL::Repeat
-				: (GL::edgeClampAvailable() ? GL::ClampToEdge : GL::Clamp)
-			);
-
-			GL::flush();
-
-			return true;
-		}
-		return false;
-	}
-
-	bool Texture::set_smooth(bool value)
-	{
-		if (ML_BIND(Texture, (*this)))
-		{
-			m_flags = value
-				? (m_flags | TextureFlags_Smooth)
-				: (m_flags & ~TextureFlags_Smooth);
-
-			GL::texParameter(m_sampler, GL::TexMagFilter,
-				smooth() ? GL::Linear : GL::Nearest
-			);
-
-			GL::texParameter(m_sampler, GL::TexMinFilter, mipmapped()
-				? smooth() ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
-				: smooth() ? GL::Linear : GL::Nearest
-			);
-
-			GL::flush();
-
-			return true;
-		}
-		return false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

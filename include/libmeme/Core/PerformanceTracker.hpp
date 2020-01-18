@@ -4,7 +4,7 @@
 #include <libmeme/Core/Timer.hpp>
 
 #ifndef ML_DISABLE_BENCHMARKS
-#	define ML_BENCHMARK(name) ML_ANONYMOUS_T(ScopeTimer, name)
+#	define ML_BENCHMARK(name) auto ML_ANONYMOUS(scope_timer) { ScopeTimer{ name } }
 #else
 #	define ML_BENCHMARK(name)
 #endif
@@ -32,7 +32,7 @@ namespace ml
 	private:
 		friend struct ScopeTimer;
 
-		using buffer_type = typename std::vector<std::pair<C_string, Duration>>;
+		using buffer_type = typename pmr::vector<std::pair<C_string, Duration>>;
 
 		static buffer_type m_curr;
 

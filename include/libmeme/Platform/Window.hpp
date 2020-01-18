@@ -26,16 +26,16 @@ namespace ml
 		WindowFlags_DoubleBuffered	= (1 << 8),
 
 		// Resizable / Visible / Decorated / Focused / Auto Iconify
-		WindowFlags_Default = 0
-			| WindowFlags_Resizable
+		WindowFlags_Default
+			= WindowFlags_Resizable
 			| WindowFlags_Visible
 			| WindowFlags_Decorated
 			| WindowFlags_Focused
 			| WindowFlags_AutoIconify,
 
 		// Resizable / Decorated / Focused / Auto Iconify / Maximized
-		WindowFlags_DefaultMaximized = 0
-			| WindowFlags_Resizable
+		WindowFlags_DefaultMaximized
+			= WindowFlags_Resizable
 			| WindowFlags_Decorated
 			| WindowFlags_Focused
 			| WindowFlags_AutoIconify
@@ -169,11 +169,11 @@ namespace ml
 
 		ML_NODISCARD static VideoMode const & get_desktop_mode();
 		
-		ML_NODISCARD static std::vector<VideoMode> const & get_fullscreen_modes();
+		ML_NODISCARD static pmr::vector<VideoMode> const & get_fullscreen_modes();
 
 		ML_NODISCARD static proc_fn get_proc_address(C_string value);
 		
-		ML_NODISCARD static std::vector<void *> const & get_monitors();
+		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
 
 		ML_NODISCARD static float64_t get_time();
 

@@ -7,15 +7,15 @@
 
 #define ML_Registry ::ml::Registry<>::getInstance()
 
-#define ML_REGISTER_EX(T, info, factory)			\
+#define ML_REGISTER_EX(T, factory)			\
 	static std::optional<std::any> factory();		\
 	bool Registry<T>::s_registered {				\
-		ML_Registry.registrate<T>(info, factory)	\
+		ML_Registry.registrate<T>(factory)	\
 	};												\
 	std::optional<std::any> factory()
 
-#define ML_REGISTER(T, info) \
-	ML_REGISTER_EX(T, info, ML_CONCAT(ML_FACTORY_, T))
+#define ML_REGISTER(T) \
+	ML_REGISTER_EX(T, ML_CONCAT(ML_FACTORY_, T))
 
 namespace ml
 {
@@ -45,12 +45,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Codes, ID_Funcs, ID_Infos, ID_Names };
+		enum : size_t { ID_Codes, ID_Funcs, ID_Names };
 
 		using storage_type = typename std::tuple<
 			ds::flat_map<name_t, code_t>, // Codes
 			ds::flat_map<name_t, func_t>, // Funcs
-			ds::flat_map<name_t, info_t>, // Infos
 			ds::flat_map<code_t, name_t>  // Names
 		>;
 
@@ -58,7 +57,6 @@ namespace ml
 
 		inline decltype(auto) codes() const noexcept { return std::get<ID_Codes>(m_storage); }
 		inline decltype(auto) funcs() const noexcept { return std::get<ID_Funcs>(m_storage); }
-		inline decltype(auto) infos() const noexcept { return std::get<ID_Infos>(m_storage); }
 		inline decltype(auto) names() const noexcept { return std::get<ID_Names>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -82,22 +80,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool registrate(name_t const & name, info_t const & info, code_t const & code, func_t const & func)
+		inline bool registrate(name_t const & name, code_t const & code, func_t const & func)
 		{
 			if (funcs().contains(name)) { return false; }
 			std::get<ID_Codes>(m_storage).insert(name, code);
 			std::get<ID_Funcs>(m_storage).insert(name, func);
-			std::get<ID_Infos>(m_storage).insert(name, info);
 			std::get<ID_Names>(m_storage).insert(code, name);
 			return true;
 		}
 
-		template <class T, class Info, class Func
-		> inline bool registrate(Info && info, Func && func)
+		template <class T, class Fn
+		> inline bool registrate(Fn fn)
 		{
-			return registrate(
-				nameof_v<T>, std::forward<Info>(info), hashof_v<T>, std::forward<Func>(func)
-			);
+			return registrate(nameof_v<T>, hashof_v<T>, std::forward<Fn>(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -131,18 +126,6 @@ namespace ml
 			if (auto const it{ names().find(code) })
 			{
 				return get_func(*it->second);
-			}
-			else
-			{
-				return std::nullopt;
-			}
-		}
-
-		inline std::optional<info_t> get_info(name_t const & name) const
-		{
-			if (auto const it{ infos().find(name) })
-			{
-				return std::make_optional(*it->second);
 			}
 			else
 			{

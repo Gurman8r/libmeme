@@ -35,7 +35,7 @@ namespace ml
 
 		int32_t execute();
 		
-		int32_t execute(std::vector<std::string> const & args);
+		int32_t execute(pmr::vector<std::string> const & args);
 
 		template <class ... Args> inline int32_t operator()(Args && ... args)
 		{

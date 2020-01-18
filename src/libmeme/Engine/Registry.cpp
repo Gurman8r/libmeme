@@ -13,9 +13,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_REGISTER(Material,	"") { return std::make_optional(make_material()); }
-	ML_REGISTER(Shader,		"") { return std::make_optional(make_shader()); }
-	ML_REGISTER(Texture,	"") { return std::make_optional(make_texture()); }
+	ML_REGISTER(Material)	{ return std::make_optional(make_material()); }
+	ML_REGISTER(Shader)		{ return std::make_optional(make_shader()); }
+	ML_REGISTER(Texture)	{ return std::make_optional(make_texture()); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

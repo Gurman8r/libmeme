@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using glyph_page = typename ds::flat_map<uint32_t, Glyph>;
-		
-		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using glyph_page		= typename ds::flat_map<uint32_t, Glyph>;
+		using page_table		= typename ds::flat_map<uint32_t, glyph_page>;
 
 		struct Info
 		{
@@ -22,9 +22,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Font();
-		Font(path_t const & path);
-		Font(Font const & other);
-		Font(Font && other) noexcept;
+		explicit Font(allocator_type const & alloc);
+		Font(path_t const & path, allocator_type const & alloc = {});
+		Font(Font const & other, allocator_type const & alloc = {});
+		Font(Font && other, allocator_type const & alloc = {}) noexcept;
 		~Font();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

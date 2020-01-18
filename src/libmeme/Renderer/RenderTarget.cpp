@@ -6,35 +6,50 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void RenderTarget::draw(VertexArrayObject const & vao, VertexBufferObject const & vbo) const
+	void RenderTarget::clear_color(Color const & color) const
 	{
-		if (ML_BIND(VertexArrayObject, vao))
-		{
-			if (ML_BIND(VertexBufferObject, vbo))
-			{
-				GL::drawArrays(vao.mode(), 0, vbo.size());
-		
-				GL::flush();
-			}
-		}
+		this->clear_color(color, GL::DepthBufferBit);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void RenderTarget::draw(VertexArrayObject const & vao, VertexBufferObject const & vbo, IndexBufferObject const & ibo) const
+	void RenderTarget::clear_color(Color const & color, uint32_t flags) const
 	{
-		if (ML_BIND(VertexArrayObject, vao))
-		{
-			if (ML_BIND(VertexBufferObject, vbo))
-			{
-				if (ML_BIND(IndexBufferObject, ibo))
-				{
-					GL::drawElements(vao.mode(), ibo.count(), ibo.type(), nullptr);
+		GL::clearColor(color[0], color[1], color[2], color[3]);
 
-					GL::flush();
-				}
-			}
-		}
+		this->clear_flags(GL::ColorBufferBit | flags);
+	}
+
+	void RenderTarget::clear_flags(uint32_t flags) const
+	{
+		GL::clear(flags);
+	}
+
+	void RenderTarget::draw(VAO const & vao, VBO const & vbo) const
+	{
+		if (!vao || !vao) return;
+		ML_BIND_SCOPE_M(vao);
+		ML_BIND_SCOPE_M(vbo);
+		GL::drawArrays(vao.mode(), 0, vbo.size());
+		GL::flush();
+	}
+
+	void RenderTarget::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
+	{
+		if (!vao || !vao || !ibo) return;
+		ML_BIND_SCOPE_M(vao);
+		ML_BIND_SCOPE_M(vbo);
+		ML_BIND_SCOPE_M(ibo);
+		GL::drawElements(vao.mode(), ibo.count(), ibo.type(), nullptr);
+		GL::flush();
+	}
+
+	void RenderTarget::viewport(IntRect const & bounds) const
+	{
+		GL::viewport(
+			bounds.left(),
+			bounds.top(),
+			bounds.width(),
+			bounds.height()
+		);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

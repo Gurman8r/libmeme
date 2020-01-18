@@ -10,23 +10,28 @@ namespace ml
 	{
 	}
 
-	Material::Material(storage_type const & data)
-		: m_storage{ data }
+	Material::Material(allocator_type const & alloc)
+		: m_storage{ alloc }
 	{
 	}
 
-	Material::Material(storage_type && data) noexcept
-		: m_storage{ std::move(data) }
+	Material::Material(storage_type const & data, allocator_type const & alloc)
+		: m_storage{ data, alloc }
 	{
 	}
 
-	Material::Material(Material const & other)
-		: m_storage{ other.m_storage }
+	Material::Material(storage_type && data, allocator_type const & alloc) noexcept
+		: m_storage{ std::move(data), alloc }
 	{
 	}
 
-	Material::Material(Material && other) noexcept
-		: m_storage{}
+	Material::Material(Material const & other, allocator_type const & alloc)
+		: m_storage{ other.m_storage, alloc }
+	{
+	}
+
+	Material::Material(Material && other, allocator_type const & alloc) noexcept
+		: m_storage{ alloc }
 	{
 		swap(std::move(other));
 	}

@@ -3,11 +3,6 @@
 
 #include <libmeme/Core/Array.hpp>
 
-#define ML_bitread(value, index)		((value >> index) & 1)
-#define ML_bitset(value, index)			(value |= (1 << index))
-#define ML_bitclear(value, index)		(value &= ~(1 << index))
-#define ML_bitwrite(value, index, b)	(b ? ML_bitset(value, index) : ML_bitclear(value, index))
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * */

@@ -11,9 +11,9 @@ namespace ml
 
 	ML_USING path_t = typename std::filesystem::path;
 
-	ML_USING file_t = typename std::vector<char>;
+	ML_USING file_t = typename pmr::vector<char>;
 
-	ML_USING directory_t = typename ds::flat_map<char, std::vector<path_t>>;
+	ML_USING directory_t = typename ds::flat_map<char, pmr::vector<path_t>>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 

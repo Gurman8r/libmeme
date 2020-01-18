@@ -24,21 +24,32 @@ namespace ml
 	{
 	}
 
-	Font::Font(path_t const & path)
-		: Font{}
+	Font::Font(allocator_type const & alloc)
+		: m_pages	{ alloc }
+		, m_library	{ nullptr }
+		, m_face	{ nullptr }
+	{
+	}
+
+	Font::Font(path_t const & path, allocator_type const & alloc)
+		: m_pages	{ alloc }
+		, m_library	{ nullptr }
+		, m_face	{ nullptr }
 	{
 		load_from_file(path);
 	}
 
-	Font::Font(Font const & other)
-		: m_pages	{ other.m_pages }
+	Font::Font(Font const & other, allocator_type const & alloc)
+		: m_pages	{ other.m_pages, alloc }
 		, m_library	{ other.m_library }
 		, m_face	{ other.m_face }
 	{
 	}
 
-	Font::Font(Font && other) noexcept
-		: Font{}
+	Font::Font(Font && other, allocator_type const & alloc) noexcept
+		: m_pages	{ alloc }
+		, m_library	{ nullptr }
+		, m_face	{ nullptr }
 	{
 		swap(std::move(other));
 	}

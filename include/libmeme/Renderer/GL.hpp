@@ -29,7 +29,7 @@ namespace ml
 
 		// Initialization
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static bool init();
+		static bool startup();
 		static void validateVersion(int32_t & major, int32_t & minor);
 
 		// Flags

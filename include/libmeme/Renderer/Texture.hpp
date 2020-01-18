@@ -10,10 +10,15 @@ namespace ml
 
 	enum TextureFlags_ : int32_t
 	{
-		TextureFlags_None		= 0,
+		TextureFlags_None,
 		TextureFlags_Smooth		= (1 << 0),
 		TextureFlags_Repeated	= (1 << 1),
 		TextureFlags_Mipmapped	= (1 << 2),
+
+		// Smooth / Repeated
+		TextureFlags_Default
+			= TextureFlags_Smooth
+			| TextureFlags_Repeated,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,12 +27,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture();
-		Texture(uint32_t sampler);
-		Texture(uint32_t sampler, int32_t flags);
-		Texture(uint32_t sampler, uint32_t format, int32_t flags);
-		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
 		Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
+		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
+		Texture(uint32_t sampler, uint32_t format, int32_t flags);
+		Texture(uint32_t sampler, int32_t flags);
+		Texture(uint32_t sampler);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Texture();
 		Texture(path_t const & path);
 		Texture(Image const & image);
 		Texture(Texture const & other);
@@ -58,9 +66,9 @@ namespace ml
 
 		static void bind(Texture const * value);
 
-		void bind() const;
+		inline void bind() const { bind(this); }
 
-		void unbind() const;
+		inline void unbind() const { bind(nullptr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -103,18 +111,18 @@ namespace ml
 		bool update(byte_t const * pixels, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD uint32_t channels() const noexcept;
-
-		ML_NODISCARD Image copy_to_image() const;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		bool set_mipmapped(bool value);
 
 		bool set_repeated(bool value);
-		
+
 		bool set_smooth(bool value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD uint32_t channels() const noexcept;
+
+		ML_NODISCARD Image copy_to_image() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

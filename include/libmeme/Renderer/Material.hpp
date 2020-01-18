@@ -11,7 +11,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type				= typename std::vector<Uniform>;
+		using storage_type				= typename pmr::vector<Uniform>;
+		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -24,10 +25,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Material();
-		Material(storage_type const & data);
-		Material(storage_type && data) noexcept;
-		Material(Material const & other);
-		Material(Material && other) noexcept;
+		explicit Material(allocator_type const & alloc);
+		Material(storage_type const & data, allocator_type const & alloc = {});
+		Material(storage_type && data, allocator_type const & alloc = {}) noexcept;
+		Material(Material const & other, allocator_type const & alloc = {});
+		Material(Material && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -1,6 +1,7 @@
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
@@ -82,27 +83,58 @@ namespace ml
 
 	bool RenderTexture::create()
 	{
-		if (!m_fbo && !m_rbo && ((m_size[0] != 0) && (m_size[1] != 0)))
+		if (good())
+			return debug::log_error("render texture already created");
+
+		if (width() == 0)
+			return debug::log_error("render texture width negative or zero");
+
+		if (height() == 0)
+			return debug::log_error("render texture height negative or zero");
+
+		if (!m_fbo.generate(m_size))
 		{
-			if (ML_BIND(FrameBufferObject, m_fbo.generate(m_size)))
-			{
-				if (ML_BIND(RenderBufferObject, m_rbo.generate(m_size)))
-				{
-					m_rbo.update(m_format);
-
-					m_fbo.attachRenderbuffer(m_frameID, m_rbo.handle());
-				}
-
-				if (GL::checkFramebufferStatus(GL::Framebuffer))
-				{
-					if (m_texture.destroy() && m_texture.create(m_size))
-					{
-						m_fbo.attachTexture2D(m_colorID, m_texture.handle(), m_texture.level());
-					}
-				}
-			}
+			destroy();
+			return debug::log_error("render texture failed creating framebuffer");
 		}
-		return (m_fbo && m_rbo);
+
+		if (!m_rbo.generate(m_size))
+		{
+			destroy();
+			return debug::log_error("render texture failed creating renderbuffer");
+		}
+
+		// bind framebuffer
+		ML_BIND_SCOPE_M(m_fbo);
+		{
+			// bind renderbuffer
+			ML_BIND_SCOPE_M(m_rbo);
+
+			// update renderbuffer
+			m_rbo.update(m_format);
+
+			// attach renderbuffer to framebuffer
+			m_fbo.attachRenderbuffer(m_frameID, m_rbo.handle());
+		}
+
+		// check framebuffer status
+		if (!GL::checkFramebufferStatus(GL::Framebuffer))
+		{
+			destroy();
+			return debug::log_error("render texture framebuffer status check failed");
+		}
+
+		// recreate texture
+		if (!m_texture.destroy() || !m_texture.create(m_size))
+		{
+			destroy();
+			return debug::log_error("render texture failed creating texture");
+		}
+
+		// attach texture to framebuffer
+		m_fbo.attachTexture2D(m_colorID, m_texture.handle(), m_texture.level());
+
+		return good();
 	}
 
 	bool RenderTexture::destroy()

@@ -7,9 +7,9 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::vector<std::string> tokenize(std::string value, std::string const & delim) noexcept
+	ML_NODISCARD static inline pmr::vector<std::string> tokenize(std::string value, std::string const & delim) noexcept
 	{
-		std::vector<std::string> out;
+		pmr::vector<std::string> out;
 		size_t pos = 0;
 		while ((pos = value.find(delim)) != std::string::npos)
 		{
@@ -181,16 +181,16 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_bool(std::string const & value) noexcept
 	{
-		switch (_ML_UTIL hash(to_lower(value)))
+		switch (util::hash(to_lower(value)))
 		{
-		case _ML_UTIL hash("1"):
-		case _ML_UTIL hash("true"):
-		case _ML_UTIL hash("on"):
-		case _ML_UTIL hash("yes"):
-		case _ML_UTIL hash("0"):
-		case _ML_UTIL hash("false"):
-		case _ML_UTIL hash("off"):
-		case _ML_UTIL hash("no"):
+		case util::hash("1"):
+		case util::hash("true"):
+		case util::hash("on"):
+		case util::hash("yes"):
+		case util::hash("0"):
+		case util::hash("false"):
+		case util::hash("off"):
+		case util::hash("no"):
 			return true;
 
 		default: return false;
@@ -247,18 +247,18 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool to_bool(std::string const & value, bool dv = 0) noexcept
 	{
-		switch (_ML_UTIL hash(to_lower(value)))
+		switch (util::hash(to_lower(value)))
 		{
-		case _ML_UTIL hash("1"):
-		case _ML_UTIL hash("true"):
-		case _ML_UTIL hash("on"):
-		case _ML_UTIL hash("yes"):
+		case util::hash("1"):
+		case util::hash("true"):
+		case util::hash("on"):
+		case util::hash("yes"):
 			return true;
 
-		case _ML_UTIL hash("0"):
-		case _ML_UTIL hash("false"):
-		case _ML_UTIL hash("off"):
-		case _ML_UTIL hash("no"):
+		case util::hash("0"):
+		case util::hash("false"):
+		case util::hash("off"):
+		case util::hash("no"):
 			return false;
 			
 		default:
@@ -433,7 +433,7 @@ namespace ml::util
 		return fmt;
 	}
 
-	template <class S> ML_NODISCARD static inline std::string format(std::string fmt, std::vector<S> const & args) noexcept
+	template <class S> ML_NODISCARD static inline std::string format(std::string fmt, pmr::vector<S> const & args) noexcept
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; ++i)
 		{

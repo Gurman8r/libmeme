@@ -23,6 +23,7 @@
 #if ML_HAS_CXX17
 #	include <any>
 #	include <filesystem>
+#	include <memory_resource>
 #	include <optional>
 #	include <string_view>
 #	include <variant>
@@ -32,6 +33,7 @@
 #	include <concepts>
 #	include <format>
 #	include <ranges>
+#	include <version>
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,6 +66,12 @@ namespace ml
 	using namespace _STD chrono_literals;
 	using namespace _STD string_literals;
 	using namespace _STD string_view_literals;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	namespace literals {}
+
+	using namespace _ML literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

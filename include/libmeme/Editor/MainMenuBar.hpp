@@ -61,9 +61,9 @@ namespace ml
 		bool m_good;
 		bool m_open;
 
-		std::vector<std::pair<
+		pmr::vector<std::pair<
 			std::string,
-			std::vector<menu_t>
+			pmr::vector<menu_t>
 		>> m_menus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

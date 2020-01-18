@@ -32,6 +32,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum : size_t { ID_Variable, ID_Function };
 		enum : size_t { ID_Type, ID_Name, ID_Data };
 
 		using storage_type = typename std::tuple<type_t, name_t, data_t>;
@@ -120,16 +121,14 @@ namespace ml
 
 		ML_NODISCARD inline std::optional<variable_t> load() const
 		{
-			if (is_function())
+			switch (data().index())
 			{
-				if (auto const & fn{ std::get<function_t>(data()) })
-				{
-					return std::make_optional(std::invoke(fn));
-				}
-			}
-			else if (is_variable())
-			{
+			case ID_Variable:
 				return std::make_optional(std::get<variable_t>(data()));
+			
+			case ID_Function:
+				if (auto const & fn{ std::get<function_t>(data()) })
+					return std::make_optional(std::invoke(fn));
 			}
 			return std::nullopt;
 		}
