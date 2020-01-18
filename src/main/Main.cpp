@@ -45,14 +45,10 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using memory_buff	= pmr::monotonic_buffer_resource;
-	using memory_pool	= pmr::unsynchronized_pool_resource;
-
-	static byte_t		g_memory	[ 8_MiB ];
-	static memory_buff	g_buffer	{ &g_memory, sizeof g_memory };
-	static memory_pool	g_pool		{ &g_buffer };
-
-	// set global memory buffer
+	// setup memory
+	static auto g_block	= array<byte_t, 100_MiB>{ 0 };
+	static auto g_buff	= pmr::monotonic_buffer_resource{ g_block.data(), g_block.size() };
+	static auto g_pool	= pmr::unsynchronized_pool_resource{ &g_buff };
 	pmr::set_default_resource(&g_pool);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

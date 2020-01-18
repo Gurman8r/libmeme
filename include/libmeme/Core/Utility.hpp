@@ -456,15 +456,9 @@ namespace ml::util
 	template <class T
 	> ML_NODISCARD static constexpr decltype(auto) power_of_2(T v)
 	{
-		/*
-			Sources:
-			https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
-		*/
-		if constexpr (std::is_floating_point_v<T>)
-		{
-			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
-		}
-		else if constexpr (std::is_integral_v<T>)
+		// Sources:
+		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
+		if constexpr (std::is_integral_v<T>)
 		{
 			v--;
 			if constexpr (sizeof(T) >= 1)
@@ -479,10 +473,8 @@ namespace ml::util
 		}
 		else
 		{
-			T power = static_cast<T>(1);
-			while (power < v)
-				power *= static_cast<T>(2);
-			return v;
+			static_assert(std::is_floating_point_v<T>);
+			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
 		}
 	}
 

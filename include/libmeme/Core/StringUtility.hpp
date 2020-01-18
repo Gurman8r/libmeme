@@ -22,28 +22,6 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class To, class From
-	> ML_NODISCARD static inline std::basic_string<To> convert(const std::basic_string<From> & value) noexcept
-	{
-		std::basic_string<To> temp {};
-		temp.reserve(value.size());
-		for (From const & c : value)
-			temp.push_back(static_cast<To>(c));
-		return temp;
-	}
-
-	ML_NODISCARD static inline std::string narrow(std::wstring const & value) noexcept
-	{ 
-		return convert<char>(value);
-	}
-
-	ML_NODISCARD static inline std::wstring widen(std::string const & value) noexcept
-	{ 
-		return convert<wchar_t>(value); 
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Ch
 	> ML_NODISCARD static inline bool is_whitespace(Ch c) noexcept
 	{
@@ -333,11 +311,6 @@ namespace ml::util
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD static inline std::string to_string(std::string const & value) noexcept
-	{
-		return value;
-	}
 
 	ML_NODISCARD static inline std::string to_string(int8_t value) noexcept
 	{
