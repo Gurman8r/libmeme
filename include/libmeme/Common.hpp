@@ -92,16 +92,16 @@ namespace ml
 	ML_USING	uint32_t	= typename ML_UINT32;
 	ML_USING	uint64_t	= typename ML_UINT64;
 
+	ML_USING	byte_t		= typename ML_BYTE;
+	ML_USING	intmax_t	= typename ML_INTMAX;
+	ML_USING	uintmax_t	= typename ML_UINTMAX;
+
 	ML_USING	float32_t	= typename ML_FLOAT32;
 	ML_USING	float64_t	= typename ML_FLOAT64;
 	ML_USING	float80_t	= typename ML_FLOAT80;
 
-	ML_USING	intmax_t	= typename ML_INTMAX;
-	ML_USING	uintmax_t	= typename ML_UINTMAX;
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	byte_t		= typename uint8_t;
 	ML_USING	float_t		= typename float32_t;
 	ML_USING	intptr_t	= typename intmax_t;
 	ML_USING	ptrdiff_t	= typename intptr_t;
