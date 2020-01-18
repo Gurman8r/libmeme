@@ -76,28 +76,34 @@ namespace ml::ds
 		{
 		}
 
-		explicit basic_flat_map(allocator_type const & alloc)
-			: m_storage{ key_storage{ alloc }, value_storage{ alloc } }
+		explicit basic_flat_map(allocator_type const & alloc) : m_storage{
+			key_storage{ alloc },
+			value_storage{ alloc }
+		}
 		{
 		}
 
-		explicit basic_flat_map(storage_type const & value, allocator_type const & alloc = {})
-			: m_storage{ key_storage{ value.first, alloc }, value_storage{ value.second, alloc } }
+		explicit basic_flat_map(storage_type const & value, allocator_type const & alloc = {}) : m_storage{
+			key_storage{ value.first, alloc },
+			value_storage{ value.second, alloc }
+		}
 		{
 		}
 
-		explicit basic_flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept
-			: m_storage{ key_storage{ std::move(value.first), alloc }, value_storage{ std::move(value.second), alloc } }
+		explicit basic_flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{
+			key_storage{ std::move(value.first), alloc },
+			value_storage{ std::move(value.second), alloc }
+		}
 		{
 		}
 
 		basic_flat_map(self_type const & other, allocator_type const & alloc = {})
-			: m_storage{ other.m_storage, alloc }
+			: self_type{ other.m_storage, alloc }
 		{
 		}
 
 		basic_flat_map(self_type && other, allocator_type const & alloc = {}) noexcept
-			: m_storage{ std::move(other.m_storage), alloc }
+			: self_type{ std::move(other.m_storage), alloc }
 		{
 		}
 

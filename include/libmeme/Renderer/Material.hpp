@@ -25,10 +25,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Material();
+		
 		explicit Material(allocator_type const & alloc);
+		
 		Material(storage_type const & data, allocator_type const & alloc = {});
+		
 		Material(storage_type && data, allocator_type const & alloc = {}) noexcept;
+		
 		Material(Material const & other, allocator_type const & alloc = {});
+		
 		Material(Material && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -94,7 +99,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::optional<Uniform> find(std::string const & name)
+		ML_NODISCARD inline std::optional<Uniform> find(pmr::string const & name)
 		{
 			if (name.empty()) { return std::nullopt; }
 			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
@@ -109,7 +114,7 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline std::optional<Uniform> find(std::string const & name) const
+		ML_NODISCARD inline std::optional<Uniform> find(pmr::string const & name) const
 		{
 			if (name.empty()) { return std::nullopt; }
 			if (auto it{ std::find_if(cbegin(), cend(), [name](auto const & u) {

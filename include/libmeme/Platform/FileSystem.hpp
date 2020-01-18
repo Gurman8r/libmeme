@@ -41,7 +41,7 @@ namespace ml
 
 		ML_NODISCARD static std::optional<file_t> read_file(path_t const & path);
 
-		ML_NODISCARD static std::string get_file_contents(path_t const & path);
+		ML_NODISCARD static pmr::string get_file_contents(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

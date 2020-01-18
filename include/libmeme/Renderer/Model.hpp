@@ -29,12 +29,19 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Model();
+		
 		explicit Model(allocator_type const & alloc);
+		
 		Model(initializer_type init, allocator_type const & alloc = {});
+		
 		Model(path_t const & path, allocator_type const & alloc = {});
+		
 		Model(storage_type const & storage, allocator_type const & alloc = {});
+		
 		Model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
+		
 		Model(Model const & other, allocator_type const & alloc = {});
+		
 		Model(Model && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

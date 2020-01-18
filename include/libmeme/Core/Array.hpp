@@ -3,14 +3,12 @@
 
 #include <libmeme/Core/Utility.hpp>
 
-namespace ml
+namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size array
-	template <class _Ty,	// value type
-		size_t _Size		// element count
-	> struct array
+	template <class _Ty, size_t _Size> struct array
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

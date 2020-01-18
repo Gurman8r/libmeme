@@ -5,14 +5,12 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml
+namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size matrix
-	template <class _Ty,	// value type
-		size_t _Width,		// width / columns
-		size_t _Height		// height / rows
+	template <class _Ty, size_t _Width, size_t _Height
 	> struct matrix
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,7 +23,7 @@ namespace ml
 
 		using value_type		= typename _Ty;
 		using self_type			= typename matrix<value_type, _Width, _Height>;
-		using storage_type		= typename array<value_type, _Width * _Height>;
+		using storage_type		= typename ds::array<value_type, _Width * _Height>;
 		using size_type			= typename storage_type::size_type;
 		using difference_type	= typename storage_type::difference_type;
 		using pointer			= typename storage_type::pointer;
@@ -174,8 +172,8 @@ namespace ml
 {
 	// MATRIX NxN
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_VA(class T, size_t N) tmatn = matrix<T, N, N>;
-	ML_USING_VA(class T, size_t N) tvecn = matrix<T, N, 1>;
+	ML_USING_VA(class T, size_t N) tmatn = ds::matrix<T, N, N>;
+	ML_USING_VA(class T, size_t N) tvecn = ds::matrix<T, N, 1>;
 
 
 	// MATRIX 2x2
@@ -259,7 +257,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t X, size_t Y
-	> inline ML_SERIALIZE(std::ostream & out, matrix<T, X, Y> const & value)
+	> inline ML_SERIALIZE(std::ostream & out, ds::matrix<T, X, Y> const & value)
 	{
 		for (auto const & elem : value)
 			out << elem << ' ';
@@ -267,7 +265,7 @@ namespace ml
 	}
 
 	template <class T, size_t X, size_t Y
-	> inline ML_DESERIALIZE(std::istream & in, matrix<T, X, Y> & value)
+	> inline ML_DESERIALIZE(std::istream & in, ds::matrix<T, X, Y> & value)
 	{
 		for (auto & elem : value)
 			if (in.good())
@@ -278,37 +276,37 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator==(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator==(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data == rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator!=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator!=(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data != rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator<(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator<(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data < rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator<=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator<=(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data <= rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator>(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator>(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data > rhs.m_data);
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr bool operator>=(matrix<Tx, W, H> const & lhs, matrix<Ty, W, H> const & rhs) noexcept
+	> ML_NODISCARD constexpr bool operator>=(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
 		return (lhs.m_data >= rhs.m_data);
 	}

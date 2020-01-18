@@ -51,16 +51,21 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Python::do_string(std::string const & value)
+	int32_t Python::do_string(C_string value)
 	{
-		return ((!value.empty() && m_init) ? PyRun_SimpleString(value.c_str()) : 0);
+		return (value && m_init) ? PyRun_SimpleString(value) : 0;
+	}
+
+	int32_t Python::do_string(pmr::string const & value)
+	{
+		return do_string(value.c_str());
 	}
 
 	int32_t Python::do_file(path_t const & path)
 	{
 		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
-			return do_string(std::string{ o->begin(), o->end() });
+			return do_string(pmr::string{ o->begin(), o->end() });
 		}
 		return 0;
 	}

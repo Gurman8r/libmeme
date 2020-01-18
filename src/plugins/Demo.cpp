@@ -182,8 +182,8 @@ namespace ml
 				// update stuff, etc...
 				
 				Engine::window().set_title("libmeme"s
-					+ " | "s + util::to_string(ev->total_time)
-					+ " | "s + util::to_string(ev->delta_time)
+					+ " | "s + std::to_string(ev->total_time)
+					+ " | "s + std::to_string(ev->delta_time)
 				);
 				
 			} break;
@@ -333,7 +333,7 @@ namespace ml
 	};
 }
 
-extern "C" ML_PLUGIN_API ml::Plugin * ML_Plugin_Main()
+extern "C" ML_PLUGIN_API ml::Plugin * ml_plugin_main()
 {
 	static ml::Plugin * temp{ nullptr };
 	if (!temp) { temp = new ml::Demo{}; }

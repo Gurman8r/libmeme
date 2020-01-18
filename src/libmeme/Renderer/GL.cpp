@@ -29,6 +29,9 @@
 
 namespace ml
 {
+	static bool s_gl_init{ false };
+
+
 	// Errors
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -62,17 +65,32 @@ namespace ml
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool GL::is_init() noexcept
+	{
+		return s_gl_init;
+	}
+
 	bool GL::startup()
 	{
+		if (is_init())
+			return debug::log_error("GL is already initialized");
+
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
-		glewExperimental = true;
-		return (glewInit() == GLEW_OK);
+
+		ML_ONCE_CALL{ glewExperimental = true; }
+		return (s_gl_init = (glewInit() == GLEW_OK));
+
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-		return (gl3wInit() != 0);
+
+		return (s_gl_init = (gl3wInit() != 0));
+
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-		return (gladLoadGL() == 0);
+
+		return (s_gl_init = (gladLoadGL() == 0));
+
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-		return false;
+
+		return (s_gl_init = false);
 #endif
 	}
 
@@ -668,12 +686,12 @@ namespace ml
 	bool GL::shadersAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp =
-				GL_ARB_multitexture &&
-				GL_ARB_shading_language_100 &&
-				GL_ARB_shader_objects &&
-				GL_ARB_vertex_shader &&
-				GL_ARB_fragment_shader;
+		ML_ONCE_CALL temp
+			= GL_ARB_multitexture
+			&& GL_ARB_shading_language_100
+			&& GL_ARB_shader_objects
+			&& GL_ARB_vertex_shader
+			&& GL_ARB_fragment_shader;
 		return temp;
 	}
 

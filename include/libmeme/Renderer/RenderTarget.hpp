@@ -37,7 +37,7 @@ namespace ml
 			this->draw(&value);
 		}
 		
-		void viewport(IntRect const & bounds) const;
+		void viewport(int_rect const & bounds) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

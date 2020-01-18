@@ -11,6 +11,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		using variable_t = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
@@ -26,13 +30,14 @@ namespace ml
 
 		using type_t = typename typeof<>;
 
-		using name_t = typename std::string;
+		using name_t = typename pmr::string;
 
 		using data_t = typename std::variant<variable_t, function_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Variable, ID_Function };
+
 		enum : size_t { ID_Type, ID_Name, ID_Data };
 
 		using storage_type = typename std::tuple<type_t, name_t, data_t>;
@@ -43,25 +48,47 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit Uniform(storage_type const & storage)
-			: m_storage{ storage }
-		{
-		}
-
-		explicit Uniform(storage_type && storage) noexcept
-			: m_storage{ std::move(storage) }
+		explicit Uniform(allocator_type const & alloc) : m_storage{ std::make_tuple(
+			type_t{},
+			name_t{ alloc },
+			data_t{}
+		) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform(Uniform const & other)
-			: m_storage{ other.m_storage }
+		explicit Uniform(storage_type const & value, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
+			type_t{ std::get<ID_Type>(value) },
+			name_t{ std::get<ID_Name>(value), alloc },
+			data_t{ std::get<ID_Data>(value) }
+		) }
 		{
 		}
 
-		Uniform(Uniform && other) noexcept
-			: m_storage{ std::move(other.m_storage) }
+		explicit Uniform(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
+			type_t{ std::move(std::get<ID_Type>(value)) },
+			name_t{ std::move(std::get<ID_Name>(value)), alloc },
+			data_t{ std::move(std::get<ID_Data>(value)) }
+		) }
+		{
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		Uniform(Uniform const & other, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
+			type_t{ std::get<ID_Type>(other.m_storage) },
+			name_t{ std::get<ID_Name>(other.m_storage), alloc },
+			data_t{ std::get<ID_Data>(other.m_storage) }
+		) }
+		{
+		}
+
+		Uniform(Uniform && other, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
+			type_t{ std::move(std::get<ID_Type>(other.m_storage)) },
+			name_t{ std::move(std::get<ID_Name>(other.m_storage)), alloc },
+			data_t{ std::move(std::get<ID_Data>(other.m_storage)) }
+		) }
 		{
 		}
 
@@ -84,7 +111,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				util::swap(m_storage, other.m_storage);
+				m_storage.swap(other.m_storage);
 			}
 		}
 

@@ -29,9 +29,9 @@ namespace ml
 			{
 				if (auto lib{ make_shared_library(*it.first) })
 				{
-					if (auto const plugin{ lib.call_function<Plugin *>("ML_Plugin_Main") })
+					if (auto const plug{ lib.call_function<Plugin *>("ml_plugin_main") })
 					{
-						return (*m_libs.insert(std::move(lib), plugin).first.second);
+						return (*m_libs.insert(std::move(lib), plug).first.second);
 					}
 				}
 				m_files.erase(it.first);

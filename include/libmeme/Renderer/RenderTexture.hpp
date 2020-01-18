@@ -60,7 +60,7 @@ namespace ml
 
 		ML_NODISCARD inline auto height() const noexcept -> int32_t { return m_size[1]; }
 
-		ML_NODISCARD inline auto bounds() const noexcept -> IntRect { return IntRect{ 0, 0, width(), height() }; }
+		ML_NODISCARD inline auto bounds() const noexcept -> int_rect { return int_rect{ 0, 0, width(), height() }; }
 
 		ML_NODISCARD inline auto colorID() const noexcept -> uint32_t { return m_colorID; }
 

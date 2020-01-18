@@ -7,8 +7,8 @@ namespace ml
 
 	Glyph::Glyph() : Glyph{ std::make_tuple(make_texture(
 		GL::Texture2D, GL::RGBA, GL::Red, TextureFlags_Smooth | TextureFlags_Repeated),
-		FloatRect::zero(),
-		0U
+		float_rect::zero(),
+		0u
 	) }
 	{
 	}
@@ -29,32 +29,8 @@ namespace ml
 	}
 
 	Glyph::Glyph(Glyph && other) noexcept
-		: m_storage{}
+		: m_storage{ std::move(other.m_storage) }
 	{
-		swap(std::move(other));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	Glyph Glyph::operator=(Glyph const & other)
-	{
-		Glyph temp{ other };
-		swap(temp);
-		return (*this);
-	}
-
-	Glyph Glyph::operator=(Glyph && other) noexcept
-	{
-		swap(std::move(other));
-		return (*this);
-	}
-
-	void Glyph::swap(Glyph & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_storage, other.m_storage);
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

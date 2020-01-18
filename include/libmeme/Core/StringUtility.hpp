@@ -7,11 +7,11 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline pmr::vector<std::string> tokenize(std::string value, std::string const & delim) noexcept
+	ML_NODISCARD static inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
 	{
-		pmr::vector<std::string> out;
+		pmr::vector<pmr::string> out;
 		size_t pos = 0;
-		while ((pos = value.find(delim)) != std::string::npos)
+		while ((pos = value.find(delim)) != pmr::string::npos)
 		{
 			out.push_back(value.substr(0, pos));
 			value.erase(0, pos + delim.length());
@@ -32,7 +32,7 @@ namespace ml::util
 			c == static_cast<Ch>('\r');
 	}
 
-	ML_NODISCARD static inline std::string trim_front(std::string value) noexcept
+	ML_NODISCARD static inline pmr::string trim_front(pmr::string value) noexcept
 	{
 		while (!value.empty() && is_whitespace(value.front()))
 		{
@@ -41,7 +41,7 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string trim_back(std::string value) noexcept
+	ML_NODISCARD static inline pmr::string trim_back(pmr::string value) noexcept
 	{
 		while (!value.empty() && is_whitespace(value.back()))
 		{
@@ -50,18 +50,18 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string trim(std::string value) noexcept
+	ML_NODISCARD static inline pmr::string trim(pmr::string value) noexcept
 	{
 		return trim_front(trim_back(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string replace_all(std::string value, std::string const & toFind, std::string const & replaceWith) noexcept
+	ML_NODISCARD static inline pmr::string replace_all(pmr::string value, pmr::string const & toFind, pmr::string const & replaceWith) noexcept
 	{
 		if (!value.empty() && !toFind.empty())
 		{
-			for (size_t i = 0; (i = value.find(toFind, i)) != std::string::npos;)
+			for (size_t i = 0; (i = value.find(toFind, i)) != pmr::string::npos;)
 			{
 				value.replace(i, toFind.size(), replaceWith);
 				i += replaceWith.size();
@@ -70,14 +70,14 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string remove_all(std::string value, std::string const & toRemove) noexcept
+	ML_NODISCARD static inline pmr::string remove_all(pmr::string value, pmr::string const & toRemove) noexcept
 	{
 		return replace_all(value, toRemove, {});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_alpha(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_alpha(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -87,7 +87,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_alnum(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_alnum(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -97,7 +97,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_graph(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_graph(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -107,7 +107,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_print(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_print(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -117,7 +117,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_lower(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_lower(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -127,7 +127,7 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_upper(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_upper(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -139,7 +139,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string to_lower(std::string value) noexcept
+	ML_NODISCARD static inline pmr::string to_lower(pmr::string value) noexcept
 	{
 		std::locale loc{};
 		for (auto & elem : value)
@@ -147,7 +147,7 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline std::string to_upper(std::string value) noexcept
+	ML_NODISCARD static inline pmr::string to_upper(pmr::string value) noexcept
 	{
 		std::locale loc{};
 		for (auto & elem : value)
@@ -157,29 +157,29 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_bool(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_bool(pmr::string const & value) noexcept
 	{
-		switch (util::hash(to_lower(value)))
+		switch (hash(to_lower(value)))
 		{
-		case util::hash("1"):
-		case util::hash("true"):
-		case util::hash("on"):
-		case util::hash("yes"):
-		case util::hash("0"):
-		case util::hash("false"):
-		case util::hash("off"):
-		case util::hash("no"):
+		case hash("1"):
+		case hash("true"):
+		case hash("on"):
+		case hash("yes"):
+		case hash("0"):
+		case hash("false"):
+		case hash("off"):
+		case hash("no"):
 			return true;
 
 		default: return false;
 		}
 	}
 
-	ML_NODISCARD static inline bool is_integer(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_integer(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false; 
 		std::locale loc{};
-		std::string::const_iterator it = value.cbegin();
+		pmr::string::const_iterator it = value.cbegin();
 		if ((*it) == '-')
 		{ 
 			it++; 
@@ -191,15 +191,15 @@ namespace ml::util
 		return (it == value.cend());
 	}
 
-	ML_NODISCARD static inline bool is_decimal(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_decimal(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::string::pointer endptr = nullptr;
+		pmr::string::pointer endptr = nullptr;
 		auto temp { std::strtod(value.c_str(), &endptr) };
 		return !(*endptr != '\0' || endptr == value);
 	}
 
-	ML_NODISCARD static inline bool is_name(std::string const & value) noexcept
+	ML_NODISCARD static inline bool is_name(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -223,156 +223,156 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool to_bool(std::string const & value, bool dv = 0) noexcept
+	ML_NODISCARD static inline bool to_bool(pmr::string const & value, bool dv = 0) noexcept
 	{
-		switch (util::hash(to_lower(value)))
+		switch (hash(to_lower(value)))
 		{
-		case util::hash("1"):
-		case util::hash("true"):
-		case util::hash("on"):
-		case util::hash("yes"):
+		case hash("1"):
+		case hash("true"):
+		case hash("on"):
+		case hash("yes"):
 			return true;
 
-		case util::hash("0"):
-		case util::hash("false"):
-		case util::hash("off"):
-		case util::hash("no"):
+		case hash("0"):
+		case hash("false"):
+		case hash("off"):
+		case hash("no"):
 			return false;
-			
+
 		default:
 			return dv;
 		}
 	}
 
-	ML_NODISCARD static inline int32_t to_i8(std::string const & value, int8_t dv = 0) noexcept
+	ML_NODISCARD static inline int32_t to_i8(pmr::string const & value, int8_t dv = 0) noexcept
 	{
-		try { return static_cast<int8_t>(std::stoi(value)); }
+		try { return static_cast<int8_t>(std::stoi(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int32_t to_i16(std::string const & value, int16_t dv = 0) noexcept
+	ML_NODISCARD static inline int32_t to_i16(pmr::string const & value, int16_t dv = 0) noexcept
 	{
-		try { return static_cast<int16_t>(std::stoi(value)); }
+		try { return static_cast<int16_t>(std::stoi(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int32_t to_i32(std::string const & value, int32_t dv = 0) noexcept
+	ML_NODISCARD static inline int32_t to_i32(pmr::string const & value, int32_t dv = 0) noexcept
 	{
-		try { return static_cast<int32_t>(std::stoi(value)); }
+		try { return static_cast<int32_t>(std::stoi(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline int64_t to_i64(std::string const & value, int64_t dv = 0) noexcept
+	ML_NODISCARD static inline int64_t to_i64(pmr::string const & value, int64_t dv = 0) noexcept
 	{
-		try { return static_cast<int64_t>(std::stoll(value)); }
+		try { return static_cast<int64_t>(std::stoll(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint8_t to_u8(std::string const & value, uint8_t dv = 0) noexcept
+	ML_NODISCARD static inline uint8_t to_u8(pmr::string const & value, uint8_t dv = 0) noexcept
 	{
-		try { return static_cast<uint8_t>(std::stoul(value)); }
+		try { return static_cast<uint8_t>(std::stoul(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint16_t to_u16(std::string const & value, uint16_t dv = 0) noexcept
+	ML_NODISCARD static inline uint16_t to_u16(pmr::string const & value, uint16_t dv = 0) noexcept
 	{
-		try { return static_cast<uint16_t>(std::stoul(value)); }
+		try { return static_cast<uint16_t>(std::stoul(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint32_t to_u32(std::string const & value, uint32_t dv = 0) noexcept
+	ML_NODISCARD static inline uint32_t to_u32(pmr::string const & value, uint32_t dv = 0) noexcept
 	{
-		try { return static_cast<uint32_t>(std::stoul(value)); }
+		try { return static_cast<uint32_t>(std::stoul(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline uint64_t to_u64(std::string const & value, uint64_t dv = 0) noexcept
+	ML_NODISCARD static inline uint64_t to_u64(pmr::string const & value, uint64_t dv = 0) noexcept
 	{
-		try { return static_cast<uint64_t>(std::stoull(value)); }
+		try { return static_cast<uint64_t>(std::stoull(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float32_t to_f32(std::string const & value, float32_t dv = 0) noexcept
+	ML_NODISCARD static inline float32_t to_f32(pmr::string const & value, float32_t dv = 0) noexcept
 	{
-		try { return static_cast<float32_t>(std::stof(value)); }
+		try { return static_cast<float32_t>(std::stof(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float64_t to_f64(std::string const & value, float64_t dv = 0) noexcept
+	ML_NODISCARD static inline float64_t to_f64(pmr::string const & value, float64_t dv = 0) noexcept
 	{
-		try { return static_cast<float64_t>(std::stod(value)); }
+		try { return static_cast<float64_t>(std::stod(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
-	ML_NODISCARD static inline float80_t to_f80(std::string const & value, float80_t dv = 0) noexcept
+	ML_NODISCARD static inline float80_t to_f80(pmr::string const & value, float80_t dv = 0) noexcept
 	{
-		try { return static_cast<float80_t>(std::stold(value)); }
+		try { return static_cast<float80_t>(std::stold(value.c_str())); }
 		catch (std::invalid_argument &) { return dv; }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline std::string to_string(int8_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int8_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(int16_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int16_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(int32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int32_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(int64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int64_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(uint8_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint8_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(uint16_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint16_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(uint32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint32_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(uint64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint64_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(float32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float32_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(float64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float64_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
-	ML_NODISCARD static inline std::string to_string(float80_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float80_t value) noexcept
 	{
-		return std::to_string(value);
+		return std::to_string(value).c_str();
 	}
 
 	template <class T
-	> ML_NODISCARD static inline std::string to_string(T const & value) noexcept
+	> ML_NODISCARD static inline pmr::string to_string(T const & value) noexcept
 	{
 		std::stringstream ss{};
 		ss << value;
-		return ss.str();
+		return ss.str().c_str();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -387,17 +387,17 @@ namespace ml::util
 	}
 
 	template <class Arg0, class ... Args
-	> ML_NODISCARD static inline std::string format(std::string fmt, Arg0 const & arg0, Args && ... args) noexcept
+	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
 		std::stringstream ss{ sink(arg0, std::forward<Args>(args)...) };
 		return format(fmt, ss);
 	}
 
-	ML_NODISCARD static inline std::string format(std::string fmt, std::stringstream & ss) noexcept
+	ML_NODISCARD static inline pmr::string format(pmr::string fmt, std::stringstream & ss) noexcept
 	{
 		for (size_t i = 0; ss.good(); ++i)
 		{
-			std::string line;
+			pmr::string line;
 			if (std::getline(ss, line))
 			{
 				fmt = replace_all(fmt, ("{" + to_string(i) + "}"), line);
@@ -406,7 +406,7 @@ namespace ml::util
 		return fmt;
 	}
 
-	template <class S> ML_NODISCARD static inline std::string format(std::string fmt, pmr::vector<S> const & args) noexcept
+	template <class S> ML_NODISCARD static inline pmr::string format(pmr::string fmt, pmr::vector<S> const & args) noexcept
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; ++i)
 		{
@@ -418,7 +418,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T
-	> ML_NODISCARD static inline std::string to_hex(T const & value)
+	> ML_NODISCARD static inline pmr::string to_hex(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::hex << value;
@@ -426,7 +426,7 @@ namespace ml::util
 	}
 
 	template <class T
-	> ML_NODISCARD static inline std::string to_oct(T const & value)
+	> ML_NODISCARD static inline pmr::string to_oct(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::oct << value;

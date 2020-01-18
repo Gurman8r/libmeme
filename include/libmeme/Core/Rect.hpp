@@ -24,38 +24,36 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Rect()
-			: base_type()
-		{
-		}
+		constexpr Rect() noexcept : base_type{} {}
 		
 		constexpr Rect(value_type width, value_type height)
-			: base_type({ 0, 0, width, height })
+			: base_type{ 0, 0, width, height }
 		{
 		}
 		
 		constexpr Rect(value_type left, value_type top, value_type width, value_type height)
-			: base_type({ left, top, width, height })
+			: base_type{ left, top, width, height }
 		{
 		}
 
-		constexpr Rect(self_type const & copy)
-			: base_type(copy)
+		constexpr Rect(self_type const & other)
+			: base_type{ other }
 		{
 		}
 
-		template <class U> constexpr Rect(const tvec4<U> & copy)
-			: base_type(copy)
+		template <class U
+		> constexpr Rect(tvec4<U> const & other)
+			: base_type{ other }
 		{
 		}
 		
 		constexpr Rect(coord_type const & pos, coord_type const & size)
-			: base_type({ pos[0], pos[1], size[0], size[1] })
+			: base_type{ pos[0], pos[1], size[0], size[1] }
 		{
 		}
 		
 		constexpr Rect(coord_type const & size)
-			: base_type({ 0, 0, size[0], size[1] })
+			: base_type{ 0, 0, size[0], size[1] }
 		{
 		}
 		
@@ -104,9 +102,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING FloatRect = Rect<float_t>;
-	ML_USING IntRect	= Rect<int32_t>;
-	ML_USING UintRect	= Rect<uint32_t>;
+	ML_USING float_rect = Rect<float_t>;
+	
+	ML_USING int_rect = Rect<int32_t>;
+	
+	ML_USING uint_rect = Rect<uint32_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * */
 }

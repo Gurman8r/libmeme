@@ -31,29 +31,36 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Image::Image()
-		: Image{ vec2u { NULL } }
+		: Image{ allocator_type{} }
 	{
 	}
 
-	Image::Image(vec2u const & size)
-		: Image{ size, 4 }
+	Image::Image(allocator_type const & alloc)
+		: m_size	{ 0 }
+		, m_channels{ 0 }
+		, m_pixels	{ alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, size_t channels) 
-		: Image{ size, channels, Pixels() }
+	Image::Image(vec2u const & size, allocator_type const & alloc)
+		: Image{ size, 4, alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, Pixels const & pixels)
-		: Image{ size, 4, pixels }
+	Image::Image(vec2u const & size, size_t channels, allocator_type const & alloc)
+		: Image{ size, channels, pixels_type{}, alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, size_t channels, Pixels const & pixels)
+	Image::Image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc)
+		: Image{ size, 4, pixels, alloc }
+	{
+	}
+
+	Image::Image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc)
 		: m_size	{ size }
 		, m_channels{ channels }
-		, m_pixels	{ pixels }
+		, m_pixels	{ pixels, alloc }
 	{
 		if (size_t const c{ capacity() }; m_pixels.empty() || (m_pixels.size() != c))
 		{
@@ -61,31 +68,31 @@ namespace ml
 		}
 	}
 
-	Image::Image(path_t const & path)
-		: Image{ path, false }
+	Image::Image(path_t const & path, allocator_type const & alloc)
+		: Image{ path, false, alloc }
 	{
 	}
 
-	Image::Image(path_t const & path, bool flip)
-		: Image{ path, flip, 0 }
+	Image::Image(path_t const & path, bool flip, allocator_type const & alloc)
+		: Image{ path, flip, 0, alloc }
 	{
 	}
 
-	Image::Image(path_t const & path, bool flip, size_t req_comp)
-		: Image{}
+	Image::Image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc)
+		: Image{ alloc }
 	{
 		load_from_file(path, flip, req_comp);
 	}
 
-	Image::Image(Image const & other)
+	Image::Image(Image const & other, allocator_type const & alloc)
 		: m_size	{ other.m_size }
 		, m_channels{ other.m_channels }
 		, m_pixels	{ other.m_pixels }
 	{
 	}
 
-	Image::Image(Image && other) noexcept
-		: Image{}
+	Image::Image(Image && other, allocator_type const & alloc) noexcept
+		: Image{ alloc }
 	{
 		swap(std::move(other));
 	}
@@ -186,17 +193,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Image & Image::create_from_pixels(vec2u const & size, Pixels const & pixels)
+	Image & Image::create_from_pixels(vec2u const & size, pixels_type const & pixels)
 	{
 		return create_from_pixels(size, m_channels, pixels);
 	}
 
-	Image & Image::create_from_pixels(Pixels const & pixels)
+	Image & Image::create_from_pixels(pixels_type const & pixels)
 	{
 		return create_from_pixels(m_size, m_channels, pixels);
 	}
 	
-	Image & Image::create_from_pixels(vec2u const & size, size_t channels, Pixels const & pixels)
+	Image & Image::create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{
@@ -213,7 +220,7 @@ namespace ml
 
 	bool Image::dispose()
 	{
-		Pixels().swap(m_pixels);
+		pixels_type().swap(m_pixels);
 
 		m_size = { 0, 0 };
 

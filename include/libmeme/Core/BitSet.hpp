@@ -15,7 +15,7 @@ namespace ml
 
 		using value_type		= typename T;
 		using self_type			= typename BitSet<value_type>;
-		using array_type		= typename array<bool, Size>;
+		using array_type		= typename ds::array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
 		using const_pointer		= typename value_type const *;

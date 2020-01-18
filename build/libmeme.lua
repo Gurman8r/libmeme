@@ -62,14 +62,18 @@ project "libmeme"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"lua", "imgui", "glfw", --"raknet",
+		"glfw",
+		"imgui",
+		"lua",
+		--"raknet", "ws2_32",
 		"opengl32", "glew32s", 
 		"assimp", "IrrXML", "zlibstatic", "freetype",
 	}
 	
 	filter { "system:Windows" }
-		includedirs { "%{ext_dir}cpython/PC" }
-		links { "ws2_32" }
+		includedirs {
+			"%{ext_dir}cpython/PC"
+		}
 		postbuildcommands {	
 			"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
 			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\assimp.dll %{bin_out}",
@@ -77,7 +81,9 @@ project "libmeme"
 	
 	filter { "system:Windows", "configurations:Debug" }
 		symbols "On"
-		links { "python39_d" }
+		links {
+			"python39_d"
+		}
 		postbuildcommands {	
 			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39_d.dll %{bin_out}",
 		}
@@ -87,7 +93,9 @@ project "libmeme"
 	
 	filter { "system:Windows", "configurations:Release" }
 		optimize "Speed"
-		links { "python39" }
+		links {
+			"python39"
+		}
 		postbuildcommands {	
 			"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39.dll %{bin_out}",
 		}

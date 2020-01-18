@@ -11,25 +11,44 @@ namespace ml
 
 		enum : size_t { ID_Texture, ID_Bounds, ID_Advance };
 
-		using storage_type = typename std::tuple<Texture, FloatRect, uint32_t>;
+		using storage_type = typename std::tuple<Texture, float_rect, uint32_t>;
 
 		static constexpr size_t const count{ 6 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Glyph();
+		
 		Glyph(storage_type const & storage);
+		
 		Glyph(storage_type && storage) noexcept;
+		
 		Glyph(Glyph const & other);
+		
 		Glyph(Glyph && other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Glyph operator=(Glyph const & other);
+		inline Glyph & operator=(Glyph const & other)
+		{
+			Glyph temp{ other };
+			swap(temp);
+			return (*this);
+		}
 
-		Glyph operator=(Glyph && other) noexcept;
+		inline Glyph & operator=(Glyph && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
-		void swap(Glyph & other) noexcept;
+		inline void swap(Glyph & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_storage, other.m_storage);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

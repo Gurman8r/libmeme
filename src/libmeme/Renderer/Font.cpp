@@ -19,6 +19,7 @@ namespace ml
 
 	Font::Font()
 		: m_pages	{}
+		, m_info	{}
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -26,6 +27,7 @@ namespace ml
 
 	Font::Font(allocator_type const & alloc)
 		: m_pages	{ alloc }
+		, m_info	{}
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -33,6 +35,7 @@ namespace ml
 
 	Font::Font(path_t const & path, allocator_type const & alloc)
 		: m_pages	{ alloc }
+		, m_info	{ pmr::string{ alloc }, std::locale{} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -41,6 +44,7 @@ namespace ml
 
 	Font::Font(Font const & other, allocator_type const & alloc)
 		: m_pages	{ other.m_pages, alloc }
+		, m_info	{ { other.m_info.family, alloc }, other.m_info.locale }
 		, m_library	{ other.m_library }
 		, m_face	{ other.m_face }
 	{
@@ -48,6 +52,7 @@ namespace ml
 
 	Font::Font(Font && other, allocator_type const & alloc) noexcept
 		: m_pages	{ alloc }
+		, m_info	{ pmr::string{ alloc }, std::locale{} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -185,7 +190,7 @@ namespace ml
 			return glyph;
 		}
 
-		glyph.bounds() = FloatRect{
+		glyph.bounds() = float_rect{
 			(float_t)face->glyph->bitmap_left,
 			(float_t)face->glyph->bitmap_top,
 			(float_t)face->glyph->bitmap.width,

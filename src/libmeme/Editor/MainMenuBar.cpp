@@ -10,7 +10,7 @@ namespace ml
 	MainMenuBar::MainMenuBar()
 		: m_open	{ true }
 		, m_good	{ false }
-		, m_menus	{}
+		, m_menus	{ decltype(m_menus)::allocator_type{} }
 	{
 	}
 

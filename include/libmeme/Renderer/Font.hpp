@@ -15,17 +15,22 @@ namespace ml
 
 		struct Info
 		{
-			std::string family;
+			pmr::string family;
 			std::locale locale;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Font();
+		
 		explicit Font(allocator_type const & alloc);
+		
 		Font(path_t const & path, allocator_type const & alloc = {});
+		
 		Font(Font const & other, allocator_type const & alloc = {});
+		
 		Font(Font && other, allocator_type const & alloc = {}) noexcept;
+		
 		~Font();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -57,9 +62,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		Info	m_info;
 		void *	m_library;
 		void *	m_face;
-		Info	m_info;
 
 		mutable page_table m_pages;
 

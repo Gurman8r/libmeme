@@ -30,7 +30,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t do_string(std::string const & value);
+		static int32_t do_string(C_string const & value);
+
+		static int32_t do_string(pmr::string const & value);
 
 		static int32_t do_file(path_t const & path);
 

@@ -42,7 +42,7 @@ namespace ml
 		GL::flush();
 	}
 
-	void RenderTarget::viewport(IntRect const & bounds) const
+	void RenderTarget::viewport(int_rect const & bounds) const
 	{
 		GL::viewport(
 			bounds.left(),

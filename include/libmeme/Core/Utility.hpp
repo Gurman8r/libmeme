@@ -142,61 +142,57 @@ namespace ml::util
 	template <class T
 	> struct cast final
 	{
-		using type = typename T;
-
-		static constexpr type minus_one		{ static_cast<type>( -1) };
-		static constexpr type zero			{ static_cast<type>(  0) };
-		static constexpr type one			{ static_cast<type>(  1) };
-		static constexpr type two			{ static_cast<type>(  2) };
-		static constexpr type three			{ static_cast<type>(  3) };
-		static constexpr type four			{ static_cast<type>(  4) };
-		static constexpr type five			{ static_cast<type>(  5) };
-		static constexpr type six			{ static_cast<type>(  6) };
-		static constexpr type seven			{ static_cast<type>(  7) };
-		static constexpr type eight			{ static_cast<type>(  8) };
-		static constexpr type nine			{ static_cast<type>(  9) };
-		static constexpr type ten			{ static_cast<type>( 10) };
-		static constexpr type fourty_five	{ static_cast<type>( 45) };
-		static constexpr type sixty			{ static_cast<type>( 60) };
-		static constexpr type ninety		{ static_cast<type>( 90) };
-		static constexpr type one_hundred	{ static_cast<type>(100) };
-		static constexpr type one_eighty	{ static_cast<type>(180) };
-		static constexpr type three_sixty	{ static_cast<type>(360) };
-		static constexpr type half			{ one / two };
-		static constexpr type third			{ one / three };
-		static constexpr type quarter		{ one / four };
-		static constexpr type fifth			{ one / five };
-		static constexpr type sixth			{ one / six };
-		static constexpr type seventh		{ one / seven };
-		static constexpr type eighth		{ one / eight };
-		static constexpr type ninth			{ one / nine };
-		static constexpr type tenth			{ one / ten };
-		static constexpr type two_thirds	{ two / three };
-		static constexpr type three_fourths	{ three / four };
+		static constexpr T minus_one		{ static_cast<T>( -1) };
+		static constexpr T zero				{ static_cast<T>(  0) };
+		static constexpr T one				{ static_cast<T>(  1) };
+		static constexpr T two				{ static_cast<T>(  2) };
+		static constexpr T three			{ static_cast<T>(  3) };
+		static constexpr T four				{ static_cast<T>(  4) };
+		static constexpr T five				{ static_cast<T>(  5) };
+		static constexpr T six				{ static_cast<T>(  6) };
+		static constexpr T seven			{ static_cast<T>(  7) };
+		static constexpr T eight			{ static_cast<T>(  8) };
+		static constexpr T nine				{ static_cast<T>(  9) };
+		static constexpr T ten				{ static_cast<T>( 10) };
+		static constexpr T fourty_five		{ static_cast<T>( 45) };
+		static constexpr T sixty			{ static_cast<T>( 60) };
+		static constexpr T ninety			{ static_cast<T>( 90) };
+		static constexpr T one_hundred		{ static_cast<T>(100) };
+		static constexpr T one_eighty		{ static_cast<T>(180) };
+		static constexpr T three_sixty		{ static_cast<T>(360) };
+		static constexpr T half				{ one / two };
+		static constexpr T third			{ one / three };
+		static constexpr T quarter			{ one / four };
+		static constexpr T fifth			{ one / five };
+		static constexpr T sixth			{ one / six };
+		static constexpr T seventh			{ one / seven };
+		static constexpr T eighth			{ one / eight };
+		static constexpr T ninth			{ one / nine };
+		static constexpr T tenth			{ one / ten };
+		static constexpr T two_thirds		{ two / three };
+		static constexpr T three_fourths	{ three / four };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 // Pi
-namespace ml::util
+namespace ml::utilm
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class = std::enable_if<std::is_floating_point_v<T>>
 	> struct pi final
 	{
-		using type = typename T;
+		static constexpr auto value		{ static_cast<T>(3.14159265358979323846264338327L) };
+		static constexpr auto two		{ value * cast<T>::two };
+		static constexpr auto half		{ value * cast<T>::half };
+		static constexpr auto quarter	{ value * cast<T>::quarter };
+		static constexpr auto third		{ value * cast<T>::third };
+		static constexpr auto deg2rad	{ value / cast<T>::one_eighty };
+		static constexpr auto rad2deg	{ cast<T>::one_eighty / value };
 
-		static constexpr auto value		{ static_cast<type>(3.14159265358979323846264338327L) };
-		static constexpr auto two		{ value * cast<type>::two };
-		static constexpr auto half		{ value * cast<type>::half };
-		static constexpr auto quarter	{ value * cast<type>::quarter };
-		static constexpr auto third		{ value * cast<type>::third };
-		static constexpr auto deg2rad	{ value / cast<type>::one_eighty };
-		static constexpr auto rad2deg	{ cast<type>::one_eighty / value };
-
-		ML_NODISCARD constexpr operator type const() const { return value; }
+		ML_NODISCARD constexpr operator T const() const { return value; }
 	};
 
 	template <class T
@@ -294,18 +290,16 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr T dot(const A<T, N...> & lhs, const A<T, N...> & rhs)
+	> ML_NODISCARD static constexpr auto dot(const A<T, N...> & lhs, const A<T, N...> & rhs)
 	{
 		T temp{ 0 };
 		for (size_t i = 0; i < lhs.size(); ++i)
-		{
 			temp += (lhs[i] * rhs[i]);
-		}
 		return temp;
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr T determinant(const M<T, 4, 4> & v)
+	> ML_NODISCARD static constexpr auto determinant(const M<T, 4, 4> & v)
 	{
 		return
 			v[0] * (v[15] * v[5] - v[7] * v[13]) -
@@ -314,24 +308,22 @@ namespace ml::util
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr T sqr_magnitude(const A<T, N...> & value)
+	> ML_NODISCARD static constexpr auto sqr_magnitude(const A<T, N...> & value)
 	{
 		T temp{ (T)0 };
 		for (auto const & elem : value)
-		{
 			temp += (elem * elem);
-		}
 		return temp;
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr T magnitude(const A<T, N...> & value)
+	> ML_NODISCARD static constexpr auto magnitude(const A<T, N...> & value)
 	{
-		return sqrt<T>{}(sqr_magnitude<A, T, N...>(value));
+		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr M<T, 2, 1> scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
+	> ML_NODISCARD static constexpr auto scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
 	{
 		const M<T, 2, 1>
 			h{ { (r[0] / l[0]), (r[0] / l[0]) } },
@@ -342,13 +334,13 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr A<T, N...> normalize(const A<T, N...> & value)
+	> ML_NODISCARD static constexpr auto normalize(const A<T, N...> & value)
 	{
 		return (value / magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr A<T, N...> transpose(const A<T, N...> & value)
+	> ML_NODISCARD static constexpr auto transpose(const A<T, N...> & value)
 	{
 		A<T, N...> temp{ 0 };
 		for (size_t i = 0; i < value.size(); ++i)
@@ -363,9 +355,9 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr M<T, 4, 4> inverse(const M<T, 4, 4> & v)
+	> ML_NODISCARD static constexpr auto inverse(const M<T, 4, 4> & v)
 	{
-		const T det{ determinant<M, T>(v) };
+		T const det{ determinant<M, T>(v) };
 		return ((det != (T)0)
 			? M<T, 4, 4> {
 			+(v[15] * v[5] - v[7] * v[13]) / det,
@@ -383,7 +375,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr M<T, 3, 3> rebase(const M<T, 3, 3> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD static constexpr auto rebase(const M<T, 3, 3> & v, const M<T, 4, 4> & m)
 	{
 		return M<T, 3, 3>
 		{
@@ -400,7 +392,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr M<T, 3, 1> rebase(const M<T, 3, 1> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD static constexpr auto rebase(const M<T, 3, 1> & v, const M<T, 4, 4> & m)
 	{
 		return M<T, 3, 1>
 		{
@@ -413,13 +405,13 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr T cross(const M<T, 2, 1> & a, const M<T, 2, 1> & b)
+	> ML_NODISCARD static constexpr auto cross(const M<T, 2, 1> & a, const M<T, 2, 1> & b)
 	{
 		return a[0] * b[1] - b[0] * a[1];
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr M<T, 3, 1> cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
+	> ML_NODISCARD static constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
 	{
 		return M<T, 3, 1> {
 			a[1] * b[2] - b[1] * a[2],

@@ -56,22 +56,22 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace chrono	= _STD chrono;
-	namespace pmr		= _STD pmr;
+	namespace chrono	= ::std::chrono;
+	namespace pmr		= ::std::pmr;
 #if ML_HAS_CXX20
-	namespace ranges	= _STD ranges;
-	namespace views		= _STD ranges::views;
+	namespace ranges	= ::std::ranges;
+	namespace views		= ::std::ranges::views;
 #endif
 
-	using namespace _STD chrono_literals;
-	using namespace _STD string_literals;
-	using namespace _STD string_view_literals;
+	using namespace ::std::chrono_literals;
+	using namespace ::std::string_literals;
+	using namespace ::std::string_view_literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace literals {}
 
-	using namespace _ML literals;
+	using namespace ::ml::literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -111,6 +111,9 @@ namespace ml
 
 	ML_USING	C_string	= typename char const *;
 	ML_USING	C_wstring	= typename wchar_t const *;
+#if ML_HAS_CXX20
+	ML_USING	C_u8string	= typename char8_t const *;
+#endif
 	ML_USING	C_u16string	= typename char16_t const *;
 	ML_USING	C_u32string	= typename char32_t const *;
 

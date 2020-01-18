@@ -11,15 +11,23 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
 		enum class Language { Unknown, Python, Lua };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Script();
-		explicit Script(path_t const & path);
-		explicit Script(Language language, std::string const & text);
-		Script(Script const & other);
-		Script(Script && other) noexcept;
+		
+		explicit Script(allocator_type const & alloc);
+		
+		Script(path_t const & path, allocator_type const & alloc = {});
+		
+		Script(Language language, pmr::string const & text, allocator_type const & alloc = {});
+		
+		Script(Script const & other, allocator_type const & alloc = {});
+		
+		Script(Script && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,7 +43,7 @@ namespace ml
 
 		int32_t execute();
 		
-		int32_t execute(pmr::vector<std::string> const & args);
+		int32_t execute(pmr::vector<pmr::string> const & args);
 
 		template <class ... Args> inline int32_t operator()(Args && ... args)
 		{
@@ -46,14 +54,14 @@ namespace ml
 
 		inline auto language() const noexcept -> Language { return m_language; }
 
-		inline auto text() const noexcept -> std::string const & { return m_text; }
+		inline auto text() const noexcept -> pmr::string const & { return m_text; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		Language m_language;
 
-		std::string m_text;
+		pmr::string m_text;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

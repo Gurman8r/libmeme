@@ -24,10 +24,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Mesh();
+		
 		Mesh(vertices_t const & vertices);
+		
 		Mesh(vertices_t const & vertices, indices_t const & indices);
+		
 		Mesh(Mesh const & other);
+		
 		Mesh(Mesh && other) noexcept;
+		
 		~Mesh();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

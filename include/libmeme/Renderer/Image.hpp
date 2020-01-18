@@ -12,11 +12,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using Pixels					= typename pmr::vector<byte_t>;
-		using iterator					= typename Pixels::iterator;
-		using const_iterator			= typename Pixels::const_iterator;
-		using reverse_iterator			= typename Pixels::reverse_iterator;
-		using const_reverse_iterator	= typename Pixels::const_reverse_iterator;
+		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
+		using pixels_type				= typename pmr::vector<byte_t>;
+		using iterator					= typename pixels_type::iterator;
+		using const_iterator			= typename pixels_type::const_iterator;
+		using reverse_iterator			= typename pixels_type::reverse_iterator;
+		using const_reverse_iterator	= typename pixels_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -25,15 +26,26 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Image();
-		Image(vec2u const & size);
-		Image(vec2u const & size, size_t channels);
-		Image(vec2u const & size, Pixels const & pixels);
-		Image(vec2u const & size, size_t channels, Pixels const & pixels);
-		Image(path_t const & path);
-		Image(path_t const & path, bool flip);
-		Image(path_t const & path, bool flip, size_t req_comp);
-		Image(Image const & other);
-		Image(Image && other) noexcept;
+		
+		explicit Image(allocator_type const & alloc);
+		
+		Image(vec2u const & size, allocator_type const & alloc = {});
+		
+		Image(vec2u const & size, size_t channels, allocator_type const & alloc = {});
+		
+		Image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc = {});
+		
+		Image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc = {});
+		
+		Image(path_t const & path, allocator_type const & alloc = {});
+		
+		Image(path_t const & path, bool flip, allocator_type const & alloc = {});
+		
+		Image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc = {});
+		
+		Image(Image const & other, allocator_type const & alloc = {});
+		
+		Image(Image && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -61,11 +73,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & create_from_pixels(vec2u const & size, Pixels const & pixels);
+		Image & create_from_pixels(vec2u const & size, pixels_type const & pixels);
 		
-		Image & create_from_pixels(Pixels const & pixels);
+		Image & create_from_pixels(pixels_type const & pixels);
 		
-		Image & create_from_pixels(vec2u const & size, size_t channels, Pixels const & pixels);
+		Image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -97,7 +109,7 @@ namespace ml
 
 		ML_NODISCARD inline auto operator[](size_t i) const -> byte_t const & { return m_pixels.at(i); }
 
-		ML_NODISCARD inline auto bounds() const noexcept -> UintRect { return UintRect { { 0, 0 }, size() }; }
+		ML_NODISCARD inline auto bounds() const noexcept -> uint_rect { return uint_rect { { 0, 0 }, size() }; }
 		
 		ML_NODISCARD inline auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
 		
@@ -111,9 +123,9 @@ namespace ml
 		
 		ML_NODISCARD inline auto height() const noexcept -> size_t { return m_size[1]; }
 
-		ML_NODISCARD inline auto pixels() noexcept -> Pixels & { return m_pixels; }
+		ML_NODISCARD inline auto pixels() noexcept -> pixels_type & { return m_pixels; }
 		
-		ML_NODISCARD inline auto pixels() const noexcept -> Pixels const & { return m_pixels; }
+		ML_NODISCARD inline auto pixels() const noexcept -> pixels_type const & { return m_pixels; }
 		
 		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
 		
@@ -148,9 +160,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		vec2u	m_size;
-		Pixels	m_pixels;
-		size_t	m_channels;
+		vec2u		m_size;
+		size_t		m_channels;
+		pixels_type	m_pixels;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

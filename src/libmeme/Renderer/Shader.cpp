@@ -9,10 +9,10 @@ namespace ml
 	{
 		union { uint32_t program; uint32_t cached; int32_t location; };
 
-		explicit UniformBinder(Shader & shader, std::string const & name)
-			: program	{ shader ? shader.handle() : NULL }
-			, cached	{ shader ? GL::getProgramHandle(GL::ProgramObject) : NULL }
-			, location	{ shader ? shader.get_uniform_location(name) : -1 }
+		explicit UniformBinder(Shader & s, pmr::string const & name)
+			: program	{ s ? s.handle() : NULL }
+			, cached	{ s ? GL::getProgramHandle(GL::ProgramObject) : NULL }
+			, location	{ s ? s.get_uniform_location(name) : -1 }
 		{
 			if (program && (program != cached))
 			{
@@ -39,21 +39,21 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	Shader::Shader()
+		: Shader{ allocator_type{} }
+	{
+	}
+
 	Shader::Shader(allocator_type const & alloc)
 		: m_handle		{ NULL }
-		, m_source		{}
+		, m_source		{ nullptr, nullptr, nullptr }
 		, m_attributes	{ alloc }
 		, m_textures	{ alloc }
 		, m_uniforms	{ alloc }
 	{
 	}
 
-	Shader::Shader()
-		: Shader{ allocator_type{} }
-	{
-	}
-
-	Shader::Shader(Source const & source, allocator_type const & alloc)
+	Shader::Shader(shader_source const & source, allocator_type const & alloc)
 		: Shader{ alloc }
 	{
 		load_from_source(source);
@@ -90,17 +90,102 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Shader & Shader::operator=(Shader const & other)
+	bool Shader::load_from_file(path_t const & v_file, path_t const & f_file)
 	{
-		Shader temp{ other };
-		swap(temp);
-		return (*this);
+		return load_from_memory(
+			FS::get_file_contents(v_file).c_str(),
+			FS::get_file_contents(f_file).c_str()
+		);
 	}
 
-	Shader & Shader::operator=(Shader && other) noexcept
+	bool Shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
 	{
-		swap(std::move(other));
-		return (*this);
+		return load_from_memory(
+			FS::get_file_contents(v_file).c_str(),
+			FS::get_file_contents(g_file).c_str(),
+			FS::get_file_contents(f_file).c_str()
+		);
+	}
+
+	bool Shader::load_from_source(shader_source const & value)
+	{
+		return load_from_memory(value.vs, value.gs, value.fs);
+	}
+
+	bool Shader::load_from_memory(pmr::string const & vs, pmr::string const & fs)
+	{
+		return load_from_memory(vs.c_str(), nullptr, fs.c_str());
+	}
+
+	bool Shader::load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs)
+	{
+		return load_from_memory(vs.c_str(), gs.c_str(), fs.c_str());
+	}
+
+	bool Shader::load_from_memory(C_string vs, C_string fs)
+	{
+		return compile(
+			m_source.vs = vs,
+			m_source.gs = nullptr,
+			m_source.fs = fs
+		) == EXIT_SUCCESS;
+	}
+
+	bool Shader::load_from_memory(C_string vs, C_string gs, C_string fs)
+	{
+		return compile(
+			m_source.vs = vs,
+			m_source.gs = gs,
+			m_source.fs = fs
+		) == EXIT_SUCCESS;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void Shader::bind(Shader const * value, bool bindTextures)
+	{
+		if (!value || !value->m_handle)
+		{
+			return GL::useProgram(NULL);;
+		}
+
+		GL::useProgram(value->m_handle);
+
+		if (bindTextures)
+		{
+			uint32_t index = 0;
+
+			value->m_textures.for_each([&index](int32_t location, auto const & tex)
+			{
+				GL::uniform1i(location, index);
+
+				GL::activeTexture(GL::Texture0 + (index++));
+
+				Texture::bind(tex);
+			});
+		}
+	}
+
+	bool Shader::destroy()
+	{
+		Shader::bind(nullptr);
+		if (m_handle)
+		{
+			GL::deleteShader(m_handle);
+			m_handle = NULL;
+			GL::flush();
+			
+			m_source = { nullptr, nullptr, nullptr };
+			m_attributes.clear();
+			m_uniforms.clear();
+			m_textures.clear();
+		}
+		return !(m_handle);
+	}
+
+	bool Shader::generate()
+	{
+		return !m_handle && (m_handle = GL::createProgram());
 	}
 
 	void Shader::swap(Shader & other) noexcept
@@ -109,116 +194,9 @@ namespace ml
 		{
 			std::swap(m_handle, other.m_handle);
 			std::swap(m_source, other.m_source);
-			std::swap(m_attributes, other.m_attributes);
-			std::swap(m_uniforms, other.m_uniforms);
-			std::swap(m_textures, other.m_textures);
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool Shader::load_from_file(path_t const & v_file, path_t const & f_file)
-	{
-		// Read Vertex
-		std::string const vs{ FS::get_file_contents(v_file) };
-
-		// Read Fragment
-		std::string const fs{ FS::get_file_contents(f_file) };
-
-		return load_from_memory(vs, fs);
-	}
-
-	bool Shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
-	{
-		// Read Vertex
-		std::string const vs{ FS::get_file_contents(v_file) };
-
-		// Read Geometry
-		std::string const gs{ FS::get_file_contents(g_file) };
-
-		// Read Fragment
-		std::string const fs{ FS::get_file_contents(f_file) };
-
-		return load_from_memory(vs, gs, fs);
-	}
-
-	bool Shader::load_from_source(Source const & value)
-	{
-		return load_from_memory(
-			std::string{ value.vs },
-			std::string{ value.gs },
-			std::string{ value.fs }
-		);
-	}
-
-	bool Shader::load_from_memory(std::string const & vs, std::string const & fs)
-	{
-		return load_from_memory(vs, std::string{}, fs);
-	}
-
-	bool Shader::load_from_memory(std::string const & vs, std::string const & gs, std::string const & fs)
-	{
-		m_source = Source{
-			(vs.empty() ? nullptr : vs.c_str()),
-			(gs.empty() ? nullptr : gs.c_str()),
-			(fs.empty() ? nullptr : fs.c_str())
-		};
-		return (compile(m_source.vs, m_source.gs, m_source.fs) == EXIT_SUCCESS);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool Shader::generate()
-	{
-		return !m_handle && (m_handle = GL::createProgram());
-	}
-
-	bool Shader::destroy()
-	{
-		Shader::bind(nullptr);
-		
-		if (m_handle)
-		{
-			GL::deleteShader(m_handle);
-			
-			m_handle = NULL;
-
-			GL::flush();
-			
-			m_source = { nullptr, nullptr, nullptr };
-			
-			m_attributes.clear();
-			
-			m_uniforms.clear();
-			
-			m_textures.clear();
-		}
-		
-		return !(m_handle);
-	}
-
-	void Shader::bind(Shader const * value, bool bindTextures)
-	{
-		if (value && value->m_handle)
-		{
-			GL::useProgram(value->m_handle);
-
-			if (bindTextures)
-			{
-				uint32_t index{ 0 };
-				value->m_textures.for_each([&index](int32_t loc, auto const & tex)
-				{
-					GL::uniform1i(loc, index);
-					
-					GL::activeTexture(GL::Texture0 + (index++));
-					
-					Texture::bind(tex);
-				});
-			}
-		}
-		else
-		{
-			GL::useProgram(NULL);
+			m_attributes.swap(other.m_attributes);
+			m_uniforms.swap(other.m_uniforms);
+			m_textures.swap(other.m_textures);
 		}
 	}
 
@@ -265,73 +243,73 @@ namespace ml
 		return false;
 	}
 
-	bool Shader::set_uniform(std::string const & name, bool value)
+	bool Shader::set_uniform(pmr::string const & name, bool value)
 	{
 		return set_uniform(name, static_cast<int32_t>(value));
 	}
 
-	bool Shader::set_uniform(std::string const & name, int32_t value)
+	bool Shader::set_uniform(pmr::string const & name, int32_t value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, float32_t value)
+	bool Shader::set_uniform(pmr::string const & name, float32_t value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, vec2 const & value)
+	bool Shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, vec3 const & value)
+	bool Shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, vec4 const & value)
+	bool Shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, Color const & value)
+	bool Shader::set_uniform(pmr::string const & name, Color const & value)
 	{
 		return set_uniform(name, value.rgba());
 	}
 
-	bool Shader::set_uniform(std::string const & name, mat2 const & value)
+	bool Shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, mat3 const & value)
+	bool Shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, mat4 const & value)
+	bool Shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, Texture const & value)
+	bool Shader::set_uniform(pmr::string const & name, Texture const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u)
@@ -357,14 +335,14 @@ namespace ml
 		return u;
 	}
 
-	bool Shader::set_uniform(std::string const & name, Texture const * value)
+	bool Shader::set_uniform(pmr::string const & name, Texture const * value)
 	{
 		return value ? set_uniform(name, (*value)) : false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Shader::get_attribute_location(std::string const & value)
+	int32_t Shader::get_attribute_location(pmr::string const & value)
 	{
 		if (auto const it{ m_attributes.find(value) })
 		{
@@ -380,7 +358,7 @@ namespace ml
 		}
 	}
 
-	int32_t Shader::get_uniform_location(std::string const & value)
+	int32_t Shader::get_uniform_location(pmr::string const & value)
 	{
 		if (auto const it{ m_uniforms.find(value) })
 		{

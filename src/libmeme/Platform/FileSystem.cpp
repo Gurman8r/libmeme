@@ -87,15 +87,15 @@ namespace ml
 		return std::nullopt;
 	}
 
-	std::string FS::get_file_contents(path_t const & path)
+	pmr::string FS::get_file_contents(path_t const & path)
 	{
 		if (auto const o{ FS::read_file(path.string()) })
 		{
-			return std::string{ o->cbegin(), o->cend() };
+			return pmr::string{ o->cbegin(), o->cend() };
 		}
 		else
 		{
-			return std::string{};
+			return pmr::string{};
 		}
 	}
 

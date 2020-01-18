@@ -23,7 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline MainMenuBar & add_menu(std::string const & name, menu_t const & value)
+		inline MainMenuBar & add_menu(pmr::string const & name, menu_t const & value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{
@@ -62,7 +62,7 @@ namespace ml
 		bool m_open;
 
 		pmr::vector<std::pair<
-			std::string,
+			pmr::string,
 			pmr::vector<menu_t>
 		>> m_menus;
 

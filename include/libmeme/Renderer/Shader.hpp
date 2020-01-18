@@ -12,35 +12,52 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Source final
+		struct shader_source final
 		{
 			C_string vs{ nullptr }, gs{ nullptr }, fs{ nullptr };
 
-			constexpr Source() noexcept = default;
+			constexpr shader_source() noexcept = default;
 		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using attribute_cache	= typename ds::flat_map<std::string, int32_t>;
-		using uniform_cache		= typename ds::flat_map<std::string, int32_t>;
+		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
+		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, struct Texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Shader();
+		
 		explicit Shader(allocator_type const & alloc);
-		Shader(Source const & source, allocator_type const & alloc = {});
+		
+		Shader(shader_source const & source, allocator_type const & alloc = {});
+		
 		Shader(path_t const & v, path_t const & f, allocator_type const & alloc = {});
+		
 		Shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc = {});
+		
 		Shader(Shader const & other, allocator_type const & alloc = {});
+		
 		Shader(Shader && other, allocator_type const & alloc = {}) noexcept;
+		
 		~Shader();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Shader & operator=(Shader const & other);
+		inline Shader & Shader::operator=(Shader const & other)
+		{
+			Shader temp{ other };
+			this->swap(temp);
+			return (*this);
+		}
 
-		Shader & operator=(Shader && other) noexcept;
-
-		void swap(Shader & other) noexcept;
+		inline Shader & Shader::operator=(Shader && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -48,17 +65,17 @@ namespace ml
 
 		bool load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file);
 
-		bool load_from_source(Source const & value);
+		bool load_from_source(shader_source const & value);
 
-		bool load_from_memory(std::string const & vs, std::string const & fs);
+		bool load_from_memory(pmr::string const & vs, pmr::string const & fs);
 
-		bool load_from_memory(std::string const & vs, std::string const & gs, std::string const & fs);
+		bool load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs);
+
+		bool load_from_memory(C_string vs, C_string fs);
+
+		bool load_from_memory(C_string vs, C_string gs, C_string fs);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool generate();
-		
-		bool destroy();
 
 		static void bind(Shader const * value, bool bindTextures = true);
 
@@ -66,33 +83,39 @@ namespace ml
 
 		inline void unbind() const { bind(nullptr, false); }
 
+		bool destroy();
+		
+		bool generate();
+
+		void swap(Shader & other) noexcept;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool set_uniform(Uniform const & value);
 		
-		bool set_uniform(std::string const & name, bool value);
+		bool set_uniform(pmr::string const & name, bool value);
 		
-		bool set_uniform(std::string const & name, int32_t value);
+		bool set_uniform(pmr::string const & name, int32_t value);
 		
-		bool set_uniform(std::string const & name, float32_t value);
+		bool set_uniform(pmr::string const & name, float32_t value);
 		
-		bool set_uniform(std::string const & name, vec2 const & value);
+		bool set_uniform(pmr::string const & name, vec2 const & value);
 		
-		bool set_uniform(std::string const & name, vec3 const & value);
+		bool set_uniform(pmr::string const & name, vec3 const & value);
 		
-		bool set_uniform(std::string const & name, vec4 const & value);
+		bool set_uniform(pmr::string const & name, vec4 const & value);
 		
-		bool set_uniform(std::string const & name, Color const & value);
+		bool set_uniform(pmr::string const & name, Color const & value);
 		
-		bool set_uniform(std::string const & name, mat2 const & value);
+		bool set_uniform(pmr::string const & name, mat2 const & value);
 		
-		bool set_uniform(std::string const & name, mat3 const & value);
+		bool set_uniform(pmr::string const & name, mat3 const & value);
 		
-		bool set_uniform(std::string const & name, mat4 const & value);
+		bool set_uniform(pmr::string const & name, mat4 const & value);
 		
-		bool set_uniform(std::string const & name, struct Texture const * value);
+		bool set_uniform(pmr::string const & name, struct Texture const * value);
 		
-		bool set_uniform(std::string const & name, struct Texture const & value);
+		bool set_uniform(pmr::string const & name, struct Texture const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -111,9 +134,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t get_attribute_location(std::string const & value);
+		int32_t get_attribute_location(pmr::string const & value);
 
-		int32_t get_uniform_location(std::string const & value);
+		int32_t get_uniform_location(pmr::string const & value);
 
 		int32_t compile(C_string vs, C_string gs, C_string fs);
 
@@ -124,8 +147,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uint32_t		m_handle;
-		Source			m_source;
-		attribute_cache		m_attributes;
+		shader_source	m_source;
+		attribute_cache	m_attributes;
 		uniform_cache	m_uniforms;
 		texture_cache	m_textures;
 

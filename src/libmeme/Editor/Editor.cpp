@@ -52,7 +52,7 @@ namespace ml
 		io.IniFilename = nullptr;
 
 		// Style
-		static const std::string imgui_style{ "Dark" };
+		static const C_string imgui_style{ "Dark" };
 		switch (util::hash(util::to_lower(imgui_style)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;

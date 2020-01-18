@@ -8,32 +8,38 @@ namespace ml
 
 	Script::Script()
 		: m_language{ Language::Unknown }
-		, m_text{}
+		, m_text{ allocator_type{} }
+	{
+	}
+
+	Script::Script(allocator_type const & alloc)
+		: m_language{ Language::Unknown }
+		, m_text{ alloc }
 	{
 	}
 	
-	Script::Script(path_t const & path)
+	Script::Script(path_t const & path, allocator_type const & alloc)
 		: m_language{ Language::Unknown }
-		, m_text{}
+		, m_text{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	Script::Script(Language language, std::string const & text)
+	Script::Script(Language language, pmr::string const & text, allocator_type const & alloc)
 		: m_language{ language }
-		, m_text{ text }
+		, m_text{ text, alloc }
 	{
 	}
 	
-	Script::Script(Script const & other)
+	Script::Script(Script const & other, allocator_type const & alloc)
 		: m_language{ other.m_language }
-		, m_text{ other.m_text }
+		, m_text{ other.m_text, alloc }
 	{
 	}
 	
-	Script::Script(Script && other) noexcept
+	Script::Script(Script && other, allocator_type const & alloc) noexcept
 		: m_language{ std::move(other.m_language) }
-		, m_text{ std::move(other.m_text) }
+		, m_text{ std::move(other.m_text), alloc }
 	{
 	}
 	
@@ -74,7 +80,7 @@ namespace ml
 		return execute({});
 	}
 
-	int32_t Script::execute(pmr::vector<std::string> const & args)
+	int32_t Script::execute(pmr::vector<pmr::string> const & args)
 	{
 		switch (m_language)
 		{

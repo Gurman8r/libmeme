@@ -28,18 +28,27 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
+		
 		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
+		
 		Texture(uint32_t sampler, uint32_t format, int32_t flags);
+		
 		Texture(uint32_t sampler, int32_t flags);
+		
 		Texture(uint32_t sampler);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		Texture();
+		
 		Texture(path_t const & path);
+		
 		Texture(Image const & image);
+		
 		Texture(Texture const & other);
+		
 		Texture(Texture && other) noexcept;
+		
 		~Texture();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,7 +93,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool update(Texture const & other, UintRect const & area);
+		bool update(Texture const & other, uint_rect const & area);
 		
 		bool update(Texture const & other, vec2u const & position, vec2u const & size);
 		
@@ -94,7 +103,7 @@ namespace ml
 
 		bool update(Image const & image);
 		
-		bool update(Image const & image, UintRect const & area);
+		bool update(Image const & image, uint_rect const & area);
 		
 		bool update(Image const & image, vec2u const & position, vec2u const & size);
 		
@@ -104,7 +113,7 @@ namespace ml
 
 		bool update(byte_t const * pixels);
 		
-		bool update(byte_t const * pixels, UintRect const & area);
+		bool update(byte_t const * pixels, uint_rect const & area);
 		
 		bool update(byte_t const * pixels, vec2u const & position, vec2u const & size);
 		

@@ -288,7 +288,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Texture::update(Texture const & other, UintRect const & area)
+	bool Texture::update(Texture const & other, uint_rect const & area)
 	{
 		return update(other.copy_to_image(), area);
 	}
@@ -310,7 +310,7 @@ namespace ml
 		return update(image.data(), image.bounds());
 	}
 
-	bool Texture::update(Image const & image, UintRect const & area)
+	bool Texture::update(Image const & image, uint_rect const & area)
 	{
 		return update(image.data(), area.position(), area.size());
 	}
@@ -329,10 +329,10 @@ namespace ml
 
 	bool Texture::update(byte_t const * pixels)
 	{
-		return update(pixels, UintRect{ width(), height() });
+		return update(pixels, uint_rect{ width(), height() });
 	}
 
-	bool Texture::update(byte_t const * pixels, UintRect const & area)
+	bool Texture::update(byte_t const * pixels, uint_rect const & area)
 	{
 		return update(pixels, area.position(), area.size());
 	}
