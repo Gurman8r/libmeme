@@ -192,35 +192,35 @@
 // Types
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(ML_CC_MSVC)
-#	define	ML_INT8		signed __int8
-#	define	ML_INT16	signed __int16
-#	define	ML_INT32	signed __int32
-#	define	ML_INT64	signed __int64
-#	define	ML_UINT8	unsigned __int8
-#	define	ML_UINT16	unsigned __int16
-#	define	ML_UINT32	unsigned __int32
-#	define	ML_UINT64	unsigned __int64
+#	define	ML_INT8     signed __int8
+#	define	ML_INT16    signed __int16
+#	define	ML_INT32    signed __int32
+#	define	ML_INT64    signed __int64
+#	define	ML_UINT8    unsigned __int8
+#	define	ML_UINT16   unsigned __int16
+#	define	ML_UINT32   unsigned __int32
+#	define	ML_UINT64   unsigned __int64
 #else
-#	define	ML_INT8		signed char
-#	define	ML_INT16	signed short
-#	define	ML_INT32	signed int
-#	define	ML_INT64	signed long long
-#	define	ML_UINT8	unsigned char
-#	define	ML_UINT16	unsigned short
-#	define	ML_UINT32	unsigned int
-#	define	ML_UINT64	unsigned long long
+#	define	ML_INT8     signed char
+#	define	ML_INT16    signed short
+#	define	ML_INT32    signed int
+#	define	ML_INT64    signed long long
+#	define	ML_UINT8    unsigned char
+#	define	ML_UINT16   unsigned short
+#	define	ML_UINT32   unsigned int
+#	define	ML_UINT64   unsigned long long
 #endif
 
 #ifndef ML_BYTE
-#   define ML_BYTE unsigned char
+#   define ML_BYTE      unsigned char
 #endif
 
 #if (ML_ARCH == 32)
-#	define ML_INTMAX	ML_INT32
-#	define ML_UINTMAX	ML_UINT32
+#	define ML_INTMAX    ML_INT32
+#	define ML_UINTMAX   ML_UINT32
 #else
-#	define ML_INTMAX	ML_INT64
-#	define ML_UINTMAX	ML_UINT64
+#	define ML_INTMAX    ML_INT64
+#	define ML_UINTMAX   ML_UINT64
 #endif
 
 #define	ML_FLOAT32 float

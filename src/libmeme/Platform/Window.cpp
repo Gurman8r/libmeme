@@ -236,7 +236,7 @@ namespace ml
 
 	Window & Window::swap_buffers()
 	{
-		if (m_window && (m_flags & WindowFlags_DoubleBuffered))
+		if (m_window)
 		{
 			glfwSwapBuffers(static_cast<GLFWwindow *>(m_window));
 		}

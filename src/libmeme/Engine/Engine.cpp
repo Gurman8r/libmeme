@@ -192,7 +192,11 @@ namespace ml
 
 	void Engine::end_loop()
 	{
-		s_window.swap_buffers();
+		if (s_window.get_flags() & WindowFlags_DoubleBuffered)
+		{
+			s_window.swap_buffers();
+		}
+		GL::flush();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -34,11 +34,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static std::optional<directory_t> read_dir(path_t const & path);
+		static inline std::optional<file_t> read_file(path_t const & path)
+		{
+			if (std::ifstream in{ path, std::ios_base::binary })
+			{
+				file_t temp{};
+				in.seekg(0, std::ios_base::end);
+				std::streamsize size;
+				if ((size = in.tellg()) > 0)
+				{
+					in.seekg(0, std::ios_base::beg);
+					temp.resize(static_cast<size_t>(size));
+					in.read(&temp[0], size);
+				}
+				in.close();
+				return std::make_optional(std::move(temp));
+			}
+			return std::nullopt;
+		}
 
-		ML_NODISCARD static std::optional<file_t> read_file(path_t const & path);
-
-		ML_NODISCARD static pmr::string get_file_contents(path_t const & path);
+		static inline pmr::string get_file_contents(path_t const & path)
+		{
+			if (auto const o{ FS::read_file(path.string()) })
+			{
+				return pmr::string{ o->cbegin(), o->cend() };
+			}
+			return {};
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

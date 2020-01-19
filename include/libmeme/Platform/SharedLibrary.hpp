@@ -11,7 +11,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using functions_t = typename ds::flat_map<std::string, void *>;
+		using functions_t = typename ds::flat_map<pmr::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,18 +35,18 @@ namespace ml
 
 		bool close();
 
-		void * load_function(std::string const & name);
+		void * load_function(C_string name);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> inline decltype(auto) load_function(std::string const & name)
+		> inline decltype(auto) load_function(C_string name)
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> inline decltype(auto) call_function(std::string const & name, Args && ... args)
+		> inline decltype(auto) call_function(C_string name, Args && ... args)
 		{
 			return std::invoke(load_function<Ret, Args...>(name), std::forward<Args>(args)...);
 		}

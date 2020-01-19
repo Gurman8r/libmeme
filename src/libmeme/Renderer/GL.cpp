@@ -44,7 +44,7 @@ namespace ml
 	{
 		if (auto const code{ getError() })
 		{
-			std::string path{ file };
+			pmr::string path{ file };
 			path = path.substr(path.find_last_of("\\/") + 1);
 			C_string const err_name = "FIXME"; // GL::name_of((GL::Err)code)
 			C_string const err_desc = "FIXME"; // GL::desc_of((GL::Err)code)

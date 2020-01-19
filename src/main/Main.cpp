@@ -1,3 +1,5 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -45,11 +47,10 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static auto g_block = ds::array<byte_t, 150._MiB>{ 0 };
-	static auto g_buff = pmr::monotonic_buffer_resource{ g_block.data(), g_block.size() };
-	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buff };
-	
-	pmr::set_default_resource(&g_pool);
+	// setup memory
+	static auto g_mem = ds::array<byte_t, 100._MiB>{};
+	static auto g_buf = pmr::monotonic_buffer_resource{ g_mem.data(), g_mem.size() };
+	pmr::set_default_resource(&g_buf);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

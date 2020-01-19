@@ -88,7 +88,7 @@ namespace ml
 		}
 	}
 
-	void * SharedLibrary::load_function(std::string const & name)
+	void * SharedLibrary::load_function(C_string name)
 	{
 		if (good())
 		{
@@ -100,7 +100,7 @@ namespace ml
 			{
 				return (*m_functions.insert(name,
 #ifdef ML_OS_WINDOWS
-					::GetProcAddress(static_cast<HINSTANCE>(m_instance), name.c_str())
+					::GetProcAddress(static_cast<HINSTANCE>(m_instance), name)
 #else
 					nullptr
 #endif

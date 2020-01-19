@@ -27,7 +27,7 @@ namespace ml
 
 	Font::Font(allocator_type const & alloc)
 		: m_pages	{ alloc }
-		, m_info	{}
+		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -35,7 +35,7 @@ namespace ml
 
 	Font::Font(path_t const & path, allocator_type const & alloc)
 		: m_pages	{ alloc }
-		, m_info	{ pmr::string{ alloc }, std::locale{} }
+		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -52,7 +52,7 @@ namespace ml
 
 	Font::Font(Font && other, allocator_type const & alloc) noexcept
 		: m_pages	{ alloc }
-		, m_info	{ pmr::string{ alloc }, std::locale{} }
+		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
@@ -146,7 +146,7 @@ namespace ml
 		m_face = face;
 
 		// Store the fonts information
-		m_info.family = face->family_name ? face->family_name : std::string{};
+		m_info.family = face->family_name ? face->family_name : pmr::string{};
 
 		return m_library;
 	}
