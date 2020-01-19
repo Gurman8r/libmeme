@@ -233,130 +233,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::optional<iterator_pair> find(key_type const & key)
-		{
-			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.end())
-			{
-				return std::make_optional(iterator_pair{ it, this->fetch(it) });
-			}
-			else
-			{
-				return std::nullopt;
-			}
-		}
-
-		ML_NODISCARD inline std::optional<const_iterator_pair> find(key_type const & key) const
-		{
-			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.cend())
-			{
-				return std::make_optional(const_iterator_pair{ it, this->fetch(it) });
-			}
-			else
-			{
-				return std::nullopt;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
-		> inline self_type & for_each(const_key_iterator first, const_key_iterator last, Fn fn)
-		{
-			if (!empty())
-			{
-				for (; first != last; ++first)
-				{
-					std::invoke(fn, *first, *this->fetch(first));
-				}
-			}
-			return (*this);
-		}
-
-		template <class Fn
-		> inline self_type & for_each(const_key_iterator first, Fn fn)
-		{
-			return this->for_each(first, m_storage.first.end(), fn);
-		}
-
-		template <class Fn
-		> inline self_type & for_each(Fn fn)
-		{
-			return this->for_each(m_storage.first.begin(), fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
-		{
-			if (!empty())
-			{
-				for (; first != last; ++first)
-				{
-					std::invoke(fn, *first, *this->fetch(first));
-				}
-			}
-			return first;
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
-		{
-			return this->for_each(first, m_storage.first.end(), fn);
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each(Fn fn) const
-		{
-			return this->for_each(m_storage.first.begin(), fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
-		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
-		{
-			if (!empty() && (0 < count))
-			{
-				do {
-					std::invoke(fn, *first, *this->fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
-			}
-			return first;
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn)
-		{
-			return this->for_each_n(m_storage.first.begin(), count, fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
-		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
-		{
-			if (!empty() && (0 < count))
-			{
-				do {
-					std::invoke(fn, *first, *fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
-			}
-			return first;
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
-		{
-			return this->for_each_n(m_storage.first.begin(), count, fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD inline bool operator==(self_type const & other) const
 		{
 			return (m_storage == other.m_storage);
@@ -489,6 +365,32 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline std::optional<iterator_pair> find(key_type const & key)
+		{
+			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.end())
+			{
+				return std::make_optional(iterator_pair{ it, this->fetch(it) });
+			}
+			else
+			{
+				return std::nullopt;
+			}
+		}
+
+		ML_NODISCARD inline std::optional<const_iterator_pair> find(key_type const & key) const
+		{
+			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.cend())
+			{
+				return std::make_optional(const_iterator_pair{ it, this->fetch(it) });
+			}
+			else
+			{
+				return std::nullopt;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class ... Args
 		> inline std::pair<iterator_pair, bool> insert(key_type const & key, Args && ... args)
 		{
@@ -519,7 +421,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & at(key_type const & key)
 		{
-			if (auto const it{ base_type::find(key) })
+			if (auto const it{ this->find(key) })
 			{
 				return (*it->second);
 			}
@@ -531,7 +433,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & at(key_type && key)
 		{
-			if (auto const it{ base_type::find(std::move(key)) })
+			if (auto const it{ this->find(std::move(key)) })
 			{
 				return (*it->second);
 			}
@@ -551,6 +453,104 @@ namespace ml::ds
 		ML_NODISCARD inline value_type & operator[](key_type && key)
 		{
 			return this->at(std::move(key));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> inline self_type & for_each(const_key_iterator first, const_key_iterator last, Fn fn)
+		{
+			if (!empty())
+			{
+				for (; first != last; ++first)
+				{
+					std::invoke(fn, *first, *this->fetch(first));
+				}
+			}
+			return (*this);
+		}
+
+		template <class Fn
+		> inline self_type & for_each(const_key_iterator first, Fn fn)
+		{
+			return this->for_each(first, m_storage.first.end(), fn);
+		}
+
+		template <class Fn
+		> inline self_type & for_each(Fn fn)
+		{
+			return this->for_each(m_storage.first.begin(), fn);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
+		{
+			if (!empty())
+			{
+				for (; first != last; ++first)
+				{
+					std::invoke(fn, *first, *this->fetch(first));
+				}
+			}
+			return first;
+		}
+
+		template <class Fn
+		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
+		{
+			return this->for_each(first, m_storage.first.end(), fn);
+		}
+
+		template <class Fn
+		> inline const_key_iterator for_each(Fn fn) const
+		{
+			return this->for_each(m_storage.first.begin(), fn);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
+		{
+			if (!empty() && (0 < count))
+			{
+				do {
+					std::invoke(fn, *first, *this->fetch(first));
+					--count;
+					++first;
+				} while (0 < count);
+			}
+			return first;
+		}
+
+		template <class Fn
+		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn)
+		{
+			return this->for_each_n(m_storage.first.begin(), count, fn);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
+		{
+			if (!empty() && (0 < count))
+			{
+				do {
+					std::invoke(fn, *first, *fetch(first));
+					--count;
+					++first;
+				} while (0 < count);
+			}
+			return first;
+		}
+
+		template <class Fn
+		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
+		{
+			return this->for_each_n(m_storage.first.begin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -56,32 +56,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace chrono	= ::std::chrono;
-	namespace pmr		= ::std::pmr;
-#if ML_HAS_CXX20
-	namespace ranges	= ::std::ranges;
-	namespace views		= ::std::ranges::views;
-#endif
-
-	using namespace ::std::chrono_literals;
-	using namespace ::std::string_literals;
-	using namespace ::std::string_view_literals;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	namespace literals {}
-
-	using namespace ::ml::literals;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	ML_USING	int8_t		= typename ML_INT8;
 	ML_USING	int16_t		= typename ML_INT16;
 	ML_USING	int32_t		= typename ML_INT32;
@@ -116,6 +90,32 @@ namespace ml
 #endif
 	ML_USING	C_u16string	= typename char16_t const *;
 	ML_USING	C_u32string	= typename char32_t const *;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	namespace chrono	= ::std::chrono;
+	namespace pmr		= ::std::pmr;
+#if ML_HAS_CXX20
+	namespace ranges	= ::std::ranges;
+	namespace views		= ::std::ranges::views;
+#endif
+
+	using namespace ::std::chrono_literals;
+	using namespace ::std::string_literals;
+	using namespace ::std::string_view_literals;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	namespace literals {}
+
+	using namespace ::ml::literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -211,7 +211,9 @@
 #	define	ML_UINT64	unsigned long long
 #endif
 
-#define ML_BYTE unsigned char
+#ifndef ML_BYTE
+#   define ML_BYTE unsigned char
+#endif
 
 #if (ML_ARCH == 32)
 #	define ML_INTMAX	ML_INT32

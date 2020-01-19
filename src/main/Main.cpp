@@ -45,9 +45,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup memory
-
-	static auto g_block = ds::array<byte_t, 100._MiB>{ 0 };
+	static auto g_block = ds::array<byte_t, 150._MiB>{ 0 };
 	static auto g_buff = pmr::monotonic_buffer_resource{ g_block.data(), g_block.size() };
 	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buff };
 	
