@@ -13,7 +13,6 @@ project "libmeme"
 	staticruntime	"Off"
 	systemversion	"latest"
 	dependson {
-		"glad",
 		"glfw",
 		"imgui",
 		"lua",
@@ -30,8 +29,8 @@ project "libmeme"
 		"ML_IMPL_NEW=std::malloc",
 		"ML_IMPL_DELETE=std::free",
 		"ML_IMPL_RENDERER_OPENGL",
-		--"ML_IMPL_OPENGL_LOADER_GLEW",
-		"ML_IMPL_OPENGL_LOADER_GLAD",
+		"ML_IMPL_OPENGL_LOADER_GLEW",
+		--"ML_IMPL_OPENGL_LOADER_GLAD",
 		"GLEW_STATIC",
 		"_CRT_SECURE_NO_WARNINGS",
 		"NOMINMAX",
@@ -67,7 +66,6 @@ project "libmeme"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"glad",
 		"glfw",
 		"imgui",
 		"lua",

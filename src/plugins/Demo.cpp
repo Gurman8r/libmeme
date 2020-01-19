@@ -153,7 +153,7 @@ namespace ml
 				m_models["sphere32x24"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);
-				m_models["triangle"] = make_model(make_mesh(
+				m_models["triangle"] = make_model(make_mesh( // broken
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -163,7 +163,7 @@ namespace ml
 						0, 1, 2,
 					}
 				));
-				m_models["quad"] = make_model(make_mesh(
+				m_models["quad"] = make_model(make_mesh( // broken
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
 						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),

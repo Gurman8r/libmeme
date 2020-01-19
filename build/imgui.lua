@@ -18,8 +18,8 @@ project "imgui"
 		"_CRT_SECURE_NO_WARNINGS",
 		"NOMINMAX",
 		"GLEW_STATIC",
-		--"IMGUI_IMPL_OPENGL_LOADER_GLEW",
-		"IMGUI_IMPL_OPENGL_LOADER_GLAD",
+		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
+		--"IMGUI_IMPL_OPENGL_LOADER_GLAD",
 	}
 	includedirs {
 		"%{sln_dir}include",
@@ -45,7 +45,8 @@ project "imgui"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"opengl32", "glfw", "glew32s"
+		"opengl32", "glfw",
+		"glew32s"
 	}
 	
 	filter { "configurations:Debug" }

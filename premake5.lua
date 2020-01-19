@@ -47,7 +47,7 @@ filter { "system:Windows" }
 -- Generate Project Files
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-dofile "./build/glad.lua"
+--dofile "./build/glad.lua"
 dofile "./build/glfw.lua"
 dofile "./build/lua.lua"
 dofile "./build/imgui.lua"

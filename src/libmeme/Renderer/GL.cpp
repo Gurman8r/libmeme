@@ -16,9 +16,9 @@
 #		include <GLES3/gl3.h>
 #	endif
 #elif defined(ML_IMPL_OPENGL_LOADER_GLEW)
-#	include <glew/glew.h>
+#	include <GL/glew.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-#	include <gl3w/gl3w.h>
+#	include <GL/gl3w.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
 #	include <glad/glad.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
@@ -896,24 +896,26 @@ namespace ml
 	{
 		if ((count < 1) || !source || !(*source))
 		{
-			return ML_WARNING; // -1 (true)
+			return -1; // true
 		}
-		else if (obj = createShader(type))
+		
+		if (!(obj = createShader(type)))
 		{
-			shaderSource(obj, count, source, nullptr);
-
-			if (!compileShader(obj))
-			{
-				log = getProgramInfoLog(obj);
-
-				deleteShader(obj);
-
-				return ML_FAILURE; // 0 (false)
-			}
-
-			return ML_SUCCESS; // +1 (true)
+			return 0; // false
 		}
-		return ML_FAILURE; // 0 (false)
+
+		shaderSource(obj, count, source, nullptr);
+
+		if (!compileShader(obj))
+		{
+			log = getProgramInfoLog(obj);
+
+			deleteShader(obj);
+
+			return 0; // false
+		}
+
+		return 1; // true
 	}
 
 	auto GL::linkProgram(uint32_t obj) -> int32_t
