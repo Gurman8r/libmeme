@@ -8,12 +8,12 @@ namespace ml
 	// Vertex Array Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void VertexArrayObject::bind(VertexArrayObject const * value)
+	void vertex_array_object::bind(vertex_array_object const * value)
 	{
 		GL::bindVertexArray(value ? value->m_handle : NULL);
 	}
 
-	VertexArrayObject & VertexArrayObject::generate(uint32_t mode)
+	vertex_array_object & vertex_array_object::generate(uint32_t mode)
 	{
 		if (!m_handle)
 		{
@@ -24,7 +24,7 @@ namespace ml
 		return (*this);
 	}
 
-	VertexArrayObject & VertexArrayObject::destroy()
+	vertex_array_object & vertex_array_object::destroy()
 	{
 		if (m_handle)
 		{
@@ -42,12 +42,12 @@ namespace ml
 	// Vertex Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void VertexBufferObject::bind(VertexBufferObject const * value)
+	void vertex_buffer_object::bind(vertex_buffer_object const * value)
 	{
 		GL::bindBuffer(GL::ArrayBuffer, value ? value->m_handle : NULL);
 	}
 
-	VertexBufferObject & VertexBufferObject::generate(uint32_t usage)
+	vertex_buffer_object & vertex_buffer_object::generate(uint32_t usage)
 	{
 		if (!m_handle)
 		{
@@ -58,7 +58,7 @@ namespace ml
 		return (*this);
 	}
 
-	VertexBufferObject & VertexBufferObject::destroy()
+	vertex_buffer_object & vertex_buffer_object::destroy()
 	{
 		if (m_handle)
 		{
@@ -71,7 +71,7 @@ namespace ml
 		return (*this);
 	}
 
-	VertexBufferObject & VertexBufferObject::update(buffer_t data, uint32_t size)
+	vertex_buffer_object & vertex_buffer_object::update(void const * data, uint32_t size)
 	{
 		if (m_handle)
 		{
@@ -86,14 +86,14 @@ namespace ml
 			GL::bufferData(
 				GL::ArrayBuffer,
 				this->size() * sizeof(float_t),
-				const_cast<void *>(this->data()),
+				this->data(),
 				this->usage()
 			);
 		}
 		return (*this);
 	}
 
-	VertexBufferObject & VertexBufferObject::update(buffer_t data, uint32_t size, uint32_t offset)
+	vertex_buffer_object & vertex_buffer_object::update(void const * data, uint32_t size, uint32_t offset)
 	{
 		if (m_handle)
 		{
@@ -109,7 +109,7 @@ namespace ml
 				GL::ArrayBuffer,
 				this->offset(),
 				this->size() * sizeof(float_t),
-				const_cast<void *>(this->data())
+				this->data()
 			);
 		}
 		return (*this);
@@ -120,12 +120,12 @@ namespace ml
 	// Index Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void IndexBufferObject::bind(IndexBufferObject const * value)
+	void index_buffer_object::bind(index_buffer_object const * value)
 	{
 		GL::bindBuffer(GL::ElementArrayBuffer, value ? value->m_handle : NULL);
 	}
 
-	IndexBufferObject & IndexBufferObject::generate(uint32_t usage, uint32_t type)
+	index_buffer_object & index_buffer_object::generate(uint32_t usage, uint32_t type)
 	{
 		if (!m_handle)
 		{
@@ -138,7 +138,7 @@ namespace ml
 		return (*this);
 	}
 
-	IndexBufferObject & IndexBufferObject::destroy()
+	index_buffer_object & index_buffer_object::destroy()
 	{
 		if (m_handle)
 		{
@@ -151,7 +151,7 @@ namespace ml
 		return (*this);
 	}
 
-	IndexBufferObject & IndexBufferObject::update(buffer_t data, uint32_t count)
+	index_buffer_object & index_buffer_object::update(void const * data, uint32_t count)
 	{
 		if (m_handle)
 		{
@@ -162,7 +162,7 @@ namespace ml
 			GL::bufferData(
 				GL::ElementArrayBuffer,
 				this->count() * sizeof(uint32_t),
-				const_cast<void *>(this->data()),
+				this->data(),
 				this->usage()
 			);
 		}
@@ -174,12 +174,12 @@ namespace ml
 	// Frame Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void FrameBufferObject::bind(FrameBufferObject const * value)
+	void frame_buffer_object::bind(frame_buffer_object const * value)
 	{
 		GL::bindFramebuffer(GL::Framebuffer, value ? value->m_handle : NULL);
 	}
 
-	FrameBufferObject & FrameBufferObject::generate(vec2 const & size)
+	frame_buffer_object & frame_buffer_object::generate(vec2 const & size)
 	{
 		if (!m_handle)
 		{
@@ -190,7 +190,7 @@ namespace ml
 		return (*this);
 	}
 
-	FrameBufferObject & FrameBufferObject::destroy()
+	frame_buffer_object & frame_buffer_object::destroy()
 	{
 		if (m_handle)
 		{
@@ -203,7 +203,7 @@ namespace ml
 		return (*this);
 	}
 
-	FrameBufferObject & FrameBufferObject::attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer)
+	frame_buffer_object & frame_buffer_object::attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer)
 	{
 		if (m_handle)
 		{
@@ -217,7 +217,7 @@ namespace ml
 		return (*this);
 	}
 
-	FrameBufferObject & FrameBufferObject::attachTexture2D(uint32_t attachment, uint32_t tex, uint32_t level)
+	frame_buffer_object & frame_buffer_object::attachTexture2D(uint32_t attachment, uint32_t tex, uint32_t level)
 	{
 		if (m_handle)
 		{
@@ -236,12 +236,12 @@ namespace ml
 	// Render Buffer Object
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void RenderBufferObject::bind(RenderBufferObject const * value)
+	void render_buffer_object::bind(render_buffer_object const * value)
 	{
 		GL::bindRenderbuffer(GL::Renderbuffer, value ? value->m_handle : NULL);
 	}
 
-	RenderBufferObject & RenderBufferObject::generate(vec2i const & size)
+	render_buffer_object & render_buffer_object::generate(vec2i const & size)
 	{
 		if (!m_handle)
 		{
@@ -252,7 +252,7 @@ namespace ml
 		return (*this);
 	}
 
-	RenderBufferObject & RenderBufferObject::destroy()
+	render_buffer_object & render_buffer_object::destroy()
 	{
 		if (m_handle)
 		{
@@ -265,7 +265,7 @@ namespace ml
 		return (*this);
 	}
 
-	RenderBufferObject & RenderBufferObject::update(uint32_t format)
+	render_buffer_object & render_buffer_object::update(uint32_t format)
 	{
 		if (m_handle)
 		{

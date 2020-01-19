@@ -160,7 +160,7 @@ namespace ml
 
 	void render_texture::bind(render_texture const * value)
 	{
-		FrameBufferObject::bind(value ? &value->fbo() : nullptr);
+		frame_buffer_object::bind(value ? &value->fbo() : nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

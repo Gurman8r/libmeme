@@ -357,12 +357,12 @@ namespace ml
 		glCheck(glBindVertexArray(value));
 	}
 
-	void GL::bufferData(uint32_t type, uint32_t size, void * data, uint32_t usage)
+	void GL::bufferData(uint32_t type, uint32_t size, void const * data, uint32_t usage)
 	{
-		glCheck(glBufferData(type, size, data, usage));
+		glCheck(glBufferData(type, size, data, GL_STATIC_DRAW));
 	}
 
-	void GL::bufferSubData(uint32_t target, int32_t offset, int32_t size, void * data)
+	void GL::bufferSubData(uint32_t target, int32_t offset, int32_t size, void const * data)
 	{
 		glCheck(glBufferSubData(target, offset, size, data));
 	}
@@ -433,7 +433,7 @@ namespace ml
 		glCheck(glEnableVertexAttribArray(index));
 	}
 
-	void GL::drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices)
+	void GL::drawElements(uint32_t mode, int32_t count, uint32_t type, void const * indices)
 	{
 		glCheck(glDrawElements(mode, count, type, indices));
 	}

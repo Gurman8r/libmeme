@@ -77,8 +77,8 @@ namespace ml
 		static auto genVertexArrays(uint32_t count) -> uint32_t;
 		static void bindBuffer(uint32_t type, uint32_t buffer);
 		static void bindVertexArray(uint32_t value);
-		static void bufferData(uint32_t type, uint32_t size, void * data, uint32_t usage);
-		static void bufferSubData(uint32_t target, int32_t offset, int32_t size, void * data);
+		static void bufferData(uint32_t type, uint32_t size, void const * data, uint32_t usage);
+		static void bufferSubData(uint32_t target, int32_t offset, int32_t size, void const * data);
 		static bool deleteBuffer(uint32_t const * value);
 		static void deleteBuffers(uint32_t count, uint32_t const * buffers);
 		static bool deleteVertexArray(uint32_t const * value);
@@ -86,7 +86,7 @@ namespace ml
 		static void vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, void * pointer);
 		static void vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width);
 		static void enableVertexAttribArray(uint32_t index);
-		static void drawElements(uint32_t mode, int32_t count, uint32_t type, void * indices);
+		static void drawElements(uint32_t mode, int32_t count, uint32_t type, void const * indices);
 		static void drawArrays(uint32_t mode, int32_t first, int32_t count);
 
 		// Textures

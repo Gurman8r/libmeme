@@ -113,7 +113,7 @@ namespace ml
 
 		inline bool good() const noexcept
 		{
-			return (vao() && vbo()) || (vao() && vbo() && ibo());
+			return (ibo() && vao() && vbo()) || (vao() && vbo());
 		}
 
 		inline operator bool() const noexcept
