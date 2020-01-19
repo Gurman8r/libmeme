@@ -107,7 +107,13 @@ namespace ml
 		}
 		
 		// cleanup
-		if (!m_storage.empty()) { m_storage.clear(); }
+		if (!m_storage.empty())
+			m_storage.clear();
+
+		// reserve space
+		m_storage.reserve(
+			std::distance(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes])
+		);
 
 		// for each mesh
 		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const & mesh)
@@ -119,8 +125,8 @@ namespace ml
 			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)
 			{
 				// reserve space
-				verts.reserve(verts.size() +
-					std::distance(&face.mIndices[0], &face.mIndices[face.mNumIndices])
+				verts.reserve(verts.size()
+					+ std::distance(&face.mIndices[0], &face.mIndices[face.mNumIndices])
 				);
 
 				// for each index
@@ -146,7 +152,6 @@ namespace ml
 			});
 
 			// make mesh
-			verts.shrink_to_fit();
 			m_storage.emplace_back(make_mesh(verts));
 		});
 

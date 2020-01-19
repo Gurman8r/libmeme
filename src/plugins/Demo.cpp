@@ -185,6 +185,7 @@ namespace ml
 			case hashof_v<draw_event>:
 			{
 				// draw stuff, etc...
+
 				if (m_pipeline.empty())
 					return;
 
