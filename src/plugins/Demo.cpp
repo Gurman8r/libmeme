@@ -180,10 +180,13 @@ namespace ml
 			case UpdateEvent::ID: if (auto ev{ event_cast<UpdateEvent>(&value) })
 			{
 				// update stuff, etc...
-				
-				Engine::window().set_title("libmeme"s
-					+ " | "s + std::to_string(ev->total_time)
-					+ " | "s + std::to_string(ev->delta_time)
+
+				static auto const original_title{
+					Engine::window().get_title()
+				};
+				Engine::window().set_title(original_title
+					+ " | " + util::to_string(ev->total_time) + "s "
+					+ " | " + util::to_string(ev->delta_time) + "s "
 				);
 				
 			} break;
@@ -193,23 +196,23 @@ namespace ml
 				if (m_pipeline.empty())
 					return;
 
-				if (RenderTexture const & rt{ m_pipeline.at(0) })
+				if (RenderTexture const & _r{ m_pipeline.at(0) })
 				{
-					ML_BIND_SCOPE_M(rt);
-					rt.clear_color(colors::magenta);
-					rt.viewport(rt.bounds());
+					ML_BIND_SCOPE_M(_r);
+					_r.clear_color(colors::magenta);
+					_r.viewport(_r.bounds());
 
 					constexpr RenderStates states{
 						{}, {}, CullState{ false }, {}
 					}; states();
 					
-					if (Shader & sh{ m_shaders["3d"] })
+					if (Shader & _s{ m_shaders["3d"] })
 					{
-						ML_BIND_SCOPE_M(sh, false);
+						ML_BIND_SCOPE_M(_s, false);
 						for (Uniform const & u : m_materials["3d"])
-							sh.set_uniform(u);
-						sh.bind(true);
-						rt.draw(m_models["sphere32x24"]);
+							_s.set_uniform(u);
+						_s.bind(true);
+						_r.draw(m_models["sphere32x24"]);
 					}
 				}
 

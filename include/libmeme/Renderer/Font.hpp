@@ -9,9 +9,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using glyph_page		= typename ds::flat_map<uint32_t, Glyph>;
-		using page_table		= typename ds::flat_map<uint32_t, glyph_page>;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		
+		using glyph_page = typename ds::flat_map<uint32_t, Glyph>;
+		
+		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
 
 		struct Info
 		{

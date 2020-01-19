@@ -13,7 +13,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderWindow::create(std::string const & title, VideoMode const & display, ContextSettings const & context, int32_t flags)
+	bool RenderWindow::create(pmr::string const & title, VideoMode const & display, ContextSettings const & context, int32_t flags)
 	{
 		if (!Window::create(title, display, context, flags))
 		{

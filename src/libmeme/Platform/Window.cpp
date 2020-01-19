@@ -86,7 +86,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(std::string const & title, VideoMode const & video, ContextSettings const & context, int32_t flags)
+	bool Window::create(pmr::string const & title, VideoMode const & video, ContextSettings const & context, int32_t flags)
 	{
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ML_ASSERT(context.api == Client_API::OpenGL);
@@ -250,7 +250,7 @@ namespace ml
 		return set_position((vec2i)(get_desktop_mode().resolution - this->get_size()) / 2);
 	}
 
-	Window & Window::set_clipboard(std::string const & value)
+	Window & Window::set_clipboard(pmr::string const & value)
 	{
 		if (m_window)
 		{
@@ -364,7 +364,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_title(std::string const & value)
+	Window & Window::set_title(pmr::string const & value)
 	{
 		m_title = value;
 		if (m_window)

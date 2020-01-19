@@ -17,7 +17,7 @@ namespace ml
 		virtual ~RenderWindow() noexcept = default;
 
 		virtual bool create(
-			std::string const & title,
+			pmr::string const & title,
 			VideoMode const & display,
 			ContextSettings const & context,
 			int32_t flags

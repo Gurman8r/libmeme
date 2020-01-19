@@ -17,12 +17,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API FS final
+	class ML_PLATFORM_API FS final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		FS() = delete;
-
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static path_t current_path();
@@ -42,11 +39,6 @@ namespace ml
 		ML_NODISCARD static std::optional<file_t> read_file(path_t const & path);
 
 		ML_NODISCARD static pmr::string get_file_contents(path_t const & path);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static path_t s_root;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

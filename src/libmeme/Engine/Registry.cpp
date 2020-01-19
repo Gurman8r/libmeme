@@ -7,9 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Registry<>::Registry() noexcept : m_storage{}
-	{
-	}
+	Registry<>::Registry() noexcept : m_storage{} {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

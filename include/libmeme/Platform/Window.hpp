@@ -71,7 +71,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
-			std::string const & title, 
+			pmr::string const & title, 
 			VideoMode const & display,
 			ContextSettings const & context,
 			int32_t flags
@@ -97,7 +97,7 @@ namespace ml
 
 		Window & set_centered();
 		
-		Window & set_clipboard(std::string const & value);
+		Window & set_clipboard(pmr::string const & value);
 		
 		Window & set_cursor(void * value);
 		
@@ -115,7 +115,7 @@ namespace ml
 		
 		Window & set_size(vec2u const & value);
 		
-		Window & set_title(std::string const & value);
+		Window & set_title(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -214,7 +214,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_flags() const -> int32_t const & { return m_flags; }
 
-		ML_NODISCARD inline auto get_title() const -> std::string const & { return m_title; }
+		ML_NODISCARD inline auto get_title() const -> pmr::string const & { return m_title; }
 
 		ML_NODISCARD inline auto get_video_mode() const -> VideoMode const & { return m_video; }
 
@@ -226,7 +226,7 @@ namespace ml
 		void * 			m_window;
 		void * 			m_monitor;
 		void * 			m_share;
-		std::string		m_title;
+		pmr::string		m_title;
 		VideoMode		m_video;
 		ContextSettings	m_context;
 		int32_t			m_flags;

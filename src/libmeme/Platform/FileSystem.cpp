@@ -10,7 +10,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	path_t FS::s_root{};
+	static path_t s_root{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,7 +63,7 @@ namespace ml
 					}
 				})()).emplace_back(path_t{ ent->d_name });
 			}
-			return std::make_optional(temp);
+			return std::make_optional(std::move(temp));
 		}
 		return std::nullopt;
 	}
@@ -82,7 +82,7 @@ namespace ml
 				in.read(&temp[0], size);
 			}
 			in.close();
-			return std::make_optional(temp);
+			return std::make_optional(std::move(temp));
 		}
 		return std::nullopt;
 	}
