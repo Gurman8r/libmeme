@@ -18,7 +18,8 @@ project "imgui"
 		"_CRT_SECURE_NO_WARNINGS",
 		"NOMINMAX",
 		"GLEW_STATIC",
-		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
+		--"IMGUI_IMPL_OPENGL_LOADER_GLEW",
+		"IMGUI_IMPL_OPENGL_LOADER_GLAD",
 	}
 	includedirs {
 		"%{sln_dir}include",

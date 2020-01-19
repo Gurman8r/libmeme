@@ -16,11 +16,11 @@
 #		include <GLES3/gl3.h>
 #	endif
 #elif defined(ML_IMPL_OPENGL_LOADER_GLEW)
-#	include <GL/glew.h>
+#	include <glew/glew.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-#	include <GL/gl3w.h>
+#	include <gl3w/gl3w.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-#	include <GL/glad.h>
+#	include <glad/glad.h>
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 #	include ML_IMPL_OPENGL_LOADER_CUSTOM
 #endif
@@ -106,20 +106,13 @@ namespace ml
 			return debug::log_error("GL is already initialized");
 
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
-
-		ML_ONCE_CALL{ glewExperimental = true; }
+		glewExperimental = true;
 		return (s_gl_init = (glewInit() == GLEW_OK));
-
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-
 		return (s_gl_init = (gl3wInit() != 0));
-
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-
-		return (s_gl_init = (gladLoadGL() == 0));
-
+		return (s_gl_init = (gladLoadGL() != 0));
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-
 		return (s_gl_init = false);
 #endif
 	}
@@ -481,41 +474,60 @@ namespace ml
 	bool GL::edgeClampAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp 
-			= GL_EXT_texture_edge_clamp
-			|| GLEW_EXT_texture_edge_clamp;
+#if defined(GL_EXT_texture_edge_clamp) \
+|| defined(GLEW_EXT_texture_edge_clamp) \
+|| defined(GL_SGIS_texture_edge_clamp)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 
 	bool GL::textureSrgbAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp
-			= GL_EXT_texture_sRGB;
+#ifdef GL_EXT_texture_sRGB
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 
 	bool GL::nonPowerOfTwoAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp 
-			= GLEW_ARB_texture_non_power_of_two;
+#if defined(GLEW_ARB_texture_non_power_of_two) \
+|| defined(GL_ARB_texture_non_power_of_two)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
 		static int32_t temp{ 0 };
-		ML_ONCE_CALL temp
-			= getInteger(GL::MaxCombTexImgUnits);
+		if (is_init())
+		{
+			ML_ONCE_CALL {
+				temp = getInteger(GL::MaxCombTexImgUnits);
+			}
+		}
 		return temp;
 	}
 
 	auto GL::getMaxTextureSize() -> uint32_t
 	{
 		static uint32_t temp{ 0 };
-		ML_ONCE_CALL temp
-			= (uint32_t)getInteger(GL::MaxTextureSize);
+		if (is_init())
+		{
+			ML_ONCE_CALL {
+				temp = (uint32_t)getInteger(GL::MaxTextureSize);
+			}
+		}
 		return temp;
 	}
 
@@ -604,9 +616,12 @@ namespace ml
 	bool GL::framebuffersAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp
-			= GL_EXT_framebuffer_object
-			&& GL_EXT_framebuffer_blit;
+#if defined(GL_EXT_framebuffer_object) \
+|| defined(GL_EXT_framebuffer_blit)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 
@@ -716,21 +731,26 @@ namespace ml
 	bool GL::shadersAvailable()
 	{
 		static bool temp{ false };
-		ML_ONCE_CALL temp
-			= GL_ARB_multitexture
-			&& GL_ARB_shading_language_100
-			&& GL_ARB_shader_objects
-			&& GL_ARB_vertex_shader
-			&& GL_ARB_fragment_shader;
+#if defined(GL_ARB_multitexture) \
+|| defined(GL_ARB_shading_language_100) \
+|| defined(GL_ARB_shader_objects) \
+|| defined(GL_ARB_vertex_shader) \
+|| defined(GL_ARB_fragment_shader)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 
 	bool GL::geometryShadersAvailable()
 	{
-		static bool temp{ false };
-		ML_ONCE_CALL temp
-			= shadersAvailable()
-			&& GL_ARB_geometry_shader4;
+		static bool temp{ shadersAvailable() };
+#if defined(GL_ARB_geometry_shader4)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
 		return temp;
 	}
 

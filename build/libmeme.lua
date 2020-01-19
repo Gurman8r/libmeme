@@ -13,7 +13,11 @@ project "libmeme"
 	staticruntime	"Off"
 	systemversion	"latest"
 	dependson {
-		"glfw", "imgui", "lua", --"raknet",
+		"glad",
+		"glfw",
+		"imgui",
+		"lua",
+		--"raknet",
 	}
 	defines {
 		"ML_CORE_EXPORTS",
@@ -26,7 +30,8 @@ project "libmeme"
 		"ML_IMPL_NEW=std::malloc",
 		"ML_IMPL_DELETE=std::free",
 		"ML_IMPL_RENDERER_OPENGL",
-		"ML_IMPL_OPENGL_LOADER_GLEW",
+		--"ML_IMPL_OPENGL_LOADER_GLEW",
+		"ML_IMPL_OPENGL_LOADER_GLAD",
 		"GLEW_STATIC",
 		"_CRT_SECURE_NO_WARNINGS",
 		"NOMINMAX",
@@ -62,12 +67,14 @@ project "libmeme"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
+		"glad",
 		"glfw",
 		"imgui",
 		"lua",
+		"opengl32",
+		--"glew32s",
+		 "freetype", "assimp", "IrrXML", "zlibstatic",
 		--"raknet", "ws2_32",
-		"opengl32", "glew32s", 
-		"assimp", "IrrXML", "zlibstatic", "freetype",
 	}
 	
 	filter { "system:Windows" }

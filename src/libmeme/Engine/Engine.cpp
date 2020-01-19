@@ -195,9 +195,8 @@ namespace ml
 		
 		s_window.viewport({ {}, s_window.get_frame_size() });
 		
-		constexpr render_states states{ // default states
-			{}, {}, {}, {}
-		}; states();
+		constexpr render_states states{
+		}; states(); // default states
 	}
 
 	void engine::end_loop()

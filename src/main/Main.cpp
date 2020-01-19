@@ -127,10 +127,9 @@ ml::int32_t main()
 			engine::end_loop();
 			event_system::fire_event<end_loop_event>();
 		}
-
 		performance_tracker::swap();
-
-	} while (engine::running());
+	}
+	while (engine::running());
 
 	// unload event
 	event_system::fire_event<unload_event>();
