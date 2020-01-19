@@ -204,7 +204,6 @@ namespace ml
 						for (uniform const & u : m_materials["3d"])
 							_s.set_uniform(u);
 						_s.bind(true);
-						//_r.draw(m_models["triangle"]);
 						_r.draw(m_models["sphere32x24"]);
 					}
 				}
