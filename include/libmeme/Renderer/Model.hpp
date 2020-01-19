@@ -7,11 +7,11 @@
 namespace ml
 {
 	// collection of meshes
-	struct ML_RENDERER_API Model final : public Trackable
+	struct ML_RENDERER_API model final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type				= typename Mesh;
+		using value_type				= typename mesh;
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
 		using storage_type				= typename pmr::vector<value_type>;
 		using initializer_type			= typename std::initializer_list<value_type>;
@@ -28,29 +28,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Model();
+		model();
 		
-		explicit Model(allocator_type const & alloc);
+		explicit model(allocator_type const & alloc);
 		
-		Model(initializer_type init, allocator_type const & alloc = {});
+		model(initializer_type init, allocator_type const & alloc = {});
 		
-		Model(path_t const & path, allocator_type const & alloc = {});
+		model(path_t const & path, allocator_type const & alloc = {});
 		
-		Model(storage_type const & storage, allocator_type const & alloc = {});
+		model(storage_type const & storage, allocator_type const & alloc = {});
 		
-		Model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
+		model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
 		
-		Model(Model const & other, allocator_type const & alloc = {});
+		model(model const & other, allocator_type const & alloc = {});
 		
-		Model(Model && other, allocator_type const & alloc = {}) noexcept;
+		model(model && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Model & operator=(Model const & other);
+		model & operator=(model const & other);
 
-		Model & operator=(Model && other) noexcept;
+		model & operator=(model && other) noexcept;
 
-		void swap(Model & other) noexcept;
+		void swap(model & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -60,7 +60,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw(RenderTarget const & target, Model const * value);
+		static void draw(render_target const & target, model const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -124,15 +124,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline auto make_model(Mesh && mesh)
+	ML_NODISCARD static inline auto make_model(mesh && m)
 	{
-		return Model{ Model::initializer_type{ std::forward<Mesh>(mesh) } };
+		return model{ model::initializer_type{ std::forward<mesh>(m) } };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_model(Args && ... args)
 	{
-		return Model{ std::forward<Args>(args)... };
+		return model{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

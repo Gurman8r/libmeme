@@ -7,17 +7,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderTexture::RenderTexture()
-		: RenderTexture{ vec2i::zero() }
+	render_texture::render_texture()
+		: render_texture{ vec2i::zero() }
 	{
 	}
 
-	RenderTexture::RenderTexture(vec2i const & size)
-		: RenderTexture{ size, GL::ColorAttachment0, GL::DepthStencil, GL::Depth24_Stencil8 }
+	render_texture::render_texture(vec2i const & size)
+		: render_texture{ size, GL::ColorAttachment0, GL::DepthStencil, GL::Depth24_Stencil8 }
 	{
 	}
 
-	RenderTexture::RenderTexture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format)
+	render_texture::render_texture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format)
 		: m_fbo		{ make_fbo() }
 		, m_rbo		{ make_rbo() }
 		, m_size	{ size }
@@ -28,7 +28,7 @@ namespace ml
 	{
 	}
 
-	RenderTexture::RenderTexture(RenderTexture const & other)
+	render_texture::render_texture(render_texture const & other)
 		: m_fbo		{ other.m_fbo }
 		, m_rbo		{ other.m_rbo }
 		, m_size	{ other.m_size }
@@ -39,33 +39,33 @@ namespace ml
 	{
 	}
 
-	RenderTexture::RenderTexture(RenderTexture && other) noexcept
-		: RenderTexture{}
+	render_texture::render_texture(render_texture && other) noexcept
+		: render_texture{}
 	{
 		swap(std::move(other));
 	}
 
-	RenderTexture::~RenderTexture()
+	render_texture::~render_texture()
 	{
 		destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderTexture & RenderTexture::operator=(RenderTexture const & other)
+	render_texture & render_texture::operator=(render_texture const & other)
 	{
-		RenderTexture temp{ other };
+		render_texture temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	RenderTexture & RenderTexture::operator=(RenderTexture && other) noexcept
+	render_texture & render_texture::operator=(render_texture && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void RenderTexture::swap(RenderTexture & other) noexcept
+	void render_texture::swap(render_texture & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -81,7 +81,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderTexture::create()
+	bool render_texture::create()
 	{
 		if (good())
 			return debug::log_error("render texture already created");
@@ -137,7 +137,7 @@ namespace ml
 		return good();
 	}
 
-	bool RenderTexture::destroy()
+	bool render_texture::destroy()
 	{
 		m_fbo.destroy();
 		m_rbo.destroy();
@@ -145,7 +145,7 @@ namespace ml
 		return true;
 	}
 
-	bool RenderTexture::resize(vec2i const & value)
+	bool render_texture::resize(vec2i const & value)
 	{
 		if ((value[0] != 0) && (value[1] != 0) && (m_size != value))
 		{
@@ -158,7 +158,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void RenderTexture::bind(RenderTexture const * value)
+	void render_texture::bind(render_texture const * value)
 	{
 		FrameBufferObject::bind(value ? &value->fbo() : nullptr);
 	}

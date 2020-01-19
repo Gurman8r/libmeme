@@ -2,97 +2,58 @@
 #define _ML_EVENT_HPP_
 
 #include <libmeme/Core/Export.hpp>
-#include <libmeme/Common.hpp>
-
-#ifndef ML_IMPL_MAX_LIBRARY_EVENTS
-#define ML_IMPL_MAX_LIBRARY_EVENTS 64
-#endif
+#include <libmeme/Core/TypeOf.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ev
-	> ML_NODISCARD static constexpr auto event_cast(struct Event const * value) noexcept
+	> ML_NODISCARD static constexpr auto event_cast(struct event const * value) noexcept
 	{
-		return (value && (value->id() == Ev::ID)) ? static_cast<Ev const *>(value) : nullptr;
+		return (value && (value->id() == hashof_v<Ev>))
+			? static_cast<Ev const *>(value)
+			: nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct Event
+	// basic event
+	struct event
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : int32_t
-		{
-			// The number of events reserved for each sub-library
-			MAX_LIBRARY_EVENTS = ML_IMPL_MAX_LIBRARY_EVENTS,
-
-			EV_INVALID	= -1,
-			EV_CORE		= (MAX_LIBRARY_EVENTS * 1),
-			EV_EDITOR	= (MAX_LIBRARY_EVENTS * 2),
-			EV_ENGINE	= (MAX_LIBRARY_EVENTS * 3),
-			EV_PLATFORM = (MAX_LIBRARY_EVENTS * 4),
-			EV_NETWORK	= (MAX_LIBRARY_EVENTS * 5),
-			EV_RENDERER = (MAX_LIBRARY_EVENTS * 6),
-			EV_CUSTOM	= (MAX_LIBRARY_EVENTS * 7),
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr Event(int32_t const value) noexcept : m_id{ value }
+		constexpr explicit event(size_t const value) noexcept
+			: m_id{ value }
 		{
 		}
 
-		constexpr Event() noexcept : Event{ EV_INVALID }
+		ML_NODISCARD constexpr size_t const & id() const noexcept
 		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr operator bool() const noexcept
-		{
-			return (m_id > EV_INVALID);
+			return m_id;
 		}
 
 		template <class Ev
-		> ML_NODISCARD constexpr decltype(auto) as() const noexcept
+		> ML_NODISCARD constexpr Ev const * as() const noexcept
 		{
 			return event_cast<Ev>(this);
-		}
-
-		ML_NODISCARD constexpr int32_t const & id() const noexcept
-		{
-			return m_id;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t const m_id;
+		size_t const m_id;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <int32_t ID> struct I_Event : public Event
+	// event interface
+	template <class T
+	> struct I_event : event
 	{
-		enum : int32_t { ID = ID };
-
-		constexpr I_Event() noexcept : Event{ ID }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, T ID> struct T_Event : public I_Event<static_cast<int32_t>(ID)>
-	{
-		constexpr T_Event() noexcept : I_Event<static_cast<int32_t>(ID)>{}
-		{
-		}
+		constexpr I_event() noexcept : event{ hashof_v<T> } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

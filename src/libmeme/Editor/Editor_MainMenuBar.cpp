@@ -1,4 +1,4 @@
-#include <libmeme/Editor/MainMenuBar.hpp>
+#include <libmeme/Editor/Editor_MainMenuBar.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
@@ -7,27 +7,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	MainMenuBar::MainMenuBar()
+	editor_main_menu::editor_main_menu()
 		: m_open	{ true }
 		, m_good	{ false }
 		, m_menus	{ decltype(m_menus)::allocator_type{} }
 	{
 	}
 
-	MainMenuBar::~MainMenuBar()
+	editor_main_menu::~editor_main_menu()
 	{
 		m_menus.clear();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool MainMenuBar::dispose()
+	bool editor_main_menu::dispose()
 	{
 		m_menus.clear();
 		return m_menus.empty();
 	}
 
-	bool MainMenuBar::render()
+	bool editor_main_menu::render()
 	{
 		if (([&, this]()
 		{
@@ -35,7 +35,6 @@ namespace ml
 			if (m_good = m_open)
 			{
 				ImGui::PushID(ML_ADDRESSOF(this));
-				ImGui::PushID(mainmenubar_title);
 				m_good = ImGui::BeginMainMenuBar();
 			}
 			return m_good;
@@ -60,7 +59,6 @@ namespace ml
 			if (m_good)
 			{
 				ImGui::EndMainMenuBar();
-				ImGui::PopID();
 				ImGui::PopID();
 			}
 			return m_good;

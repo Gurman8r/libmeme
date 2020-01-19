@@ -8,42 +8,45 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API Engine final
+	class ML_ENGINE_API engine final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Engine() = delete;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct EngineSettings final
+		struct engine_startup_settings final
 		{
 			path_t program_name;
 			path_t library_path;
 		};
 
-		struct WindowSettings final
+		struct window_startup_settings final
 		{
-			C_string		title;
-			VideoMode		display;
-			ContextSettings context;
-			int32_t			flags;
-			bool			install_callbacks;
+			C_string			title;
+			video_mode			display;
+			context_settings	context;
+			int32_t				flags;
+			bool				install_callbacks;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Time final
+		struct engine_time final
 		{
-			Timer		main{ true },	loop{ false };
-			float64_t	total{ 0. },	delta{ 0. };
+			inline float64_t total() const noexcept { return m_main.elapsed().count(); }
+
+			inline float64_t delta() const noexcept { return m_delta; }
+
+		private:
+			friend engine;
+			timer		m_main, m_loop;
+			float64_t	m_delta;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(EngineSettings const & es);
+		static bool startup(engine_startup_settings const & s);
 
-		static bool init_window(WindowSettings const & ws);
+		static bool init_window(window_startup_settings const & s);
 
 		static bool running();
 
@@ -61,22 +64,19 @@ namespace ml
 
 		static int32_t load_plugin(path_t const & path);
 
-		static int32_t load_plugin(path_t && path);
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & time() noexcept { return s_time; }
+		ML_NODISCARD static inline auto const & get_time() noexcept { return s_time; }
 
-		ML_NODISCARD static inline auto & window() { return s_window; }
+		ML_NODISCARD static inline auto & get_window() { return s_window; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static Time s_time;
-		static RenderWindow s_window;
-
-		struct PluginLoader;
-		static PluginLoader s_plugins;
+		static engine_time		s_time;
+		static render_window	s_window;
+		struct engine_plugins;
+		static engine_plugins	s_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

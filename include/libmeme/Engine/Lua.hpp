@@ -14,12 +14,9 @@ extern "C"
 
 namespace ml
 {
-	struct ML_ENGINE_API Lua final
+	class ML_ENGINE_API Lua final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		Lua() = delete;
-
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static bool startup();
@@ -35,11 +32,6 @@ namespace ml
 		static int32_t do_string(pmr::string const & value);
 
 		static int32_t do_file(path_t const & path);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static lua_State * m_L;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

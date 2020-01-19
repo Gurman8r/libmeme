@@ -5,9 +5,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	EventListener::~EventListener()
+	event_listener::~event_listener()
 	{
-		EventSystem::remove_listener(this);
+		event_system::remove_listener(this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

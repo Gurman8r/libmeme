@@ -5,105 +5,62 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum class EngineEventType
-	{
-		MIN_ENGINE_EVENT = Event::EV_ENGINE,
-
-		EV_Enter,		// 
-		EV_Load,		// 
-		EV_BeginLoop,	// 
-		EV_Update,		// 
-		EV_Draw,		// 
-		EV_EndLoop,		// 
-		EV_Unload,		// 
-		EV_Exit,		// 
-
-		MAX_ENGINE_EVENT
-	};
-
-	static_assert(
-		(int32_t)EngineEventType::MAX_ENGINE_EVENT < 
-		(int32_t)EngineEventType::MIN_ENGINE_EVENT + Event::MAX_LIBRARY_EVENTS,
-		"too many library event types specified in " __FILE__
-	);
-
-	template <EngineEventType ID> struct EngineEvent : public T_Event<EngineEventType, ID> 
-	{
-	};
-
-
 	// Startup
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct EnterEvent final : public EngineEvent<EngineEventType::EV_Enter>
+	struct enter_event final : I_event<enter_event>
 	{
 		int32_t const argc;
 		C_string const * argv;
 
-		constexpr EnterEvent(int32_t argc, C_string const * argv) noexcept
+		constexpr enter_event(int32_t argc, C_string const * argv) noexcept
 			: argc{ argc }
 			, argv{ argv }
 		{
 		}
 	};
 
-	struct LoadEvent final : public EngineEvent<EngineEventType::EV_Load>
+	struct load_event final : I_event<load_event>
 	{
-		constexpr LoadEvent() {}
+		constexpr load_event() noexcept = default;
 	};
 
 
 	// Loop
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct BeginLoopEvent final : public EngineEvent<EngineEventType::EV_BeginLoop>
+	struct begin_loop_event final : I_event<begin_loop_event>
 	{
-		constexpr BeginLoopEvent() {}
+		constexpr begin_loop_event() noexcept = default;
 	};
 
-	struct UpdateEvent final : public EngineEvent<EngineEventType::EV_Update>
+	struct update_event final : I_event<update_event>
 	{
-		float64_t const total_time;
-		float64_t const delta_time;
-
-		constexpr UpdateEvent(float64_t total_time, float64_t delta_time)
-			: total_time{ total_time }
-			, delta_time{ delta_time }
-		{
-		}
+		constexpr update_event() noexcept = default;
 	};
 
-	struct DrawEvent final : public EngineEvent<EngineEventType::EV_Draw>
+	struct draw_event final : I_event<draw_event>
 	{
-		float64_t const total_time;
-		float64_t const delta_time;
-
-		constexpr DrawEvent(float64_t total_time, float64_t delta_time)
-			: total_time{ total_time }
-			, delta_time{ delta_time }
-		{
-		}
+		constexpr draw_event() noexcept = default;
 	};
 
-	struct EndLoopEvent final : public EngineEvent<EngineEventType::EV_EndLoop>
+	struct end_loop_event final : I_event<end_loop_event>
 	{
-		constexpr EndLoopEvent() {}
+		constexpr end_loop_event() noexcept = default;
 	};
 
 
 	// Shutdown
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct UnloadEvent final : public EngineEvent<EngineEventType::EV_Unload>
+	struct unload_event final : I_event<unload_event>
 	{
-		constexpr UnloadEvent() {}
+		constexpr unload_event() noexcept = default;
 	};
 
-	struct ExitEvent final : public EngineEvent<EngineEventType::EV_Exit>
+	struct exit_event final : I_event<exit_event>
 	{
-		constexpr ExitEvent() {}
+		constexpr exit_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

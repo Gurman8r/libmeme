@@ -3,29 +3,29 @@
 
 namespace ml
 {
-	struct Cursor final
+	struct cursor final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum class Mode
+		enum class mode
 		{
-			Normal,
-			Hidden,
-			Disabled,
+			normal,
+			hidden,
+			disabled,
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum class Shape
+		enum class shape
 		{
-			Arrow,
-			TextInput,
-			Crosshair,
-			Hand,
-			ResizeEW,
-			ResizeNS,
-			ResizeNESW,
-			ResizeNWSE,
+			arrow,
+			text_input,
+			crosshair,
+			hand,
+			resize_ew,
+			resize_ns,
+			resize_nesw,
+			resize_nwse,
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

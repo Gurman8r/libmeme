@@ -5,11 +5,11 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API Glyph final : public Trackable
+	struct ML_RENDERER_API glyph final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture		texture	{};
+		texture		graphic	{};
 		float_rect	bounds	{ 0 };
 		uint32_t	advance	{ 0 };
 
@@ -39,24 +39,24 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
 	{
-		return Glyph{ std::forward<Args>(args)... };
+		return glyph{ std::forward<Args>(args)... };
 	}
 
 	template <class Bounds, class Advance
-	> ML_NODISCARD static inline auto make_glyph(Texture const & t, Bounds && b, Advance && a)
+	> ML_NODISCARD static inline auto make_glyph(texture const & t, Bounds && b, Advance && a)
 	{
-		Glyph g;
-		g.texture = t;
+		glyph g;
+		g.graphic = t;
 		g.bounds = std::move(b);
 		g.advance = std::move(a);
 		return g;
 	}
 
 	template <class Bounds, class Advance
-	> ML_NODISCARD static inline auto make_glyph(Texture && t, Bounds && b, Advance && a) noexcept
+	> ML_NODISCARD static inline auto make_glyph(texture && t, Bounds && b, Advance && a) noexcept
 	{
-		Glyph g;
-		g.texture = std::move(t);
+		glyph g;
+		g.graphic = std::move(t);
 		g.bounds = std::move(b);
 		g.advance = std::move(a);
 		return g;

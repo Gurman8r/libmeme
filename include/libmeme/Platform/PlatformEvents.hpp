@@ -29,49 +29,11 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct Window;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum class PlatformEventType
-	{
-		MIN_WINDOW_EVENT = Event::EV_PLATFORM,
-
-		EV_Char,				// Keyboard text input
-		EV_CursorEnter,			// Cursor enter/exit window
-		EV_CursorPos,			// Cursor position changed
-		EV_FrameSize,			// Window frame size changed
-		EV_Key,					// Keyboard state changed
-		EV_Mouse,				// Mouse button state changed
-		EV_Scroll,				// Mouse scrollwheel state changed
-		EV_WindowClose,			// Fired when window is closed
-		EV_WindowError,			// Window error callback
-		EV_WindowFocus,			// Window focused/unfocused
-		EV_WindowKill,			// Tell window to close
-		EV_WindowSize,			// Window size changed
-		EV_WindowPos,			// Window position changed
-		EV_WindowFullscreen,	// Change window fullscreen state
-
-		MAX_WINDOW_EVENT
-	};
-
-	static_assert(
-		(int32_t)PlatformEventType::MAX_WINDOW_EVENT < 
-		(int32_t)PlatformEventType::MIN_WINDOW_EVENT + Event::MAX_LIBRARY_EVENTS,
-		"too many library event types specified in " __FILE__
-	);
-
-	template <PlatformEventType ID> struct PlatformEvent : public T_Event<PlatformEventType, ID>
-	{
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct CharEvent final : public PlatformEvent<PlatformEventType::EV_Char>
+	struct char_event final : I_event<char_event>
 	{
 		uint32_t const value;
 
-		constexpr CharEvent(uint32_t value) noexcept
+		constexpr char_event(uint32_t value) noexcept
 			: value{ value }
 		{
 		}
@@ -79,11 +41,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct CursorEnterEvent final : public PlatformEvent<PlatformEventType::EV_CursorEnter>
+	struct cursor_enter_event final : I_event<cursor_enter_event>
 	{
 		int32_t const entered;
 
-		constexpr CursorEnterEvent(int32_t entered) noexcept
+		constexpr cursor_enter_event(int32_t entered) noexcept
 			: entered{ entered }
 		{
 		}
@@ -91,12 +53,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct CursorPosEvent final : public PlatformEvent<PlatformEventType::EV_CursorPos>
+	struct cursor_pos_event final : I_event<cursor_pos_event>
 	{
 		float64_t const x;
 		float64_t const y;
 
-		constexpr CursorPosEvent(float64_t x, float64_t y) noexcept
+		constexpr cursor_pos_event(float64_t x, float64_t y) noexcept
 			: x{ x }
 			, y{ y }
 		{
@@ -105,14 +67,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct KeyEvent final : public PlatformEvent<PlatformEventType::EV_Key>
+	struct key_event final : I_event<key_event>
 	{
-		int32_t const key;
-		int32_t const scan;
-		int32_t const action;
-		mask8_t const mods;
+		key_code const	key;
+		int32_t const	scan;
+		int32_t const	action;
+		mask8_t const	mods;
 
-		constexpr KeyEvent(int32_t key, int32_t scan, int32_t action, mask8_t mods) noexcept
+		constexpr key_event(key_code key, int32_t scan, int32_t action, mask8_t mods) noexcept
 			: key	{ key }
 			, scan	{ scan }
 			, action{ action }
@@ -120,43 +82,43 @@ namespace ml
 		{
 		}
 
-		constexpr bool getKeyAction(int32_t k, int32_t a) const
+		constexpr bool getKeyAction(key_code k, int32_t a) const
 		{
 			return (key == k) && (action == a);
 		}
 
-		constexpr bool getPress	(int32_t k)	const { return getKeyAction(k, ML_KEY_PRESS); }
-		constexpr bool getDown	(int32_t k) const { return getKeyAction(k, ML_KEY_REPEAT); }
-		constexpr bool getUp	(int32_t k)	const { return getKeyAction(k, ML_KEY_RELEASE); }
+		constexpr bool getPress	(key_code k)	const { return getKeyAction(k, ML_KEY_PRESS); }
+		constexpr bool getDown	(key_code k) const { return getKeyAction(k, ML_KEY_REPEAT); }
+		constexpr bool getUp	(key_code k)	const { return getKeyAction(k, ML_KEY_RELEASE); }
 
-		constexpr bool getPress	(int32_t k, mask8_t m) const { return getPress(k) && (mods == m); }
-		constexpr bool getDown	(int32_t k, mask8_t m) const { return getDown(k) && (mods == m); }
-		constexpr bool getUp	(int32_t k, mask8_t m) const { return getUp(k) && (mods == m); }
+		constexpr bool getPress	(key_code k, mask8_t m) const { return getPress(k) && (mods == m); }
+		constexpr bool getDown	(key_code k, mask8_t m) const { return getDown(k) && (mods == m); }
+		constexpr bool getUp	(key_code k, mask8_t m) const { return getUp(k) && (mods == m); }
 
-		constexpr bool isShift	(int32_t k)	const { return getPress(k, { { 1, 0, 0, 0 } }); }
-		constexpr bool isCtrl	(int32_t k)	const { return getPress(k, { { 0, 1, 0, 0 } }); }
-		constexpr bool isAlt	(int32_t k)	const { return getPress(k, { { 0, 0, 1, 0 } }); }
-		constexpr bool isSuper	(int32_t k)	const { return getPress(k, { { 0, 0, 0, 1 } }); }
+		constexpr bool isShift	(key_code k)	const { return getPress(k, { { 1, 0, 0, 0 } }); }
+		constexpr bool isCtrl	(key_code k)	const { return getPress(k, { { 0, 1, 0, 0 } }); }
+		constexpr bool isAlt	(key_code k)	const { return getPress(k, { { 0, 0, 1, 0 } }); }
+		constexpr bool isSuper	(key_code k)	const { return getPress(k, { { 0, 0, 0, 1 } }); }
 
-		constexpr bool isNew	() const { return isCtrl(KeyCode::N); }
-		constexpr bool is_open	() const { return isCtrl(KeyCode::O); }
-		constexpr bool isSave	() const { return isCtrl(KeyCode::S) || getPress(KeyCode::S, { { 1, 1, 0, 0 } }); }
-		constexpr bool isUndo	() const { return isCtrl(KeyCode::Z); }
-		constexpr bool isRedo	() const { return isCtrl(KeyCode::Y) || getPress(KeyCode::Z, { { 1, 1, 0, 0 } }); }
-		constexpr bool isCut	() const { return isCtrl(KeyCode::X) || isShift(KeyCode::Delete); }
-		constexpr bool isCopy	() const { return isCtrl(KeyCode::C) || isCtrl(KeyCode::Insert); }
-		constexpr bool isPaste	() const { return isCtrl(KeyCode::V) || isShift(KeyCode::Insert); }
+		constexpr bool isNew	() const { return isCtrl(key_code::N); }
+		constexpr bool is_open	() const { return isCtrl(key_code::O); }
+		constexpr bool isSave	() const { return isCtrl(key_code::S) || getPress(key_code::S, { { 1, 1, 0, 0 } }); }
+		constexpr bool isUndo	() const { return isCtrl(key_code::Z); }
+		constexpr bool isRedo	() const { return isCtrl(key_code::Y) || getPress(key_code::Z, { { 1, 1, 0, 0 } }); }
+		constexpr bool isCut	() const { return isCtrl(key_code::X) || isShift(key_code::Delete); }
+		constexpr bool isCopy	() const { return isCtrl(key_code::C) || isCtrl(key_code::Insert); }
+		constexpr bool isPaste	() const { return isCtrl(key_code::V) || isShift(key_code::Insert); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct MouseEvent final : public PlatformEvent<PlatformEventType::EV_Mouse>
+	struct mouse_event final : I_event<mouse_event>
 	{
 		int32_t const key;
 		int32_t const action;
 		int32_t const mods;
 
-		constexpr MouseEvent(int32_t key, int32_t action, int32_t mods) noexcept
+		constexpr mouse_event(int32_t key, int32_t action, int32_t mods) noexcept
 			: key{ key }
 			, action{ action }
 			, mods{ mods }
@@ -166,12 +128,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ScrollEvent final : public PlatformEvent<PlatformEventType::EV_Scroll>
+	struct scroll_event final : I_event<scroll_event>
 	{
 		float64_t const x;
 		float64_t const y;
 
-		constexpr ScrollEvent(float64_t x, float64_t y) noexcept
+		constexpr scroll_event(float64_t x, float64_t y) noexcept
 			: x{ x }
 			, y{ y }
 		{
@@ -180,12 +142,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct FrameSizeEvent final : public PlatformEvent<PlatformEventType::EV_FrameSize>
+	struct frame_size_event final : I_event<frame_size_event>
 	{
 		int32_t const width;
 		int32_t const height;
 
-		constexpr FrameSizeEvent(int32_t width, int32_t height) noexcept
+		constexpr frame_size_event(int32_t width, int32_t height) noexcept
 			: width{ width }
 			, height{ height }
 		{
@@ -194,19 +156,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowCloseEvent final : public PlatformEvent<PlatformEventType::EV_WindowClose>
+	struct window_close_event final : I_event<window_close_event>
 	{
-		WindowCloseEvent() {}
+		window_close_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowErrorEvent final : public PlatformEvent<PlatformEventType::EV_WindowError>
+	struct window_error_event final : I_event<window_error_event>
 	{
 		int32_t const code;
 		C_string const desc;
 
-		constexpr WindowErrorEvent(int32_t code, C_string desc) noexcept
+		constexpr window_error_event(int32_t code, C_string desc) noexcept
 			: code{ code }
 			, desc{ desc }
 		{
@@ -215,11 +177,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowFocusEvent final : public PlatformEvent<PlatformEventType::EV_WindowFocus>
+	struct window_focus_event final : I_event<window_focus_event>
 	{
 		int32_t const focused;
 		
-		constexpr WindowFocusEvent(int32_t focused) noexcept
+		constexpr window_focus_event(int32_t focused) noexcept
 			: focused{ focused }
 		{
 		}
@@ -227,19 +189,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowKillEvent final : public PlatformEvent<PlatformEventType::EV_WindowKill>
-	{
-		constexpr WindowKillEvent() {}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct WindowPosEvent final : public PlatformEvent<PlatformEventType::EV_WindowPos>
+	struct window_pos_event final : I_event<window_pos_event>
 	{
 		int32_t const x;
 		int32_t const y;
 
-		constexpr WindowPosEvent(int32_t x, int32_t y) noexcept
+		constexpr window_pos_event(int32_t x, int32_t y) noexcept
 			: x{ x }
 			, y{ y }
 		{
@@ -248,26 +203,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct WindowSizeEvent final : public PlatformEvent<PlatformEventType::EV_WindowSize>
+	struct window_size_event final : I_event<window_size_event>
 	{
 		int32_t const width;
 		int32_t const height;
 
-		constexpr WindowSizeEvent(int32_t width, int32_t height) noexcept
+		constexpr window_size_event(int32_t width, int32_t height) noexcept
 			: width{ width }
 			, height{ height }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct WindowFullscreenEvent final : public PlatformEvent<PlatformEventType::EV_WindowFullscreen>
-	{
-		int32_t const value;
-		
-		constexpr WindowFullscreenEvent(int32_t value) noexcept
-			: value{ value }
 		{
 		}
 	};

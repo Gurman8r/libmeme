@@ -6,35 +6,35 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void RenderTarget::clear_color(Color const & color) const
+	void render_target::clear_color(Color const & col) const
 	{
-		this->clear_color(color, GL::DepthBufferBit);
+		this->clear_color(col, GL::DepthBufferBit);
 	}
 
-	void RenderTarget::clear_color(Color const & color, uint32_t flags) const
+	void render_target::clear_color(Color const & col, uint32_t flags) const
 	{
-		GL::clearColor(color[0], color[1], color[2], color[3]);
+		GL::clearColor(col[0], col[1], col[2], col[3]);
 
 		this->clear_flags(GL::ColorBufferBit | flags);
 	}
 
-	void RenderTarget::clear_flags(uint32_t flags) const
+	void render_target::clear_flags(uint32_t flags) const
 	{
 		GL::clear(flags);
 	}
 
-	void RenderTarget::draw(VAO const & vao, VBO const & vbo) const
+	void render_target::draw(VAO const & vao, VBO const & vbo) const
 	{
-		if (!vao || !vao) return;
+		if (!vao || !vbo) return;
 		ML_BIND_SCOPE_M(vao);
 		ML_BIND_SCOPE_M(vbo);
 		GL::drawArrays(vao.mode(), 0, vbo.size());
 		GL::flush();
 	}
 
-	void RenderTarget::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
+	void render_target::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
 	{
-		if (!vao || !vao || !ibo) return;
+		if (!vao || !vbo || !ibo) return;
 		ML_BIND_SCOPE_M(vao);
 		ML_BIND_SCOPE_M(vbo);
 		ML_BIND_SCOPE_M(ibo);
@@ -42,7 +42,7 @@ namespace ml
 		GL::flush();
 	}
 
-	void RenderTarget::viewport(int_rect const & bounds) const
+	void render_target::viewport(int_rect const & bounds) const
 	{
 		GL::viewport(
 			bounds.left(),

@@ -17,7 +17,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Font::Font()
+	font::font()
 		: m_pages	{}
 		, m_info	{}
 		, m_library	{ nullptr }
@@ -25,7 +25,7 @@ namespace ml
 	{
 	}
 
-	Font::Font(allocator_type const & alloc)
+	font::font(allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
@@ -33,7 +33,7 @@ namespace ml
 	{
 	}
 
-	Font::Font(path_t const & path, allocator_type const & alloc)
+	font::font(path_t const & path, allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
@@ -42,7 +42,7 @@ namespace ml
 		load_from_file(path);
 	}
 
-	Font::Font(Font const & other, allocator_type const & alloc)
+	font::font(font const & other, allocator_type const & alloc)
 		: m_pages	{ other.m_pages, alloc }
 		, m_info	{ { other.m_info.family, alloc }, other.m_info.locale }
 		, m_library	{ other.m_library }
@@ -50,7 +50,7 @@ namespace ml
 	{
 	}
 
-	Font::Font(Font && other, allocator_type const & alloc) noexcept
+	font::font(font && other, allocator_type const & alloc) noexcept
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
@@ -59,7 +59,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	Font::~Font()
+	font::~font()
 	{
 		if (!m_pages.empty()) { m_pages.clear(); }
 
@@ -70,20 +70,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Font & Font::operator=(Font const & other)
+	font & font::operator=(font const & other)
 	{
-		Font temp{ other };
+		font temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	Font & Font::operator=(Font && other) noexcept
+	font & font::operator=(font && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void Font::swap(Font & other) noexcept
+	void font::swap(font & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -96,7 +96,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Font::load_from_file(path_t const & path)
+	bool font::load_from_file(path_t const & path)
 	{
 		if (m_library)
 			return false;
@@ -138,7 +138,7 @@ namespace ml
 			FT_Stroker_Done(stroker);
 			FT_Done_Face(face);
 			return debug::log_error(
-				"Failed loading font \"{0}\" (failed to set the Unicode character set)",
+				"Failed loading font \"{0}\" ()",
 				path
 			);
 		}
@@ -157,7 +157,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Glyph const & Font::get_glyph(uint32_t c, uint32_t char_size) const
+	glyph const & font::get_glyph(uint32_t c, uint32_t char_size) const
 	{
 		glyph_page & page{ m_pages[char_size] };
 		
@@ -171,7 +171,7 @@ namespace ml
 		}
 	}
 
-	Glyph Font::load_glyph(uint32_t c, uint32_t char_size) const
+	glyph font::load_glyph(uint32_t c, uint32_t char_size) const
 	{
 		// face not loaded
 		FT_Face face{ static_cast<FT_Face>(m_face) };
@@ -189,13 +189,13 @@ namespace ml
 		// load character glyph
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
 		{
-			debug::log_warning("Failed loading Glyph \'{0}\'", (char)c);
+			debug::log_warning("font failed loading  glyph \'{0}\'", (char)c);
 			
 			return make_glyph();
 		}
 
 		// create the glyph
-		Glyph g = make_glyph(
+		glyph g = make_glyph(
 			make_texture(
 				GL::Texture2D,
 				GL::RGBA,
@@ -214,9 +214,9 @@ namespace ml
 		// only load a texture for characters requiring a graphic
 		if (!std::isspace(c, m_info.locale) && std::isgraph(c, m_info.locale))
 		{
-			if (!g.texture.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
+			if (!g.graphic.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
 			{
-				debug::log_warning("Failed Loading Glyph Texture: \'{0}\'", (char)c);
+				debug::log_warning("font failed loading glyph texture: \'{0}\'", (char)c);
 			}
 		}
 

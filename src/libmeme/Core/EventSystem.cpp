@@ -5,36 +5,35 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	decltype(EventSystem::m_listeners) EventSystem::m_listeners{};
+	static ds::flat_map<int32_t, ds::flat_set<event_listener *>> m_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool EventSystem::add_listener(int32_t type, EventListener * listener)
+	bool event_system::add_listener(int32_t type, event_listener * listener)
 	{
-		return (listener && (type > Event::EV_INVALID))
-			&& (m_listeners[type].insert(listener).second);
+		return listener && (m_listeners[type].insert(listener).second);
 	}
 
-	void EventSystem::fire_event(Event const & value)
+	void event_system::fire_event(event const & value)
 	{
 		if (auto const it{ m_listeners.find(value.id()) })
 		{
 			for (auto const & listener : (*it->second))
 			{
-				listener->onEvent(value);
+				listener->on_event(value);
 			}
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void EventSystem::remove_listener(int32_t type, EventListener * listener)
+	void event_system::remove_listener(int32_t type, event_listener * listener)
 	{
 		if (auto v{ m_listeners.find(type) })
 		{
 			for (auto it = (*v->second).begin(); it != (*v->second).end(); ++it)
 			{
-				if ((*it) == listener)
+				if (*it == listener)
 				{
 					(*v->second).erase(it);
 					
@@ -44,7 +43,7 @@ namespace ml
 		}
 	}
 
-	void EventSystem::remove_listener(EventListener * listener)
+	void event_system::remove_listener(event_listener * listener)
 	{
 		bool done{ false };
 		while (!done)
@@ -54,7 +53,7 @@ namespace ml
 			{
 				for (auto it = v.begin(); it != v.end(); ++it)
 				{
-					if ((*it) == listener)
+					if (*it == listener)
 					{
 						v.erase(it);
 						done = false;

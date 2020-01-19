@@ -8,7 +8,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_RENDERER_API Shader final : public Trackable
+	struct ML_RENDERER_API shader final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,36 +24,36 @@ namespace ml
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
 		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
-		using texture_cache		= typename ds::flat_map<int32_t, struct Texture const *>;
+		using texture_cache		= typename ds::flat_map<int32_t, struct texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Shader();
+		shader();
 		
-		explicit Shader(allocator_type const & alloc);
+		explicit shader(allocator_type const & alloc);
 		
-		Shader(shader_source const & source, allocator_type const & alloc = {});
+		shader(shader_source const & source, allocator_type const & alloc = {});
 		
-		Shader(path_t const & v, path_t const & f, allocator_type const & alloc = {});
+		shader(path_t const & v, path_t const & f, allocator_type const & alloc = {});
 		
-		Shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc = {});
+		shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc = {});
 		
-		Shader(Shader const & other, allocator_type const & alloc = {});
+		shader(shader const & other, allocator_type const & alloc = {});
 		
-		Shader(Shader && other, allocator_type const & alloc = {}) noexcept;
+		shader(shader && other, allocator_type const & alloc = {}) noexcept;
 		
-		~Shader();
+		~shader();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline Shader & Shader::operator=(Shader const & other)
+		inline shader & shader::operator=(shader const & other)
 		{
-			Shader temp{ other };
+			shader temp{ other };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline Shader & Shader::operator=(Shader && other) noexcept
+		inline shader & shader::operator=(shader && other) noexcept
 		{
 			this->swap(std::move(other));
 			return (*this);
@@ -77,7 +77,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(Shader const * value, bool bindTextures = true);
+		static void bind(shader const * value, bool bindTextures = true);
 
 		inline void bind(bool bindTextures = true) const { bind(this, bindTextures); }
 
@@ -87,11 +87,11 @@ namespace ml
 		
 		bool generate();
 
-		void swap(Shader & other) noexcept;
+		void swap(shader & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool set_uniform(Uniform const & value);
+		bool set_uniform(uniform const & value);
 		
 		bool set_uniform(pmr::string const & name, bool value);
 		
@@ -113,9 +113,9 @@ namespace ml
 		
 		bool set_uniform(pmr::string const & name, mat4 const & value);
 		
-		bool set_uniform(pmr::string const & name, struct Texture const * value);
+		bool set_uniform(pmr::string const & name, struct texture const * value);
 		
-		bool set_uniform(pmr::string const & name, struct Texture const & value);
+		bool set_uniform(pmr::string const & name, struct texture const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -160,7 +160,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_shader(Args && ... args)
 	{
-		return Shader{ std::forward<Args>(args)... };
+		return shader{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

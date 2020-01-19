@@ -11,9 +11,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool	Python::m_init{ false };
-	path_t	Python::m_name{};
-	path_t	Python::m_home{};
+	static bool		m_init{ false };
+	static path_t	m_name{};
+	static path_t	m_home{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

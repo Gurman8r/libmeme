@@ -6,11 +6,11 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API BufferLayout final
+	struct ML_RENDERER_API buffer_layout final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct Attribute final
+		struct attribute final
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -22,21 +22,21 @@ namespace ml
 			uint32_t	offset		{ 0 };
 			uint32_t	width		{ 0 };
 
-			constexpr Attribute() noexcept = default;
-			constexpr Attribute(Attribute const &) = default;
-			constexpr Attribute(Attribute &&) noexcept = default;
-			constexpr Attribute & operator=(Attribute const &) = default;
-			constexpr Attribute & operator=(Attribute &&) noexcept = default;
+			constexpr attribute() noexcept = default;
+			constexpr attribute(attribute const &) = default;
+			constexpr attribute(attribute &&) noexcept = default;
+			constexpr attribute & operator=(attribute const &) = default;
+			constexpr attribute & operator=(attribute &&) noexcept = default;
 
-			Attribute const & operator()() const noexcept;
+			attribute const & operator()() const noexcept;
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename Attribute;
-		using self_type			= typename BufferLayout;
+		using value_type		= typename attribute;
+		using self_type			= typename buffer_layout;
 		using initializer_type	= typename std::initializer_list<value_type>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
@@ -55,28 +55,28 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BufferLayout() noexcept
+		constexpr buffer_layout() noexcept
 			: self_type{ Default }
 		{
 		}
 
 		template <size_t N
-		> constexpr BufferLayout(const value_type(&data)[N]) noexcept
+		> constexpr buffer_layout(const value_type(&data)[N]) noexcept
 			: self_type{ &data[0], N }
 		{
 		}
 
-		constexpr BufferLayout(const_iterator first, const_iterator last) noexcept
+		constexpr buffer_layout(const_iterator first, const_iterator last) noexcept
 			: self_type{ first, (size_t)(last - first) }
 		{
 		}
 
-		constexpr BufferLayout(self_type const & copy) noexcept
+		constexpr buffer_layout(self_type const & copy) noexcept
 			: self_type{ copy.m_data, copy.m_size }
 		{
 		}
 
-		constexpr BufferLayout(const_pointer data, size_t size) noexcept
+		constexpr buffer_layout(const_pointer data, size_t size) noexcept
 			: m_data{ data }
 			, m_size{ size }
 		{
@@ -135,7 +135,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_buffer_layout(Args && ... args)
 	{
-		return BufferLayout{ std::forward<Args>(args)... };
+		return buffer_layout{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

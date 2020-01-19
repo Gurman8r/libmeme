@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API Uniform final : public Trackable
+	struct ML_RENDERER_API uniform final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -19,7 +19,7 @@ namespace ml
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, Color,
 			mat2, mat3, mat4,
-			struct Texture const *
+			struct texture const *
 		>;
 
 		using function_t = typename std::function<
@@ -44,11 +44,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform() noexcept : m_storage{} {}
+		uniform() noexcept : m_storage{} {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit Uniform(allocator_type const & alloc) : m_storage{ std::make_tuple(
+		explicit uniform(allocator_type const & alloc) : m_storage{ std::make_tuple(
 			type_t{},
 			name_t{ alloc },
 			data_t{}
@@ -58,7 +58,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit Uniform(storage_type const & value, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
+		explicit uniform(storage_type const & value, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
 			type_t{ std::get<ID_Type>(value) },
 			name_t{ std::get<ID_Name>(value), alloc },
 			data_t{ std::get<ID_Data>(value) }
@@ -66,7 +66,7 @@ namespace ml
 		{
 		}
 
-		explicit Uniform(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
+		explicit uniform(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
 			type_t{ std::move(std::get<ID_Type>(value)) },
 			name_t{ std::move(std::get<ID_Name>(value)), alloc },
 			data_t{ std::move(std::get<ID_Data>(value)) }
@@ -76,7 +76,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Uniform(Uniform const & other, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
+		uniform(uniform const & other, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
 			type_t{ std::get<ID_Type>(other.m_storage) },
 			name_t{ std::get<ID_Name>(other.m_storage), alloc },
 			data_t{ std::get<ID_Data>(other.m_storage) }
@@ -84,7 +84,7 @@ namespace ml
 		{
 		}
 
-		Uniform(Uniform && other, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
+		uniform(uniform && other, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
 			type_t{ std::move(std::get<ID_Type>(other.m_storage)) },
 			name_t{ std::move(std::get<ID_Name>(other.m_storage)), alloc },
 			data_t{ std::move(std::get<ID_Data>(other.m_storage)) }
@@ -94,20 +94,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline Uniform & operator=(Uniform const & other)
+		inline uniform & operator=(uniform const & other)
 		{
-			Uniform temp{ other };
+			uniform temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline Uniform & operator=(Uniform && other) noexcept
+		inline uniform & operator=(uniform && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(Uniform & other) noexcept
+		inline void swap(uniform & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -154,8 +154,7 @@ namespace ml
 				return std::make_optional(std::get<variable_t>(data()));
 			
 			case ID_Function:
-				if (auto const & fn{ std::get<function_t>(data()) })
-					return std::make_optional(std::invoke(fn));
+				return std::make_optional(std::invoke(std::get<function_t>(data())));
 			}
 			return std::nullopt;
 		}
@@ -177,34 +176,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool operator==(Uniform const & other)
+		ML_NODISCARD inline bool operator==(uniform const & other)
 		{
 			return (type() == other.type())
 				&& (name() == other.name());
 		}
 
-		ML_NODISCARD inline bool operator!=(Uniform const & other)
+		ML_NODISCARD inline bool operator!=(uniform const & other)
 		{
 			return !(*this == other);
 		}
 
-		ML_NODISCARD inline bool operator<(Uniform const & other)
+		ML_NODISCARD inline bool operator<(uniform const & other)
 		{
 			return (type() < other.type())
 				&& (name() < other.name());
 		}
 
-		ML_NODISCARD inline bool operator>(Uniform const & other)
+		ML_NODISCARD inline bool operator>(uniform const & other)
 		{
 			return !(*this < other);
 		}
 
-		ML_NODISCARD inline bool operator<=(Uniform const & other)
+		ML_NODISCARD inline bool operator<=(uniform const & other)
 		{
 			return (*this < other) || (*this == other);
 		}
 
-		ML_NODISCARD inline bool operator>=(Uniform const & other)
+		ML_NODISCARD inline bool operator>=(uniform const & other)
 		{
 			return (*this > other) || (*this == other);
 		}
@@ -219,7 +218,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	inline ML_SERIALIZE(std::ostream & out, Uniform const & value)
+	inline ML_SERIALIZE(std::ostream & out, uniform const & value)
 	{
 		return out
 			<< value.type().name() << " "
@@ -231,19 +230,19 @@ namespace ml
 	template <class Type, class Name, class ... Args
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
-		return Uniform{ std::make_tuple(
+		return uniform{ std::make_tuple(
 			typeof<Type>{}, std::move(name), std::forward<Args>(args)...
 		) };
 	}
 
-	ML_NODISCARD static inline auto make_uniform(Uniform const & value)
+	ML_NODISCARD static inline auto make_uniform(uniform const & value)
 	{
-		return Uniform{ value };
+		return uniform{ value };
 	}
 
-	ML_NODISCARD static inline auto make_uniform(Uniform && value) noexcept
+	ML_NODISCARD static inline auto make_uniform(uniform && value) noexcept
 	{
-		return Uniform{ std::move(value) };
+		return uniform{ std::move(value) };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

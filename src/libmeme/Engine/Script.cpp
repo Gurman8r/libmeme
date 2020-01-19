@@ -6,38 +6,38 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Script::Script()
-		: m_language{ Language::Unknown }
+	script::script()
+		: m_language{ language::unknown }
 		, m_text{ allocator_type{} }
 	{
 	}
 
-	Script::Script(allocator_type const & alloc)
-		: m_language{ Language::Unknown }
+	script::script(allocator_type const & alloc)
+		: m_language{ language::unknown }
 		, m_text{ alloc }
 	{
 	}
 	
-	Script::Script(path_t const & path, allocator_type const & alloc)
-		: m_language{ Language::Unknown }
+	script::script(path_t const & path, allocator_type const & alloc)
+		: m_language{ language::unknown }
 		, m_text{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	Script::Script(Language language, pmr::string const & text, allocator_type const & alloc)
-		: m_language{ language }
+	script::script(language lang, pmr::string const & text, allocator_type const & alloc)
+		: m_language{ lang }
 		, m_text{ text, alloc }
 	{
 	}
 	
-	Script::Script(Script const & other, allocator_type const & alloc)
+	script::script(script const & other, allocator_type const & alloc)
 		: m_language{ other.m_language }
 		, m_text{ other.m_text, alloc }
 	{
 	}
 	
-	Script::Script(Script && other, allocator_type const & alloc) noexcept
+	script::script(script && other, allocator_type const & alloc) noexcept
 		: m_language{ std::move(other.m_language) }
 		, m_text{ std::move(other.m_text), alloc }
 	{
@@ -45,20 +45,20 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Script & Script::operator=(Script const & other)
+	script & script::operator=(script const & other)
 	{
-		Script temp{ other };
+		script temp{ other };
 		swap(temp);
 		return (*this);
 	}
 	
-	Script & Script::operator=(Script && other) noexcept
+	script & script::operator=(script && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void Script::swap(Script & other) noexcept
+	void script::swap(script & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -70,26 +70,27 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Script::load_from_file(path_t const & path)
+	bool script::load_from_file(path_t const & path)
 	{
 		return !(m_text = FS::get_file_contents(path)).empty();
 	}
 
-	int32_t Script::execute()
+	int32_t script::execute()
 	{
 		return execute({});
 	}
 
-	int32_t Script::execute(pmr::vector<pmr::string> const & args)
+	int32_t script::execute(pmr::vector<pmr::string> const & args)
 	{
 		switch (m_language)
 		{
-		case Language::Python: return Python::do_string(m_text);
+		case language::python:
+			return Python::do_string(m_text);
 		
-		case Language::Lua: return Lua::do_string(m_text);
-		
-		default: return 0;
+		case language::lua:
+			return Lua::do_string(m_text);
 		}
+		return 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

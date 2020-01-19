@@ -122,7 +122,7 @@ namespace ml
 		static bool deleteFramebuffer(uint32_t const * value);
 		static void deleteFramebuffers(uint32_t count, uint32_t const * framebuffers);
 		static void blitFramebuffer(int32_t srcX0, int32_t srcY0, int32_t srcX1, int32_t srcY1, int32_t dstX0, int32_t dstY0, int32_t dstX1, int32_t dstY1, uint8_t mask, uint32_t filter);
-		static void framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t texture, int32_t level);
+		static void framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t tex, int32_t level);
 
 		// Renderbuffers
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

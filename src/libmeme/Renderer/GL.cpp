@@ -628,9 +628,9 @@ namespace ml
 		));
 	}
 
-	void GL::framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t texture, int32_t level)
+	void GL::framebufferTexture2D(uint32_t target, uint32_t attachment, uint32_t textarget, uint32_t tex, int32_t level)
 	{
-		glCheck(glFramebufferTexture2D(target, attachment, textarget, texture, level));
+		glCheck(glFramebufferTexture2D(target, attachment, textarget, tex, level));
 	}
 
 

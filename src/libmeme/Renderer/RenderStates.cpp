@@ -6,7 +6,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderStates const & RenderStates::operator()() const
+	render_states const & render_states::operator()() const
 	{
 		if (m_enabled)
 		{
@@ -20,7 +20,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	AlphaState const & AlphaState::operator()() const
+	alpha_state const & alpha_state::operator()() const
 	{
 		if (!this->enabled)
 		{
@@ -35,7 +35,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	BlendState const & BlendState::operator()() const
+	blend_state const & blend_state::operator()() const
 	{
 		if (!this->enabled)
 		{
@@ -53,7 +53,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	CullState const & CullState::operator()() const
+	cull_state const & cull_state::operator()() const
 	{
 		if (!this->enabled)
 		{
@@ -68,7 +68,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	DepthState const & DepthState::operator()() const
+	depth_state const & depth_state::operator()() const
 	{
 		if (!this->enabled)
 		{

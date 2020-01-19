@@ -9,24 +9,29 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API RenderTexture final : public Trackable, public RenderTarget
+	struct ML_RENDERER_API render_texture final : trackable, render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderTexture();
-		RenderTexture(vec2i const & size);
-		RenderTexture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format);
-		RenderTexture(RenderTexture const & other);
-		RenderTexture(RenderTexture && other) noexcept;
-		~RenderTexture();
+		render_texture();
+
+		render_texture(vec2i const & size);
+
+		render_texture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format);
+
+		render_texture(render_texture const & other);
+
+		render_texture(render_texture && other) noexcept;
+
+		~render_texture();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderTexture & operator=(RenderTexture const & other);
+		render_texture & operator=(render_texture const & other);
 
-		RenderTexture & operator=(RenderTexture && other) noexcept;
+		render_texture & operator=(render_texture && other) noexcept;
 
-		void swap(RenderTexture & other) noexcept;
+		void swap(render_texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,7 +43,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(RenderTexture const * value);
+		static void bind(render_texture const * value);
 
 		inline void bind() const { return bind(this); }
 
@@ -46,9 +51,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo; }
-
 		ML_NODISCARD inline operator bool() const noexcept { return good(); }
+
+		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo; }
 
 		ML_NODISCARD inline auto fbo() const noexcept -> FrameBufferObject const & { return m_fbo; }
 
@@ -68,7 +73,7 @@ namespace ml
 
 		ML_NODISCARD inline auto format() const noexcept -> uint32_t { return m_format; }
 
-		ML_NODISCARD inline auto texture() const noexcept -> Texture const & { return m_texture; }
+		ML_NODISCARD inline auto get_texture() const noexcept -> texture const & { return m_texture; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -79,7 +84,7 @@ namespace ml
 		uint32_t			m_colorID;
 		uint32_t			m_frameID;
 		uint32_t			m_format;
-		Texture				m_texture;
+		texture				m_texture;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -89,7 +94,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_render_texture(Args && ... args)
 	{
-		return RenderTexture{ std::forward<Args>(args)... };
+		return render_texture{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

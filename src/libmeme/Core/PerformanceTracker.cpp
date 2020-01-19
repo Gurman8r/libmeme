@@ -2,6 +2,6 @@
 
 namespace ml
 {
-	decltype(PerformanceTracker::m_curr) PerformanceTracker::m_curr{};
-	decltype(PerformanceTracker::m_prev) PerformanceTracker::m_prev{};
+	decltype(performance_tracker::m_curr) performance_tracker::m_curr{};
+	decltype(performance_tracker::m_prev) performance_tracker::m_prev{};
 }

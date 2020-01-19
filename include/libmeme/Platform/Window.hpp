@@ -44,7 +44,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API Window : public Trackable, public NonCopyable
+	struct ML_PLATFORM_API window : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -64,58 +64,58 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Window() noexcept;
+		window() noexcept;
 
-		virtual ~Window() noexcept;
+		virtual ~window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
 			pmr::string const & title, 
-			VideoMode const & display,
-			ContextSettings const & context,
+			video_mode const & display,
+			context_settings const & context,
 			int32_t flags
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Window & close();
+		window & close();
 		
-		Window & destroy();
+		window & destroy();
 
-		Window & iconify();
+		window & iconify();
 		
-		Window & make_context_current();
+		window & make_context_current();
 		
-		Window & maximize();
+		window & maximize();
 		
-		Window & restore();
+		window & restore();
 		
-		Window & swap_buffers();
+		window & swap_buffers();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Window & set_centered();
+		window & set_centered();
 		
-		Window & set_clipboard(pmr::string const & value);
+		window & set_clipboard(pmr::string const & value);
 		
-		Window & set_cursor(void * value);
+		window & set_cursor(void * value);
 		
-		Window & set_cursor_mode(Cursor::Mode value);
+		window & set_cursor_mode(cursor::mode value);
 		
-		Window & set_cursor_pos(vec2i const & value);
+		window & set_cursor_pos(vec2i const & value);
 		
-		Window & set_fullscreen(bool value);
+		window & set_fullscreen(bool value);
 		
-		Window & set_icon(size_t w, size_t h, byte_t const * pixels);
+		window & set_icon(size_t w, size_t h, byte_t const * pixels);
 		
-		Window & set_position(vec2i const & value);
+		window & set_position(vec2i const & value);
 		
-		Window & set_monitor(void * value);
+		window & set_monitor(void * value);
 		
-		Window & set_size(vec2u const & value);
+		window & set_size(vec2u const & value);
 		
-		Window & set_title(pmr::string const & value);
+		window & set_title(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -161,21 +161,21 @@ namespace ml
 
 		ML_NODISCARD static void * create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
 		
-		ML_NODISCARD static void * create_standard_cursor(Cursor::Shape value);
+		ML_NODISCARD static void * create_standard_cursor(cursor::shape value);
 
 		ML_NODISCARD static int32_t extension_supported(C_string value);
 
 		ML_NODISCARD static void * get_context_current();
 
-		ML_NODISCARD static VideoMode const & get_desktop_mode();
+		ML_NODISCARD static video_mode const & get_desktop_mode();
 		
-		ML_NODISCARD static pmr::vector<VideoMode> const & get_fullscreen_modes();
+		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
 
 		ML_NODISCARD static proc_fn get_proc_address(C_string value);
 		
 		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
 
-		ML_NODISCARD static float64_t get_time();
+		ML_NODISCARD static float64_t time();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -196,7 +196,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
 
-		ML_NODISCARD inline auto get_context() const -> ContextSettings const & { return m_context; }
+		ML_NODISCARD inline auto get_context() const -> context_settings const & { return m_context; }
 
 		ML_NODISCARD inline auto get_frame_aspect() const -> float_t { return ML_ASPECT2(get_frame_size()); };
 
@@ -216,7 +216,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_title() const -> pmr::string const & { return m_title; }
 
-		ML_NODISCARD inline auto get_video_mode() const -> VideoMode const & { return m_video; }
+		ML_NODISCARD inline auto get_video_mode() const -> video_mode const & { return m_video; }
 
 		ML_NODISCARD inline auto get_width() const -> uint32_t { return get_size()[0]; }
 
@@ -227,8 +227,8 @@ namespace ml
 		void * 			m_monitor;
 		void * 			m_share;
 		pmr::string		m_title;
-		VideoMode		m_video;
-		ContextSettings	m_context;
+		video_mode		m_video;
+		context_settings	m_context;
 		int32_t			m_flags;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

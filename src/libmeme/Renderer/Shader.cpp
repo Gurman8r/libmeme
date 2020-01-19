@@ -5,11 +5,11 @@
 
 namespace ml
 {
-	struct Shader::UniformBinder final
+	struct shader::UniformBinder final
 	{
 		union { uint32_t program; uint32_t cached; int32_t location; };
 
-		explicit UniformBinder(Shader & s, pmr::string const & name)
+		explicit UniformBinder(shader & s, pmr::string const & name)
 			: program	{ s ? s.handle() : NULL }
 			, cached	{ s ? GL::getProgramHandle(GL::ProgramObject) : NULL }
 			, location	{ s ? s.get_uniform_location(name) : -1 }
@@ -39,12 +39,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Shader::Shader()
-		: Shader{ allocator_type{} }
+	shader::shader()
+		: shader{ allocator_type{} }
 	{
 	}
 
-	Shader::Shader(allocator_type const & alloc)
+	shader::shader(allocator_type const & alloc)
 		: m_handle		{ NULL }
 		, m_source		{ nullptr, nullptr, nullptr }
 		, m_attributes	{ alloc }
@@ -53,44 +53,44 @@ namespace ml
 	{
 	}
 
-	Shader::Shader(shader_source const & source, allocator_type const & alloc)
-		: Shader{ alloc }
+	shader::shader(shader_source const & source, allocator_type const & alloc)
+		: shader{ alloc }
 	{
 		load_from_source(source);
 	}
 
-	Shader::Shader(path_t const & v, path_t const & f, allocator_type const & alloc)
-		: Shader{ alloc }
+	shader::shader(path_t const & v, path_t const & f, allocator_type const & alloc)
+		: shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	Shader::Shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc)
-		: Shader{ alloc }
+	shader::shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc)
+		: shader{ alloc }
 	{
 		load_from_file(v, g, f);
 	}
 
-	Shader::Shader(Shader const & other, allocator_type const & alloc)
-		: Shader{ alloc }
+	shader::shader(shader const & other, allocator_type const & alloc)
+		: shader{ alloc }
 	{
 		load_from_source(other.m_source);
 	}
 
-	Shader::Shader(Shader && other, allocator_type const & alloc) noexcept
-		: Shader{ alloc }
+	shader::shader(shader && other, allocator_type const & alloc) noexcept
+		: shader{ alloc }
 	{
 		swap(std::move(other));
 	}
 
-	Shader::~Shader()
+	shader::~shader()
 	{
 		destroy();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::load_from_file(path_t const & v_file, path_t const & f_file)
+	bool shader::load_from_file(path_t const & v_file, path_t const & f_file)
 	{
 		return load_from_memory(
 			FS::get_file_contents(v_file).c_str(),
@@ -98,7 +98,7 @@ namespace ml
 		);
 	}
 
-	bool Shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
+	bool shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
 	{
 		return load_from_memory(
 			FS::get_file_contents(v_file).c_str(),
@@ -107,22 +107,22 @@ namespace ml
 		);
 	}
 
-	bool Shader::load_from_source(shader_source const & value)
+	bool shader::load_from_source(shader_source const & value)
 	{
 		return load_from_memory(value.vs, value.gs, value.fs);
 	}
 
-	bool Shader::load_from_memory(pmr::string const & vs, pmr::string const & fs)
+	bool shader::load_from_memory(pmr::string const & vs, pmr::string const & fs)
 	{
 		return load_from_memory(vs.c_str(), nullptr, fs.c_str());
 	}
 
-	bool Shader::load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs)
+	bool shader::load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs)
 	{
 		return load_from_memory(vs.c_str(), gs.c_str(), fs.c_str());
 	}
 
-	bool Shader::load_from_memory(C_string vs, C_string fs)
+	bool shader::load_from_memory(C_string vs, C_string fs)
 	{
 		return compile(
 			m_source.vs = vs,
@@ -131,7 +131,7 @@ namespace ml
 		) == EXIT_SUCCESS;
 	}
 
-	bool Shader::load_from_memory(C_string vs, C_string gs, C_string fs)
+	bool shader::load_from_memory(C_string vs, C_string gs, C_string fs)
 	{
 		return compile(
 			m_source.vs = vs,
@@ -142,7 +142,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Shader::bind(Shader const * value, bool bindTextures)
+	void shader::bind(shader const * value, bool bindTextures)
 	{
 		if (!value || !value->m_handle)
 		{
@@ -158,14 +158,14 @@ namespace ml
 			{
 				GL::uniform1i(location, index);
 				GL::activeTexture(GL::Texture0 + (index++));
-				Texture::bind(tex);
+				texture::bind(tex);
 			});
 		}
 	}
 
-	bool Shader::destroy()
+	bool shader::destroy()
 	{
-		Shader::bind(nullptr);
+		shader::bind(nullptr);
 		if (m_handle)
 		{
 			GL::deleteShader(m_handle);
@@ -180,12 +180,12 @@ namespace ml
 		return !(m_handle);
 	}
 
-	bool Shader::generate()
+	bool shader::generate()
 	{
 		return !m_handle && (m_handle = GL::createProgram());
 	}
 
-	void Shader::swap(Shader & other) noexcept
+	void shader::swap(shader & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -199,7 +199,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Shader::set_uniform(Uniform const & value)
+	bool shader::set_uniform(uniform const & value)
 	{
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
@@ -234,79 +234,79 @@ namespace ml
 		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Texture>: if (auto v{ value.get<Texture const *>() })
+		case hashof_v<texture>: if (auto v{ value.get<texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, bool value)
+	bool shader::set_uniform(pmr::string const & name, bool value)
 	{
 		return set_uniform(name, static_cast<int32_t>(value));
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, int32_t value)
+	bool shader::set_uniform(pmr::string const & name, int32_t value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, float32_t value)
+	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, vec2 const & value)
+	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, vec3 const & value)
+	bool shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, vec4 const & value)
+	bool shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, Color const & value)
+	bool shader::set_uniform(pmr::string const & name, Color const & value)
 	{
 		return set_uniform(name, value.rgba());
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, mat2 const & value)
+	bool shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, mat3 const & value)
+	bool shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, mat4 const & value)
+	bool shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, Texture const & value)
+	bool shader::set_uniform(pmr::string const & name, texture const & value)
 	{
 		UniformBinder const u{ (*this), name };
 		if (u)
@@ -332,14 +332,14 @@ namespace ml
 		return u;
 	}
 
-	bool Shader::set_uniform(pmr::string const & name, Texture const * value)
+	bool shader::set_uniform(pmr::string const & name, texture const * value)
 	{
 		return value ? set_uniform(name, (*value)) : false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Shader::get_attribute_location(pmr::string const & value)
+	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
 		if (auto const it{ m_attributes.find(value) })
 		{
@@ -355,7 +355,7 @@ namespace ml
 		}
 	}
 
-	int32_t Shader::get_uniform_location(pmr::string const & value)
+	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
 		if (auto const it{ m_uniforms.find(value) })
 		{
@@ -371,7 +371,7 @@ namespace ml
 		}
 	}
 
-	int32_t Shader::compile(C_string vs, C_string gs, C_string fs)
+	int32_t shader::compile(C_string vs, C_string gs, C_string fs)
 	{
 		// Shaders Available
 		if (!GL::shadersAvailable())

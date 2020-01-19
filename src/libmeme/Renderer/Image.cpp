@@ -8,9 +8,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image const Image::Default{ ([]()
+	image const image::Default{ ([]()
 	{
-		Image img { vec2u{ 512, 512 }, 3 };
+		image img { vec2u{ 512, 512 }, 3 };
 		for (size_t y = 0; y < img.height(); y++)
 		{
 			for (size_t x = 0; x < img.width(); x++)
@@ -30,34 +30,34 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image::Image()
-		: Image{ allocator_type{} }
+	image::image()
+		: image{ allocator_type{} }
 	{
 	}
 
-	Image::Image(allocator_type const & alloc)
+	image::image(allocator_type const & alloc)
 		: m_size	{ 0 }
 		, m_channels{ 0 }
 		, m_pixels	{ alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, allocator_type const & alloc)
-		: Image{ size, 4, alloc }
+	image::image(vec2u const & size, allocator_type const & alloc)
+		: image{ size, 4, alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, size_t channels, allocator_type const & alloc)
-		: Image{ size, channels, pixels_type{}, alloc }
+	image::image(vec2u const & size, size_t channels, allocator_type const & alloc)
+		: image{ size, channels, pixels_type{}, alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc)
-		: Image{ size, 4, pixels, alloc }
+	image::image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc)
+		: image{ size, 4, pixels, alloc }
 	{
 	}
 
-	Image::Image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc)
+	image::image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc)
 		: m_size	{ size }
 		, m_channels{ channels }
 		, m_pixels	{ pixels, alloc }
@@ -68,45 +68,45 @@ namespace ml
 		}
 	}
 
-	Image::Image(path_t const & path, allocator_type const & alloc)
-		: Image{ path, false, alloc }
+	image::image(path_t const & path, allocator_type const & alloc)
+		: image{ path, false, alloc }
 	{
 	}
 
-	Image::Image(path_t const & path, bool flip, allocator_type const & alloc)
-		: Image{ path, flip, 0, alloc }
+	image::image(path_t const & path, bool flip, allocator_type const & alloc)
+		: image{ path, flip, 0, alloc }
 	{
 	}
 
-	Image::Image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc)
-		: Image{ alloc }
+	image::image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc)
+		: image{ alloc }
 	{
 		load_from_file(path, flip, req_comp);
 	}
 
-	Image::Image(Image const & other, allocator_type const & alloc)
+	image::image(image const & other, allocator_type const & alloc)
 		: m_size	{ other.m_size }
 		, m_channels{ other.m_channels }
 		, m_pixels	{ other.m_pixels }
 	{
 	}
 
-	Image::Image(Image && other, allocator_type const & alloc) noexcept
-		: Image{ alloc }
+	image::image(image && other, allocator_type const & alloc) noexcept
+		: image{ alloc }
 	{
 		swap(std::move(other));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::operator=(Image const & other)
+	image & image::operator=(image const & other)
 	{
-		Image temp{ other };
+		image temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	Image & Image::operator=(Image && other) noexcept
+	image & image::operator=(image && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
@@ -114,17 +114,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Image::load_from_file(path_t const & path)
+	bool image::load_from_file(path_t const & path)
 	{
 		return load_from_file(path, true);
 	}
 
-	bool Image::load_from_file(path_t const & path, bool flip)
+	bool image::load_from_file(path_t const & path, bool flip)
 	{
 		return load_from_file(path, flip, 0);
 	}
 
-	bool Image::load_from_file(path_t const & path, bool flip, size_t req_comp)
+	bool image::load_from_file(path_t const & path, bool flip, size_t req_comp)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 
@@ -151,17 +151,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::create_from_color(vec2u const & size, Color32 const & color)
+	image & image::create_from_color(vec2u const & size, Color32 const & col)
 	{
-		return create_from_color(size, channels(), color);
+		constexpr auto foo = sizeof(float);
+		return create_from_color(size, channels(), col);
 	}
 
-	Image & Image::create_from_color(Color32 const & color)
+	image & image::create_from_color(Color32 const & col)
 	{
-		return create_from_color(size(), channels(), color);
+		return create_from_color(size(), channels(), col);
 	}
 	
-	Image & Image::create_from_color(vec2u const & size, size_t channels, Color32 const & color)
+	image & image::create_from_color(vec2u const & size, size_t channels, Color32 const & col)
 	{
 		if (size[0] && size[1] && channels)
 		{
@@ -172,10 +173,10 @@ namespace ml
 			iterator it { begin() };
 			while (it != end())
 			{
-				if (m_channels >= 1) *it++ = color[0];
-				if (m_channels >= 2) *it++ = color[1];
-				if (m_channels >= 3) *it++ = color[2];
-				if (m_channels >= 4) *it++ = color[3];
+				if (m_channels >= 1) *it++ = col[0];
+				if (m_channels >= 2) *it++ = col[1];
+				if (m_channels >= 3) *it++ = col[2];
+				if (m_channels >= 4) *it++ = col[3];
 			}
 		}
 		else
@@ -187,17 +188,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	Image & Image::create_from_pixels(vec2u const & size, pixels_type const & pixels)
+	image & image::create_from_pixels(vec2u const & size, pixels_type const & pixels)
 	{
 		return create_from_pixels(size, m_channels, pixels);
 	}
 
-	Image & Image::create_from_pixels(pixels_type const & pixels)
+	image & image::create_from_pixels(pixels_type const & pixels)
 	{
 		return create_from_pixels(m_size, m_channels, pixels);
 	}
 	
-	Image & Image::create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels)
+	image & image::create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{
@@ -214,14 +215,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Image::clear() noexcept
+	void image::clear() noexcept
 	{
 		m_size = { 0 };
 		m_channels = 0;
 		m_pixels.clear();
 	}
 
-	void Image::swap(Image & other) noexcept
+	void image::swap(image & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -235,7 +236,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Image & Image::flip_vertically()
+	image & image::flip_vertically()
 	{
 		if (!empty())
 		{
@@ -255,7 +256,7 @@ namespace ml
 		return (*this);
 	}
 
-	Image & Image::flip_horizontally()
+	image & image::flip_horizontally()
 	{
 		if (!empty())
 		{
@@ -274,7 +275,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t Image::get_format() const
+	uint32_t image::get_format() const
 	{
 		switch (channels())
 		{
@@ -287,7 +288,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	std::optional<Color32> Image::get_pixel(size_t index) const
+	std::optional<Color32> image::get_pixel(size_t index) const
 	{
 		return (index < capacity())
 			? std::make_optional(make_color32(
@@ -299,30 +300,30 @@ namespace ml
 			: std::nullopt;
 	}
 
-	std::optional<Color32> Image::get_pixel(size_t x, size_t y) const
+	std::optional<Color32> image::get_pixel(size_t x, size_t y) const
 	{
 		return get_pixel((x + y * m_size[0]) * m_channels);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Image::set_pixel(size_t index, Color32 const & color)
+	bool image::set_pixel(size_t index, Color32 const & col)
 	{
 		if (index < capacity())
 		{
 			iterator it{ begin() + index };
-			if (m_channels >= 1) *it++ = color[0];
-			if (m_channels >= 2) *it++ = color[1];
-			if (m_channels >= 3) *it++ = color[2];
-			if (m_channels >= 4) *it++ = color[3];
+			if (m_channels >= 1) *it++ = col[0];
+			if (m_channels >= 2) *it++ = col[1];
+			if (m_channels >= 3) *it++ = col[2];
+			if (m_channels >= 4) *it++ = col[3];
 			return true;
 		}
 		return false;
 	}
 
-	bool Image::set_pixel(size_t x, size_t y, Color32 const & color)
+	bool image::set_pixel(size_t x, size_t y, Color32 const & col)
 	{
-		return set_pixel((x + y * m_size[0]) * m_channels, color);
+		return set_pixel((x + y * m_size[0]) * m_channels, col);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

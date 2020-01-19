@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_PLATFORM_API SharedLibrary final : public Trackable, public NonCopyable
+	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -15,19 +15,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		SharedLibrary() noexcept;
+		shared_library() noexcept;
 		
-		explicit SharedLibrary(path_t const & path);
+		explicit shared_library(path_t const & path);
 		
-		SharedLibrary(SharedLibrary && copy) noexcept;
+		shared_library(shared_library && copy) noexcept;
 		
-		~SharedLibrary();
+		~shared_library();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		SharedLibrary & operator=(SharedLibrary && other) noexcept;
+		shared_library & operator=(shared_library && other) noexcept;
 
-		void swap(SharedLibrary & other) noexcept;
+		void swap(shared_library & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -75,32 +75,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool operator==(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator==(shared_library const & other) const
 		{
 			return !(*this < other) && !(other < *this);
 		}
 
-		ML_NODISCARD inline bool operator!=(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator!=(shared_library const & other) const
 		{
 			return !(*this == other);
 		}
 
-		ML_NODISCARD inline bool operator<(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator<(shared_library const & other) const
 		{
 			return (m_instance < other.m_instance);
 		}
 
-		ML_NODISCARD inline bool operator>(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator>(shared_library const & other) const
 		{
 			return !(*this < other);
 		}
 
-		ML_NODISCARD inline bool operator<=(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator<=(shared_library const & other) const
 		{
 			return (*this < other) || (*this == other);
 		}
 
-		ML_NODISCARD inline bool operator>=(SharedLibrary const & other) const
+		ML_NODISCARD inline bool operator>=(shared_library const & other) const
 		{
 			return (*this > other) || (*this == other);
 		}
@@ -120,7 +120,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_shared_library(Args && ... args)
 	{
-		return SharedLibrary{ std::forward<Args>(args)... };
+		return shared_library{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

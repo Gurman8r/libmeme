@@ -2,28 +2,25 @@
 #define _ML_EDITOR_HPP_
 
 #include <libmeme/Core/Singleton.hpp>
-#include <libmeme/Editor/Dockspace.hpp>
-#include <libmeme/Editor/MainMenuBar.hpp>
+#include <libmeme/Editor/Editor_Dockspace.hpp>
+#include <libmeme/Editor/Editor_MainMenuBar.hpp>
 
 namespace ml
 {
-	struct ML_EDITOR_API Editor final
+	class ML_EDITOR_API editor final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Editor() = delete;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct EditorSettings final
+		struct editor_startup_settings final
 		{
-			void *	window_handle;
-			bool	install_callbacks;
+			void * window_handle;
+			bool install_callbacks;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(EditorSettings const & es);
+		static bool startup(editor_startup_settings const & s);
 
 		static void new_frame();
 
@@ -45,13 +42,13 @@ namespace ml
 
 		static inline auto & dockspace() noexcept { return s_dockspace; }
 
-		static inline auto & main_menu() noexcept { return s_mainMenuBar; }
+		static inline auto & main_menu() noexcept { return s_main_menu; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static Dockspace s_dockspace;
-		static MainMenuBar s_mainMenuBar;
+		static editor_dockspace s_dockspace;
+		static editor_main_menu s_main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

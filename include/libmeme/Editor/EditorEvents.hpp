@@ -7,62 +7,29 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum class EditorEventType
+	struct begin_gui_event final : I_event<begin_gui_event>
 	{
-		MIN_EDITOR_EVENT = Event::EV_EDITOR,
-
-		EV_BeginGui,
-		EV_Gui,
-		EV_EndGui,
-
-		EV_Dockspace,
-		EV_MainMenuBar,
-
-		MAX_EDITOR_EVENT
+		constexpr begin_gui_event() noexcept = default;
 	};
 
-	static_assert(
-		(int32_t)EditorEventType::MAX_EDITOR_EVENT < 
-		(int32_t)EditorEventType::MIN_EDITOR_EVENT + Event::MAX_LIBRARY_EVENTS,
-		"too many library event types specified in " __FILE__
-	);
-
-	template <EditorEventType ID> struct EditorEvent : public T_Event<EditorEventType, ID>
+	struct gui_event final : I_event<gui_event>
 	{
+		constexpr gui_event() noexcept = default;
+	};
+
+	struct end_gui_event final : I_event<end_gui_event>
+	{
+		constexpr end_gui_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct BeginGuiEvent final : public EditorEvent<EditorEventType::EV_BeginGui>
+	struct dockspace_event final : I_event<dockspace_event>
 	{
-		constexpr BeginGuiEvent() {}
-	};
+		struct editor_dockspace & d;
 
-	struct GuiEvent final : public EditorEvent<EditorEventType::EV_Gui>
-	{
-		float64_t const total_time;
-		float64_t const delta_time;
-
-		constexpr GuiEvent(float64_t total_time, float64_t delta_time)
-			: total_time{ total_time }
-			, delta_time{ delta_time }
-		{
-		}
-	};
-
-	struct EndGuiEvent final : public EditorEvent<EditorEventType::EV_EndGui>
-	{
-		constexpr EndGuiEvent() {}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct DockspaceEvent final : public EditorEvent<EditorEventType::EV_Dockspace>
-	{
-		struct Dockspace & dockspace;
-
-		constexpr DockspaceEvent(struct Dockspace & dockspace)
-			: dockspace{ dockspace }
+		constexpr dockspace_event(struct editor_dockspace & d) noexcept
+			: d{ d }
 		{
 		}
 	};

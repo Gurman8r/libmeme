@@ -17,43 +17,43 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Model::Model()
+	model::model()
 		: m_storage{}
 	{
 	}
 
-	Model::Model(allocator_type const & alloc)
+	model::model(allocator_type const & alloc)
 		: m_storage{ alloc }
 	{
 	}
 
-	Model::Model(initializer_type init, allocator_type const & alloc)
+	model::model(initializer_type init, allocator_type const & alloc)
 		: m_storage{ init, alloc }
 	{
 	}
 
-	Model::Model(path_t const & path, allocator_type const & alloc)
+	model::model(path_t const & path, allocator_type const & alloc)
 		: m_storage{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	Model::Model(storage_type const & storage, allocator_type const & alloc)
+	model::model(storage_type const & storage, allocator_type const & alloc)
 		: m_storage{ storage, alloc }
 	{
 	}
 
-	Model::Model(storage_type && storage, allocator_type const & alloc) noexcept
+	model::model(storage_type && storage, allocator_type const & alloc) noexcept
 		: m_storage{ std::move(storage), alloc }
 	{
 	}
 
-	Model::Model(Model const & other, allocator_type const & alloc)
+	model::model(model const & other, allocator_type const & alloc)
 		: m_storage{ other.m_storage, alloc }
 	{
 	}
 
-	Model::Model(Model && other, allocator_type const & alloc) noexcept
+	model::model(model && other, allocator_type const & alloc) noexcept
 		: m_storage{ alloc }
 	{
 		swap(std::move(other));
@@ -61,20 +61,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Model & Model::operator=(Model const & other)
+	model & model::operator=(model const & other)
 	{
-		Model temp{ other };
+		model temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	Model & Model::operator=(Model && other) noexcept
+	model & model::operator=(model && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void Model::swap(Model & other) noexcept
+	void model::swap(model & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -84,7 +84,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Model::load_from_file(path_t const & path)
+	bool model::load_from_file(path_t const & path)
 	{
 		return load_from_file(path,
 			aiProcess_CalcTangentSpace |
@@ -96,7 +96,7 @@ namespace ml
 		);
 	}
 
-	bool Model::load_from_file(path_t const & path, uint32_t flags)
+	bool model::load_from_file(path_t const & path, uint32_t flags)
 	{
 		// open scene
 		Assimp::Importer _ai;
@@ -155,7 +155,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Model::draw(RenderTarget const & target, Model const * value)
+	void model::draw(render_target const & target, model const * value)
 	{
 		if (!value) { return; }
 

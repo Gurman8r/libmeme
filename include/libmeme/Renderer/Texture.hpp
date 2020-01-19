@@ -23,49 +23,49 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_RENDERER_API Texture final : public Trackable
+	struct ML_RENDERER_API texture final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags);
+		texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags);
 		
-		Texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags);
+		texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags);
 		
-		Texture(uint32_t sampler, uint32_t format, int32_t flags);
+		texture(uint32_t sampler, uint32_t format, int32_t flags);
 		
-		Texture(uint32_t sampler, int32_t flags);
+		texture(uint32_t sampler, int32_t flags);
 		
-		Texture(uint32_t sampler);
+		texture(uint32_t sampler);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture();
+		texture();
 		
-		Texture(path_t const & path);
+		texture(path_t const & path);
 		
-		Texture(Image const & image);
+		texture(image const & image);
 		
-		Texture(Texture const & other);
+		texture(texture const & other);
 		
-		Texture(Texture && other) noexcept;
+		texture(texture && other) noexcept;
 		
-		~Texture();
+		~texture();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture & operator=(Texture const & other);
+		texture & operator=(texture const & other);
 
-		Texture & operator=(Texture && other) noexcept;
+		texture & operator=(texture && other) noexcept;
 
-		void swap(Texture & other) noexcept;
+		void swap(texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool load_from_file(path_t const & path);
 
-		bool load_from_image(Image const & image);
+		bool load_from_image(image const & image);
 
-		bool load_from_texture(Texture const & other);
+		bool load_from_texture(texture const & other);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -73,7 +73,7 @@ namespace ml
 
 		bool destroy();
 
-		static void bind(Texture const * value);
+		static void bind(texture const * value);
 
 		inline void bind() const { bind(this); }
 
@@ -83,9 +83,9 @@ namespace ml
 
 		bool create(vec2u const & size);
 		
-		bool create(Image const & image, vec2u const & size);
+		bool create(image const & image, vec2u const & size);
 		
-		bool create(Image const & image, uint32_t w, uint32_t h);
+		bool create(image const & image, uint32_t w, uint32_t h);
 		
 		bool create(byte_t const * pixels, vec2u const & size);
 		
@@ -93,21 +93,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool update(Texture const & other, uint_rect const & area);
+		bool update(texture const & other, uint_rect const & area);
 		
-		bool update(Texture const & other, vec2u const & position, vec2u const & size);
+		bool update(texture const & other, vec2u const & position, vec2u const & size);
 		
-		bool update(Texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+		bool update(texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool update(Image const & image);
+		bool update(image const & image);
 		
-		bool update(Image const & image, uint_rect const & area);
+		bool update(image const & image, uint_rect const & area);
 		
-		bool update(Image const & image, vec2u const & position, vec2u const & size);
+		bool update(image const & image, vec2u const & position, vec2u const & size);
 		
-		bool update(Image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
+		bool update(image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -131,7 +131,7 @@ namespace ml
 
 		ML_NODISCARD uint32_t channels() const noexcept;
 
-		ML_NODISCARD Image copy_to_image() const;
+		ML_NODISCARD image copy_to_image() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -188,7 +188,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_texture(Args && ... args)
 	{
-		return Texture{ std::forward<Args>(args)... };
+		return texture{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

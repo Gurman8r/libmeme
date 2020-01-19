@@ -8,7 +8,7 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API Image final : public Trackable
+	struct ML_RENDERER_API image final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -21,37 +21,37 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static Image const Default;
+		static image const Default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image();
+		image();
 		
-		explicit Image(allocator_type const & alloc);
+		explicit image(allocator_type const & alloc);
 		
-		Image(vec2u const & size, allocator_type const & alloc = {});
+		image(vec2u const & size, allocator_type const & alloc = {});
 		
-		Image(vec2u const & size, size_t channels, allocator_type const & alloc = {});
+		image(vec2u const & size, size_t channels, allocator_type const & alloc = {});
 		
-		Image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc = {});
 		
-		Image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc = {});
 		
-		Image(path_t const & path, allocator_type const & alloc = {});
+		image(path_t const & path, allocator_type const & alloc = {});
 		
-		Image(path_t const & path, bool flip, allocator_type const & alloc = {});
+		image(path_t const & path, bool flip, allocator_type const & alloc = {});
 		
-		Image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc = {});
+		image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc = {});
 		
-		Image(Image const & other, allocator_type const & alloc = {});
+		image(image const & other, allocator_type const & alloc = {});
 		
-		Image(Image && other, allocator_type const & alloc = {}) noexcept;
+		image(image && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & operator=(Image const & other);
+		image & operator=(image const & other);
 
-		Image & operator=(Image && other) noexcept;
+		image & operator=(image && other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -63,31 +63,31 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & create_from_color(vec2u const & size, Color32 const & color);
+		image & create_from_color(vec2u const & size, Color32 const & color);
 		
-		Image & create_from_color(Color32 const & color);
+		image & create_from_color(Color32 const & color);
 		
-		Image & create_from_color(vec2u const & size, size_t channels, Color32 const & color);
+		image & create_from_color(vec2u const & size, size_t channels, Color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Image & create_from_pixels(vec2u const & size, pixels_type const & pixels);
+		image & create_from_pixels(vec2u const & size, pixels_type const & pixels);
 		
-		Image & create_from_pixels(pixels_type const & pixels);
+		image & create_from_pixels(pixels_type const & pixels);
 		
-		Image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels);
+		image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void clear() noexcept;
 
-		void swap(Image & other) noexcept;
+		void swap(image & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		Image & flip_vertically();
+		image & flip_vertically();
 
-		Image & flip_horizontally();
+		image & flip_horizontally();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -174,7 +174,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_image(Args && ... args)
 	{
-		return Image{ std::forward<Args>(args)... };
+		return image{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

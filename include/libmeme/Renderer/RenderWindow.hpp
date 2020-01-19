@@ -8,18 +8,18 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_RENDERER_API RenderWindow : public Window, public RenderTarget
+	struct ML_RENDERER_API render_window : window, render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		RenderWindow() noexcept;
+		render_window() noexcept;
 
-		virtual ~RenderWindow() noexcept = default;
+		virtual ~render_window() noexcept = default;
 
 		virtual bool create(
 			pmr::string const & title,
-			VideoMode const & display,
-			ContextSettings const & context,
+			video_mode const & display,
+			context_settings const & context,
 			int32_t flags
 		) override;
 

@@ -7,35 +7,35 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API Script final : public Trackable
+	struct ML_ENGINE_API script final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		enum class Language { Unknown, Python, Lua };
+		enum class language { unknown, python, lua };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Script();
+		script();
 		
-		explicit Script(allocator_type const & alloc);
+		explicit script(allocator_type const & alloc);
 		
-		Script(path_t const & path, allocator_type const & alloc = {});
+		script(path_t const & path, allocator_type const & alloc = {});
 		
-		Script(Language language, pmr::string const & text, allocator_type const & alloc = {});
+		script(language lang, pmr::string const & text, allocator_type const & alloc = {});
 		
-		Script(Script const & other, allocator_type const & alloc = {});
+		script(script const & other, allocator_type const & alloc = {});
 		
-		Script(Script && other, allocator_type const & alloc = {}) noexcept;
+		script(script && other, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Script & operator=(Script const & other);
+		script & operator=(script const & other);
 
-		Script & operator=(Script && other) noexcept;
+		script & operator=(script && other) noexcept;
 
-		void swap(Script & other) noexcept;
+		void swap(script & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,19 +47,19 @@ namespace ml
 
 		template <class ... Args> inline int32_t operator()(Args && ... args)
 		{
-			return execute(std::forward<Args>(args)...);
+			return execute({ std::forward<Args>(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto language() const noexcept -> Language { return m_language; }
+		inline auto get_language() const noexcept -> language { return m_language; }
 
-		inline auto text() const noexcept -> pmr::string const & { return m_text; }
+		inline auto get_text() const noexcept -> pmr::string const & { return m_text; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		Language m_language;
+		language m_language;
 
 		pmr::string m_text;
 

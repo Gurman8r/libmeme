@@ -7,14 +7,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct BitSet final
+	template <class T> struct bit_set final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { Size = sizeof(T) * 8 };
 
 		using value_type		= typename T;
-		using self_type			= typename BitSet<value_type>;
+		using self_type			= typename bit_set<value_type>;
 		using array_type		= typename ds::array<bool, Size>;
 		using pointer			= typename value_type *;
 		using reference			= typename value_type &;
@@ -23,31 +23,31 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitSet(value_type const value) noexcept : m_value{ value } {}
+		constexpr bit_set(value_type const value) noexcept : m_value{ value } {}
 
-		constexpr BitSet() noexcept : self_type{ 0 } {}
+		constexpr bit_set() noexcept : self_type{ 0 } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitSet(self_type const & other)
+		constexpr bit_set(self_type const & other)
 			: self_type{ other.m_value }
 		{
 		}
 
-		constexpr BitSet(self_type && other) noexcept
+		constexpr bit_set(self_type && other) noexcept
 			: self_type{ std::move(other.m_value) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BitSet(array_type const & value)
+		constexpr bit_set(array_type const & value)
 			: self_type{ from_bits<array_type, T, value.size()>(value) }
 		{
 		}
 
 		template <class U, size_t N
-		> constexpr BitSet(const U(&value)[N])
+		> constexpr bit_set(const U(&value)[N])
 			: self_type{ from_bits<const U(&)[N], U, N>(value) }
 		{
 		}
@@ -193,21 +193,21 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING mask8_t = typename BitSet<uint8_t>;
-	ML_USING mask16_t = typename BitSet<uint16_t>;
-	ML_USING mask32_t = typename BitSet<uint32_t>;
-	ML_USING mask64_t = typename BitSet<uint64_t>;
+	ML_USING mask8_t = typename bit_set<uint8_t>;
+	ML_USING mask16_t = typename bit_set<uint16_t>;
+	ML_USING mask32_t = typename bit_set<uint32_t>;
+	ML_USING mask64_t = typename bit_set<uint64_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T>
-	inline ML_SERIALIZE(std::ostream & out, const BitSet<T> & value)
+	inline ML_SERIALIZE(std::ostream & out, const bit_set<T> & value)
 	{
 		return out << value.bits();
 	}
 
 	template <class T>
-	inline ML_DESERIALIZE(std::istream & in, BitSet<T> & value)
+	inline ML_DESERIALIZE(std::istream & in, bit_set<T> & value)
 	{
 		return in.good() ? (in >> value.data()) : in;
 	}

@@ -5,14 +5,12 @@
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
-#define ML_Registry ::ml::Registry<>::get_instance()
-
-#define ML_REGISTER_EX(T, factory)			\
-	static std::optional<std::any> factory();		\
-	bool Registry<T>::s_registered {				\
-		ML_Registry.registrate<T>(factory)	\
+#define ML_REGISTER_EX(T, factory)					\
+	static ::std::optional<std::any> factory();		\
+	bool ::ml::registry<T>::s_registered {			\
+		::ml::registrar::registrate<T>(factory)		\
 	};												\
-	std::optional<std::any> factory()
+	::std::optional<std::any> factory()
 
 #define ML_REGISTER(T) \
 	ML_REGISTER_EX(T, ML_CONCAT(ML_FACTORY_, T))
@@ -21,83 +19,90 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... T> struct Registry;
+	template <class ... T
+	> struct registry;
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	template <
+	> struct registry<> { registry() = delete; };
 
-	template <class T> struct ML_ENGINE_API Registry<T> final
+	template <class T
+	> struct ML_ENGINE_API registry<T> final
 	{
-		Registry() = delete;
-
 	private: static bool s_registered;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <> struct ML_ENGINE_API Registry<> final : public Singleton<Registry<>>
+	class ML_ENGINE_API registrar final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using code_t = typename size_t;
-		using name_t = typename std::string_view;
-		using info_t = typename std::string_view;
-		using func_t = typename std::function<std::optional<std::any>()>;
+		using code_type = typename size_t;
+		using name_type = typename std::string_view;
+		using func_type = typename std::function<std::optional<std::any>()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Codes, ID_Funcs, ID_Names };
+		enum : size_t { ID_Codes, ID_Names, ID_Factories };
 
 		using storage_type = typename std::tuple<
-			ds::flat_map<name_t, code_t>, // Codes
-			ds::flat_map<name_t, func_t>, // Funcs
-			ds::flat_map<code_t, name_t>  // Names
+			ds::flat_map<name_type, code_type>,	// Codes
+			ds::flat_map<code_type, name_type>,	// Names
+			ds::flat_map<name_type, func_type>	// Factories
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline decltype(auto) codes() const noexcept { return std::get<ID_Codes>(m_storage); }
-		inline decltype(auto) funcs() const noexcept { return std::get<ID_Funcs>(m_storage); }
-		inline decltype(auto) names() const noexcept { return std::get<ID_Names>(m_storage); }
+		static inline decltype(auto) codes() noexcept { return std::get<ID_Codes>(m_storage); }
+		
+		static inline decltype(auto) names() noexcept { return std::get<ID_Names>(m_storage); }
+		
+		static inline decltype(auto) factories() noexcept { return std::get<ID_Factories>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::optional<std::any> generate(name_t const & name) const
+		static inline std::optional<std::any> generate(name_type const & name)
 		{
-			auto const func{ get_func(name) };
-			return func ? std::invoke(func.value()) : std::nullopt;
+			auto const fn{ get_factory(name) };
+			return fn ? std::invoke(fn.value()) : std::nullopt;
 		}
 
-		inline std::optional<std::any> generate(code_t const & code) const
+		static inline std::optional<std::any> generate(code_type const & code)
 		{
-			auto const func{ get_func(code) };
-			return func ? std::invoke(func.value()) : std::nullopt;
+			auto const fn{ get_factory(code) };
+			return fn ? std::invoke(fn.value()) : std::nullopt;
 		}
 
-		template <class T> inline std::optional<std::any> generate() const
+		template <class T> static inline std::optional<std::any> generate()
 		{
 			return generate(hashof_v<T>);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool registrate(name_t const & name, code_t const & code, func_t const & func)
+		static inline bool registrate(name_type const & name, code_type const & code, func_type const & fn)
 		{
-			if (funcs().contains(name)) { return false; }
+			if (factories().contains(name)) { return false; }
+			
 			std::get<ID_Codes>(m_storage).insert(name, code);
-			std::get<ID_Funcs>(m_storage).insert(name, func);
+			
 			std::get<ID_Names>(m_storage).insert(code, name);
+			
+			std::get<ID_Factories>(m_storage).insert(name, fn);
+			
 			return true;
 		}
 
 		template <class T, class Fn
-		> inline bool registrate(Fn fn)
+		> static inline bool registrate(Fn fn)
 		{
-			return registrate(nameof_v<T>, hashof_v<T>, std::forward<Fn>(fn));
+			return registrate(nameof_v<T>, hashof_v<T>, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline std::optional<code_t> get_code(name_t const & name) const
+		static inline std::optional<code_type> get_code(name_type const & name)
 		{
 			if (auto const it{ codes().find(name) })
 			{
@@ -109,9 +114,9 @@ namespace ml
 			}
 		}
 
-		inline std::optional<func_t> get_func(name_t const & name) const
+		static inline std::optional<name_type> get_name(code_type code)
 		{
-			if (auto const it{ funcs().find(name) })
+			if (auto const it{ names().find(code) })
 			{
 				return std::make_optional(*it->second);
 			}
@@ -121,11 +126,11 @@ namespace ml
 			}
 		}
 
-		inline std::optional<func_t> get_func(code_t code) const
+		static inline std::optional<func_type> get_factory(name_type const & name)
 		{
-			if (auto const it{ names().find(code) })
+			if (auto const it{ factories().find(name) })
 			{
-				return get_func(*it->second);
+				return std::make_optional(*it->second);
 			}
 			else
 			{
@@ -133,11 +138,11 @@ namespace ml
 			}
 		}
 
-		inline std::optional<name_t> get_name(code_t code) const
+		static inline std::optional<func_type> get_factory(code_type code)
 		{
 			if (auto const it{ names().find(code) })
 			{
-				return std::make_optional(*it->second);
+				return get_factory(*it->second);
 			}
 			else
 			{
@@ -148,11 +153,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<Registry<>>;
-
-		Registry() noexcept;
-
-		storage_type m_storage;
+		static storage_type m_storage;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

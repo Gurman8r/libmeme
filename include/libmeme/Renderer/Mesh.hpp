@@ -8,40 +8,40 @@
 
 namespace ml
 {
-	struct RenderTarget;
+	struct render_target;
 
-	struct ML_RENDERER_API Mesh final : public Trackable
+	struct ML_RENDERER_API mesh final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Layout, ID_VAO, ID_VBO, ID_IBO };
 
-		using storage_type	= typename std::tuple<BufferLayout, VAO, VBO, IBO>;
+		using storage_type	= typename std::tuple<buffer_layout, VAO, VBO, IBO>;
 		using contiguous_t	= typename pmr::vector<float_t>;
 		using vertices_t	= typename pmr::vector<vertex>;
 		using indices_t		= typename pmr::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Mesh();
+		mesh();
 		
-		Mesh(vertices_t const & vertices);
+		mesh(vertices_t const & vertices);
 		
-		Mesh(vertices_t const & vertices, indices_t const & indices);
+		mesh(vertices_t const & vertices, indices_t const & indices);
 		
-		Mesh(Mesh const & other);
+		mesh(mesh const & other);
 		
-		Mesh(Mesh && other) noexcept;
+		mesh(mesh && other) noexcept;
 		
-		~Mesh();
+		~mesh();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Mesh & operator=(Mesh const & other);
+		mesh & operator=(mesh const & other);
 		
-		Mesh & operator=(Mesh && other) noexcept;
+		mesh & operator=(mesh && other) noexcept;
 
-		void swap(Mesh & other) noexcept;
+		void swap(mesh & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -59,7 +59,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw(RenderTarget const & target, Mesh const * value);
+		static void draw(render_target const & target, mesh const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -131,20 +131,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline auto make_mesh(Mesh::vertices_t && v)
+	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v)
 	{
-		return Mesh{ std::move(v) };
+		return mesh{ std::move(v) };
 	}
 
-	ML_NODISCARD static inline auto make_mesh(Mesh::vertices_t && v, Mesh::indices_t && i)
+	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v, mesh::indices_t && i)
 	{
-		return Mesh{ std::move(v), std::move(i) };
+		return mesh{ std::move(v), std::move(i) };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_mesh(Args && ... args)
 	{
-		return Mesh{ std::forward<Args>(args)... };
+		return mesh{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

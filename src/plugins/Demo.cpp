@@ -20,74 +20,75 @@
 
 namespace ml
 {
-	struct Demo final : public Plugin
+	struct demo final : plugin
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool m_show_imgui_demo{ false };
 
-		pmr::vector<RenderTexture>			m_pipeline	{};
-		ds::flat_map<pmr::string, Font>		m_fonts		{};
-		ds::flat_map<pmr::string, Image>	m_images	{};
-		ds::flat_map<pmr::string, Material>	m_materials	{};
-		ds::flat_map<pmr::string, Model>	m_models	{};
-		ds::flat_map<pmr::string, Script>	m_scripts	{};
-		ds::flat_map<pmr::string, Shader>	m_shaders	{};
-		ds::flat_map<pmr::string, Texture>	m_textures	{};
+		pmr::vector<render_texture>			m_pipeline	{};
+		ds::flat_map<pmr::string, font>		m_fonts		{};
+		ds::flat_map<pmr::string, image>	m_images	{};
+		ds::flat_map<pmr::string, material>	m_materials	{};
+		ds::flat_map<pmr::string, model>	m_models	{};
+		ds::flat_map<pmr::string, script>	m_scripts	{};
+		ds::flat_map<pmr::string, shader>	m_shaders	{};
+		ds::flat_map<pmr::string, texture>	m_textures	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Demo() : Plugin{}
+		demo() : plugin{}
 		{
 			// Main Sequence
-			EventSystem::add_listener<LoadEvent>(this);
-			EventSystem::add_listener<UpdateEvent>(this);
-			EventSystem::add_listener<DrawEvent>(this);
-			EventSystem::add_listener<GuiEvent>(this);
-			EventSystem::add_listener<UnloadEvent>(this);
+			event_system::add_listener<load_event>(this);
+			event_system::add_listener<update_event>(this);
+			event_system::add_listener<draw_event>(this);
+			event_system::add_listener<gui_event>(this);
+			event_system::add_listener<unload_event>(this);
 
-			// Misc
-			EventSystem::add_listener<DockspaceEvent>(this);
-			EventSystem::add_listener<KeyEvent>(this);
+			// Miscellaneous
+			event_system::add_listener<dockspace_event>(this);
+			event_system::add_listener<key_event>(this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void onEvent(Event const & value) override
+		void on_event(event const & value) override
 		{
 			switch (value.id())
 			{
-			case LoadEvent::ID: if (auto ev{ event_cast<LoadEvent>(&value) })
+			// Main Sequence
+			case hashof_v<load_event>:
 			{
 				// load stuff, etc...
 				
 				// File Menu
-				Editor::main_menu().add_menu("File", [&, this]()
+				editor::main_menu().add_menu("File", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
 					{
-						Engine::window().close();
+						engine::get_window().close();
 					}
 				});
 
 				// View Menu
-				Editor::main_menu().add_menu("View", [&, this]()
+				editor::main_menu().add_menu("View", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("ImGui Demo", "", &m_show_imgui_demo);
+					ImGui::MenuItem("ImGui demo", "", &m_show_imgui_demo);
 				});
 
 				// Option Menu
-				Editor::main_menu().add_menu("Option", [&, this]()
+				editor::main_menu().add_menu("Option", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Window"))
 					{
-						bool fullscreen{ Engine::window().is_fullscreen() };
+						bool fullscreen{ engine::get_window().is_fullscreen() };
 						if (ImGui::MenuItem("Fullscreen", "", &fullscreen))
 						{
-							Engine::window().set_fullscreen(fullscreen);
+							engine::get_window().set_fullscreen(fullscreen);
 						}
 						ImGui::EndMenu();
 					}
@@ -101,7 +102,7 @@ namespace ml
 					FS::path_to("../../../assets/textures/icon.png")
 				) }; !img.empty())
 				{
-					Engine::window().set_icon(img.width(), img.height(), img.data());
+					engine::get_window().set_icon(img.width(), img.height(), img.data());
 				}
 
 				// Textures
@@ -129,24 +130,24 @@ namespace ml
 
 				// Materials
 				m_materials["2d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)Engine::time().total; }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)Engine::time().delta; }),
-					make_uniform<Texture>("u_texture0",	&m_textures["navball"]),
+					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().total(); }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_time().delta(); }),
+					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
 					make_uniform<Color	>("u_color",	colors::white),
 					make_uniform<mat4	>("u_proj",		mat4::identity()),
 					make_uniform<mat4	>("u_view",		mat4::identity()),
 					make_uniform<mat4	>("u_model",	mat4::identity())
 				);
 				m_materials["3d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)Engine::time().total; }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)Engine::time().delta; }),
+					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().total(); }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_time().delta(); }),
 					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov",	45.0f),
 					make_uniform<float_t>("u_cam.near",	0.0001f),
 					make_uniform<float_t>("u_cam.far",	1000.0f),
 					make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
-					make_uniform<Texture>("u_texture0",	&m_textures["navball"]),
+					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
 					make_uniform<Color	>("u_color",	colors::white),
 					make_uniform<vec3	>("u_position",	vec3{ 0.f, 0.f, 0.f }),
 					make_uniform<vec3	>("u_scale",	vec3{ 1.f, 1.f, 1.f }),
@@ -181,39 +182,39 @@ namespace ml
 				));
 
 			} break;
-			case UpdateEvent::ID: if (auto ev{ event_cast<UpdateEvent>(&value) })
+			case hashof_v<update_event>:
 			{
 				// update stuff, etc...
 
 				static auto const original_title{
-					Engine::window().get_title()
+					engine::get_window().get_title()
 				};
-				Engine::window().set_title(original_title
-					+ " | " + util::to_string(ev->total_time) + "s "
-					+ " | " + util::to_string(ev->delta_time) + "s "
+				engine::get_window().set_title(original_title
+					+ " | " + util::to_string(engine::get_time().total()) + "s "
+					+ " | " + util::to_string(engine::get_time().delta()) + "s "
 				);
 				
 			} break;
-			case DrawEvent::ID: if (auto ev{ event_cast<DrawEvent>(&value) })
+			case hashof_v<draw_event>:
 			{
 				// draw stuff, etc...
 				if (m_pipeline.empty())
 					return;
 
-				if (RenderTexture const & _r{ m_pipeline.at(0) })
+				if (render_texture const & _r{ m_pipeline.at(0) })
 				{
 					ML_BIND_SCOPE_M(_r);
 					_r.clear_color(colors::magenta);
 					_r.viewport(_r.bounds());
 
-					constexpr RenderStates states{
-						{}, {}, CullState{ false }, {}
+					constexpr render_states states{
+						{}, {}, cull_state{ false }, {}
 					}; states();
 					
-					if (Shader & _s{ m_shaders["3d"] })
+					if (shader & _s{ m_shaders["3d"] })
 					{
 						ML_BIND_SCOPE_M(_s, false);
-						for (Uniform const & u : m_materials["3d"])
+						for (uniform const & u : m_materials["3d"])
 							_s.set_uniform(u);
 						_s.bind(true);
 						_r.draw(m_models["sphere32x24"]);
@@ -221,39 +222,39 @@ namespace ml
 				}
 
 			} break;
-			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(&value) })
+			case hashof_v<gui_event>:
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-				// ImGui Demo
+				// ImGui demo
 				if (m_show_imgui_demo)
 				{
-					Editor::show_imgui_demo(&m_show_imgui_demo);
+					editor::show_imgui_demo(&m_show_imgui_demo);
 				}
 
 				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("Manual Allocations: %u", ML_MemoryTracker.records().size());
+					ImGui::Text("Manual Allocations: %u", ML_memory_tracker.records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);
 
 					// Total Time
 					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3fs", ev->total_time); ImGui::NextColumn();
+					ImGui::Text("%.3fs", engine::get_time().total()); ImGui::NextColumn();
 
 					// Delta Time
 					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", ev->delta_time); ImGui::NextColumn();
+					ImGui::Text("%.7fs", engine::get_time().delta()); ImGui::NextColumn();
 
 					// Frame Rate
 					ImGui::Text("frame rate"); ImGui::NextColumn();
 					ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
 
 					// Benchmarks
-					if (auto const & prev{ PerformanceTracker::previous() }; !prev.empty())
+					if (auto const & prev{ performance_tracker::previous() }; !prev.empty())
 					{
 						ImGui::Separator();
 						for (auto const & elem : prev)
@@ -266,11 +267,11 @@ namespace ml
 					ImGui::Separator();
 					ImGui::Columns(1);
 
-					draw_texture_preview(m_pipeline[0].texture(), { 640, 480 }); ImGui::Separator();
+					draw_texture_preview(m_pipeline[0].get_texture(), { 640, 480 }); ImGui::Separator();
 				}
 				ImGui::End();
 			} break;
-			case UnloadEvent::ID: if (auto ev{ event_cast<UnloadEvent>(&value) })
+			case hashof_v<unload_event>:
 			{
 				m_images.clear();
 				m_shaders.clear();
@@ -281,12 +282,13 @@ namespace ml
 				m_pipeline.clear();
 				m_scripts.clear();
 			} break;
-			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(&value) })
+
+			// Miscellaneous
+			case hashof_v<dockspace_event>: if (auto ev = value.as<dockspace_event>())
 			{
-				auto & d{ ev->dockspace };
-				d.dock_window("libmeme demo", d.get_node(d.Root));
+				ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
 			} break;
-			case KeyEvent::ID: if (auto ev = value.as<KeyEvent>())
+			case hashof_v<key_event>: if (auto ev = value.as<key_event>())
 			{
 				if (ev->isPaste())
 				{
@@ -299,7 +301,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw_texture_preview(Texture const & value, vec2 const & maxSize = { 512, 512 })
+		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 512, 512 })
 		{
 			auto & io{ ImGui::GetIO() };
 			void * const tex_id{ value.address() };
@@ -348,9 +350,9 @@ namespace ml
 	};
 }
 
-extern "C" ML_PLUGIN_API ml::Plugin * ml_plugin_main()
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::Plugin * temp{ nullptr };
-	if (!temp) { temp = new ml::Demo{}; }
+	static ml::plugin * temp{ nullptr };
+	if (!temp) { temp = new ml::demo{}; }
 	return temp;
 }

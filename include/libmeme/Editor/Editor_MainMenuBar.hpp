@@ -7,13 +7,12 @@
 
 namespace ml
 {
-	struct ML_EDITOR_API MainMenuBar final : public NonCopyable
+	// built-in main menu bar
+	struct ML_EDITOR_API editor_main_menu final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using menu_t = typename std::function<void()>;
-
-		static constexpr auto mainmenubar_title{ "libmeme##editor##mainmenubar" };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -23,7 +22,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline MainMenuBar & add_menu(pmr::string const & name, menu_t const & value)
+		inline editor_main_menu & add_menu(pmr::string const & name, menu_t const & value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{
@@ -52,11 +51,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Editor;
+		friend class editor;
 
-		MainMenuBar();
+		editor_main_menu();
 		
-		~MainMenuBar();
+		~editor_main_menu();
 
 		bool m_good;
 		bool m_open;

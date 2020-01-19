@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct Client_API final
+	struct client_api final
 	{
 		enum API { Unknown, OpenGL, Vulkan, DirectX };
 
@@ -16,14 +16,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ContextSettings final
+	struct context_settings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t		api				{ Client_API::Unknown };
+		int32_t		api				{ client_api::Unknown };
 		int32_t		major			{ 0 };
 		int32_t		minor			{ 0 };
-		int32_t		profile			{ Client_API::Any };
+		int32_t		profile			{ client_api::Any };
 		int32_t		depth_bits		{ 0 };
 		int32_t		stencil_bits	{ 0 };
 		bool		multisample		{ false };
@@ -31,11 +31,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr ContextSettings() noexcept = default;
-		constexpr ContextSettings(ContextSettings const &) = default;
-		constexpr ContextSettings(ContextSettings &&) noexcept = default;
-		constexpr ContextSettings & operator=(ContextSettings const &) = default;
-		constexpr ContextSettings & operator=(ContextSettings &&) noexcept = default;
+		constexpr context_settings() noexcept = default;
+		constexpr context_settings(context_settings const &) = default;
+		constexpr context_settings(context_settings &&) noexcept = default;
+		constexpr context_settings & operator=(context_settings const &) = default;
+		constexpr context_settings & operator=(context_settings &&) noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -45,7 +45,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_context_settings(Args && ... args)
 	{
-		return ContextSettings{ std::forward<Args>(args)... };
+		return context_settings{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

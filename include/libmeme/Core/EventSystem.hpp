@@ -7,32 +7,29 @@
 
 namespace ml
 {
-	struct Event;
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API EventSystem final
+	class ML_CORE_API event_system final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		EventSystem() = delete;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static bool add_listener(int32_t type, EventListener * listener);
+		static bool add_listener(int32_t type, event_listener * listener);
 		
-		static void fire_event(Event const & value);
+		static void fire_event(struct event const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(int32_t type, EventListener * listener);
+		static void remove_listener(int32_t type, event_listener * listener);
 		
-		static void remove_listener(EventListener * listener);
+		static void remove_listener(event_listener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline bool add_listener(EventListener * listener)
+		> static inline bool add_listener(event_listener * listener)
 		{
-			return add_listener(Ev::ID, listener);
+			return add_listener(hashof_v<Ev>, listener);
 		}
 
 		template <class Ev, class ... Args
@@ -42,12 +39,9 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static ds::flat_map<int32_t, ds::flat_set<EventListener *>> m_listeners;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_EVENT_SYSTEM_HPP_

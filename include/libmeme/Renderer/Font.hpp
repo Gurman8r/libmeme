@@ -5,13 +5,13 @@
 
 namespace ml
 {
-	struct ML_RENDERER_API Font final
+	struct ML_RENDERER_API font final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using glyph_page = typename ds::flat_map<uint32_t, Glyph>;
+		using glyph_page = typename ds::flat_map<uint32_t, glyph>;
 		
 		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
 
@@ -23,25 +23,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Font();
+		font();
 		
-		explicit Font(allocator_type const & alloc);
+		explicit font(allocator_type const & alloc);
 		
-		Font(path_t const & path, allocator_type const & alloc = {});
+		font(path_t const & path, allocator_type const & alloc = {});
 		
-		Font(Font const & other, allocator_type const & alloc = {});
+		font(font const & other, allocator_type const & alloc = {});
 		
-		Font(Font && other, allocator_type const & alloc = {}) noexcept;
+		font(font && other, allocator_type const & alloc = {}) noexcept;
 		
-		~Font();
+		~font();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Font & operator=(Font const & other);
+		font & operator=(font const & other);
 
-		Font & operator=(Font && other) noexcept;
+		font & operator=(font && other) noexcept;
 
-		void swap(Font & other) noexcept;
+		void swap(font & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -49,9 +49,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD Glyph const & get_glyph(uint32_t c, uint32_t char_size) const;
+		ML_NODISCARD glyph const & get_glyph(uint32_t c, uint32_t char_size) const;
 
-		ML_NODISCARD Glyph load_glyph(uint32_t c, uint32_t char_size) const;
+		ML_NODISCARD glyph load_glyph(uint32_t c, uint32_t char_size) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -77,7 +77,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_font(Args && ... args)
 	{
-		return Font{ std::forward<Args>(args)... };
+		return font{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

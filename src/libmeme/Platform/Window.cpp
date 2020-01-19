@@ -51,7 +51,7 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window::Window() noexcept
+	window::window() noexcept
 		: m_window	{ nullptr }
 		, m_monitor	{ nullptr }
 		, m_share	{ nullptr }
@@ -71,7 +71,7 @@ namespace ml
 #endif
 	}
 	
-	Window::~Window() noexcept
+	window::~window() noexcept
 	{
 #if defined(ML_OS_WINDOWS)
 		if (HWND window{ ::GetConsoleWindow() })
@@ -86,10 +86,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::create(pmr::string const & title, VideoMode const & video, ContextSettings const & context, int32_t flags)
+	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t flags)
 	{
 #ifdef ML_IMPL_RENDERER_OPENGL
-		ML_ASSERT(context.api == Client_API::OpenGL);
+		ML_ASSERT(context.api == client_api::OpenGL);
 #endif
 		if (m_window)
 		{
@@ -110,9 +110,9 @@ namespace ml
 		glfwWindowHint(GLFW_CLIENT_API, ([api = m_context.api]() {
 			switch (api)
 			{
-			case Client_API::OpenGL	: return GLFW_OPENGL_API;
-			case Client_API::Vulkan	:
-			case Client_API::DirectX:
+			case client_api::OpenGL	: return GLFW_OPENGL_API;
+			case client_api::Vulkan	:
+			case client_api::DirectX:
 			default					: return GLFW_NO_API;
 			}
 		})());
@@ -121,10 +121,10 @@ namespace ml
 		glfwWindowHint(GLFW_OPENGL_PROFILE, ([profile = m_context.profile]() {
 			switch (profile)
 			{
-			case Client_API::Core	: return GLFW_OPENGL_CORE_PROFILE;
-			case Client_API::Compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case Client_API::Debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case Client_API::Any	:
+			case client_api::Core	: return GLFW_OPENGL_CORE_PROFILE;
+			case client_api::Compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case client_api::Debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case client_api::Any	:
 			default					: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());
@@ -154,7 +154,7 @@ namespace ml
 		{
 			this->make_context_current();
 
-			this->set_cursor_mode(Cursor::Mode::Normal);
+			this->set_cursor_mode(cursor::mode::normal);
 
 			if (m_flags & WindowFlags_Fullscreen)
 			{
@@ -176,7 +176,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window & Window::close()
+	window & window::close()
 	{
 		if (m_window)
 		{
@@ -185,7 +185,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::destroy()
+	window & window::destroy()
 	{
 		if (m_window)
 		{
@@ -194,7 +194,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::iconify()
+	window & window::iconify()
 	{
 		if (m_window) 
 		{
@@ -203,7 +203,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::make_context_current()
+	window & window::make_context_current()
 	{
 		if (m_window)
 		{
@@ -212,7 +212,7 @@ namespace ml
 		return (*this);
 	}
 	
-	Window & Window::maximize()
+	window & window::maximize()
 	{
 		if (m_window)
 		{
@@ -223,7 +223,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::restore()
+	window & window::restore()
 	{
 		if (m_window)
 		{
@@ -234,7 +234,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::swap_buffers()
+	window & window::swap_buffers()
 	{
 		if (m_window)
 		{
@@ -245,12 +245,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window & Window::set_centered()
+	window & window::set_centered()
 	{
 		return set_position((vec2i)(get_desktop_mode().resolution - this->get_size()) / 2);
 	}
 
-	Window & Window::set_clipboard(pmr::string const & value)
+	window & window::set_clipboard(pmr::string const & value)
 	{
 		if (m_window)
 		{
@@ -259,7 +259,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_cursor(void * value)
+	window & window::set_cursor(void * value)
 	{
 		if (m_window && value)
 		{
@@ -268,7 +268,7 @@ namespace ml
 		return (*this);
 	}
 	
-	Window & Window::set_cursor_mode(Cursor::Mode value)
+	window & window::set_cursor_mode(cursor::mode value)
 	{
 		if (m_window)
 		{
@@ -276,9 +276,9 @@ namespace ml
 			{
 				switch (value)
 				{
-				case Cursor::Mode::Normal: return GLFW_CURSOR_NORMAL;
-				case Cursor::Mode::Hidden: return GLFW_CURSOR_HIDDEN;
-				case Cursor::Mode::Disabled: return GLFW_CURSOR_DISABLED;
+				case cursor::mode::normal: return GLFW_CURSOR_NORMAL;
+				case cursor::mode::hidden: return GLFW_CURSOR_HIDDEN;
+				case cursor::mode::disabled: return GLFW_CURSOR_DISABLED;
 				default: return GLFW_CURSOR_NORMAL;
 				}
 			})());
@@ -286,7 +286,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_cursor_pos(vec2i const & value)
+	window & window::set_cursor_pos(vec2i const & value)
 	{
 		if (m_window)
 		{
@@ -295,12 +295,12 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_fullscreen(bool value)
+	window & window::set_fullscreen(bool value)
 	{
 		return set_monitor(value ? glfwGetPrimaryMonitor() : nullptr);
 	}
 
-	Window & Window::set_icon(size_t w, size_t h, byte_t const * pixels)
+	window & window::set_icon(size_t w, size_t h, byte_t const * pixels)
 	{
 		if (m_window)
 		{
@@ -311,7 +311,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_position(vec2i const & value)
+	window & window::set_position(vec2i const & value)
 	{
 		if (m_window)
 		{
@@ -320,7 +320,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_monitor(void * value)
+	window & window::set_monitor(void * value)
 	{
 		if (m_window && (m_monitor != value))
 		{
@@ -354,7 +354,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_size(vec2u const & value)
+	window & window::set_size(vec2u const & value)
 	{
 		m_video.resolution = value;
 		if (m_window)
@@ -364,7 +364,7 @@ namespace ml
 		return (*this);
 	}
 
-	Window & Window::set_title(pmr::string const & value)
+	window & window::set_title(pmr::string const & value)
 	{
 		m_title = value;
 		if (m_window)
@@ -376,27 +376,27 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Window::is_focused() const
+	bool window::is_focused() const
 	{
 		return get_attribute(GLFW_FOCUSED);
 	}
 
-	bool Window::is_fullscreen() const
+	bool window::is_fullscreen() const
 	{
 		return m_window && m_monitor && (m_monitor == glfwGetPrimaryMonitor());
 	}
 
-	bool Window::is_open() const
+	bool window::is_open() const
 	{
 		return m_window && !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
 	}
 	
-	int32_t Window::get_attribute(int32_t value) const
+	int32_t window::get_attribute(int32_t value) const
 	{
 		return (m_window ? glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	C_string Window::get_clipboard() const
+	C_string window::get_clipboard() const
 	{
 		return (m_window 
 			? glfwGetClipboardString(static_cast<GLFWwindow *>(m_window)) 
@@ -404,7 +404,7 @@ namespace ml
 		);
 	}
 
-	vec2 Window::get_cursor_pos() const
+	vec2 window::get_cursor_pos() const
 	{
 		vec2d temp { 0 };
 		if (m_window)
@@ -414,7 +414,7 @@ namespace ml
 		return (vec2)temp;
 	}
 
-	vec2i Window::get_frame_size() const
+	vec2i window::get_frame_size() const
 	{
 		vec2i temp { 0 };
 		if (m_window)
@@ -424,27 +424,27 @@ namespace ml
 		return temp;
 	}
 
-	void * Window::get_handle() const
+	void * window::get_handle() const
 	{
 		return m_window;
 	}
 
-	int32_t	Window::get_key(int32_t value) const
+	int32_t	window::get_key(int32_t value) const
 	{
 		return (m_window ? glfwGetKey(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	int32_t Window::get_input_mode(int32_t value) const
+	int32_t window::get_input_mode(int32_t value) const
 	{
 		return (m_window ? glfwGetInputMode(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	int32_t	Window::get_mouse_button(int32_t value) const
+	int32_t	window::get_mouse_button(int32_t value) const
 	{
 		return (m_window ? glfwGetMouseButton(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	vec2i Window::get_position() const
+	vec2i window::get_position() const
 	{
 		vec2i temp { 0 };
 		if (m_window)
@@ -454,7 +454,7 @@ namespace ml
 		return temp;
 	}
 
-	void * Window::get_raw_handle() const
+	void * window::get_raw_handle() const
 	{
 #ifdef ML_OS_WINDOWS
 		return glfwGetWin32Window(static_cast<GLFWwindow *>(m_window));
@@ -465,70 +465,70 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Window::destroy_cursor(void * value)
+	void window::destroy_cursor(void * value)
 	{
 		return glfwDestroyCursor(static_cast<GLFWcursor *>(value));
 	}
 
-	void Window::make_context_current(void * value)
+	void window::make_context_current(void * value)
 	{
 		return glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
 	}
 
-	void Window::poll_events()
+	void window::poll_events()
 	{
 		return glfwPollEvents();
 	}
 
-	void Window::swap_interval(int32_t value)
+	void window::swap_interval(int32_t value)
 	{
 		return glfwSwapInterval(value);
 	}
 
-	void Window::terminate()
+	void window::terminate()
 	{
 		return glfwTerminate();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * Window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
+	void * window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
 		return glfwCreateCursor(make_glfw_image(w, h, pixels), w, h);
 	}
 
-	void * Window::create_standard_cursor(Cursor::Shape value)
+	void * window::create_standard_cursor(cursor::shape value)
 	{
 		return glfwCreateStandardCursor(([value]()
 		{
 			switch (value)
 			{
-			case Cursor::Shape::Arrow: return GLFW_ARROW_CURSOR;
-			case Cursor::Shape::TextInput: return GLFW_IBEAM_CURSOR;
-			case Cursor::Shape::Crosshair: return GLFW_CROSSHAIR_CURSOR;
-			case Cursor::Shape::Hand: return GLFW_POINTING_HAND_CURSOR;
-			case Cursor::Shape::ResizeEW: return GLFW_RESIZE_EW_CURSOR;
-			case Cursor::Shape::ResizeNS: return GLFW_RESIZE_NS_CURSOR;
-			case Cursor::Shape::ResizeNESW: return GLFW_RESIZE_NESW_CURSOR;
-			case Cursor::Shape::ResizeNWSE: return GLFW_RESIZE_NWSE_CURSOR;
+			case cursor::shape::arrow		: return GLFW_ARROW_CURSOR;
+			case cursor::shape::text_input	: return GLFW_IBEAM_CURSOR;
+			case cursor::shape::crosshair	: return GLFW_CROSSHAIR_CURSOR;
+			case cursor::shape::hand		: return GLFW_POINTING_HAND_CURSOR;
+			case cursor::shape::resize_ew	: return GLFW_RESIZE_EW_CURSOR;
+			case cursor::shape::resize_ns	: return GLFW_RESIZE_NS_CURSOR;
+			case cursor::shape::resize_nesw	: return GLFW_RESIZE_NESW_CURSOR;
+			case cursor::shape::resize_nwse	: return GLFW_RESIZE_NWSE_CURSOR;
 			default: return GLFW_ARROW_CURSOR;
 			}
 		})());
 	}
 
-	int32_t Window::extension_supported(C_string value)
+	int32_t window::extension_supported(C_string value)
 	{
 		return glfwExtensionSupported(value);
 	}
 
-	void * Window::get_context_current()
+	void * window::get_context_current()
 	{
 		return glfwGetCurrentContext();
 	}
 
-	VideoMode const & Window::get_desktop_mode()
+	video_mode const & window::get_desktop_mode()
 	{
-		static VideoMode temp {};
+		static video_mode temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -536,7 +536,7 @@ namespace ml
 			DEVMODE dm;
 			dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = VideoMode{ vec2u{
+			temp = video_mode{ vec2u{
 				dm.dmPelsWidth,
 				dm.dmPelsHeight },
 				dm.dmBitsPerPel
@@ -548,9 +548,9 @@ namespace ml
 		return temp;
 	}
 
-	pmr::vector<VideoMode> const & Window::get_fullscreen_modes()
+	pmr::vector<video_mode> const & window::get_fullscreen_modes()
 	{
-		static pmr::vector<VideoMode> temp {};
+		static pmr::vector<video_mode> temp {};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -559,7 +559,7 @@ namespace ml
 			dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				auto vm{ VideoMode{ vec2u{
+				auto vm{ video_mode{ vec2u{
 					dm.dmPelsWidth,
 					dm.dmPelsHeight },
 					dm.dmBitsPerPel
@@ -577,12 +577,12 @@ namespace ml
 		return temp;
 	}
 
-	Window::proc_fn Window::get_proc_address(C_string value)
+	window::proc_fn window::get_proc_address(C_string value)
 	{
-		return reinterpret_cast<Window::proc_fn>(glfwGetProcAddress(value));
+		return reinterpret_cast<window::proc_fn>(glfwGetProcAddress(value));
 	}
 
-	pmr::vector<void *> const & Window::get_monitors()
+	pmr::vector<void *> const & window::get_monitors()
 	{
 		static pmr::vector<void *> temp {};
 		if (temp.empty())
@@ -597,21 +597,21 @@ namespace ml
 		return temp;
 	}
 
-	float64_t Window::get_time()
+	float64_t window::time()
 	{
 		return glfwGetTime();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Window::error_fn Window::set_error_callback(error_fn value)
+	window::error_fn window::set_error_callback(error_fn value)
 	{
 		return glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(value))
 			? value
 			: nullptr;
 	}
 
-	Window::char_fn Window::set_char_callback(char_fn value)
+	window::char_fn window::set_char_callback(char_fn value)
 	{
 		return m_window
 			? glfwSetCharCallback(
@@ -620,7 +620,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::cursor_enter_fn Window::set_cursor_enter_callback(cursor_enter_fn value)
+	window::cursor_enter_fn window::set_cursor_enter_callback(cursor_enter_fn value)
 	{
 		return m_window
 			? glfwSetCursorEnterCallback(
@@ -629,7 +629,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::cursor_pos_fn Window::set_cursor_pos_callback(cursor_pos_fn value)
+	window::cursor_pos_fn window::set_cursor_pos_callback(cursor_pos_fn value)
 	{
 		return m_window
 			? glfwSetCursorPosCallback(
@@ -638,7 +638,7 @@ namespace ml
 			: nullptr;
 	}
 
-	Window::frame_size_fn Window::set_frame_size_callback(frame_size_fn value)
+	window::frame_size_fn window::set_frame_size_callback(frame_size_fn value)
 	{
 		return m_window
 			? glfwSetFramebufferSizeCallback(
@@ -647,7 +647,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::key_fn Window::set_key_callback(key_fn value)
+	window::key_fn window::set_key_callback(key_fn value)
 	{
 		return m_window
 			? glfwSetKeyCallback(
@@ -656,7 +656,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::mouse_fn Window::set_mouse_callback(mouse_fn value)
+	window::mouse_fn window::set_mouse_callback(mouse_fn value)
 	{
 		return m_window
 			? glfwSetMouseButtonCallback(
@@ -665,7 +665,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::scroll_fn Window::set_scroll_callback(scroll_fn value)
+	window::scroll_fn window::set_scroll_callback(scroll_fn value)
 	{
 		return m_window
 			? glfwSetScrollCallback(
@@ -674,7 +674,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::close_fn Window::set_window_close_callback(close_fn value)
+	window::close_fn window::set_window_close_callback(close_fn value)
 	{
 		return m_window
 			? glfwSetWindowCloseCallback(
@@ -683,7 +683,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::focus_fn Window::set_window_focus_callback(focus_fn value)
+	window::focus_fn window::set_window_focus_callback(focus_fn value)
 	{
 		return m_window
 			? glfwSetWindowFocusCallback(
@@ -692,7 +692,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::position_fn Window::set_window_pos_callback(position_fn value)
+	window::position_fn window::set_window_pos_callback(position_fn value)
 	{
 		return m_window
 			? glfwSetWindowPosCallback(
@@ -701,7 +701,7 @@ namespace ml
 			: nullptr;
 	}
 	
-	Window::size_fn Window::set_window_size_callback(size_fn value)
+	window::size_fn window::set_window_size_callback(size_fn value)
 	{
 		return m_window
 			? glfwSetWindowSizeCallback(

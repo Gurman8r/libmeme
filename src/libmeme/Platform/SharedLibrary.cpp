@@ -11,38 +11,38 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	SharedLibrary::SharedLibrary() noexcept
+	shared_library::shared_library() noexcept
 		: m_instance{ nullptr }
 		, m_functions{}
 	{
 	}
 	
-	SharedLibrary::SharedLibrary(path_t const & path)
-		: SharedLibrary{}
+	shared_library::shared_library(path_t const & path)
+		: shared_library{}
 	{
 		open(path);
 	}
 
-	SharedLibrary::SharedLibrary(SharedLibrary && copy) noexcept
-		: SharedLibrary{}
+	shared_library::shared_library(shared_library && copy) noexcept
+		: shared_library{}
 	{
 		swap(std::move(copy));
 	}
 
-	SharedLibrary::~SharedLibrary()
+	shared_library::~shared_library()
 	{
 		close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	SharedLibrary & SharedLibrary::operator=(SharedLibrary && other) noexcept
+	shared_library & shared_library::operator=(shared_library && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void SharedLibrary::swap(SharedLibrary & other) noexcept
+	void shared_library::swap(shared_library & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -54,7 +54,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool SharedLibrary::open(path_t const & path)
+	bool shared_library::open(path_t const & path)
 	{
 		if (!good())
 		{
@@ -70,7 +70,7 @@ namespace ml
 		}
 	}
 
-	bool SharedLibrary::close()
+	bool shared_library::close()
 	{
 		if (good())
 		{
@@ -88,7 +88,7 @@ namespace ml
 		}
 	}
 
-	void * SharedLibrary::load_function(C_string name)
+	void * shared_library::load_function(C_string name)
 	{
 		if (good())
 		{

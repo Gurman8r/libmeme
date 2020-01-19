@@ -20,13 +20,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Dockspace Editor::s_dockspace{};
+	editor_dockspace editor::s_dockspace{};
 	
-	MainMenuBar Editor::s_mainMenuBar{};
+	editor_main_menu editor::s_main_menu{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Editor::startup(EditorSettings const & es)
+	bool editor::startup(editor_startup_settings const & s)
 	{
 		// Create ImGui Context
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -62,7 +62,7 @@ namespace ml
 
 		// Init Platform/Renderer
 #ifdef ML_IMPL_RENDERER_OPENGL
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)es.window_handle, es.install_callbacks))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)s.window_handle, s.install_callbacks))
 		{
 			return debug::log_error("Failed initializing ImGui platform");
 		}
@@ -76,7 +76,7 @@ namespace ml
 		return true;
 	}
 
-	void Editor::new_frame()
+	void editor::new_frame()
 	{
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
@@ -86,7 +86,7 @@ namespace ml
 		ImGui::NewFrame();
 	}
 
-	void Editor::render_frame()
+	void editor::render_frame()
 	{
 		ImGui::Render();
 
@@ -96,19 +96,19 @@ namespace ml
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ Window::get_context_current() };
+			auto backup_context{ window::get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			Window::make_context_current(backup_context);
+			window::make_context_current(backup_context);
 		}
 
 		GL::flush();
 	}
 
-	void Editor::shutdown()
+	void editor::shutdown()
 	{
 		s_dockspace.dispose();
-		s_mainMenuBar.dispose();
+		s_main_menu.dispose();
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -119,22 +119,22 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Editor::show_about_window(bool * p_open)
+	void editor::show_about_window(bool * p_open)
 	{
 		ImGui::ShowAboutWindow(p_open);
 	}
 
-	void Editor::show_imgui_demo(bool * p_open)
+	void editor::show_imgui_demo(bool * p_open)
 	{
 		ImGui::ShowDemoWindow(p_open);
 	}
 
-	void Editor::show_user_guide()
+	void editor::show_user_guide()
 	{
 		ImGui::ShowUserGuide();
 	}
 
-	void Editor::show_style_editor(void * ref)
+	void editor::show_style_editor(void * ref)
 	{
 		ImGui::ShowStyleEditor(static_cast<ImGuiStyle *>(ref));
 	}

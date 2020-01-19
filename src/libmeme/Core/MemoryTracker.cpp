@@ -13,16 +13,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	AllocationRecord::AllocationRecord(storage_type && storage) noexcept
+	allocation_record::allocation_record(storage_type && storage) noexcept
 		: m_storage{ std::move(storage) }
 	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	MemoryTracker::MemoryTracker() noexcept : m_current{ 0 }, m_records{} {}
+	memory_tracker::memory_tracker() noexcept : m_current{ 0 }, m_records{} {}
 
-	MemoryTracker::~MemoryTracker()
+	memory_tracker::~memory_tracker()
 	{
 #if ML_DEBUG
 		if (!m_records.empty())
@@ -57,17 +57,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Trackable * MemoryTracker::make_allocation(size_t size, int32_t flags)
+	trackable * memory_tracker::make_allocation(size_t size, int32_t flags)
 	{
-		auto const temp{ static_cast<Trackable *>(ML_IMPL_NEW(size)) };
-		return (*m_records.insert(temp, ::new AllocationRecord{
+		auto const temp{ static_cast<trackable *>(ML_IMPL_NEW(size)) };
+		return (*m_records.insert(temp, ::new allocation_record{
 			std::make_tuple(m_current++, size, flags, temp) }
 		).first.second)->data();
 	}
 
-	void MemoryTracker::free_allocation(void * value, int32_t flags)
+	void memory_tracker::free_allocation(void * value, int32_t flags)
 	{
-		if (auto const it{ m_records.find(static_cast<Trackable *>(value)) })
+		if (auto const it{ m_records.find(static_cast<trackable *>(value)) })
 		{
 			ML_IMPL_DELETE(value); // free the allocation
 

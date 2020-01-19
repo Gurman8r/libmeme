@@ -46,7 +46,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Texture::Texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags)
+	texture::texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags)
 		: m_handle			{ NULL }
 		, m_sampler			{ sampler }
 		, m_level			{ level }
@@ -59,46 +59,46 @@ namespace ml
 	{
 	}
 
-	Texture::Texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags)
-		: Texture{ sampler, 0, internal_format, color_format, GL::UnsignedByte, flags }
+	texture::texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags)
+		: texture{ sampler, 0, internal_format, color_format, GL::UnsignedByte, flags }
 	{
 	}
 
-	Texture::Texture(uint32_t sampler, uint32_t format, int32_t flags)
-		: Texture{ sampler, 0, format, format, GL::UnsignedByte, flags }
+	texture::texture(uint32_t sampler, uint32_t format, int32_t flags)
+		: texture{ sampler, 0, format, format, GL::UnsignedByte, flags }
 	{
 	}
 
-	Texture::Texture(uint32_t sampler, int32_t flags)
-		: Texture{ sampler, GL::RGBA, flags }
+	texture::texture(uint32_t sampler, int32_t flags)
+		: texture{ sampler, GL::RGBA, flags }
 	{
 	}
 
-	Texture::Texture(uint32_t sampler)
-		: Texture{ sampler, TextureFlags_Default }
+	texture::texture(uint32_t sampler)
+		: texture{ sampler, TextureFlags_Default }
 	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Texture::Texture()
-		: Texture{ GL::Texture2D }
+	texture::texture()
+		: texture{ GL::Texture2D }
 	{
 	}
 
-	Texture::Texture(path_t const & path)
-		: Texture{}
+	texture::texture(path_t const & path)
+		: texture{}
 	{
 		load_from_file(path);
 	}
 
-	Texture::Texture(Image const & image)
-		: Texture{}
+	texture::texture(image const & image)
+		: texture{}
 	{
 		load_from_image(image);
 	}
 
-	Texture::Texture(Texture const & other) : Texture{
+	texture::texture(texture const & other) : texture{
 		other.m_sampler,
 		other.m_level,
 		other.m_internalFormat,
@@ -110,30 +110,30 @@ namespace ml
 		load_from_texture(other);
 	}
 
-	Texture::Texture(Texture && other) noexcept
-		: Texture{}
+	texture::texture(texture && other) noexcept
+		: texture{}
 	{
 		swap(std::move(other));
 	}
 
-	Texture::~Texture() { destroy(); }
+	texture::~texture() { destroy(); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Texture & Texture::operator=(Texture const & other)
+	texture & texture::operator=(texture const & other)
 	{
-		Texture temp{ other };
+		texture temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	Texture & Texture::operator=(Texture && other) noexcept
+	texture & texture::operator=(texture && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
 	}
 
-	void Texture::swap(Texture & other) noexcept
+	void texture::swap(texture & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -151,12 +151,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::load_from_file(path_t const & path)
+	bool texture::load_from_file(path_t const & path)
 	{
 		return load_from_image(make_image(path));
 	}
 
-	bool Texture::load_from_image(Image const & image)
+	bool texture::load_from_image(image const & image)
 	{
 		if (!image.channels()) { return false; }
 
@@ -165,7 +165,7 @@ namespace ml
 		return create(image.size()) && update(image);
 	}
 
-	bool Texture::load_from_texture(Texture const & other)
+	bool texture::load_from_texture(texture const & other)
 	{
 		return other.m_handle
 			? create(other.size())
@@ -176,12 +176,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Texture::generate()
+	bool texture::generate()
 	{
 		return !m_handle && (m_handle = GL::genTexture());
 	}
 
-	bool Texture::destroy()
+	bool texture::destroy()
 	{
 		unbind();
 
@@ -197,7 +197,7 @@ namespace ml
 		return !(m_handle);
 	}
 
-	void Texture::bind(Texture const * value)
+	void texture::bind(texture const * value)
 	{
 		if (value && value->m_handle)
 		{
@@ -211,27 +211,27 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::create(vec2u const & size)
+	bool texture::create(vec2u const & size)
 	{
 		return create(nullptr, size);
 	}
 
-	bool Texture::create(Image const & image, vec2u const & size)
+	bool texture::create(image const & image, vec2u const & size)
 	{
 		return create(image.data(), size);
 	}
 
-	bool Texture::create(Image const & image, uint32_t w, uint32_t h)
+	bool texture::create(image const & image, uint32_t w, uint32_t h)
 	{
 		return create(image.data(), w, h);
 	}
 
-	bool Texture::create(byte_t const * pixels, vec2u const & size)
+	bool texture::create(byte_t const * pixels, vec2u const & size)
 	{
 		return create(pixels, size[0], size[1]);
 	}
 
-	bool Texture::create(byte_t const * pixels, uint32_t w, uint32_t h)
+	bool texture::create(byte_t const * pixels, uint32_t w, uint32_t h)
 	{
 		// size cannot be zero
 		if (!w || !h)
@@ -292,61 +292,61 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool Texture::update(Texture const & other, uint_rect const & area)
+	bool texture::update(texture const & other, uint_rect const & area)
 	{
 		return update(other.copy_to_image(), area);
 	}
 
-	bool Texture::update(Texture const & other, vec2u const & position, vec2u const & size)
+	bool texture::update(texture const & other, vec2u const & position, vec2u const & size)
 	{
 		return update(other.copy_to_image(), position, size);
 	}
 
-	bool Texture::update(Texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+	bool texture::update(texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	{
 		return update(other.copy_to_image(), x, y, w, h);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::update(Image const & image)
+	bool texture::update(image const & image)
 	{
 		return update(image.data(), image.bounds());
 	}
 
-	bool Texture::update(Image const & image, uint_rect const & area)
+	bool texture::update(image const & image, uint_rect const & area)
 	{
 		return update(image.data(), area.position(), area.size());
 	}
 
-	bool Texture::update(Image const & image, vec2u const & position, vec2u const & size)
+	bool texture::update(image const & image, vec2u const & position, vec2u const & size)
 	{
 		return update(image.data(), position[0], position[1], size[0], size[1]);
 	}
 
-	bool Texture::update(Image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+	bool texture::update(image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	{
 		return update(image.data(), x, y, w, h);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::update(byte_t const * pixels)
+	bool texture::update(byte_t const * pixels)
 	{
 		return update(pixels, uint_rect{ width(), height() });
 	}
 
-	bool Texture::update(byte_t const * pixels, uint_rect const & area)
+	bool texture::update(byte_t const * pixels, uint_rect const & area)
 	{
 		return update(pixels, area.position(), area.size());
 	}
 
-	bool Texture::update(byte_t const * pixels, vec2u const & position, vec2u const & size)
+	bool texture::update(byte_t const * pixels, vec2u const & position, vec2u const & size)
 	{
 		return update(pixels, position[0], position[1], size[0], size[1]);
 	}
 
-	bool Texture::update(byte_t const * pixels, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
+	bool texture::update(byte_t const * pixels, uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 	{
 		if (!w || !h || !pixels)
 		{
@@ -378,7 +378,7 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Texture::set_mipmapped(bool value)
+	bool texture::set_mipmapped(bool value)
 	{
 		if (!m_handle)
 		{
@@ -398,7 +398,7 @@ namespace ml
 		return true;
 	}
 
-	bool Texture::set_repeated(bool value)
+	bool texture::set_repeated(bool value)
 	{
 		if (!m_handle)
 		{
@@ -418,7 +418,7 @@ namespace ml
 		return true;
 	}
 
-	bool Texture::set_smooth(bool value)
+	bool texture::set_smooth(bool value)
 	{
 		if (!m_handle)
 		{
@@ -440,7 +440,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t Texture::channels() const noexcept
+	uint32_t texture::channels() const noexcept
 	{
 		switch (m_internalFormat)
 		{
@@ -451,11 +451,11 @@ namespace ml
 		return 0;
 	}
 
-	Image Texture::copy_to_image() const
+	image texture::copy_to_image() const
 	{
-		if (m_handle) return Image{};
+		if (m_handle) return image{};
 
-		Image temp{ size(), channels() };
+		image temp{ size(), channels() };
 		
 		ML_BIND_SCOPE_M((*this));
 		

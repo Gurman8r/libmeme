@@ -17,73 +17,72 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct Duration final
+	struct duration final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = typename Duration;
 		using base_type = typename chrono::duration<float64_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Duration() noexcept
+		constexpr duration() noexcept
 			: m_base{ 0.0 }
 		{
 		}
 
-		constexpr Duration(float64_t const value) noexcept
+		constexpr duration(float64_t const value) noexcept
 			: m_base{ value }
 		{
 		}
 
-		constexpr explicit Duration(base_type const & other)
+		constexpr explicit duration(base_type const & other)
 			: m_base{ other }
 		{
 		}
 
-		constexpr explicit Duration(base_type && other) noexcept
+		constexpr explicit duration(base_type && other) noexcept
 			: m_base{ std::move(other) }
 		{
 		}
 
 		template <class R, class P = typename R::period
-		> constexpr Duration(chrono::duration<R, P> const & value)
+		> constexpr duration(chrono::duration<R, P> const & value)
 			: m_base{ chrono::duration_cast<base_type>(value) }
 		{
 		}
 
 		template <class R, class P = typename R::period
-		> constexpr Duration(chrono::duration<R, P> && value) noexcept
+		> constexpr duration(chrono::duration<R, P> && value) noexcept
 			: m_base{ chrono::duration_cast<base_type>(std::move(value)) }
 		{
 		}
 
-		constexpr Duration(self_type const & other)
+		constexpr duration(duration const & other)
 			: m_base{ other.m_base }
 		{
 		}
 
-		constexpr Duration(self_type && other) noexcept
+		constexpr duration(duration && other) noexcept
 			: m_base{ std::move(other.m_base) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr self_type & operator=(self_type const & other)
+		constexpr duration & operator=(duration const & other)
 		{
-			Duration temp{ other };
+			duration temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr self_type & operator=(self_type && other) noexcept
+		constexpr duration & operator=(duration && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		constexpr void swap(self_type & other) noexcept
+		constexpr void swap(duration & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -129,6 +128,44 @@ namespace ml
 		ML_NODISCARD constexpr auto hours() const noexcept
 		{
 			return chrono::duration_cast<hours_t>(m_base);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator==(T const & other) const
+		{
+			return (m_base == other.m_base);
+		}
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator!=(T const & other) const
+		{
+			return (m_base != other.m_base);
+		}
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator<(T const & other) const
+		{
+			return (m_base < other.m_base);
+		}
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator>(T const & other) const
+		{
+			return (m_base > other.m_base);
+		}
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator<=(T const & other) const
+		{
+			return (m_base <= other.m_base);
+		}
+
+		template <class T
+		> ML_NODISCARD constexpr bool operator>=(T const & other) const
+		{
+			return (m_base >= other.m_base);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -217,11 +217,11 @@ namespace ml
 		return (*this);
 	}
 
-	FrameBufferObject & FrameBufferObject::attachTexture2D(uint32_t attachment, uint32_t texture, uint32_t level)
+	FrameBufferObject & FrameBufferObject::attachTexture2D(uint32_t attachment, uint32_t tex, uint32_t level)
 	{
 		if (m_handle)
 		{
-			std::get<ID_Texture>(m_storage) = std::make_tuple(attachment, texture, level);
+			std::get<ID_Texture>(m_storage) = std::make_tuple(attachment, tex, level);
 
 			GL::framebufferTexture2D(
 				GL::Framebuffer, this->textureAttachment(),

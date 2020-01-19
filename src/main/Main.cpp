@@ -12,7 +12,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static constexpr Engine::WindowSettings window_settings
+	static constexpr engine::window_startup_settings window_settings
 	{
 		"libmeme",				// title
 		make_video_mode(
@@ -20,10 +20,10 @@ namespace ml
 			32u					// color depth
 		),
 		make_context_settings(
-			Client_API::OpenGL,	// api
+			client_api::OpenGL,	// api
 			4,					// major version
 			6,					// minor version
-			Client_API::Compat,	// profile
+			client_api::Compat,	// profile
 			24,					// depth bits
 			8,					// stencil bits
 			false,				// multisample
@@ -56,93 +56,89 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// startup engine
-	if (!Engine::startup({ ML_ARGV[0], "../../../" }))
+	if (!engine::startup({ ML_ARGV[0], "../../../" }))
 	{
 		return debug::log_error("Failed initializing Engine") | debug::pause(1);
 	}
 
 	// enter event
-	EventSystem::fire_event<EnterEvent>(ML_ARGC, ML_ARGV);
+	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
 
 	// create window
-	if (!Engine::init_window(window_settings))
+	if (!engine::init_window(window_settings))
 	{
 		return debug::log_error("Failed initializing Window") | debug::pause(1);
 	}
 
 	// startup editor
-	if (!Editor::startup({ Engine::window().get_handle(), true }))
+	if (!editor::startup({ engine::get_window().get_handle(), true }))
 	{
 		return debug::log_error("Failed initializing Editor") | debug::pause(1);
 	}
 
 	// load plugins
-	Engine::load_plugin("demo.dll");
+	engine::load_plugin("demo.dll");
 
 	// load event
-	EventSystem::fire_event<LoadEvent>();
+	event_system::fire_event<load_event>();
 
 	// main loop
-	while (Engine::running())
+	while (engine::running())
 	{
-		static float64_t const // timers
-			& tt = Engine::time().total,
-			& dt = Engine::time().delta;
-
 		// begin loop
 		{
 			ML_BENCHMARK("LOOP_BEGIN");
-			Engine::begin_loop();
-			EventSystem::fire_event<BeginLoopEvent>();
+			engine::begin_loop();
+			event_system::fire_event<begin_loop_event>();
 		}
 		// update
 		{
 			ML_BENCHMARK("\tUPDATE");
-			EventSystem::fire_event<UpdateEvent>(tt, dt);
+			event_system::fire_event<update_event>();
 		}
 		// draw
 		{
 			ML_BENCHMARK("\tDRAW");
-			Engine::begin_draw();
-			EventSystem::fire_event<DrawEvent>(tt, dt);
+			engine::begin_draw();
+			event_system::fire_event<draw_event>();
 		}
 		// begin gui
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
-			Editor::new_frame();
-			EventSystem::fire_event<BeginGuiEvent>();
+			editor::new_frame();
+			event_system::fire_event<begin_gui_event>();
 		}
 		// gui
 		{
 			ML_BENCHMARK("\t\tGUI");
-			Editor::main_menu().render();
-			Editor::dockspace().render();
-			EventSystem::fire_event<GuiEvent>(tt, dt);
+			editor::main_menu().render();
+			editor::dockspace().render();
+			event_system::fire_event<gui_event>();
 		}
 		// end gui
 		{
 			ML_BENCHMARK("\tGUI_END");
-			Editor::render_frame();
-			EventSystem::fire_event<EndGuiEvent>();
+			editor::render_frame();
+			event_system::fire_event<end_gui_event>();
 		}
 		// end loop
 		{
 			ML_BENCHMARK("LOOP_END");
-			Engine::end_loop();
-			EventSystem::fire_event<EndLoopEvent>();
+			engine::end_loop();
+			event_system::fire_event<end_loop_event>();
 		}
-		PerformanceTracker::swap();
+		performance_tracker::swap();
 	}
 
 	// unload event
-	EventSystem::fire_event<UnloadEvent>();
+	event_system::fire_event<unload_event>();
 
 	// shutdown
-	Editor::shutdown();
-	Engine::shutdown();
+	editor::shutdown();
+	engine::shutdown();
 
 	// exit event
-	EventSystem::fire_event<ExitEvent>();
+	event_system::fire_event<exit_event>();
 
 	// goodbye!
 	return EXIT_SUCCESS;

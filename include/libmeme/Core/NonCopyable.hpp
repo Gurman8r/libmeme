@@ -7,15 +7,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API NonCopyable
+	struct ML_CORE_API non_copyable
 	{
 	protected:
-		NonCopyable() {}
-		~NonCopyable() {}
+		non_copyable() {}
+		~non_copyable() {}
 
 	private:
-		NonCopyable(NonCopyable const &) = delete;
-		NonCopyable & operator=(NonCopyable const &) = delete;
+		non_copyable(non_copyable const &) = delete;
+		non_copyable & operator=(non_copyable const &) = delete;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

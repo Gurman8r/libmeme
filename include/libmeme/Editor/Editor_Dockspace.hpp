@@ -7,7 +7,8 @@
 
 namespace ml
 {
-	struct ML_EDITOR_API Dockspace final : public NonCopyable
+	// built-in dockspace
+	struct ML_EDITOR_API editor_dockspace final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,8 +21,8 @@ namespace ml
 			Right, RightUp, RightDn,
 			MAX_DOCK_NODE
 		};
-		
-		static constexpr auto dockspace_title{ "libmeme##editor##dockspace" };
+
+		static constexpr auto title{ "##libmeme##editor##dockspace" };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -53,9 +54,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Editor;
+		friend class editor;
 
-		Dockspace();
+		editor_dockspace();
 
 		bool		m_open;			//
 		bool		m_good;			//

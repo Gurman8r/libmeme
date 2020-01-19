@@ -5,32 +5,32 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Material::Material()
+	material::material()
 		: m_storage{}
 	{
 	}
 
-	Material::Material(allocator_type const & alloc)
+	material::material(allocator_type const & alloc)
 		: m_storage{ alloc }
 	{
 	}
 
-	Material::Material(storage_type const & data, allocator_type const & alloc)
+	material::material(storage_type const & data, allocator_type const & alloc)
 		: m_storage{ data, alloc }
 	{
 	}
 
-	Material::Material(storage_type && data, allocator_type const & alloc) noexcept
+	material::material(storage_type && data, allocator_type const & alloc) noexcept
 		: m_storage{ std::move(data), alloc }
 	{
 	}
 
-	Material::Material(Material const & other, allocator_type const & alloc)
+	material::material(material const & other, allocator_type const & alloc)
 		: m_storage{ other.m_storage, alloc }
 	{
 	}
 
-	Material::Material(Material && other, allocator_type const & alloc) noexcept
+	material::material(material && other, allocator_type const & alloc) noexcept
 		: m_storage{ alloc }
 	{
 		swap(std::move(other));
@@ -38,14 +38,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Material & Material::operator=(Material const & other)
+	material & material::operator=(material const & other)
 	{
-		Material temp{ other };
+		material temp{ other };
 		swap(temp);
 		return (*this);
 	}
 
-	Material & Material::operator=(Material && other) noexcept
+	material & material::operator=(material && other) noexcept
 	{
 		swap(std::move(other));
 		return (*this);
@@ -53,7 +53,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Material::swap(Material & other) noexcept
+	void material::swap(material & other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -63,7 +63,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Material::load_from_file(path_t const & path)
+	bool material::load_from_file(path_t const & path)
 	{
 		if (std::ifstream in{ path })
 		{

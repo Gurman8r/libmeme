@@ -7,13 +7,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Registry<>::Registry() noexcept : m_storage{} {}
+	decltype(registrar::m_storage) registrar::m_storage{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_REGISTER(Material)	{ return std::make_optional(make_material()); }
-	ML_REGISTER(Shader)		{ return std::make_optional(make_shader()); }
-	ML_REGISTER(Texture)	{ return std::make_optional(make_texture()); }
+	ML_REGISTER(material)	{ return std::make_optional(make_material()); }
+	ML_REGISTER(shader)		{ return std::make_optional(make_shader()); }
+	ML_REGISTER(texture)	{ return std::make_optional(make_texture()); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

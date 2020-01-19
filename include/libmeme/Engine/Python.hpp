@@ -7,12 +7,9 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API Python final
+	class ML_ENGINE_API Python final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		Python() = delete;
-
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static bool startup(path_t const & name, path_t const & home);
@@ -26,13 +23,6 @@ namespace ml
 		static int32_t do_string(pmr::string const & value);
 		
 		static int32_t do_file(path_t const & path);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static bool		m_init;
-		static path_t	m_name;
-		static path_t	m_home;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

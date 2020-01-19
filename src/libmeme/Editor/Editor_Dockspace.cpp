@@ -1,4 +1,4 @@
-#include <libmeme/Editor/Dockspace.hpp>
+#include <libmeme/Editor/Editor_Dockspace.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -8,7 +8,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Dockspace::Dockspace()
+	editor_dockspace::editor_dockspace()
 		: m_open		{ true }
 		, m_good		{ false }
 		, m_nodes		{}
@@ -29,12 +29,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Dockspace::dispose()
+	bool editor_dockspace::dispose()
 	{
 		return false;
 	}
 
-	bool Dockspace::render()
+	bool editor_dockspace::render()
 	{
 		if (([&, this]()
 		{
@@ -55,8 +55,7 @@ namespace ml
 
 				// Begin
 				ImGui::PushID(ML_ADDRESSOF(this));
-				ImGui::PushID(dockspace_title);
-				if (m_good = ImGui::Begin(dockspace_title, &m_open,
+				if (m_good = ImGui::Begin(title, &m_open,
 					ImGuiWindowFlags_NoTitleBar |
 					ImGuiWindowFlags_NoCollapse |
 					ImGuiWindowFlags_NoResize |
@@ -65,7 +64,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(Editor::main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
+					(editor::main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -84,7 +83,7 @@ namespace ml
 				m_nodes[LeftDn] = split_node(m_nodes[Left], ImGuiDir_Down, 0.25f, &m_nodes[Left]);
 				m_nodes[RightDn] = split_node(m_nodes[Right], ImGuiDir_Down, 0.25f, &m_nodes[Right]);
 
-				EventSystem::fire_event<DockspaceEvent>(*this);
+				event_system::fire_event<dockspace_event>(*this);
 
 				end_builder(m_nodes[Root]);
 			};
@@ -95,13 +94,12 @@ namespace ml
 			if (m_good)
 			{
 				ImGui::DockSpace(
-					ImGui::GetID(dockspace_title),
+					ImGui::GetID(title),
 					{ m_size[0], m_size[1] },
 					ImGuiDockNodeFlags_PassthruCentralNode |
 					ImGuiDockNodeFlags_AutoHideTabBar
 				);
 				ImGui::End();
-				ImGui::PopID();
 				ImGui::PopID();
 			}
 			return m_good;
@@ -110,9 +108,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t Dockspace::begin_builder(int32_t flags)
+	uint32_t editor_dockspace::begin_builder(int32_t flags)
 	{
-		if (uint32_t root{ ImGui::GetID(dockspace_title) })
+		if (uint32_t root{ ImGui::GetID(title) })
 		{
 			if (!ImGui::DockBuilderGetNode(root))
 			{
@@ -126,7 +124,7 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t Dockspace::end_builder(uint32_t root)
+	uint32_t editor_dockspace::end_builder(uint32_t root)
 	{
 		if (root)
 		{
@@ -135,7 +133,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t Dockspace::dock_window(C_string name, uint32_t id)
+	uint32_t editor_dockspace::dock_window(C_string name, uint32_t id)
 	{
 		if (name && id)
 		{
@@ -145,12 +143,12 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t Dockspace::split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor_dockspace::split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
 		return split_node(id, dir, ratio, nullptr, other);
 	}
 
-	uint32_t Dockspace::split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
+	uint32_t editor_dockspace::split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, other);
 	}

@@ -10,13 +10,13 @@
 
 namespace ml
 {
-	struct Engine::PluginLoader final
+	struct engine::engine_plugins final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		PluginLoader() noexcept {}
+		engine_plugins() noexcept {}
 
-		~PluginLoader()
+		~engine_plugins()
 		{
 			m_libs.for_each([](auto const &, auto & p) { delete p; });
 		}
@@ -29,7 +29,7 @@ namespace ml
 			{
 				if (auto lib{ make_shared_library(*it.first) })
 				{
-					if (auto const plug{ lib.call_function<Plugin *>("ml_plugin_main") })
+					if (auto const plug{ lib.call_function<plugin *>("ml_plugin_main") })
 					{
 						return (*m_libs.insert(std::move(lib), plug).first.second);
 					}
@@ -50,7 +50,7 @@ namespace ml
 
 	private:
 		ds::flat_set<path_t> m_files{};
-		ds::flat_map<SharedLibrary, Plugin *> m_libs{};
+		ds::flat_map<shared_library, plugin *> m_libs{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -62,53 +62,61 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	decltype(Engine::s_window)	Engine::s_window	{};
-	decltype(Engine::s_time)	Engine::s_time		{};
-	decltype(Engine::s_plugins) Engine::s_plugins	{};
+	decltype(engine::s_window)	engine::s_window	{};
+	decltype(engine::s_time)	engine::s_time		{};
+	decltype(engine::s_plugins) engine::s_plugins	{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Engine::startup(EngineSettings const & es)
+	bool engine::startup(engine_startup_settings const & s)
 	{
+		s_time.m_main.start();
+
 		if (!Lua::startup())
 			return debug::log_error("Failed initializing Lua");
 
-		if (!Python::startup(es.program_name, es.library_path))
+		if (!Python::startup(s.program_name, s.library_path))
 			return debug::log_error("Failed initializing Python");
 		
 		return true;
 	}
 
-	bool Engine::init_window(WindowSettings const & ws)
+	bool engine::init_window(window_startup_settings const & s)
 	{
-		if (!s_window.create(ws.title, ws.display, ws.context, ws.flags))
+		if (!s_window.create(s.title, s.display, s.context, s.flags))
 			return false;
 
-		if (ws.install_callbacks)
+		if (s.install_callbacks)
 		{
 			s_window.set_char_callback([](auto, auto ch)
 			{
-				EventSystem::fire_event<CharEvent>(ch);
+				event_system::fire_event<char_event>(ch);
 			});
+
 			s_window.set_cursor_enter_callback([](auto, auto entered)
 			{
-				EventSystem::fire_event<CursorEnterEvent>(entered);
+				event_system::fire_event<cursor_enter_event>(entered);
 			});
+
 			s_window.set_cursor_pos_callback([](auto, auto x, auto y)
 			{
-				EventSystem::fire_event<CursorPosEvent>(x, y);
+				event_system::fire_event<cursor_pos_event>(x, y);
 			});
+
 			s_window.set_error_callback([](auto code, auto desc)
 			{
-				EventSystem::fire_event<WindowErrorEvent>(code, desc);
+				event_system::fire_event<window_error_event>(code, desc);
 			});
+
 			s_window.set_frame_size_callback([](auto, auto w, auto h)
 			{
-				EventSystem::fire_event<FrameSizeEvent>(w, h);
+				event_system::fire_event<frame_size_event>(w, h);
 			});
+
 			s_window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
 			{
-				EventSystem::fire_event<KeyEvent>(button, scan, action, mask8_t{ {
+				event_system::fire_event<key_event>(
+					(key_code)button, scan, action, mask8_t{ {
 					(mods & ML_MOD_SHIFT),
 					(mods & ML_MOD_CTRL),
 					(mods & ML_MOD_ALT),
@@ -117,47 +125,53 @@ namespace ml
 					(mods & ML_MOD_NUMLOCK)
 				} });
 			});
+
 			s_window.set_mouse_callback([](auto, auto button, auto action, auto mods)
 			{
-				EventSystem::fire_event<MouseEvent>(button, action, mods);
+				event_system::fire_event<mouse_event>(button, action, mods);
 			});
+
 			s_window.set_scroll_callback([](auto, auto x, auto y)
 			{
-				EventSystem::fire_event<ScrollEvent>(x, y);
+				event_system::fire_event<scroll_event>(x, y);
 			});
+
 			s_window.set_window_close_callback([](auto)
 			{
-				EventSystem::fire_event<WindowCloseEvent>();
+				event_system::fire_event<window_close_event>();
 			});
+
 			s_window.set_window_focus_callback([](auto, auto focused)
 			{
-				EventSystem::fire_event<WindowFocusEvent>(focused);
+				event_system::fire_event<window_focus_event>(focused);
 			});
+
 			s_window.set_window_pos_callback([](auto, auto x, auto y)
 			{
-				EventSystem::fire_event<WindowPosEvent>(x, y);
+				event_system::fire_event<window_pos_event>(x, y);
 			});
+
 			s_window.set_window_size_callback([](auto, auto w, auto h)
 			{
-				EventSystem::fire_event<WindowSizeEvent>(w, h);
+				event_system::fire_event<window_size_event>(w, h);
 			});
 		}
 
 		return true;
 	}
 
-	bool Engine::running()
+	bool engine::running()
 	{
 		return s_window.is_open();
 	}
 
-	void Engine::shutdown()
+	void engine::shutdown()
 	{
 		s_plugins.clear_plugins();
 
 		s_window.destroy();
 		
-		Window::terminate();
+		window::terminate();
 
 		Python::shutdown();
 		
@@ -166,18 +180,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void Engine::begin_loop()
+	void engine::begin_loop()
 	{
-		s_time.total = s_time.main.elapsed().count();
+		s_time.m_delta = s_time.m_loop.elapsed().count();
 		
-		s_time.delta = s_time.loop.elapsed().count();
-		
-		s_time.loop.stop().start();
+		s_time.m_loop.stop().start();
 
-		Window::poll_events();
+		window::poll_events();
 	}
 
-	void Engine::begin_draw()
+	void engine::begin_draw()
 	{
 		GL::clearColor(0, 0, 0, 1);
 
@@ -185,12 +197,12 @@ namespace ml
 		
 		GL::viewport(0, 0, s_window.get_frame_width(), s_window.get_frame_height());
 		
-		constexpr RenderStates states{ // default states
+		constexpr render_states states{ // default states
 			{}, {}, {}, {}
 		}; states();
 	}
 
-	void Engine::end_loop()
+	void engine::end_loop()
 	{
 		if (s_window.get_flags() & WindowFlags_DoubleBuffered)
 		{
@@ -201,14 +213,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Engine::load_plugin(path_t const & path)
+	int32_t engine::load_plugin(path_t const & path)
 	{
 		return s_plugins.load_plugin(path);
-	}
-
-	int32_t Engine::load_plugin(path_t && path)
-	{
-		return s_plugins.load_plugin(std::move(path)); // fixme
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

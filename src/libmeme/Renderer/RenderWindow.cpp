@@ -7,15 +7,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	RenderWindow::RenderWindow() noexcept : Window{}, RenderTarget{}
+	render_window::render_window() noexcept : window{}, render_target{}
 	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool RenderWindow::create(pmr::string const & title, VideoMode const & display, ContextSettings const & context, int32_t flags)
+	bool render_window::create(pmr::string const & title, video_mode const & display, context_settings const & context, int32_t flags)
 	{
-		if (!Window::create(title, display, context, flags))
+		if (!window::create(title, display, context, flags))
 		{
 			return debug::log_error("Failed initializing RenderWindow");
 		}
@@ -27,7 +27,7 @@ namespace ml
 
 		GL::validateVersion(m_context.major, m_context.minor);
 
-		constexpr RenderStates states{ // default states
+		constexpr render_states states{ // default states
 			{}, {}, {}, {}
 		}; states();
 

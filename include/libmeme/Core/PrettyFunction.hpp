@@ -1,7 +1,7 @@
 #ifndef _ML_PRETTY_FUNCTION_HPP_
 #define _ML_PRETTY_FUNCTION_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

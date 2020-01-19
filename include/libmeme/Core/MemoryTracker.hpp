@@ -5,18 +5,18 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 
-#define ML_MemoryTracker ::ml::MemoryTracker::get_instance()
+#define ML_memory_tracker ::ml::memory_tracker::get_instance()
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct Trackable;
+	struct trackable;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// Allocation Record
-	struct ML_CORE_API AllocationRecord final : public NonCopyable
+	struct ML_CORE_API allocation_record final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -26,7 +26,7 @@ namespace ml
 			size_t,		// index
 			size_t,		// size
 			int32_t,	// flags
-			Trackable *	// data
+			trackable *	// data
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -54,9 +54,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct MemoryTracker;
+		friend struct memory_tracker;
 
-		explicit AllocationRecord(storage_type && storage) noexcept;
+		explicit allocation_record(storage_type && storage) noexcept;
 
 		storage_type m_storage;
 
@@ -67,11 +67,11 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// Memory Tracker
-	struct ML_CORE_API MemoryTracker final : public Singleton<MemoryTracker>
+	struct ML_CORE_API memory_tracker final : singleton<memory_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type = typename ds::flat_map<Trackable *, AllocationRecord *>;
+		using storage_type = typename ds::flat_map<trackable *, allocation_record *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -82,25 +82,25 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct Singleton<MemoryTracker>;
+		friend struct singleton<memory_tracker>;
 
-		friend struct Trackable;
+		friend struct trackable;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		MemoryTracker() noexcept;
+		memory_tracker() noexcept;
 
-		~MemoryTracker();
+		~memory_tracker();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		size_t m_current;
 
-		ds::flat_map<Trackable *, AllocationRecord *> m_records;
+		ds::flat_map<trackable *, allocation_record *> m_records;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Trackable * make_allocation(size_t size, int32_t flags);
+		trackable * make_allocation(size_t size, int32_t flags);
 
 		void free_allocation(void * value, int32_t flags);
 
@@ -110,32 +110,32 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// Trackable
-	struct ML_CORE_API Trackable
+	struct ML_CORE_API trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~Trackable() noexcept = default;
+		virtual ~trackable() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline void * operator new(size_t size)
 		{
-			return ML_MemoryTracker.make_allocation(size, 0);
+			return ML_memory_tracker.make_allocation(size, 0);
 		}
 
 		inline void * operator new[](size_t size)
 		{
-			return ML_MemoryTracker.make_allocation(size, 1);
+			return ML_memory_tracker.make_allocation(size, 1);
 		}
 		
 		inline void operator delete(void * value)
 		{
-			return ML_MemoryTracker.free_allocation(value, 0);
+			return ML_memory_tracker.free_allocation(value, 0);
 		}
 
 		inline void operator delete[](void * value)
 		{
-			return ML_MemoryTracker.free_allocation(value, 1);
+			return ML_memory_tracker.free_allocation(value, 1);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

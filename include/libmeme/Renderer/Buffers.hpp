@@ -41,7 +41,7 @@ namespace ml
 
 
 	// Vertex Array Object
-	struct ML_RENDERER_API VertexArrayObject final : public GraphicsObject<VertexArrayObject>
+	struct ML_RENDERER_API VertexArrayObject final : GraphicsObject<VertexArrayObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -132,7 +132,7 @@ namespace ml
 
 
 	// Vertex Buffer Object
-	struct ML_RENDERER_API VertexBufferObject final : public GraphicsObject<VertexBufferObject>
+	struct ML_RENDERER_API VertexBufferObject final : GraphicsObject<VertexBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -247,7 +247,7 @@ namespace ml
 
 
 	// Index Buffer Object
-	struct ML_RENDERER_API IndexBufferObject final : public GraphicsObject<IndexBufferObject>
+	struct ML_RENDERER_API IndexBufferObject final : GraphicsObject<IndexBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -355,7 +355,7 @@ namespace ml
 
 
 	// Frame Buffer Object
-	struct ML_RENDERER_API FrameBufferObject final : public GraphicsObject<FrameBufferObject>
+	struct ML_RENDERER_API FrameBufferObject final : GraphicsObject<FrameBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -442,7 +442,7 @@ namespace ml
 
 		FrameBufferObject & attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer);
 
-		FrameBufferObject & attachTexture2D(uint32_t attachment, uint32_t texture, uint32_t level);
+		FrameBufferObject & attachTexture2D(uint32_t attachment, uint32_t tex, uint32_t level);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -451,39 +451,39 @@ namespace ml
 			return std::get<ID_Size>(m_storage);
 		}
 
-		ML_NODISCARD constexpr decltype(auto) buffer() const noexcept
+		ML_NODISCARD constexpr decltype(auto) buffer_data() const noexcept
 		{
 			return std::get<ID_Buffer>(m_storage);
 		}
 
 		ML_NODISCARD constexpr decltype(auto) bufferAttachment() const noexcept
 		{
-			return buffer().first;
+			return buffer_data().first;
 		}
 
 		ML_NODISCARD constexpr decltype(auto) bufferHandle() const noexcept
 		{
-			return buffer().second;
+			return buffer_data().second;
 		}
 
-		ML_NODISCARD constexpr decltype(auto) texture() const noexcept
+		ML_NODISCARD constexpr decltype(auto) texture_data() const noexcept
 		{
 			return std::get<ID_Texture>(m_storage);
 		}
 
 		ML_NODISCARD constexpr decltype(auto) textureAttachment() const noexcept
 		{
-			return std::get<0>(texture());
+			return std::get<0>(texture_data());
 		}
 
 		ML_NODISCARD constexpr decltype(auto) textureHandle() const noexcept
 		{
-			return std::get<1>(texture());
+			return std::get<1>(texture_data());
 		}
 
 		ML_NODISCARD constexpr decltype(auto) textureLevel() const noexcept
 		{
-			return std::get<2>(texture());
+			return std::get<2>(texture_data());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -496,7 +496,7 @@ namespace ml
 
 
 	// Render Buffer Object
-	struct ML_RENDERER_API RenderBufferObject final : public GraphicsObject<RenderBufferObject>
+	struct ML_RENDERER_API RenderBufferObject final : GraphicsObject<RenderBufferObject>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
