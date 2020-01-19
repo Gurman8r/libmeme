@@ -154,13 +154,10 @@ namespace ml
 		if (bindTextures)
 		{
 			uint32_t index = 0;
-
 			value->m_textures.for_each([&index](int32_t location, auto const & tex)
 			{
 				GL::uniform1i(location, index);
-
 				GL::activeTexture(GL::Texture0 + (index++));
-
 				Texture::bind(tex);
 			});
 		}

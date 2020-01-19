@@ -112,18 +112,6 @@ namespace ml
 		return (*this);
 	}
 
-	void Image::swap(Image & other)
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_pixels, other.m_pixels);
-			
-			std::swap(m_size, other.m_size);
-			
-			std::swap(m_channels, other.m_channels);
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	bool Image::load_from_file(path_t const & path)
@@ -154,7 +142,11 @@ namespace ml
 			
 			return !empty();
 		}
-		return dispose();
+		else
+		{
+			clear();
+			return false;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -185,9 +177,11 @@ namespace ml
 				if (m_channels >= 3) *it++ = color[2];
 				if (m_channels >= 4) *it++ = color[3];
 			}
-			return (*this);
 		}
-		dispose();
+		else
+		{
+			clear();
+		}
 		return (*this);
 	}
 
@@ -210,24 +204,36 @@ namespace ml
 			m_size = size;
 			m_channels = channels;
 			m_pixels = pixels;
-			return (*this);
 		}
-		dispose();
+		else
+		{
+			clear();
+		}
 		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Image::dispose()
+	void Image::clear() noexcept
 	{
-		pixels_type().swap(m_pixels);
-
-		m_size = { 0, 0 };
-
+		m_size = { 0 };
 		m_channels = 0;
-
-		return empty();
+		m_pixels.clear();
 	}
+
+	void Image::swap(Image & other) noexcept
+	{
+		if (this != std::addressof(other))
+		{
+			std::swap(m_pixels, other.m_pixels);
+
+			std::swap(m_size, other.m_size);
+
+			std::swap(m_channels, other.m_channels);
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	Image & Image::flip_vertically()
 	{
@@ -268,7 +274,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t Image::getFormat() const
+	uint32_t Image::get_format() const
 	{
 		switch (channels())
 		{

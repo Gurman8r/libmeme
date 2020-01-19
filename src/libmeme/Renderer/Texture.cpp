@@ -46,21 +46,21 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Texture::Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags)
+	Texture::Texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags)
 		: m_handle			{ NULL }
 		, m_sampler			{ sampler }
 		, m_level			{ level }
-		, m_internalFormat	{ internalFormat }
-		, m_colorFormat		{ colorFormat }
-		, m_pixelType		{ pixelType }
+		, m_internalFormat	{ internal_format }
+		, m_colorFormat		{ color_format }
+		, m_pixelType		{ pixel_type }
 		, m_size			{ 0, 0 }
 		, m_realSize		{ 0, 0 }
 		, m_flags			{ flags }
 	{
 	}
 
-	Texture::Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags)
-		: Texture{ sampler, 0, internalFormat, colorFormat, GL::UnsignedByte, flags }
+	Texture::Texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags)
+		: Texture{ sampler, 0, internal_format, color_format, GL::UnsignedByte, flags }
 	{
 	}
 
@@ -160,14 +160,14 @@ namespace ml
 	{
 		if (!image.channels()) { return false; }
 
-		m_internalFormat = m_colorFormat = image.getFormat();
+		m_internalFormat = m_colorFormat = image.get_format();
 
 		return create(image.size()) && update(image);
 	}
 
 	bool Texture::load_from_texture(Texture const & other)
 	{
-		return other.handle()
+		return other.m_handle
 			? create(other.size())
 				? update(other.copy_to_image())
 				: debug::log_error("Failed to copy texture, failed to create new texture")
@@ -233,7 +233,7 @@ namespace ml
 
 	bool Texture::create(byte_t const * pixels, uint32_t w, uint32_t h)
 	{
-		// 
+		// size cannot be zero
 		if (!w || !h)
 		{
 			return debug::log_error("texture size cannot be zero");
@@ -245,14 +245,18 @@ namespace ml
 			return debug::log_error("texture failed generating handle");
 		}
 
+		// set size
 		m_size = { w, h };
 		m_realSize = {
 			GL::getValidTextureSize(m_size[0]),
 			GL::getValidTextureSize(m_size[1])
 		};
 
-		// check size
-		static const auto max_size{ GL::getMaxTextureSize() };
+		// validate size
+		static auto const max_size
+		{
+			GL::getMaxTextureSize()
+		};
 		if ((m_realSize[0] > max_size) || (m_realSize[1] > max_size))
 		{
 			return debug::log_error("texture size is too large ({0}) max is: {1}",
@@ -303,7 +307,7 @@ namespace ml
 		return update(other.copy_to_image(), x, y, w, h);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool Texture::update(Image const & image)
 	{
@@ -325,7 +329,7 @@ namespace ml
 		return update(image.data(), x, y, w, h);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool Texture::update(byte_t const * pixels)
 	{

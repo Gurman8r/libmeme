@@ -146,7 +146,7 @@ namespace ml::ds
 		{
 			auto temp{ zero() };
 			for (auto & elem : temp)
-				elem = util::cast<value_type>::one;
+				elem = static_cast<value_type>(1);
 			return temp;
 		}
 
@@ -154,9 +154,11 @@ namespace ml::ds
 		{
 			auto temp{ zero() };
 			for (size_t i = 0; i < temp.size(); ++i)
+			{
 				temp[i] = (i / temp.width()) == (i % temp.width())
-					? util::cast<value_type>::one
-					: util::cast<value_type>::zero;
+					? static_cast<value_type>(1)
+					: static_cast<value_type>(0);
+			}
 			return temp;
 		}
 

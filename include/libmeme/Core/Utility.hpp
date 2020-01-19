@@ -57,147 +57,52 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_NODISCARD hash final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	static constexpr auto fnv1a_basis{ static_cast<size_t>(14695981039346656037ULL) };
 
-		static constexpr auto fnv1a_basis{ static_cast<size_t>(14695981039346656037ULL) };
+	static constexpr auto fnv1a_prime{ static_cast<size_t>(1099511628211ULL) };
 
-		static constexpr auto fnv1a_prime{ static_cast<size_t>(1099511628211ULL) };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class ... Args
-		> constexpr hash(Args && ... args) noexcept
-			: m_value{ (*this)(std::forward<Args>(args)...) }
-		{
-		}
-
-		constexpr hash() noexcept : m_value{ 0 } {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T
-		> constexpr size_t operator()(T const * arr, size_t size, size_t seed) noexcept
-		{
-			return (size > 0)
-				? (*this)(arr + 1, size - 1, (seed ^ static_cast<size_t>(*arr)) * fnv1a_prime)
-				: seed;
-		}
-
-		template <class T
-		> constexpr size_t operator()(T const * arr, size_t size) noexcept
-		{
-			return (*this)(arr, size, fnv1a_basis);
-		}
-
-		template <class T, size_t N
-		> constexpr size_t operator()(const T(&value)[N]) noexcept
-		{
-			return (*this)(value, N - 1);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Arr
-		> constexpr size_t operator()(Arr const & value) noexcept
-		{
-			return (*this)(value.data(), value.size());
-		}
-
-		template <template <class, size_t...> class Arr, class T, size_t ... N
-		> constexpr size_t operator()(Arr<T, N...> const & value) noexcept
-		{
-			return (*this)(value.data(), value.size());
-		}
-
-		template <template <class...> class Arr, class ... Ts
-		> constexpr size_t operator()(Arr<Ts...> const & value) noexcept
-		{
-			return (*this)(value.data(), value.size());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr size_t operator()() const noexcept { return m_value; }
-
-		constexpr operator size_t() const noexcept { return (*this)(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		size_t m_value;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// Cast
-namespace ml::util
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T
-	> struct cast final
+	> ML_NODISCARD static constexpr size_t hash(T const * arr, size_t size, size_t seed) noexcept
 	{
-		static constexpr T minus_one		{ static_cast<T>( -1) };
-		static constexpr T zero				{ static_cast<T>(  0) };
-		static constexpr T one				{ static_cast<T>(  1) };
-		static constexpr T two				{ static_cast<T>(  2) };
-		static constexpr T three			{ static_cast<T>(  3) };
-		static constexpr T four				{ static_cast<T>(  4) };
-		static constexpr T five				{ static_cast<T>(  5) };
-		static constexpr T six				{ static_cast<T>(  6) };
-		static constexpr T seven			{ static_cast<T>(  7) };
-		static constexpr T eight			{ static_cast<T>(  8) };
-		static constexpr T nine				{ static_cast<T>(  9) };
-		static constexpr T ten				{ static_cast<T>( 10) };
-		static constexpr T fourty_five		{ static_cast<T>( 45) };
-		static constexpr T sixty			{ static_cast<T>( 60) };
-		static constexpr T ninety			{ static_cast<T>( 90) };
-		static constexpr T one_hundred		{ static_cast<T>(100) };
-		static constexpr T one_eighty		{ static_cast<T>(180) };
-		static constexpr T three_sixty		{ static_cast<T>(360) };
-		static constexpr T half				{ one / two };
-		static constexpr T third			{ one / three };
-		static constexpr T quarter			{ one / four };
-		static constexpr T fifth			{ one / five };
-		static constexpr T sixth			{ one / six };
-		static constexpr T seventh			{ one / seven };
-		static constexpr T eighth			{ one / eight };
-		static constexpr T ninth			{ one / nine };
-		static constexpr T tenth			{ one / ten };
-		static constexpr T two_thirds		{ two / three };
-		static constexpr T three_fourths	{ three / four };
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// Pi
-namespace ml::utilm
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, class = std::enable_if<std::is_floating_point_v<T>>
-	> struct pi final
-	{
-		static constexpr auto value		{ static_cast<T>(3.14159265358979323846264338327L) };
-		static constexpr auto two		{ value * cast<T>::two };
-		static constexpr auto half		{ value * cast<T>::half };
-		static constexpr auto quarter	{ value * cast<T>::quarter };
-		static constexpr auto third		{ value * cast<T>::third };
-		static constexpr auto deg2rad	{ value / cast<T>::one_eighty };
-		static constexpr auto rad2deg	{ cast<T>::one_eighty / value };
-
-		ML_NODISCARD constexpr operator T const() const { return value; }
-	};
+		return (size > 0)
+			? hash(arr + 1, size - 1, (seed ^ static_cast<size_t>(*arr)) * fnv1a_prime)
+			: seed;
+	}
 
 	template <class T
-	> static constexpr auto pi_v{ pi<T>::value };
-	
+	> ML_NODISCARD static constexpr size_t hash(T const * arr, size_t size) noexcept
+	{
+		return hash(arr, size, fnv1a_basis);
+	}
+
+	template <class T, size_t N
+	> ML_NODISCARD static constexpr size_t hash(const T(&value)[N]) noexcept
+	{
+		return hash(value, N - 1);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Arr
+	> ML_NODISCARD static constexpr size_t hash(Arr const & value) noexcept
+	{
+		return hash(value.data(), value.size());
+	}
+
+	template <template <class, size_t...> class Arr, class T, size_t ... N
+	> ML_NODISCARD static constexpr size_t hash(Arr<T, N...> const & value) noexcept
+	{
+		return hash(value.data(), value.size());
+	}
+
+	template <template <class...> class Arr, class ... Ts
+	> ML_NODISCARD static constexpr size_t hash(Arr<Ts...> const & value) noexcept
+	{
+		return hash(value.data(), value.size());
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

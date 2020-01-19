@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_CORE_API NonCopyable
 	{
@@ -18,7 +18,7 @@ namespace ml
 		NonCopyable & operator=(NonCopyable const &) = delete;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_NON_COPYABLE_HPP_

@@ -8,9 +8,11 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// BASIC FLAT SET TRAITS
-	template <class _Ty,	// value type
-		class _Pr,			// comparator predicate type
-		bool _Multi			// true if multiple equivalent keys are permitted
+	template <
+		class	_Ty,	// value type
+		class	_Pr,	// comparator predicate type
+		bool	_Multi,	// true if multiple equivalent keys are permitted
+		size_t	_Magic	// size threshold used to determine search algorithm
 	> struct basic_flat_set_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,6 +24,8 @@ namespace ml::ds
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		static constexpr bool multi{ _Multi };
+
+		static constexpr size_t magic{ _Magic };
 
 		using difference_type = typename ptrdiff_t;
 
@@ -170,7 +174,16 @@ namespace ml::ds
 
 		ML_NODISCARD inline bool contains(const_reference value) const
 		{
-			return std::binary_search(cbegin(), cend(), value, compare_type{});
+			if (size() < traits_type::magic)
+			{
+				// linear
+				return (std::find(cbegin(), cend(), value) != cend());
+			}
+			else
+			{
+				// binary
+				return std::binary_search(cbegin(), cend(), value, compare_type{});
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -213,12 +226,33 @@ namespace ml::ds
 
 		ML_NODISCARD inline iterator find(const_reference value)
 		{
-			return std::find(begin(), end(), value);
+			// linear
+			if (size() < traits_type::magic)
+			{
+				return std::find(begin(), end(), value);
+			}
+			// binary
+			if (auto const it{ equal_range(value) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return end();
 		}
 
 		ML_NODISCARD inline const_iterator find(const_reference value) const
 		{
-			return std::find(cbegin(), cend(), value);
+			// linear
+			if (size() < traits_type::magic)
+			{
+				return std::find(cbegin(), cend(), value);
+			}
+			// binary
+			if (auto const it{ equal_range(value) }; it.first != it.second)
+			{
+				return it.first;
+			}
+			return cend();
+
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -320,13 +354,13 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT SET - sorted vector of unique elements
-	template <class _Ty, class _Pr = std::less<_Ty>
-	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false>>
+	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Magic = 42
+	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Magic>>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_set<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Magic>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -463,15 +497,15 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MULTISET - sorted vector of elements
-	template <class _Ty, class _Pr = std::less<_Ty>
+	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Magic = 42
 	> struct flat_multiset : basic_flat_set<
-		basic_flat_set_traits<_Ty, _Pr, true>
+		basic_flat_set_traits<_Ty, _Pr, true, _Magic>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_multiset<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true, _Magic>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;

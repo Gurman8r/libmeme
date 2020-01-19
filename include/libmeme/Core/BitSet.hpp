@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T> struct BitSet final
 	{
@@ -191,14 +191,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_USING mask8_t = typename BitSet<uint8_t>;
 	ML_USING mask16_t = typename BitSet<uint16_t>;
 	ML_USING mask32_t = typename BitSet<uint32_t>;
 	ML_USING mask64_t = typename BitSet<uint64_t>;
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T>
 	inline ML_SERIALIZE(std::ostream & out, const BitSet<T> & value)
@@ -212,7 +212,7 @@ namespace ml
 		return in.good() ? (in >> value.data()) : in;
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BIT_SET_HPP_

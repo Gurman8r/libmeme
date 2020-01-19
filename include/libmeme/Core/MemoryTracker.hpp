@@ -5,7 +5,7 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 
-#define ML_MemoryTracker ::ml::MemoryTracker::getInstance()
+#define ML_MemoryTracker ::ml::MemoryTracker::get_instance()
 
 namespace ml
 {

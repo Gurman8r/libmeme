@@ -177,24 +177,18 @@ namespace ml::util
 
 	ML_NODISCARD static inline bool is_integer(pmr::string const & value) noexcept
 	{
-		if (value.empty()) return false; 
+		if (value.empty()) return false;
 		std::locale loc{};
-		pmr::string::const_iterator it = value.cbegin();
-		if ((*it) == '-')
-		{ 
-			it++; 
-		}
-		while (it != value.cend() && std::isdigit(*it, loc))
-		{
-			++it;
-		}
-		return (it == value.cend());
+		auto it{ std::begin(value) };
+		if ((*it) == '-') it++; 
+		while (it != std::end(value) && std::isdigit(*it, loc)) ++it;
+		return (it == std::end(value));
 	}
 
 	ML_NODISCARD static inline bool is_decimal(pmr::string const & value) noexcept
 	{
 		if (value.empty()) return false;
-		pmr::string::pointer endptr = nullptr;
+		char * endptr{ nullptr };
 		auto temp { std::strtod(value.c_str(), &endptr) };
 		return !(*endptr != '\0' || endptr == value);
 	}
@@ -203,22 +197,18 @@ namespace ml::util
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
-		if (std::isalpha(value.front(), loc) || (value.front() == '_'))
+		auto it{ std::begin(value) };
+		if (!(*it == '_') || !std::isalpha(*it, loc))
+			return false;
+		++it;
+		std::for_each(it, std::end(value), [&, loc](auto const c)
 		{
-			for (size_t i = 1; i < value.size(); ++i)
+			if ((c != '_') || !std::isalnum(c, loc))
 			{
-				if (value[i] == '_')
-				{
-					continue;
-				}
-				else if (!std::isalnum(value[i], loc))
-				{
-					return false;
-				}
+				return false;
 			}
-			return true;
-		}
-		return false;
+		});
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

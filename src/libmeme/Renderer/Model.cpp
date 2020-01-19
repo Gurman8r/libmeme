@@ -3,7 +3,7 @@
 #include <libmeme/Renderer/RenderTarget.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <assimp/Importer.hpp>
 #include <assimp/cimport.h>
@@ -11,7 +11,7 @@
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {

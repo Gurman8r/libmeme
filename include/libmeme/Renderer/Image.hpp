@@ -53,8 +53,6 @@ namespace ml
 
 		Image & operator=(Image && other) noexcept;
 
-		void swap(Image & other);
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		bool load_from_file(path_t const & path);
@@ -81,7 +79,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool dispose();
+		void clear() noexcept;
+
+		void swap(Image & other) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		Image & flip_vertically();
 
@@ -89,7 +91,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD uint32_t getFormat() const;
+		ML_NODISCARD uint32_t get_format() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -8,23 +8,27 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// BASIC FLAT MAP TRAITS
-	template <class _Kty,	// key type
-		class _Vty,			// value type
-		class _Pr,			// key comparator predicate type
-		bool _Multi			// true if multiple equivalent keys are permitted (NYI)
+	template <
+		class	_Kty,	// key type
+		class	_Vty,	// value type
+		class	_Pr,	// key comparator predicate type
+		bool	_Multi,	// true if multiple equivalent keys are permitted
+		size_t	_Magic	// size threshold used to determine search algorithm
 	> struct basic_flat_map_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using key_type = typename _Kty;
 		
-		using value_type = typename _Vty;
+		using mapped_type = typename _Vty;
 		
 		using compare_type = typename _Pr;
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		static constexpr bool multi{ _Multi };
+
+		static constexpr size_t magic{ _Magic };
 
 		using difference_type = typename ptrdiff_t;
 		
@@ -49,25 +53,26 @@ namespace ml::ds
 		using size_type						= typename traits_type::size_type;
 		
 		using key_type						= typename traits_type::key_type;
-		using key_storage					= typename ds::flat_set<key_type, compare_type>;
+		using key_storage					= typename ds::flat_set<key_type, compare_type, traits_type::magic>;
 		using key_iterator					= typename key_storage::iterator;
 		using const_key_iterator			= typename key_storage::const_iterator;
 		using reverse_key_iterator			= typename key_storage::reverse_iterator;
 		using const_reverse_key_iterator	= typename key_storage::const_reverse_iterator;
 		
-		using value_type					= typename traits_type::value_type;
-		using value_storage					= typename pmr::vector<value_type>;
-		using value_iterator				= typename value_storage::iterator;
-		using const_value_iterator			= typename value_storage::const_iterator;
-		using reverse_value_iterator		= typename value_storage::reverse_iterator;
-		using const_reverse_value_iterator	= typename value_storage::const_reverse_iterator;
+		using mapped_type					= typename traits_type::mapped_type;
+		using mapped_storage				= typename pmr::vector<mapped_type>;
+		using mapped_iterator				= typename mapped_storage::iterator;
+		using const_mapped_iterator			= typename mapped_storage::const_iterator;
+		using reverse_mapped_iterator		= typename mapped_storage::reverse_iterator;
+		using const_reverse_mapped_iterator	= typename mapped_storage::const_reverse_iterator;
 		
-		using storage_type					= typename std::pair<key_storage, value_storage>;
-		using initializer_type				= typename std::initializer_list<std::pair<key_type, value_type>>;
-		using iterator_pair					= typename std::pair<key_iterator, value_iterator>;
-		using const_iterator_pair			= typename std::pair<const_key_iterator, const_value_iterator>;
-		using reverse_iterator_pair			= typename std::pair<reverse_key_iterator, reverse_value_iterator>;
-		using const_reverse_iterator_pair	= typename std::pair<const_reverse_key_iterator, const_reverse_value_iterator>;
+		using storage_type					= typename std::pair<key_storage, mapped_storage>;
+		using pair_type						= typename std::pair<key_type, mapped_type>;
+		using initializer_type				= typename std::initializer_list<pair_type>;
+		using iterator_pair					= typename std::pair<key_iterator, mapped_iterator>;
+		using const_iterator_pair			= typename std::pair<const_key_iterator, const_mapped_iterator>;
+		using reverse_iterator_pair			= typename std::pair<reverse_key_iterator, reverse_mapped_iterator>;
+		using const_reverse_iterator_pair	= typename std::pair<const_reverse_key_iterator, const_reverse_mapped_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -78,21 +83,21 @@ namespace ml::ds
 
 		explicit basic_flat_map(allocator_type const & alloc) : m_storage{
 			key_storage{ alloc },
-			value_storage{ alloc }
+			mapped_storage{ alloc }
 		}
 		{
 		}
 
 		explicit basic_flat_map(storage_type const & value, allocator_type const & alloc = {}) : m_storage{
 			key_storage{ value.first, alloc },
-			value_storage{ value.second, alloc }
+			mapped_storage{ value.second, alloc }
 		}
 		{
 		}
 
 		explicit basic_flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{
 			key_storage{ std::move(value.first), alloc },
-			value_storage{ std::move(value.second), alloc }
+			mapped_storage{ std::move(value.second), alloc }
 		}
 		{
 		}
@@ -142,7 +147,7 @@ namespace ml::ds
 			m_storage.second.resize(count);
 		}
 
-		inline void resize(size_type const count, value_type const & value)
+		inline void resize(size_type const count, mapped_type const & value)
 		{
 			m_storage.first.resize(count);
 			m_storage.second.resize(count, value);
@@ -191,7 +196,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_iterator fetch(const_key_iterator addr)
+		ML_NODISCARD inline mapped_iterator fetch(const_key_iterator addr)
 		{
 			return (addr == m_storage.first.cend())
 				? m_storage.second.end()
@@ -200,7 +205,7 @@ namespace ml::ds
 				);
 		}
 
-		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator addr) const
+		ML_NODISCARD inline const_mapped_iterator fetch(const_key_iterator addr) const
 		{
 			return (addr == m_storage.first.cend())
 				? m_storage.second.cend()
@@ -212,7 +217,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline value_iterator emplace(const_key_iterator addr, Args && ... args)
+		> inline mapped_iterator emplace(const_key_iterator addr, Args && ... args)
 		{
 			return m_storage.second.emplace(this->fetch(addr), std::forward<Args>(args)...);
 		}
@@ -274,16 +279,16 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MAP
-	template <class _Kty, class _Vty, class _Pr	= std::less<_Kty>
+	template <class _Kty, class _Vty, class _Pr	= std::less<_Kty>, size_t _Magic = 42
 	> struct flat_map : basic_flat_map<
-		basic_flat_map_traits<_Kty, _Vty, _Pr, false>
+		basic_flat_map_traits<_Kty, _Vty, _Pr, false, _Magic>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type						= typename flat_map<_Kty, _Vty, _Pr>;
-		using base_type						= typename basic_flat_map<basic_flat_map_traits<_Kty, _Vty, _Pr, false>>;
-		using traits_type					= typename base_type::traits_type;
+		using traits_type					= typename basic_flat_map_traits<_Kty, _Vty, _Pr, false, _Magic>;
+		using base_type						= typename basic_flat_map<traits_type>;
 		using compare_type					= typename base_type::compare_type;
 		using allocator_type				= typename base_type::allocator_type;
 		using difference_type				= typename base_type::difference_type;
@@ -296,14 +301,15 @@ namespace ml::ds
 		using reverse_key_iterator			= typename base_type::reverse_key_iterator;
 		using const_reverse_key_iterator	= typename base_type::const_reverse_key_iterator;
 		
-		using value_type					= typename base_type::value_type;
-		using value_storage					= typename base_type::value_storage;
-		using value_iterator				= typename base_type::value_iterator;
-		using const_value_iterator			= typename base_type::const_value_iterator;
-		using reverse_value_iterator		= typename base_type::reverse_value_iterator;
-		using const_reverse_value_iterator	= typename base_type::const_reverse_value_iterator;
+		using mapped_type					= typename base_type::mapped_type;
+		using mapped_storage				= typename base_type::mapped_storage;
+		using mapped_iterator				= typename base_type::mapped_iterator;
+		using const_mapped_iterator			= typename base_type::const_mapped_iterator;
+		using reverse_mapped_iterator		= typename base_type::reverse_mapped_iterator;
+		using const_reverse_mapped_iterator	= typename base_type::const_reverse_mapped_iterator;
 		
 		using storage_type					= typename base_type::storage_type;
+		using pair_type						= typename base_type::pair_type;
 		using initializer_type				= typename base_type::initializer_type;
 		using iterator_pair					= typename base_type::iterator_pair;
 		using const_iterator_pair			= typename base_type::const_iterator_pair;
@@ -419,7 +425,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & at(key_type const & key)
+		ML_NODISCARD inline mapped_type & at(key_type const & key)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -427,11 +433,11 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(key, value_type{}).first.second);
+				return (*this->insert(key, mapped_type{}).first.second);
 			}
 		}
 
-		ML_NODISCARD inline value_type & at(key_type && key)
+		ML_NODISCARD inline mapped_type & at(key_type && key)
 		{
 			if (auto const it{ this->find(std::move(key)) })
 			{
@@ -439,18 +445,18 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(std::move(key), value_type{}).first.second);
+				return (*this->insert(std::move(key), mapped_type{}).first.second);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & operator[](key_type const & key)
+		ML_NODISCARD inline mapped_type & operator[](key_type const & key)
 		{
 			return this->at(key);
 		}
 
-		ML_NODISCARD inline value_type & operator[](key_type && key)
+		ML_NODISCARD inline mapped_type & operator[](key_type && key)
 		{
 			return this->at(std::move(key));
 		}

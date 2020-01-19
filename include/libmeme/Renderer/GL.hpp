@@ -103,7 +103,7 @@ namespace ml
 		static bool deleteTexture(uint32_t const * value);
 		static void deleteTextures(uint32_t count, uint32_t const * id);
 		static void bindTexture(uint32_t target, uint32_t id);
-		static void texImage2D(uint32_t target, int32_t level, uint32_t internalFormat, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels);
+		static void texImage2D(uint32_t target, int32_t level, uint32_t internal_format, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels);
 		static void texSubImage2D(uint32_t target, int32_t level, int32_t xoffset, int32_t yoffset, int32_t width, int32_t height, uint32_t format, uint32_t type, void * pixels);
 		static void texParameter(uint32_t target, uint32_t name, uint32_t param);
 		static void getTexImage(uint32_t target, int32_t level, uint32_t format, uint32_t type, void * pixels);

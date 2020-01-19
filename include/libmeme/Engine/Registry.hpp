@@ -5,7 +5,7 @@
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
-#define ML_Registry ::ml::Registry<>::getInstance()
+#define ML_Registry ::ml::Registry<>::get_instance()
 
 #define ML_REGISTER_EX(T, factory)			\
 	static std::optional<std::any> factory();		\
@@ -19,11 +19,11 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... T> struct Registry;
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T> struct ML_ENGINE_API Registry<T> final
 	{
@@ -32,7 +32,7 @@ namespace ml
 	private: static bool s_registered;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct ML_ENGINE_API Registry<> final : public Singleton<Registry<>>
 	{
@@ -155,7 +155,7 @@ namespace ml
 		storage_type m_storage;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_REGISTRY_HPP_

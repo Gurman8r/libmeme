@@ -27,9 +27,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Texture(uint32_t sampler, int32_t level, uint32_t internalFormat, uint32_t colorFormat, uint32_t pixelType, int32_t flags);
+		Texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags);
 		
-		Texture(uint32_t sampler, uint32_t internalFormat, uint32_t colorFormat, int32_t flags);
+		Texture(uint32_t sampler, uint32_t internal_format, uint32_t color_format, int32_t flags);
 		
 		Texture(uint32_t sampler, uint32_t format, int32_t flags);
 		
@@ -145,15 +145,15 @@ namespace ml
 		
 		ML_NODISCARD inline auto level() const noexcept -> int32_t { return m_level; }
 		
-		ML_NODISCARD inline auto internalFormat() const noexcept -> uint32_t { return m_internalFormat; }
+		ML_NODISCARD inline auto internal_format() const noexcept -> uint32_t { return m_internalFormat; }
 		
-		ML_NODISCARD inline auto colorFormat() const noexcept -> uint32_t { return m_colorFormat; }
+		ML_NODISCARD inline auto color_format() const noexcept -> uint32_t { return m_colorFormat; }
 		
-		ML_NODISCARD inline auto pixelType() const noexcept -> uint32_t { return m_pixelType; }
+		ML_NODISCARD inline auto pixel_type() const noexcept -> uint32_t { return m_pixelType; }
 		
 		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
 		
-		ML_NODISCARD inline auto realSize() const noexcept -> vec2u const & { return m_realSize; }
+		ML_NODISCARD inline auto real_size() const noexcept -> vec2u const & { return m_realSize; }
 		
 		ML_NODISCARD inline auto flags() const noexcept -> uint32_t { return m_flags; }
 

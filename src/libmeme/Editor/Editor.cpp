@@ -3,7 +3,7 @@
 #include <libmeme/Platform/Window.hpp>
 #include <libmeme/Renderer/GL.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
@@ -14,7 +14,7 @@
 #else
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -29,7 +29,7 @@ namespace ml
 	bool Editor::startup(EditorSettings const & es)
 	{
 		// Create ImGui Context
-		/* * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		auto & io{ ImGui::GetIO() };

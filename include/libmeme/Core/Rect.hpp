@@ -5,14 +5,14 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct Rect final : public tvec4<T>
+	template <class T> struct rectangle final : public tvec4<T>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using value_type		= typename T;
-		using self_type			= typename Rect<value_type>;
+		using self_type			= typename rectangle<value_type>;
 		using base_type			= typename tvec4<value_type>;
 		using coord_type		= typename tvec2<value_type>;
 		using pointer			= typename base_type::pointer;
@@ -24,48 +24,66 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr Rect() noexcept : base_type{} {}
-		
-		constexpr Rect(value_type width, value_type height)
-			: base_type{ 0, 0, width, height }
-		{
-		}
-		
-		constexpr Rect(value_type left, value_type top, value_type width, value_type height)
-			: base_type{ left, top, width, height }
+		constexpr rectangle() noexcept
+			: base_type{}
 		{
 		}
 
-		constexpr Rect(self_type const & other)
+		constexpr rectangle(T value) noexcept
+			: base_type{ value }
+		{
+		}
+		
+		constexpr rectangle(T w, T h) noexcept
+			: base_type{ 0, 0, w, h }
+		{
+		}
+		
+		constexpr rectangle(T x, T y, T w, T h) noexcept
+			: base_type{ x, y, w, h }
+		{
+		}
+
+		template <class X, class Y, class W, class H
+		> constexpr rectangle(X x, Y y, W w, H h) noexcept : base_type{
+			static_cast<T>(x),
+			static_cast<T>(y),
+			static_cast<T>(w),
+			static_cast<T>(h)
+		}
+		{
+		}
+
+		constexpr rectangle(self_type const & other) noexcept
 			: base_type{ other }
 		{
 		}
 
 		template <class U
-		> constexpr Rect(tvec4<U> const & other)
+		> constexpr rectangle(tvec4<U> const & other) noexcept
 			: base_type{ other }
 		{
 		}
 		
-		constexpr Rect(coord_type const & pos, coord_type const & size)
+		constexpr rectangle(coord_type const & pos, coord_type const & size) noexcept
 			: base_type{ pos[0], pos[1], size[0], size[1] }
 		{
 		}
 		
-		constexpr Rect(coord_type const & size)
+		constexpr rectangle(coord_type const & size) noexcept
 			: base_type{ 0, 0, size[0], size[1] }
 		{
 		}
-		
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto left() const -> value_type { return (*this)[0]; }
+		ML_NODISCARD constexpr auto left() const -> value_type { return at(0); }
 		
-		ML_NODISCARD constexpr auto top() const -> value_type { return (*this)[1]; }
+		ML_NODISCARD constexpr auto top() const -> value_type { return at(1); }
 		
-		ML_NODISCARD constexpr auto width() const -> value_type { return (*this)[2]; }
+		ML_NODISCARD constexpr auto width() const -> value_type { return at(2); }
 		
-		ML_NODISCARD constexpr auto height() const -> value_type { return (*this)[3]; }
+		ML_NODISCARD constexpr auto height() const -> value_type { return at(3); }
 		
 		ML_NODISCARD constexpr auto bot() const -> value_type { return (top() + height()); }
 		
@@ -100,17 +118,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING float_rect = Rect<float_t>;
-	
-	ML_USING int_rect = Rect<int32_t>;
-	
-	ML_USING uint_rect = Rect<uint32_t>;
+	ML_USING float_rect = rectangle<float_t>;
+	ML_USING int_rect	= rectangle<int32_t>;
+	ML_USING uint_rect	= rectangle<uint32_t>;
 
-	/* * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_RECT_HPP_

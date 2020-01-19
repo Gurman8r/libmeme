@@ -527,9 +527,9 @@ namespace ml
 		glCheck(glBindTexture(target, id));
 	}
 
-	void GL::texImage2D(uint32_t target, int32_t level, uint32_t internalFormat, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels)
+	void GL::texImage2D(uint32_t target, int32_t level, uint32_t internal_format, int32_t width, int32_t height, int32_t border, uint32_t format, uint32_t type, void * pixels)
 	{
-		glCheck(glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels));
+		glCheck(glTexImage2D(target, level, internal_format, width, height, border, format, type, pixels));
 	}
 
 	void GL::texSubImage2D(uint32_t target, int32_t level, int32_t xoffset, int32_t yoffset, int32_t width, int32_t height, uint32_t format, uint32_t type, void * pixels)

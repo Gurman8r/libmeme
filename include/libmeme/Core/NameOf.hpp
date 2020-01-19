@@ -1,7 +1,7 @@
 #ifndef _ML_NAMEOF_HPP_
 #define _ML_NAMEOF_HPP_
 
-#include <libmeme/Core/Signature.hpp>
+#include <libmeme/Core/PrettyFunction.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,8 +47,8 @@ namespace ml
 		ML_NODISCARD static constexpr std::string_view filter_type(std::string_view const & s)
 		{
 			return filter_suffix(filter_prefix(s,
-				std::get<0>(signature::detail::type)),
-				std::get<1>(signature::detail::type)
+				std::get<0>(pretty_function::detail::type)),
+				std::get<1>(pretty_function::detail::type)
 			);
 		}
 
@@ -97,7 +97,7 @@ namespace ml
 	template <class T
 	> struct nameof<T> final
 	{
-		static constexpr auto value{ nameof<>::filter_type(signature::type<T>()) };
+		static constexpr auto value{ nameof<>::filter_type(pretty_function::type<T>()) };
 	};
 
 #ifdef ML_CC_MSVC

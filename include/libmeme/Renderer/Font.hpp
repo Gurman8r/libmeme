@@ -49,9 +49,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD Glyph const & get_glyph(uint32_t c, uint32_t characterSize) const;
+		ML_NODISCARD Glyph const & get_glyph(uint32_t c, uint32_t char_size) const;
 
-		ML_NODISCARD Glyph load_glyph(uint32_t c, uint32_t characterSize) const;
+		ML_NODISCARD Glyph load_glyph(uint32_t c, uint32_t char_size) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

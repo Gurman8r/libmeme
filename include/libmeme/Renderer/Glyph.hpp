@@ -9,105 +9,27 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Texture, ID_Bounds, ID_Advance };
-
-		using storage_type = typename std::tuple<Texture, float_rect, uint32_t>;
-
-		static constexpr size_t const count{ 6 };
+		Texture		texture	{};
+		float_rect	bounds	{ 0 };
+		uint32_t	advance	{ 0 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		Glyph();
+		inline auto bearing() const noexcept -> vec2 { return bounds.position(); }
 		
-		Glyph(storage_type const & storage);
+		inline auto size() const noexcept -> vec2 { return bounds.size(); }
 		
-		Glyph(storage_type && storage) noexcept;
+		inline auto left() const noexcept -> float_t { return bearing()[0]; }
 		
-		Glyph(Glyph const & other);
-		
-		Glyph(Glyph && other) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline Glyph & operator=(Glyph const & other)
-		{
-			Glyph temp{ other };
-			swap(temp);
-			return (*this);
-		}
-
-		inline Glyph & operator=(Glyph && other) noexcept
-		{
-			swap(std::move(other));
-			return (*this);
-		}
-
-		inline void swap(Glyph & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				std::swap(m_storage, other.m_storage);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline decltype(auto) texture() noexcept
-		{
-			return std::get<ID_Texture>(m_storage);
-		}
-
-		ML_NODISCARD inline decltype(auto) texture() const noexcept
-		{
-			return std::get<ID_Texture>(m_storage);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline decltype(auto) bounds() noexcept
-		{
-			return std::get<ID_Bounds>(m_storage);
-		}
-
-		ML_NODISCARD inline decltype(auto) bounds() const noexcept
-		{
-			return std::get<ID_Bounds>(m_storage);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline decltype(auto) advance() noexcept
-		{
-			return std::get<ID_Advance>(m_storage);
-		}
-
-		ML_NODISCARD inline decltype(auto) advance() const noexcept
-		{
-			return std::get<ID_Advance>(m_storage);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline auto bearing() const noexcept -> vec2 { return bounds().position(); }
-		
-		inline auto size() const noexcept -> vec2 { return bounds().size(); }
-		
-		inline auto x() const noexcept -> float_t { return bearing()[0]; }
-		
-		inline auto y() const noexcept -> float_t { return bearing()[1]; }
+		inline auto top() const noexcept -> float_t { return bearing()[1]; }
 		
 		inline auto width() const noexcept -> float_t { return size()[0]; }
 		
 		inline auto height() const noexcept -> float_t { return size()[1]; }
 		
-		inline auto offset() const noexcept -> vec2 { return { x(), -y() }; }
+		inline auto offset() const noexcept -> vec2 { return { left(), -top() }; }
 		
-		inline auto step() const noexcept -> float_t { return (float_t)(advance() >> count); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_storage;
+		inline auto step() const noexcept -> float_t { return (float_t)(advance >> 6); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -117,7 +39,27 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
 	{
-		return Glyph{ Glyph::storage_type{ std::forward<Args>(args)... } };
+		return Glyph{ std::forward<Args>(args)... };
+	}
+
+	template <class Bounds, class Advance
+	> ML_NODISCARD static inline auto make_glyph(Texture const & t, Bounds && b, Advance && a)
+	{
+		Glyph g;
+		g.texture = t;
+		g.bounds = std::move(b);
+		g.advance = std::move(a);
+		return g;
+	}
+
+	template <class Bounds, class Advance
+	> ML_NODISCARD static inline auto make_glyph(Texture && t, Bounds && b, Advance && a) noexcept
+	{
+		Glyph g;
+		g.texture = std::move(t);
+		g.bounds = std::move(b);
+		g.advance = std::move(a);
+		return g;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -2,7 +2,7 @@
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -11,7 +11,7 @@
 #include FT_BITMAP_H
 #include FT_STROKER_H
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -98,8 +98,10 @@ namespace ml
 
 	bool Font::load_from_file(path_t const & path)
 	{
-		if (m_library) return false;
+		if (m_library)
+			return false;
 
+		// load freetype library instance
 		FT_Library library;
 		if (FT_Init_FreeType(&library) != 0)
 		{
@@ -108,11 +110,10 @@ namespace ml
 				path
 			);
 		}
-		m_library = library;
 
-		// Load the new fonts face from the specified file
+		// load the new fonts face from the specified file
 		FT_Face face;
-		if (FT_New_Face(static_cast<FT_Library>(m_library), path.string().c_str(), 0, &face) != 0)
+		if (FT_New_Face(library, path.string().c_str(), 0, &face) != 0)
 		{
 			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to create the font face)",
@@ -120,9 +121,9 @@ namespace ml
 			);
 		}
 
-		// Load the stroker that will be used to outline the fonts
+		// load the stroker that will be used to outline the fonts
 		FT_Stroker stroker;
-		if (FT_Stroker_New(static_cast<FT_Library>(m_library), &stroker) != 0)
+		if (FT_Stroker_New(library, &stroker) != 0)
 		{
 			FT_Done_Face(face);
 			return debug::log_error(
@@ -131,7 +132,7 @@ namespace ml
 			);
 		}
 
-		// Select the unicode character map
+		// select the unicode character map
 		if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
 		{
 			FT_Stroker_Done(stroker);
@@ -142,20 +143,23 @@ namespace ml
 			);
 		}
 
-		// Store the loaded fonts
+		// store loaded font library
+		m_library = library;
+
+		// store the font faces
 		m_face = face;
 
-		// Store the fonts information
-		m_info.family = face->family_name ? face->family_name : pmr::string{};
+		// store the font information
+		m_info.family = face->family_name;
 
-		return m_library;
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	Glyph const & Font::get_glyph(uint32_t c, uint32_t characterSize) const
+	Glyph const & Font::get_glyph(uint32_t c, uint32_t char_size) const
 	{
-		glyph_page & page{ m_pages[characterSize] };
+		glyph_page & page{ m_pages[char_size] };
 		
 		if (auto it{ page.find(c) })
 		{
@@ -163,52 +167,60 @@ namespace ml
 		}
 		else
 		{
-			return (*page.insert(c, load_glyph(c, characterSize)).first.second);
+			return (*page.insert(c, load_glyph(c, char_size)).first.second);
 		}
 	}
 
-	Glyph Font::load_glyph(uint32_t c, uint32_t characterSize) const
+	Glyph Font::load_glyph(uint32_t c, uint32_t char_size) const
 	{
-		Glyph glyph;
-
-		FT_Face face;
-		if (!(face = static_cast<FT_Face>(m_face)))
+		// face not loaded
+		FT_Face face{ static_cast<FT_Face>(m_face) };
+		if (!face)
 		{
-			return glyph;
+			return make_glyph();
 		}
 
-		// Set size loading glyphs as
-		FT_Set_Pixel_Sizes(face, 0, characterSize);
+		// set size loading glyphs as
+		FT_Set_Pixel_Sizes(face, 0, char_size);
 
-		// Disable byte-alignment restriction
+		// disable byte-alignment restriction
 		GL::pixelStore(GL::UnpackAlignment, 1);
 
-		// Load character glyph 
+		// load character glyph
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
 		{
 			debug::log_warning("Failed loading Glyph \'{0}\'", (char)c);
-			return glyph;
+			
+			return make_glyph();
 		}
 
-		glyph.bounds() = float_rect{
-			(float_t)face->glyph->bitmap_left,
-			(float_t)face->glyph->bitmap_top,
-			(float_t)face->glyph->bitmap.width,
-			(float_t)face->glyph->bitmap.rows
-		};
-
-		glyph.advance() = (uint32_t)face->glyph->advance.x;
-
-		// Only load a texture for characters requiring a graphic
-		if ((c != ' ') && std::isgraph(c, m_info.locale))
+		// create the glyph
+		Glyph g = make_glyph(
+			make_texture(
+				GL::Texture2D,
+				GL::RGBA,
+				GL::Red,
+				TextureFlags_Default
+			),
+			float_rect{
+				face->glyph->bitmap_left,
+				face->glyph->bitmap_top,
+				face->glyph->bitmap.width,
+				face->glyph->bitmap.rows
+			},
+			(uint32_t)face->glyph->advance.x
+		);
+		
+		// only load a texture for characters requiring a graphic
+		if (!std::isspace(c, m_info.locale) && std::isgraph(c, m_info.locale))
 		{
-			if (!glyph.texture().create(face->glyph->bitmap.buffer, (vec2u)glyph.size()))
+			if (!g.texture.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
 			{
 				debug::log_warning("Failed Loading Glyph Texture: \'{0}\'", (char)c);
 			}
 		}
 
-		return glyph;
+		return g;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

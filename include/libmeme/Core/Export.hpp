@@ -1,15 +1,15 @@
 #ifndef _ML_CORE_EXPORT_HPP_
 #define _ML_CORE_EXPORT_HPP_
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // MemeLib Core
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Config.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_STATIC)
 #	define ML_CORE_API
@@ -19,6 +19,6 @@
 #	define ML_CORE_API ML_API_IMPORT
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_CORE_EXPORT_HPP_

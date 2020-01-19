@@ -1,11 +1,11 @@
 #ifndef _ML_WINDOW_EXPORT_HPP_
 #define _ML_WINDOW_EXPORT_HPP_
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Config.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_STATIC)
 #	define ML_PLATFORM_API
@@ -15,6 +15,6 @@
 #	define ML_PLATFORM_API ML_API_IMPORT
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_WINDOW_EXPORT_HPP_
