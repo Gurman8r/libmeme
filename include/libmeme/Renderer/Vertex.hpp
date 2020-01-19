@@ -13,40 +13,38 @@ namespace ml
 
 		using storage_type = typename ds::array<float_t, size>;
 
-		storage_type m_storage{ 0 };
-
-		constexpr explicit vertex(vec3 const & p, vec3 const & n, vec2 const & t) : m_storage{
+		constexpr explicit vertex(vec3 const & p, vec3 const & n, vec2 const & t) : m_data{
 			p[0], p[1], p[2], n[0], n[1], n[2], t[0], t[1]
 		}
 		{
 		}
 
 		constexpr vertex(std::initializer_list<float_t> init)
-			: m_storage{}
+			: m_data{}
 		{
 			for (auto it{ init.begin() }; it != init.end(); ++it)
 			{
-				m_storage[std::distance(init.begin(), it)] = (*it);
+				m_data[std::distance(init.begin(), it)] = (*it);
 			}
 		}
 
 		constexpr vertex(storage_type const & storage)
-			: m_storage{ storage }
+			: m_data{ storage }
 		{
 		}
 
 		constexpr vertex(storage_type && storage) noexcept
-			: m_storage{ std::move(storage) }
+			: m_data{ std::move(storage) }
 		{
 		}
 
 		constexpr vertex(vertex const & other)
-			: m_storage{ other.m_storage }
+			: m_data{ other.m_data }
 		{
 		}
 
 		constexpr vertex(vertex && other) noexcept
-			: m_storage{}
+			: m_data{}
 		{
 			swap(std::move(other));
 		}
@@ -70,57 +68,62 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				util::swap(m_storage, other.m_storage);
+				util::swap(m_data, other.m_data);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) operator[](size_t const i) { return m_storage[i]; }
+		constexpr decltype(auto) operator[](size_t const i) { return m_data[i]; }
 		
-		constexpr decltype(auto) operator[](size_t const i) const { return m_storage[i]; }
+		constexpr decltype(auto) operator[](size_t const i) const { return m_data[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr vec3 position() const noexcept
 		{
-			return { m_storage[0], m_storage[1], m_storage[2] };
+			return { m_data[0], m_data[1], m_data[2] };
 		}
 
 		ML_NODISCARD constexpr vec3 normal() const noexcept
 		{
-			return { m_storage[3], m_storage[4], m_storage[5] };
+			return { m_data[3], m_data[4], m_data[5] };
 		}
 
 		ML_NODISCARD constexpr vec2 texcoord() const noexcept
 		{
-			return { m_storage[6], m_storage[7] };
+			return { m_data[6], m_data[7] };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr vertex & position(vec3 const & value) noexcept
 		{
-			m_storage[0] = value[0];
-			m_storage[1] = value[1];
-			m_storage[2] = value[2];
+			m_data[0] = value[0];
+			m_data[1] = value[1];
+			m_data[2] = value[2];
 			return (*this);
 		}
 
 		constexpr vertex & normal(vec3 const & value) noexcept
 		{
-			m_storage[3] = value[0];
-			m_storage[4] = value[1];
-			m_storage[5] = value[2];
+			m_data[3] = value[0];
+			m_data[4] = value[1];
+			m_data[5] = value[2];
 			return (*this);
 		}
 
 		constexpr vertex & texcoord(vec2 const & value) noexcept
 		{
-			m_storage[6] = value[0];
-			m_storage[7] = value[1];
+			m_data[6] = value[0];
+			m_data[7] = value[1];
 			return (*this);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_data{ 0 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

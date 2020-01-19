@@ -41,7 +41,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	template <class T> struct BasicColor final
+	template <class T> struct basic_color final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,43 +51,43 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr BasicColor(rgba_t const & value)
-			: m_value { value }
+		constexpr basic_color(rgba_t const & value)
+			: m_value{ value }
 		{
 		}
 
-		constexpr BasicColor(rgb_t const & rgb, type a)
-			: m_value { rgb[0], rgb[1], rgb[2], a }
+		constexpr basic_color(rgb_t const & rgb, type a)
+			: m_value{ rgb[0], rgb[1], rgb[2], a }
 		{
 		}
 
-		constexpr BasicColor(type rgba)
-			: m_value { rgba, rgba, rgba, rgba }
+		constexpr basic_color(type rgba)
+			: m_value{ rgba, rgba, rgba, rgba }
 		{
 		}
 
-		constexpr BasicColor(type r, type g, type b)
-			: m_value { r, g, b, 1.0f }
+		constexpr basic_color(type r, type g, type b)
+			: m_value{ r, g, b, 1 }
 		{
 		}
 
-		constexpr BasicColor(type r, type g, type b, type a)
-			: m_value { r, g, b, a }
+		constexpr basic_color(type r, type g, type b, type a)
+			: m_value{ r, g, b, a }
 		{
 		}
 
-		template <class U> constexpr BasicColor(const tvec4<U> & value)
-			: m_value { detail::color_cast(value) }
+		template <class U> constexpr basic_color(tvec4<U> const & value)
+			: m_value{ detail::color_cast(value) }
 		{
 		}
 
-		template <class U> constexpr BasicColor(const BasicColor<U> & copy)
-			: m_value { detail::color_cast(copy.rgba()) }
+		template <class U> constexpr basic_color(basic_color<U> const & other)
+			: m_value{ detail::color_cast(other.rgba()) }
 		{
 		}
 
-		constexpr BasicColor()
-			: m_value { 0 }
+		constexpr basic_color()
+			: m_value{ 0 }
 		{
 		}
 
@@ -105,29 +105,35 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto r()		const -> type const &	{ return m_value[0]; }
-		constexpr auto g()		const -> type const &	{ return m_value[1]; }
-		constexpr auto b()		const -> type const &	{ return m_value[2]; }
-		constexpr auto a()		const -> type const &	{ return m_value[3]; }
-		constexpr auto rgb()	const -> const rgb_t	{ return (rgb_t)m_value; }
-		constexpr auto rgba()	const -> rgba_t const & { return m_value; }
+		constexpr auto r() const -> type const & { return m_value[0]; }
+		
+		constexpr auto g() const -> type const & { return m_value[1]; }
+		
+		constexpr auto b() const -> type const & { return m_value[2]; }
+		
+		constexpr auto a() const -> type const & { return m_value[3]; }
+		
+		constexpr auto rgb() const -> rgb_t { return (rgb_t)m_value; }
+		
+		constexpr auto rgba() const -> rgba_t const & { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private: rgba_t m_value;
+	private:
+		rgba_t m_value;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING Color = typename BasicColor<float_t>;
+	ML_USING Color = typename basic_color<float_t>;
 	
-	ML_USING Color32 = typename BasicColor<byte_t>;
+	ML_USING Color32 = typename basic_color<byte_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> inline ML_SERIALIZE(std::ostream & out, const BasicColor<T> & value)
+	template <class T> inline ML_SERIALIZE(std::ostream & out, basic_color<T> const & value)
 	{
 		return out << value.rgba();
 	}

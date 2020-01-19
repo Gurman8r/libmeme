@@ -8,7 +8,11 @@
 	ref.bind(##__VA_ARGS__); ML_SCOPE_EXIT{ ref.unbind(); }
 
 // Bind Scope Static
-#define ML_BIND_SCOPE_S(T, ptr, ...) \
+#define ML_BIND_SCOPE_S(T, ptr) \
+	T::bind(ptr); ML_SCOPE_EXIT{ T::bind(nullptr); }
+
+// Bind Scope Static Args
+#define ML_BIND_SCOPE_SA(T, ptr, ...) \
 	T::bind(ptr, ##__VA_ARGS__); ML_SCOPE_EXIT{ T::bind(nullptr); }
 
 #endif // !_ML_BINDER_HPP_

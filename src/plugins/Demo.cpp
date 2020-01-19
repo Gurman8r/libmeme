@@ -39,12 +39,16 @@ namespace ml
 
 		Demo() : Plugin{}
 		{
+			// Main Sequence
 			EventSystem::add_listener<LoadEvent>(this);
 			EventSystem::add_listener<UpdateEvent>(this);
 			EventSystem::add_listener<DrawEvent>(this);
-			EventSystem::add_listener<DockspaceEvent>(this);
 			EventSystem::add_listener<GuiEvent>(this);
 			EventSystem::add_listener<UnloadEvent>(this);
+
+			// Misc
+			EventSystem::add_listener<DockspaceEvent>(this);
+			EventSystem::add_listener<KeyEvent>(this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -217,11 +221,6 @@ namespace ml
 				}
 
 			} break;
-			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(&value) })
-			{
-				auto & d{ ev->dockspace };
-				d.dock_window("libmeme demo", d.get_node(d.Root));
-			} break;
 			case GuiEvent::ID: if (auto ev{ event_cast<GuiEvent>(&value) })
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
@@ -281,6 +280,19 @@ namespace ml
 				m_fonts.clear();
 				m_pipeline.clear();
 				m_scripts.clear();
+			} break;
+			case DockspaceEvent::ID: if (auto ev{ event_cast<DockspaceEvent>(&value) })
+			{
+				auto & d{ ev->dockspace };
+				d.dock_window("libmeme demo", d.get_node(d.Root));
+			} break;
+			case KeyEvent::ID: if (auto ev = value.as<KeyEvent>())
+			{
+				if (ev->isPaste())
+				{
+					std::printf("Here!\n");
+				}
+
 			} break;
 			}
 		}

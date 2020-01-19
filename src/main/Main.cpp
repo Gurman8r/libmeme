@@ -48,9 +48,9 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static auto g_mem = ds::array<byte_t, 100._MiB>{};
-	static auto g_buf = pmr::monotonic_buffer_resource{ g_mem.data(), g_mem.size() };
-	pmr::set_default_resource(&g_buf);
+	static auto g_raw = ds::array<byte_t, 128._MiB>{};
+	static auto g_mem = pmr::monotonic_buffer_resource{ g_raw.data(), g_raw.size() };
+	pmr::set_default_resource(&g_mem);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

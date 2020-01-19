@@ -317,8 +317,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		IndexBufferObject & generate(uint32_t usage, uint32_t type);
 
 		IndexBufferObject & destroy();

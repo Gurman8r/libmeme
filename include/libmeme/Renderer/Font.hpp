@@ -64,10 +64,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		Info	m_info;
 		void *	m_library;
 		void *	m_face;
-
+		Info	m_info;
 		mutable page_table m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
