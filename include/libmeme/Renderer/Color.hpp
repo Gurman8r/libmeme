@@ -127,9 +127,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING Color = typename basic_color<float_t>;
+	ML_USING color = typename basic_color<float_t>;
 	
-	ML_USING Color32 = typename basic_color<byte_t>;
+	ML_USING color32 = typename basic_color<byte_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -143,13 +143,13 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color(Args && ... args)
 	{
-		return Color{ std::forward<Args>(args)... };
+		return color{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color32(Args && ... args)
 	{
-		return Color32{ std::forward<Args>(args)... };
+		return color32{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -14,18 +14,6 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(int32_t type, event_listener * listener);
-		
-		static void fire_event(struct event const & value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void remove_listener(int32_t type, event_listener * listener);
-		
-		static void remove_listener(event_listener * listener);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class Ev
 		> static inline bool add_listener(event_listener * listener)
 		{
@@ -37,6 +25,18 @@ namespace ml
 		{
 			return fire_event(Ev{ std::forward<Args>(args)... });
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool add_listener(size_t type, event_listener * listener);
+		
+		static void fire_event(struct event const & value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void remove_listener(size_t type, event_listener * listener);
+		
+		static void remove_listener(event_listener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

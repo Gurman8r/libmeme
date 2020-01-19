@@ -39,16 +39,12 @@ namespace ml
 
 		demo() : plugin{}
 		{
-			// Main Sequence
 			event_system::add_listener<load_event>(this);
 			event_system::add_listener<update_event>(this);
 			event_system::add_listener<draw_event>(this);
+			event_system::add_listener<dockspace_event>(this);
 			event_system::add_listener<gui_event>(this);
 			event_system::add_listener<unload_event>(this);
-
-			// Miscellaneous
-			event_system::add_listener<dockspace_event>(this);
-			event_system::add_listener<key_event>(this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -57,7 +53,6 @@ namespace ml
 		{
 			switch (value.id())
 			{
-			// Main Sequence
 			case hashof_v<load_event>:
 			{
 				// load stuff, etc...
@@ -133,7 +128,7 @@ namespace ml
 					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().total(); }),
 					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_time().delta(); }),
 					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<Color	>("u_color",	colors::white),
+					make_uniform<color	>("u_color",	colors::white),
 					make_uniform<mat4	>("u_proj",		mat4::identity()),
 					make_uniform<mat4	>("u_view",		mat4::identity()),
 					make_uniform<mat4	>("u_model",	mat4::identity())
@@ -148,7 +143,7 @@ namespace ml
 					make_uniform<float_t>("u_cam.far",	1000.0f),
 					make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
 					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<Color	>("u_color",	colors::white),
+					make_uniform<color	>("u_color",	colors::white),
 					make_uniform<vec3	>("u_position",	vec3{ 0.f, 0.f, 0.f }),
 					make_uniform<vec3	>("u_scale",	vec3{ 1.f, 1.f, 1.f }),
 					make_uniform<vec4	>("u_rotation",	vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
@@ -185,14 +180,6 @@ namespace ml
 			case hashof_v<update_event>:
 			{
 				// update stuff, etc...
-
-				static auto const original_title{
-					engine::get_window().get_title()
-				};
-				engine::get_window().set_title(original_title
-					+ " | " + util::to_string(engine::get_time().total()) + "s "
-					+ " | " + util::to_string(engine::get_time().delta()) + "s "
-				);
 				
 			} break;
 			case hashof_v<draw_event>:
@@ -221,6 +208,13 @@ namespace ml
 					}
 				}
 
+			} break;
+			case hashof_v<dockspace_event>:
+			{
+				if (auto ev = value.as<dockspace_event>())
+				{
+					ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
+				}
 			} break;
 			case hashof_v<gui_event>:
 			{
@@ -281,20 +275,6 @@ namespace ml
 				m_fonts.clear();
 				m_pipeline.clear();
 				m_scripts.clear();
-			} break;
-
-			// Miscellaneous
-			case hashof_v<dockspace_event>: if (auto ev = value.as<dockspace_event>())
-			{
-				ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
-			} break;
-			case hashof_v<key_event>: if (auto ev = value.as<key_event>())
-			{
-				if (ev->isPaste())
-				{
-					std::printf("Here!\n");
-				}
-
 			} break;
 			}
 		}

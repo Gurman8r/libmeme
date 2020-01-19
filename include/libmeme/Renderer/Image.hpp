@@ -63,11 +63,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_color(vec2u const & size, Color32 const & color);
+		image & create_from_color(vec2u const & size, color32 const & color);
 		
-		image & create_from_color(Color32 const & color);
+		image & create_from_color(color32 const & color);
 		
-		image & create_from_color(vec2u const & size, size_t channels, Color32 const & color);
+		image & create_from_color(vec2u const & size, size_t channels, color32 const & color);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -95,15 +95,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD std::optional<Color32> get_pixel(size_t index) const;
+		ML_NODISCARD std::optional<color32> get_pixel(size_t index) const;
 		
-		ML_NODISCARD std::optional<Color32> get_pixel(size_t x, size_t y) const;
+		ML_NODISCARD std::optional<color32> get_pixel(size_t x, size_t y) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool set_pixel(size_t index, Color32 const & color);
+		bool set_pixel(size_t index, color32 const & col);
 		
-		bool set_pixel(size_t x, size_t y, Color32 const & color);
+		bool set_pixel(size_t x, size_t y, color32 const & col);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

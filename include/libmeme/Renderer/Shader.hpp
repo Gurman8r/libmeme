@@ -105,7 +105,7 @@ namespace ml
 		
 		bool set_uniform(pmr::string const & name, vec4 const & value);
 		
-		bool set_uniform(pmr::string const & name, Color const & value);
+		bool set_uniform(pmr::string const & name, color const & value);
 		
 		bool set_uniform(pmr::string const & name, mat2 const & value);
 		

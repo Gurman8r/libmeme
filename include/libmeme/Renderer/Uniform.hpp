@@ -17,7 +17,7 @@ namespace ml
 
 		using variable_t = typename std::variant<
 			bool, int32_t, float32_t,
-			vec2, vec3, vec4, Color,
+			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			struct texture const *
 		>;

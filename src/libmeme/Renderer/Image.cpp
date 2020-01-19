@@ -18,7 +18,7 @@ namespace ml
 				img.set_pixel(x, y,
 					(((y < img.height() / 2) && (x < img.width() / 2)) ||
 					((y >= img.height() / 2) && (x >= img.width() / 2))
-						? Color(Color(0.1f).rgb(), 1.0)
+						? color(color(0.1f).rgb(), 1.0)
 						: (((y >= img.height() / 2) || (x >= img.width() / 2))
 							? colors::magenta
 							: colors::green
@@ -151,18 +151,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image & image::create_from_color(vec2u const & size, Color32 const & col)
+	image & image::create_from_color(vec2u const & size, color32 const & col)
 	{
 		constexpr auto foo = sizeof(float);
 		return create_from_color(size, channels(), col);
 	}
 
-	image & image::create_from_color(Color32 const & col)
+	image & image::create_from_color(color32 const & col)
 	{
 		return create_from_color(size(), channels(), col);
 	}
 	
-	image & image::create_from_color(vec2u const & size, size_t channels, Color32 const & col)
+	image & image::create_from_color(vec2u const & size, size_t channels, color32 const & col)
 	{
 		if (size[0] && size[1] && channels)
 		{
@@ -288,7 +288,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	std::optional<Color32> image::get_pixel(size_t index) const
+	std::optional<color32> image::get_pixel(size_t index) const
 	{
 		return (index < capacity())
 			? std::make_optional(make_color32(
@@ -300,14 +300,14 @@ namespace ml
 			: std::nullopt;
 	}
 
-	std::optional<Color32> image::get_pixel(size_t x, size_t y) const
+	std::optional<color32> image::get_pixel(size_t x, size_t y) const
 	{
 		return get_pixel((x + y * m_size[0]) * m_channels);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool image::set_pixel(size_t index, Color32 const & col)
+	bool image::set_pixel(size_t index, color32 const & col)
 	{
 		if (index < capacity())
 		{
@@ -321,7 +321,7 @@ namespace ml
 		return false;
 	}
 
-	bool image::set_pixel(size_t x, size_t y, Color32 const & col)
+	bool image::set_pixel(size_t x, size_t y, color32 const & col)
 	{
 		return set_pixel((x + y * m_size[0]) * m_channels, col);
 	}

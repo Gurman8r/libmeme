@@ -2,6 +2,7 @@
 #define _ML_EVENT_HPP_
 
 #include <libmeme/Core/Export.hpp>
+#include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
 namespace ml
@@ -19,7 +20,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// basic event
-	struct event
+	struct event : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

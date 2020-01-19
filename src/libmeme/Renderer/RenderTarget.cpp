@@ -6,12 +6,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void render_target::clear_color(Color const & col) const
+	void render_target::clear_color(color const & col) const
 	{
 		this->clear_color(col, GL::DepthBufferBit);
 	}
 
-	void render_target::clear_color(Color const & col, uint32_t flags) const
+	void render_target::clear_color(color const & col, uint32_t flags) const
 	{
 		GL::clearColor(col[0], col[1], col[2], col[3]);
 

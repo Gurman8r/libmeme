@@ -222,7 +222,7 @@ namespace ml
 		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<Color>: if (auto v{ value.get<Color>() })
+		case hashof_v<color>: if (auto v{ value.get<color>() })
 			return set_uniform(value.name(), v.value());
 		
 		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
@@ -280,7 +280,7 @@ namespace ml
 		return u;
 	}
 
-	bool shader::set_uniform(pmr::string const & name, Color const & value)
+	bool shader::set_uniform(pmr::string const & name, color const & value)
 	{
 		return set_uniform(name, value.rgba());
 	}

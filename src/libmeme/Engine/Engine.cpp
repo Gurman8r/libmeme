@@ -191,11 +191,9 @@ namespace ml
 
 	void engine::begin_draw()
 	{
-		GL::clearColor(0, 0, 0, 1);
-
-		GL::clear(GL::DepthBufferBit | GL::ColorBufferBit);
+		s_window.clear_color(colors::black);
 		
-		GL::viewport(0, 0, s_window.get_frame_width(), s_window.get_frame_height());
+		s_window.viewport({ {}, s_window.get_frame_size() });
 		
 		constexpr render_states states{ // default states
 			{}, {}, {}, {}

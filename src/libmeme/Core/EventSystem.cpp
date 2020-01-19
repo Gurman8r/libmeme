@@ -5,11 +5,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static ds::flat_map<int32_t, ds::flat_set<event_listener *>> m_listeners{};
+	static ds::flat_map<
+		size_t,
+		ds::flat_set<event_listener *>
+	> m_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool event_system::add_listener(int32_t type, event_listener * listener)
+	bool event_system::add_listener(size_t type, event_listener * listener)
 	{
 		return listener && (m_listeners[type].insert(listener).second);
 	}
@@ -27,7 +30,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void event_system::remove_listener(int32_t type, event_listener * listener)
+	void event_system::remove_listener(size_t type, event_listener * listener)
 	{
 		if (auto v{ m_listeners.find(type) })
 		{
