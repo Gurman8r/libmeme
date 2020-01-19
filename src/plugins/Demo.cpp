@@ -204,6 +204,7 @@ namespace ml
 						for (uniform const & u : m_materials["3d"])
 							_s.set_uniform(u);
 						_s.bind(true);
+						//_r.draw(m_models["triangle"]);
 						_r.draw(m_models["sphere32x24"]);
 					}
 				}
@@ -211,10 +212,8 @@ namespace ml
 			} break;
 			case hashof_v<dockspace_event>:
 			{
-				if (auto ev = value.as<dockspace_event>())
-				{
-					ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
-				}
+				auto ev = value.as<dockspace_event>();
+				ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
 			} break;
 			case hashof_v<gui_event>:
 			{

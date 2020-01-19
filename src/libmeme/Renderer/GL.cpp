@@ -42,22 +42,52 @@ namespace ml
 
 	void GL::checkError(C_string file, uint32_t line, C_string expr)
 	{
-		if (auto const code{ getError() })
+		if (Err const code{ getError() })
 		{
 			pmr::string path{ file };
 			path = path.substr(path.find_last_of("\\/") + 1);
-			C_string const err_name = "FIXME"; // GL::name_of((GL::Err)code)
-			C_string const err_desc = "FIXME"; // GL::desc_of((GL::Err)code)
+			pmr::string err_name{ "No Error" };
+			pmr::string err_desc{ "No Description" };
+			switch (code)
+			{
+			case InvalidEnum:
+				err_name = "Invalid Enum";
+				err_desc = "An unacceptable value has been specified for an enumerated argument";
+				break;
+			case InvalidValue:
+				err_name = "Invalid Value";
+				err_desc = "A numeric argument is out of range";
+				break;
+			case InvalidOperation:
+				err_name = "Invalid Operation";
+				err_desc = "The specified operation is not allowed in the current state";
+				break;
+			case StackOverflow:
+				err_name = "Stack Overflow";
+				err_desc = "This command would cause a stack overflow";
+				break;
+			case StackUnderflow:
+				err_name = "Stack Underflow";
+				err_desc = "This command would cause a stack underflow";
+				break;
+			case OutOfMemory:
+				err_name = "Out of Memory";
+				err_desc = "There is not enough memory left to execute the command";
+				break;
+			case InvalidFramebufferOperation:
+				err_name = "Invalid Framebuffer Operation";
+				err_desc = "The object bound to framebuffer binding is not \'framebuffer complete\'";
+				break;
+			}
 			std::cerr
-				<< "An OpenGL call failed in \'" << file << "\' (" << line << ")\n"
-				<< "Code:\n"
-				<< "\t" << code << "\n"
-				<< "Expression:\n"
+				<< "OpenGL Error " << code << ":\n"
+				<< " \'" << file << "\' (" << line << ")\n"
+				<< "Expr:\n"
 				<< "\t" << expr << "\n"
-				<< "Description:\n"
+				<< "Desc:\n"
 				<< "\t" << err_name << "\n"
 				<< "\t" << err_desc << "\n"
-				;
+				<< "\n\n";
 		}
 	}
 

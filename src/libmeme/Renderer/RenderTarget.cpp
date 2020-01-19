@@ -38,7 +38,7 @@ namespace ml
 		ML_BIND_SCOPE_M(vao);
 		ML_BIND_SCOPE_M(vbo);
 		ML_BIND_SCOPE_M(ibo);
-		GL::drawElements(vao.mode(), ibo.count(), ibo.type(), nullptr);
+		GL::drawElements(vao.mode(), ibo.usage(), ibo.type(), nullptr);
 		GL::flush();
 	}
 
