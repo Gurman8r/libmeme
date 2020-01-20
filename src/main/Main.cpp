@@ -50,8 +50,8 @@ ml::int32_t main()
 	// setup memory
 	static auto g_raw = ds::array<byte_t, 64._MiB>{};
 	static auto g_buf = pmr::monotonic_buffer_resource{ g_raw.data(), g_raw.size() };
-	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buf };
-	pmr::set_default_resource(&g_pool);
+	//static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buf };
+	pmr::set_default_resource(&g_buf);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -88,9 +88,6 @@ namespace ml
 
 	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t flags)
 	{
-#ifdef ML_IMPL_RENDERER_OPENGL
-		ML_ASSERT(context.api == client_api::OpenGL);
-#endif
 		if (m_window)
 		{
 			return debug::log_error("Window already initialized");

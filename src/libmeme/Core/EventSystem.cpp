@@ -34,37 +34,22 @@ namespace ml
 	{
 		if (auto v{ m_listeners.find(type) })
 		{
-			for (auto it = (*v->second).begin(); it != (*v->second).end(); ++it)
+			if (auto it{ (*v->second).find(listener) }; it != (*v->second).end())
 			{
-				if (*it == listener)
-				{
-					(*v->second).erase(it);
-					
-					return;
-				}
+				(*v->second).erase(it);
 			}
 		}
 	}
 
 	void event_system::remove_listener(event_listener * listener)
 	{
-		bool done{ false };
-		while (!done)
+		m_listeners.for_each([listener](auto, auto & v)
 		{
-			done = true;
-			m_listeners.for_each([&done, listener](auto, auto & v)
+			if (auto it{ v.find(listener) }; it != v.end())
 			{
-				for (auto it = v.begin(); it != v.end(); ++it)
-				{
-					if (*it == listener)
-					{
-						v.erase(it);
-						done = false;
-						break;
-					}
-				}
-			});
-		}
+				v.erase(it);
+			}
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

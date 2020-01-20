@@ -6,11 +6,11 @@
 #include <libmeme/Core/StringUtility.hpp>
 
 #define ML_REGISTER_EX(T, factory)					\
-	static ::std::optional<std::any> factory();		\
-	bool ::ml::registry<T>::s_registered {			\
-		::ml::registrar::registrate<T>(factory)		\
+	static std::optional<std::any> factory();		\
+	bool ml::registry<T>::s_registered {			\
+		ml::registrar::registrate<T>(factory)		\
 	};												\
-	::std::optional<std::any> factory()
+	std::optional<std::any> factory()
 
 #define ML_REGISTER(T) \
 	ML_REGISTER_EX(T, ML_CONCAT(ML_FACTORY_, T))

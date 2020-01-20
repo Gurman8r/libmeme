@@ -60,8 +60,8 @@ namespace ml
 	trackable * memory_tracker::make_allocation(size_t size, int32_t flags)
 	{
 		auto const temp{ static_cast<trackable *>(ML_IMPL_NEW(size)) };
-		return (*m_records.insert(temp, ::new allocation_record{
-			std::make_tuple(m_current++, size, flags, temp) }
+		return (*m_records.insert(temp, 
+			::new allocation_record{ std::make_tuple(m_current++, size, flags, temp) }
 		).first.second)->data();
 	}
 
@@ -69,10 +69,8 @@ namespace ml
 	{
 		if (auto const it{ m_records.find(static_cast<trackable *>(value)) })
 		{
-			ML_IMPL_DELETE(value); // free the allocation
-
-			::delete (*it->second); // delete the record
-			
+			ML_IMPL_DELETE(value);		// free the allocation
+			::delete (*it->second);		// delete the record
 			m_records.erase(it->first); // erase the entry
 		}
 	}

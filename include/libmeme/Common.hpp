@@ -100,22 +100,23 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace chrono	= ::std::chrono;
-	namespace pmr		= ::std::pmr;
+	namespace chrono	= std::chrono;
+	namespace pmr		= std::pmr;
 #if ML_HAS_CXX20
-	namespace ranges	= ::std::ranges;
-	namespace views		= ::std::ranges::views;
+	namespace ranges	= std::ranges;
+	namespace views		= std::ranges::views;
 #endif
-
-	using namespace ::std::chrono_literals;
-	using namespace ::std::string_literals;
-	using namespace ::std::string_view_literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace literals {}
+	namespace literals
+	{
+		using namespace std::chrono_literals;
+		using namespace std::string_literals;
+		using namespace std::string_view_literals;
+	}
 
-	using namespace ::ml::literals;
+	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

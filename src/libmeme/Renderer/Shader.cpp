@@ -5,11 +5,11 @@
 
 namespace ml
 {
-	struct shader::UniformBinder final
+	struct shader::uniform_binder final
 	{
 		union { uint32_t program; uint32_t cached; int32_t location; };
 
-		explicit UniformBinder(shader & s, pmr::string const & name)
+		explicit uniform_binder(shader & s, pmr::string const & name)
 			: program	{ s ? s.handle() : NULL }
 			, cached	{ s ? GL::getProgramHandle(GL::ProgramObject) : NULL }
 			, location	{ s ? s.get_uniform_location(name) : -1 }
@@ -20,7 +20,7 @@ namespace ml
 			}
 		}
 
-		~UniformBinder()
+		~uniform_binder()
 		{
 			if (program && (program != cached))
 			{
@@ -204,37 +204,37 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().hash())
 		{
-		case hashof_v<bool>: if (auto v{ value.get<bool>() })
+		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<int32_t>: if (auto v{ value.get<int32_t>() })
+		case hashof_v<int32_t>: if (auto const v{ value.get<int32_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<float_t>: if (auto v{ value.get<float_t>() })
+		case hashof_v<float_t>: if (auto const v{ value.get<float_t>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec2>: if (auto v{ value.get<vec2>() })
+		case hashof_v<vec2>: if (auto const v{ value.get<vec2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec3>: if (auto v{ value.get<vec3>() })
+		case hashof_v<vec3>: if (auto const v{ value.get<vec3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<vec4>: if (auto v{ value.get<vec4>() })
+		case hashof_v<vec4>: if (auto const v{ value.get<vec4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<color>: if (auto v{ value.get<color>() })
+		case hashof_v<color>: if (auto const v{ value.get<color>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat2>: if (auto v{ value.get<mat2>() })
+		case hashof_v<mat2>: if (auto const v{ value.get<mat2>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat3>: if (auto v{ value.get<mat3>() })
+		case hashof_v<mat3>: if (auto const v{ value.get<mat3>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<mat4>: if (auto v{ value.get<mat4>() })
+		case hashof_v<mat4>: if (auto const v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<texture>: if (auto v{ value.get<texture const *>() })
+		case hashof_v<texture>: if (auto const v{ value.get<texture const *>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;
@@ -247,35 +247,35 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, int32_t value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
@@ -287,28 +287,28 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, texture const & value)
 	{
-		UniformBinder const u{ (*this), name };
+		uniform_binder const u{ (*this), name };
 		if (u)
 		{
 			static auto const max_textures

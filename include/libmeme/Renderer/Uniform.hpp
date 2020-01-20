@@ -15,15 +15,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using variable_t = typename std::variant<
+		using variable_type = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			struct texture const *
 		>;
 
-		using function_t = typename std::function<
-			variable_t()
+		using function_type = typename std::function<
+			variable_type()
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -32,7 +32,7 @@ namespace ml
 
 		using name_t = typename pmr::string;
 
-		using data_t = typename std::variant<variable_t, function_t>;
+		using data_t = typename std::variant<variable_type, function_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -134,39 +134,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool is_variable() const noexcept
-		{
-			return std::holds_alternative<variable_t>(data());
-		}
-
-		ML_NODISCARD inline bool is_function() const noexcept
-		{
-			return std::holds_alternative<function_t>(data());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline std::optional<variable_t> load() const
-		{
-			switch (data().index())
-			{
-			case ID_Variable:
-				return std::make_optional(std::get<variable_t>(data()));
-			
-			case ID_Function:
-				return std::make_optional(std::invoke(std::get<function_t>(data())));
-			}
-			return std::nullopt;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class T
 		> ML_NODISCARD inline std::optional<T> get() const
 		{
-			if (std::optional<variable_t> v{ load() }; v && std::holds_alternative<T>(*v))
+			if (auto const v{ ([&, this]()
 			{
-				return std::make_optional<T>(std::get<T>(*v));
+				switch (data().index())
+				{
+				case ID_Variable: return std::get<variable_type>(data());
+				case ID_Function: return std::invoke(std::get<function_type>(data()));
+				default			: return variable_type{};
+				}
+			})() }; std::holds_alternative<T>(v))
+			{
+				return std::make_optional<T>(std::get<T>(v));
 			}
 			else
 			{
@@ -190,7 +171,7 @@ namespace ml
 		ML_NODISCARD inline bool operator<(uniform const & other)
 		{
 			return (type() < other.type())
-				&& (name() < other.name());
+				|| (name() < other.name());
 		}
 
 		ML_NODISCARD inline bool operator>(uniform const & other)
