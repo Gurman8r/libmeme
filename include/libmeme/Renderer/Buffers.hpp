@@ -8,16 +8,17 @@
 namespace ml
 {
 	// Base Graphics Object
-	template <class T> struct graphics_buffer
+	template <class Derived, class ... Args
+	> struct graphics_buffer
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type	= typename T;
-		using handle_t	= typename uint32_t;
+		using self_type	= typename Derived;
+		using storage_type = typename std::tuple<Args...>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr explicit graphics_buffer(handle_t handle) noexcept
+		constexpr explicit graphics_buffer(uint32_t handle) noexcept
 			: m_handle{ handle }
 		{
 		}
@@ -26,51 +27,47 @@ namespace ml
 
 		ML_NODISCARD constexpr operator bool() const noexcept { return m_handle; }
 
-		ML_NODISCARD constexpr auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
-
-		ML_NODISCARD constexpr auto handle() const noexcept -> handle_t const & { return m_handle; }
+		ML_NODISCARD constexpr auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		handle_t m_handle;
+		uint32_t m_handle;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 
 	// Vertex Array Object
-	struct ML_RENDERER_API vertex_array_object final : graphics_buffer<vertex_array_object>
+	struct ML_RENDERER_API vertex_array final : graphics_buffer<vertex_array,
+		uint32_t
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Mode };
 
-		using storage_type = typename std::tuple<
-			uint32_t
-		>;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> constexpr explicit vertex_array_object(handle_t handle, Args && ... args)
+		> constexpr explicit vertex_array(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		constexpr vertex_array_object(self_type const & other)
+		constexpr vertex_array(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		constexpr vertex_array_object(self_type && other) noexcept
+		constexpr vertex_array(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		constexpr vertex_array_object()
+		constexpr vertex_array()
 			: self_type{ NULL, 0 }
 		{
 		}
@@ -102,7 +99,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static void bind(vertex_array_object const * value);
+		static void bind(vertex_array const * value);
 
 		ML_NODISCARD inline void bind() const { bind(this); }
 
@@ -110,9 +107,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		vertex_array_object & generate(uint32_t mode);
+		vertex_array & generate(uint32_t mode);
 
-		vertex_array_object & destroy();
+		vertex_array & destroy();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -131,37 +128,35 @@ namespace ml
 
 
 	// Vertex Buffer Object
-	struct ML_RENDERER_API vertex_buffer_object final : graphics_buffer<vertex_buffer_object>
+	struct ML_RENDERER_API vertex_buffer final : graphics_buffer<vertex_buffer,
+		uint32_t, void const *, uint32_t, uint32_t, uint32_t
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Usage, ID_Data, ID_Size, ID_Count, ID_Offset };
 
-		using storage_type = typename std::tuple<
-			uint32_t, void const *, uint32_t, uint32_t, uint32_t
-		>;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> constexpr explicit vertex_buffer_object(handle_t handle, Args && ... args)
+		> constexpr explicit vertex_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		constexpr vertex_buffer_object(self_type const & other)
+		constexpr vertex_buffer(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		constexpr vertex_buffer_object(self_type && other) noexcept
+		constexpr vertex_buffer(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		constexpr vertex_buffer_object()
+		constexpr vertex_buffer()
 			: self_type{ NULL, 0, nullptr, 0, 0, 0 }
 		{
 		}
@@ -193,7 +188,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static void bind(vertex_buffer_object const * value);
+		static void bind(vertex_buffer const * value);
 
 		ML_NODISCARD inline void bind() const { bind(this); }
 
@@ -201,13 +196,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		vertex_buffer_object & generate(uint32_t usage);
+		vertex_buffer & generate(uint32_t usage);
 
-		vertex_buffer_object & destroy();
+		vertex_buffer & destroy();
 
-		vertex_buffer_object & update(void const * data, uint32_t size);
+		vertex_buffer & update(void const * data, uint32_t size);
 
-		vertex_buffer_object & update(void const * data, uint32_t size, uint32_t offset);
+		vertex_buffer & update(void const * data, uint32_t size, uint32_t offset);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -246,37 +241,35 @@ namespace ml
 
 
 	// Index Buffer Object
-	struct ML_RENDERER_API index_buffer_object final : graphics_buffer<index_buffer_object>
+	struct ML_RENDERER_API index_buffer final : graphics_buffer<index_buffer,
+		uint32_t, uint32_t, void const *, uint32_t
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Usage, ID_Type, ID_Data, ID_Count };
 
-		using storage_type = typename std::tuple<
-			uint32_t, uint32_t, void const *, uint32_t
-		>;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> constexpr explicit index_buffer_object(handle_t handle, Args && ... args)
+		> constexpr explicit index_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		constexpr index_buffer_object(self_type const & other)
+		constexpr index_buffer(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		constexpr index_buffer_object(self_type && other) noexcept
+		constexpr index_buffer(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		constexpr index_buffer_object()
+		constexpr index_buffer()
 			: self_type{ NULL, 0, 0, nullptr, 0 }
 		{
 		}
@@ -308,7 +301,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static void bind(index_buffer_object const * value);
+		static void bind(index_buffer const * value);
 
 		ML_NODISCARD inline void bind() const { bind(this); }
 
@@ -316,11 +309,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		index_buffer_object & generate(uint32_t usage, uint32_t type);
+		index_buffer & generate(uint32_t usage, uint32_t type);
 
-		index_buffer_object & destroy();
+		index_buffer & destroy();
 
-		index_buffer_object & update(void const * data, uint32_t count);
+		index_buffer & update(void const * data, uint32_t count);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -354,49 +347,48 @@ namespace ml
 
 
 	// Frame Buffer Object
-	struct ML_RENDERER_API frame_buffer_object final : graphics_buffer<frame_buffer_object>
+	struct ML_RENDERER_API frame_buffer final : graphics_buffer<frame_buffer,
+		vec2,		// size
+		uint32_t,	// buffer attachment
+		uint32_t,	// buffer handle
+		uint32_t,	// texture attachment
+		uint32_t,	// texture handle
+		uint32_t	// texture level
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using BufAttachment = typename std::pair<
-			uint32_t,	// attachment
-			uint32_t	// handle
-		>;
+		enum : size_t {
+			ID_Size,
+			ID_BufferAttachment,
+			ID_BufferHandle,
+			ID_TextureAttachment,
+			ID_TextureHandle,
+			ID_TextureLevel
+		};
 		
-		using TexAttachment = typename std::tuple<
-			uint32_t,	// attachment
-			uint32_t,	// handle
-			uint32_t	// level
-		>;
-
-		enum : size_t { ID_Size, ID_Buffer, ID_Texture };
-		
-		using storage_type = typename std::tuple<
-			vec2, BufAttachment, TexAttachment
-		>;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> constexpr explicit frame_buffer_object(handle_t handle, Args && ... args)
+		> constexpr explicit frame_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		constexpr frame_buffer_object(self_type const & other)
+		constexpr frame_buffer(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		constexpr frame_buffer_object(self_type && other) noexcept
+		constexpr frame_buffer(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		constexpr frame_buffer_object()
-			: self_type{ NULL, vec2{ 0 }, std::make_pair(0, 0), std::make_tuple(0, 0, 0) }
+		constexpr frame_buffer()
+			: self_type{ NULL, vec2{ 0 }, 0, 0, 0, 0, 0 }
 		{
 		}
 
@@ -427,7 +419,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static void bind(frame_buffer_object const * value);
+		static void bind(frame_buffer const * value);
 		
 		ML_NODISCARD inline void bind() const { bind(this); }
 
@@ -435,13 +427,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		frame_buffer_object & generate(vec2 const & size);
+		frame_buffer & generate(vec2 const & size);
 
-		frame_buffer_object & destroy();
+		frame_buffer & destroy();
 
-		frame_buffer_object & attachRenderbuffer(uint32_t attachment, uint32_t renderbuffer);
+		frame_buffer & attach_buffer(uint32_t attachment, uint32_t buf);
 
-		frame_buffer_object & attachTexture2D(uint32_t attachment, uint32_t tex, uint32_t level);
+		frame_buffer & attach_texture(uint32_t attachment, uint32_t tex, uint32_t level);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -450,39 +442,29 @@ namespace ml
 			return std::get<ID_Size>(m_storage);
 		}
 
-		ML_NODISCARD constexpr auto buffer_data() const noexcept
+		ML_NODISCARD constexpr auto buffer_attachment() const noexcept
 		{
-			return std::get<ID_Buffer>(m_storage);
+			return std::get<ID_BufferAttachment>(m_storage);
 		}
 
-		ML_NODISCARD constexpr auto bufferAttachment() const noexcept
+		ML_NODISCARD constexpr auto buffer_handle() const noexcept
 		{
-			return buffer_data().first;
+			return std::get<ID_BufferHandle>(m_storage);
 		}
 
-		ML_NODISCARD constexpr auto bufferHandle() const noexcept
+		ML_NODISCARD constexpr auto texture_attachment() const noexcept
 		{
-			return buffer_data().second;
+			return std::get<ID_TextureAttachment>(m_storage);
 		}
 
-		ML_NODISCARD constexpr auto texture_data() const noexcept
+		ML_NODISCARD constexpr auto texture_handle() const noexcept
 		{
-			return std::get<ID_Texture>(m_storage);
+			return std::get<ID_TextureHandle>(m_storage);
 		}
 
-		ML_NODISCARD constexpr auto textureAttachment() const noexcept
+		ML_NODISCARD constexpr auto texture_level() const noexcept
 		{
-			return std::get<0>(texture_data());
-		}
-
-		ML_NODISCARD constexpr auto textureHandle() const noexcept
-		{
-			return std::get<1>(texture_data());
-		}
-
-		ML_NODISCARD constexpr auto textureLevel() const noexcept
-		{
-			return std::get<2>(texture_data());
+			return std::get<ID_TextureLevel>(m_storage);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -495,37 +477,35 @@ namespace ml
 
 
 	// Render Buffer Object
-	struct ML_RENDERER_API render_buffer_object final : graphics_buffer<render_buffer_object>
+	struct ML_RENDERER_API render_buffer final : graphics_buffer<render_buffer,
+		vec2i, uint32_t, uint32_t
+	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum : size_t { ID_Size, ID_Format };
 
-		using storage_type = typename std::tuple<
-			vec2i, uint32_t, uint32_t
-		>;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> constexpr explicit render_buffer_object(handle_t handle, Args && ... args)
+		> constexpr explicit render_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
 			, m_storage{ std::forward<Args>(args)... }
 		{
 		}
 
-		constexpr render_buffer_object(self_type const & other)
+		constexpr render_buffer(self_type const & other)
 			: self_type{ other.m_handle, other.m_storage }
 		{
 		}
 
-		constexpr render_buffer_object(self_type && other) noexcept
+		constexpr render_buffer(self_type && other) noexcept
 			: self_type{}
 		{
 			swap(std::move(other));
 		}
 
-		constexpr render_buffer_object()
+		constexpr render_buffer()
 			: self_type{ NULL, vec2{ 0 }, 0, 0 }
 		{
 		}
@@ -557,7 +537,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(render_buffer_object const * value);
+		static void bind(render_buffer const * value);
 
 		ML_NODISCARD inline void bind() const { bind(this); }
 
@@ -565,11 +545,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		render_buffer_object & generate(vec2i const & size);
+		render_buffer & generate(vec2i const & size);
 
-		render_buffer_object & destroy();
+		render_buffer & destroy();
 
-		render_buffer_object & update(uint32_t format);
+		render_buffer & update(uint32_t format);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -593,42 +573,34 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING VAO = typename vertex_array_object;
-	ML_USING VBO = typename vertex_buffer_object;
-	ML_USING IBO = typename index_buffer_object;
-	ML_USING FBO = typename frame_buffer_object;
-	ML_USING RBO = typename render_buffer_object;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vao(Args && ... args)
 	{
-		return VAO{ std::forward<Args>(args)... };
+		return vertex_array{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vbo(Args && ... args)
 	{
-		return VBO{ std::forward<Args>(args)... };
+		return vertex_buffer{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_ibo(Args && ... args)
 	{
-		return IBO{ std::forward<Args>(args)... };
+		return index_buffer{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_fbo(Args && ... args)
 	{
-		return FBO{ std::forward<Args>(args)... };
+		return frame_buffer{ std::forward<Args>(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_rbo(Args && ... args)
 	{
-		return RBO{ std::forward<Args>(args)... };
+		return render_buffer{ std::forward<Args>(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

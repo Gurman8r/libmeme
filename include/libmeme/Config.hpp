@@ -160,11 +160,6 @@
 #	endif
 #	define ML_CC_VER ML_CC_INTEL
 #	define ML_CC_NAME "Intel"
-#elif defined(__EMSCRIPTEN__)
-//  Emscripten
-#	define ML_CC_EMSCRIPTEN
-#	define ML_CC_VER ML_CC_EMSCRIPTEN
-#	define ML_CC_NAME "Emscripten"
 #elif defined(__MINGW32__) || defined(__MINGW64__)
 //  MinGW
 #	if defined(__MINGW64__)
@@ -174,6 +169,11 @@
 #	endif
 #	define ML_CC_VER ML_CC_MINGW
 #	define ML_CC_NAME "MinGW"
+#elif defined(__EMSCRIPTEN__)
+//  Emscripten
+#	define ML_CC_EMSCRIPTEN
+#	define ML_CC_VER ML_CC_EMSCRIPTEN
+#	define ML_CC_NAME "Emscripten"
 #elif defined(__asmjs__)
 //  asm.js
 #	define ML_CC_ASMJS

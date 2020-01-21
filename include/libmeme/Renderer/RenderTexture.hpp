@@ -55,9 +55,9 @@ namespace ml
 
 		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo; }
 
-		ML_NODISCARD inline auto fbo() const noexcept -> frame_buffer_object const & { return m_fbo; }
+		ML_NODISCARD inline auto fbo() const noexcept -> frame_buffer const & { return m_fbo; }
 
-		ML_NODISCARD inline auto rbo() const noexcept -> render_buffer_object const & { return m_rbo; }
+		ML_NODISCARD inline auto rbo() const noexcept -> render_buffer const & { return m_rbo; }
 
 		ML_NODISCARD inline auto size() const noexcept -> vec2i const & { return m_size; }
 
@@ -78,13 +78,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		frame_buffer_object	m_fbo;
-		render_buffer_object	m_rbo;
-		vec2i				m_size;
-		uint32_t			m_colorID;
-		uint32_t			m_frameID;
-		uint32_t			m_format;
-		texture				m_texture;
+		frame_buffer	m_fbo;
+		render_buffer	m_rbo;
+		vec2i			m_size;
+		uint32_t		m_colorID;
+		uint32_t		m_frameID;
+		uint32_t		m_format;
+		texture			m_texture;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

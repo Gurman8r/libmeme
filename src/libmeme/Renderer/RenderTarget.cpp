@@ -23,7 +23,7 @@ namespace ml
 		GL::clear(flags);
 	}
 
-	void render_target::draw(VAO const & vao, VBO const & vbo) const
+	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo) const
 	{
 		if (!vao || !vbo) return;
 		ML_BIND_SCOPE_M(vao);
@@ -32,7 +32,7 @@ namespace ml
 		GL::flush();
 	}
 
-	void render_target::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
+	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo, index_buffer const & ibo) const
 	{
 		if (!vao || !vbo || !ibo) return;
 		ML_BIND_SCOPE_M(vao);

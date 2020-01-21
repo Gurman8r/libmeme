@@ -146,7 +146,7 @@ namespace ml
 	{
 		if (!value || !value->m_handle)
 		{
-			return GL::useProgram(NULL);;
+			return GL::useProgram(NULL);
 		}
 
 		GL::useProgram(value->m_handle);
@@ -201,7 +201,7 @@ namespace ml
 
 	bool shader::set_uniform(uniform const & value)
 	{
-		if (value.name().empty()) { return false; }
+		if (!value) { return false; }
 		switch (value.type().hash())
 		{
 		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
@@ -316,7 +316,7 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto it{ m_textures.find(u.location) })
+			if (auto const it{ m_textures.find(u.location) })
 			{
 				(*it->second) = &value;
 			}

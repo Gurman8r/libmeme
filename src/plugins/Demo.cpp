@@ -90,7 +90,9 @@ namespace ml
 				});
 
 				// Pipeline
-				m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })).create();
+				m_pipeline.emplace_back(make_render_texture(
+					vec2i{ 1280, 720 }
+				)).create();
 
 				// Images
 				if (auto const & img{ m_images["icon"] = make_image(
@@ -150,6 +152,12 @@ namespace ml
 				);
 
 				// Models
+				m_models["monkey"] = make_model(
+					FS::path_to("../../../assets/meshes/monkey.obj")
+				);
+				m_models["sphere8x6"] = make_model(
+					FS::path_to("../../../assets/meshes/sphere8x6.obj")
+				);
 				m_models["sphere32x24"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);

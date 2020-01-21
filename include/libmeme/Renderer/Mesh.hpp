@@ -14,16 +14,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Layout, ID_VAO, ID_VBO, ID_IBO };
-
-		using storage_type	= typename std::tuple<buffer_layout, VAO, VBO, IBO>;
 		using contiguous_t	= typename pmr::vector<float_t>;
 		using vertices_t	= typename pmr::vector<vertex>;
 		using indices_t		= typename pmr::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh();
+		mesh() noexcept;
 		
 		mesh(vertices_t const & vertices);
 		
@@ -63,57 +60,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) layout() noexcept
-		{
-			return std::get<ID_Layout>(m_storage);
-		}
+		ML_NODISCARD inline auto layout() noexcept -> buffer_layout & { return m_layout; }
 
-		ML_NODISCARD inline decltype(auto) layout() const noexcept
-		{
-			return std::get<ID_Layout>(m_storage);
-		}
+		ML_NODISCARD inline auto layout() const noexcept -> buffer_layout const & { return m_layout; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) vao() noexcept
-		{
-			return std::get<ID_VAO>(m_storage);
-		}
+		ML_NODISCARD inline auto vao() noexcept -> vertex_array & { return m_vao; }
 
-		ML_NODISCARD inline decltype(auto) vao() const noexcept
-		{
-			return std::get<ID_VAO>(m_storage);
-		}
+		ML_NODISCARD inline auto vao() const noexcept -> vertex_array const & { return m_vao; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) vbo() noexcept
-		{
-			return std::get<ID_VBO>(m_storage);
-		}
+		ML_NODISCARD inline auto vbo() noexcept -> vertex_buffer & { return m_vbo; }
 
-		ML_NODISCARD inline decltype(auto) vbo() const noexcept
-		{
-			return std::get<ID_VBO>(m_storage);
-		}
+		ML_NODISCARD inline auto vbo() const noexcept -> vertex_buffer const & { return m_vbo; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline decltype(auto) ibo() noexcept
-		{
-			return std::get<ID_IBO>(m_storage);
-		}
+		ML_NODISCARD inline auto ibo() noexcept -> index_buffer & { return m_ibo; }
 
-		ML_NODISCARD inline decltype(auto) ibo() const noexcept
-		{
-			return std::get<ID_IBO>(m_storage);
-		}
+		ML_NODISCARD inline auto ibo() const noexcept -> index_buffer const & { return m_ibo; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline bool good() const noexcept
 		{
-			return (ibo() && vao() && vbo()) || (vao() && vbo());
+			return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo);
 		}
 
 		inline operator bool() const noexcept
@@ -124,7 +97,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type m_storage;
+		buffer_layout	m_layout;
+		vertex_array	m_vao;
+		vertex_buffer	m_vbo;
+		index_buffer	m_ibo;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

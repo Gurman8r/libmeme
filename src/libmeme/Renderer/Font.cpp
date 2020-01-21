@@ -115,10 +115,7 @@ namespace ml
 		FT_Face face;
 		if (FT_New_Face(library, path.string().c_str(), 0, &face) != 0)
 		{
-			return debug::log_error(
-				"Failed loading font \"{0}\" (failed to create the font face)",
-				path
-			);
+			return debug::log_error("failed creating font face: {0}", path);
 		}
 
 		// load the stroker that will be used to outline the fonts
@@ -126,10 +123,7 @@ namespace ml
 		if (FT_Stroker_New(library, &stroker) != 0)
 		{
 			FT_Done_Face(face);
-			return debug::log_error(
-				"Failed loading font \"{0}\" (failed to create the stroker)",
-				path
-			);
+			return debug::log_error("failed creating font stroker: {0}", path);
 		}
 
 		// select the unicode character map
@@ -137,10 +131,7 @@ namespace ml
 		{
 			FT_Stroker_Done(stroker);
 			FT_Done_Face(face);
-			return debug::log_error(
-				"Failed loading font \"{0}\" ()",
-				path
-			);
+			return debug::log_error("failed selecting font unicode character map: {0}", path);
 		}
 
 		// store loaded font library

@@ -114,7 +114,7 @@ namespace ml
 			m_rbo.update(m_format);
 
 			// attach renderbuffer to framebuffer
-			m_fbo.attachRenderbuffer(m_frameID, m_rbo.handle());
+			m_fbo.attach_buffer(m_frameID, m_rbo.handle());
 		}
 
 		// check framebuffer status
@@ -132,7 +132,7 @@ namespace ml
 		}
 
 		// attach texture to framebuffer
-		m_fbo.attachTexture2D(m_colorID, m_texture.handle(), m_texture.level());
+		m_fbo.attach_texture(m_colorID, m_texture.handle(), m_texture.level());
 
 		return good();
 	}
@@ -160,7 +160,7 @@ namespace ml
 
 	void render_texture::bind(render_texture const * value)
 	{
-		frame_buffer_object::bind(value ? &value->fbo() : nullptr);
+		frame_buffer::bind(value ? &value->fbo() : nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

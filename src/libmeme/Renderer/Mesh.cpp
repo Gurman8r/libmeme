@@ -8,31 +8,36 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	mesh::mesh() : m_storage{ std::make_tuple(
-		make_buffer_layout(), make_vao(), make_vbo(), make_ibo()
-	) }
+	mesh::mesh() noexcept
+		: m_layout{ make_buffer_layout() }
+		, m_vao{ make_vao() }
+		, m_vbo{ make_vbo() }
+		, m_ibo{ make_ibo() }
 	{
 	}
 
 	mesh::mesh(vertices_t const & vertices)
-		: m_storage{}
+		: mesh{}
 	{
 		load_from_memory(vertices);
 	}
 
 	mesh::mesh(vertices_t const & vertices, indices_t const & indices)
-		: m_storage{}
+		: mesh{}
 	{
 		load_from_memory(vertices, indices);
 	}
 
 	mesh::mesh(mesh const & other)
-		: m_storage{ other.m_storage }
+		: m_layout{ other.m_layout }
+		, m_vao{ other.m_vao }
+		, m_vbo{ other.m_vbo }
+		, m_ibo{ other.m_ibo }
 	{
 	}
 
 	mesh::mesh(mesh && other) noexcept
-		: m_storage{}
+		: mesh{}
 	{
 		swap(std::move(other));
 	}
@@ -61,7 +66,10 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			std::swap(m_storage, other.m_storage);
+			m_layout.swap(other.m_layout);
+			m_vao.swap(other.m_vao);
+			m_vbo.swap(other.m_vbo);
+			m_ibo.swap(other.m_ibo);
 		}
 	}
 
@@ -107,34 +115,34 @@ namespace ml
 		}
 
 		// create vao
-		if (!vao().generate(GL::Triangles))
+		if (!m_vao.generate(GL::Triangles))
 		{
 			destroy();
 			return debug::log_error("mesh failed creating VAO");
 		}
 
 		// create vbo
-		if (!vbo().generate(GL::StaticDraw))
+		if (!m_vbo.generate(GL::StaticDraw))
 		{
 			destroy();
 			return debug::log_error("mesh failed creating VBO");
 		}
 
 		// create ibo
-		if (!ibo().generate(GL::StaticDraw, GL::UnsignedInt))
+		if (!m_ibo.generate(GL::StaticDraw, GL::UnsignedInt))
 		{
 			destroy();
 			return debug::log_error("mesh failed creating IBO");
 		}
 		
 		// bind buffers
-		ML_BIND_SCOPE_M(vao());
-		ML_BIND_SCOPE_M(vbo());
-		ML_BIND_SCOPE_M(ibo());
+		ML_BIND_SCOPE_M(m_vao);
+		ML_BIND_SCOPE_M(m_vbo);
+		ML_BIND_SCOPE_M(m_ibo);
 		
 		// update buffers
-		vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
-		ibo().update((void *)indices.data(), (uint32_t)indices.size());
+		m_vbo.update((void *)vertices.data(), (uint32_t)vertices.size());
+		m_ibo.update((void *)indices.data(), (uint32_t)indices.size());
 		
 		// apply layout
 		layout().apply();
@@ -157,25 +165,25 @@ namespace ml
 		}
 
 		// create vao
-		if (!vao().generate(GL::Triangles))
+		if (!m_vao.generate(GL::Triangles))
 		{
 			destroy();
 			return debug::log_error("mesh failed creating VAO");
 		}
 
 		// create vbo
-		if (!vbo().generate(GL::StaticDraw))
+		if (!m_vbo.generate(GL::StaticDraw))
 		{
 			destroy();
 			return debug::log_error("mesh failed creating VBO");
 		}
 
 		// bind buffers
-		ML_BIND_SCOPE_M(vao());
-		ML_BIND_SCOPE_M(vbo());
+		ML_BIND_SCOPE_M(m_vao);
+		ML_BIND_SCOPE_M(m_vbo);
 
 		// update buffers
-		vbo().update((void *)vertices.data(), (uint32_t)vertices.size());
+		m_vbo.update((void *)vertices.data(), (uint32_t)vertices.size());
 		
 		// apply layout
 		layout().apply();
@@ -187,16 +195,16 @@ namespace ml
 
 	void mesh::draw(render_target const & target, mesh const * value)
 	{
-		if (!value || !value->vao() || !value->vbo())
+		if (!value || !value->m_vao || !value->m_vbo)
 			return;
 
-		if (value->ibo())
+		if (value->m_ibo)
 		{
-			target.draw(value->vao(), value->vbo(), value->ibo());
+			target.draw(value->m_vao, value->m_vbo, value->m_ibo);
 		}
 		else
 		{
-			target.draw(value->vao(), value->vbo());
+			target.draw(value->m_vao, value->m_vbo);
 		}
 	}
 

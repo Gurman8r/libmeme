@@ -73,10 +73,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static engine_time		s_time;
-		static render_window	s_window;
+		static engine_time		s_time;		// Time
+		static render_window	s_window;	// Window
 		struct engine_plugins;
-		static engine_plugins	s_plugins;
+		static engine_plugins	s_plugins;	// Plugins
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -40,9 +40,20 @@ namespace ml
 		{
 		}
 
-		template <class T> constexpr typeof(typeof<T> const & other) noexcept
+		template <class T
+		> constexpr typeof(typeof<T> const & other) noexcept
 			: m_name{ other.name() }, m_hash{ other.hash() }
 		{
+		}
+
+		constexpr void swap(typeof<> & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_name.swap(other.m_name);
+
+				util::swap(m_hash, other.m_hash);
+			}
 		}
 
 		ML_NODISCARD constexpr std::string_view const & name() const noexcept

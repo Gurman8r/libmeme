@@ -84,6 +84,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr void swap(buffer_layout & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				util::swap(m_data, other.m_data);
+				util::swap(m_size, other.m_size);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline self_type const & apply() const noexcept
 		{
 			for (auto const & elem : (*this))

@@ -34,61 +34,69 @@ namespace ml
 
 		using data_t = typename std::variant<variable_type, function_type>;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		enum : size_t { ID_Variable, ID_Function };
 
-		enum : size_t { ID_Type, ID_Name, ID_Data };
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type = typename std::tuple<type_t, name_t, data_t>;
+		uniform() noexcept
+			: m_type{}
+			, m_name{}
+			, m_data{}
+		{
+		}
+
+		~uniform() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uniform() noexcept : m_storage{} {}
+		explicit uniform(allocator_type const & alloc)
+			: m_type{}
+			, m_name{ alloc }
+			, m_data{}
+		{
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		explicit uniform(type_t const & type, name_t const & name, data_t const & data, allocator_type const & alloc = {})
+			: m_type{ type }
+			, m_name{ name, alloc }
+			, m_data{ data }
+		{
+		}
 
-		explicit uniform(allocator_type const & alloc) : m_storage{ std::make_tuple(
-			type_t{},
-			name_t{ alloc },
-			data_t{}
-		) }
+		explicit uniform(type_t const & type, name_t && name, data_t const & data, allocator_type const & alloc = {})
+			: m_type{ type }
+			, m_name{ std::move(name), alloc }
+			, m_data{ data }
+		{
+		}
+
+		explicit uniform(type_t const & type, name_t const & name, data_t && data, allocator_type const & alloc = {})
+			: m_type{ type }
+			, m_name{ name, alloc }
+			, m_data{ std::move(data) }
+		{
+		}
+
+		explicit uniform(type_t const & type, name_t && name, data_t && data, allocator_type const & alloc = {})
+			: m_type{ type }
+			, m_name{ std::move(name), alloc }
+			, m_data{ std::move(data) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit uniform(storage_type const & value, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
-			type_t{ std::get<ID_Type>(value) },
-			name_t{ std::get<ID_Name>(value), alloc },
-			data_t{ std::get<ID_Data>(value) }
-		) }
+		uniform(uniform const & other, allocator_type const & alloc = {})
+			: m_type{ other.m_type }
+			, m_name{ other.m_name, alloc }
+			, m_data{ other.m_data }
 		{
 		}
 
-		explicit uniform(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
-			type_t{ std::move(std::get<ID_Type>(value)) },
-			name_t{ std::move(std::get<ID_Name>(value)), alloc },
-			data_t{ std::move(std::get<ID_Data>(value)) }
-		) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		uniform(uniform const & other, allocator_type const & alloc = {}) : m_storage{ std::make_tuple(
-			type_t{ std::get<ID_Type>(other.m_storage) },
-			name_t{ std::get<ID_Name>(other.m_storage), alloc },
-			data_t{ std::get<ID_Data>(other.m_storage) }
-		) }
-		{
-		}
-
-		uniform(uniform && other, allocator_type const & alloc = {}) noexcept : m_storage{ std::make_tuple(
-			type_t{ std::move(std::get<ID_Type>(other.m_storage)) },
-			name_t{ std::move(std::get<ID_Name>(other.m_storage)), alloc },
-			data_t{ std::move(std::get<ID_Data>(other.m_storage)) }
-		) }
+		uniform(uniform && other, allocator_type const & alloc = {}) noexcept
+			: m_type{ std::move(other.m_type) }
+			, m_name{ std::move(other.m_name), alloc }
+			, m_data{ std::move(other.m_data) }
 		{
 		}
 
@@ -111,41 +119,57 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				m_storage.swap(other.m_storage);
+				m_type.swap(other.m_type);
+				m_name.swap(other.m_name);
+				m_data.swap(other.m_data);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline type_t const & type() const noexcept
+		ML_NODISCARD inline auto type() const noexcept -> type_t const & { return m_type; }
+		
+		ML_NODISCARD inline auto name() const noexcept -> name_t const & { return m_name; }
+		
+		ML_NODISCARD inline auto data() const noexcept -> data_t const & { return m_data; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool is_variable() const noexcept
 		{
-			return std::get<ID_Type>(m_storage);
+			return (m_data.index() == ID_Variable);
 		}
 
-		ML_NODISCARD inline name_t const & name() const noexcept
+		ML_NODISCARD inline bool is_function() const noexcept
 		{
-			return std::get<ID_Name>(m_storage);
-		}
-
-		ML_NODISCARD inline data_t const & data() const noexcept
-		{
-			return std::get<ID_Data>(m_storage);
+			return (m_data.index() == ID_Function);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline variable_type load() const
+		{
+			switch (m_data.index())
+			{
+			case ID_Variable:
+				return std::get<variable_type>(m_data);
+
+			case ID_Function:
+				return std::invoke(std::get<function_type>(m_data));
+			}
+			return variable_type{};
+		}
+
+		template <class T
+		> ML_NODISCARD inline bool holds() const noexcept
+		{
+			return std::holds_alternative<T>(load());
+		}
+
 		template <class T
 		> ML_NODISCARD inline std::optional<T> get() const
 		{
-			if (auto const v{ ([&, this]()
-			{
-				switch (data().index())
-				{
-				case ID_Variable: return std::get<variable_type>(data());
-				case ID_Function: return std::invoke(std::get<function_type>(data()));
-				default			: return variable_type{};
-				}
-			})() }; std::holds_alternative<T>(v))
+			if (auto const v{ load() }; std::holds_alternative<T>(v))
 			{
 				return std::make_optional<T>(std::get<T>(v));
 			}
@@ -157,10 +181,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline operator bool const() const noexcept
+		{
+			return !name().empty();
+		}
+
 		ML_NODISCARD inline bool operator==(uniform const & other)
 		{
-			return (type() == other.type())
-				&& (name() == other.name());
+			return (m_type == other.m_type)
+				&& (m_name == other.m_name);
 		}
 
 		ML_NODISCARD inline bool operator!=(uniform const & other)
@@ -170,8 +199,8 @@ namespace ml
 
 		ML_NODISCARD inline bool operator<(uniform const & other)
 		{
-			return (type() < other.type())
-				|| (name() < other.name());
+			return (m_type < other.m_type)
+				|| (m_name < other.m_name);
 		}
 
 		ML_NODISCARD inline bool operator>(uniform const & other)
@@ -192,7 +221,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type m_storage;
+		type_t m_type;
+		name_t m_name;
+		data_t m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -211,9 +242,7 @@ namespace ml
 	template <class Type, class Name, class ... Args
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
-		return uniform{ std::make_tuple(
-			typeof<Type>{}, std::move(name), std::forward<Args>(args)...
-		) };
+		return uniform{ typeof<Type>{}, std::move(name), std::forward<Args>(args)... };
 	}
 
 	ML_NODISCARD static inline auto make_uniform(uniform const & value)
