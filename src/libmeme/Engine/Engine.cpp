@@ -115,15 +115,7 @@ namespace ml
 
 			s_window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
 			{
-				event_system::fire_event<key_event>(
-					(key_code)button, scan, action, mask8_t{ {
-					(mods & ML_MOD_SHIFT),
-					(mods & ML_MOD_CTRL),
-					(mods & ML_MOD_ALT),
-					(mods & ML_MOD_SUPER),
-					(mods & ML_MOD_CAPSLOCK),
-					(mods & ML_MOD_NUMLOCK)
-				} });
+				event_system::fire_event<key_event>(button, scan, action, mods);
 			});
 
 			s_window.set_mouse_callback([](auto, auto button, auto action, auto mods)

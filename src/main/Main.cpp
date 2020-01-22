@@ -3,6 +3,7 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
@@ -58,10 +59,16 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// startup engine
-	if (!engine::startup({ ML_ARGV[0], "../../../" }))
+	static engine::engine_startup_settings engine_settings
+	{
+		ML_ARGV[0], "../../../"
+	};
+	if (!engine::startup(engine_settings))
 	{
 		return debug::log_error("Failed initializing Engine") | debug::pause(1);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// enter event
 	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
@@ -72,11 +79,24 @@ ml::int32_t main()
 		return debug::log_error("Failed initializing Window") | debug::pause(1);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// startup editor
-	if (!editor::startup({ engine::get_window().get_handle(), true }))
+	static editor::editor_startup_settings editor_settings
+	{
+		engine::get_window().get_handle(),
+		true,
+		"#version 130",
+		"dark",
+		"",
+		""
+	};
+	if (!editor::startup(editor_settings))
 	{
 		return debug::log_error("Failed initializing Editor") | debug::pause(1);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load plugins
 	engine::load_plugin("demo.dll");
@@ -84,9 +104,13 @@ ml::int32_t main()
 	// load event
 	event_system::fire_event<load_event>();
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// main loop
-	do
+	while (engine::running())
 	{
+		ML_DEFER{ performance_tracker::refresh(); };
+
 		// begin loop
 		{
 			ML_BENCHMARK("LOOP_BEGIN");
@@ -108,13 +132,13 @@ ml::int32_t main()
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
 			editor::new_frame();
+			editor::main_menu().render();
+			editor::dockspace().render();
 			event_system::fire_event<begin_gui_event>();
 		}
 		// gui
 		{
 			ML_BENCHMARK("\t\tGUI");
-			editor::main_menu().render();
-			editor::dockspace().render();
 			event_system::fire_event<gui_event>();
 		}
 		// end gui
@@ -129,9 +153,7 @@ ml::int32_t main()
 			engine::end_loop();
 			event_system::fire_event<end_loop_event>();
 		}
-		performance_tracker::swap();
 	}
-	while (engine::running());
 
 	// unload event
 	event_system::fire_event<unload_event>();

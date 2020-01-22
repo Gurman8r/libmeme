@@ -1,4 +1,3 @@
-#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Engine/Engine.hpp>
@@ -199,7 +198,7 @@ namespace ml
 
 				if (render_texture const & _r{ m_pipeline.at(0) })
 				{
-					ML_BIND_SCOPE_M(_r);
+					ML_BIND_SCOPE(_r);
 					_r.clear_color(colors::magenta);
 					_r.viewport(_r.bounds());
 
@@ -209,7 +208,7 @@ namespace ml
 					
 					if (shader & _s{ m_shaders["3d"] })
 					{
-						ML_BIND_SCOPE_M(_s, false);
+						ML_BIND_SCOPE(_s, false);
 						for (uniform const & u : m_materials["3d"])
 							_s.set_uniform(u);
 						_s.bind(true);
@@ -268,7 +267,10 @@ namespace ml
 					ImGui::Separator();
 					ImGui::Columns(1);
 
-					draw_texture_preview(m_pipeline[0].get_texture(), { 640, 480 }); ImGui::Separator();
+					editor::draw_texture_preview(m_pipeline[0].get_texture(),
+						(vec2)engine::get_window().get_frame_size() / 2.f
+					);
+					ImGui::Separator();
 				}
 				ImGui::End();
 			} break;
@@ -283,53 +285,6 @@ namespace ml
 				m_pipeline.clear();
 				m_scripts.clear();
 			} break;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 512, 512 })
-		{
-			auto & io{ ImGui::GetIO() };
-			void * const tex_id{ value.address() };
-			vec2 const tex_sz{ util::scale_to_fit((vec2)value.size(), maxSize) };
-			float_t const tex_w{ tex_sz[0] };
-			float_t const tex_h{ tex_sz[1] };
-			ImGui::Text("%u: %ux%u (%.0fx%.0f)", value.handle(), value.width(), value.height(), tex_w, tex_h);
-			auto const pos{ ImGui::GetCursorScreenPos() };
-			ImGui::Image(tex_id,
-				{ tex_w, tex_h },
-				{ 0, 0 },
-				{ 1, 1 },
-				{ 1.0f, 1.0f, 1.0f, 1.0f },
-				{ 1.0f, 1.0f, 1.0f, 0.5f }
-			);
-			if (ImGui::IsItemHovered())
-			{
-				float_t const region_zoom{ 4.0f };
-				float_t const region_size{ 32.0f };
-
-				ImGui::BeginTooltip();
-
-				float_t region_x{ io.MousePos.x - pos.x - region_size * 0.5f };
-				if (region_x < 0.0f) region_x = 0.0f;
-				else if (region_x > (tex_w - region_size)) region_x = (tex_w - region_size);
-
-				float_t region_y{ io.MousePos.y - pos.y - region_size * 0.5f };
-				if (region_y < 0.0f) region_y = 0.0f;
-				else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
-
-				ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-				ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
-				ImGui::Image(tex_id,
-					{ region_size * region_zoom, region_size * region_zoom },
-					{ region_x / tex_w, region_y / tex_h },
-					{ (region_x + region_size) / tex_w, (region_y + region_size) / tex_h },
-					{ 1.0f, 1.0f, 1.0f, 1.0f },
-					{ 1.0f, 1.0f, 1.0f, 0.5f }
-				);
-
-				ImGui::EndTooltip();
 			}
 		}
 

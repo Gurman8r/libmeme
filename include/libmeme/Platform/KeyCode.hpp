@@ -5,6 +5,19 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum KeyMods_
+	{
+		KeyMods_None,
+		KeyMods_Shift		= (0 << 1),
+		KeyMods_Ctrl		= (1 << 1),
+		KeyMods_Alt			= (1 << 2),
+		KeyMods_Super		= (1 << 3),
+		KeyMods_CapsLock	= (1 << 4),
+		KeyMods_NumLock		= (1 << 5)
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum class key_code
 	{
 		Invalid,

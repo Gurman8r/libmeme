@@ -266,7 +266,7 @@ namespace ml
 
 		// create
 		{
-			ML_BIND_SCOPE_M((*this));
+			ML_BIND_SCOPE((*this));
 
 			GL::texImage2D(
 				m_sampler,
@@ -280,11 +280,11 @@ namespace ml
 				(void *)pixels
 			);
 
-			impl::set_repeated(repeated(), m_sampler);
+			impl::set_repeated(is_repeated(), m_sampler);
 			
-			impl::set_smooth(smooth(), m_sampler, mipmapped());
+			impl::set_smooth(is_smooth(), m_sampler, is_mipmapped());
 			
-			impl::set_mipmapped(mipmapped(), m_sampler, smooth());
+			impl::set_mipmapped(is_mipmapped(), m_sampler, is_smooth());
 		}
 		GL::flush();
 		return true;
@@ -355,7 +355,7 @@ namespace ml
 
 		// update
 		{
-			ML_BIND_SCOPE_M((*this));
+			ML_BIND_SCOPE((*this));
 
 			GL::texSubImage2D(
 				m_sampler,
@@ -366,11 +366,11 @@ namespace ml
 				(void *)pixels
 			);
 
-			impl::set_repeated(repeated(), m_sampler);
+			impl::set_repeated(is_repeated(), m_sampler);
 
-			impl::set_smooth(smooth(), m_sampler, mipmapped());
+			impl::set_smooth(is_smooth(), m_sampler, is_mipmapped());
 
-			impl::set_mipmapped(mipmapped(), m_sampler, smooth());
+			impl::set_mipmapped(is_mipmapped(), m_sampler, is_smooth());
 		}
 		GL::flush();
 		return true;
@@ -390,9 +390,9 @@ namespace ml
 				? (m_flags | TextureFlags_Mipmapped)
 				: (m_flags & ~TextureFlags_Mipmapped);
 
-			ML_BIND_SCOPE_M((*this));
+			ML_BIND_SCOPE((*this));
 
-			impl::set_mipmapped(value, m_sampler, smooth());
+			impl::set_mipmapped(value, m_sampler, is_smooth());
 		}
 		GL::flush();
 		return true;
@@ -410,7 +410,7 @@ namespace ml
 				? (m_flags | TextureFlags_Repeated)
 				: (m_flags & ~TextureFlags_Repeated);
 
-			ML_BIND_SCOPE_M((*this));
+			ML_BIND_SCOPE((*this));
 
 			impl::set_repeated(value, m_sampler);
 		}
@@ -430,9 +430,9 @@ namespace ml
 				? (m_flags | TextureFlags_Smooth)
 				: (m_flags & ~TextureFlags_Smooth);
 
-			ML_BIND_SCOPE_M((*this));
+			ML_BIND_SCOPE((*this));
 
-			impl::set_smooth(value, m_sampler, mipmapped());
+			impl::set_smooth(value, m_sampler, is_mipmapped());
 		}
 		GL::flush();
 		return true;
@@ -453,20 +453,19 @@ namespace ml
 
 	image texture::copy_to_image() const
 	{
-		if (m_handle) return image{};
-
-		image temp{ size(), channels() };
-		
-		ML_BIND_SCOPE_M((*this));
-		
-		GL::getTexImage(
-			GL::Texture2D,
-			m_level,
-			m_internalFormat,
-			m_pixelType,
-			&temp[0]
-		);
-
+		auto temp{ make_image(size(), channels()) };
+		if (m_handle)
+		{
+			ML_BIND_SCOPE((*this));
+			
+			GL::getTexImage(
+				GL::Texture2D,
+				m_level,
+				m_internalFormat,
+				m_pixelType,
+				&temp[0]
+			);
+		}
 		return temp;
 	}
 

@@ -27,8 +27,7 @@ namespace ml
 
 		GL::validateVersion(m_context.major, m_context.minor);
 
-		constexpr render_states states{ // default states
-			{}, {}, {}, {}
+		constexpr render_states states{
 		}; states();
 
 		GL::enable(GL::Multisample, m_context.multisample);

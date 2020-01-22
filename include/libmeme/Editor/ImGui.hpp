@@ -5,6 +5,7 @@
 #include <imgui/imgui_internal.h>
 #include <libmeme/Core/ScopeGuard.hpp>
 
-#define ML_ImGui_ScopeID(id) ImGui::PushID(id); ML_SCOPE_EXIT{ ImGui::PopID(); };
+#define ML_ImGui_ScopeID(id)\
+	ImGui::PushID(id); ML_DEFER{ ImGui::PopID(); };
 
 #endif // !_ML_IMGUI_HPP_

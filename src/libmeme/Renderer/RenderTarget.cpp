@@ -26,8 +26,8 @@ namespace ml
 	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo) const
 	{
 		if (!vao || !vbo) return;
-		ML_BIND_SCOPE_M(vao);
-		ML_BIND_SCOPE_M(vbo);
+		ML_BIND_SCOPE(vao);
+		ML_BIND_SCOPE(vbo);
 		GL::drawArrays(vao.mode(), 0, vbo.size());
 		GL::flush();
 	}
@@ -35,9 +35,9 @@ namespace ml
 	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo, index_buffer const & ibo) const
 	{
 		if (!vao || !vbo || !ibo) return;
-		ML_BIND_SCOPE_M(vao);
-		ML_BIND_SCOPE_M(vbo);
-		ML_BIND_SCOPE_M(ibo);
+		ML_BIND_SCOPE(vao);
+		ML_BIND_SCOPE(vbo);
+		ML_BIND_SCOPE(ibo);
 		GL::drawElements(vao.mode(), ibo.usage(), ibo.type(), nullptr);
 		GL::flush();
 	}

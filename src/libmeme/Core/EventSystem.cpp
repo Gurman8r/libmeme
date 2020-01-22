@@ -1,13 +1,13 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/Event.hpp>
+#include <libmeme/Core/EventListener.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static ds::flat_map<
-		size_t,
-		ds::flat_set<event_listener *>
+		size_t, ds::flat_set<event_listener *>
 	> m_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

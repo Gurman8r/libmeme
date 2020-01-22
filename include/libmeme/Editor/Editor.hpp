@@ -1,7 +1,7 @@
 #ifndef _ML_EDITOR_HPP_
 #define _ML_EDITOR_HPP_
 
-#include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Editor/Editor_Dockspace.hpp>
 #include <libmeme/Editor/Editor_MainMenuBar.hpp>
 
@@ -14,8 +14,12 @@ namespace ml
 
 		struct editor_startup_settings final
 		{
-			void * window_handle;
-			bool install_callbacks;
+			void *		window;
+			bool		install_callbacks;
+			C_string	api_version;
+			C_string	style_config;
+			C_string	ini_file;
+			C_string	log_file;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,6 +41,10 @@ namespace ml
 		static void show_user_guide();
 		
 		static void show_style_editor(void * ref = nullptr);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

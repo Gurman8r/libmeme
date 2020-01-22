@@ -21,10 +21,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool editor_main_menu::dispose()
+	void editor_main_menu::clear() noexcept
 	{
 		m_menus.clear();
-		return m_menus.empty();
 	}
 
 	bool editor_main_menu::render()

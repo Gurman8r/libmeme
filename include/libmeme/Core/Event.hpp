@@ -1,7 +1,6 @@
 #ifndef _ML_EVENT_HPP_
 #define _ML_EVENT_HPP_
 
-#include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 

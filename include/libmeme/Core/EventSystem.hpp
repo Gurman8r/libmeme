@@ -1,8 +1,7 @@
 #ifndef _ML_EVENT_SYSTEM_HPP_
 #define _ML_EVENT_SYSTEM_HPP_
 
-#include <libmeme/Core/EventListener.hpp>
-#include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 
 namespace ml
@@ -15,7 +14,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline bool add_listener(event_listener * listener)
+		> static inline bool add_listener(struct event_listener * listener)
 		{
 			return add_listener(hashof_v<Ev>, listener);
 		}
@@ -28,15 +27,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(size_t type, event_listener * listener);
+		static bool add_listener(size_t type, struct event_listener * listener);
 		
 		static void fire_event(struct event const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(size_t type, event_listener * listener);
+		static void remove_listener(size_t type, struct event_listener * listener);
 		
-		static void remove_listener(event_listener * listener);
+		static void remove_listener(struct event_listener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

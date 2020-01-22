@@ -15,9 +15,9 @@ namespace ml
 		using menu_t = typename std::function<void()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		bool dispose();
 
+		void clear() noexcept;
+		
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

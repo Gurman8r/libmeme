@@ -33,7 +33,7 @@ namespace ml
 			return m_curr.emplace_back(std::forward<Args>(args)...);
 		}
 
-		static inline void swap() noexcept
+		static inline void refresh() noexcept
 		{
 			m_prev.swap(m_curr);
 

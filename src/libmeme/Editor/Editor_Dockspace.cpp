@@ -29,11 +29,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool editor_dockspace::dispose()
-	{
-		return false;
-	}
-
 	bool editor_dockspace::render()
 	{
 		if (([&, this]()

@@ -13,13 +13,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	allocation_record::allocation_record(storage_type && storage) noexcept
-		: m_storage{ std::move(storage) }
-	{
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	memory_tracker::memory_tracker() noexcept : m_current{ 0 }, m_records{} {}
 
 	memory_tracker::~memory_tracker()
@@ -61,7 +54,7 @@ namespace ml
 	{
 		auto const temp{ static_cast<trackable *>(ML_IMPL_NEW(size)) };
 		return (*m_records.insert(temp, 
-			::new allocation_record{ std::make_tuple(m_current++, size, flags, temp) }
+			::new allocation_record{ m_current++, size, flags, temp }
 		).first.second)->data();
 	}
 

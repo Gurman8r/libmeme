@@ -161,11 +161,11 @@ namespace ml
 
 		ML_NODISCARD inline auto height() const noexcept -> uint32_t { return m_size[1]; }
 
-		ML_NODISCARD inline bool smooth() const noexcept { return m_flags & TextureFlags_Smooth; }
+		ML_NODISCARD inline bool is_smooth() const noexcept { return m_flags & TextureFlags_Smooth; }
 
-		ML_NODISCARD inline bool repeated() const noexcept { return m_flags & TextureFlags_Repeated; }
+		ML_NODISCARD inline bool is_repeated() const noexcept { return m_flags & TextureFlags_Repeated; }
 
-		ML_NODISCARD inline bool mipmapped() const noexcept { return m_flags & TextureFlags_Mipmapped; }
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return m_flags & TextureFlags_Mipmapped; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

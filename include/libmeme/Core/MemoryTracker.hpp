@@ -56,7 +56,11 @@ namespace ml
 	private:
 		friend struct memory_tracker;
 
-		explicit allocation_record(storage_type && storage) noexcept;
+		template <class ... Args
+		> explicit allocation_record(Args && ... args) noexcept
+			: m_storage{ std::make_tuple(std::forward<Args>(args)...) }
+		{
+		}
 
 		storage_type m_storage;
 

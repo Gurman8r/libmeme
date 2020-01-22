@@ -4,7 +4,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Core/Event.hpp>
-#include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
 
@@ -72,10 +71,10 @@ namespace ml
 		key_code const	key;
 		int32_t const	scan;
 		int32_t const	action;
-		mask8_t const	mods;
+		int32_t const	mods;
 
-		constexpr key_event(key_code key, int32_t scan, int32_t action, mask8_t mods) noexcept
-			: key	{ key }
+		constexpr key_event(int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
+			: key	{ (key_code)key }
 			, scan	{ scan }
 			, action{ action }
 			, mods	{ mods }
@@ -87,27 +86,27 @@ namespace ml
 			return (key == k) && (action == a);
 		}
 
-		constexpr bool getPress	(key_code k)	const { return getKeyAction(k, ML_KEY_PRESS); }
-		constexpr bool getDown	(key_code k) const { return getKeyAction(k, ML_KEY_REPEAT); }
-		constexpr bool getUp	(key_code k)	const { return getKeyAction(k, ML_KEY_RELEASE); }
+		constexpr bool getPress(key_code k) const { return getKeyAction(k, ML_KEY_PRESS); }
+		constexpr bool getDown(key_code k) const { return getKeyAction(k, ML_KEY_REPEAT); }
+		constexpr bool getUp(key_code k) const { return getKeyAction(k, ML_KEY_RELEASE); }
 
-		constexpr bool getPress	(key_code k, mask8_t m) const { return getPress(k) && (mods == m); }
-		constexpr bool getDown	(key_code k, mask8_t m) const { return getDown(k) && (mods == m); }
-		constexpr bool getUp	(key_code k, mask8_t m) const { return getUp(k) && (mods == m); }
+		constexpr bool getPress(key_code k, int32_t m) const { return getPress(k) && (mods == m); }
+		constexpr bool getDown(key_code k, int32_t m) const { return getDown(k) && (mods == m); }
+		constexpr bool getUp(key_code k, int32_t m) const { return getUp(k) && (mods == m); }
 
-		constexpr bool isShift	(key_code k)	const { return getPress(k, { { 1, 0, 0, 0 } }); }
-		constexpr bool isCtrl	(key_code k)	const { return getPress(k, { { 0, 1, 0, 0 } }); }
-		constexpr bool isAlt	(key_code k)	const { return getPress(k, { { 0, 0, 1, 0 } }); }
-		constexpr bool isSuper	(key_code k)	const { return getPress(k, { { 0, 0, 0, 1 } }); }
+		constexpr bool isShift(key_code k) const { return getPress(k, KeyMods_Shift); }
+		constexpr bool isCtrl(key_code k) const { return getPress(k, KeyMods_Ctrl); }
+		constexpr bool isAlt(key_code k) const { return getPress(k, KeyMods_Alt); }
+		constexpr bool isSuper(key_code k) const { return getPress(k, KeyMods_Super); }
 
-		constexpr bool isNew	() const { return isCtrl(key_code::N); }
-		constexpr bool is_open	() const { return isCtrl(key_code::O); }
-		constexpr bool isSave	() const { return isCtrl(key_code::S) || getPress(key_code::S, { { 1, 1, 0, 0 } }); }
-		constexpr bool isUndo	() const { return isCtrl(key_code::Z); }
-		constexpr bool isRedo	() const { return isCtrl(key_code::Y) || getPress(key_code::Z, { { 1, 1, 0, 0 } }); }
-		constexpr bool isCut	() const { return isCtrl(key_code::X) || isShift(key_code::Delete); }
-		constexpr bool isCopy	() const { return isCtrl(key_code::C) || isCtrl(key_code::Insert); }
-		constexpr bool isPaste	() const { return isCtrl(key_code::V) || isShift(key_code::Insert); }
+		constexpr bool isNew() const { return isCtrl(key_code::N); }
+		constexpr bool isOpen() const { return isCtrl(key_code::O); }
+		constexpr bool isSave() const { return isCtrl(key_code::S) || getPress(key_code::S, KeyMods_Ctrl | KeyMods_Shift); }
+		constexpr bool isUndo() const { return isCtrl(key_code::Z); }
+		constexpr bool isRedo() const { return isCtrl(key_code::Y) || getPress(key_code::Z, KeyMods_Ctrl | KeyMods_Shift); }
+		constexpr bool isCut() const { return isCtrl(key_code::X) || isShift(key_code::Delete); }
+		constexpr bool isCopy() const { return isCtrl(key_code::C) || isCtrl(key_code::Insert); }
+		constexpr bool isPaste() const { return isCtrl(key_code::V) || isShift(key_code::Insert); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

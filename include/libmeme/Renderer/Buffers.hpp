@@ -27,6 +27,8 @@ namespace ml
 
 		ML_NODISCARD constexpr operator bool() const noexcept { return m_handle; }
 
+		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+
 		ML_NODISCARD constexpr auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

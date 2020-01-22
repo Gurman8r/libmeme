@@ -81,18 +81,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr reference at(size_type const x, size_type const y)
-		{
-			return this->at(y * _Width + x);
-		}
-
-		ML_NODISCARD constexpr const_reference at(size_type const x, size_type const y) const
-		{
-			return this->at(y * _Width + x);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD constexpr auto operator[](size_type const i) -> reference { return m_data[i]; }
 
 		ML_NODISCARD constexpr auto operator[](size_type const i) const -> const_reference { return m_data[i]; }
@@ -100,6 +88,10 @@ namespace ml::ds
 		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
 		
 		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
+
+		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) -> reference { return at(y * _Width + x); }
+
+		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) const -> const_reference { return at(y * _Width + x); }
 
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data.back(); }
 		
