@@ -17,6 +17,7 @@ namespace ml
 		{
 			path_t program_name;
 			path_t library_path;
+			std::initializer_list<path_t> boot_scripts;
 		};
 
 		struct window_startup_settings final
@@ -30,23 +31,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct engine_time final
+		class plugins final
 		{
+			friend engine;
+
+			ds::flat_set<path_t> files;
+
+			ds::flat_map<struct shared_library, struct plugin *> libs;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		class time final
+		{
+			friend engine;
+			timer m_main, m_loop;
+			float64_t m_delta;
+
+		public:
 			inline float64_t total() const noexcept { return m_main.elapsed().count(); }
 
 			inline float64_t delta() const noexcept { return m_delta; }
-
-		private:
-			friend engine;
-			timer		m_main, m_loop;
-			float64_t	m_delta;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static bool startup(engine_startup_settings const & s);
 
-		static bool init_window(window_startup_settings const & s);
+		static bool create_window(window_startup_settings const & s);
 
 		static bool running();
 
@@ -62,21 +74,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t load_plugin(path_t const & path);
+		static bool load_plugin(path_t const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & get_time() noexcept { return s_time; }
+		ML_NODISCARD static engine::plugins const & get_plugins() noexcept;
 
-		ML_NODISCARD static inline auto & get_window() { return s_window; }
+		ML_NODISCARD static engine::time const & get_time() noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static engine_time		s_time;		// Time
-		static render_window	s_window;	// Window
-		struct engine_plugins;
-		static engine_plugins	s_plugins;	// Plugins
+		ML_NODISCARD static render_window & get_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

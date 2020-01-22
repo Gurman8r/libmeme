@@ -28,7 +28,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct char_event final : I_event<char_event>
+	struct char_event final : type_event<char_event>
 	{
 		uint32_t const value;
 
@@ -40,7 +40,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct cursor_enter_event final : I_event<cursor_enter_event>
+	struct cursor_enter_event final : type_event<cursor_enter_event>
 	{
 		int32_t const entered;
 
@@ -52,7 +52,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct cursor_pos_event final : I_event<cursor_pos_event>
+	struct cursor_pos_event final : type_event<cursor_pos_event>
 	{
 		float64_t const x;
 		float64_t const y;
@@ -66,7 +66,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct key_event final : I_event<key_event>
+	struct key_event final : type_event<key_event>
 	{
 		key_code const	key;
 		int32_t const	scan;
@@ -111,7 +111,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct mouse_event final : I_event<mouse_event>
+	struct mouse_event final : type_event<mouse_event>
 	{
 		int32_t const key;
 		int32_t const action;
@@ -127,7 +127,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct scroll_event final : I_event<scroll_event>
+	struct scroll_event final : type_event<scroll_event>
 	{
 		float64_t const x;
 		float64_t const y;
@@ -141,7 +141,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct frame_size_event final : I_event<frame_size_event>
+	struct frame_size_event final : type_event<frame_size_event>
 	{
 		int32_t const width;
 		int32_t const height;
@@ -155,14 +155,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_close_event final : I_event<window_close_event>
+	struct window_close_event final : type_event<window_close_event>
 	{
 		window_close_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_error_event final : I_event<window_error_event>
+	struct window_error_event final : type_event<window_error_event>
 	{
 		int32_t const code;
 		C_string const desc;
@@ -176,7 +176,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_focus_event final : I_event<window_focus_event>
+	struct window_focus_event final : type_event<window_focus_event>
 	{
 		int32_t const focused;
 		
@@ -188,7 +188,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_pos_event final : I_event<window_pos_event>
+	struct window_pos_event final : type_event<window_pos_event>
 	{
 		int32_t const x;
 		int32_t const y;
@@ -202,7 +202,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_size_event final : I_event<window_size_event>
+	struct window_size_event final : type_event<window_size_event>
 	{
 		int32_t const width;
 		int32_t const height;

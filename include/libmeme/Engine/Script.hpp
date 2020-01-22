@@ -13,7 +13,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		enum class language { unknown, python, lua };
+		enum language { unknown, python, lua };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -41,27 +41,32 @@ namespace ml
 
 		bool load_from_file(path_t const & path);
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		int32_t execute();
 		
 		int32_t execute(pmr::vector<pmr::string> const & args);
 
-		template <class ... Args> inline int32_t operator()(Args && ... args)
+		template <class ... Args
+		> inline int32_t operator()(Args && ... args)
 		{
 			return execute({ std::forward<Args>(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline auto get_language() const noexcept -> language { return m_language; }
+		inline operator bool() const noexcept { return !m_str.empty(); }
 
-		inline auto get_text() const noexcept -> pmr::string const & { return m_text; }
+		inline auto lang() const noexcept -> language { return m_lang; }
+
+		inline auto str() const noexcept -> pmr::string const & { return m_str; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		language m_language;
+		language m_lang;
 
-		pmr::string m_text;
+		pmr::string m_str;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

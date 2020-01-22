@@ -5,10 +5,9 @@
 
 namespace ml
 {
-	// Startup
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct enter_event final : I_event<enter_event>
+	struct enter_event final : type_event<enter_event>
 	{
 		int32_t const argc;
 		C_string const * argv;
@@ -20,47 +19,24 @@ namespace ml
 		}
 	};
 
-	struct load_event final : I_event<load_event>
+	struct begin_loop_event final : type_event<begin_loop_event>
 	{
-		constexpr load_event() noexcept = default;
 	};
 
-
-	// Loop
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct begin_loop_event final : I_event<begin_loop_event>
+	struct update_event final : type_event<update_event>
 	{
-		constexpr begin_loop_event() noexcept = default;
 	};
 
-	struct update_event final : I_event<update_event>
+	struct draw_event final : type_event<draw_event>
 	{
-		constexpr update_event() noexcept = default;
 	};
 
-	struct draw_event final : I_event<draw_event>
+	struct end_loop_event final : type_event<end_loop_event>
 	{
-		constexpr draw_event() noexcept = default;
 	};
 
-	struct end_loop_event final : I_event<end_loop_event>
+	struct exit_event final : type_event<exit_event>
 	{
-		constexpr end_loop_event() noexcept = default;
-	};
-
-
-	// Shutdown
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct unload_event final : I_event<unload_event>
-	{
-		constexpr unload_event() noexcept = default;
-	};
-
-	struct exit_event final : I_event<exit_event>
-	{
-		constexpr exit_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -11,6 +11,7 @@ namespace ml
 	template <class Ev
 	> ML_NODISCARD static constexpr auto event_cast(struct event const * value) noexcept
 	{
+		static_assert(std::is_base_of_v<struct event, Ev>, "bad event cast");
 		return (value && (value->id() == hashof_v<Ev>))
 			? static_cast<Ev const *>(value)
 			: nullptr;
@@ -18,7 +19,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// basic event
+	// base event
 	struct event : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,7 +29,7 @@ namespace ml
 		{
 		}
 
-		ML_NODISCARD constexpr size_t const & id() const noexcept
+		ML_NODISCARD constexpr size_t id() const noexcept
 		{
 			return m_id;
 		}
@@ -49,11 +50,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event interface
-	template <class T
-	> struct I_event : event
+	// event that uses the hash code of T as its id
+	template <class T> struct type_event : event
 	{
-		constexpr I_event() noexcept : event{ hashof_v<T> } {}
+		constexpr type_event() noexcept : event{ hashof_v<T> }
+		{
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

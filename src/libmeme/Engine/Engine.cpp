@@ -2,6 +2,7 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Engine/Lua.hpp>
+#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
@@ -10,66 +11,19 @@
 
 namespace ml
 {
-	struct engine::engine_plugins final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		engine_plugins() noexcept {}
-
-		~engine_plugins()
-		{
-			m_libs.for_each([](auto const &, auto & p) { delete p; });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline bool load_plugin(path_t const & path)
-		{
-			if (auto const it{ m_files.insert(path) }; it.second)
-			{
-				if (auto lib{ make_shared_library(*it.first) })
-				{
-					if (auto const plug{ lib.call_function<plugin *>("ml_plugin_main") })
-					{
-						return (*m_libs.insert(std::move(lib), plug).first.second);
-					}
-				}
-				m_files.erase(it.first);
-			}
-			return false;
-		}
-
-		inline void clear_plugins()
-		{
-			m_files.clear();
-			m_libs.for_each([](auto const &, auto & p) { delete p; });
-			m_libs.clear();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		ds::flat_set<path_t> m_files{};
-		ds::flat_map<shared_library, plugin *> m_libs{};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	decltype(engine::s_window)	engine::s_window	{};
-	decltype(engine::s_time)	engine::s_time		{};
-	decltype(engine::s_plugins) engine::s_plugins	{};
-
+	static engine::plugins	s_plugins	{};
+	static engine::time		s_time		{};
+	static render_window	s_window	{};
+	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool engine::startup(engine_startup_settings const & s)
 	{
+		if (running())
+			return false;
+
 		s_time.m_main.start();
 
 		if (!Lua::startup())
@@ -77,12 +31,20 @@ namespace ml
 
 		if (!Python::startup(s.program_name, s.library_path))
 			return debug::log_error("Failed initializing Python");
+
+		for (auto const & filename : s.boot_scripts)
+		{
+			script{ filename }();
+		}
 		
 		return true;
 	}
 
-	bool engine::init_window(window_startup_settings const & s)
+	bool engine::create_window(window_startup_settings const & s)
 	{
+		if (running())
+			return false;
+
 		if (!s_window.create(s.title, s.display, s.context, s.flags))
 			return false;
 
@@ -159,14 +121,12 @@ namespace ml
 
 	void engine::shutdown()
 	{
-		s_plugins.clear_plugins();
-
+		s_plugins.files.clear();
+		s_plugins.libs.for_each([](auto const &, auto & p) { delete p; });
+		s_plugins.libs.clear();
 		s_window.destroy();
-		
 		window::terminate();
-
 		Python::shutdown();
-		
 		Lua::shutdown();
 	}
 
@@ -175,18 +135,14 @@ namespace ml
 	void engine::begin_loop()
 	{
 		s_time.m_delta = s_time.m_loop.elapsed().count();
-		
 		s_time.m_loop.stop().start();
-
 		window::poll_events();
 	}
 
 	void engine::begin_draw()
 	{
 		s_window.clear_color(colors::black);
-		
 		s_window.viewport({ {}, s_window.get_frame_size() });
-		
 		constexpr render_states states{
 		}; states(); // default states
 	}
@@ -197,14 +153,45 @@ namespace ml
 		{
 			s_window.swap_buffers();
 		}
-		GL::flush();
+		else
+		{
+			GL::flush();
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t engine::load_plugin(path_t const & path)
+	bool engine::load_plugin(path_t const & path)
 	{
-		return s_plugins.load_plugin(path);
+		if (auto const file{ s_plugins.files.insert(path) }; file.second)
+		{
+			if (auto lib{ make_shared_library(*file.first) })
+			{
+				if (auto const inst{ lib.call_function<plugin *>("ml_plugin_main") })
+				{
+					return (*s_plugins.libs.insert(std::move(lib), inst).first.second);
+				}
+			}
+			s_plugins.files.erase(file.first);
+		}
+		return false;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_NODISCARD engine::plugins const & engine::get_plugins() noexcept
+	{
+		return s_plugins;
+	}
+
+	ML_NODISCARD engine::time const & engine::get_time() noexcept
+	{
+		return s_time;
+	}
+
+	ML_NODISCARD render_window & engine::get_window() noexcept
+	{
+		return s_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

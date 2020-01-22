@@ -58,9 +58,15 @@ namespace ml
 	{
 		if (!good())
 		{
+			size_t const ext{ // hash the extension
+				util::hash(util::to_lower(path.extension().string().c_str()))
+			};
+
 #ifdef ML_OS_WINDOWS
+			if (ext != util::hash(".dll")) return false;
 			return (m_instance = ::LoadLibraryA(path.string().c_str()));
 #else
+			if (ext != util::hash(".so")) return false;
 			return (m_instance = nullptr);
 #endif
 		}

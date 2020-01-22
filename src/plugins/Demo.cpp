@@ -38,12 +38,12 @@ namespace ml
 
 		demo() : plugin{}
 		{
-			event_system::add_listener<load_event>(this);
+			event_system::add_listener<enter_event>(this);
 			event_system::add_listener<update_event>(this);
 			event_system::add_listener<draw_event>(this);
 			event_system::add_listener<dockspace_event>(this);
 			event_system::add_listener<gui_event>(this);
-			event_system::add_listener<unload_event>(this);
+			event_system::add_listener<exit_event>(this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,7 +52,7 @@ namespace ml
 		{
 			switch (value.id())
 			{
-			case hashof_v<load_event>:
+			case hashof_v<enter_event>:
 			{
 				// load stuff, etc...
 				
@@ -151,15 +151,15 @@ namespace ml
 				);
 
 				// Models
-				m_models["monkey"] = make_model(
-					FS::path_to("../../../assets/meshes/monkey.obj")
-				);
 				m_models["sphere8x6"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere8x6.obj")
 				);
 				m_models["sphere32x24"] = make_model(
 					FS::path_to("../../../assets/meshes/sphere32x24.obj")
 				);
+				//m_models["monkey"] = make_model(
+				//	FS::path_to("../../../assets/meshes/monkey.obj")
+				//);
 				m_models["triangle"] = make_model(make_mesh( // broken
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
@@ -274,7 +274,7 @@ namespace ml
 				}
 				ImGui::End();
 			} break;
-			case hashof_v<unload_event>:
+			case hashof_v<exit_event>:
 			{
 				m_images.clear();
 				m_shaders.clear();

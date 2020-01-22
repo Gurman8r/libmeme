@@ -7,39 +7,39 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	script::script()
-		: m_language{ language::unknown }
-		, m_text{ allocator_type{} }
+		: m_lang{ language::unknown }
+		, m_str{ allocator_type{} }
 	{
 	}
 
 	script::script(allocator_type const & alloc)
-		: m_language{ language::unknown }
-		, m_text{ alloc }
+		: m_lang{ language::unknown }
+		, m_str{ alloc }
 	{
 	}
 	
 	script::script(path_t const & path, allocator_type const & alloc)
-		: m_language{ language::unknown }
-		, m_text{ alloc }
+		: m_lang{ language::unknown }
+		, m_str{ alloc }
 	{
 		load_from_file(path);
 	}
 
 	script::script(language lang, pmr::string const & text, allocator_type const & alloc)
-		: m_language{ lang }
-		, m_text{ text, alloc }
+		: m_lang{ lang }
+		, m_str{ text, alloc }
 	{
 	}
 	
 	script::script(script const & other, allocator_type const & alloc)
-		: m_language{ other.m_language }
-		, m_text{ other.m_text, alloc }
+		: m_lang{ other.m_lang }
+		, m_str{ other.m_str, alloc }
 	{
 	}
 	
 	script::script(script && other, allocator_type const & alloc) noexcept
-		: m_language{ std::move(other.m_language) }
-		, m_text{ std::move(other.m_text), alloc }
+		: m_lang{ std::move(other.m_lang) }
+		, m_str{ std::move(other.m_str), alloc }
 	{
 	}
 	
@@ -62,9 +62,9 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			std::swap(m_language, other.m_language);
+			std::swap(m_lang, other.m_lang);
 
-			m_text.swap(other.m_text);
+			m_str.swap(other.m_str);
 		}
 	}
 
@@ -72,8 +72,21 @@ namespace ml
 
 	bool script::load_from_file(path_t const & path)
 	{
-		return !(m_text = FS::get_file_contents(path)).empty();
+		if (path.empty())
+			return false;
+		switch (util::hash(path.extension().string()))
+		{
+		case util::hash(".lua"): m_lang = language::lua;
+			break;
+		case util::hash(".py"): m_lang = language::python;
+			break;
+		default:
+			return false;
+		}
+		return !(m_str = FS::get_file_contents(path)).empty();
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int32_t script::execute()
 	{
@@ -82,15 +95,17 @@ namespace ml
 
 	int32_t script::execute(pmr::vector<pmr::string> const & args)
 	{
-		switch (m_language)
+		switch (m_lang)
 		{
 		case language::python:
-			return Python::do_string(m_text);
+			return Python::do_string(m_str);
 		
 		case language::lua:
-			return Lua::do_string(m_text);
+			return Lua::do_string(m_str);
+		
+		default:
+			return 0;
 		}
-		return 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

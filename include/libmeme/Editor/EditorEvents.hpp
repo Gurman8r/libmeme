@@ -7,24 +7,21 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct begin_gui_event final : I_event<begin_gui_event>
+	struct begin_gui_event final : type_event<begin_gui_event>
 	{
-		constexpr begin_gui_event() noexcept = default;
 	};
 
-	struct gui_event final : I_event<gui_event>
+	struct gui_event final : type_event<gui_event>
 	{
-		constexpr gui_event() noexcept = default;
 	};
 
-	struct end_gui_event final : I_event<end_gui_event>
+	struct end_gui_event final : type_event<end_gui_event>
 	{
-		constexpr end_gui_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct dockspace_event final : I_event<dockspace_event>
+	struct dockspace_event final : type_event<dockspace_event>
 	{
 		struct editor_dockspace & d;
 

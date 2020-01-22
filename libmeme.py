@@ -1,18 +1,9 @@
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-
 import LIBMEME as ml
 
-# Debug Mode
-if ml.config.is_debug():
-    
-    for e in ml.config.args():
-        ml.io.printl(e)
-    
-    ml.io.pause()
-    ml.io.exit()
+# cli args
+for e in ml.config.args():
+    ml.io.info(e)
 
-# Load Plugins
-if (ml.config.system_name() == "Windows"):
-    ml.plugins.load("demo.dll")
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
+# load plugins
+#if (ml.config.os() == "Windows"):
+#    ml.engine.load_plugin("demo.dll")

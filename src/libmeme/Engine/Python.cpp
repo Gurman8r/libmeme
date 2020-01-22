@@ -2,6 +2,7 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
+#include <libmeme/Engine/Engine.hpp>
 
 #include <Python.h>
 #include <pybind11/embed.h>
@@ -77,45 +78,48 @@ namespace ml::python::embedded
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using py_str_t		= typename std::string;
-	using py_list_t		= typename std::vector<py_str_t>;
-	using py_dict_t		= typename std::map<py_str_t, py_str_t>;
-	using py_table_t	= typename std::vector<py_dict_t>;
-	using py_vec2_t		= typename std::array<float_t, 2>;
-	using py_rect_t		= typename std::array<float_t, 4>;
+	using str_t			= typename std::string;
+	using list_t		= typename std::vector<str_t>;
+	using dict_t		= typename std::map<str_t, str_t>;
+	using table_t		= typename std::vector<dict_t>;
+	using vec2_t		= typename std::array<float_t, 2>;
+	using rect_t		= typename std::array<float_t, 4>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	PYBIND11_EMBEDDED_MODULE(LIBMEME, m)
 	{
 		struct ml_py_config final {};
-		pybind11::class_<ml_py_config>(m, "cfg")
-			.def_static("args",				[]() { return py_list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
-			.def_static("architecture",		[]() { return ML_ARCH; })
-			.def_static("compiler_name",	[]() { return ML_CC_NAME; })
-			.def_static("compiler_version", []() { return ML_CC_VER; })
-			.def_static("configuration",	[]() { return ML_CONFIGURATION; })
-			.def_static("cpp_version",		[]() { return ML_LANG; })
-			.def_static("is_debug",			[]() { return ML_DEBUG; })
-			.def_static("platform_target",	[]() { return ML_ARCH_NAME; })
-			.def_static("project_author",	[]() { return ML__AUTHOR; })
-			.def_static("project_date",		[]() { return ML__DATE; })
-			.def_static("project_name",		[]() { return ML__NAME; })
-			.def_static("project_time",		[]() { return ML__TIME; })
-			.def_static("project_url",		[]() { return ML__URL; })
-			.def_static("project_version",	[]() { return ML__VERSION; })
-			.def_static("system_name",		[]() { return ML_OS_NAME; });
+		pybind11::class_<ml_py_config>(m, "config")
+			.def_static("args",		[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("author",	[]() { return ML__AUTHOR; })
+			.def_static("date",		[]() { return ML__DATE; })
+			.def_static("name",		[]() { return ML__NAME; })
+			.def_static("time",		[]() { return ML__TIME; })
+			.def_static("url",		[]() { return ML__URL; })
+			.def_static("version",	[]() { return ML__VERSION; })
+			.def_static("arch",		[]() { return ML_ARCH; })
+			.def_static("arch_id",	[]() { return ML_ARCH_NAME; })
+			.def_static("cc_id",	[]() { return ML_CC_NAME; })
+			.def_static("cc_ver",	[]() { return ML_CC_VER; })
+			.def_static("cpp_ver",	[]() { return ML_LANG; })
+			.def_static("is_debug",	[]() { return ML_DEBUG; })
+			.def_static("os",		[]() { return ML_OS_NAME; });
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
 			.def_static("clear",	[]() { return debug::clear(); })
 			.def_static("exit",		[]() { return std::exit(0); })
 			.def_static("pause",	[]() { return debug::pause(0); })
-			.def_static("print",	[](py_str_t const & s) { std::cout << s; })
-			.def_static("printl",	[](py_str_t const & s) { std::cout << s << '\n'; })
-			.def_static("log",		[](py_str_t const & s) { return debug::log_info(s); })
-			.def_static("warning",	[](py_str_t const & s) { return debug::log_warning(s); })
-			.def_static("error",	[](py_str_t const & s) { return debug::log_error(s); });
+			.def_static("print",	[](C_string s) { std::cout << s; })
+			.def_static("printl",	[](C_string s) { std::cout << s << '\n'; })
+			.def_static("info",		[](C_string s) { return debug::log_info(s); })
+			.def_static("warning",	[](C_string s) { return debug::log_warning(s); })
+			.def_static("error",	[](C_string s) { return debug::log_error(s); });
+
+		struct ml_py_engine final {};
+		pybind11::class_<ml_py_engine>(m, "engine")
+			.def_static("load_plugin", [](C_string s) { return engine::load_plugin(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

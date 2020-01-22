@@ -9,12 +9,36 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
+ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	using namespace ml;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// setup memory
+	static auto g_raw = ds::array<byte_t, 64._MiB>{};
+	static auto g_buf = pmr::monotonic_buffer_resource{ g_raw.data(), g_raw.size() };
+	pmr::set_default_resource(&g_buf);
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// start engine
+	static engine::engine_startup_settings engine_settings
+	{
+		path_t{ ML_ARGV[0] }.filename(),
+		FS::path_to("../../../"),
+		{ FS::path_to("../../../libmeme.py"), }
+	};
+	if (!engine::startup(engine_settings))
+	{
+		return debug::log_error("main failed starting engine") | debug::pause(1);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// create window
 	static constexpr engine::window_startup_settings window_settings
 	{
 		"libmeme",				// title
@@ -35,74 +59,44 @@ namespace ml
 		WindowFlags_Default,	// flags
 		true					// install callbacks
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// Main
-ml::int32_t main()
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	using namespace ml;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// setup memory
-	static auto g_raw = ds::array<byte_t, 64._MiB>{};
-	static auto g_buf = pmr::monotonic_buffer_resource{ g_raw.data(), g_raw.size() };
-	//static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buf };
-	pmr::set_default_resource(&g_buf);
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// startup engine
-	static engine::engine_startup_settings engine_settings
+	if (!engine::create_window(window_settings))
 	{
-		ML_ARGV[0], "../../../"
+		return debug::log_error("main failed creating window") | debug::pause(1);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// start editor
+	static editor::editor_startup_settings editor_settings
+	{
+		engine::get_window().get_handle(),	// window
+		true,								// install callbacks
+		"#version 130",						// api version
+		"dark",								// style
+		"",									// ini file
+		""									// log file
 	};
-	if (!engine::startup(engine_settings))
+	if (!editor::startup(editor_settings))
 	{
-		return debug::log_error("Failed initializing Engine") | debug::pause(1);
+		return debug::log_error("main failed starting editor") | debug::pause(1);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// load plugins
+	pmr::vector<path_t> plugins
+	{
+		"demo.dll",
+	};
+	for (auto const & path : plugins)
+	{
+		engine::load_plugin(path);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// enter event
 	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
-
-	// create window
-	if (!engine::init_window(window_settings))
-	{
-		return debug::log_error("Failed initializing Window") | debug::pause(1);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// startup editor
-	static editor::editor_startup_settings editor_settings
-	{
-		engine::get_window().get_handle(),
-		true,
-		"#version 130",
-		"dark",
-		"",
-		""
-	};
-	if (!editor::startup(editor_settings))
-	{
-		return debug::log_error("Failed initializing Editor") | debug::pause(1);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// load plugins
-	engine::load_plugin("demo.dll");
-
-	// load event
-	event_system::fire_event<load_event>();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -155,20 +149,17 @@ ml::int32_t main()
 		}
 	}
 
-	// unload event
-	event_system::fire_event<unload_event>();
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// exit event
+	event_system::fire_event<exit_event>();
 
 	// shutdown
 	editor::shutdown();
 	engine::shutdown();
-
-	// exit event
-	event_system::fire_event<exit_event>();
 
 	// goodbye!
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

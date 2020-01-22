@@ -32,7 +32,7 @@ namespace ml
 
 	path_t FS::path_to(path_t const & value)
 	{
-		return path_t{ root_path().string() + "/"s + value.string() };
+		return path_t{ root_path().string() + '/' + value.string() };
 	}
 
 	path_t const & FS::root_path()
