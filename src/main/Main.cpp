@@ -1,5 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -24,67 +22,75 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// engine config
+	auto & engine_cfg{ engine::get_config() };
+	
+	// program name
+	engine_cfg.program_name = fs::path{ ML_ARGV[0] };
+	
+	// library path
+	engine_cfg.library_path = fs::path{ "../../../" };
+	
+	// window title
+	engine_cfg.window_title = "libmeme";
+	
+	// window flags
+	engine_cfg.window_flags = WindowFlags_Default;
+	
+	// window video
+	engine_cfg.window_video = make_video_mode(
+		vec2u{ 1280, 720 },	// resolution
+		32u					// color depth
+	);
+	
+	// window context settings
+	engine_cfg.window_context = make_context_settings(
+		client_api::OpenGL,	// api
+		4,					// major version
+		6,					// minor version
+		client_api::Compat,	// profile
+		24,					// depth bits
+		8,					// stencil bits
+		false,				// multisample
+		false				// sRGB capable
+	);
+
 	// start engine
-	static engine::engine_startup_settings engine_settings
+	if (!engine::startup(true))
 	{
-		path_t{ ML_ARGV[0] }.filename(),
-		FS::path_to("../../../"),
-		{ FS::path_to("../../../libmeme.py"), }
-	};
-	if (!engine::startup(engine_settings))
-	{
-		return debug::log_error("main failed starting engine") | debug::pause(1);
+		return debug::log_error("failed starting engine") | debug::pause(1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create window
-	static constexpr engine::window_startup_settings window_settings
-	{
-		"libmeme",				// title
-		make_video_mode(
-			vec2u{ 1280, 720 },	// resolution
-			32u					// color depth
-		),
-		make_context_settings(
-			client_api::OpenGL,	// api
-			4,					// major version
-			6,					// minor version
-			client_api::Compat,	// profile
-			24,					// depth bits
-			8,					// stencil bits
-			false,				// multisample
-			false				// sRGB capable
-		),
-		WindowFlags_Default,	// flags
-		true					// install callbacks
-	};
-	if (!engine::create_window(window_settings))
-	{
-		return debug::log_error("main failed creating window") | debug::pause(1);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	// editor config
+	auto & editor_cfg{ editor::get_config() };
+	
+	// window handle
+	editor_cfg.window_handle = engine::get_window().get_handle();
+	
+	// api version
+	editor_cfg.api_version = "#version 130";
+	
+	// style configuration
+	editor_cfg.style_config = "dark";
+	
+	// ini file
+	editor_cfg.ini_file = "";
+	
+	// log file
+	editor_cfg.log_file = "";
+	
 	// start editor
-	static editor::editor_startup_settings editor_settings
+	if (!editor::startup(true))
 	{
-		engine::get_window().get_handle(),	// window
-		true,								// install callbacks
-		"#version 130",						// api version
-		"dark",								// style
-		"",									// ini file
-		""									// log file
-	};
-	if (!editor::startup(editor_settings))
-	{
-		return debug::log_error("main failed starting editor") | debug::pause(1);
+		return debug::log_error("failed starting editor") | debug::pause(1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load plugins
-	pmr::vector<path_t> plugins
+	pmr::vector<fs::path> plugins
 	{
 		"demo.dll",
 	};
@@ -126,8 +132,8 @@ ml::int32_t main()
 		{
 			ML_BENCHMARK("\tGUI_BEGIN");
 			editor::new_frame();
-			editor::main_menu().render();
-			editor::dockspace().render();
+			editor::get_main_menu().render();
+			editor::get_dockspace().render();
 			event_system::fire_event<begin_gui_event>();
 		}
 		// gui

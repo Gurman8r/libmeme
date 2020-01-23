@@ -2,7 +2,6 @@
 #define _ML_SHARED_LIBRARY_HPP_
 
 #include <libmeme/Platform/Export.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 
 namespace ml
@@ -17,7 +16,7 @@ namespace ml
 
 		shared_library() noexcept;
 		
-		explicit shared_library(path_t const & path);
+		explicit shared_library(fs::path const & filename);
 		
 		shared_library(shared_library && copy) noexcept;
 		
@@ -31,7 +30,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool open(path_t const & path);
+		bool open(fs::path const & filename);
 
 		bool close();
 

@@ -10,21 +10,16 @@ namespace ml
 	editor_main_menu::editor_main_menu()
 		: m_open	{ true }
 		, m_good	{ false }
-		, m_menus	{ decltype(m_menus)::allocator_type{} }
+		, m_menus	{}
 	{
 	}
 
 	editor_main_menu::~editor_main_menu()
 	{
-		m_menus.clear();
+		clear();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void editor_main_menu::clear() noexcept
-	{
-		m_menus.clear();
-	}
 
 	bool editor_main_menu::render()
 	{

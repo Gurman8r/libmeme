@@ -1,6 +1,7 @@
 #include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/Lua.hpp>
 #include <libmeme/Engine/Python.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -18,11 +19,11 @@ namespace ml
 	{
 	}
 	
-	script::script(path_t const & path, allocator_type const & alloc)
+	script::script(fs::path const & filename, allocator_type const & alloc)
 		: m_lang{ language::unknown }
 		, m_str{ alloc }
 	{
-		load_from_file(path);
+		load_from_file(filename);
 	}
 
 	script::script(language lang, pmr::string const & text, allocator_type const & alloc)
@@ -70,11 +71,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script::load_from_file(path_t const & path)
+	bool script::load_from_file(fs::path const & filename)
 	{
-		if (path.empty())
+		if (filename.empty())
 			return false;
-		switch (util::hash(path.extension().string()))
+		switch (util::hash(filename.extension().string()))
 		{
 		case util::hash(".lua"): m_lang = language::lua;
 			break;
@@ -83,7 +84,7 @@ namespace ml
 		default:
 			return false;
 		}
-		return !(m_str = FS::get_file_contents(path)).empty();
+		return !(m_str = FS::get_file_contents(filename)).empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -98,10 +99,10 @@ namespace ml
 		switch (m_lang)
 		{
 		case language::python:
-			return Python::do_string(m_str);
+			return python::do_string(m_str);
 		
 		case language::lua:
-			return Lua::do_string(m_str);
+			return lua::do_string(m_str);
 		
 		default:
 			return 0;

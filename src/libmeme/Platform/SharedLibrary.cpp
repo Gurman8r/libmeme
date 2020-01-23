@@ -1,5 +1,4 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
 
 #ifdef ML_OS_WINDOWS
 #	include <Windows.h>
@@ -17,10 +16,10 @@ namespace ml
 	{
 	}
 	
-	shared_library::shared_library(path_t const & path)
+	shared_library::shared_library(fs::path const & filename)
 		: shared_library{}
 	{
-		open(path);
+		open(filename);
 	}
 
 	shared_library::shared_library(shared_library && copy) noexcept
@@ -54,19 +53,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::open(path_t const & path)
+	bool shared_library::open(fs::path const & filename)
 	{
 		if (!good())
 		{
-			size_t const ext{ // hash the extension
-				util::hash(util::to_lower(path.extension().string().c_str()))
-			};
-
 #ifdef ML_OS_WINDOWS
-			if (ext != util::hash(".dll")) return false;
-			return (m_instance = ::LoadLibraryA(path.string().c_str()));
+			if (filename.extension().string() != ".dll") return false;
+			return (m_instance = ::LoadLibraryA(filename.string().c_str()));
 #else
-			if (ext != util::hash(".so")) return false;
+			if (filename.extension().string() != ".so") return false;
 			return (m_instance = nullptr);
 #endif
 		}

@@ -15,14 +15,12 @@ namespace ml
 		using menu_t = typename std::function<void()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void clear() noexcept;
 		
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline editor_main_menu & add_menu(pmr::string const & name, menu_t const & value)
+		inline editor_main_menu & add_menu(pmr::string const & name, menu_t && value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{
@@ -35,7 +33,7 @@ namespace ml
 			}
 			if (value)
 			{
-				it->second.push_back(value);
+				it->second.emplace_back(std::move(value));
 			}
 			return (*this);
 		}
@@ -56,6 +54,11 @@ namespace ml
 		editor_main_menu();
 		
 		~editor_main_menu();
+
+		void clear() noexcept
+		{
+			m_menus.clear();
+		}
 
 		bool m_good;
 		bool m_open;

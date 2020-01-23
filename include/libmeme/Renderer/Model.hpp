@@ -2,7 +2,6 @@
 #define _ML_MODEL_HPP_
 
 #include <libmeme/Renderer/Mesh.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {
@@ -34,7 +33,7 @@ namespace ml
 		
 		model(initializer_type init, allocator_type const & alloc = {});
 		
-		model(path_t const & path, allocator_type const & alloc = {});
+		model(fs::path const & filename, allocator_type const & alloc = {});
 		
 		model(storage_type const & storage, allocator_type const & alloc = {});
 		
@@ -54,9 +53,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(path_t const & path);
+		bool load_from_file(fs::path const & filename);
 
-		bool load_from_file(path_t const & path, uint32_t flags);
+		bool load_from_file(fs::path const & filename, uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

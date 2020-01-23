@@ -12,10 +12,9 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct editor_startup_settings final
+		struct config
 		{
-			void *		window;
-			bool		install_callbacks;
+			void *		window_handle;
 			C_string	api_version;
 			C_string	style_config;
 			C_string	ini_file;
@@ -24,7 +23,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool startup(editor_startup_settings const & s);
+		struct IO
+		{
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool startup(bool install_callbacks);
 
 		static void new_frame();
 
@@ -44,13 +49,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
+		static editor::config & get_config() noexcept;
+
+		static editor::IO & get_io() noexcept;
+
+		static editor_dockspace & get_dockspace() noexcept;
+
+		static editor_main_menu & get_main_menu() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline auto & dockspace() noexcept { return s_dockspace; }
-
-		static inline auto & main_menu() noexcept { return s_main_menu; }
+		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -1,6 +1,5 @@
 #include <libmeme/Renderer/Mesh.hpp>
 #include <libmeme/Renderer/Binder.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
 #include <libmeme/Renderer/RenderTarget.hpp>
 #include <libmeme/Core/Debug.hpp>
 

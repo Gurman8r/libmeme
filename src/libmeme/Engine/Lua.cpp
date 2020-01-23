@@ -1,15 +1,15 @@
 #include <libmeme/Engine/Lua.hpp>
-#include <libmeme/Core/StringUtility.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static lua_State * m_L{ nullptr };
+	static lua_State * s_L{ nullptr };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Lua::startup()
+	bool lua::startup()
 	{
 		// My Print
 		auto my_print{ ([](lua_State * L)
@@ -31,28 +31,28 @@ namespace ml
 		return startup(true, lib);
 	}
 
-	bool Lua::startup(bool openLibs, luaL_Reg const * userLib)
+	bool lua::startup(bool openLibs, luaL_Reg const * userLib)
 	{
-		if (!m_L && (m_L = luaL_newstate()))
+		if (!s_L && (s_L = luaL_newstate()))
 		{
-			if (openLibs) { luaL_openlibs(m_L); }
+			if (openLibs) { luaL_openlibs(s_L); }
 
-			lua_getglobal(m_L, "_G");
+			lua_getglobal(s_L, "_G");
 
-			if (userLib) { luaL_setfuncs(m_L, userLib, 0); }
+			if (userLib) { luaL_setfuncs(s_L, userLib, 0); }
 
-			lua_pop(m_L, 1);
+			lua_pop(s_L, 1);
 		}
-		return m_L;
+		return s_L;
 	}
 
-	bool Lua::shutdown()
+	bool lua::shutdown()
 	{
-		if (m_L)
+		if (s_L)
 		{
-			lua_close(m_L);
+			lua_close(s_L);
 			
-			m_L = nullptr;
+			s_L = nullptr;
 			
 			return true;
 		}
@@ -61,19 +61,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Lua::do_string(C_string const & value)
+	int32_t lua::do_string(C_string const & value)
 	{
-		return (value && m_L) ? luaL_dostring(m_L, value) : 0;
+		return (value && s_L) ? luaL_dostring(s_L, value) : 0;
 	}
 
-	int32_t Lua::do_string(pmr::string const & value)
+	int32_t lua::do_string(pmr::string const & value)
 	{
 		return do_string(value.c_str());
 	}
 
-	int32_t Lua::do_file(path_t const & path)
+	int32_t lua::do_file(fs::path const & filename)
 	{
-		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
+		if (auto o{ FS::read_file(filename.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}

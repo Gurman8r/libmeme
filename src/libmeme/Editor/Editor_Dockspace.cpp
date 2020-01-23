@@ -59,7 +59,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(editor::main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
+					(editor::get_main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);

@@ -1,6 +1,7 @@
 #include <libmeme/Engine/Python.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/Engine.hpp>
 
@@ -12,38 +13,38 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static bool		m_init{ false };
-	static path_t	m_name{};
-	static path_t	m_home{};
+	static bool		s_py_init{ false };
+	static fs::path	s_py_name{};
+	static fs::path	s_py_home{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool Python::startup(path_t const & name, path_t const & home)
+	bool python::startup(fs::path const & name, fs::path const & home)
 	{
-		m_name = name;
-		m_home = home;
-		if (!m_init && !m_name.empty() && !m_home.empty())
+		s_py_name = name;
+		s_py_home = home;
+		if (!s_py_init && !s_py_name.empty() && !s_py_home.empty())
 		{
-			Py_SetProgramName(m_name.c_str());
+			Py_SetProgramName(s_py_name.c_str());
 
-			Py_SetPythonHome(m_home.c_str());
+			Py_SetPythonHome(s_py_home.c_str());
 
 			Py_InitializeEx(Py_DontWriteBytecodeFlag);
 
-			m_init = true;
+			s_py_init = true;
 
 			return true;
 		}
 		return false;
 	}
 
-	bool Python::shutdown()
+	bool python::shutdown()
 	{
-		if (m_init)
+		if (s_py_init)
 		{
 			Py_Finalize();
 
-			m_init = false;
+			s_py_init = false;
 
 			return true;
 		}
@@ -52,19 +53,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t Python::do_string(C_string value)
+	int32_t python::do_string(C_string value)
 	{
-		return (value && m_init) ? PyRun_SimpleString(value) : 0;
+		return (value && s_py_init) ? PyRun_SimpleString(value) : 0;
 	}
 
-	int32_t Python::do_string(pmr::string const & value)
+	int32_t python::do_string(pmr::string const & value)
 	{
 		return do_string(value.c_str());
 	}
 
-	int32_t Python::do_file(path_t const & path)
+	int32_t python::do_file(fs::path const & filename)
 	{
-		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
+		if (auto o{ FS::read_file(filename.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}
@@ -74,7 +75,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-namespace ml::python::embedded
+namespace ml::python_embedded
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

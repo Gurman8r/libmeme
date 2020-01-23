@@ -13,42 +13,52 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static engine::plugins	s_plugins	{};
-	static engine::time		s_time		{};
-	static render_window	s_window	{};
+	struct engine_plugins
+	{
+		ds::flat_set<fs::path> files;
+
+		ds::flat_map<shared_library, plugin *> libs;
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static engine::config	s_engine_config		{};
+	static engine::IO		s_engine_io			{};
+	static timer			s_main_timer		{};
+	static timer			s_loop_timer		{};
+	static engine_plugins	s_plugins			{};
+	static render_window	s_window			{};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::startup(engine_startup_settings const & s)
+	bool engine::startup(bool install_callbacks)
 	{
 		if (running())
 			return false;
 
-		s_time.m_main.start();
+		s_main_timer.start();
 
-		if (!Lua::startup())
-			return debug::log_error("Failed initializing Lua");
+		if (!lua::startup())
+			return debug::log_error("Failed initializing lua");
 
-		if (!Python::startup(s.program_name, s.library_path))
-			return debug::log_error("Failed initializing Python");
+		if (!python::startup(s_engine_config.program_name, s_engine_config.library_path))
+			return debug::log_error("Failed initializing python");
 
-		for (auto const & filename : s.boot_scripts)
+		//for (auto const & filename : s.boot_scripts)
+		//{
+		//	script{ filename }();
+		//}
+
+		if (!s_window.create(
+			s_engine_config.window_title, 
+			s_engine_config.window_video, 
+			s_engine_config.window_context, 
+			s_engine_config.window_flags))
 		{
-			script{ filename }();
+			return false;
 		}
-		
-		return true;
-	}
 
-	bool engine::create_window(window_startup_settings const & s)
-	{
-		if (running())
-			return false;
-
-		if (!s_window.create(s.title, s.display, s.context, s.flags))
-			return false;
-
-		if (s.install_callbacks)
+		if (install_callbacks)
 		{
 			s_window.set_char_callback([](auto, auto ch)
 			{
@@ -110,13 +120,8 @@ namespace ml
 				event_system::fire_event<window_size_event>(w, h);
 			});
 		}
-
+		
 		return true;
-	}
-
-	bool engine::running()
-	{
-		return s_window.is_open();
 	}
 
 	void engine::shutdown()
@@ -126,16 +131,21 @@ namespace ml
 		s_plugins.libs.clear();
 		s_window.destroy();
 		window::terminate();
-		Python::shutdown();
-		Lua::shutdown();
+		python::shutdown();
+		lua::shutdown();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool engine::running()
+	{
+		return s_window.is_open();
+	}
+
 	void engine::begin_loop()
 	{
-		s_time.m_delta = s_time.m_loop.elapsed().count();
-		s_time.m_loop.stop().start();
+		get_io().delta_time = s_loop_timer.elapsed().count();
+		s_loop_timer.stop().start();
 		window::poll_events();
 	}
 
@@ -161,9 +171,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::load_plugin(path_t const & path)
+	bool engine::load_plugin(fs::path const & filename)
 	{
-		if (auto const file{ s_plugins.files.insert(path) }; file.second)
+		if (auto const file{ s_plugins.files.insert(filename) }; file.second)
 		{
 			if (auto lib{ make_shared_library(*file.first) })
 			{
@@ -179,14 +189,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD engine::plugins const & engine::get_plugins() noexcept
+	ML_NODISCARD engine::config & engine::get_config() noexcept
 	{
-		return s_plugins;
+		return s_engine_config;
 	}
 
-	ML_NODISCARD engine::time const & engine::get_time() noexcept
+	ML_NODISCARD engine::IO & engine::get_io() noexcept
 	{
-		return s_time;
+		return s_engine_io;
+	}
+
+	ML_NODISCARD duration const & engine::get_time() noexcept
+	{
+		return s_main_timer.elapsed();
 	}
 
 	ML_NODISCARD render_window & engine::get_window() noexcept

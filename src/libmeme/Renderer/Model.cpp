@@ -32,10 +32,10 @@ namespace ml
 	{
 	}
 
-	model::model(path_t const & path, allocator_type const & alloc)
+	model::model(fs::path const & filename, allocator_type const & alloc)
 		: m_storage{ alloc }
 	{
-		load_from_file(path);
+		load_from_file(filename);
 	}
 
 	model::model(storage_type const & storage, allocator_type const & alloc)
@@ -84,9 +84,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool model::load_from_file(path_t const & path)
+	bool model::load_from_file(fs::path const & filename)
 	{
-		return load_from_file(path,
+		return load_from_file(filename,
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
@@ -96,11 +96,11 @@ namespace ml
 		);
 	}
 
-	bool model::load_from_file(path_t const & path, uint32_t flags)
+	bool model::load_from_file(fs::path const & filename, uint32_t flags)
 	{
 		// open scene
 		Assimp::Importer _ai;
-		aiScene const * scene{ _ai.ReadFile(path.string().c_str(), flags) };
+		aiScene const * scene{ _ai.ReadFile(filename.string().c_str(), flags) };
 		if (!scene)
 		{
 			return debug::log_error("Failed reading aiScene from file");

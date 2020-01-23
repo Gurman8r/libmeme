@@ -215,6 +215,12 @@
 #   define ML_BYTE      unsigned char
 #endif
 
+#if !ML_HAS_CXX20
+#   define ML_CHAR      char
+#else
+#   define ML_CHAR      char8_t
+#endif
+
 #if (ML_ARCH == 32)
 #	define ML_INTMAX    ML_INT32
 #	define ML_UINTMAX   ML_UINT32

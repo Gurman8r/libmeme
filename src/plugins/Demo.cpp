@@ -55,9 +55,9 @@ namespace ml
 			case hashof_v<enter_event>:
 			{
 				// load stuff, etc...
-				
+
 				// File Menu
-				editor::main_menu().add_menu("File", [&, this]()
+				editor::get_main_menu().add_menu("File", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
@@ -67,14 +67,14 @@ namespace ml
 				});
 
 				// View Menu
-				editor::main_menu().add_menu("View", [&, this]()
+				editor::get_main_menu().add_menu("View", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					ImGui::MenuItem("ImGui demo", "", &m_show_imgui_demo);
 				});
 
 				// Option Menu
-				editor::main_menu().add_menu("Option", [&, this]()
+				editor::get_main_menu().add_menu("Option", [&, this]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::BeginMenu("Window"))
@@ -95,7 +95,7 @@ namespace ml
 
 				// Images
 				if (auto const & img{ m_images["icon"] = make_image(
-					FS::path_to("../../../assets/textures/icon.png")
+					fs::path{ "../../../assets/textures/icon.png" }
 				) }; !img.empty())
 				{
 					engine::get_window().set_icon(img.width(), img.height(), img.data());
@@ -103,31 +103,31 @@ namespace ml
 
 				// Textures
 				m_textures["doot"] = make_texture(
-					FS::path_to("../../../assets/textures/doot.png")
+					fs::path{ "../../../assets/textures/doot.png" }
 				);
 				m_textures["navball"] = make_texture(
-					FS::path_to("../../../assets/textures/navball.png")
+					fs::path{ "../../../assets/textures/navball.png" }
 				);
 
 				// Fonts
 				m_fonts["consolas"] = make_font(
-					FS::path_to("../../../assets/fonts/consolas.ttf")
+					fs::path{ "../../../assets/fonts/consolas.ttf" }
 				);
 
 				// Shaders
 				m_shaders["2d"] = make_shader(
-					FS::path_to("../../../assets/shaders/2D.vs.shader"),
-					FS::path_to("../../../assets/shaders/basic.fs.shader")
+					fs::path{ "../../../assets/shaders/2D.vs.shader" },
+					fs::path{ "../../../assets/shaders/basic.fs.shader" }
 				);
 				m_shaders["3d"] = make_shader(
-					FS::path_to("../../../assets/shaders/3D.vs.shader"),
-					FS::path_to("../../../assets/shaders/basic.fs.shader")
+					fs::path{ "../../../assets/shaders/3D.vs.shader" },
+					fs::path{ "../../../assets/shaders/basic.fs.shader" }
 				);
 
 				// Materials
 				m_materials["2d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().total(); }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_time().delta(); }),
+					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
 					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
 					make_uniform<color	>("u_color",	colors::white),
 					make_uniform<mat4	>("u_proj",		mat4::identity()),
@@ -135,8 +135,8 @@ namespace ml
 					make_uniform<mat4	>("u_model",	mat4::identity())
 				);
 				m_materials["3d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().total(); }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_time().delta(); }),
+					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
+					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
 					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov",	45.0f),
@@ -152,15 +152,15 @@ namespace ml
 
 				// Models
 				m_models["sphere8x6"] = make_model(
-					FS::path_to("../../../assets/meshes/sphere8x6.obj")
+					fs::path{ "../../../assets/models/sphere8x6.obj" }
 				);
 				m_models["sphere32x24"] = make_model(
-					FS::path_to("../../../assets/meshes/sphere32x24.obj")
+					fs::path{ "../../../assets/models/sphere32x24.obj" }
 				);
 				//m_models["monkey"] = make_model(
-				//	FS::path_to("../../../assets/meshes/monkey.obj")
+				//	fs::path{ "../../../assets/models/monkey.obj" }
 				//);
-				m_models["triangle"] = make_model(make_mesh( // broken
+				m_models["triangle"] = make_model(make_mesh( // FIXME: broken
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -170,7 +170,7 @@ namespace ml
 						0, 1, 2,
 					}
 				));
-				m_models["quad"] = make_model(make_mesh( // broken
+				m_models["quad"] = make_model(make_mesh( // FIXME: broken
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
 						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -243,11 +243,11 @@ namespace ml
 
 					// Total Time
 					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3fs", engine::get_time().total()); ImGui::NextColumn();
+					ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
 
 					// Delta Time
 					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", engine::get_time().delta()); ImGui::NextColumn();
+					ImGui::Text("%.7fs", engine::get_io().delta_time); ImGui::NextColumn();
 
 					// Frame Rate
 					ImGui::Text("frame rate"); ImGui::NextColumn();

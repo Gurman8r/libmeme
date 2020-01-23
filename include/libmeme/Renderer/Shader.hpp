@@ -2,7 +2,6 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Renderer/Uniform.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
 
 namespace ml
 {
@@ -14,7 +13,7 @@ namespace ml
 
 		struct shader_source final
 		{
-			C_string vs{ nullptr }, gs{ nullptr }, fs{ nullptr };
+			C_string v{}, g{}, f{};
 
 			constexpr shader_source() noexcept = default;
 		};
@@ -34,9 +33,9 @@ namespace ml
 		
 		shader(shader_source const & source, allocator_type const & alloc = {});
 		
-		shader(path_t const & v, path_t const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & f, allocator_type const & alloc = {});
 		
-		shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc = {});
 		
 		shader(shader const & other, allocator_type const & alloc = {});
 		
@@ -61,19 +60,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(path_t const & v_file, path_t const & f_file);
+		bool load_from_file(fs::path const & v_file, fs::path const & f_file);
 
-		bool load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file);
+		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
 
 		bool load_from_source(shader_source const & value);
 
-		bool load_from_memory(pmr::string const & vs, pmr::string const & fs);
+		bool load_from_memory(pmr::string const & v, pmr::string const & f);
 
-		bool load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs);
+		bool load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f);
 
-		bool load_from_memory(C_string vs, C_string fs);
+		bool load_from_memory(C_string v, C_string f);
 
-		bool load_from_memory(C_string vs, C_string gs, C_string fs);
+		bool load_from_memory(C_string v, C_string g, C_string f);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -138,7 +137,7 @@ namespace ml
 
 		int32_t get_uniform_location(pmr::string const & value);
 
-		int32_t compile(C_string vs, C_string gs, C_string fs);
+		int32_t compile(C_string v, C_string g, C_string f);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

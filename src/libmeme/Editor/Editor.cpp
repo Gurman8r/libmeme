@@ -20,13 +20,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor_dockspace editor::s_dockspace{};
-	
-	editor_main_menu editor::s_main_menu{};
+	static editor::config	s_editor_config		{};
+	static editor::IO		s_editor_io			{};
+	editor_dockspace		editor::s_dockspace	{};
+	editor_main_menu		editor::s_main_menu	{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool editor::startup(editor_startup_settings const & s)
+	bool editor::startup(bool install_callbacks)
 	{
 		// Create ImGui Context
 		IMGUI_CHECKVERSION();
@@ -47,11 +48,11 @@ namespace ml
 		}
 
 		// Paths
-		io.LogFilename = s.ini_file;
-		io.IniFilename = s.log_file;
+		io.LogFilename = s_editor_config.ini_file;
+		io.IniFilename = s_editor_config.log_file;
 
 		// Style
-		switch (util::hash(util::to_lower(s.style_config)))
+		switch (util::hash(util::to_lower(s_editor_config.style_config)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
@@ -60,12 +61,13 @@ namespace ml
 
 		// Initialize Backend
 #ifdef ML_IMPL_RENDERER_OPENGL
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)s.window, s.install_callbacks))
+		if (!ImGui_ImplGlfw_InitForOpenGL(
+			(struct GLFWwindow *)s_editor_config.window_handle, install_callbacks))
 		{
 			return debug::log_error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(s.api_version))
+		if (!ImGui_ImplOpenGL3_Init(s_editor_config.api_version))
 		{
 			return debug::log_error("Failed initializing ImGui renderer");
 		}
@@ -104,7 +106,7 @@ namespace ml
 
 	void editor::shutdown()
 	{
-		s_main_menu.clear();
+		get_main_menu().clear();
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -136,27 +138,49 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	editor::config & editor::get_config() noexcept
+	{
+		return s_editor_config;
+	}
+
+	editor::IO & editor::get_io() noexcept
+	{
+		return s_editor_io;
+	}
+
+	editor_dockspace & editor::get_dockspace() noexcept
+	{
+		return s_dockspace;
+	}
+
+	editor_main_menu & editor::get_main_menu() noexcept
+	{
+		return s_main_menu;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void editor::draw_texture_preview(texture const & value, vec2 const & maxSize)
 	{
 		auto & io{ ImGui::GetIO() };
-		
+
 		void * const tex_id{ value.address() };
-		
+
 		vec2 const tex_sz{ util::scale_to_fit((vec2)value.size(),
 		{
 			maxSize[0] == 0.0f ? ImGui::GetContentRegionAvail()[0] : maxSize[0],
 			maxSize[1] == 0.0f ? ImGui::GetContentRegionAvail()[1] : maxSize[1]
 		}) };
-		
+
 		float_t const tex_w{ tex_sz[0] };
 		float_t const tex_h{ tex_sz[1] };
-		
+
 		ImGui::Text("%u: %ux%u (%.0fx%.0f)",
 			value.handle(), value.width(), value.height(), tex_w, tex_h
 		);
-		
+
 		auto const pos{ ImGui::GetCursorScreenPos() };
-		
+
 		ImGui::Image(tex_id,
 			{ tex_w, tex_h },
 			{ 0, 0 },
@@ -164,7 +188,7 @@ namespace ml
 			{ 1.0f, 1.0f, 1.0f, 1.0f },
 			{ 1.0f, 1.0f, 1.0f, 0.5f }
 		);
-		
+
 		if (ImGui::IsItemHovered())
 		{
 			float_t const region_zoom{ 4.0f };

@@ -1,5 +1,5 @@
 #include <libmeme/Renderer/Material.hpp>
-#include <libmeme/Platform/FileSystem.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -63,9 +63,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool material::load_from_file(path_t const & path)
+	bool material::load_from_file(fs::path const & filename)
 	{
-		if (std::ifstream in{ path })
+		if (std::ifstream in{ filename })
 		{
 			in.close();
 

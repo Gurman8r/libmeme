@@ -68,20 +68,20 @@ namespace ml
 		}
 	}
 
-	image::image(path_t const & path, allocator_type const & alloc)
-		: image{ path, false, alloc }
+	image::image(fs::path const & filename, allocator_type const & alloc)
+		: image{ filename, false, alloc }
 	{
 	}
 
-	image::image(path_t const & path, bool flip, allocator_type const & alloc)
-		: image{ path, flip, 0, alloc }
+	image::image(fs::path const & filename, bool flip, allocator_type const & alloc)
+		: image{ filename, flip, 0, alloc }
 	{
 	}
 
-	image::image(path_t const & path, bool flip, size_t req_comp, allocator_type const & alloc)
+	image::image(fs::path const & filename, bool flip, size_t req_comp, allocator_type const & alloc)
 		: image{ alloc }
 	{
-		load_from_file(path, flip, req_comp);
+		load_from_file(filename, flip, req_comp);
 	}
 
 	image::image(image const & other, allocator_type const & alloc)
@@ -114,22 +114,22 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool image::load_from_file(path_t const & path)
+	bool image::load_from_file(fs::path const & filename)
 	{
-		return load_from_file(path, true);
+		return load_from_file(filename, true);
 	}
 
-	bool image::load_from_file(path_t const & path, bool flip)
+	bool image::load_from_file(fs::path const & filename, bool flip)
 	{
-		return load_from_file(path, flip, 0);
+		return load_from_file(filename, flip, 0);
 	}
 
-	bool image::load_from_file(path_t const & path, bool flip, size_t req_comp)
+	bool image::load_from_file(fs::path const & filename, bool flip, size_t req_comp)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 
 		if (byte_t * data{ ::stbi_load(
-			path.string().c_str(),
+			filename.string().c_str(),
 			reinterpret_cast<int32_t *>(&m_size[0]),
 			reinterpret_cast<int32_t *>(&m_size[1]),
 			reinterpret_cast<int32_t *>(&m_channels),

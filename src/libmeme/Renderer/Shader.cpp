@@ -2,6 +2,7 @@
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/FileSystem.hpp>
 
 namespace ml
 {
@@ -59,13 +60,13 @@ namespace ml
 		load_from_source(source);
 	}
 
-	shader::shader(path_t const & v, path_t const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	shader::shader(path_t const & v, path_t const & g, path_t const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, g, f);
@@ -90,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shader::load_from_file(path_t const & v_file, path_t const & f_file)
+	bool shader::load_from_file(fs::path const & v_file, fs::path const & f_file)
 	{
 		return load_from_memory(
 			FS::get_file_contents(v_file).c_str(),
@@ -98,7 +99,7 @@ namespace ml
 		);
 	}
 
-	bool shader::load_from_file(path_t const & v_file, path_t const g_file, path_t const & f_file)
+	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
 	{
 		return load_from_memory(
 			FS::get_file_contents(v_file).c_str(),
@@ -109,34 +110,34 @@ namespace ml
 
 	bool shader::load_from_source(shader_source const & value)
 	{
-		return load_from_memory(value.vs, value.gs, value.fs);
+		return load_from_memory(value.v, value.g, value.f);
 	}
 
-	bool shader::load_from_memory(pmr::string const & vs, pmr::string const & fs)
+	bool shader::load_from_memory(pmr::string const & v, pmr::string const & f)
 	{
-		return load_from_memory(vs.c_str(), nullptr, fs.c_str());
+		return load_from_memory(v.c_str(), nullptr, f.c_str());
 	}
 
-	bool shader::load_from_memory(pmr::string const & vs, pmr::string const & gs, pmr::string const & fs)
+	bool shader::load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f)
 	{
-		return load_from_memory(vs.c_str(), gs.c_str(), fs.c_str());
+		return load_from_memory(v.c_str(), g.c_str(), f.c_str());
 	}
 
-	bool shader::load_from_memory(C_string vs, C_string fs)
+	bool shader::load_from_memory(C_string v, C_string f)
 	{
 		return compile(
-			m_source.vs = vs,
-			m_source.gs = nullptr,
-			m_source.fs = fs
+			m_source.v = v,
+			m_source.g = nullptr,
+			m_source.f = f
 		) == EXIT_SUCCESS;
 	}
 
-	bool shader::load_from_memory(C_string vs, C_string gs, C_string fs)
+	bool shader::load_from_memory(C_string v, C_string g, C_string f)
 	{
 		return compile(
-			m_source.vs = vs,
-			m_source.gs = gs,
-			m_source.fs = fs
+			m_source.v = v,
+			m_source.g = g,
+			m_source.f = f
 		) == EXIT_SUCCESS;
 	}
 
@@ -371,16 +372,16 @@ namespace ml
 		}
 	}
 
-	int32_t shader::compile(C_string vs, C_string gs, C_string fs)
+	int32_t shader::compile(C_string v, C_string g, C_string f)
 	{
 		// Shaders Available
 		if (!GL::shadersAvailable())
 		{
 			return EXIT_FAILURE * 1;
 		}
-		
+
 		// Geometry Shaders Available
-		if (gs && !GL::geometryShadersAvailable())
+		if (g && !GL::geometryShadersAvailable())
 		{
 			return EXIT_FAILURE * 2;
 		}
@@ -398,12 +399,12 @@ namespace ml
 		}
 
 		// Compile Vertex
-		uint32_t v{ 0 };
-		switch (GL::compileShader(v, GL::VertexShader, 1, &vs))
+		uint32_t vert{ 0 };
+		switch (GL::compileShader(vert, GL::VertexShader, 1, &v))
 		{
 		case ML_SUCCESS:
-			GL::attachShader(m_handle, v);
-			GL::deleteShader(v);
+			GL::attachShader(m_handle, vert);
+			GL::deleteShader(vert);
 			break;
 		case ML_FAILURE:
 			destroy();
@@ -411,12 +412,12 @@ namespace ml
 		}
 
 		// Compile Geometry
-		uint32_t g{ 0 };
-		switch (GL::compileShader(g, GL::GeometryShader, 1, &gs))
+		uint32_t geom{ 0 };
+		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g))
 		{
 		case ML_SUCCESS:
-			GL::attachShader(m_handle, g);
-			GL::deleteShader(g);
+			GL::attachShader(m_handle, geom);
+			GL::deleteShader(geom);
 			break;
 		case ML_FAILURE:
 			destroy();
@@ -424,12 +425,12 @@ namespace ml
 		}
 
 		// Compile Fragment
-		uint32_t f{ 0 };
-		switch (GL::compileShader(f, GL::FragmentShader, 1, &fs))
+		uint32_t frag{ 0 };
+		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f))
 		{
 		case ML_SUCCESS:
-			GL::attachShader(m_handle, f);
-			GL::deleteShader(f);
+			GL::attachShader(m_handle, frag);
+			GL::deleteShader(frag);
 			break;
 		case ML_FAILURE:
 			destroy();

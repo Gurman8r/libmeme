@@ -67,6 +67,7 @@ namespace ml
 	ML_USING	uint64_t	= typename ML_UINT64;
 
 	ML_USING	byte_t		= typename ML_BYTE;
+	ML_USING	char_t		= typename ML_CHAR;
 	ML_USING	intmax_t	= typename ML_INTMAX;
 	ML_USING	uintmax_t	= typename ML_UINTMAX;
 
@@ -100,14 +101,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	namespace std		= ::std;
 	namespace chrono	= std::chrono;
+	namespace fs		= std::filesystem;
 	namespace pmr		= std::pmr;
 #if ML_HAS_CXX20
 	namespace ranges	= std::ranges;
 	namespace views		= std::ranges::views;
 #endif
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace literals
 	{
@@ -115,7 +116,6 @@ namespace ml
 		using namespace std::string_literals;
 		using namespace std::string_view_literals;
 	}
-
 	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
