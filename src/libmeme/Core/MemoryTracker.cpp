@@ -70,7 +70,8 @@ namespace ml
 		// find the entry
 		if (auto const it{ m_records.find(value) })
 		{
-			auto & record{ (*it->second) };
+			// get the record
+			auto const & record{ (*it->second) };
 
 			// free the allocation
 			m_alloc.deallocate(record->data(), record->size());

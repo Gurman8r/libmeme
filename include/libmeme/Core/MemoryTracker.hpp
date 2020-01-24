@@ -11,10 +11,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct trackable;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// Allocation Record
 	struct ML_CORE_API allocation_record final : non_copyable
 	{
@@ -69,14 +65,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void * make_allocation(size_t size, int32_t flags) noexcept;
-
-		void free_allocation(void * value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto get_allocator() const noexcept -> allocator_type { return m_alloc; }
-
 		ML_NODISCARD inline auto get_index() const noexcept -> size_t { return m_index; }
 
 		ML_NODISCARD inline auto get_records() const noexcept -> storage_type const & { return m_records; }
@@ -86,9 +74,21 @@ namespace ml
 	private:
 		friend struct singleton<memory_tracker>;
 
+		friend struct trackable;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		memory_tracker() noexcept;
 
 		~memory_tracker();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void * make_allocation(size_t size, int32_t flags) noexcept;
+
+		void free_allocation(void * value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		allocator_type	m_alloc;
 		size_t			m_index;
@@ -110,12 +110,12 @@ namespace ml
 
 		ML_NODISCARD inline void * operator new(size_t size) noexcept
 		{
-			return ML_memory.make_allocation(size, 0);
+			return ML_memory.make_allocation(size, 1);
 		}
 
 		ML_NODISCARD inline void * operator new[](size_t size) noexcept
 		{
-			return ML_memory.make_allocation(size, 1);
+			return ML_memory.make_allocation(size, 2);
 		}
 		
 		inline void operator delete(void * value) noexcept
