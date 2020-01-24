@@ -236,7 +236,7 @@ namespace ml
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("Manual Allocations: %u", ML_memory_tracker.get_records().size());
+					ImGui::Text("Manual Allocations: %u", ML_memory.get_records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);
