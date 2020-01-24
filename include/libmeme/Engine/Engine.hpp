@@ -14,12 +14,13 @@ namespace ml
 
 		struct config final
 		{
+			// paths
 			fs::path				program_name;
 			fs::path				library_path;
-
 			std::vector<fs::path>	script_list;
 			std::vector<fs::path>	plugin_list;
 
+			// window
 			C_string				window_title;
 			video_mode				window_video;
 			context_settings		window_context;
@@ -30,14 +31,14 @@ namespace ml
 
 		struct io final
 		{
+			// time
 			float64_t delta_time;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct context final : trackable
+		class context final : trackable
 		{
-		private:
 			friend engine;
 
 			config			g_config;

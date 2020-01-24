@@ -29,9 +29,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct context final : trackable
+		class context final : trackable
 		{
-		private:
 			friend editor;
 
 			config				g_config;
@@ -64,15 +63,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct editor::context const * get_context() noexcept;
+		ML_NODISCARD static editor::context const * get_context() noexcept;
 
-		static editor::config & get_config() noexcept;
+		ML_NODISCARD static editor::config & get_config() noexcept;
 
-		static editor::io & get_io() noexcept;
+		ML_NODISCARD static editor::io & get_io() noexcept;
 
-		static editor_dockspace & get_dockspace() noexcept;
+		ML_NODISCARD static editor_dockspace & get_dockspace() noexcept;
 
-		static editor_main_menu & get_main_menu() noexcept;
+		ML_NODISCARD static editor_main_menu & get_main_menu() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

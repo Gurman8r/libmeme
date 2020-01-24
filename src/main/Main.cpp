@@ -33,19 +33,19 @@ ml::int32_t main()
 		config.program_name		= ML_ARGV[0];
 		config.library_path		= "../../../"s;
 		config.script_list		= { "../../../libmeme.py"s };
-		config.plugin_list		= { "demo"s };
+		config.plugin_list		= {};
 		config.window_title		= "libmeme";
 		config.window_flags		= WindowFlags_Default;
 		config.window_video		= make_video_mode(vec2u{ 1280, 720 }, 32u);
 		config.window_context	= make_context_settings(
-			client_api::OpenGL,		// api
-			4,						// major version
-			6,						// minor version
-			client_api::Compat,		// profile
-			24,						// depth bits
-			8,						// stencil bits
-			false,					// multisample
-			false					// sRGB capable
+			client_api::OpenGL,	// api
+			4,					// major version
+			6,					// minor version
+			client_api::Compat,	// profile
+			24,					// depth bits
+			8,					// stencil bits
+			false,				// multisample
+			false				// sRGB capable
 		);
 	}
 
