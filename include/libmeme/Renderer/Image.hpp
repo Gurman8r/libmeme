@@ -36,11 +36,11 @@ namespace ml
 		
 		image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc = {});
 		
-		image(fs::path const & filename, allocator_type const & alloc = {});
+		image(fs::path const & path, allocator_type const & alloc = {});
 		
-		image(fs::path const & filename, bool flip, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip, allocator_type const & alloc = {});
 		
-		image(fs::path const & filename, bool flip, size_t req_comp, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip, size_t req_comp, allocator_type const & alloc = {});
 		
 		image(image const & other, allocator_type const & alloc = {});
 		
@@ -54,11 +54,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		bool load_from_file(fs::path const & filename);
+		bool load_from_file(fs::path const & path);
 		
-		bool load_from_file(fs::path const & filename, bool flip);
+		bool load_from_file(fs::path const & path, bool flip);
 		
-		bool load_from_file(fs::path const & filename, bool flip, size_t req_comp);
+		bool load_from_file(fs::path const & path, bool flip, size_t req_comp);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

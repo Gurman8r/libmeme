@@ -27,7 +27,7 @@ namespace ml
 		
 		explicit font(allocator_type const & alloc);
 		
-		font(fs::path const & filename, allocator_type const & alloc = {});
+		font(fs::path const & path, allocator_type const & alloc = {});
 		
 		font(font const & other, allocator_type const & alloc = {});
 		
@@ -45,7 +45,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & filename);
+		bool load_from_file(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

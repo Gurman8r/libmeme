@@ -20,15 +20,20 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static editor::config	s_editor_config		{};
-	static editor::IO		s_editor_io			{};
-	editor_dockspace		editor::s_dockspace	{};
-	editor_main_menu		editor::s_main_menu	{};
+	static editor::context * g_editor{ nullptr };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	editor::context const * editor::create_context()
+	{
+		if (g_editor) return nullptr;
+		return (g_editor = new editor::context{});
+	}
+
 	bool editor::startup(bool install_callbacks)
 	{
+		if (!g_editor) return false;
+
 		// Create ImGui Context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -48,11 +53,11 @@ namespace ml
 		}
 
 		// Paths
-		io.LogFilename = s_editor_config.ini_file;
-		io.IniFilename = s_editor_config.log_file;
+		io.LogFilename = g_editor->g_config.ini_file;
+		io.IniFilename = g_editor->g_config.log_file;
 
 		// Style
-		switch (util::hash(util::to_lower(s_editor_config.style_config)))
+		switch (util::hash(util::to_lower(g_editor->g_config.style_config)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
@@ -61,13 +66,16 @@ namespace ml
 
 		// Initialize Backend
 #ifdef ML_IMPL_RENDERER_OPENGL
+
 		if (!ImGui_ImplGlfw_InitForOpenGL(
-			(struct GLFWwindow *)s_editor_config.window_handle, install_callbacks))
+			(struct GLFWwindow *)g_editor->g_config.window_handle,
+			install_callbacks
+		))
 		{
 			return debug::log_error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(s_editor_config.api_version))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->g_config.api_version))
 		{
 			return debug::log_error("Failed initializing ImGui renderer");
 		}
@@ -106,12 +114,16 @@ namespace ml
 
 	void editor::shutdown()
 	{
+		if (!g_editor) return;
+
 		get_main_menu().clear();
 
 #ifdef ML_IMPL_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #endif
 		ImGui_ImplGlfw_Shutdown();
+
+		delete g_editor;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -138,24 +150,29 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor::config & editor::get_config() noexcept
+	editor::context const * editor::get_context() noexcept
 	{
-		return s_editor_config;
+		return g_editor;
 	}
 
-	editor::IO & editor::get_io() noexcept
+	editor::config & editor::get_config() noexcept
 	{
-		return s_editor_io;
+		return g_editor->g_config;
+	}
+
+	editor::io & editor::get_io() noexcept
+	{
+		return g_editor->g_io;
 	}
 
 	editor_dockspace & editor::get_dockspace() noexcept
 	{
-		return s_dockspace;
+		return g_editor->g_dockspace;
 	}
 
 	editor_main_menu & editor::get_main_menu() noexcept
 	{
-		return s_main_menu;
+		return g_editor->g_main_menu;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

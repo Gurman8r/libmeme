@@ -22,38 +22,32 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// engine config
-	auto & engine_cfg{ engine::get_config() };
-	
-	// program name
-	engine_cfg.program_name = fs::path{ ML_ARGV[0] };
-	
-	// library path
-	engine_cfg.library_path = fs::path{ "../../../" };
-	
-	// window title
-	engine_cfg.window_title = "libmeme";
-	
-	// window flags
-	engine_cfg.window_flags = WindowFlags_Default;
-	
-	// window video
-	engine_cfg.window_video = make_video_mode(
-		vec2u{ 1280, 720 },	// resolution
-		32u					// color depth
-	);
-	
-	// window context settings
-	engine_cfg.window_context = make_context_settings(
-		client_api::OpenGL,	// api
-		4,					// major version
-		6,					// minor version
-		client_api::Compat,	// profile
-		24,					// depth bits
-		8,					// stencil bits
-		false,				// multisample
-		false				// sRGB capable
-	);
+	// engine configuration
+	if (!engine::create_context())
+	{
+		return debug::log_error("failed creating engine context") | debug::pause(1);
+	}
+	else
+	{
+		engine::config & config	= engine::get_config();
+		config.program_name		= ML_ARGV[0];
+		config.library_path		= "../../../"s;
+		config.script_list		= { "../../../libmeme.py"s };
+		config.plugin_list		= { "demo"s };
+		config.window_title		= "libmeme";
+		config.window_flags		= WindowFlags_Default;
+		config.window_video		= make_video_mode(vec2u{ 1280, 720 }, 32u);
+		config.window_context	= make_context_settings(
+			client_api::OpenGL,		// api
+			4,						// major version
+			6,						// minor version
+			client_api::Compat,		// profile
+			24,						// depth bits
+			8,						// stencil bits
+			false,					// multisample
+			false					// sRGB capable
+		);
+	}
 
 	// start engine
 	if (!engine::startup(true))
@@ -63,40 +57,25 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// editor config
-	auto & editor_cfg{ editor::get_config() };
-	
-	// window handle
-	editor_cfg.window_handle = engine::get_window().get_handle();
-	
-	// api version
-	editor_cfg.api_version = "#version 130";
-	
-	// style configuration
-	editor_cfg.style_config = "dark";
-	
-	// ini file
-	editor_cfg.ini_file = "";
-	
-	// log file
-	editor_cfg.log_file = "";
-	
+	// editor configuration
+	if (!editor::create_context())
+	{
+		return debug::log_error("failed creating editor context") | debug::pause(1);
+	}
+	else
+	{
+		editor::config & config	= editor::get_config();
+		config.window_handle	= engine::get_window().get_handle();
+		config.api_version		= "#version 130";
+		config.style_config		= "dark";
+		config.ini_file			= "";
+		config.log_file			= "";
+	}
+
 	// start editor
 	if (!editor::startup(true))
 	{
 		return debug::log_error("failed starting editor") | debug::pause(1);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// load plugins
-	pmr::vector<fs::path> plugins
-	{
-		"demo.dll",
-	};
-	for (auto const & path : plugins)
-	{
-		engine::load_plugin(path);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

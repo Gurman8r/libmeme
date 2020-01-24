@@ -21,7 +21,7 @@ namespace ml
 
 		static int32_t do_string(pmr::string const & value);
 		
-		static int32_t do_file(fs::path const & filename);
+		static int32_t do_file(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

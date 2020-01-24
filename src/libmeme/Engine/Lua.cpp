@@ -71,9 +71,9 @@ namespace ml
 		return do_string(value.c_str());
 	}
 
-	int32_t lua::do_file(fs::path const & filename)
+	int32_t lua::do_file(fs::path const & path)
 	{
-		if (auto o{ FS::read_file(filename.string()) }; o && !o->empty())
+		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}

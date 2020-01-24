@@ -16,10 +16,10 @@ namespace ml
 	{
 	}
 	
-	shared_library::shared_library(fs::path const & filename)
+	shared_library::shared_library(fs::path const & path)
 		: shared_library{}
 	{
-		open(filename);
+		open(path);
 	}
 
 	shared_library::shared_library(shared_library && copy) noexcept
@@ -53,15 +53,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::open(fs::path const & filename)
+	bool shared_library::open(fs::path const & path)
 	{
-		if (!good())
+		if (!good() && (this->ext == path.extension().string()))
 		{
 #ifdef ML_OS_WINDOWS
-			if (filename.extension().string() != ".dll") return false;
-			return (m_instance = ::LoadLibraryA(filename.string().c_str()));
+			return (m_instance = ::LoadLibraryA(path.string().c_str()));
 #else
-			if (filename.extension().string() != ".so") return false;
 			return (m_instance = nullptr);
 #endif
 		}

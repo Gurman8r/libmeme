@@ -12,24 +12,51 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct config
+		struct config final
 		{
-			fs::path			program_name;
-			fs::path			library_path;
-			C_string			window_title;
-			video_mode			window_video;
-			context_settings	window_context;
-			int32_t				window_flags;
+			fs::path				program_name;
+			fs::path				library_path;
+
+			std::vector<fs::path>	script_list;
+			std::vector<fs::path>	plugin_list;
+
+			C_string				window_title;
+			video_mode				window_video;
+			context_settings		window_context;
+			int32_t					window_flags;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct IO
+		struct io final
 		{
 			float64_t delta_time;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct context final : trackable
+		{
+		private:
+			friend engine;
+
+			config			g_config;
+			io				g_io;
+			render_window	g_window;
+			timer			g_main_timer;
+			timer			g_loop_timer;
+
+			struct plugins
+			{
+				ds::flat_set<fs::path> files;
+				ds::flat_map<struct shared_library, struct plugin *> libs;
+			}
+			g_plugins;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static engine::context const * create_context();
 
 		static bool startup(bool install_callbacks);
 
@@ -47,13 +74,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool load_plugin(fs::path const & filename);
+		static bool load_plugin(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static engine::context const * get_context() noexcept;
+
 		ML_NODISCARD static engine::config & get_config() noexcept;
 
-		ML_NODISCARD static engine::IO & get_io() noexcept;
+		ML_NODISCARD static engine::io & get_io() noexcept;
 
 		ML_NODISCARD static duration const & get_time() noexcept;
 

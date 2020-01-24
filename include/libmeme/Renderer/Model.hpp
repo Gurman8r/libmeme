@@ -33,7 +33,7 @@ namespace ml
 		
 		model(initializer_type init, allocator_type const & alloc = {});
 		
-		model(fs::path const & filename, allocator_type const & alloc = {});
+		model(fs::path const & path, allocator_type const & alloc = {});
 		
 		model(storage_type const & storage, allocator_type const & alloc = {});
 		
@@ -53,9 +53,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & filename);
+		bool load_from_file(fs::path const & path);
 
-		bool load_from_file(fs::path const & filename, uint32_t flags);
+		bool load_from_file(fs::path const & path, uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

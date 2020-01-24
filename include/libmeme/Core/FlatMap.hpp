@@ -212,6 +212,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline key_storage const & get_keys() const noexcept
+		{
+			return m_storage.first;
+		}
+
+		ML_NODISCARD inline mapped_storage const & get_values() const noexcept
+		{
+			return m_storage.second;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline mapped_iterator fetch(const_key_iterator addr)
 		{
 			return (addr == m_storage.first.cend())

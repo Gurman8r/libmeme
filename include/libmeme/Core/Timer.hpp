@@ -99,7 +99,6 @@ namespace ml
 
 		inline timer & wait(duration const & t) noexcept
 		{
-			restart();
 			while (elapsed() < t);
 			return (*this);
 		}

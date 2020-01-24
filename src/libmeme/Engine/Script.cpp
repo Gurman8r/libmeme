@@ -19,11 +19,11 @@ namespace ml
 	{
 	}
 	
-	script::script(fs::path const & filename, allocator_type const & alloc)
+	script::script(fs::path const & path, allocator_type const & alloc)
 		: m_lang{ language::unknown }
 		, m_str{ alloc }
 	{
-		load_from_file(filename);
+		load_from_file(path);
 	}
 
 	script::script(language lang, pmr::string const & text, allocator_type const & alloc)
@@ -71,11 +71,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script::load_from_file(fs::path const & filename)
+	bool script::load_from_file(fs::path const & path)
 	{
-		if (filename.empty())
+		if (path.empty())
 			return false;
-		switch (util::hash(filename.extension().string()))
+		switch (util::hash(path.extension().string()))
 		{
 		case util::hash(".lua"): m_lang = language::lua;
 			break;
@@ -84,7 +84,7 @@ namespace ml
 		default:
 			return false;
 		}
-		return !(m_str = FS::get_file_contents(filename)).empty();
+		return !(m_str = FS::get_file_contents(path)).empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

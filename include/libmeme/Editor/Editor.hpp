@@ -12,7 +12,7 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct config
+		struct config final
 		{
 			void *		window_handle;
 			C_string	api_version;
@@ -23,11 +23,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct IO
+		struct io final
 		{
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct context final : trackable
+		{
+		private:
+			friend editor;
+
+			config				g_config;
+			io					g_io;
+			editor_dockspace	g_dockspace;
+			editor_main_menu	g_main_menu;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static editor::context const * create_context();
 
 		static bool startup(bool install_callbacks);
 
@@ -49,9 +64,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct editor::context const * get_context() noexcept;
+
 		static editor::config & get_config() noexcept;
 
-		static editor::IO & get_io() noexcept;
+		static editor::io & get_io() noexcept;
 
 		static editor_dockspace & get_dockspace() noexcept;
 
@@ -60,12 +77,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		static editor_dockspace s_dockspace;
-		static editor_main_menu s_main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

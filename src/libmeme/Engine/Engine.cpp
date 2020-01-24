@@ -13,109 +13,123 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct engine_plugins
-	{
-		ds::flat_set<fs::path> files;
-
-		ds::flat_map<shared_library, plugin *> libs;
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static engine::config	s_engine_config		{};
-	static engine::IO		s_engine_io			{};
-	static timer			s_main_timer		{};
-	static timer			s_loop_timer		{};
-	static engine_plugins	s_plugins			{};
-	static render_window	s_window			{};
+	static engine::context * g_engine{ nullptr };
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	engine::context const * engine::create_context()
+	{
+		if (g_engine) return nullptr;
+		return (g_engine = new engine::context{});
+	}
+
 	bool engine::startup(bool install_callbacks)
 	{
-		if (running())
-			return false;
+		if (!g_engine) return false;
 
-		s_main_timer.start();
+		// start main timer
+		g_engine->g_main_timer.start();
 
+		// start lua
 		if (!lua::startup())
-			return debug::log_error("Failed initializing lua");
-
-		if (!python::startup(s_engine_config.program_name, s_engine_config.library_path))
-			return debug::log_error("Failed initializing python");
-
-		//for (auto const & filename : s.boot_scripts)
-		//{
-		//	script{ filename }();
-		//}
-
-		if (!s_window.create(
-			s_engine_config.window_title, 
-			s_engine_config.window_video, 
-			s_engine_config.window_context, 
-			s_engine_config.window_flags))
 		{
-			return false;
+			return debug::log_error("engine failed initializing lua");
 		}
 
+		// start python
+		if (!python::startup(
+			g_engine->g_config.program_name,
+			g_engine->g_config.library_path
+		))
+		{
+			return debug::log_error("engine failed initializing python");
+		}
+
+		// run scripts
+		for (auto const & path : g_engine->g_config.script_list)
+		{
+			script{ path }();
+		}
+
+		// load plugins
+		for (auto const & path : g_engine->g_config.plugin_list)
+		{
+			if (!load_plugin(path))
+			{
+				debug::log_error("engine failed loading plugin: {0}", path);
+			}
+		}
+
+		// create window
+		if (!g_engine->g_window.create(
+			g_engine->g_config.window_title,
+			g_engine->g_config.window_video,
+			g_engine->g_config.window_context,
+			g_engine->g_config.window_flags
+		))
+		{
+			return debug::log_error("engine failed creating window");
+		}
+
+		// install window callbacks
 		if (install_callbacks)
 		{
-			s_window.set_char_callback([](auto, auto ch)
+			g_engine->g_window.set_char_callback([](auto, auto ch)
 			{
 				event_system::fire_event<char_event>(ch);
 			});
 
-			s_window.set_cursor_enter_callback([](auto, auto entered)
+			g_engine->g_window.set_cursor_enter_callback([](auto, auto entered)
 			{
 				event_system::fire_event<cursor_enter_event>(entered);
 			});
 
-			s_window.set_cursor_pos_callback([](auto, auto x, auto y)
+			g_engine->g_window.set_cursor_pos_callback([](auto, auto x, auto y)
 			{
 				event_system::fire_event<cursor_pos_event>(x, y);
 			});
 
-			s_window.set_error_callback([](auto code, auto desc)
+			g_engine->g_window.set_error_callback([](auto code, auto desc)
 			{
 				event_system::fire_event<window_error_event>(code, desc);
 			});
 
-			s_window.set_frame_size_callback([](auto, auto w, auto h)
+			g_engine->g_window.set_frame_size_callback([](auto, auto w, auto h)
 			{
 				event_system::fire_event<frame_size_event>(w, h);
 			});
 
-			s_window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
+			g_engine->g_window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
 			{
 				event_system::fire_event<key_event>(button, scan, action, mods);
 			});
 
-			s_window.set_mouse_callback([](auto, auto button, auto action, auto mods)
+			g_engine->g_window.set_mouse_callback([](auto, auto button, auto action, auto mods)
 			{
 				event_system::fire_event<mouse_event>(button, action, mods);
 			});
 
-			s_window.set_scroll_callback([](auto, auto x, auto y)
+			g_engine->g_window.set_scroll_callback([](auto, auto x, auto y)
 			{
 				event_system::fire_event<scroll_event>(x, y);
 			});
 
-			s_window.set_window_close_callback([](auto)
+			g_engine->g_window.set_window_close_callback([](auto)
 			{
 				event_system::fire_event<window_close_event>();
 			});
 
-			s_window.set_window_focus_callback([](auto, auto focused)
+			g_engine->g_window.set_window_focus_callback([](auto, auto focused)
 			{
 				event_system::fire_event<window_focus_event>(focused);
 			});
 
-			s_window.set_window_pos_callback([](auto, auto x, auto y)
+			g_engine->g_window.set_window_pos_callback([](auto, auto x, auto y)
 			{
 				event_system::fire_event<window_pos_event>(x, y);
 			});
 
-			s_window.set_window_size_callback([](auto, auto w, auto h)
+			g_engine->g_window.set_window_size_callback([](auto, auto w, auto h)
 			{
 				event_system::fire_event<window_size_event>(w, h);
 			});
@@ -126,42 +140,56 @@ namespace ml
 
 	void engine::shutdown()
 	{
-		s_plugins.files.clear();
-		s_plugins.libs.for_each([](auto const &, auto & p) { delete p; });
-		s_plugins.libs.clear();
-		s_window.destroy();
+		if (!g_engine) return;
+		
+		g_engine->g_plugins.files.clear();
+		
+		g_engine->g_plugins.libs.for_each([](auto const &, auto & p) { delete p; });
+		
+		g_engine->g_plugins.libs.clear();
+		
+		g_engine->g_window.destroy();
+		
 		window::terminate();
+		
 		python::shutdown();
+		
 		lua::shutdown();
+		
+		delete g_engine;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool engine::running()
 	{
-		return s_window.is_open();
+		return g_engine->g_window.is_open();
 	}
 
 	void engine::begin_loop()
 	{
-		get_io().delta_time = s_loop_timer.elapsed().count();
-		s_loop_timer.stop().start();
+		g_engine->g_io.delta_time = g_engine->g_loop_timer.elapsed().count();
+
+		g_engine->g_loop_timer.stop().start();
+
 		window::poll_events();
 	}
 
 	void engine::begin_draw()
 	{
-		s_window.clear_color(colors::black);
-		s_window.viewport({ {}, s_window.get_frame_size() });
+		g_engine->g_window.clear_color(colors::black);
+
+		g_engine->g_window.viewport({ {}, g_engine->g_window.get_frame_size() });
+
 		constexpr render_states states{
-		}; states(); // default states
+		}; states();
 	}
 
 	void engine::end_loop()
 	{
-		if (s_window.get_flags() & WindowFlags_DoubleBuffered)
+		if (g_engine->g_window.get_flags() & WindowFlags_DoubleBuffered)
 		{
-			s_window.swap_buffers();
+			g_engine->g_window.swap_buffers();
 		}
 		else
 		{
@@ -171,42 +199,50 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::load_plugin(fs::path const & filename)
+	bool engine::load_plugin(fs::path const & path)
 	{
-		if (auto const file{ s_plugins.files.insert(filename) }; file.second)
+		auto & plugins{ g_engine->g_plugins };
+
+		if (auto const file{ plugins.files.insert(path) }; file.second)
 		{
-			if (auto lib{ make_shared_library(*file.first) })
+			if (auto lib{ make_shared_library((*file.first).string() + shared_library::ext) })
 			{
 				if (auto const inst{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return (*s_plugins.libs.insert(std::move(lib), inst).first.second);
+					return (*plugins.libs.insert(std::move(lib), inst).first.second);
 				}
 			}
-			s_plugins.files.erase(file.first);
+
+			plugins.files.erase(file.first);
 		}
 		return false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD engine::config & engine::get_config() noexcept
+	engine::context const * engine::get_context() noexcept
 	{
-		return s_engine_config;
+		return g_engine;
 	}
 
-	ML_NODISCARD engine::IO & engine::get_io() noexcept
+	engine::config & engine::get_config() noexcept
 	{
-		return s_engine_io;
+		return g_engine->g_config;
 	}
 
-	ML_NODISCARD duration const & engine::get_time() noexcept
+	engine::io & engine::get_io() noexcept
 	{
-		return s_main_timer.elapsed();
+		return g_engine->g_io;
 	}
 
-	ML_NODISCARD render_window & engine::get_window() noexcept
+	duration const & engine::get_time() noexcept
 	{
-		return s_window;
+		return g_engine->g_main_timer.elapsed();
+	}
+
+	render_window & engine::get_window() noexcept
+	{
+		return g_engine->g_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

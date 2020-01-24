@@ -20,7 +20,7 @@ namespace ml
 		
 		explicit script(allocator_type const & alloc);
 		
-		script(fs::path const & filename, allocator_type const & alloc = {});
+		script(fs::path const & path, allocator_type const & alloc = {});
 		
 		script(language lang, pmr::string const & text, allocator_type const & alloc = {});
 		
@@ -38,7 +38,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & filename);
+		bool load_from_file(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

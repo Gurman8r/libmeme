@@ -33,13 +33,13 @@ namespace ml
 	{
 	}
 
-	font::font(fs::path const & filename, allocator_type const & alloc)
+	font::font(fs::path const & path, allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
 		, m_face	{ nullptr }
 	{
-		load_from_file(filename);
+		load_from_file(path);
 	}
 
 	font::font(font const & other, allocator_type const & alloc)
@@ -96,7 +96,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool font::load_from_file(fs::path const & filename)
+	bool font::load_from_file(fs::path const & path)
 	{
 		if (m_library)
 			return false;
@@ -107,15 +107,15 @@ namespace ml
 		{
 			return debug::log_error(
 				"Failed loading font \"{0}\" (failed to open FreeType)",
-				filename
+				path
 			);
 		}
 
 		// load the new fonts face from the specified file
 		FT_Face face;
-		if (FT_New_Face(library, filename.string().c_str(), 0, &face) != 0)
+		if (FT_New_Face(library, path.string().c_str(), 0, &face) != 0)
 		{
-			return debug::log_error("failed creating font face: {0}", filename);
+			return debug::log_error("failed creating font face: {0}", path);
 		}
 
 		// load the stroker that will be used to outline the fonts
@@ -123,7 +123,7 @@ namespace ml
 		if (FT_Stroker_New(library, &stroker) != 0)
 		{
 			FT_Done_Face(face);
-			return debug::log_error("failed creating font stroker: {0}", filename);
+			return debug::log_error("failed creating font stroker: {0}", path);
 		}
 
 		// select the unicode character map
@@ -131,7 +131,7 @@ namespace ml
 		{
 			FT_Stroker_Done(stroker);
 			FT_Done_Face(face);
-			return debug::log_error("failed selecting font unicode character map: {0}", filename);
+			return debug::log_error("failed selecting font unicode character map: {0}", path);
 		}
 
 		// store loaded font library

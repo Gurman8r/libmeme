@@ -12,9 +12,9 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline std::optional<pmr::vector<char>> read_file(fs::path const & filename)
+		static inline std::optional<pmr::vector<char>> read_file(fs::path const & path)
 		{
-			if (std::ifstream in{ filename, std::ios_base::binary })
+			if (std::ifstream in{ path, std::ios_base::binary })
 			{
 				pmr::vector<char> temp{};
 				in.seekg(0, std::ios_base::end);
@@ -33,9 +33,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline pmr::string get_file_contents(fs::path const & filename)
+		static inline pmr::string get_file_contents(fs::path const & path)
 		{
-			if (auto const o{ FS::read_file(filename.string()) })
+			if (auto const o{ FS::read_file(path.string()) })
 			{
 				return pmr::string{ o->cbegin(), o->cend() };
 			}

@@ -86,10 +86,10 @@ namespace ml
 	{
 	}
 
-	texture::texture(fs::path const & filename)
+	texture::texture(fs::path const & path)
 		: texture{}
 	{
-		load_from_file(filename);
+		load_from_file(path);
 	}
 
 	texture::texture(image const & image)
@@ -151,9 +151,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool texture::load_from_file(fs::path const & filename)
+	bool texture::load_from_file(fs::path const & path)
 	{
-		return load_from_image(make_image(filename));
+		return load_from_image(make_image(path));
 	}
 
 	bool texture::load_from_image(image const & image)

@@ -9,14 +9,24 @@ namespace ml
 	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		using functions_type = typename ds::flat_map<pmr::string, void *>;
 
-		using functions_t = typename ds::flat_map<pmr::string, void *>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr C_string ext{
+#ifdef ML_OS_WINDOWS
+			".dll"
+#else
+			".so"
+#endif
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		shared_library() noexcept;
 		
-		explicit shared_library(fs::path const & filename);
+		explicit shared_library(fs::path const & path);
 		
 		shared_library(shared_library && copy) noexcept;
 		
@@ -30,7 +40,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool open(fs::path const & filename);
+		bool open(fs::path const & path);
 
 		bool close();
 
@@ -67,7 +77,7 @@ namespace ml
 			return m_instance;
 		}
 
-		ML_NODISCARD inline functions_t const & functions() const noexcept
+		ML_NODISCARD inline functions_type const & functions() const noexcept
 		{
 			return m_functions;
 		}
@@ -109,7 +119,7 @@ namespace ml
 	private:
 		void * m_instance;
 
-		functions_t m_functions;
+		functions_type m_functions;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
