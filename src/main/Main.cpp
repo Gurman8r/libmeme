@@ -37,7 +37,10 @@ ml::int32_t main()
 		config.plugin_list		= {};
 		config.window_title		= "libmeme";
 		config.window_flags		= WindowFlags_Default;
-		config.window_video		= make_video_mode(vec2u{ 1280, 720 }, 32u);
+		config.window_video		= make_video_mode(
+			vec2u{ 1280, 720 },	// resolution
+			32u					// color depth
+		);
 		config.window_context	= make_context_settings(
 			client_api::OpenGL,	// api
 			4,					// major version

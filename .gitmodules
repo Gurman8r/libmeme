@@ -5,9 +5,6 @@
 [submodule "ext/assimp"]
 	path = ext/assimp
 	url = https://github.com/Gurman8r/assimp.git
-[submodule "ext/inih"]
-	path = ext/inih
-	url = https://github.com/Gurman8r/inih.git
 [submodule "ext/ImGuiColorTextEdit"]
 	path = ext/ImGuiColorTextEdit
 	url = https://github.com/Gurman8r/ImGuiColorTextEdit.git
@@ -29,9 +26,6 @@
 [submodule "ext/gcem"]
 	path = ext/gcem
 	url = https://github.com/kthohr/gcem.git
-[submodule "ext/dirent"]
-	path = ext/dirent
-	url = https://github.com/tronkko/dirent.git
 [submodule "ext/freetype2"]
 	path = ext/freetype2
 	url = https://github.com/aseprite/freetype2.git

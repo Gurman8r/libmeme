@@ -17,8 +17,8 @@ namespace ml
 			// paths
 			fs::path				program_name;
 			fs::path				library_path;
-			std::vector<fs::path>	script_list;
-			std::vector<fs::path>	plugin_list;
+			pmr::vector<fs::path>	script_list{ pmr::get_default_resource() };
+			pmr::vector<fs::path>	plugin_list{ pmr::get_default_resource() };
 
 			// window
 			C_string				window_title;

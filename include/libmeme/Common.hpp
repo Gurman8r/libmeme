@@ -80,6 +80,7 @@ namespace ml
 	ML_USING	float_t		= typename float32_t;
 	ML_USING	intptr_t	= typename intmax_t;
 	ML_USING	ptrdiff_t	= typename intptr_t;
+	ML_USING	max_align_t = typename float64_t;
 	ML_USING	size_t		= typename uintmax_t;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

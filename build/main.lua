@@ -24,7 +24,6 @@ project "main"
 	files {
 		"%{sln_dir}build/%{prj.name}.lua", 
 		"%{sln_dir}src/%{prj.name}/**.**",
-		"%{sln_dir}libmeme.ini", 
 		"%{sln_dir}libmeme.py", 
 	}
 	libdirs {
