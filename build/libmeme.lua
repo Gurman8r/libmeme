@@ -26,8 +26,6 @@ project "libmeme"
 		"ML_PLATFORM_EXPORTS",
 		"ML_RENDERER_EXPORTS",
 		"ML_INI_FILENAME=\"../../../libmeme.ini\"",
-		"ML_IMPL_NEW=std::malloc",
-		"ML_IMPL_DELETE=std::free",
 		"ML_IMPL_RENDERER_OPENGL",
 		"ML_IMPL_OPENGL_LOADER_GLEW",
 		--"ML_IMPL_OPENGL_LOADER_GLAD",
@@ -56,8 +54,6 @@ project "libmeme"
 		"%{sln_dir}include/libmeme/**.hpp",
 		"%{sln_dir}src/libmeme/**.cpp",
 		"%{sln_dir}tools/**.**",
-		"%{sln_dir}libmeme.ini", 
-		"%{sln_dir}libmeme.py", 
 		"%{sln_dir}premake5.lua",
 		"%{sln_dir}README.md",
 	}

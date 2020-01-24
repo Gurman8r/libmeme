@@ -13,7 +13,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_tracker::memory_tracker() noexcept : m_current{ 0 }, m_records{} {}
+	memory_tracker::memory_tracker() noexcept : m_index{ 0 }, m_records{}
+	{
+	}
 
 	memory_tracker::~memory_tracker()
 	{
@@ -50,21 +52,34 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	trackable * memory_tracker::make_allocation(size_t size, int32_t flags)
+	void * memory_tracker::make_allocation(size_t size, int32_t flags) noexcept
 	{
-		auto const temp{ static_cast<trackable *>(ML_IMPL_NEW(size)) };
-		return (*m_records.insert(temp, 
-			::new allocation_record{ m_current++, size, flags, temp }
-		).first.second)->data();
+		// create the allocation
+		byte_t * const data{ m_alloc.allocate(size) };
+
+		// create the record
+		return (*m_records.insert(
+			data,
+			::new (m_alloc.allocate(sizeof(allocation_record)))
+			allocation_record{ m_index++, size, flags, data }
+		).first.first);
 	}
 
-	void memory_tracker::free_allocation(void * value, int32_t flags)
+	void memory_tracker::free_allocation(void * value) noexcept
 	{
-		if (auto const it{ m_records.find(static_cast<trackable *>(value)) })
+		// find the entry
+		if (auto const it{ m_records.find(value) })
 		{
-			ML_IMPL_DELETE(value);		// free the allocation
-			::delete (*it->second);		// delete the record
-			m_records.erase(it->first); // erase the entry
+			auto & record{ (*it->second) };
+
+			// free the allocation
+			m_alloc.deallocate(record->data(), record->size());
+
+			// free the record
+			m_alloc.deallocate(reinterpret_cast<byte_t *>(record), sizeof(allocation_record));
+			
+			// erase the entry
+			m_records.erase(it->first);
 		}
 	}
 
