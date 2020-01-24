@@ -149,10 +149,12 @@ namespace ml
 						uv ? vec2{ uv->x, uv->y } : vec2{ 0 }
 					));
 				});
+
 			});
 
 			// make mesh
 			m_storage.emplace_back(make_mesh(verts));
+
 		});
 
 		return !m_storage.empty();

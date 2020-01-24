@@ -156,10 +156,14 @@ namespace ml::util
 	ML_NODISCARD static inline pmr::vector<float_t> contiguous(pmr::vector<vertex> const & vertices)
 	{
 		pmr::vector<float_t> temp;
-		temp.resize(vertices.size() * vertex::size);
-		for (size_t i = 0, imax = temp.size(); i < imax; ++i)
+		if (size_t const imax{ vertices.size() * vertex::size })
 		{
-			temp[i] = vertices[i / vertex::size][i % vertex::size];
+			temp.reserve(imax);
+
+			for (size_t i = 0; i < imax; ++i)
+			{
+				temp.emplace_back(vertices[i / vertex::size][i % vertex::size]);
+			}
 		}
 		return temp;
 	}

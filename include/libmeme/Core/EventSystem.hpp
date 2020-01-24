@@ -20,10 +20,6 @@ namespace ml
 
 	class ML_CORE_API event_system final
 	{
-		static ds::flat_map<
-			size_t, ds::flat_set<event_listener *>
-		> s_listeners;
-
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

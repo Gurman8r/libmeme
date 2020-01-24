@@ -4,14 +4,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	static ds::flat_map<
+		size_t, ds::flat_set<event_listener *>
+	> s_listeners;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	event_listener::~event_listener()
 	{
 		event_system::remove_listener(this);
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	decltype(event_system::s_listeners) event_system::s_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -157,10 +157,10 @@ namespace ml
 				m_models["sphere32x24"] = make_model(
 					fs::path{ "../../../assets/models/sphere32x24.obj" }
 				);
-				//m_models["monkey"] = make_model(
-				//	fs::path{ "../../../assets/models/monkey.obj" }
-				//);
-				m_models["triangle"] = make_model(make_mesh( // FIXME: broken
+				m_models["monkey"] = make_model( // FIXME: upside down?
+					fs::path{ "../../../assets/models/monkey.obj" }
+				);
+				m_models["triangle"] = make_model(make_mesh( // FIXME: ibo broken
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
 						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -170,7 +170,7 @@ namespace ml
 						0, 1, 2,
 					}
 				));
-				m_models["quad"] = make_model(make_mesh( // FIXME: broken
+				m_models["quad"] = make_model(make_mesh( // FIXME: ibo broken
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
 						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
@@ -294,7 +294,7 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::plugin * temp{ nullptr };
-	if (!temp) { temp = new ml::demo{}; }
+	static ml::plugin * temp;
+	ML_ONCE_CALL{ temp = new ml::demo{}; }
 	return temp;
 }

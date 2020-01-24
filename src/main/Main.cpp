@@ -87,8 +87,6 @@ ml::int32_t main()
 	// enter event
 	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// main loop
 	while (engine::running())
 	{
@@ -137,8 +135,6 @@ ml::int32_t main()
 			event_system::fire_event<end_loop_event>();
 		}
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// exit event
 	event_system::fire_event<exit_event>();
