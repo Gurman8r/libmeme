@@ -34,10 +34,10 @@ namespace ml
 		{
 			friend editor;
 
-			config				g_config;
-			io					g_io;
-			editor_dockspace	g_dockspace;
-			editor_main_menu	g_main_menu;
+			config				g_config	{};
+			io					g_io		{};
+			editor_dockspace	g_dockspace	{};
+			editor_main_menu	g_main_menu	{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

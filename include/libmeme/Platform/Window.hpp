@@ -223,13 +223,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		void * 			m_window;
-		void * 			m_monitor;
-		void * 			m_share;
-		pmr::string		m_title;
-		video_mode		m_video;
+		void * 				m_window;
+		void * 				m_monitor;
+		void * 				m_share;
+		pmr::string			m_title;
+		video_mode			m_video;
 		context_settings	m_context;
-		int32_t			m_flags;
+		int32_t				m_flags;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

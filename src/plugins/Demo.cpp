@@ -36,7 +36,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo() : plugin{}
+		demo()
 		{
 			event_system::add_listener<enter_event>(this);
 			event_system::add_listener<update_event>(this);

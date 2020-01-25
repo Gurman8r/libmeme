@@ -7,11 +7,80 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
+#include <libmeme/Engine/Entity.hpp>
+
+namespace ml
+{
+	struct Pos { vec3 value; };
+	struct Rot { vec4 value; };
+	struct Scl { vec3 value; };
+
+	struct C0 {};
+	struct C1 {};
+	struct C2 {};
+	struct C3 {};
+	struct C4 {};
+
+	struct T0 {};
+	struct T1 {};
+	struct T2 {};
+
+	using S0 = meta::type_list<>;
+	using S1 = meta::type_list<C0, C1>;
+	using S2 = meta::type_list<C0, C4, T0>;
+	using S3 = meta::type_list<C1, T0, C3, T2>;
+
+	int32_t do_test()
+	{
+		using ES = ecs::settings<
+			meta::type_list<C0, C1, C2, C3, C4>,
+			meta::type_list<T0, T1, T2>,
+			meta::type_list<S0, S1, S2, S3>
+		>;
+
+		static_assert(ES::component_count() == 5);
+		static_assert(ES::tag_count() == 3);
+		static_assert(ES::signature_count() == 4);
+
+		static_assert(ES::component_id<C0>() == 0);
+		static_assert(ES::component_id<C1>() == 1);
+		static_assert(ES::component_id<C2>() == 2);
+		static_assert(ES::component_id<C3>() == 3);
+		static_assert(ES::component_id<C4>() == 4);
+
+		static_assert(ES::tag_id<T0>() == 0);
+		static_assert(ES::tag_id<T1>() == 1);
+		static_assert(ES::tag_id<T2>() == 2);
+
+		static_assert(ES::signature_id<S0>() == 0);
+		static_assert(ES::signature_id<S1>() == 1);
+		static_assert(ES::signature_id<S2>() == 2);
+		static_assert(ES::signature_id<S3>() == 3);
+
+		static_assert(ES::component_bit<C0>() == 0);
+		static_assert(ES::component_bit<C1>() == 1);
+		static_assert(ES::component_bit<C2>() == 2);
+		static_assert(ES::component_bit<C3>() == 3);
+		static_assert(ES::component_bit<C4>() == 4);
+		static_assert(ES::tag_bit<T0>() == 5);
+		static_assert(ES::tag_bit<T1>() == 6);
+		static_assert(ES::tag_bit<T2>() == 7);
+
+		static_assert(std::is_same_v<
+			ES::signature_bitsets::signature_components<S0>,
+			meta::type_list<>
+		>);
+
+		return 0;
+	}
+}
+
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using namespace ml;
+	return do_test();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

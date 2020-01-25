@@ -1,4 +1,5 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
+#include <libmeme/Core/Debug.hpp>
 
 #ifdef ML_OS_WINDOWS
 #	include <Windows.h>
@@ -6,31 +7,75 @@
 // https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #endif
 
+namespace ml::impl
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static inline void * load_library(fs::path const & path)
+	{
+#ifdef ML_OS_WINDOWS
+		return LoadLibraryExW(path.native().c_str(), nullptr, 0);
+#else
+		return nullptr;
+#endif
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static inline bool free_library(void * instance)
+	{
+#ifdef ML_OS_WINDOWS
+		return FreeLibrary(static_cast<HINSTANCE>(instance));
+#else
+		return false;
+#endif
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	static inline void * load_function(void * instance, C_string name)
+	{
+#ifdef ML_OS_WINDOWS
+		return GetProcAddress(static_cast<HINSTANCE>(instance), name);
+#else
+		return nullptr;
+#endif
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared_library::shared_library() noexcept
+	shared_library::shared_library(allocator_type const & alloc)
 		: m_instance{ nullptr }
-		, m_functions{}
+		, m_path	{}
+		, m_funcs	{ alloc }
 	{
 	}
 	
-	shared_library::shared_library(fs::path const & path)
-		: shared_library{}
+	shared_library::shared_library() noexcept
+		: shared_library{ allocator_type{} }
+	{
+	}
+
+	shared_library::shared_library(fs::path const & path, allocator_type const & alloc)
+		: shared_library{ alloc }
 	{
 		open(path);
 	}
 
-	shared_library::shared_library(shared_library && copy) noexcept
-		: shared_library{}
+	shared_library::shared_library(shared_library && copy, allocator_type const & alloc) noexcept
+		: shared_library{ alloc }
 	{
 		swap(std::move(copy));
 	}
 
 	shared_library::~shared_library()
 	{
-		close();
+		impl::free_library(m_instance);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -46,8 +91,10 @@ namespace ml
 		if (this != std::addressof(other))
 		{
 			std::swap(m_instance, other.m_instance);
-
-			std::swap(m_functions, other.m_functions);
+			
+			m_path.swap(other.m_path);
+			
+			m_funcs.swap(other.m_funcs);
 		}
 	}
 
@@ -55,61 +102,42 @@ namespace ml
 
 	bool shared_library::open(fs::path const & path)
 	{
-		if (!good() && (this->ext == path.extension().string()))
-		{
-#ifdef ML_OS_WINDOWS
-			return (m_instance = ::LoadLibraryA(path.string().c_str()));
-#else
-			return (m_instance = nullptr);
-#endif
-		}
-		else
-		{
-			return false;
-		}
+		// already opened
+		if (good()) return false;
+
+		// set path
+		m_path = path;
+
+		// open library
+		return (m_instance = impl::load_library(path));
 	}
 
 	bool shared_library::close()
 	{
-		if (good())
-		{
-			m_functions.clear();
+		// not opened
+		if (!good()) return false;
 
-#ifdef ML_OS_WINDOWS
-			return ::FreeLibrary(static_cast<HINSTANCE>(m_instance));
-#else
-			return (m_instance = nullptr);
-#endif
-		}
-		else
-		{
-			return false;
-		}
+		// cleanup
+		m_path.clear();
+		m_funcs.clear();
+
+		// free library
+		return impl::free_library(m_instance);
 	}
 
 	void * shared_library::load_function(C_string name)
 	{
-		if (good())
+		// not opened
+		if (!good()) return nullptr;
+
+		// already loaded
+		if (auto const it{ m_funcs.find(name) })
 		{
-			if (auto const it{ m_functions.find(name) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return (*m_functions.insert(name,
-#ifdef ML_OS_WINDOWS
-					::GetProcAddress(static_cast<HINSTANCE>(m_instance), name)
-#else
-					nullptr
-#endif
-				).first.second);
-			}
+			return (*it->second);
 		}
-		else
-		{
-			return nullptr;
-		}
+		
+		// load function
+		return (*m_funcs.insert(name, impl::load_function(m_instance, name)).first.second);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

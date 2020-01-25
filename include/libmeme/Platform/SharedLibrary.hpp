@@ -9,26 +9,20 @@ namespace ml
 	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		using functions_type = typename ds::flat_map<pmr::string, void *>;
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		using function_map = typename ds::flat_map<fs::path, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr C_string ext{
-#ifdef ML_OS_WINDOWS
-			".dll"
-#else
-			".so"
-#endif
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		explicit shared_library(allocator_type const & alloc);
 
 		shared_library() noexcept;
 		
-		explicit shared_library(fs::path const & path);
+		shared_library(fs::path const & path, allocator_type const & alloc = {});
 		
-		shared_library(shared_library && copy) noexcept;
+		shared_library(shared_library && copy, allocator_type const & alloc = {}) noexcept;
 		
 		~shared_library();
 
@@ -49,38 +43,37 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> inline decltype(auto) load_function(C_string name)
+		> ML_NODISCARD inline decltype(auto) load_function(C_string name)
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> inline decltype(auto) call_function(C_string name, Args && ... args)
+		> inline std::optional<Ret> call_function(C_string name, Args && ... args)
 		{
-			return std::invoke(load_function<Ret, Args...>(name), std::forward<Args>(args)...);
+			if (auto const fn{ load_function<Ret, Args...>(name) })
+			{
+				return std::make_optional(std::invoke(fn, std::forward<Args>(args)...));
+			}
+			else
+			{
+				return std::nullopt;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept
-		{
-			return good();
-		}
+		ML_NODISCARD inline operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD inline decltype(auto) address() const noexcept
-		{
-			return std::addressof(m_instance);
-		}
+		ML_NODISCARD inline auto address() const noexcept -> void * const * { return std::addressof(m_instance); }
 
-		ML_NODISCARD inline bool good() const noexcept
-		{
-			return m_instance;
-		}
+		ML_NODISCARD inline auto functions() const noexcept -> function_map const & { return m_funcs; }
 
-		ML_NODISCARD inline functions_type const & functions() const noexcept
-		{
-			return m_functions;
-		}
+		ML_NODISCARD inline bool good() const noexcept { return m_instance; }
+
+		ML_NODISCARD inline auto instance() const noexcept -> void const * { return m_instance; }
+
+		ML_NODISCARD inline auto path() const noexcept -> fs::path const & { return m_path; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,7 +89,7 @@ namespace ml
 
 		ML_NODISCARD inline bool operator<(shared_library const & other) const
 		{
-			return (m_instance < other.m_instance);
+			return (m_path.filename() < other.m_path.filename());
 		}
 
 		ML_NODISCARD inline bool operator>(shared_library const & other) const
@@ -117,9 +110,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void * m_instance;
-
-		functions_type m_functions;
+		void *			m_instance;
+		fs::path		m_path;
+		function_map	m_funcs;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

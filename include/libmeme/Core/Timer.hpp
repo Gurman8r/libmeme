@@ -19,11 +19,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		timer(bool start_me = false) noexcept
-			: m_running	{ start_me }
-			, m_current	{ start_me ? clock::now() : time_point{} }
-			, m_previous{ m_current }
+			: m_running	{}
+			, m_current	{}
+			, m_previous{}
 			, m_elapsed	{ 0.0 }
 		{
+			if (start_me) { start(); }
 		}
 
 		timer(timer && other) noexcept

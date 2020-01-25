@@ -13,7 +13,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_tracker::memory_tracker() noexcept : m_index{ 0 }, m_records{}
+	memory_tracker::memory_tracker() noexcept
+		: m_alloc	{}
+		, m_index	{ 0 }
+		, m_records	{}
 	{
 	}
 

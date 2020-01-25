@@ -11,16 +11,12 @@ namespace ml
 	struct ML_EDITOR_API editor_main_menu final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using menu_t = typename std::function<void()>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline editor_main_menu & add_menu(pmr::string const & name, menu_t && value)
+		inline editor_main_menu & add_menu(pmr::string const & name, std::function<void()> && value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{
@@ -65,7 +61,7 @@ namespace ml
 
 		pmr::vector<std::pair<
 			pmr::string,
-			pmr::vector<menu_t>
+			pmr::vector<std::function<void()>>
 		>> m_menus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

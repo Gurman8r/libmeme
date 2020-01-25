@@ -8,6 +8,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if (ML_HAS_CXX11 && ML_HAS_CXX14)
+#	include <bitset>
 #	include <cassert>
 #	include <chrono>
 #	include <fstream>
@@ -47,8 +48,8 @@
 #define ML_ARGC			__argc
 #define ML_ARGV			__argv
 #define ML_WARGV		__wargv
-#define ML_SERIALIZE	::std::ostream & operator <<
-#define ML_DESERIALIZE	::std::istream & operator >>
+#define ML_SERIALIZE	std::ostream & operator <<
+#define ML_DESERIALIZE	std::istream & operator >>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -41,11 +41,11 @@ namespace ml
 		{
 			friend engine;
 
-			config			g_config;
-			io				g_io;
-			render_window	g_window;
-			timer			g_main_timer;
-			timer			g_loop_timer;
+			config			g_config	{};
+			io				g_io		{};
+			render_window	g_window	{};
+			timer			g_main_timer{ true };
+			timer			g_loop_timer{ false };
 
 			struct plugins
 			{

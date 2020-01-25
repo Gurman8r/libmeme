@@ -27,9 +27,6 @@ namespace ml
 	{
 		if (!g_engine) return false;
 
-		// start main timer
-		g_engine->g_main_timer.start();
-
 		// start lua
 		if (!lua::startup())
 		{
@@ -143,9 +140,7 @@ namespace ml
 		if (!g_engine) return;
 		
 		g_engine->g_plugins.files.clear();
-		
 		g_engine->g_plugins.libs.for_each([](auto const &, auto & p) { delete p; });
-		
 		g_engine->g_plugins.libs.clear();
 		
 		g_engine->g_window.destroy();
@@ -203,16 +198,18 @@ namespace ml
 	{
 		auto & plugins{ g_engine->g_plugins };
 
-		if (auto const file{ plugins.files.insert(path) }; file.second)
+		// check file name already loaded
+		if (auto const file{ plugins.files.insert(path.filename()) }; file.second)
 		{
-			if (auto lib{ make_shared_library((*file.first).string() + shared_library::ext) })
+			// load library
+			if (auto lib{ make_shared_library(*file.first) })
 			{
-				if (auto const inst{ lib.call_function<plugin *>("ml_plugin_main") })
+				// load plugin
+				if (auto const opt{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return (*plugins.libs.insert(std::move(lib), inst).first.second);
+					return (*plugins.libs.insert(std::move(lib), opt.value()).first.second);
 				}
 			}
-
 			plugins.files.erase(file.first);
 		}
 		return false;
