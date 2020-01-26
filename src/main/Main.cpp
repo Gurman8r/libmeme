@@ -7,71 +7,97 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-#include <libmeme/Engine/Entity.hpp>
+#include <libmeme/Engine/ECS.hpp>
+#include <libmeme/Core/BitSet.hpp>
 
 namespace ml
 {
-	struct Pos { vec3 value; };
-	struct Rot { vec4 value; };
-	struct Scl { vec3 value; };
-
+	// components
 	struct C0 {};
 	struct C1 {};
 	struct C2 {};
 	struct C3 {};
 	struct C4 {};
 
+	// tags
 	struct T0 {};
 	struct T1 {};
 	struct T2 {};
 
+	// signatures
 	using S0 = meta::type_list<>;
 	using S1 = meta::type_list<C0, C1>;
 	using S2 = meta::type_list<C0, C4, T0>;
 	using S3 = meta::type_list<C1, T0, C3, T2>;
 
-	int32_t do_test()
+	int32_t ecs_test()
 	{
-		using ES = ecs::settings<
-			meta::type_list<C0, C1, C2, C3, C4>,
-			meta::type_list<T0, T1, T2>,
-			meta::type_list<S0, S1, S2, S3>
+		using S = ecs::settings<
+			ecs::component_config<C0, C1, C2, C3, C4>,
+			ecs::signature_config<S0, S1, S2, S3>,
+			ecs::system_config<>,
+			ecs::tag_config<T0, T1, T2>
 		>;
 
-		static_assert(ES::component_count() == 5);
-		static_assert(ES::tag_count() == 3);
-		static_assert(ES::signature_count() == 4);
+		static_assert(S::component_config::count() == 5);
+		static_assert(S::tag_config::count() == 3);
+		static_assert(S::signature_config::count() == 4);
 
-		static_assert(ES::component_id<C0>() == 0);
-		static_assert(ES::component_id<C1>() == 1);
-		static_assert(ES::component_id<C2>() == 2);
-		static_assert(ES::component_id<C3>() == 3);
-		static_assert(ES::component_id<C4>() == 4);
+		static_assert(S::component_config::index<C0>() == 0);
+		static_assert(S::component_config::index<C1>() == 1);
+		static_assert(S::component_config::index<C2>() == 2);
+		static_assert(S::component_config::index<C3>() == 3);
+		static_assert(S::component_config::index<C4>() == 4);
 
-		static_assert(ES::tag_id<T0>() == 0);
-		static_assert(ES::tag_id<T1>() == 1);
-		static_assert(ES::tag_id<T2>() == 2);
+		static_assert(S::tag_config::index<T0>() == 0);
+		static_assert(S::tag_config::index<T1>() == 1);
+		static_assert(S::tag_config::index<T2>() == 2);
 
-		static_assert(ES::signature_id<S0>() == 0);
-		static_assert(ES::signature_id<S1>() == 1);
-		static_assert(ES::signature_id<S2>() == 2);
-		static_assert(ES::signature_id<S3>() == 3);
+		static_assert(S::signature_config::index<S0>() == 0);
+		static_assert(S::signature_config::index<S1>() == 1);
+		static_assert(S::signature_config::index<S2>() == 2);
+		static_assert(S::signature_config::index<S3>() == 3);
 
-		static_assert(ES::component_bit<C0>() == 0);
-		static_assert(ES::component_bit<C1>() == 1);
-		static_assert(ES::component_bit<C2>() == 2);
-		static_assert(ES::component_bit<C3>() == 3);
-		static_assert(ES::component_bit<C4>() == 4);
-		static_assert(ES::tag_bit<T0>() == 5);
-		static_assert(ES::tag_bit<T1>() == 6);
-		static_assert(ES::tag_bit<T2>() == 7);
+		static_assert(S::component_bit<C0>() == 0);
+		static_assert(S::component_bit<C1>() == 1);
+		static_assert(S::component_bit<C2>() == 2);
+		static_assert(S::component_bit<C3>() == 3);
+		static_assert(S::component_bit<C4>() == 4);
+		static_assert(S::tag_bit<T0>() == 5);
+		static_assert(S::tag_bit<T1>() == 6);
+		static_assert(S::tag_bit<T2>() == 7);
 
-		static_assert(std::is_same_v<
-			ES::signature_bitsets::signature_components<S0>,
-			meta::type_list<>
-		>);
+		//static_assert(std::is_same_v<
+		//	S::signature_bitsets::signature_components<S0>,
+		//	meta::type_list<>
+		//>);
 
-		return 0;
+		//static_assert(std::is_same_v<
+		//	S::signature_bitsets::signature_components<S3>,
+		//	meta::type_list<C1, C3>
+		//>);
+		//
+		//static_assert(std::is_same_v<
+		//	S::signature_bitsets::signature_tags<S3>,
+		//	meta::type_list<T0, T2>
+		//>);
+
+		using I = ecs::entity_index;
+
+		using M = ecs::manager<S>;
+		M man;
+		man.refresh();
+		man.grow_to(100);
+		man.is_alive(I(0));
+		man.kill(I(0));
+		man.create_index();
+		auto t0 = man.has_tag<T0>(I(0));
+		auto c0 = man.has_component<C0>(I(1));
+
+		M::entity_type * e{ 0 };
+		if (e) e->set_flag(ecs::entity_flags::alive, 0);
+
+		return debug::pause(0);
 	}
 }
 
@@ -80,7 +106,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using namespace ml;
-	return do_test();
+	return ecs_test();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

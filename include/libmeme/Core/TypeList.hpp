@@ -76,13 +76,8 @@ namespace ml::meta
 
 namespace ml::meta
 {
+	// TYPE LIST
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T
-	> struct type_tag
-	{
-		using type = typename T;
-	};
 
 	template <class ... Ts
 	> struct type_list
@@ -90,6 +85,7 @@ namespace ml::meta
 		static constexpr size_t size{ sizeof...(Ts) };
 	};
 
+	// RENAME
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class...> class To, class T
@@ -108,6 +104,7 @@ namespace ml::meta
 		template <class...> class To, class T
 	> using rename = typename rename_impl<To, T>::type;
 
+	// CONCAT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ...
@@ -131,6 +128,7 @@ namespace ml::meta
 		using type = concat<type_list<Ts0..., Ts1...>, Rest...>;
 	};
 
+	// MAP
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Fn, class
@@ -148,6 +146,7 @@ namespace ml::meta
 		using type = concat<type_list<Fn<T>>, map<Fn, type_list<Ts...>>>;;
 	};
 
+	// INDEX OF
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class List
@@ -163,6 +162,7 @@ namespace ml::meta
 		size_t, 1 + index_of<T, type_list<Ts...>>::value
 	>{};
 
+	// CONTAINS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class List
@@ -177,16 +177,20 @@ namespace ml::meta
 	template <class T, class ... Ts
 	> struct contains<T, type_list<T, Ts...>> : std::true_type {};
 
+	// OPERATIONS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T
+	> struct type_tag { using type = T; };
 
 	template <class List
 	> using tuple = rename<std::tuple, List>;
 
 	template <class List
-	> using type_tuple = tuple<map<type_tag, List>>;
+	> using type_tuple = meta::tuple<map<type_tag, List>>;
 
 	template <size_t Index, class List
-	> using Nth = std::tuple_element_t<Index, tuple<List>>;
+	> using Nth = std::tuple_element_t<Index, meta::tuple<List>>;
 
 	template <class List, class T
 	> using push_back = concat<List, type_list<T>>;
@@ -210,8 +214,9 @@ namespace ml::meta
 	> using head = Nth<0, List>;
 
 	template <class List
-	> using tail = Nth<size<List>() - 1, List>;
+	> using tail = Nth<meta::size<List>() - 1, List>;
 
+	// REPEAT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <size_t N, class T
@@ -231,6 +236,7 @@ namespace ml::meta
 	template <size_t N, class T
 	> using repeat = typename repeat_impl<N, T>::type;
 
+	// FILTER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Pr, class
@@ -254,6 +260,7 @@ namespace ml::meta
 		>;
 	};
 
+	// ALL
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class, class...
