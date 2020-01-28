@@ -181,11 +181,40 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class T> constexpr self_type & operator&=(T other)
+		{
+			if constexpr (std::is_same_v<T, self_type>)
+			{
+				for (size_t i = 0; i < words; ++i)
+				{
+					m_words[i] &= other.m_words[i];
+				}
+				return (*this);
+			}
+			else
+			{
+				return (*this) &= self_type{ other };
+			}
+		}
+
+		template <class T> constexpr self_type operator&(T other) const
+		{
+			self_type temp{ other };
+			return temp &= (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T> ML_NODISCARD constexpr bool operator==(T other) const
 		{
-			if constexpr (std::is_same_v<self_type, T>)
+			if constexpr (std::is_same_v<T, self_type>)
+			{
 				return m_words == other.m_words;
-			else return *this == self_type{ other };
+			}
+			else
+			{
+				return (*this) == self_type{ other };
+			}
 		}
 
 		template <class T> ML_NODISCARD constexpr bool operator!=(T other) const
@@ -195,9 +224,14 @@ namespace ml::ds
 
 		template <class T> ML_NODISCARD constexpr bool operator<(T other) const
 		{
-			if constexpr (std::is_same_v<self_type, T>)
+			if constexpr (std::is_same_v<T, self_type>)
+			{
 				return m_words < other.m_words;
-			else return *this < self_type{ other };
+			}
+			else
+			{
+				return (*this) < self_type{ other };
+			}
 		}
 
 		template <class T> ML_NODISCARD constexpr bool operator>(T other) const

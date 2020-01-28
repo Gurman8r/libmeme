@@ -85,16 +85,22 @@ namespace ml
 			meta::type_list<T0, T2>
 		>);
 
-		return debug::pause(0);
-
-		ecs::entity_manager<EC> man;
+		ecs::entity_manager<EC> man{};
 		man.grow_to(100);
-		man.is_alive(0);
-		man.kill(0);
+		if (auto e = man.create_index())
+		{
+			man.add_component<C0>(e, C0{});
+			man.add_component<C1>(e, C1{});
+		}
 		man.refresh();
-		auto i0 = man.create_index();
-		auto t0 = man.has_tag<T0>(0);
-		auto c0 = man.has_component<C0>(1);
+		man.for_entities([&](size_t i)
+		{
+			std::cout << i << ' ' << man.get_entity(i).mask << '\n';
+		});
+		man.for_matching<S1>([&](auto, auto & c0, auto & c1)
+		{
+			std::cout << c0.name << ' ' << c1.name << '\n';
+		});
 		return debug::pause(0);
 	}
 }
