@@ -12,10 +12,23 @@
 
 #include <libmeme/Common.hpp>
 
-#define ECS_FWD(x) std::forward<decltype(x)>(x)
+#define ML_FWD(v)   std::forward<decltype(v)>(v)
+#define ML_TYPE(v)  typename decltype(v)::type
 
-#define ECS_TYPE(mX) typename decltype(mX)::type
+namespace ml::meta
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class ... Ts
+	> struct type_list { static constexpr size_t size{ sizeof...(Ts) }; };
+
+	template <class T
+	> struct type_tag { using type = T; };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// Loops
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,13 +38,15 @@ namespace ml::meta
 		template <class Fn, class Tuple, size_t ... Indices
 		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tuple && tp, std::index_sequence<Indices...>)
 		{
-			return ECS_FWD(fn)(std::get<Indices>(ECS_FWD(tp))...);
+			return ML_FWD(fn)(std::get<Indices>(ML_FWD(tp))...);
 		}
 
 		template <class Fn, class Tuple
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tuple && tp)
 		{
-			return tuple_apply_impl(ECS_FWD(fn), ECS_FWD(tp),
+			return meta::impl::tuple_apply_impl(
+				ML_FWD(fn),
+				ML_FWD(tp),
 				std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>{}
 			);
 		}
@@ -39,15 +54,17 @@ namespace ml::meta
 		template <class Fn, class ... Args
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
-			return (void)std::initializer_list<int>{ (fn(ECS_FWD(args)), 0)... };
+			return (void)std::initializer_list<int>{ (fn(ML_FWD(args)), 0)... };
 		}
 
 		template <class Fn, class Tuple
 		> constexpr decltype(auto) for_tuple(Fn && fn, Tuple && tp)
 		{
-			return tuple_apply([&fn](auto && ... vs) {
-				for_args(fn, ECS_FWD(vs)...);
-			}, ECS_FWD(tp));
+			return meta::impl::tuple_apply([&fn](auto && ... vs)
+			{
+				meta::impl::for_args(fn, ML_FWD(vs)...);
+			},
+			ML_FWD(tp));
 		}
 	}
 
@@ -56,35 +73,27 @@ namespace ml::meta
 	template <class Fn, class Tuple
 	> constexpr decltype(auto) tuple_apply(Fn && fn, Tuple && tp)
 	{
-		return impl::tuple_apply(fn, ECS_FWD(tp));
+		return meta::impl::tuple_apply(fn, ML_FWD(tp));
 	}
 
 	template <class Fn, class ... Args
 	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 	{
-		return impl::for_args(fn, ECS_FWD(args)...);
+		return meta::impl::for_args(fn, ML_FWD(args)...);
 	}
 
 	template <class Fn, class Tuple
 	> constexpr decltype(auto) for_tuple(Fn && fn, Tuple && tp)
 	{
-		return impl::for_tuple(fn, ECS_FWD(tp));
+		return meta::impl::for_tuple(fn, ML_FWD(tp));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+// List Operations
 namespace ml::meta
 {
-	// TYPE LIST
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... Ts
-	> struct type_list
-	{
-		static constexpr size_t size{ sizeof...(Ts) };
-	};
-
 	// RENAME
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -97,12 +106,12 @@ namespace ml::meta
 		class ... Ts
 	> struct rename_impl<To, From<Ts...>>
 	{
-		using type = typename To<Ts...>;
+		using type = To<Ts...>;
 	};
 
 	template<
 		template <class...> class To, class T
-	> using rename = typename rename_impl<To, T>::type;
+	> ML_USING rename = typename rename_impl<To, T>::type;
 
 	// CONCAT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -114,7 +123,7 @@ namespace ml::meta
 	};
 
 	template <class ... Ts
-	> using concat = typename concat_impl<Ts...>::type;
+	> ML_USING concat = typename concat_impl<Ts...>::type;
 
 	template <class ... Ts
 	> struct concat_impl<type_list<Ts...>>
@@ -123,98 +132,93 @@ namespace ml::meta
 	};
 
 	template <class ... Ts0, class ... Ts1, class ... Rest
-	> struct concat_impl<type_list<Ts0..., Ts1...>, Rest...>
+	> struct concat_impl<type_list<Ts0...>, type_list<Ts1...>, Rest...>
 	{
 		using type = concat<type_list<Ts0..., Ts1...>, Rest...>;
 	};
 
-	// MAP
+	// REBIND
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Fn, class
-	> struct map_impl
+	> struct rebind_impl
 	{
 		using type = type_list<>;
 	};
 
-	template <template <class> class Fn, class List
-	> using map = typename map_impl<Fn, List>::type;
+	template <template <class> class Pr, class Ls
+	> ML_USING rebind = typename rebind_impl<Pr, Ls>::type;
 
-	template <template <class> class Fn, class T, class ... Ts
-	> struct map_impl<Fn, type_list<T, Ts...>>
+	template <template <class> class Pr, class T, class ... Ts
+	> struct rebind_impl<Pr, type_list<T, Ts...>>
 	{
-		using type = concat<type_list<Fn<T>>, map<Fn, type_list<Ts...>>>;;
+		using type = concat<
+			type_list<Pr<T>>, rebind<Pr, type_list<Ts...>>
+		>;
 	};
 
 	// INDEX OF
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, class List
+	template <class T, class Ls
 	> struct index_of;
 
 	template <class T, class ... Ts
-	> struct index_of<T, type_list<T, Ts...>> : std::integral_constant<
-		size_t, 0
-	>{};
+	> struct index_of<T, type_list<T, Ts...>>
+		: std::integral_constant<size_t, 0> {};
 
 	template <class T, class U, class ... Ts
-	> struct index_of<T, type_list<U, Ts...>> : std::integral_constant<
-		size_t, 1 + index_of<T, type_list<Ts...>>::value
-	>{};
+	> struct index_of<T, type_list<U, Ts...>>
+		: std::integral_constant<size_t, 1 + index_of<T, type_list<Ts...>>::value> {};
 
 	// CONTAINS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, class List
+	template <class T, class Ls
 	> struct contains;
 
 	template <class T
-	> struct contains<T, type_list<>> : std::false_type {};
+	> struct contains<T, type_list<>>
+		: std::false_type {};
 
 	template <class T, class U, class ... Ts
-	> struct contains<T, type_list<U, Ts...>> : contains<T, type_list<Ts...>> {};
+	> struct contains<T, type_list<U, Ts...>>
+		: contains<T, type_list<Ts...>> {};
 
 	template <class T, class ... Ts
-	> struct contains<T, type_list<T, Ts...>> : std::true_type {};
+	> struct contains<T, type_list<T, Ts...>>
+		: std::true_type {};
 
-	// OPERATIONS
+	// GENERAL
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	template <class Ls
+	> ML_USING tuple = rename<std::tuple, Ls>;
+	
+	template <class Ls
+	> ML_USING type_tuple = typename tuple<rebind<type_tag, Ls>>;
 
-	template <class T
-	> struct type_tag { using type = T; };
-
-	template <class List
-	> using tuple = rename<std::tuple, List>;
-
-	template <class List
-	> using type_tuple = meta::tuple<map<type_tag, List>>;
-
-	template <size_t Index, class List
-	> using Nth = std::tuple_element_t<Index, meta::tuple<List>>;
-
-	template <class List, class T
-	> using push_back = concat<List, type_list<T>>;
-
-	template <class List, class T
-	> using push_front = concat<type_list<T>, List>;
-
-	template <class List
-	> static constexpr size_t size() noexcept
-	{
-		return List::size;
-	}
-
-	template <class List, class Fn
+	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return for_tuple(fn, type_tuple<List>{});
+		return meta::for_tuple(fn, type_tuple<Ls>{});
 	}
 
-	template <class List
-	> using head = Nth<0, List>;
+	template <class Ls
+	> constexpr size_t size() noexcept
+	{
+		return Ls::size;
+	}
 
-	template <class List
-	> using tail = Nth<meta::size<List>() - 1, List>;
+	template <class Ls, class T> ML_USING push_back = concat<Ls, type_list<T>>;
+
+	template <class Ls, class T> ML_USING push_front = concat<type_list<T>, Ls>;
+
+	template <size_t I, class Ls> ML_USING nth = std::tuple_element_t<I, tuple<Ls>>;
+
+	template <class Ls> ML_USING head = nth<0, Ls>;
+
+	template <class Ls> ML_USING tail = nth<size<Ls>() - 1, Ls>;
 
 	// REPEAT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -222,9 +226,7 @@ namespace ml::meta
 	template <size_t N, class T
 	> struct repeat_impl
 	{
-		using type = push_back<
-			typename repeat_impl<N - 1, T>::type, T
-		>;
+		using type = push_back<typename repeat_impl<N - 1, T>::type, T>;
 	};
 
 	template <class T
@@ -234,7 +236,7 @@ namespace ml::meta
 	};
 
 	template <size_t N, class T
-	> using repeat = typename repeat_impl<N, T>::type;
+	> ML_USING repeat = typename repeat_impl<N, T>::type;
 
 	// FILTER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -245,8 +247,8 @@ namespace ml::meta
 		using type = type_list<>;
 	};
 
-	template <template <class> class Pr, class List
-	> using filter = typename filter_impl<Pr, List>::type;
+	template <template <class> class Pr, class Ls
+	> ML_USING filter = typename filter_impl<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
 	> struct filter_impl<Pr, type_list<T, Ts...>>
@@ -264,12 +266,12 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class, class...
-	> struct all : std::true_type {};
+	> struct all
+		: std::true_type {};
 
 	template <template <class> class Pr, class T, class ... Ts
-	> struct all<Pr, T, Ts...> : std::bool_constant<(
-		Pr<T>{} && all<Pr, Ts...>{}
-	)>{};
+	> struct all<Pr, T, Ts...>
+		: std::bool_constant<(Pr<T>{} && all<Pr, Ts...>{})> {};
 
 	template <template <class> class TMF
 	> struct bound_all
@@ -279,7 +281,7 @@ namespace ml::meta
 	};
 
 	template <template <class> class TMF, class TL
-	> using all_types = rename<bound_all<TMF>::template type, TL>;
+	> ML_USING all_types = rename<bound_all<TMF>::template type, TL>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

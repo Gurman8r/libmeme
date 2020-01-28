@@ -245,16 +245,16 @@
 #endif
 
 
-// Misc Utilities
+// Misc
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define _ML                     ::ml::
-#define ML_ADDRESSOF(ptr)		((void *)(ML_INTMAX)ptr)
-#define ML_ARRAYSIZE(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_ADDRESSOF(ptr)       ((void *)(ML_INTMAX)ptr)
+#define ML_ARRAYSIZE(arr)       (sizeof(arr) / sizeof(*arr))
+#define ML_CONCAT_IMPL(a, b)    a##b
+#define ML_CONCAT(a, b)         ML_CONCAT_IMPL(a, b)
+#define ML_TOSTRING(str)        #str
+#define ML_STRINGIFY(str)       ML_TOSTRING(str)
 #define ML_THROW                throw
-#define ML_CONCAT_IMPL(a, b)	a##b
-#define ML_CONCAT(a, b)			ML_CONCAT_IMPL(a, b)
-#define ML_TOSTRING(str)		#str
-#define ML_STRINGIFY(str)		ML_TOSTRING(str)
 
 
 // Anonymous Variables

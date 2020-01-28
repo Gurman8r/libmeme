@@ -174,7 +174,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline bool contains(const_reference value) const
 		{
-			if (size() < traits_type::magic)
+			if ((traits_type::magic == 0) || traits_type::magic > size())
 			{
 				// linear
 				return (std::find(cbegin(), cend(), value) != cend());
@@ -227,7 +227,7 @@ namespace ml::ds
 		ML_NODISCARD inline iterator find(const_reference value)
 		{
 			// linear
-			if (size() < traits_type::magic)
+			if ((traits_type::magic == 0) || traits_type::magic > size())
 			{
 				return std::find(begin(), end(), value);
 			}
@@ -242,7 +242,7 @@ namespace ml::ds
 		ML_NODISCARD inline const_iterator find(const_reference value) const
 		{
 			// linear
-			if (size() < traits_type::magic)
+			if ((traits_type::magic == 0) || traits_type::magic > size())
 			{
 				return std::find(cbegin(), cend(), value);
 			}

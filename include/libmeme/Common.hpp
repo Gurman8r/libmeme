@@ -8,14 +8,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if (ML_HAS_CXX11 && ML_HAS_CXX14)
-#	include <bitset>
 #	include <cassert>
 #	include <chrono>
 #	include <fstream>
 #	include <functional>
 #	include <iostream>
 #	include <locale>
-#	include <memory>
 #	include <sstream>
 #	include <type_traits>
 #	include <utility>

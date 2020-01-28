@@ -10,14 +10,16 @@
 #include <libmeme/Engine/ECS.hpp>
 #include <libmeme/Core/BitSet.hpp>
 
+#include <bitset>
+
 namespace ml
 {
 	// components
-	struct C0 {};
-	struct C1 {};
-	struct C2 {};
-	struct C3 {};
-	struct C4 {};
+	struct C0 { static constexpr auto name = "C0"sv; };
+	struct C1 { static constexpr auto name = "C1"sv; };
+	struct C2 { static constexpr auto name = "C2"sv; };
+	struct C3 { static constexpr auto name = "C3"sv; };
+	struct C4 { static constexpr auto name = "C4"sv; };
 
 	// tags
 	struct T0 {};
@@ -25,78 +27,74 @@ namespace ml
 	struct T2 {};
 
 	// signatures
-	using S0 = meta::type_list<>;
-	using S1 = meta::type_list<C0, C1>;
-	using S2 = meta::type_list<C0, C4, T0>;
-	using S3 = meta::type_list<C1, T0, C3, T2>;
+	using S0 = meta::type_list<>;				// 00000000
+	using S1 = meta::type_list<C0, C1>;			// 11000000
+	using S2 = meta::type_list<C0, C4, T0>;		// 10001100
+	using S3 = meta::type_list<C1, T0, C3, T2>;	// 01010101
 
 	int32_t ecs_test()
 	{
-		using S = ecs::settings<
+		using EC = ecs::entity_config<
 			ecs::component_config<C0, C1, C2, C3, C4>,
 			ecs::signature_config<S0, S1, S2, S3>,
 			ecs::system_config<>,
 			ecs::tag_config<T0, T1, T2>
 		>;
 
-		static_assert(S::component_config::count() == 5);
-		static_assert(S::tag_config::count() == 3);
-		static_assert(S::signature_config::count() == 4);
+		static_assert(EC::components::count()	== 5);
+		static_assert(EC::signatures::count()	== 4);
+		static_assert(EC::systems::count()		== 0);
+		static_assert(EC::tags::count()			== 3);
 
-		static_assert(S::component_config::index<C0>() == 0);
-		static_assert(S::component_config::index<C1>() == 1);
-		static_assert(S::component_config::index<C2>() == 2);
-		static_assert(S::component_config::index<C3>() == 3);
-		static_assert(S::component_config::index<C4>() == 4);
+		static_assert(EC::components::index<C0>() == 0);
+		static_assert(EC::components::index<C1>() == 1);
+		static_assert(EC::components::index<C2>() == 2);
+		static_assert(EC::components::index<C3>() == 3);
+		static_assert(EC::components::index<C4>() == 4);
 
-		static_assert(S::tag_config::index<T0>() == 0);
-		static_assert(S::tag_config::index<T1>() == 1);
-		static_assert(S::tag_config::index<T2>() == 2);
+		static_assert(EC::tags::index<T0>() == 0);
+		static_assert(EC::tags::index<T1>() == 1);
+		static_assert(EC::tags::index<T2>() == 2);
 
-		static_assert(S::signature_config::index<S0>() == 0);
-		static_assert(S::signature_config::index<S1>() == 1);
-		static_assert(S::signature_config::index<S2>() == 2);
-		static_assert(S::signature_config::index<S3>() == 3);
+		static_assert(EC::signatures::index<S0>() == 0);
+		static_assert(EC::signatures::index<S1>() == 1);
+		static_assert(EC::signatures::index<S2>() == 2);
+		static_assert(EC::signatures::index<S3>() == 3);
 
-		static_assert(S::component_bit<C0>() == 0);
-		static_assert(S::component_bit<C1>() == 1);
-		static_assert(S::component_bit<C2>() == 2);
-		static_assert(S::component_bit<C3>() == 3);
-		static_assert(S::component_bit<C4>() == 4);
-		static_assert(S::tag_bit<T0>() == 5);
-		static_assert(S::tag_bit<T1>() == 6);
-		static_assert(S::tag_bit<T2>() == 7);
+		static_assert(EC::component_bit<C0>() == 0);
+		static_assert(EC::component_bit<C1>() == 1);
+		static_assert(EC::component_bit<C2>() == 2);
+		static_assert(EC::component_bit<C3>() == 3);
+		static_assert(EC::component_bit<C4>() == 4);
+		static_assert(EC::tag_bit<T0>() == 5);
+		static_assert(EC::tag_bit<T1>() == 6);
+		static_assert(EC::tag_bit<T2>() == 7);
 
-		//static_assert(std::is_same_v<
-		//	S::signature_bitsets::signature_components<S0>,
-		//	meta::type_list<>
-		//>);
+		static_assert(EC::get_bitset<S0>() == "00000000");
+		static_assert(EC::get_bitset<S1>() == "11000000");
+		static_assert(EC::get_bitset<S2>() == "10001100");
+		static_assert(EC::get_bitset<S3>() == "01010101");
 
-		//static_assert(std::is_same_v<
-		//	S::signature_bitsets::signature_components<S3>,
-		//	meta::type_list<C1, C3>
-		//>);
-		//
-		//static_assert(std::is_same_v<
-		//	S::signature_bitsets::signature_tags<S3>,
-		//	meta::type_list<T0, T2>
-		//>);
+		static_assert(std::is_same_v<EC::component_signatures<S0>,
+			meta::type_list<>
+		>);
+		static_assert(std::is_same_v<EC::component_signatures<S3>,
+			meta::type_list<C1, C3>
+		>);
+		static_assert(std::is_same_v<EC::tag_signatures<S3>,
+			meta::type_list<T0, T2>
+		>);
 
-		using I = ecs::entity_index;
+		return debug::pause(0);
 
-		using M = ecs::manager<S>;
-		M man;
-		man.refresh();
+		ecs::entity_manager<EC> man;
 		man.grow_to(100);
-		man.is_alive(I(0));
-		man.kill(I(0));
-		man.create_index();
-		auto t0 = man.has_tag<T0>(I(0));
-		auto c0 = man.has_component<C0>(I(1));
-
-		M::entity_type * e{ 0 };
-		if (e) e->set_flag(ecs::entity_flags::alive, 0);
-
+		man.is_alive(0);
+		man.kill(0);
+		man.refresh();
+		auto i0 = man.create_index();
+		auto t0 = man.has_tag<T0>(0);
+		auto c0 = man.has_component<C0>(1);
 		return debug::pause(0);
 	}
 }

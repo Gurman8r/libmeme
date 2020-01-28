@@ -3,67 +3,104 @@
 
 #include <libmeme/Common.hpp>
 
-//using enum_base = int;
-//enum class enum_flags : enum_base {};
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_ENUM_FLAGS(enum_base, enum_flags) \
-constexpr bool operator==(enum_flags const lhs, enum_base const rhs) noexcept					\
-{																								\
-	return static_cast<enum_base>(lhs) == rhs;													\
-}																								\
-constexpr bool operator==(enum_base const lhs, enum_flags const rhs) noexcept					\
-{																								\
-	return lhs == static_cast<enum_base>(rhs);													\
-}																								\
-																								\
-constexpr bool operator!=(enum_flags const lhs, enum_base const rhs) noexcept					\
-{																								\
-	return static_cast<enum_base>(lhs) != rhs;													\
-}																								\
-constexpr bool operator!=(enum_base const lhs, enum_flags const rhs) noexcept					\
-{																								\
-	return lhs != static_cast<enum_base>(rhs);													\
-}																								\
-																								\
-constexpr decltype(auto) operator~(enum_flags const value) noexcept								\
-{																								\
-	return ~static_cast<enum_base>(value);														\
-}																								\
-																								\
-constexpr decltype(auto) operator|(enum_flags const lhs, enum_base const rhs) noexcept			\
-{																								\
-	return static_cast<enum_flags>(static_cast<enum_base>(lhs) | rhs);							\
-}																								\
-constexpr decltype(auto) operator&(enum_flags const lhs, enum_base const rhs) noexcept			\
-{																								\
-	return static_cast<enum_flags>(static_cast<enum_base>(lhs) & rhs);							\
-}																								\
-constexpr decltype(auto) operator|=(enum_flags & lhs, enum_base const rhs) noexcept				\
-{																								\
-	return lhs = lhs | rhs;																		\
-}																								\
-constexpr decltype(auto) operator&=(enum_flags & lhs, enum_base const rhs) noexcept				\
-{																								\
-	return lhs = lhs & rhs;																		\
-}																								\
-																								\
-constexpr decltype(auto) operator|(enum_flags const lhs, enum_flags const rhs) noexcept			\
-{																								\
-	return lhs | static_cast<enum_base>(rhs);													\
-}																								\
-constexpr decltype(auto) operator&(enum_flags const lhs, enum_flags const rhs) noexcept			\
-{																								\
-	return lhs & static_cast<enum_base>(rhs);													\
-}																								\
-constexpr decltype(auto) operator|=(enum_flags & lhs, enum_flags const rhs) noexcept			\
-{																								\
-	return lhs = lhs | rhs;																		\
-}																								\
-constexpr decltype(auto) operator&=(enum_flags & lhs, enum_flags const rhs) noexcept			\
-{																								\
-	return lhs = lhs & rhs;																		\
-}																								\
-																								\
-static_assert(std::is_enum_v<enum_flags>)
+// operator overloads to make using enum class more hospitable
+#define ML_ENUM_FLAGS(Base, Enum)												\
+	/* == */																	\
+	constexpr bool operator==(Enum const lhs, Base const rhs) noexcept			\
+	{																			\
+		return static_cast<Base>(lhs) == rhs;									\
+	}																			\
+	constexpr bool operator==(Base const lhs, Enum const rhs) noexcept			\
+	{																			\
+		return lhs == static_cast<Base>(rhs);									\
+	}																			\
+																				\
+	/* != */																	\
+	constexpr bool operator!=(Enum const lhs, Base const rhs) noexcept			\
+	{																			\
+		return static_cast<Base>(lhs) != rhs;									\
+	}																			\
+	constexpr bool operator!=(Base const lhs, Enum const rhs) noexcept			\
+	{																			\
+		return lhs != static_cast<Base>(rhs);									\
+	}																			\
+																				\
+	/* ! ~ + - */																\
+	constexpr decltype(auto) operator!(Enum const value) noexcept				\
+	{																			\
+		return !static_cast<Base>(value);										\
+	}																			\
+	constexpr decltype(auto) operator~(Enum const value) noexcept				\
+	{																			\
+		return ~static_cast<Base>(value);										\
+	}																			\
+	constexpr decltype(auto) operator+(Enum const value) noexcept				\
+	{																			\
+		return +static_cast<Base>(value);										\
+	}																			\
+	constexpr decltype(auto) operator-(Enum const value) noexcept				\
+	{																			\
+		return -static_cast<Base>(value);										\
+	}																			\
+																				\
+	/* | */																		\
+	constexpr decltype(auto) operator|(Base const lhs, Enum const rhs) noexcept	\
+	{																			\
+		return static_cast<Base>(lhs | static_cast<Base>(rhs));					\
+	}																			\
+	constexpr decltype(auto) operator|(Enum const lhs, Base const rhs) noexcept	\
+	{																			\
+		return static_cast<Enum>(static_cast<Base>(lhs) | rhs);					\
+	}																			\
+	constexpr decltype(auto) operator|=(Base & lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs = lhs | rhs;													\
+	}																			\
+	constexpr decltype(auto) operator|=(Enum & lhs, Base const rhs) noexcept	\
+	{																			\
+		return lhs = lhs | rhs;													\
+	}																			\
+	constexpr decltype(auto) operator|(Enum const lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs | static_cast<Base>(rhs);									\
+	}																			\
+	constexpr decltype(auto) operator|=(Enum & lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs = lhs | rhs;													\
+	}																			\
+																				\
+	/* & */																		\
+	constexpr decltype(auto) operator&(Base const lhs, Enum const rhs) noexcept	\
+	{																			\
+		return static_cast<Base>(lhs & static_cast<Base>(rhs));					\
+	}																			\
+	constexpr decltype(auto) operator&(Enum const lhs, Base const rhs) noexcept	\
+	{																			\
+		return static_cast<Enum>(static_cast<Base>(lhs) & rhs);					\
+	}																			\
+	constexpr decltype(auto) operator&=(Base & lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs = lhs & rhs;													\
+	}																			\
+	constexpr decltype(auto) operator&=(Enum & lhs, Base const rhs) noexcept	\
+	{																			\
+		return lhs = lhs & rhs;													\
+	}																			\
+	constexpr decltype(auto) operator&(Enum const lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs & static_cast<Base>(rhs);									\
+	}																			\
+	constexpr decltype(auto) operator&=(Enum & lhs, Enum const rhs) noexcept	\
+	{																			\
+		return lhs = lhs & rhs;													\
+	}																			\
+																				\
+	/* sanity check */															\
+	static_assert(std::is_enum_v<Enum>)
+	
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_ENUM_FLAGS_HPP_

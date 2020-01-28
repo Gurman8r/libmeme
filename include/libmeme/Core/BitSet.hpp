@@ -1,47 +1,69 @@
 #ifndef _ML_BIT_SET_HPP_
 #define _ML_BIT_SET_HPP_
 
-#include <libmeme/Core/Utility.hpp>
+#include <libmeme/Core/Array.hpp>
 
-namespace ml
+namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <size_t _Size = 64
-	> struct bit_set
+	template <size_t _Bits = 64> struct bitset
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(_Size <= 64);
+		static constexpr size_t bits{ _Bits };
 
-		using value_type = typename uint64_t;
-		using array_type = typename ds::array<bool, _Size>;
+		static_assert(0 < bits);
+
+		using self_type = typename bitset<bits>;
+
+		using value_type = typename std::conditional_t<bits <= sizeof(uint32_t) * 8,
+			uint32_t, uint64_t
+		>;
+
+		static constexpr ptrdiff_t bitsperword{ sizeof(value_type) * 8 };
+		
+		static constexpr ptrdiff_t words{ (bits - 1) / bitsperword };
+
+		using storage_type = typename array<value_type, words + 1>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr bitset() noexcept
+			: m_words{ 0 }
+		{
+		}
+
 		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
-		> constexpr bit_set(T const value) noexcept
-			: m_value{ static_cast<uint64_t>(value) }
+		> constexpr bitset(T const value) noexcept
+			: m_words{ static_cast<uint64_t>(value) }
 		{
 		}
 
-		constexpr bit_set() noexcept
-			: bit_set{ 0 }
+		constexpr bitset(self_type const & other)
+			: m_words{ other.m_words }
 		{
 		}
 
-		constexpr bit_set(bit_set const & other)
-			: bit_set{ other.m_value }
+		constexpr bitset(self_type && other) noexcept
+			: m_words{ std::move(other.m_words) }
 		{
 		}
 
-		constexpr bit_set(bit_set && other) noexcept
-			: bit_set{ std::move(other.m_value) }
+		template <size_t N
+		> constexpr bitset(bitset<N> const & other)
+			: m_words{ other.m_words }
 		{
 		}
 
-		constexpr bit_set(array_type const & arr) noexcept
-			: bit_set{}
+		template <size_t N
+		> constexpr bitset(bitset<N> && other) noexcept
+			: m_words{ std::move(other.m_words) }
+		{
+		}
+
+		constexpr bitset(array<bool, bits> const & arr) noexcept
+			: m_words{}
 		{
 			for (auto it = arr.begin(); it != arr.end(); ++it)
 			{
@@ -49,8 +71,8 @@ namespace ml
 			}
 		}
 
-		constexpr bit_set(std::string_view const & str) noexcept
-			: bit_set{}
+		constexpr bitset(std::string_view const & str) noexcept
+			: self_type{}
 		{
 			for (auto it = str.begin(); it != str.end(); ++it)
 			{
@@ -59,33 +81,33 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		constexpr bit_set & operator=(bit_set const & other)
+
+		constexpr self_type & operator=(self_type const & other)
 		{
-			bit_set temp{ other };
+			self_type temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr bit_set & operator=(bit_set && other) noexcept
+		constexpr self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
 		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
-		> constexpr bit_set & operator=(T const value) noexcept
+		> constexpr bitset & operator=(T const value) noexcept
 		{
-			bit_set temp{ value };
+			bitset temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr operator uint64_t const &() const noexcept
+		constexpr operator uint64_t const & () const noexcept
 		{
-			return m_value;
+			return m_words;
 		}
 
 		constexpr bool operator[](size_t const i) const noexcept
@@ -93,83 +115,102 @@ namespace ml
 			return read(i);
 		}
 
-		constexpr array_type arr() const noexcept
+		constexpr array<bool, bits> arr() const noexcept
 		{
-			array_type temp{};
-			for (size_t i = 0; i < _Size; ++i)
+			array<bool, bits> temp{};
+			for (size_t i = 0; i < bits; ++i)
 				temp[i] = read(i);
 			return temp;
 		}
 
-		constexpr bit_set & clear() noexcept
+		template <size_t I> constexpr self_type & clear() noexcept
 		{
-			m_value = 0;
+			return clear(I);
+		}
+
+		constexpr self_type & clear(size_t const i) noexcept
+		{
+			m_words[i / bitsperword] &= ~(value_type{ 1 } << i % bitsperword);
 			return (*this);
 		}
 
-		constexpr bit_set & clear(size_t const i) noexcept
+		template <size_t I> constexpr bool read() noexcept
 		{
-			if (i < size()) m_value &= ~(1ULL << static_cast<uint64_t>(i));
-			return (*this);
+			return read(I);
 		}
 
 		constexpr bool read(size_t const i) const noexcept
 		{
-			return (i < size()) ? ((m_value >> static_cast<uint64_t>(i)) & 1ULL) : false;
+			return m_words[i / bitsperword] & (value_type{ 1 } << i % bitsperword);
 		}
 
-		constexpr bit_set & set(size_t const i) noexcept
+		constexpr self_type & reset() noexcept
 		{
-			if (i < size()) m_value |= (1ULL << static_cast<uint64_t>(i));
+			m_words = { 0 };
+			return (*this);
+		}
+
+		template <size_t I> constexpr self_type & set() noexcept
+		{
+			return set(I);
+		}
+
+		constexpr self_type & set(size_t const i) noexcept
+		{
+			m_words[i / bitsperword] |= (value_type{ 1 } << i % bitsperword);
 			return (*this);
 		}
 
 		constexpr size_t size() const noexcept
 		{
-			return _Size;
+			return bits;
 		}
 
-		constexpr void swap(bit_set & other) noexcept
+		constexpr void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
-				util::swap(m_value, other.m_value);
+				util::swap(m_words, other.m_words);
 			}
 		}
 
-		constexpr bit_set & write(size_t const i, bool b) noexcept
+		constexpr self_type & write(size_t const i, bool b) noexcept
 		{
 			return b ? set(i) : clear(i);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> ML_NODISCARD constexpr bool operator==(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator==(T other) const
 		{
-			return !(*this < other) && !(other < *this);
+			if constexpr (std::is_same_v<self_type, T>)
+				return m_words == other.m_words;
+			else return *this == self_type{ other };
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator!=(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator!=(T other) const
 		{
 			return !(*this == other);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator<(T other) const
 		{
-			return (m_value < static_cast<uint64_t>(other));
+			if constexpr (std::is_same_v<self_type, T>)
+				return m_words < other.m_words;
+			else return *this < self_type{ other };
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator>(T other) const
 		{
 			return !(*this < other);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<=(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator<=(T other) const
 		{
 			return (*this < other) || (*this == other);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>=(T const & other) const
+		template <class T> ML_NODISCARD constexpr bool operator>=(T other) const
 		{
 			return (*this > other) || (*this == other);
 		}
@@ -177,15 +218,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		uint64_t m_value;
+		storage_type m_words;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
-	template <size_t N> inline ML_SERIALIZE(std::ostream & out, bit_set<N> const & value)
+	template <size_t N> inline ML_SERIALIZE(std::ostream & out, bitset<N> const & value)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
