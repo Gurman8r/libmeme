@@ -11,16 +11,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct shader_source final
-		{
-			C_string v{}, g{}, f{};
-
-			constexpr shader_source() noexcept = default;
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using source_cache		= typename ds::array<pmr::string, 3>;
 		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
 		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, struct texture const *>;
@@ -31,7 +23,7 @@ namespace ml
 		
 		explicit shader(allocator_type const & alloc);
 		
-		shader(shader_source const & source, allocator_type const & alloc = {});
+		shader(source_cache const & source, allocator_type const & alloc = {});
 		
 		shader(fs::path const & v, fs::path const & f, allocator_type const & alloc = {});
 		
@@ -64,15 +56,11 @@ namespace ml
 
 		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
 
-		bool load_from_source(shader_source const & value);
+		bool load_from_source(source_cache const & value);
 
 		bool load_from_memory(pmr::string const & v, pmr::string const & f);
 
 		bool load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f);
-
-		bool load_from_memory(C_string v, C_string f);
-
-		bool load_from_memory(C_string v, C_string g, C_string f);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -124,6 +112,8 @@ namespace ml
 
 		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
+		ML_NODISCARD inline auto source() const noexcept -> source_cache const & { return m_source; }
+
 		ML_NODISCARD inline auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
 
 		ML_NODISCARD inline auto textures() const noexcept -> texture_cache const & { return m_textures; }
@@ -146,7 +136,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uint32_t		m_handle;
-		shader_source	m_source;
+		source_cache	m_source;
 		attribute_cache	m_attributes;
 		uniform_cache	m_uniforms;
 		texture_cache	m_textures;

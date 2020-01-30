@@ -4,6 +4,7 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/Script.hpp>
+#include <libmeme/Engine/ECS.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -21,6 +22,39 @@ namespace ml
 {
 	struct demo final : plugin
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// components
+		struct c_position	{ vec3		value; };
+		struct c_rotation	{ vec4		value; };
+		struct c_scale		{ vec3		value; };
+		struct c_shader		{ shader	value; };
+		struct c_material	{ material	value; };
+		struct c_model		{ model		value; };
+
+		// signatures
+		using s_transform	= meta::type_list<c_material, c_position, c_rotation, c_scale>;
+		using s_render		= meta::type_list<c_shader, c_material, c_model>;
+
+		ecs::manager<ecs::settings<
+			// components
+			ecs::component_config
+			<
+			c_position, c_rotation, c_scale,
+			c_shader, c_material, c_model
+			>,
+			// tags
+			ecs::tag_config
+			<
+			>,
+			// signatures
+			ecs::signature_config
+			<
+			s_transform, s_render
+			>
+		>
+		> m_entities;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool m_show_imgui_demo{ false };
@@ -145,9 +179,9 @@ namespace ml
 					make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
 					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
 					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<vec3	>("u_position",	vec3{ 0.f, 0.f, 0.f }),
-					make_uniform<vec3	>("u_scale",	vec3{ 1.f, 1.f, 1.f }),
-					make_uniform<vec4	>("u_rotation",	vec4{ 0.0f, 0.1f, 0.0f, 0.25f })
+					make_uniform<vec3	>("u_position", vec3{}),
+					make_uniform<vec3	>("u_scale",	vec3{}),
+					make_uniform<vec4	>("u_rotation", vec4{})
 				);
 
 				// Models
@@ -183,37 +217,61 @@ namespace ml
 					}
 				));
 
+				// Entities
+				m_entities.resize(1);
+				if (auto e{ m_entities.create_handle() })
+				{
+					e.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
+					e.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
+					e.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
+					e.add_component<c_shader	>(m_shaders["3d"]);
+					e.add_component<c_material	>(m_materials["3d"]);
+					e.add_component<c_model		>(m_models["sphere32x24"]);
+				}
+				m_entities.refresh();
+
 			} break;
 			case hashof_v<update_event>:
 			{
 				// update stuff, etc...
+
+				m_entities.for_matching<s_transform>(
+				[&](size_t, auto & _mat, auto & _pos, auto & _rot, auto & _scl)
+				{
+					if (auto u{ _mat.value.find("u_position") }
+					; u && u->holds<vec3>()) u->set<vec3>(_pos.value);
+
+					if (auto u{ _mat.value.find("u_scale") }
+					; u && u->holds<vec3>()) u->set<vec3>(_scl.value);
+
+					if (auto u{ _mat.value.find("u_rotation") }
+					; u && u->holds<vec4>()) u->set<vec4>(_rot.value);
+				});
 				
 			} break;
 			case hashof_v<draw_event>:
 			{
 				// draw stuff, etc...
 
-				if (m_pipeline.empty())
-					return;
+				if (m_pipeline.empty()) return;
 
-				if (render_texture const & _r{ m_pipeline.at(0) })
+				if (render_texture const & target{ m_pipeline.at(0) })
 				{
-					ML_BIND_SCOPE(_r);
-					_r.clear_color(colors::magenta);
-					_r.viewport(_r.bounds());
-
-					constexpr render_states states{
-						{}, {}, cull_state{ false }, {}
-					}; states();
+					ML_BIND_SCOPE(target);
+					target.clear_color(colors::magenta);
+					target.viewport(target.bounds());
+					cull_state{ false }();
 					
-					if (shader & _s{ m_shaders["3d"] })
+					m_entities.for_matching<s_render>(
+					[&](size_t, auto & _shd, auto & _mat, auto & _mod)
 					{
-						ML_BIND_SCOPE(_s, false);
-						for (uniform const & u : m_materials["3d"])
-							_s.set_uniform(u);
-						_s.bind(true);
-						_r.draw(m_models["sphere32x24"]);
-					}
+						_shd.value.bind(false);
+						for (uniform const & u : _mat.value)
+							_shd.value.set_uniform(u);
+						_shd.value.bind(true);
+						target.draw(_mod.value);
+						_shd.value.unbind();
+					});
 				}
 
 			} break;

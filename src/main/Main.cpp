@@ -8,9 +8,6 @@
 #include <libmeme/Editor/EditorEvents.hpp>
 
 #include <libmeme/Engine/ECS.hpp>
-#include <libmeme/Core/BitSet.hpp>
-
-#include <bitset>
 
 namespace ml
 {
@@ -34,72 +31,89 @@ namespace ml
 
 	int32_t ecs_test()
 	{
-		using EC = ecs::entity_config<
-			ecs::component_config<C0, C1, C2, C3, C4>,
-			ecs::signature_config<S0, S1, S2, S3>,
-			ecs::system_config<>,
-			ecs::tag_config<T0, T1, T2>
+		using ES = ecs::settings<
+			ecs::component_config	<C0, C1, C2, C3, C4>,
+			ecs::tag_config			<T0, T1, T2>,
+			ecs::signature_config	<S0, S1, S2, S3>
 		>;
 
-		static_assert(EC::components::count()	== 5);
-		static_assert(EC::signatures::count()	== 4);
-		static_assert(EC::systems::count()		== 0);
-		static_assert(EC::tags::count()			== 3);
+		static_assert(ES::components::count() == 5);
+		static_assert(ES::signatures::count() == 4);
+		static_assert(ES::tags		::count() == 3);
 
-		static_assert(EC::components::index<C0>() == 0);
-		static_assert(EC::components::index<C1>() == 1);
-		static_assert(EC::components::index<C2>() == 2);
-		static_assert(EC::components::index<C3>() == 3);
-		static_assert(EC::components::index<C4>() == 4);
+		static_assert(ES::components::index<C0>() == 0);
+		static_assert(ES::components::index<C1>() == 1);
+		static_assert(ES::components::index<C2>() == 2);
+		static_assert(ES::components::index<C3>() == 3);
+		static_assert(ES::components::index<C4>() == 4);
+		static_assert(ES::tags		::index<T0>() == 0);
+		static_assert(ES::tags		::index<T1>() == 1);
+		static_assert(ES::tags		::index<T2>() == 2);
+		static_assert(ES::signatures::index<S0>() == 0);
+		static_assert(ES::signatures::index<S1>() == 1);
+		static_assert(ES::signatures::index<S2>() == 2);
+		static_assert(ES::signatures::index<S3>() == 3);
 
-		static_assert(EC::tags::index<T0>() == 0);
-		static_assert(EC::tags::index<T1>() == 1);
-		static_assert(EC::tags::index<T2>() == 2);
+		static_assert(ES::component_bit<C0>() == 0);
+		static_assert(ES::component_bit<C1>() == 1);
+		static_assert(ES::component_bit<C2>() == 2);
+		static_assert(ES::component_bit<C3>() == 3);
+		static_assert(ES::component_bit<C4>() == 4);
+		static_assert(ES::		tag_bit<T0>() == 5);
+		static_assert(ES::		tag_bit<T1>() == 6);
+		static_assert(ES::		tag_bit<T2>() == 7);
 
-		static_assert(EC::signatures::index<S0>() == 0);
-		static_assert(EC::signatures::index<S1>() == 1);
-		static_assert(EC::signatures::index<S2>() == 2);
-		static_assert(EC::signatures::index<S3>() == 3);
+		static_assert(ES::get_bitmask<S0>() == "00000000");
+		static_assert(ES::get_bitmask<S1>() == "11000000");
+		static_assert(ES::get_bitmask<S2>() == "10001100");
+		static_assert(ES::get_bitmask<S3>() == "01010101");
 
-		static_assert(EC::component_bit<C0>() == 0);
-		static_assert(EC::component_bit<C1>() == 1);
-		static_assert(EC::component_bit<C2>() == 2);
-		static_assert(EC::component_bit<C3>() == 3);
-		static_assert(EC::component_bit<C4>() == 4);
-		static_assert(EC::tag_bit<T0>() == 5);
-		static_assert(EC::tag_bit<T1>() == 6);
-		static_assert(EC::tag_bit<T2>() == 7);
-
-		static_assert(EC::get_bitset<S0>() == "00000000");
-		static_assert(EC::get_bitset<S1>() == "11000000");
-		static_assert(EC::get_bitset<S2>() == "10001100");
-		static_assert(EC::get_bitset<S3>() == "01010101");
-
-		static_assert(std::is_same_v<EC::component_signatures<S0>,
+		static_assert(std::is_same_v<ES::component_signatures<S0>,
 			meta::type_list<>
 		>);
-		static_assert(std::is_same_v<EC::component_signatures<S3>,
+		static_assert(std::is_same_v<ES::component_signatures<S3>,
 			meta::type_list<C1, C3>
 		>);
-		static_assert(std::is_same_v<EC::tag_signatures<S3>,
+		static_assert(std::is_same_v<ES::tag_signatures<S3>,
 			meta::type_list<T0, T2>
 		>);
 
-		ecs::entity_manager<EC> man{};
-		man.grow_to(100);
-		if (auto e = man.create_index())
-		{
-			man.add_component<C0>(e, C0{});
-			man.add_component<C1>(e, C1{});
-		}
+		ecs::manager<ES> man{};
+		man.resize(100);
+
+		auto e0 = man.create_handle();
+		e0.add_component<C0>();
+		e0.add_component<C1>();
+
+		auto e1 = man.create_handle();
+		e1.add_component<C0>();
+		e1.add_component<C1>();
+		e1.add_component<C2>();
+		e1.add_component<C4>();
+
+		auto e3 = man.create_handle();
+		e3.add_component<C0>();
+		e3.add_component<C4>();
+		e3.add_tag<T0>();
+		
 		man.refresh();
-		man.for_entities([&](size_t i)
+
+		std::cout << "Handles:\n";
+		man.for_handles([&](size_t i, auto & h)
 		{
-			std::cout << i << ' ' << man.get_entity(i).mask << '\n';
+			std::cout << " [" << i << "] " << h->m_mask << '\n';
 		});
-		man.for_matching<S1>([&](auto, auto & c0, auto & c1)
+
+		std::cout << "S1:\n";
+		man.for_matching<S1>([&](size_t i, C0 & c0, C1 & c1)
 		{
-			std::cout << c0.name << ' ' << c1.name << '\n';
+			std::cout << " " << c0.name << ' ' << c1.name << '\n';
+		});
+
+		std::cout << "S2:\n";
+		man.for_matching<S2>([&](size_t i, C0 & c0, C4 & c4)
+		{
+			std::cout << " " << c0.name << ' ' << c4.name << '\n';
 		});
 		return debug::pause(0);
 	}
@@ -110,7 +124,6 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using namespace ml;
-	return ecs_test();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

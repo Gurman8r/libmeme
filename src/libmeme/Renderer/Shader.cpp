@@ -47,14 +47,14 @@ namespace ml
 
 	shader::shader(allocator_type const & alloc)
 		: m_handle		{ NULL }
-		, m_source		{ nullptr, nullptr, nullptr }
+		, m_source		{ pmr::string{ alloc }, pmr::string{ alloc }, pmr::string{ alloc } }
 		, m_attributes	{ alloc }
 		, m_textures	{ alloc }
 		, m_uniforms	{ alloc }
 	{
 	}
 
-	shader::shader(shader_source const & source, allocator_type const & alloc)
+	shader::shader(source_cache const & source, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_source(source);
@@ -108,37 +108,36 @@ namespace ml
 		);
 	}
 
-	bool shader::load_from_source(shader_source const & value)
+	bool shader::load_from_source(source_cache const & value)
 	{
-		return load_from_memory(value.v, value.g, value.f);
+		if (!value[0].empty() && !value[1].empty() && !value[2].empty())
+		{
+			return load_from_memory(value[0], value[1], value[2]);
+		}
+		else if (!value[0].empty() && !value[2].empty())
+		{
+			return load_from_memory(value[0], value[2]);
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	bool shader::load_from_memory(pmr::string const & v, pmr::string const & f)
 	{
-		return load_from_memory(v.c_str(), nullptr, f.c_str());
+		if (v.empty() || f.empty())
+			return false;
+		m_source = { v, {}, f };
+		return compile(v.c_str(), nullptr, f.c_str()) == EXIT_SUCCESS;
 	}
 
 	bool shader::load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f)
 	{
-		return load_from_memory(v.c_str(), g.c_str(), f.c_str());
-	}
-
-	bool shader::load_from_memory(C_string v, C_string f)
-	{
-		return compile(
-			m_source.v = v,
-			m_source.g = nullptr,
-			m_source.f = f
-		) == EXIT_SUCCESS;
-	}
-
-	bool shader::load_from_memory(C_string v, C_string g, C_string f)
-	{
-		return compile(
-			m_source.v = v,
-			m_source.g = g,
-			m_source.f = f
-		) == EXIT_SUCCESS;
+		if (v.empty() || g.empty() || f.empty())
+			return false;
+		m_source = { v, g, f };
+		return compile(v.c_str(), g.c_str(), f.c_str()) == EXIT_SUCCESS;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -173,7 +172,7 @@ namespace ml
 			m_handle = NULL;
 			GL::flush();
 			
-			m_source = { nullptr, nullptr, nullptr };
+			for (auto & src : m_source) src.clear();
 			m_attributes.clear();
 			m_uniforms.clear();
 			m_textures.clear();

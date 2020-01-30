@@ -13,8 +13,6 @@ namespace ml::ds
 
 		static constexpr size_t bits{ _Bits };
 
-		static_assert(0 < bits);
-
 		using self_type = typename bitset<bits>;
 
 		using value_type = typename std::conditional_t<bits <= sizeof(uint32_t) * 8,
@@ -185,10 +183,8 @@ namespace ml::ds
 		{
 			if constexpr (std::is_same_v<T, self_type>)
 			{
-				for (size_t i = 0; i < words; ++i)
-				{
-					m_words[i] &= other.m_words[i];
-				}
+				size_t i{};
+				for (auto & elem : m_words) { elem &= other.m_words[i++]; }
 				return (*this);
 			}
 			else
@@ -201,6 +197,28 @@ namespace ml::ds
 		{
 			self_type temp{ other };
 			return temp &= (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T> constexpr self_type & operator|=(T other)
+		{
+			if constexpr (std::is_same_v<T, self_type>)
+			{
+				size_t i{};
+				for (auto & elem : m_words) { elem |= other.m_words[i++]; }
+				return (*this);
+			}
+			else
+			{
+				return (*this) |= self_type{ other };
+			}
+		}
+
+		template <class T> constexpr self_type operator|(T other) const
+		{
+			self_type temp{ other };
+			return temp |= (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -98,33 +98,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::optional<uniform> find(pmr::string const & name)
+		ML_NODISCARD inline uniform * find(pmr::string const & name)
 		{
-			if (name.empty()) { return std::nullopt; }
+			if (name.empty()) { return nullptr; }
 			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
 				return u.name() == name;
 			}) }; it != end())
 			{
-				return std::make_optional(*it);
+				return &(*it);
 			}
 			else
 			{
-				return std::nullopt;
+				return nullptr;
 			}
 		}
 
-		ML_NODISCARD inline std::optional<uniform> find(pmr::string const & name) const
+		ML_NODISCARD inline uniform const * find(pmr::string const & name) const
 		{
-			if (name.empty()) { return std::nullopt; }
-			if (auto it{ std::find_if(cbegin(), cend(), [name](auto const & u) {
+			if (name.empty()) { return nullptr; }
+			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
 				return u.name() == name;
-			}) }; it != cend())
+			}) }; it != end())
 			{
-				return std::make_optional(*it);
+				return &(*it);
 			}
 			else
 			{
-				return std::nullopt;
+				return nullptr;
 			}
 		}
 

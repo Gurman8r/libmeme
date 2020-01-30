@@ -106,7 +106,7 @@ namespace ml::meta
 		class ... Ts
 	> struct rename_impl<To, From<Ts...>>
 	{
-		using type = To<Ts...>;
+		using type = typename To<Ts...>;
 	};
 
 	template<
@@ -119,7 +119,7 @@ namespace ml::meta
 	template <class ...
 	> struct concat_impl
 	{
-		using type = type_list<>;
+		using type = typename type_list<>;
 	};
 
 	template <class ... Ts
@@ -128,32 +128,32 @@ namespace ml::meta
 	template <class ... Ts
 	> struct concat_impl<type_list<Ts...>>
 	{
-		using type = type_list<Ts...>;
+		using type = typename type_list<Ts...>;
 	};
 
 	template <class ... Ts0, class ... Ts1, class ... Rest
 	> struct concat_impl<type_list<Ts0...>, type_list<Ts1...>, Rest...>
 	{
-		using type = concat<type_list<Ts0..., Ts1...>, Rest...>;
+		using type = typename concat<type_list<Ts0..., Ts1...>, Rest...>;
 	};
 
-	// REBIND
+	// REMAP
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Fn, class
-	> struct rebind_impl
+	> struct remap_impl
 	{
-		using type = type_list<>;
+		using type = typename type_list<>;
 	};
 
 	template <template <class> class Pr, class Ls
-	> ML_USING rebind = typename rebind_impl<Pr, Ls>::type;
+	> ML_USING remap = typename remap_impl<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
-	> struct rebind_impl<Pr, type_list<T, Ts...>>
+	> struct remap_impl<Pr, type_list<T, Ts...>>
 	{
-		using type = concat<
-			type_list<Pr<T>>, rebind<Pr, type_list<Ts...>>
+		using type = typename concat<
+			type_list<Pr<T>>, remap<Pr, type_list<Ts...>>
 		>;
 	};
 
@@ -193,10 +193,10 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	template <class Ls
-	> ML_USING tuple = rename<std::tuple, Ls>;
+	> ML_USING tuple = typename rename<std::tuple, Ls>;
 	
 	template <class Ls
-	> ML_USING type_tuple = typename tuple<rebind<type_tag, Ls>>;
+	> ML_USING type_tuple = typename tuple<remap<type_tag, Ls>>;
 
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
@@ -210,15 +210,15 @@ namespace ml::meta
 		return Ls::size;
 	}
 
-	template <class Ls, class T> ML_USING push_back = concat<Ls, type_list<T>>;
+	template <class Ls, class T> ML_USING push_back = typename concat<Ls, type_list<T>>;
 
-	template <class Ls, class T> ML_USING push_front = concat<type_list<T>, Ls>;
+	template <class Ls, class T> ML_USING push_front = typename concat<type_list<T>, Ls>;
 
-	template <size_t I, class Ls> ML_USING nth = std::tuple_element_t<I, tuple<Ls>>;
+	template <size_t I, class Ls> ML_USING nth = typename std::tuple_element_t<I, tuple<Ls>>;
 
-	template <class Ls> ML_USING head = nth<0, Ls>;
+	template <class Ls> ML_USING head = typename nth<0, Ls>;
 
-	template <class Ls> ML_USING tail = nth<size<Ls>() - 1, Ls>;
+	template <class Ls> ML_USING tail = typename nth<size<Ls>() - 1, Ls>;
 
 	// REPEAT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -226,13 +226,13 @@ namespace ml::meta
 	template <size_t N, class T
 	> struct repeat_impl
 	{
-		using type = push_back<typename repeat_impl<N - 1, T>::type, T>;
+		using type = typename push_back<typename repeat_impl<N - 1, T>::type, T>;
 	};
 
 	template <class T
 	> struct repeat_impl<0, T>
 	{
-		using type = type_list<>;
+		using type = typename type_list<>;
 	};
 
 	template <size_t N, class T
@@ -244,7 +244,7 @@ namespace ml::meta
 	template <template <class> class Pr, class
 	> struct filter_impl
 	{
-		using type = type_list<>;
+		using type = typename type_list<>;
 	};
 
 	template <template <class> class Pr, class Ls
@@ -253,9 +253,9 @@ namespace ml::meta
 	template <template <class> class Pr, class T, class ... Ts
 	> struct filter_impl<Pr, type_list<T, Ts...>>
 	{
-		using next = filter<Pr, type_list<Ts...>>;
+		using next = typename filter<Pr, type_list<Ts...>>;
 
-		using type = std::conditional_t<
+		using type = typename std::conditional_t<
 			Pr<T>{},
 			concat<type_list<T>, next>,
 			next
@@ -277,11 +277,11 @@ namespace ml::meta
 	> struct bound_all
 	{
 		template <class ... Ts
-		> using type = all<TMF, Ts...>;
+		> using type = typename all<TMF, Ts...>;
 	};
 
 	template <template <class> class TMF, class TL
-	> ML_USING all_types = rename<bound_all<TMF>::template type, TL>;
+	> ML_USING all_types = typename rename<bound_all<TMF>::template type, TL>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -179,6 +179,20 @@ namespace ml
 			}
 		}
 
+		template <class T> inline uniform & set(data_t const & value)
+		{
+			m_type = typeof<T>{};
+			m_data = value;
+			return (*this);
+		}
+
+		template <class T> inline uniform & set(data_t && value)
+		{
+			m_type = typeof<T>{};
+			m_data = std::move(value);
+			return (*this);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline operator bool const() const noexcept
