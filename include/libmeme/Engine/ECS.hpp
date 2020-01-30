@@ -29,12 +29,14 @@ namespace ml::ecs
 			return meta::size<type_list>();
 		}
 
-		template <class T> static constexpr bool contains() noexcept
+		template <class T
+		> static constexpr bool contains() noexcept
 		{
 			return meta::contains<T, type_list>();
 		}
 
-		template <class T> static constexpr size_t index() noexcept
+		template <class T
+		> static constexpr size_t index() noexcept
 		{
 			static_assert(contains<T>());
 			return meta::index_of<T, type_list>();
@@ -54,12 +56,14 @@ namespace ml::ecs
 			return meta::size<type_list>();
 		}
 
-		template <class T> static constexpr bool contains() noexcept
+		template <class T
+		> static constexpr bool contains() noexcept
 		{
 			return meta::contains<T, type_list>();
 		}
 
-		template <class T> static constexpr size_t index() noexcept
+		template <class T
+		> static constexpr size_t index() noexcept
 		{
 			static_assert(contains<T>());
 			return meta::index_of<T, type_list>();
@@ -79,12 +83,45 @@ namespace ml::ecs
 			return meta::size<type_list>();
 		}
 
-		template <class T> static constexpr bool contains() noexcept
+		template <class T
+		> static constexpr bool contains() noexcept
 		{
 			return meta::contains<T, type_list>();
 		}
 
-		template <class T> static constexpr size_t index() noexcept
+		template <class T
+		> static constexpr size_t index() noexcept
+		{
+			static_assert(contains<T>());
+			return meta::index_of<T, type_list>();
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// SYSTEM WRAPPER
+	template <template <class> class _System
+	> struct system_wrapper {};
+
+	// SYSTEM CONFIG
+	template <template <class> class ... _Systems
+	> struct system_config
+	{
+		using type_list = typename meta::type_list<system_wrapper<_Systems>...>;
+
+		static constexpr size_t count() noexcept
+		{
+			return meta::size<type_list>();
+		}
+
+		template <template <class> class T
+		> static constexpr bool contains() noexcept
+		{
+			return meta::contains<T, type_list>();
+		}
+
+		template <template <class> class T
+		> static constexpr size_t index() noexcept
 		{
 			static_assert(contains<T>());
 			return meta::index_of<T, type_list>();
@@ -100,7 +137,8 @@ namespace ml::ecs
 	template <
 		class _ComponentConfig	= component_config<>,
 		class _TagConfig		= tag_config<>,
-		class _SignatureConfig	= signature_config<>
+		class _SignatureConfig	= signature_config<>,
+		class _SystemConfig		= system_config<>
 	> struct settings
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -108,6 +146,7 @@ namespace ml::ecs
 		using components		= typename _ComponentConfig;
 		using tags				= typename _TagConfig;
 		using signatures		= typename _SignatureConfig;
+		using systems			= typename _SystemConfig;
 		using bitmask			= typename ds::bitset<components::count() + tags::count()>;
 		using bitmask_storage	= typename meta::tuple<meta::repeat<signatures::count(), bitmask>>;
 

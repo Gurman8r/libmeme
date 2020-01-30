@@ -62,12 +62,18 @@ namespace ml
 			// TAG CONFIG
 			ecs::tag_config
 			<
+			// etc...
 			>,
 			// SIGNATURE CONFIG
 			ecs::signature_config
 			<
 			s_apply_position, s_apply_rotation, s_apply_scale,
 			s_render_model
+			>,
+			// SYSEM CONFIG
+			ecs::system_config
+			<
+			// etc...
 			>
 		>
 		> m_entities;
