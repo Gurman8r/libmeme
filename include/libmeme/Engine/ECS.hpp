@@ -741,7 +741,6 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool matches_signature(size_t const i) const noexcept
 		{
-			static_assert(settings::signatures::template contains<T>());
 			auto const & e{ get_entity(i).m_bitmask };
 			auto const & s{ settings::template get_bitmask<T>() };
 			return (s & e) == s;
