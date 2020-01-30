@@ -24,39 +24,6 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// components
-		struct c_position	{ vec3		value; };
-		struct c_rotation	{ vec4		value; };
-		struct c_scale		{ vec3		value; };
-		struct c_shader		{ shader	value; };
-		struct c_material	{ material	value; };
-		struct c_model		{ model		value; };
-
-		// signatures
-		using s_transform	= meta::type_list<c_material, c_position, c_rotation, c_scale>;
-		using s_render		= meta::type_list<c_shader, c_material, c_model>;
-
-		ecs::manager<ecs::settings<
-			// components
-			ecs::component_config
-			<
-			c_position, c_rotation, c_scale,
-			c_shader, c_material, c_model
-			>,
-			// tags
-			ecs::tag_config
-			<
-			>,
-			// signatures
-			ecs::signature_config
-			<
-			s_transform, s_render
-			>
-		>
-		> m_entities;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		bool m_show_imgui_demo{ false };
 
 		pmr::vector<render_texture>			m_pipeline	{};
@@ -67,6 +34,43 @@ namespace ml
 		ds::flat_map<pmr::string, script>	m_scripts	{};
 		ds::flat_map<pmr::string, shader>	m_shaders	{};
 		ds::flat_map<pmr::string, texture>	m_textures	{};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// components
+		struct c_position	{ vec3		value; };
+		struct c_rotation	{ vec4		value; };
+		struct c_scale		{ vec3		value; };
+		struct c_shader		{ shader	value; };
+		struct c_material	{ material	value; };
+		struct c_model		{ model		value; };
+
+		// signatures
+		using s_apply_position	= meta::type_list<c_material, c_position>;
+		using s_apply_rotation	= meta::type_list<c_material, c_rotation>;
+		using s_apply_scale		= meta::type_list<c_material, c_scale>;
+		using s_render_model	= meta::type_list<c_shader, c_material, c_model>;
+
+		// manager
+		ecs::manager<ecs::settings<
+			// COMPONENT CONFIG
+			ecs::component_config
+			<
+			c_position, c_rotation, c_scale,
+			c_shader, c_material, c_model
+			>,
+			// TAG CONFIG
+			ecs::tag_config
+			<
+			>,
+			// SIGNATURE CONFIG
+			ecs::signature_config
+			<
+			s_apply_position, s_apply_rotation, s_apply_scale,
+			s_render_model
+			>
+		>
+		> m_entities;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -235,17 +239,22 @@ namespace ml
 			{
 				// update stuff, etc...
 
-				m_entities.for_matching<s_transform>(
-				[&](size_t, auto & _mat, auto & _pos, auto & _rot, auto & _scl)
+				m_entities.for_matching<s_apply_position>([&](auto, auto & mat, auto & pos)
 				{
-					if (auto u{ _mat.value.find("u_position") }
-					; u && u->holds<vec3>()) u->set<vec3>(_pos.value);
+					if (auto u{ mat.value.find("u_position") }
+					; u && u->holds<vec3>()) u->set<vec3>(pos.value);
+				});
 
-					if (auto u{ _mat.value.find("u_scale") }
-					; u && u->holds<vec3>()) u->set<vec3>(_scl.value);
+				m_entities.for_matching<s_apply_rotation>([&](auto, auto & mat, auto & rot)
+				{
+					if (auto u{ mat.value.find("u_rotation") }
+					; u && u->holds<vec4>()) u->set<vec4>(rot.value);
+				});
 
-					if (auto u{ _mat.value.find("u_rotation") }
-					; u && u->holds<vec4>()) u->set<vec4>(_rot.value);
+				m_entities.for_matching<s_apply_scale>([&](auto, auto & mat, auto & scl)
+				{
+					if (auto u{ mat.value.find("u_scale") }
+					; u && u->holds<vec3>()) u->set<vec3>(scl.value);
 				});
 				
 			} break;
@@ -262,15 +271,18 @@ namespace ml
 					target.viewport(target.bounds());
 					cull_state{ false }();
 					
-					m_entities.for_matching<s_render>(
-					[&](size_t, auto & _shd, auto & _mat, auto & _mod)
+					m_entities.for_matching<s_render_model>([&](auto, auto & shd, auto & mat, auto & mdl)
 					{
-						_shd.value.bind(false);
-						for (uniform const & u : _mat.value)
-							_shd.value.set_uniform(u);
-						_shd.value.bind(true);
-						target.draw(_mod.value);
-						_shd.value.unbind();
+						shd.value.bind(false);
+						
+						for (uniform const & u : mat.value)
+							shd.value.set_uniform(u);
+						
+						shd.value.bind(true);
+						
+						target.draw(mdl.value);
+						
+						shd.value.unbind();
 					});
 				}
 
@@ -342,6 +354,7 @@ namespace ml
 				m_fonts.clear();
 				m_pipeline.clear();
 				m_scripts.clear();
+				m_entities.clear();
 			} break;
 			}
 		}

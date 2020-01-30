@@ -81,28 +81,28 @@ namespace ml
 		ecs::manager<ES> man{};
 		man.resize(100);
 
-		auto e0 = man.create_handle();
-		e0.add_component<C0>();
-		e0.add_component<C1>();
+		if (auto e = man.create_handle())
+		{
+			e.add_component<C0>();
+			e.add_component<C1>();
+		}
 
-		auto e1 = man.create_handle();
-		e1.add_component<C0>();
-		e1.add_component<C1>();
-		e1.add_component<C2>();
-		e1.add_component<C4>();
+		if (auto e = man.create_handle())
+		{
+			e.add_component<C0>();
+			e.add_component<C1>();
+			e.add_component<C2>();
+			e.add_component<C4>();
+		}
 
-		auto e3 = man.create_handle();
-		e3.add_component<C0>();
-		e3.add_component<C4>();
-		e3.add_tag<T0>();
+		if (auto e = man.create_handle())
+		{
+			e.add_component<C0>();
+			e.add_component<C4>();
+			e.add_tag<T0>();
+		}
 		
 		man.refresh();
-
-		std::cout << "Handles:\n";
-		man.for_handles([&](size_t i, auto & h)
-		{
-			std::cout << " [" << i << "] " << h->m_mask << '\n';
-		});
 
 		std::cout << "S1:\n";
 		man.for_matching<S1>([&](size_t i, C0 & c0, C1 & c1)
@@ -115,6 +115,7 @@ namespace ml
 		{
 			std::cout << " " << c0.name << ' ' << c4.name << '\n';
 		});
+
 		return debug::pause(0);
 	}
 }
