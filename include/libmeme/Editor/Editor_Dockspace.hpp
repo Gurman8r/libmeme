@@ -32,7 +32,7 @@ namespace ml
 
 		uint32_t begin_builder(int32_t flags);
 		uint32_t end_builder(uint32_t root);
-		uint32_t dock_window(C_string name, uint32_t id);
+		uint32_t dock_window(cstring name, uint32_t id);
 		uint32_t split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * other);
 		uint32_t split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other);
 

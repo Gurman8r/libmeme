@@ -85,13 +85,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	C_string	= typename char const *;
-	ML_USING	C_wstring	= typename wchar_t const *;
+	ML_USING	cstring		= typename char const *;
+	ML_USING	cwstring	= typename wchar_t const *;
 #if ML_HAS_CXX20
-	ML_USING	C_u8string	= typename char8_t const *;
+	ML_USING	c8string	= typename char8_t const *;
 #endif
-	ML_USING	C_u16string	= typename char16_t const *;
-	ML_USING	C_u32string	= typename char32_t const *;
+	ML_USING	c16string	= typename char16_t const *;
+	ML_USING	c32string	= typename char32_t const *;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -103,20 +103,23 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace std		= ::std;
-	namespace chrono	= std::chrono;
-	namespace fs		= std::filesystem;
-	namespace pmr		= std::pmr;
+	namespace chrono	= _ML std::chrono;
+	namespace fs		= _ML std::filesystem;
+	namespace pmr		= _ML std::pmr;
 #if ML_HAS_CXX20
-	namespace ranges	= std::ranges;
-	namespace views		= std::ranges::views;
+	namespace ranges	= _ML std::ranges;
+	namespace views		= _ML std::ranges::views;
 #endif
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace literals
 	{
-		using namespace std::chrono_literals;
-		using namespace std::string_literals;
-		using namespace std::string_view_literals;
+		using namespace _ML std::chrono_literals;
+		using namespace _ML std::string_literals;
+		using namespace _ML std::string_view_literals;
 	}
+
 	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

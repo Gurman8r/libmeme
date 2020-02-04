@@ -38,18 +38,18 @@ namespace ml
 
 		bool close();
 
-		void * load_function(C_string name);
+		void * load_function(cstring name);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> ML_NODISCARD inline decltype(auto) load_function(C_string name)
+		> ML_NODISCARD inline decltype(auto) load_function(cstring name)
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> inline std::optional<Ret> call_function(C_string name, Args && ... args)
+		> inline std::optional<Ret> call_function(cstring name, Args && ... args)
 		{
 			if (auto const fn{ load_function<Ret, Args...>(name) })
 			{
@@ -77,34 +77,39 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline int32_t compare(shared_library const & other) const noexcept
+		{
+			return m_path.compare(other.m_path);
+		}
+
 		ML_NODISCARD inline bool operator==(shared_library const & other) const
 		{
-			return !(*this < other) && !(other < *this);
+			return compare(other) == 0;
 		}
 
 		ML_NODISCARD inline bool operator!=(shared_library const & other) const
 		{
-			return !(*this == other);
+			return compare(other) != 0;
 		}
 
 		ML_NODISCARD inline bool operator<(shared_library const & other) const
 		{
-			return (m_path.filename() < other.m_path.filename());
+			return compare(other) < 0;
 		}
 
 		ML_NODISCARD inline bool operator>(shared_library const & other) const
 		{
-			return !(*this < other);
+			return compare(other) > 0;
 		}
 
 		ML_NODISCARD inline bool operator<=(shared_library const & other) const
 		{
-			return (*this < other) || (*this == other);
+			return compare(other) <= 0;
 		}
 
 		ML_NODISCARD inline bool operator>=(shared_library const & other) const
 		{
-			return (*this > other) || (*this == other);
+			return compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

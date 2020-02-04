@@ -10,9 +10,9 @@ namespace ml
 	struct enter_event final : type_event<enter_event>
 	{
 		int32_t const argc;
-		C_string const * argv;
+		cstring const * argv;
 
-		constexpr enter_event(int32_t argc, C_string const * argv) noexcept
+		constexpr enter_event(int32_t argc, cstring const * argv) noexcept
 			: argc{ argc }
 			, argv{ argv }
 		{

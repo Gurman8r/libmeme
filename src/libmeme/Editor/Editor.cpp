@@ -2,6 +2,7 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Platform/Window.hpp>
 #include <libmeme/Renderer/GL.hpp>
+#include <libmeme/Editor/StyleLoader.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -53,29 +54,35 @@ namespace ml
 		}
 
 		// Paths
-		io.LogFilename = g_editor->g_config.ini_file;
-		io.IniFilename = g_editor->g_config.log_file;
+		io.LogFilename = g_editor->config.ini_file;
+		io.IniFilename = g_editor->config.log_file;
 
 		// Style
-		switch (util::hash(util::to_lower(g_editor->g_config.style_config)))
+		switch (util::hash(util::to_lower(g_editor->config.style)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
 		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
+		default:
+			if (fs::path const path{ g_editor->config.style }; fs::exists(path))
+			{
+				style_loader{}(path);
+			}
+			break;
 		}
 
 		// Initialize Backend
 #ifdef ML_IMPL_RENDERER_OPENGL
 
 		if (!ImGui_ImplGlfw_InitForOpenGL(
-			(struct GLFWwindow *)g_editor->g_config.window_handle,
+			(struct GLFWwindow *)g_editor->config.window_handle,
 			install_callbacks
 		))
 		{
 			return debug::log_error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(g_editor->g_config.api_version))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->config.api_version))
 		{
 			return debug::log_error("Failed initializing ImGui renderer");
 		}
@@ -157,22 +164,22 @@ namespace ml
 
 	editor::config & editor::get_config() noexcept
 	{
-		return g_editor->g_config;
+		return g_editor->config;
 	}
 
 	editor::io & editor::get_io() noexcept
 	{
-		return g_editor->g_io;
+		return g_editor->io;
 	}
 
 	editor_dockspace & editor::get_dockspace() noexcept
 	{
-		return g_editor->g_dockspace;
+		return g_editor->dockspace;
 	}
 
 	editor_main_menu & editor::get_main_menu() noexcept
 	{
-		return g_editor->g_main_menu;
+		return g_editor->main_menu;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

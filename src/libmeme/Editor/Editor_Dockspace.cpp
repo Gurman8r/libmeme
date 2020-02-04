@@ -71,12 +71,12 @@ namespace ml
 			// Draw
 			if (m_nodes[Root] = begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
-				m_nodes[Left] = split_node(m_nodes[Root], ImGuiDir_Left, 0.4f, &m_nodes[Root]);
-				m_nodes[Right] = split_node(m_nodes[Root], ImGuiDir_Right, 0.6f, &m_nodes[Root]);
-				m_nodes[LeftUp] = split_node(m_nodes[Left], ImGuiDir_Up, 0.75f, &m_nodes[Left]);
-				m_nodes[RightUp] = split_node(m_nodes[Right], ImGuiDir_Up, 0.75f, &m_nodes[Right]);
-				m_nodes[LeftDn] = split_node(m_nodes[Left], ImGuiDir_Down, 0.25f, &m_nodes[Left]);
-				m_nodes[RightDn] = split_node(m_nodes[Right], ImGuiDir_Down, 0.25f, &m_nodes[Right]);
+				m_nodes[Left]	= split_node(m_nodes[Root], ImGuiDir_Left,	0.5f, &m_nodes[Root]);
+				m_nodes[Right]	= split_node(m_nodes[Root], ImGuiDir_Right, 0.5f, &m_nodes[Root]);
+				m_nodes[LeftUp]	= split_node(m_nodes[Left], ImGuiDir_Up,	0.5f, &m_nodes[Left]);
+				m_nodes[RightUp]= split_node(m_nodes[Right],ImGuiDir_Up,	0.5f, &m_nodes[Right]);
+				m_nodes[LeftDn]	= split_node(m_nodes[Left], ImGuiDir_Down,	0.5f, &m_nodes[Left]);
+				m_nodes[RightDn]= split_node(m_nodes[Right],ImGuiDir_Down,	0.5f, &m_nodes[Right]);
 
 				event_system::fire_event<dockspace_event>(*this);
 
@@ -128,7 +128,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t editor_dockspace::dock_window(C_string name, uint32_t id)
+	uint32_t editor_dockspace::dock_window(cstring name, uint32_t id)
 	{
 		if (name && id)
 		{

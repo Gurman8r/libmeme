@@ -7,30 +7,28 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <size_t _Bits = 64> struct bitset
+	template <size_t BitCount = 64
+	> struct bitset
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t bits{ _Bits };
+		using self_type = typename bitset<BitCount>;
 
-		using self_type = typename bitset<bits>;
-
-		using value_type = typename std::conditional_t<bits <= sizeof(uint32_t) * 8,
-			uint32_t, uint64_t
+		using value_type = typename std::conditional_t<
+			BitCount <= sizeof(uint32_t) * 8,
+			uint32_t,
+			uint64_t
 		>;
 
 		static constexpr ptrdiff_t bitsperword{ sizeof(value_type) * 8 };
 		
-		static constexpr ptrdiff_t words{ (bits - 1) / bitsperword };
+		static constexpr ptrdiff_t words{ (BitCount - 1) / bitsperword };
 
 		using storage_type = typename array<value_type, words + 1>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bitset() noexcept
-			: m_words{ 0 }
-		{
-		}
+		constexpr bitset() noexcept : m_words{ 0 } {}
 
 		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
 		> constexpr bitset(T const value) noexcept
@@ -60,7 +58,7 @@ namespace ml::ds
 		{
 		}
 
-		constexpr bitset(array<bool, bits> const & arr) noexcept
+		constexpr bitset(array<bool, BitCount> const & arr) noexcept
 			: m_words{}
 		{
 			for (auto it = arr.begin(); it != arr.end(); ++it)
@@ -93,8 +91,9 @@ namespace ml::ds
 			return (*this);
 		}
 
-		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
-		> constexpr bitset & operator=(T const value) noexcept
+		template <class T, class = std::enable_if_t<
+			std::is_integral_v<T>
+		>> constexpr bitset & operator=(T const value) noexcept
 		{
 			bitset temp{ value };
 			swap(temp);
@@ -113,16 +112,17 @@ namespace ml::ds
 			return read(i);
 		}
 
-		constexpr array<bool, bits> arr() const noexcept
+		constexpr array<bool, BitCount> arr() const noexcept
 		{
-			array<bool, bits> temp{};
-			for (size_t i = 0; i < bits; ++i)
+			array<bool, BitCount> temp{};
+			for (size_t i = 0; i < BitCount; ++i)
 				temp[i] = read(i);
 			return temp;
 		}
 
 		template <size_t I> constexpr self_type & clear() noexcept
 		{
+			static_assert(I < BitCount, "bitset subscript out of range");
 			return clear(I);
 		}
 
@@ -134,6 +134,7 @@ namespace ml::ds
 
 		template <size_t I> constexpr bool read() noexcept
 		{
+			static_assert(I < BitCount, "bitset subscript out of range");
 			return read(I);
 		}
 
@@ -150,6 +151,7 @@ namespace ml::ds
 
 		template <size_t I> constexpr self_type & set() noexcept
 		{
+			static_assert(I < BitCount, "bitset subscript out of range");
 			return set(I);
 		}
 
@@ -161,7 +163,7 @@ namespace ml::ds
 
 		constexpr size_t size() const noexcept
 		{
-			return bits;
+			return BitCount;
 		}
 
 		constexpr void swap(self_type & other) noexcept
@@ -170,6 +172,12 @@ namespace ml::ds
 			{
 				util::swap(m_words, other.m_words);
 			}
+		}
+
+		template <size_t I> constexpr self_type & write(bool b) noexcept
+		{
+			static_assert(I < BitCount, "bitset subscript out of range");
+			return write(I, b);
 		}
 
 		constexpr self_type & write(size_t const i, bool b) noexcept

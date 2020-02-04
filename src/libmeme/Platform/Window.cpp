@@ -393,7 +393,7 @@ namespace ml
 		return (m_window ? glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value) : 0);
 	}
 
-	C_string window::get_clipboard() const
+	cstring window::get_clipboard() const
 	{
 		return (m_window 
 			? glfwGetClipboardString(static_cast<GLFWwindow *>(m_window)) 
@@ -513,7 +513,7 @@ namespace ml
 		})());
 	}
 
-	int32_t window::extension_supported(C_string value)
+	int32_t window::extension_supported(cstring value)
 	{
 		return glfwExtensionSupported(value);
 	}
@@ -574,7 +574,7 @@ namespace ml
 		return temp;
 	}
 
-	window::proc_fn window::get_proc_address(C_string value)
+	window::proc_fn window::get_proc_address(cstring value)
 	{
 		return reinterpret_cast<window::proc_fn>(glfwGetProcAddress(value));
 	}

@@ -61,7 +61,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t lua::do_string(C_string const & value)
+	int32_t lua::do_string(cstring const & value)
 	{
 		return (value && s_L) ? luaL_dostring(s_L, value) : 0;
 	}

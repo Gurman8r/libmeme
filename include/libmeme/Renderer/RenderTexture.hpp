@@ -53,7 +53,7 @@ namespace ml
 
 		ML_NODISCARD inline operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo; }
+		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo && m_texture; }
 
 		ML_NODISCARD inline auto fbo() const noexcept -> frame_buffer const & { return m_fbo; }
 

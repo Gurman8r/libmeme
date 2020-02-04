@@ -40,7 +40,7 @@ namespace ml
 		return glGetError();
 	}
 
-	void GL::checkError(C_string file, uint32_t line, C_string expr)
+	void GL::checkError(cstring file, uint32_t line, cstring expr)
 	{
 		if (Err const code{ getError() })
 		{
@@ -201,17 +201,17 @@ namespace ml
 	// Getters
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto GL::getString(uint32_t name) -> C_string
+	auto GL::getString(uint32_t name) -> cstring
 	{
-		C_string temp{ nullptr };
-		glCheck(temp = reinterpret_cast<C_string>(glGetString(name)));
+		cstring temp{ nullptr };
+		glCheck(temp = reinterpret_cast<cstring>(glGetString(name)));
 		return temp;
 	}
 
-	auto GL::getString(uint32_t name, uint32_t index) -> C_string
+	auto GL::getString(uint32_t name, uint32_t index) -> cstring
 	{
-		C_string temp{ nullptr };
-		glCheck(temp = reinterpret_cast<C_string>(glGetStringi(name, index)));
+		cstring temp{ nullptr };
+		glCheck(temp = reinterpret_cast<cstring>(glGetStringi(name, index)));
 		return temp;
 	}
 
@@ -756,7 +756,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto GL::getProgramInfoLog(uint32_t obj) -> C_string
+	auto GL::getProgramInfoLog(uint32_t obj) -> cstring
 	{
 		static char temp[512];
 #ifdef GL_ARB_shader_objects
@@ -811,7 +811,7 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getAttribLocation(uint32_t program, C_string name) -> int32_t
+	auto GL::getAttribLocation(uint32_t program, cstring name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -822,7 +822,7 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getUniformLocation(uint32_t program, C_string name) -> int32_t
+	auto GL::getUniformLocation(uint32_t program, cstring name) -> int32_t
 	{
 		int32_t temp{ 0 };
 #ifdef GL_ARB_shader_objects
@@ -871,7 +871,7 @@ namespace ml
 #endif
 	}
 
-	void GL::shaderSource(uint32_t obj, int32_t count, C_string const * src, int32_t const * length)
+	void GL::shaderSource(uint32_t obj, int32_t count, cstring const * src, int32_t const * length)
 	{
 		glCheck(glShaderSource(obj, count, &src[0], length));
 	}
@@ -886,13 +886,13 @@ namespace ml
 		return getProgramParameter(obj, GL::ObjectCompileStatus);
 	}
 
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source) -> int32_t
 	{
-		C_string log{ nullptr };
+		cstring log{ nullptr };
 		return compileShader(obj, type, count, source, log);
 	}
 
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source, C_string & log) -> int32_t
+	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source, cstring & log) -> int32_t
 	{
 		if ((count < 1) || !source || !(*source))
 		{

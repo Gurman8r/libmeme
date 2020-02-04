@@ -25,7 +25,7 @@ namespace ml
 		// Errors
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static auto getError() -> uint32_t;
-		static void checkError(C_string file, uint32_t line, C_string expr);
+		static void checkError(cstring file, uint32_t line, cstring expr);
 
 		// Initialization
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,8 +41,8 @@ namespace ml
 		
 		// Getters
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static auto getString(uint32_t name) -> C_string;
-		static auto getString(uint32_t name, uint32_t index) -> C_string;
+		static auto getString(uint32_t name) -> cstring;
+		static auto getString(uint32_t name, uint32_t index) -> cstring;
 		static auto getBool(uint32_t name) -> uint8_t;
 		static auto getBool(uint32_t name, uint8_t * params) -> uint8_t *;
 		static auto getDouble(uint32_t name) -> float64_t;
@@ -139,22 +139,22 @@ namespace ml
 		static bool shadersAvailable();
 		static bool geometryShadersAvailable();
 
-		static auto getProgramInfoLog(uint32_t obj) -> C_string;
+		static auto getProgramInfoLog(uint32_t obj) -> cstring;
 		static auto getProgramHandle(uint32_t name) -> uint32_t;
 		static auto createProgram() -> uint32_t;
 		static auto createShader(uint32_t type) -> uint32_t;
 		static auto getProgramParameter(int32_t obj, uint32_t param) -> int32_t;
-		static auto getAttribLocation(uint32_t program, C_string name) -> int32_t;
-		static auto getUniformLocation(uint32_t program, C_string name) -> int32_t;
+		static auto getAttribLocation(uint32_t program, cstring name) -> int32_t;
+		static auto getUniformLocation(uint32_t program, cstring name) -> int32_t;
 
 		static void useProgram(uint32_t obj);
 		static void deleteShader(uint32_t obj);
 		static void detachShader(uint32_t containerObj, uint32_t obj);
 		static void attachShader(uint32_t containerObj, uint32_t obj);
-		static void shaderSource(uint32_t obj, int32_t count, C_string const * src, int32_t const * length);
+		static void shaderSource(uint32_t obj, int32_t count, cstring const * src, int32_t const * length);
 		static auto compileShader(uint32_t obj) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, C_string const * source, C_string & log) -> int32_t;
+		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source) -> int32_t;
+		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source, cstring & log) -> int32_t;
 		static auto linkProgram(uint32_t obj) -> int32_t;
 
 		static void uniform1i(int32_t location, int32_t value);

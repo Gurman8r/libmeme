@@ -127,7 +127,7 @@ namespace ml
 
 		int32_t get_uniform_location(pmr::string const & value);
 
-		int32_t compile(C_string v, C_string g, C_string f);
+		int32_t compile(cstring v, cstring g, cstring f);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

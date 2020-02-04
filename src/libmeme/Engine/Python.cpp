@@ -53,7 +53,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t python::do_string(C_string value)
+	int32_t python::do_string(cstring value)
 	{
 		return (value && s_py_init) ? PyRun_SimpleString(value) : 0;
 	}
@@ -112,15 +112,15 @@ namespace ml::python_embedded
 			.def_static("clear",	[]() { return debug::clear(); })
 			.def_static("exit",		[]() { return std::exit(0); })
 			.def_static("pause",	[]() { return debug::pause(0); })
-			.def_static("print",	[](C_string s) { std::cout << s; })
-			.def_static("printl",	[](C_string s) { std::cout << s << '\n'; })
-			.def_static("info",		[](C_string s) { return debug::log_info(s); })
-			.def_static("warning",	[](C_string s) { return debug::log_warning(s); })
-			.def_static("error",	[](C_string s) { return debug::log_error(s); });
+			.def_static("print",	[](cstring s) { std::cout << s; })
+			.def_static("printl",	[](cstring s) { std::cout << s << '\n'; })
+			.def_static("info",		[](cstring s) { return debug::log_info(s); })
+			.def_static("warning",	[](cstring s) { return debug::log_warning(s); })
+			.def_static("error",	[](cstring s) { return debug::log_error(s); });
 
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")
-			.def_static("load_plugin", [](C_string s) { return engine::load_plugin(s); });
+			.def_static("load_plugin", [](cstring s) { return engine::load_plugin(s); });
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

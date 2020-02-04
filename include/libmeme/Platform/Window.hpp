@@ -52,7 +52,7 @@ namespace ml
 		using close_fn			= typename void(*)(void *);
 		using cursor_enter_fn	= typename void(*)(void *, int32_t);
 		using cursor_pos_fn		= typename void(*)(void *, float64_t, float64_t);
-		using error_fn			= typename void(*)(int32_t, C_string);
+		using error_fn			= typename void(*)(int32_t, cstring);
 		using focus_fn			= typename void(*)(void *, int32_t);
 		using frame_size_fn		= typename void(*)(void *, int32_t, int32_t);
 		using key_fn			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
@@ -127,7 +127,7 @@ namespace ml
 		
 		ML_NODISCARD int32_t get_attribute(int32_t value) const;
 		
-		ML_NODISCARD C_string get_clipboard() const;
+		ML_NODISCARD cstring get_clipboard() const;
 		
 		ML_NODISCARD vec2 get_cursor_pos() const;
 		
@@ -163,7 +163,7 @@ namespace ml
 		
 		ML_NODISCARD static void * create_standard_cursor(cursor::shape value);
 
-		ML_NODISCARD static int32_t extension_supported(C_string value);
+		ML_NODISCARD static int32_t extension_supported(cstring value);
 
 		ML_NODISCARD static void * get_context_current();
 
@@ -171,7 +171,7 @@ namespace ml
 		
 		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
 
-		ML_NODISCARD static proc_fn get_proc_address(C_string value);
+		ML_NODISCARD static proc_fn get_proc_address(cstring value);
 		
 		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
 

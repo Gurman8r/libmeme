@@ -179,6 +179,8 @@ namespace ml
 			}
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T> inline uniform & set(data_t const & value)
 		{
 			m_type = typeof<T>{};
@@ -195,41 +197,51 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline bool good() const noexcept
+		{
+			return !m_name.empty();
+		}
+
+		ML_NODISCARD inline int32_t compare(uniform const & other) const noexcept
+		{
+			return m_name.compare(other.m_name);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline operator bool const() const noexcept
 		{
-			return !name().empty();
+			return good();
 		}
 
-		ML_NODISCARD inline bool operator==(uniform const & other)
+		ML_NODISCARD inline bool operator==(uniform const & other) const noexcept
 		{
-			return (m_type == other.m_type)
-				&& (m_name == other.m_name);
+			return compare(other) == 0;
 		}
 
-		ML_NODISCARD inline bool operator!=(uniform const & other)
+		ML_NODISCARD inline bool operator!=(uniform const & other) const noexcept
 		{
-			return !(*this == other);
+			return compare(other) != 0;
 		}
 
-		ML_NODISCARD inline bool operator<(uniform const & other)
+		ML_NODISCARD inline bool operator<(uniform const & other) const noexcept
 		{
-			return (m_type < other.m_type)
-				|| (m_name < other.m_name);
+			return compare(other) < 0;
 		}
 
-		ML_NODISCARD inline bool operator>(uniform const & other)
+		ML_NODISCARD inline bool operator>(uniform const & other) const noexcept
 		{
-			return !(*this < other);
+			return compare(other) > 0;
 		}
 
-		ML_NODISCARD inline bool operator<=(uniform const & other)
+		ML_NODISCARD inline bool operator<=(uniform const & other) const noexcept
 		{
-			return (*this < other) || (*this == other);
+			return compare(other) <= 0;
 		}
 
-		ML_NODISCARD inline bool operator>=(uniform const & other)
+		ML_NODISCARD inline bool operator>=(uniform const & other) const noexcept
 		{
-			return (*this > other) || (*this == other);
+			return compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

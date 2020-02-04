@@ -5,12 +5,17 @@
 
 namespace ml
 {
-	style_loader::style_loader(fs::path const & path)
+	style_loader::style_loader()
 	{
 	}
 	
 	bool style_loader::operator()(fs::path const & path)
 	{
+		if (auto const data{ FS::get_file_contents(path) }; !data.empty())
+		{
+			std::stringstream ss{ data.c_str() };
+			return true;
+		}
 		return false;
 	}
 }

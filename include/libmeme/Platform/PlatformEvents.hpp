@@ -165,9 +165,9 @@ namespace ml
 	struct window_error_event final : type_event<window_error_event>
 	{
 		int32_t const code;
-		C_string const desc;
+		cstring const desc;
 
-		constexpr window_error_event(int32_t code, C_string desc) noexcept
+		constexpr window_error_event(int32_t code, cstring desc) noexcept
 			: code{ code }
 			, desc{ desc }
 		{

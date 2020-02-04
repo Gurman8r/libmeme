@@ -11,48 +11,45 @@ namespace ml
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using path_storage		= typename ds::flat_set<fs::path>;
+		using plugin_storage	= typename ds::flat_map<struct shared_library, struct plugin *>;
 
-		struct config final
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct config final : trackable
 		{
-			// paths
-			fs::path				program_name;
-			fs::path				library_path;
-			pmr::vector<fs::path>	script_list{ pmr::get_default_resource() };
-			pmr::vector<fs::path>	plugin_list{ pmr::get_default_resource() };
+			fs::path				program_name;	// 
+			fs::path				library_path;	// 
 
-			// window
-			C_string				window_title;
-			video_mode				window_video;
-			context_settings		window_context;
-			int32_t					window_flags;
+			pmr::vector<fs::path>	script_list;	// 
+			pmr::vector<fs::path>	plugin_list;	// 
+
+			cstring					window_title;	// 
+			video_mode				window_video;	// 
+			context_settings		window_context;	// 
+			int32_t					window_flags;	// 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct io final
+		struct io final : trackable
 		{
-			// time
-			float64_t delta_time;
+			float64_t delta_time; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		class context final : trackable
+		struct context final : trackable
 		{
-			friend engine;
-
-			config			g_config	{};
-			io				g_io		{};
-			render_window	g_window	{};
-			timer			g_main_timer{ true };
-			timer			g_loop_timer{ false };
-
-			struct plugins
-			{
-				ds::flat_set<fs::path> files;
-				ds::flat_map<struct shared_library, struct plugin *> libs;
-			}
-			g_plugins;
+			config			config			{};			// 
+			io				io				{};			// 
+			render_window	window			{};			// 
+			timer			main_timer		{ true };	// 
+			timer			loop_timer		{ false };	// 
+			path_storage	lib_filenames	{};			// 
+			plugin_storage	lib_instances	{};			// 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -12,32 +12,30 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct config final
+		struct config final : trackable
 		{
-			void *		window_handle;
-			C_string	api_version;
-			C_string	style_config;
-			C_string	ini_file;
-			C_string	log_file;
+			void *		window_handle;	// 
+			cstring	api_version;	// 
+			cstring	style;	// 
+			cstring	ini_file;		// 
+			cstring	log_file;		// 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct io final
+		struct io final : trackable
 		{
 			// ...
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		class context final : trackable
+		struct context final : trackable
 		{
-			friend editor;
-
-			config				g_config	{};
-			io					g_io		{};
-			editor_dockspace	g_dockspace	{};
-			editor_main_menu	g_main_menu	{};
+			config				config		{};
+			io					io			{};
+			editor_dockspace	dockspace	{};
+			editor_main_menu	main_menu	{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

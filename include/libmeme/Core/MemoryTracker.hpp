@@ -5,7 +5,7 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 
-#define ML_memory ::ml::memory_tracker::get_instance()
+#define ML_Memory ::ml::memory_tracker::get_instance()
 
 namespace ml
 {
@@ -65,6 +65,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline auto get_allocator() const noexcept -> allocator_type const & { return m_alloc; }
+
 		ML_NODISCARD inline auto get_index() const noexcept -> size_t { return m_index; }
 
 		ML_NODISCARD inline auto get_records() const noexcept -> storage_type const & { return m_records; }
@@ -110,22 +112,22 @@ namespace ml
 
 		ML_NODISCARD inline void * operator new(size_t size) noexcept
 		{
-			return ML_memory.make_allocation(size, 1);
+			return ML_Memory.make_allocation(size, 1);
 		}
 
 		ML_NODISCARD inline void * operator new[](size_t size) noexcept
 		{
-			return ML_memory.make_allocation(size, 2);
+			return ML_Memory.make_allocation(size, 2);
 		}
 		
 		inline void operator delete(void * value) noexcept
 		{
-			return ML_memory.free_allocation(value);
+			return ML_Memory.free_allocation(value);
 		}
 
 		inline void operator delete[](void * value) noexcept
 		{
-			return ML_memory.free_allocation(value);
+			return ML_Memory.free_allocation(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

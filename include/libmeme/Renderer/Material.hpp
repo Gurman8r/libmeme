@@ -10,8 +10,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using storage_type				= typename pmr::vector<uniform>;
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
+		using storage_type				= typename pmr::vector<uniform>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -23,25 +23,48 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material();
-		
-		explicit material(allocator_type const & alloc);
-		
-		material(storage_type const & data, allocator_type const & alloc = {});
-		
-		material(storage_type && data, allocator_type const & alloc = {}) noexcept;
-		
-		material(material const & other, allocator_type const & alloc = {});
-		
-		material(material && other, allocator_type const & alloc = {}) noexcept;
+		material() noexcept : m_storage{} {}
+
+		explicit material(allocator_type const & alloc)
+			: m_storage{ alloc }
+		{
+		}
+
+		explicit material(storage_type const & data, allocator_type const & alloc = {})
+			: m_storage{ data, alloc }
+		{
+		}
+
+		explicit material(storage_type && data, allocator_type const & alloc = {}) noexcept
+			: m_storage{ std::move(data), alloc }
+		{
+		}
+
+		material(material const & other, allocator_type const & alloc = {})
+			: m_storage{ other.m_storage, alloc }
+		{
+		}
+
+		material(material && other, allocator_type const & alloc = {}) noexcept
+			: m_storage{ alloc }
+		{
+			swap(std::move(other));
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material & operator=(material const & other);
+		inline material & operator=(material const & other)
+		{
+			material temp{ other };
+			swap(temp);
+			return (*this);
+		}
 
-		material & operator=(material && other) noexcept;
-
-		void swap(material & other) noexcept;
+		inline material & operator=(material && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,13 +77,21 @@ namespace ml
 			m_storage.clear();
 		}
 
+		inline void swap(material & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_storage, other.m_storage);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class ... Args
 		> inline uniform & emplace_back(Args && ... args)
 		{
 			return m_storage.emplace_back(std::forward<Args>(args)...);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline void push_back(uniform const & value)
 		{
@@ -101,6 +132,7 @@ namespace ml
 		ML_NODISCARD inline uniform * find(pmr::string const & name)
 		{
 			if (name.empty()) { return nullptr; }
+
 			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
 				return u.name() == name;
 			}) }; it != end())

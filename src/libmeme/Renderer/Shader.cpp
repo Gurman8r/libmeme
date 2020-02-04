@@ -371,7 +371,7 @@ namespace ml
 		}
 	}
 
-	int32_t shader::compile(C_string v, C_string g, C_string f)
+	int32_t shader::compile(cstring v, cstring g, cstring f)
 	{
 		// Shaders Available
 		if (!GL::shadersAvailable())
@@ -439,7 +439,7 @@ namespace ml
 		// Link Program
 		if (!GL::linkProgram(m_handle))
 		{
-			C_string const log{ GL::getProgramInfoLog(m_handle) };
+			cstring const log{ GL::getProgramInfoLog(m_handle) };
 			debug::log_error(log);
 			destroy();
 			return EXIT_FAILURE * 8;

@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static int32_t do_string(C_string value);
+		static int32_t do_string(cstring value);
 
 		static int32_t do_string(pmr::string const & value);
 		

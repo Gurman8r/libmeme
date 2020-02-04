@@ -15,7 +15,7 @@ namespace ml
 
 	class ML_CORE_API performance_tracker final
 	{
-		using buffer_type = typename pmr::vector<std::pair<C_string, duration>>;
+		using buffer_type = typename pmr::vector<std::pair<cstring, duration>>;
 
 		static buffer_type m_curr;
 
@@ -47,9 +47,9 @@ namespace ml
 
 	struct scope_timer final : non_copyable
 	{
-		C_string name; timer timer;
+		cstring name; timer timer;
 
-		scope_timer(C_string name) noexcept : name{ name }, timer { true }
+		scope_timer(cstring name) noexcept : name{ name }, timer { true }
 		{
 		}
 

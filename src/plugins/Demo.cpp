@@ -45,38 +45,40 @@ namespace ml
 		struct c_material	{ material	value; };
 		struct c_model		{ model		value; };
 
-		// signatures
-		using s_apply_position	= meta::type_list<c_material, c_position>;
-		using s_apply_rotation	= meta::type_list<c_material, c_rotation>;
-		using s_apply_scale		= meta::type_list<c_material, c_scale>;
-		using s_render_model	= meta::type_list<c_shader, c_material, c_model>;
+		// tags
+		struct t_renderer {};
 
-		// manager
-		ecs::manager<ecs::settings<
-			// COMPONENT CONFIG
+		// signatures
+		using s_apply_position	= meta::list<c_material, c_position>;
+		using s_apply_rotation	= meta::list<c_material, c_rotation>;
+		using s_apply_scale		= meta::list<c_material, c_scale>;
+		using s_renderer		= meta::list<t_renderer, c_shader, c_material, c_model>;
+
+		// entity settings
+		using entity_settings = ecs::settings<
+			// COMPONENTS
 			ecs::component_config
 			<
 			c_position, c_rotation, c_scale,
 			c_shader, c_material, c_model
 			>,
-			// TAG CONFIG
+			// TAGS
 			ecs::tag_config
 			<
-			// etc...
+			t_renderer
 			>,
-			// SIGNATURE CONFIG
+			// SIGNATURES
 			ecs::signature_config
 			<
 			s_apply_position, s_apply_rotation, s_apply_scale,
-			s_render_model
-			>,
-			// SYSEM CONFIG
-			ecs::system_config
-			<
-			// etc...
+			s_renderer
 			>
-		>
-		> m_entities;
+		>;
+
+		// entity manager
+		using entity_manager = ecs::manager<entity_settings>;
+
+		entity_manager m_entities;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -100,167 +102,193 @@ namespace ml
 			{
 				// load stuff, etc...
 
-				// File Menu
-				editor::get_main_menu().add_menu("File", [&, this]()
+				// SETUP MENUS
 				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					if (ImGui::MenuItem("Quit", "Alt+F4"))
+					// File Menu
+					editor::get_main_menu().add_menu("File", [&, this]()
 					{
-						engine::get_window().close();
-					}
-				});
+						ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+						if (ImGui::MenuItem("Quit", "Alt+F4"))
+						{
+							engine::get_window().close();
+						}
+					});
 
-				// View Menu
-				editor::get_main_menu().add_menu("View", [&, this]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("ImGui demo", "", &m_show_imgui_demo);
-				});
-
-				// Option Menu
-				editor::get_main_menu().add_menu("Option", [&, this]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					if (ImGui::BeginMenu("Window"))
+					// View Menu
+					editor::get_main_menu().add_menu("View", [&, this]()
 					{
+						ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+						ImGui::MenuItem("ImGui demo", "", &m_show_imgui_demo);
+					});
+
+					// Option Menu
+					editor::get_main_menu().add_menu("Option", [&, this]()
+					{
+						ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 						bool fullscreen{ engine::get_window().is_fullscreen() };
 						if (ImGui::MenuItem("Fullscreen", "", &fullscreen))
 						{
 							engine::get_window().set_fullscreen(fullscreen);
 						}
-						ImGui::EndMenu();
-					}
-				});
-
-				// Pipeline
-				m_pipeline.emplace_back(make_render_texture(
-					vec2i{ 1280, 720 }
-				)).create();
-
-				// Images
-				if (auto const & img{ m_images["icon"] = make_image(
-					fs::path{ "../../../assets/textures/icon.png" }
-				) }; !img.empty())
-				{
-					engine::get_window().set_icon(img.width(), img.height(), img.data());
+					});
 				}
 
-				// Textures
-				m_textures["doot"] = make_texture(
-					fs::path{ "../../../assets/textures/doot.png" }
-				);
-				m_textures["navball"] = make_texture(
-					fs::path{ "../../../assets/textures/navball.png" }
-				);
-
-				// Fonts
-				m_fonts["consolas"] = make_font(
-					fs::path{ "../../../assets/fonts/consolas.ttf" }
-				);
-
-				// Shaders
-				m_shaders["2d"] = make_shader(
-					fs::path{ "../../../assets/shaders/2D.vs.shader" },
-					fs::path{ "../../../assets/shaders/basic.fs.shader" }
-				);
-				m_shaders["3d"] = make_shader(
-					fs::path{ "../../../assets/shaders/3D.vs.shader" },
-					fs::path{ "../../../assets/shaders/basic.fs.shader" }
-				);
-
-				// Materials
-				m_materials["2d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
-					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<mat4	>("u_proj",		mat4::identity()),
-					make_uniform<mat4	>("u_view",		mat4::identity()),
-					make_uniform<mat4	>("u_model",	mat4::identity())
-				);
-				m_materials["3d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
-					make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
-					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
-					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
-					make_uniform<float_t>("u_cam.fov",	45.0f),
-					make_uniform<float_t>("u_cam.near",	0.0001f),
-					make_uniform<float_t>("u_cam.far",	1000.0f),
-					make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
-					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<vec3	>("u_position", vec3{}),
-					make_uniform<vec3	>("u_scale",	vec3{}),
-					make_uniform<vec4	>("u_rotation", vec4{})
-				);
-
-				// Models
-				m_models["sphere8x6"] = make_model(
-					fs::path{ "../../../assets/models/sphere8x6.obj" }
-				);
-				m_models["sphere32x24"] = make_model(
-					fs::path{ "../../../assets/models/sphere32x24.obj" }
-				);
-				m_models["monkey"] = make_model( // FIXME: upside down?
-					fs::path{ "../../../assets/models/monkey.obj" }
-				);
-				m_models["triangle"] = make_model(make_mesh( // FIXME: ibo broken
-					{
-						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
-						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
-						make_vertex({ -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
-					},
-					{
-						0, 1, 2,
-					}
-				));
-				m_models["quad"] = make_model(make_mesh( // FIXME: ibo broken
-					{
-						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
-						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
-						make_vertex({ -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
-						make_vertex({ -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f }),
-					},
-					{
-						0, 1, 3,
-						1, 2, 3,
-					}
-				));
-
-				// Entities
-				m_entities.resize(1);
-				if (auto e{ m_entities.create_handle() })
+				// SETUP PIPELINE
 				{
-					e.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
-					e.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
-					e.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
-					e.add_component<c_shader	>(m_shaders["3d"]);
-					e.add_component<c_material	>(m_materials["3d"]);
-					e.add_component<c_model		>(m_models["sphere32x24"]);
+					m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })).create();
 				}
-				m_entities.refresh();
+
+				// LOAD IMAGES
+				{
+					if (auto const & img{ m_images["icon"] = make_image(
+						fs::path{ "../../../assets/textures/icon.png" }
+					) }; !img.empty())
+					{
+						engine::get_window().set_icon(img.width(), img.height(), img.data());
+					}
+				}
+
+				// LOAD SHADERS
+				{
+					m_textures["doot"] = make_texture(
+						fs::path{ "../../../assets/textures/doot.png" }
+					);
+
+					m_textures["navball"] = make_texture(
+						fs::path{ "../../../assets/textures/navball.png" }
+					);
+				}
+
+				// LOAD FONTS
+				{
+					m_fonts["consolas"] = make_font(
+						fs::path{ "../../../assets/fonts/consolas.ttf" }
+					);
+				}
+
+				// LOAD SHADERS
+				{
+					m_shaders["2d"] = make_shader(
+						fs::path{ "../../../assets/shaders/2D.vs.shader" },
+						fs::path{ "../../../assets/shaders/basic.fs.shader" }
+					);
+
+					m_shaders["3d"] = make_shader(
+						fs::path{ "../../../assets/shaders/3D.vs.shader" },
+						fs::path{ "../../../assets/shaders/basic.fs.shader" }
+					);
+				}
+
+				// LOAD MATERIALS
+				{
+					m_materials["2d"] = make_material(
+						make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
+						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
+						make_uniform<texture>("u_texture0",	&m_textures["navball"]),
+						make_uniform<color	>("u_color",	colors::white),
+						make_uniform<mat4	>("u_proj",		mat4::identity()),
+						make_uniform<mat4	>("u_view",		mat4::identity()),
+						make_uniform<mat4	>("u_model",	mat4::identity())
+					);
+
+					m_materials["3d"] = make_material(
+						make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
+						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
+						make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
+						make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
+						make_uniform<float_t>("u_cam.fov",	45.0f),
+						make_uniform<float_t>("u_cam.near",	0.0001f),
+						make_uniform<float_t>("u_cam.far",	1000.0f),
+						make_uniform<vec2	>("u_cam.view",	vec2{ 1280.f, 720.f }),
+						make_uniform<texture>("u_texture0",	&m_textures["navball"]),
+						make_uniform<color	>("u_color",	colors::white),
+						make_uniform<vec3	>("u_position", vec3{}),
+						make_uniform<vec3	>("u_scale",	vec3{}),
+						make_uniform<vec4	>("u_rotation", vec4{})
+					);
+				}
+
+				// LOAD MODELS
+				{
+					m_models["sphere8x6"] = make_model(
+						fs::path{ "../../../assets/models/sphere8x6.obj" }
+					);
+
+					m_models["sphere32x24"] = make_model(
+						fs::path{ "../../../assets/models/sphere32x24.obj" }
+					);
+
+					// FIXME: upside down?
+					m_models["monkey"] = make_model(
+						fs::path{ "../../../assets/models/monkey.obj" }
+					);
+
+					// FIXME: ibo broken
+					m_models["triangle"] = make_model(make_mesh(
+						{
+							make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
+							make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
+							make_vertex({ -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
+						},
+						{
+							0, 1, 2,
+						}
+					));
+
+					// FIXME: ibo broken
+					m_models["quad"] = make_model(make_mesh(
+						{
+							make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
+							make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
+							make_vertex({ -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
+							make_vertex({ -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f }),
+						},
+						{
+							0, 1, 3,
+							1, 2, 3,
+						}
+					));
+				}
+
+				// LOAD ENTITIES
+				{
+					if (auto h{ m_entities.create_handle() })
+					{
+						h.add_tag<t_renderer>();
+						h.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
+						h.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
+						h.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
+						h.add_component<c_shader	>(m_shaders["3d"]);
+						h.add_component<c_material	>(m_materials["3d"]);
+						h.add_component<c_model		>(m_models["sphere32x24"]);
+					}
+					m_entities.refresh();
+				}
 
 			} break;
 			case hashof_v<update_event>:
 			{
 				// update stuff, etc...
 
-				m_entities.for_matching<s_apply_position>([&](auto, auto & mat, auto & pos)
+				m_entities.for_matching<s_apply_position
+				>([&](auto, c_material & mt, c_position & p)
 				{
-					if (auto u{ mat.value.find("u_position") }
-					; u && u->holds<vec3>()) u->set<vec3>(pos.value);
+					if (auto u{ mt.value.find("u_position") }
+					; u && u->holds<vec3>()) u->set<vec3>(p.value);
 				});
 
-				m_entities.for_matching<s_apply_rotation>([&](auto, auto & mat, auto & rot)
+				m_entities.for_matching<s_apply_rotation
+				>([&](auto, c_material & mt, c_rotation & r)
 				{
-					if (auto u{ mat.value.find("u_rotation") }
-					; u && u->holds<vec4>()) u->set<vec4>(rot.value);
+					if (auto u{ mt.value.find("u_rotation") }
+					; u && u->holds<vec4>()) u->set<vec4>(r.value);
 				});
 
-				m_entities.for_matching<s_apply_scale>([&](auto, auto & mat, auto & scl)
+				m_entities.for_matching<s_apply_scale
+				>([&](auto, c_material & mt, c_scale & s)
 				{
-					if (auto u{ mat.value.find("u_scale") }
-					; u && u->holds<vec3>()) u->set<vec3>(scl.value);
+					if (auto u{ mt.value.find("u_scale") }
+					; u && u->holds<vec3>()) u->set<vec3>(s.value);
 				});
 				
 			} break;
@@ -277,25 +305,26 @@ namespace ml
 					target.viewport(target.bounds());
 					cull_state{ false }();
 					
-					m_entities.for_matching<s_render_model>([&](auto, auto & shd, auto & mat, auto & mdl)
+					m_entities.for_matching<s_renderer
+					>([&](auto, c_shader & sh, c_material & mt, c_model & md)
 					{
-						shd.value.bind(false);
+						sh.value.bind(false);
 						
-						for (uniform const & u : mat.value)
-							shd.value.set_uniform(u);
+						for (uniform const & u : mt.value)
+							sh.value.set_uniform(u);
 						
-						shd.value.bind(true);
+						sh.value.bind(true);
 						
-						target.draw(mdl.value);
+						target.draw(md.value);
 						
-						shd.value.unbind();
+						sh.value.unbind();
 					});
 				}
 
 			} break;
 			case hashof_v<dockspace_event>:
 			{
-				auto ev = value.as<dockspace_event>();
+				auto ev{ value.as<dockspace_event>() };
 				ev->d.dock_window("libmeme demo", ev->d.get_node(ev->d.Root));
 			} break;
 			case hashof_v<gui_event>:
@@ -312,7 +341,7 @@ namespace ml
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("Manual Allocations: %u", ML_memory.get_records().size());
+					ImGui::Text("Manual Allocations: %u", ML_Memory.get_records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);
@@ -371,7 +400,7 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::plugin * temp{};
+	static ml::plugin * temp{ nullptr };
 	if (!temp) { temp = new ml::demo{}; }
 	return temp;
 }

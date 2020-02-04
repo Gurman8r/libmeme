@@ -7,119 +7,6 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-#include <libmeme/Engine/ECS.hpp>
-
-namespace ml
-{
-	// components
-	struct C0 { static constexpr auto name = "C0"sv; };
-	struct C1 { static constexpr auto name = "C1"sv; };
-	struct C2 { static constexpr auto name = "C2"sv; };
-	struct C3 { static constexpr auto name = "C3"sv; };
-	struct C4 { static constexpr auto name = "C4"sv; };
-
-	// tags
-	struct T0 {};
-	struct T1 {};
-	struct T2 {};
-
-	// signatures
-	using S0 = meta::type_list<>;				// 00000000
-	using S1 = meta::type_list<C0, C1>;			// 11000000
-	using S2 = meta::type_list<C0, C4, T0>;		// 10001100
-	using S3 = meta::type_list<C1, T0, C3, T2>;	// 01010101
-
-	int32_t ecs_test()
-	{
-		using ES = ecs::settings<
-			ecs::component_config	<C0, C1, C2, C3, C4>,
-			ecs::tag_config			<T0, T1, T2>,
-			ecs::signature_config	<S0, S1, S2, S3>
-		>;
-
-		static_assert(ES::components::count() == 5);
-		static_assert(ES::signatures::count() == 4);
-		static_assert(ES::tags		::count() == 3);
-
-		static_assert(ES::components::index<C0>() == 0);
-		static_assert(ES::components::index<C1>() == 1);
-		static_assert(ES::components::index<C2>() == 2);
-		static_assert(ES::components::index<C3>() == 3);
-		static_assert(ES::components::index<C4>() == 4);
-		static_assert(ES::tags		::index<T0>() == 0);
-		static_assert(ES::tags		::index<T1>() == 1);
-		static_assert(ES::tags		::index<T2>() == 2);
-		static_assert(ES::signatures::index<S0>() == 0);
-		static_assert(ES::signatures::index<S1>() == 1);
-		static_assert(ES::signatures::index<S2>() == 2);
-		static_assert(ES::signatures::index<S3>() == 3);
-
-		static_assert(ES::component_bit<C0>() == 0);
-		static_assert(ES::component_bit<C1>() == 1);
-		static_assert(ES::component_bit<C2>() == 2);
-		static_assert(ES::component_bit<C3>() == 3);
-		static_assert(ES::component_bit<C4>() == 4);
-		static_assert(ES::		tag_bit<T0>() == 5);
-		static_assert(ES::		tag_bit<T1>() == 6);
-		static_assert(ES::		tag_bit<T2>() == 7);
-
-		static_assert(ES::get_bitmask<S0>() == "00000000");
-		static_assert(ES::get_bitmask<S1>() == "11000000");
-		static_assert(ES::get_bitmask<S2>() == "10001100");
-		static_assert(ES::get_bitmask<S3>() == "01010101");
-
-		static_assert(std::is_same_v<ES::component_signatures<S0>,
-			meta::type_list<>
-		>);
-		static_assert(std::is_same_v<ES::component_signatures<S3>,
-			meta::type_list<C1, C3>
-		>);
-		static_assert(std::is_same_v<ES::tag_signatures<S3>,
-			meta::type_list<T0, T2>
-		>);
-
-		ecs::manager<ES> man{};
-		man.resize(100);
-
-		if (auto e = man.create_handle())
-		{
-			e.add_component<C0>();
-			e.add_component<C1>();
-		}
-
-		if (auto e = man.create_handle())
-		{
-			e.add_component<C0>();
-			e.add_component<C1>();
-			e.add_component<C2>();
-			e.add_component<C4>();
-		}
-
-		if (auto e = man.create_handle())
-		{
-			e.add_component<C0>();
-			e.add_component<C4>();
-			e.add_tag<T0>();
-		}
-		
-		man.refresh();
-
-		std::cout << "S1:\n";
-		man.for_matching<S1>([&](size_t i, C0 & c0, C1 & c1)
-		{
-			std::cout << " " << c0.name << ' ' << c1.name << '\n';
-		});
-
-		std::cout << "S2:\n";
-		man.for_matching<S2>([&](size_t i, C0 & c0, C4 & c4)
-		{
-			std::cout << " " << c0.name << ' ' << c4.name << '\n';
-		});
-
-		return debug::pause(0);
-	}
-}
-
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -184,7 +71,7 @@ ml::int32_t main()
 		editor::config & config	= editor::get_config();
 		config.window_handle	= engine::get_window().get_handle();
 		config.api_version		= "#version 130";
-		config.style_config		= "dark";
+		config.style			= "dark";
 		config.ini_file			= "";
 		config.log_file			= "";
 	}

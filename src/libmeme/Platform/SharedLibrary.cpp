@@ -33,7 +33,7 @@ namespace ml::impl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline void * load_function(void * instance, C_string name)
+	static inline void * load_function(void * instance, cstring name)
 	{
 #ifdef ML_OS_WINDOWS
 		return GetProcAddress(static_cast<HINSTANCE>(instance), name);
@@ -125,7 +125,7 @@ namespace ml
 		return impl::free_library(m_instance);
 	}
 
-	void * shared_library::load_function(C_string name)
+	void * shared_library::load_function(cstring name)
 	{
 		// not opened
 		if (!good()) return nullptr;
