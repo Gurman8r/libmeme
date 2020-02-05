@@ -149,7 +149,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_shader(Args && ... args)
 	{
-		return shader{ std::forward<Args>(args)... };
+		return shader{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

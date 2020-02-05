@@ -120,7 +120,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_mesh(Args && ... args)
 	{
-		return mesh{ std::forward<Args>(args)... };
+		return mesh{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

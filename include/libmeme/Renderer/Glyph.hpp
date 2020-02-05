@@ -39,7 +39,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
 	{
-		return glyph{ std::forward<Args>(args)... };
+		return glyph{ ML_FWD(args)... };
 	}
 
 	template <class Bounds, class Advance

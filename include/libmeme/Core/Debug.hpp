@@ -60,21 +60,21 @@ namespace ml
 		template <class Str
 		> static inline int32_t log_info(Str && value)
 		{
-			std::cout << "[" << ML_MSG_LOG << "] " << std::forward<Str>(value) << "\n";
+			std::cout << "[" << ML_MSG_LOG << "] " << ML_FWD(value) << "\n";
 			return ML_SUCCESS;
 		}
 
 		template <class Str
 		> static inline int32_t log_error(Str && value)
 		{
-			std::cout << "[" << ML_MSG_ERR << "] " << std::forward<Str>(value) << "\n";
+			std::cout << "[" << ML_MSG_ERR << "] " << ML_FWD(value) << "\n";
 			return ML_FAILURE;
 		}
 
 		template <class Str
 		> static inline int32_t log_warning(Str && value)
 		{
-			std::cout << "[" << ML_MSG_WRN << "] " << std::forward<Str>(value) << "\n";
+			std::cout << "[" << ML_MSG_WRN << "] " << ML_FWD(value) << "\n";
 			return ML_WARNING;
 		}
 
@@ -83,19 +83,19 @@ namespace ml
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_info(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return debug::log_info(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_info(util::format(fmt, arg0, ML_FWD(args)...));
 		}
 
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_error(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return debug::log_error(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_error(util::format(fmt, arg0, ML_FWD(args)...));
 		}
 
 		template <class Fmt, class Arg0, class ... Args
 		> static inline int32_t log_warning(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
 		{
-			return debug::log_warning(util::format(fmt, arg0, std::forward<Args>(args)...));
+			return debug::log_warning(util::format(fmt, arg0, ML_FWD(args)...));
 		}
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

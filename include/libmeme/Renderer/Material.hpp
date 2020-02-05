@@ -90,7 +90,7 @@ namespace ml
 		template <class ... Args
 		> inline uniform & emplace_back(Args && ... args)
 		{
-			return m_storage.emplace_back(std::forward<Args>(args)...);
+			return m_storage.emplace_back(ML_FWD(args)...);
 		}
 
 		inline void push_back(uniform const & value)
@@ -208,7 +208,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_material(Args && ... args)
 	{
-		return material{ material::storage_type{ std::forward<Args>(args)... } };
+		return material{ material::storage_type{ ML_FWD(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

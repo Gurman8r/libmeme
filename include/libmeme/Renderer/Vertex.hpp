@@ -143,7 +143,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vertex(Args && ... args)
 	{
-		return vertex{ std::forward<Args>(args)... };
+		return vertex{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

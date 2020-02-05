@@ -1,5 +1,6 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/FlatMap.hpp>
+#include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -39,24 +40,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// HELPER
-		template <class T> struct wrapper
-		{
-			T value;
-
-			constexpr T &		operator *() noexcept		{ return value; }
-			constexpr T const & operator *() const noexcept { return value; }
-			constexpr T *		operator->() noexcept		{ return &value; }
-			constexpr T const * operator->() const noexcept { return &value; }
-		};
-
 		// COMPONENTS
-		struct c_position	: wrapper<vec3>		{};
-		struct c_rotation	: wrapper<vec4>		{};
-		struct c_scale		: wrapper<vec3>		{};
-		struct c_shader		: wrapper<shader>	{};
-		struct c_material	: wrapper<material> {};
-		struct c_model		: wrapper<model>	{};
+		struct c_position	: ds::wrapper<vec3>		{};
+		struct c_rotation	: ds::wrapper<vec4>		{};
+		struct c_scale		: ds::wrapper<vec3>		{};
+		struct c_shader		: ds::wrapper<shader>	{};
+		struct c_material	: ds::wrapper<material> {};
+		struct c_model		: ds::wrapper<model>	{};
 
 		// SIGNATURES
 		using s_update_renderer = meta::list<

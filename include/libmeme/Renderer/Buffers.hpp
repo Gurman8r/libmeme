@@ -54,7 +54,7 @@ namespace ml
 		template <class ... Args
 		> constexpr explicit vertex_array(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
-			, m_storage{ std::forward<Args>(args)... }
+			, m_storage{ ML_FWD(args)... }
 		{
 		}
 
@@ -143,7 +143,7 @@ namespace ml
 		template <class ... Args
 		> constexpr explicit vertex_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
-			, m_storage{ std::forward<Args>(args)... }
+			, m_storage{ ML_FWD(args)... }
 		{
 		}
 
@@ -256,7 +256,7 @@ namespace ml
 		template <class ... Args
 		> constexpr explicit index_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
-			, m_storage{ std::forward<Args>(args)... }
+			, m_storage{ ML_FWD(args)... }
 		{
 		}
 
@@ -374,7 +374,7 @@ namespace ml
 		template <class ... Args
 		> constexpr explicit frame_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
-			, m_storage{ std::forward<Args>(args)... }
+			, m_storage{ ML_FWD(args)... }
 		{
 		}
 
@@ -492,7 +492,7 @@ namespace ml
 		template <class ... Args
 		> constexpr explicit render_buffer(uint32_t handle, Args && ... args)
 			: graphics_buffer{ handle }
-			, m_storage{ std::forward<Args>(args)... }
+			, m_storage{ ML_FWD(args)... }
 		{
 		}
 
@@ -578,31 +578,31 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vao(Args && ... args)
 	{
-		return vertex_array{ std::forward<Args>(args)... };
+		return vertex_array{ ML_FWD(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vbo(Args && ... args)
 	{
-		return vertex_buffer{ std::forward<Args>(args)... };
+		return vertex_buffer{ ML_FWD(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_ibo(Args && ... args)
 	{
-		return index_buffer{ std::forward<Args>(args)... };
+		return index_buffer{ ML_FWD(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_fbo(Args && ... args)
 	{
-		return frame_buffer{ std::forward<Args>(args)... };
+		return frame_buffer{ ML_FWD(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_rbo(Args && ... args)
 	{
-		return render_buffer{ std::forward<Args>(args)... };
+		return render_buffer{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

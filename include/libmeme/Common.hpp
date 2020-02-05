@@ -33,7 +33,6 @@
 #	include <concepts>
 #	include <format>
 #	include <ranges>
-#	include <version>
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,6 +48,7 @@
 #define ML_WARGV		__wargv
 #define ML_SERIALIZE	std::ostream & operator <<
 #define ML_DESERIALIZE	std::istream & operator >>
+#define ML_FWD(x)		std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -79,7 +79,7 @@ namespace ml
 
 	ML_USING	float_t		= typename float32_t;
 	ML_USING	intptr_t	= typename intmax_t;
-	ML_USING	ptrdiff_t	= typename intptr_t;
+	ML_USING	ptrdiff_t	= typename intmax_t;
 	ML_USING	max_align_t = typename float64_t;
 	ML_USING	size_t		= typename uintmax_t;
 
@@ -93,13 +93,6 @@ namespace ml
 	ML_USING	c16string	= typename char16_t const *;
 	ML_USING	c32string	= typename char32_t const *;
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace std		= ::std;

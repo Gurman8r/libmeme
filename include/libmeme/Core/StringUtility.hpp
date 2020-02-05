@@ -379,7 +379,7 @@ namespace ml::util
 	template <class Arg0, class ... Args
 	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{ sink(arg0, std::forward<Args>(args)...) };
+		std::stringstream ss{ sink(arg0, ML_FWD(args)...) };
 		return format(fmt, ss);
 	}
 

@@ -247,7 +247,7 @@ namespace ml::ds
 		template <class ... Args
 		> inline mapped_iterator emplace(const_key_iterator addr, Args && ... args)
 		{
-			return m_storage.second.emplace(this->fetch(addr), std::forward<Args>(args)...);
+			return m_storage.second.emplace(this->fetch(addr), ML_FWD(args)...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -297,7 +297,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_storage.first.insert(key) }; k.second)
 			{
-				return { { k.first, this->emplace(k.first, std::forward<Args>(args)...) }, true };
+				return { { k.first, this->emplace(k.first, ML_FWD(args)...) }, true };
 			}
 			else
 			{
@@ -310,7 +310,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_storage.first.insert(std::move(key)) }; k.second)
 			{
-				return { { k.first, this->emplace(k.first, std::forward<Args>(args)...) }, true };
+				return { { k.first, this->emplace(k.first, ML_FWD(args)...) }, true };
 			}
 			else
 			{

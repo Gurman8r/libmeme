@@ -42,7 +42,7 @@ namespace ml
 
 		template <class ... Args
 		> explicit allocation_record(Args && ... args) noexcept
-			: m_storage{ std::make_tuple(std::forward<Args>(args)...) }
+			: m_storage{ std::make_tuple(ML_FWD(args)...) }
 		{
 		}
 

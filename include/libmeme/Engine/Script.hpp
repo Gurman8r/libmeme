@@ -49,7 +49,7 @@ namespace ml
 		template <class ... Args
 		> inline int32_t operator()(Args && ... args)
 		{
-			return execute({ std::forward<Args>(args)... });
+			return execute({ ML_FWD(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

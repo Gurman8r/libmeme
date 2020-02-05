@@ -10,7 +10,6 @@
 // 
 // https://stackoverflow.com/questions/18063451/get-index-of-a-tuple-elements-type
 // https://stackoverflow.com/questions/25958259/how-do-i-find-out-if-a-tuple-contains-a-type
-// 
 // https://stackoverflow.com/questions/37029886/how-to-construct-a-tuple-from-an-array
 // https://stackoverflow.com/questions/36580855/construct-tuple-by-passing-the-same-argument-to-each-element-with-explicit-const
 // https://stackoverflow.com/questions/22560100/how-to-initialize-all-tuple-elements-by-the-same-arguments
@@ -43,15 +42,15 @@ namespace ml::meta
 		template <class Fn, class Tup, size_t ... Indices
 		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<Indices...>)
 		{
-			return std::forward<Fn>(fn)(std::get<Indices>(std::forward<Tup>(tp))...);
+			return ML_FWD(fn)(std::get<Indices>(ML_FWD(tp))...);
 		}
 
 		template <class Fn, class Tup
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tup && tp)
 		{
 			return meta::impl::tuple_apply_impl(
-				std::forward<Fn>(fn),
-				std::forward<Tup>(tp),
+				ML_FWD(fn),
+				ML_FWD(tp),
 				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tup>>>{}
 			);
 		}
@@ -59,7 +58,7 @@ namespace ml::meta
 		template <class Fn, class ... Args
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
-			return (void)std::initializer_list<int>{ (fn(std::forward<Args>(args)), 0)... };
+			return (void)std::initializer_list<int>{ (fn(ML_FWD(args)), 0)... };
 		}
 
 		template <class Fn, class Tup
@@ -67,9 +66,9 @@ namespace ml::meta
 		{
 			return meta::impl::tuple_apply([&fn](auto && ... vs)
 			{
-				meta::impl::for_args(fn, std::forward<decltype(vs)>(vs)...);
+				meta::impl::for_args(fn, ML_FWD(vs)...);
 			},
-			std::forward<Tup>(tp));
+			ML_FWD(tp));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -80,19 +79,19 @@ namespace ml::meta
 	template <class Fn, class Tup
 	> constexpr decltype(auto) tuple_apply(Fn && fn, Tup && tp)
 	{
-		return meta::impl::tuple_apply(fn, std::forward<Tup>(tp));
+		return meta::impl::tuple_apply(fn, ML_FWD(tp));
 	}
 
 	template <class Fn, class ... Args
 	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 	{
-		return meta::impl::for_args(fn, std::forward<Args>(args)...);
+		return meta::impl::for_args(fn, ML_FWD(args)...);
 	}
 
 	template <class Fn, class Tup
 	> constexpr decltype(auto) for_tuple(Fn && fn, Tup && tp)
 	{
-		return meta::impl::for_tuple(fn, std::forward<Tup>(tp));
+		return meta::impl::for_tuple(fn, ML_FWD(tp));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

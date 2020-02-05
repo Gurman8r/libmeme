@@ -45,7 +45,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_context_settings(Args && ... args)
 	{
-		return context_settings{ std::forward<Args>(args)... };
+		return context_settings{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

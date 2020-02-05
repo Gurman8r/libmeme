@@ -139,7 +139,7 @@ namespace ml::ecs
 		class _Tags			= config::tags<>,
 		class _Signatures	= config::signatures<>,
 		class _Systems		= config::systems<>
-	> struct settings
+	> struct settings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -233,43 +233,33 @@ namespace ml::ecs
 
 		struct entity; struct handle;
 
-		using settings			= typename _Settings;
-		using self_type			= typename manager<settings>;
+		using settings_type		= typename _Settings;
+		using self_type			= typename manager<settings_type>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using entity_storage	= typename pmr::vector<entity>;
 		using handle_storage	= typename pmr::vector<handle>;
 		using component_storage = typename meta::tuple<
-			meta::remap<pmr::vector, typename settings::components::list>
+			meta::remap<pmr::vector, typename settings_type::components::list>
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// serves as a key for accessing real component/tag data
 		struct entity final
 		{
-			using bitset = typename settings::bitset;
+			using bitset = typename settings_type::bitset;
 
-			bool	m_alive;	// true if alive
-			size_t	m_data;		// component data index
-			size_t	m_handle;	// handle data index
-			bitset	m_mask;		// signature bitsets
+			bool	m_alive;	// state of entity (alive / dead)
+			size_t	m_data;		// index of real component data
+			size_t	m_handle;	// index of managing handle
+			bitset	m_mask;		// component/tag signature bitsets
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// abstraction over entity interface
 		struct handle final
 		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			ML_NODISCARD inline operator bool() const noexcept
-			{
-				return this->good();
-			}
-
-			ML_NODISCARD inline bool good() const noexcept
-			{
-				return m_manager && m_manager->is_valid_handle(*this);
-			}
-
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			ML_NODISCARD inline entity & operator*() noexcept
@@ -290,6 +280,18 @@ namespace ml::ecs
 			ML_NODISCARD inline entity const * operator->() const noexcept
 			{
 				return &(**this);
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			ML_NODISCARD inline operator bool() const noexcept
+			{
+				return this->is_valid();
+			}
+
+			ML_NODISCARD inline bool is_valid() const noexcept
+			{
+				return m_manager && m_manager->is_valid_handle(*this);
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -326,7 +328,7 @@ namespace ml::ecs
 			template <class T, class ... Args
 			> inline decltype(auto) add_component(Args && ... args) noexcept
 			{
-				return m_manager->add_component<T>(*this, std::forward<Args>(args)...);
+				return m_manager->add_component<T>(*this, ML_FWD(args)...);
 			}
 
 			template <class T> inline decltype(auto) add_component() noexcept
@@ -354,30 +356,24 @@ namespace ml::ecs
 				return m_manager->has_component<T>(*this);
 			}
 
+			template <class T> ML_NODISCARD inline bool matches_signature() const noexcept
+			{
+				return m_manager->matches_signature<T>(*this);
+			}
+
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 			
 		private:
 			friend self_type;
-			self_type * m_manager;	// owning manager
-			size_t		m_entity;	// entity data index
-			size_t		m_self;		// handle data index
+			self_type * m_manager;	// pointer to owning manager
+			size_t		m_entity;	// index of real entity data
+			size_t		m_self;		// index of real handle data
 			int32_t		m_counter;	// validity check counter
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		manager() noexcept
-			: self_type{ 100, allocator_type{} }
-		{
-		}
-
-		manager(size_t const cap, allocator_type const & alloc = {})
-			: self_type{ alloc }
-		{
-			this->grow_to(cap);
-		}
 
 		explicit manager(allocator_type const & alloc) noexcept
 			: m_capacity	{ 0 }
@@ -390,13 +386,9 @@ namespace ml::ecs
 		}
 
 		manager(self_type const & other, allocator_type const & alloc = {})
-			: m_capacity	{ other.m_capacity }
-			, m_size		{ other.m_size }
-			, m_size_next	{ other.m_size_next }
-			, m_entities	{ other.m_entities, alloc }
-			, m_handles		{ other.m_handles, alloc }
-			, m_components	{ std::allocator_arg, alloc, other.m_components }
+			: self_type{ alloc }
 		{
+			this->copy(other);
 		}
 		
 		manager(self_type && other, allocator_type const & alloc = {}) noexcept
@@ -404,6 +396,14 @@ namespace ml::ecs
 		{
 			this->swap(std::move(other));
 		}
+
+		manager(size_t const cap, allocator_type const & alloc = {})
+			: self_type{ alloc }
+		{
+			this->grow_to(cap);
+		}
+
+		manager() noexcept : self_type{ 100, {} } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -437,6 +437,19 @@ namespace ml::ecs
 				h.m_counter = 0;
 			}
 			m_size = m_size_next = 0;
+		}
+
+		inline void copy(self_type const & other)
+		{
+			if (this != std::addressof(other))
+			{
+				m_size = other.m_size;
+				m_capacity = other.m_capacity;
+				m_size_next = other.m_size_next;
+				m_entities = other.m_entities;
+				m_handles = other.m_handles;
+				m_components = other.m_components;
+			}
 		}
 
 		inline void grow_to(size_t const cap)
@@ -526,7 +539,6 @@ namespace ml::ecs
 				std::swap(m_size, other.m_size);
 				std::swap(m_capacity, other.m_capacity);
 				std::swap(m_size_next, other.m_size_next);
-				
 				m_entities.swap(other.m_entities);
 				m_handles.swap(other.m_handles);
 				m_components.swap(other.m_components);
@@ -639,6 +651,8 @@ namespace ml::ecs
 			return this->is_alive(h.m_entity);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline void kill(size_t const i)
 		{
 			return this->get_entity(i).m_alive = false;
@@ -654,7 +668,7 @@ namespace ml::ecs
 		template <class T
 		> inline void add_tag(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.set<settings::template tag_bit<T>()>();
+			this->get_entity(i).m_mask.set<settings_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -663,10 +677,12 @@ namespace ml::ecs
 			return this->add_tag<T>(h.m_entity);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> inline void del_tag(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.clear<settings::template tag_bit<T>()>();
+			this->get_entity(i).m_mask.clear<settings_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -675,10 +691,12 @@ namespace ml::ecs
 			return this->del_tag<T>(h.m_entity);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> ML_NODISCARD inline bool has_tag(size_t const i) const noexcept
 		{
-			return this->get_entity(i).m_mask.read<settings::template tag_bit<T>()>();
+			return this->get_entity(i).m_mask.read<settings_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -693,10 +711,10 @@ namespace ml::ecs
 		> inline decltype(auto) add_component(size_t const i, Args && ... args) noexcept
 		{
 			auto & e{ this->get_entity(i) };
-			e.m_mask.set<settings::template component_bit<T>()>();
+			e.m_mask.set<settings_type::template component_bit<T>()>();
 
 			auto & c{ std::get<pmr::vector<T>>(m_components)[e.m_data] };
-			c = T{ std::forward<Args>(args)... };
+			c = T{ ML_FWD(args)... };
 			return c;
 		}
 
@@ -709,7 +727,7 @@ namespace ml::ecs
 		template <class T, class ... Args
 		> inline decltype(auto) add_component(handle const & h, Args && ... args) noexcept
 		{
-			return this->add_component<T>(h.m_entity, std::forward<Args>(args)...);
+			return this->add_component<T>(h.m_entity, ML_FWD(args)...);
 		}
 
 		template <class T
@@ -718,10 +736,12 @@ namespace ml::ecs
 			return this->add_component<T>(h.m_entity);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> inline void del_component(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.clear<settings::template component_bit<T>()>();
+			this->get_entity(i).m_mask.clear<settings_type::template component_bit<T>()>();
 		}
 
 		template <class T
@@ -729,6 +749,8 @@ namespace ml::ecs
 		{
 			this->del_component<T>(h.m_entity);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> ML_NODISCARD inline auto & get_component(size_t const i) noexcept
@@ -754,10 +776,12 @@ namespace ml::ecs
 			return this->get_component<T>(h.m_entity);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> ML_NODISCARD inline bool has_component(size_t const i) const noexcept
 		{
-			return this->get_entity(i).m_mask.read(settings::template component_bit<T>());
+			return this->get_entity(i).m_mask.read(settings_type::template component_bit<T>());
 		}
 		
 		template <class T
@@ -772,9 +796,17 @@ namespace ml::ecs
 		> ML_NODISCARD inline bool matches_signature(size_t const i) const noexcept
 		{
 			auto const & e{ this->get_entity(i).m_mask };
-			auto const & s{ settings::template signature_mask<T>() };
+			auto const & s{ settings_type::template signature_mask<T>() };
 			return (s & e) == s;
 		}
+
+		template <class T
+		> ML_NODISCARD inline bool matches_signature(handle const & h) const noexcept
+		{
+			return this->matches_signature<T>(h.m_entity);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
 		> inline self_type & for_entities(Fn && fn)
@@ -806,7 +838,7 @@ namespace ml::ecs
 		template <class T, class Fn
 		> inline void expand_invoke(size_t const i, Fn && fn)
 		{
-			using req_comp = typename settings::template component_filter<T>;
+			using req_comp = typename settings_type::template component_filter<T>;
 
 			using helper = meta::rename<invoke_helper, req_comp>;
 
@@ -828,7 +860,7 @@ namespace ml::ecs
 
 	private:
 		size_t m_capacity;	// storage capacity		(allocated memory)
-		size_t m_size;		// current size			(ignores newly created entities)
+		size_t m_size;		// current size			(excludes newly created entities)
 		size_t m_size_next;	// size after refresh	(includes newly created entities)
 		
 		entity_storage		m_entities;		// entity storage

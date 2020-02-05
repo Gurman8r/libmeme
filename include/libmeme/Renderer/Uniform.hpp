@@ -268,7 +268,7 @@ namespace ml
 	template <class Type, class Name, class ... Args
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
-		return uniform{ typeof<Type>{}, std::move(name), std::forward<Args>(args)... };
+		return uniform{ typeof<Type>{}, std::move(name), ML_FWD(args)... };
 	}
 
 	ML_NODISCARD static inline auto make_uniform(uniform const & value)

@@ -94,7 +94,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_render_texture(Args && ... args)
 	{
-		return render_texture{ std::forward<Args>(args)... };
+		return render_texture{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

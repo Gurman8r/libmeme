@@ -75,7 +75,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_font(Args && ... args)
 	{
-		return font{ std::forward<Args>(args)... };
+		return font{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

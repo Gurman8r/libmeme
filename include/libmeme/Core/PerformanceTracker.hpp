@@ -37,7 +37,7 @@ namespace ml
 		template <class ... Args
 		> static inline decltype(auto) emplace_back(Args && ... args)
 		{
-			return m_curr.emplace_back(std::forward<Args>(args)...);
+			return m_curr.emplace_back(ML_FWD(args)...);
 		}
 
 		static inline void refresh() noexcept
