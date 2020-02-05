@@ -297,7 +297,7 @@ namespace ml::meta
 	{
 		using next = typename filter<Pr, list<Ts...>>;
 
-		using type = typename std::conditional_t <
+		using type = typename std::conditional_t<
 			Pr<T>{},
 			concat<list<T>, next>,
 			next
@@ -318,7 +318,7 @@ namespace ml::meta
 
 	template <template <class> class Pr, class T, class ... Ts
 	> struct all<Pr, T, Ts...>
-		: std::bool_constant < (Pr<T>{} && all<Pr, Ts...>{}) > {};
+		: std::bool_constant<(Pr<T>{} && all<Pr, Ts...>{})> {};
 
 	template <template <class> class TMF
 	> struct bound_all

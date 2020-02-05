@@ -5,18 +5,16 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Ts> struct wrapper;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T> struct wrapper<T>
+	template <class T> struct wrapper
 	{
-		T value;
+		using type = typename T;
 
-		constexpr T &		operator *() noexcept		{ return value; }
-		constexpr T const & operator *() const noexcept { return value; }
-		constexpr T *		operator->() noexcept		{ return &value; }
-		constexpr T const * operator->() const noexcept { return &value; }
+		type value;
+
+		constexpr type &		operator *() noexcept		{ return value; }
+		constexpr type const &	operator *() const noexcept { return value; }
+		constexpr type *		operator->() noexcept		{ return &value; }
+		constexpr type const *	operator->() const noexcept { return &value; }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

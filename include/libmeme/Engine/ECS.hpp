@@ -5,14 +5,14 @@
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
-#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Wrapper.hpp>
 
-// CONFIG
-namespace ml::ecs::config
+// DETAIL
+namespace ml::ecs::detail
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,25 +20,41 @@ namespace ml::ecs::config
 	template <class ... _Components
 	> struct components final
 	{
-		using list = typename meta::list<_Components...>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t count() noexcept
+		using self_type	= typename components<_Components...>;
+		using type_list	= typename meta::list<_Components...>;
+		using storage	= typename meta::tuple<meta::remap<pmr::vector, type_list>>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr size_t size() noexcept
 		{
-			return meta::size<list>();
+			return meta::size<type_list>();
 		}
 
 		template <class T
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<T, list>();
+			return meta::contains<T, type_list>();
 		}
 
 		template <class T
 		> static constexpr size_t index() noexcept
 		{
-			static_assert(contains<T>(), "invalid component index");
-			return meta::index_of<T, list>();
+			static_assert(contains<T>());
+			return meta::index_of<T, type_list>();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> using impl_filter = std::bool_constant<self_type::contains<T>()>;
+
+		template <class T
+		> using filter = typename meta::filter<impl_filter, T>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,25 +63,40 @@ namespace ml::ecs::config
 	template <class ... _Tags
 	> struct tags final
 	{
-		using list = typename meta::list<_Tags...>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t count() noexcept
+		using self_type	= typename tags<_Tags...>;
+		using type_list	= typename meta::list<_Tags...>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr size_t size() noexcept
 		{
-			return meta::size<list>();
+			return meta::size<type_list>();
 		}
 
 		template <class T
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<T, list>();
+			return meta::contains<T, type_list>();
 		}
 
 		template <class T
 		> static constexpr size_t index() noexcept
 		{
-			static_assert(contains<T>(), "invalid tag index");
-			return meta::index_of<T, list>();
+			static_assert(contains<T>());
+			return meta::index_of<T, type_list>();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> using impl_filter = std::bool_constant<self_type::contains<T>()>;
+
+		template <class T
+		> using filter = typename meta::filter<impl_filter, T>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -74,56 +105,66 @@ namespace ml::ecs::config
 	template <class ... _Signatures
 	> struct signatures final
 	{
-		using list = typename meta::list<_Signatures...>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t count() noexcept
+		using self_type	= typename signatures<_Signatures...>;
+		using type_list	= typename meta::list<_Signatures...>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr size_t size() noexcept
 		{
-			return meta::size<list>();
+			return meta::size<type_list>();
 		}
 
 		template <class T
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<T, list>();
+			return meta::contains<T, type_list>();
 		}
 
 		template <class T
 		> static constexpr size_t index() noexcept
 		{
-			static_assert(contains<T>(), "invalid signature index");
-			return meta::index_of<T, list>();
+			static_assert(contains<T>());
+			return meta::index_of<T, type_list>();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// SYSTEM WRAPPER
-	template <template <class> class _System
-	> struct system_wrapper {};
 
 	// SYSTEMS (WIP)
 	template <template <class> class ... _Systems
 	> struct systems final
 	{
-		using list = typename meta::list<system_wrapper<_Systems>...>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t count() noexcept
+		using self_type	= typename systems<_Systems...>;
+		using type_list	= typename meta::list<ds::wrapper<_Systems>...>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr size_t size() noexcept
 		{
-			return meta::size<list>();
+			return meta::size<type_list>();
 		}
 
 		template <template <class> class T
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<T, list>();
+			return meta::contains<ds::wrapper<T>, type_list>();
 		}
 
 		template <template <class> class T
 		> static constexpr size_t index() noexcept
 		{
-			static_assert(contains<T>(), "invalid system index");
-			return meta::index_of<T, list>();
+			static_assert(contains<ds::wrapper<T>>());
+			return meta::index_of<ds::wrapper<T>, type_list>();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -135,36 +176,24 @@ namespace ml::ecs
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
-		class _Components	= config::components<>,
-		class _Tags			= config::tags<>,
-		class _Signatures	= config::signatures<>,
-		class _Systems		= config::systems<>
+		class _Components	= detail::components<>,
+		class _Tags			= detail::tags<>,
+		class _Signatures	= detail::signatures<>,
+		class _Systems		= detail::systems<>
 	> struct settings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		using components		= typename _Components;
-		using tags				= typename _Tags;
-		using signatures		= typename _Signatures;
-		using systems			= typename _Systems;
-		using bitset			= typename ds::bitset<components::count() + tags::count()>;
-		using bitset_storage	= typename meta::tuple<meta::repeat<signatures::count(), bitset>>;
+		using components	= typename _Components;
+		using tags			= typename _Tags;
+		using signatures	= typename _Signatures;
+		using systems		= typename _Systems;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T
-		> using impl_component_filter = std::bool_constant<components::template contains<T>()>;
+		using bitset = typename ds::bitset<components::size() + tags::size()>;
 
-		template <class T
-		> using component_filter = typename meta::filter<impl_component_filter, T>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T
-		> using impl_tag_filter = std::bool_constant<tags::template contains<T>()>;
-
-		template <class T
-		> using tag_filter = typename meta::filter<impl_tag_filter, T>;
+		using bitset_storage = typename meta::tuple<meta::repeat<signatures::size(), bitset>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -175,10 +204,10 @@ namespace ml::ecs
 
 		template <class T> static constexpr size_t tag_bit() noexcept
 		{
-			return components::count() + tags::index<T>();
+			return components::size() + tags::index<T>();
 		}
 
-		template <class T> static constexpr bitset const & signature_mask() noexcept
+		template <class T> static constexpr bitset const & signature_bitset() noexcept
 		{
 			return std::get<signatures::template index<T>()>(m_bitsets);
 		}
@@ -186,25 +215,25 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr bitset_storage generate_signature_bitset_storage() noexcept
+		static constexpr bitset_storage generate_bitset_storage() noexcept
 		{
-			// generate masks for each signature
+			// generate bitsets for each signature
 			bitset_storage temp{};
-			meta::for_types<typename signatures::list
+			meta::for_types<typename signatures::type_list
 			>([&temp](auto sig)
 			{
 				// get signature bitset
 				auto & b{ std::get<signatures::template index<decltype(sig)::type>()>(temp) };
 
 				// set component bits
-				meta::for_types<component_filter<decltype(sig)::type>
+				meta::for_types<components::template filter<decltype(sig)::type>
 				>([&b](auto cpt)
 				{
 					b.set<component_bit<decltype(cpt)::type>()>();
 				});
 
 				// set tag bits
-				meta::for_types<tag_filter<decltype(sig)::type>
+				meta::for_types<tags::template filter<decltype(sig)::type>
 				>([&b](auto tag)
 				{
 					b.set<tag_bit<decltype(tag)::type>()>();
@@ -213,7 +242,7 @@ namespace ml::ecs
 			return temp;
 		}
 		
-		static constexpr auto m_bitsets{ generate_signature_bitset_storage() };
+		static constexpr auto m_bitsets{ generate_bitset_storage() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -227,7 +256,7 @@ namespace ml::ecs
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class _Settings
-	> struct manager : public trackable
+	> struct manager final : public trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -238,13 +267,11 @@ namespace ml::ecs
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using entity_storage	= typename pmr::vector<entity>;
 		using handle_storage	= typename pmr::vector<handle>;
-		using component_storage = typename meta::tuple<
-			meta::remap<pmr::vector, typename settings_type::components::list>
-		>;
+		using component_storage = typename settings_type::components::storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// serves as a key for accessing real component/tag data
+		// used like a key to access the real data
 		struct entity final
 		{
 			using bitset = typename settings_type::bitset;
@@ -253,6 +280,9 @@ namespace ml::ecs
 			size_t	m_data;		// index of real component data
 			size_t	m_handle;	// index of managing handle
 			bitset	m_mask;		// component/tag signature bitsets
+
+			// true if alive
+			constexpr operator bool() const noexcept { return m_alive; }
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -264,17 +294,17 @@ namespace ml::ecs
 
 			ML_NODISCARD inline operator bool() const noexcept
 			{
-				return this->is_valid();
+				return this->valid();
 			}
 
-			ML_NODISCARD inline bool is_valid() const noexcept
+			ML_NODISCARD inline bool valid() const noexcept
 			{
 				return m_manager && m_manager->is_valid_handle(*this);
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD inline bool is_alive() const noexcept
+			ML_NODISCARD inline bool alive() const noexcept
 			{
 				return m_manager->is_alive(*this);
 			}
@@ -347,7 +377,7 @@ namespace ml::ecs
 			self_type * m_manager;	// pointer to owning manager
 			size_t		m_entity;	// index of real entity data
 			size_t		m_self;		// index of real handle data
-			int32_t		m_counter;	// validity check counter
+			int32_t		m_sizeer;	// validity check sizeer
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -413,7 +443,7 @@ namespace ml::ecs
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
-				h.m_counter = 0;
+				h.m_sizeer = 0;
 			}
 			m_size = m_size_next = 0;
 		}
@@ -450,7 +480,7 @@ namespace ml::ecs
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
 				h.m_entity = i;
-				h.m_counter = 0;
+				h.m_sizeer = 0;
 			}
 			m_capacity = cap;
 		}
@@ -462,53 +492,53 @@ namespace ml::ecs
 				m_size = 0;
 				return;
 			}
-			else m_size = m_size_next = static_cast<size_t>(([&]()
+			else m_size = m_size_next = ([&]()
 			{
 				// arrange all alive entities towards the left
 				size_t dead{ 0 }, alive{ m_size_next - 1 };
 				while (true)
 				{
-					// find first dead entity from the left
+					// find dead entity from the left
 					for (; true; ++dead)
 					{
 						if (dead > alive) return dead;
-						if (!(m_entities[dead].m_alive)) break;
+						if (!m_entities[dead]) break;
 					}
 
-					// find first alive entity from the right
+					// find alive entity from the right
 					for (; true; --alive)
 					{
-						if (m_entities[alive].m_alive) break;
+						if (m_entities[alive]) break;
 						if (alive <= dead) return dead;
 					}
 
 					// found two entities that need to be swapped
-					ML_ASSERT(m_entities[alive].m_alive);
-					ML_ASSERT(!(m_entities[dead].m_alive));
+					ML_ASSERT(m_entities[alive]);
+					ML_ASSERT(!m_entities[dead]);
 					std::swap(m_entities[alive], m_entities[dead]);
 
 					auto invalidate_handle = [this](size_t const i) noexcept
 					{
-						auto & h{ m_handles[m_entities[i].m_handle] };
-						++h.m_counter;
+						++get_handle(i).m_sizeer;
 					};
 
 					auto refresh_handle = [this](size_t const i) noexcept
 					{
-						auto & h{ m_handles[m_entities[i].m_handle] };
-						h.m_entity = i;
+						get_handle(i).m_entity = i;
 					};
 
-					refresh_handle(dead);
-
-					invalidate_handle(alive);
+					// refresh alive entity
 					refresh_handle(alive);
+
+					// invalidate and refresh dead entity
+					invalidate_handle(dead);
+					refresh_handle(dead);
 
 					// move both iterator indices
 					++dead; --alive;
 				}
 				return dead;
-			})());
+			})();
 		}
 
 		inline void swap(self_type & other) noexcept
@@ -534,9 +564,9 @@ namespace ml::ecs
 
 		inline auto entities() const noexcept -> entity_storage const & { return m_entities; }
 
-		inline auto components() const noexcept -> component_storage const & { return m_components; }
-
 		inline auto handles() const noexcept -> handle_storage const & { return m_handles; }
+
+		inline auto components() const noexcept -> component_storage const & { return m_components; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -587,7 +617,7 @@ namespace ml::ecs
 			temp.m_manager	= h.m_manager;
 			temp.m_entity	= h.m_entity = i;
 			temp.m_self		= e.m_handle;
-			temp.m_counter	= h.m_counter;
+			temp.m_sizeer	= h.m_sizeer;
 
 			ML_ASSERT(temp);
 			return temp;
@@ -595,7 +625,7 @@ namespace ml::ecs
 
 		ML_NODISCARD inline bool is_valid_handle(handle const & h) const noexcept
 		{
-			return (h.m_counter == this->get_handle(h).m_counter);
+			return (h.m_sizeer == this->get_handle(h).m_sizeer);
 		}
 
 		ML_NODISCARD inline handle & get_handle(size_t const i)
@@ -775,7 +805,7 @@ namespace ml::ecs
 		> ML_NODISCARD inline bool matches_signature(size_t const i) const noexcept
 		{
 			auto const & e{ this->get_entity(i).m_mask };
-			auto const & s{ settings_type::template signature_mask<T>() };
+			auto const & s{ settings_type::template signature_bitset<T>() };
 			return (s & e) == s;
 		}
 
@@ -792,7 +822,7 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_size; ++i)
 			{
-				std::invoke(fn, i);
+				std::invoke(ML_FWD(fn), i);
 			}
 			return (*this);
 		}
@@ -804,7 +834,7 @@ namespace ml::ecs
 			{
 				if (this->matches_signature<T>(i))
 				{
-					this->expand_invoke<T>(i, fn);
+					this->expand_invoke<T>(i, ML_FWD(fn));
 				}
 			});
 		}
@@ -817,11 +847,11 @@ namespace ml::ecs
 		template <class T, class Fn
 		> inline void expand_invoke(size_t const i, Fn && fn)
 		{
-			using req_comp = typename settings_type::template component_filter<T>;
+			using depends = typename settings_type::components::template filter<T>;
 
-			using helper = meta::rename<invoke_helper, req_comp>;
+			using helper = meta::rename<invoke_helper, depends>;
 
-			helper::invoke(i, *this, fn);
+			helper::invoke(i, *this, ML_FWD(fn));
 		}
 
 		template <class ... Ts> struct invoke_helper
@@ -831,7 +861,7 @@ namespace ml::ecs
 			{
 				size_t const index{ self.get_entity(i).m_data };
 
-				std::invoke(fn, i, std::get<pmr::vector<Ts>>(self.m_components)[index]...);
+				std::invoke(ML_FWD(fn), i, std::get<pmr::vector<Ts>>(self.m_components)[index]...);
 			}
 		};
 
@@ -877,15 +907,15 @@ namespace ml::ecs::tests
 
 	// settings
 	using ES = settings<
-		config::components	<C0, C1, C2, C3, C4>,
-		config::tags			<T0, T1, T2>,
-		config::signatures	<S0, S1, S2, S3>
+		detail::components	<C0, C1, C2, C3, C4>,
+		detail::tags		<T0, T1, T2>,
+		detail::signatures	<S0, S1, S2, S3>
 	>;
 
 	// tests
-	static_assert(ES::components::count() == 5);
-	static_assert(ES::signatures::count() == 4);
-	static_assert(ES::tags		::count() == 3);
+	static_assert(ES::components::size() == 5);
+	static_assert(ES::signatures::size() == 4);
+	static_assert(ES::tags		::size() == 3);
 
 	static_assert(ES::components::index<C0>() == 0);
 	static_assert(ES::components::index<C1>() == 1);
@@ -909,18 +939,18 @@ namespace ml::ecs::tests
 	static_assert(ES::		tag_bit<T1>() == 6);
 	static_assert(ES::		tag_bit<T2>() == 7);
 
-	static_assert(ES::signature_mask<S0>() == "00000000");
-	static_assert(ES::signature_mask<S1>() == "11000000");
-	static_assert(ES::signature_mask<S2>() == "10001100");
-	static_assert(ES::signature_mask<S3>() == "01010101");
+	static_assert(ES::signature_bitset<S0>() == "00000000");
+	static_assert(ES::signature_bitset<S1>() == "11000000");
+	static_assert(ES::signature_bitset<S2>() == "10001100");
+	static_assert(ES::signature_bitset<S3>() == "01010101");
 
-	static_assert(std::is_same_v<ES::component_filter<S0>,
+	static_assert(std::is_same_v<ES::components::template filter<S0>,
 		meta::list<>
 	>);
-	static_assert(std::is_same_v<ES::component_filter<S3>,
+	static_assert(std::is_same_v<ES::components::template filter<S3>,
 		meta::list<C1, C3>
 	>);
-	static_assert(std::is_same_v<ES::tag_filter<S3>,
+	static_assert(std::is_same_v<ES::tags::template filter<S3>,
 		meta::list<T0, T2>
 	>);
 

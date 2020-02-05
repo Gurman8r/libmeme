@@ -37,18 +37,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if !defined(ML_ASSERT) && defined(assert)
-#	define ML_ASSERT(expr) assert(expr)
-#else
-#	define ML_ASSERT(expr)
-#endif
-
+#define ML_ASSERT		assert
 #define ML_ARGC			__argc
 #define ML_ARGV			__argv
 #define ML_WARGV		__wargv
 #define ML_SERIALIZE	std::ostream & operator <<
 #define ML_DESERIALIZE	std::istream & operator >>
-#define ML_FWD(x)		std::forward<decltype(x)>(x)
+#define ML_FWD(var)		std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

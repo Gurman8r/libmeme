@@ -25,9 +25,6 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// MISC
-		bool m_show_imgui_demo{ false };
-
 		// CONTENT
 		pmr::vector<render_texture>			m_pipeline	{};
 		ds::flat_map<pmr::string, font>		m_fonts		{};
@@ -40,7 +37,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// COMPONENTS
+		// GUI STATE
+		bool m_show_imgui_demo{ false };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// ECS COMPONENTS
 		struct c_position	: ds::wrapper<vec3>		{};
 		struct c_rotation	: ds::wrapper<vec4>		{};
 		struct c_scale		: ds::wrapper<vec3>		{};
@@ -48,41 +50,39 @@ namespace ml
 		struct c_material	: ds::wrapper<material> {};
 		struct c_model		: ds::wrapper<model>	{};
 
-		// SIGNATURES
+		// ECS TAGS
+		struct t_renderer {};
+
+		// ECS SIGNATURES
 		using s_update_renderer = meta::list<
-			c_material,
-			c_position, c_rotation, c_scale
+			t_renderer,
+			c_material, c_position, c_rotation, c_scale
 		>;
 		using s_draw_renderer = meta::list<
+			t_renderer,
 			c_shader, c_material, c_model
 		>;
 
-		// ENTITY SETTINGS
+		// ECS SETTINGS
 		using entity_settings = ecs::settings
 		<
-			ecs::config::components
+			ecs::detail::components
 			<
 			c_position, c_rotation, c_scale,
 			c_shader, c_material, c_model
 			>,
-			ecs::config::tags
+			ecs::detail::tags
 			<
-			// etc...
+			t_renderer
 			>,
-			ecs::config::signatures
+			ecs::detail::signatures
 			<
 			s_update_renderer, s_draw_renderer
-			>,
-			ecs::config::systems
-			<
-			// etc...
 			>
 		>;
 
-		// ENTITY MANAGER
-		using entity_manager = ecs::manager<entity_settings>;
-
-		entity_manager m_entities;
+		// ECS MANAGER
+		ecs::manager<entity_settings> m_entities;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,7 +106,7 @@ namespace ml
 			{
 				// load stuff, etc...
 
-				// SETUP MENUS
+				// MENUS
 				{
 					// File Menu
 					editor::get_main_menu().add_menu("File", [&, this]()
@@ -137,12 +137,12 @@ namespace ml
 					});
 				}
 
-				// SETUP PIPELINE
+				// PIPELINE
 				{
 					m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })).create();
 				}
 
-				// LOAD IMAGES
+				// IMAGES
 				{
 					if (auto const & img{ m_images["icon"] = make_image(
 						fs::path{ "../../../assets/textures/icon.png" }
@@ -152,7 +152,7 @@ namespace ml
 					}
 				}
 
-				// LOAD SHADERS
+				// SHADERS
 				{
 					m_textures["doot"] = make_texture(
 						fs::path{ "../../../assets/textures/doot.png" }
@@ -163,14 +163,14 @@ namespace ml
 					);
 				}
 
-				// LOAD FONTS
+				// FONTS
 				{
 					m_fonts["consolas"] = make_font(
 						fs::path{ "../../../assets/fonts/consolas.ttf" }
 					);
 				}
 
-				// LOAD SHADERS
+				// SHADERS
 				{
 					m_shaders["2d"] = make_shader(
 						fs::path{ "../../../assets/shaders/2D.vs.shader" },
@@ -183,7 +183,7 @@ namespace ml
 					);
 				}
 
-				// LOAD MATERIALS
+				// MATERIALS
 				{
 					m_materials["2d"] = make_material(
 						make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
@@ -212,7 +212,7 @@ namespace ml
 					);
 				}
 
-				// LOAD MODELS
+				// MODELS
 				{
 					m_models["sphere8x6"] = make_model(
 						fs::path{ "../../../assets/models/sphere8x6.obj" }
@@ -254,10 +254,11 @@ namespace ml
 					));
 				}
 
-				// LOAD ENTITIES
+				// ENTITIES
 				{
 					if (auto h{ m_entities.create_handle() })
 					{
+						h.add_tag<t_renderer>();
 						h.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
 						h.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
 						h.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
@@ -274,7 +275,7 @@ namespace ml
 				// update stuff, etc...
 
 				m_entities.for_matching<s_update_renderer
-				>([&](auto, c_material & mt, auto & pos, auto & rot, auto & scl)
+				>([&](auto, c_material & mt, auto pos, auto rot, auto scl)
 				{
 					if (auto u{ mt->find("u_position") }
 					; u && u->holds<vec3>()) u->set<vec3>(*pos);
