@@ -103,25 +103,25 @@ namespace ml
 		m_flags		= flags;
 		m_context	= context;
 		
-		// API
+		// Client API
 		glfwWindowHint(GLFW_CLIENT_API, ([api = m_context.api]() {
 			switch (api)
 			{
-			case client_api::OpenGL	: return GLFW_OPENGL_API;
-			case client_api::Vulkan	:
-			case client_api::DirectX:
+			case client_api::opengl	: return GLFW_OPENGL_API;
+			case client_api::vulkan	:
+			case client_api::directx:
 			default					: return GLFW_NO_API;
 			}
 		})());
 
-		// Profile
+		// API Profile
 		glfwWindowHint(GLFW_OPENGL_PROFILE, ([profile = m_context.profile]() {
 			switch (profile)
 			{
-			case client_api::Core	: return GLFW_OPENGL_CORE_PROFILE;
-			case client_api::Compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case client_api::Debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case client_api::Any	:
+			case client_api::core	: return GLFW_OPENGL_CORE_PROFILE;
+			case client_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case client_api::debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case client_api::any	:
 			default					: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());

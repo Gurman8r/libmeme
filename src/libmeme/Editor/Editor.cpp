@@ -28,9 +28,15 @@ namespace ml
 	editor::context const * editor::create_context()
 	{
 		if (g_editor) return nullptr;
+
 		return (g_editor = new editor::context{});
 	}
-
+	
+	bool editor::initialized() noexcept
+	{
+		return g_editor;
+	}
+	
 	bool editor::startup(bool install_callbacks)
 	{
 		if (!g_editor) return false;
@@ -82,7 +88,7 @@ namespace ml
 			return debug::log_error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(g_editor->config.api_version))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->config.api_version.c_str()))
 		{
 			return debug::log_error("Failed initializing ImGui renderer");
 		}
@@ -90,6 +96,23 @@ namespace ml
 #endif
 		return true;
 	}
+
+	void editor::shutdown()
+	{
+		if (!g_editor) return;
+
+		get_main_menu().clear();
+
+#ifdef ML_IMPL_RENDERER_OPENGL
+		ImGui_ImplOpenGL3_Shutdown();
+#endif
+		ImGui_ImplGlfw_Shutdown();
+
+		delete g_editor;
+		g_editor = nullptr;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void editor::new_frame()
 	{
@@ -117,20 +140,6 @@ namespace ml
 		}
 
 		GL::flush();
-	}
-
-	void editor::shutdown()
-	{
-		if (!g_editor) return;
-
-		get_main_menu().clear();
-
-#ifdef ML_IMPL_RENDERER_OPENGL
-		ImGui_ImplOpenGL3_Shutdown();
-#endif
-		ImGui_ImplGlfw_Shutdown();
-
-		delete g_editor;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

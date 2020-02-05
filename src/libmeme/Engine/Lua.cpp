@@ -9,6 +9,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool lua::initialized() noexcept
+	{
+		return s_L;
+	}
+
 	bool lua::startup()
 	{
 		// My Print

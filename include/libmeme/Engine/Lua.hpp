@@ -18,6 +18,8 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static bool initialized() noexcept;
+
 		static bool startup();
 
 		static bool startup(bool openLibs, luaL_Reg const * userLib);

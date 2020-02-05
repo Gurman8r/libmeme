@@ -174,10 +174,10 @@ namespace ml::ds
 
 		ML_NODISCARD inline bool contains(const_reference value) const
 		{
-			if ((traits_type::magic == 0) || traits_type::magic > size())
+			if (size() < traits_type::magic)
 			{
 				// linear
-				return (std::find(cbegin(), cend(), value) != cend());
+				return std::find(cbegin(), cend(), value) != cend();
 			}
 			else
 			{
@@ -227,7 +227,7 @@ namespace ml::ds
 		ML_NODISCARD inline iterator find(const_reference value)
 		{
 			// linear
-			if ((traits_type::magic == 0) || traits_type::magic > size())
+			if (size() < traits_type::magic)
 			{
 				return std::find(begin(), end(), value);
 			}
@@ -242,7 +242,7 @@ namespace ml::ds
 		ML_NODISCARD inline const_iterator find(const_reference value) const
 		{
 			// linear
-			if ((traits_type::magic == 0) || traits_type::magic > size())
+			if (size() < traits_type::magic)
 			{
 				return std::find(cbegin(), cend(), value);
 			}
@@ -252,7 +252,6 @@ namespace ml::ds
 				return it.first;
 			}
 			return cend();
-
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

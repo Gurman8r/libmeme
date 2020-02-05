@@ -24,6 +24,11 @@ namespace ml
 		return (g_engine = new engine::context{});
 	}
 
+	bool engine::initialized() noexcept
+	{
+		return g_engine;
+	}
+
 	bool engine::startup(bool install_callbacks)
 	{
 		if (!g_engine) return false;
@@ -144,15 +149,25 @@ namespace ml
 		g_engine->lib_instances.for_each([](auto const &, auto & p) { delete p; });
 		g_engine->lib_instances.clear();
 		
-		g_engine->window.destroy();
+		if (g_engine->window.is_open())
+		{
+			g_engine->window.destroy();
+
+			window::terminate();
+		}
 		
-		window::terminate();
+		if (python::initialized())
+		{
+			python::shutdown();
+		}
 		
-		python::shutdown();
-		
-		lua::shutdown();
+		if (lua::initialized())
+		{
+			lua::shutdown();
+		}
 		
 		delete g_engine;
+		g_engine = nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

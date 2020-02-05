@@ -8,7 +8,7 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <size_t BitCount = 64
-	> struct bitset
+	> struct bitset final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -30,8 +30,9 @@ namespace ml::ds
 
 		constexpr bitset() noexcept : m_words{ 0 } {}
 
-		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
-		> constexpr bitset(T const value) noexcept
+		template <class T, class = std::enable_if_t<
+			std::is_integral_v<T>
+		>> constexpr bitset(T const value) noexcept
 			: m_words{ static_cast<uint64_t>(value) }
 		{
 		}
@@ -93,9 +94,9 @@ namespace ml::ds
 
 		template <class T, class = std::enable_if_t<
 			std::is_integral_v<T>
-		>> constexpr bitset & operator=(T const value) noexcept
+		>> constexpr self_type & operator=(T const value) noexcept
 		{
-			bitset temp{ value };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}

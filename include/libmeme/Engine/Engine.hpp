@@ -18,22 +18,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// startup settings
 		struct config final : trackable
 		{
-			fs::path				program_name;	// 
-			fs::path				library_path;	// 
-
-			pmr::vector<fs::path>	script_list;	// 
-			pmr::vector<fs::path>	plugin_list;	// 
-
-			cstring					window_title;	// 
-			video_mode				window_video;	// 
-			context_settings		window_context;	// 
-			int32_t					window_flags;	// 
+			pmr::vector<pmr::string>	command_line;	// command line arguments
+			fs::path					program_name;	// program name
+			fs::path					library_path;	// library path
+			fs::path					content_path;	// content path
+			pmr::vector<fs::path>		script_list;	// scripts to run on start
+			pmr::vector<fs::path>		plugin_list;	// plugins to load on start
+			pmr::string					window_title;	// window title
+			video_mode					window_video;	// window video mode
+			context_settings			window_context;	// window context settings
+			int32_t						window_flags;	// window flags
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// runtime settings
 		struct io final : trackable
 		{
 			float64_t delta_time; // 
@@ -41,6 +43,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// engine context
 		struct context final : trackable
 		{
 			config			config			{};			// 
@@ -55,6 +58,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static engine::context const * create_context();
+
+		static bool initialized() noexcept;
 
 		static bool startup(bool install_callbacks);
 

@@ -9,9 +9,9 @@ namespace ml
 
 	struct client_api final
 	{
-		enum API { Unknown, OpenGL, Vulkan, DirectX };
+		enum API { unknown, opengl, vulkan, directx };
 
-		enum Profile { Any, Core, Compat, Debug };
+		enum Profile { any, core, compat, debug };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,10 +20,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t		api				{ client_api::Unknown };
+		int32_t		api				{ client_api::unknown };
 		int32_t		major			{ 0 };
 		int32_t		minor			{ 0 };
-		int32_t		profile			{ client_api::Any };
+		int32_t		profile			{ client_api::any };
 		int32_t		depth_bits		{ 0 };
 		int32_t		stencil_bits	{ 0 };
 		bool		multisample		{ false };

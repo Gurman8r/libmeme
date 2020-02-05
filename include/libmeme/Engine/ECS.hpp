@@ -11,14 +11,14 @@
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 
-// CONFIGURATION
-namespace ml::ecs
+// CONFIG
+namespace ml::ecs::config
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// COMPONENT CONFIG
+	// COMPONENTS
 	template <class ... _Components
-	> struct component_config final
+	> struct components final
 	{
 		using list = typename meta::list<_Components...>;
 
@@ -43,9 +43,9 @@ namespace ml::ecs
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// TAG CONFIG
+	// TAGS
 	template <class ... _Tags
-	> struct tag_config final
+	> struct tags final
 	{
 		using list = typename meta::list<_Tags...>;
 
@@ -70,9 +70,9 @@ namespace ml::ecs
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// SIGNATURE CONFIG
+	// SIGNATURES
 	template <class ... _Signatures
-	> struct signature_config final
+	> struct signatures final
 	{
 		using list = typename meta::list<_Signatures...>;
 
@@ -101,9 +101,9 @@ namespace ml::ecs
 	template <template <class> class _System
 	> struct system_wrapper {};
 
-	// SYSTEM CONFIG
+	// SYSTEMS (WIP)
 	template <template <class> class ... _Systems
-	> struct system_config final
+	> struct systems final
 	{
 		using list = typename meta::list<system_wrapper<_Systems>...>;
 
@@ -129,26 +129,26 @@ namespace ml::ecs
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// ENTITY SETTINGS
+// SETTINGS
 namespace ml::ecs
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <
-		class _ComponentConfig	= component_config<>,
-		class _TagConfig		= tag_config<>,
-		class _SignatureConfig	= signature_config<>,
-		class _SystemConfig		= system_config<>
+		class _Components	= config::components<>,
+		class _Tags			= config::tags<>,
+		class _Signatures	= config::signatures<>,
+		class _Systems		= config::systems<>
 	> struct settings
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		using components		= typename _ComponentConfig;
-		using tags				= typename _TagConfig;
-		using signatures		= typename _SignatureConfig;
-		using systems			= typename _SystemConfig;
-		using bitmask			= typename ds::bitset<components::count() + tags::count()>;
-		using bitmask_storage	= typename meta::tuple<meta::repeat<signatures::count(), bitmask>>;
+		using components		= typename _Components;
+		using tags				= typename _Tags;
+		using signatures		= typename _Signatures;
+		using systems			= typename _Systems;
+		using bitset			= typename ds::bitset<components::count() + tags::count()>;
+		using bitset_storage	= typename meta::tuple<meta::repeat<signatures::count(), bitset>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -168,51 +168,52 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> static constexpr size_t get_component_bit() noexcept
+		template <class T> static constexpr size_t component_bit() noexcept
 		{
 			return components::index<T>();
 		}
 
-		template <class T> static constexpr size_t get_tag_bit() noexcept
+		template <class T> static constexpr size_t tag_bit() noexcept
 		{
 			return components::count() + tags::index<T>();
 		}
 
-		template <class T> static constexpr bitmask const & get_mask() noexcept
+		template <class T> static constexpr bitset const & signature_mask() noexcept
 		{
-			return std::get<signatures::template index<T>()>(m_bitmasks);
+			return std::get<signatures::template index<T>()>(m_bitsets);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr bitmask_storage generate_signature_bitmask_storage() noexcept
+		static constexpr bitset_storage generate_signature_bitset_storage() noexcept
 		{
-			// generate bitmasks for each signature
-			bitmask_storage temp{};
-			meta::for_types<typename signatures::list>([&temp](auto sig)
+			// generate masks for each signature
+			bitset_storage temp{};
+			meta::for_types<typename signatures::list
+			>([&temp](auto sig)
 			{
-				// get signature bitmask
+				// get signature bitset
 				auto & b{ std::get<signatures::template index<decltype(sig)::type>()>(temp) };
 
 				// set component bits
-				meta::for_types<component_filter<decltype(sig)::type>>([&b](auto cpt)
+				meta::for_types<component_filter<decltype(sig)::type>
+				>([&b](auto cpt)
 				{
-					b.set<get_component_bit<decltype(cpt)::type>()>();
+					b.set<component_bit<decltype(cpt)::type>()>();
 				});
 
 				// set tag bits
-				meta::for_types<tag_filter<decltype(sig)::type>>([&b](auto tag)
+				meta::for_types<tag_filter<decltype(sig)::type>
+				>([&b](auto tag)
 				{
-					b.set<get_tag_bit<decltype(tag)::type>()>();
+					b.set<tag_bit<decltype(tag)::type>()>();
 				});
 			});
 			return temp;
 		}
 		
-		static constexpr bitmask_storage m_bitmasks{
-			generate_signature_bitmask_storage()
-		};
+		static constexpr auto m_bitsets{ generate_signature_bitset_storage() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -225,7 +226,6 @@ namespace ml::ecs
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// MANAGER
 	template <class _Settings
 	> struct manager : public trackable
 	{
@@ -246,12 +246,12 @@ namespace ml::ecs
 
 		struct entity final
 		{
-			using bitmask = typename settings::bitmask;
+			using bitset = typename settings::bitset;
 
 			bool	m_alive;	// true if alive
-			size_t	m_index;	// component data index
+			size_t	m_data;		// component data index
 			size_t	m_handle;	// handle data index
-			bitmask	m_mask;		// signature bitsets
+			bitset	m_mask;		// signature bitsets
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -427,7 +427,7 @@ namespace ml::ecs
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
 				auto & e{ m_entities[i] };
-				e.m_index = i;
+				e.m_data = i;
 				e.m_handle = i;
 				e.m_mask.reset();
 				e.m_alive = false;
@@ -450,7 +450,7 @@ namespace ml::ecs
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
 				auto & e{ m_entities.at(i) };
-				e.m_index = i;
+				e.m_data = i;
 				e.m_handle = i;
 				e.m_mask.reset();
 				e.m_alive = false;
@@ -654,7 +654,7 @@ namespace ml::ecs
 		template <class T
 		> inline void add_tag(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.set<settings::template get_tag_bit<T>()>();
+			this->get_entity(i).m_mask.set<settings::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -666,7 +666,7 @@ namespace ml::ecs
 		template <class T
 		> inline void del_tag(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.clear<settings::template get_tag_bit<T>()>();
+			this->get_entity(i).m_mask.clear<settings::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -678,7 +678,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool has_tag(size_t const i) const noexcept
 		{
-			return this->get_entity(i).m_mask.read<settings::template get_tag_bit<T>()>();
+			return this->get_entity(i).m_mask.read<settings::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -693,9 +693,9 @@ namespace ml::ecs
 		> inline decltype(auto) add_component(size_t const i, Args && ... args) noexcept
 		{
 			auto & e{ this->get_entity(i) };
-			e.m_mask.set<settings::template get_component_bit<T>()>();
+			e.m_mask.set<settings::template component_bit<T>()>();
 
-			auto & c{ std::get<pmr::vector<T>>(m_components)[e.m_index] };
+			auto & c{ std::get<pmr::vector<T>>(m_components)[e.m_data] };
 			c = T{ std::forward<Args>(args)... };
 			return c;
 		}
@@ -721,7 +721,7 @@ namespace ml::ecs
 		template <class T
 		> inline void del_component(size_t const i) noexcept
 		{
-			this->get_entity(i).m_mask.clear<settings::template get_component_bit<T>()>();
+			this->get_entity(i).m_mask.clear<settings::template component_bit<T>()>();
 		}
 
 		template <class T
@@ -733,13 +733,13 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline auto & get_component(size_t const i) noexcept
 		{
-			return std::get<pmr::vector<T>>(m_components)[this->get_entity(i).m_index];
+			return std::get<pmr::vector<T>>(m_components)[this->get_entity(i).m_data];
 		}
 
 		template <class T
 		> ML_NODISCARD inline auto const & get_component(size_t const i) const noexcept
 		{
-			return std::get<pmr::vector<T>>(m_components)[this->get_entity(i).m_index];
+			return std::get<pmr::vector<T>>(m_components)[this->get_entity(i).m_data];
 		}
 
 		template <class T
@@ -757,7 +757,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool has_component(size_t const i) const noexcept
 		{
-			return this->get_entity(i).m_mask.read(settings::template get_component_bit<T>());
+			return this->get_entity(i).m_mask.read(settings::template component_bit<T>());
 		}
 		
 		template <class T
@@ -772,7 +772,7 @@ namespace ml::ecs
 		> ML_NODISCARD inline bool matches_signature(size_t const i) const noexcept
 		{
 			auto const & e{ this->get_entity(i).m_mask };
-			auto const & s{ settings::template get_mask<T>() };
+			auto const & s{ settings::template signature_mask<T>() };
 			return (s & e) == s;
 		}
 
@@ -818,7 +818,7 @@ namespace ml::ecs
 			template <class Fn
 			> static inline void invoke(size_t const i, self_type & self, Fn && fn)
 			{
-				size_t const index{ self.get_entity(i).m_index };
+				size_t const index{ self.get_entity(i).m_data };
 
 				std::invoke(fn, i, std::get<pmr::vector<Ts>>(self.m_components)[index]...);
 			}
@@ -866,9 +866,9 @@ namespace ml::ecs::tests
 
 	// settings
 	using ES = settings<
-		component_config	<C0, C1, C2, C3, C4>,
-		tag_config			<T0, T1, T2>,
-		signature_config	<S0, S1, S2, S3>
+		config::components	<C0, C1, C2, C3, C4>,
+		config::tags			<T0, T1, T2>,
+		config::signatures	<S0, S1, S2, S3>
 	>;
 
 	// tests
@@ -889,19 +889,19 @@ namespace ml::ecs::tests
 	static_assert(ES::signatures::index<S2>() == 2);
 	static_assert(ES::signatures::index<S3>() == 3);
 
-	static_assert(ES::get_component_bit<C0>() == 0);
-	static_assert(ES::get_component_bit<C1>() == 1);
-	static_assert(ES::get_component_bit<C2>() == 2);
-	static_assert(ES::get_component_bit<C3>() == 3);
-	static_assert(ES::get_component_bit<C4>() == 4);
-	static_assert(ES::		get_tag_bit<T0>() == 5);
-	static_assert(ES::		get_tag_bit<T1>() == 6);
-	static_assert(ES::		get_tag_bit<T2>() == 7);
+	static_assert(ES::component_bit<C0>() == 0);
+	static_assert(ES::component_bit<C1>() == 1);
+	static_assert(ES::component_bit<C2>() == 2);
+	static_assert(ES::component_bit<C3>() == 3);
+	static_assert(ES::component_bit<C4>() == 4);
+	static_assert(ES::		tag_bit<T0>() == 5);
+	static_assert(ES::		tag_bit<T1>() == 6);
+	static_assert(ES::		tag_bit<T2>() == 7);
 
-	static_assert(ES::get_mask<S0>() == "00000000");
-	static_assert(ES::get_mask<S1>() == "11000000");
-	static_assert(ES::get_mask<S2>() == "10001100");
-	static_assert(ES::get_mask<S3>() == "01010101");
+	static_assert(ES::signature_mask<S0>() == "00000000");
+	static_assert(ES::signature_mask<S1>() == "11000000");
+	static_assert(ES::signature_mask<S2>() == "10001100");
+	static_assert(ES::signature_mask<S3>() == "01010101");
 
 	static_assert(std::is_same_v<ES::component_filter<S0>,
 		meta::list<>

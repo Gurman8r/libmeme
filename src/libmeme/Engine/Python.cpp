@@ -19,6 +19,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool python::initialized() noexcept
+	{
+		return s_py_init;
+	}
+
 	bool python::startup(fs::path const & name, fs::path const & home)
 	{
 		s_py_name = name;

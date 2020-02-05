@@ -24,8 +24,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// MISC
 		bool m_show_imgui_demo{ false };
 
+		// CONTENT
 		pmr::vector<render_texture>			m_pipeline	{};
 		ds::flat_map<pmr::string, font>		m_fonts		{};
 		ds::flat_map<pmr::string, image>	m_images	{};
@@ -37,45 +39,57 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// components
-		struct c_position	{ vec3		value; };
-		struct c_rotation	{ vec4		value; };
-		struct c_scale		{ vec3		value; };
-		struct c_shader		{ shader	value; };
-		struct c_material	{ material	value; };
-		struct c_model		{ model		value; };
+		// HELPER
+		template <class T> struct wrapper
+		{
+			T value;
 
-		// tags
-		struct t_renderer {};
+			constexpr T &		operator *() noexcept		{ return value; }
+			constexpr T const & operator *() const noexcept { return value; }
+			constexpr T *		operator->() noexcept		{ return &value; }
+			constexpr T const * operator->() const noexcept { return &value; }
+		};
 
-		// signatures
-		using s_apply_position	= meta::list<c_material, c_position>;
-		using s_apply_rotation	= meta::list<c_material, c_rotation>;
-		using s_apply_scale		= meta::list<c_material, c_scale>;
-		using s_renderer		= meta::list<t_renderer, c_shader, c_material, c_model>;
+		// COMPONENTS
+		struct c_position	: wrapper<vec3>		{};
+		struct c_rotation	: wrapper<vec4>		{};
+		struct c_scale		: wrapper<vec3>		{};
+		struct c_shader		: wrapper<shader>	{};
+		struct c_material	: wrapper<material> {};
+		struct c_model		: wrapper<model>	{};
 
-		// entity settings
-		using entity_settings = ecs::settings<
-			// COMPONENTS
-			ecs::component_config
+		// SIGNATURES
+		using s_update_renderer = meta::list<
+			c_material,
+			c_position, c_rotation, c_scale
+		>;
+		using s_draw_renderer = meta::list<
+			c_shader, c_material, c_model
+		>;
+
+		// ENTITY SETTINGS
+		using entity_settings = ecs::settings
+		<
+			ecs::config::components
 			<
 			c_position, c_rotation, c_scale,
 			c_shader, c_material, c_model
 			>,
-			// TAGS
-			ecs::tag_config
+			ecs::config::tags
 			<
-			t_renderer
+			// etc...
 			>,
-			// SIGNATURES
-			ecs::signature_config
+			ecs::config::signatures
 			<
-			s_apply_position, s_apply_rotation, s_apply_scale,
-			s_renderer
+			s_update_renderer, s_draw_renderer
+			>,
+			ecs::config::systems
+			<
+			// etc...
 			>
 		>;
 
-		// entity manager
+		// ENTITY MANAGER
 		using entity_manager = ecs::manager<entity_settings>;
 
 		entity_manager m_entities;
@@ -118,7 +132,7 @@ namespace ml
 					editor::get_main_menu().add_menu("View", [&, this]()
 					{
 						ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-						ImGui::MenuItem("ImGui demo", "", &m_show_imgui_demo);
+						ImGui::MenuItem("ImGui Demo", "", &m_show_imgui_demo);
 					});
 
 					// Option Menu
@@ -254,7 +268,6 @@ namespace ml
 				{
 					if (auto h{ m_entities.create_handle() })
 					{
-						h.add_tag<t_renderer>();
 						h.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
 						h.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
 						h.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
@@ -270,25 +283,17 @@ namespace ml
 			{
 				// update stuff, etc...
 
-				m_entities.for_matching<s_apply_position
-				>([&](auto, c_material & mt, c_position & p)
+				m_entities.for_matching<s_update_renderer
+				>([&](auto, c_material & mt, auto & pos, auto & rot, auto & scl)
 				{
-					if (auto u{ mt.value.find("u_position") }
-					; u && u->holds<vec3>()) u->set<vec3>(p.value);
-				});
+					if (auto u{ mt->find("u_position") }
+					; u && u->holds<vec3>()) u->set<vec3>(*pos);
 
-				m_entities.for_matching<s_apply_rotation
-				>([&](auto, c_material & mt, c_rotation & r)
-				{
-					if (auto u{ mt.value.find("u_rotation") }
-					; u && u->holds<vec4>()) u->set<vec4>(r.value);
-				});
+					if (auto u{ mt->find("u_rotation") }
+					; u && u->holds<vec4>()) u->set<vec4>(*rot);
 
-				m_entities.for_matching<s_apply_scale
-				>([&](auto, c_material & mt, c_scale & s)
-				{
-					if (auto u{ mt.value.find("u_scale") }
-					; u && u->holds<vec3>()) u->set<vec3>(s.value);
+					if (auto u{ mt->find("u_scale") }
+					; u && u->holds<vec3>()) u->set<vec3>(*scl);
 				});
 				
 			} break;
@@ -305,19 +310,15 @@ namespace ml
 					target.viewport(target.bounds());
 					cull_state{ false }();
 					
-					m_entities.for_matching<s_renderer
-					>([&](auto, c_shader & sh, c_material & mt, c_model & md)
+					m_entities.for_matching<s_draw_renderer
+					>([&target](auto, c_shader & sh, c_material & mt, c_model & md)
 					{
-						sh.value.bind(false);
-						
-						for (uniform const & u : mt.value)
-							sh.value.set_uniform(u);
-						
-						sh.value.bind(true);
-						
-						target.draw(md.value);
-						
-						sh.value.unbind();
+						sh->bind(false);
+						for (uniform const & u : *mt)
+							sh->set_uniform(u);
+						sh->bind(true);
+						target.draw(*md);
+						sh->unbind();
 					});
 				}
 
@@ -331,17 +332,19 @@ namespace ml
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-				// ImGui demo
+				// imgui demo
 				if (m_show_imgui_demo)
 				{
 					editor::show_imgui_demo(&m_show_imgui_demo);
 				}
 
+				// libmeme demo
 				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("Manual Allocations: %u", ML_Memory.get_records().size());
+					ImGui::Text("memory index: %u", ML_Memory.get_index());
+					ImGui::Text("active allocations: %u", ML_Memory.get_records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);

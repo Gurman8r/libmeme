@@ -11,6 +11,8 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static bool initialized() noexcept;
+
 		static bool startup(fs::path const & name, fs::path const & home);
 		
 		static bool shutdown();

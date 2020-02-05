@@ -57,15 +57,15 @@ namespace ml
 
 	void * memory_tracker::make_allocation(size_t size, int32_t flags) noexcept
 	{
-		// create the allocation
-		byte_t * const data{ m_alloc.allocate(size) };
-
-		// create the record
-		return (*m_records.insert(
-			data,
-			::new (m_alloc.allocate(sizeof(allocation_record)))
-			allocation_record{ m_index++, size, flags, data }
-		).first.first);
+		return ([this, size, flags](byte_t * data)
+		{
+			return (*m_records.insert(
+				data,
+				::new (m_alloc.allocate(sizeof(allocation_record)))
+				allocation_record{ m_index++, size, flags, data }
+			).first.first);
+		}
+		)(m_alloc.allocate(size));
 	}
 
 	void memory_tracker::free_allocation(void * value) noexcept

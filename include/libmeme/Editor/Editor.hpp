@@ -12,17 +12,19 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// startup settings
 		struct config final : trackable
 		{
 			void *		window_handle;	// 
-			cstring	api_version;	// 
-			cstring	style;	// 
-			cstring	ini_file;		// 
-			cstring	log_file;		// 
+			pmr::string	api_version;	// 
+			pmr::string	style;			// 
+			cstring		ini_file;		// 
+			cstring		log_file;		// 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// runtime settings
 		struct io final : trackable
 		{
 			// ...
@@ -30,6 +32,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// editor context
 		struct context final : trackable
 		{
 			config				config		{};
@@ -42,13 +45,17 @@ namespace ml
 
 		static editor::context const * create_context();
 
+		static bool initialized() noexcept;
+
 		static bool startup(bool install_callbacks);
+
+		static void shutdown();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void new_frame();
 
 		static void render_frame();
-
-		static void shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

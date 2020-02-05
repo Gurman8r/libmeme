@@ -23,16 +23,14 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// engine configuration
-	if (!engine::create_context())
-	{
-		return debug::log_error("failed creating engine context") | debug::pause(1);
-	}
-	else
+	// initialize engine
+	if (!engine::create_context() || !([&]()
 	{
 		engine::config & config	= engine::get_config();
+		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 		config.program_name		= ML_ARGV[0];
 		config.library_path		= "../../../"s;
+		config.content_path		= "../../../assets/"s;
 		config.script_list		= { "../../../libmeme.py"s };
 		config.plugin_list		= {};
 		config.window_title		= "libmeme";
@@ -42,44 +40,38 @@ ml::int32_t main()
 			32u					// color depth
 		);
 		config.window_context	= make_context_settings(
-			client_api::OpenGL,	// api
+			client_api::opengl,	// api
 			4,					// major version
 			6,					// minor version
-			client_api::Compat,	// profile
+			client_api::compat,	// profile
 			24,					// depth bits
 			8,					// stencil bits
 			false,				// multisample
 			false				// sRGB capable
 		);
-	}
-
-	// start engine
-	if (!engine::startup(true))
+		return engine::startup(true);
+	})())
 	{
-		return debug::log_error("failed starting engine") | debug::pause(1);
+		engine::shutdown();
+		return debug::log_error("failed initializing engine") | debug::pause(1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// editor configuration
-	if (!editor::create_context())
-	{
-		return debug::log_error("failed creating editor context") | debug::pause(1);
-	}
-	else
+	// initialize editor
+	if (!editor::create_context() || !([&]()
 	{
 		editor::config & config	= editor::get_config();
 		config.window_handle	= engine::get_window().get_handle();
-		config.api_version		= "#version 130";
-		config.style			= "dark";
-		config.ini_file			= "";
-		config.log_file			= "";
-	}
-
-	// start editor
-	if (!editor::startup(true))
+		config.api_version		= "#version 130"s;
+		config.style			= "dark"s;
+		config.ini_file			= nullptr;
+		config.log_file			= nullptr;
+		return editor::startup(true);
+	})())
 	{
-		return debug::log_error("failed starting editor") | debug::pause(1);
+		editor::shutdown();
+		return debug::log_error("failed initializing editor") | debug::pause(1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
