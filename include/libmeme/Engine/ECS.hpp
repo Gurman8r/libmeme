@@ -262,28 +262,6 @@ namespace ml::ecs
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD inline entity & operator*() noexcept
-			{
-				return m_manager->get_entity(*this);
-			}
-
-			ML_NODISCARD inline entity const & operator*() const noexcept
-			{
-				return m_manager->get_entity(*this);
-			}
-
-			ML_NODISCARD inline entity * operator->() noexcept
-			{
-				return &(**this);
-			}
-
-			ML_NODISCARD inline entity const * operator->() const noexcept
-			{
-				return &(**this);
-			}
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 			ML_NODISCARD inline operator bool() const noexcept
 			{
 				return this->is_valid();
@@ -365,6 +343,7 @@ namespace ml::ecs
 			
 		private:
 			friend self_type;
+
 			self_type * m_manager;	// pointer to owning manager
 			size_t		m_entity;	// index of real entity data
 			size_t		m_self;		// index of real handle data
