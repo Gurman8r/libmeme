@@ -131,9 +131,11 @@ namespace ml
 
 		ML_NODISCARD inline uniform * find(pmr::string const & name)
 		{
-			if (name.empty()) { return nullptr; }
-
-			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
+			if (name.empty())
+			{
+				return nullptr;
+			}
+			else if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
 				return u.name() == name;
 			}) }; it != end())
 			{
@@ -147,10 +149,13 @@ namespace ml
 
 		ML_NODISCARD inline uniform const * find(pmr::string const & name) const
 		{
-			if (name.empty()) { return nullptr; }
-			if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
+			if (name.empty())
+			{
+				return nullptr;
+			}
+			else if (auto it{ std::find_if(cbegin(), cend(), [name](auto const & u) {
 				return u.name() == name;
-			}) }; it != end())
+			}) }; it != cend())
 			{
 				return &(*it);
 			}

@@ -1,8 +1,10 @@
 #ifndef _ML_RIGIDBODY_HPP_
 #define _ML_RIGIDBODY_HPP_
 
+// WIP
+
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/Transform.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 
 namespace ml

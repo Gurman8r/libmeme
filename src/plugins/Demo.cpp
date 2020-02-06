@@ -48,15 +48,15 @@ namespace ml
 		struct c_model		: ds::wrapper<model>	{};
 
 		// TAGS
-		struct t_object {};
+		struct t_renderer {};
 
 		// SIGNATURES
 		using s_update_renderer = meta::list<
-			t_object,
+			t_renderer,
 			c_material, c_position, c_rotation, c_scale
 		>;
 		using s_draw_renderer = meta::list<
-			t_object,
+			t_renderer,
 			c_shader, c_material, c_model
 		>;
 
@@ -69,7 +69,7 @@ namespace ml
 			>,
 
 			ecs::traits::tags<
-			t_object
+			t_renderer
 			>,
 
 			ecs::traits::signatures<
@@ -250,17 +250,18 @@ namespace ml
 
 				// ENTITIES
 				{
-					if (auto h{ m_ecs.create_handle() })
+					ML_DEFER{ m_ecs.refresh(); };
+
+					if (auto e{ m_ecs.create_handle() })
 					{
-						h.add_tag<t_object>();
-						h.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
-						h.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
-						h.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
-						h.add_component<c_shader	>(m_shaders["3d"]);
-						h.add_component<c_material	>(m_materials["3d"]);
-						h.add_component<c_model		>(m_models["sphere32x24"]);
+						e.add_tag<t_renderer>();
+						e.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
+						e.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
+						e.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
+						e.add_component<c_shader	>(m_shaders["3d"]);
+						e.add_component<c_material	>(m_materials["3d"]);
+						e.add_component<c_model		>(m_models["sphere32x24"]);
 					}
-					m_ecs.refresh();
 				}
 
 			} break;
@@ -271,14 +272,9 @@ namespace ml
 				m_ecs.for_matching<s_update_renderer
 				>([&](auto, c_material & mtl, c_position & pos, c_rotation & rot, c_scale & scl)
 				{
-					if (auto u{ mtl->find("u_position") }
-					; u && u->holds<vec3>()) u->set<vec3>(*pos);
-
-					if (auto u{ mtl->find("u_rotation") }
-					; u && u->holds<vec4>()) u->set<vec4>(*rot);
-
-					if (auto u{ mtl->find("u_scale") }
-					; u && u->holds<vec3>()) u->set<vec3>(*scl);
+					if (auto u{ mtl->find("u_position") }) u->set_if<vec3>(*pos);
+					if (auto u{ mtl->find("u_rotation") }) u->set_if<vec4>(*rot);
+					if (auto u{ mtl->find("u_scale") }) u->set_if<vec3>(*scl);
 				});
 				
 			} break;
@@ -296,10 +292,10 @@ namespace ml
 					cull_state{ false }();
 					
 					m_ecs.for_matching<s_draw_renderer
-					>([&target](auto, c_shader & shd, c_material & mtl, c_model & mdl)
+					>([&](auto, c_shader & shd, c_material & mtl, c_model & mdl)
 					{
 						shd->bind(false);
-						for (auto const & u : *mtl)
+						for (uniform const & u : *mtl)
 							shd->set_uniform(u);
 						shd->bind(true);
 						target.draw(*mdl);

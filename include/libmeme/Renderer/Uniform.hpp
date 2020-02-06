@@ -198,6 +198,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class T> inline uniform & set_if(data_t const & value)
+		{
+			return holds<T>() ? set<T>(value) : (*this);
+		}
+
+		template <class T> inline uniform & set_if(data_t && value)
+		{
+			return holds<T>() ? set<T>(std::move(value)) : (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline bool good() const noexcept
 		{
 			return !m_name.empty();

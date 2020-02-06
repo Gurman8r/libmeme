@@ -71,6 +71,7 @@ ml::int32_t main()
 	})())
 	{
 		editor::shutdown();
+		engine::shutdown();
 		return debug::log_error("failed initializing editor") | debug::pause(1);
 	}
 
