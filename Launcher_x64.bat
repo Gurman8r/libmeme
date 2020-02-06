@@ -1,4 +1,4 @@
 @echo off
-cd .\bin\x64\Release\
+cd .\bin\vs2019\x64\Release\
 start main.exe %*
 if %ERRORLEVEL% NEQ 0 ( pause )

@@ -13,7 +13,7 @@ namespace ml::ds
 		class	_Vty,	// value type
 		class	_Pr,	// key comparator predicate type
 		bool	_Multi,	// true if multiple equivalent keys are permitted
-		size_t	_Magic	// size threshold used to determine search algorithm
+		size_t	_Thresh	// size threshold used to determine search algorithm
 	> struct flat_map_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,7 +28,7 @@ namespace ml::ds
 
 		static constexpr bool multi{ _Multi };
 
-		static constexpr size_t magic{ _Magic };
+		static constexpr size_t thresh{ _Thresh };
 
 		using difference_type = typename ptrdiff_t;
 		
@@ -40,20 +40,20 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MAP
-	template <class _Kty, class _Vty, class _Pr = std::less<_Kty>, size_t _Magic = 42
+	template <class _Kty, class _Vty, class _Pr = std::less<_Kty>, size_t _Thresh = 42
 	> struct flat_map final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type						= typename flat_map<_Kty, _Vty, _Pr, _Magic>;
-		using traits_type					= typename flat_map_traits<_Kty, _Vty, _Pr, false, _Magic>;
+		using self_type						= typename flat_map<_Kty, _Vty, _Pr, _Thresh>;
+		using traits_type					= typename flat_map_traits<_Kty, _Vty, _Pr, false, _Thresh>;
 		using compare_type					= typename traits_type::compare_type;
 		using allocator_type				= typename traits_type::allocator_type;
 		using difference_type				= typename traits_type::difference_type;
 		using size_type						= typename traits_type::size_type;
 		
 		using key_type						= typename traits_type::key_type;
-		using key_storage					= typename ds::flat_set<key_type, compare_type, traits_type::magic>;
+		using key_storage					= typename ds::flat_set<key_type, compare_type, traits_type::thresh>;
 		using key_iterator					= typename key_storage::iterator;
 		using const_key_iterator			= typename key_storage::const_iterator;
 		using reverse_key_iterator			= typename key_storage::reverse_iterator;
@@ -334,7 +334,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline mapped_type & at(key_type && key)
 		{
-			if (auto const it{ this->find(std::move(key)) })
+			if (auto const it{ this->find(key) })
 			{
 				return (*it->second);
 			}
@@ -359,26 +359,23 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type & for_each(const_key_iterator first, const_key_iterator last, Fn fn)
+		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn)
 		{
-			if (!empty())
+			for (; first != last; ++first)
 			{
-				for (; first != last; ++first)
-				{
-					std::invoke(fn, *first, *this->fetch(first));
-				}
+				std::invoke(fn, *first, *this->fetch(first));
 			}
-			return (*this);
+			return first;
 		}
 
 		template <class Fn
-		> inline self_type & for_each(const_key_iterator first, Fn fn)
+		> inline const_key_iterator for_each(const_key_iterator first, Fn fn)
 		{
 			return this->for_each(first, m_storage.first.end(), fn);
 		}
 
 		template <class Fn
-		> inline self_type & for_each(Fn fn)
+		> inline const_key_iterator for_each(Fn fn)
 		{
 			return this->for_each(m_storage.first.begin(), fn);
 		}
@@ -388,12 +385,9 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
 		{
-			if (!empty())
+			for (; first != last; ++first)
 			{
-				for (; first != last; ++first)
-				{
-					std::invoke(fn, *first, *this->fetch(first));
-				}
+				std::invoke(fn, *first, *this->fetch(first));
 			}
 			return first;
 		}
@@ -415,7 +409,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
 		{
-			if (!empty() && (0 < count))
+			if (0 < count)
 			{
 				do {
 					std::invoke(fn, *first, *this->fetch(first));
@@ -437,7 +431,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
 		{
-			if (!empty() && (0 < count))
+			if (0 < count)
 			{
 				do {
 					std::invoke(fn, *first, *fetch(first));

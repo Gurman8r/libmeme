@@ -4,17 +4,11 @@
 #include <libmeme/Core/Timer.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 
-//#ifndef ML_DISABLE_BENCHMARKS
-//#	define ML_BENCHMARK(name) auto ML_ANONYMOUS(scope_timer) { scope_timer{ name } }
-//#else
-//#	define ML_BENCHMARK(name)
-//#endif
+#define ML_IMPL_BENCHMARK(var, name) \
+	auto var = ml::timer{ true }; \
+	ML_DEFER{ ml::performance_tracker::push_frame( name, var.elapsed() ); };
 
-#define ML_BENCHMARK_IMPL(var, name) \
-	auto var = timer{ true }; \
-	ML_DEFER{ ml::performance_tracker::emplace_back( name, var.stop().elapsed() ); };
-
-#define ML_BENCHMARK(name) ML_BENCHMARK_IMPL(ML_ANONYMOUS(timer), name)
+#define ML_BENCHMARK(name) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), name)
 
 namespace ml
 {
@@ -22,25 +16,26 @@ namespace ml
 
 	class ML_CORE_API performance_tracker final
 	{
-		using buffer_type = typename pmr::vector<std::pair<cstring, duration>>;
+		using frame_type = typename pmr::vector<
+			std::pair<cstring, duration>
+		>;
 
-		static buffer_type m_curr;
-
-		static buffer_type m_prev;
+		static frame_type m_curr;
+		static frame_type m_prev;
 
 	public:
-		ML_NODISCARD static inline buffer_type const & previous() noexcept
+		ML_NODISCARD static inline frame_type const & last_frame() noexcept
 		{
 			return m_prev;
 		}
 
 		template <class ... Args
-		> static inline decltype(auto) emplace_back(Args && ... args)
+		> static inline decltype(auto) push_frame(Args && ... args)
 		{
 			return m_curr.emplace_back(ML_FWD(args)...);
 		}
 
-		static inline void refresh() noexcept
+		static inline void refresh_frames() noexcept
 		{
 			m_prev.swap(m_curr);
 

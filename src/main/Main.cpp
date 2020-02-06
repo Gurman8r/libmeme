@@ -29,9 +29,9 @@ ml::int32_t main()
 		engine::config & config	= engine::get_config();
 		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 		config.program_name		= ML_ARGV[0];
-		config.library_path		= "../../../"s;
-		config.content_path		= "../../../assets/"s;
-		config.script_list		= { "../../../libmeme.py"s };
+		config.library_path		= "../../../../"s;
+		config.content_path		= "../../../../assets/"s;
+		config.script_list		= { "../../../../libmeme.py"s };
 		config.plugin_list		= {};
 		config.window_title		= "libmeme";
 		config.window_flags		= WindowFlags_Default;
@@ -82,7 +82,7 @@ ml::int32_t main()
 	// main loop
 	while (engine::running())
 	{
-		ML_DEFER{ performance_tracker::refresh(); };
+		ML_DEFER{ performance_tracker::refresh_frames(); };
 
 		// begin loop
 		{

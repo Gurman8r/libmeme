@@ -1,9 +1,7 @@
 #ifndef _ML_COLOR_HPP_
 #define _ML_COLOR_HPP_
 
-#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
-#include <libmeme/Common.hpp>
 
 namespace ml
 {

@@ -1,7 +1,6 @@
 #ifndef _ML_TEXTURE_HPP_
 #define _ML_TEXTURE_HPP_
 
-#include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/Image.hpp>
 
 namespace ml

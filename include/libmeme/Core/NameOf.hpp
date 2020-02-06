@@ -118,7 +118,7 @@ namespace ml
 	> static constexpr auto nameof_v{ nameof<T>::value };
 
 	template <class T
-	> static constexpr auto const hashof_v{ util::hash(nameof_v<T>) };
+	> static constexpr auto hashof_v{ util::hash(nameof_v<T>) };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

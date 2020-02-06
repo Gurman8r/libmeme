@@ -1,6 +1,8 @@
 #ifndef _ML_MEMORY_TRACKER_HPP_
 #define _ML_MEMORY_TRACKER_HPP_
 
+// system for tracking manual allocations
+
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>

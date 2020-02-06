@@ -4,12 +4,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static ds::flat_map<
-		size_t, ds::flat_set<event_listener *>
-	> s_listeners;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	event_listener::~event_listener()
 	{
 		event_system::remove_listener(this);
@@ -17,9 +11,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	decltype(event_system::s_listeners) event_system::s_listeners{};
+
 	bool event_system::add_listener(size_t type, event_listener * listener)
 	{
-		return listener && (s_listeners[type].insert(listener).second);
+		return listener && s_listeners[type].insert(listener).second;
 	}
 
 	void event_system::fire_event(event const & value)
@@ -32,8 +28,6 @@ namespace ml
 			}
 		}
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void event_system::remove_listener(size_t type, event_listener * listener)
 	{

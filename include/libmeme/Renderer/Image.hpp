@@ -1,7 +1,8 @@
 #ifndef _ML_IMAGE_HPP_
 #define _ML_IMAGE_HPP_
 
-#include <libmeme/Renderer/Color.hpp>
+#include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 

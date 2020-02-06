@@ -1,11 +1,11 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Wrapper.hpp>
+#include <libmeme/Core/ECS.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/Script.hpp>
-#include <libmeme/Engine/ECS.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -13,7 +13,6 @@
 #include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
-#include <libmeme/Renderer/Color.hpp>
 #include <libmeme/Renderer/Model.hpp>
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
@@ -24,6 +23,9 @@ namespace ml
 	struct demo final : plugin
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// GUI
+		bool m_show_imgui_demo{ false };
 
 		// CONTENT
 		pmr::vector<render_texture>			m_pipeline	{};
@@ -37,12 +39,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// GUI STATE
-		bool m_show_imgui_demo{ false };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// ECS COMPONENTS
+		// COMPONENTS
 		struct c_position	: ds::wrapper<vec3>		{};
 		struct c_rotation	: ds::wrapper<vec4>		{};
 		struct c_scale		: ds::wrapper<vec3>		{};
@@ -50,39 +47,36 @@ namespace ml
 		struct c_material	: ds::wrapper<material> {};
 		struct c_model		: ds::wrapper<model>	{};
 
-		// ECS TAGS
-		struct t_renderer {};
+		// TAGS
+		struct t_object {};
 
-		// ECS SIGNATURES
+		// SIGNATURES
 		using s_update_renderer = meta::list<
-			t_renderer,
+			t_object,
 			c_material, c_position, c_rotation, c_scale
 		>;
 		using s_draw_renderer = meta::list<
-			t_renderer,
+			t_object,
 			c_shader, c_material, c_model
 		>;
 
-		// ECS SETTINGS
-		using entity_settings = ecs::settings
-		<
-			ecs::detail::components
-			<
+		// MANAGER
+		ecs::manager<ecs::settings<
+
+			ecs::traits::components<
 			c_position, c_rotation, c_scale,
 			c_shader, c_material, c_model
 			>,
-			ecs::detail::tags
-			<
-			t_renderer
+
+			ecs::traits::tags<
+			t_object
 			>,
-			ecs::detail::signatures
-			<
+
+			ecs::traits::signatures<
 			s_update_renderer, s_draw_renderer
 			>
-		>;
-
-		// ECS MANAGER
-		ecs::manager<entity_settings> m_entities;
+		>
+		> m_ecs;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -145,7 +139,7 @@ namespace ml
 				// IMAGES
 				{
 					if (auto const & img{ m_images["icon"] = make_image(
-						fs::path{ "../../../assets/textures/icon.png" }
+						fs::path{ "../../../../assets/textures/icon.png" }
 					) }; !img.empty())
 					{
 						engine::get_window().set_icon(img.width(), img.height(), img.data());
@@ -155,31 +149,31 @@ namespace ml
 				// SHADERS
 				{
 					m_textures["doot"] = make_texture(
-						fs::path{ "../../../assets/textures/doot.png" }
+						fs::path{ "../../../../assets/textures/doot.png" }
 					);
 
 					m_textures["navball"] = make_texture(
-						fs::path{ "../../../assets/textures/navball.png" }
+						fs::path{ "../../../../assets/textures/navball.png" }
 					);
 				}
 
 				// FONTS
 				{
 					m_fonts["consolas"] = make_font(
-						fs::path{ "../../../assets/fonts/consolas.ttf" }
+						fs::path{ "../../../../assets/fonts/consolas.ttf" }
 					);
 				}
 
 				// SHADERS
 				{
 					m_shaders["2d"] = make_shader(
-						fs::path{ "../../../assets/shaders/2D.vs.shader" },
-						fs::path{ "../../../assets/shaders/basic.fs.shader" }
+						fs::path{ "../../../../assets/shaders/2D.vs.shader" },
+						fs::path{ "../../../../assets/shaders/basic.fs.shader" }
 					);
 
 					m_shaders["3d"] = make_shader(
-						fs::path{ "../../../assets/shaders/3D.vs.shader" },
-						fs::path{ "../../../assets/shaders/basic.fs.shader" }
+						fs::path{ "../../../../assets/shaders/3D.vs.shader" },
+						fs::path{ "../../../../assets/shaders/basic.fs.shader" }
 					);
 				}
 
@@ -215,16 +209,16 @@ namespace ml
 				// MODELS
 				{
 					m_models["sphere8x6"] = make_model(
-						fs::path{ "../../../assets/models/sphere8x6.obj" }
+						fs::path{ "../../../../assets/models/sphere8x6.obj" }
 					);
 
 					m_models["sphere32x24"] = make_model(
-						fs::path{ "../../../assets/models/sphere32x24.obj" }
+						fs::path{ "../../../../assets/models/sphere32x24.obj" }
 					);
 
 					// FIXME: upside down?
 					m_models["monkey"] = make_model(
-						fs::path{ "../../../assets/models/monkey.obj" }
+						fs::path{ "../../../../assets/models/monkey.obj" }
 					);
 
 					// FIXME: ibo broken
@@ -256,9 +250,9 @@ namespace ml
 
 				// ENTITIES
 				{
-					if (auto h{ m_entities.create_handle() })
+					if (auto h{ m_ecs.create_handle() })
 					{
-						h.add_tag<t_renderer>();
+						h.add_tag<t_object>();
 						h.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
 						h.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
 						h.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
@@ -266,7 +260,7 @@ namespace ml
 						h.add_component<c_material	>(m_materials["3d"]);
 						h.add_component<c_model		>(m_models["sphere32x24"]);
 					}
-					m_entities.refresh();
+					m_ecs.refresh();
 				}
 
 			} break;
@@ -274,16 +268,16 @@ namespace ml
 			{
 				// update stuff, etc...
 
-				m_entities.for_matching<s_update_renderer
-				>([&](auto, c_material & mt, auto pos, auto rot, auto scl)
+				m_ecs.for_matching<s_update_renderer
+				>([&](auto, c_material & mtl, c_position & pos, c_rotation & rot, c_scale & scl)
 				{
-					if (auto u{ mt->find("u_position") }
+					if (auto u{ mtl->find("u_position") }
 					; u && u->holds<vec3>()) u->set<vec3>(*pos);
 
-					if (auto u{ mt->find("u_rotation") }
+					if (auto u{ mtl->find("u_rotation") }
 					; u && u->holds<vec4>()) u->set<vec4>(*rot);
 
-					if (auto u{ mt->find("u_scale") }
+					if (auto u{ mtl->find("u_scale") }
 					; u && u->holds<vec3>()) u->set<vec3>(*scl);
 				});
 				
@@ -301,15 +295,15 @@ namespace ml
 					target.viewport(target.bounds());
 					cull_state{ false }();
 					
-					m_entities.for_matching<s_draw_renderer
-					>([&target](auto, c_shader & sh, c_material & mt, c_model & md)
+					m_ecs.for_matching<s_draw_renderer
+					>([&target](auto, c_shader & shd, c_material & mtl, c_model & mdl)
 					{
-						sh->bind(false);
-						for (uniform const & u : *mt)
-							sh->set_uniform(u);
-						sh->bind(true);
-						target.draw(*md);
-						sh->unbind();
+						shd->bind(false);
+						for (auto const & u : *mtl)
+							shd->set_uniform(u);
+						shd->bind(true);
+						target.draw(*mdl);
+						shd->unbind();
 					});
 				}
 
@@ -334,8 +328,8 @@ namespace ml
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("memory index: %u", ML_Memory.get_index());
-					ImGui::Text("active allocations: %u", ML_Memory.get_records().size());
+					ImGui::Text("current memory index: %u", ML_Memory.get_index());
+					ImGui::Text("manual allocations: %u", ML_Memory.get_records().size());
 
 					ImGui::Separator();
 					ImGui::Columns(2);
@@ -353,7 +347,7 @@ namespace ml
 					ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
 
 					// Benchmarks
-					if (auto const & prev{ performance_tracker::previous() }; !prev.empty())
+					if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
 					{
 						ImGui::Separator();
 						for (auto const & elem : prev)
@@ -383,7 +377,7 @@ namespace ml
 				m_fonts.clear();
 				m_pipeline.clear();
 				m_scripts.clear();
-				m_entities.clear();
+				m_ecs.clear();
 			} break;
 			}
 		}

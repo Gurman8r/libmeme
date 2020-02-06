@@ -30,6 +30,7 @@
 #endif
 
 #if ML_HAS_CXX20
+#	include <compare>
 #	include <concepts>
 #	include <format>
 #	include <ranges>

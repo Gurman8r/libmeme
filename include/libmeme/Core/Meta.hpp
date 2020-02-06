@@ -39,10 +39,10 @@ namespace ml::meta
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class Tup, size_t ... Indices
-		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<Indices...>)
+		template <class Fn, class Tup, size_t ... I
+		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<I...>)
 		{
-			return ML_FWD(fn)(std::get<Indices>(ML_FWD(tp))...);
+			return ML_FWD(fn)(std::get<I>(ML_FWD(tp))...);
 		}
 
 		template <class Fn, class Tup
@@ -126,7 +126,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// REMAP
+// REMAP - modify inner type
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -151,7 +151,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// RENAME
+// RENAME - modify outer type
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -175,28 +175,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// INDEX OF
-namespace ml::meta
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, class Ls
-	> struct index_of;
-
-	template <class T, class ... Ts
-	> struct index_of<T, list<T, Ts...>> : std::integral_constant<size_t,
-		0
-	> {};
-
-	template <class T, class U, class ... Ts
-	> struct index_of<T, list<U, Ts...>> : std::integral_constant<size_t,
-		1 + index_of<T, list<Ts...>>::value
-	> {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// CONTAINS
+// CONTAINS - list contains type
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -215,6 +194,33 @@ namespace ml::meta
 	template <class T, class ... Ts
 	> struct contains<T, list<T, Ts...>>
 		: std::true_type {};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// INDEX OF - index of type in list
+namespace ml::meta
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Ls
+	> struct index_of;
+
+	template <class T, class ... Ts
+	> struct index_of<T, list<T, Ts...>>
+		: std::integral_constant<size_t, 0>
+	{
+		static_assert(contains<T, list<T, Ts...>>(),
+			"type not found in list");
+	};
+
+	template <class T, class U, class ... Ts
+	> struct index_of<T, list<U, Ts...>>
+		: std::integral_constant<size_t, 1 + index_of<T, list<Ts...>>::value>
+	{
+		static_assert(contains<T, list<U, Ts...>>(),
+			"type not found in list");
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -255,7 +261,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// REPEAT
+// REPEAT - size N list of T
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -278,7 +284,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// FILTER
+// FILTER - remove types from list
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -307,7 +313,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// ALL
+// ALL - used to run a check against all types in a list
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -329,6 +335,10 @@ namespace ml::meta
 
 	template <template <class> class TMF, class TL
 	> ML_USING all_types = typename rename<bound_all<TMF>::template type, TL>;
+
+	// example
+	static_assert(all<std::is_const, const int>{});
+	static_assert(all_types<std::is_const, list<const int>>{});
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

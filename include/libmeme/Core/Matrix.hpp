@@ -56,24 +56,25 @@ namespace ml::ds
 			{
 				return (*this);
 			}
-			else if constexpr (W == _Width && H == _Height)
-			{
-				auto temp{ matrix<U, W, H>::zero() };
-				for (size_t i = 0; i < temp.size(); ++i)
-				{
-					temp[i] = static_cast<U>(at(i));
-				}
-				return temp;
-			}
 			else
 			{
 				auto temp{ matrix<U, W, H>::zero() };
-				for (size_t i = 0; i < temp.size(); ++i)
+				if constexpr (W == _Width && H == _Height)
 				{
-					size_t const x{ i % temp.width() }, y{ i / temp.width() };
-					temp[i] = (y < _Height && x < _Width)
-						? static_cast<U>(at(y * _Width + x))
-						: static_cast<U>(0);
+					for (size_t i = 0; i < (W * H); ++i)
+					{
+						temp[i] = (U)at(i);
+					}
+				}
+				else
+				{
+					for (size_t i = 0; i < (W * H); ++i)
+					{
+						size_t const x{ i % W }, y{ i / W };
+						temp[i] = (y < _Height && x < _Width)
+							? (U)at(x, y)
+							: (U)0;
+					}
 				}
 				return temp;
 			}

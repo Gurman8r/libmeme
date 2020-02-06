@@ -12,7 +12,7 @@ namespace ml::ds
 		class	_Ty,	// value type
 		class	_Pr,	// comparator predicate type
 		bool	_Multi,	// true if multiple equivalent keys are permitted
-		size_t	_Magic	// size threshold used to determine search algorithm
+		size_t	_Thresh	// size threshold used to determine search algorithm
 	> struct basic_flat_set_traits
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,7 +25,7 @@ namespace ml::ds
 
 		static constexpr bool multi{ _Multi };
 
-		static constexpr size_t magic{ _Magic };
+		static constexpr size_t thresh{ _Thresh };
 
 		using difference_type = typename ptrdiff_t;
 
@@ -174,7 +174,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline bool contains(const_reference value) const
 		{
-			if (size() < traits_type::magic)
+			if (size() < traits_type::thresh)
 			{
 				// linear
 				return std::find(cbegin(), cend(), value) != cend();
@@ -227,7 +227,7 @@ namespace ml::ds
 		ML_NODISCARD inline iterator find(const_reference value)
 		{
 			// linear
-			if (size() < traits_type::magic)
+			if (size() < traits_type::thresh)
 			{
 				return std::find(begin(), end(), value);
 			}
@@ -242,7 +242,7 @@ namespace ml::ds
 		ML_NODISCARD inline const_iterator find(const_reference value) const
 		{
 			// linear
-			if (size() < traits_type::magic)
+			if (size() < traits_type::thresh)
 			{
 				return std::find(cbegin(), cend(), value);
 			}
@@ -353,13 +353,13 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT SET - sorted vector of unique elements
-	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Magic = 42
-	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Magic>>
+	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Thresh = 42
+	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Thresh>>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_set<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Magic>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Thresh>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
@@ -496,15 +496,15 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// FLAT MULTISET - sorted vector of elements
-	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Magic = 42
+	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Thresh = 42
 	> struct flat_multiset : basic_flat_set<
-		basic_flat_set_traits<_Ty, _Pr, true, _Magic>
+		basic_flat_set_traits<_Ty, _Pr, true, _Thresh>
 	>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type					= typename flat_multiset<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true, _Magic>>;
+		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true, _Thresh>>;
 		using traits_type				= typename base_type::traits_type;
 		using value_type				= typename base_type::value_type;
 		using compare_type				= typename base_type::compare_type;
