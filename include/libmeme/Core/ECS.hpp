@@ -147,6 +147,7 @@ namespace ml::ecs
 		using components	= typename _Components;
 		using tags			= typename _Tags;
 		using signatures	= typename _Signatures;
+		using self_type		= typename settings<components, tags, signatures>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -192,14 +193,14 @@ namespace ml::ecs
 				meta::for_types<components::template filter<decltype(sig)::type>
 				>([&b](auto cpt)
 				{
-					b.set<component_bit<decltype(cpt)::type>()>();
+					b.set<self_type::component_bit<decltype(cpt)::type>()>();
 				});
 
 				// enable tag bits
 				meta::for_types<tags::template filter<decltype(sig)::type>
 				>([&b](auto tag)
 				{
-					b.set<tag_bit<decltype(tag)::type>()>();
+					b.set<self_type::tag_bit<decltype(tag)::type>()>();
 				});
 			});
 			return temp;

@@ -324,7 +324,6 @@ namespace ml
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("current memory index: %u", ML_Memory.get_index());
 					ImGui::Text("manual allocations: %u", ML_Memory.get_records().size());
 
 					ImGui::Separator();
