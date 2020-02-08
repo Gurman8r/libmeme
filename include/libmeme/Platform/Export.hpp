@@ -1,5 +1,5 @@
-#ifndef _ML_WINDOW_EXPORT_HPP_
-#define _ML_WINDOW_EXPORT_HPP_
+#ifndef _ML_PLATFORM_EXPORT_HPP_
+#define _ML_PLATFORM_EXPORT_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -7,7 +7,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_STATIC)
+#ifdef ML_API
+#	define ML_PLATFORM_API ML_API
+#elif defined(ML_STATIC)
 #	define ML_PLATFORM_API
 #elif defined(ML_PLATFORM_EXPORTS)
 #	define ML_PLATFORM_API ML_API_EXPORT
@@ -17,4 +19,4 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_WINDOW_EXPORT_HPP_
+#endif // !_ML_PLATFORM_EXPORT_HPP_

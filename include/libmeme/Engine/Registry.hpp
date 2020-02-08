@@ -84,13 +84,9 @@ namespace ml
 		static inline bool registrate(name_type const & name, code_type const & code, func_type const & fn)
 		{
 			if (factories().contains(name)) { return false; }
-			
 			std::get<ID_Codes>(m_storage).insert(name, code);
-			
 			std::get<ID_Names>(m_storage).insert(code, name);
-			
 			std::get<ID_Factories>(m_storage).insert(name, fn);
-			
 			return true;
 		}
 

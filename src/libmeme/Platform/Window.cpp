@@ -42,9 +42,12 @@ namespace ml
 			{
 				return &(*it->second);
 			}
-			return &(*cache.insert(
-				pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
-			).first.second);
+			else
+			{
+				return &(*cache.insert(
+					pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
+				).second);
+			}
 		}
 		return nullptr;
 	}

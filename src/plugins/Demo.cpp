@@ -1,5 +1,4 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Engine/Engine.hpp>
@@ -324,9 +323,9 @@ namespace ml
 				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
 				{
 					// Memory
-					ImGui::Text("manual allocations: %u", ML_Memory.get_records().size());
-
+					ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
 					ImGui::Separator();
+
 					ImGui::Columns(2);
 
 					// Total Time

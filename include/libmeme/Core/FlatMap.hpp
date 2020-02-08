@@ -12,118 +12,132 @@ namespace ml::ds
 		class	_Kty,	// key type
 		class	_Vty,	// value type
 		class	_Pr,	// key comparator predicate type
-		bool	_Multi,	// true if multiple equivalent keys are permitted
-		size_t	_Thresh	// size threshold used to determine search algorithm
-	> struct flat_map_traits
+		size_t	_Th		// threshold for selecting search algorithm
+	> struct flat_map_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_type = typename _Kty;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using key_type			= typename _Kty;
+		using value_type		= typename _Vty;
+		using compare_type		= typename _Pr;
+		using difference_type	= typename ptrdiff_t;
+		using size_type			= typename size_t;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr size_type thresh{ _Th };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using key_storage					= typename ds::flat_set<key_type, compare_type, thresh>;
+		using key_iterator					= typename key_storage::iterator;
+		using const_key_iterator			= typename key_storage::const_iterator;
+		using reverse_key_iterator			= typename key_storage::reverse_iterator;
+		using const_reverse_key_iterator	= typename key_storage::const_reverse_iterator;
+
+		using value_storage					= typename pmr::vector<value_type>;
+		using value_iterator				= typename value_storage::iterator;
+		using const_value_iterator			= typename value_storage::const_iterator;
+		using reverse_value_iterator		= typename value_storage::reverse_iterator;
+		using const_reverse_value_iterator	= typename value_storage::const_reverse_iterator;
 		
-		using mapped_type = typename _Vty;
+		using storage_type					= typename std::pair<key_storage, value_storage>;
+		using keyval_pair					= typename std::pair<key_type, value_type>;
+		using iterator_pair					= typename std::pair<key_iterator, value_iterator>;
+		using const_iterator_pair			= typename std::pair<const_key_iterator, const_value_iterator>;
+		using reverse_iterator_pair			= typename std::pair<reverse_key_iterator, reverse_value_iterator>;
+		using const_reverse_iterator_pair	= typename std::pair<const_reverse_key_iterator, const_reverse_value_iterator>;
 		
-		using compare_type = typename _Pr;
-
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		static constexpr bool multi{ _Multi };
-
-		static constexpr size_t thresh{ _Thresh };
-
-		using difference_type = typename ptrdiff_t;
-		
-		using size_type = typename size_t;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// FLAT MAP
-	template <class _Kty, class _Vty, class _Pr = std::less<_Kty>, size_t _Thresh = 42
-	> struct flat_map final
+	// BASIC FLAT MAP
+	template <class _Traits
+	> struct basic_flat_map final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type						= typename flat_map<_Kty, _Vty, _Pr, _Thresh>;
-		using traits_type					= typename flat_map_traits<_Kty, _Vty, _Pr, false, _Thresh>;
+		using traits_type					= typename _Traits;
+		using self_type						= typename basic_flat_map<traits_type>;
 		using compare_type					= typename traits_type::compare_type;
 		using allocator_type				= typename traits_type::allocator_type;
 		using difference_type				= typename traits_type::difference_type;
 		using size_type						= typename traits_type::size_type;
 		
 		using key_type						= typename traits_type::key_type;
-		using key_storage					= typename ds::flat_set<key_type, compare_type, traits_type::thresh>;
-		using key_iterator					= typename key_storage::iterator;
-		using const_key_iterator			= typename key_storage::const_iterator;
-		using reverse_key_iterator			= typename key_storage::reverse_iterator;
-		using const_reverse_key_iterator	= typename key_storage::const_reverse_iterator;
+		using key_storage					= typename traits_type::key_storage;
+		using key_iterator					= typename traits_type::key_iterator;
+		using const_key_iterator			= typename traits_type::const_key_iterator;
+		using reverse_key_iterator			= typename traits_type::reverse_key_iterator;
+		using const_reverse_key_iterator	= typename traits_type::const_reverse_key_iterator;
 		
-		using mapped_type					= typename traits_type::mapped_type;
-		using mapped_storage				= typename pmr::vector<mapped_type>;
-		using mapped_iterator				= typename mapped_storage::iterator;
-		using const_mapped_iterator			= typename mapped_storage::const_iterator;
-		using reverse_mapped_iterator		= typename mapped_storage::reverse_iterator;
-		using const_reverse_mapped_iterator	= typename mapped_storage::const_reverse_iterator;
+		using value_type					= typename traits_type::value_type;
+		using value_storage					= typename traits_type::value_storage;
+		using value_iterator				= typename traits_type::value_iterator;
+		using const_value_iterator			= typename traits_type::const_value_iterator;
+		using reverse_value_iterator		= typename traits_type::reverse_value_iterator;
+		using const_reverse_value_iterator	= typename traits_type::const_reverse_value_iterator;
 		
-		using storage_type					= typename std::pair<key_storage, mapped_storage>;
-		using pair_type						= typename std::pair<key_type, mapped_type>;
-		using initializer_type				= typename std::initializer_list<pair_type>;
-		using iterator_pair					= typename std::pair<key_iterator, mapped_iterator>;
-		using const_iterator_pair			= typename std::pair<const_key_iterator, const_mapped_iterator>;
-		using reverse_iterator_pair			= typename std::pair<reverse_key_iterator, reverse_mapped_iterator>;
-		using const_reverse_iterator_pair	= typename std::pair<const_reverse_key_iterator, const_reverse_mapped_iterator>;
+		using storage_type					= typename traits_type::storage_type;
+		using keyval_pair					= typename traits_type::keyval_pair;
+		using iterator_pair					= typename traits_type::iterator_pair;
+		using const_iterator_pair			= typename traits_type::const_iterator_pair;
+		using reverse_iterator_pair			= typename traits_type::reverse_iterator_pair;
+		using const_reverse_iterator_pair	= typename traits_type::const_reverse_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		flat_map() noexcept
+		basic_flat_map() noexcept
 			: m_storage{}
 		{
 		}
 
-		explicit flat_map(allocator_type const & alloc) : m_storage{
+		explicit basic_flat_map(allocator_type const & alloc) : m_storage{
 			key_storage{ alloc },
-			mapped_storage{ alloc }
+			value_storage{ alloc }
 		}
 		{
 		}
 
-		flat_map(initializer_type init, allocator_type const & alloc = {})
+		basic_flat_map(std::initializer_list<keyval_pair> init, allocator_type const & alloc = {})
 			: m_storage{ alloc }
 		{
-			for (auto it = init.begin(); it != init.end(); ++it)
+			for (auto pair = init.begin(); pair != init.end(); ++pair)
 			{
-				this->insert(it->first, it->second);
+				this->insert(pair->first, pair->second);
 			}
 		}
 
-		flat_map(storage_type const & value, allocator_type const & alloc = {}) : m_storage{
+		basic_flat_map(storage_type const & value, allocator_type const & alloc = {}) : m_storage{
 			key_storage{ value.first, alloc },
-			mapped_storage{ value.second, alloc }
+			value_storage{ value.second, alloc }
 		}
 		{
 		}
 
-		flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{
+		basic_flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept : m_storage{
 			key_storage{ std::move(value.first), alloc },
-			mapped_storage{ std::move(value.second), alloc }
+			value_storage{ std::move(value.second), alloc }
 		}
 		{
 		}
 
-		flat_map(self_type const & other, allocator_type const & alloc = {})
+		basic_flat_map(self_type const & other, allocator_type const & alloc = {})
 			: self_type{ other.m_storage, alloc }
 		{
 		}
 
-		flat_map(self_type && other, allocator_type const & alloc = {}) noexcept
+		basic_flat_map(self_type && other, allocator_type const & alloc = {}) noexcept
 			: self_type{ std::move(other.m_storage), alloc }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(initializer_type init)
+		inline self_type & operator=(std::initializer_list<keyval_pair> init)
 		{
 			self_type temp{ init };
 			this->swap(temp);
@@ -163,7 +177,7 @@ namespace ml::ds
 			m_storage.second.resize(count);
 		}
 
-		inline void resize(size_type const count, mapped_type const & value)
+		inline void resize(size_type const count, value_type const & value)
 		{
 			m_storage.first.resize(count);
 			m_storage.second.resize(count, value);
@@ -190,11 +204,6 @@ namespace ml::ds
 			return m_storage.first.capacity();
 		}
 
-		ML_NODISCARD inline bool contains(key_type const & key) const
-		{
-			return m_storage.first.contains(key);
-		}
-
 		ML_NODISCARD inline bool empty() const noexcept
 		{
 			return m_storage.first.empty();
@@ -210,67 +219,72 @@ namespace ml::ds
 			return m_storage.first.size();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline key_storage const & get_keys() const noexcept
+		ML_NODISCARD inline bool valid() const noexcept
 		{
-			return m_storage.first;
-		}
-
-		ML_NODISCARD inline mapped_storage const & get_values() const noexcept
-		{
-			return m_storage.second;
+			return this->size() == m_storage.second.size();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline mapped_iterator fetch(const_key_iterator addr)
+		ML_NODISCARD inline value_iterator fetch(const_key_iterator loc)
 		{
-			return (addr == m_storage.first.cend())
-				? m_storage.second.end()
-				: std::next(
-					m_storage.second.begin(), std::distance(m_storage.first.cbegin(), addr)
-				);
+			return std::next(m_storage.second.begin(), std::distance(m_storage.first.cbegin(), loc));
 		}
 
-		ML_NODISCARD inline const_mapped_iterator fetch(const_key_iterator addr) const
+		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator loc) const
 		{
-			return (addr == m_storage.first.cend())
-				? m_storage.second.cend()
-				: std::next(
-					m_storage.second.cbegin(), std::distance(m_storage.first.cbegin(), addr)
-				);
+			return std::next(m_storage.second.cbegin(), std::distance(m_storage.first.cbegin(), loc));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> inline mapped_iterator emplace(const_key_iterator addr, Args && ... args)
+		inline iterator_pair erase(key_iterator loc)
 		{
-			return m_storage.second.emplace(this->fetch(addr), ML_FWD(args)...);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator_pair erase(key_iterator addr)
-		{
-			auto const temp{ m_storage.second.erase(this->fetch(addr)) };
-			return { m_storage.first.erase(addr), temp };
+			auto const result
+			{
+				m_storage.second.erase(this->fetch(loc))
+			};
+			return { m_storage.first.erase(loc), result };
 		}
 
 		inline iterator_pair erase(key_iterator first, key_iterator last)
 		{
-			auto const temp{ m_storage.second.erase(this->fetch(first), this->fetch(last)) };
-			return { m_storage.first.erase(first, last), temp };
+			auto const result
+			{
+				m_storage.second.erase(this->fetch(first), this->fetch(last))
+			};
+			return { m_storage.first.erase(first, last), result };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline std::optional<iterator_pair> find(key_type const & key)
+		template <class Other = self_type
+		> ML_NODISCARD inline auto compare(Other const & other) const
 		{
-			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.end())
+			if constexpr (std::is_same_v<Other, self_type>)
 			{
-				return std::make_optional(iterator_pair{ it, this->fetch(it) });
+				return this->compare(other.m_storage);
+			}
+			else
+			{
+				return (m_storage != other) ? ((m_storage < other) ? -1 : 1) : 0;
+			}
+		}
+
+		template <class Other = key_type
+		> ML_NODISCARD inline bool contains(Other const & key) const
+		{
+			return m_storage.first.contains(key);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Other = key_type
+		> ML_NODISCARD inline std::optional<iterator_pair> find(Other const & other)
+		{
+			if (auto const k{ m_storage.first.find(other) }; k != m_storage.first.end())
+			{
+				return std::make_optional(iterator_pair{ k, this->fetch(k) });
 			}
 			else
 			{
@@ -278,11 +292,12 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD inline std::optional<const_iterator_pair> find(key_type const & key) const
+		template <class Other = key_type
+		> ML_NODISCARD inline std::optional<const_iterator_pair> find(Other const & other) const
 		{
-			if (auto const it{ m_storage.first.find(key) }; it != m_storage.first.cend())
+			if (auto const k{ m_storage.first.find(other) }; k != m_storage.first.cend())
 			{
-				return std::make_optional(const_iterator_pair{ it, this->fetch(it) });
+				return std::make_optional(const_iterator_pair{ k, this->fetch(k) });
 			}
 			else
 			{
@@ -293,11 +308,28 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline std::pair<iterator_pair, bool> insert(key_type const & key, Args && ... args)
+		> inline value_iterator emplace(Args && ... args)
+		{
+			return m_storage.second.emplace(ML_FWD(args)...);
+		}
+
+		template <class ... Args
+		> inline iterator_pair emplace_hint(const_key_iterator loc, Args && ... args)
+		{
+			return { 
+				std::next(m_storage.first.begin(), std::distance(m_storage.first.cbegin(), loc)),
+				this->emplace(this->fetch(loc), ML_FWD(args)...)
+			};
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class ... Args
+		> inline std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args)
 		{
 			if (auto const k{ m_storage.first.insert(key) }; k.second)
 			{
-				return { { k.first, this->emplace(k.first, ML_FWD(args)...) }, true };
+				return { this->emplace_hint(k.first, ML_FWD(args)...), true };
 			}
 			else
 			{
@@ -306,11 +338,11 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> inline std::pair<iterator_pair, bool> insert(key_type && key, Args && ... args)
+		> inline std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args)
 		{
 			if (auto const k{ m_storage.first.insert(std::move(key)) }; k.second)
 			{
-				return { { k.first, this->emplace(k.first, ML_FWD(args)...) }, true };
+				return { this->emplace_hint(k.first, ML_FWD(args)...), true };
 			}
 			else
 			{
@@ -320,38 +352,62 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline mapped_type & at(key_type const & key)
+		template <class Value
+		> inline iterator_pair insert(const_key_iterator loc, Value && value)
 		{
-			if (auto const it{ this->find(key) })
+			return this->emplace_hint(loc, ML_FWD(value));
+		}
+
+		template <class Key, class Value
+		> inline iterator_pair insert(Key && key, Value && value)
+		{
+			return this->try_emplace(ML_FWD(key), ML_FWD(value)).first;
+		}
+
+		inline iterator_pair insert(keyval_pair const & pair)
+		{
+			return this->try_emplace(pair.first, pair.second).first;
+		}
+
+		inline iterator_pair insert(keyval_pair && pair)
+		{
+			return this->try_emplace(std::move(pair.first), std::move(pair.second)).first;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline value_type & at(key_type const & key)
+		{
+			if (auto const pair{ this->find(key) })
 			{
-				return (*it->second);
+				return (*pair->second);
 			}
 			else
 			{
-				return (*this->insert(key, mapped_type{}).first.second);
+				return (*this->insert(key, value_type{}).second);
 			}
 		}
 
-		ML_NODISCARD inline mapped_type & at(key_type && key)
+		ML_NODISCARD inline value_type & at(key_type && key)
 		{
-			if (auto const it{ this->find(key) })
+			if (auto const pair{ this->find(key) })
 			{
-				return (*it->second);
+				return (*pair->second);
 			}
 			else
 			{
-				return (*this->insert(std::move(key), mapped_type{}).first.second);
+				return (*this->insert(std::move(key), value_type{}).second);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline mapped_type & operator[](key_type const & key)
+		ML_NODISCARD inline value_type & operator[](key_type const & key) noexcept
 		{
 			return this->at(key);
 		}
 
-		ML_NODISCARD inline mapped_type & operator[](key_type && key)
+		ML_NODISCARD inline value_type & operator[](key_type && key) noexcept
 		{
 			return this->at(std::move(key));
 		}
@@ -450,34 +506,40 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool operator==(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator==(Other const & other) const
 		{
-			return (m_storage == other.m_storage);
+			return this->compare(other) == 0;
 		}
 
-		ML_NODISCARD inline bool operator!=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator!=(Other const & other) const
 		{
-			return (m_storage != other.m_storage);
+			return this->compare(other) != 0;
 		}
 
-		ML_NODISCARD inline bool operator<(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator<(Other const & other) const
 		{
-			return (m_storage < other.m_storage);
+			return this->compare(other) < 0;
 		}
 
-		ML_NODISCARD inline bool operator>(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator>(Other const & other) const
 		{
-			return (m_storage > other.m_storage);
+			return this->compare(other) > 0;
 		}
 
-		ML_NODISCARD inline bool operator<=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator<=(Other const & other) const
 		{
-			return (m_storage <= other.m_storage);
+			return this->compare(other) <= 0;
 		}
 
-		ML_NODISCARD inline bool operator>=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator>=(Other const & other) const
 		{
-			return (m_storage >= other.m_storage);
+			return this->compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -487,6 +549,32 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// FLAT MAP | linear associative container with unique keys
+	template <
+		class	_Kty,
+		class	_Vty,
+		class	_Pr = std::less<_Kty>,
+		size_t	_Th = 42
+	> ML_USING flat_map = typename basic_flat_map<
+		flat_map_traits<_Kty, _Vty, _Pr, _Th>
+	>;
+
+	// FLAT MULTIMAP | linear associative container that allows duplicate keys (map of sets)
+	template <
+		class	_Kty,
+		class	_Vty,
+		class	_Kpr = std::less<_Kty>,
+		class	_Vpr = std::less<_Vty>,
+		size_t	_Th = 42
+	> ML_USING flat_multimap = typename flat_map<
+		_Kty,
+		ds::flat_set<_Vty, _Vpr, _Th>,
+		_Kpr,
+		_Th
+	>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

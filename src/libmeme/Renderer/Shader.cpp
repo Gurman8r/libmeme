@@ -347,7 +347,7 @@ namespace ml
 		}
 		else if (auto const loc{ GL::getAttribLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return (*m_attributes.insert(value, loc).first.second);
+			return (*m_attributes.insert(value, loc).second);
 		}
 		else
 		{
@@ -363,7 +363,7 @@ namespace ml
 		}
 		else if (auto const loc{ GL::getUniformLocation(m_handle, value.c_str()) }; loc != -1)
 		{
-			return (*m_uniforms.insert(value, loc).first.second);
+			return (*m_uniforms.insert(value, loc).second);
 		}
 		else
 		{

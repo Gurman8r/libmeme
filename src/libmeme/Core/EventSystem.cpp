@@ -4,14 +4,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	event_listener::~event_listener()
-	{
-		event_system::remove_listener(this);
-	}
+	decltype(event_system::s_listeners) event_system::s_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	decltype(event_system::s_listeners) event_system::s_listeners{};
 
 	bool event_system::add_listener(size_t type, event_listener * listener)
 	{

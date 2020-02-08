@@ -158,7 +158,7 @@ namespace ml
 		}
 		else
 		{
-			return (*page.insert(c, load_glyph(c, char_size)).first.second);
+			return (*page.insert(c, load_glyph(c, char_size)).second);
 		}
 	}
 

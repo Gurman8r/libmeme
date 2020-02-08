@@ -126,12 +126,12 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// REMAP - modify inner type
+// REMAP - modify inner types
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class> class Fn, class
+	template <template <class> class Pr, class
 	> struct remap_impl
 	{
 		using type = typename list<>;

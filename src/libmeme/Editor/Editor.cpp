@@ -10,7 +10,7 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/examples/imgui_impl_glfw.h>
 
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 #	include <imgui/examples/imgui_impl_opengl3.h>
 #else
 #endif
@@ -78,7 +78,7 @@ namespace ml
 		}
 
 		// Initialize Backend
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 
 		if (!ImGui_ImplGlfw_InitForOpenGL(
 			(struct GLFWwindow *)g_editor->config.window_handle,
@@ -103,7 +103,7 @@ namespace ml
 
 		get_main_menu().clear();
 
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #endif
 		ImGui_ImplGlfw_Shutdown();
@@ -116,7 +116,7 @@ namespace ml
 
 	void editor::new_frame()
 	{
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #endif
 		ImGui_ImplGlfw_NewFrame();
@@ -127,7 +127,7 @@ namespace ml
 	{
 		ImGui::Render();
 
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #else
 #endif

@@ -180,8 +180,7 @@ namespace ml::ecs
 	private:
 		static constexpr bitset_storage generate_bitset_storage() noexcept
 		{
-			// generate bitsets for each signature where we enable the
-			// bits at the bit index of each of that signature's types
+			// generate bitsets for each signature
 			bitset_storage temp{};
 			meta::for_types<typename signatures::type_list
 			>([&temp](auto sig)
@@ -224,7 +223,7 @@ namespace ml::ecs
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct entity; struct handle;
+		class entity; struct handle;
 
 		using settings_type		= typename _Settings;
 		using self_type			= typename manager<settings_type>;
@@ -239,56 +238,32 @@ namespace ml::ecs
 		// entity class
 		class entity final
 		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 			friend self_type;
 			
 			bool	m_alive;	// state of entity (alive / dead)
 			size_t	m_data;		// index of real component data
 			size_t	m_handle;	// index of managing handle
 			bitset	m_bitset;	// signature bitset
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// abstraction over entity/manager interface
-		class handle final
+		struct handle final
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-			
-			friend self_type;
 
-			self_type * m_manager;	// pointer to owning manager
-			size_t		m_entity;	// index of real entity data
-			size_t		m_self;		// index of real handle data
-			int32_t		m_counter;	// validity check counter
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			inline handle & invalidate() noexcept
-			{
-				++m_counter; return (*this);
-			}
-
-			inline handle & refresh(size_t const i) noexcept
-			{
-				m_entity = i; return (*this);
-			}
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		public:
 			ML_NODISCARD inline operator bool() const noexcept
 			{
-				return this->valid();
+				return this->valid(); // true if valid
 			}
 
 			ML_NODISCARD inline bool valid() const noexcept
 			{
-				return m_manager->is_valid_handle(*this);
+				return m_manager && m_manager->is_valid_handle(*this);
 			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			ML_NODISCARD inline bool alive() const noexcept
 			{
@@ -367,6 +342,20 @@ namespace ml::ecs
 			{
 				return m_manager->matches_signature<C>(*this);
 			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			
+		private:
+			friend self_type;
+
+			self_type * m_manager;	// pointer to owning manager
+			size_t		m_entity;	// index of real entity data
+			size_t		m_self;		// index of real handle data
+			int32_t		m_counter;	// validity check counter
+
+			inline handle & invalidate() noexcept { ++m_counter; return (*this); }
+
+			inline handle & refresh(size_t const i) noexcept { m_entity = i; return (*this); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -507,10 +496,10 @@ namespace ml::ecs
 					std::swap(m_entities[alive], m_entities[dead]);
 
 					// refresh alive entity
-					get_handle(alive).refresh(alive);
+					m_handles[alive].refresh(alive);
 
 					// invalidate and refresh dead entity
-					get_handle(dead).invalidate().refresh(dead);
+					m_handles[dead].invalidate().refresh(dead);
 
 					// move both iterator indices
 					++dead; --alive;

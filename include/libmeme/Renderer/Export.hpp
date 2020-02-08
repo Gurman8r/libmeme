@@ -1,5 +1,5 @@
-#ifndef _ML_GRAPHICS_EXPORT_HPP_
-#define _ML_GRAPHICS_EXPORT_HPP_
+#ifndef _ML_RENDERER_EXPORT_HPP_
+#define _ML_RENDERER_EXPORT_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -7,7 +7,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_STATIC)
+#ifdef ML_API
+#	define ML_RENDERER_API ML_API
+#elif defined(ML_STATIC)
 #	define ML_RENDERER_API
 #elif defined(ML_RENDERER_EXPORTS)
 #	define ML_RENDERER_API ML_API_EXPORT
@@ -17,4 +19,4 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_GRAPHICS_EXPORT_HPP_
+#endif // !_ML_RENDERER_EXPORT_HPP_

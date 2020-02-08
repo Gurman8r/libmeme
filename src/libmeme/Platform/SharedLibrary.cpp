@@ -137,7 +137,7 @@ namespace ml
 		}
 		
 		// load function
-		return (*m_funcs.insert(name, impl::load_function(m_instance, name)).first.second);
+		return (*m_funcs.insert(name, impl::load_function(m_instance, name)).second);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

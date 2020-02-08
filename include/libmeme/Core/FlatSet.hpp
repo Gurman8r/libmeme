@@ -1,35 +1,47 @@
 #ifndef _ML_FLAT_SET_HPP_
 #define _ML_FLAT_SET_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Meta.hpp>
 
 namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// BASIC FLAT SET TRAITS
+	// FLAT SET TRAITS
 	template <
 		class	_Ty,	// value type
 		class	_Pr,	// comparator predicate type
-		bool	_Multi,	// true if multiple equivalent keys are permitted
-		size_t	_Thresh	// size threshold used to determine search algorithm
-	> struct basic_flat_set_traits
+		bool	_Mt,	// true if multiple equivalent values are permitted
+		size_t	_Th		// threshold for selecting search algorithm
+	> struct flat_set_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type = typename _Ty;
-		
-		using compare_type = typename _Pr;
-		
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		using value_type		= typename _Ty;
+		using compare_type		= typename _Pr;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using difference_type	= typename ptrdiff_t;
+		using size_type			= typename size_t;
 
-		static constexpr bool multi{ _Multi };
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t thresh{ _Thresh };
+		static constexpr bool multi{ _Mt };
 
-		using difference_type = typename ptrdiff_t;
+		static constexpr size_type thresh{ 42 };
 
-		using size_type = typename size_t;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using storage_type				= typename pmr::vector<value_type>;
+		using pointer					= typename storage_type::pointer;
+		using reference					= typename storage_type::reference;
+		using const_pointer				= typename storage_type::const_pointer;
+		using const_reference			= typename storage_type::const_reference;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+		using iterator_pair				= typename std::pair<iterator, iterator>;
+		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -38,7 +50,7 @@ namespace ml::ds
 
 	// BASIC FLAT SET
 	template <class _Traits
-	> struct basic_flat_set
+	> struct basic_flat_set final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -50,18 +62,17 @@ namespace ml::ds
 		using difference_type			= typename traits_type::difference_type;
 		using size_type					= typename traits_type::size_type;
 
-		using storage_type				= typename pmr::vector<value_type>;
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
-		using iterator					= typename storage_type::iterator;
-		using const_iterator			= typename storage_type::const_iterator;
-		using reverse_iterator			= typename storage_type::reverse_iterator;
-		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
-		using initializer_type			= typename std::initializer_list<value_type>;
-		using iterator_pair				= typename std::pair<iterator, iterator>;
-		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
+		using storage_type				= typename traits_type::storage_type;
+		using pointer					= typename traits_type::pointer;
+		using reference					= typename traits_type::reference;
+		using const_pointer				= typename traits_type::const_pointer;
+		using const_reference			= typename traits_type::const_reference;
+		using iterator					= typename traits_type::iterator;
+		using const_iterator			= typename traits_type::const_iterator;
+		using reverse_iterator			= typename traits_type::reverse_iterator;
+		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
+		using iterator_pair				= typename traits_type::iterator_pair;
+		using const_iterator_pair		= typename traits_type::const_iterator_pair	;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -75,25 +86,29 @@ namespace ml::ds
 		{
 		}
 
-		basic_flat_set(initializer_type init, allocator_type const & alloc = {})
+		basic_flat_set(std::initializer_list<value_type> init, allocator_type const & alloc = {})
 			: m_storage{ init, alloc }
 		{
+			this->impl_sort();
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
 			: m_storage{ first, last, alloc }
 		{
+			this->impl_sort();
 		}
 
 		explicit basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
 			: m_storage{ value, alloc }
 		{
+			this->impl_sort();
 		}
 
 		explicit basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
+			this->impl_sort();
 		}
 
 		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
@@ -108,7 +123,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(initializer_type init)
+		inline self_type & operator=(std::initializer_list<value_type> init)
 		{
 			self_type temp{ init };
 			swap(temp);
@@ -135,14 +150,14 @@ namespace ml::ds
 			m_storage.clear();
 		}
 
-		inline void reserve(size_type const count)
+		inline void reserve(size_type const cap)
 		{
-			m_storage.reserve(count);
+			m_storage.reserve(cap);
 		}
 
-		inline void resize(size_type const count)
+		inline void resize(size_type const cap)
 		{
-			m_storage.resize(count);
+			m_storage.resize(cap);
 		}
 
 		inline void shrink_to_fit()
@@ -172,82 +187,67 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool contains(const_reference value) const
+		template <class Other = self_type
+		> ML_NODISCARD inline auto compare(Other const & other) const
 		{
-			if (size() < traits_type::thresh)
+			if constexpr (std::is_same_v<Other, self_type>)
 			{
-				// linear
-				return std::find(cbegin(), cend(), value) != cend();
+				return this->compare(other.m_storage);
 			}
 			else
 			{
-				// binary
-				return std::binary_search(cbegin(), cend(), value, compare_type{});
+				return (m_storage != other) ? ((m_storage < other) ? -1 : 1) : 0;
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline iterator_pair equal_range(const_reference value)
+		template <class Other = value_type
+		> ML_NODISCARD inline bool contains(Other const & other) const
 		{
-			return std::equal_range(begin(), end(), value, compare_type{});
-		}
+			// empty
+			if (empty()) { return false; }
 
-		ML_NODISCARD inline const_iterator_pair equal_range(const_reference value) const
-		{
-			return std::equal_range(cbegin(), cend(), value, compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline iterator lower_bound(const_reference value)
-		{
-			return std::lower_bound(begin(), end(), value, compare_type{});
-		}
-
-		ML_NODISCARD inline const_iterator lower_bound(const_reference value) const
-		{
-			return std::lower_bound(cbegin(), cend(), value, compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline iterator upper_bound(const_reference value)
-		{
-			return std::upper_bound(begin(), end(), value, compare_type{});
-		}
-
-		ML_NODISCARD inline const_iterator upper_bound(const_reference value) const
-		{
-			return std::upper_bound(cbegin(), cend(), value, compare_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline iterator find(const_reference value)
-		{
 			// linear
 			if (size() < traits_type::thresh)
-			{
-				return std::find(begin(), end(), value);
-			}
+				return std::find(cbegin(), cend(), other) != cend();
+
 			// binary
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			return std::binary_search(cbegin(), cend(), other, compare_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Other = value_type
+		> ML_NODISCARD inline iterator find(Other const & other)
+		{
+			// empty
+			if (empty()) { return end(); }
+
+			// linear
+			if (size() < traits_type::thresh)
+				return std::find(begin(), end(), other);
+
+			// binary
+			if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
+			; it.first != it.second)
 			{
 				return it.first;
 			}
 			return end();
 		}
 
-		ML_NODISCARD inline const_iterator find(const_reference value) const
+		template <class Other = value_type
+		> ML_NODISCARD inline const_iterator find(Other const & other) const
 		{
+			// empty
+			if (empty()) { return cend(); }
+
 			// linear
 			if (size() < traits_type::thresh)
-			{
-				return std::find(cbegin(), cend(), value);
-			}
+				return std::find(cbegin(), cend(), other);
+
 			// binary
-			if (auto const it{ equal_range(value) }; it.first != it.second)
+			if (auto const it{ std::equal_range(cbegin(), cend(), other, compare_type{}) }
+			; it.first != it.second)
 			{
 				return it.first;
 			}
@@ -256,9 +256,23 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_type const i) -> reference { return m_storage[i]; }
+		template <class Other = value_type
+		> ML_NODISCARD inline auto insert(Other const & other)
+		{
+			return this->impl_insert(other);
+		}
 
-		ML_NODISCARD inline auto operator[](size_type const i) const -> const_reference { return m_storage[i]; }
+		template <class Other = value_type
+		> ML_NODISCARD inline auto insert(Other && other)
+		{
+			return this->impl_insert(std::move(other));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto operator[](size_type const i) noexcept -> reference { return m_storage[i]; }
+
+		ML_NODISCARD inline auto operator[](size_type const i) const noexcept -> const_reference { return m_storage[i]; }
 
 		ML_NODISCARD inline auto at(size_type const i) -> reference { return m_storage.at(i); }
 
@@ -312,39 +326,82 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool operator==(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator==(Other const & other) const
 		{
-			return (m_storage == other.m_storage);
+			return this->compare(other) == 0;
 		}
 
-		ML_NODISCARD inline bool operator!=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator!=(Other const & other) const
 		{
-			return (m_storage != other.m_storage);
+			return this->compare(other) != 0;
 		}
 
-		ML_NODISCARD inline bool operator<(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator<(Other const & other) const
 		{
-			return (m_storage < other.m_storage);
+			return this->compare(other) < 0;
 		}
 
-		ML_NODISCARD inline bool operator>(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator>(Other const & other) const
 		{
-			return (m_storage > other.m_storage);
+			return this->compare(other) > 0;
 		}
 
-		ML_NODISCARD inline bool operator<=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator<=(Other const & other) const
 		{
-			return (m_storage <= other.m_storage);
+			return this->compare(other) <= 0;
 		}
 
-		ML_NODISCARD inline bool operator>=(self_type const & other) const
+		template <class Other = self_type
+		> ML_NODISCARD inline bool operator>=(Other const & other) const
 		{
-			return (m_storage >= other.m_storage);
+			return this->compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	protected:
+	private:
+		inline void impl_sort() noexcept
+		{
+			if (this->empty()) return;
+
+			std::sort(this->begin(), this->end(), compare_type{});
+
+			if constexpr (!traits_type::multi)
+			{
+				this->erase(std::unique(this->begin(), this->end()), this->end());
+			}
+		}
+
+		template <class T> inline auto impl_insert(T && other)
+		{
+			if constexpr (traits_type::multi)
+			{
+				return m_storage.emplace(
+					std::upper_bound(begin(), end(), other, compare_type{}),
+					ML_FWD(other));
+			}
+			else
+			{
+				if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
+				; it.first == it.second)
+				{
+					return std::make_pair(m_storage.emplace(it.second, ML_FWD(other)), true);
+				}
+				else
+				{
+					return std::make_pair(it.second, false);
+				}
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -352,269 +409,24 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// FLAT SET - sorted vector of unique elements
-	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Thresh = 42
-	> struct flat_set : basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Thresh>>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	// FLAT SET | sorted vector of unique elements
+	template <
+		class	_Ty,
+		class	_Pr = std::less<_Ty>,
+		size_t	_Th = 42
+	> ML_USING flat_set = typename basic_flat_set<
+		flat_set_traits<_Ty, _Pr, false, _Th>
+		>;
 
-		using self_type					= typename flat_set<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, false, _Thresh>>;
-		using traits_type				= typename base_type::traits_type;
-		using value_type				= typename base_type::value_type;
-		using compare_type				= typename base_type::compare_type;
-		using allocator_type			= typename base_type::allocator_type;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
-
-		using storage_type				= typename base_type::storage_type;
-		using pointer					= typename base_type::pointer;
-		using reference					= typename base_type::reference;
-		using const_pointer				= typename base_type::const_pointer;
-		using const_reference			= typename base_type::const_reference;
-		using iterator					= typename base_type::iterator;
-		using const_iterator			= typename base_type::const_iterator;
-		using reverse_iterator			= typename base_type::reverse_iterator;
-		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
-		using initializer_type			= typename base_type::initializer_type;
-		using iterator_pair				= typename base_type::iterator_pair;
-		using const_iterator_pair		= typename base_type::const_iterator_pair;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_set() noexcept
-			: base_type{}
-		{
-		}
-
-		explicit flat_set(allocator_type const & alloc) noexcept
-			: base_type{ alloc }
-		{
-		}
-
-		flat_set(initializer_type init, allocator_type const & alloc = {})
-			: base_type{ init, alloc }
-		{
-			this->sort();
-		}
-
-		template <class It
-		> flat_set(It first, It last, allocator_type const & alloc = {})
-			: base_type{ first, last, alloc }
-		{
-			this->sort();
-		}
-
-		explicit flat_set(storage_type const & storage, allocator_type const & alloc = {})
-			: base_type{ storage, alloc }
-		{
-			this->sort();
-		}
-
-		explicit flat_set(storage_type && storage, allocator_type const & alloc = {}) noexcept
-			: base_type{ std::move(storage), alloc }
-		{
-			this->sort();
-		}
-
-		flat_set(self_type const & other, allocator_type const & alloc = {})
-			: base_type{ other, alloc }
-		{
-		}
-
-		flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
-			: base_type{ std::move(other), alloc }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline self_type & operator=(self_type const & other)
-		{
-			self_type temp{ other };
-			base_type::swap(temp);
-			return (*this);
-		}
-
-		inline self_type & operator=(self_type && other) noexcept
-		{
-			base_type::swap(std::move(other));
-			return (*this);
-		}
-
-		inline self_type & operator=(initializer_type init)
-		{
-			self_type temp{ init };
-			base_type::swap(temp);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline std::pair<iterator, bool> insert(const_reference value)
-		{
-			if (auto const it{ base_type::equal_range(value) }
-			; it.first == it.second)
-			{
-				return { m_storage.emplace(it.second, value), true };
-			}
-			else
-			{
-				return { it.second, false };
-			}
-		}
-
-		inline std::pair<iterator, bool> insert(value_type && value)
-		{
-			if (auto const it{ base_type::equal_range(std::move(value)) }
-			; it.first == it.second)
-			{
-				return { m_storage.emplace(it.second, std::move(value)), true };
-			}
-			else
-			{
-				return { it.second, false };
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		inline void sort()
-		{
-			std::sort(base_type::begin(), base_type::end(), compare_type{});
-
-			base_type::erase(
-				std::unique(base_type::begin(), base_type::end(), compare_type{}),
-				base_type::end()
-			);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// FLAT MULTISET - sorted vector of elements
-	template <class _Ty, class _Pr = std::less<_Ty>, size_t _Thresh = 42
-	> struct flat_multiset : basic_flat_set<
-		basic_flat_set_traits<_Ty, _Pr, true, _Thresh>
-	>
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using self_type					= typename flat_multiset<_Ty, _Pr>;
-		using base_type					= typename basic_flat_set<basic_flat_set_traits<_Ty, _Pr, true, _Thresh>>;
-		using traits_type				= typename base_type::traits_type;
-		using value_type				= typename base_type::value_type;
-		using compare_type				= typename base_type::compare_type;
-		using allocator_type			= typename base_type::allocator_type;
-		using difference_type			= typename base_type::difference_type;
-		using size_type					= typename base_type::size_type;
-
-		using storage_type				= typename base_type::storage_type;
-		using pointer					= typename base_type::pointer;
-		using reference					= typename base_type::reference;
-		using const_pointer				= typename base_type::const_pointer;
-		using const_reference			= typename base_type::const_reference;
-		using iterator					= typename base_type::iterator;
-		using const_iterator			= typename base_type::const_iterator;
-		using reverse_iterator			= typename base_type::reverse_iterator;
-		using const_reverse_iterator	= typename base_type::const_reverse_iterator;
-		using initializer_type			= typename base_type::initializer_type;
-		using iterator_pair				= typename base_type::iterator_pair;
-		using const_iterator_pair		= typename base_type::const_iterator_pair;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		flat_multiset() noexcept
-			: base_type{}
-		{
-		}
-
-		explicit flat_multiset(allocator_type const & alloc) noexcept
-			: base_type{ alloc }
-		{
-		}
-
-		flat_multiset(initializer_type init, allocator_type const & alloc = {})
-			: base_type{ init, alloc }
-		{
-			this->sort();
-		}
-
-		template <class It
-		> flat_multiset(It first, It last, allocator_type const & alloc = {})
-			: base_type{ first, last, alloc }
-		{
-			this->sort();
-		}
-
-		explicit flat_multiset(storage_type const & storage, allocator_type const & alloc = {})
-			: base_type{ storage, alloc }
-		{
-			this->sort();
-		}
-
-		explicit flat_multiset(storage_type && storage, allocator_type const & alloc = {}) noexcept
-			: base_type{ std::move(storage), alloc }
-		{
-			this->sort();
-		}
-
-		flat_multiset(self_type const & other, allocator_type const & alloc = {})
-			: base_type{ other, alloc }
-		{
-		}
-
-		flat_multiset(self_type && other, allocator_type const & alloc = {}) noexcept
-			: base_type{ std::move(other), alloc }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline self_type & operator=(self_type const & other)
-		{
-			self_type temp{ other };
-			base_type::swap(temp);
-			return (*this);
-		}
-
-		inline self_type & operator=(self_type && other) noexcept
-		{
-			base_type::swap(std::move(other));
-			return (*this);
-		}
-
-		inline self_type & operator=(initializer_type init)
-		{
-			self_type temp{ init };
-			base_type::swap(temp);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline iterator insert(const_reference value)
-		{
-			return m_storage.emplace(base_type::upper_bound(value), value);
-		}
-
-		inline iterator insert(value_type && value)
-		{
-			return m_storage.emplace(base_type::upper_bound(std::move(value)), std::move(value));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		inline void sort() noexcept
-		{
-			std::sort(base_type::begin(), base_type::end(), compare_type{});
-		}
-	};
-
+	// FLAT MULTISET | sorted vector of elements
+	template <
+		class	_Ty,
+		class	_Pr = std::less<_Ty>,
+		size_t	_Th = 42
+	> ML_USING flat_multiset = typename basic_flat_set<
+		flat_set_traits<_Ty, _Pr, true, _Th>
+		>;
+	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

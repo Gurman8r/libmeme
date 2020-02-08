@@ -13,7 +13,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup settings
-		struct config final : trackable
+		struct config final
 		{
 			void *		window_handle;	// 
 			pmr::string	api_version;	// 
@@ -25,7 +25,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime settings
-		struct io final : trackable
+		struct io final
 		{
 			// ...
 		};

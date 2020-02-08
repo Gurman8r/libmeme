@@ -1,4 +1,4 @@
-#ifdef ML_IMPL_RENDERER_OPENGL
+#ifdef ML_RENDERER_OPENGL
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -7,22 +7,22 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_IMPL_OPENGL_ES2)
+#if defined(ML_OPENGL_ES2)
 #	include <GLES2/gl2.h>
-#elif defined(ML_IMPL_OPENGL_ES3)
+#elif defined(ML_OPENGL_ES3)
 #	if defined(ML_OS_APPLE && (TARGET_OS_IOS || TARGET_OS_TV))
 #		include <OpenGLES/ES3/gl.h>
 #	else
 #		include <GLES3/gl3.h>
 #	endif
-#elif defined(ML_IMPL_OPENGL_LOADER_GLEW)
+#elif defined(ML_OPENGL_LOADER_GLEW)
 #	include <GL/glew.h>
-#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
+#elif defined(ML_OPENGL_LOADER_GL3W)
 #	include <GL/gl3w.h>
-#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
+#elif defined(ML_OPENGL_LOADER_GLAD)
 #	include <glad/glad.h>
-#elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-#	include ML_IMPL_OPENGL_LOADER_CUSTOM
+#elif defined(ML_OPENGL_LOADER_CUSTOM)
+#	include ML_OPENGL_LOADER_CUSTOM
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -105,14 +105,14 @@ namespace ml
 		if (is_init())
 			return debug::log_error("GL is already initialized");
 
-#if defined(ML_IMPL_OPENGL_LOADER_GLEW)
+#if defined(ML_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
 		return (s_gl_init = (glewInit() == GLEW_OK));
-#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
+#elif defined(ML_OPENGL_LOADER_GL3W)
 		return (s_gl_init = (gl3wInit() != 0));
-#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
+#elif defined(ML_OPENGL_LOADER_GLAD)
 		return (s_gl_init = (gladLoadGL() != 0));
-#elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
+#elif defined(ML_OPENGL_LOADER_CUSTOM)
 		return (s_gl_init = false);
 #endif
 	}

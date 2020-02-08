@@ -16,19 +16,12 @@ project "libmeme"
 		"glfw",
 		"imgui",
 		"lua",
-		--"raknet",
 	}
 	defines {
-		"ML_CORE_EXPORTS",
-		"ML_EDITOR_EXPORTS",
-		"ML_ENGINE_EXPORTS",
-		"ML_NETWORK_EXPORTS",
-		"ML_PLATFORM_EXPORTS",
-		"ML_RENDERER_EXPORTS",
-		"ML_INI_FILENAME=\"../../../libmeme.ini\"",
-		"ML_IMPL_RENDERER_OPENGL",
-		"ML_IMPL_OPENGL_LOADER_GLEW",
-		--"ML_IMPL_OPENGL_LOADER_GLAD",
+		"ML_API=ML_API_EXPORT",
+		"ML_RENDERER_OPENGL",
+		"ML_OPENGL_LOADER_GLEW",
+		--"ML_OPENGL_LOADER_GLAD",
 		"GLEW_STATIC",
 		"_CRT_SECURE_NO_WARNINGS",
 		"NOMINMAX",
@@ -65,10 +58,8 @@ project "libmeme"
 		"glfw",
 		"imgui",
 		"lua",
-		"opengl32",
-		--"glew32s",
+		"opengl32", "glew32s",
 		 "freetype", "assimp", "IrrXML", "zlibstatic",
-		--"raknet", "ws2_32",
 	}
 	
 	filter { "system:Windows" }

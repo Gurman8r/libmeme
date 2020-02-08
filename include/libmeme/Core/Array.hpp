@@ -30,29 +30,39 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr reference operator[](size_type const i)
+		ML_NODISCARD constexpr reference operator[](size_type const i) noexcept
 		{
-			if (_Size <= i)
-			{
-				ML_THROW std::out_of_range("ml::array subscript out of range");
-			}
+			ML_ASSERT(i < _Size);
 			return m_data[i];
 		}
 
-		ML_NODISCARD constexpr const_reference operator[](size_type const i) const
+		ML_NODISCARD constexpr const_reference operator[](size_type const i) const noexcept
 		{
-			if (_Size <= i)
-			{
-				ML_THROW std::out_of_range("ml::array subscript out of range");
-			}
+			ML_ASSERT(i < _Size);
 			return m_data[i];
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return operator[](i); }
+		ML_NODISCARD constexpr reference at(size_type const i)
+		{
+			if (_Size <= i)
+			{
+				ML_THROW(std::out_of_range("ml::array subscript out of range"));
+			}
+			return m_data[i];
+		}
 
-		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return operator[](i); }
+		ML_NODISCARD constexpr const_reference at(size_type const i) const
+		{
+			if (_Size <= i)
+			{
+				ML_THROW(std::out_of_range("ml::array subscript out of range"));
+			}
+			return m_data[i];
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return (*end()); }
 		

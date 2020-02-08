@@ -9,20 +9,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API event_listener
-	{
-		virtual ~event_listener();
-
-		virtual void on_event(event const & value) = 0;
-	};
+	struct event_listener;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	class ML_CORE_API event_system final
 	{
-		static ds::flat_map<
-			size_t, ds::flat_set<event_listener *>
-		> s_listeners;
+		static ds::flat_multimap<size_t, event_listener *> s_listeners;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,6 +43,18 @@ namespace ml
 		static void remove_listener(event_listener * listener);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct ML_CORE_API event_listener
+	{
+		virtual ~event_listener()
+		{
+			event_system::remove_listener(this);
+		}
+
+		virtual void on_event(event const & value) = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -19,7 +19,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup settings
-		struct config final : trackable
+		struct config final
 		{
 			pmr::vector<pmr::string>	command_line;	// command line arguments
 			fs::path					program_name;	// program name
@@ -36,7 +36,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime settings
-		struct io final : trackable
+		struct io final
 		{
 			float64_t delta_time; // 
 		};

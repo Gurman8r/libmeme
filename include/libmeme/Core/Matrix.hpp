@@ -15,15 +15,21 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(0 < (_Width * _Height), "size negative or zero");
-		
-		static_assert(std::is_trivial_v<_Ty>, "type must be trivial");
+		static_assert(
+			0 < (_Width * _Height), 
+			"matrix size negative or zero"
+		);
+
+		static_assert(
+			std::is_integral_v<_Ty> || std::is_floating_point_v<_Ty>,
+			"matrix only supports integral and floating point types"
+		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type		= typename _Ty;
 		using self_type			= typename matrix<value_type, _Width, _Height>;
-		using storage_type		= typename ds::array<value_type, _Width * _Height>;
+		using storage_type		= typename array<value_type, _Width * _Height>;
 		using size_type			= typename storage_type::size_type;
 		using difference_type	= typename storage_type::difference_type;
 		using pointer			= typename storage_type::pointer;
@@ -39,15 +45,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator storage_type & () noexcept
-		{
-			return m_data;
-		}
+		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
 
-		ML_NODISCARD constexpr operator storage_type const & () const noexcept
-		{
-			return m_data;
-		}
+		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
+
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U, size_t W, size_t H
 		> ML_NODISCARD constexpr operator matrix<U, W, H>() const noexcept
@@ -82,17 +86,17 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto operator[](size_type const i) -> reference { return m_data[i]; }
+		ML_NODISCARD constexpr auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto operator[](size_type const i) const -> const_reference { return m_data[i]; }
+		ML_NODISCARD constexpr auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
 
 		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
 		
 		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
 
-		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) -> reference { return at(y * _Width + x); }
+		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) -> reference { return m_data.at(y * _Width + x); }
 
-		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) const -> const_reference { return at(y * _Width + x); }
+		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) const -> const_reference { return m_data.at(y * _Width + x); }
 
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data.back(); }
 		

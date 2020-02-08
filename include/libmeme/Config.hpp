@@ -3,56 +3,52 @@
 
 // Project Information
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML__AUTHOR	    "Melody Gurman"
-#define ML__NAME	    "libmeme"
-#define ML__VERSION     "00.00.01"
-#define ML__URL	        "https://www.github.com/Gurman8r/libmeme"
-#define ML__DATE	    __DATE__
-#define ML__TIME	    __TIME__
+#define ML__AUTHOR  "Melody Gurman"
+#define ML__NAME    "libmeme"
+#define ML__VERSION "00.00.01"
+#define ML__URL     "https://www.github.com/Gurman8r/libmeme"
+#define ML__DATE    __DATE__
+#define ML__TIME    __TIME__
+
+
+// Debug
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#if defined(_DEBUG)
+#	define ML_DEBUG 1
+#else
+#	define ML_DEBUG 0
+#endif
 
 
 // Language
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__cplusplus)
-//  C++ Version
 #	if defined(_MSVC_LANG)
 #		define ML_LANG _MSVC_LANG
 #	else
 #		define ML_LANG __cplusplus
 #	endif
-#	if (ML_LANG >= 201907L) // C++20
+#	if (ML_LANG >= 201907L)     // C++20
 #		define ML_HAS_CXX20 1
 #       define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201703L) // C++17
+#   elif (ML_LANG >= 201703L)   // C++17
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201402L) // C++14
+#   elif (ML_LANG >= 201402L)   // C++14
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201103L) // C++11
+#   elif (ML_LANG >= 201103L)   // C++11
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 0
 #       define ML_HAS_CXX11 1
 #	endif
-//  C++ Attributes
-#   ifndef __has_cpp_attribute
-#       define ML_CPP_ATTRIBUTE(expr) 0
-#   else
-#       define ML_CPP_ATTRIBUTE(expr) __has_cpp_attribute(expr)
-#   endif
-//  C++ Constexpr
-#   ifndef __cpp_constexpr
-#      define ML_CPP_CONSTEXPR 0
-#   else
-#      define ML_CPP_CONSTEXPR __cpp_constexpr
-#   endif
 #else
 #	error This system does not support C++.
 #endif
@@ -142,7 +138,7 @@
 #	define ML_CC_CLANG __clang__
 #	define ML_CC_VER ML_CC_CLANG
 #	define ML_CC_NAME "Clang/LLVM"
-#elif defined(__GNUC__) || defined(__GNUG__)
+#elif (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
 //  GCC
 #	if defined(__GNUC__)
 #		define ML_CC_GCC __GNUC__
@@ -234,17 +230,6 @@
 #define	ML_FLOAT80 long double // 8, 10, 12, or 16 bytes (CC Dependant)
 
 
-// Build
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if defined(_DEBUG)
-#	define ML_DEBUG 1
-#	define ML_CONFIGURATION "Debug"
-#else
-#	define ML_DEBUG 0
-#	define ML_CONFIGURATION "Release"
-#endif
-
-
 // Misc
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define _ML                     ::ml::
@@ -254,37 +239,56 @@
 #define ML_CONCAT(a, b)         ML_CONCAT_IMPL(a, b)
 #define ML_TOSTRING(str)        #str
 #define ML_STRINGIFY(str)       ML_TOSTRING(str)
-#define ML_THROW                throw
+#define ML_THROW(...)           throw (##__VA_ARGS__)
 
 
 // Anonymous Variables
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__COUNTER__)
-#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
+#	define ML_ANONYMOUS(expr) ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
 #elif defined(__LINE__)
-#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
+#	define ML_ANONYMOUS(expr) ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
 #endif
 
-#define ML_ONCE_CALL_IMPL(once) static bool once{ false }; if (!once && (once = true))
-#define ML_ONCE_CALL            ML_ONCE_CALL_IMPL(ML_ANONYMOUS(once))
+#define ML_ANON_V           ML_ANONYMOUS(anon)
+#define ML_IMPL_ONCE(once)  static bool once{ false }; if (!once && (once = true))
+#define ML_ONCE_CALL        ML_IMPL_ONCE(ML_ANON_V)
 
 
-// Typedefs
+// Aliases
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_USING			    using
-#define ML_USING_VA(...)	    template <##__VA_ARGS__> ML_USING
-#define ML_USING_X			    ML_USING_VA(class X)
-#define ML_USING_XY			    ML_USING_VA(class X, class Y)
-#define ML_USING_XYZ		    ML_USING_VA(class X, class Y, class Z)
-#define ML_USING_Ts			    ML_USING_VA(class ... Ts)
+#define ML_USING            using
+#define ML_USING_VA(...)    template <##__VA_ARGS__> ML_USING
+#define ML_USING_X          ML_USING_VA(class X)
+#define ML_USING_XY         ML_USING_VA(class X, class Y)
+#define ML_USING_XYZ        ML_USING_VA(class X, class Y, class Z)
+#define ML_USING_Ts         ML_USING_VA(class ... Ts)
 
 
-// No-Discard
+// Attributes
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifndef __has_cpp_attribute
+#    define ML_CPP_ATTRIBUTE(attr) 0
+#else
+#    define ML_CPP_ATTRIBUTE(attr) __has_cpp_attribute(attr)
+#endif
+// nodiscard
 #if ML_CPP_ATTRIBUTE(nodiscard) >= 201603L
 #   define ML_NODISCARD [[nodiscard]]
 #else
 #   define ML_NODISCARD
+#endif
+// likely
+#if ML_CPP_ATTRIBUTE(likely) >= 201907L
+#   define ML_LIKELY(...) (##__VA_ARGS__) [[likely]]
+#else
+#   define ML_LIKELY(expr) (##__VA_ARGS__)
+#endif
+// unlikely
+#if ML_CPP_ATTRIBUTE(unlikely) >= 201907L
+#   define ML_UNLIKELY(expr) (##__VA_ARGS__) [[unlikely]]
+#else
+#   define ML_UNLIKELY(expr) (##__VA_ARGS__)
 #endif
 
 
@@ -294,25 +298,32 @@
 #	define ML_ALWAYS_INLINE __forceinline
 #	define ML_NEVER_INLINE  __declspec(noinline)
 #elif defined(ML_CC_GCC) || defined(ML_CC_CLANG)
-#	define ML_ALWAYS_INLINE inline __attribute__((__always_inline__))
-#	define ML_NEVER_INLINE  __attribute__((__noinline__))
+#	define ML_ALWAYS_INLINE inline __attribute__((always_inline))
+#	define ML_NEVER_INLINE  __attribute__ ((noinline))
 #else
 #	define ML_ALWAYS_INLINE
 #	define ML_NEVER_INLINE
 #endif
 
 
-// API Export/Import
+// API Visibility
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifdef ML_CC_MSVC
-#	define ML_API_EXPORT __declspec(dllexport)
-#	define ML_API_IMPORT __declspec(dllimport)
-#elif ((defined(ML_CC_GCC) || defined(ML_CC_CLANG)) && (ML_CC_VER >= 4))
-#	define ML_API_EXPORT __attribute__((__visibility__ ("default")))
-#	define ML_API_IMPORT __attribute__((__visibility__ ("default")))
-#else
-#	define ML_API_EXPORT
-#	define ML_API_IMPORT
+#ifndef ML_STATIC
+#   ifdef ML_CC_MSVC
+#   	define ML_API_EXPORT __declspec(dllexport)
+#   	define ML_API_IMPORT __declspec(dllimport)
+#   elif (defined(ML_CC_CLANG) || defined(ML_CC_GCC)) && (ML_CC_VER >= 4)
+#   	define ML_API_EXPORT __attribute__ ((visibility ("default")))
+#   	define ML_API_IMPORT __attribute__ ((visibility ("hidden")))
+#   endif
+#endif
+
+#ifndef ML_API_EXPORT
+#define ML_API_EXPORT
+#endif
+
+#ifndef ML_API_IMPORT
+#define ML_API_IMPORT
 #endif
 
 

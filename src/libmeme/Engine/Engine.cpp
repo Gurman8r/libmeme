@@ -232,7 +232,7 @@ namespace ml
 				// load plugin
 				if (auto const p{ l.call_function<plugin *>("ml_plugin_main") })
 				{
-					return (*g_engine->lib_instances.insert(std::move(l), *p).first.second);
+					return (*g_engine->lib_instances.insert(std::move(l), *p).second);
 				}
 			}
 			files.erase(f.first);
