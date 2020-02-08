@@ -30,7 +30,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_storage					= typename ds::flat_set<key_type, compare_type, _>;
+		using key_storage					= typename ds::flat_set<key_type, compare_type, thresh>;
 		using key_iterator					= typename key_storage::iterator;
 		using const_key_iterator			= typename key_storage::const_iterator;
 		using reverse_key_iterator			= typename key_storage::reverse_iterator;
