@@ -56,7 +56,7 @@ namespace ml
 
 		// create the record
 		return (*inst.m_records.insert(
-			data, 
+			data,
 			::new (inst.m_allocator.allocate(sizeof(allocation_record))) allocation_record
 			{
 				++inst.m_current, size, flags, data

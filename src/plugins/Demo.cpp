@@ -158,8 +158,17 @@ namespace ml
 
 				// FONTS
 				{
+					m_fonts["clacon"] = make_font(
+						fs::path{ "../../../../assets/fonts/clacon.ttf" }
+					);
 					m_fonts["consolas"] = make_font(
 						fs::path{ "../../../../assets/fonts/consolas.ttf" }
+					);
+					m_fonts["lucida_console"] = make_font(
+						fs::path{ "../../../../assets/fonts/lucida_console.ttf" }
+					);
+					m_fonts["minecraft"] = make_font(
+						fs::path{ "../../../../assets/fonts/minecraft.ttf" }
 					);
 				}
 
