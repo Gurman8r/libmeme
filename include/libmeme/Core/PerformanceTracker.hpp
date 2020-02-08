@@ -4,9 +4,12 @@
 #include <libmeme/Core/Timer.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 
-#define ML_IMPL_BENCHMARK(var, name) \
-	auto var = ml::timer{ true }; \
-	ML_DEFER{ ml::performance_tracker::push_frame( name, var.elapsed() ); };
+#define ML_IMPL_BENCHMARK(var, name)							\
+	auto var{ ml::timer{ true } };								\
+	ML_DEFER{													\
+	var.stop();													\
+	ml::performance_tracker::push_frame(name, var.elapsed() );	\
+	};
 
 #define ML_BENCHMARK(name) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), name)
 

@@ -250,9 +250,8 @@
 #	define ML_ANONYMOUS(expr) ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
 #endif
 
-#define ML_ANON_V           ML_ANONYMOUS(anon)
 #define ML_IMPL_ONCE(once)  static bool once{ false }; if (!once && (once = true))
-#define ML_ONCE_CALL        ML_IMPL_ONCE(ML_ANON_V)
+#define ML_ONCE_CALL        ML_IMPL_ONCE(ML_ANONYMOUS(once))
 
 
 // Aliases

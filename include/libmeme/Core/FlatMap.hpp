@@ -30,7 +30,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_storage					= typename ds::flat_set<key_type, compare_type, thresh>;
+		using key_storage					= typename ds::flat_set<key_type, compare_type, _>;
 		using key_iterator					= typename key_storage::iterator;
 		using const_key_iterator			= typename key_storage::const_iterator;
 		using reverse_key_iterator			= typename key_storage::reverse_iterator;
@@ -339,11 +339,6 @@ namespace ml::ds
 			return this->try_emplace(ML_FWD(key), ML_FWD(value)).first;
 		}
 
-		inline iterator_pair insert(keyval_pair const & pair)
-		{
-			return this->try_emplace(pair.first, pair.second).first;
-		}
-
 		inline iterator_pair insert(keyval_pair && pair)
 		{
 			return this->try_emplace(ML_FWD(pair.first), ML_FWD(pair.second)).first;
@@ -551,7 +546,7 @@ namespace ml::ds
 	>;
 
 	/* FLAT MULTIMAP 
-	associative container which allows duplicate keys (implemented as map of set) */ 
+	associative container which allows duplicate keys (implemented as map of sets) */ 
 	template <
 		class	_Kty,
 		class	_Vty,

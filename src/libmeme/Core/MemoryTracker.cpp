@@ -6,7 +6,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	memory_tracker::memory_tracker() noexcept
-		: m_index{}, m_records{}, m_allocator{}
+		: m_allocator{}, m_current{}, m_records{}
 	{
 	}
 
@@ -31,9 +31,9 @@ namespace ml
 			m_records.for_each([&](auto, auto const & rec)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << std::get<ID_Index>(*rec)
-					<< std::setw(size_size) << std::get<ID_Size>(*rec)
-					<< std::setw(addr_size) << std::get<ID_Data>(*rec)
+					<< std::setw(indx_size) << rec->index()
+					<< std::setw(size_size) << rec->size()
+					<< std::setw(addr_size) << rec->data()
 					<< '\n';
 			});
 
@@ -48,18 +48,18 @@ namespace ml
 	void * memory_tracker::make_allocation(size_t size, int32_t flags) noexcept
 	{
 		static auto & inst{ get_instance() };
-		if (size <= 0 || flags < 0)
+		if (size <= 0)
 			return nullptr;
 
 		// allocate the requested bytes
 		byte_t * const data{ inst.m_allocator.allocate(size) };
 
-		// create the allocation record
+		// create the record
 		return (*inst.m_records.insert(
 			data, 
-			::new (inst.m_allocator.allocate(sizeof(record))) record
+			::new (inst.m_allocator.allocate(sizeof(allocation_record))) allocation_record
 			{
-				++inst.m_index, size, flags, data
+				++inst.m_current, size, flags, data
 			}
 		).first);
 	}
@@ -75,12 +75,14 @@ namespace ml
 		{
 			// free the allocation
 			inst.m_allocator.deallocate(
-				std::get<ID_Data>(**it->second), std::get<ID_Size>(**it->second)
+				(*it->second)->data(),
+				(*it->second)->size()
 			);
 
 			// free the record
 			inst.m_allocator.deallocate(
-				reinterpret_cast<byte_t *>(*it->second), sizeof(record)
+				reinterpret_cast<byte_t *>(*it->second),
+				sizeof(allocation_record)
 			);
 			
 			// erase the entry
