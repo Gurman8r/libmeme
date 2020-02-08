@@ -22,7 +22,7 @@ namespace ml
 		
 		shared_library(fs::path const & path, allocator_type const & alloc = {});
 		
-		shared_library(shared_library && copy, allocator_type const & alloc = {}) noexcept;
+		shared_library(shared_library && other, allocator_type const & alloc = {}) noexcept;
 		
 		~shared_library();
 
@@ -77,7 +77,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline int32_t compare(shared_library const & other) const noexcept
+		ML_NODISCARD inline auto compare(shared_library const & other) const noexcept
 		{
 			return m_path.compare(other.m_path);
 		}

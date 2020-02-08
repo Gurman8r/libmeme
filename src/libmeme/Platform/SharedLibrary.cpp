@@ -67,10 +67,10 @@ namespace ml
 		open(path);
 	}
 
-	shared_library::shared_library(shared_library && copy, allocator_type const & alloc) noexcept
+	shared_library::shared_library(shared_library && other, allocator_type const & alloc) noexcept
 		: shared_library{ alloc }
 	{
-		swap(std::move(copy));
+		swap(std::move(other));
 	}
 
 	shared_library::~shared_library()

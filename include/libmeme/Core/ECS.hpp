@@ -377,7 +377,7 @@ namespace ml::ecs
 		manager(self_type const & other, allocator_type const & alloc = {})
 			: self_type{ alloc }
 		{
-			this->copy(other);
+			this->deep_copy(other);
 		}
 		
 		manager(self_type && other, allocator_type const & alloc = {}) noexcept
@@ -426,16 +426,16 @@ namespace ml::ecs
 			m_size = m_size_next = 0;
 		}
 
-		inline void copy(self_type const & other)
+		inline void deep_copy(self_type const & other)
 		{
 			if (this != std::addressof(other))
 			{
-				m_size = other.m_size;
-				m_capacity = other.m_capacity;
+				m_size		= other.m_size;
+				m_capacity	= other.m_capacity;
 				m_size_next = other.m_size_next;
-				m_entities = other.m_entities;
-				m_handles = other.m_handles;
-				m_components = other.m_components;
+				m_entities	= other.m_entities;
+				m_handles	= other.m_handles;
+				m_components= other.m_components;
 			}
 		}
 
@@ -512,12 +512,12 @@ namespace ml::ecs
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_size, other.m_size);
-				std::swap(m_capacity, other.m_capacity);
-				std::swap(m_size_next, other.m_size_next);
-				m_entities.swap(other.m_entities);
-				m_handles.swap(other.m_handles);
-				m_components.swap(other.m_components);
+				std::swap(m_size,		other.m_size);
+				std::swap(m_capacity,	other.m_capacity);
+				std::swap(m_size_next,	other.m_size_next);
+				std::swap(m_entities,	other.m_entities);
+				std::swap(m_handles,	other.m_handles);
+				std::swap(m_components, other.m_components);
 			}
 		}
 

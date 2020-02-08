@@ -282,13 +282,13 @@
 #if ML_CPP_ATTRIBUTE(likely) >= 201907L
 #   define ML_LIKELY(...) (##__VA_ARGS__) [[likely]]
 #else
-#   define ML_LIKELY(expr) (##__VA_ARGS__)
+#   define ML_LIKELY(...) (##__VA_ARGS__)
 #endif
 // unlikely
 #if ML_CPP_ATTRIBUTE(unlikely) >= 201907L
-#   define ML_UNLIKELY(expr) (##__VA_ARGS__) [[unlikely]]
+#   define ML_UNLIKELY(...) (##__VA_ARGS__) [[unlikely]]
 #else
-#   define ML_UNLIKELY(expr) (##__VA_ARGS__)
+#   define ML_UNLIKELY(...) (##__VA_ARGS__)
 #endif
 
 

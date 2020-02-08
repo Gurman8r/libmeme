@@ -1,7 +1,7 @@
 #ifndef _ML_FLAT_SET_HPP_
 #define _ML_FLAT_SET_HPP_
 
-#include <libmeme/Core/Meta.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml::ds
 {
@@ -89,26 +89,26 @@ namespace ml::ds
 		basic_flat_set(std::initializer_list<value_type> init, allocator_type const & alloc = {})
 			: m_storage{ init, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
 			: m_storage{ first, last, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		explicit basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
 			: m_storage{ value, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		explicit basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_storage{ std::move(value), alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
@@ -175,9 +175,9 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator erase(iterator location)
+		inline iterator erase(iterator it)
 		{
-			return m_storage.erase(location);
+			return m_storage.erase(it);
 		}
 
 		inline iterator erase(iterator first, iterator last)
@@ -208,7 +208,9 @@ namespace ml::ds
 
 			// linear
 			if (size() < traits_type::thresh)
-				return std::find(cbegin(), cend(), other) != cend();
+			{
+				return cend() != std::find(cbegin(), cend(), other);
+			}
 
 			// binary
 			return std::binary_search(cbegin(), cend(), other, compare_type{});
@@ -224,7 +226,9 @@ namespace ml::ds
 
 			// linear
 			if (size() < traits_type::thresh)
+			{
 				return std::find(begin(), end(), other);
+			}
 
 			// binary
 			if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
@@ -243,7 +247,9 @@ namespace ml::ds
 
 			// linear
 			if (size() < traits_type::thresh)
+			{
 				return std::find(cbegin(), cend(), other);
+			}
 
 			// binary
 			if (auto const it{ std::equal_range(cbegin(), cend(), other, compare_type{}) }
@@ -265,7 +271,7 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD inline auto insert(Other && other)
 		{
-			return this->impl_insert(std::move(other));
+			return this->impl_insert(ML_FWD(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -367,26 +373,34 @@ namespace ml::ds
 	private:
 		inline void impl_sort() noexcept
 		{
-			if (this->empty()) return;
+			// empty
+			if (empty()) return;
 
-			std::sort(this->begin(), this->end(), compare_type{});
+			// sort
+			std::sort(begin(), end(), compare_type{});
 
+			// remove duplicates
 			if constexpr (!traits_type::multi)
 			{
-				this->erase(std::unique(this->begin(), this->end()), this->end());
+				erase(std::unique(begin(), end()), end());
 			}
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		template <class T> inline auto impl_insert(T && other)
 		{
 			if constexpr (traits_type::multi)
 			{
+				// insert multi
 				return m_storage.emplace(
 					std::upper_bound(begin(), end(), other, compare_type{}),
 					ML_FWD(other));
 			}
 			else
 			{
+				// insert unique
 				if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
 				; it.first == it.second)
 				{
@@ -409,23 +423,25 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// FLAT SET | sorted vector of unique elements
+	/* FLAT SET
+	sorted vector of unique elements */
 	template <
 		class	_Ty,
 		class	_Pr = std::less<_Ty>,
 		size_t	_Th = 42
 	> ML_USING flat_set = typename basic_flat_set<
 		flat_set_traits<_Ty, _Pr, false, _Th>
-		>;
+	>;
 
-	// FLAT MULTISET | sorted vector of elements
+	/* FLAT MULTISET
+	sorted vector of elements which allows duplicates */
 	template <
 		class	_Ty,
 		class	_Pr = std::less<_Ty>,
 		size_t	_Th = 42
 	> ML_USING flat_multiset = typename basic_flat_set<
 		flat_set_traits<_Ty, _Pr, true, _Th>
-		>;
+	>;
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

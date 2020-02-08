@@ -39,10 +39,10 @@ namespace ml::meta
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class Tup, size_t ... I
-		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<I...>)
+		template <class Fn, class Tup, size_t ... Is
+		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<Is...>)
 		{
-			return ML_FWD(fn)(std::get<I>(ML_FWD(tp))...);
+			return ML_FWD(fn)(std::get<Is>(ML_FWD(tp))...);
 		}
 
 		template <class Fn, class Tup

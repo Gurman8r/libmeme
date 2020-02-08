@@ -140,20 +140,20 @@ namespace ml::ds
 		inline self_type & operator=(std::initializer_list<keyval_pair> init)
 		{
 			self_type temp{ init };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
 		inline self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
 		inline self_type & operator=(self_type && other) noexcept
 		{
-			this->swap(std::move(other));
+			swap(std::move(other));
 			return (*this);
 		}
 
@@ -221,30 +221,31 @@ namespace ml::ds
 
 		ML_NODISCARD inline bool valid() const noexcept
 		{
-			return this->size() == m_storage.second.size();
+			return (empty() && m_storage.second.empty())
+				|| (size() == m_storage.second.size());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_iterator fetch(const_key_iterator loc)
+		ML_NODISCARD inline value_iterator fetch(const_key_iterator it)
 		{
-			return std::next(m_storage.second.begin(), std::distance(m_storage.first.cbegin(), loc));
+			return std::next(m_storage.second.begin(), std::distance(m_storage.first.cbegin(), it));
 		}
 
-		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator loc) const
+		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator it) const
 		{
-			return std::next(m_storage.second.cbegin(), std::distance(m_storage.first.cbegin(), loc));
+			return std::next(m_storage.second.cbegin(), std::distance(m_storage.first.cbegin(), it));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator_pair erase(key_iterator loc)
+		inline iterator_pair erase(key_iterator it)
 		{
 			auto const result
 			{
-				m_storage.second.erase(this->fetch(loc))
+				m_storage.second.erase(this->fetch(it))
 			};
-			return { m_storage.first.erase(loc), result };
+			return { m_storage.first.erase(it), result };
 		}
 
 		inline iterator_pair erase(key_iterator first, key_iterator last)
@@ -271,18 +272,16 @@ namespace ml::ds
 			}
 		}
 
-		template <class Other = key_type
-		> ML_NODISCARD inline bool contains(Other const & key) const
+		ML_NODISCARD inline bool contains(key_type const & key) const
 		{
 			return m_storage.first.contains(key);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = key_type
-		> ML_NODISCARD inline std::optional<iterator_pair> find(Other const & other)
+		ML_NODISCARD inline std::optional<iterator_pair> find(key_type const & key)
 		{
-			if (auto const k{ m_storage.first.find(other) }; k != m_storage.first.end())
+			if (auto const k{ m_storage.first.find(key) }; k != m_storage.first.end())
 			{
 				return std::make_optional(iterator_pair{ k, this->fetch(k) });
 			}
@@ -292,10 +291,9 @@ namespace ml::ds
 			}
 		}
 
-		template <class Other = key_type
-		> ML_NODISCARD inline std::optional<const_iterator_pair> find(Other const & other) const
+		ML_NODISCARD inline std::optional<const_iterator_pair> find(key_type const & key) const
 		{
-			if (auto const k{ m_storage.first.find(other) }; k != m_storage.first.cend())
+			if (auto const k{ m_storage.first.find(key) }; k != m_storage.first.cend())
 			{
 				return std::make_optional(const_iterator_pair{ k, this->fetch(k) });
 			}
@@ -308,28 +306,11 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline value_iterator emplace(Args && ... args)
-		{
-			return m_storage.second.emplace(ML_FWD(args)...);
-		}
-
-		template <class ... Args
-		> inline iterator_pair emplace_hint(const_key_iterator loc, Args && ... args)
-		{
-			return { 
-				std::next(m_storage.first.begin(), std::distance(m_storage.first.cbegin(), loc)),
-				this->emplace(this->fetch(loc), ML_FWD(args)...)
-			};
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class ... Args
 		> inline std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args)
 		{
 			if (auto const k{ m_storage.first.insert(key) }; k.second)
 			{
-				return { this->emplace_hint(k.first, ML_FWD(args)...), true };
+				return { this->impl_emplace_hint(k.first, ML_FWD(args)...), true };
 			}
 			else
 			{
@@ -342,7 +323,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_storage.first.insert(std::move(key)) }; k.second)
 			{
-				return { this->emplace_hint(k.first, ML_FWD(args)...), true };
+				return { this->impl_emplace_hint(k.first, ML_FWD(args)...), true };
 			}
 			else
 			{
@@ -351,12 +332,6 @@ namespace ml::ds
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Value
-		> inline iterator_pair insert(const_key_iterator loc, Value && value)
-		{
-			return this->emplace_hint(loc, ML_FWD(value));
-		}
 
 		template <class Key, class Value
 		> inline iterator_pair insert(Key && key, Value && value)
@@ -371,7 +346,7 @@ namespace ml::ds
 
 		inline iterator_pair insert(keyval_pair && pair)
 		{
-			return this->try_emplace(std::move(pair.first), std::move(pair.second)).first;
+			return this->try_emplace(ML_FWD(pair.first), ML_FWD(pair.second)).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -545,6 +520,18 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		template <class ... Args
+		> inline iterator_pair impl_emplace_hint(const_key_iterator it, Args && ... args)
+		{
+			return {
+				std::next(m_storage.first.begin(), std::distance(m_storage.first.cbegin(), it)),
+				m_storage.second.emplace(this->fetch(it), ML_FWD(args)...)
+			};
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -552,7 +539,8 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// FLAT MAP | linear associative container with unique keys
+	/* FLAT MAP
+	associative container with a unique set of keys */
 	template <
 		class	_Kty,
 		class	_Vty,
@@ -562,18 +550,20 @@ namespace ml::ds
 		flat_map_traits<_Kty, _Vty, _Pr, _Th>
 	>;
 
-	// FLAT MULTIMAP | linear associative container that allows duplicate keys (map of sets)
+	/* FLAT MULTIMAP 
+	associative container which allows duplicate keys (implemented as map of set) */ 
 	template <
 		class	_Kty,
 		class	_Vty,
 		class	_Kpr = std::less<_Kty>,
 		class	_Vpr = std::less<_Vty>,
-		size_t	_Th = 42
+		size_t	_Kth = 42,
+		size_t	_Vth = _Kth
 	> ML_USING flat_multimap = typename flat_map<
 		_Kty,
-		ds::flat_set<_Vty, _Vpr, _Th>,
+		flat_set<_Vty, _Vpr, _Vth>,
 		_Kpr,
-		_Th
+		_Kth
 	>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
