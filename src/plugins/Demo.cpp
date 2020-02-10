@@ -75,7 +75,7 @@ namespace ml
 		template <class> struct update_materials final
 		{
 			using signature = s_update_materials;
-			static void update(c_material & mat, c_transform const & tf)
+			void update(c_material & mat, c_transform const & tf)
 			{
 				(*mat)
 					.set<vec3>("u_position", tf.pos)
@@ -87,7 +87,7 @@ namespace ml
 		template <class> struct update_shaders final
 		{
 			using signature = s_update_shaders;
-			static void update(c_shader & shd, c_material const & mat)
+			void update(c_shader & shd, c_material const & mat)
 			{
 				shd->bind(false);
 				for (uniform const & u : *mat)
@@ -99,10 +99,10 @@ namespace ml
 		template <class> struct draw_renderers final
 		{
 			using signature = s_draw_renderers;
-			static void update(render_target const & tgt, c_shader const & shd, c_model const & mod)
+			void update(render_target const & target, c_shader const & shd, c_model const & mod)
 			{
 				shd->bind(true);
-				tgt.draw(*mod);
+				target.draw(*mod);
 				shd->unbind();
 			}
 		};
@@ -110,7 +110,7 @@ namespace ml
 		// ENTITY MANAGER
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ecs::manager<ecs::manager_traits<
+		ecs::manager<ecs::traits<
 
 			// tags
 			ecs::cfg::tags<
