@@ -336,9 +336,10 @@ namespace ml::util
 	template <class T, int64_t Num, int64_t Den
 	> ML_NODISCARD static constexpr decltype(auto) ratio_cast(T value, std::ratio<Num, Den> const & r)
 	{
-		T const one{ static_cast<T>(1) };
-		T const num{ static_cast<T>(r.num) };
-		T const den{ static_cast<T>(r.den) };
+		auto const
+			one{ static_cast<T>(1) },
+			num{ static_cast<T>(r.num) },
+			den{ static_cast<T>(r.den) };
 		return ((num == one) && (den == one))
 			? value
 			: (((num != one) && (den == one))

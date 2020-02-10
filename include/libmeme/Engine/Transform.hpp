@@ -125,13 +125,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr transform & concat(transform const & other) noexcept
-		{
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		constexpr vec3 left() const noexcept { return get_row(0); }
 		
 		constexpr vec3 up() const noexcept { return get_row(1); }

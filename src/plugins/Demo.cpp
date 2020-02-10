@@ -3,8 +3,8 @@
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/Script.hpp>
+#include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -21,12 +21,16 @@ namespace ml
 {
 	struct demo final : plugin
 	{
+		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// GUI
-		bool m_show_imgui_demo{ false };
+		bool m_show_libmeme_demo{ true };
+		bool m_show_imgui_demo	{ false };
+
 
 		// CONTENT
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		pmr::vector<render_texture>			m_pipeline	{};
 		ds::flat_map<pmr::string, font>		m_fonts		{};
 		ds::flat_map<pmr::string, image>	m_images	{};
@@ -36,47 +40,102 @@ namespace ml
 		ds::flat_map<pmr::string, shader>	m_shaders	{};
 		ds::flat_map<pmr::string, texture>	m_textures	{};
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// COMPONENTS
-		struct c_position	: ds::wrapper<vec3>		{};
-		struct c_rotation	: ds::wrapper<vec4>		{};
-		struct c_scale		: ds::wrapper<vec3>		{};
-		struct c_shader		: ds::wrapper<shader>	{};
-		struct c_material	: ds::wrapper<material> {};
-		struct c_model		: ds::wrapper<model>	{};
 
 		// TAGS
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		struct t_renderer {};
 
+		// COMPONENTS
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
+		struct c_shader		: ds::wrapper<shader>	{};
+		struct c_material	: ds::wrapper<material>	{};
+		struct c_model		: ds::wrapper<model>	{};
+
 		// SIGNATURES
-		using s_update_renderer = meta::list<
-			t_renderer,
-			c_material, c_position, c_rotation, c_scale
-		>;
-		using s_draw_renderer = meta::list<
-			t_renderer,
-			c_shader, c_material, c_model
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using s_update_materials = meta::list<
+			t_renderer, c_material, c_transform
 		>;
 
-		// MANAGER
-		ecs::manager<ecs::settings<
+		using s_update_shaders = meta::list<
+			t_renderer, c_shader, c_material
+		>;
 
-			ecs::traits::components<
-			c_position, c_rotation, c_scale,
-			c_shader, c_material, c_model
-			>,
+		using s_draw_renderers = meta::list<
+			t_renderer, c_shader, c_model
+		>;
 
-			ecs::traits::tags<
+		// SYSTEMS
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class> struct update_materials final
+		{
+			using signature = s_update_materials;
+			static void update(c_material & mat, c_transform const & tf)
+			{
+				(*mat)
+					.set<vec3>("u_position", tf.pos)
+					.set<vec4>("u_rotation", tf.rot)
+					.set<vec3>("u_scale", tf.scl);
+			}
+		};
+
+		template <class> struct update_shaders final
+		{
+			using signature = s_update_shaders;
+			static void update(c_shader & shd, c_material const & mat)
+			{
+				shd->bind(false);
+				for (uniform const & u : *mat)
+					shd->set_uniform(u);
+				shd->unbind();
+			}
+		};
+
+		template <class> struct draw_renderers final
+		{
+			using signature = s_draw_renderers;
+			static void update(render_target const & tgt, c_shader const & shd, c_model const & mod)
+			{
+				shd->bind(true);
+				tgt.draw(*mod);
+				shd->unbind();
+			}
+		};
+
+		// ENTITY MANAGER
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ecs::manager<ecs::manager_traits<
+
+			// tags
+			ecs::cfg::tags<
 			t_renderer
 			>,
 
-			ecs::traits::signatures<
-			s_update_renderer, s_draw_renderer
+			// components
+			ecs::cfg::components<
+			c_transform, c_shader, c_material, c_model
+			>,
+
+			// signatures
+			ecs::cfg::signatures<
+			s_update_materials, s_update_shaders, s_draw_renderers
+			>,
+
+			// systems
+			ecs::cfg::systems<
+			update_materials, update_shaders, draw_renderers
 			>
 		>
 		> m_ecs{};
 
+
+		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		demo()
@@ -115,7 +174,8 @@ namespace ml
 					editor::get_main_menu().add_menu("View", [&, this]()
 					{
 						ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-						ImGui::MenuItem("ImGui Demo", "", &m_show_imgui_demo);
+						ImGui::MenuItem("libmeme demo", "", &m_show_libmeme_demo);
+						ImGui::MenuItem("imgui demo", "", &m_show_imgui_demo);
 					});
 
 					// Option Menu
@@ -263,12 +323,14 @@ namespace ml
 					if (auto e{ m_ecs.create_handle() })
 					{
 						e.add_tag<t_renderer>();
-						e.add_component<c_position	>(vec3{ 0.f, 0.f, 0.f });
-						e.add_component<c_scale		>(vec3{ 1.f, 1.f, 1.f });
-						e.add_component<c_rotation	>(vec4{ 0.0f, 0.1f, 0.0f, 0.25f });
-						e.add_component<c_shader	>(m_shaders["3d"]);
-						e.add_component<c_material	>(m_materials["3d"]);
-						e.add_component<c_model		>(m_models["sphere32x24"]);
+						e.add_component<c_shader>	(m_shaders	["3d"]);
+						e.add_component<c_material>	(m_materials["3d"]);
+						e.add_component<c_model>	(m_models	["sphere32x24"]);
+						e.add_component<c_transform>(
+							vec3{ 0.f, 0.f, 0.f },
+							vec4{ 0.0f, 0.1f, 0.0f, 0.25f },
+							vec3{ 1.f, 1.f, 1.f }
+						);
 					}
 				}
 
@@ -277,14 +339,8 @@ namespace ml
 			{
 				// update stuff, etc...
 
-				m_ecs.for_matching<s_update_renderer
-				>([&](auto, c_material & mtl, c_position & pos, c_rotation & rot, c_scale & scl)
-				{
-					(*mtl)
-						.set<vec3>("u_position", *pos)
-						.set<vec4>("u_rotation", *rot)
-						.set<vec3>("u_scale", *scl);
-				});
+				m_ecs.update_system<update_materials>();
+				m_ecs.update_system<update_shaders>();
 				
 			} break;
 			case hashof_v<draw_event>:
@@ -295,21 +351,14 @@ namespace ml
 
 				if (render_texture const & target{ m_pipeline.at(0) })
 				{
-					ML_BIND_SCOPE(target);
+					target.bind();
 					target.clear_color(colors::magenta);
 					target.viewport(target.bounds());
-					cull_state{ false }();
-					
-					m_ecs.for_matching<s_draw_renderer
-					>([&](auto, c_shader & shd, c_material & mtl, c_model & mdl)
-					{
-						shd->bind(false);
-						for (uniform const & u : *mtl)
-							shd->set_uniform(u);
-						shd->bind(true);
-						target.draw(*mdl);
-						shd->unbind();
-					});
+					constexpr render_states states{
+						{}, {}, cull_state{ false }, {}
+					}; states();
+					m_ecs.update_system<draw_renderers>(target);
+					target.unbind();
 				}
 
 			} break;
@@ -329,47 +378,50 @@ namespace ml
 				}
 
 				// libmeme demo
-				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
-				if (ImGui::Begin("libmeme demo", nullptr, ImGuiWindowFlags_None))
+				if (m_show_libmeme_demo)
 				{
-					// Memory
-					ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
-					ImGui::Separator();
-
-					ImGui::Columns(2);
-
-					// Total Time
-					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
-
-					// Delta Time
-					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
-
-					// Frame Rate
-					ImGui::Text("frame rate"); ImGui::NextColumn();
-					ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
-
-					// Benchmarks
-					if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
+					ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
+					if (ImGui::Begin("libmeme demo", &m_show_libmeme_demo, ImGuiWindowFlags_None))
 					{
+						// Memory
+						ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
 						ImGui::Separator();
-						for (auto const & elem : prev)
+
+						ImGui::Columns(2);
+
+						// Total Time
+						ImGui::Text("total time"); ImGui::NextColumn();
+						ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
+
+						// Delta Time
+						ImGui::Text("delta time"); ImGui::NextColumn();
+						ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
+
+						// Frame Rate
+						ImGui::Text("frame rate"); ImGui::NextColumn();
+						ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
+
+						// Benchmarks
+						if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
 						{
-							ImGui::Text("%s", elem.first); ImGui::NextColumn();
-							ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+							ImGui::Separator();
+							for (auto const & elem : prev)
+							{
+								ImGui::Text("%s", elem.first); ImGui::NextColumn();
+								ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+							}
 						}
+
+						ImGui::Separator();
+						ImGui::Columns(1);
+
+						editor::draw_texture_preview(m_pipeline[0].get_texture(),
+							(vec2)engine::get_window().get_frame_size() / 2.f
+						);
+						ImGui::Separator();
 					}
-
-					ImGui::Separator();
-					ImGui::Columns(1);
-
-					editor::draw_texture_preview(m_pipeline[0].get_texture(),
-						(vec2)engine::get_window().get_frame_size() / 2.f
-					);
-					ImGui::Separator();
+					ImGui::End();
 				}
-				ImGui::End();
 			} break;
 			case hashof_v<exit_event>:
 			{

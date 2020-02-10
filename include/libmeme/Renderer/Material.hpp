@@ -12,10 +12,6 @@ namespace ml
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
 		using storage_type				= typename ds::flat_set<uniform>;
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
 		using iterator					= typename storage_type::iterator;
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;
@@ -234,9 +230,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_t index) -> reference { return m_storage[index]; }
+		ML_NODISCARD inline auto operator[](size_t index) -> uniform & { return m_storage[index]; }
 
-		ML_NODISCARD inline auto operator[](size_t index) const -> const_reference { return m_storage[index]; }
+		ML_NODISCARD inline auto operator[](size_t index) const -> uniform const & { return m_storage[index]; }
 
 		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
 		

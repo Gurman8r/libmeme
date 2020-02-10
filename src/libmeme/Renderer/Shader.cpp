@@ -247,35 +247,35 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, int32_t value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniform1i(u.location, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniform1f(u.location, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
@@ -287,28 +287,28 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, texture const & value)
 	{
-		uniform_binder const u{ (*this), name };
+		uniform_binder const u{ *this, name };
 		if (u)
 		{
 			static auto const max_textures

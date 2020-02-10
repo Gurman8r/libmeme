@@ -22,11 +22,15 @@
             value = rhs;                                                        \
             return *this;                                                       \
         }                                                                       \
-        inline constexpr operator Base const &() const noexcept                 \
+        inline constexpr operator Base &() & noexcept                           \
         {                                                                       \
             return value;                                                       \
         }                                                                       \
-        inline constexpr operator Base &() noexcept                             \
+        inline constexpr operator Base && () && noexcept                        \
+        {                                                                       \
+            return value;                                                       \
+        }                                                                       \
+        inline constexpr operator Base const &() const & noexcept               \
         {                                                                       \
             return value;                                                       \
         }                                                                       \

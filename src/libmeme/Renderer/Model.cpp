@@ -144,9 +144,9 @@ namespace ml
 
 					// make vertex
 					verts.emplace_back(make_vertex(
-						vp ? vec3{ vp->x, vp->y, vp->z } : vec3{ 0 },
-						vn ? vec3{ vn->x, vn->y, vn->z } : vec3{ 0 },
-						uv ? vec2{ uv->x, uv->y } : vec2{ 0 }
+						vp ? vec3{ vp->x, vp->y, vp->z } : vec3::zero(),
+						vn ? vec3{ vn->x, vn->y, vn->z } : vec3::one(),
+						uv ? vec2{ uv->x, uv->y } : vec2::one()
 					));
 				});
 

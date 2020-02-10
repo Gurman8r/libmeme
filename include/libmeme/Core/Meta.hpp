@@ -64,9 +64,9 @@ namespace ml::meta
 		template <class Fn, class Tup
 		> constexpr decltype(auto) for_tuple(Fn && fn, Tup && tp)
 		{
-			return meta::impl::tuple_apply([&fn](auto && ... vs)
+			return meta::impl::tuple_apply([&fn](auto && ... rest)
 			{
-				meta::impl::for_args(fn, ML_FWD(vs)...);
+				meta::impl::for_args(fn, ML_FWD(rest)...);
 			},
 			ML_FWD(tp));
 		}
@@ -208,19 +208,11 @@ namespace ml::meta
 
 	template <class T, class ... Ts
 	> struct index_of<T, list<T, Ts...>>
-		: std::integral_constant<size_t, 0>
-	{
-		static_assert(contains<T, list<T, Ts...>>(),
-			"type not found in list");
-	};
+		: std::integral_constant<size_t, 0> {};
 
 	template <class T, class U, class ... Ts
 	> struct index_of<T, list<U, Ts...>>
-		: std::integral_constant<size_t, 1 + index_of<T, list<Ts...>>::value>
-	{
-		static_assert(contains<T, list<U, Ts...>>(),
-			"type not found in list");
-	};
+		: std::integral_constant<size_t, 1 + index_of<T, list<Ts...>>::value> {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -304,10 +296,10 @@ namespace ml::meta
 		using next = typename filter<Pr, list<Ts...>>;
 
 		using type = typename std::conditional_t<
-			Pr<T>{},
+			(Pr<T>{}),
 			concat<list<T>, next>,
 			next
-		> ;
+		>;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
