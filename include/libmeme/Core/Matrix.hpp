@@ -16,7 +16,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static_assert(
-			0 < (_Width * _Height), 
+			0 < (_Width * _Height),
 			"matrix size negative or zero"
 		);
 
@@ -58,13 +58,14 @@ namespace ml::ds
 		{
 			if constexpr (std::is_same_v<matrix<U, W, H>, self_type>)
 			{
-				return (*this);
+				return (*this); // same type
 			}
 			else
 			{
 				auto temp{ matrix<U, W, H>::zero() };
 				if constexpr (W == _Width && H == _Height)
 				{
+					// same dimensions
 					for (size_t i = 0; i < (W * H); ++i)
 					{
 						temp[i] = (U)at(i);
@@ -72,12 +73,11 @@ namespace ml::ds
 				}
 				else
 				{
+					// different dimensions
 					for (size_t i = 0; i < (W * H); ++i)
 					{
 						size_t const x{ i % W }, y{ i / W };
-						temp[i] = (y < _Height && x < _Width)
-							? (U)at(x, y)
-							: (U)0;
+						temp[i] = (y < _Height && x < _Width) ? (U)at(x, y) : (U)0;
 					}
 				}
 				return temp;
@@ -169,15 +169,18 @@ namespace ml::ds
 
 namespace ml
 {
-	// MATRIX NxN
+	// BASE
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_VA(class T, size_t N) tmatn = ds::matrix<T, N, N>;
-	ML_USING_VA(class T, size_t N) tvecn = ds::matrix<T, N, 1>;
+	template <class T, size_t N
+	> ML_USING tmatnxn = ds::matrix<T, N, N>;
+
+	template <class T, size_t N
+	> ML_USING tvector = ds::matrix<T, N, 1>;
 
 
 	// MATRIX 2x2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat2 = tmatn<X, 2>;
+	ML_USING_X	tmat2 = tmatnxn<X, 2>;
 	ML_USING	mat2b = tmat2<byte_t>;
 	ML_USING	mat2i = tmat2<int32_t>;
 	ML_USING	mat2u = tmat2<uint32_t>;
@@ -189,7 +192,7 @@ namespace ml
 
 	// MATRIX 3x3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat3 = tmatn<X, 3>;
+	ML_USING_X	tmat3 = tmatnxn<X, 3>;
 	ML_USING	mat3b = tmat3<byte_t>;
 	ML_USING	mat3i = tmat3<int32_t>;
 	ML_USING	mat3u = tmat3<uint32_t>;
@@ -201,7 +204,7 @@ namespace ml
 
 	// MATRIX 4x4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat4 = tmatn<X, 4>;
+	ML_USING_X	tmat4 = tmatnxn<X, 4>;
 	ML_USING	mat4b = tmat4<byte_t>;
 	ML_USING	mat4i = tmat4<int32_t>;
 	ML_USING	mat4u = tmat4<uint32_t>;
@@ -213,7 +216,7 @@ namespace ml
 
 	// VECTOR 2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec2 = tvecn<X, 2>;
+	ML_USING_X	tvec2 = tvector<X, 2>;
 	ML_USING	vec2b = tvec2<byte_t>;
 	ML_USING	vec2i = tvec2<int32_t>;
 	ML_USING	vec2u = tvec2<uint32_t>;
@@ -225,7 +228,7 @@ namespace ml
 
 	// VECTOR 3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec3 = tvecn<X, 3>;
+	ML_USING_X	tvec3 = tvector<X, 3>;
 	ML_USING	vec3b = tvec3<byte_t>;
 	ML_USING	vec3i = tvec3<int32_t>;
 	ML_USING	vec3u = tvec3<uint32_t>;
@@ -237,7 +240,7 @@ namespace ml
 
 	// VECTOR 4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec4 = tvecn<X, 4>;
+	ML_USING_X	tvec4 = tvector<X, 4>;
 	ML_USING	vec4b = tvec4<byte_t>;
 	ML_USING	vec4i = tvec4<int32_t>;
 	ML_USING	vec4u = tvec4<uint32_t>;
@@ -251,6 +254,7 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Matrix Operators
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -311,96 +315,10 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-namespace ml
-{
-	// Vector Arithmetic Operators
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator+=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N> &
-	{
-		for (size_t i = 0; i < lhs.size(); ++i)
-		{
-			lhs[i] = (lhs[i] + static_cast<Tx>(rhs[i]));
-		}
-		return lhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator-=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N> &
-	{
-		for (size_t i = 0; i < lhs.size(); ++i)
-		{
-			lhs[i] = (lhs[i] - static_cast<Tx>(rhs[i]));
-		}
-		return lhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator*=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N> &
-	{
-		for (size_t i = 0; i < lhs.size(); ++i)
-		{
-			lhs[i] = (lhs[i] * static_cast<Tx>(rhs[i]));
-		}
-		return lhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator/=(tvecn<Tx, N> & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N> &
-	{
-		for (size_t i = 0; i < lhs.size(); ++i)
-		{
-			lhs[i] = (lhs[i] / static_cast<Tx>(rhs[i]));
-		}
-		return lhs;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator+(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N>
-	{
-		tvecn<Tx, N> temp{ lhs };
-		return temp += rhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator-(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N>
-	{
-		tvecn<Tx, N> temp{ lhs };
-		return temp -= rhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator*(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N>
-	{
-		tvecn<Tx, N> temp{ lhs };
-		return temp *= rhs;
-	}
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator/(tvecn<Tx, N> const & lhs, tvecn<Ty, N> const & rhs) noexcept
-		-> tvecn<Tx, N>
-	{
-		tvecn<Tx, N> temp{ lhs };
-		return temp /= rhs;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator+=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N> &
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator+=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
 		{
@@ -409,9 +327,9 @@ namespace ml
 		return lhs;
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator-=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N> &
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator-=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
 		{
@@ -420,9 +338,9 @@ namespace ml
 		return lhs;
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator*=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N> &
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator*=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
 		{
@@ -431,9 +349,9 @@ namespace ml
 		return lhs;
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator/=(tvecn<Tx, N> & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N> &
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator/=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
 		{
@@ -444,52 +362,138 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator+(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N>
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator+(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H>
 	{
-		tvecn<Tx, N> temp{ lhs };
+		auto temp{ lhs };
 		return temp += static_cast<Tx>(rhs);
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator-(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N>
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator-(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H>
 	{
-		tvecn<Tx, N> temp{ lhs };
+		auto temp{ lhs };
 		return temp -= static_cast<Tx>(rhs);
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator*(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N>
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator*(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H>
 	{
-		tvecn<Tx, N> temp{ lhs };
+		auto temp{ lhs };
 		return temp *= static_cast<Tx>(rhs);
 	}
 
-	template <class Tx, class Ty, size_t N
-	> ML_NODISCARD constexpr auto operator/(tvecn<Tx, N> const & lhs, Ty const & rhs) noexcept
-		-> tvecn<Tx, N>
+	template <class Tx, class Ty, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator/(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+		-> ds::matrix<Tx, W, H>
 	{
-		tvecn<Tx, N> temp{ lhs };
+		auto temp{ lhs };
 		return temp /= static_cast<Tx>(rhs);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, size_t N
-	> ML_NODISCARD constexpr auto operator-(tvecn<T, N> const & lhs) noexcept
-		-> tvecn<T, N>
+	template <class T, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator-(ds::matrix<T, W, H> const & lhs) noexcept
+		-> ds::matrix<T, W, H>
 	{
 		return (lhs * static_cast<T>(-1));
 	}
 
-	template <class T, size_t N
-	> ML_NODISCARD constexpr auto operator+(tvecn<T, N> const & lhs) noexcept
-		-> tvecn<T, N>
+	template <class T, size_t W, size_t H
+	> ML_NODISCARD constexpr auto operator+(ds::matrix<T, W, H> const & lhs) noexcept
+		-> ds::matrix<T, W, H>
 	{
 		return -(-(lhs));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// Vector Operators
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator+=(tvector<Tx, N> & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N> &
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			lhs[i] = (lhs[i] + static_cast<Tx>(rhs[i]));
+		}
+		return lhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator-=(tvector<Tx, N> & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N> &
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			lhs[i] = (lhs[i] - static_cast<Tx>(rhs[i]));
+		}
+		return lhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator*=(tvector<Tx, N> & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N> &
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			lhs[i] = (lhs[i] * static_cast<Tx>(rhs[i]));
+		}
+		return lhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator/=(tvector<Tx, N> & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N> &
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			lhs[i] = (lhs[i] / static_cast<Tx>(rhs[i]));
+		}
+		return lhs;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator+(tvector<Tx, N> const & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N>
+	{
+		auto temp{ lhs };
+		return temp += rhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator-(tvector<Tx, N> const & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N>
+	{
+		auto temp{ lhs };
+		return temp -= rhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator*(tvector<Tx, N> const & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N>
+	{
+		auto temp{ lhs };
+		return temp *= rhs;
+	}
+
+	template <class Tx, class Ty, size_t N
+	> ML_NODISCARD constexpr auto operator/(tvector<Tx, N> const & lhs, tvector<Ty, N> const & rhs) noexcept
+		-> tvector<Tx, N>
+	{
+		auto temp{ lhs };
+		return temp /= rhs;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

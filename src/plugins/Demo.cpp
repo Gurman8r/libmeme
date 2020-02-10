@@ -75,7 +75,7 @@ namespace ml
 			s_update_renderer, s_draw_renderer
 			>
 		>
-		> m_ecs;
+		> m_ecs{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -189,7 +189,7 @@ namespace ml
 				{
 					m_materials["2d"] = make_material(
 						make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
-						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
+						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_runtime().delta_time; }),
 						make_uniform<texture>("u_texture0",	&m_textures["navball"]),
 						make_uniform<color	>("u_color",	colors::white),
 						make_uniform<mat4	>("u_proj",		mat4::identity()),
@@ -199,7 +199,7 @@ namespace ml
 
 					m_materials["3d"] = make_material(
 						make_uniform<float_t>("u_time",		[]() { return (float_t)engine::get_time().count(); }),
-						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_io().delta_time; }),
+						make_uniform<float_t>("u_delta",	[]() { return (float_t)engine::get_runtime().delta_time; }),
 						make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
 						make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
 						make_uniform<float_t>("u_cam.fov",	45.0f),
@@ -280,9 +280,10 @@ namespace ml
 				m_ecs.for_matching<s_update_renderer
 				>([&](auto, c_material & mtl, c_position & pos, c_rotation & rot, c_scale & scl)
 				{
-					if (auto u{ mtl->find("u_position") }) u->set_if<vec3>(*pos);
-					if (auto u{ mtl->find("u_rotation") }) u->set_if<vec4>(*rot);
-					if (auto u{ mtl->find("u_scale") }) u->set_if<vec3>(*scl);
+					(*mtl)
+						.set<vec3>("u_position", *pos)
+						.set<vec4>("u_rotation", *rot)
+						.set<vec3>("u_scale", *scl);
 				});
 				
 			} break;
@@ -343,7 +344,7 @@ namespace ml
 
 					// Delta Time
 					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", engine::get_io().delta_time); ImGui::NextColumn();
+					ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
 
 					// Frame Rate
 					ImGui::Text("frame rate"); ImGui::NextColumn();

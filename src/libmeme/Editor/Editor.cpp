@@ -24,44 +24,39 @@ namespace ml
 	static editor::context * g_editor{ nullptr };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	
 	editor::context const * editor::create_context()
 	{
-		if (g_editor) return nullptr;
+		if (initialized()) return nullptr;
 
 		return (g_editor = new editor::context{});
 	}
 	
-	bool editor::initialized() noexcept
-	{
-		return g_editor;
-	}
-	
 	bool editor::startup(bool install_callbacks)
 	{
-		if (!g_editor) return false;
+		if (!initialized()) return false;
 
 		// Create ImGui Context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		auto & io{ ImGui::GetIO() };
+		auto & runtime{ ImGui::GetIO() };
 		auto & style{ ImGui::GetStyle() };
 
 		// Config Flags
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		runtime.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		runtime.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		runtime.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		
 		// Viewports
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		if (runtime.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
 		// Paths
-		io.LogFilename = g_editor->config.ini_file;
-		io.IniFilename = g_editor->config.log_file;
+		runtime.LogFilename = g_editor->config.ini_file;
+		runtime.IniFilename = g_editor->config.log_file;
 
 		// Style
 		switch (util::hash(util::to_lower(g_editor->config.style)))
@@ -99,7 +94,7 @@ namespace ml
 
 	void editor::shutdown()
 	{
-		if (!g_editor) return;
+		if (!initialized()) return;
 
 		get_main_menu().clear();
 
@@ -116,6 +111,8 @@ namespace ml
 
 	void editor::new_frame()
 	{
+		if (!initialized()) return;
+
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #endif
@@ -125,6 +122,8 @@ namespace ml
 
 	void editor::render_frame()
 	{
+		if (!initialized()) return;
+
 		ImGui::Render();
 
 #ifdef ML_RENDERER_OPENGL
@@ -146,25 +145,34 @@ namespace ml
 
 	void editor::show_about_window(bool * p_open)
 	{
+		if (!initialized()) return;
 		ImGui::ShowAboutWindow(p_open);
 	}
 
 	void editor::show_imgui_demo(bool * p_open)
 	{
+		if (!initialized()) return;
 		ImGui::ShowDemoWindow(p_open);
 	}
 
 	void editor::show_user_guide()
 	{
+		if (!initialized()) return;
 		ImGui::ShowUserGuide();
 	}
 
 	void editor::show_style_editor(void * ref)
 	{
+		if (!initialized()) return;
 		ImGui::ShowStyleEditor(static_cast<ImGuiStyle *>(ref));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool editor::initialized() noexcept
+	{
+		return g_editor;
+	}
 
 	editor::context const * editor::get_context() noexcept
 	{
@@ -173,21 +181,25 @@ namespace ml
 
 	editor::config & editor::get_config() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_editor->config;
 	}
 
-	editor::io & editor::get_io() noexcept
+	editor::runtime & editor::get_runtime() noexcept
 	{
-		return g_editor->io;
+		ML_ASSERT(initialized());
+		return g_editor->runtime;
 	}
 
 	editor_dockspace & editor::get_dockspace() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_editor->dockspace;
 	}
 
 	editor_main_menu & editor::get_main_menu() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_editor->main_menu;
 	}
 
@@ -195,7 +207,7 @@ namespace ml
 
 	void editor::draw_texture_preview(texture const & value, vec2 const & maxSize)
 	{
-		auto & io{ ImGui::GetIO() };
+		auto & runtime{ ImGui::GetIO() };
 
 		void * const tex_id{ value.address() };
 
@@ -229,11 +241,11 @@ namespace ml
 
 			ImGui::BeginTooltip();
 
-			float_t region_x{ io.MousePos.x - pos.x - region_size * 0.5f };
+			float_t region_x{ runtime.MousePos.x - pos.x - region_size * 0.5f };
 			if (region_x < 0.0f) region_x = 0.0f;
 			else if (region_x > (tex_w - region_size)) region_x = (tex_w - region_size);
 
-			float_t region_y{ io.MousePos.y - pos.y - region_size * 0.5f };
+			float_t region_y{ runtime.MousePos.y - pos.y - region_size * 0.5f };
 			if (region_y < 0.0f) region_y = 0.0f;
 			else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
 

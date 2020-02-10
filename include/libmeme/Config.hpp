@@ -187,6 +187,8 @@
 
 // Types
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// integer
 #if defined(ML_CC_MSVC)
 #	define	ML_INT8     signed __int8
 #	define	ML_INT16    signed __int16
@@ -207,16 +209,24 @@
 #	define	ML_UINT64   unsigned long long
 #endif
 
+// float
+#define	ML_FLOAT32 float
+#define	ML_FLOAT64 double
+#define	ML_FLOAT80 long double // 8, 10, 12, or 16 bytes (CC Dependant)
+
+// byte
 #ifndef ML_BYTE
-#   define ML_BYTE      unsigned char
+#   define ML_BYTE unsigned char
 #endif
 
+// char
 #if !ML_HAS_CXX20
-#   define ML_CHAR      char
+#   define ML_CHAR char
 #else
-#   define ML_CHAR      char8_t
+#   define ML_CHAR char8_t
 #endif
 
+// max
 #if (ML_ARCH == 32)
 #	define ML_INTMAX    ML_INT32
 #	define ML_UINTMAX   ML_UINT32
@@ -224,10 +234,6 @@
 #	define ML_INTMAX    ML_INT64
 #	define ML_UINTMAX   ML_UINT64
 #endif
-
-#define	ML_FLOAT32 float
-#define	ML_FLOAT64 double
-#define	ML_FLOAT80 long double // 8, 10, 12, or 16 bytes (CC Dependant)
 
 
 // Misc

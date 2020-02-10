@@ -46,10 +46,6 @@ namespace ml
 		{
 		}
 
-		~uniform() noexcept {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		explicit uniform(allocator_type const & alloc)
 			: m_type{}
 			, m_name{ alloc }
@@ -57,35 +53,12 @@ namespace ml
 		{
 		}
 
-		explicit uniform(type_t const & type, name_t const & name, data_t const & data, allocator_type const & alloc = {})
-			: m_type{ type }
-			, m_name{ name, alloc }
-			, m_data{ data }
+		uniform(type_t && type, name_t && name, data_t && data, allocator_type const & alloc = {})
+			: m_type{ ML_FWD(type) }
+			, m_name{ ML_FWD(name), alloc }
+			, m_data{ ML_FWD(data) }
 		{
 		}
-
-		explicit uniform(type_t const & type, name_t && name, data_t const & data, allocator_type const & alloc = {})
-			: m_type{ type }
-			, m_name{ std::move(name), alloc }
-			, m_data{ data }
-		{
-		}
-
-		explicit uniform(type_t const & type, name_t const & name, data_t && data, allocator_type const & alloc = {})
-			: m_type{ type }
-			, m_name{ name, alloc }
-			, m_data{ std::move(data) }
-		{
-		}
-
-		explicit uniform(type_t const & type, name_t && name, data_t && data, allocator_type const & alloc = {})
-			: m_type{ type }
-			, m_name{ std::move(name), alloc }
-			, m_data{ std::move(data) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uniform(uniform const & other, allocator_type const & alloc = {})
 			: m_type{ other.m_type }
@@ -128,13 +101,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto type() const noexcept -> type_t const & { return m_type; }
+		ML_NODISCARD inline type_t const & type() const noexcept { return m_type; }
 		
-		ML_NODISCARD inline auto name() const noexcept -> name_t const & { return m_name; }
+		ML_NODISCARD inline name_t const & name() const noexcept { return m_name; }
 		
-		ML_NODISCARD inline auto data() const noexcept -> data_t const & { return m_data; }
+		ML_NODISCARD inline data_t const & data() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto compare(uniform const & other) const noexcept
+		{
+			if (m_type != other.m_type)
+			{
+				return m_type.compare(other.m_type);
+			}
+			else
+			{
+				return m_name.compare(other.m_name);
+			}
+		}
 
 		ML_NODISCARD inline bool is_variable() const noexcept
 		{
@@ -146,31 +131,28 @@ namespace ml
 			return (m_data.index() == ID_Function);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline variable_type load() const
+		ML_NODISCARD inline variable_type var() const
 		{
 			switch (m_data.index())
 			{
-			case ID_Variable:
-				return std::get<variable_type>(m_data);
-
-			case ID_Function:
-				return std::invoke(std::get<function_type>(m_data));
+			case ID_Variable: return std::get<variable_type>(m_data);
+			case ID_Function: return std::invoke(std::get<function_type>(m_data));
+			default			: return variable_type{};
 			}
-			return variable_type{};
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> ML_NODISCARD inline bool holds() const noexcept
 		{
-			return std::holds_alternative<T>(load());
+			return std::holds_alternative<T>(this->var());
 		}
 
 		template <class T
 		> ML_NODISCARD inline std::optional<T> get() const
 		{
-			if (auto const v{ load() }; std::holds_alternative<T>(v))
+			if (auto const v{ this->var() }; std::holds_alternative<T>(v))
 			{
 				return std::make_optional<T>(std::get<T>(v));
 			}
@@ -182,49 +164,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> inline uniform & set(data_t const & value)
+		template <class Data
+		> inline uniform & set(Data && value)
 		{
-			m_type = typeof<T>{};
-			m_data = value;
+			m_data = ML_FWD(value);
 			return (*this);
 		}
 
-		template <class T> inline uniform & set(data_t && value)
+		template <class T, class Data
+		> inline uniform & set(Data && value)
 		{
-			m_type = typeof<T>{};
-			m_data = std::move(value);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T> inline uniform & set_if(data_t const & value)
-		{
-			return holds<T>() ? set<T>(value) : (*this);
-		}
-
-		template <class T> inline uniform & set_if(data_t && value)
-		{
-			return holds<T>() ? set<T>(std::move(value)) : (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline bool good() const noexcept
-		{
-			return !m_name.empty();
-		}
-
-		ML_NODISCARD inline int32_t compare(uniform const & other) const noexcept
-		{
-			return m_name.compare(other.m_name);
+			return this->holds<T>() ? this->set<T>(ML_FWD(value)) : (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline operator bool const() const noexcept
 		{
-			return good();
+			return !m_name.empty();
 		}
 
 		ML_NODISCARD inline bool operator==(uniform const & other) const noexcept
@@ -269,29 +226,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	inline ML_SERIALIZE(std::ostream & out, uniform const & value)
-	{
-		return out
-			<< value.type().name() << " "
-			<< value.name() << " ";
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Type, class Name, class ... Args
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
-		return uniform{ typeof<Type>{}, std::move(name), ML_FWD(args)... };
-	}
-
-	ML_NODISCARD static inline auto make_uniform(uniform const & value)
-	{
-		return uniform{ value };
-	}
-
-	ML_NODISCARD static inline auto make_uniform(uniform && value) noexcept
-	{
-		return uniform{ std::move(value) };
+		return uniform{ typeof_v<Type>, ML_FWD(name), ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

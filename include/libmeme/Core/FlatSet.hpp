@@ -207,7 +207,7 @@ namespace ml::ds
 			if (empty()) { return false; }
 
 			// linear
-			if (size() < traits_type::thresh)
+			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
 			{
 				return cend() != std::find(cbegin(), cend(), other);
 			}
@@ -225,7 +225,7 @@ namespace ml::ds
 			if (empty()) { return end(); }
 
 			// linear
-			if (size() < traits_type::thresh)
+			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
 			{
 				return std::find(begin(), end(), other);
 			}
@@ -236,7 +236,10 @@ namespace ml::ds
 			{
 				return it.first;
 			}
-			return end();
+			else
+			{
+				return end();
+			}
 		}
 
 		template <class Other = value_type
@@ -246,7 +249,7 @@ namespace ml::ds
 			if (empty()) { return cend(); }
 
 			// linear
-			if (size() < traits_type::thresh)
+			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
 			{
 				return std::find(cbegin(), cend(), other);
 			}
@@ -257,7 +260,10 @@ namespace ml::ds
 			{
 				return it.first;
 			}
-			return cend();
+			else
+			{
+				return cend();
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -371,32 +377,45 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		storage_type m_storage;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
 		inline void impl_sort() noexcept
 		{
-			// empty
-			if (empty()) return;
-
-			// sort
-			std::sort(begin(), end(), compare_type{});
-
-			// remove duplicates
-			if constexpr (!traits_type::multi)
+			if constexpr (traits_type::thresh != 0)
 			{
-				erase(std::unique(begin(), end()), end());
+				// empty
+				if (empty()) return;
+
+				// sort
+				std::sort(begin(), end(), compare_type{});
+
+				// remove duplicates
+				if constexpr (!traits_type::multi)
+				{
+					erase(std::unique(begin(), end()), end());
+				}
+
+				// sanity check
+				ML_ASSERT(std::is_sorted(cbegin(), cend()));
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		template <class T> inline auto impl_insert(T && other)
+		template <class T
+		> inline auto impl_insert(T && other) -> std::conditional_t<
+			traits_type::multi,
+			iterator,
+			std::pair<iterator, bool>
+		>
 		{
 			if constexpr (traits_type::multi)
 			{
 				// insert multi
 				return m_storage.emplace(
 					std::upper_bound(begin(), end(), other, compare_type{}),
-					ML_FWD(other));
+					ML_FWD(other)
+				);
 			}
 			else
 			{
@@ -404,19 +423,14 @@ namespace ml::ds
 				if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
 				; it.first == it.second)
 				{
-					return std::make_pair(m_storage.emplace(it.second, ML_FWD(other)), true);
+					return { m_storage.emplace(it.second, ML_FWD(other)), true };
 				}
 				else
 				{
-					return std::make_pair(it.second, false);
+					return { it.second, false };
 				}
 			}
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -429,9 +443,12 @@ namespace ml::ds
 		class	_Ty,
 		class	_Pr = std::less<_Ty>,
 		size_t	_Th = 42
-	> ML_USING flat_set = typename basic_flat_set<
-		flat_set_traits<_Ty, _Pr, false, _Th>
-	>;
+	> ML_USING flat_set = typename basic_flat_set<flat_set_traits<
+		_Ty,
+		_Pr,
+		false,
+		_Th
+	>>;
 
 	/* FLAT MULTISET
 	sorted vector of elements which allows duplicates */
@@ -439,9 +456,12 @@ namespace ml::ds
 		class	_Ty,
 		class	_Pr = std::less<_Ty>,
 		size_t	_Th = 42
-	> ML_USING flat_multiset = typename basic_flat_set<
-		flat_set_traits<_Ty, _Pr, true, _Th>
-	>;
+	> ML_USING flat_multiset = typename basic_flat_set<flat_set_traits<
+		_Ty,
+		_Pr,
+		true,
+		_Th
+	>>;
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

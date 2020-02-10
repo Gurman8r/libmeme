@@ -21,9 +21,9 @@ namespace ml::ds
 
 		static constexpr ptrdiff_t bitsperword{ sizeof(value_type) * 8 };
 		
-		static constexpr ptrdiff_t words{ (_Count - 1) / bitsperword };
+		static constexpr ptrdiff_t word_count{ (_Count - 1) / bitsperword };
 
-		using storage_type = typename array<value_type, words + 1>;
+		using storage_type = typename array<value_type, word_count + 1>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -174,6 +174,16 @@ namespace ml::ds
 			}
 		}
 
+		constexpr storage_type & words() noexcept
+		{
+			return m_words;
+		}
+
+		constexpr storage_type const & words() const noexcept
+		{
+			return m_words;
+		}
+
 		template <size_t I> constexpr self_type & write(bool b) noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
@@ -287,11 +297,17 @@ namespace ml::ds
 
 	template <size_t N> inline ML_SERIALIZE(std::ostream & out, bitset<N> const & value)
 	{
-		for (size_t i = 0; i < N; ++i)
-		{
-			out << value.read(i);
-		}
+		for (auto const & w : value.words())
+			out << w << ' ';
 		return out;
+	}
+
+	template <size_t N> inline ML_DESERIALIZE(std::istream & in, bitset<N> const & value)
+	{
+		for (auto & w : value.words())
+			if (in.good())
+				in >> w;
+		return in;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -25,7 +25,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime settings
-		struct io final
+		struct runtime final
 		{
 			// ...
 		};
@@ -36,7 +36,7 @@ namespace ml
 		struct context final : trackable
 		{
 			config				config		{};
-			io					io			{};
+			runtime				runtime		{};
 			editor_dockspace	dockspace	{};
 			editor_main_menu	main_menu	{};
 		};
@@ -44,8 +44,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static editor::context const * create_context();
-
-		static bool initialized() noexcept;
 
 		static bool startup(bool install_callbacks);
 
@@ -69,11 +67,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static bool initialized() noexcept;
+
 		ML_NODISCARD static editor::context const * get_context() noexcept;
 
 		ML_NODISCARD static editor::config & get_config() noexcept;
 
-		ML_NODISCARD static editor::io & get_io() noexcept;
+		ML_NODISCARD static editor::runtime & get_runtime() noexcept;
 
 		ML_NODISCARD static editor_dockspace & get_dockspace() noexcept;
 

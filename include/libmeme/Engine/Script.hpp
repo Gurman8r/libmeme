@@ -42,9 +42,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t execute();
-		
-		int32_t execute(pmr::vector<pmr::string> const & args);
+		int32_t execute(pmr::vector<pmr::string> const & args = {});
 
 		template <class ... Args
 		> inline int32_t operator()(Args && ... args)

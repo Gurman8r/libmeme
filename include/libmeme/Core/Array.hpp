@@ -164,39 +164,44 @@ namespace ml::ds
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator==(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator==(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return util::equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator!=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator!=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator<(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator<(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return util::less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator<=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator<=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return (lhs < rhs) || (lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator>(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator>(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return !(lhs < rhs) && (lhs != rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator>=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
+	> constexpr bool operator>=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
 	}

@@ -19,19 +19,14 @@ namespace ml
 
 	engine::context const * engine::create_context()
 	{
-		if (g_engine) return nullptr;
+		if (initialized()) return nullptr;
 
 		return (g_engine = new engine::context{});
 	}
 
-	bool engine::initialized() noexcept
-	{
-		return g_engine;
-	}
-
 	bool engine::startup(bool install_callbacks)
 	{
-		if (!g_engine) return false;
+		if (!initialized()) return false;
 
 		// start lua
 		if (!lua::startup())
@@ -143,7 +138,7 @@ namespace ml
 
 	void engine::shutdown()
 	{
-		if (!g_engine) return;
+		if (!initialized()) return;
 		
 		g_engine->lib_filenames.clear();
 		g_engine->lib_instances.for_each([](auto const &, auto & p) { delete p; });
@@ -174,14 +169,14 @@ namespace ml
 
 	bool engine::running()
 	{
-		return g_engine && (g_engine->window.is_open());
+		return initialized() && g_engine->window.is_open();
 	}
 
 	void engine::begin_loop()
 	{
-		if (!g_engine) return;
+		if (!initialized()) return;
 
-		g_engine->io.delta_time = g_engine->loop_timer.elapsed().count();
+		g_engine->runtime.delta_time = g_engine->loop_timer.elapsed().count();
 
 		g_engine->loop_timer.stop().start();
 
@@ -190,7 +185,7 @@ namespace ml
 
 	void engine::begin_draw()
 	{
-		if (!g_engine) return;
+		if (!initialized()) return;
 
 		g_engine->window.clear_color(colors::black);
 
@@ -202,7 +197,7 @@ namespace ml
 
 	void engine::end_loop()
 	{
-		if (!g_engine) return;
+		if (!initialized()) return;
 
 		if (g_engine->window.get_flags() & WindowFlags_DoubleBuffered)
 		{
@@ -218,7 +213,7 @@ namespace ml
 
 	bool engine::load_plugin(fs::path const & path)
 	{
-		if (!g_engine) return false;
+		if (!initialized()) return false;
 
 		// get existing paths
 		auto & files{ g_engine->lib_filenames };
@@ -242,6 +237,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool engine::initialized() noexcept
+	{
+		return g_engine;
+	}
+
 	engine::context const * engine::get_context() noexcept
 	{
 		return g_engine;
@@ -249,21 +249,25 @@ namespace ml
 
 	engine::config & engine::get_config() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_engine->config;
 	}
 
-	engine::io & engine::get_io() noexcept
+	engine::runtime & engine::get_runtime() noexcept
 	{
-		return g_engine->io;
+		ML_ASSERT(initialized());
+		return g_engine->runtime;
 	}
 
 	duration const & engine::get_time() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_engine->main_timer.elapsed();
 	}
 
 	render_window & engine::get_window() noexcept
 	{
+		ML_ASSERT(initialized());
 		return g_engine->window;
 	}
 

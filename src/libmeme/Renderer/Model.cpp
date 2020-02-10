@@ -125,7 +125,7 @@ namespace ml
 			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)
 			{
 				// reserve space
-				verts.reserve(verts.size()
+				verts.reserve(verts.capacity()
 					+ std::distance(&face.mIndices[0], &face.mIndices[face.mNumIndices])
 				);
 

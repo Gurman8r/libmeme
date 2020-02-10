@@ -23,22 +23,22 @@ namespace ml
 		GL::clear(flags);
 	}
 
-	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo) const
+	void render_target::draw(VAO const & vao, VBO const & vbo) const
 	{
 		if (!vao || !vbo) return;
 		ML_BIND_SCOPE(vao);
 		ML_BIND_SCOPE(vbo);
-		GL::drawArrays(vao.mode(), 0, vbo.size());
+		GL::drawArrays(vao.m_mode, 0, vbo.m_size);
 		GL::flush();
 	}
 
-	void render_target::draw(vertex_array const & vao, vertex_buffer const & vbo, index_buffer const & ibo) const
+	void render_target::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
 	{
 		if (!vao || !vbo || !ibo) return;
 		ML_BIND_SCOPE(vao);
 		ML_BIND_SCOPE(vbo);
 		ML_BIND_SCOPE(ibo);
-		GL::drawElements(vao.mode(), ibo.usage(), ibo.type(), nullptr);
+		GL::drawElements(vao.m_mode, ibo.m_usage, ibo.m_type, nullptr);
 		GL::flush();
 	}
 

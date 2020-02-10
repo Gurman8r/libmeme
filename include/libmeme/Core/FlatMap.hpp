@@ -232,9 +232,19 @@ namespace ml::ds
 			return std::next(m_storage.second.begin(), std::distance(m_storage.first.cbegin(), it));
 		}
 
+		ML_NODISCARD inline value_iterator fetch(const_reverse_key_iterator it)
+		{
+			return std::next(m_storage.second.rbegin(), std::distance(m_storage.first.crbegin(), it));
+		}
+
 		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator it) const
 		{
 			return std::next(m_storage.second.cbegin(), std::distance(m_storage.first.cbegin(), it));
+		}
+
+		ML_NODISCARD inline const_value_iterator fetch(const_reverse_key_iterator it) const
+		{
+			return std::next(m_storage.second.crbegin(), std::distance(m_storage.first.crbegin(), it));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -384,8 +394,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn)
+		template <class It, class Fn
+		> inline It for_each(It first, It last, Fn fn)
 		{
 			for (; first != last; ++first)
 			{
@@ -397,7 +407,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each(const_key_iterator first, Fn fn)
 		{
-			return this->for_each(first, m_storage.first.end(), fn);
+			return this->for_each<const_key_iterator>(first, m_storage.first.end(), fn);
 		}
 
 		template <class Fn
@@ -408,8 +418,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
+		template <class It, class Fn
+		> inline It for_each(It first, It last, Fn fn) const
 		{
 			for (; first != last; ++first)
 			{
@@ -421,7 +431,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
 		{
-			return this->for_each(first, m_storage.first.end(), fn);
+			return this->for_each<const_key_iterator>(first, m_storage.first.end(), fn);
 		}
 
 		template <class Fn
@@ -432,8 +442,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn
-		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
+		template <class It, class Fn
+		> inline It for_each_n(It first, ptrdiff_t count, Fn fn)
 		{
 			if (0 < count)
 			{
@@ -449,13 +459,13 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn)
 		{
-			return this->for_each_n(m_storage.first.begin(), count, fn);
+			return this->for_each_n<const_key_iterator>(m_storage.first.begin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn
-		> inline const_key_iterator for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
+		template <class It, class Fn
+		> inline It for_each_n(It first, ptrdiff_t count, Fn fn) const
 		{
 			if (0 < count)
 			{
@@ -471,7 +481,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
 		{
-			return this->for_each_n(m_storage.first.begin(), count, fn);
+			return this->for_each_n<const_key_iterator>(m_storage.first.begin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -518,6 +528,7 @@ namespace ml::ds
 		template <class ... Args
 		> inline iterator_pair impl_emplace_hint(const_key_iterator it, Args && ... args)
 		{
+			// needs to be private or the map could become unsorted
 			return {
 				std::next(m_storage.first.begin(), std::distance(m_storage.first.cbegin(), it)),
 				m_storage.second.emplace(this->fetch(it), ML_FWD(args)...)
@@ -541,9 +552,12 @@ namespace ml::ds
 		class	_Vty,
 		class	_Pr = std::less<_Kty>,
 		size_t	_Th = 42
-	> ML_USING flat_map = typename basic_flat_map<
-		flat_map_traits<_Kty, _Vty, _Pr, _Th>
-	>;
+	> ML_USING flat_map = typename basic_flat_map<flat_map_traits<
+		_Kty,
+		_Vty,
+		_Pr,
+		_Th
+	>>;
 
 	/* FLAT MULTIMAP 
 	associative container which allows duplicate keys (implemented as map of sets) */ 

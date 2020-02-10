@@ -7,11 +7,6 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-namespace ml::meta
-{
-	
-}
-
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,7 +23,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// initialize engine
+	// setup engine
 	if (!engine::create_context() || !([&]()
 	{
 		engine::config & config	= engine::get_config();
@@ -63,7 +58,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// initialize editor
+	// setup editor
 	if (!editor::create_context() || !([&]()
 	{
 		editor::config & config	= editor::get_config();

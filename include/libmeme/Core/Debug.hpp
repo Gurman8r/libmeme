@@ -43,6 +43,11 @@ namespace ml
 			return 0;
 		}
 
+		static inline void exit(int32_t exit_code)
+		{
+			return std::exit(exit_code);
+		}
+
 		static inline int32_t pause(int32_t exit_code)
 		{
 #if ML_DEBUG

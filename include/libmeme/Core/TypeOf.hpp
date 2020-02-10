@@ -56,6 +56,11 @@ namespace ml
 			}
 		}
 
+		ML_NODISCARD constexpr int32_t compare(typeof<> const & other) const noexcept
+		{
+			return m_name.compare(other.name());
+		}
+
 		ML_NODISCARD constexpr std::string_view const & name() const noexcept
 		{
 			return m_name;
@@ -68,19 +73,15 @@ namespace ml
 
 	private:
 		std::string_view m_name;
-
+		
 		size_t m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class ... T
-	> inline ML_SERIALIZE(std::ostream & out, typeof<T...> const & value)
-	{
-		return out << value.name();
-	}
-
+	template <class ... T
+	> static constexpr auto typeof_v{ typeof<T...>{} };
+	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <

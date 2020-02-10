@@ -36,7 +36,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime settings
-		struct io final
+		struct runtime final
 		{
 			float64_t delta_time; // 
 		};
@@ -47,7 +47,7 @@ namespace ml
 		struct context final : trackable
 		{
 			config			config			{};			// 
-			io				io				{};			// 
+			runtime			runtime			{};			// 
 			render_window	window			{};			// 
 			timer			main_timer		{ true };	// 
 			timer			loop_timer		{ false };	// 
@@ -58,8 +58,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static engine::context const * create_context();
-
-		static bool initialized() noexcept;
 
 		static bool startup(bool install_callbacks);
 
@@ -81,11 +79,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static bool initialized() noexcept;
+
 		ML_NODISCARD static engine::context const * get_context() noexcept;
 
 		ML_NODISCARD static engine::config & get_config() noexcept;
 
-		ML_NODISCARD static engine::io & get_io() noexcept;
+		ML_NODISCARD static engine::runtime & get_runtime() noexcept;
 
 		ML_NODISCARD static duration const & get_time() noexcept;
 

@@ -66,9 +66,9 @@ namespace ml
 		if (this != std::addressof(other))
 		{
 			m_layout.swap(other.m_layout);
-			m_vao.swap(other.m_vao);
-			m_vbo.swap(other.m_vbo);
-			m_ibo.swap(other.m_ibo);
+			std::swap(m_vao, other.m_vao);
+			std::swap(m_vbo, other.m_vbo);
+			std::swap(m_ibo, other.m_ibo);
 		}
 	}
 

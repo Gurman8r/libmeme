@@ -66,21 +66,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto vao() noexcept -> vertex_array & { return m_vao; }
+		ML_NODISCARD inline auto vao() noexcept -> VAO & { return m_vao; }
 
-		ML_NODISCARD inline auto vao() const noexcept -> vertex_array const & { return m_vao; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto vbo() noexcept -> vertex_buffer & { return m_vbo; }
-
-		ML_NODISCARD inline auto vbo() const noexcept -> vertex_buffer const & { return m_vbo; }
+		ML_NODISCARD inline auto vao() const noexcept -> VAO const & { return m_vao; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto ibo() noexcept -> index_buffer & { return m_ibo; }
+		ML_NODISCARD inline auto vbo() noexcept -> VBO & { return m_vbo; }
 
-		ML_NODISCARD inline auto ibo() const noexcept -> index_buffer const & { return m_ibo; }
+		ML_NODISCARD inline auto vbo() const noexcept -> VBO const & { return m_vbo; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto ibo() noexcept -> IBO & { return m_ibo; }
+
+		ML_NODISCARD inline auto ibo() const noexcept -> IBO const & { return m_ibo; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -97,10 +97,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		buffer_layout	m_layout;
-		vertex_array	m_vao;
-		vertex_buffer	m_vbo;
-		index_buffer	m_ibo;
+		buffer_layout m_layout;
+		VAO m_vao;
+		VBO m_vbo;
+		IBO m_ibo;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -109,12 +109,12 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v)
 	{
-		return mesh{ std::move(v) };
+		return mesh{ ML_FWD(v) };
 	}
 
 	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v, mesh::indices_t && i)
 	{
-		return mesh{ std::move(v), std::move(i) };
+		return mesh{ ML_FWD(v), ML_FWD(i) };
 	}
 
 	template <class ... Args

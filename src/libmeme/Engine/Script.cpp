@@ -73,14 +73,18 @@ namespace ml
 
 	bool script::load_from_file(fs::path const & path)
 	{
-		if (path.empty())
-			return false;
+		if (path.empty()) return false;
+
 		switch (util::hash(path.extension().string()))
 		{
-		case util::hash(".lua"): m_lang = language::lua;
+		case util::hash(".lua"):
+			m_lang = language::lua;
 			break;
-		case util::hash(".py"): m_lang = language::python;
+
+		case util::hash(".py"):
+			m_lang = language::python;
 			break;
+
 		default:
 			return false;
 		}
@@ -88,11 +92,6 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	int32_t script::execute()
-	{
-		return execute({});
-	}
 
 	int32_t script::execute(pmr::vector<pmr::string> const & args)
 	{

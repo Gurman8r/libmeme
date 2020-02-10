@@ -84,10 +84,10 @@ namespace ml::python_embedded
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using str_t			= typename std::string;
-	using list_t		= typename std::vector<str_t>;
-	using dict_t		= typename std::map<str_t, str_t>;
-	using table_t		= typename std::vector<dict_t>;
+	using str_t			= typename pmr::string;
+	using list_t		= typename pmr::vector<str_t>;
+	using dict_t		= typename pmr::map<str_t, str_t>;
+	using table_t		= typename pmr::vector<dict_t>;
 	using vec2_t		= typename std::array<float_t, 2>;
 	using rect_t		= typename std::array<float_t, 4>;
 
@@ -114,11 +114,11 @@ namespace ml::python_embedded
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("clear",	[]() { return debug::clear(); })
-			.def_static("exit",		[]() { return std::exit(0); })
-			.def_static("pause",	[]() { return debug::pause(0); })
 			.def_static("print",	[](cstring s) { std::cout << s; })
 			.def_static("printl",	[](cstring s) { std::cout << s << '\n'; })
+			.def_static("clear",	[]() { return debug::clear(); })
+			.def_static("exit",		[]() { return debug::exit(0); })
+			.def_static("pause",	[]() { return debug::pause(0); })
 			.def_static("info",		[](cstring s) { return debug::log_info(s); })
 			.def_static("warning",	[](cstring s) { return debug::log_warning(s); })
 			.def_static("error",	[](cstring s) { return debug::log_error(s); });
@@ -126,6 +126,7 @@ namespace ml::python_embedded
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")
 			.def_static("load_plugin", [](cstring s) { return engine::load_plugin(s); });
+
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

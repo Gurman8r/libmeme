@@ -11,7 +11,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type				= typename pmr::vector<uniform>;
+		using storage_type				= typename ds::flat_set<uniform>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -37,6 +37,17 @@ namespace ml
 
 		explicit material(storage_type && data, allocator_type const & alloc = {}) noexcept
 			: m_storage{ std::move(data), alloc }
+		{
+		}
+
+		material(std::initializer_list<uniform> init, allocator_type const & alloc = {})
+			: m_storage{ init, alloc }
+		{
+		}
+
+		template <class It
+		> material(It first, It last, allocator_type const & alloc = {})
+			: m_storage{ first, last, alloc }
 		{
 		}
 
@@ -87,82 +98,138 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> inline uniform & emplace_back(Args && ... args)
+		inline iterator erase(iterator it)
 		{
-			return m_storage.emplace_back(ML_FWD(args)...);
+			return m_storage.erase(it);
 		}
 
-		inline void push_back(uniform const & value)
+		inline iterator erase(iterator first, iterator last)
 		{
-			this->emplace_back(value);
+			return m_storage.erase(first, last);
 		}
 
-		inline void push_back(uniform && value)
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline iterator find(pmr::string const & name)
 		{
-			this->emplace_back(std::move(value));
+			if (!name.empty())
+			{
+				return std::find_if(begin(), end(), [name](auto const & u)
+				{
+					return u.name() == name;
+				});
+			}
+			return end();
+		}
+
+		ML_NODISCARD inline const_iterator find(pmr::string const & name) const
+		{
+			if (!name.empty())
+			{
+				return std::find_if(cbegin(), cend(), [name](auto const & u)
+				{
+					return u.name() == name;
+				});
+			}
+			return cend();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> ML_NODISCARD inline iterator find(pmr::string const & name)
+		{
+			if (auto const it{ find(name) }; it != end() && it->holds<T>())
+			{
+				return it;
+			}
+			return end();
+		}
+
+		template <class T
+		> ML_NODISCARD inline const_iterator find(pmr::string const & name) const
+		{
+			if (auto const it{ find(name) }; it != cend() && it->holds<T>())
+			{
+				return it;
+			}
+			return cend();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline uniform * get(pmr::string const & name)
+		{
+			if (auto const it{ find(name) }; it != end())
+			{
+				return &(*it);
+			}
+			return nullptr;
+		}
+
+		ML_NODISCARD inline uniform const * get(pmr::string const & name) const
+		{
+			if (auto const it{ find(name) }; it != end())
+			{
+				return &(*it);
+			}
+			return nullptr;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> ML_NODISCARD inline uniform * get(pmr::string const & name)
+		{
+			if (auto const it{ find<T>(name) }; it != end())
+			{
+				return &(*it);
+			}
+			return nullptr;
+		}
+
+		template <class T
+		> ML_NODISCARD inline uniform const * get(pmr::string const & name) const
+		{
+			if (auto const it{ find<T>(name) }; it != cend())
+			{
+				return &(*it);
+			}
+			return nullptr;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> inline material & set(pmr::string const & name, T const & data)
+		{
+			if (auto u{ get<T>(name) })
+			{
+				u->set(data);
+			}
+			return (*this);
+		}
+
+		template <class T
+		> inline material & set(pmr::string const & name, T && data)
+		{
+			if (auto u{ get<T>(name) })
+			{
+				u->set(std::move(data));
+			}
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline bool insert(uniform const & value)
 		{
-			if (!value.name().empty() && !this->find(value.name()))
-			{
-				push_back(value);
-
-				return true;
-			}
-			return false;
+			return value && m_storage.insert(value).second;
 		}
 
 		inline bool insert(uniform && value)
 		{
-			if (!value.name().empty() && !this->find(value.name()))
-			{
-				push_back(std::move(value));
-				
-				return true;
-			}
-			return false;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline uniform * find(pmr::string const & name)
-		{
-			if (name.empty())
-			{
-				return nullptr;
-			}
-			else if (auto it{ std::find_if(begin(), end(), [name](auto const & u) {
-				return u.name() == name;
-			}) }; it != end())
-			{
-				return &(*it);
-			}
-			else
-			{
-				return nullptr;
-			}
-		}
-
-		ML_NODISCARD inline uniform const * find(pmr::string const & name) const
-		{
-			if (name.empty())
-			{
-				return nullptr;
-			}
-			else if (auto it{ std::find_if(cbegin(), cend(), [name](auto const & u) {
-				return u.name() == name;
-			}) }; it != cend())
-			{
-				return &(*it);
-			}
-			else
-			{
-				return nullptr;
-			}
+			return value && m_storage.insert(std::move(value)).second;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -207,7 +274,7 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_material(material::storage_type && s)
 	{
-		return material{ std::move(s) };
+		return material{ ML_FWD(s) };
 	}
 
 	template <class ... Args

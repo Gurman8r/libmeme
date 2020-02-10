@@ -136,6 +136,11 @@ namespace ml
 		return out << value.rgba();
 	}
 
+	template <class T> inline ML_DESERIALIZE(std::istream & in, basic_color<T> & value)
+	{
+		return in >> value.rgba();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... Args

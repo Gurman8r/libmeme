@@ -36,30 +36,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
-	{
-		return glyph{ ML_FWD(args)... };
-	}
-
-	template <class Bounds, class Advance
-	> ML_NODISCARD static inline auto make_glyph(texture const & t, Bounds && b, Advance && a)
-	{
-		glyph g;
-		g.graphic = t;
-		g.bounds = std::move(b);
-		g.advance = std::move(a);
-		return g;
-	}
-
 	template <class Bounds, class Advance
 	> ML_NODISCARD static inline auto make_glyph(texture && t, Bounds && b, Advance && a) noexcept
 	{
 		glyph g;
-		g.graphic = std::move(t);
-		g.bounds = std::move(b);
-		g.advance = std::move(a);
+		g.graphic = ML_FWD(t);
+		g.bounds = ML_FWD(b);
+		g.advance = ML_FWD(a);
 		return g;
+	}
+
+	template <class ... Args
+	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
+	{
+		return glyph{ ML_FWD(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -23,9 +23,9 @@ namespace ml
 
 		void clear_flags(uint32_t flags) const;
 		
-		void draw(vertex_array const & vao, vertex_buffer const & vbo) const;
+		void draw(VAO const & vao, VBO const & vbo) const;
 
-		void draw(vertex_array const & vao, vertex_buffer const & vbo, index_buffer const & ibo) const;
+		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
 
 		template <class T> inline void draw(T const * value) const
 		{

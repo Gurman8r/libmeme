@@ -114,7 +114,7 @@ namespace ml
 			m_rbo.update(m_format);
 
 			// attach renderbuffer to framebuffer
-			m_fbo.attach_buffer(m_frameID, m_rbo.handle());
+			m_fbo.attach_buffer(m_frameID, m_rbo);
 		}
 
 		// check framebuffer status
@@ -160,7 +160,7 @@ namespace ml
 
 	void render_texture::bind(render_texture const * value)
 	{
-		frame_buffer::bind(value ? &value->fbo() : nullptr);
+		FBO::bind(value ? &value->fbo() : nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
