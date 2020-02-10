@@ -1,8 +1,10 @@
 #ifndef _ML_ALG_HPP_
 #define _ML_ALG_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Meta.hpp>
 #include <gcem/include/gcem.hpp>
+
+#define _ML_UTIL _ML util::
 
 #define ML_ASPECT(w, h)			((w != 0 && h != 0) ? ((float_t)w / (float_t)h) : 0.f)
 #define ML_ASPECT2(v)			ML_ASPECT(v[0], v[1])
@@ -10,10 +12,10 @@
 #define ML_MAX(lhs, rhs)		(lhs >= rhs ? lhs : rhs)
 #define ML_CLAMP(v, lo, hi)		ML_MIN(ML_MAX(v, lo), hi)
 
-#define ML_bitread(v, i)		((v >> i) & 1)
-#define ML_bitset(v, i)			(v |= (1 << i))
-#define ML_bitclear(v, i)		(v &= ~(1 << i))
-#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
+#define ML_BIT_READ(v, i)		((v >> i) & 1)
+#define ML_BIT_SET(v, i)		(v |= (1 << i))
+#define ML_BIT_CLEAR(v, i)		(v &= ~(1 << i))
+#define ML_BIT_WRITE(v, i, b)	(b ? ML_BIT_SET(v, i) : ML_BIT_CLEAR(v, i))
 
 // General
 namespace ml::util

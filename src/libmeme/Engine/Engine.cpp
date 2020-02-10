@@ -176,7 +176,7 @@ namespace ml
 	{
 		if (!initialized()) return;
 
-		g_engine->runtime.delta_time = g_engine->loop_timer.elapsed().count();
+		g_engine->runtime.delta_time = g_engine->loop_timer.elapsed().count<float_t>();
 
 		g_engine->loop_timer.stop().start();
 

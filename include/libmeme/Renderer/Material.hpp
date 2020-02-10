@@ -199,7 +199,7 @@ namespace ml
 		template <class T
 		> inline material & set(pmr::string const & name, T const & data)
 		{
-			if (auto u{ get<T>(name) })
+			if (uniform * u{ get<T>(name) })
 			{
 				u->set(data);
 			}
@@ -209,7 +209,7 @@ namespace ml
 		template <class T
 		> inline material & set(pmr::string const & name, T && data)
 		{
-			if (auto u{ get<T>(name) })
+			if (uniform * u{ get<T>(name) })
 			{
 				u->set(std::move(data));
 			}
@@ -230,9 +230,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_t index) -> uniform & { return m_storage[index]; }
+		ML_NODISCARD inline auto operator[](size_t const i) noexcept -> uniform & { return m_storage[i]; }
 
-		ML_NODISCARD inline auto operator[](size_t index) const -> uniform const & { return m_storage[index]; }
+		ML_NODISCARD inline auto operator[](size_t const i) const noexcept -> uniform const & { return m_storage[i]; }
+
+		ML_NODISCARD inline auto at(size_t const i) -> uniform & { return m_storage[i]; }
+
+		ML_NODISCARD inline auto at(size_t const i) const -> uniform const & { return m_storage[i]; }
 
 		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
 		

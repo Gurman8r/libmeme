@@ -11,9 +11,9 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using glyph_page = typename ds::flat_map<uint32_t, glyph>;
+		using page = typename ds::flat_map<uint32_t, glyph>;
 		
-		using page_table = typename ds::flat_map<uint32_t, glyph_page>;
+		using page_table = typename ds::flat_map<uint32_t, page>;
 
 		struct info final
 		{
@@ -49,9 +49,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD glyph const & get_glyph(uint32_t c, uint32_t char_size) const;
+		ML_NODISCARD font::page const * get_page(uint32_t size) const;
 
-		ML_NODISCARD glyph load_glyph(uint32_t c, uint32_t char_size) const;
+		ML_NODISCARD font::page & get_page(uint32_t size);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD glyph const * get_glyph(uint32_t size, uint32_t c) const;
+
+		ML_NODISCARD glyph & get_glyph(uint32_t size, uint32_t c);
+
+		ML_NODISCARD glyph load_glyph(uint32_t size, uint32_t c);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -62,10 +70,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *	m_library;
-		void *	m_face;
-		info	m_info;
-		mutable page_table m_pages;
+		void *		m_library;
+		void *		m_face;
+		info		m_info;
+		page_table	m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

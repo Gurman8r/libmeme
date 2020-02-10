@@ -38,7 +38,7 @@ namespace ml
 		// runtime settings
 		struct runtime final
 		{
-			float64_t delta_time; // 
+			float_t delta_time; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

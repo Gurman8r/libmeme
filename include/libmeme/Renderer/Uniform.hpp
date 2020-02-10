@@ -12,15 +12,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using variable_type = typename std::variant<
+		using allowed_types = typename meta::list<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			struct texture const *
+		>;
+
+		using variable_type = typename meta::rename<
+			std::variant, allowed_types
 		>;
 
 		using function_type = typename std::function<
@@ -28,6 +28,8 @@ namespace ml
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		using type_t = typename typeof<>;
 
@@ -53,7 +55,14 @@ namespace ml
 		{
 		}
 
-		uniform(type_t && type, name_t && name, data_t && data, allocator_type const & alloc = {})
+		uniform(type_t const & type, name_t const & name, data_t const & data, allocator_type const & alloc = {})
+			: m_type{ type }
+			, m_name{ name, alloc }
+			, m_data{ data }
+		{
+		}
+
+		uniform(type_t && type, name_t && name, data_t && data, allocator_type const & alloc = {}) noexcept
 			: m_type{ ML_FWD(type) }
 			, m_name{ ML_FWD(name), alloc }
 			, m_data{ ML_FWD(data) }
@@ -68,9 +77,9 @@ namespace ml
 		}
 
 		uniform(uniform && other, allocator_type const & alloc = {}) noexcept
-			: m_type{ std::move(other.m_type) }
-			, m_name{ std::move(other.m_name), alloc }
-			, m_data{ std::move(other.m_data) }
+			: m_type{ ML_FWD(other.m_type) }
+			, m_name{ ML_FWD(other.m_name), alloc }
+			, m_data{ ML_FWD(other.m_data) }
 		{
 		}
 
@@ -137,11 +146,14 @@ namespace ml
 			{
 			case ID_Variable: return std::get<variable_type>(m_data);
 			case ID_Function: return std::invoke(std::get<function_type>(m_data));
-			default			: return variable_type{};
+			default: return variable_type{};
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD inline size_t index() const noexcept
+		{
+			return this->var().index();
+		}
 
 		template <class T
 		> ML_NODISCARD inline bool holds() const noexcept
@@ -162,13 +174,10 @@ namespace ml
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class Data
 		> inline uniform & set(Data && value)
 		{
-			m_data = ML_FWD(value);
-			return (*this);
+			m_data = ML_FWD(value); return (*this);
 		}
 
 		template <class T, class Data

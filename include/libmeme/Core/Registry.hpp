@@ -1,7 +1,6 @@
 #ifndef _ML_REGISTRY_HPP_
 #define _ML_REGISTRY_HPP_
 
-#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/MemoryTracker.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
@@ -15,6 +14,9 @@
 #define ML_REGISTER(T) \
 	ML_REGISTER_EX(T, ML_CONCAT(ML_FACTORY_, T))
 
+// example:
+// ML_REGISTER(MyType) { return std::make_optional(MyType{}); }
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,14 +28,14 @@ namespace ml
 	> struct registry<> { registry() = delete; };
 
 	template <class T
-	> struct ML_ENGINE_API registry<T> final
+	> struct ML_CORE_API registry<T> final
 	{
 	private: static bool s_registered;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_ENGINE_API registrar final
+	class ML_CORE_API registrar final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

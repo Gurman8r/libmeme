@@ -8,38 +8,38 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool event_system::add_listener(size_t type, event_listener * listener)
+	bool event_system::add_listener(size_t type, event_listener * value)
 	{
-		return listener && s_listeners[type].insert(listener).second;
+		return value && s_listeners[type].insert(value).second;
 	}
 
 	void event_system::fire_event(event const & value)
 	{
-		if (auto const it{ s_listeners.find(value.id()) })
+		if (auto const v{ s_listeners.find(value.id()) })
 		{
-			for (auto const & listener : (*it->second))
+			for (auto const & it : (*v->second))
 			{
-				listener->on_event(value);
+				it->on_event(value);
 			}
 		}
 	}
 
-	void event_system::remove_listener(size_t type, event_listener * listener)
+	void event_system::remove_listener(size_t type, event_listener * value)
 	{
 		if (auto v{ s_listeners.find(type) })
 		{
-			if (auto it{ (*v->second).find(listener) }; it != (*v->second).end())
+			if (auto it{ (*v->second).find(value) }; it != (*v->second).end())
 			{
 				(*v->second).erase(it);
 			}
 		}
 	}
 
-	void event_system::remove_listener(event_listener * listener)
+	void event_system::remove_listener(event_listener * value)
 	{
-		s_listeners.for_each([listener](auto, auto & v)
+		s_listeners.for_each([value](auto, auto & v)
 		{
-			if (auto it{ v.find(listener) }; it != v.end())
+			if (auto it{ v.find(value) }; it != v.end())
 			{
 				v.erase(it);
 			}

@@ -3,7 +3,6 @@
 
 // system for tracking manual allocations
 
-#include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 

@@ -1,7 +1,7 @@
 #ifndef _ML_FLAT_SET_HPP_
 #define _ML_FLAT_SET_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml::ds
 {
@@ -27,7 +27,7 @@ namespace ml::ds
 
 		static constexpr bool multi{ _Mt };
 
-		static constexpr size_type thresh{ 42 };
+		static constexpr size_type thresh{ _Th };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -383,30 +383,25 @@ namespace ml::ds
 		
 		inline void impl_sort() noexcept
 		{
-			if constexpr (traits_type::thresh != 0)
+			// empty
+			if (empty()) return;
+
+			// sort
+			if constexpr (0 < traits_type::thresh)
 			{
-				// empty
-				if (empty()) return;
-
-				// sort
 				std::sort(begin(), end(), compare_type{});
+			}
 
-				// remove duplicates
-				if constexpr (!traits_type::multi)
-				{
-					erase(std::unique(begin(), end()), end());
-				}
-
-				// sanity check
-				ML_ASSERT(std::is_sorted(cbegin(), cend()));
+			// remove duplicates
+			if constexpr (!traits_type::multi)
+			{
+				erase(std::unique(begin(), end()), end());
 			}
 		}
 
-		template <class T
-		> inline auto impl_insert(T && other) -> std::conditional_t<
-			traits_type::multi,
-			iterator,
-			std::pair<iterator, bool>
+		template <class Other
+		> inline auto impl_insert(Other && other) -> std::conditional_t<
+			traits_type::multi, iterator, std::pair<iterator, bool>
 		>
 		{
 			if constexpr (traits_type::multi)
@@ -451,7 +446,7 @@ namespace ml::ds
 	>>;
 
 	/* FLAT MULTISET
-	sorted vector of elements which allows duplicates */
+	sorted vector of elements */
 	template <
 		class	_Ty,
 		class	_Pr = std::less<_Ty>,

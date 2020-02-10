@@ -27,7 +27,7 @@ namespace ml
 	{
 	}
 
-	model::model(initializer_type init, allocator_type const & alloc)
+	model::model(std::initializer_list<mesh> init, allocator_type const & alloc)
 		: m_storage{ init, alloc }
 	{
 	}
@@ -74,6 +74,8 @@ namespace ml
 		return (*this);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void model::swap(model & other) noexcept
 	{
 		if (this != std::addressof(other))
@@ -105,7 +107,7 @@ namespace ml
 		{
 			return debug::log_error("Failed reading aiScene from file");
 		}
-		
+
 		// cleanup
 		if (!m_storage.empty())
 			m_storage.clear();
@@ -118,8 +120,8 @@ namespace ml
 		// for each mesh
 		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const & mesh)
 		{
-			// vertices
-			pmr::vector<vertex> verts;
+			// mesh vertices
+			mesh::vertices_t verts{};
 
 			// for each face
 			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)
@@ -152,7 +154,7 @@ namespace ml
 
 			});
 
-			// make mesh
+			// create the mesh
 			m_storage.emplace_back(make_mesh(verts));
 
 		});
@@ -165,7 +167,7 @@ namespace ml
 	void model::draw(render_target const & target, model const * value)
 	{
 		if (!value) { return; }
-
+		
 		for (auto const & elem : (*value))
 		{
 			target.draw(elem);

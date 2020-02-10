@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct enter_event final : type_event<enter_event>
+	struct enter_event final : T_event<enter_event>
 	{
 		int32_t const argc;
 		cstring const * argv;
@@ -19,23 +19,23 @@ namespace ml
 		}
 	};
 
-	struct begin_loop_event final : type_event<begin_loop_event>
+	struct frame_begin_event final : T_event<frame_begin_event>
 	{
 	};
 
-	struct update_event final : type_event<update_event>
+	struct update_event final : T_event<update_event>
 	{
 	};
 
-	struct draw_event final : type_event<draw_event>
+	struct draw_event final : T_event<draw_event>
 	{
 	};
 
-	struct end_loop_event final : type_event<end_loop_event>
+	struct frame_end_event final : T_event<frame_end_event>
 	{
 	};
 
-	struct exit_event final : type_event<exit_event>
+	struct exit_event final : T_event<exit_event>
 	{
 	};
 

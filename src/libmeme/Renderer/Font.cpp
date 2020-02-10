@@ -148,31 +148,62 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	glyph const & font::get_glyph(uint32_t c, uint32_t char_size) const
+	font::page const * font::get_page(uint32_t size) const
 	{
-		glyph_page & page{ m_pages[char_size] };
-		
-		if (auto it{ page.find(c) })
+		if (auto const p{ m_pages.find(size) })
+		{
+			return &(*p->second);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	font::page & font::get_page(uint32_t size)
+	{
+		return m_pages[size];
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	glyph const * font::get_glyph(uint32_t size, uint32_t c) const
+	{
+		if (auto const p{ get_page(size) }; auto const g{ p->find(c) })
+		{
+			return &(*g->second);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
+	glyph & font::get_glyph(uint32_t size, uint32_t c)
+	{
+		if (page & p{ get_page(size) }; auto it{ p.find(c) })
 		{
 			return (*it->second);
 		}
 		else
 		{
-			return (*page.insert(c, load_glyph(c, char_size)).second);
+			return (*p.insert(c, load_glyph(c, size)).second);
 		}
 	}
 
-	glyph font::load_glyph(uint32_t c, uint32_t char_size) const
+	glyph font::load_glyph(uint32_t size, uint32_t c)
 	{
+		glyph g;
+
 		// face not loaded
 		FT_Face face{ static_cast<FT_Face>(m_face) };
 		if (!face)
 		{
-			return make_glyph();
+			return g;
 		}
 
 		// set size loading glyphs as
-		FT_Set_Pixel_Sizes(face, 0, char_size);
+		FT_Set_Pixel_Sizes(face, 0, size);
 
 		// disable byte-alignment restriction
 		GL::pixelStore(GL::UnpackAlignment, 1);
@@ -182,25 +213,25 @@ namespace ml
 		{
 			debug::log_warning("font failed loading  glyph \'{0}\'", (char)c);
 			
-			return make_glyph();
+			return g;
 		}
 
 		// create the glyph
-		glyph g = make_glyph(
-			make_texture(
-				GL::Texture2D,
-				GL::RGBA,
-				GL::Red,
-				TextureFlags_Default
-			),
-			float_rect{
-				face->glyph->bitmap_left,
-				face->glyph->bitmap_top,
-				face->glyph->bitmap.width,
-				face->glyph->bitmap.rows
-			},
-			(uint32_t)face->glyph->advance.x
+		g.graphic = make_texture(
+			GL::Texture2D,
+			GL::RGBA,
+			GL::Red,
+			TextureFlags_Default
 		);
+
+		g.bounds = float_rect{
+			face->glyph->bitmap_left,
+			face->glyph->bitmap_top,
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows
+		};
+
+		g.advance = (uint32_t)face->glyph->advance.x;
 		
 		// only load a texture for characters requiring a graphic
 		if (!std::isspace(c, m_info.locale) && std::isgraph(c, m_info.locale))
@@ -208,6 +239,8 @@ namespace ml
 			if (!g.graphic.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
 			{
 				debug::log_warning("font failed loading glyph texture: \'{0}\'", (char)c);
+
+				g.graphic.destroy();
 			}
 		}
 

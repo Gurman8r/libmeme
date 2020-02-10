@@ -431,13 +431,13 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
 		{
-			return this->for_each<const_key_iterator>(first, m_storage.first.end(), fn);
+			return this->for_each<const_key_iterator>(first, m_storage.first.cend(), fn);
 		}
 
 		template <class Fn
 		> inline const_key_iterator for_each(Fn fn) const
 		{
-			return this->for_each(m_storage.first.begin(), fn);
+			return this->for_each(m_storage.first.cbegin(), fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -481,7 +481,7 @@ namespace ml::ds
 		template <class Fn
 		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
 		{
-			return this->for_each_n<const_key_iterator>(m_storage.first.begin(), count, fn);
+			return this->for_each_n<const_key_iterator>(m_storage.first.cbegin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -560,7 +560,7 @@ namespace ml::ds
 	>>;
 
 	/* FLAT MULTIMAP 
-	associative container which allows duplicate keys (implemented as map of sets) */ 
+	associative container which allows duplicate keys (implemented as map of set) */ 
 	template <
 		class	_Kty,
 		class	_Vty,

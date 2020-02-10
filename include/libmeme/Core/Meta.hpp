@@ -16,6 +16,8 @@
 
 #include <libmeme/Common.hpp>
 
+#define _ML_META _ML meta::
+
 // DS
 namespace ml::meta
 {
@@ -39,19 +41,19 @@ namespace ml::meta
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class Tup, size_t ... Is
-		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tup && tp, std::index_sequence<Is...>)
+		template <class Fn, class Tp, size_t ... Is
+		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tp && tp, std::index_sequence<Is...>)
 		{
 			return ML_FWD(fn)(std::get<Is>(ML_FWD(tp))...);
 		}
 
-		template <class Fn, class Tup
-		> constexpr decltype(auto) tuple_apply(Fn && fn, Tup && tp)
+		template <class Fn, class Tp
+		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 		{
 			return meta::impl::tuple_apply_impl(
 				ML_FWD(fn),
 				ML_FWD(tp),
-				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tup>>>{}
+				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
 			);
 		}
 
@@ -61,8 +63,8 @@ namespace ml::meta
 			return (void)std::initializer_list<int>{ (fn(ML_FWD(args)), 0)... };
 		}
 
-		template <class Fn, class Tup
-		> constexpr decltype(auto) for_tuple(Fn && fn, Tup && tp)
+		template <class Fn, class Tp
+		> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 		{
 			return meta::impl::tuple_apply([&fn](auto && ... rest)
 			{
@@ -76,8 +78,8 @@ namespace ml::meta
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Fn, class Tup
-	> constexpr decltype(auto) tuple_apply(Fn && fn, Tup && tp)
+	template <class Fn, class Tp
+	> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 	{
 		return meta::impl::tuple_apply(fn, ML_FWD(tp));
 	}
@@ -88,8 +90,8 @@ namespace ml::meta
 		return meta::impl::for_args(fn, ML_FWD(args)...);
 	}
 
-	template <class Fn, class Tup
-	> constexpr decltype(auto) for_tuple(Fn && fn, Tup && tp)
+	template <class Fn, class Tp
+	> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 	{
 		return meta::impl::for_tuple(fn, ML_FWD(tp));
 	}

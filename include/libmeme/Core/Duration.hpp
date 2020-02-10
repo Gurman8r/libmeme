@@ -94,9 +94,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr base_type base() const noexcept { return m_base; }
+		ML_NODISCARD constexpr base_type base() const noexcept
+		{
+			return m_base;
+		}
 
-		ML_NODISCARD constexpr float64_t count() const noexcept { return m_base.count(); }
+		template <class T = float64_t
+		> ML_NODISCARD constexpr T count() const noexcept
+		{
+			return static_cast<T>(m_base.count());
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

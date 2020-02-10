@@ -50,10 +50,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event that uses the hash code of T as its id
-	template <class T> struct type_event : event
+	// interface event that uses the hash code of T as its id
+	template <class T> struct T_event : event
 	{
-		constexpr type_event() noexcept : event{ hashof_v<T> }
+		constexpr T_event() noexcept : event{ hashof_v<T> }
 		{
 		}
 	};

@@ -21,9 +21,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline bool add_listener(event_listener * listener)
+		> static inline bool add_listener(event_listener * value)
 		{
-			return add_listener(hashof_v<Ev>, listener);
+			return add_listener(hashof_v<Ev>, value);
 		}
 
 		template <class Ev, class ... Args
@@ -34,13 +34,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(size_t type, event_listener * listener);
+		static bool add_listener(size_t type, event_listener * value);
 		
 		static void fire_event(event const & value);
 
-		static void remove_listener(size_t type, event_listener * listener);
+		static void remove_listener(size_t type, event_listener * value);
 		
-		static void remove_listener(event_listener * listener);
+		static void remove_listener(event_listener * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

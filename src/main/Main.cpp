@@ -85,11 +85,11 @@ ml::int32_t main()
 	{
 		ML_DEFER{ performance_tracker::refresh_frames(); };
 
-		// begin loop
+		// begin frame
 		{
-			ML_BENCHMARK("LOOP_BEGIN");
+			ML_BENCHMARK("FRAME_BEGIN");
 			engine::begin_loop();
-			event_system::fire_event<begin_loop_event>();
+			event_system::fire_event<frame_begin_event>();
 		}
 		// update
 		{
@@ -108,24 +108,24 @@ ml::int32_t main()
 			editor::new_frame();
 			editor::get_main_menu().render();
 			editor::get_dockspace().render();
-			event_system::fire_event<begin_gui_event>();
+			event_system::fire_event<gui_begin_event>();
 		}
 		// gui
 		{
 			ML_BENCHMARK("\t\tGUI");
-			event_system::fire_event<gui_event>();
+			event_system::fire_event<gui_draw_event>();
 		}
 		// end gui
 		{
 			ML_BENCHMARK("\tGUI_END");
 			editor::render_frame();
-			event_system::fire_event<end_gui_event>();
+			event_system::fire_event<gui_end_event>();
 		}
-		// end loop
+		// end frame
 		{
-			ML_BENCHMARK("LOOP_END");
+			ML_BENCHMARK("FRAME_END");
 			engine::end_loop();
-			event_system::fire_event<end_loop_event>();
+			event_system::fire_event<frame_end_event>();
 		}
 	}
 

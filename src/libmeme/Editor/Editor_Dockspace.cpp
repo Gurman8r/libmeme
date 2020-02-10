@@ -78,7 +78,7 @@ namespace ml
 				m_nodes[LeftDn]	= split_node(m_nodes[Left], ImGuiDir_Down,	0.5f, &m_nodes[Left]);
 				m_nodes[RightDn]= split_node(m_nodes[Right],ImGuiDir_Down,	0.5f, &m_nodes[Right]);
 
-				event_system::fire_event<dockspace_event>(*this);
+				event_system::fire_event<gui_dock_event>(*this);
 
 				end_builder(m_nodes[Root]);
 			};

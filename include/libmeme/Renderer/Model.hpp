@@ -13,7 +13,6 @@ namespace ml
 		using value_type				= typename mesh;
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
 		using storage_type				= typename pmr::vector<value_type>;
-		using initializer_type			= typename std::initializer_list<value_type>;
 		using difference_type			= typename storage_type::difference_type;
 		using size_type					= typename storage_type::size_type;
 		using pointer					= typename storage_type::pointer;
@@ -31,7 +30,7 @@ namespace ml
 		
 		explicit model(allocator_type const & alloc);
 		
-		model(initializer_type init, allocator_type const & alloc = {});
+		model(std::initializer_list<mesh> init, allocator_type const & alloc = {});
 		
 		model(fs::path const & path, allocator_type const & alloc = {});
 		
@@ -48,6 +47,8 @@ namespace ml
 		model & operator=(model const & other);
 
 		model & operator=(model && other) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void swap(model & other) noexcept;
 
@@ -125,7 +126,7 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_model(mesh && m)
 	{
-		return model{ model::initializer_type{ ML_FWD(m) } };
+		return model{ std::initializer_list<mesh>{ ML_FWD(m) } };
 	}
 
 	template <class ... Args

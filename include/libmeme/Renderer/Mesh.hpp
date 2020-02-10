@@ -60,6 +60,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline bool good() const noexcept
+		{
+			return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo);
+		}
+
+		inline operator bool() const noexcept
+		{
+			return good();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline auto layout() noexcept -> buffer_layout & { return m_layout; }
 
 		ML_NODISCARD inline auto layout() const noexcept -> buffer_layout const & { return m_layout; }
@@ -81,18 +93,6 @@ namespace ml
 		ML_NODISCARD inline auto ibo() noexcept -> IBO & { return m_ibo; }
 
 		ML_NODISCARD inline auto ibo() const noexcept -> IBO const & { return m_ibo; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline bool good() const noexcept
-		{
-			return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo);
-		}
-
-		inline operator bool() const noexcept
-		{
-			return good();
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
