@@ -55,11 +55,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD glyph const * get_glyph(uint32_t size, uint32_t c) const;
+		ML_NODISCARD glyph const * get_glyph(uint32_t c, uint32_t size) const;
 
-		ML_NODISCARD glyph & get_glyph(uint32_t size, uint32_t c);
+		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size);
 
-		ML_NODISCARD glyph load_glyph(uint32_t size, uint32_t c);
+		ML_NODISCARD glyph load_glyph(uint32_t c, uint32_t size);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -61,11 +61,10 @@ namespace ml::ecs
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// basic system helper
-		template <class Traits, class Signature
+		// helper for creating systems
+		template <class Signature
 		> struct x_base
 		{
-			using traits_type = typename Traits;
 			using signature = typename Signature;
 		};
 

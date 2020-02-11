@@ -55,8 +55,7 @@ namespace ml
 		// (X) SYSTEMS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U
-		> struct x_apply_transform final : ecs::util::x_base<U, s_apply_transform>
+		template <class> struct x_apply_transform final : ecs::util::x_base<s_apply_transform>
 		{
 			void update(c_material & mat, c_transform const & tfm)
 			{
@@ -66,8 +65,7 @@ namespace ml
 			}
 		};
 
-		template <class U
-		> struct x_apply_uniforms final : ecs::util::x_base<U, s_apply_uniforms>
+		template <class> struct x_apply_uniforms final : ecs::util::x_base<s_apply_uniforms>
 		{
 			void update(c_shader & shd, c_material const & mat)
 			{
@@ -78,8 +76,7 @@ namespace ml
 			}
 		};
 
-		template <class U
-		> struct x_draw_renderer final : ecs::util::x_base<U, s_draw_renderer>
+		template <class> struct x_draw_renderer final : ecs::util::x_base<s_draw_renderer>
 		{
 			void update(c_shader const & shd, c_model const & mod, render_target const & tgt)
 			{

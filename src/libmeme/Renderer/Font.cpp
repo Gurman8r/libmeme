@@ -167,7 +167,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	glyph const * font::get_glyph(uint32_t size, uint32_t c) const
+	glyph const * font::get_glyph(uint32_t c, uint32_t size) const
 	{
 		if (auto const p{ get_page(size) }; auto const g{ p->find(c) })
 		{
@@ -179,7 +179,7 @@ namespace ml
 		}
 	}
 
-	glyph & font::get_glyph(uint32_t size, uint32_t c)
+	glyph & font::get_glyph(uint32_t c, uint32_t size)
 	{
 		if (page & p{ get_page(size) }; auto it{ p.find(c) })
 		{
@@ -191,7 +191,7 @@ namespace ml
 		}
 	}
 
-	glyph font::load_glyph(uint32_t size, uint32_t c)
+	glyph font::load_glyph(uint32_t c, uint32_t size)
 	{
 		glyph g;
 
