@@ -177,7 +177,8 @@ namespace ml
 		template <class Data
 		> inline uniform & set(Data && value)
 		{
-			m_data = ML_FWD(value); return (*this);
+			m_data = ML_FWD(value);
+			return (*this);
 		}
 
 		template <class T, class Data

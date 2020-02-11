@@ -41,7 +41,7 @@ namespace ml
 		
 		image(fs::path const & path, bool flip, allocator_type const & alloc = {});
 		
-		image(fs::path const & path, bool flip, size_t req_comp, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip, size_t req_channels, allocator_type const & alloc = {});
 		
 		image(image const & other, allocator_type const & alloc = {});
 		
@@ -59,7 +59,7 @@ namespace ml
 		
 		bool load_from_file(fs::path const & path, bool flip);
 		
-		bool load_from_file(fs::path const & path, bool flip, size_t req_comp);
+		bool load_from_file(fs::path const & path, bool flip, size_t req_channels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

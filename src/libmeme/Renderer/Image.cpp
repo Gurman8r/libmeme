@@ -78,10 +78,10 @@ namespace ml
 	{
 	}
 
-	image::image(fs::path const & path, bool flip, size_t req_comp, allocator_type const & alloc)
+	image::image(fs::path const & path, bool flip, size_t req_channels, allocator_type const & alloc)
 		: image{ alloc }
 	{
-		load_from_file(path, flip, req_comp);
+		load_from_file(path, flip, req_channels);
 	}
 
 	image::image(image const & other, allocator_type const & alloc)
@@ -124,7 +124,7 @@ namespace ml
 		return load_from_file(path, flip, 0);
 	}
 
-	bool image::load_from_file(fs::path const & path, bool flip, size_t req_comp)
+	bool image::load_from_file(fs::path const & path, bool flip, size_t req_channels)
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 
@@ -133,7 +133,7 @@ namespace ml
 			reinterpret_cast<int32_t *>(&m_size[0]),
 			reinterpret_cast<int32_t *>(&m_size[1]),
 			reinterpret_cast<int32_t *>(&m_channels),
-			static_cast<int32_t>(req_comp)
+			static_cast<int32_t>(req_channels)
 		) })
 		{
 			create_from_pixels({ data, data + capacity() });

@@ -1,10 +1,9 @@
 #ifndef _ML_ECS_HPP_
 #define _ML_ECS_HPP_
 
-//	Data-Oriented Entity Component System
-//		Inspired by Vittorio Romeo
-//		https://github.com/SuperV1234/cppcon2015
-//		https://www.youtube.com/watch?v=NTWSeQtHZ9M
+// Sources:
+// https://github.com/SuperV1234/cppcon2015
+// https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
 #include <libmeme/Core/BitSet.hpp>
 
@@ -55,29 +54,28 @@ namespace ml::ecs
 		template <class Manager
 		> class handle;
 	}
-}
 
-// UTILITY
-namespace ml::ecs::util
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// utility for creating systems
-	template <class U, class S
-	> struct x_base
+	// UTILITY
+	namespace util
 	{
-		using traits_type	= typename U;
-		using signature		= typename S;
-		using manager_type	= typename manager<traits_type>;
-	};
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		// basic system helper
+		template <class Traits, class Signature
+		> struct x_base
+		{
+			using traits_type = typename Traits;
+			using signature = typename Signature;
+		};
 
-	// utility for storing "template template" systems in type lists
-	template <template <class> class X
-	> struct x_wrapper final {};
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		// used to store "template template" systems in type lists
+		template <template <class> class System
+		> struct x_wrapper final {};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	}
 }
 
 // (T) TAGS
@@ -286,7 +284,7 @@ namespace ml::ecs::impl
 		using bitset_type = typename traits_type::bitset_type;
 
 		bool		m_alive;	// state of entity (alive / dead)
-		size_t		m_index;		// index of real component data
+		size_t		m_index;	// index of real component data
 		size_t		m_handle;	// index of managing handle
 		bitset_type	m_bitset;	// signature bitset
 
@@ -547,7 +545,7 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr auto generate_signature_bitsets() noexcept
+		static constexpr bitset_storage generate_signature_bitsets() noexcept
 		{
 			// generate bitsets for each signature
 			bitset_storage temp{};
@@ -578,7 +576,6 @@ namespace ml::ecs
 			return temp;
 		}
 
-		// store pre-calculated signatures
 		static constexpr auto m_signatures{ generate_signature_bitsets() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -593,13 +590,13 @@ namespace ml::ecs
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type		= typename Traits;
-		using self_type			= typename manager<traits_type>;
-		using entity			= typename impl::entity<self_type>;
-		using handle			= typename impl::handle<self_type>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using entity_storage	= typename pmr::vector<entity>;
-		using handle_storage	= typename pmr::vector<handle>;
+		using traits_type		= typename Traits;
+		using self_type			= typename traits_type::manager_type;
+		using entity			= typename traits_type::entity_type;
+		using handle			= typename traits_type::handle_type;
+		using entity_storage	= typename traits_type::entity_storage;
+		using handle_storage	= typename traits_type::handle_storage;
 		using component_storage	= typename traits_type::component_storage;
 		using system_storage	= typename traits_type::system_storage;
 
@@ -792,8 +789,8 @@ namespace ml::ecs
 			// grow if needed
 			if (m_capacity <= m_size_next)
 			{
-				static constexpr auto amt{ traits_type::options::grow_amount };
-				static constexpr auto mul{ traits_type::options::grow_multiplier };
+				constexpr auto amt{ traits_type::options::grow_amount };
+				constexpr auto mul{ traits_type::options::grow_multiplier };
 				this->grow_to(static_cast<size_t>((m_capacity * amt) * mul));
 			}
 
@@ -1032,7 +1029,7 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type & for_entities(Fn && fn)
+		> inline self_type & for_each(Fn && fn)
 		{
 			for (size_t i = 0; i < m_size; ++i)
 			{
@@ -1041,14 +1038,35 @@ namespace ml::ecs
 			return (*this);
 		}
 
+		template <class Fn
+		> inline self_type & for_handles(Fn && fn)
+		{
+			return this->for_each([&](size_t const i)
+			{
+				std::invoke(ML_FWD(fn), i, this->get_handle(i));
+			});
+		}
+
+		template <class C, class Fn
+		> inline self_type & for_components(Fn && fn)
+		{
+			return this->for_each([&](size_t const i)
+			{
+				if (this->has_component<C>(i))
+				{
+					std::invoke(ML_FWD(fn), i, this->get_component<C>(i));
+				}
+			});
+		}
+
 		template <class S, class Fn
 		> inline self_type & for_matching(Fn && fn)
 		{
-			return this->for_entities([&](size_t const i)
+			return this->for_each([&](size_t const i)
 			{
 				if (this->matches_signature<S>(i))
 				{
-					this->impl_invoke<S>(i, ML_FWD(fn));
+					this->expand_call<S>(i, ML_FWD(fn));
 				}
 			});
 		}
@@ -1058,7 +1076,7 @@ namespace ml::ecs
 		{
 			auto & sys{ std::get<traits_type::template system_index<X>()>(m_systems) };
 			return this->for_matching<typename X<traits_type>::signature
-			>([&fn, &sys](auto, auto && ... req_comp)
+			>([&](auto, auto && ... req_comp)
 			{
 				std::invoke(ML_FWD(fn), sys, ML_FWD(req_comp)...);
 			});
@@ -1069,20 +1087,21 @@ namespace ml::ecs
 		template <template <class> class X, class ... Args
 		> inline self_type & update_system(Args && ... args)
 		{
-			return this->for_system<X>([&args...](auto & sys, auto && ... req_comp)
+			return this->for_system<X
+			>([&](auto & sys, auto && ... req_comp)
 			{
-				sys.update(ML_FWD(args)..., ML_FWD(req_comp)...);
+				sys.update(ML_FWD(req_comp)..., ML_FWD(args)...);
 			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		template <class ... Ls
+		template <class ... Ts
 		> struct invoke_helper;
 
 		template <class S, class Fn
-		> inline void impl_invoke(size_t const i, Fn && fn)
+		> inline void expand_call(size_t const i, Fn && fn)
 		{
 			using req_comp = typename traits_type::components::template filter<S>;
 
@@ -1091,24 +1110,24 @@ namespace ml::ecs
 			helper::invoke(i, *this, ML_FWD(fn));
 		}
 
-		template <class ... Ls
+		template <class ... Ts
 		> struct invoke_helper
 		{
 			template <class Fn
 			> static inline void invoke(size_t const i, self_type & self, Fn && fn)
 			{
-				auto const idx{ self.m_entities[i].m_index };
+				auto const c{ self.m_entities[i].m_index }; // component data index
 
-				std::invoke(ML_FWD(fn), i, std::get<pmr::vector<Ls>>(self.m_components)[idx]...);
+				std::invoke(ML_FWD(fn), i, std::get<pmr::vector<Ts>>(self.m_components)[c]...);
 			}
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		size_t m_capacity;	// storage capacity		(allocated memory)
-		size_t m_size;		// current size			(excludes newly created entities)
-		size_t m_size_next;	// size after refresh	(includes newly created entities)
+		size_t m_capacity;	// storage capacity		(total allocated memory)
+		size_t m_size;		// current size			(size excluding newly created entities)
+		size_t m_size_next;	// size after refresh	(size including newly created entities)
 		
 		entity_storage		m_entities;		// entity data
 		handle_storage		m_handles;		// handle data
@@ -1119,8 +1138,8 @@ namespace ml::ecs
 	};
 }
 
-// UNIT TESTS
-namespace ml::ecs::unit_tests
+// TESTS
+namespace ml::ecs::tests
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1143,7 +1162,7 @@ namespace ml::ecs::unit_tests
 	using S3 = meta::list<C1, T0, C3, T2>;	// 01010101
 
 	// traits
-	using MT = traits<
+	using M = traits<
 		cfg::tags		<T0, T1, T2>,
 		cfg::components	<C0, C1, C2, C3, C4>,
 		cfg::signatures	<S0, S1, S2, S3>,
@@ -1151,37 +1170,37 @@ namespace ml::ecs::unit_tests
 	>;
 
 	// tests
-	static_assert(MT::tag_count			== 3);
-	static_assert(MT::component_count	== 5);
-	static_assert(MT::signature_count	== 4);
-	static_assert(MT::system_count		== 0);
+	static_assert(M::tag_count			== 3);
+	static_assert(M::component_count	== 5);
+	static_assert(M::signature_count	== 4);
+	static_assert(M::system_count		== 0);
 
-	static_assert(MT::component_index<C0>() == 0);
-	static_assert(MT::component_index<C1>() == 1);
-	static_assert(MT::component_index<C2>() == 2);
-	static_assert(MT::component_index<C3>() == 3);
-	static_assert(MT::component_index<C4>() == 4);
-	static_assert(MT::tag_index<T0>()		== 0);
-	static_assert(MT::tag_index<T1>()		== 1);
-	static_assert(MT::tag_index<T2>()		== 2);
-	static_assert(MT::signature_index<S0>() == 0);
-	static_assert(MT::signature_index<S1>() == 1);
-	static_assert(MT::signature_index<S2>() == 2);
-	static_assert(MT::signature_index<S3>() == 3);
+	static_assert(M::component_index<C0>() == 0);
+	static_assert(M::component_index<C1>() == 1);
+	static_assert(M::component_index<C2>() == 2);
+	static_assert(M::component_index<C3>() == 3);
+	static_assert(M::component_index<C4>() == 4);
+	static_assert(M::tag_index<T0>()		== 0);
+	static_assert(M::tag_index<T1>()		== 1);
+	static_assert(M::tag_index<T2>()		== 2);
+	static_assert(M::signature_index<S0>() == 0);
+	static_assert(M::signature_index<S1>() == 1);
+	static_assert(M::signature_index<S2>() == 2);
+	static_assert(M::signature_index<S3>() == 3);
 
-	static_assert(MT::component_bit<C0>()	== 0);
-	static_assert(MT::component_bit<C1>()	== 1);
-	static_assert(MT::component_bit<C2>()	== 2);
-	static_assert(MT::component_bit<C3>()	== 3);
-	static_assert(MT::component_bit<C4>()	== 4);
-	static_assert(MT::tag_bit<T0>()			== 5);
-	static_assert(MT::tag_bit<T1>()			== 6);
-	static_assert(MT::tag_bit<T2>()			== 7);
+	static_assert(M::component_bit<C0>()	== 0);
+	static_assert(M::component_bit<C1>()	== 1);
+	static_assert(M::component_bit<C2>()	== 2);
+	static_assert(M::component_bit<C3>()	== 3);
+	static_assert(M::component_bit<C4>()	== 4);
+	static_assert(M::tag_bit<T0>()			== 5);
+	static_assert(M::tag_bit<T1>()			== 6);
+	static_assert(M::tag_bit<T2>()			== 7);
 
-	static_assert(MT::signature_bitset<S0>() == "00000000");
-	static_assert(MT::signature_bitset<S1>() == "11000000");
-	static_assert(MT::signature_bitset<S2>() == "10001100");
-	static_assert(MT::signature_bitset<S3>() == "01010101");
+	static_assert(M::signature_bitset<S0>() == "00000000");
+	static_assert(M::signature_bitset<S1>() == "11000000");
+	static_assert(M::signature_bitset<S2>() == "10001100");
+	static_assert(M::signature_bitset<S3>() == "01010101");
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

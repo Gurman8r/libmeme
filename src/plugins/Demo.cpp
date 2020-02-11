@@ -30,25 +30,25 @@ namespace ml
 		// (C) COMPONENTS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 		struct c_shader		: ds::value_wrapper<shader	> {};
 		struct c_material	: ds::value_wrapper<material> {};
 		struct c_model		: ds::value_wrapper<model	> {};
-		struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
 		// (S) SIGNATURES
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using s_apply_transform = meta::list<t_renderer,
-			c_material, c_transform
+		using s_apply_transform = meta::list<
+			t_renderer, c_material, c_transform
 		>;
 
-		using s_apply_uniforms = meta::list<t_renderer,
-			c_shader, c_material
+		using s_apply_uniforms = meta::list<
+			t_renderer, c_shader, c_material
 		>;
 
-		using s_draw_renderer = meta::list<t_renderer,
-			c_shader, c_model
+		using s_draw_renderer = meta::list<
+			t_renderer, c_shader, c_model
 		>;
 
 
@@ -81,7 +81,7 @@ namespace ml
 		template <class U
 		> struct x_draw_renderer final : ecs::util::x_base<U, s_draw_renderer>
 		{
-			void update(render_target const & tgt, c_shader const & shd, c_model const & mod)
+			void update(c_shader const & shd, c_model const & mod, render_target const & tgt)
 			{
 				shd->bind(true);
 				tgt.draw(*mod);
@@ -102,8 +102,7 @@ namespace ml
 
 			// components
 			ecs::cfg::components<
-			c_shader, c_material, c_model,
-			c_transform
+			c_transform, c_shader, c_material, c_model
 			>,
 
 			// signatures
@@ -205,7 +204,7 @@ namespace ml
 
 			// PIPELINE
 			{
-				(m_pipeline["0"] = make_render_texture(vec2i{ 1280, 720 })).create();
+				(m_pipeline["1"] = make_render_texture(vec2i{ 1280, 720 })).create();
 			}
 
 			// IMAGES
@@ -362,7 +361,7 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			if (render_texture const & target{ m_pipeline["0"] })
+			if (render_texture const & target{ m_pipeline["1"] })
 			{
 				target.bind();
 				target.clear_color(colors::magenta);
@@ -431,7 +430,7 @@ namespace ml
 					ImGui::Separator();
 					ImGui::Columns(1);
 
-					editor::draw_texture_preview(m_pipeline["0"].get_texture(),
+					editor::draw_texture_preview(m_pipeline["1"].get_texture(),
 						(vec2)engine::get_window().get_frame_size() / 2.f
 					);
 					ImGui::Separator();
