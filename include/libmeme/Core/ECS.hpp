@@ -1,6 +1,8 @@
 #ifndef _ML_ECS_HPP_
 #define _ML_ECS_HPP_
 
+// Data-Oriented Entity Component System
+
 // Sources:
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
@@ -55,7 +57,6 @@ namespace ml::ecs
 		> class handle;
 	}
 
-	// UTILITY
 	namespace util
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -268,157 +269,6 @@ namespace ml::ecs::cfg
 	};
 }
 
-// (E) ENTITY
-namespace ml::ecs::impl
-{
-	// internal entity data class
-	template <class Manager
-	> class entity final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend Manager;
-
-		using traits_type = typename Manager::traits_type;
-
-		using bitset_type = typename traits_type::bitset_type;
-
-		bool		m_alive;	// state of entity (alive / dead)
-		size_t		m_index;	// index of real component data
-		size_t		m_handle;	// index of managing handle
-		bitset_type	m_bitset;	// signature bitset
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-// (H) HANDLE
-namespace ml::ecs::impl
-{
-	// abstraction over entity/manager interface
-	template <class Manager
-	> class handle final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend Manager;
-
-		Manager *	m_manager;	// pointer to owning manager
-		size_t		m_entity;	// index of real entity data
-		size_t		m_self;		// index of real handle data
-		int32_t		m_counter;	// validity check counter
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline handle & invalidate() noexcept
-		{
-			++m_counter;
-			return (*this);
-		}
-
-		inline handle & refresh(size_t const i) noexcept
-		{
-			m_entity = i;
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	public:
-		ML_NODISCARD inline operator bool() const noexcept
-		{
-			return this->valid(); // true if valid
-		}
-
-		ML_NODISCARD inline bool valid() const noexcept
-		{
-			return m_manager && m_manager->is_valid_handle(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline bool alive() const noexcept
-		{
-			return m_manager->is_alive(*this);
-		}
-
-		inline handle & kill() noexcept
-		{
-			m_manager->kill(*this);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T
-		> inline handle & add_tag() noexcept
-		{
-			m_manager->add_tag<T>(*this);
-			return (*this);
-		}
-
-		template <class T
-		> inline handle & del_tag() noexcept
-		{
-			m_manager->del_tag<T>(*this);
-			return (*this);
-		}
-
-		template <class T
-		> inline bool has_tag() noexcept
-		{
-			return m_manager->has_tag<T>(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class C, class ... Args
-		> inline decltype(auto) add_component(Args && ... args) noexcept
-		{
-			return m_manager->add_component<C>(*this, ML_FWD(args)...);
-		}
-
-		template <class C
-		> inline decltype(auto) add_component() noexcept
-		{
-			return m_manager->add_component<C>(*this);
-		}
-
-		template <class C
-		> inline handle & del_component() noexcept
-		{
-			m_manager->del_component<C>(*this);
-			return (*this);
-		}
-
-		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component() noexcept
-		{
-			return m_manager->get_component<C>(*this);
-		}
-
-		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component() const noexcept
-		{
-			return m_manager->get_component<C>(*this);
-		}
-
-		template <class C
-		> ML_NODISCARD inline bool has_component() const noexcept
-		{
-			return m_manager->has_component<C>(*this);
-		}
-
-		template <class C
-		> ML_NODISCARD inline bool matches_signature() const noexcept
-		{
-			return m_manager->matches_signature<C>(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
 // (U) TRAITS
 namespace ml::ecs
 {
@@ -577,6 +427,157 @@ namespace ml::ecs
 		}
 
 		static constexpr auto m_signatures{ generate_signature_bitsets() };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+// (E) ENTITY
+namespace ml::ecs::impl
+{
+	// internal entity data class
+	template <class Manager
+	> class entity final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend Manager;
+
+		using traits_type = typename Manager::traits_type;
+
+		using bitset_type = typename traits_type::bitset_type;
+
+		bool		m_alive;	// state of entity (alive / dead)
+		size_t		m_index;	// index of real component data
+		size_t		m_handle;	// index of managing handle
+		bitset_type	m_bitset;	// signature bitset
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+// (H) HANDLE
+namespace ml::ecs::impl
+{
+	// abstraction over entity/manager interface
+	template <class Manager
+	> class handle final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend Manager;
+
+		Manager *	m_manager;	// pointer to owning manager
+		size_t		m_entity;	// index of real entity data
+		size_t		m_self;		// index of real handle data
+		int32_t		m_counter;	// validity check counter
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline handle & invalidate() noexcept
+		{
+			++m_counter;
+			return (*this);
+		}
+
+		inline handle & refresh(size_t const i) noexcept
+		{
+			m_entity = i;
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	public:
+		ML_NODISCARD inline operator bool() const noexcept
+		{
+			return this->valid(); // true if valid
+		}
+
+		ML_NODISCARD inline bool valid() const noexcept
+		{
+			return m_manager && m_manager->is_valid_handle(*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool alive() const noexcept
+		{
+			return m_manager->is_alive(*this);
+		}
+
+		inline handle & kill() noexcept
+		{
+			m_manager->kill(*this);
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> inline handle & add_tag() noexcept
+		{
+			m_manager->add_tag<T>(*this);
+			return (*this);
+		}
+
+		template <class T
+		> inline handle & del_tag() noexcept
+		{
+			m_manager->del_tag<T>(*this);
+			return (*this);
+		}
+
+		template <class T
+		> inline bool has_tag() noexcept
+		{
+			return m_manager->has_tag<T>(*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class C, class ... Args
+		> inline decltype(auto) add_component(Args && ... args) noexcept
+		{
+			return m_manager->add_component<C>(*this, ML_FWD(args)...);
+		}
+
+		template <class C
+		> inline decltype(auto) add_component() noexcept
+		{
+			return m_manager->add_component<C>(*this);
+		}
+
+		template <class C
+		> inline handle & del_component() noexcept
+		{
+			m_manager->del_component<C>(*this);
+			return (*this);
+		}
+
+		template <class C
+		> ML_NODISCARD inline decltype(auto) get_component() noexcept
+		{
+			return m_manager->get_component<C>(*this);
+		}
+
+		template <class C
+		> ML_NODISCARD inline decltype(auto) get_component() const noexcept
+		{
+			return m_manager->get_component<C>(*this);
+		}
+
+		template <class C
+		> ML_NODISCARD inline bool has_component() const noexcept
+		{
+			return m_manager->has_component<C>(*this);
+		}
+
+		template <class C
+		> ML_NODISCARD inline bool matches_signature() const noexcept
+		{
+			return m_manager->matches_signature<C>(*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -1074,9 +1075,9 @@ namespace ml::ecs
 		template <template <class> class X, class Fn
 		> inline self_type & for_system(Fn && fn)
 		{
-			auto & sys{ std::get<traits_type::template system_index<X>()>(m_systems) };
 			return this->for_matching<typename X<traits_type>::signature
-			>([&](auto, auto && ... req_comp)
+			>([&fn, &sys = std::get<traits_type::template system_index<X>()>(m_systems)
+			](auto, auto && ... req_comp)
 			{
 				std::invoke(ML_FWD(fn), sys, ML_FWD(req_comp)...);
 			});
@@ -1087,8 +1088,7 @@ namespace ml::ecs
 		template <template <class> class X, class ... Args
 		> inline self_type & update_system(Args && ... args)
 		{
-			return this->for_system<X
-			>([&](auto & sys, auto && ... req_comp)
+			return this->for_system<X>([&args...](auto & sys, auto && ... req_comp)
 			{
 				sys.update(ML_FWD(req_comp)..., ML_FWD(args)...);
 			});
