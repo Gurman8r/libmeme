@@ -29,6 +29,12 @@ namespace ml
 
 	struct draw_event final : T_event<draw_event>
 	{
+		struct render_target & target;
+
+		constexpr draw_event(struct render_target & target) noexcept
+			: target{ target }
+		{
+		}
 	};
 
 	struct frame_end_event final : T_event<frame_end_event>

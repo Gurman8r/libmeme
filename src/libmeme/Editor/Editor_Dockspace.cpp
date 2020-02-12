@@ -31,7 +31,7 @@ namespace ml
 
 	bool editor_dockspace::render()
 	{
-		if (([&, this]()
+		if (([&]()
 		{
 			// Begin Draw
 			if (m_good = (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable))
@@ -83,7 +83,7 @@ namespace ml
 				end_builder(m_nodes[Root]);
 			};
 		}
-		return ([&, this]()
+		return ([&]()
 		{
 			// End Draw
 			if (m_good)

@@ -100,7 +100,7 @@ ml::int32_t main()
 		{
 			ML_BENCHMARK("\tDRAW");
 			engine::begin_draw();
-			event_system::fire_event<draw_event>();
+			event_system::fire_event<draw_event>(engine::get_window());
 		}
 		// begin gui
 		{

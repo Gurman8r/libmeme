@@ -21,12 +21,6 @@ namespace ml
 {
 	struct demo final : plugin
 	{
-		// (T) TAGS
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct t_renderer {};
-
-
 		// (C) COMPONENTS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -39,16 +33,11 @@ namespace ml
 		// (S) SIGNATURES
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using s_apply_transform = meta::list<
-			t_renderer, c_material, c_transform
+		using s_apply_transform	= meta::list<c_material, c_transform
 		>;
-
-		using s_apply_uniforms = meta::list<
-			t_renderer, c_shader, c_material
+		using s_apply_uniforms	= meta::list<c_shader, c_material
 		>;
-
-		using s_draw_renderer = meta::list<
-			t_renderer, c_shader, c_model
+		using s_draw_renderer	= meta::list<c_shader, c_model
 		>;
 
 
@@ -57,11 +46,11 @@ namespace ml
 
 		template <class> struct x_apply_transform final : ecs::util::x_base<s_apply_transform>
 		{
-			void update(c_material & mat, c_transform const & tfm)
+			void update(c_material & mat, c_transform const & tf)
 			{
-				mat->set<vec3>("u_position", tfm.pos)
-					.set<vec4>("u_rotation", tfm.rot)
-					.set<vec3>("u_scale", tfm.scl);
+				mat->set<vec3>("u_position", tf.pos)
+					.set<vec4>("u_rotation", tf.rot)
+					.set<vec3>("u_scale", tf.scl);
 			}
 		};
 
@@ -78,10 +67,10 @@ namespace ml
 
 		template <class> struct x_draw_renderer final : ecs::util::x_base<s_draw_renderer>
 		{
-			void update(c_shader const & shd, c_model const & mod, render_target const & tgt)
+			void update(render_target const & target, c_shader const & shd, c_model const & mdl)
 			{
 				shd->bind(true);
-				tgt.draw(*mod);
+				target.draw(*mdl);
 				shd->unbind();
 			}
 		};
@@ -93,9 +82,7 @@ namespace ml
 		ecs::manager<ecs::traits<
 
 			// tags
-			ecs::cfg::tags<
-			t_renderer
-			>,
+			ecs::cfg::tags<>,
 
 			// components
 			ecs::cfg::components<
@@ -125,14 +112,14 @@ namespace ml
 		// CONTENT
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::flat_map<pmr::string, render_texture	> m_pipeline	{};
-		ds::flat_map<pmr::string, font				> m_fonts		{};
-		ds::flat_map<pmr::string, image				> m_images		{};
-		ds::flat_map<pmr::string, material			> m_materials	{};
-		ds::flat_map<pmr::string, model				> m_models		{};
-		ds::flat_map<pmr::string, script			> m_scripts		{};
-		ds::flat_map<pmr::string, shader			> m_shaders		{};
-		ds::flat_map<pmr::string, texture			> m_textures	{};
+		pmr::vector<				render_texture	> m_pipeline	{};
+		ds::flat_map<pmr::string,	font			> m_fonts		{};
+		ds::flat_map<pmr::string,	image			> m_images		{};
+		ds::flat_map<pmr::string,	material		> m_materials	{};
+		ds::flat_map<pmr::string,	model			> m_models		{};
+		ds::flat_map<pmr::string,	script			> m_scripts		{};
+		ds::flat_map<pmr::string,	shader			> m_shaders		{};
+		ds::flat_map<pmr::string,	texture			> m_textures	{};
 
 
 		// DEMO
@@ -201,7 +188,8 @@ namespace ml
 
 			// PIPELINE
 			{
-				(m_pipeline["1"] = make_render_texture(vec2i{ 1280, 720 })).create();
+				m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })
+				).create();
 			}
 
 			// IMAGES
@@ -230,12 +218,15 @@ namespace ml
 				m_fonts["clacon"] = make_font(
 					fs::path{ "../../../../assets/fonts/clacon.ttf" }
 				);
+
 				m_fonts["consolas"] = make_font(
 					fs::path{ "../../../../assets/fonts/consolas.ttf" }
 				);
+
 				m_fonts["lucida_console"] = make_font(
 					fs::path{ "../../../../assets/fonts/lucida_console.ttf" }
 				);
+
 				m_fonts["minecraft"] = make_font(
 					fs::path{ "../../../../assets/fonts/minecraft.ttf" }
 				);
@@ -256,31 +247,47 @@ namespace ml
 
 			// MATERIALS
 			{
-				m_materials["2d"] = make_material(
+				// timers
+				auto const _timers = make_material(
 					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; }),
-					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<mat4	>("u_proj",		mat4::identity()),
-					make_uniform<mat4	>("u_view",		mat4::identity()),
-					make_uniform<mat4	>("u_model",	mat4::identity())
+					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; })
 				);
 
-				m_materials["3d"] = make_material(
-					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; }),
+				// MVP
+				auto const _mvp = make_material(
+					make_uniform<mat4	>("u_model",	mat4::identity()),
+					make_uniform<mat4	>("u_view",		mat4::identity()),
+					make_uniform<mat4	>("u_proj",		mat4::identity())
+				);
+
+				// camera
+				auto const _camera = make_material(
 					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov",	45.0f),
 					make_uniform<float_t>("u_cam.near", 0.0001f),
 					make_uniform<float_t>("u_cam.far",	1000.0f),
-					make_uniform<vec2	>("u_cam.view", vec2{ 1280.f, 720.f }),
-					make_uniform<texture>("u_texture0",	&m_textures["navball"]),
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<vec3	>("u_position", vec3{}),
-					make_uniform<vec3	>("u_scale",	vec3{}),
-					make_uniform<vec4	>("u_rotation", vec4{})
+					make_uniform<vec2	>("u_cam.view", vec2{ 1280.f, 720.f })
 				);
+
+				// transform
+				auto const _transform = make_material(
+					make_uniform<vec3	>("u_position", vec3{}),
+					make_uniform<vec4	>("u_rotation", vec4{}),
+					make_uniform<vec3	>("u_scale",	vec3{})
+				);
+
+				// 2d
+				m_materials["2d"] = make_material(
+					make_uniform<color	>("u_color",	colors::white),
+					make_uniform<texture>("u_texture0", &m_textures["doot"])
+				) + _timers + _mvp;
+
+				// 3d
+				m_materials["3d"] = make_material(
+					make_uniform<color	>("u_color",	colors::white),
+					make_uniform<texture>("u_texture0", &m_textures["navball"])
+				) + _timers + _camera + _transform;
 			}
 
 			// MODELS
@@ -331,7 +338,6 @@ namespace ml
 
 				if (auto e{ m_ecs.create_handle() })
 				{
-					e.add_tag<t_renderer>();
 					e.add_component<c_shader>	(m_shaders	["3d"]);
 					e.add_component<c_material>	(m_materials["3d"]);
 					e.add_component<c_model>	(m_models	["sphere32x24"]);
@@ -358,16 +364,16 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			if (render_texture const & target{ m_pipeline["1"] })
+			if (render_texture const & rt{ m_pipeline[0] })
 			{
-				target.bind();
-				target.clear_color(colors::magenta);
-				target.viewport(target.bounds());
+				rt.bind();
+				rt.clear_color(colors::magenta);
+				rt.viewport(rt.bounds());
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_ecs.update_system<x_draw_renderer>(target);
-				target.unbind();
+				m_ecs.update_system<x_draw_renderer>(rt);
+				rt.unbind();
 			}
 		}
 
@@ -427,7 +433,7 @@ namespace ml
 					ImGui::Separator();
 					ImGui::Columns(1);
 
-					editor::draw_texture_preview(m_pipeline["1"].get_texture(),
+					editor::draw_texture_preview(m_pipeline[0].get_texture(),
 						(vec2)engine::get_window().get_frame_size() / 2.f
 					);
 					ImGui::Separator();

@@ -94,40 +94,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator erase(iterator it)
-		{
-			return m_storage.erase(it);
-		}
-
-		inline iterator erase(iterator first, iterator last)
-		{
-			return m_storage.erase(first, last);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD inline iterator find(pmr::string const & name)
 		{
-			if (!name.empty())
+			if (name.empty()) return end();
+
+			return std::find_if(begin(), end(), [&name](auto const & u)
 			{
-				return std::find_if(begin(), end(), [name](auto const & u)
-				{
-					return u.name() == name;
-				});
-			}
-			return end();
+				return u.name() == name;
+			});
 		}
 
 		ML_NODISCARD inline const_iterator find(pmr::string const & name) const
 		{
-			if (!name.empty())
+			if (name.empty()) return cend();
+			
+			return std::find_if(cbegin(), cend(), [&name](auto const & u)
 			{
-				return std::find_if(cbegin(), cend(), [name](auto const & u)
-				{
-					return u.name() == name;
-				});
-			}
-			return cend();
+				return u.name() == name;
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -226,6 +210,83 @@ namespace ml
 		inline bool insert(uniform && value)
 		{
 			return value && m_storage.insert(std::move(value)).second;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline iterator erase(iterator it)
+		{
+			return m_storage.erase(it);
+		}
+
+		inline iterator erase(iterator first, iterator last)
+		{
+			return m_storage.erase(first, last);
+		}
+
+		inline iterator erase(pmr::string const & name)
+		{
+			return m_storage.erase(this->find(name));
+		}
+
+		template <class T
+		> inline iterator erase(pmr::string const & name)
+		{
+			return m_storage.erase(this->find<T>(name));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline material & concat(material const & other)
+		{
+			for (auto const & u : other)
+			{
+				this->insert(u);
+			}
+			return (*this);
+		}
+
+		inline material & concat(material && other)
+		{
+			for (auto && u : other)
+			{
+				this->insert(std::move(u));
+			}
+			return (*this);
+		}
+
+		inline material concat(material const & other) const
+		{
+			material temp{ *this };
+			return temp.concat(other);
+		}
+
+		inline material concat(material && other) const
+		{
+			material temp{ *this };
+			return temp.concat(std::move(other));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline material & operator+=(material const & other)
+		{
+			return this->concat(other);
+		}
+
+		inline material & operator+=(material && other)
+		{
+			return this->concat(std::move(other));
+		}
+
+		inline material operator+(material const & other) const
+		{
+			return this->concat(other);
+		}
+
+		inline material operator+(material && other) const
+		{
+			return this->concat(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

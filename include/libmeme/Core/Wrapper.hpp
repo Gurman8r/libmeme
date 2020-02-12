@@ -11,7 +11,6 @@ namespace ml::ds
 		T value;
 
 		constexpr T &		operator *() & noexcept			{ return value; }
-		constexpr T &&		operator *() && noexcept		{ return value; }
 		constexpr T const &	operator *() const & noexcept	{ return value; }
 		constexpr T *		operator->() & noexcept			{ return &value; }
 		constexpr T const *	operator->() const & noexcept	{ return &value; }

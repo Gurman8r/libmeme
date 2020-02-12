@@ -139,12 +139,17 @@ namespace ml::ds
 			return self_type{ 0 };
 		}
 
-		ML_NODISCARD static constexpr self_type one() noexcept
+		ML_NODISCARD static constexpr self_type fill(value_type const v) noexcept
 		{
 			auto temp{ zero() };
-			for (auto & elem : temp)
-				elem = static_cast<value_type>(1);
+			for (auto & e : temp)
+				e = v;
 			return temp;
+		}
+
+		ML_NODISCARD static constexpr self_type one() noexcept
+		{
+			return self_type::fill(value_type{ 1 });
 		}
 
 		ML_NODISCARD static constexpr self_type identity() noexcept

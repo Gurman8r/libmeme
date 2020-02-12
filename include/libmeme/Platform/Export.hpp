@@ -9,8 +9,6 @@
 
 #ifdef ML_API
 #	define ML_PLATFORM_API ML_API
-#elif defined(ML_STATIC)
-#	define ML_PLATFORM_API
 #elif defined(ML_PLATFORM_EXPORTS)
 #	define ML_PLATFORM_API ML_API_EXPORT
 #else

@@ -7,45 +7,46 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct rectangle final : tvec4<T>
+	template <class T
+	> struct rectangle final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using value_type		= typename T;
 		using self_type			= typename rectangle<value_type>;
-		using base_type			= typename tvec4<value_type>;
+		using storage_type		= typename tvec4<value_type>;
 		using coord_type		= typename tvec2<value_type>;
-		using pointer			= typename base_type::pointer;
-		using reference			= typename base_type::reference;
-		using const_pointer		= typename base_type::const_pointer;
-		using const_reference	= typename base_type::const_reference;
-		using iterator			= typename base_type::iterator;
-		using const_iterator	= typename base_type::const_iterator;
+		using pointer			= typename storage_type::pointer;
+		using reference			= typename storage_type::reference;
+		using const_pointer		= typename storage_type::const_pointer;
+		using const_reference	= typename storage_type::const_reference;
+		using iterator			= typename storage_type::iterator;
+		using const_iterator	= typename storage_type::const_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr rectangle() noexcept
-			: base_type{}
+			: m_data{}
 		{
 		}
 
 		constexpr rectangle(T value) noexcept
-			: base_type{ value }
+			: m_data{ value }
 		{
 		}
 		
 		constexpr rectangle(T w, T h) noexcept
-			: base_type{ 0, 0, w, h }
+			: m_data{ 0, 0, w, h }
 		{
 		}
 		
 		constexpr rectangle(T x, T y, T w, T h) noexcept
-			: base_type{ x, y, w, h }
+			: m_data{ x, y, w, h }
 		{
 		}
 
 		template <class X, class Y, class W, class H
-		> constexpr rectangle(X x, Y y, W w, H h) noexcept : base_type{
+		> constexpr rectangle(X x, Y y, W w, H h) noexcept : m_data{
 			static_cast<T>(x),
 			static_cast<T>(y),
 			static_cast<T>(w),
@@ -55,35 +56,43 @@ namespace ml
 		}
 
 		constexpr rectangle(self_type const & other) noexcept
-			: base_type{ other }
+			: m_data{ other.m_data }
 		{
 		}
 
 		template <class U
 		> constexpr rectangle(tvec4<U> const & other) noexcept
-			: base_type{ other }
+			: m_data{ other }
 		{
 		}
 		
 		constexpr rectangle(coord_type const & pos, coord_type const & size) noexcept
-			: base_type{ pos[0], pos[1], size[0], size[1] }
+			: m_data{ pos[0], pos[1], size[0], size[1] }
 		{
 		}
 		
 		constexpr rectangle(coord_type const & size) noexcept
-			: base_type{ 0, 0, size[0], size[1] }
+			: m_data{ 0, 0, size[0], size[1] }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
+
+		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
+
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto left() const -> value_type { return at(0); }
+		ML_NODISCARD constexpr auto left() const -> value_type { return m_data.at(0); }
 		
-		ML_NODISCARD constexpr auto top() const -> value_type { return at(1); }
+		ML_NODISCARD constexpr auto top() const -> value_type { return m_data.at(1); }
 		
-		ML_NODISCARD constexpr auto width() const -> value_type { return at(2); }
+		ML_NODISCARD constexpr auto width() const -> value_type { return m_data.at(2); }
 		
-		ML_NODISCARD constexpr auto height() const -> value_type { return at(3); }
+		ML_NODISCARD constexpr auto height() const -> value_type { return m_data.at(3); }
 		
 		ML_NODISCARD constexpr auto bot() const -> value_type { return (top() + height()); }
 		
@@ -97,13 +106,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto left(value_type value) -> self_type & { return set(0, value); }
+		constexpr auto left(value_type value) -> self_type & { m_data.at(0) = value; return (*this); }
 		
-		constexpr auto top(value_type value) -> self_type & { return set(1, value); }
+		constexpr auto top(value_type value) -> self_type & { m_data.at(1) = value; return (*this); }
 		
-		constexpr auto width(value_type value) -> self_type & { return set(2, value); }
+		constexpr auto width(value_type value) -> self_type & { m_data.at(2) = value; return (*this); }
 		
-		constexpr auto height(value_type value) -> self_type & { return set(3, value); }
+		constexpr auto height(value_type value) -> self_type & { m_data.at(3) = value; return (*this); }
 		
 		constexpr auto bot(value_type value) -> self_type & { return height(value - top()); }
 		
@@ -116,6 +125,9 @@ namespace ml
 		constexpr auto center(coord_type const & value) -> self_type & { return position(value - (size() / (T)2)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_data;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

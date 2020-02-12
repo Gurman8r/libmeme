@@ -6,16 +6,17 @@
 
 #define _ML_UTIL _ML util::
 
-#define ML_ASPECT(w, h)			((w != 0 && h != 0) ? ((float_t)w / (float_t)h) : 0.f)
-#define ML_ASPECT2(v)			ML_ASPECT(v[0], v[1])
-#define ML_MIN(lhs, rhs)		(lhs <= rhs ? lhs : rhs)
-#define ML_MAX(lhs, rhs)		(lhs >= rhs ? lhs : rhs)
-#define ML_CLAMP(v, lo, hi)		ML_MIN(ML_MAX(v, lo), hi)
-
 #define ML_BIT_READ(v, i)		((v >> i) & 1)
 #define ML_BIT_SET(v, i)		(v |= (1 << i))
 #define ML_BIT_CLEAR(v, i)		(v &= ~(1 << i))
 #define ML_BIT_WRITE(v, i, b)	(b ? ML_BIT_SET(v, i) : ML_BIT_CLEAR(v, i))
+
+#define ML_ASPECT(w, h)			((w != 0 && h != 0) ? ((float_t)w / (float_t)h) : 0.f)
+#define ML_ASPECT2(v)			ML_ASPECT(v[0], v[1])
+
+#define ML_MIN(lhs, rhs)		(lhs <= rhs ? lhs : rhs)
+#define ML_MAX(lhs, rhs)		(lhs >= rhs ? lhs : rhs)
+#define ML_CLAMP(v, lo, hi)		ML_MIN(ML_MAX(v, lo), hi)
 
 // General
 namespace ml::util
@@ -23,15 +24,15 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch
-	> ML_NODISCARD static constexpr size_t strlen(Ch const * value)
+	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
 	{
-		return ((*value) ? (1 + strlen(value + 1)) : 0);
+		return ((*value) ? (1 + _ML_UTIL strlen(value + 1)) : 0);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T
-	> static constexpr void swap(T & lhs, T & rhs) noexcept
+	> constexpr void swap(T & lhs, T & rhs) noexcept
 	{
 		T temp = std::move(lhs);
 		lhs = std::move(rhs);
@@ -39,16 +40,86 @@ namespace ml::util
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-	template <class To, class From, class = std::enable_if_t<
-		(sizeof(To) == sizeof(From)) &&
-		std::is_trivially_copyable_v<From> &&
-		std::is_trivial_v<To>
-	>> ML_NODISCARD static inline To bit_cast(const From & src) noexcept
+
+	template <class Lhs, class Rhs, class ... Rest
+	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
-		To dst;
-		std::memcpy(&dst, &src, sizeof(To));
-		return dst;
+		return lhs < rhs
+			? _ML_UTIL min(ML_FWD(lhs), ML_FWD(rest)...)
+			: _ML_UTIL min(ML_FWD(rhs), ML_FWD(rest)...);
+	}
+
+	template <class Only
+	> constexpr decltype(auto) min(Only && only)
+	{
+		return ML_FWD(only);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Lhs, class Rhs, class ... Rest
+	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
+	{
+		return lhs > rhs
+			? _ML_UTIL max(ML_FWD(lhs), ML_FWD(rest)...)
+			: _ML_UTIL max(ML_FWD(rhs), ML_FWD(rest)...);
+	}
+
+	template <class Only
+	> constexpr decltype(auto) max(Only && only)
+	{
+		return ML_FWD(only);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Lhs, class Rhs
+	> constexpr auto clamp(T && v, Lhs && lhs, Rhs && rhs)
+	{
+		return _ML_UTIL min(_ML_UTIL max(ML_FWD(v), ML_FWD(lhs)), ML_FWD(rhs));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, int64_t Num, int64_t Den
+	> ML_NODISCARD constexpr auto ratio_cast(T v, std::ratio<Num, Den> const & r)
+	{
+		auto const
+			one{ static_cast<T>(1) },
+			num{ static_cast<T>(r.num) },
+			den{ static_cast<T>(r.den) };
+		return ((num == one) && (den == one))
+			? v
+			: (((num != one) && (den == one))
+				? v * num
+				: (((num == one) && (den != one))
+					? v / den
+					: v * num / den));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T
+	> ML_NODISCARD constexpr auto power_of_2(T v)
+	{
+		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
+		if constexpr (std::is_floating_point_v<T>)
+		{
+			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
+		}
+		else if constexpr (std::is_integral_v<T>)
+		{
+			v--;
+			if constexpr (sizeof(T) >= 1)
+			{
+				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8
+			}
+			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16
+			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32
+			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64
+			v++;
+			return v;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,7 +137,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T
-	> ML_NODISCARD static constexpr size_t hash(T const * arr, size_t size, size_t seed) noexcept
+	> ML_NODISCARD constexpr size_t hash(T const * arr, size_t size, size_t seed) noexcept
 	{
 		return (size > 0)
 			? hash(arr + 1, size - 1, (seed ^ static_cast<size_t>(*arr)) * fnv1a_prime)
@@ -74,13 +145,13 @@ namespace ml::util
 	}
 
 	template <class T
-	> ML_NODISCARD static constexpr size_t hash(T const * arr, size_t size) noexcept
+	> ML_NODISCARD constexpr size_t hash(T const * arr, size_t size) noexcept
 	{
 		return hash(arr, size, fnv1a_basis);
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr size_t hash(const T(&value)[N]) noexcept
+	> ML_NODISCARD constexpr size_t hash(const T(&value)[N]) noexcept
 	{
 		return hash(value, N - 1);
 	}
@@ -88,19 +159,19 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arr
-	> ML_NODISCARD static constexpr size_t hash(Arr const & value) noexcept
+	> ML_NODISCARD constexpr size_t hash(Arr const & value) noexcept
 	{
 		return hash(value.data(), value.size());
 	}
 
 	template <template <class, size_t...> class Arr, class T, size_t ... N
-	> ML_NODISCARD static constexpr size_t hash(Arr<T, N...> const & value) noexcept
+	> ML_NODISCARD constexpr size_t hash(Arr<T, N...> const & value) noexcept
 	{
 		return hash(value.data(), value.size());
 	}
 
 	template <template <class...> class Arr, class ... Ts
-	> ML_NODISCARD static constexpr size_t hash(Arr<Ts...> const & value) noexcept
+	> ML_NODISCARD constexpr size_t hash(Arr<Ts...> const & value) noexcept
 	{
 		return hash(value.data(), value.size());
 	}
@@ -114,7 +185,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class LI, class RI
-	> ML_NODISCARD static constexpr bool equals(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	> ML_NODISCARD constexpr bool equals(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return ((lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) == (*rBegin))
@@ -124,7 +195,7 @@ namespace ml::util
 	}
 
 	template <class LI, class RI
-	> ML_NODISCARD static constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return ((lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) < (*rBegin))
@@ -136,7 +207,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class It, class Cmp
-	> ML_NODISCARD static constexpr It find_if(It first, It last, Cmp compare)
+	> ML_NODISCARD constexpr It find_if(It first, It last, Cmp compare)
 	{
 		while (first != last)
 		{
@@ -150,13 +221,13 @@ namespace ml::util
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr size_t array_size(const T(&value)[N])
+	> ML_NODISCARD constexpr size_t array_size(const T(&value)[N])
 	{
 		return static_cast<size_t>(ML_ARRAYSIZE(value));
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr int32_t index_of(T const & value, const T(&arr)[N])
+	> ML_NODISCARD constexpr int32_t index_of(T const & value, const T(&arr)[N])
 	{
 		for (int32_t i = 0; (&arr[i]) != (&arr[N]); ++i)
 		{
@@ -166,13 +237,13 @@ namespace ml::util
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr T const & value_at(int32_t index, const T(&arr)[N])
+	> ML_NODISCARD constexpr T const & value_at(int32_t index, const T(&arr)[N])
 	{
 		return arr[index];
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr bool value_at(int32_t index, T & value, const T(&arr)[N])
+	> ML_NODISCARD constexpr bool value_at(int32_t index, T & value, const T(&arr)[N])
 	{
 		if (index < N)
 		{
@@ -183,7 +254,7 @@ namespace ml::util
 	}
 
 	template <class T, size_t N
-	> ML_NODISCARD static constexpr auto at_index(int32_t index, const T(&arr)[N])
+	> ML_NODISCARD constexpr auto at_index(int32_t index, const T(&arr)[N])
 	{
 		return ((index >= 0 && index < N) ? arr[index] : nullptr);
 	}
@@ -197,7 +268,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr auto dot(const A<T, N...> & lhs, const A<T, N...> & rhs)
+	> ML_NODISCARD constexpr auto dot(const A<T, N...> & lhs, const A<T, N...> & rhs)
 	{
 		T temp{ 0 };
 		for (size_t i = 0; i < lhs.size(); ++i)
@@ -206,7 +277,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto determinant(const M<T, 4, 4> & v)
+	> ML_NODISCARD constexpr auto determinant(const M<T, 4, 4> & v)
 	{
 		return
 			v[0] * (v[15] * v[5] - v[7] * v[13]) -
@@ -215,7 +286,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr auto sqr_magnitude(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto sqr_magnitude(const A<T, N...> & value)
 	{
 		T temp{ (T)0 };
 		for (auto const & elem : value)
@@ -224,13 +295,13 @@ namespace ml::util
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr auto magnitude(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto magnitude(const A<T, N...> & value)
 	{
 		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
+	> ML_NODISCARD constexpr auto scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
 	{
 		const M<T, 2, 1>
 			h{ { (r[0] / l[0]), (r[0] / l[0]) } },
@@ -241,13 +312,13 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr auto normalize(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto normalize(const A<T, N...> & value)
 	{
 		return (value / magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD static constexpr auto transpose(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto transpose(const A<T, N...> & value)
 	{
 		A<T, N...> temp{ 0 };
 		for (size_t i = 0; i < value.size(); ++i)
@@ -262,7 +333,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto inverse(const M<T, 4, 4> & v)
+	> ML_NODISCARD constexpr auto inverse(const M<T, 4, 4> & v)
 	{
 		T const det{ determinant<M, T>(v) };
 		return ((det != (T)0)
@@ -282,7 +353,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto rebase(const M<T, 3, 3> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 3> & v, const M<T, 4, 4> & m)
 	{
 		return M<T, 3, 3>
 		{
@@ -299,7 +370,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto rebase(const M<T, 3, 1> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, const M<T, 4, 4> & m)
 	{
 		return M<T, 3, 1>
 		{
@@ -312,69 +383,19 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto cross(const M<T, 2, 1> & a, const M<T, 2, 1> & b)
+	> ML_NODISCARD constexpr auto cross(const M<T, 2, 1> & a, const M<T, 2, 1> & b)
 	{
 		return a[0] * b[1] - b[0] * a[1];
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD static constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
+	> ML_NODISCARD constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
 	{
 		return M<T, 3, 1> {
 			a[1] * b[2] - b[1] * a[2],
 				a[2] * b[0] - b[2] * a[0],
 				a[0] * b[1] - b[0] * a[1]
 		};
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// Ratios
-namespace ml::util
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, int64_t Num, int64_t Den
-	> ML_NODISCARD static constexpr decltype(auto) ratio_cast(T value, std::ratio<Num, Den> const & r)
-	{
-		auto const
-			one{ static_cast<T>(1) },
-			num{ static_cast<T>(r.num) },
-			den{ static_cast<T>(r.den) };
-		return ((num == one) && (den == one))
-			? value
-			: (((num != one) && (den == one))
-				? value * num
-				: (((num == one) && (den != one))
-					? value / den
-					: value * num / den));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T
-	> ML_NODISCARD static constexpr decltype(auto) power_of_2(T v)
-	{
-		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
-		if constexpr (std::is_floating_point_v<T>)
-		{
-			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
-		}
-		else
-		{
-			static_assert(std::is_integral_v<T>);
-			v--;
-			if constexpr (sizeof(T) >= 1)
-			{
-				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8
-			}
-			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16
-			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32
-			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64
-			v++;
-			return v;
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

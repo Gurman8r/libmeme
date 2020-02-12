@@ -9,8 +9,6 @@
 
 #ifdef ML_API
 #	define ML_RENDERER_API ML_API
-#elif defined(ML_STATIC)
-#	define ML_RENDERER_API
 #elif defined(ML_RENDERER_EXPORTS)
 #	define ML_RENDERER_API ML_API_EXPORT
 #else

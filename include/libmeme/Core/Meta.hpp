@@ -50,11 +50,10 @@ namespace ml::meta
 		template <class Fn, class Tp
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 		{
-			return meta::impl::tuple_apply_impl(
+			return _ML_META impl::tuple_apply_impl(
 				ML_FWD(fn),
 				ML_FWD(tp),
-				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
-			);
+				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{});
 		}
 
 		template <class Fn, class ... Args
@@ -66,9 +65,9 @@ namespace ml::meta
 		template <class Fn, class Tp
 		> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 		{
-			return meta::impl::tuple_apply([&fn](auto && ... rest)
+			return _ML_META impl::tuple_apply([&fn](auto && ... rest)
 			{
-				meta::impl::for_args(fn, ML_FWD(rest)...);
+				_ML_META impl::for_args(fn, ML_FWD(rest)...);
 			},
 			ML_FWD(tp));
 		}
@@ -78,22 +77,25 @@ namespace ml::meta
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// "Unpacks" the contents of a tuple inside a function call.
 	template <class Fn, class Tp
 	> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 	{
-		return meta::impl::tuple_apply(fn, ML_FWD(tp));
+		return impl::tuple_apply(fn, ML_FWD(tp));
 	}
 
+	// Invokes a function on every passed object.
 	template <class Fn, class ... Args
 	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 	{
-		return meta::impl::for_args(fn, ML_FWD(args)...);
+		return impl::for_args(fn, ML_FWD(args)...);
 	}
 
+	// Invokes a function on every element of a tuple.
 	template <class Fn, class Tp
 	> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 	{
-		return meta::impl::for_tuple(fn, ML_FWD(tp));
+		return impl::for_tuple(fn, ML_FWD(tp));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -200,7 +202,7 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// INDEX OF - check index of type in list
+// INDEX OF - get index of type in a list
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -228,12 +230,12 @@ namespace ml::meta
 	> ML_USING tuple = typename rename<std::tuple, Ls>;
 	
 	template <class Ls
-	> ML_USING type_tuple = typename tuple<remap<tag, Ls>>;
+	> ML_USING tag_tuple = typename tuple<remap<tag, Ls>>;
 
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return meta::for_tuple(fn, type_tuple<Ls>{});
+		return meta::for_tuple(fn, tag_tuple<Ls>{});
 	}
 
 	template <class Ls

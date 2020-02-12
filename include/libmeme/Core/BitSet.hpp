@@ -202,7 +202,8 @@ namespace ml::ds
 			if constexpr (std::is_same_v<T, self_type>)
 			{
 				size_t i{};
-				for (auto & elem : m_words) { elem &= other.m_words[i++]; }
+				for (auto & elem : m_words)
+					elem &= other.m_words[i++];
 				return (*this);
 			}
 			else
@@ -224,7 +225,8 @@ namespace ml::ds
 			if constexpr (std::is_same_v<T, self_type>)
 			{
 				size_t i{};
-				for (auto & elem : m_words) { elem |= other.m_words[i++]; }
+				for (auto & elem : m_words)
+					elem |= other.m_words[i++];
 				return (*this);
 			}
 			else

@@ -313,22 +313,15 @@
 
 // API Visibility
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef ML_STATIC
-#   ifdef ML_CC_MSVC
-#   	define ML_API_EXPORT __declspec(dllexport)
-#   	define ML_API_IMPORT __declspec(dllimport)
-#   elif (defined(ML_CC_CLANG) || defined(ML_CC_GCC)) && (ML_CC_VER >= 4)
-#   	define ML_API_EXPORT __attribute__ ((visibility ("default")))
-#   	define ML_API_IMPORT __attribute__ ((visibility ("hidden")))
-#   endif
-#endif
-
-#ifndef ML_API_EXPORT
-#define ML_API_EXPORT
-#endif
-
-#ifndef ML_API_IMPORT
-#define ML_API_IMPORT
+#ifdef ML_CC_MSVC
+#	define ML_API_EXPORT __declspec(dllexport)
+#	define ML_API_IMPORT __declspec(dllimport)
+#elif (defined(ML_CC_CLANG) || defined(ML_CC_GCC)) && (ML_CC_VER >= 4)
+#	define ML_API_EXPORT __attribute__ ((visibility ("default")))
+#	define ML_API_IMPORT __attribute__ ((visibility ("hidden")))
+#else
+#   define ML_API_EXPORT
+#   define ML_API_IMPORT
 #endif
 
 

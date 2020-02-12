@@ -277,7 +277,7 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD inline auto insert(Other && other)
 		{
-			return this->impl_insert(ML_FWD(other));
+			return this->impl_insert(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
