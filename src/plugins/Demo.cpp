@@ -393,7 +393,7 @@ namespace ml
 		void on_gui_dock(gui_dock_event const & ev)
 		{
 			// dock gui windows
-			ev.d.dock_window("ml::debug",	ev.d.get_node(ev.d.Left));
+			ev.d.dock_window("ml::demo",	ev.d.get_node(ev.d.Left));
 			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.Right));
 		}
 
@@ -412,11 +412,12 @@ namespace ml
 			// debug
 			if (m_show_libmeme_demo)
 			{
-				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
-				if (ImGui::Begin("ml::debug", &m_show_libmeme_demo, ImGuiWindowFlags_None))
+				if (ImGui::Begin("ml::demo", &m_show_libmeme_demo, ImGuiWindowFlags_None))
 				{
 					// libmeme demo tabs
-					if (ImGui::BeginTabBar("libmeme demo tabs"))
+					if (ImGui::BeginTabBar("libmeme demo tabs",
+						ImGuiTabBarFlags_Reorderable
+					))
 					{
 						// debug
 						if (ImGui::BeginTabItem("debug"))
@@ -458,30 +459,14 @@ namespace ml
 						// ecs
 						if (ImGui::BeginTabItem("ecs"))
 						{
-							using M = decltype(m_ecs);
-							using U = typename M::traits_type;
-							m_ecs.for_each([&](size_t const i)
+							m_ecs.for_entities([&](size_t const i)
 							{
-								meta::for_types<typename U::components::type_list
-								>([&](auto c)
+								m_ecs.for_components(i, [&](auto const & t, auto & c)
 								{
-									using C = typename decltype(c)::type;
-
-									if (m_ecs.has_component<C>(i))
-									{
-										typeof<> const & type{
-											U::component_info<C>()
-										};
-
-										std::string const name{
-											type.name().data(), type.name().size()
-										};
-
-										ImGui::Columns(2);
-										ImGui::Text("C: %s", name.c_str()); ImGui::NextColumn();
-										ImGui::Text("H: %u", type.hash()); ImGui::NextColumn();
-										ImGui::Columns(1);
-									}
+									ImGui::Columns(2);
+									ImGui::Text("Ty: %s", t.str().c_str()); ImGui::NextColumn();
+									ImGui::Text("ID: %u", t.hash()); ImGui::NextColumn();
+									ImGui::Columns(1);
 								});
 							});
 

@@ -30,7 +30,7 @@ namespace ml
 		}
 
 		template <class ... U
-		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) const noexcept
+		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) noexcept
 		{
 			return (m_hash != other.hash()) ? (m_hash < other.hash()) ? -1 : 1 : 0;
 		}
@@ -84,6 +84,12 @@ namespace ml
 
 				util::swap(m_hash, other.m_hash);
 			}
+		}
+
+		template <class Str = pmr::string
+		> ML_NODISCARD inline Str str() const noexcept
+		{
+			return Str{ m_name.data(), m_name.size() };
 		}
 
 	private:

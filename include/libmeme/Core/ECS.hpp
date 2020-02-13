@@ -593,6 +593,12 @@ namespace ml::ecs::impl
 			return m_manager->template matches_signature<C>(*this);
 		}
 
+		template <template <class> class X
+		> ML_NODISCARD inline bool matches_system() const noexcept
+		{
+			return m_manager->template matches_system<X>();
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
@@ -1096,8 +1102,9 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline self_type & for_each(Fn && fn)
+		> inline self_type & for_entities(Fn && fn)
 		{
+			// call function on every alive entity
 			for (size_t i = 0; i < m_size; ++i)
 			{
 				std::invoke(ML_FWD(fn), i);
@@ -1105,10 +1112,29 @@ namespace ml::ecs
 			return (*this);
 		}
 
+		template <class Fn
+		> inline self_type & for_components(size_t const i, Fn && fn)
+		{
+			// call function on all of an entity's components
+			meta::for_types<typename traits_type::component_list>([&](auto c)
+			{
+				using C = typename decltype(c)::type;
+				if (this->has_component<C>(i))
+				{
+					std::invoke(ML_FWD(fn),
+						traits_type::template component_info<C>(), 
+						this->get_component<C>(i)
+					);
+				}
+			});
+			return (*this);
+		}
+
 		template <class S, class Fn
 		> inline self_type & for_matching(Fn && fn)
 		{
-			return this->for_each([&](size_t const i)
+			// call function on all entities matching signature
+			return this->for_entities([&](size_t const i)
 			{
 				if (this->matches_signature<S>(i))
 				{
@@ -1120,6 +1146,7 @@ namespace ml::ecs
 		template <template <class> class X, class Fn
 		> inline self_type & for_system(Fn && fn)
 		{
+			// call function on all systems matching signature
 			return this->for_matching<typename X<traits_type>::signature
 			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp)
@@ -1131,6 +1158,7 @@ namespace ml::ecs
 		template <template <class> class X, class ... Args
 		> inline self_type & update_system(Args && ... args)
 		{
+			// update all systems matching signature
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp)
 			{
 				x.update(ML_FWD(args)..., ML_FWD(req_comp)...);
