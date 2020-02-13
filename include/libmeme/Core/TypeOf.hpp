@@ -86,12 +86,6 @@ namespace ml
 			}
 		}
 
-		template <class Str = pmr::string
-		> ML_NODISCARD inline Str str() const noexcept
-		{
-			return Str{ m_name.data(), m_name.size() };
-		}
-
 	private:
 		name_type m_name;
 		

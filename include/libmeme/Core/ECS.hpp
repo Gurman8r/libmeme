@@ -97,6 +97,7 @@ namespace ml::ecs::cfg
 			}, meta::tuple<meta::remap<typeof, type_list>>{});
 			return temp.second;
 		}
+
 		static constexpr type_info m_info{ gen_info() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -322,7 +323,6 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using self_type		= typename traits<T, C, S, X, O>;
-		using owner_type	= typename manager<self_type>;
 		using tags			= typename T;
 		using components	= typename C;
 		using signatures	= typename S;
@@ -492,36 +492,32 @@ namespace ml::ecs
 namespace ml::ecs::impl
 {
 	// abstraction over entity interface
-	template <class Traits
+	template <class M = manager<>
 	> struct handle final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type = typename Traits;
-
-		using owner_type = typename manager<traits_type>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline operator bool() const noexcept
-		{
-			return this->valid(); // true if valid
-		}
 
 		ML_NODISCARD inline bool valid() const noexcept
 		{
 			return m_manager && m_manager->is_valid_handle(*this);
 		}
 
+		ML_NODISCARD inline operator bool() const noexcept
+		{
+			return this->valid(); // true if valid
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline bool alive() const noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->is_alive(*this);
 		}
 
 		inline handle & kill() noexcept
 		{
+			ML_ASSERT(m_manager);
 			m_manager->kill(*this);
 			return (*this);
 		}
@@ -531,6 +527,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline handle & add_tag() noexcept
 		{
+			ML_ASSERT(m_manager);
 			m_manager->template add_tag<T>(*this);
 			return (*this);
 		}
@@ -538,6 +535,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline handle & del_tag() noexcept
 		{
+			ML_ASSERT(m_manager);
 			m_manager->template del_tag<T>(*this);
 			return (*this);
 		}
@@ -545,6 +543,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline bool has_tag() noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template has_tag<T>(*this);
 		}
 
@@ -553,18 +552,21 @@ namespace ml::ecs::impl
 		template <class C, class ... Args
 		> inline decltype(auto) add_component(Args && ... args) noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template add_component<C>(*this, ML_FWD(args)...);
 		}
 
 		template <class C
 		> inline decltype(auto) add_component() noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template add_component<C>(*this);
 		}
 
 		template <class C
 		> inline handle & del_component() noexcept
 		{
+			ML_ASSERT(m_manager);
 			m_manager->template del_component<C>(*this);
 			return (*this);
 		}
@@ -572,42 +574,47 @@ namespace ml::ecs::impl
 		template <class C
 		> ML_NODISCARD inline decltype(auto) get_component() noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template get_component<C>(*this);
 		}
 
 		template <class C
 		> ML_NODISCARD inline decltype(auto) get_component() const noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template get_component<C>(*this);
 		}
 
 		template <class C
 		> ML_NODISCARD inline bool has_component() const noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template has_component<C>(*this);
 		}
 
 		template <class C
 		> ML_NODISCARD inline bool matches_signature() const noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template matches_signature<C>(*this);
 		}
 
 		template <template <class> class X
 		> ML_NODISCARD inline bool matches_system() const noexcept
 		{
+			ML_ASSERT(m_manager);
 			return m_manager->template matches_system<X>();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend owner_type;
+		friend M;
 
-		owner_type *m_manager;	// pointer to owning manager
-		size_t		m_entity;	// index of real entity data
-		size_t		m_self;		// index of real handle data
-		int32_t		m_counter;	// validity check counter
+		M *		m_manager;	// pointer to owning manager
+		size_t	m_entity;	// index of real entity data
+		size_t	m_self;		// index of real handle data
+		int32_t	m_counter;	// validity check counter
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -616,23 +623,23 @@ namespace ml::ecs::impl
 // (M) MANAGER
 namespace ml::ecs
 {
-	template <class Traits
+	template <class U = traits<>
 	> struct manager final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using traits_type		= typename U;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using traits_type		= typename Traits;
 		using self_type			= typename manager<traits_type>;
 		using signature			= typename traits_type::signature;
 		using component_storage	= typename traits_type::component_storage;
 		using system_storage	= typename traits_type::system_storage;
-		using handle			= typename impl::handle<traits_type>;
+		using handle			= typename impl::handle<self_type>;
 		using handle_storage	= typename pmr::vector<handle>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Bitset };
+		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Signature };
 
 		using entity_storage = typename std::tuple<
 			pmr::vector<bool>,		// state of entity (alive / dead)
@@ -713,7 +720,7 @@ namespace ml::ecs
 				std::get<ID_Alive>(	m_entities)[i] = false;
 				std::get<ID_Index>(	m_entities)[i] = i;
 				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Bitset>(m_entities)[i].reset();
+				std::get<ID_Signature>(m_entities)[i].reset();
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
@@ -750,7 +757,7 @@ namespace ml::ecs
 				std::get<ID_Alive>(m_entities)[i] = false;
 				std::get<ID_Index>(m_entities)[i] = i;
 				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Bitset>(m_entities)[i].reset();
+				std::get<ID_Signature>(m_entities)[i].reset();
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
@@ -830,7 +837,7 @@ namespace ml::ecs
 				std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
 				std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
 				std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
-				std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
+				std::swap(std::get<ID_Signature>(m_entities)[lhs], std::get<ID_Signature>(m_entities)[rhs]);
 			}
 		}
 
@@ -848,7 +855,7 @@ namespace ml::ecs
 
 			size_t const i{ m_size_next++ };
 			std::get<ID_Alive>(m_entities)[i] = true;
-			std::get<ID_Bitset>(m_entities)[i].reset();
+			std::get<ID_Signature>(m_entities)[i].reset();
 			return i;
 		}
 
@@ -926,7 +933,7 @@ namespace ml::ecs
 		template <class T
 		> inline self_type & add_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
+			std::get<ID_Signature>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(true);
 			return (*this);
 		}
@@ -942,7 +949,7 @@ namespace ml::ecs
 		template <class T
 		> inline self_type & del_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
+			std::get<ID_Signature>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(false);
 			return (*this);
 		}
@@ -958,7 +965,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool has_tag(size_t const i) const noexcept
 		{
-			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
+			return std::get<ID_Signature>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -972,7 +979,7 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> inline decltype(auto) add_component(size_t const i, Args && ... args) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
+			std::get<ID_Signature>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(true);
 
 			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
@@ -1003,7 +1010,7 @@ namespace ml::ecs
 		template <class C
 		> inline self_type & del_component(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
+			std::get<ID_Signature>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(false);
 			return (*this);
 		}
@@ -1044,7 +1051,7 @@ namespace ml::ecs
 
 		ML_NODISCARD signature const & get_signature(size_t const i) const noexcept
 		{
-			return std::get<ID_Bitset>(m_entities)[i];
+			return std::get<ID_Signature>(m_entities)[i];
 		}
 
 		ML_NODISCARD signature const & get_signature(handle const & h) const noexcept

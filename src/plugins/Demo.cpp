@@ -79,7 +79,7 @@ namespace ml
 		// (M) MANAGER
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ecs::manager<ecs::traits<
+		using entity_traits = ecs::traits<
 
 			// tags
 			ecs::cfg::tags<>,
@@ -98,8 +98,9 @@ namespace ml
 			ecs::cfg::systems<
 			x_apply_transforms, x_apply_materials, x_draw_renderers
 			>
-		>
-		> m_ecs{};
+		>;
+
+		ecs::manager<entity_traits> m_ecs{};
 
 		pmr::vector<decltype(m_ecs)::handle> m_handles;
 
@@ -108,7 +109,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool m_show_imgui_demo	{ false };
-		bool m_show_libmeme_demo{ true };
+		bool m_show_debug{ true };
 		bool m_show_display		{ true };
 
 
@@ -160,7 +161,7 @@ namespace ml
 			// MENUS
 			{
 				// File Menu
-				editor::get_main_menu().add_menu("File", [&, this]()
+				editor::get_main_menu().add_menu("File", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					if (ImGui::MenuItem("Quit", "Alt+F4"))
@@ -170,15 +171,14 @@ namespace ml
 				});
 
 				// View Menu
-				editor::get_main_menu().add_menu("View", [&, this]()
+				editor::get_main_menu().add_menu("View", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("libmeme demo", "", &m_show_libmeme_demo);
-					ImGui::MenuItem("imgui demo", "", &m_show_imgui_demo);
+					ImGui::MenuItem("libmeme demo", "", &m_show_debug);
 				});
 
 				// Option Menu
-				editor::get_main_menu().add_menu("Option", [&, this]()
+				editor::get_main_menu().add_menu("Option", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					bool fullscreen{ engine::get_window().is_fullscreen() };
@@ -186,6 +186,13 @@ namespace ml
 					{
 						engine::get_window().set_fullscreen(fullscreen);
 					}
+				});
+
+				// Help Menu
+				editor::get_main_menu().add_menu("Help", [&]()
+				{
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+					ImGui::MenuItem("imgui demo", "", &m_show_imgui_demo);
 				});
 			}
 
@@ -393,7 +400,7 @@ namespace ml
 		void on_gui_dock(gui_dock_event const & ev)
 		{
 			// dock gui windows
-			ev.d.dock_window("ml::demo",	ev.d.get_node(ev.d.Left));
+			ev.d.dock_window("ml::debug",	ev.d.get_node(ev.d.Left));
 			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.Right));
 		}
 
@@ -410,17 +417,16 @@ namespace ml
 			}
 
 			// debug
-			if (m_show_libmeme_demo)
+			if (m_show_debug)
 			{
-				if (ImGui::Begin("ml::demo", &m_show_libmeme_demo, ImGuiWindowFlags_None))
+				if (ImGui::Begin("ml::debug", &m_show_debug, ImGuiWindowFlags_None))
 				{
-					// libmeme demo tabs
-					if (ImGui::BeginTabBar("libmeme demo tabs",
+					if (ImGui::BeginTabBar("ml::debug##tabs",
 						ImGuiTabBarFlags_Reorderable
 					))
 					{
-						// debug
-						if (ImGui::BeginTabItem("debug"))
+						// performance
+						if (ImGui::BeginTabItem("performance"))
 						{
 							// memory
 							ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
@@ -461,10 +467,10 @@ namespace ml
 						{
 							m_ecs.for_entities([&](size_t const i)
 							{
-								m_ecs.for_components(i, [&](auto const & t, auto & c)
+								m_ecs.for_components(i, [&](auto t, auto & c)
 								{
 									ImGui::Columns(2);
-									ImGui::Text("Ty: %s", t.str().c_str()); ImGui::NextColumn();
+									ImGui::Text("T: %.*s", t.name().size(), t.name().data()); ImGui::NextColumn();
 									ImGui::Text("ID: %u", t.hash()); ImGui::NextColumn();
 									ImGui::Columns(1);
 								});
@@ -486,7 +492,7 @@ namespace ml
 				{
 					editor::draw_texture_preview(
 						m_pipeline[0].get_texture(),
-						(vec2)engine::get_window().get_frame_size() / 2.f
+						ImGui::GetContentRegionAvail()
 					);
 				}
 				ImGui::End();
@@ -506,6 +512,14 @@ namespace ml
 			m_fonts.clear();
 			m_pipeline.clear();
 			m_scripts.clear();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U = ecs::traits<>
+		> static auto edit_ecs(ecs::manager<U> & m)
+		{
+
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
