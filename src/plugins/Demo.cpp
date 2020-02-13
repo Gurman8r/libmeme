@@ -33,18 +33,18 @@ namespace ml
 		// (S) SIGNATURES
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using s_apply_transform	= meta::list<c_material, c_transform
+		using s_apply_transforms = meta::list<c_material, c_transform
 		>;
-		using s_apply_uniforms	= meta::list<c_shader, c_material
+		using s_apply_materials = meta::list<c_shader, c_material
 		>;
-		using s_draw_renderer	= meta::list<c_shader, c_model
+		using s_draw_renderers = meta::list<c_shader, c_model
 		>;
 
 
 		// (X) SYSTEMS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class> struct x_apply_transform final : ecs::util::x_base<s_apply_transform>
+		template <class> struct x_apply_transforms final : ecs::util::x_base<s_apply_transforms>
 		{
 			void update(c_material & mat, c_transform const & tf)
 			{
@@ -54,7 +54,7 @@ namespace ml
 			}
 		};
 
-		template <class> struct x_apply_uniforms final : ecs::util::x_base<s_apply_uniforms>
+		template <class> struct x_apply_materials final : ecs::util::x_base<s_apply_materials>
 		{
 			void update(c_shader & shd, c_material const & mat)
 			{
@@ -65,7 +65,7 @@ namespace ml
 			}
 		};
 
-		template <class> struct x_draw_renderer final : ecs::util::x_base<s_draw_renderer>
+		template <class> struct x_draw_renderers final : ecs::util::x_base<s_draw_renderers>
 		{
 			void update(render_target const & target, c_shader const & shd, c_model const & mdl)
 			{
@@ -91,22 +91,25 @@ namespace ml
 
 			// signatures
 			ecs::cfg::signatures<
-			s_apply_transform, s_apply_uniforms, s_draw_renderer
+			s_apply_transforms, s_apply_materials, s_draw_renderers
 			>,
 
 			// systems
 			ecs::cfg::systems<
-			x_apply_transform, x_apply_uniforms, x_draw_renderer
+			x_apply_transforms, x_apply_materials, x_draw_renderers
 			>
 		>
 		> m_ecs{};
+
+		pmr::vector<decltype(m_ecs)::handle> m_handles;
 
 
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool m_show_libmeme_demo{ true };
 		bool m_show_imgui_demo	{ false };
+		bool m_show_libmeme_demo{ true };
+		bool m_show_display		{ true };
 
 
 		// CONTENT
@@ -139,12 +142,12 @@ namespace ml
 		{
 			switch (value.id())
 			{
-			case hashof_v<enter_event	> : on_enter	(*value.as<enter_event>());		break;
-			case hashof_v<update_event	> : on_update	(*value.as<update_event>());	break;
-			case hashof_v<draw_event	> : on_draw		(*value.as<draw_event>());		break;
-			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<gui_dock_event>());	break;
-			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<gui_draw_event>());	break;
-			case hashof_v<exit_event	> : on_exit		(*value.as<exit_event>());		break;
+			case hashof_v<enter_event	> : on_enter	(*value.as<enter_event>()	); break;
+			case hashof_v<update_event	> : on_update	(*value.as<update_event>()	); break;
+			case hashof_v<draw_event	> : on_draw		(*value.as<draw_event>()	); break;
+			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<gui_dock_event>()); break;
+			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<gui_draw_event>()); break;
+			case hashof_v<exit_event	> : on_exit		(*value.as<exit_event>()	); break;
 			}
 		}
 
@@ -188,7 +191,8 @@ namespace ml
 
 			// PIPELINE
 			{
-				m_pipeline.emplace_back(make_render_texture(vec2i{ 1280, 720 })
+				m_pipeline.emplace_back(
+					make_render_texture(vec2i{ 1280, 720 })
 				).create();
 			}
 
@@ -336,26 +340,27 @@ namespace ml
 			{
 				ML_DEFER{ m_ecs.refresh(); };
 
-				if (auto e{ m_ecs.create_handle() })
+				if (auto & h{ m_handles.emplace_back(m_ecs.create_handle()) })
 				{
-					e.add_component<c_shader>	(m_shaders	["3d"]);
-					e.add_component<c_material>	(m_materials["3d"]);
-					e.add_component<c_model>	(m_models	["sphere32x24"]);
-					e.add_component<c_transform>(
+					h.add_component<c_shader>	(m_shaders	["3d"]);
+					h.add_component<c_material>	(m_materials["3d"]);
+					h.add_component<c_model>	(m_models	["sphere32x24"]);
+					h.add_component<c_transform>(
 						vec3{ 0.f, 0.f, 0.f },
 						vec4{ 0.0f, 0.1f, 0.0f, 0.25f },
 						vec3{ 1.f, 1.f, 1.f }
 					);
 				}
 			}
+			auto here = 0;
 		}
 
 		void on_update(update_event const & ev)
 		{
 			// update stuff, etc...
 
-			m_ecs.update_system<x_apply_transform>();
-			m_ecs.update_system<x_apply_uniforms>();
+			m_ecs.update_system<x_apply_transforms>();
+			m_ecs.update_system<x_apply_materials>();
 		}
 
 		void on_draw(draw_event const & ev)
@@ -363,6 +368,14 @@ namespace ml
 			// draw stuff, etc...
 
 			if (m_pipeline.empty()) return;
+
+			using M = typename decltype(m_ecs);
+			using U = typename M::traits_type;
+
+			static_assert(U::component_info()[0] == typeof_v<c_transform>);
+
+			static_assert(U::system_info()[2] == typeof_v<
+				ecs::util::x_wrapper<x_draw_renderers>>);
 
 			if (render_texture const & rt{ m_pipeline[0] })
 			{
@@ -372,7 +385,7 @@ namespace ml
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_ecs.update_system<x_draw_renderer>(rt);
+				m_ecs.update_system<x_draw_renderers>(rt);
 				rt.unbind();
 			}
 		}
@@ -380,7 +393,8 @@ namespace ml
 		void on_gui_dock(gui_dock_event const & ev)
 		{
 			// dock gui windows
-			ev.d.dock_window("libmeme demo", ev.d.get_node(ev.d.Root));
+			ev.d.dock_window("ml::debug",	ev.d.get_node(ev.d.Left));
+			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.Right));
 		}
 
 		void on_gui_draw(gui_draw_event const & ev)
@@ -395,48 +409,100 @@ namespace ml
 				editor::show_imgui_demo(&m_show_imgui_demo);
 			}
 
-			// libmeme demo
+			// debug
 			if (m_show_libmeme_demo)
 			{
 				ImGui::SetNextWindowSize({ 640, 640 }, ImGuiCond_Once);
-				if (ImGui::Begin("libmeme demo", &m_show_libmeme_demo, ImGuiWindowFlags_None))
+				if (ImGui::Begin("ml::debug", &m_show_libmeme_demo, ImGuiWindowFlags_None))
 				{
-					// Memory
-					ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
-					ImGui::Separator();
-
-					ImGui::Columns(2);
-
-					// Total Time
-					ImGui::Text("total time"); ImGui::NextColumn();
-					ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
-
-					// Delta Time
-					ImGui::Text("delta time"); ImGui::NextColumn();
-					ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
-
-					// Frame Rate
-					ImGui::Text("frame rate"); ImGui::NextColumn();
-					ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
-
-					// Benchmarks
-					if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
+					// libmeme demo tabs
+					if (ImGui::BeginTabBar("libmeme demo tabs"))
 					{
-						ImGui::Separator();
-						for (auto const & elem : prev)
+						// debug
+						if (ImGui::BeginTabItem("debug"))
 						{
-							ImGui::Text("%s", elem.first); ImGui::NextColumn();
-							ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+							// memory
+							ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
+							ImGui::Separator();
+
+							ImGui::Columns(2);
+
+							// total time
+							ImGui::Text("total time"); ImGui::NextColumn();
+							ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
+
+							// delta time
+							ImGui::Text("delta time"); ImGui::NextColumn();
+							ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
+
+							// frame rate
+							ImGui::Text("frame rate"); ImGui::NextColumn();
+							ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
+
+							// benchmarks
+							if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
+							{
+								ImGui::Separator();
+								for (auto const & elem : prev)
+								{
+									ImGui::Text("%s", elem.first); ImGui::NextColumn();
+									ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+								}
+							}
+
+							ImGui::Separator();
+							ImGui::Columns(1);
+							ImGui::EndTabItem();
 						}
+
+						// ecs
+						if (ImGui::BeginTabItem("ecs"))
+						{
+							using M = decltype(m_ecs);
+							using U = typename M::traits_type;
+							m_ecs.for_each([&](size_t const i)
+							{
+								meta::for_types<typename U::components::type_list
+								>([&](auto c)
+								{
+									using C = typename decltype(c)::type;
+
+									if (m_ecs.has_component<C>(i))
+									{
+										typeof<> const & type{
+											U::component_info<C>()
+										};
+
+										std::string const name{
+											type.name().data(), type.name().size()
+										};
+
+										ImGui::Columns(2);
+										ImGui::Text("C: %s", name.c_str()); ImGui::NextColumn();
+										ImGui::Text("H: %u", type.hash()); ImGui::NextColumn();
+										ImGui::Columns(1);
+									}
+								});
+							});
+
+							ImGui::EndTabItem();
+						}
+						
+						ImGui::EndTabBar();
 					}
+				}
+				ImGui::End();
+			}
 
-					ImGui::Separator();
-					ImGui::Columns(1);
-
-					editor::draw_texture_preview(m_pipeline[0].get_texture(),
+			// display
+			if (m_show_display)
+			{
+				if (ImGui::Begin("ml::display", &m_show_display))
+				{
+					editor::draw_texture_preview(
+						m_pipeline[0].get_texture(),
 						(vec2)engine::get_window().get_frame_size() / 2.f
 					);
-					ImGui::Separator();
 				}
 				ImGui::End();
 			}
@@ -446,6 +512,7 @@ namespace ml
 		{
 			// cleanup stuff, etc...
 
+			m_ecs.clear();
 			m_images.clear();
 			m_shaders.clear();
 			m_materials.clear();
@@ -454,7 +521,6 @@ namespace ml
 			m_fonts.clear();
 			m_pipeline.clear();
 			m_scripts.clear();
-			m_ecs.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -463,7 +529,7 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::plugin * temp{};
-	if (!temp) { temp = new ml::demo{}; }
-	return temp;
+	static ml::plugin * p{};
+	if (!p) p = new ml::demo{};
+	return p;
 }

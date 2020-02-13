@@ -40,37 +40,34 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Type Signature
 namespace ml::pretty_function
 {
+	namespace impl
+	{
+		using name = typename std::string_view;
+	}
+
 	template <class T
-	> ML_NODISCARD static constexpr std::string_view type()
+	> ML_NODISCARD static constexpr impl::name type()
+	{
+		return { ML_PRETTY_FUNCTION };
+	}
+
+	template <class T, T Value
+	> ML_NODISCARD static constexpr impl::name value()
 	{
 		return { ML_PRETTY_FUNCTION };
 	}
 
 	namespace detail
 	{
-		static constexpr std::tuple<std::string_view, std::string_view> type
+		static constexpr std::tuple<impl::name, impl::name> type
 		{
 			ML_PRETTY_TYPE_PREFIX,
 			ML_PRETTY_TYPE_SUFFIX
 		};
-	}
-}
 
-// Value Signature
-namespace ml::pretty_function
-{
-	template <class T, T Value
-	> ML_NODISCARD static constexpr std::string_view value()
-	{
-		return { ML_PRETTY_FUNCTION };
-	}
-
-	namespace detail
-	{
-		static constexpr std::tuple<std::string_view, std::string_view, std::string_view> value
+		static constexpr std::tuple<impl::name, impl::name, impl::name> value
 		{
 			ML_PRETTY_VALUE_PREFIX,
 			ML_PRETTY_VALUE_DELIM,

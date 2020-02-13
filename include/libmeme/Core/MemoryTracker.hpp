@@ -1,5 +1,5 @@
-#ifndef _ML_MEMORY_TRACKER_HPP_
-#define _ML_MEMORY_TRACKER_HPP_
+#ifndef _ML_MEMORY_HPP_
+#define _ML_MEMORY_HPP_
 
 // system for tracking manual allocations
 
@@ -134,4 +134,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_MEMORY_TRACKER_HPP_
+#endif // !_ML_MEMORY_HPP_

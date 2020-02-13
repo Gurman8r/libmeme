@@ -8,73 +8,36 @@
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
 #include <libmeme/Core/BitSet.hpp>
+#include <libmeme/Core/Typeof.hpp>
 
 #define _ML_ECS _ML ecs::
 
 // ECS
 namespace ml::ecs
 {
-	// (M) manager
 	template <class
 	> struct manager;
+}
 
-	// (U) traits
-	template <class, class, class, class, class
-	> struct traits;
+// UTILITY
+namespace ml::ecs::util
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace cfg
+	// base system helper
+	template <class Signature
+	> struct x_base
 	{
-		// (T) tags
-		template <class ...
-		> struct tags;
-		
-		// (C) components
-		template <class ...
-		> struct components;
+		using signature = typename Signature;
+	};
 
-		// (S) signatures
-		template <class ...
-		> struct signatures;
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// (X) systems
-		template <template <class> class ...
-		> struct systems;
+	// used to store "template template" systems in type lists
+	template <template <class> class System
+	> struct x_wrapper final {};
 
-		// (O) options
-		template <size_t, size_t, size_t, size_t
-		> struct options;
-	}
-
-	namespace impl
-	{
-		// (E) entity
-		template <class
-		> struct entity;
-
-		// (H) handle
-		template <class
-		> struct handle;
-	}
-
-	namespace util
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// base system helper
-		template <class Signature
-		> struct x_base
-		{
-			using signature = typename Signature;
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// used to store "template template" systems in type lists
-		template <template <class> class System
-		> struct x_wrapper final {};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	}
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 // (T) TAGS
@@ -89,7 +52,14 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<Tags...>;
 
+		using type_info = typename ds::array<typeof<>, meta::size<type_list>()>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr type_info const & info() noexcept
+		{
+			return m_info;
+		}
 
 		static constexpr size_t count() noexcept
 		{
@@ -118,6 +88,18 @@ namespace ml::ecs::cfg
 		> using filter = typename meta::filter<impl_filter, T>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static constexpr type_info gen_info() noexcept
+		{
+			std::pair<size_t, type_info> temp{};
+			meta::for_tuple([&temp](auto const & t) { temp.second[temp.first++] = t;
+			}, meta::tuple<meta::remap<typeof, type_list>>{});
+			return temp.second;
+		}
+		static constexpr type_info m_info{ gen_info() };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -133,9 +115,16 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<Components...>;
 
+		using type_info = typename ds::array<typeof<>, meta::size<type_list>()>;
+
 		using storage_type = typename meta::tuple<meta::remap<pmr::vector, type_list>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr type_info const & info() noexcept
+		{
+			return m_info;
+		}
 
 		static constexpr size_t count() noexcept
 		{
@@ -164,6 +153,19 @@ namespace ml::ecs::cfg
 		> using filter = typename meta::filter<impl_filter, T>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static constexpr type_info gen_info() noexcept
+		{
+			std::pair<size_t, type_info> temp{};
+			meta::for_tuple([&temp](auto const & t) { temp.second[temp.first++] = t;
+			}, meta::tuple<meta::remap<typeof, type_list>>{});
+			return temp.second;
+		}
+
+		static constexpr type_info m_info{ gen_info() };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -179,7 +181,14 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<Signatures...>;
 
+		using type_info = typename ds::array<typeof<>, meta::size<type_list>()>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr type_info const & info() noexcept
+		{
+			return m_info;
+		}
 
 		static constexpr size_t count() noexcept
 		{
@@ -200,6 +209,19 @@ namespace ml::ecs::cfg
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static constexpr type_info gen_info() noexcept
+		{
+			std::pair<size_t, type_info> temp{};
+			meta::for_tuple([&temp](auto const & t) { temp.second[temp.first++] = t;
+			}, meta::tuple<meta::remap<typeof, type_list>>{});
+			return temp.second;
+		}
+
+		static constexpr type_info m_info{ gen_info() };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -215,10 +237,17 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<_ML_ECS util::template x_wrapper<Systems>...>;
 
-		template <class U
-		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
+		using type_info = typename ds::array<typeof<>, meta::size<type_list>()>;
+
+		template <class M
+		> using storage_type = typename meta::tuple<meta::list<Systems<M>...>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr type_info const & info() noexcept
+		{
+			return m_info;
+		}
 
 		static constexpr size_t count() noexcept
 		{
@@ -239,6 +268,19 @@ namespace ml::ecs::cfg
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static constexpr type_info gen_info() noexcept
+		{
+			std::pair<size_t, type_info> temp{};
+			meta::for_tuple([&temp](auto const & t) { temp.second[temp.first++] = t;
+			}, meta::tuple<meta::remap<typeof, type_list>>{});
+			return temp.second;
+		}
+		
+		static constexpr type_info m_info{ gen_info() };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -246,21 +288,20 @@ namespace ml::ecs::cfg
 namespace ml::ecs::cfg
 {
 	template <
-		size_t InitCap = 42,	// initial capacity
-		size_t GrowAmt = 5,		// grow amount
-		size_t MultNum = 2,		// multipler numerator
-		size_t MultDen = 1		// multipler denomenator
+		size_t GrowAmt = 5,	// growth base amount
+		size_t MultNum = 2,	// growth multipler numerator
+		size_t MultDen = 1	// growth multipler denomenator
 	> struct options final
 	{
-		static constexpr size_t init_cap
-		{
-			InitCap
-		};
-		static constexpr size_t grow_amount
+		static_assert(0 < GrowAmt);
+		static_assert(0 < MultDen);
+		static_assert(MultDen <= MultNum);
+
+		static constexpr size_t grow_amt
 		{
 			GrowAmt
 		};
-		static constexpr float_t grow_multiplier
+		static constexpr float_t grow_mul
 		{
 			_ML util::ratio_cast(1.f, std::ratio<MultNum, MultDen>{})
 		};
@@ -271,30 +312,22 @@ namespace ml::ecs::cfg
 namespace ml::ecs
 {
 	template <
-		class Tags			= cfg::tags			<>,
-		class Components	= cfg::components	<>,
-		class Signatures	= cfg::signatures	<>,
-		class Systems		= cfg::systems		<>,
-		class Options		= cfg::options		<>
+		class T = cfg::tags			<>,	// Tags
+		class C = cfg::components	<>,	// Components
+		class S = cfg::signatures	<>,	// Signatures
+		class X = cfg::systems		<>,	// Systems
+		class O = cfg::options		<>	// Options
 	> struct traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using tags			= typename Tags;
-		using components	= typename Components;
-		using signatures	= typename Signatures;
-		using systems		= typename Systems;
-		using options		= typename Options;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		using self_type = typename traits<
-			tags,
-			components,
-			signatures,
-			systems,
-			options
-		>;
+		using self_type		= typename traits<T, C, S, X, O>;
+		using owner_type	= typename manager<self_type>;
+		using tags			= typename T;
+		using components	= typename C;
+		using signatures	= typename S;
+		using systems		= typename X;
+		using options		= typename O;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -305,18 +338,17 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using entity_type		= typename impl::entity<self_type>;
-		using handle_type		= typename impl::handle<self_type>;
-		using entity_storage	= typename pmr::vector<entity_type>;
-		using handle_storage	= typename pmr::vector<handle_type>;
-		using component_storage = typename components::storage_type;
-		using system_storage	= typename systems::template storage_type<self_type>;
+		using component_list	= typename components::type_list;
+		using tag_list			= typename tags::type_list;
+		using signature_list	= typename signatures::type_list;
+		using system_list		= typename systems::type_list;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using bitset_type = typename ds::bitset<component_count + tag_count>;
-
-		using bitset_storage = typename meta::tuple<meta::repeat<signature_count, bitset_type>>;
+		using component_storage = typename components::storage_type;
+		using system_storage	= typename systems::template storage_type<self_type>;
+		using signature			= typename ds::bitset<component_count + tag_count>;
+		using signature_storage	= typename meta::tuple<meta::repeat<signature_count, signature>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -326,11 +358,55 @@ namespace ml::ecs
 			return components::template contains<C>();
 		}
 
+		template <class C
+		> static constexpr size_t component_id() noexcept
+		{
+			return components::template index<C>();
+		}
+
+		template <class C
+		> static constexpr size_t component_bit() noexcept
+		{
+			return self_type::component_id<C>();
+		}
+
+		static constexpr auto const & component_info() noexcept
+		{
+			return self_type::components::info();
+		}
+
+		template <class C
+		> static constexpr typeof<> const & component_info() noexcept
+		{
+			return self_type::component_info()[self_type::component_id<C>()];
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> static constexpr bool has_tag() noexcept
 		{
 			return tags::template contains<T>();
 		}
+
+		template <class T
+		> static constexpr size_t tag_id() noexcept
+		{
+			return tags::template index<T>();
+		}
+
+		template <class T
+		> static constexpr size_t tag_bit() noexcept
+		{
+			return component_count + self_type::tag_id<T>();
+		}
+
+		static constexpr auto const & tag_info() noexcept
+		{
+			return self_type::tags::info();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class S
 		> static constexpr bool has_signature() noexcept
@@ -338,71 +414,54 @@ namespace ml::ecs
 			return signatures::template contains<S>();
 		}
 
+		template <class S
+		> static constexpr size_t signature_id() noexcept
+		{
+			return signatures::template index<S>();
+		}
+
+		template <class S
+		> static constexpr signature const & signature_bitset() noexcept
+		{
+			return std::get<self_type::signature_id<S>()>(m_signature_bitsets);
+		}
+
+		static constexpr auto const & signature_info() noexcept
+		{
+			return self_type::signatures::info();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <template <class> class X
 		> static constexpr bool has_system() noexcept
 		{
 			return systems::template contains<X>();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class C
-		> static constexpr size_t component_index() noexcept
-		{
-			return components::template index<C>();
-		}
-
-		template <class T
-		> static constexpr size_t tag_index() noexcept
-		{
-			return tags::template index<T>();
-		}
-
-		template <class S
-		> static constexpr size_t signature_index() noexcept
-		{
-			return signatures::template index<S>();
-		}
-
 		template <template <class> class X
-		> static constexpr size_t system_index() noexcept
+		> static constexpr size_t system_id() noexcept
 		{
 			return systems::template index<X>();
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class C
-		> static constexpr size_t component_bit() noexcept
+		static constexpr auto const & system_info() noexcept
 		{
-			return self_type::component_index<C>();
-		}
-
-		template <class T
-		> static constexpr size_t tag_bit() noexcept
-		{
-			return component_count + self_type::tag_index<T>();
-		}
-
-		template <class S
-		> static constexpr auto const & signature_bitset() noexcept
-		{
-			return std::get<self_type::signature_index<S>()>(m_signatures);
+			return self_type::systems::info();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr bitset_storage generate_signature_bitsets() noexcept
+		static constexpr signature_storage gen_signature_bitsets() noexcept
 		{
 			// generate bitsets for each signature
-			bitset_storage temp{};
+			signature_storage temp{};
 			meta::for_types<typename signatures::type_list
 			>([&temp](auto s)
 			{
-				// get the signature's bitset
-				auto & b{ std::get<self_type::signature_index<decltype(s)::type>()
-				>(temp) };
+				// get the signature's signature
+				auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
 
 				// enable component bits
 				meta::for_types<components::template filter<decltype(s)::type>
@@ -423,34 +482,7 @@ namespace ml::ecs
 			return temp;
 		}
 
-		static constexpr auto m_signatures{ generate_signature_bitsets() };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-// (E) ENTITY
-namespace ml::ecs::impl
-{
-	// internal entity data
-	template <class Traits
-	> struct entity final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type = typename Traits;
-
-		using owner_type = typename manager<traits_type>;
-
-		using bitset_type = typename traits_type::bitset_type;
-
-	private:
-		friend owner_type;
-
-		bool		m_alive;	// state of entity (alive / dead)
-		size_t		m_index;	// index of real component data
-		size_t		m_handle;	// index of managing handle
-		bitset_type	m_bitset;	// signature bitset
+		static constexpr signature_storage m_signature_bitsets{ gen_signature_bitsets() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -459,7 +491,7 @@ namespace ml::ecs::impl
 // (H) HANDLE
 namespace ml::ecs::impl
 {
-	// abstraction over entity/manager interface
+	// abstraction over entity interface
 	template <class Traits
 	> struct handle final
 	{
@@ -572,18 +604,6 @@ namespace ml::ecs::impl
 		int32_t		m_counter;	// validity check counter
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline handle & invalidate() noexcept
-		{
-			++m_counter; return (*this);
-		}
-
-		inline handle & refresh(size_t const i) noexcept
-		{
-			m_entity = i; return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -598,12 +618,22 @@ namespace ml::ecs
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using traits_type		= typename Traits;
 		using self_type			= typename manager<traits_type>;
-		using entity			= typename traits_type::entity_type;
-		using handle			= typename traits_type::handle_type;
-		using entity_storage	= typename traits_type::entity_storage;
-		using handle_storage	= typename traits_type::handle_storage;
+		using signature			= typename traits_type::signature;
 		using component_storage	= typename traits_type::component_storage;
 		using system_storage	= typename traits_type::system_storage;
+		using handle			= typename impl::handle<traits_type>;
+		using handle_storage	= typename pmr::vector<handle>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Bitset };
+
+		using entity_storage = typename std::tuple<
+			pmr::vector<bool>,		// state of entity (alive / dead)
+			pmr::vector<size_t>,	// index of real component data
+			pmr::vector<size_t>,	// index of managing handle
+			pmr::vector<signature>	// signature bitsets
+		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -611,7 +641,7 @@ namespace ml::ecs
 			: m_capacity	{ 0 }
 			, m_size		{ 0 }
 			, m_size_next	{ 0 }
-			, m_entities	{ alloc }
+			, m_entities	{ std::allocator_arg, alloc }
 			, m_handles		{ alloc }
 			, m_components	{ std::allocator_arg, alloc }
 			, m_systems		{}
@@ -636,10 +666,7 @@ namespace ml::ecs
 			this->grow_to(cap);
 		}
 
-		manager() noexcept
-			: self_type{ traits_type::options::init_cap }
-		{
-		}
+		manager() noexcept : self_type{ 0 } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -677,11 +704,10 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				auto & e{ m_entities[i] };
-				e.m_index = i;
-				e.m_handle = i;
-				e.m_bitset.reset();
-				e.m_alive = false;
+				std::get<ID_Alive>(	m_entities)[i] = false;
+				std::get<ID_Index>(	m_entities)[i] = i;
+				std::get<ID_Handle>(m_entities)[i] = i;
+				std::get<ID_Bitset>(m_entities)[i].reset();
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
@@ -697,6 +723,7 @@ namespace ml::ecs
 				m_size		= other.m_size;
 				m_capacity	= other.m_capacity;
 				m_size_next = other.m_size_next;
+
 				m_entities	= other.m_entities;
 				m_handles	= other.m_handles;
 				m_components= other.m_components;
@@ -704,36 +731,20 @@ namespace ml::ecs
 			}
 		}
 
-		inline void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				std::swap(m_size,		other.m_size);
-				std::swap(m_capacity,	other.m_capacity);
-				std::swap(m_size_next,	other.m_size_next);
-				std::swap(m_entities,	other.m_entities);
-				std::swap(m_handles,	other.m_handles);
-				std::swap(m_components, other.m_components);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		inline void grow_to(size_t const cap)
 		{
 			if (cap <= m_capacity) return;
 
-			m_entities.resize(cap);
+			meta::for_tuple([this, cap](auto & v) { v.resize(cap); }, m_entities);
 			m_handles.resize(cap);
-			meta::for_tuple([this, cap](auto & vec) { vec.resize(cap); }, m_components);
+			meta::for_tuple([this, cap](auto & v) { v.resize(cap); }, m_components);
 
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
-				auto & e{ m_entities[i] };
-				e.m_index = i;
-				e.m_handle = i;
-				e.m_bitset.reset();
-				e.m_alive = false;
+				std::get<ID_Alive>(m_entities)[i] = false;
+				std::get<ID_Index>(m_entities)[i] = i;
+				std::get<ID_Handle>(m_entities)[i] = i;
+				std::get<ID_Bitset>(m_entities)[i].reset();
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
@@ -759,32 +770,62 @@ namespace ml::ecs
 					for (; true; ++dead)
 					{
 						if (dead > alive) return dead;
-						if (!m_entities[dead].m_alive) break;
+						if (!std::get<ID_Alive>(m_entities)[dead]) break;
 					}
 
 					// find alive entity from the right
 					for (; true; --alive)
 					{
-						if (m_entities[alive].m_alive) break;
+						if (std::get<ID_Alive>(m_entities)[alive]) break;
 						if (alive <= dead) return dead;
 					}
 
 					// found two entities that need to be swapped
-					ML_ASSERT(m_entities[alive].m_alive);
-					ML_ASSERT(!m_entities[dead].m_alive);
-					std::swap(m_entities[alive], m_entities[dead]);
+					ML_ASSERT(std::get<ID_Alive>(m_entities)[alive]);
+					ML_ASSERT(!std::get<ID_Alive>(m_entities)[dead]);
+
+					this->swap(alive, dead);
 
 					// refresh alive entity
-					m_handles[alive].refresh(alive);
+					auto & a{ m_handles[alive] };
+					a.m_entity = alive;
 
 					// invalidate and refresh dead entity
-					m_handles[dead].invalidate().refresh(dead);
+					auto & d{ m_handles[dead] };
+					++d.m_counter;
+					d.m_entity = dead;
 
 					// move both iterator indices
 					++dead; --alive;
 				}
 				return dead;
 			})();
+		}
+
+		inline void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_size,		other.m_size);
+				std::swap(m_capacity,	other.m_capacity);
+				std::swap(m_size_next,	other.m_size_next);
+
+				m_entities	.swap(other.m_entities);
+				m_handles	.swap(other.m_handles);
+				m_components.swap(other.m_components);
+				m_systems	.swap(other.m_systems);
+			}
+		}
+
+		inline void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			if (lhs != rhs)
+			{
+				std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
+				std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
+				std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
+				std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -794,28 +835,54 @@ namespace ml::ecs
 			// grow if needed
 			if (m_capacity <= m_size_next)
 			{
-				constexpr auto amt{ traits_type::options::grow_amount };
-				constexpr auto mul{ traits_type::options::grow_multiplier };
-				this->grow_to(static_cast<size_t>((m_capacity * amt) * mul));
+				constexpr auto amt{ traits_type::options::grow_amt };
+				constexpr auto mul{ traits_type::options::grow_mul };
+				this->grow_to(static_cast<size_t>((m_capacity + amt) * mul));
 			}
 
-			size_t i{ m_size_next++ };
-			auto & e{ m_entities[i] };
-			e.m_alive = true;
-			e.m_bitset.reset();
+			size_t const i{ m_size_next++ };
+			std::get<ID_Alive>(m_entities)[i] = true;
+			std::get<ID_Bitset>(m_entities)[i].reset();
 			return i;
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool is_alive(size_t const i) const
+		{
+			return std::get<ID_Alive>(m_entities)[i];
+		}
+
+		ML_NODISCARD inline bool is_alive(handle const & h) const
+		{
+			return this->is_alive(h.m_entity);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline self_type & kill(size_t const i)
+		{
+			std::get<ID_Alive>(m_entities)[i] = false;
+			return (*this);
+		}
+
+		inline self_type & kill(handle const & h)
+		{
+			return this->kill(h.m_entity);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline handle create_handle()
 		{
-			size_t i{ this->create_entity() };
-			auto & e{ m_entities[i] };
-			auto & h{ m_handles[e.m_handle] };
+			size_t const i{ this->create_entity() };
+			size_t const e{ std::get<ID_Handle>(m_entities)[i] };
+			auto & h{ m_handles[e] };
 
 			handle temp{};
 			temp.m_manager	= h.m_manager;
 			temp.m_entity	= h.m_entity = i;
-			temp.m_self		= e.m_handle;
+			temp.m_self		= e;
 			temp.m_counter	= h.m_counter;
 			ML_ASSERT(temp);
 			return temp;
@@ -825,6 +892,8 @@ namespace ml::ecs
 		{
 			return (h.m_counter == this->get_handle(h).m_counter);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline handle & get_handle(size_t const i)
 		{
@@ -848,35 +917,10 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool is_alive(size_t const i) const
-		{
-			return m_entities[i].m_alive;
-		}
-
-		ML_NODISCARD inline bool is_alive(handle const & h) const
-		{
-			return this->is_alive(h.m_entity);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline self_type & kill(size_t const i)
-		{
-			m_entities[i].m_alive = false;
-			return (*this);
-		}
-
-		inline self_type & kill(handle const & h)
-		{
-			return this->kill(h.m_entity);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class T
 		> inline self_type & add_tag(size_t const i) noexcept
 		{
-			m_entities[i].m_bitset.write<traits_type::template tag_bit<T>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(true);
 			return (*this);
 		}
@@ -892,7 +936,7 @@ namespace ml::ecs
 		template <class T
 		> inline self_type & del_tag(size_t const i) noexcept
 		{
-			m_entities[i].m_bitset.write<traits_type::template tag_bit<T>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(false);
 			return (*this);
 		}
@@ -908,7 +952,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool has_tag(size_t const i) const noexcept
 		{
-			return m_entities[i].m_bitset.read<traits_type::template tag_bit<T>()>();
+			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -922,11 +966,10 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> inline decltype(auto) add_component(size_t const i, Args && ... args) noexcept
 		{
-			auto & e{ m_entities[i] };
-			e.m_bitset.write<traits_type::template component_bit<C>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(true);
 
-			auto & c{ std::get<pmr::vector<C>>(m_components)[e.m_index] };
+			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
 			c = C{ ML_FWD(args)... };
 			return c;
 		}
@@ -954,7 +997,7 @@ namespace ml::ecs
 		template <class C
 		> inline self_type & del_component(size_t const i) noexcept
 		{
-			m_entities[i].m_bitset.write<traits_type::template component_bit<C>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(false);
 			return (*this);
 		}
@@ -970,13 +1013,13 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD inline decltype(auto) get_component(size_t const i) noexcept
 		{
-			return std::get<pmr::vector<C>>(m_components)[m_entities[i].m_index];
+			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
 		}
 
 		template <class C
 		> ML_NODISCARD inline decltype(auto) get_component(size_t const i) const noexcept
 		{
-			return std::get<pmr::vector<C>>(m_components)[m_entities[i].m_index];
+			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
 		}
 
 		template <class C
@@ -993,10 +1036,22 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD signature const & get_signature(size_t const i) const noexcept
+		{
+			return std::get<ID_Bitset>(m_entities)[i];
+		}
+
+		ML_NODISCARD signature const & get_signature(handle const & h) const noexcept
+		{
+			return this->get_signature(h.m_entity);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class C
 		> ML_NODISCARD inline bool has_component(size_t const i) const noexcept
 		{
-			return m_entities[i].m_bitset.read(traits_type::template component_bit<C>());
+			return this->get_signature(i).read<traits_type::template component_bit<C>()>();
 		}
 		
 		template <class C
@@ -1007,12 +1062,15 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline bool matches_signature(size_t const i, signature const & s) const noexcept
+		{
+			return (s & this->get_signature(i)) == s;
+		}
+
 		template <class S
 		> ML_NODISCARD inline bool matches_signature(size_t const i) const noexcept
 		{
-			auto const & e{ m_entities[i].m_bitset };
-			auto const & s{ traits_type::template signature_bitset<S>() };
-			return (s & e) == s;
+			return this->matches_signature(i, traits_type::template signature_bitset<S>());
 		}
 
 		template <class S
@@ -1063,8 +1121,8 @@ namespace ml::ecs
 		> inline self_type & for_system(Fn && fn)
 		{
 			return this->for_matching<typename X<traits_type>::signature
-			>([&fn, &x = std::get<traits_type::template system_index<X>()>(m_systems)
-			](auto, auto && ... req_comp)
+			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
+			](size_t, auto && ... req_comp)
 			{
 				std::invoke(ML_FWD(fn), x, ML_FWD(req_comp)...);
 			});
@@ -1101,7 +1159,7 @@ namespace ml::ecs
 			template <class Fn
 			> static inline void call(size_t const i, self_type & self, Fn && fn)
 			{
-				auto const c{ self.m_entities[i].m_index }; // component data index
+				auto const c{ std::get<ID_Index>(self.m_entities)[i] }; // component data index
 
 				std::invoke(ML_FWD(fn), i, std::get<pmr::vector<Ts>>(self.m_components)[c]...);
 			}
@@ -1155,23 +1213,23 @@ namespace ml::ecs::tests
 	>;
 
 	// tests
-	static_assert(M::tag_count			== 3);
-	static_assert(M::component_count	== 5);
-	static_assert(M::signature_count	== 4);
-	static_assert(M::system_count		== 0);
+	static_assert(M::tag_count				== 3);
+	static_assert(M::component_count		== 5);
+	static_assert(M::signature_count		== 4);
+	static_assert(M::system_count			== 0);
 
-	static_assert(M::component_index<C0>() == 0);
-	static_assert(M::component_index<C1>() == 1);
-	static_assert(M::component_index<C2>() == 2);
-	static_assert(M::component_index<C3>() == 3);
-	static_assert(M::component_index<C4>() == 4);
-	static_assert(M::tag_index<T0>()		== 0);
-	static_assert(M::tag_index<T1>()		== 1);
-	static_assert(M::tag_index<T2>()		== 2);
-	static_assert(M::signature_index<S0>() == 0);
-	static_assert(M::signature_index<S1>() == 1);
-	static_assert(M::signature_index<S2>() == 2);
-	static_assert(M::signature_index<S3>() == 3);
+	static_assert(M::component_id<C0>()		== 0);
+	static_assert(M::component_id<C1>()		== 1);
+	static_assert(M::component_id<C2>()		== 2);
+	static_assert(M::component_id<C3>()		== 3);
+	static_assert(M::component_id<C4>()		== 4);
+	static_assert(M::tag_id<T0>()			== 0);
+	static_assert(M::tag_id<T1>()			== 1);
+	static_assert(M::tag_id<T2>()			== 2);
+	static_assert(M::signature_id<S0>()		== 0);
+	static_assert(M::signature_id<S1>()		== 1);
+	static_assert(M::signature_id<S2>()		== 2);
+	static_assert(M::signature_id<S3>()		== 3);
 
 	static_assert(M::component_bit<C0>()	== 0);
 	static_assert(M::component_bit<C1>()	== 1);

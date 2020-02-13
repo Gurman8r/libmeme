@@ -13,28 +13,42 @@ namespace ml
 
 	template <class T> struct typeof<T> final
 	{
+		using name_type = typename nameof<>::name_type;
+
+		using hash_type = typename nameof<>::hash_type;
+
 		constexpr typeof() noexcept = default;
 
-		ML_NODISCARD static constexpr std::string_view const & name() noexcept
+		ML_NODISCARD static constexpr name_type const & name() noexcept
 		{
 			return m_name;
 		}
 
-		ML_NODISCARD static constexpr size_t const & hash() noexcept
+		ML_NODISCARD static constexpr hash_type const & hash() noexcept
 		{
 			return m_hash;
 		}
 
-	private:
-		static constexpr std::string_view m_name{ nameof_v<T> };
+		template <class ... U
+		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) const noexcept
+		{
+			return (m_hash != other.hash()) ? (m_hash < other.hash()) ? -1 : 1 : 0;
+		}
 
-		static constexpr size_t m_hash{ hashof_v<T> };
+	private:
+		static constexpr name_type m_name{ nameof_v<T> };
+
+		static constexpr hash_type m_hash{ hashof_v<T> };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct typeof<> final
 	{
+		using name_type = typename std::string_view;
+
+		using hash_type = typename size_t;
+
 		constexpr typeof() noexcept
 			: m_name{ "" }, m_hash{ 0 }
 		{
@@ -44,6 +58,22 @@ namespace ml
 		> constexpr typeof(typeof<T> const & other) noexcept
 			: m_name{ other.name() }, m_hash{ other.hash() }
 		{
+		}
+
+		ML_NODISCARD constexpr name_type const & name() const noexcept
+		{
+			return m_name;
+		}
+
+		ML_NODISCARD constexpr hash_type const & hash() const noexcept
+		{
+			return m_hash;
+		}
+
+		template <class ... U
+		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) const noexcept
+		{
+			return (m_hash != other.hash()) ? (m_hash < other.hash()) ? -1 : 1 : 0;
 		}
 
 		constexpr void swap(typeof<> & other) noexcept
@@ -56,25 +86,10 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD constexpr int32_t compare(typeof<> const & other) const noexcept
-		{
-			return m_name.compare(other.name());
-		}
-
-		ML_NODISCARD constexpr std::string_view const & name() const noexcept
-		{
-			return m_name;
-		}
-
-		ML_NODISCARD constexpr size_t const & hash() const noexcept
-		{
-			return m_hash;
-		}
-
 	private:
-		std::string_view m_name;
+		name_type m_name;
 		
-		size_t m_hash;
+		hash_type m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,90 +99,78 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator==(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return (lhs.hash() == rhs.hash());
+		return lhs.compare(rhs) == 0;
 	}
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator!=(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return !(lhs == rhs);
+		return lhs.compare(rhs) != 0;
 	}
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator<(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return (lhs.name() < rhs.name());
+		return lhs.compare(rhs) < 0;
 	}
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator>(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return !(lhs < rhs);
+		return lhs.compare(rhs) > 0;
 	}
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator<=(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return (lhs < rhs) || (lhs == rhs);
+		return lhs.compare(rhs) <= 0;
 	}
 
-	template <
-		class ... T
+	template <class ... T
 	> ML_NODISCARD constexpr bool operator>=(typeof<> const & lhs, typeof<T...> const & rhs) noexcept
 	{
-		return (lhs > rhs) || (lhs == rhs);
+		return lhs.compare(rhs) >= 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator==(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return !(lhs < rhs) && !(rhs < lhs);
+		return lhs.compare(rhs) == 0;
 	}
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator!=(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return !(lhs == rhs);
+		return lhs.compare(rhs) != 0;
 	}
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator<(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return (lhs.hash() < rhs.hash());
+		return lhs.compare(rhs) < 0;
 	}
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator>(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return !(lhs < rhs);
+		return lhs.compare(rhs) > 0;
 	}
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator<=(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return (lhs < rhs) || (lhs == rhs);
+		return lhs.compare(rhs) <= 0;
 	}
 
-	template <
-		class X, class ... Y
+	template <class X, class ... Y
 	> ML_NODISCARD constexpr bool operator>=(typeof<X> const & lhs, typeof<Y...> const & rhs) noexcept
 	{
-		return (lhs > rhs) || (lhs == rhs);
+		return lhs.compare(rhs) >= 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

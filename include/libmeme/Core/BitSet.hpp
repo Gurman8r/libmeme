@@ -132,7 +132,7 @@ namespace ml::ds
 			return (*this);
 		}
 
-		template <size_t I> constexpr bool read() noexcept
+		template <size_t I> constexpr bool read() const noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
 			return read(I);

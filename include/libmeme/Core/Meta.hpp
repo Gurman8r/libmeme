@@ -59,7 +59,7 @@ namespace ml::meta
 		template <class Fn, class ... Args
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
-			return (void)std::initializer_list<int>{ (fn(ML_FWD(args)), 0)... };
+			return (void)std::initializer_list<int>{ (ML_FWD(fn)(ML_FWD(args)), 0)... };
 		}
 
 		template <class Fn, class Tp
@@ -235,14 +235,13 @@ namespace ml::meta
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return meta::for_tuple(fn, tag_tuple<Ls>{});
+		return _ML_META for_tuple(fn, tag_tuple<Ls>{});
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class Ls
-	> constexpr size_t size() noexcept
-	{
-		return Ls::size;
-	}
+	> constexpr size_t size() noexcept { return Ls::size; }
 
 	template <class Ls, class T> ML_USING push_back = typename concat<Ls, list<T>>;
 

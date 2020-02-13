@@ -368,18 +368,18 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
-	> inline std::stringstream sink(Arg0 const & arg0, Args && ... args) noexcept
+	> inline std::stringstream sink(Arg0 && arg0, Args && ... args) noexcept
 	{
 		std::stringstream ss{};
-		ss << arg0 << '\n';
+		ss << ML_FWD(arg0) << '\n';
 		int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
 		return ss;
 	}
 
 	template <class Arg0, class ... Args
-	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, Arg0 const & arg0, Args && ... args) noexcept
+	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{ sink(arg0, ML_FWD(args)...) };
+		std::stringstream ss{ sink(ML_FWD(arg0), ML_FWD(args)...) };
 		return format(fmt, ss);
 	}
 

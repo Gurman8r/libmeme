@@ -8,7 +8,7 @@
 	auto var{ ml::timer{ true } };								\
 	ML_DEFER{													\
 	var.stop();													\
-	ml::performance_tracker::push_frame(name, var.elapsed() );	\
+	ml::performance_tracker::push_frame(name, var.elapsed());	\
 	};
 
 #define ML_BENCHMARK(name) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), name)

@@ -21,8 +21,8 @@ namespace ml
 		// startup settings
 		struct config final
 		{
-			pmr::vector<pmr::string>	command_line;	// command line arguments
 			fs::path					program_name;	// program name
+			pmr::vector<pmr::string>	command_line;	// command line arguments
 			fs::path					library_path;	// library path
 			fs::path					content_path;	// content path
 			pmr::vector<fs::path>		script_list;	// scripts to run on start

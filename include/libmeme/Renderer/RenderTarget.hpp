@@ -26,18 +26,22 @@ namespace ml
 		void draw(VAO const & vao, VBO const & vbo) const;
 
 		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
-
-		template <class T> inline void draw(T const * value) const
-		{
-			T::draw(*this, value);
-		}
-
-		template <class T> inline void draw(T const & value) const
-		{
-			this->draw(&value);
-		}
 		
 		void viewport(int_rect const & bounds) const;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T, class ... Args
+		> inline void draw(T const * value, Args && ... args) const
+		{
+			T::draw(*this, value, ML_FWD(args)...);
+		}
+
+		template <class T, class ... Args
+		> inline void draw(T const & value, Args && ... args) const
+		{
+			this->draw(&value, ML_FWD(args)...);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

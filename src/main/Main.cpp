@@ -16,9 +16,9 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static auto g_raw = ds::array<byte_t, 64._MiB>{};
-	static auto g_buf = pmr::monotonic_buffer_resource{ g_raw.data(), g_raw.size() };
-	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_buf };
+	static auto g_buff = ds::array<byte_t, 64._MiB>{};
+	static auto g_mono = pmr::monotonic_buffer_resource{ g_buff.data(), g_buff.size() };
+	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_mono };
 	pmr::set_default_resource(&g_pool);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,8 +27,8 @@ ml::int32_t main()
 	if (!engine::create_context() || !([&]()
 	{
 		engine::config & config	= engine::get_config();
-		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 		config.program_name		= ML_ARGV[0];
+		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 		config.library_path		= "../../../../"s;
 		config.content_path		= "../../../../assets/"s;
 		config.script_list		= { "../../../../libmeme.py"s };
