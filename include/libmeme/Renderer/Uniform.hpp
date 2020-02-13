@@ -102,9 +102,9 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				m_type.swap(other.m_type);
-				m_name.swap(other.m_name);
-				m_data.swap(other.m_data);
+				std::swap(m_type, other.m_type);
+				std::swap(m_name, other.m_name);
+				std::swap(m_data, other.m_data);
 			}
 		}
 

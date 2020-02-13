@@ -173,7 +173,7 @@ namespace ml
 	template <class Tx, class Ty, size_t N
 	> constexpr bool operator==(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
 	{
-		return util::equals(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+		return util::equal_to(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t N

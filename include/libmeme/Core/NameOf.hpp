@@ -24,9 +24,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using name_type = typename pretty_function::impl::name;
+		using name_type = typename pretty_function::detail::name;
 
-		using hash_type = typename decltype(util::hash(name_type{}));
+		using guid_type = typename decltype(util::hash(name_type{}));
 
 		nameof() = delete;
 

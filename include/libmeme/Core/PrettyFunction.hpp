@@ -42,32 +42,32 @@
 
 namespace ml::pretty_function
 {
-	namespace impl
+	namespace detail
 	{
 		using name = typename std::string_view;
 	}
 
 	template <class T
-	> ML_NODISCARD static constexpr impl::name type()
+	> ML_NODISCARD static constexpr detail::name type()
 	{
 		return { ML_PRETTY_FUNCTION };
 	}
 
 	template <class T, T Value
-	> ML_NODISCARD static constexpr impl::name value()
+	> ML_NODISCARD static constexpr detail::name value()
 	{
 		return { ML_PRETTY_FUNCTION };
 	}
 
 	namespace detail
 	{
-		static constexpr std::tuple<impl::name, impl::name> type
+		static constexpr std::tuple<detail::name, detail::name> type
 		{
 			ML_PRETTY_TYPE_PREFIX,
 			ML_PRETTY_TYPE_SUFFIX
 		};
 
-		static constexpr std::tuple<impl::name, impl::name, impl::name> value
+		static constexpr std::tuple<detail::name, detail::name, detail::name> value
 		{
 			ML_PRETTY_VALUE_PREFIX,
 			ML_PRETTY_VALUE_DELIM,

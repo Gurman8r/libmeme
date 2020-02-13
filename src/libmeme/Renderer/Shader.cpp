@@ -202,7 +202,7 @@ namespace ml
 	bool shader::set_uniform(uniform const & value)
 	{
 		if (!value) { return false; }
-		switch (value.type().hash())
+		switch (value.type().guid())
 		{
 		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
 			return set_uniform(value.name(), v.value());

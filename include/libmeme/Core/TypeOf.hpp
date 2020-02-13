@@ -15,7 +15,7 @@ namespace ml
 	{
 		using name_type = typename nameof<>::name_type;
 
-		using hash_type = typename nameof<>::hash_type;
+		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept = default;
 
@@ -24,39 +24,39 @@ namespace ml
 			return m_name;
 		}
 
-		ML_NODISCARD static constexpr hash_type const & hash() noexcept
+		ML_NODISCARD static constexpr guid_type const & guid() noexcept
 		{
-			return m_hash;
+			return m_guid;
 		}
 
 		template <class ... U
 		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) noexcept
 		{
-			return (m_hash != other.hash()) ? (m_hash < other.hash()) ? -1 : 1 : 0;
+			return (m_guid != other.guid()) ? (m_guid < other.guid()) ? -1 : 1 : 0;
 		}
 
 	private:
 		static constexpr name_type m_name{ nameof_v<T> };
 
-		static constexpr hash_type m_hash{ hashof_v<T> };
+		static constexpr guid_type m_guid{ hashof_v<T> };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct typeof<> final
 	{
-		using name_type = typename std::string_view;
+		using name_type = typename nameof<>::name_type;
 
-		using hash_type = typename size_t;
+		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept
-			: m_name{ "" }, m_hash{ 0 }
+			: m_name{ "" }, m_guid{ 0 }
 		{
 		}
 
 		template <class T
 		> constexpr typeof(typeof<T> const & other) noexcept
-			: m_name{ other.name() }, m_hash{ other.hash() }
+			: m_name{ other.name() }, m_guid{ other.guid() }
 		{
 		}
 
@@ -65,31 +65,20 @@ namespace ml
 			return m_name;
 		}
 
-		ML_NODISCARD constexpr hash_type const & hash() const noexcept
+		ML_NODISCARD constexpr guid_type const & guid() const noexcept
 		{
-			return m_hash;
+			return m_guid;
 		}
 
 		template <class ... U
 		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) const noexcept
 		{
-			return (m_hash != other.hash()) ? (m_hash < other.hash()) ? -1 : 1 : 0;
-		}
-
-		constexpr void swap(typeof<> & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_name.swap(other.m_name);
-
-				util::swap(m_hash, other.m_hash);
-			}
+			return (m_guid != other.guid()) ? (m_guid < other.guid()) ? -1 : 1 : 0;
 		}
 
 	private:
 		name_type m_name;
-		
-		hash_type m_hash;
+		guid_type m_guid;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

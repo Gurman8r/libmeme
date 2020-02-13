@@ -99,17 +99,19 @@ namespace ml
 			x_apply_transforms, x_apply_materials, x_draw_renderers
 			>
 		>;
+		
+		using entity_manager = ecs::manager<entity_traits>;
 
-		ecs::manager<entity_traits> m_ecs{};
+		entity_manager m_ecs{};
 
-		pmr::vector<decltype(m_ecs)::handle> m_handles;
+		pmr::vector<entity_manager::handle> m_handles;
 
 
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool m_show_imgui_demo	{ false };
-		bool m_show_debug{ true };
+		bool m_show_debug		{ true };
 		bool m_show_display		{ true };
 
 
@@ -143,12 +145,12 @@ namespace ml
 		{
 			switch (value.id())
 			{
-			case hashof_v<enter_event	> : on_enter	(*value.as<enter_event>()	); break;
-			case hashof_v<update_event	> : on_update	(*value.as<update_event>()	); break;
-			case hashof_v<draw_event	> : on_draw		(*value.as<draw_event>()	); break;
-			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<gui_dock_event>()); break;
-			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<gui_draw_event>()); break;
-			case hashof_v<exit_event	> : on_exit		(*value.as<exit_event>()	); break;
+			case hashof_v<enter_event	> : on_enter	(*value.as<	enter_event		>()); break;
+			case hashof_v<update_event	> : on_update	(*value.as<	update_event	>()); break;
+			case hashof_v<draw_event	> : on_draw		(*value.as<	draw_event		>()); break;
+			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<	gui_dock_event	>()); break;
+			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<	gui_draw_event	>()); break;
+			case hashof_v<exit_event	> : on_exit		(*value.as<	exit_event		>()); break;
 			}
 		}
 
@@ -161,35 +163,36 @@ namespace ml
 			// MENUS
 			{
 				// File Menu
-				editor::get_main_menu().add_menu("File", [&]()
+				editor::get_main_menu().add_menu("file", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					if (ImGui::MenuItem("Quit", "Alt+F4"))
+					if (ImGui::MenuItem("quit", "Alt+F4"))
 					{
 						engine::get_window().close();
 					}
 				});
 
 				// View Menu
-				editor::get_main_menu().add_menu("View", [&]()
+				editor::get_main_menu().add_menu("view", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("libmeme demo", "", &m_show_debug);
+					ImGui::MenuItem("debug", "", &m_show_debug);
+					ImGui::MenuItem("display", "", &m_show_display);
 				});
 
 				// Option Menu
-				editor::get_main_menu().add_menu("Option", [&]()
+				editor::get_main_menu().add_menu("option", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					bool fullscreen{ engine::get_window().is_fullscreen() };
-					if (ImGui::MenuItem("Fullscreen", "", &fullscreen))
+					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 					{
 						engine::get_window().set_fullscreen(fullscreen);
 					}
 				});
 
 				// Help Menu
-				editor::get_main_menu().add_menu("Help", [&]()
+				editor::get_main_menu().add_menu("help", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					ImGui::MenuItem("imgui demo", "", &m_show_imgui_demo);
@@ -376,14 +379,6 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			using M = typename decltype(m_ecs);
-			using U = typename M::traits_type;
-
-			static_assert(U::component_info()[0] == typeof_v<c_transform>);
-
-			static_assert(U::system_info()[2] == typeof_v<
-				ecs::util::x_wrapper<x_draw_renderers>>);
-
 			if (render_texture const & rt{ m_pipeline[0] })
 			{
 				rt.bind();
@@ -465,15 +460,27 @@ namespace ml
 						// ecs
 						if (ImGui::BeginTabItem("ecs"))
 						{
-							m_ecs.for_entities([&](size_t const i)
+							m_ecs.for_entities([&](size_t const e)
 							{
-								m_ecs.for_components(i, [&](auto t, auto & c)
+								ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
+								ImGui::Columns(3);
+								ImGui::Text("name"); ImGui::NextColumn();
+								ImGui::Text("guid"); ImGui::NextColumn();
+								ImGui::Text("addr"); ImGui::NextColumn();
+								ImGui::Columns(1);
+								ImGui::Separator();
+								m_ecs.for_components(e, [&](auto & c)
 								{
-									ImGui::Columns(2);
-									ImGui::Text("T: %.*s", t.name().size(), t.name().data()); ImGui::NextColumn();
-									ImGui::Text("ID: %u", t.hash()); ImGui::NextColumn();
+									static constexpr auto info{
+										typeof_v<std::decay_t<decltype(c)>>
+									};
+									ImGui::Columns(3);
+									ImGui::Text("%.*s", info.name().size(), info.name().data()); ImGui::NextColumn();
+									ImGui::Text("%u", info.guid()); ImGui::NextColumn();
+									ImGui::Text("%p", &c); ImGui::NextColumn();
 									ImGui::Columns(1);
 								});
+								ImGui::PopStyleVar();
 							});
 
 							ImGui::EndTabItem();
@@ -488,7 +495,7 @@ namespace ml
 			// display
 			if (m_show_display)
 			{
-				if (ImGui::Begin("ml::display", &m_show_display))
+				if (ImGui::Begin("ml::display", &m_show_display, ImGuiWindowFlags_NoScrollbar))
 				{
 					editor::draw_texture_preview(
 						m_pipeline[0].get_texture(),

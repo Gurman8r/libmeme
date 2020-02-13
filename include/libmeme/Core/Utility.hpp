@@ -41,6 +41,26 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class LI, class RI
+	> ML_NODISCARD constexpr bool equal_to(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	{
+		return (lBegin != lEnd && rBegin != rEnd)
+			? (((*lBegin) == (*rBegin))
+				&& _ML_UTIL equal_to((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+			: ((lBegin == lEnd) && (rBegin == rEnd));
+	}
+
+	template <class LI, class RI
+	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	{
+		return (lBegin != lEnd && rBegin != rEnd)
+			? (((*lBegin) < (*rBegin))
+				&& _ML_UTIL less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+			: ((lBegin == lEnd) && (rBegin == rEnd));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class Lhs, class Rhs, class ... Rest
 	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
@@ -172,89 +192,6 @@ namespace ml::util
 	> ML_NODISCARD constexpr size_t hash(Arr<Ts...> const & value) noexcept
 	{
 		return hash(value.data(), value.size());
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// Ranges
-namespace ml::util
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class LI, class RI
-	> ML_NODISCARD constexpr bool equals(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
-	{
-		return ((lBegin != lEnd && rBegin != rEnd)
-			? (((*lBegin) == (*rBegin))
-				&& equals((lBegin + 1), lEnd, (rBegin + 1), rEnd))
-			: ((lBegin == lEnd) && (rBegin == rEnd))
-		);
-	}
-
-	template <class LI, class RI
-	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
-	{
-		return ((lBegin != lEnd && rBegin != rEnd)
-			? (((*lBegin) < (*rBegin))
-				&& less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
-			: ((lBegin == lEnd) && (rBegin == rEnd))
-		);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class It, class Cmp
-	> ML_NODISCARD constexpr It find_if(It first, It last, Cmp compare)
-	{
-		while (first != last)
-		{
-			if (compare(*first))
-			{
-				return first;
-			}
-			++first;
-		}
-		return last;
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr size_t array_size(const T(&value)[N])
-	{
-		return static_cast<size_t>(ML_ARRAYSIZE(value));
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr int32_t index_of(T const & value, const T(&arr)[N])
-	{
-		for (int32_t i = 0; (&arr[i]) != (&arr[N]); ++i)
-		{
-			if (arr[i] == value) { return i; }
-		}
-		return -1;
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr T const & value_at(int32_t index, const T(&arr)[N])
-	{
-		return arr[index];
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr bool value_at(int32_t index, T & value, const T(&arr)[N])
-	{
-		if (index < N)
-		{
-			value = value_at(index, arr);
-			return true;
-		}
-		return false;
-	}
-
-	template <class T, size_t N
-	> ML_NODISCARD constexpr auto at_index(int32_t index, const T(&arr)[N])
-	{
-		return ((index >= 0 && index < N) ? arr[index] : nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
