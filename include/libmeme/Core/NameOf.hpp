@@ -34,63 +34,81 @@ namespace ml
 
 		ML_NODISCARD static constexpr auto filter_prefix(name_type const & s, name_type const & pre)
 		{
-			return (s.size() >= pre.size() && (s.substr(0, pre.size()) == pre))
-				? s.substr(pre.size())
-				: s;
+			bool const match{
+				(s.size() >= pre.size() && (s.substr(0, pre.size()) == pre))
+			};
+			return match ? s.substr(pre.size()) : s;
 		}
 
 		ML_NODISCARD static constexpr auto filter_suffix(name_type const & s, name_type const & suf)
 		{
-			return (s.size() >= suf.size()) && ((s.substr(s.size() - suf.size(), suf.size()) == suf))
-				? s.substr(0, (s.size() - suf.size()))
-				: s;
+			bool const match{
+				(s.size() >= suf.size()) && ((s.substr(s.size() - suf.size(), suf.size()) == suf))
+			};
+			return match ? s.substr(0, (s.size() - suf.size())) : s;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_type(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_type(name_type const & s) noexcept
 		{
-			return filter_suffix(filter_prefix(s,
-				std::get<0>(pretty_function::detail::type)),
-				std::get<1>(pretty_function::detail::type)
-			);
+			auto const
+				& a{ std::get<0>(pretty_function::detail::type) },
+				& b{ std::get<1>(pretty_function::detail::type) };
+			return filter_suffix(filter_prefix(s, a), b);
 		}
 
-		ML_NODISCARD static constexpr auto filter_value(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_value(name_type const & s) noexcept
 		{
-			return s; // NYI - currently no need for this functionality
+			auto const
+				& a{ std::get<0>(pretty_function::detail::value) },
+				& b{ std::get<1>(pretty_function::detail::value) },
+				& c{ std::get<2>(pretty_function::detail::value) };
+			return s; // NYI
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_namespace(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_template(name_type const & s) noexcept
 		{
-			return s.substr(s.find_first_of(':') + 2);
+			size_t const t{ s.find_first_of('<') };
+			return (t != s.npos) ? s.substr(0, t) : s;
 		}
 
-		ML_NODISCARD static constexpr auto filter_struct(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_namespace(name_type const & s) noexcept
+		{
+			size_t const t{ s.find_first_of('<') }; // check for template
+			return (t != s.npos)
+				? s.substr(s.substr(0, t).find_last_of(':') + 1)
+				: s.substr(s.find_last_of(':') + 1);
+		}
+
+		ML_NODISCARD static constexpr auto filter_struct(name_type const & s) noexcept
 		{
 			return filter_prefix(s, "struct ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_class(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_class(name_type const & s) noexcept
 		{
 			return filter_prefix(s, "class ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_constexpr(name_type const & s)
-		{
-			return filter_prefix(s, "constexpr ");
-		}
-
-		ML_NODISCARD static constexpr auto filter_const(name_type const & s)
-		{
-			return filter_prefix(s, "const ");
-		}
-
-		ML_NODISCARD static constexpr auto filter_union(name_type const & s)
+		ML_NODISCARD static constexpr auto filter_union(name_type const & s) noexcept
 		{
 			return filter_prefix(s, "union ");
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static constexpr auto filter_all(name_type const & s) noexcept
+		{
+			return
+				filter_class(
+				filter_struct(
+				filter_union(
+				filter_namespace(
+				filter_template(
+				s)))));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -107,12 +125,12 @@ namespace ml
 #ifdef ML_CC_MSVC
 	template <> struct nameof<int64_t> final
 	{
-		static constexpr auto value{ "long long" }; // __int64
+		static constexpr auto value{ "long long"sv }; // __int64
 	};
 
 	template <> struct nameof<uint64_t> final
 	{
-		static constexpr auto value{ "unsigned long long" }; // unsigned __int64
+		static constexpr auto value{ "unsigned long long"sv }; // unsigned __int64
 	};
 #endif
 

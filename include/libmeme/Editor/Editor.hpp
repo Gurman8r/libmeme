@@ -81,6 +81,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static void help_marker(pmr::string const & value);
+
+		static void tooltip(pmr::string const & value);
+
 		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

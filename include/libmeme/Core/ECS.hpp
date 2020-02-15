@@ -214,9 +214,14 @@ namespace ml::ecs::cfg
 		size_t MultDen = 1	// growth multipler denomenator
 	> struct options final
 	{
-		static_assert(0 < GrowAmt);
-		static_assert(0 < MultDen);
-		static_assert(MultDen <= MultNum);
+		static_assert(0 < GrowAmt,
+			"growth amount negative or zero");
+		
+		static_assert(0 < MultDen,
+			"growth multiplier denomenator negative or zero");
+		
+		static_assert(MultDen <= MultNum,
+			"expression would result in negative growth");
 
 		static constexpr size_t grow_amt
 		{
@@ -444,14 +449,14 @@ namespace ml::ecs::impl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class C, class ... Args
-		> inline decltype(auto) add_component(Args && ... args) noexcept
+		> inline auto & add_component(Args && ... args) noexcept
 		{
 			ML_ASSERT(m_manager);
 			return m_manager->template add_component<C>(*this, ML_FWD(args)...);
 		}
 
 		template <class C
-		> inline decltype(auto) add_component() noexcept
+		> inline auto & add_component() noexcept
 		{
 			ML_ASSERT(m_manager);
 			return m_manager->template add_component<C>(*this);
@@ -466,14 +471,14 @@ namespace ml::ecs::impl
 		}
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component() noexcept
+		> ML_NODISCARD inline auto & get_component() noexcept
 		{
 			ML_ASSERT(m_manager);
 			return m_manager->template get_component<C>(*this);
 		}
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component() const noexcept
+		> ML_NODISCARD inline auto const & get_component() const noexcept
 		{
 			ML_ASSERT(m_manager);
 			return m_manager->template get_component<C>(*this);
@@ -485,6 +490,8 @@ namespace ml::ecs::impl
 			ML_ASSERT(m_manager);
 			return m_manager->template has_component<C>(*this);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class C
 		> ML_NODISCARD inline bool matches_signature() const noexcept
@@ -527,19 +534,19 @@ namespace ml::ecs
 		using self_type			= typename manager<traits_type>;
 		using signature			= typename traits_type::signature;
 		using component_storage	= typename traits_type::component_storage;
-		using system_storage	= typename traits_type::system_storage;
 		using handle			= typename impl::handle<self_type>;
 		using handle_storage	= typename pmr::vector<handle>;
+		using system_storage	= typename traits_type::system_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Signature };
+		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Bitset };
 
 		using entity_storage = typename std::tuple<
 			pmr::vector<bool>,		// state of entity (alive / dead)
 			pmr::vector<size_t>,	// index of real component data
 			pmr::vector<size_t>,	// index of managing handle
-			pmr::vector<signature>	// signature bitsets
+			pmr::vector<signature>	// entity signature bitset
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -549,8 +556,8 @@ namespace ml::ecs
 			, m_size		{ 0 }
 			, m_size_next	{ 0 }
 			, m_entities	{ std::allocator_arg, alloc }
-			, m_handles		{ alloc }
 			, m_components	{ std::allocator_arg, alloc }
+			, m_handles		{ alloc }
 			, m_systems		{}
 		{
 		}
@@ -597,11 +604,11 @@ namespace ml::ecs
 
 		inline auto size_next() const noexcept -> size_t { return m_size_next; }
 
+		inline auto components() const noexcept -> component_storage const & { return m_components; }
+
 		inline auto entities() const noexcept -> entity_storage const & { return m_entities; }
 
 		inline auto handles() const noexcept -> handle_storage const & { return m_handles; }
-
-		inline auto components() const noexcept -> component_storage const & { return m_components; }
 
 		inline auto systems() const noexcept -> system_storage const & { return m_systems; }
 
@@ -611,10 +618,10 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				std::get<ID_Alive>(	m_entities)[i] = false;
-				std::get<ID_Index>(	m_entities)[i] = i;
+				std::get<ID_Alive>(m_entities)[i] = false;
+				std::get<ID_Index>(m_entities)[i] = i;
 				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Signature>(m_entities)[i].reset();
+				std::get<ID_Bitset>(m_entities)[i].reset();
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
@@ -627,13 +634,13 @@ namespace ml::ecs
 		{
 			if (this != std::addressof(other))
 			{
-				m_size		= other.m_size;
 				m_capacity	= other.m_capacity;
+				m_size		= other.m_size;
 				m_size_next = other.m_size_next;
 
+				m_components= other.m_components;
 				m_entities	= other.m_entities;
 				m_handles	= other.m_handles;
-				m_components= other.m_components;
 				m_systems	= other.m_systems;
 			}
 		}
@@ -642,16 +649,16 @@ namespace ml::ecs
 		{
 			if (cap <= m_capacity) return;
 
-			meta::for_tuple([this, cap](auto & v) { v.resize(cap); }, m_entities);
+			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_components);
+			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_entities);
 			m_handles.resize(cap);
-			meta::for_tuple([this, cap](auto & v) { v.resize(cap); }, m_components);
 
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
 				std::get<ID_Alive>(m_entities)[i] = false;
 				std::get<ID_Index>(m_entities)[i] = i;
 				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Signature>(m_entities)[i].reset();
+				std::get<ID_Bitset>(m_entities)[i].reset();
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
@@ -713,13 +720,13 @@ namespace ml::ecs
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_size,		other.m_size);
 				std::swap(m_capacity,	other.m_capacity);
+				std::swap(m_size,		other.m_size);
 				std::swap(m_size_next,	other.m_size_next);
 
+				m_components.swap(other.m_components);
 				m_entities	.swap(other.m_entities);
 				m_handles	.swap(other.m_handles);
-				m_components.swap(other.m_components);
 				m_systems	.swap(other.m_systems);
 			}
 		}
@@ -731,7 +738,7 @@ namespace ml::ecs
 				std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
 				std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
 				std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
-				std::swap(std::get<ID_Signature>(m_entities)[lhs], std::get<ID_Signature>(m_entities)[rhs]);
+				std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
 			}
 		}
 
@@ -749,7 +756,7 @@ namespace ml::ecs
 
 			size_t const i{ m_size_next++ };
 			std::get<ID_Alive>(m_entities)[i] = true;
-			std::get<ID_Signature>(m_entities)[i].reset();
+			std::get<ID_Bitset>(m_entities)[i].reset();
 			return i;
 		}
 
@@ -827,7 +834,7 @@ namespace ml::ecs
 		template <class T
 		> inline self_type & add_tag(size_t const i) noexcept
 		{
-			std::get<ID_Signature>(m_entities)[i].write<traits_type::template tag_bit<T>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(true);
 			return (*this);
 		}
@@ -843,7 +850,7 @@ namespace ml::ecs
 		template <class T
 		> inline self_type & del_tag(size_t const i) noexcept
 		{
-			std::get<ID_Signature>(m_entities)[i].write<traits_type::template tag_bit<T>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
 			>(false);
 			return (*this);
 		}
@@ -859,7 +866,8 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD inline bool has_tag(size_t const i) const noexcept
 		{
-			return std::get<ID_Signature>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
+			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()
+			>();
 		}
 
 		template <class T
@@ -871,9 +879,9 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class C, class ... Args
-		> inline decltype(auto) add_component(size_t const i, Args && ... args) noexcept
+		> inline auto & add_component(size_t const i, Args && ... args) noexcept
 		{
-			std::get<ID_Signature>(m_entities)[i].write<traits_type::template component_bit<C>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(true);
 
 			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
@@ -882,19 +890,19 @@ namespace ml::ecs
 		}
 
 		template <class C
-		> inline decltype(auto) add_component(size_t const i) noexcept
+		> inline auto & add_component(size_t const i) noexcept
 		{
 			return this->add_component<C>(i, C{});
 		}
 
 		template <class C, class ... Args
-		> inline decltype(auto) add_component(handle const & h, Args && ... args) noexcept
+		> inline auto & add_component(handle const & h, Args && ... args) noexcept
 		{
 			return this->add_component<C>(h.m_entity, ML_FWD(args)...);
 		}
 
 		template <class C
-		> inline decltype(auto) add_component(handle const & h) noexcept
+		> inline auto & add_component(handle const & h) noexcept
 		{
 			return this->add_component<C>(h.m_entity);
 		}
@@ -904,7 +912,7 @@ namespace ml::ecs
 		template <class C
 		> inline self_type & del_component(size_t const i) noexcept
 		{
-			std::get<ID_Signature>(m_entities)[i].write<traits_type::template component_bit<C>()
+			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
 			>(false);
 			return (*this);
 		}
@@ -918,39 +926,27 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component(size_t const i) noexcept
+		> ML_NODISCARD inline auto & get_component(size_t const i) noexcept
 		{
 			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
 		}
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component(size_t const i) const noexcept
+		> ML_NODISCARD inline auto const & get_component(size_t const i) const noexcept
 		{
 			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
 		}
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component(handle const & h) noexcept
+		> ML_NODISCARD inline auto & get_component(handle const & h) noexcept
 		{
 			return this->get_component<C>(h.m_entity);
 		}
 
 		template <class C
-		> ML_NODISCARD inline decltype(auto) get_component(handle const & h) const noexcept
+		> ML_NODISCARD inline auto const & get_component(handle const & h) const noexcept
 		{
 			return this->get_component<C>(h.m_entity);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD signature const & get_signature(size_t const i) const noexcept
-		{
-			return std::get<ID_Signature>(m_entities)[i];
-		}
-
-		ML_NODISCARD signature const & get_signature(handle const & h) const noexcept
-		{
-			return this->get_signature(h.m_entity);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -958,13 +954,26 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD inline bool has_component(size_t const i) const noexcept
 		{
-			return this->get_signature(i).read<traits_type::template component_bit<C>()>();
+			return this->get_signature(i).read<traits_type::template component_bit<C>()
+			>();
 		}
-		
+
 		template <class C
 		> ML_NODISCARD inline bool has_component(handle const & h) const noexcept
 		{
 			return this->has_component<C>(h.m_entity);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD signature const & get_signature(size_t const i) const noexcept
+		{
+			return std::get<ID_Bitset>(m_entities)[i];
+		}
+
+		ML_NODISCARD signature const & get_signature(handle const & h) const noexcept
+		{
+			return this->get_signature(h.m_entity);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1016,7 +1025,7 @@ namespace ml::ecs
 		template <class Fn
 		> inline self_type & for_components(size_t const i, Fn && fn)
 		{
-			// invoke function on all of an entity's components
+			// invoke function on each of an entity's components
 			meta::for_types<typename traits_type::component_list>([&](auto c)
 			{
 				using C = typename decltype(c)::type;

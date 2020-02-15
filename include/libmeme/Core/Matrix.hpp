@@ -322,7 +322,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator+=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator+=(ds::matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
@@ -333,7 +333,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator-=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator-=(ds::matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
@@ -344,7 +344,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator*=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator*=(ds::matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
@@ -355,7 +355,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator/=(ds::matrix<Tx, W, H> & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator/=(ds::matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H> &
 	{
 		for (auto & elem : lhs)
@@ -368,7 +368,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator+(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator+(ds::matrix<Tx, W, H> const & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H>
 	{
 		auto temp{ lhs };
@@ -376,7 +376,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator-(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator-(ds::matrix<Tx, W, H> const & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H>
 	{
 		auto temp{ lhs };
@@ -384,7 +384,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator*(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator*(ds::matrix<Tx, W, H> const & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H>
 	{
 		auto temp{ lhs };
@@ -392,7 +392,7 @@ namespace ml
 	}
 
 	template <class Tx, class Ty, size_t W, size_t H
-	> ML_NODISCARD constexpr auto operator/(ds::matrix<Tx, W, H> const & lhs, Ty const & rhs) noexcept
+	> ML_NODISCARD constexpr auto operator/(ds::matrix<Tx, W, H> const & lhs, Ty const rhs) noexcept
 		-> ds::matrix<Tx, W, H>
 	{
 		auto temp{ lhs };

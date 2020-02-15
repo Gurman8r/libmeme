@@ -299,16 +299,23 @@ namespace ml::ds
 
 	template <size_t N> inline ML_SERIALIZE(std::ostream & out, bitset<N> const & value)
 	{
-		for (auto const & w : value.words())
-			out << w << ' ';
+		for (size_t i = 0; i < N; ++i)
+		{
+			out << value.read(i);
+		}
 		return out;
 	}
 
-	template <size_t N> inline ML_DESERIALIZE(std::istream & in, bitset<N> const & value)
+	template <size_t N> inline ML_DESERIALIZE(std::istream & in, bitset<N> & value)
 	{
-		for (auto & w : value.words())
+		for (size_t i = 0; i < N; ++i)
+		{
 			if (in.good())
-				in >> w;
+			{
+				bool b{}; in >> b;
+				value.write(i, b);
+			}
+		}
 		return in;
 	}
 

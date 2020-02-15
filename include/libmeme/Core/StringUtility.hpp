@@ -7,6 +7,41 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class Ch
+	> struct is_char : std::bool_constant<std::_Is_any_of_v<Ch
+		, char
+		, wchar_t
+		, char16_t
+		, char32_t
+	>> {};
+
+	template <class Ch
+	> ML_USING is_char_t = typename _ML_UTIL is_char<Ch>;
+
+	template <class Ch
+	> static constexpr bool is_char_v{ _ML_UTIL is_char_t<Ch>::value };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Ch = char
+	> struct is_string : std::bool_constant<is_char_v<Ch> && std::_Is_any_of_v<T
+		, cstring
+		, cwstring
+		, c16string
+		, c32string
+		, std::basic_string<Ch, std::char_traits<Ch>, std::allocator<Ch>>
+		, pmr::basic_string<Ch>
+		, std::basic_string_view<Ch>
+	>> {};
+
+	template <class T, class Ch = char
+	> ML_USING is_string_t = typename _ML_UTIL is_string<T, Ch>;
+
+	template <class T, class Ch = char
+	> static constexpr bool is_string_v{ _ML_UTIL is_string_t<T, Ch>::value };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	ML_NODISCARD static inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
 	{
 		pmr::vector<pmr::string> out;
