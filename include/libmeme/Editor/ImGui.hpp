@@ -6,30 +6,26 @@
 #include <libmeme/Core/Matrix.hpp>
 
 #ifndef IM_VEC2_CLASS_EXTRA
-#define IM_VEC2_CLASS_EXTRA									\
-	template <class T = _ML float_t							\
-	> constexpr ImVec2(_ML tvec2<T> const & v) noexcept		\
-		: x{ (float)v[0] }									\
-		, y{ (float)v[1] }									\
-	{}														\
-	template <class T = _ML float_t							\
-	> constexpr operator _ML tvec2<T>() const noexcept {	\
-		return { (T)x, (T)y };								\
-	 }
+#define IM_VEC2_CLASS_EXTRA							\
+	constexpr ImVec2(_ML vec2 const & v) noexcept	\
+		: x{ (float)v[0] }							\
+		, y{ (float)v[1] }							\
+	{}												\
+	constexpr operator _ML vec2() const noexcept {	\
+		return { x, y };							\
+	}
 #endif
 
 #ifndef IM_VEC4_CLASS_EXTRA
-#define IM_VEC4_CLASS_EXTRA									\
-	template <class T = _ML float_t							\
-	> constexpr ImVec4(_ML tvec4<T> const & v) noexcept		\
-		: x{ (float)v[0] }									\
-		, y{ (float)v[1] }									\
-		, z{ (float)v[2] }									\
-		, w{ (float)v[3] }									\
-	{}														\
-	template <class T = _ML float_t							\
-	> constexpr operator _ML tvec4<T>() const noexcept {	\
-		return { (T)x, (T)y, (T)z, (T)w };					\
+#define IM_VEC4_CLASS_EXTRA							\
+	constexpr ImVec4(_ML vec4 const & v) noexcept	\
+		: x{ (float)v[0] }							\
+		, y{ (float)v[1] }							\
+		, z{ (float)v[2] }							\
+		, w{ (float)v[3] }							\
+	{}												\
+	constexpr operator _ML vec4() const noexcept {	\
+		return { x, y, z, w };						\
 	}
 #endif
 
@@ -37,6 +33,9 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+
+#include <ImGuiColorTextEdit/TextEditor.h>
+#include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

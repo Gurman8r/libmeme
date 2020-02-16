@@ -81,9 +81,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void help_marker(pmr::string const & value);
+		static void help_marker(cstring first, cstring last = nullptr);
 
-		static void tooltip(pmr::string const & value);
+		template <class Str = pmr::string
+		> static void help_marker(Str const & value)
+		{
+			help_marker(&(*value.begin()), &(*value.end()));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void tooltip(cstring first, cstring last = nullptr);
+
+		template <class Str = pmr::string
+		> static void tooltip(Str const & value)
+		{
+			tooltip(&(*value.begin()), &(*value.end()));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
 

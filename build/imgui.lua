@@ -40,6 +40,7 @@ project "imgui"
 		"%{ext_dir}ImGuiColorTextEdit/*.cpp",
 		"%{ext_dir}ImGuizmo/*.h",
 		"%{ext_dir}ImGuizmo/*.cpp",
+		"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 	}
 	libdirs {
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",

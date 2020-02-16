@@ -205,24 +205,26 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor::help_marker(pmr::string const & value)
+	void editor::help_marker(cstring first, cstring last)
 	{
 		ImGui::TextDisabled("(?)");
 
-		tooltip(value);
+		tooltip(first, last);
 	}
 
-	void editor::tooltip(pmr::string const & value)
+	void editor::tooltip(cstring first, cstring last)
 	{
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(value.c_str());
+			ImGui::TextUnformatted(first, last);
 			ImGui::PopTextWrapPos();
 			ImGui::EndTooltip();
 		}
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void editor::draw_texture_preview(texture const & value, vec2 const & maxSize)
 	{
@@ -238,10 +240,6 @@ namespace ml
 
 		float_t const tex_w{ tex_sz[0] };
 		float_t const tex_h{ tex_sz[1] };
-
-		ImGui::Text("%u: %ux%u (%.0fx%.0f)",
-			value.handle(), value.width(), value.height(), tex_w, tex_h
-		);
 
 		auto const pos{ ImGui::GetCursorScreenPos() };
 
@@ -268,6 +266,9 @@ namespace ml
 			if (region_y < 0.0f) region_y = 0.0f;
 			else if (region_y > (tex_h - region_size)) region_y = (tex_h - region_size);
 
+			ImGui::Text("%u: %ux%u (%.0fx%.0f)",
+				value.handle(), value.width(), value.height(), tex_w, tex_h
+			);
 			ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
 			ImGui::Text("Max: (%.2f, %.2f)", region_x + region_size, region_y + region_size);
 			ImGui::Image(tex_id,

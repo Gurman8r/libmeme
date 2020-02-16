@@ -120,6 +120,7 @@ namespace ml
 		bool m_show_imgui_demo	{ false };
 		bool m_show_debug		{ true };
 		bool m_show_display		{ true };
+		bool m_show_memory		{ true };
 
 
 		// CONTENT
@@ -185,6 +186,7 @@ namespace ml
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					ImGui::MenuItem("debug", "", &m_show_debug);
 					ImGui::MenuItem("display", "", &m_show_display);
+					ImGui::MenuItem("memory", "", &m_show_memory);
 				});
 
 				// Option Menu
@@ -402,8 +404,9 @@ namespace ml
 		void on_gui_dock(gui_dock_event const & ev)
 		{
 			// dock gui windows
-			ev.d.dock_window("ml::debug",	ev.d.get_node(ev.d.Left));
-			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.Right));
+			ev.d.dock_window("ml::debug", ev.d.get_node(ev.d.Left));
+			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.RightUp));
+			ev.d.dock_window("Memory Editor", ev.d.get_node(ev.d.RightDn));
 		}
 
 		void on_gui_draw(gui_draw_event const & ev)
@@ -411,6 +414,13 @@ namespace ml
 			// gui stuff, etc...
 
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+
+			static MemoryEditor mem_edit;
+			static auto g_buff{ memory_tracker::get_buffer() };
+			if (m_show_memory)
+			{
+				mem_edit.DrawWindow("Memory Editor", g_buff.first, g_buff.second);
+			}
 
 			// imgui demo
 			if (m_show_imgui_demo)
@@ -427,10 +437,10 @@ namespace ml
 						ImGuiTabBarFlags_Reorderable
 					))
 					{
-						// performance
-						if (ImGui::BeginTabItem("performance"))
+						// profiler
+						if (ImGui::BeginTabItem("profiler"))
 						{
-							show_performance_gui();
+							show_profiler_gui();
 							ImGui::EndTabItem();
 						}
 
@@ -452,9 +462,7 @@ namespace ml
 			{
 				if (ImGui::Begin("ml::display", &m_show_display, ImGuiWindowFlags_NoScrollbar))
 				{
-					editor::draw_texture_preview(
-						m_pipeline[0].get_texture(),
-						ImGui::GetContentRegionAvail());
+					editor::draw_texture_preview(m_pipeline[0].get_texture());
 				}
 				ImGui::End();
 			}
@@ -477,7 +485,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_performance_gui()
+		void show_profiler_gui()
 		{
 			// memory
 			ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
@@ -542,12 +550,39 @@ namespace ml
 						auto temp{ static_cast<bool>(value) };
 						ImGui::Checkbox("##value", &temp);
 					}
-					// INT
-					else
+					// INT64
+					else if constexpr (std::is_same_v<T, int64_t>)
+					{
+						auto temp{ static_cast<int64_t>(value) };
+						ImGui::DragScalar("##value", ImGuiDataType_S64, &temp, 0.2f);
+					}
+					// INT32
+					else if constexpr (std::is_same_v<T, int32_t>)
 					{
 						auto temp{ static_cast<int32_t>(value) };
-						ImGui::DragInt("##value", &temp);
+						ImGui::DragScalar("##value", ImGuiDataType_S32, &temp, 0.2f);
 					}
+					// UINT64
+					else if constexpr (std::is_same_v<T, uint64_t>)
+					{
+						auto temp{ static_cast<uint64_t>(value) };
+						ImGui::DragScalar("##value", ImGuiDataType_U64, &temp, 0.2f);
+					}
+					// UINT32
+					else if constexpr (std::is_same_v<T, uint32_t>)
+					{
+						auto temp{ static_cast<uint32_t>(value) };
+						ImGui::DragScalar("##value", ImGuiDataType_U32, &temp, 0.2f);
+					}
+				}
+				// POINTER
+				else if constexpr (std::is_pointer_v<T>)
+				{
+					char buf[sizeof(size_t) * 2 + 1] = "";
+					std::sprintf(buf, "%p", value);
+					ImGui::InputText("##value", buf, ML_ARRAYSIZE(buf),
+						ImGuiInputTextFlags_ReadOnly
+					);
 				}
 				// STRING
 				else if constexpr (util::is_string_v<T>)
@@ -565,15 +600,6 @@ namespace ml
 						ImGuiInputTextFlags_ReadOnly
 					);
 				}
-				// POINTER
-				else if constexpr (std::is_pointer_v<T>)
-				{
-					char buf[sizeof(size_t) * 2 + 1] = "";
-					std::sprintf(buf, "%p", value);
-					ImGui::InputText("##value", buf, ML_ARRAYSIZE(buf),
-						ImGuiInputTextFlags_ReadOnly
-					);
-				}
 				// SIGNATURE
 				else if constexpr (std::is_same_v<T, entity_traits::signature>)
 				{
@@ -582,41 +608,33 @@ namespace ml
 					auto const button_count		{ static_cast<int32_t>(value.size()) };
 					auto const window_visible	{ ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x };
 
-					auto do_checkbox = [&](auto t, auto & i, auto && fn)
+					int32_t i{};
+					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
+					>([&](auto type)
 					{
 						ML_ImGui_ScopeID(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
-						std::invoke(ML_FWD(fn), nameof_v<typename decltype(t)::type>);
+
+						using T = typename decltype(type)::type;
+						using U = typename entity_traits;
+						using S = typename U::signature;
+						static constexpr bool
+							is_component{ U::has_component<T>() },
+							is_tag{ U::has_tag<T>() };
+
+						std::stringstream ss; ss
+							<< nameof_v<T> << "\n"
+							<< (is_component ? "component" : (is_tag ? "tag" : "?"))
+							<< " [" << (is_component ? i : (is_tag ? i - U::component_count : -1)) << "]"
+							<< " 0b" << S{}.set(i)
+							;
+						editor::tooltip(pmr::string{ ss.str() });
+
 						float_t const last_button{ ImGui::GetItemRectMax().x };
 						float_t const next_button{ last_button + style.ItemSpacing.x + button_width };
-						if ((i + 1 < button_count) && (next_button < window_visible))
-						{
-							ImGui::SameLine();
-						}
+						if ((i + 1 < button_count) && (next_button < window_visible)) { ImGui::SameLine(); }
 						++i;
-					};
-
-					int32_t i{};
-
-					meta::for_types<entity_traits::tag_list>([&](auto t)
-					{
-						do_checkbox(t, i, [&](auto name)
-						{
-							std::stringstream ss;
-							ss << "tag [" << i << "]\n" << name;
-							editor::tooltip(pmr::string{ ss.str() });
-						});
-					});
-
-					meta::for_types<entity_traits::component_list>([&](auto c)
-					{
-						do_checkbox(c, i, [&](auto name)
-						{
-							std::stringstream ss;
-							ss << "component [" << i << "]\n" << name;
-							editor::tooltip(pmr::string{ ss.str() });
-						});
 					});
 				}
 				else
@@ -643,9 +661,14 @@ namespace ml
 					ImGuiTreeNodeFlags_Bullet,
 					label
 				);
-				editor::tooltip(pmr::string{ type });
+
+				char tooltip[128] = "";
+				std::sprintf(tooltip, "%.*s", type.size(), type.data());
+				editor::tooltip(tooltip);
+
 				if (ImGui::BeginPopupContextItem())
 				{
+					editor::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
@@ -671,9 +694,14 @@ namespace ml
 					entity_traits::component_id<C>(),
 					type.size(), type.data()
 				) };
-				editor::tooltip(pmr::string{ info.name() });
+
+				char tooltip[128] = "";
+				std::sprintf(tooltip, "%.*s (guid: %u)", info.name().size(), info.name().data(), info.guid());
+				editor::tooltip(tooltip);
+
 				if (ImGui::BeginPopupContextItem())
 				{
+					editor::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
@@ -685,6 +713,7 @@ namespace ml
 				if (node_open)
 				{
 					show_field("addr", &c);
+					show_field("size", sizeof(C));
 					ImGui::TreePop();
 				}
 			};
@@ -698,10 +727,11 @@ namespace ml
 
 				ImGui::AlignTextToFramePadding();
 				bool const node_open{ ImGui::TreeNode("entity node",
-					"[%u] entity", e
+					"entity_%u", e
 				) };
 				if (ImGui::BeginPopupContextItem())
 				{
+					editor::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
@@ -712,6 +742,7 @@ namespace ml
 
 				if (node_open)
 				{
+					show_field("index", e);
 					show_field("alive", m_ecs.is_alive(e));
 					show_field("signature", m_ecs.get_signature(e));
 
@@ -768,9 +799,8 @@ namespace ml
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 					ImGui::Columns(4);
-					ImGui::Text("index"); ImGui::NextColumn();
-					ImGui::Text("name"); ImGui::NextColumn();
 					ImGui::Text("guid"); ImGui::NextColumn();
+					ImGui::Text("name"); ImGui::NextColumn();
 					ImGui::Text("addr"); ImGui::NextColumn();
 					ImGui::Columns(1);
 					ImGui::Separator();
@@ -782,7 +812,6 @@ namespace ml
 						ImGui::Columns(4);
 						ImGui::Text("%u", e); ImGui::NextColumn();
 						ImGui::Text("%.*s", info.name().size(), info.name().data()); ImGui::NextColumn();
-						ImGui::Text("%u", info.guid()); ImGui::NextColumn();
 						ImGui::Text("%p", &c); ImGui::NextColumn();
 						ImGui::Columns(1);
 					});
@@ -790,6 +819,7 @@ namespace ml
 				});
 			} break;
 			}
+
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			ImGui::PopStyleVar();

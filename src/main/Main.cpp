@@ -20,6 +20,7 @@ ml::int32_t main()
 	static auto g_mono = pmr::monotonic_buffer_resource{ g_buff.data(), g_buff.size() };
 	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_mono };
 	pmr::set_default_resource(&g_pool);
+	memory_tracker::set_buffer(g_buff.data(), g_buff.size());
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -29,9 +30,9 @@ ml::int32_t main()
 		engine::config & config	= engine::get_config();
 		config.program_name		= ML_ARGV[0];
 		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
-		config.library_path		= "../../../../"s;
-		config.content_path		= "../../../../assets/"s;
-		config.script_list		= { "../../../../libmeme.py"s };
+		config.library_path		= "../../../../";
+		config.content_path		= "../../../../assets/";
+		config.script_list		= { "../../../../libmeme.py" };
 		config.plugin_list		= {};
 		config.window_title		= "libmeme";
 		config.window_flags		= WindowFlags_Default;
@@ -63,8 +64,8 @@ ml::int32_t main()
 	{
 		editor::config & config	= editor::get_config();
 		config.window_handle	= engine::get_window().get_handle();
-		config.api_version		= "#version 130"s;
-		config.style			= "dark"s;
+		config.api_version		= "#version 130";
+		config.style			= "classic";
 		config.ini_file			= nullptr;
 		config.log_file			= nullptr;
 		return editor::startup(true);
