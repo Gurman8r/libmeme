@@ -6,7 +6,10 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	memory_tracker::memory_tracker() noexcept
-		: m_allocator{}, m_current{}, m_records{}
+		: m_allocator{}
+		, m_current{}
+		, m_records{}
+		, m_buffer{}
 	{
 	}
 

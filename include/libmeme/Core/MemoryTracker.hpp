@@ -61,15 +61,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto get_buffer() noexcept
+		ML_NODISCARD static inline auto const & get_buffer() noexcept
 		{
-			return std::make_pair(get_instance().m_buffer, get_instance().m_buffer_size);
+			return get_instance().m_buffer;
 		}
 
 		static inline void set_buffer(byte_t * buffer, size_t size) noexcept
 		{
-			get_instance().m_buffer = buffer;
-			get_instance().m_buffer_size = size;
+			get_instance().m_buffer.first = buffer;
+			get_instance().m_buffer.second = size;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -106,8 +106,8 @@ namespace ml
 		allocator_type	m_allocator;
 		size_t			m_current;
 		storage_type	m_records;
-		byte_t *		m_buffer;
-		size_t			m_buffer_size;
+
+		std::pair<byte_t *, size_t> m_buffer;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

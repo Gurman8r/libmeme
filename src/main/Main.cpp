@@ -33,9 +33,9 @@ ml::int32_t main()
 		config.library_path		= "../../../../";
 		config.content_path		= "../../../../assets/";
 		config.script_list		= { "../../../../libmeme.py" };
-		config.plugin_list		= {};
+		config.plugin_list		= { /* "demo.dll" */ };
 		config.window_title		= "libmeme";
-		config.window_flags		= WindowFlags_Default;
+		config.window_flags		= WindowFlags_DefaultMaximized;
 		config.window_video		= make_video_mode(
 			vec2u{ 1280, 720 },	// resolution
 			32u					// color depth
@@ -65,7 +65,7 @@ ml::int32_t main()
 		editor::config & config	= editor::get_config();
 		config.window_handle	= engine::get_window().get_handle();
 		config.api_version		= "#version 130";
-		config.style			= "classic";
+		config.style			= "dark";
 		config.ini_file			= nullptr;
 		config.log_file			= nullptr;
 		return editor::startup(true);

@@ -18,13 +18,6 @@ namespace ml
 		, m_size		{ 0.f, 0.f }
 		, m_transparency{ 1.0f }
 	{
-		m_nodes.push_back(0);
-		m_nodes.push_back(1);
-		m_nodes.push_back(2);
-		m_nodes.push_back(3);
-		m_nodes.push_back(4);
-		m_nodes.push_back(5);
-		m_nodes.push_back(6);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -69,19 +62,10 @@ namespace ml
 		})())
 		{
 			// Draw
-			if (m_nodes[Root] = begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			if (m_nodes.empty())
 			{
-				m_nodes[Left]	= split_node(m_nodes[Root], ImGuiDir_Left,	0.5f, &m_nodes[Root]);
-				m_nodes[Right]	= split_node(m_nodes[Root], ImGuiDir_Right, 0.5f, &m_nodes[Root]);
-				m_nodes[LeftUp]	= split_node(m_nodes[Left], ImGuiDir_Up,	0.5f, &m_nodes[Left]);
-				m_nodes[RightUp]= split_node(m_nodes[Right],ImGuiDir_Up,	0.5f, &m_nodes[Right]);
-				m_nodes[LeftDn]	= split_node(m_nodes[Left], ImGuiDir_Down,	0.5f, &m_nodes[Left]);
-				m_nodes[RightDn]= split_node(m_nodes[Right],ImGuiDir_Down,	0.5f, &m_nodes[Right]);
-
 				event_system::fire_event<gui_dock_event>(*this);
-
-				end_builder(m_nodes[Root]);
-			};
+			}
 		}
 		return ([&]()
 		{
@@ -136,6 +120,11 @@ namespace ml
 			return id;
 		}
 		return NULL;
+	}
+
+	uint32_t editor_dockspace::split_node(uint32_t index, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	{
+		return m_nodes[(size_t)index] = split_node(id, dir, ratio, other);
 	}
 
 	uint32_t editor_dockspace::split_node(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)

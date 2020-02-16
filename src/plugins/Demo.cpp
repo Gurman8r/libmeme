@@ -117,11 +117,31 @@ namespace ml
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool m_show_imgui_demo	{ false };
-		bool m_show_debug		{ true };
-		bool m_show_display		{ true };
-		bool m_show_memory		{ true };
+		struct gui_window final
+		{
+			cstring title;
+			bool	open;
+			cstring shortcut;
+			int32_t flags;
 
+			template <class Fn> inline void render(Fn && fn)
+			{
+				if (!open) return;
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				ML_DEFER{ ImGui::End(); };
+				if (ImGui::Begin(title, &open, flags))
+				{
+					std::invoke(ML_FWD(fn), flags);
+				}
+			}
+		};
+
+		gui_window m_imgui_demo		{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None };
+		gui_window m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None };
+		gui_window m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None };
+		gui_window m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar };
+		gui_window m_gui_memory		{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar };
+		gui_window m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
 
 		// CONTENT
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -180,17 +200,19 @@ namespace ml
 					}
 				});
 
-				// View Menu
-				editor::get_main_menu().add_menu("view", [&]()
+				// Tools Menu
+				editor::get_main_menu().add_menu("tools", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("debug", "", &m_show_debug);
-					ImGui::MenuItem("display", "", &m_show_display);
-					ImGui::MenuItem("memory", "", &m_show_memory);
+					ImGui::MenuItem(m_gui_content.title,	m_gui_content.shortcut,		&m_gui_content.open);
+					ImGui::MenuItem(m_gui_display.title,	m_gui_display.shortcut,		&m_gui_display.open);
+					ImGui::MenuItem(m_gui_ecs.title,		m_gui_ecs.shortcut,			&m_gui_ecs.open);
+					ImGui::MenuItem(m_gui_memory.title,		m_gui_memory.shortcut,		&m_gui_memory.open);
+					ImGui::MenuItem(m_gui_profiler.title,	m_gui_profiler.shortcut,	&m_gui_profiler.open);
 				});
 
-				// Option Menu
-				editor::get_main_menu().add_menu("option", [&]()
+				// Window Menu
+				editor::get_main_menu().add_menu("window", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					bool fullscreen{ engine::get_window().is_fullscreen() };
@@ -204,7 +226,7 @@ namespace ml
 				editor::get_main_menu().add_menu("help", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem("imgui demo", "", &m_show_imgui_demo);
+					ImGui::MenuItem(m_imgui_demo.title, "", &m_imgui_demo.open);
 				});
 			}
 
@@ -404,9 +426,38 @@ namespace ml
 		void on_gui_dock(gui_dock_event const & ev)
 		{
 			// dock gui windows
-			ev.d.dock_window("ml::debug", ev.d.get_node(ev.d.Left));
-			ev.d.dock_window("ml::display", ev.d.get_node(ev.d.RightUp));
-			ev.d.dock_window("Memory Editor", ev.d.get_node(ev.d.RightDn));
+
+			static auto & d{ ev.d.resize(7) };
+			static auto
+				& root		{ d.get_node(0) },
+				& left		{ d.get_node(1) },
+				& left_up	{ d.get_node(2) },
+				& left_dn	{ d.get_node(3) },
+				& right		{ d.get_node(4) },
+				& right_up	{ d.get_node(5) },
+				& right_dn	{ d.get_node(6) };
+
+			if (root = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			{
+				constexpr float_t lhs = 0.465f;
+				constexpr float_t rhs = 1.f - lhs;
+
+				d.split_node(1, root,	ImGuiDir_Left,	lhs, &root);	// left
+				d.split_node(4, root,	ImGuiDir_Right,	rhs, &root);	// right
+
+				d.split_node(2, left,	ImGuiDir_Up,	0.5f, &left);	// left-up
+				d.split_node(3, left,	ImGuiDir_Down,	0.5f, &left);	// left-down
+				d.split_node(5, right,	ImGuiDir_Up,	0.5f, &right);	// right-up
+				d.split_node(6, right,	ImGuiDir_Down,	0.5f, &right);	// right-down
+
+				d.dock_window(m_gui_content.title	, left_dn);
+				d.dock_window(m_gui_display.title	, left_up);
+				d.dock_window(m_gui_ecs.title		, left_dn);
+				d.dock_window(m_gui_memory.title	, right);
+				d.dock_window(m_gui_profiler.title	, left_dn);
+
+				d.end_builder(root);
+			}
 		}
 
 		void on_gui_draw(gui_draw_event const & ev)
@@ -415,57 +466,65 @@ namespace ml
 
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-			static MemoryEditor mem_edit;
-			static auto g_buff{ memory_tracker::get_buffer() };
-			if (m_show_memory)
+			// IMGUI DEMO
+			if (m_imgui_demo.open)
 			{
-				mem_edit.DrawWindow("Memory Editor", g_buff.first, g_buff.second);
+				editor::show_imgui_demo(&m_imgui_demo.open);
 			}
 
-			// imgui demo
-			if (m_show_imgui_demo)
+			// CONTENT
+			m_gui_content.render([&](int32_t flags) noexcept
 			{
-				editor::show_imgui_demo(&m_show_imgui_demo);
-			}
+				show_content_gui();
+			});
 
-			// debug
-			if (m_show_debug)
+			// DISPLAY
+			m_gui_display.render([&](int32_t flags) noexcept
 			{
-				if (ImGui::Begin("ml::debug", &m_show_debug, ImGuiWindowFlags_None))
+				editor::draw_texture_preview(m_pipeline.back().get_texture());
+			});
+
+			// ECS
+			m_gui_ecs.render([&](int32_t flags) noexcept
+			{
+				show_ecs_gui(&m_ecs);
+			});
+
+			// PROFILER
+			m_gui_profiler.render([&](int32_t flags) noexcept
+			{
+				show_profiler_gui();
+			});
+
+			// MEMORY
+			m_gui_memory.render([&](int32_t flags) noexcept
+			{
+				static auto const & g_buffer{ memory_tracker::get_buffer() };
+				static MemoryEditor m; ML_ONCE_CALL()
 				{
-					if (ImGui::BeginTabBar("ml::debug##tabs",
-						ImGuiTabBarFlags_Reorderable
-					))
-					{
-						// profiler
-						if (ImGui::BeginTabItem("profiler"))
-						{
-							show_profiler_gui();
-							ImGui::EndTabItem();
-						}
-
-						// ecs
-						if (ImGui::BeginTabItem("ecs"))
-						{
-							show_ecs_gui();
-							ImGui::EndTabItem();
-						}
-
-						ImGui::EndTabBar();
-					}
+					m.Open					= true;
+					m.ReadOnly				= true;
+					m.Cols					= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
+					m.OptShowOptions		= true;
+					m.OptShowDataPreview	= true;
+					m.OptShowHexII			= false;
+					m.OptShowAscii			= true;
+					m.OptGreyOutZeroes		= true;
+					m.OptUpperCaseHex		= true;
+					m.OptMidColsCount		= 8;
+					m.OptAddrDigitsCount	= 0;
+					m.HighlightColor		= IM_COL32(0, 255, 255, 50);
+					m.ReadFn				= nullptr;
+					m.WriteFn				= nullptr;
+					m.HighlightFn			= nullptr;
 				}
-				ImGui::End();
-			}
-
-			// display
-			if (m_show_display)
-			{
-				if (ImGui::Begin("ml::display", &m_show_display, ImGuiWindowFlags_NoScrollbar))
+				if (ImGui::BeginMenuBar())
 				{
-					editor::draw_texture_preview(m_pipeline[0].get_texture());
+					ImGui::Checkbox("read only", &m.ReadOnly);
+					ImGui::EndMenuBar();
 				}
-				ImGui::End();
-			}
+				m.DrawContents(g_buffer.first, g_buffer.second, (size_t)g_buffer.first);
+			});
 		}
 
 		void on_exit(exit_event const & ev)
@@ -485,44 +544,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_profiler_gui()
+		static void show_content_gui()
 		{
-			// memory
-			ImGui::Text("manual allocations: %u", memory_tracker::get_records().size());
-			ImGui::Separator();
-
-			ImGui::Columns(2);
-
-			// total time
-			ImGui::Text("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
-
-			// delta time
-			ImGui::Text("delta time"); ImGui::NextColumn();
-			ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
-
-			// frame rate
-			ImGui::Text("frame rate"); ImGui::NextColumn();
-			ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
-
-			// benchmarks
-			if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
-			{
-				ImGui::Separator();
-				for (auto const & elem : prev)
-				{
-					ImGui::Text("%s", elem.first); ImGui::NextColumn();
-					ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
-				}
-			}
-
-			ImGui::Separator();
-			ImGui::Columns(1);
+			editor::help_marker("WIP");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_ecs_gui()
+		template <class U = ecs::traits<>
+		> static void show_ecs_gui(ecs::manager<U> * man)
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -617,7 +647,6 @@ namespace ml
 						ImGui::Checkbox("##value", &temp);
 
 						using T = typename decltype(type)::type;
-						using U = typename entity_traits;
 						using S = typename U::signature;
 						static constexpr bool
 							is_component{ U::has_component<T>() },
@@ -662,9 +691,7 @@ namespace ml
 					label
 				);
 
-				char tooltip[128] = "";
-				std::sprintf(tooltip, "%.*s", type.size(), type.data());
-				editor::tooltip(tooltip);
+				editor::tooltip(pmr::string{ type });
 
 				if (ImGui::BeginPopupContextItem())
 				{
@@ -695,9 +722,7 @@ namespace ml
 					type.size(), type.data()
 				) };
 
-				char tooltip[128] = "";
-				std::sprintf(tooltip, "%.*s (guid: %u)", info.name().size(), info.name().data(), info.guid());
-				editor::tooltip(tooltip);
+				editor::tooltip(pmr::string{ info.name() });
 
 				if (ImGui::BeginPopupContextItem())
 				{
@@ -743,10 +768,10 @@ namespace ml
 				if (node_open)
 				{
 					show_field("index", e);
-					show_field("alive", m_ecs.is_alive(e));
-					show_field("signature", m_ecs.get_signature(e));
+					show_field("alive", man->is_alive(e));
+					show_field("signature", man->get_signature(e));
 
-					m_ecs.for_components(e, [&](auto & c)
+					man->for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
 						show_component(c);
@@ -758,6 +783,7 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			enum { gui_layout_tree, gui_layout_list };
+			
 			static int32_t s_gui_layout{ 0 };
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -769,24 +795,18 @@ namespace ml
 			);
 			if (ImGui::BeginMenuBar())
 			{
-				if (ImGui::BeginMenu("view"))
-				{
-					if (ImGui::Combo("layout", &s_gui_layout, "tree\0list"))
-						ImGui::CloseCurrentPopup();
-					ImGui::EndMenu();
-				}
+				if (ImGui::Combo("layout", &s_gui_layout, "tree\0list"))
+					ImGui::CloseCurrentPopup();
 				ImGui::EndMenuBar();
 			}
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			switch (s_gui_layout)
 			{
 			case gui_layout_tree: {
 				ImGui::Columns(2);
 				ImGui::Separator();
-				m_ecs.for_entities([&](size_t const e)
+				man->for_entities([&](size_t const e)
 				{
 					show_entity(e);
 				});
@@ -795,7 +815,7 @@ namespace ml
 			} break;
 
 			case gui_layout_list: {
-				m_ecs.for_entities([&](size_t const e)
+				man->for_entities([&](size_t const e)
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 					ImGui::Columns(4);
@@ -804,7 +824,7 @@ namespace ml
 					ImGui::Text("addr"); ImGui::NextColumn();
 					ImGui::Columns(1);
 					ImGui::Separator();
-					m_ecs.for_components(e, [&](auto & c)
+					man->for_components(e, [&](auto & c)
 					{
 						static constexpr auto info{
 							typeof_v<std::decay_t<decltype(c)>>
@@ -820,12 +840,43 @@ namespace ml
 			} break;
 			}
 
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 			ImGui::PopStyleVar();
 			ImGui::EndChildFrame();
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void show_profiler_gui()
+		{
+			ImGui::Columns(2);
+
+			// total time
+			ImGui::Text("total time"); ImGui::NextColumn();
+			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
+
+			// delta time
+			ImGui::Text("delta time"); ImGui::NextColumn();
+			ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
+
+			// frame rate
+			ImGui::Text("frame rate"); ImGui::NextColumn();
+			ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
+
+			// benchmarks
+			if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
+			{
+				ImGui::Separator();
+				for (auto const & elem : prev)
+				{
+					ImGui::Text("%s", elem.first); ImGui::NextColumn();
+					ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+				}
+			}
+
+			ImGui::Separator();
+			ImGui::Columns(1);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
