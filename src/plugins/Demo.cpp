@@ -521,6 +521,7 @@ namespace ml
 				if (ImGui::BeginMenuBar())
 				{
 					ImGui::Checkbox("read only", &m.ReadOnly);
+					editor::tooltip("scary checkbox");
 					ImGui::EndMenuBar();
 				}
 				m.DrawContents(g_buffer.first, g_buffer.second, (size_t)g_buffer.first);
