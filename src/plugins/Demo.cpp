@@ -732,13 +732,14 @@ namespace ml
 				ImGui::NextColumn();
 
 				ImGui::AlignTextToFramePadding();
-				ImGui::Text("");
+				show_value(&c);
+				editor::tooltip("address");
 				ImGui::NextColumn();
 
 				if (node_open)
 				{
-					show_field("addr", &c);
 					show_field("size", sizeof(C));
+					show_field("align", alignof(C));
 					ImGui::TreePop();
 				}
 			};
