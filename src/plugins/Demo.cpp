@@ -143,6 +143,8 @@ namespace ml
 		gui_window m_gui_memory		{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar };
 		gui_window m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
 
+		MemoryEditor m_memory;
+
 		// CONTENT
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -207,7 +209,7 @@ namespace ml
 					ImGui::MenuItem(m_gui_content.title,	m_gui_content.shortcut,		&m_gui_content.open);
 					ImGui::MenuItem(m_gui_display.title,	m_gui_display.shortcut,		&m_gui_display.open);
 					ImGui::MenuItem(m_gui_ecs.title,		m_gui_ecs.shortcut,			&m_gui_ecs.open);
-					ImGui::MenuItem(m_gui_memory.title,		m_gui_memory.shortcut,		&m_gui_memory.open);
+					ImGui::MenuItem("memory",				"",							&m_memory.Open);
 					ImGui::MenuItem(m_gui_profiler.title,	m_gui_profiler.shortcut,	&m_gui_profiler.open);
 				});
 
@@ -427,34 +429,36 @@ namespace ml
 		{
 			// dock gui windows
 
-			static auto & d{ ev.d.resize(7) };
+			static auto & d{ ev.dockspace.resize(8) };
+			static auto & n{ d.nodes() };
 			static auto
 				& root		{ d.get_node(0) },
 				& left		{ d.get_node(1) },
 				& left_up	{ d.get_node(2) },
 				& left_dn	{ d.get_node(3) },
+				& left_dn2	{ d.get_node(7) },
 				& right		{ d.get_node(4) },
 				& right_up	{ d.get_node(5) },
 				& right_dn	{ d.get_node(6) };
 
 			if (root = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
-				constexpr float_t lhs = 0.465f;
-				constexpr float_t rhs = 1.f - lhs;
+				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
-				d.split_node(1, root,	ImGuiDir_Left,	lhs, &root);	// left
-				d.split_node(4, root,	ImGuiDir_Right,	rhs, &root);	// right
+				d.split_node(1, root	, ImGuiDir_Left	, lhs	, &root);		// left
+				d.split_node(2, left	, ImGuiDir_Up	, 0.5f	, &left);		// left-up
+				d.split_node(3, left	, ImGuiDir_Down	, 0.5f	, &left);		// left-down
+				d.split_node(7, left_dn	, ImGuiDir_Right, 0.5f	, &left_dn);	// left-down2
 
-				d.split_node(2, left,	ImGuiDir_Up,	0.5f, &left);	// left-up
-				d.split_node(3, left,	ImGuiDir_Down,	0.5f, &left);	// left-down
-				d.split_node(5, right,	ImGuiDir_Up,	0.5f, &right);	// right-up
-				d.split_node(6, right,	ImGuiDir_Down,	0.5f, &right);	// right-down
+				d.split_node(4, root	, ImGuiDir_Right, rhs	, &root);		// right
+				d.split_node(5, right	, ImGuiDir_Up	, 0.5f	, &right);		// right-up
+				d.split_node(6, right	, ImGuiDir_Down	, 0.5f	, &right);		// right-down
 
-				d.dock_window(m_gui_content.title	, left_dn);
 				d.dock_window(m_gui_display.title	, left_up);
-				d.dock_window(m_gui_ecs.title		, left_dn);
-				d.dock_window(m_gui_memory.title	, right);
+				d.dock_window(m_gui_content.title	, left_dn);
 				d.dock_window(m_gui_profiler.title	, left_dn);
+				d.dock_window(m_gui_ecs.title		, left_dn2);
+				d.dock_window(m_gui_memory.title	, right);
 
 				d.end_builder(root);
 			}
@@ -487,7 +491,7 @@ namespace ml
 			// ECS
 			m_gui_ecs.render([&](int32_t flags) noexcept
 			{
-				show_ecs_gui(&m_ecs);
+				show_ecs_gui();
 			});
 
 			// PROFILER
@@ -499,32 +503,50 @@ namespace ml
 			// MEMORY
 			m_gui_memory.render([&](int32_t flags) noexcept
 			{
-				static auto const & g_buffer{ memory_tracker::get_buffer() };
-				static MemoryEditor m; ML_ONCE_CALL()
+				static auto & buf{ memory_tracker::get_buffer() };
+				ML_ONCE_CALL()
 				{
-					m.Open					= true;
-					m.ReadOnly				= true;
-					m.Cols					= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
-					m.OptShowOptions		= true;
-					m.OptShowDataPreview	= true;
-					m.OptShowHexII			= false;
-					m.OptShowAscii			= true;
-					m.OptGreyOutZeroes		= true;
-					m.OptUpperCaseHex		= true;
-					m.OptMidColsCount		= 8;
-					m.OptAddrDigitsCount	= 0;
-					m.HighlightColor		= IM_COL32(0, 255, 255, 50);
-					m.ReadFn				= nullptr;
-					m.WriteFn				= nullptr;
-					m.HighlightFn			= nullptr;
+					m_memory.Open				= true;
+					m_memory.ReadOnly			= true;
+					m_memory.Cols				= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
+					m_memory.OptShowOptions		= true;
+					m_memory.OptShowDataPreview	= true;
+					m_memory.OptShowHexII		= false;
+					m_memory.OptShowAscii		= true;
+					m_memory.OptGreyOutZeroes	= true;
+					m_memory.OptUpperCaseHex	= true;
+					m_memory.OptMidColsCount	= 8;
+					m_memory.OptAddrDigitsCount	= 0;
+					m_memory.HighlightColor		= IM_COL32(0, 255, 255, 50);
+					m_memory.ReadFn				= nullptr;
+					m_memory.WriteFn			= nullptr;
+					m_memory.HighlightFn		= nullptr;
 				}
 				if (ImGui::BeginMenuBar())
 				{
-					ImGui::Checkbox("read only", &m.ReadOnly);
+					ImGui::Checkbox("read only", &m_memory.ReadOnly);
 					editor::tooltip("scary checkbox");
+
+					static int32_t jump{};
+					if (ImGui::Combo("jump", &jump,
+						"demo\0engine\0editor"
+					))
+					{
+						auto do_jump = [&](void const * p, size_t const s)
+						{
+							ptrdiff_t const addr = std::distance(buf.first, (byte_t *)p);
+							m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + s);
+						};
+						switch (jump)
+						{
+						case 0: do_jump(this, sizeof(*this)); break;
+						case 1: do_jump(engine::get_context(), sizeof(engine::context)); break;
+						case 2: do_jump(editor::get_context(), sizeof(editor::context)); break;
+						};
+					}
 					ImGui::EndMenuBar();
 				}
-				m.DrawContents(g_buffer.first, g_buffer.second, (size_t)g_buffer.first);
+				m_memory.DrawContents(buf.first, buf.second, (size_t)buf.first);
 			});
 		}
 
@@ -545,15 +567,50 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void show_content_gui()
+		void show_content_gui()
 		{
-			editor::help_marker("WIP");
+			auto draw_item = [&](auto const & n, auto const & v)
+			{
+				using N = typename std::decay_t<decltype(n)>;
+				using V = typename std::decay_t<decltype(v)>;
+				static constexpr auto info{ typeof_v<V> };
+				static constexpr auto type{ info.name() };
+
+				ImGui::Text("%.*s", type.size(), type.data()); ImGui::NextColumn();
+				ImGui::Text("%s", n.c_str()); ImGui::NextColumn();
+
+				char addr[sizeof(size_t) * 2 + 1] = "";
+				std::sprintf(addr, "%p", &v);
+				if (ImGui::Button(addr))
+				{
+					static auto const & mem{ memory_tracker::get_buffer() };
+					auto const ptr{ (size_t)std::distance(mem.first, (byte_t *)&v) };
+					m_memory.GotoAddrAndHighlight(ptr, ptr + sizeof(V));
+				}
+				ImGui::NextColumn();
+			};
+
+			ImGui::Columns(3);
+			ImGui::Text("type"); ImGui::NextColumn();
+			ImGui::Text("name"); ImGui::NextColumn();
+			ImGui::Text("addr"); ImGui::NextColumn();
+			ImGui::Columns(1);
+			ImGui::Separator();
+
+			ImGui::Columns(3);
+			m_fonts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_images.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_materials.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_models.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_scripts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_shaders.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_textures.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			ImGui::Columns(1);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = ecs::traits<>
-		> static void show_ecs_gui(ecs::manager<U> * man)
+		void show_ecs_gui()
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -611,9 +668,18 @@ namespace ml
 				{
 					char buf[sizeof(size_t) * 2 + 1] = "";
 					std::sprintf(buf, "%p", value);
-					ImGui::InputText("##value", buf, ML_ARRAYSIZE(buf),
-						ImGuiInputTextFlags_ReadOnly
-					);
+					if (ImGui::Selectable(buf))
+					{
+						static auto const & mem{ memory_tracker::get_buffer() };
+						ptrdiff_t const addr{ std::distance(mem.first, (byte_t *)value) };
+						m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + sizeof(*value));
+					}
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (ImGui::MenuItem("copy"))
+							engine::get_window().set_clipboard(buf);
+						ImGui::EndPopup();
+					}
 				}
 				// STRING
 				else if constexpr (util::is_string_v<T>)
@@ -647,6 +713,7 @@ namespace ml
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
+						using U = typename entity_traits;
 						using T = typename decltype(type)::type;
 						using S = typename U::signature;
 						static constexpr bool
@@ -770,10 +837,10 @@ namespace ml
 				if (node_open)
 				{
 					show_field("index", e);
-					show_field("alive", man->is_alive(e));
-					show_field("signature", man->get_signature(e));
+					show_field("alive", m_ecs.is_alive(e));
+					show_field("signature", m_ecs.get_signature(e));
 
-					man->for_components(e, [&](auto & c)
+					m_ecs.for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
 						show_component(c);
@@ -808,7 +875,7 @@ namespace ml
 			case gui_layout_tree: {
 				ImGui::Columns(2);
 				ImGui::Separator();
-				man->for_entities([&](size_t const e)
+				m_ecs.for_entities([&](size_t const e)
 				{
 					show_entity(e);
 				});
@@ -817,7 +884,7 @@ namespace ml
 			} break;
 
 			case gui_layout_list: {
-				man->for_entities([&](size_t const e)
+				m_ecs.for_entities([&](size_t const e)
 				{
 					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 					ImGui::Columns(4);
@@ -826,7 +893,7 @@ namespace ml
 					ImGui::Text("addr"); ImGui::NextColumn();
 					ImGui::Columns(1);
 					ImGui::Separator();
-					man->for_components(e, [&](auto & c)
+					m_ecs.for_components(e, [&](auto & c)
 					{
 						static constexpr auto info{
 							typeof_v<std::decay_t<decltype(c)>>
@@ -850,7 +917,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void show_profiler_gui()
+		void show_profiler_gui()
 		{
 			ImGui::Columns(2);
 
@@ -880,6 +947,47 @@ namespace ml
 			ImGui::Separator();
 			ImGui::Columns(1);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct field
+		{
+			cstring name;
+			size_t size;
+			size_t offset;
+		};
+
+		struct members
+		{
+			pmr::vector<field> fields;
+
+			template <class V, class T, class It = void const *
+			> members & serialize(cstring n, T const & v, It it)
+			{
+				fields.push_back(field{ 
+					n,
+					sizeof(V),
+					(size_t)std::distance((byte_t *)&v, (byte_t *)it)
+				});
+				return (*this);
+			}
+		};
+
+		template <class T> struct properties;
+
+		template <> struct properties<c_transform>
+		{
+			using value_type = c_transform;
+			using type_list = meta::list<vec3, vec4, vec3>;
+			static members & serialize(members & m, value_type const & v)
+			{
+				return m
+					.serialize<vec3>("pos", v, &v.pos)
+					.serialize<vec4>("rot", v, &v.rot)
+					.serialize<vec3>("scl", v, &v.scl);
+			}
+		};
+
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
