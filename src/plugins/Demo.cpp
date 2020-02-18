@@ -5,7 +5,7 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Editor/ImGui.hpp>
+#include <libmeme/Editor/ImGuiExt.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
@@ -16,6 +16,27 @@
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
+
+namespace ml::util
+{
+	struct fps_tracker  final
+	{
+		float_t accum{};
+		int32_t index{};
+		float_t value{};
+		ds::array<float_t, 120> frames{};
+
+		inline fps_tracker & update(float_t const dt) noexcept
+		{
+			accum += dt - frames[index];
+			frames[index] = dt;
+			index = (index + 1) % frames.size();
+			value = (accum > 0.f) ? (1.f / (accum / (float_t)frames.size())) : FLT_MAX;
+			return (*this);
+		}
+
+	};
+}
 
 namespace ml
 {
@@ -117,38 +138,34 @@ namespace ml
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct gui_window final
-		{
-			cstring title;
-			bool	open;
-			cstring shortcut;
-			int32_t flags;
+		gui::widget m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None };
+		gui::widget m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None };
+		gui::widget m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None };
+		gui::widget m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar };
+		gui::widget m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar };
+		gui::widget m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
 
-			template <class Fn> inline void render(Fn && fn)
-			{
-				if (!open) return;
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-				ML_DEFER{ ImGui::End(); };
-				if (ImGui::Begin(title, &open, flags))
-				{
-					std::invoke(ML_FWD(fn), flags);
-				}
-			}
-		};
+		util::fps_tracker m_fps;
 
-		gui_window m_imgui_demo		{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None };
-		gui_window m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None };
-		gui_window m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None };
-		gui_window m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar };
-		gui_window m_gui_memory		{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar };
-		gui_window m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
+		gui::plot
+			m_plot_avg{ gui::plot::lines, "##frame time" },
+			m_plot_fps{ gui::plot::lines, "##frame rate" };
 
 		MemoryEditor m_memory;
 
+		template <class T> inline auto highlight_memory(T const * ptr)
+		{
+			static auto const & mem{ memory_manager::get_buffer() };
+			ptrdiff_t const addr{ std::distance(mem.data, (byte_t *)ptr) };
+			m_gui_memory.set_focused();
+			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + sizeof(T));
+		}
+
+		
 		// CONTENT
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pmr::vector<				render_texture	> m_pipeline	{};
+		ds::flat_map<pmr::string,	render_texture	> m_pipeline	{};
 		ds::flat_map<pmr::string,	font			> m_fonts		{};
 		ds::flat_map<pmr::string,	image			> m_images		{};
 		ds::flat_map<pmr::string,	material		> m_materials	{};
@@ -190,7 +207,7 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			// MENUS
+			// GUI
 			{
 				// File Menu
 				editor::get_main_menu().add_menu("file", [&]()
@@ -206,11 +223,11 @@ namespace ml
 				editor::get_main_menu().add_menu("tools", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem(m_gui_content.title,	m_gui_content.shortcut,		&m_gui_content.open);
-					ImGui::MenuItem(m_gui_display.title,	m_gui_display.shortcut,		&m_gui_display.open);
-					ImGui::MenuItem(m_gui_ecs.title,		m_gui_ecs.shortcut,			&m_gui_ecs.open);
-					ImGui::MenuItem("memory",				"",							&m_memory.Open);
-					ImGui::MenuItem(m_gui_profiler.title,	m_gui_profiler.shortcut,	&m_gui_profiler.open);
+					m_gui_content.menu_item();
+					m_gui_display.menu_item();
+					m_gui_ecs.menu_item();
+					m_gui_memory.menu_item();
+					m_gui_profiler.menu_item();
 				});
 
 				// Window Menu
@@ -228,15 +245,13 @@ namespace ml
 				editor::get_main_menu().add_menu("help", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					ImGui::MenuItem(m_imgui_demo.title, "", &m_imgui_demo.open);
+					m_imgui_demo.menu_item();
 				});
 			}
 
 			// PIPELINE
 			{
-				m_pipeline.emplace_back(
-					make_render_texture(vec2i{ 1280, 720 })
-				).create();
+				(m_pipeline["0"] = make_render_texture(vec2i{ 1280, 720 })).create();
 			}
 
 			// IMAGES
@@ -402,6 +417,21 @@ namespace ml
 		{
 			// update stuff, etc...
 
+			// runtime
+			static auto const & rt{ engine::get_runtime() };
+			static auto const & dt{ rt.delta_time };
+			auto const tt{ engine::get_time().count() };
+
+			// fps tracker
+			m_fps.update(dt);
+
+			// frame time
+			m_plot_avg.update(dt * 1000.f, "%.3f ms/frame", dt * 1000.f, tt, dt);
+
+			// frame rate
+			m_plot_fps.update(m_fps.value, "%.3f fps", m_fps.value, tt, dt);
+
+			// systems
 			m_ecs.update_system<x_apply_transforms>();
 			m_ecs.update_system<x_apply_materials>();
 		}
@@ -412,7 +442,7 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			if (render_texture const & rt{ m_pipeline[0] })
+			if (render_texture const & rt{ m_pipeline["0"] })
 			{
 				rt.bind();
 				rt.clear_color(colors::magenta);
@@ -430,7 +460,6 @@ namespace ml
 			// dock gui windows
 
 			static auto & d{ ev.dockspace.resize(8) };
-			static auto & n{ d.nodes() };
 			static auto
 				& root		{ d.get_node(0) },
 				& left		{ d.get_node(1) },
@@ -458,6 +487,7 @@ namespace ml
 				d.dock_window(m_gui_content.title	, left_dn);
 				d.dock_window(m_gui_profiler.title	, left_dn);
 				d.dock_window(m_gui_ecs.title		, left_dn2);
+				d.dock_window(m_imgui_demo.title	, right);
 				d.dock_window(m_gui_memory.title	, right);
 
 				d.end_builder(root);
@@ -471,83 +501,22 @@ namespace ml
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
 			// IMGUI DEMO
-			if (m_imgui_demo.open)
-			{
-				editor::show_imgui_demo(&m_imgui_demo.open);
-			}
+			if (m_imgui_demo.open) { editor::show_imgui_demo(&m_imgui_demo.open); }
 
 			// CONTENT
-			m_gui_content.render([&](int32_t flags) noexcept
-			{
-				show_content_gui();
-			});
+			m_gui_content.render([&](auto) noexcept { show_content_gui(); });
 
 			// DISPLAY
-			m_gui_display.render([&](int32_t flags) noexcept
-			{
-				editor::draw_texture_preview(m_pipeline.back().get_texture());
-			});
+			m_gui_display.render([&](auto) noexcept { show_display_gui(); });
 
 			// ECS
-			m_gui_ecs.render([&](int32_t flags) noexcept
-			{
-				show_ecs_gui();
-			});
+			m_gui_ecs.render([&](auto) noexcept { show_ecs_gui(); });
 
 			// PROFILER
-			m_gui_profiler.render([&](int32_t flags) noexcept
-			{
-				show_profiler_gui();
-			});
+			m_gui_profiler.render([&](auto) noexcept { show_profiler_gui(); });
 
 			// MEMORY
-			m_gui_memory.render([&](int32_t flags) noexcept
-			{
-				static auto & buf{ memory_tracker::get_buffer() };
-				ML_ONCE_CALL()
-				{
-					m_memory.Open				= true;
-					m_memory.ReadOnly			= true;
-					m_memory.Cols				= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
-					m_memory.OptShowOptions		= true;
-					m_memory.OptShowDataPreview	= true;
-					m_memory.OptShowHexII		= false;
-					m_memory.OptShowAscii		= true;
-					m_memory.OptGreyOutZeroes	= true;
-					m_memory.OptUpperCaseHex	= true;
-					m_memory.OptMidColsCount	= 8;
-					m_memory.OptAddrDigitsCount	= 0;
-					m_memory.HighlightColor		= IM_COL32(0, 255, 255, 50);
-					m_memory.ReadFn				= nullptr;
-					m_memory.WriteFn			= nullptr;
-					m_memory.HighlightFn		= nullptr;
-				}
-				if (ImGui::BeginMenuBar())
-				{
-					ImGui::Checkbox("read only", &m_memory.ReadOnly);
-					editor::tooltip("scary checkbox");
-
-					static int32_t jump{};
-					if (ImGui::Combo("jump", &jump,
-						"demo\0engine\0editor"
-					))
-					{
-						auto do_jump = [&](void const * p, size_t const s)
-						{
-							ptrdiff_t const addr = std::distance(buf.first, (byte_t *)p);
-							m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + s);
-						};
-						switch (jump)
-						{
-						case 0: do_jump(this, sizeof(*this)); break;
-						case 1: do_jump(engine::get_context(), sizeof(engine::context)); break;
-						case 2: do_jump(editor::get_context(), sizeof(editor::context)); break;
-						};
-					}
-					ImGui::EndMenuBar();
-				}
-				m_memory.DrawContents(buf.first, buf.second, (size_t)buf.first);
-			});
+			m_gui_memory.render([&](auto) noexcept { show_memory_gui(); });
 		}
 
 		void on_exit(exit_event const & ev)
@@ -569,6 +538,8 @@ namespace ml
 
 		void show_content_gui()
 		{
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 			auto draw_item = [&](auto const & n, auto const & v)
 			{
 				using N = typename std::decay_t<decltype(n)>;
@@ -578,17 +549,18 @@ namespace ml
 
 				ImGui::Text("%.*s", type.size(), type.data()); ImGui::NextColumn();
 				ImGui::Text("%s", n.c_str()); ImGui::NextColumn();
-
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
-				if (ImGui::Button(addr))
+				if (ImGui::Selectable(addr))
 				{
-					static auto const & mem{ memory_tracker::get_buffer() };
-					auto const ptr{ (size_t)std::distance(mem.first, (byte_t *)&v) };
+					static auto const & mem{ memory_manager::get_buffer() };
+					auto const ptr{ (size_t)std::distance(mem.data, (byte_t *)&v) };
 					m_memory.GotoAddrAndHighlight(ptr, ptr + sizeof(V));
 				}
 				ImGui::NextColumn();
 			};
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			ImGui::Columns(3);
 			ImGui::Text("type"); ImGui::NextColumn();
@@ -598,6 +570,7 @@ namespace ml
 			ImGui::Separator();
 
 			ImGui::Columns(3);
+			m_pipeline.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_fonts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_images.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_materials.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
@@ -606,6 +579,15 @@ namespace ml
 			m_shaders.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_textures.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			ImGui::Columns(1);
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_display_gui()
+		{
+			editor::draw_texture_preview(m_pipeline["0"].get_texture());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -670,8 +652,8 @@ namespace ml
 					std::sprintf(buf, "%p", value);
 					if (ImGui::Selectable(buf))
 					{
-						static auto const & mem{ memory_tracker::get_buffer() };
-						ptrdiff_t const addr{ std::distance(mem.first, (byte_t *)value) };
+						static auto const & mem{ memory_manager::get_buffer() };
+						ptrdiff_t const addr{ std::distance(mem.data, (byte_t *)value) };
 						m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + sizeof(*value));
 					}
 					if (ImGui::BeginPopupContextItem())
@@ -721,12 +703,12 @@ namespace ml
 							is_tag{ U::has_tag<T>() };
 
 						std::stringstream ss; ss
-							<< nameof_v<T> << "\n"
+							<< i << ": " << nameof_v<T> << "\n"
 							<< (is_component ? "component" : (is_tag ? "tag" : "?"))
 							<< " [" << (is_component ? i : (is_tag ? i - U::component_count : -1)) << "]"
 							<< " 0b" << S{}.set(i)
 							;
-						editor::tooltip(pmr::string{ ss.str() });
+						gui::tooltip(pmr::string{ ss.str() });
 
 						float_t const last_button{ ImGui::GetItemRectMax().x };
 						float_t const next_button{ last_button + style.ItemSpacing.x + button_width };
@@ -759,11 +741,11 @@ namespace ml
 					label
 				);
 
-				editor::tooltip(pmr::string{ type });
+				gui::tooltip(pmr::string{ type });
 
 				if (ImGui::BeginPopupContextItem())
 				{
-					editor::help_marker("WIP");
+					gui::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
@@ -790,18 +772,18 @@ namespace ml
 					type.size(), type.data()
 				) };
 
-				editor::tooltip(pmr::string{ info.name() });
+				gui::tooltip(pmr::string{ info.name() });
 
 				if (ImGui::BeginPopupContextItem())
 				{
-					editor::help_marker("WIP");
+					gui::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
 
 				ImGui::AlignTextToFramePadding();
 				show_value(&c);
-				editor::tooltip("address");
+				gui::tooltip("address");
 				ImGui::NextColumn();
 
 				if (node_open)
@@ -825,7 +807,7 @@ namespace ml
 				) };
 				if (ImGui::BeginPopupContextItem())
 				{
-					editor::help_marker("WIP");
+					gui::help_marker("WIP");
 					ImGui::EndPopup();
 				}
 				ImGui::NextColumn();
@@ -917,77 +899,110 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void show_memory_gui()
+		{
+			// setup memory editor
+			ML_ONCE_CALL()
+			{
+				m_memory.Open				= true;
+				m_memory.ReadOnly			= true;
+				m_memory.Cols				= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
+				m_memory.OptShowOptions		= true;
+				m_memory.OptShowDataPreview	= true;
+				m_memory.OptShowHexII		= false;
+				m_memory.OptShowAscii		= true;
+				m_memory.OptGreyOutZeroes	= true;
+				m_memory.OptUpperCaseHex	= true;
+				m_memory.OptMidColsCount	= 8;
+				m_memory.OptAddrDigitsCount	= 0;
+				m_memory.HighlightColor		= IM_COL32(0, 255, 255, 50);
+
+				//m_memory.ReadFn = [](uint8_t const * data, size_t addr)
+				//{
+				//	return data[addr];
+				//};
+				//
+				//m_memory.WriteFn = [](uint8_t * data, size_t addr, uint8_t value)
+				//{
+				//	data[addr] = value;
+				//};
+				//
+				//m_memory.HighlightFn = [](uint8_t const * data, size_t addr)
+				//{
+				//	return false;
+				//};
+			}
+
+			static auto & mem{ memory_manager::get_buffer() };
+			if (ImGui::BeginMenuBar())
+			{
+				gui::help_marker_ex([&]() noexcept
+				{
+					ImGui::Text("(%u bytes)", std::distance(mem.data, mem.data + mem.size));
+				});
+
+				ImGui::Checkbox("read only", &m_memory.ReadOnly);
+
+				ImGui::PushItemWidth(160);
+				static int32_t jump_loc{};
+				if (ImGui::Combo("highlight", &jump_loc, 
+					"engine\0"
+					"editor\0"
+					"demo\0"
+				))
+				{
+					switch (jump_loc)
+					{
+					case 0: highlight_memory(engine::get_context()); break;
+					case 1: highlight_memory(editor::get_context()); break;
+					case 2: highlight_memory(this); break;
+					};
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::EndMenuBar();
+			}
+
+			m_memory.DrawContents(mem.data, mem.size, (size_t)mem.data);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void show_profiler_gui()
 		{
-			ImGui::Columns(2);
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			static auto const & io{ ImGui::GetIO() };
+			static auto const & rt{ engine::get_runtime() };
 
 			// total time
+			ImGui::Columns(2);
 			ImGui::Text("total time"); ImGui::NextColumn();
 			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
+			ImGui::Columns(1);
+			ImGui::Separator();
 
-			// delta time
-			ImGui::Text("delta time"); ImGui::NextColumn();
-			ImGui::Text("%.7fs", engine::get_runtime().delta_time); ImGui::NextColumn();
+			// app average
+			m_plot_avg.render(); ImGui::NextColumn();
 
 			// frame rate
-			ImGui::Text("frame rate"); ImGui::NextColumn();
-			ImGui::Text("%.4ffps", ImGui::GetIO().Framerate); ImGui::NextColumn();
+			m_plot_fps.render(); ImGui::NextColumn();
 
 			// benchmarks
-			if (auto const & prev{ performance_tracker::last_frame() }; !prev.empty())
+			ImGui::Columns(2);
+			if (static auto const & bench{ performance_tracker::last_frame() }; !bench.empty())
 			{
 				ImGui::Separator();
-				for (auto const & elem : prev)
+				for (auto const & elem : bench)
 				{
 					ImGui::Text("%s", elem.first); ImGui::NextColumn();
 					ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
 				}
 			}
-
-			ImGui::Separator();
 			ImGui::Columns(1);
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct field
-		{
-			cstring name;
-			size_t size;
-			size_t offset;
-		};
-
-		struct members
-		{
-			pmr::vector<field> fields;
-
-			template <class V, class T, class It = void const *
-			> members & serialize(cstring n, T const & v, It it)
-			{
-				fields.push_back(field{ 
-					n,
-					sizeof(V),
-					(size_t)std::distance((byte_t *)&v, (byte_t *)it)
-				});
-				return (*this);
-			}
-		};
-
-		template <class T> struct properties;
-
-		template <> struct properties<c_transform>
-		{
-			using value_type = c_transform;
-			using type_list = meta::list<vec3, vec4, vec3>;
-			static members & serialize(members & m, value_type const & v)
-			{
-				return m
-					.serialize<vec3>("pos", v, &v.pos)
-					.serialize<vec4>("rot", v, &v.rot)
-					.serialize<vec3>("scl", v, &v.scl);
-			}
-		};
-
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -1,8 +1,6 @@
 #ifndef _ML_MEMORY_HPP_
 #define _ML_MEMORY_HPP_
 
-// system for tracking manual allocations
-
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 
@@ -10,8 +8,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// allocation record
-	struct allocation_record final : non_copyable
+	// MEMORY RECORD
+	struct memory_record final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,10 +33,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend struct memory_tracker;
+		friend struct memory_manager;
 
 		template <class ... Args
-		> explicit allocation_record(Args && ... args) noexcept
+		> explicit memory_record(Args && ... args) noexcept
 			: m_storage{ std::make_tuple(ML_FWD(args)...) }
 		{
 		}
@@ -50,71 +48,73 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// memory tracker
-	struct ML_CORE_API memory_tracker final : singleton<memory_tracker>
+	// MEMORY MANAGER
+	struct ML_CORE_API memory_manager final : singleton<memory_manager>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using storage_type = typename ds::flat_map<void *, allocation_record *>;
+		using record_table = typename ds::flat_map<void *, memory_record *>;
+
+		struct buffer_view final { byte_t * data; size_t size; };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static inline void startup(buffer_view const & buf)
+		{
+			ML_ASSERT(buf.data);
+			ML_ASSERT(buf.size);
+			std::memcpy(&get_instance().m_buffer, &buf, sizeof(buffer_view));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static void * allocate(size_t size, int32_t flags) noexcept;
+
+		static void deallocate(void * value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static inline auto const & get_buffer() noexcept
 		{
-			return get_instance().m_buffer;
+			return ((memory_manager const &)get_instance()).m_buffer;
 		}
 
-		static inline void set_buffer(byte_t * buffer, size_t size) noexcept
+		ML_NODISCARD inline auto const & get_allocator() noexcept
 		{
-			get_instance().m_buffer.first = buffer;
-			get_instance().m_buffer.second = size;
+			return ((memory_manager const &)get_instance()).m_allocator;
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static inline allocator_type const & get_allocator() noexcept
+		ML_NODISCARD static inline auto get_current() noexcept
 		{
-			return get_instance().m_allocator;
+			return ((memory_manager const &)get_instance()).m_current;
 		}
 
-		ML_NODISCARD static inline size_t const & get_current_index() noexcept
+		ML_NODISCARD static inline auto const & get_records() noexcept
 		{
-			return get_instance().m_current;
+			return ((memory_manager const &)get_instance()).m_records;
 		}
-
-		ML_NODISCARD static inline storage_type const & get_records() noexcept
-		{
-			return get_instance().m_records;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static void * make_allocation(size_t size, int32_t flags) noexcept;
-
-		static void free_allocation(void * value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<memory_tracker>;
+		friend singleton<memory_manager>;
 
-		memory_tracker() noexcept;
-		~memory_tracker() noexcept;
+		memory_manager() noexcept;
+		~memory_manager() noexcept;
 
 		allocator_type	m_allocator;
 		size_t			m_current;
-		storage_type	m_records;
-
-		std::pair<byte_t *, size_t> m_buffer;
+		record_table	m_records;
+		buffer_view		m_buffer;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// trackable
+	// TRACKABLE
 	struct ML_CORE_API trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -125,22 +125,22 @@ namespace ml
 
 		ML_NODISCARD inline void * operator new(size_t size) noexcept
 		{
-			return memory_tracker::make_allocation(size, 1 << 0);
+			return memory_manager::allocate(size, 1 << 0);
 		}
 
 		ML_NODISCARD inline void * operator new[](size_t size) noexcept
 		{
-			return memory_tracker::make_allocation(size, 1 << 1);
+			return memory_manager::allocate(size, 1 << 1);
 		}
 		
 		inline void operator delete(void * value) noexcept
 		{
-			return memory_tracker::free_allocation(value);
+			return memory_manager::deallocate(value);
 		}
 
 		inline void operator delete[](void * value) noexcept
 		{
-			return memory_tracker::free_allocation(value);
+			return memory_manager::deallocate(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

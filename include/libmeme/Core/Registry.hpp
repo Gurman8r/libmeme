@@ -1,7 +1,7 @@
 #ifndef _ML_REGISTRY_HPP_
 #define _ML_REGISTRY_HPP_
 
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
 #define ML_REGISTER_EX(T, factory)					\

@@ -38,7 +38,8 @@ namespace ml
 		// runtime settings
 		struct runtime final
 		{
-			float_t delta_time; // 
+			float_t	delta_time{};
+			size_t	frame_count{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

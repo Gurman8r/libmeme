@@ -5,7 +5,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Engine/Transform.hpp>
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {

@@ -2,7 +2,7 @@
 #define _ML_SHARED_LIBRARY_HPP_
 
 #include <libmeme/Platform/Export.hpp>
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {

@@ -31,27 +31,29 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * pixels)
 	{
-		static ds::flat_map<void const *, GLFWimage> cache{};
-		if (w && h && pixels)
+		if (!w || !h || !pixels) return nullptr;
+
+		static ds::flat_map<size_t, GLFWimage> img{};
+
+		if (size_t const code{ util::hash(pixels, w * h) }; auto const it{ img.find(code) })
 		{
-			if (auto const it{ cache.find(pixels) })
-			{
-				return &(*it->second);
-			}
-			else
-			{
-				return &(*cache.insert(
-					pixels, GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
-				).second);
-			}
+			return &(*it->second);
 		}
-		return nullptr;
+		else
+		{
+			return &(*img.insert(code,
+				GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
+			).second);
+		}
 	}
-	
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	window::window() noexcept
@@ -63,7 +65,7 @@ namespace ml
 		, m_context	{}
 		, m_flags	{}
 	{
-#if defined(ML_OS_WINDOWS)
+#ifdef ML_OS_WINDOWS
 		if (HWND window{ ::GetConsoleWindow() })
 		{
 			if (HMENU menu{ ::GetSystemMenu(window, false) })
@@ -76,7 +78,7 @@ namespace ml
 	
 	window::~window() noexcept
 	{
-#if defined(ML_OS_WINDOWS)
+#ifdef ML_OS_WINDOWS
 		if (HWND window{ ::GetConsoleWindow() })
 		{
 			if (HMENU menu{ ::GetSystemMenu(window, false) })
@@ -172,6 +174,12 @@ namespace ml
 			return true;
 		}
 		return false;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void window::on_event(event const & value)
+	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -276,17 +284,17 @@ namespace ml
 			{
 				switch (value)
 				{
-				case cursor::mode::normal: return GLFW_CURSOR_NORMAL;
-				case cursor::mode::hidden: return GLFW_CURSOR_HIDDEN;
-				case cursor::mode::disabled: return GLFW_CURSOR_DISABLED;
-				default: return GLFW_CURSOR_NORMAL;
+				case cursor::mode::hidden	: return GLFW_CURSOR_HIDDEN;
+				case cursor::mode::disabled	: return GLFW_CURSOR_DISABLED;
+				case cursor::mode::normal	:
+				default						: return GLFW_CURSOR_NORMAL;
 				}
 			})());
 		}
 		return (*this);
 	}
 
-	window & window::set_cursor_pos(vec2i const & value)
+	window & window::set_cursor_pos(vec2d const & value)
 	{
 		if (m_window)
 		{

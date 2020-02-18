@@ -16,12 +16,18 @@ namespace ml
 
 		virtual ~render_window() noexcept = default;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual bool create(
 			pmr::string const & title,
 			video_mode const & display,
 			context_settings const & context,
 			int32_t flags
 		) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void on_event(event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

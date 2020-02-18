@@ -3,7 +3,7 @@
 
 #include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
 namespace ml

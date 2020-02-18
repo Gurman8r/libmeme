@@ -16,11 +16,11 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static auto g_buff = ds::array<byte_t, 64._MiB>{};
-	static auto g_mono = pmr::monotonic_buffer_resource{ g_buff.data(), g_buff.size() };
-	static auto g_pool = pmr::unsynchronized_pool_resource{ &g_mono };
-	pmr::set_default_resource(&g_pool);
-	memory_tracker::set_buffer(g_buff.data(), g_buff.size());
+	static auto buff = ds::array<byte_t, 16_MiB>{};
+	static auto mono = pmr::monotonic_buffer_resource{ buff.data(), buff.size() };
+	static auto pool = pmr::unsynchronized_pool_resource{ &mono };
+	pmr::set_default_resource(&pool);
+	memory_manager::startup({ buff.data(), buff.size() });
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,18 +94,18 @@ ml::int32_t main()
 		}
 		// update
 		{
-			ML_BENCHMARK("\tUPDATE");
+			ML_BENCHMARK("UPDATE");
 			event_system::fire_event<update_event>();
 		}
 		// draw
 		{
-			ML_BENCHMARK("\tDRAW");
+			ML_BENCHMARK("DRAW");
 			engine::begin_draw();
 			event_system::fire_event<draw_event>(engine::get_window());
 		}
 		// begin gui
 		{
-			ML_BENCHMARK("\tGUI_BEGIN");
+			ML_BENCHMARK("GUI_BEGIN");
 			editor::new_frame();
 			editor::get_main_menu().render();
 			editor::get_dockspace().render();
@@ -113,12 +113,12 @@ ml::int32_t main()
 		}
 		// gui
 		{
-			ML_BENCHMARK("\t\tGUI");
+			ML_BENCHMARK("GUI");
 			event_system::fire_event<gui_draw_event>();
 		}
 		// end gui
 		{
-			ML_BENCHMARK("\tGUI_END");
+			ML_BENCHMARK("GUI_END");
 			editor::render_frame();
 			event_system::fire_event<gui_end_event>();
 		}

@@ -12,7 +12,7 @@ namespace ml
 	{
 		ML_NODISCARD static inline T & get_instance() noexcept
 		{
-			static T instance;
+			static T instance{};
 			return instance;
 		}
 	};

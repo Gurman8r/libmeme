@@ -215,12 +215,6 @@ namespace ml::ds
 			return m_pair.first.size();
 		}
 
-		ML_NODISCARD inline bool valid() const noexcept
-		{
-			return (empty() && m_pair.second.empty())
-				|| (size() == m_pair.second.size());
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline value_iterator fetch(const_key_iterator it)

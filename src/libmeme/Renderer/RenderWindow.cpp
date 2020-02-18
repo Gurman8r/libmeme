@@ -17,12 +17,12 @@ namespace ml
 	{
 		if (!window::create(title, display, context, flags))
 		{
-			return debug::log_error("Failed initializing RenderWindow");
+			return debug::log_error("failed initializing ml::render_window");
 		}
 
 		if (!GL::startup())
 		{
-			return debug::log_error("Failed initializing OpenGL");
+			return debug::log_error("failed initializing OpenGL");
 		}
 
 		GL::validateVersion(m_context.major, m_context.minor);
@@ -35,6 +35,13 @@ namespace ml
 		GL::enable(GL::FramebufferSRGB, m_context.sRGB_capable);
 
 		return true;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void render_window::on_event(event const & value)
+	{
+		window::on_event(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

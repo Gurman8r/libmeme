@@ -1,7 +1,8 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
 #include <libmeme/Platform/Cursor.hpp>
 #include <libmeme/Platform/VideoMode.hpp>
@@ -44,7 +45,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API window : trackable, non_copyable
+	struct ML_PLATFORM_API window : trackable, non_copyable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -79,6 +80,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		virtual void on_event(event const & value) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		window & close();
 		
 		window & destroy();
@@ -103,7 +108,7 @@ namespace ml
 		
 		window & set_cursor_mode(cursor::mode value);
 		
-		window & set_cursor_pos(vec2i const & value);
+		window & set_cursor_pos(vec2d const & value);
 		
 		window & set_fullscreen(bool value);
 		

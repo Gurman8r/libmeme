@@ -1,19 +1,19 @@
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_tracker::memory_tracker() noexcept
-		: m_allocator{}
-		, m_current{}
-		, m_records{}
-		, m_buffer{}
+	memory_manager::memory_manager() noexcept
+		: m_allocator	{}
+		, m_current		{}
+		, m_records		{}
+		, m_buffer		{ nullptr, 0U }
 	{
 	}
 
-	memory_tracker::~memory_tracker() noexcept
+	memory_manager::~memory_manager() noexcept
 	{
 #if ML_DEBUG
 		if (!m_records.empty())
@@ -48,11 +48,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_tracker::make_allocation(size_t size, int32_t flags) noexcept
+	void * memory_manager::allocate(size_t size, int32_t flags) noexcept
 	{
-		static auto & inst{ get_instance() };
-		if (size <= 0)
-			return nullptr;
+		static memory_manager & inst{ get_instance() };
+
+		if (size <= 0) return nullptr;
 
 		// allocate the requested bytes
 		byte_t * const data{ inst.m_allocator.allocate(size) };
@@ -60,16 +60,17 @@ namespace ml
 		// create the record
 		return (*inst.m_records.insert(
 			data,
-			::new (inst.m_allocator.allocate(sizeof(allocation_record))) allocation_record
+			::new (inst.m_allocator.allocate(sizeof(memory_record))) memory_record
 			{
 				++inst.m_current, size, flags, data
 			}
 		).first);
 	}
 
-	void memory_tracker::free_allocation(void * value) noexcept
+	void memory_manager::deallocate(void * value) noexcept
 	{
-		static auto & inst{ get_instance() };
+		static memory_manager & inst{ get_instance() };
+
 		if (inst.m_records.empty() || !value)
 			return;
 
@@ -85,9 +86,9 @@ namespace ml
 			// free the record
 			inst.m_allocator.deallocate(
 				reinterpret_cast<byte_t *>(*it->second),
-				sizeof(allocation_record)
+				sizeof(memory_record)
 			);
-			
+
 			// erase the entry
 			inst.m_records.erase(it->first);
 		}

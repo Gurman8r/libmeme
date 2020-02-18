@@ -2,7 +2,7 @@
 #define _ML_PLUGIN_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/MemoryTracker.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 
 #define ML_PLUGIN_API ML_API_EXPORT

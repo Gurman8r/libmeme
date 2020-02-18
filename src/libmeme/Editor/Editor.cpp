@@ -205,27 +205,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor::help_marker(cstring first, cstring last)
-	{
-		ImGui::TextDisabled("(?)");
-
-		tooltip(first, last);
-	}
-
-	void editor::tooltip(cstring first, cstring last)
-	{
-		if (ImGui::IsItemHovered())
-		{
-			ImGui::BeginTooltip();
-			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-			ImGui::TextUnformatted(first, last);
-			ImGui::PopTextWrapPos();
-			ImGui::EndTooltip();
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void editor::draw_texture_preview(texture const & value, vec2 const & maxSize)
 	{
 		auto & runtime{ ImGui::GetIO() };

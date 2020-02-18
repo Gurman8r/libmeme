@@ -72,44 +72,44 @@ namespace ml
 		// install window callbacks
 		if (install_callbacks)
 		{
-			g_engine->window.set_char_callback([](auto, auto ch)
+			g_engine->window.set_char_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<char_event>(ch);
+				event_system::fire_event<char_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_cursor_enter_callback([](auto, auto entered)
+			g_engine->window.set_cursor_enter_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<cursor_enter_event>(entered);
+				event_system::fire_event<cursor_enter_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_cursor_pos_callback([](auto, auto x, auto y)
+			g_engine->window.set_cursor_pos_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<cursor_pos_event>(x, y);
+				event_system::fire_event<cursor_pos_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_error_callback([](auto code, auto desc)
+			g_engine->window.set_error_callback([](auto ... args)
 			{
-				event_system::fire_event<window_error_event>(code, desc);
+				event_system::fire_event<window_error_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_frame_size_callback([](auto, auto w, auto h)
+			g_engine->window.set_frame_size_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<frame_size_event>(w, h);
+				event_system::fire_event<frame_size_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_key_callback([](auto, auto button, auto scan, auto action, auto mods)
+			g_engine->window.set_key_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<key_event>(button, scan, action, mods);
+				event_system::fire_event<key_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_mouse_callback([](auto, auto button, auto action, auto mods)
+			g_engine->window.set_mouse_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<mouse_event>(button, action, mods);
+				event_system::fire_event<mouse_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_scroll_callback([](auto, auto x, auto y)
+			g_engine->window.set_scroll_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<scroll_event>(x, y);
+				event_system::fire_event<scroll_event>(ML_FWD(args)...);
 			});
 
 			g_engine->window.set_window_close_callback([](auto)
@@ -117,19 +117,19 @@ namespace ml
 				event_system::fire_event<window_close_event>();
 			});
 
-			g_engine->window.set_window_focus_callback([](auto, auto focused)
+			g_engine->window.set_window_focus_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<window_focus_event>(focused);
+				event_system::fire_event<window_focus_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_window_pos_callback([](auto, auto x, auto y)
+			g_engine->window.set_window_pos_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<window_pos_event>(x, y);
+				event_system::fire_event<window_pos_event>(ML_FWD(args)...);
 			});
 
-			g_engine->window.set_window_size_callback([](auto, auto w, auto h)
+			g_engine->window.set_window_size_callback([](auto, auto ... args)
 			{
-				event_system::fire_event<window_size_event>(w, h);
+				event_system::fire_event<window_size_event>(ML_FWD(args)...);
 			});
 		}
 		
@@ -198,6 +198,8 @@ namespace ml
 	void engine::end_loop()
 	{
 		if (!initialized()) return;
+
+		++g_engine->runtime.frame_count;
 
 		if (g_engine->window.get_flags() & WindowFlags_DoubleBuffered)
 		{

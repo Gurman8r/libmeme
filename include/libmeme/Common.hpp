@@ -10,6 +10,7 @@
 #if (ML_HAS_CXX11 && ML_HAS_CXX14)
 #	include <cassert>
 #	include <chrono>
+#	include <cstdarg>
 #	include <fstream>
 #	include <functional>
 #	include <iostream>
