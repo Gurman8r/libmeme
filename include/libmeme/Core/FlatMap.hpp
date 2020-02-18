@@ -27,19 +27,31 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using key_storage					= typename ds::flat_set<key_type, compare_type, _Th>;
+		using key_pointer					= typename key_storage::pointer;
+		using const_key_pointer				= typename key_storage::const_pointer;
+		using key_reference					= typename key_storage::reference;
+		using const_key_reference			= typename key_storage::const_reference;
 		using key_iterator					= typename key_storage::iterator;
 		using const_key_iterator			= typename key_storage::const_iterator;
 		using reverse_key_iterator			= typename key_storage::reverse_iterator;
 		using const_reverse_key_iterator	= typename key_storage::const_reverse_iterator;
 
 		using value_storage					= typename pmr::vector<value_type>;
+		using value_pointer					= typename value_storage::pointer;
+		using const_value_pointer			= typename value_storage::const_pointer;
+		using value_reference				= typename value_storage::reference;
+		using const_value_reference			= typename value_storage::const_reference;
 		using value_iterator				= typename value_storage::iterator;
 		using const_value_iterator			= typename value_storage::const_iterator;
 		using reverse_value_iterator		= typename value_storage::reverse_iterator;
 		using const_reverse_value_iterator	= typename value_storage::const_reverse_iterator;
-		
+
 		using storage_type					= typename std::pair<key_storage, value_storage>;
 		using keyval_pair					= typename std::pair<key_type, value_type>;
+		using pointer_pair					= typename std::pair<key_pointer, value_pointer>;
+		using const_pointer_pair			= typename std::pair<const_key_pointer, const_value_pointer>;
+		using reference_pair				= typename std::pair<key_reference, value_reference>;
+		using const_reference_pair			= typename std::pair<const_key_reference, const_value_reference>;
 		using iterator_pair					= typename std::pair<key_iterator, value_iterator>;
 		using const_iterator_pair			= typename std::pair<const_key_iterator, const_value_iterator>;
 		using reverse_iterator_pair			= typename std::pair<reverse_key_iterator, reverse_value_iterator>;
@@ -65,6 +77,10 @@ namespace ml::ds
 		
 		using key_type						= typename traits_type::key_type;
 		using key_storage					= typename traits_type::key_storage;
+		using key_pointer					= typename traits_type::key_pointer;
+		using const_key_pointer				= typename traits_type::const_key_pointer;
+		using key_reference					= typename traits_type::key_reference;
+		using const_key_reference			= typename traits_type::const_key_reference;
 		using key_iterator					= typename traits_type::key_iterator;
 		using const_key_iterator			= typename traits_type::const_key_iterator;
 		using reverse_key_iterator			= typename traits_type::reverse_key_iterator;
@@ -72,6 +88,10 @@ namespace ml::ds
 		
 		using value_type					= typename traits_type::value_type;
 		using value_storage					= typename traits_type::value_storage;
+		using value_pointer					= typename traits_type::value_pointer;
+		using const_value_pointer			= typename traits_type::const_value_pointer;
+		using value_reference				= typename traits_type::value_reference;
+		using const_value_reference			= typename traits_type::const_value_reference;
 		using value_iterator				= typename traits_type::value_iterator;
 		using const_value_iterator			= typename traits_type::const_value_iterator;
 		using reverse_value_iterator		= typename traits_type::reverse_value_iterator;
@@ -79,6 +99,10 @@ namespace ml::ds
 		
 		using storage_type					= typename traits_type::storage_type;
 		using keyval_pair					= typename traits_type::keyval_pair;
+		using pointer_pair					= typename traits_type::pointer_pair;
+		using const_pointer_pair			= typename traits_type::const_pointer_pair;
+		using reference_pair				= typename traits_type::reference_pair;
+		using const_reference_pair			= typename traits_type::const_reference_pair;
 		using iterator_pair					= typename traits_type::iterator_pair;
 		using const_iterator_pair			= typename traits_type::const_iterator_pair;
 		using reverse_iterator_pair			= typename traits_type::reverse_iterator_pair;
@@ -217,12 +241,38 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_iterator fetch(const_key_iterator it)
+		ML_NODISCARD inline reference_pair back() noexcept
+		{
+			ML_ASSERT(!empty());
+			return { m_pair.first.back(), m_pair.second.back() };
+		}
+
+		ML_NODISCARD inline const_reference_pair back() const noexcept
+		{
+			ML_ASSERT(!empty());
+			return { m_pair.first.back(), m_pair.second.back() };
+		}
+
+		ML_NODISCARD inline reference_pair front() noexcept
+		{
+			ML_ASSERT(!empty());
+			return { m_pair.first.front(), m_pair.second.front() };
+		}
+
+		ML_NODISCARD inline const_reference_pair front() const noexcept
+		{
+			ML_ASSERT(!empty());
+			return { m_pair.first.front(), m_pair.second.front() };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline value_iterator fetch(const_key_iterator it) noexcept
 		{
 			return std::next(m_pair.second.begin(), std::distance(m_pair.first.cbegin(), it));
 		}
 
-		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator it) const
+		ML_NODISCARD inline const_value_iterator fetch(const_key_iterator it) const noexcept
 		{
 			return std::next(m_pair.second.cbegin(), std::distance(m_pair.first.cbegin(), it));
 		}

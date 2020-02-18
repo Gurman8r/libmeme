@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t flags)
+	bool window::create(cstring title, video_mode const & video, context_settings const & context, int32_t flags)
 	{
 		if (m_window)
 		{
@@ -103,6 +103,8 @@ namespace ml
 			return debug::log_error("Failed initializing GLFW");
 		}
 
+		m_monitor	= nullptr;
+		m_share		= nullptr;
 		m_title		= title;
 		m_video		= video;
 		m_flags		= flags;
@@ -147,11 +149,11 @@ namespace ml
 		
 		// Create Window
 		if (m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
-			this->get_width(),
-			this->get_height(),
-			this->get_title().c_str(),
-			static_cast<GLFWmonitor *>(m_monitor = nullptr),
-			static_cast<GLFWwindow *>(m_share = nullptr)
+			m_video.resolution[0],
+			m_video.resolution[1],
+			m_title,
+			static_cast<GLFWmonitor *>(m_monitor),
+			static_cast<GLFWwindow *>(m_share)
 		)))
 		{
 			this->make_context_current();
@@ -362,7 +364,7 @@ namespace ml
 		return (*this);
 	}
 
-	window & window::set_size(vec2u const & value)
+	window & window::set_size(vec2i const & value)
 	{
 		m_video.resolution = value;
 		if (m_window)
@@ -372,12 +374,11 @@ namespace ml
 		return (*this);
 	}
 
-	window & window::set_title(pmr::string const & value)
+	window & window::set_title(cstring value)
 	{
-		m_title = value;
-		if (m_window)
+		if (m_window && value)
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_title.c_str());
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value));
 		}
 		return (*this);
 	}
@@ -541,12 +542,11 @@ namespace ml
 		if (once && !(once = false))
 		{
 #ifdef ML_OS_WINDOWS
-			DEVMODE dm;
-			dm.dmSize = sizeof(dm);
+			DEVMODE dm; dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = video_mode{ vec2u{
-				dm.dmPelsWidth,
-				dm.dmPelsHeight },
+			temp = video_mode{ vec2i{
+				(int32_t)dm.dmPelsWidth,
+				(int32_t)dm.dmPelsHeight },
 				dm.dmBitsPerPel
 			};
 #else
@@ -563,13 +563,12 @@ namespace ml
 		if (once && !(once = false))
 		{
 #ifdef ML_OS_WINDOWS
-			DEVMODE dm;
-			dm.dmSize = sizeof(dm);
+			DEVMODE dm; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				auto vm{ video_mode{ vec2u{
-					dm.dmPelsWidth,
-					dm.dmPelsHeight },
+				auto const vm{ video_mode{ vec2i{
+					(int32_t)dm.dmPelsWidth,
+					(int32_t)dm.dmPelsHeight },
 					dm.dmBitsPerPel
 				} };
 
@@ -605,7 +604,7 @@ namespace ml
 		return temp;
 	}
 
-	float64_t window::time()
+	float64_t window::get_time()
 	{
 		return glfwGetTime();
 	}

@@ -53,7 +53,7 @@ namespace ml
 		{
 			if (auto const fn{ load_function<Ret, Args...>(name) })
 			{
-				return std::make_optional(std::invoke(fn, ML_FWD(args)...));
+				return std::make_optional(std::move(std::invoke(fn, ML_FWD(args)...)));
 			}
 			else
 			{

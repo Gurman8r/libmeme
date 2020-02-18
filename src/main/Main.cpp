@@ -19,16 +19,18 @@ ml::int32_t main()
 	static auto buff = ds::array<byte_t, 16_MiB>{};
 	static auto mono = pmr::monotonic_buffer_resource{ buff.data(), buff.size() };
 	static auto pool = pmr::unsynchronized_pool_resource{ &mono };
-	pmr::set_default_resource(&pool);
-	memory_manager::startup({ buff.data(), buff.size() });
+	static auto test = util::test_resource{ &pool, buff.data(), buff.size() };
+	pmr::set_default_resource(&test);
+	ML_ASSERT(memory_manager::startup(&test));
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup engine
-	if (!engine::create_context() || !([&]()
+	ML_ASSERT(engine::create_context());
+	ML_DEFER{ engine::shutdown(); };
+	if (!([&]()
 	{
 		engine::config & config	= engine::get_config();
-		config.program_name		= ML_ARGV[0];
 		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 		config.library_path		= "../../../../";
 		config.content_path		= "../../../../assets/";
@@ -37,7 +39,7 @@ ml::int32_t main()
 		config.window_title		= "libmeme";
 		config.window_flags		= WindowFlags_DefaultMaximized;
 		config.window_video		= make_video_mode(
-			vec2u{ 1280, 720 },	// resolution
+			vec2i{ 1280, 720 },	// resolution
 			32u					// color depth
 		);
 		config.window_context	= make_context_settings(
@@ -53,14 +55,15 @@ ml::int32_t main()
 		return engine::startup(true);
 	})())
 	{
-		engine::shutdown();
 		return debug::log_error("failed initializing engine") | debug::pause(1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup editor
-	if (!editor::create_context() || !([&]()
+	ML_ASSERT(editor::create_context());
+	ML_DEFER{ editor::shutdown(); };
+	if (!([&]()
 	{
 		editor::config & config	= editor::get_config();
 		config.window_handle	= engine::get_window().get_handle();
@@ -71,8 +74,6 @@ ml::int32_t main()
 		return editor::startup(true);
 	})())
 	{
-		editor::shutdown();
-		engine::shutdown();
 		return debug::log_error("failed initializing editor") | debug::pause(1);
 	}
 
@@ -88,24 +89,28 @@ ml::int32_t main()
 
 		// begin frame
 		{
-			ML_BENCHMARK("FRAME_BEGIN");
+			ML_BENCHMARK("frame-begin");
 			engine::begin_loop();
 			event_system::fire_event<frame_begin_event>();
 		}
 		// update
 		{
-			ML_BENCHMARK("UPDATE");
+			ML_BENCHMARK("update");
 			event_system::fire_event<update_event>();
+		}
+		// begin draw
+		{
+			ML_BENCHMARK("draw-begin");
+			engine::begin_draw();
 		}
 		// draw
 		{
-			ML_BENCHMARK("DRAW");
-			engine::begin_draw();
+			ML_BENCHMARK("\tdraw");
 			event_system::fire_event<draw_event>(engine::get_window());
 		}
 		// begin gui
 		{
-			ML_BENCHMARK("GUI_BEGIN");
+			ML_BENCHMARK("\tgui-begin");
 			editor::new_frame();
 			editor::get_main_menu().render();
 			editor::get_dockspace().render();
@@ -113,18 +118,23 @@ ml::int32_t main()
 		}
 		// gui
 		{
-			ML_BENCHMARK("GUI");
+			ML_BENCHMARK("\t\tgui");
 			event_system::fire_event<gui_draw_event>();
 		}
 		// end gui
 		{
-			ML_BENCHMARK("GUI_END");
+			ML_BENCHMARK("\tgui-end");
 			editor::render_frame();
 			event_system::fire_event<gui_end_event>();
 		}
+		// end draw
+		{
+			ML_BENCHMARK("draw-end");
+			engine::end_draw();
+		}
 		// end frame
 		{
-			ML_BENCHMARK("FRAME_END");
+			ML_BENCHMARK("frame-end");
 			engine::end_loop();
 			event_system::fire_event<frame_end_event>();
 		}
@@ -132,10 +142,6 @@ ml::int32_t main()
 
 	// exit event
 	event_system::fire_event<exit_event>();
-
-	// shutdown
-	editor::shutdown();
-	engine::shutdown();
 
 	// goodbye!
 	return EXIT_SUCCESS;

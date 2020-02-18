@@ -1,3 +1,5 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Core/ECS.hpp>
@@ -17,26 +19,7 @@
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
 
-namespace ml::util
-{
-	struct fps_tracker  final
-	{
-		float_t accum{};
-		int32_t index{};
-		float_t value{};
-		ds::array<float_t, 120> frames{};
-
-		inline fps_tracker & update(float_t const dt) noexcept
-		{
-			accum += dt - frames[index];
-			frames[index] = dt;
-			index = (index + 1) % frames.size();
-			value = (accum > 0.f) ? (1.f / (accum / (float_t)frames.size())) : FLT_MAX;
-			return (*this);
-		}
-
-	};
-}
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -134,33 +117,6 @@ namespace ml
 
 		pmr::vector<entity_manager::handle> m_handles;
 
-
-		// GUI
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		gui::widget m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None };
-		gui::widget m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None };
-		gui::widget m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None };
-		gui::widget m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar };
-		gui::widget m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar };
-		gui::widget m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
-
-		util::fps_tracker m_fps;
-
-		gui::plot
-			m_plot_avg{ gui::plot::lines, "##frame time" },
-			m_plot_fps{ gui::plot::lines, "##frame rate" };
-
-		MemoryEditor m_memory;
-
-		template <class T> inline auto highlight_memory(T const * ptr)
-		{
-			static auto const & mem{ memory_manager::get_buffer() };
-			ptrdiff_t const addr{ std::distance(mem.data, (byte_t *)ptr) };
-			m_gui_memory.set_focused();
-			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + sizeof(T));
-		}
-
 		
 		// CONTENT
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -173,6 +129,33 @@ namespace ml
 		ds::flat_map<pmr::string,	script			> m_scripts		{};
 		ds::flat_map<pmr::string,	shader			> m_shaders		{};
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
+
+
+		// GUI
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		gui::widget
+			m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None },
+			m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None },
+			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
+			m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
+
+		gui::plot
+			m_plot_avg{ gui::plot::lines, "##frame time" },
+			m_plot_fps{ gui::plot::lines, "##frame rate" };
+
+		MemoryEditor m_memory;
+
+		template <class T> inline auto highlight_memory(T const * ptr)
+		{
+			static auto * const mem{ memory_manager::get_resource() };
+			if (!ptr) { m_memory.GotoAddrAndHighlight(mem->addr(), 0); }
+			auto const addr{ (size_t)std::distance(mem->begin(), (byte_t *)ptr) };
+			m_gui_memory.set_focused();
+			m_memory.GotoAddrAndHighlight(addr, addr + sizeof(T));
+		}
 
 
 		// DEMO
@@ -231,7 +214,7 @@ namespace ml
 				});
 
 				// Window Menu
-				editor::get_main_menu().add_menu("window", [&]()
+				editor::get_main_menu().add_menu("options", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 					bool fullscreen{ engine::get_window().is_fullscreen() };
@@ -251,7 +234,7 @@ namespace ml
 
 			// PIPELINE
 			{
-				(m_pipeline["0"] = make_render_texture(vec2i{ 1280, 720 })).create();
+				(m_pipeline["1"] = make_render_texture(vec2i{ 1280, 720 })).create();
 			}
 
 			// IMAGES
@@ -312,7 +295,7 @@ namespace ml
 				// timers
 				auto const _timers = make_material(
 					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; })
+					make_uniform<float_t>("u_delta",	[]() { return engine::get_io().delta_time; })
 				);
 
 				// MVP
@@ -418,18 +401,15 @@ namespace ml
 			// update stuff, etc...
 
 			// runtime
-			static auto const & rt{ engine::get_runtime() };
-			static auto const & dt{ rt.delta_time };
+			static auto const & dt{ engine::get_io().delta_time };
+			static auto const & fps{ engine::get_io().frame_rate };
 			auto const tt{ engine::get_time().count() };
-
-			// fps tracker
-			m_fps.update(dt);
 
 			// frame time
 			m_plot_avg.update(dt * 1000.f, "%.3f ms/frame", dt * 1000.f, tt, dt);
 
 			// frame rate
-			m_plot_fps.update(m_fps.value, "%.3f fps", m_fps.value, tt, dt);
+			m_plot_fps.update(fps, "%.3f fps", fps, tt, dt);
 
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
@@ -442,16 +422,16 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			if (render_texture const & rt{ m_pipeline["0"] })
+			if (render_texture const & target{ m_pipeline["1"] })
 			{
-				rt.bind();
-				rt.clear_color(colors::magenta);
-				rt.viewport(rt.bounds());
+				target.bind();
+				target.clear_color(colors::magenta);
+				target.viewport(target.bounds());
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_ecs.update_system<x_draw_renderers>(rt);
-				rt.unbind();
+				m_ecs.update_system<x_draw_renderers>(target);
+				target.unbind();
 			}
 		}
 
@@ -553,9 +533,7 @@ namespace ml
 				std::sprintf(addr, "%p", &v);
 				if (ImGui::Selectable(addr))
 				{
-					static auto const & mem{ memory_manager::get_buffer() };
-					auto const ptr{ (size_t)std::distance(mem.data, (byte_t *)&v) };
-					m_memory.GotoAddrAndHighlight(ptr, ptr + sizeof(V));
+					highlight_memory(&v);
 				}
 				ImGui::NextColumn();
 			};
@@ -587,7 +565,13 @@ namespace ml
 
 		void show_display_gui()
 		{
-			editor::draw_texture_preview(m_pipeline["0"].get_texture());
+			if (m_pipeline.empty()) return;
+
+			static gui::texture_preview preview{ nullptr, vec2{}, 4.f, 32.f };
+
+			preview.value = &m_pipeline.back().second.get_texture();
+
+			preview.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -652,9 +636,7 @@ namespace ml
 					std::sprintf(buf, "%p", value);
 					if (ImGui::Selectable(buf))
 					{
-						static auto const & mem{ memory_manager::get_buffer() };
-						ptrdiff_t const addr{ std::distance(mem.data, (byte_t *)value) };
-						m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + sizeof(*value));
+						highlight_memory(value);
 					}
 					if (ImGui::BeginPopupContextItem())
 					{
@@ -839,17 +821,17 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ImGui::BeginChildFrame(ImGui::GetID("ecs"),
-				ImGui::GetContentRegionAvail(),
-				ImGuiWindowFlags_NoScrollbar |
-				ImGuiWindowFlags_MenuBar
-			);
 			if (ImGui::BeginMenuBar())
 			{
 				if (ImGui::Combo("layout", &s_gui_layout, "tree\0list"))
 					ImGui::CloseCurrentPopup();
 				ImGui::EndMenuBar();
 			}
+
+			ImGui::BeginChildFrame(ImGui::GetID("ecs"),
+				ImGui::GetContentRegionAvail(),
+				ImGuiWindowFlags_NoScrollbar
+			);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 
 			switch (s_gui_layout)
@@ -901,6 +883,8 @@ namespace ml
 
 		void show_memory_gui()
 		{
+			static auto * const mem{ memory_manager::get_resource() };
+
 			// setup memory editor
 			ML_ONCE_CALL()
 			{
@@ -916,54 +900,52 @@ namespace ml
 				m_memory.OptMidColsCount	= 8;
 				m_memory.OptAddrDigitsCount	= 0;
 				m_memory.HighlightColor		= IM_COL32(0, 255, 255, 50);
-
-				//m_memory.ReadFn = [](uint8_t const * data, size_t addr)
-				//{
-				//	return data[addr];
-				//};
-				//
-				//m_memory.WriteFn = [](uint8_t * data, size_t addr, uint8_t value)
-				//{
-				//	data[addr] = value;
-				//};
-				//
-				//m_memory.HighlightFn = [](uint8_t const * data, size_t addr)
-				//{
-				//	return false;
-				//};
+				m_memory.ReadFn				= nullptr;
+				m_memory.WriteFn			= nullptr;
+				m_memory.HighlightFn		= nullptr;
 			}
 
-			static auto & mem{ memory_manager::get_buffer() };
+			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
-				gui::help_marker_ex([&]() noexcept
-				{
-					ImGui::Text("(%u bytes)", std::distance(mem.data, mem.data + mem.size));
-				});
-
+				// read only
 				ImGui::Checkbox("read only", &m_memory.ReadOnly);
+				ImGui::Separator();
 
-				ImGui::PushItemWidth(160);
-				static int32_t jump_loc{};
-				if (ImGui::Combo("highlight", &jump_loc, 
-					"engine\0"
-					"editor\0"
-					"demo\0"
-				))
+				// highlight
+				if (ImGui::BeginMenu("highlight"))
 				{
-					switch (jump_loc)
+					auto jump_item = [&](cstring label, auto const * v)
 					{
-					case 0: highlight_memory(engine::get_context()); break;
-					case 1: highlight_memory(editor::get_context()); break;
-					case 2: highlight_memory(this); break;
+						if (!ImGui::MenuItem(label)) return;
+						highlight_memory(v);
+						ImGui::CloseCurrentPopup();
 					};
+					jump_item("demo", this);
+					jump_item("engine", engine::get_context());
+					jump_item("editor", editor::get_context());
+
+					ImGui::EndMenu();
 				}
-				ImGui::PopItemWidth();
+				ImGui::Separator();
+
+				// progress
+				char progress[64] = "";
+				std::sprintf(progress, "%uB / %uB (%.2f%%)", mem->used(), mem->size(), mem->percent());
+				ImGui::ProgressBar(mem->fraction(), { 256.f, 0.f }, progress);
+				gui::tooltip_ex([&]() noexcept
+				{
+					ImGui::Text("total %uB", mem->size());
+					ImGui::Text("used  %uB", mem->used());
+					ImGui::Text("free  %uB", mem->available());
+				});
+				ImGui::Separator();
 
 				ImGui::EndMenuBar();
 			}
 
-			m_memory.DrawContents(mem.data, mem.size, (size_t)mem.data);
+			// memory contents
+			m_memory.DrawContents(mem->data(), mem->size(), mem->addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -972,12 +954,9 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			static auto const & io{ ImGui::GetIO() };
-			static auto const & rt{ engine::get_runtime() };
-
-			// total time
+			// size time
 			ImGui::Columns(2);
-			ImGui::Text("total time"); ImGui::NextColumn();
+			ImGui::Text("size time"); ImGui::NextColumn();
 			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
@@ -1008,9 +987,13 @@ namespace ml
 	};
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
 	static ml::plugin * p{};
 	if (!p) p = new ml::demo{};
 	return p;
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

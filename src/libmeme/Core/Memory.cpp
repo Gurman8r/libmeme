@@ -9,7 +9,7 @@ namespace ml
 		: m_allocator	{}
 		, m_current		{}
 		, m_records		{}
-		, m_buffer		{ nullptr, 0U }
+		, m_resource	{ nullptr }
 	{
 	}
 
@@ -48,7 +48,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_manager::allocate(size_t size, int32_t flags) noexcept
+	void * memory_manager::allocate(size_t const size, int32_t const flags) noexcept
 	{
 		static memory_manager & inst{ get_instance() };
 
@@ -71,8 +71,7 @@ namespace ml
 	{
 		static memory_manager & inst{ get_instance() };
 
-		if (inst.m_records.empty() || !value)
-			return;
+		if (inst.m_records.empty() || !value) return;
 
 		// find the entry
 		if (auto const it{ inst.m_records.find(value) })

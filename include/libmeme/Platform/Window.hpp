@@ -72,7 +72,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
-			pmr::string const & title, 
+			cstring title, 
 			video_mode const & display,
 			context_settings const & context,
 			int32_t flags
@@ -118,9 +118,9 @@ namespace ml
 		
 		window & set_monitor(void * value);
 		
-		window & set_size(vec2u const & value);
+		window & set_size(vec2i const & value);
 		
-		window & set_title(pmr::string const & value);
+		window & set_title(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -180,22 +180,22 @@ namespace ml
 		
 		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
 
-		ML_NODISCARD static float64_t time();
+		ML_NODISCARD static float64_t get_time();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static error_fn set_error_callback			(error_fn value);
-		char_fn			set_char_callback			(char_fn value);
-		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn value);
-		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn value);
-		frame_size_fn	set_frame_size_callback		(frame_size_fn value);
-		key_fn			set_key_callback			(key_fn value);
-		mouse_fn		set_mouse_callback			(mouse_fn value);
-		scroll_fn		set_scroll_callback			(scroll_fn value);
-		close_fn		set_window_close_callback	(close_fn value);
-		focus_fn		set_window_focus_callback	(focus_fn value);
-		position_fn		set_window_pos_callback		(position_fn value);
-		size_fn			set_window_size_callback	(size_fn value);
+		static error_fn set_error_callback			(error_fn			fn);
+		char_fn			set_char_callback			(char_fn			fn);
+		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn	fn);
+		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn		fn);
+		frame_size_fn	set_frame_size_callback		(frame_size_fn		fn);
+		key_fn			set_key_callback			(key_fn				fn);
+		mouse_fn		set_mouse_callback			(mouse_fn			fn);
+		scroll_fn		set_scroll_callback			(scroll_fn			fn);
+		close_fn		set_window_close_callback	(close_fn			fn);
+		focus_fn		set_window_focus_callback	(focus_fn			fn);
+		position_fn		set_window_pos_callback		(position_fn		fn);
+		size_fn			set_window_size_callback	(size_fn			fn);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -209,21 +209,21 @@ namespace ml
 
 		ML_NODISCARD inline auto get_frame_width() const -> int32_t { return get_frame_size()[0]; }
 
-		ML_NODISCARD inline auto get_height() const -> uint32_t { return get_size()[1]; }
+		ML_NODISCARD inline auto get_height() const -> int32_t const & { return get_size()[1]; }
 
 		ML_NODISCARD inline auto get_monitor() const -> void * { return m_monitor; }
 
 		ML_NODISCARD inline auto get_share() const -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_size() const -> vec2u const & { return get_video_mode().resolution; }
+		ML_NODISCARD inline auto get_size() const -> vec2i const & { return get_video_mode().resolution; }
 
 		ML_NODISCARD inline auto get_flags() const -> int32_t const & { return m_flags; }
 
-		ML_NODISCARD inline auto get_title() const -> pmr::string const & { return m_title; }
+		ML_NODISCARD inline auto get_title() const -> cstring const & { return m_title; }
 
 		ML_NODISCARD inline auto get_video_mode() const -> video_mode const & { return m_video; }
 
-		ML_NODISCARD inline auto get_width() const -> uint32_t { return get_size()[0]; }
+		ML_NODISCARD inline auto get_width() const -> int32_t const & { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -231,7 +231,7 @@ namespace ml
 		void * 				m_window;
 		void * 				m_monitor;
 		void * 				m_share;
-		pmr::string			m_title;
+		cstring				m_title;
 		video_mode			m_video;
 		context_settings	m_context;
 		int32_t				m_flags;

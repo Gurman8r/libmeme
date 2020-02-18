@@ -12,38 +12,38 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// startup settings
-		struct config final
+		// startup
+		struct config final : trackable, non_copyable
 		{
-			void *		window_handle;	// 
-			pmr::string	api_version;	// 
-			pmr::string	style;			// 
-			cstring		ini_file;		// 
-			cstring		log_file;		// 
+			void *				window_handle	{}		; // 
+			pmr::string			api_version		{}		; // 
+			pmr::string			style			{}		; // 
+			cstring				ini_file		{}		; // 
+			cstring				log_file		{}		; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// runtime settings
-		struct runtime final
+		// runtime
+		struct io final : trackable, non_copyable
 		{
-			// ...
+			editor_dockspace	dockspace		{}		; // 
+			editor_main_menu	main_menu		{}		; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// editor context
-		struct context final : trackable
+		// context
+		class context final : trackable, non_copyable
 		{
-			config				config		{};
-			runtime				runtime		{};
-			editor_dockspace	dockspace	{};
-			editor_main_menu	main_menu	{};
+			friend class		editor					; // 
+			editor::config		config			{}		; // 
+			editor::io			io				{}		; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static editor::context const * create_context();
+		static bool create_context();
 
 		static bool startup(bool install_callbacks);
 
@@ -69,19 +69,15 @@ namespace ml
 
 		ML_NODISCARD static bool initialized() noexcept;
 
-		ML_NODISCARD static editor::context const * get_context() noexcept;
+		ML_NODISCARD static editor::context const * const get_context() noexcept;
 
 		ML_NODISCARD static editor::config & get_config() noexcept;
 
-		ML_NODISCARD static editor::runtime & get_runtime() noexcept;
+		ML_NODISCARD static editor::io & get_io() noexcept;
 
 		ML_NODISCARD static editor_dockspace & get_dockspace() noexcept;
 
 		ML_NODISCARD static editor_main_menu & get_main_menu() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void draw_texture_preview(texture const & value, vec2 const & maxSize = { 0 });
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

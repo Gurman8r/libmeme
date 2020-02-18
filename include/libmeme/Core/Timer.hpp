@@ -44,6 +44,8 @@ namespace ml
 		{
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		inline timer & operator=(timer && other) noexcept
 		{
 			this->swap(std::move(other));
@@ -59,18 +61,6 @@ namespace ml
 				std::swap(m_previous,	other.m_previous);
 				std::swap(m_elapsed,	other.m_elapsed);
 			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline bool running() const noexcept
-		{
-			return (m_flags & TimerFlags_Running);
-		}
-
-		ML_NODISCARD inline duration const & elapsed() const noexcept
-		{
-			return this->running() ? (m_elapsed = (clock::now() - m_previous)) : m_elapsed;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,6 +85,28 @@ namespace ml
 				m_flags &= ~TimerFlags_Running;
 			}
 			return (*this);
+		}
+
+		inline timer & restart() noexcept
+		{
+			return this->stop().start();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline bool running() const noexcept
+		{
+			return (m_flags & TimerFlags_Running);
+		}
+
+		ML_NODISCARD inline duration const & elapsed() const & noexcept
+		{
+			return this->running() ? (m_elapsed = (clock::now() - m_previous)) : m_elapsed;
+		}
+
+		ML_NODISCARD inline operator duration const & () const & noexcept
+		{
+			return this->elapsed();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
