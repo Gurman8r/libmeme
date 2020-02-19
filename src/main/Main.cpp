@@ -16,66 +16,67 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static auto buff = ds::array<byte_t, 16_MiB>{};
-	static auto mono = pmr::monotonic_buffer_resource{ buff.data(), buff.size() };
-	static auto pool = pmr::unsynchronized_pool_resource{ &mono };
-	static auto test = util::test_resource{ &pool, buff.data(), buff.size() };
-	pmr::set_default_resource(&test);
-	ML_ASSERT(memory_manager::startup(&test));
+	static struct memory_config final : non_copyable
+	{
+		ds::array<byte_t, 16_MiB>			data{};
+		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
+		pmr::unsynchronized_pool_resource	pool{ &mono };
+		util::test_resource					test{ &pool, data.data(), data.size() };
+
+		explicit memory_config() noexcept
+		{
+			ML_ASSERT(pmr::set_default_resource(&test));
+			ML_ASSERT(memory_tracker::startup(&test));
+		}
+
+	} g_mem{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup engine
-	ML_ASSERT(engine::create_context());
-	ML_DEFER{ engine::shutdown(); };
-	if (!([&]()
-	{
-		engine::config & config	= engine::get_config();
-		config.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
-		config.library_path		= "../../../../";
-		config.content_path		= "../../../../assets/";
-		config.script_list		= { "../../../../libmeme.py" };
-		config.plugin_list		= { /* "demo.dll" */ };
-		config.window_title		= "libmeme";
-		config.window_flags		= WindowFlags_DefaultMaximized;
-		config.window_video		= make_video_mode(
-			vec2i{ 1280, 720 },	// resolution
-			32u					// color depth
-		);
-		config.window_context	= make_context_settings(
-			client_api::opengl,	// api
-			4,					// major version
-			6,					// minor version
-			client_api::compat,	// profile
-			24,					// depth bits
-			8,					// stencil bits
-			false,				// multisample
-			false				// sRGB capable
-		);
-		return engine::startup(true);
-	})())
-	{
-		return debug::log_error("failed initializing engine") | debug::pause(1);
-	}
+	// create context
+	ML_ASSERT(engine::create_context()); ML_DEFER{ engine::shutdown(); };
+	ML_ASSERT(editor::create_context()); ML_DEFER{ editor::shutdown(); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup editor
-	ML_ASSERT(editor::create_context());
-	ML_DEFER{ editor::shutdown(); };
-	if (!([&]()
-	{
-		editor::config & config	= editor::get_config();
-		config.window_handle	= engine::get_window().get_handle();
-		config.api_version		= "#version 130";
-		config.style			= "dark";
-		config.ini_file			= nullptr;
-		config.log_file			= nullptr;
-		return editor::startup(true);
-	})())
-	{
-		return debug::log_error("failed initializing editor") | debug::pause(1);
-	}
+	// configure engine
+	engine::config & engine_cfg	= engine::get_config();
+	engine_cfg.program_name		= ML_ARGV[0];
+	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
+	engine_cfg.library_path		= "../../../../";
+	engine_cfg.content_path		= "../../../../assets/";
+	engine_cfg.script_list		= { "../../../../libmeme.py" };
+	engine_cfg.plugin_list		= { /* "demo.dll" */ };
+	engine_cfg.window_title		= "libmeme";
+	engine_cfg.window_flags		= WindowFlags_DefaultMaximized;
+	engine_cfg.window_video		= make_video_mode(
+		vec2i{ 1280, 720 },		// resolution
+		32u						// color depth
+	);
+	engine_cfg.window_context	= make_context_settings(
+		client_api::opengl,		// api
+		4,						// major version
+		6,						// minor version
+		client_api::compat,		// profile
+		24,						// depth bits
+		8,						// stencil bits
+		false,					// multisample
+		false					// sRGB capable
+	);
+
+	ML_ASSERT(engine::startup(true));
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// configure editor
+	editor::config & editor_cfg	= editor::get_config();
+	editor_cfg.window_handle	= engine::get_window().get_handle();
+	editor_cfg.api_version		= "#version 130";
+	editor_cfg.style			= "dark";
+	editor_cfg.ini_file			= nullptr;
+	editor_cfg.log_file			= nullptr;
+
+	ML_ASSERT(editor::startup(true));
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -83,58 +84,59 @@ ml::int32_t main()
 	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
 
 	// main loop
-	while (engine::running())
+	while (engine::get_window().is_open())
 	{
 		ML_DEFER{ performance_tracker::refresh_frames(); };
 
 		// begin frame
 		{
-			ML_BENCHMARK("frame-begin");
+			ML_BENCHMARK("| begin frame");
 			engine::begin_loop();
 			event_system::fire_event<frame_begin_event>();
 		}
 		// update
 		{
-			ML_BENCHMARK("update");
+			ML_BENCHMARK("|  update");
 			event_system::fire_event<update_event>();
 		}
 		// begin draw
 		{
-			ML_BENCHMARK("draw-begin");
+			ML_BENCHMARK("|  begin draw");
 			engine::begin_draw();
+			event_system::fire_event<begin_draw_event>();
 		}
 		// draw
 		{
-			ML_BENCHMARK("\tdraw");
+			ML_BENCHMARK("|   draw");
 			event_system::fire_event<draw_event>(engine::get_window());
 		}
 		// begin gui
 		{
-			ML_BENCHMARK("\tgui-begin");
+			ML_BENCHMARK("|   begin gui");
 			editor::new_frame();
-			editor::get_main_menu().render();
-			editor::get_dockspace().render();
 			event_system::fire_event<gui_begin_event>();
 		}
 		// gui
 		{
-			ML_BENCHMARK("\t\tgui");
+			ML_BENCHMARK("|    gui");
+			editor::render();
 			event_system::fire_event<gui_draw_event>();
 		}
 		// end gui
 		{
-			ML_BENCHMARK("\tgui-end");
+			ML_BENCHMARK("|   end gui");
 			editor::render_frame();
 			event_system::fire_event<gui_end_event>();
 		}
 		// end draw
 		{
-			ML_BENCHMARK("draw-end");
+			ML_BENCHMARK("|  end draw");
 			engine::end_draw();
+			event_system::fire_event<end_draw_event>();
 		}
 		// end frame
 		{
-			ML_BENCHMARK("frame-end");
+			ML_BENCHMARK("| end frame");
 			engine::end_loop();
 			event_system::fire_event<frame_end_event>();
 		}

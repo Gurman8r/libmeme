@@ -19,7 +19,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
-			cstring title,
+			pmr::string const & title,
 			video_mode const & display,
 			context_settings const & context,
 			int32_t flags

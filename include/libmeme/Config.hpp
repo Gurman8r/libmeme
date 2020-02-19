@@ -11,15 +11,6 @@
 #define ML__TIME    __TIME__
 
 
-// Debug
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if defined(_DEBUG)
-#	define ML_DEBUG 1
-#else
-#	define ML_DEBUG 0
-#endif
-
-
 // Language
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__cplusplus)
@@ -233,6 +224,29 @@
 #else
 #	define ML_INTMAX    ML_INT64
 #	define ML_UINTMAX   ML_UINT64
+#endif
+
+
+// Debug
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#if defined(_DEBUG)
+#	define ML_DEBUG 1
+#else
+#	define ML_DEBUG 0
+#endif
+
+#if (!ML_DEBUG)
+#	define ML_BREAKPOINT()
+#elif defined(ML_CC_MSVC)
+#	define ML_BREAKPOINT() ::__debugbreak()
+#else
+#	define ML_BREAKPOINT() ::raise(SIGTRAP)
+#endif
+
+#if ML_DEBUG
+#	define ML_BREAK_IF(expr) if (!!(expr)) ML_BREAKPOINT()
+#else
+#	define ML_BREAK_IF(expr)
 #endif
 
 

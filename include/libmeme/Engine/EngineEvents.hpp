@@ -27,6 +27,10 @@ namespace ml
 	{
 	};
 
+	struct begin_draw_event final : T_event<begin_draw_event>
+	{
+	};
+
 	struct draw_event final : T_event<draw_event>
 	{
 		struct render_target & target;
@@ -35,6 +39,10 @@ namespace ml
 			: target{ target }
 		{
 		}
+	};
+
+	struct end_draw_event final : T_event<draw_event>
+	{
 	};
 
 	struct frame_end_event final : T_event<frame_end_event>

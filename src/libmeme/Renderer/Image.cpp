@@ -48,16 +48,16 @@ namespace ml
 	}
 
 	image::image(vec2u const & size, size_t channels, allocator_type const & alloc)
-		: image{ size, channels, pixels_type{}, alloc }
+		: image{ size, channels, storage_type{}, alloc }
 	{
 	}
 
-	image::image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc)
+	image::image(vec2u const & size, storage_type const & pixels, allocator_type const & alloc)
 		: image{ size, 4, pixels, alloc }
 	{
 	}
 
-	image::image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc)
+	image::image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type const & alloc)
 		: m_size	{ size }
 		, m_channels{ channels }
 		, m_pixels	{ pixels, alloc }
@@ -128,7 +128,7 @@ namespace ml
 	{
 		::stbi_set_flip_vertically_on_load(flip);
 
-		if (byte_t * data{ ::stbi_load(
+		if (byte_t * const temp{ ::stbi_load(
 			path.string().c_str(),
 			reinterpret_cast<int32_t *>(&m_size[0]),
 			reinterpret_cast<int32_t *>(&m_size[1]),
@@ -136,9 +136,11 @@ namespace ml
 			static_cast<int32_t>(req_channels)
 		) })
 		{
-			create_from_pixels({ data, data + capacity() });
-			
-			::stbi_image_free(data);
+			m_pixels.resize(capacity());
+
+			std::memcpy(&m_pixels[0], temp, capacity());
+
+			::stbi_image_free(temp);
 			
 			return !empty();
 		}
@@ -188,17 +190,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	image & image::create_from_pixels(vec2u const & size, pixels_type const & pixels)
+	image & image::create_from_pixels(vec2u const & size, storage_type const & pixels)
 	{
 		return create_from_pixels(size, m_channels, pixels);
 	}
 
-	image & image::create_from_pixels(pixels_type const & pixels)
+	image & image::create_from_pixels(storage_type const & pixels)
 	{
 		return create_from_pixels(m_size, m_channels, pixels);
 	}
 	
-	image & image::create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels)
+	image & image::create_from_pixels(vec2u const & size, size_t channels, storage_type const & pixels)
 	{
 		if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 		{

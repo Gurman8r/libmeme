@@ -13,11 +13,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using pixels_type				= typename pmr::vector<byte_t>;
-		using iterator					= typename pixels_type::iterator;
-		using const_iterator			= typename pixels_type::const_iterator;
-		using reverse_iterator			= typename pixels_type::reverse_iterator;
-		using const_reverse_iterator	= typename pixels_type::const_reverse_iterator;
+		using storage_type				= typename pmr::vector<byte_t>;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -33,9 +33,9 @@ namespace ml
 		
 		image(vec2u const & size, size_t channels, allocator_type const & alloc = {});
 		
-		image(vec2u const & size, pixels_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, storage_type const & pixels, allocator_type const & alloc = {});
 		
-		image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type const & alloc = {});
 		
 		image(fs::path const & path, allocator_type const & alloc = {});
 		
@@ -71,11 +71,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_pixels(vec2u const & size, pixels_type const & pixels);
+		image & create_from_pixels(vec2u const & size, storage_type const & pixels);
 		
-		image & create_from_pixels(pixels_type const & pixels);
+		image & create_from_pixels(storage_type const & pixels);
 		
-		image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels);
+		image & create_from_pixels(vec2u const & size, size_t channels, storage_type const & pixels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -125,9 +125,9 @@ namespace ml
 		
 		ML_NODISCARD inline auto height() const noexcept -> size_t { return m_size[1]; }
 
-		ML_NODISCARD inline auto pixels() noexcept -> pixels_type & { return m_pixels; }
+		ML_NODISCARD inline auto pixels() noexcept -> storage_type & { return m_pixels; }
 		
-		ML_NODISCARD inline auto pixels() const noexcept -> pixels_type const & { return m_pixels; }
+		ML_NODISCARD inline auto pixels() const noexcept -> storage_type const & { return m_pixels; }
 		
 		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
 		
@@ -162,9 +162,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		vec2u		m_size;
-		size_t		m_channels;
-		pixels_type	m_pixels;
+		vec2u			m_size;
+		size_t			m_channels;
+		storage_type	m_pixels;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

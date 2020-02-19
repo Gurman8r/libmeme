@@ -137,24 +137,28 @@ namespace ml
 		gui::widget
 			m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None },
 			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
 			m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
 
-		gui::plot
-			m_plot_avg{ gui::plot::lines, "##frame time" },
-			m_plot_fps{ gui::plot::lines, "##frame rate" };
+		gui::plot<120> // <- could use some optimization
+			m_plot_avg{ 0, "##frame time" },
+			m_plot_fps{ 0, "##frame rate" };
 
 		MemoryEditor m_memory;
 
+		inline auto highlight_memory(byte_t * ptr, size_t const size)
+		{
+			static auto * const mem{ memory_tracker::get_resource() };
+			auto const addr{ std::distance(mem->begin(), ptr) };
+			m_gui_memory.set_focused();
+			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
+		}
+
 		template <class T> inline auto highlight_memory(T const * ptr)
 		{
-			static auto * const mem{ memory_manager::get_resource() };
-			if (!ptr) { m_memory.GotoAddrAndHighlight(mem->addr(), 0); }
-			auto const addr{ (size_t)std::distance(mem->begin(), (byte_t *)ptr) };
-			m_gui_memory.set_focused();
-			m_memory.GotoAddrAndHighlight(addr, addr + sizeof(T));
+			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
 
 
@@ -239,11 +243,11 @@ namespace ml
 
 			// IMAGES
 			{
-				if (auto const & img{ m_images["icon"] = make_image(
+				if (auto const & icon{ m_images["icon"] = make_image(
 					fs::path{ "../../../../assets/textures/icon.png" }
-				) }; !img.empty())
+				) }; !icon.empty())
 				{
-					engine::get_window().set_icon(img.width(), img.height(), img.data());
+					engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
 				}
 			}
 
@@ -406,10 +410,10 @@ namespace ml
 			auto const tt{ engine::get_time().count() };
 
 			// frame time
-			m_plot_avg.update(dt * 1000.f, "%.3f ms/frame", dt * 1000.f, tt, dt);
+			m_plot_avg.update(dt * 1000.f, tt, dt, "%.3f ms/frame", dt * 1000.f);
 
 			// frame rate
-			m_plot_fps.update(fps, "%.3f fps", fps, tt, dt);
+			m_plot_fps.update(fps, tt, dt, "%.3f fps", fps);
 
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
@@ -522,32 +526,33 @@ namespace ml
 
 			auto draw_item = [&](auto const & n, auto const & v)
 			{
-				using N = typename std::decay_t<decltype(n)>;
+				ML_ImGui_ScopeID(ML_ADDRESSOF(&v));
 				using V = typename std::decay_t<decltype(v)>;
 				static constexpr auto info{ typeof_v<V> };
-				static constexpr auto type{ info.name() };
+				static constexpr auto type{ nameof<>::filter_all(info.name()) };
 
 				ImGui::Text("%.*s", type.size(), type.data()); ImGui::NextColumn();
 				ImGui::Text("%s", n.c_str()); ImGui::NextColumn();
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
-				if (ImGui::Selectable(addr))
-				{
-					highlight_memory(&v);
-				}
+				if (ImGui::Selectable(addr)) { highlight_memory(&v); }
 				ImGui::NextColumn();
+				ImGui::Text("%u", sizeof(V)); ImGui::NextColumn();
 			};
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ImGui::Columns(3);
+			ImGui::Columns(4);
+
 			ImGui::Text("type"); ImGui::NextColumn();
 			ImGui::Text("name"); ImGui::NextColumn();
 			ImGui::Text("addr"); ImGui::NextColumn();
+			ImGui::Text("size"); ImGui::NextColumn();
+			
 			ImGui::Columns(1);
 			ImGui::Separator();
+			ImGui::Columns(4);
 
-			ImGui::Columns(3);
 			m_pipeline.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_fonts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_images.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
@@ -556,6 +561,7 @@ namespace ml
 			m_scripts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_shaders.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_textures.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+
 			ImGui::Columns(1);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -815,64 +821,19 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			enum { gui_layout_tree, gui_layout_list };
-			
-			static int32_t s_gui_layout{ 0 };
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			if (ImGui::BeginMenuBar())
-			{
-				if (ImGui::Combo("layout", &s_gui_layout, "tree\0list"))
-					ImGui::CloseCurrentPopup();
-				ImGui::EndMenuBar();
-			}
-
 			ImGui::BeginChildFrame(ImGui::GetID("ecs"),
 				ImGui::GetContentRegionAvail(),
 				ImGuiWindowFlags_NoScrollbar
 			);
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
-
-			switch (s_gui_layout)
+			ImGui::Columns(2);
+			ImGui::Separator();
+			m_ecs.for_entities([&](size_t const e)
 			{
-			case gui_layout_tree: {
-				ImGui::Columns(2);
-				ImGui::Separator();
-				m_ecs.for_entities([&](size_t const e)
-				{
-					show_entity(e);
-				});
-				ImGui::Columns(1);
-				ImGui::Separator();
-			} break;
-
-			case gui_layout_list: {
-				m_ecs.for_entities([&](size_t const e)
-				{
-					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
-					ImGui::Columns(4);
-					ImGui::Text("guid"); ImGui::NextColumn();
-					ImGui::Text("name"); ImGui::NextColumn();
-					ImGui::Text("addr"); ImGui::NextColumn();
-					ImGui::Columns(1);
-					ImGui::Separator();
-					m_ecs.for_components(e, [&](auto & c)
-					{
-						static constexpr auto info{
-							typeof_v<std::decay_t<decltype(c)>>
-						};
-						ImGui::Columns(4);
-						ImGui::Text("%u", e); ImGui::NextColumn();
-						ImGui::Text("%.*s", info.name().size(), info.name().data()); ImGui::NextColumn();
-						ImGui::Text("%p", &c); ImGui::NextColumn();
-						ImGui::Columns(1);
-					});
-					ImGui::PopStyleVar();
-				});
-			} break;
-			}
-
+				show_entity(e);
+			});
+			ImGui::Columns(1);
+			ImGui::Separator();
 			ImGui::PopStyleVar();
 			ImGui::EndChildFrame();
 
@@ -883,7 +844,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto * const mem{ memory_manager::get_resource() };
+			static auto * const mem{ memory_tracker::get_resource() };
 
 			// setup memory editor
 			ML_ONCE_CALL()
@@ -912,32 +873,36 @@ namespace ml
 				ImGui::Checkbox("read only", &m_memory.ReadOnly);
 				ImGui::Separator();
 
-				// highlight
-				if (ImGui::BeginMenu("highlight"))
+				// goto
+				if (ImGui::BeginMenu("goto"))
 				{
-					auto jump_item = [&](cstring label, auto const * v)
+					auto jump_item = [&](cstring label, auto && v)
 					{
 						if (!ImGui::MenuItem(label)) return;
-						highlight_memory(v);
+						highlight_memory(ML_FWD(v));
 						ImGui::CloseCurrentPopup();
 					};
-					jump_item("demo", this);
-					jump_item("engine", engine::get_context());
-					jump_item("editor", editor::get_context());
-
+					jump_item("begin", &mem->front());
+					jump_item("end", &mem->back());
+					ImGui::Separator();
+					jump_item("demo (this)", this);
+					ImGui::Separator();
+					jump_item("engine context", engine::get_context());
+					jump_item("editor context", editor::get_context());
 					ImGui::EndMenu();
 				}
 				ImGui::Separator();
 
 				// progress
-				char progress[64] = "";
-				std::sprintf(progress, "%uB / %uB (%.2f%%)", mem->used(), mem->size(), mem->percent());
+				char progress[32] = "";
+				std::sprintf(progress, "%u / %u (%.2f%%)", mem->used(), mem->size(), mem->percent());
 				ImGui::ProgressBar(mem->fraction(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
-					ImGui::Text("total %uB", mem->size());
-					ImGui::Text("used  %uB", mem->used());
-					ImGui::Text("free  %uB", mem->available());
+					ImGui::Text("allocations: %u", mem->count());
+					ImGui::Text("total:       %u", mem->size());
+					ImGui::Text("in use:      %u", mem->used());
+					ImGui::Text("available:   %u", mem->free());
 				});
 				ImGui::Separator();
 
@@ -954,9 +919,9 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			// size time
+			// total time
 			ImGui::Columns(2);
-			ImGui::Text("size time"); ImGui::NextColumn();
+			ImGui::Selectable("total time"); ImGui::NextColumn();
 			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
@@ -974,7 +939,7 @@ namespace ml
 				ImGui::Separator();
 				for (auto const & elem : bench)
 				{
-					ImGui::Text("%s", elem.first); ImGui::NextColumn();
+					ImGui::Selectable(elem.first); ImGui::NextColumn();
 					ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
 				}
 			}

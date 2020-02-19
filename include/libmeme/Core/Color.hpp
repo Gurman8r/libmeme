@@ -157,8 +157,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace colors
+	class colors final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static constexpr auto clear		= make_color(0.0f, 0.0f, 0.0f, 0.0f);

@@ -8,13 +8,13 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size array
-	template <class _Ty, size_t _Size> struct array
+	template <class _Ty, size_t Size> struct array
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type		= typename _Ty;
-		using self_type			= typename array<value_type, _Size>;
-		using storage_type		= typename value_type[_Size];
+		using self_type			= typename array<value_type, Size>;
+		using storage_type		= typename value_type[Size];
 		using size_type			= typename size_t;
 		using difference_type	= typename ptrdiff_t;
 		using pointer			= typename value_type *;
@@ -32,13 +32,13 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr reference operator[](size_type const i) noexcept
 		{
-			ML_ASSERT(i < _Size);
+			ML_ASSERT(i < Size);
 			return m_data[i];
 		}
 
 		ML_NODISCARD constexpr const_reference operator[](size_type const i) const noexcept
 		{
-			ML_ASSERT(i < _Size);
+			ML_ASSERT(i < Size);
 			return m_data[i];
 		}
 
@@ -46,7 +46,7 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr reference at(size_type const i)
 		{
-			if (_Size <= i)
+			if ML_UNLIKELY(Size <= i)
 			{
 				ML_THROW(std::out_of_range("ml::array subscript out of range"));
 			}
@@ -55,7 +55,7 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr const_reference at(size_type const i) const
 		{
-			if (_Size <= i)
+			if ML_UNLIKELY(Size <= i)
 			{
 				ML_THROW(std::out_of_range("ml::array subscript out of range"));
 			}
@@ -64,17 +64,17 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto back() noexcept -> reference { return (*end()); }
+		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data[Size - 1]; }
 		
-		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return (*cend()); }
+		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data[Size - 1]; }
 		
-		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return data(); }
+		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return m_data; }
 		
-		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return data(); }
+		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return m_data; }
 		
-		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return begin(); }
+		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return m_data; }
 		
-		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return end(); }
+		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data + Size; }
 		
 		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data; }
 		
@@ -82,17 +82,17 @@ namespace ml::ds
 		
 		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
 		
-		ML_NODISCARD constexpr auto end() noexcept -> iterator { return data() + size(); }
+		ML_NODISCARD constexpr auto end() noexcept -> iterator { return m_data + Size; }
 		
-		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return data() + size(); }
+		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return m_data + Size; }
 		
-		ML_NODISCARD constexpr auto front() noexcept -> reference { return (*begin()); }
+		ML_NODISCARD constexpr auto front() noexcept -> reference { return m_data[0]; }
 		
-		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
+		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return _Size; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return Size; }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return _Size; }
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return Size; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

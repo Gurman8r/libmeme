@@ -59,20 +59,20 @@ namespace ml::gui
 		tooltip(value);
 	}
 
-	// PLOT LINES
+	// PLOT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct plot final
+	template <size_t Samples
+	> struct plot final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum	plot_mode	: int32_t { lines, histogram };
-		using	overlay_t	= ds::array<char, 64>;
-		using	buffer_t	= ds::array<float_t, 120>;
+		using overlay_t	= ds::array<char, 32>;
+		using buffer_t	= ds::array<float_t, Samples>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plot_mode	mode		{};
+		int32_t		mode		{};
 		cstring		title		{};
 		vec2		scale		{ FLT_MAX, FLT_MAX };
 		vec2		size		{ 0.f, 0.f };
@@ -86,21 +86,16 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline plot & update(float_t const value, cstring fmt, ...) noexcept
+		inline plot & update(float_t v, float64_t tt, float_t dt, cstring fmt, ...) noexcept
 		{
 			va_list args;
 			va_start(args, fmt);
 			std::vsnprintf(overlay.data(), overlay.size() - 1, fmt, args);
 			va_end(args);
-			return update(value);
+			return update(v, tt, dt);
 		}
 
-		inline plot & update(float_t const value, float_t const dt = 1.f / 60.f) noexcept
-		{
-			return update(value, ImGui::GetTime(), dt);
-		}
-
-		inline plot & update(float_t const value, float64_t const tt, float_t const dt) noexcept
+		inline plot & update(float_t v, float64_t tt, float_t dt) noexcept
 		{
 			if (!animate || ref_time == 0.0)
 			{
@@ -108,7 +103,7 @@ namespace ml::gui
 			}
 			while (ref_time < tt)
 			{
-				buffer[offset] = value;
+				buffer[offset] = v;
 				offset = (offset + 1) % buffer.size();
 				ref_time += dt;
 			}
@@ -127,12 +122,12 @@ namespace ml::gui
 
 			switch (mode)
 			{
-			case lines: ImGui::PlotLines(title,
+			case 0: ImGui::PlotLines(title,
 				buffer.data(), (int32_t)buffer.size(), offset,
 				overlay.data(), scale[0], scale[1], { width, size[1] }, stride
 			); break;
 
-			case histogram: ImGui::PlotHistogram(title,
+			case 1: ImGui::PlotHistogram(title,
 				buffer.data(), (int32_t)buffer.size(), offset,
 				overlay.data(), scale[0], scale[1], { width, size[1] }, stride
 			); break;

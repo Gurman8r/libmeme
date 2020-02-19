@@ -4,14 +4,13 @@
 #include <libmeme/Core/Timer.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 
-#define ML_IMPL_BENCHMARK(var, name)							\
-	auto var{ ml::timer{ true } };								\
+#define ML_IMPL_BENCHMARK(v, id)							\
+	auto v{ ml::timer{ true } };								\
 	ML_DEFER{													\
-	var.stop();													\
-	ml::performance_tracker::push_frame(name, var.elapsed());	\
+	ml::performance_tracker::push_frame(id, v.elapsed());	\
 	};
 
-#define ML_BENCHMARK(name) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), name)
+#define ML_BENCHMARK(id) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), id)
 
 namespace ml
 {
@@ -33,7 +32,7 @@ namespace ml
 		}
 
 		template <class ... Args
-		> static inline decltype(auto) push_frame(Args && ... args)
+		> static inline decltype(auto) push_frame(Args && ... args) noexcept
 		{
 			return m_curr.emplace_back(ML_FWD(args)...);
 		}

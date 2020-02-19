@@ -87,11 +87,6 @@ namespace ml
 			return (*this);
 		}
 
-		inline timer & restart() noexcept
-		{
-			return this->stop().start();
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline bool running() const noexcept

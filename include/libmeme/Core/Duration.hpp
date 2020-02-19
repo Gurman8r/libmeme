@@ -94,7 +94,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr base_type base() const noexcept
+		ML_NODISCARD constexpr base_type const & base() const & noexcept
 		{
 			return m_base;
 		}

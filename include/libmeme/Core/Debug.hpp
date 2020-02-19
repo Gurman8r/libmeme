@@ -11,18 +11,6 @@
 #define ML_MSG_WRN "warn"
 #define ML_MSG_ERR "error"
 
-#if ML_DEBUG
-#	if defined(ML_IMPL_BREAKPOINT_CUSTOM)
-#		define ML_BREAKPOINT ML_IMPL_BREAKPOINT_CUSTOM
-#	elif defined(ML_CC_MSVC)
-#		define ML_BREAKPOINT ::__debugbreak()
-#	else
-#		define ML_BREAKPOINT ::raise(SIGTRAP)
-#	endif
-#else
-#	define ML_BREAKPOINT
-#endif
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

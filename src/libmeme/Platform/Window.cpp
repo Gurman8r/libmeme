@@ -31,8 +31,10 @@
 
 namespace ml
 {
-	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * pixels)
+	static GLFWimage const * make_glfw_image(vec2s const & size, byte_t const * pixels)
 	{
+		auto const & w{ size[0] }, & h{ size[1] };
+
 		if (!w || !h || !pixels) return nullptr;
 
 		static ds::flat_map<size_t, GLFWimage> img{};
@@ -91,20 +93,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(cstring title, video_mode const & video, context_settings const & context, int32_t flags)
+	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t flags)
 	{
 		if (m_window)
 		{
-			return debug::log_error("Window already initialized");
+			return debug::log_error("window is already open");
 		}
 
 		if (!glfwInit())
 		{
-			return debug::log_error("Failed initializing GLFW");
+			return debug::log_error("failed initializing glfw");
 		}
 
-		m_monitor	= nullptr;
-		m_share		= nullptr;
 		m_title		= title;
 		m_video		= video;
 		m_flags		= flags;
@@ -148,34 +148,35 @@ namespace ml
 		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_flags & WindowFlags_DoubleBuffered);
 		
 		// Create Window
-		if (m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
+		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
 			m_video.resolution[0],
 			m_video.resolution[1],
-			m_title,
+			m_title.c_str(),
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
-		)))
+		))))
 		{
-			this->make_context_current();
-
-			this->set_cursor_mode(cursor::mode::normal);
-
-			if (m_flags & WindowFlags_Fullscreen)
-			{
-				this->set_fullscreen(true); // Fullscreen
-			}
-			else if (m_flags & WindowFlags_Maximized)
-			{
-				this->maximize(); // Maximized
-			}
-			else
-			{
-				this->set_centered(); // Centered
-			}
-
-			return true;
+			return debug::log_error("failed creating glfw window");
 		}
-		return false;
+
+		make_context_current();
+
+		set_cursor_mode(cursor::mode::normal);
+
+		if (has_flags(WindowFlags_Fullscreen))
+		{
+			set_fullscreen(true); // Fullscreen
+		}
+		else if (has_flags(WindowFlags_Maximized))
+		{
+			maximize(); // Maximized
+		}
+		else
+		{
+			set_centered(); // Centered
+		}
+
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -257,7 +258,7 @@ namespace ml
 
 	window & window::set_centered()
 	{
-		return set_position((vec2i)(get_desktop_mode().resolution - this->get_size()) / 2);
+		return set_position((vec2i)(get_desktop_mode().resolution - get_size()) / 2);
 	}
 
 	window & window::set_clipboard(pmr::string const & value)
@@ -315,7 +316,7 @@ namespace ml
 		if (m_window)
 		{
 			glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window),
-				1, make_glfw_image(w, h, pixels)
+				1, make_glfw_image({ w, h }, pixels)
 			);
 		}
 		return (*this);
@@ -374,11 +375,11 @@ namespace ml
 		return (*this);
 	}
 
-	window & window::set_title(cstring value)
+	window & window::set_title(pmr::string const & value)
 	{
-		if (m_window && value)
+		if (m_window && !value.empty())
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value));
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value).c_str());
 		}
 		return (*this);
 	}
@@ -503,7 +504,7 @@ namespace ml
 
 	void * window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
 	{
-		return glfwCreateCursor(make_glfw_image(w, h, pixels), w, h);
+		return glfwCreateCursor(make_glfw_image({ w, h }, pixels), w, h);
 	}
 
 	void * window::create_standard_cursor(cursor::shape value)
