@@ -271,68 +271,68 @@ namespace ml::util
 
 	ML_NODISCARD static inline int32_t to_i8(pmr::string const & value, int8_t dv = 0) noexcept
 	{
-		try { return static_cast<int8_t>(std::stoi(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<int8_t>(std::stoi(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline int32_t to_i16(pmr::string const & value, int16_t dv = 0) noexcept
 	{
-		try { return static_cast<int16_t>(std::stoi(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<int16_t>(std::stoi(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline int32_t to_i32(pmr::string const & value, int32_t dv = 0) noexcept
 	{
-		try { return static_cast<int32_t>(std::stoi(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<int32_t>(std::stoi(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline int64_t to_i64(pmr::string const & value, int64_t dv = 0) noexcept
 	{
-		try { return static_cast<int64_t>(std::stoll(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<int64_t>(std::stoll(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline uint8_t to_u8(pmr::string const & value, uint8_t dv = 0) noexcept
 	{
-		try { return static_cast<uint8_t>(std::stoul(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<uint8_t>(std::stoul(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline uint16_t to_u16(pmr::string const & value, uint16_t dv = 0) noexcept
 	{
-		try { return static_cast<uint16_t>(std::stoul(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<uint16_t>(std::stoul(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline uint32_t to_u32(pmr::string const & value, uint32_t dv = 0) noexcept
 	{
-		try { return static_cast<uint32_t>(std::stoul(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<uint32_t>(std::stoul(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline uint64_t to_u64(pmr::string const & value, uint64_t dv = 0) noexcept
 	{
-		try { return static_cast<uint64_t>(std::stoull(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<uint64_t>(std::stoull(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline float32_t to_f32(pmr::string const & value, float32_t dv = 0) noexcept
 	{
-		try { return static_cast<float32_t>(std::stof(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<float32_t>(std::stof(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline float64_t to_f64(pmr::string const & value, float64_t dv = 0) noexcept
 	{
-		try { return static_cast<float64_t>(std::stod(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<float64_t>(std::stod(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	ML_NODISCARD static inline float80_t to_f80(pmr::string const & value, float80_t dv = 0) noexcept
 	{
-		try { return static_cast<float80_t>(std::stold(value.c_str())); }
-		catch (std::invalid_argument &) { return dv; }
+		ML_TRY { return static_cast<float80_t>(std::stold(value.c_str())); }
+		ML_CATCH (std::invalid_argument &) { return dv; }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -397,7 +397,7 @@ namespace ml::util
 	{
 		std::stringstream ss{};
 		ss << value;
-		return ss.str().c_str();
+		return pmr::string{ ss.str().begin(), ss.str().end() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

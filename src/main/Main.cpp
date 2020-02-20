@@ -23,7 +23,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup memory
+	// configure memory
 	static struct memory_config final : non_copyable
 	{
 		ds::array<byte_t, 16_MiB>			data{};
@@ -89,13 +89,15 @@ ml::int32_t main()
 		WindowFlags_DefaultMaximized	// flags
 	));
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// startup
 	ML_ASSERT(engine::startup(true)); ML_DEFER{ ML_ASSERT(engine::shutdown()); };
 	ML_ASSERT(editor::startup(true)); ML_DEFER{ ML_ASSERT(editor::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// main script
+	// run main script
 	script{ engine::path_to("main.py") }();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

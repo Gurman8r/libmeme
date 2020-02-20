@@ -188,10 +188,7 @@ namespace ml
 		{
 			g_engine->m_window.swap_buffers();
 		}
-		else
-		{
-			GL::flush();
-		}
+		GL::flush();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

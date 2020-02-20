@@ -259,7 +259,13 @@
 #define ML_CONCAT(a, b)         ML_CONCAT_IMPL(a, b)
 #define ML_TOSTRING(str)        #str
 #define ML_STRINGIFY(str)       ML_TOSTRING(str)
-#define ML_THROW(...)           throw (##__VA_ARGS__)
+
+
+// Exceptions
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#define ML_THROW                throw
+#define ML_TRY                  try
+#define ML_CATCH                catch
 
 
 // Anonymous Variables
