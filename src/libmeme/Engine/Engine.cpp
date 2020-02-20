@@ -181,9 +181,9 @@ namespace ml
 	{
 		ML_ASSERT(initialized());
 
-		ref().io.delta_time = ref().loop_timer.stop().elapsed().count<float_t>();
+		ref().io.delta_time = ref().loop_timer.elapsed().count<float_t>();
 
-		ref().loop_timer.start();
+		ref().loop_timer.stop().start();
 
 		window::poll_events();
 	}

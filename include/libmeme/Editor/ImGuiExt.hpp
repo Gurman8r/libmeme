@@ -62,59 +62,42 @@ namespace ml::gui
 	// PLOT
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <size_t Samples
-	> struct plot final
+	struct plot final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using overlay_t	= ds::array<char, 32>;
-		using buffer_t	= ds::array<float_t, Samples>;
+		using getter_t	= typename float_t(*)(void);
+		using overlay_t	= typename ds::array<char, 32>;
+		using buffer_t	= typename pmr::vector<float_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		buffer_t	buffer		{};
 		int32_t		mode		{};
 		cstring		title		{};
-		vec2		scale		{ FLT_MAX, FLT_MAX };
-		vec2		size		{ 0.f, 0.f };
-		int32_t		stride		{ sizeof(float_t) };
-
-		bool		animate		{ true	};
+		cstring		format		{ "%f" };
+		getter_t	getter		{ []() { return 0.f; } };
+		vec2		graph_scale	{ FLT_MAX, FLT_MAX };
+		vec2		graph_size	{ 0.f, 0.f };
 		int32_t		offset		{};
-		float64_t	ref_time	{};
 		overlay_t	overlay		{};
-		buffer_t	buffer		{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline plot & update(float_t v, float64_t tt, float_t dt, cstring fmt, ...) noexcept
+		inline void update() noexcept
 		{
-			va_list args;
-			va_start(args, fmt);
-			std::vsnprintf(overlay.data(), overlay.size() - 1, fmt, args);
-			va_end(args);
-			return update(v, tt, dt);
+			if (buffer.empty()) return;
+			float_t const v{ std::invoke(getter) };
+			std::sprintf(overlay.data(), format, v);
+			buffer[offset] = v;
+			offset = (offset + 1) % buffer.size();
 		}
 
-		inline plot & update(float_t v, float64_t tt, float_t dt) noexcept
-		{
-			if (!animate || ref_time == 0.0)
-			{
-				ref_time = tt;
-			}
-			while (ref_time < tt)
-			{
-				buffer[offset] = v;
-				offset = (offset + 1) % buffer.size();
-				ref_time += dt;
-			}
-			return (*this);
-		}
-
-		inline plot const & render() const noexcept
+		inline void render() const noexcept
 		{
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-			float_t width{ size[0] };
+			float_t width{ graph_size[0] };
 			if ((width == 0.f) && (title && title[0] == '#' && title[1] == '#'))
 			{
 				width = ImGui::GetContentRegionAvailWidth();
@@ -124,19 +107,28 @@ namespace ml::gui
 			{
 			case 0: ImGui::PlotLines(title,
 				buffer.data(), (int32_t)buffer.size(), offset,
-				overlay.data(), scale[0], scale[1], { width, size[1] }, stride
+				overlay.data(), graph_scale[0], graph_scale[1],
+				{ width, graph_size[1] }, sizeof(float_t)
 			); break;
 
 			case 1: ImGui::PlotHistogram(title,
 				buffer.data(), (int32_t)buffer.size(), offset,
-				overlay.data(), scale[0], scale[1], { width, size[1] }, stride
+				overlay.data(), graph_scale[0], graph_scale[1],
+				{ width, graph_size[1] }, sizeof(float_t)
 			); break;
 			}
-			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	template <class ... Args
+	> static inline auto make_plot(size_t const cap, Args && ... args) noexcept
+	{
+		return plot{
+			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_FWD(args)...
+		};
+	}
 
 	// WIDGET
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

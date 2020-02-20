@@ -142,16 +142,14 @@ namespace ml
 			m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
 
-		gui::plot<120> // <- could use some optimization
-			m_plot_avg{ 0, "##frame time" },
-			m_plot_fps{ 0, "##frame rate" };
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		MemoryEditor m_memory;
 
 		inline auto highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto * const mem{ memory_tracker::get_resource() };
-			auto const addr{ std::distance(mem->begin(), ptr) };
+			static auto * const testres{ memory_tracker::get_testres() };
+			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
 		}
@@ -160,6 +158,42 @@ namespace ml
 		{
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct plot_controller final
+		{
+			pmr::vector<gui::plot> plots
+			{
+				gui::make_plot(120, 0, "##frame time", "%.3f ms/frame", []() {
+					static auto const & dt{ engine::get_io().delta_time };
+					return dt * 1000.f; }),
+
+				gui::make_plot(120, 0, "##frame rate", "%.3f fps", []() {
+					static auto const & fps{ engine::get_io().frame_rate };
+					return fps; }),
+			};
+
+			inline void update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
+			{
+				if (m_ref_time == 0.0)
+				{
+					m_ref_time = tt; return;
+				}
+				while (m_ref_time < tt)
+				{
+					for (auto & p : plots) { p.update(); }
+
+					m_ref_time += dt;
+				}
+			}
+
+		private:
+			float64_t m_ref_time{};
+
+		} m_plots;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 		// DEMO
@@ -405,16 +439,14 @@ namespace ml
 			// update stuff, etc...
 
 			// runtime
-			static auto const & dt{ engine::get_io().delta_time };
-			static auto const & fps{ engine::get_io().frame_rate };
-			auto const tt{ engine::get_time().count() };
+			static auto const & dt	{ engine::get_io().delta_time };
+			static auto const & fps	{ engine::get_io().frame_rate };
+			static auto const & fc	{ engine::get_io().frame_count };
+			static auto const & tt	{ engine::get_time() };
 
-			// frame time
-			m_plot_avg.update(dt * 1000.f, tt, dt, "%.3f ms/frame", dt * 1000.f);
-
-			// frame rate
-			m_plot_fps.update(fps, tt, dt, "%.3f fps", fps);
-
+			// plots
+			m_plots.update(tt.count());
+			
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
 			m_ecs.update_system<x_apply_materials>();
@@ -844,7 +876,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto * const mem{ memory_tracker::get_resource() };
+			static auto * const testres{ memory_tracker::get_testres() };
 
 			// setup memory editor
 			ML_ONCE_CALL()
@@ -882,8 +914,8 @@ namespace ml
 						highlight_memory(ML_FWD(v));
 						ImGui::CloseCurrentPopup();
 					};
-					jump_item("begin", &mem->front());
-					jump_item("end", &mem->back());
+					jump_item("begin", &testres->front());
+					jump_item("end", &testres->back());
 					ImGui::Separator();
 					jump_item("demo (this)", this);
 					ImGui::Separator();
@@ -895,14 +927,14 @@ namespace ml
 
 				// progress
 				char progress[32] = "";
-				std::sprintf(progress, "%u / %u (%.2f%%)", mem->used(), mem->size(), mem->percent());
-				ImGui::ProgressBar(mem->fraction(), { 256.f, 0.f }, progress);
+				std::sprintf(progress, "%u / %u (%.2f%%)", testres->used(), testres->size(), testres->percent());
+				ImGui::ProgressBar(testres->fraction(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
-					ImGui::Text("allocations: %u", mem->count());
-					ImGui::Text("total:       %u", mem->size());
-					ImGui::Text("in use:      %u", mem->used());
-					ImGui::Text("available:   %u", mem->free());
+					ImGui::Text("allocations: %u", testres->count());
+					ImGui::Text("total:       %u", testres->size());
+					ImGui::Text("in use:      %u", testres->used());
+					ImGui::Text("available:   %u", testres->free());
 				});
 				ImGui::Separator();
 
@@ -910,7 +942,7 @@ namespace ml
 			}
 
 			// memory contents
-			m_memory.DrawContents(mem->data(), mem->size(), mem->addr());
+			m_memory.DrawContents(testres->data(), testres->size(), testres->addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -926,11 +958,8 @@ namespace ml
 			ImGui::Columns(1);
 			ImGui::Separator();
 
-			// app average
-			m_plot_avg.render(); ImGui::NextColumn();
-
-			// frame rate
-			m_plot_fps.render(); ImGui::NextColumn();
+			// plots
+			for (auto const & p : m_plots.plots) { p.render(); }
 
 			// benchmarks
 			ImGui::Columns(2);

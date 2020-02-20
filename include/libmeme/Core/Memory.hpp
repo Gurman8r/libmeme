@@ -8,10 +8,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// TEST RESOURCE
 	namespace detail
 	{
-		// test to a memory resource which provides usage statistics
+		// TEST RESOURCE - test to a memory resource which provides usage statistics
 		struct test_resource final : public pmr::memory_resource, non_copyable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,63 +116,25 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// MEMORY RECORD
-	struct memory_record final : non_copyable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		union { size_t index; size_t size; byte_t * data; };
-
-		constexpr memory_record(size_t const index, size_t const size, byte_t * data) noexcept
-			: index	{ index }
-			, size	{ size }
-			, data	{ data }
-		{
-		}
-
-		constexpr memory_record(memory_record && other) noexcept
-			: index	{ std::move(other.index) }
-			, size	{ std::move(other.size) }
-			, data	{ std::move(other.data) }
-		{
-		}
-
-		constexpr memory_record & operator=(memory_record && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		constexpr void swap(memory_record & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				util::swap(this->index, other.index);
-				util::swap(this->size, other.size);
-				util::swap(this->data, other.data);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// MEMORY TRACKER
 	struct ML_CORE_API memory_tracker final : singleton<memory_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		using record_storage = typename pmr::vector<memory_record>;
+		// MEMORY RECORD
+		struct record final
+		{
+			size_t		const index;
+			size_t		const size;
+			byte_t *	const data;
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static void * allocate(size_t const size) noexcept;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		static void deallocate(void * value) noexcept;
+		using record_table = typename ds::flat_map<byte_t *, record *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -184,12 +145,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static void * allocate(size_t const size) noexcept;
+
+		static void deallocate(void * value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD static inline auto const & get_allocator() noexcept
 		{
 			return cref().m_alloc;
 		}
 
-		ML_NODISCARD static inline auto get_index() noexcept
+		ML_NODISCARD static inline auto const & get_index() noexcept
 		{
 			return cref().m_index;
 		}
@@ -199,7 +166,7 @@ namespace ml
 			return cref().m_records;
 		}
 
-		ML_NODISCARD static inline auto * const get_resource() noexcept
+		ML_NODISCARD static inline auto const & get_testres() noexcept
 		{
 			return cref().m_testres;
 		}
@@ -214,7 +181,7 @@ namespace ml
 
 		allocator_type			m_alloc;
 		size_t					m_index;
-		record_storage			m_records;
+		record_table			m_records;
 		detail::test_resource *	m_testres;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

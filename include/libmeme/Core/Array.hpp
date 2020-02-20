@@ -30,40 +30,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr reference operator[](size_type const i) noexcept
-		{
-			ML_ASSERT(i < Size);
-			return m_data[i];
-		}
+		ML_NODISCARD constexpr auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr const_reference operator[](size_type const i) const noexcept
-		{
-			ML_ASSERT(i < Size);
-			return m_data[i];
-		}
+		ML_NODISCARD constexpr auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD constexpr auto operator*() noexcept -> reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr reference at(size_type const i)
-		{
-			if ML_UNLIKELY(Size <= i)
-			{
-				ML_THROW(std::out_of_range("ml::array subscript out of range"));
-			}
-			return m_data[i];
-		}
+		ML_NODISCARD constexpr auto operator*() const noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr const_reference at(size_type const i) const
-		{
-			if ML_UNLIKELY(Size <= i)
-			{
-				ML_THROW(std::out_of_range("ml::array subscript out of range"));
-			}
-			return m_data[i];
-		}
+		ML_NODISCARD constexpr auto at(size_type const i) noexcept -> reference { return m_data[i]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
+		ML_NODISCARD constexpr auto at(size_type const i) const noexcept -> const_reference { return m_data[i]; }
+
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data[Size - 1]; }
 		
 		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data[Size - 1]; }
@@ -122,14 +100,18 @@ namespace ml::ds
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr reference operator[](size_t const) { return m_data[0]; }
+		ML_NODISCARD constexpr auto operator[](size_type const) noexcept -> reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr const_reference operator[](size_t const) const { m_data[0]; }
+		ML_NODISCARD constexpr auto operator[](size_type const) const noexcept -> const_reference { return m_data[0]; }
+
+		ML_NODISCARD constexpr auto operator*() noexcept -> reference { return m_data[0]; }
+
+		ML_NODISCARD constexpr auto operator*() const noexcept -> const_reference { return m_data[0]; }
 
 		ML_NODISCARD constexpr auto at(size_t const) -> reference { return m_data[0]; }
 		
 		ML_NODISCARD constexpr auto at(size_t const) const -> const_reference { return m_data[0]; }
-		
+
 		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data[0]; }
 		
 		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data[0]; }
