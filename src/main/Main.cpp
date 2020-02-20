@@ -13,7 +13,7 @@
 #else
 #	define CONF_NAME "release"
 #endif
-#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_TOSTRING(ML_ARCH)
+#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_STRINGIFY(ML_ARCH) "-bit"
 
 ml::int32_t main()
 {
