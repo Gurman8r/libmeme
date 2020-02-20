@@ -187,13 +187,15 @@ namespace ml
 
 		} m_plots{
 		{
-			gui::make_plot(120, 0, "##frame time", "%.3f ms/frame", []() {
-				static auto const & dt{ engine::get_io().delta_time };
-				return dt * 1000.f; }),
+			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
+			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
+			[]() { static auto const & dt{ engine::get_io().delta_time }; return dt * 1000.f; }
+			),
 
-			gui::make_plot(120, 0, "##frame rate", "%.3f fps", []() {
-				static auto const & fps{ engine::get_io().frame_rate };
-				return fps; }),
+			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
+			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
+			[]() { static auto const & fps{ engine::get_io().frame_rate }; return fps; }
+			),
 		} };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -569,7 +571,7 @@ namespace ml
 				std::sprintf(name, "%.*s", (uint32_t)tname.size(), tname.data());
 
 				char size[20] = "";
-				std::sprintf(size, "%u", sizeof(V));
+				std::sprintf(size, "%u", (uint32_t)sizeof(V));
 
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
@@ -937,7 +939,11 @@ namespace ml
 
 				// progress
 				char progress[32] = "";
-				std::sprintf(progress, "%u / %u (%.2f%%)", testres->used(), testres->size(), testres->percent());
+				std::sprintf(progress, "%u / %u (%.2f%%)",
+					(uint32_t)testres->used(),
+					(uint32_t)testres->size(),
+					testres->percent()
+				);
 				ImGui::ProgressBar(testres->fraction(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
@@ -969,8 +975,18 @@ namespace ml
 			ImGui::Separator();
 
 			// plots
-			//for (auto const & p : m_plots.plots) { p.render(); }
-			m_plots.for_each([&](auto & p) { p.render(); });
+			m_plots.for_each([&](gui::plot & p)
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(&p));
+				p.render();
+				if (ImGui::BeginPopupContextItem("plot settings"))
+				{
+					ImGui::Checkbox("animate", &p.animate); ImGui::SameLine();
+					ImGui::Combo("##visual", &p.mode, "lines\0histogram\0");
+					ImGui::EndPopup();
+				}
+			});
+
 
 			// benchmarks
 			ImGui::Columns(2);
@@ -979,8 +995,11 @@ namespace ml
 				ImGui::Separator();
 				for (auto const & elem : bench)
 				{
-					ImGui::Selectable(elem.first); ImGui::NextColumn();
-					ImGui::Text("%.7fs", elem.second.count()); ImGui::NextColumn();
+					char time[20] = "";
+					std::sprintf(time, "%.7fs", elem.second.count());
+					ImGui::Selectable(elem.first);
+					gui::tooltip(time); ImGui::NextColumn();
+					ImGui::Text(time); ImGui::NextColumn();
 				}
 			}
 			ImGui::Columns(1);

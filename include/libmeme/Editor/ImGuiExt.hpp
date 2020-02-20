@@ -30,6 +30,16 @@ namespace ml::gui
 		});
 	}
 
+	static inline void tooltip_fmt(cstring fmt, ...) noexcept
+	{
+		char buf[1024] = "";
+		va_list args;
+		va_start(args, fmt);
+		vsnprintf(buf, ML_ARRAYSIZE(buf), fmt, args);
+		va_end(args);
+		tooltip(buf);
+	}
+
 	template <class Str = pmr::string
 	> static inline void tooltip(Str const & value) noexcept
 	{
@@ -76,12 +86,14 @@ namespace ml::gui
 		int32_t		mode		{};
 		cstring		label		{};
 		cstring		format		{ "%f" };
-		getter_t	getter		{ []() { return 0.f; } };
+		vec2		graph_size	{};
 		vec2		graph_scale	{ FLT_MAX, FLT_MAX };
-		vec2		graph_size	{ 0.f, 0.f };
+		getter_t	getter		{ []() { return 0.f; } };
+
 		int32_t		offset		{};
 		overlay_t	overlay		{};
-
+		bool		animate		{ true };
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline void update() noexcept
@@ -92,7 +104,7 @@ namespace ml::gui
 
 		inline void update(float_t const v) noexcept
 		{
-			if (buffer.empty()) return;
+			if (!animate || buffer.empty()) return;
 			std::sprintf(overlay.data(), format, v);
 			buffer[offset] = v;
 			offset = (offset + 1) % buffer.size();
