@@ -8,9 +8,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace util
+	// TEST RESOURCE
+	namespace detail
 	{
-		// TEST RESOURCE - test to a memory resource which provides usage statistics
+		// test to a memory resource which provides usage statistics
 		struct test_resource final : public pmr::memory_resource, non_copyable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -116,49 +117,81 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// MEMORY RECORD
+	struct memory_record final : non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		union { size_t index; size_t size; byte_t * data; };
+
+		constexpr memory_record(size_t const index, size_t const size, byte_t * data) noexcept
+			: index	{ index }
+			, size	{ size }
+			, data	{ data }
+		{
+		}
+
+		constexpr memory_record(memory_record && other) noexcept
+			: index	{ std::move(other.index) }
+			, size	{ std::move(other.size) }
+			, data	{ std::move(other.data) }
+		{
+		}
+
+		constexpr memory_record & operator=(memory_record && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
+
+		constexpr void swap(memory_record & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				util::swap(this->index, other.index);
+				util::swap(this->size, other.size);
+				util::swap(this->data, other.data);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// MEMORY TRACKER
 	struct ML_CORE_API memory_tracker final : singleton<memory_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// MEMORY RECORD
-		struct record final
-		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			size_t		const index;
-			size_t		const size;
-			intmax_t	const flags;
-			byte_t *	const data;
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using record_table = typename ds::flat_map<byte_t *, record *>;
+		using record_storage = typename pmr::vector<memory_record>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool startup(util::test_resource * test)
+		ML_NODISCARD static void * allocate(size_t const size) noexcept;
+
+		static void deallocate(void * value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static inline bool startup(detail::test_resource * test)
 		{
 			return (test && *test) ? &(ref().m_testres = test) : false;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static void * allocate(size_t const size, intmax_t const flags = 0) noexcept;
-
-		static void deallocate(void * value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static inline auto const & get_allocator() noexcept
 		{
-			return cref().m_allocator;
+			return cref().m_alloc;
+		}
+
+		ML_NODISCARD static inline auto get_index() noexcept
+		{
+			return cref().m_index;
 		}
 
 		ML_NODISCARD static inline auto const & get_records()  noexcept
@@ -179,10 +212,10 @@ namespace ml
 		memory_tracker() noexcept;
 		~memory_tracker() noexcept;
 
-		allocator_type			m_allocator;
-		size_t					m_current;
-		record_table			m_records;
-		util::test_resource *	m_testres;
+		allocator_type			m_alloc;
+		size_t					m_index;
+		record_storage			m_records;
+		detail::test_resource *	m_testres;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -200,12 +233,12 @@ namespace ml
 
 		ML_NODISCARD inline void * operator new(size_t size) noexcept
 		{
-			return memory_tracker::allocate(size, 1);
+			return memory_tracker::allocate(size);
 		}
 
 		ML_NODISCARD inline void * operator new[](size_t size) noexcept
 		{
-			return memory_tracker::allocate(size, 2);
+			return memory_tracker::allocate(size);
 		}
 		
 		inline void operator delete(void * value) noexcept

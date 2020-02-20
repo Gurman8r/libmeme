@@ -6,8 +6,8 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	memory_tracker::memory_tracker() noexcept
-		: m_allocator	{}
-		, m_current		{}
+		: m_alloc	{}
+		, m_index		{}
 		, m_records		{}
 		, m_testres		{ nullptr }
 	{
@@ -31,14 +31,14 @@ namespace ml
 				<< std::setw(addr_size) << "Address"
 				<< '\n';
 
-			m_records.for_each([&](auto, auto const & rec)
+			for (auto & rec : m_records)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << rec->index
-					<< std::setw(size_size) << rec->size
-					<< std::setw(addr_size) << rec->data
+					<< std::setw(indx_size) << rec.index
+					<< std::setw(size_size) << rec.size
+					<< std::setw(addr_size) << rec.data
 					<< '\n';
-			});
+			};
 
 			debug::pause(1);
 		}
@@ -48,41 +48,35 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_tracker::allocate(size_t const size, intmax_t const flags) noexcept
+	void * memory_tracker::allocate(size_t const size) noexcept
 	{
 		static auto & inst{ ref() };
-
 		if (size <= 0) return nullptr;
 
-		// allocate the record
-		byte_t * const rec{ inst.m_allocator.allocate(sizeof(record)) };
-
-		// allocate the requested bytes
-		byte_t * const ptr{ inst.m_allocator.allocate(size) };
-
-		// insert the entry
-		return (*inst.m_records.insert(ptr, new (rec) record{
-			++inst.m_current, size, flags, ptr
-		}).first);
+		return inst.m_records.emplace_back(memory_record{
+			++inst.m_index,
+			size,
+			inst.m_alloc.allocate(size)
+		}).data;
 	}
 
 	void memory_tracker::deallocate(void * value) noexcept
 	{
 		static auto & inst{ ref() };
-
 		if (!value || inst.m_records.empty()) return;
 
 		// find the entry
-		if (auto const it{ inst.m_records.find(reinterpret_cast<byte_t *>(value)) })
+		auto const rec{ std::find_if(inst.m_records.begin(), inst.m_records.end(),
+			[value](auto && e) { return (e.data == value); }
+		) };
+
+		if ((rec != inst.m_records.end()) && (rec->data && rec->size))
 		{
 			// free the allocation
-			inst.m_allocator.deallocate((*it->second)->data, (*it->second)->size);
-
-			// free the record
-			inst.m_allocator.deallocate(reinterpret_cast<byte_t *>(*it->second), sizeof(record));
+			inst.m_alloc.deallocate(rec->data, rec->size);
 
 			// erase the entry
-			inst.m_records.erase(it->first);
+			inst.m_records.erase(rec);
 		}
 	}
 

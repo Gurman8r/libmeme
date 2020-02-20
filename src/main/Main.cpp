@@ -21,15 +21,15 @@ ml::int32_t main()
 		ds::array<byte_t, 16_MiB>			data{};
 		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 		pmr::unsynchronized_pool_resource	pool{ &mono };
-		util::test_resource					test{ &pool, data.data(), data.size() };
+		detail::test_resource				test{ &pool, data.data(), data.size() };
 
-		explicit memory_config() noexcept
+		memory_config() noexcept
 		{
 			ML_ASSERT(pmr::set_default_resource(&test));
 			ML_ASSERT(memory_tracker::startup(&test));
 		}
 
-	} g_mem{};
+	} g_mem;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

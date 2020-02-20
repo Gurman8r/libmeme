@@ -19,7 +19,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline int32_t clear()
+		static inline int32_t clear(int32_t const exit_code = 0)
 		{
 #if ML_DEBUG
 #	ifdef ML_OS_WINDOWS
@@ -28,15 +28,15 @@ namespace ml
 			return std::system("clear");
 #	endif
 #endif
-			return 0;
+			return exit_code;
 		}
 
-		static inline void exit(int32_t exit_code)
+		static inline void exit(int32_t const exit_code = 0)
 		{
 			return std::exit(exit_code);
 		}
 
-		static inline int32_t pause(int32_t exit_code)
+		static inline int32_t pause(int32_t const exit_code = 0)
 		{
 #if ML_DEBUG
 #	ifdef ML_OS_WINDOWS
