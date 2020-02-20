@@ -7,6 +7,13 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
+#if ML_DEBUG
+#	define CONF_NAME "debug"
+#else
+#	define CONF_NAME "release"
+#endif
+#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_ARCH_NAME
+
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,7 +54,7 @@ ml::int32_t main()
 	engine_cfg.content_path		= "../../../../assets/";
 	engine_cfg.script_list		= { "../../../../libmeme.py" };
 	engine_cfg.plugin_list		= { /* "demo.dll" */ };
-	engine_cfg.window_title		= "libmeme";
+	engine_cfg.window_title		= WINDOW_TITLE;
 	engine_cfg.window_flags		= WindowFlags_DefaultMaximized;
 	engine_cfg.window_video		= make_video_mode(
 		vec2i{ 1280, 720 },		// resolution

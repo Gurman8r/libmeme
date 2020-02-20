@@ -118,7 +118,7 @@ namespace ml
 		pmr::vector<entity_manager::handle> m_handles;
 
 		
-		// CONTENT
+		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ds::flat_map<pmr::string,	render_texture	> m_pipeline	{};
@@ -140,7 +140,7 @@ namespace ml
 			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None },
 			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
 			m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_content	{ "content"			, 1, "", ImGuiWindowFlags_None };
+			m_gui_assets	{ "assets"			, 1, "", ImGuiWindowFlags_None };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -247,7 +247,7 @@ namespace ml
 				editor::get_main_menu().add_menu("tools", [&]()
 				{
 					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					m_gui_content.menu_item();
+					m_gui_assets.menu_item();
 					m_gui_display.menu_item();
 					m_gui_ecs.menu_item();
 					m_gui_memory.menu_item();
@@ -503,9 +503,9 @@ namespace ml
 				d.split_node(6, right	, ImGuiDir_Down	, 0.5f	, &right);		// right-down
 
 				d.dock_window(m_gui_display.title	, left_up);
-				d.dock_window(m_gui_content.title	, left_dn);
-				d.dock_window(m_gui_profiler.title	, left_dn);
-				d.dock_window(m_gui_ecs.title		, left_dn2);
+				d.dock_window(m_gui_assets.title	, left_dn);
+				d.dock_window(m_gui_ecs.title		, left_dn);
+				d.dock_window(m_gui_profiler.title	, left_dn2);
 				d.dock_window(m_imgui_demo.title	, right);
 				d.dock_window(m_gui_memory.title	, right);
 
@@ -522,8 +522,8 @@ namespace ml
 			// IMGUI DEMO
 			if (m_imgui_demo.open) { editor::show_imgui_demo(&m_imgui_demo.open); }
 
-			// CONTENT
-			m_gui_content.render([&](auto) noexcept { show_content_gui(); });
+			// ASSETS
+			m_gui_assets.render([&](auto) noexcept { show_assets_gui(); });
 
 			// DISPLAY
 			m_gui_display.render([&](auto) noexcept { show_display_gui(); });
@@ -555,7 +555,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_content_gui()
+		void show_assets_gui()
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -563,16 +563,21 @@ namespace ml
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(&v));
 				using V = typename std::decay_t<decltype(v)>;
-				static constexpr auto info{ typeof_v<V> };
-				static constexpr auto type{ nameof<>::filter_all(info.name()) };
+				static constexpr auto tname{ nameof<>::filter_all(typeof_v<V>.name()) };
 
-				ImGui::Text("%.*s", type.size(), type.data()); ImGui::NextColumn();
-				ImGui::Text("%s", n.c_str()); ImGui::NextColumn();
+				char name[64] = "";
+				std::sprintf(name, "%.*s", (uint32_t)tname.size(), tname.data());
+
+				char size[20] = "";
+				std::sprintf(size, "%u", sizeof(V));
+
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
-				if (ImGui::Selectable(addr)) { highlight_memory(&v); }
-				ImGui::NextColumn();
-				ImGui::Text("%u", sizeof(V)); ImGui::NextColumn();
+
+				if (ImGui::Selectable(name))		highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(n.c_str()))	highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(size))		highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(addr))		highlight_memory(&v); ImGui::NextColumn();
 			};
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -581,8 +586,8 @@ namespace ml
 
 			ImGui::Text("type"); ImGui::NextColumn();
 			ImGui::Text("name"); ImGui::NextColumn();
-			ImGui::Text("addr"); ImGui::NextColumn();
 			ImGui::Text("size"); ImGui::NextColumn();
+			ImGui::Text("addr"); ImGui::NextColumn();
 			
 			ImGui::Columns(1);
 			ImGui::Separator();
@@ -946,7 +951,7 @@ namespace ml
 				ImGui::EndMenuBar();
 			}
 
-			// memory contents
+			// memory assetss
 			m_memory.DrawContents(testres->data(), testres->size(), testres->addr());
 		}
 
