@@ -129,10 +129,13 @@ namespace ml
 	{
 		if (!initialized()) return false;
 
-		g_engine->m_plugin_files.clear();
-		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p) { delete p; });
-		g_engine->m_plugin_libs.clear();
+		// cleanup plugins
+		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
+		{
+			memory_manager::deallocate(p);
+		});
 
+		// close window
 		if (g_engine->m_window.is_open())
 		{
 			g_engine->m_window.destroy();
@@ -140,15 +143,10 @@ namespace ml
 			window::terminate();
 		}
 
-		if (ml_python::initialized())
-		{
-			ml_python::shutdown();
-		}
+		// shutdown scripting
+		if (ml_python::initialized()) { ml_python::shutdown(); }
+		if (ml_lua::initialized()) { ml_lua::shutdown(); }
 
-		if (ml_lua::initialized())
-		{
-			ml_lua::shutdown();
-		}
 		return true;
 	}
 

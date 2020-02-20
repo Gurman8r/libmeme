@@ -15,8 +15,6 @@ namespace ml
 
 	class ML_CORE_API event_system final
 	{
-		static ds::flat_multimap<hash_t, event_listener *> s_listeners;
-
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
