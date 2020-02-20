@@ -74,7 +74,7 @@ namespace ml::gui
 
 		buffer_t	buffer		{};
 		int32_t		mode		{};
-		cstring		title		{};
+		cstring		label		{};
 		cstring		format		{ "%f" };
 		getter_t	getter		{ []() { return 0.f; } };
 		vec2		graph_scale	{ FLT_MAX, FLT_MAX };
@@ -86,8 +86,13 @@ namespace ml::gui
 
 		inline void update() noexcept
 		{
+			ML_ASSERT(getter);
+			update(std::invoke(getter));
+		}
+
+		inline void update(float_t const v) noexcept
+		{
 			if (buffer.empty()) return;
-			float_t const v{ std::invoke(getter) };
 			std::sprintf(overlay.data(), format, v);
 			buffer[offset] = v;
 			offset = (offset + 1) % buffer.size();
@@ -98,20 +103,20 @@ namespace ml::gui
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
 			float_t width{ graph_size[0] };
-			if ((width == 0.f) && (title && title[0] == '#' && title[1] == '#'))
+			if ((width == 0.f) && (label && label[0] == '#' && label[1] == '#'))
 			{
 				width = ImGui::GetContentRegionAvailWidth();
 			}
 
 			switch (mode)
 			{
-			case 0: ImGui::PlotLines(title,
+			case 0: ImGui::PlotLines(label,
 				buffer.data(), (int32_t)buffer.size(), offset,
 				overlay.data(), graph_scale[0], graph_scale[1],
 				{ width, graph_size[1] }, sizeof(float_t)
 			); break;
 
-			case 1: ImGui::PlotHistogram(title,
+			case 1: ImGui::PlotHistogram(label,
 				buffer.data(), (int32_t)buffer.size(), offset,
 				overlay.data(), graph_scale[0], graph_scale[1],
 				{ width, graph_size[1] }, sizeof(float_t)

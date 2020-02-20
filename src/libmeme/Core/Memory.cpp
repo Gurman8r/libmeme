@@ -5,7 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_tracker::memory_tracker() noexcept
+	memory_manager::memory_manager() noexcept
 		: m_alloc	{}
 		, m_index	{}
 		, m_records	{}
@@ -13,12 +13,13 @@ namespace ml
 	{
 	}
 
-	memory_tracker::~memory_tracker() noexcept
+	memory_manager::~memory_manager()
 	{
 #if ML_DEBUG
 		if (!m_records.empty())
 		{
 			debug::log_error("MEMORY LEAKS DETECTED");
+			debug::pause(1);
 
 			static constexpr std::streamsize
 				indx_size{ 8 },
@@ -34,54 +35,46 @@ namespace ml
 			m_records.for_each([&](auto, auto const & rec)
 			{
 				std::cerr << std::left
-					<< std::setw(indx_size) << rec->index
-					<< std::setw(size_size) << rec->size
-					<< std::setw(addr_size) << rec->data
+					<< std::setw(indx_size) << rec.index
+					<< std::setw(size_size) << rec.size
+					<< std::setw(addr_size) << rec.data
 					<< '\n';
 			});
 
 			debug::pause(1);
 		}
+		ML_BREAK_IF(!m_records.empty());
 #endif
 		ML_ASSERT("MEMORY LEAKS DETECTED" && m_records.empty());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_tracker::allocate(size_t const size) noexcept
+	void * memory_manager::allocate(size_t const size)
 	{
-		static auto & inst{ ref() };
-
-		ML_ASSERT(0 < size);
-
-		// allocate the record
-		byte_t * const rec{ inst.m_alloc.allocate(sizeof(record)) };
+		static auto & inst{ memory_manager::ref() };
 
 		// allocate the requested bytes
-		byte_t * const ptr{ inst.m_alloc.allocate(size) };
-
-		// insert the entry
-		return (*inst.m_records.insert(ptr, new (rec)
-			record{ ++inst.m_index, size, ptr }
-		).first);
+		return ([&, data = inst.m_alloc.allocate(size)]()
+		{
+			// create the record
+			return (*inst.m_records.insert(data, record{ ++inst.m_index, size, data }).first);
+		})();
 	}
 
-	void memory_tracker::deallocate(void * value) noexcept
-	{
-		static auto & inst{ ref() };
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		if (!value || inst.m_records.empty()) return;
+	void memory_manager::deallocate(void * const addr)
+	{
+		static auto & inst{ memory_manager::ref() };
 
 		// find the entry
-		if (auto const it{ inst.m_records.find(reinterpret_cast<byte_t *>(value)) })
+		if (auto const it{ inst.m_records.find(addr) })
 		{
 			// free the allocation
-			inst.m_alloc.deallocate((*it->second)->data, (*it->second)->size);
+			inst.m_alloc.deallocate((*it->second).data, (*it->second).size);
 
-			// free the record
-			inst.m_alloc.deallocate(reinterpret_cast<byte_t *>(*it->second), sizeof(record));
-
-			// erase the entry
+			// erase the record
 			inst.m_records.erase(it->first);
 		}
 	}

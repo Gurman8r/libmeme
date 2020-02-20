@@ -16,7 +16,7 @@ namespace ml
 
 	editor_main_menu::~editor_main_menu()
 	{
-		clear();
+		m_menus.clear();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,11 +37,11 @@ namespace ml
 			// Draw
 			for (auto & pair : m_menus)
 			{
-				if (!pair.second.empty() && ImGui::BeginMenu(pair.first.c_str()))
+				if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
 				{
-					for (auto & func : pair.second)
+					for (auto const & fn : pair.second)
 					{
-						if (func) { func(); }
+						std::invoke(fn);
 					}
 					ImGui::EndMenu();
 				}

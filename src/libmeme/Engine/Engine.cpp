@@ -151,7 +151,12 @@ namespace ml
 		ML_ASSERT(initialized());
 		
 		ref().plugin_files.clear();
-		ref().plugin_libs.for_each([](auto const &, auto & p) { delete p; });
+		ref().plugin_libs.for_each([](auto const &, plugin * p)
+		{
+			memory_manager::deallocate(p);
+
+			//if (p) delete p;
+		});
 		ref().plugin_libs.clear();
 		
 		if (get_window().is_open())

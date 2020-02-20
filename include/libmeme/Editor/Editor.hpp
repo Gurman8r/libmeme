@@ -27,6 +27,7 @@ namespace ml
 		// runtime
 		struct io final : trackable, non_copyable
 		{
+			void *				imgui_context	{}		; // current imgui context
 			editor_dockspace	dockspace		{}		; // main dockspace
 			editor_main_menu	main_menu		{}		; // main menu bar
 		};

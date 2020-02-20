@@ -271,7 +271,7 @@
 #endif
 
 #define ML_IMPL_ONCE(once)  static bool once{ false }; if (!once && (once = true))
-#define ML_ONCE_CALL()      ML_IMPL_ONCE(ML_ANONYMOUS(once))
+#define ML_ONCE_CALL        ML_IMPL_ONCE(ML_ANONYMOUS(once))
 
 
 // Aliases

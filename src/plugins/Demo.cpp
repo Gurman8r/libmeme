@@ -148,7 +148,7 @@ namespace ml
 
 		inline auto highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto * const testres{ memory_tracker::get_testres() };
+			static auto * const testres{ memory_manager::get_testres() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -163,16 +163,13 @@ namespace ml
 
 		struct plot_controller final
 		{
-			pmr::vector<gui::plot> plots
-			{
-				gui::make_plot(120, 0, "##frame time", "%.3f ms/frame", []() {
-					static auto const & dt{ engine::get_io().delta_time };
-					return dt * 1000.f; }),
+			pmr::vector<gui::plot> m_plots{};
+			float64_t m_ref_time{};
 
-				gui::make_plot(120, 0, "##frame rate", "%.3f fps", []() {
-					static auto const & fps{ engine::get_io().frame_rate };
-					return fps; }),
-			};
+			template <class Fn> inline auto for_each(Fn && fn) noexcept
+			{
+				return std::for_each(m_plots.begin(), m_plots.end(), ML_FWD(fn));
+			}
 
 			inline void update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
 			{
@@ -182,16 +179,22 @@ namespace ml
 				}
 				while (m_ref_time < tt)
 				{
-					for (auto & p : plots) { p.update(); }
+					this->for_each([&](auto & p) { p.update(); });
 
 					m_ref_time += dt;
 				}
 			}
 
-		private:
-			float64_t m_ref_time{};
+		} m_plots{
+		{
+			gui::make_plot(120, 0, "##frame time", "%.3f ms/frame", []() {
+				static auto const & dt{ engine::get_io().delta_time };
+				return dt * 1000.f; }),
 
-		} m_plots;
+			gui::make_plot(120, 0, "##frame rate", "%.3f fps", []() {
+				static auto const & fps{ engine::get_io().frame_rate };
+				return fps; }),
+		} };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -876,10 +879,10 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto * const testres{ memory_tracker::get_testres() };
+			static auto * const testres{ memory_manager::get_testres() };
 
 			// setup memory editor
-			ML_ONCE_CALL()
+			ML_ONCE_CALL
 			{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
@@ -919,8 +922,10 @@ namespace ml
 					ImGui::Separator();
 					jump_item("demo (this)", this);
 					ImGui::Separator();
-					jump_item("engine context", engine::get_context());
-					jump_item("editor context", editor::get_context());
+					jump_item("engine::context", engine::get_context());
+					jump_item("editor::context", editor::get_context());
+					ImGui::Separator();
+					jump_item("ImGuiContext", (ImGuiContext *)editor::get_io().imgui_context);
 					ImGui::EndMenu();
 				}
 				ImGui::Separator();
@@ -959,7 +964,8 @@ namespace ml
 			ImGui::Separator();
 
 			// plots
-			for (auto const & p : m_plots.plots) { p.render(); }
+			//for (auto const & p : m_plots.plots) { p.render(); }
+			m_plots.for_each([&](auto & p) { p.render(); });
 
 			// benchmarks
 			ImGui::Columns(2);

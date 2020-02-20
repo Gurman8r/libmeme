@@ -46,29 +46,37 @@ namespace ml
 	{
 		ML_ASSERT(initialized());
 
-		// Create ImGui Context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		auto & imio{ ImGui::GetIO() };
-		auto & style{ ImGui::GetStyle() };
+		// set allocator functions
+		ImGui::SetAllocatorFunctions(
+			[](size_t const size, auto) { return memory_manager::allocate(size); },
+			[](void * const addr, auto) { return memory_manager::deallocate(addr); },
+			nullptr
+		);
 
-		// Config Flags
-		imio.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		imio.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		imio.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		// create context
+		IMGUI_CHECKVERSION();
+		get_io().imgui_context = ImGui::CreateContext();
+
+		auto & im_io{ ImGui::GetIO() };
+		auto & im_style{ ImGui::GetStyle() };
+
+		// config flags
+		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		
-		// Viewports
-		if (imio.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		// viewports
+		if (im_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+			im_style.WindowRounding = 0.0f;
+			im_style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		// Paths
-		imio.LogFilename = get_config().ini_file;
-		imio.IniFilename = get_config().log_file;
+		// paths
+		im_io.LogFilename = get_config().ini_file;
+		im_io.IniFilename = get_config().log_file;
 
-		// Style
+		// style
 		switch (util::hash(util::to_lower(get_config().style)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
@@ -82,7 +90,7 @@ namespace ml
 			break;
 		}
 
-		// Initialize Backend
+		// backend
 #ifdef ML_RENDERER_OPENGL
 
 		if (!ImGui_ImplGlfw_InitForOpenGL(
@@ -106,13 +114,15 @@ namespace ml
 	{
 		ML_ASSERT(initialized());
 
-		get_main_menu().clear();
+		get_main_menu().menus().clear();
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
 #else
 #endif
 		ImGui_ImplGlfw_Shutdown();
+
+		ImGui::DestroyContext();
 
 		delete g_editor;
 		g_editor = nullptr;

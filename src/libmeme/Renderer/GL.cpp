@@ -477,7 +477,7 @@ namespace ml
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif
@@ -488,7 +488,7 @@ namespace ml
 	{
 		static bool temp{ false };
 #ifdef GL_EXT_texture_sRGB
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif
@@ -500,7 +500,7 @@ namespace ml
 		static bool temp{ false };
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif
@@ -512,7 +512,7 @@ namespace ml
 		static int32_t temp{ 0 };
 		if (is_init())
 		{
-			ML_ONCE_CALL() {
+			ML_ONCE_CALL {
 				temp = getInteger(GL::MaxCombTexImgUnits);
 			}
 		}
@@ -524,7 +524,7 @@ namespace ml
 		static uint32_t temp{ 0 };
 		if (is_init())
 		{
-			ML_ONCE_CALL() {
+			ML_ONCE_CALL {
 				temp = (uint32_t)getInteger(GL::MaxTextureSize);
 			}
 		}
@@ -618,7 +618,7 @@ namespace ml
 		static bool temp{ false };
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif
@@ -736,7 +736,7 @@ namespace ml
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif
@@ -747,7 +747,7 @@ namespace ml
 	{
 		static bool temp{ shadersAvailable() };
 #if defined(GL_ARB_geometry_shader4)
-		ML_ONCE_CALL() {
+		ML_ONCE_CALL {
 			temp = true;
 		}
 #endif

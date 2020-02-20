@@ -26,7 +26,7 @@ ml::int32_t main()
 		memory_config() noexcept
 		{
 			ML_ASSERT(pmr::set_default_resource(&test));
-			ML_ASSERT(memory_tracker::startup(&test));
+			ML_ASSERT(memory_manager::startup(&test));
 		}
 
 	} g_mem;

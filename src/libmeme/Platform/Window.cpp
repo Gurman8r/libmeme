@@ -31,24 +31,13 @@
 
 namespace ml
 {
-	static GLFWimage const * make_glfw_image(vec2s const & size, byte_t const * pixels)
+	static GLFWimage const * make_glfw_image(vec2s const & size, byte_t const * pixels) noexcept
 	{
-		auto const & w{ size[0] }, & h{ size[1] };
-
-		if (!w || !h || !pixels) return nullptr;
-
-		static ds::flat_map<size_t, GLFWimage> img{};
-
-		if (size_t const code{ util::hash(pixels, w * h) }; auto const it{ img.find(code) })
-		{
-			return &(*it->second);
-		}
-		else
-		{
-			return &(*img.insert(code,
-				GLFWimage{ (int32_t)w, (int32_t)h, (uint8_t *)pixels }
-			).second);
-		}
+		if (!size[0] || !size[1] || !pixels) return nullptr;
+		static pmr::vector<GLFWimage> cache{};
+		return &cache.emplace_back(
+			GLFWimage{ (int32_t)size[0], (int32_t)size[1], (uint8_t *)pixels }
+		);
 	}
 }
 

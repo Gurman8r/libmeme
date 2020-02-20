@@ -8,9 +8,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// TEST RESOURCE
 	namespace detail
 	{
-		// TEST RESOURCE - test to a memory resource which provides usage statistics
+		// passthrough memory resource for collecting metrics
 		struct test_resource final : public pmr::memory_resource, non_copyable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,7 +24,7 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 			explicit test_resource(pmr::memory_resource * r, pointer const d, size_t const s) noexcept
-				: m_mres{ r }
+				: m_res{ r }
 				, m_data{ d }
 				, m_size{ s }
 			{
@@ -31,13 +32,13 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline bool valid() const noexcept { return m_mres && m_data && m_size; }
+			inline bool valid() const noexcept { return m_res && m_data && m_size; }
 
 			inline operator bool() const noexcept { return valid(); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline pmr::memory_resource * upstream_resource() const noexcept { return m_mres; }
+			inline pmr::memory_resource * upstream_resource() const noexcept { return m_res; }
 
 			inline size_t addr() const noexcept { return (size_t)m_data; }
 
@@ -86,27 +87,30 @@ namespace ml
 		protected:
 			inline void * do_allocate(size_t const bytes, size_t const align) override
 			{
+				ML_ASSERT(m_res);
 				++m_count;
 				m_used += bytes;
-				return m_mres->allocate(bytes, align);
+				return m_res->allocate(bytes, align);
 			}
 
 			inline void do_deallocate(void * ptr, size_t const bytes, size_t const align) override
 			{
+				ML_ASSERT(m_res);
 				--m_count;
 				m_used -= bytes;
-				return m_mres->deallocate(ptr, bytes, align);
+				return m_res->deallocate(ptr, bytes, align);
 			}
 
 			inline bool do_is_equal(pmr::memory_resource const & other) const noexcept override
 			{
-				return m_mres->is_equal(other);
+				ML_ASSERT(m_res);
+				return m_res->is_equal(other);
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		private:
-			pmr::memory_resource * m_mres;
+			pmr::memory_resource * m_res;
 			pointer const m_data;
 			size_t const m_size;
 			size_t m_count{}, m_used{};
@@ -117,72 +121,53 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// MEMORY TRACKER
-	struct ML_CORE_API memory_tracker final : singleton<memory_tracker>
+	// MEMORY MANAGER
+	struct ML_CORE_API memory_manager final : singleton<memory_manager>
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// MEMORY RECORD
-		struct record final
-		{
-			size_t		const index;
-			size_t		const size;
-			byte_t *	const data;
-		};
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using record_table = typename ds::flat_map<byte_t *, record *>;
+		struct ML_NODISCARD record final
+		{
+			size_t index; size_t size; byte_t * data;
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool startup(detail::test_resource * test)
+		static inline bool startup(detail::test_resource * test) noexcept
 		{
-			return (test && *test) ? &(ref().m_testres = test) : false;
+			return test && (*test) && (&(ref().m_testres = test));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static void * allocate(size_t const size) noexcept;
+		ML_NODISCARD static void * allocate(size_t const size);
 
-		static void deallocate(void * value) noexcept;
+		static void deallocate(void * const addr);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & get_allocator() noexcept
-		{
-			return cref().m_alloc;
-		}
+		ML_NODISCARD static inline auto const & get_allocator() noexcept { return cref().m_alloc; }
 
-		ML_NODISCARD static inline auto const & get_index() noexcept
-		{
-			return cref().m_index;
-		}
+		ML_NODISCARD static inline auto const & get_index() noexcept { return cref().m_index; }
 
-		ML_NODISCARD static inline auto const & get_records()  noexcept
-		{
-			return cref().m_records;
-		}
+		ML_NODISCARD static inline auto const & get_records() noexcept { return cref().m_records; }
 
-		ML_NODISCARD static inline auto const & get_testres() noexcept
-		{
-			return cref().m_testres;
-		}
+		ML_NODISCARD static inline auto const & get_testres() noexcept { return cref().m_testres; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<memory_tracker>;
+		friend singleton<memory_manager>;
 
-		memory_tracker() noexcept;
-		~memory_tracker() noexcept;
+		memory_manager() noexcept;
+		~memory_manager();
 
-		allocator_type			m_alloc;
-		size_t					m_index;
-		record_table			m_records;
-		detail::test_resource *	m_testres;
+		allocator_type					m_alloc;
+		size_t							m_index;
+		ds::flat_map<void *, record>	m_records;
+		detail::test_resource *			m_testres;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -200,22 +185,22 @@ namespace ml
 
 		ML_NODISCARD inline void * operator new(size_t size) noexcept
 		{
-			return memory_tracker::allocate(size);
+			return memory_manager::allocate(size);
 		}
 
 		ML_NODISCARD inline void * operator new[](size_t size) noexcept
 		{
-			return memory_tracker::allocate(size);
+			return memory_manager::allocate(size);
 		}
 		
 		inline void operator delete(void * value) noexcept
 		{
-			return memory_tracker::deallocate(value);
+			return memory_manager::deallocate(value);
 		}
 
 		inline void operator delete[](void * value) noexcept
 		{
-			return memory_tracker::deallocate(value);
+			return memory_manager::deallocate(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

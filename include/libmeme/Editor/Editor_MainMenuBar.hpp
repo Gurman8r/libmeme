@@ -11,12 +11,16 @@ namespace ml
 	struct ML_EDITOR_API editor_main_menu final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using menu_t = std::function<void()>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		bool render();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline editor_main_menu & add_menu(pmr::string const & name, std::function<void()> && value)
+		inline editor_main_menu & add_menu(cstring name, menu_t && value)
 		{
 			auto it{ std::find_if(m_menus.begin(), m_menus.end(), [&](auto elem)
 			{
@@ -29,7 +33,7 @@ namespace ml
 			}
 			if (value)
 			{
-				it->second.emplace_back(std::move(value));
+				it->second.emplace_back(ML_FWD(value));
 			}
 			return (*this);
 		}
@@ -51,17 +55,12 @@ namespace ml
 		
 		~editor_main_menu();
 
-		void clear() noexcept
-		{
-			m_menus.clear();
-		}
-
 		bool m_good;
 		bool m_open;
 
 		pmr::vector<std::pair<
-			pmr::string,
-			pmr::vector<std::function<void()>>
+			cstring,
+			pmr::vector<menu_t>
 		>> m_menus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
