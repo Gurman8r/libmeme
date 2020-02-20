@@ -13,18 +13,23 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static engine::context * g_engine{ nullptr };
+	static engine::context * g_engine{};
 	
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	bool engine::initialized() noexcept
+	{
+		return g_engine;
+	}
 
 	bool engine::create_context()
 	{
 		return !g_engine && (g_engine = new engine::context{});
 	}
 
-	bool engine::initialized() noexcept
+	bool engine::destroy_context()
 	{
-		return g_engine;
+		if (!g_engine) return false;
+		delete g_engine;
+		return !(g_engine = nullptr);
 	}
 
 	engine::context * const engine::get_context() noexcept
@@ -36,108 +41,82 @@ namespace ml
 
 	bool engine::startup(bool install_callbacks)
 	{
-		ML_ASSERT(initialized());
-
-		// start main timer
-		ref().main_timer.start();
+		if (!initialized()) return false;
 
 		// start lua
-		if (!lua::startup())
+		if (!ml_lua::startup())
 		{
 			return debug::log_error("engine failed initializing lua");
 		}
 
 		// start python
-		if (!python::startup(get_config().program_name, get_config().library_path))
+		if (!ml_python::startup(
+			g_engine->m_config.program_name,
+			path_to(g_engine->m_config.library_path)
+		))
 		{
 			return debug::log_error("engine failed initializing python");
 		}
 
-		// run scripts
-		for (auto const & path : get_config().script_list)
-		{
-			script{ path }();
-		}
-
-		// load plugins
-		for (auto const & path : get_config().plugin_list)
-		{
-			if (!load_plugin(path))
-			{
-				debug::log_error("engine failed loading plugin: {0}", path);
-			}
-		}
-
-		// create window
-		if (!get_window().create(
-			get_config().window_title,
-			get_config().window_video,
-			get_config().window_context,
-			get_config().window_flags
-		))
-		{
-			return debug::log_error("engine failed creating window");
-		}
-
 		// install window callbacks
-		if (install_callbacks)
+		if (auto & win{ g_engine->m_window }; win.is_open() && install_callbacks)
 		{
-			get_window().set_char_callback([](auto, auto ... args)
+			win.set_char_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<char_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_cursor_enter_callback([](auto, auto ... args)
+			win.set_cursor_enter_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<cursor_enter_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_cursor_pos_callback([](auto, auto ... args)
+			win.set_cursor_pos_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<cursor_pos_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_error_callback([](auto ... args)
+			win.set_error_callback([](auto ... args)
 			{
 				event_system::fire_event<window_error_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_frame_size_callback([](auto, auto ... args)
+			win.set_frame_size_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<frame_size_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_key_callback([](auto, auto ... args)
+			win.set_key_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<key_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_mouse_callback([](auto, auto ... args)
+			win.set_mouse_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<mouse_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_scroll_callback([](auto, auto ... args)
+			win.set_scroll_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<scroll_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_window_close_callback([](auto)
+			win.set_window_close_callback([](auto)
 			{
 				event_system::fire_event<window_close_event>();
 			});
 
-			get_window().set_window_focus_callback([](auto, auto ... args)
+			win.set_window_focus_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<window_focus_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_window_pos_callback([](auto, auto ... args)
+			win.set_window_pos_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<window_pos_event>(ML_FWD(args)...);
 			});
 
-			get_window().set_window_size_callback([](auto, auto ... args)
+			win.set_window_size_callback([](auto, auto ... args)
 			{
 				event_system::fire_event<window_size_event>(ML_FWD(args)...);
 			});
@@ -146,71 +125,58 @@ namespace ml
 		return true;
 	}
 
-	void engine::shutdown()
+	bool engine::shutdown()
 	{
-		ML_ASSERT(initialized());
-		
-		ref().plugin_files.clear();
-		ref().plugin_libs.for_each([](auto const &, plugin * p)
-		{
-			memory_manager::deallocate(p);
+		if (!initialized()) return false;
 
-			//if (p) delete p;
-		});
-		ref().plugin_libs.clear();
-		
-		if (get_window().is_open())
+		g_engine->m_plugin_files.clear();
+		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p) { delete p; });
+		g_engine->m_plugin_libs.clear();
+
+		if (g_engine->m_window.is_open())
 		{
-			get_window().destroy();
+			g_engine->m_window.destroy();
 
 			window::terminate();
 		}
-		
-		if (python::initialized())
+
+		if (ml_python::initialized())
 		{
-			python::shutdown();
+			ml_python::shutdown();
 		}
-		
-		if (lua::initialized())
+
+		if (ml_lua::initialized())
 		{
-			lua::shutdown();
+			ml_lua::shutdown();
 		}
-		
-		delete g_engine;
-		g_engine = nullptr;
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void engine::begin_loop()
 	{
-		ML_ASSERT(initialized());
+		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
 
-		ref().io.delta_time = ref().loop_timer.elapsed().count<float_t>();
-
-		ref().loop_timer.stop().start();
+		g_engine->m_loop_timer.start();
 
 		window::poll_events();
 	}
 
 	void engine::end_loop()
 	{
-		ML_ASSERT(initialized());
+		++g_engine->m_io.frame_count;
 
-		++ref().io.frame_count;
-
-		ref().io.frame_rate = ref().fps_tracker(ref().io.delta_time);
+		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void engine::begin_draw()
 	{
-		ML_ASSERT(initialized());
+		g_engine->m_window.clear_color(colors::black);
 
-		get_window().clear_color(colors::black);
-
-		get_window().viewport({ {}, get_window().get_frame_size() });
+		g_engine->m_window.viewport({ {}, g_engine->m_window.get_frame_size() });
 
 		constexpr render_states states{
 		}; states();
@@ -218,11 +184,9 @@ namespace ml
 
 	void engine::end_draw()
 	{
-		ML_ASSERT(initialized());
-
-		if ML_UNLIKELY(get_window() & WindowFlags_DoubleBuffered)
+		if ML_UNLIKELY(g_engine->m_window & WindowFlags_DoubleBuffered)
 		{
-			get_window().swap_buffers();
+			g_engine->m_window.swap_buffers();
 		}
 		else
 		{
@@ -234,10 +198,8 @@ namespace ml
 
 	bool engine::load_plugin(fs::path const & path)
 	{
-		ML_ASSERT(initialized());
-
 		// check file name already loaded
-		if (auto const file{ ref().plugin_files.insert(path.filename()) }; file.second)
+		if (auto const file{ g_engine->m_plugin_files.insert(path.filename()) }; file.second)
 		{
 			// load library
 			if (auto lib{ make_shared_library(*file.first) })
@@ -245,10 +207,10 @@ namespace ml
 				// load plugin
 				if (auto const inst{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return (*ref().plugin_libs.insert(std::move(lib), *inst).second);
+					return (*g_engine->m_plugin_libs.insert(std::move(lib), *inst).second);
 				}
 			}
-			ref().plugin_files.erase(file.first);
+			g_engine->m_plugin_files.erase(file.first);
 		}
 		return false;
 	}

@@ -24,96 +24,92 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 			explicit test_resource(pmr::memory_resource * r, pointer const d, size_t const s) noexcept
-				: m_res{ r }
-				, m_data{ d }
-				, m_size{ s }
+				: m_resource{ r }, m_buffer{ d }, m_total_bytes{ s }
 			{
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline bool valid() const noexcept { return m_res && m_data && m_size; }
+			inline bool valid() const noexcept { return m_resource && m_buffer && m_total_bytes; }
 
 			inline operator bool() const noexcept { return valid(); }
 
+			inline pmr::memory_resource * upstream_resource() const noexcept { return m_resource; }
+
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline pmr::memory_resource * upstream_resource() const noexcept { return m_res; }
+			inline size_t addr() const noexcept { return (size_t)m_buffer; }
 
-			inline size_t addr() const noexcept { return (size_t)m_data; }
+			inline pointer const data() noexcept { return m_buffer; }
 
-			inline pointer const data() noexcept { return m_data; }
+			inline const_pointer const data() const noexcept { return m_buffer; }
 
-			inline const_pointer const data() const noexcept { return m_data; }
+			inline size_t size() const noexcept { return m_total_bytes; }
 
-			inline size_t size() const noexcept { return m_size; }
+			inline size_t count() const noexcept { return m_num_allocations; }
 
-			inline size_t count() const noexcept { return m_count; }
+			inline size_t used() const noexcept { return m_bytes_used; }
 
-			inline size_t used() const noexcept { return m_used; }
+			inline size_t free() const noexcept { return m_total_bytes - m_bytes_used; }
 
-			inline size_t free() const noexcept { return m_size - m_used; }
-
-			inline float_t fraction() const noexcept { return (float_t)m_used / (float_t)m_size; }
+			inline float_t fraction() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
 
 			inline float_t percent() const noexcept { return fraction() * 100.f; }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline reference front() & noexcept { return m_data[0]; }
+			inline reference front() & noexcept { return m_buffer[0]; }
 
-			inline const_reference front() const & noexcept { return m_data[0]; }
+			inline const_reference front() const & noexcept { return m_buffer[0]; }
 
-			inline reference back() & noexcept { return m_data[m_size - 1]; }
+			inline reference back() & noexcept { return m_buffer[m_total_bytes - 1]; }
 
-			inline const_reference back() const & noexcept { return m_data[m_size - 1]; }
+			inline const_reference back() const & noexcept { return m_buffer[m_total_bytes - 1]; }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			inline pointer const begin() noexcept { return m_data; }
+			inline pointer const begin() noexcept { return m_buffer; }
 
-			inline const_pointer const begin() const noexcept { return m_data; }
+			inline const_pointer const begin() const noexcept { return m_buffer; }
 
-			inline const_pointer const cbegin() const noexcept { return m_data; }
+			inline const_pointer const cbegin() const noexcept { return m_buffer; }
 
-			inline pointer const end() noexcept { return m_data + m_size; }
+			inline pointer const end() noexcept { return m_buffer + m_total_bytes; }
 
-			inline const_pointer const end() const noexcept { return m_data + m_size; }
+			inline const_pointer const end() const noexcept { return m_buffer + m_total_bytes; }
 
-			inline const_pointer const cend() const noexcept { return m_data + m_size; }
+			inline const_pointer const cend() const noexcept { return m_buffer + m_total_bytes; }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		protected:
 			inline void * do_allocate(size_t const bytes, size_t const align) override
 			{
-				ML_ASSERT(m_res);
-				++m_count;
-				m_used += bytes;
-				return m_res->allocate(bytes, align);
+				++m_num_allocations;
+				m_bytes_used += bytes;
+				return m_resource->allocate(bytes, align);
 			}
 
 			inline void do_deallocate(void * ptr, size_t const bytes, size_t const align) override
 			{
-				ML_ASSERT(m_res);
-				--m_count;
-				m_used -= bytes;
-				return m_res->deallocate(ptr, bytes, align);
+				--m_num_allocations;
+				m_bytes_used -= bytes;
+				return m_resource->deallocate(ptr, bytes, align);
 			}
 
 			inline bool do_is_equal(pmr::memory_resource const & other) const noexcept override
 			{
-				ML_ASSERT(m_res);
-				return m_res->is_equal(other);
+				return m_resource->is_equal(other);
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		private:
-			pmr::memory_resource * m_res;
-			pointer const m_data;
-			size_t const m_size;
-			size_t m_count{}, m_used{};
+			pmr::memory_resource *	m_resource				;
+			pointer	const			m_buffer				;
+			size_t	const			m_total_bytes			;
+			size_t					m_num_allocations	{}	;
+			size_t					m_bytes_used		{}	;
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -135,9 +131,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool startup(detail::test_resource * test) noexcept
+		static inline bool startup(detail::test_resource * res) noexcept
 		{
-			return test && (*test) && (&(ref().m_testres = test));
+			return res && (*res) && (&(ref().m_testres = res));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

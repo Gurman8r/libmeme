@@ -9,12 +9,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool lua::initialized() noexcept
+	bool ml_lua::initialized() noexcept
 	{
 		return s_L;
 	}
 
-	bool lua::startup()
+	bool ml_lua::startup()
 	{
 		// My Print
 		auto my_print{ ([](lua_State * L)
@@ -36,7 +36,7 @@ namespace ml
 		return startup(true, lib);
 	}
 
-	bool lua::startup(bool openLibs, luaL_Reg const * userLib)
+	bool ml_lua::startup(bool openLibs, luaL_Reg const * userLib)
 	{
 		if (!s_L && (s_L = luaL_newstate()))
 		{
@@ -51,7 +51,7 @@ namespace ml
 		return s_L;
 	}
 
-	bool lua::shutdown()
+	bool ml_lua::shutdown()
 	{
 		if (s_L)
 		{
@@ -66,17 +66,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t lua::do_string(cstring const & value)
+	int32_t ml_lua::do_string(cstring const & value)
 	{
 		return (value && s_L) ? luaL_dostring(s_L, value) : 0;
 	}
 
-	int32_t lua::do_string(pmr::string const & value)
+	int32_t ml_lua::do_string(pmr::string const & value)
 	{
 		return do_string(value.c_str());
 	}
 
-	int32_t lua::do_file(fs::path const & path)
+	int32_t ml_lua::do_file(fs::path const & path)
 	{
 		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{

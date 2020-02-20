@@ -21,96 +21,106 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// ECS
+namespace ml
+{
+	// (T) TAGS
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct t_object {};
+
+	// (C) COMPONENTS
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct c_shader		: ds::value_wrapper<shader	> {};
+	struct c_material	: ds::value_wrapper<material> {};
+	struct c_model		: ds::value_wrapper<model	> {};
+	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
+
+
+	// (S) SIGNATURES
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	using s_apply_transforms = meta::list<c_material, c_transform
+	>;
+	using s_apply_materials = meta::list<c_shader, c_material
+	>;
+	using s_draw_renderers = meta::list<c_shader, c_model
+	>;
+
+
+	// (X) SYSTEMS
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class> struct x_apply_transforms final : ecs::util::x_base<s_apply_transforms>
+	{
+		void update(c_material & mat, c_transform const & tf)
+		{
+			mat->set<vec3>("u_position", tf.pos)
+				.set<vec4>("u_rotation", tf.rot)
+				.set<vec3>("u_scale", tf.scl);
+		}
+	};
+
+	template <class> struct x_apply_materials final : ecs::util::x_base<s_apply_materials>
+	{
+		void update(c_shader & shd, c_material const & mat)
+		{
+			shd->bind(false);
+			for (uniform const & u : *mat)
+				shd->set_uniform(u);
+			shd->unbind();
+		}
+	};
+
+	template <class> struct x_draw_renderers final : ecs::util::x_base<s_draw_renderers>
+	{
+		void update(render_target const & target, c_shader const & shd, c_model const & mdl)
+		{
+			shd->bind(true);
+			target.draw(*mdl);
+			shd->unbind();
+		}
+	};
+
+
+	// (M) MANAGER
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	using entity_traits = ecs::traits<
+
+		// tags
+		ecs::cfg::tags<
+		t_object
+		>,
+
+		// components
+		ecs::cfg::components<
+		c_shader, c_material, c_model, c_transform
+		>,
+
+		// signatures
+		ecs::cfg::signatures<
+		s_apply_transforms, s_apply_materials, s_draw_renderers
+		>,
+
+		// systems
+		ecs::cfg::systems<
+		x_apply_transforms, x_apply_materials, x_draw_renderers
+		>
+	>;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// DEMO
 namespace ml
 {
 	struct demo final : plugin
 	{
-		// (T) TAGS
+		// ECS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct t_object {};
-
-		// (C) COMPONENTS
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct c_shader		: ds::value_wrapper<shader	> {};
-		struct c_material	: ds::value_wrapper<material> {};
-		struct c_model		: ds::value_wrapper<model	> {};
-		struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
-
-
-		// (S) SIGNATURES
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using s_apply_transforms = meta::list<c_material, c_transform
-		>;
-		using s_apply_materials = meta::list<c_shader, c_material
-		>;
-		using s_draw_renderers = meta::list<c_shader, c_model
-		>;
-
-
-		// (X) SYSTEMS
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class> struct x_apply_transforms final : ecs::util::x_base<s_apply_transforms>
-		{
-			void update(c_material & mat, c_transform const & tf)
-			{
-				mat->set<vec3>("u_position", tf.pos)
-					.set<vec4>("u_rotation", tf.rot)
-					.set<vec3>("u_scale", tf.scl);
-			}
-		};
-
-		template <class> struct x_apply_materials final : ecs::util::x_base<s_apply_materials>
-		{
-			void update(c_shader & shd, c_material const & mat)
-			{
-				shd->bind(false);
-				for (uniform const & u : *mat)
-					shd->set_uniform(u);
-				shd->unbind();
-			}
-		};
-
-		template <class> struct x_draw_renderers final : ecs::util::x_base<s_draw_renderers>
-		{
-			void update(render_target const & target, c_shader const & shd, c_model const & mdl)
-			{
-				shd->bind(true);
-				target.draw(*mdl);
-				shd->unbind();
-			}
-		};
-
-
-		// (M) MANAGER
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using entity_traits = ecs::traits<
-
-			// tags
-			ecs::cfg::tags<
-			t_object
-			>,
-
-			// components
-			ecs::cfg::components<
-			c_shader, c_material, c_model, c_transform
-			>,
-
-			// signatures
-			ecs::cfg::signatures<
-			s_apply_transforms, s_apply_materials, s_draw_renderers
-			>,
-
-			// systems
-			ecs::cfg::systems<
-			x_apply_transforms, x_apply_materials, x_draw_renderers
-			>
-		>;
-		
 		using entity_manager = ecs::manager<entity_traits>;
 
 		entity_manager m_ecs{};
@@ -234,45 +244,13 @@ namespace ml
 			// load stuff, etc...
 
 			// GUI
+			setup_main_menu_bar();
+
+			// ICON
+			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) }
+			; !icon.empty())
 			{
-				// File Menu
-				editor::get_main_menu().add_menu("file", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					if (ImGui::MenuItem("quit", "Alt+F4"))
-					{
-						engine::get_window().close();
-					}
-				});
-
-				// Tools Menu
-				editor::get_main_menu().add_menu("tools", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					m_gui_assets.menu_item();
-					m_gui_display.menu_item();
-					m_gui_ecs.menu_item();
-					m_gui_memory.menu_item();
-					m_gui_profiler.menu_item();
-				});
-
-				// Window Menu
-				editor::get_main_menu().add_menu("options", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					bool fullscreen{ engine::get_window().is_fullscreen() };
-					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
-					{
-						engine::get_window().set_fullscreen(fullscreen);
-					}
-				});
-
-				// Help Menu
-				editor::get_main_menu().add_menu("help", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					m_imgui_demo.menu_item();
-				});
+				engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
@@ -280,56 +258,46 @@ namespace ml
 				(m_pipeline["1"] = make_render_texture(vec2i{ 1280, 720 })).create();
 			}
 
-			// IMAGES
-			{
-				if (auto const & icon{ m_images["icon"] = make_image(
-					fs::path{ "../../../../assets/textures/icon.png" }
-				) }; !icon.empty())
-				{
-					engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
-				}
-			}
-
 			// TEXTURES
 			{
-				m_textures["doot"] = make_texture(
-					fs::path{ "../../../../assets/textures/doot.png" }
-				);
+				m_textures["doot"] = make_texture(engine::path_to(
+					"assets/textures/doot.png"
+				));
 
-				m_textures["navball"] = make_texture(
-					fs::path{ "../../../../assets/textures/navball.png" }
-				);
+				m_textures["navball"] = make_texture(engine::path_to(
+					"assets/textures/navball.png"
+				));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"] = make_font(
-					fs::path{ "../../../../assets/fonts/clacon.ttf" }
-				);
+				m_fonts["clacon"] = make_font(engine::path_to(
+					"assets/fonts/clacon.ttf"
+				));
 
-				m_fonts["consolas"] = make_font(
-					fs::path{ "../../../../assets/fonts/consolas.ttf" }
-				);
+				m_fonts["consolas"] = make_font(engine::path_to(
+					"assets/fonts/consolas.ttf"
+				));
 
-				m_fonts["lucida_console"] = make_font(
-					fs::path{ "../../../../assets/fonts/lucida_console.ttf" }
-				);
+				m_fonts["lucida_console"] = make_font(engine::path_to(
+					"assets/fonts/lucida_console.ttf"
+				));
 
-				m_fonts["minecraft"] = make_font(
-					fs::path{ "../../../../assets/fonts/minecraft.ttf" }
-				);
+				m_fonts["minecraft"] = make_font(engine::path_to(
+					"assets/fonts/minecraft.ttf"
+				));
 			}
 
 			// SHADERS
 			{
 				m_shaders["2d"] = make_shader(
-					fs::path{ "../../../../assets/shaders/2D.vs.shader" },
-					fs::path{ "../../../../assets/shaders/basic.fs.shader" }
+					engine::path_to("assets/shaders/2D.vs.shader"),
+					engine::path_to("assets/shaders/basic.fs.shader")
 				);
 
 				m_shaders["3d"] = make_shader(
-					fs::path{ "../../../../assets/shaders/3D.vs.shader" },
-					fs::path{ "../../../../assets/shaders/basic.fs.shader" }
+					engine::path_to("assets/shaders/3D.vs.shader"),
+					engine::path_to("assets/shaders/basic.fs.shader")
 				);
 			}
 
@@ -380,18 +348,18 @@ namespace ml
 
 			// MODELS
 			{
-				m_models["sphere8x6"] = make_model(
-					fs::path{ "../../../../assets/models/sphere8x6.obj" }
-				);
+				m_models["sphere8x6"] = make_model(engine::path_to(
+					"assets/models/sphere8x6.obj"
+				));
 
-				m_models["sphere32x24"] = make_model(
-					fs::path{ "../../../../assets/models/sphere32x24.obj" }
-				);
+				m_models["sphere32x24"] = make_model(engine::path_to(
+					"assets/models/sphere32x24.obj"
+				));
 
 				// FIXME: upside down?
-				m_models["monkey"] = make_model(
-					fs::path{ "../../../../assets/models/monkey.obj" }
-				);
+				m_models["monkey"] = make_model(engine::path_to(
+					"assets/models/monkey.obj"
+				));
 
 				// FIXME: ibo broken
 				m_models["triangle"] = make_model(make_mesh(
@@ -480,36 +448,33 @@ namespace ml
 		{
 			// dock gui windows
 
-			static auto & d{ ev.dockspace.resize(8) };
-			static auto
-				& root		{ d.get_node(0) },
-				& left		{ d.get_node(1) },
-				& left_up	{ d.get_node(2) },
-				& left_dn	{ d.get_node(3) },
-				& left_dn2	{ d.get_node(7) },
-				& right		{ d.get_node(4) },
-				& right_up	{ d.get_node(5) },
-				& right_dn	{ d.get_node(6) };
+			static auto & d{ ev.dockspace };
+			enum { 
+				root,
+				left, left_up, left_dn, left_dn2,
+				right, right_up, right_dn,
+				MAX_DOCK_NODE
+			};
+			d.resize(MAX_DOCK_NODE);
 
-			if (root = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
-				d.split_node(1, root	, ImGuiDir_Left	, lhs	, &root);		// left
-				d.split_node(2, left	, ImGuiDir_Up	, 0.5f	, &left);		// left-up
-				d.split_node(3, left	, ImGuiDir_Down	, 0.5f	, &left);		// left-down
-				d.split_node(7, left_dn	, ImGuiDir_Right, 0.5f	, &left_dn);	// left-down2
+				d.split_node(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				d.split_node(left_up	, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				d.split_node(left_dn	, d[left]		, ImGuiDir_Down	, 0.5f	, &d[left]);	// left-down
+				d.split_node(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.5f	, &d[left_dn]);	// left-down2
 
-				d.split_node(4, root	, ImGuiDir_Right, rhs	, &root);		// right
-				d.split_node(5, right	, ImGuiDir_Up	, 0.5f	, &right);		// right-up
-				d.split_node(6, right	, ImGuiDir_Down	, 0.5f	, &right);		// right-down
+				d.split_node(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
+				d.split_node(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				d.split_node(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				d.dock_window(m_gui_display.title	, left_up);
-				d.dock_window(m_gui_assets.title	, left_dn);
-				d.dock_window(m_gui_ecs.title		, left_dn);
-				d.dock_window(m_gui_profiler.title	, left_dn2);
-				d.dock_window(m_imgui_demo.title	, right);
-				d.dock_window(m_gui_memory.title	, right);
+				d.dock_window(m_gui_display.title	, d[left_up]);
+				d.dock_window(m_gui_assets.title	, d[left_dn]);
+				d.dock_window(m_gui_ecs.title		, d[left_dn]);
+				d.dock_window(m_gui_profiler.title	, d[left_dn2]);
+				d.dock_window(m_gui_memory.title	, d[right]);
 
 				d.end_builder(root);
 			}
@@ -553,6 +518,50 @@ namespace ml
 			m_fonts.clear();
 			m_pipeline.clear();
 			m_scripts.clear();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void setup_main_menu_bar()
+		{
+			// File Menu
+			editor::add_menu("file", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				if (ImGui::MenuItem("quit", "Alt+F4"))
+				{
+					engine::get_window().close();
+				}
+			});
+
+			// Tools Menu
+			editor::add_menu("tools", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				m_gui_assets.menu_item();
+				m_gui_display.menu_item();
+				m_gui_ecs.menu_item();
+				m_gui_memory.menu_item();
+				m_gui_profiler.menu_item();
+			});
+
+			// Window Menu
+			editor::add_menu("options", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				bool fullscreen{ engine::get_window().is_fullscreen() };
+				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
+				{
+					engine::get_window().set_fullscreen(fullscreen);
+				}
+			});
+
+			// Help Menu
+			editor::add_menu("help", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				m_imgui_demo.menu_item();
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -932,7 +941,7 @@ namespace ml
 					jump_item("engine::context", engine::get_context());
 					jump_item("editor::context", editor::get_context());
 					ImGui::Separator();
-					jump_item("ImGuiContext", (ImGuiContext *)editor::get_io().imgui_context);
+					jump_item("ImGuiContext", editor::get_imgui_context());
 					ImGui::EndMenu();
 				}
 				ImGui::Separator();
@@ -967,10 +976,12 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+			static auto const & tt{ engine::get_time() };
+
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", engine::get_time().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", tt.count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -982,7 +993,7 @@ namespace ml
 				if (ImGui::BeginPopupContextItem("plot settings"))
 				{
 					ImGui::Checkbox("animate", &p.animate); ImGui::SameLine();
-					ImGui::Combo("##visual", &p.mode, "lines\0histogram\0");
+					ImGui::Combo("##mode", &p.mode, "lines\0histogram\0");
 					ImGui::EndPopup();
 				}
 			});

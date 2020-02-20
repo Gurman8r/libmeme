@@ -19,12 +19,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool python::initialized() noexcept
+	bool ml_python::initialized() noexcept
 	{
 		return s_py_init;
 	}
 
-	bool python::startup(fs::path const & name, fs::path const & home)
+	bool ml_python::startup(fs::path const & name, fs::path const & home)
 	{
 		s_py_name = name;
 		s_py_home = home;
@@ -43,7 +43,7 @@ namespace ml
 		return false;
 	}
 
-	bool python::shutdown()
+	bool ml_python::shutdown()
 	{
 		if (s_py_init)
 		{
@@ -58,17 +58,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t python::do_string(cstring value)
+	int32_t ml_python::do_string(cstring value)
 	{
 		return (value && s_py_init) ? PyRun_SimpleString(value) : 0;
 	}
 
-	int32_t python::do_string(pmr::string const & value)
+	int32_t ml_python::do_string(pmr::string const & value)
 	{
 		return do_string(value.c_str());
 	}
 
-	int32_t python::do_file(fs::path const & path)
+	int32_t ml_python::do_file(fs::path const & path)
 	{
 		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
@@ -97,13 +97,13 @@ namespace ml::python_embedded
 	{
 		struct ml_py_config final {};
 		pybind11::class_<ml_py_config>(m, "config")
-			.def_static("args",		[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
 			.def_static("author",	[]() { return ML__AUTHOR; })
 			.def_static("date",		[]() { return ML__DATE; })
 			.def_static("name",		[]() { return ML__NAME; })
 			.def_static("time",		[]() { return ML__TIME; })
 			.def_static("url",		[]() { return ML__URL; })
 			.def_static("version",	[]() { return ML__VERSION; })
+			.def_static("argv",		[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
 			.def_static("arch",		[]() { return ML_ARCH; })
 			.def_static("arch_id",	[]() { return ML_ARCH_NAME; })
 			.def_static("cc_id",	[]() { return ML_CC_NAME; })

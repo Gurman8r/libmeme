@@ -1,9 +1,8 @@
 #ifndef _ML_EDITOR_HPP_
 #define _ML_EDITOR_HPP_
 
-#include <libmeme/Renderer/Texture.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Editor/Editor_Dockspace.hpp>
-#include <libmeme/Editor/Editor_MainMenuBar.hpp>
 
 namespace ml
 {
@@ -12,14 +11,18 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using menu_t = std::function<void()>;
+		using main_menu_bar_t = pmr::vector<std::pair<cstring, pmr::vector<menu_t>>>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// startup
 		struct config final : trackable, non_copyable
 		{
-			void *				window_handle	{}		; // 
-			pmr::string			api_version		{}		; // 
-			pmr::string			style			{}		; // 
-			cstring				ini_file		{}		; // 
-			cstring				log_file		{}		; // 
+			pmr::string			api_version		{}			; // 
+			pmr::string			style			{}			; // 
+			cstring				ini_file		{}			; // 
+			cstring				log_file		{}			; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,9 +30,7 @@ namespace ml
 		// runtime
 		struct io final : trackable, non_copyable
 		{
-			void *				imgui_context	{}		; // current imgui context
-			editor_dockspace	dockspace		{}		; // main dockspace
-			editor_main_menu	main_menu		{}		; // main menu bar
+			bool				show_main_menu	{ true }	; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,18 +38,22 @@ namespace ml
 		// context
 		struct context final : trackable, non_copyable
 		{
-			editor::config		config			{}		; // startup settings
-			editor::io			io				{}		; // runtime variables
-
 		private:
-			friend class		editor					; // private data
+			friend class		editor						;
+			editor::config		m_config		{}			; // startup settings
+			editor::io			m_io			{}			; // runtime variables
+			void *				m_imgui_context	{}			; // current imgui context
+			editor_dockspace	m_dockspace		{}			; // dockspace
+			main_menu_bar_t		m_main_menu		{}			; // main menu bar
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static bool initialized() noexcept;
+
 		ML_NODISCARD static bool create_context();
 
-		ML_NODISCARD static bool initialized() noexcept;
+		static bool destroy_context();
 
 		ML_NODISCARD static editor::context * const get_context() noexcept;
 
@@ -56,7 +61,7 @@ namespace ml
 
 		ML_NODISCARD static bool startup(bool install_callbacks);
 
-		static void shutdown();
+		static bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,46 +73,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void show_about_window(bool * p_open = nullptr);
-		
-		static void show_imgui_demo(bool * p_open = nullptr);
-		
-		static void show_user_guide();
-		
-		static void show_style_editor(void * ref = nullptr);
+		static void add_menu(cstring label, menu_t && value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline editor::context & ref() noexcept
-		{
-			ML_BREAK_IF(!initialized());
-			ML_ASSERT("editor is not initialized" && initialized());
-			return (*get_context());
-		}
+		static void show_imgui_demo(bool * p_open);
 
-		ML_NODISCARD static inline editor::context const & cref() noexcept
-		{
-			return static_cast<editor::context const &>(ref());
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static inline editor::config & get_config() noexcept
 		{
-			return ref().config;
+			return get_context()->m_config;
 		}
 
 		ML_NODISCARD static inline editor::io & get_io() noexcept
 		{
-			return ref().io;
+			return get_context()->m_io;
+		}
+
+		ML_NODISCARD static inline auto * const get_imgui_context() noexcept
+		{
+			return static_cast<struct ImGuiContext * const>(get_context()->m_imgui_context);
 		}
 
 		ML_NODISCARD static inline editor_dockspace & get_dockspace() noexcept
 		{
-			return get_io().dockspace;
-		}
-
-		ML_NODISCARD static inline editor_main_menu & get_main_menu() noexcept
-		{
-			return get_io().main_menu;
+			return get_context()->m_dockspace;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

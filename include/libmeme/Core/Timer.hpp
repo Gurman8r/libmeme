@@ -36,33 +36,6 @@ namespace ml
 			}
 		}
 
-		timer(timer && other) noexcept
-			: m_flags	{ std::move(other.m_flags) }
-			, m_current	{ std::move(other.m_current) }
-			, m_previous{ std::move(other.m_previous) }
-			, m_elapsed	{ std::move(other.m_elapsed) }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline timer & operator=(timer && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		inline void swap(timer & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				std::swap(m_flags,		other.m_flags);
-				std::swap(m_current,	other.m_current);
-				std::swap(m_previous,	other.m_previous);
-				std::swap(m_elapsed,	other.m_elapsed);
-			}
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline timer & start() noexcept

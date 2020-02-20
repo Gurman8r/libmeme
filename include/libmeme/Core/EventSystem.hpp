@@ -15,7 +15,7 @@ namespace ml
 
 	class ML_CORE_API event_system final
 	{
-		static ds::flat_multimap<size_t, event_listener *> s_listeners;
+		static ds::flat_multimap<hash_t, event_listener *> s_listeners;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -34,11 +34,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(size_t type, event_listener * value);
+		static bool add_listener(hash_t type, event_listener * value);
 		
 		static void fire_event(event const & value);
 
-		static void remove_listener(size_t type, event_listener * value);
+		static void remove_listener(hash_t type, event_listener * value);
 		
 		static void remove_listener(event_listener * value);
 

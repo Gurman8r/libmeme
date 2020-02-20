@@ -14,8 +14,6 @@ namespace ml
 
 		using nodes_t = typename pmr::vector<uint32_t>;
 		
-		
-
 		static constexpr auto title{ "##libmeme##editor##dockspace" };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,9 +39,9 @@ namespace ml
 
 		inline nodes_t const & nodes() const noexcept { return m_nodes; }
 
-		inline uint32_t & get_node(const int32_t i) noexcept { return m_nodes[i]; }
+		inline uint32_t & operator[](const int32_t i) noexcept { return m_nodes[i]; }
 
-		inline uint32_t const & get_node(const int32_t i) const noexcept { return m_nodes[i]; }
+		inline uint32_t const & operator[](const int32_t i) const noexcept { return m_nodes[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -58,16 +56,14 @@ namespace ml
 	private:
 		friend class editor;
 
-		editor_dockspace();
-
-		bool		m_open;			//
-		bool		m_good;			//
-		nodes_t		m_nodes;		//
-		float_t		m_border;		//
-		vec2		m_padding;		//
-		float_t		m_rounding;		//
-		vec2		m_size;			//
-		float_t		m_transparency;	//
+		bool		m_open			{ true }	; // 
+		bool		m_good			{ false }	; // 
+		nodes_t		m_nodes			{}			; // 
+		float_t		m_border		{ 0.f }		; // 
+		vec2		m_padding		{ 0.f }		; // 
+		float_t		m_rounding		{ 0.f }		; // 
+		vec2		m_size			{ 0.f }		; // 
+		float_t		m_transparency	{ 1.f }		; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

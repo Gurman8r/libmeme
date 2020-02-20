@@ -8,20 +8,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor_dockspace::editor_dockspace()
-		: m_open		{ true }
-		, m_good		{ false }
-		, m_nodes		{}
-		, m_border		{ 0.0f }
-		, m_padding		{ 0.f, 0.f }
-		, m_rounding	{ 0.0f }
-		, m_size		{ 0.f, 0.f }
-		, m_transparency{ 1.0f }
-	{
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool editor_dockspace::render()
 	{
 		if (([&]()
@@ -52,7 +38,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(editor::get_main_menu().open() ? ImGuiWindowFlags_MenuBar : 0)
+					(editor::get_io().show_main_menu ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);

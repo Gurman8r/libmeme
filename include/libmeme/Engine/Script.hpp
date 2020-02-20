@@ -12,7 +12,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		enum language { unknown, python, lua };
+		enum language : int32_t { unknown, python, lua };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -22,7 +22,7 @@ namespace ml
 		
 		script(fs::path const & path, allocator_type const & alloc = {});
 		
-		script(language lang, pmr::string const & text, allocator_type const & alloc = {});
+		script(int32_t lang, pmr::string const & text, allocator_type const & alloc = {});
 		
 		script(script const & other, allocator_type const & alloc = {});
 		
@@ -52,18 +52,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator bool() const noexcept { return !m_str.empty(); }
+		inline operator bool() const noexcept { return !m_text.empty(); }
 
-		inline auto lang() const noexcept -> language { return m_lang; }
+		inline auto lang() const noexcept -> int32_t { return m_lang; }
 
-		inline auto str() const noexcept -> pmr::string const & { return m_str; }
+		inline auto str() const noexcept -> pmr::string const & { return m_text; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		language m_lang;
-
-		pmr::string m_str;
+		int32_t		m_lang;
+		pmr::string m_text;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

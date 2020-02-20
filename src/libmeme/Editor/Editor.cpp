@@ -1,19 +1,9 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Editor/StyleLoader.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
-#include <imgui/examples/imgui_impl_glfw.h>
-
-#ifdef ML_RENDERER_OPENGL
-#	include <imgui/examples/imgui_impl_opengl3.h>
-#else
-#endif
+#include <libmeme/Editor/ImGuiExt.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -21,18 +11,23 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static editor::context * g_editor{ nullptr };
+	static editor::context * g_editor{};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
+	bool editor::initialized() noexcept
+	{
+		return g_editor;
+	}
+
 	bool editor::create_context()
 	{
 		return !g_editor && (g_editor = new editor::context{});
 	}
 
-	bool editor::initialized() noexcept
+	bool editor::destroy_context()
 	{
-		return g_editor;
+		if (!g_editor) return false;
+		delete g_editor;
+		return !(g_editor = nullptr);
 	}
 
 	editor::context * const editor::get_context() noexcept
@@ -44,7 +39,7 @@ namespace ml
 	
 	bool editor::startup(bool install_callbacks)
 	{
-		ML_ASSERT(initialized());
+		if (!initialized()) return false;
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions(
@@ -55,7 +50,7 @@ namespace ml
 
 		// create context
 		IMGUI_CHECKVERSION();
-		get_io().imgui_context = ImGui::CreateContext();
+		g_editor->m_imgui_context = ImGui::CreateContext();
 
 		auto & im_io{ ImGui::GetIO() };
 		auto & im_style{ ImGui::GetStyle() };
@@ -73,17 +68,17 @@ namespace ml
 		}
 
 		// paths
-		im_io.LogFilename = get_config().ini_file;
-		im_io.IniFilename = get_config().log_file;
+		im_io.LogFilename = g_editor->m_config.ini_file;
+		im_io.IniFilename = g_editor->m_config.log_file;
 
 		// style
-		switch (util::hash(util::to_lower(get_config().style)))
+		switch (util::hash(util::to_lower(g_editor->m_config.style)))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
 		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
 		default:
-			if (fs::path const path{ get_config().style }; fs::exists(path))
+			if (fs::path const path{ g_editor->m_config.style }; fs::exists(path))
 			{
 				style_loader{}(path);
 			}
@@ -94,14 +89,14 @@ namespace ml
 #ifdef ML_RENDERER_OPENGL
 
 		if (!ImGui_ImplGlfw_InitForOpenGL(
-			(struct GLFWwindow *)get_config().window_handle,
+			(struct GLFWwindow *)engine::get_window().get_handle(),
 			install_callbacks
 		))
 		{
 			return debug::log_error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(get_config().api_version.c_str()))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.c_str()))
 		{
 			return debug::log_error("Failed initializing ImGui renderer");
 		}
@@ -110,11 +105,11 @@ namespace ml
 		return true;
 	}
 
-	void editor::shutdown()
+	bool editor::shutdown()
 	{
-		ML_ASSERT(initialized());
+		if (!initialized()) return false;
 
-		get_main_menu().menus().clear();
+		g_editor->m_main_menu.clear();
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -124,16 +119,13 @@ namespace ml
 
 		ImGui::DestroyContext();
 
-		delete g_editor;
-		g_editor = nullptr;
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void editor::new_frame()
 	{
-		ML_ASSERT(initialized());
-
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #else
@@ -144,15 +136,33 @@ namespace ml
 
 	void editor::render()
 	{
-		get_dockspace().render();
+		// dockspace
+		g_editor->m_dockspace.render();
 
-		get_main_menu().render();
+		// main menu
+		if (g_editor->m_io.show_main_menu)
+		{
+			if (ImGui::BeginMainMenuBar())
+			{
+				for (auto & pair : g_editor->m_main_menu)
+				{
+					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
+					{
+						for (auto const & fn : pair.second)
+						{
+							std::invoke(fn);
+						}
+						ImGui::EndMenu();
+					}
+				}
+
+				ImGui::EndMainMenuBar();
+			}
+		}
 	}
 
 	void editor::render_frame()
 	{
-		ML_ASSERT(initialized());
-
 		ImGui::Render();
 
 #ifdef ML_RENDERER_OPENGL
@@ -172,28 +182,30 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor::show_about_window(bool * p_open)
+	void editor::add_menu(cstring label, menu_t && value)
 	{
-		ML_ASSERT(initialized());
-		ImGui::ShowAboutWindow(p_open);
+		auto & m{ get_context()->m_main_menu };
+
+		auto it{ std::find_if(m.begin(), m.end(), [&](auto elem)
+		{
+			return (elem.first == label);
+		}) };
+		if (it == m.end())
+		{
+			m.push_back({ label, {} });
+			it = (m.end() - 1);
+		}
+		if (value)
+		{
+			it->second.emplace_back(ML_FWD(value));
+		}
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void editor::show_imgui_demo(bool * p_open)
 	{
-		ML_ASSERT(initialized());
 		ImGui::ShowDemoWindow(p_open);
-	}
-
-	void editor::show_user_guide()
-	{
-		ML_ASSERT(initialized());
-		ImGui::ShowUserGuide();
-	}
-
-	void editor::show_style_editor(void * ref)
-	{
-		ML_ASSERT(initialized());
-		ImGui::ShowStyleEditor(static_cast<ImGuiStyle *>(ref));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

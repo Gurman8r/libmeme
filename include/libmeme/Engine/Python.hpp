@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	class ML_ENGINE_API python final
+	class ML_ENGINE_API ml_python final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

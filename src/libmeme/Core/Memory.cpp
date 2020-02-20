@@ -19,7 +19,6 @@ namespace ml
 		if (!m_records.empty())
 		{
 			debug::log_error("MEMORY LEAKS DETECTED");
-			debug::pause(1);
 
 			static constexpr std::streamsize
 				indx_size{ 8 },

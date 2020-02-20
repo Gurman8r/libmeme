@@ -13,24 +13,20 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using filenames_t = ds::flat_set<fs::path>;
-		using libraries_t = ds::flat_map<struct shared_library, struct plugin *>;
+		using strings_t		= pmr::vector<pmr::string>;
+		using filenames_t	= ds::flat_set<fs::path>;
+		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup
 		struct config final : trackable, non_copyable
 		{
-			fs::path			program_name	{}		; // program name
-			filenames_t			command_line	{}		; // command line arguments
-			fs::path			library_path	{}		; // script library path
-			fs::path			content_path	{}		; // content path
-			filenames_t			script_list		{}		; // scripts to run on start
-			filenames_t			plugin_list		{}		; // plugins to load on start
-			pmr::string			window_title	{}		; // window title
-			video_mode			window_video	{}		; // window video mode
-			context_settings	window_context	{}		; // window context settings
-			int32_t				window_flags	{}		; // window flags
+			strings_t			command_line	{}			; // cli arguments
+			fs::path			program_name	{}			; // program name
+			fs::path			program_path	{}			; // program path
+			fs::path			content_path	{}			; // content path
+			fs::path			library_path	{}			; // script library path
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,9 +34,9 @@ namespace ml
 		// runtime
 		struct io final : trackable, non_copyable
 		{
-			float_t				delta_time		{}		; // frame time
-			size_t				frame_count		{}		; // frame count
-			float_t				frame_rate		{}		; // frame rate
+			float_t				delta_time		{}			; // frame time
+			size_t				frame_count		{}			; // frame count
+			float_t				frame_rate		{}			; // frame rate
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,24 +44,25 @@ namespace ml
 		// context
 		struct context final : trackable, non_copyable
 		{
-			engine::config		config			{}		; // startup settings
-			engine::io			io				{}		; // runtime variables
-
 		private:
-			friend class		engine					; // private data
-			render_window		window			{}		; // main window
-			filenames_t			plugin_files	{}		; // plugin filenames
-			libraries_t			plugin_libs		{}		; // plugin instances
-			timer				main_timer		{}		; // master timer
-			timer				loop_timer		{}		; // frame timer
-			frame_tracker<120>	fps_tracker		{}		; // frame rate tracker
+			friend class		engine						;
+			engine::config		m_config		{}			; // startup settings
+			engine::io			m_io			{}			; // runtime variables
+			timer				m_main_timer	{ true }	; // master timer
+			timer				m_loop_timer	{}			; // frame timer
+			frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
+			render_window		m_window		{}			; // main window
+			filenames_t			m_plugin_files	{}			; // plugin filenames
+			libraries_t			m_plugin_libs	{}			; // plugin instances
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static bool initialized() noexcept;
+
 		ML_NODISCARD static bool create_context();
 
-		ML_NODISCARD static bool initialized() noexcept;
+		static bool destroy_context();
 
 		ML_NODISCARD static engine::context * const get_context() noexcept;
 
@@ -73,7 +70,7 @@ namespace ml
 
 		ML_NODISCARD static bool startup(bool install_callbacks);
 
-		static void shutdown();
+		static bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,36 +90,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline engine::context & ref() noexcept
-		{
-			ML_BREAK_IF(!initialized());
-			ML_ASSERT("engine is not initialized" && initialized());
-			return (*get_context());
-		}
-
-		ML_NODISCARD static inline engine::context const & cref() noexcept
-		{
-			return static_cast<engine::context const &>(ref());
-		}
-
 		ML_NODISCARD static inline engine::config & get_config() noexcept
 		{
-			return ref().config;
+			return get_context()->m_config;
 		}
 
 		ML_NODISCARD static inline engine::io & get_io() noexcept
 		{
-			return ref().io;
+			return get_context()->m_io;
 		}
 
 		ML_NODISCARD static inline duration const & get_time() noexcept
 		{
-			return ref().main_timer.elapsed();
+			return get_context()->m_main_timer.elapsed();
 		}
 
 		ML_NODISCARD static inline render_window & get_window() noexcept
 		{
-			return ref().window;
+			return get_context()->m_window;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static inline fs::path path_to(fs::path const & path)
+		{
+			if (path.empty()) return get_config().content_path;
+			return fs::path{ get_config().content_path.string() + path.string() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -24,12 +24,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr explicit event(size_t const value) noexcept
+		constexpr explicit event(hash_t const value) noexcept
 			: m_id{ value }
 		{
 		}
 
-		ML_NODISCARD constexpr size_t id() const noexcept
+		ML_NODISCARD constexpr hash_t id() const noexcept
 		{
 			return m_id;
 		}
@@ -43,7 +43,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		size_t const m_id;
+		hash_t const m_id;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

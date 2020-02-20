@@ -148,28 +148,28 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static constexpr auto fnv1a_basis{ static_cast<size_t>(14695981039346656037ULL) };
+	static constexpr auto fnv1a_basis{ static_cast<hash_t>(14695981039346656037ULL) };
 
-	static constexpr auto fnv1a_prime{ static_cast<size_t>(1099511628211ULL) };
+	static constexpr auto fnv1a_prime{ static_cast<hash_t>(1099511628211ULL) };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T
-	> ML_NODISCARD constexpr size_t hash(T const * arr, size_t size, size_t seed) noexcept
+	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size, hash_t seed) noexcept
 	{
 		return (size > 0)
-			? hash(arr + 1, size - 1, (seed ^ static_cast<size_t>(*arr)) * fnv1a_prime)
+			? hash(arr + 1, size - 1, (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
 			: seed;
 	}
 
 	template <class T
-	> ML_NODISCARD constexpr size_t hash(T const * arr, size_t size) noexcept
+	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size) noexcept
 	{
 		return hash(arr, size, fnv1a_basis);
 	}
 
-	template <class T, size_t N
-	> ML_NODISCARD constexpr size_t hash(const T(&value)[N]) noexcept
+	template <class T, hash_t N
+	> ML_NODISCARD constexpr hash_t hash(const T(&value)[N]) noexcept
 	{
 		return hash(value, N - 1);
 	}
@@ -177,21 +177,21 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arr
-	> ML_NODISCARD constexpr size_t hash(Arr const & value) noexcept
+	> ML_NODISCARD constexpr hash_t hash(Arr const & value) noexcept
 	{
-		return hash(value.data(), value.size());
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
-	template <template <class, size_t...> class Arr, class T, size_t ... N
-	> ML_NODISCARD constexpr size_t hash(Arr<T, N...> const & value) noexcept
+	template <template <class, hash_t...> class Arr, class T, hash_t ... N
+	> ML_NODISCARD constexpr hash_t hash(Arr<T, N...> const & value) noexcept
 	{
-		return hash(value.data(), value.size());
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
 	template <template <class...> class Arr, class ... Ts
-	> ML_NODISCARD constexpr size_t hash(Arr<Ts...> const & value) noexcept
+	> ML_NODISCARD constexpr hash_t hash(Arr<Ts...> const & value) noexcept
 	{
-		return hash(value.data(), value.size());
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

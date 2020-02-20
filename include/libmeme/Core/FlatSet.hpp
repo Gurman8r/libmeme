@@ -224,22 +224,7 @@ namespace ml::ds
 			// empty
 			if (empty()) { return end(); }
 
-			// linear
-			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
-			{
-				return std::find(begin(), end(), other);
-			}
-
-			// binary
-			if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
-			; it.first != it.second)
-			{
-				return it.first;
-			}
-			else
-			{
-				return end();
-			}
+			return impl_find(begin(), end(), other);
 		}
 
 		template <class Other = value_type
@@ -248,22 +233,7 @@ namespace ml::ds
 			// empty
 			if (empty()) { return cend(); }
 
-			// linear
-			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
-			{
-				return std::find(cbegin(), cend(), other);
-			}
-
-			// binary
-			if (auto const it{ std::equal_range(cbegin(), cend(), other, compare_type{}) }
-			; it.first != it.second)
-			{
-				return it.first;
-			}
-			else
-			{
-				return cend();
-			}
+			return impl_find(cbegin(), cend(), other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -380,6 +350,35 @@ namespace ml::ds
 		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class It, class Other
+		> static inline auto impl_find(It first, It last, Other const & other)
+		{
+			// linear
+			if constexpr (traits_type::thresh == 0)
+			{
+				return std::find(first, last, other);
+			}
+			else
+			{
+				// linear
+				if (std::distance(first, last) < traits_type::thresh)
+				{
+					return std::find(first, last, other);
+				}
+
+				// binary
+				if (auto const it{ std::equal_range(first, last, other, compare_type{}) }
+				; it.first != it.second)
+				{
+					return it.first;
+				}
+				else
+				{
+					return last;
+				}
+			}
+		}
 		
 		inline void impl_sort() noexcept
 		{

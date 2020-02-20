@@ -5,9 +5,9 @@
 #include <libmeme/Core/ScopeGuard.hpp>
 
 #define ML_IMPL_BENCHMARK(v, id)							\
-	auto v{ ml::timer{ true } };								\
-	ML_DEFER{													\
-	ml::performance_tracker::push_frame(id, v.elapsed());	\
+	auto v{ _ML timer{ true } };							\
+	ML_DEFER{												\
+	_ML performance_tracker::push_frame(id, v.elapsed());	\
 	};
 
 #define ML_BENCHMARK(id) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), id)
@@ -37,7 +37,7 @@ namespace ml
 			return m_curr.emplace_back(ML_FWD(args)...);
 		}
 
-		static inline void refresh_frames() noexcept
+		static inline void swap_frames() noexcept
 		{
 			m_prev.swap(m_curr);
 

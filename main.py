@@ -1,7 +1,7 @@
 import LIBMEME as ml
 
-# print command-line args
-for e in ml.config.args():
+# print argv
+for e in ml.config.argv():
    ml.io.info(e)
 
 # load plugins

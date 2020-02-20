@@ -8,7 +8,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool event_system::add_listener(size_t type, event_listener * value)
+	bool event_system::add_listener(hash_t type, event_listener * value)
 	{
 		return value && s_listeners[type].insert(value).second;
 	}
@@ -24,7 +24,7 @@ namespace ml
 		}
 	}
 
-	void event_system::remove_listener(size_t type, event_listener * value)
+	void event_system::remove_listener(hash_t type, event_listener * value)
 	{
 		if (auto it{ s_listeners.find(type) })
 		{

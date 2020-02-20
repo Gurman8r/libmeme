@@ -9,14 +9,6 @@ namespace ml
 
 	struct enter_event final : T_event<enter_event>
 	{
-		int32_t const argc;
-		cstring const * argv;
-
-		constexpr enter_event(int32_t argc, cstring const * argv) noexcept
-			: argc{ argc }
-			, argv{ argv }
-		{
-		}
 	};
 
 	struct frame_begin_event final : T_event<frame_begin_event>
@@ -33,12 +25,6 @@ namespace ml
 
 	struct draw_event final : T_event<draw_event>
 	{
-		struct render_target & target;
-
-		constexpr draw_event(struct render_target & target) noexcept
-			: target{ target }
-		{
-		}
 	};
 
 	struct end_draw_event final : T_event<draw_event>

@@ -3,6 +3,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Engine/Engine.hpp>
+#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -12,7 +13,7 @@
 #else
 #	define CONF_NAME "release"
 #endif
-#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_ARCH_NAME
+#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_TOSTRING(ML_ARCH)
 
 ml::int32_t main()
 {
@@ -41,59 +42,71 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create context
-	ML_ASSERT(engine::create_context()); ML_DEFER{ engine::shutdown(); };
-	ML_ASSERT(editor::create_context()); ML_DEFER{ editor::shutdown(); };
+	ML_ASSERT(engine::create_context()); ML_DEFER{ ML_ASSERT(engine::destroy_context()); };
+	ML_ASSERT(editor::create_context()); ML_DEFER{ ML_ASSERT(editor::destroy_context()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
 	engine::config & engine_cfg	= engine::get_config();
-	engine_cfg.program_name		= ML_ARGV[0];
 	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
-	engine_cfg.library_path		= "../../../../";
-	engine_cfg.content_path		= "../../../../assets/";
-	engine_cfg.script_list		= { "../../../../libmeme.py" };
-	engine_cfg.plugin_list		= { /* "demo.dll" */ };
-	engine_cfg.window_title		= WINDOW_TITLE;
-	engine_cfg.window_flags		= WindowFlags_DefaultMaximized;
-	engine_cfg.window_video		= make_video_mode(
-		vec2i{ 1280, 720 },		// resolution
-		32u						// color depth
-	);
-	engine_cfg.window_context	= make_context_settings(
-		client_api::opengl,		// api
-		4,						// major version
-		6,						// minor version
-		client_api::compat,		// profile
-		24,						// depth bits
-		8,						// stencil bits
-		false,					// multisample
-		false					// sRGB capable
-	);
-
-	ML_ASSERT(engine::startup(true));
+	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
+	engine_cfg.program_path		= fs::current_path();
+	engine_cfg.content_path		= "../../../../";
+	engine_cfg.library_path		= "";
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure editor
 	editor::config & editor_cfg	= editor::get_config();
-	editor_cfg.window_handle	= engine::get_window().get_handle();
 	editor_cfg.api_version		= "#version 130";
 	editor_cfg.style			= "dark";
 	editor_cfg.ini_file			= nullptr;
 	editor_cfg.log_file			= nullptr;
 
-	ML_ASSERT(editor::startup(true));
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// create window
+	ML_ASSERT(engine::get_window().create
+	(
+		pmr::string{ WINDOW_TITLE },	// title
+		make_video_mode
+		(
+			vec2i{ 1280, 720 },			// resolution
+			32u							// color depth
+		),
+		make_context_settings
+		(
+			client_api::opengl,			// api
+			4,							// major version
+			6,							// minor version
+			client_api::compat,			// profile
+			24,							// depth bits
+			8,							// stencil bits
+			false,						// multisample
+			false						// sRGB capable
+		),
+		WindowFlags_DefaultMaximized	// flags
+	));
+
+	// startup
+	ML_ASSERT(engine::startup(true)); ML_DEFER{ ML_ASSERT(engine::shutdown()); };
+	ML_ASSERT(editor::startup(true)); ML_DEFER{ ML_ASSERT(editor::shutdown()); };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// main script
+	script{ engine::path_to("main.py") }();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// enter event
-	event_system::fire_event<enter_event>(ML_ARGC, ML_ARGV);
+	event_system::fire_event<enter_event>();
 
 	// main loop
 	while (engine::get_window().is_open())
 	{
-		ML_DEFER{ performance_tracker::refresh_frames(); };
+		ML_DEFER{ performance_tracker::swap_frames(); };
 
 		// begin frame
 		{
@@ -115,7 +128,7 @@ ml::int32_t main()
 		// draw
 		{
 			ML_BENCHMARK("|   draw");
-			event_system::fire_event<draw_event>(engine::get_window());
+			event_system::fire_event<draw_event>();
 		}
 		// begin gui
 		{

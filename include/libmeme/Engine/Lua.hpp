@@ -13,7 +13,7 @@ extern "C"
 
 namespace ml
 {
-	class ML_ENGINE_API lua final
+	class ML_ENGINE_API ml_lua final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
