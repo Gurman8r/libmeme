@@ -49,7 +49,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_manager::allocate(size_t const size)
+	void * memory_manager::allocate(size_t size)
 	{
 		static auto & inst{ memory_manager::ref() };
 
@@ -63,7 +63,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void memory_manager::deallocate(void * const addr)
+	void memory_manager::deallocate(void * addr)
 	{
 		static auto & inst{ memory_manager::ref() };
 
@@ -80,33 +80,35 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * memory_manager::reallocate(void * const addr, size_t const size)
+	void * memory_manager::reallocate(void * addr, size_t size)
 	{
-		static auto & inst{ memory_manager::ref() };
+		return reallocate(addr, size, size);
+	}
 
-		if (size == 0)
+	void * memory_manager::reallocate(void * addr, size_t oldsz, size_t newsz)
+	{
+		if (newsz == 0)
 		{
 			deallocate(addr);
 			return nullptr;
 		}
 		else if (!addr)
 		{
-			return allocate(size);
+			return allocate(newsz);
 		}
-		else if (auto const it{ inst.m_records.find(addr) }; !it)
-		{
-			return nullptr;
-		}
-		else if (size <= it->second->size)
+		else if (newsz <= oldsz)
 		{
 			return addr;
 		}
+		else if (void * temp{ allocate(newsz) })
+		{
+			std::memcpy(temp, addr, oldsz);
+			deallocate(addr);
+			return temp;
+		}
 		else
 		{
-			void * temp{ allocate(size) };
-			std::memcpy(temp, it->second->data, it->second->size);
-			deallocate(*it->first);
-			return temp;
+			return nullptr;
 		}
 	}
 

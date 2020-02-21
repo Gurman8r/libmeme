@@ -23,7 +23,7 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-			explicit test_resource(pmr::memory_resource * r, pointer const d, size_t const s) noexcept
+			explicit test_resource(pmr::memory_resource * r, pointer const d, size_t s) noexcept
 				: m_resource{ r }, m_buffer{ d }, m_total_bytes{ s }
 			{
 			}
@@ -83,14 +83,14 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		protected:
-			inline void * do_allocate(size_t const bytes, size_t const align) override
+			inline void * do_allocate(size_t bytes, size_t align) override
 			{
 				++m_num_allocations;
 				m_bytes_used += bytes;
 				return m_resource->allocate(bytes, align);
 			}
 
-			inline void do_deallocate(void * ptr, size_t const bytes, size_t const align) override
+			inline void do_deallocate(void * ptr, size_t bytes, size_t align) override
 			{
 				--m_num_allocations;
 				m_bytes_used -= bytes;
@@ -107,7 +107,7 @@ namespace ml
 		private:
 			pmr::memory_resource * m_resource;
 			pointer const m_buffer;
-			size_t const m_total_bytes;
+			size_t m_total_bytes;
 
 			size_t m_num_allocations{};
 			size_t m_bytes_used		{};
@@ -139,11 +139,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static void * allocate(size_t const size);
+		ML_NODISCARD static void * allocate(size_t size);
 
-		static void deallocate(void * const addr);
+		static void deallocate(void * addr);
 
-		ML_NODISCARD static void * reallocate(void * const addr, size_t const size);
+		ML_NODISCARD static void * reallocate(void * addr, size_t size);
+
+		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
