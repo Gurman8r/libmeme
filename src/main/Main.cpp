@@ -17,58 +17,7 @@
 #else
 #	define CONF_NAME "release"
 #endif
-#define WINDOW_TITLE "libmeme | " CONF_NAME " | " ML_STRINGIFY(ML_ARCH) "-bit"
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
-	static struct memory_config final : non_copyable
-	{
-		struct embedded_memory_header final
-		{
-			char const name	[sizeof(ML__NAME)	]{ ML__NAME };
-			char const date	[sizeof(ML__DATE)	]{ ML__DATE };
-			char const time	[sizeof(ML__TIME)	]{ ML__TIME };
-			char const url	[sizeof(ML__URL)	]{ ML__URL	};
-		};
-
-		ds::array<byte_t, 16_MiB> m_raw{};
-
-		embedded_memory_header				* m_info;
-		pmr::monotonic_buffer_resource		* m_mono;
-		pmr::unsynchronized_pool_resource	* m_pool;
-		detail::test_resource				* m_test;
-
-		memory_config() noexcept
-		{
-			m_info = new (m_raw.data()) embedded_memory_header{};
-
-			m_mono = new (m_raw.data() + sizeof(*m_info)) pmr::monotonic_buffer_resource
-			{
-				m_raw.data() + sizeof(*m_mono) + sizeof(*m_info),
-				m_raw.size() - sizeof(*m_mono) - sizeof(*m_info)
-			};
-
-			m_pool = new (m_mono->allocate(sizeof(*m_pool)))
-				pmr::unsynchronized_pool_resource{ m_mono };
-
-			m_test = new (m_mono->allocate(sizeof(*m_test)))
-				detail::test_resource{ m_pool, m_raw.data(), m_raw.size() };
-
-			ML_ASSERT(pmr::set_default_resource(m_test));
-			ML_ASSERT(memory_manager::startup(m_test));
-		}
-
-		~memory_config()
-		{
-			m_mono->deallocate(m_test, sizeof(*m_test));
-			m_mono->deallocate(m_pool, sizeof(*m_pool));
-			m_mono->release();
-		}
-
-	} g_memcfg;
-}
+#define WINDOW_TITLE "libmeme | " ML_STRINGIFY(ML_ARCH) "-bit | " CONF_NAME
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -77,6 +26,24 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using namespace ml;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// setup memory
+	static struct memory_config final : non_copyable
+	{
+		ds::array<byte_t, 16._MiB>			m_bytes	{};
+		pmr::monotonic_buffer_resource		m_mono	{ m_bytes.data(), m_bytes.size() };
+		pmr::unsynchronized_pool_resource	m_pool	{ &m_mono };
+		detail::test_resource				m_test	{ &m_pool, m_bytes.data(), m_bytes.size() };
+
+		memory_config()
+		{
+			ML_ASSERT(pmr::set_default_resource(&m_test));
+			ML_ASSERT(memory_manager::startup(&m_test));
+		}
+
+	} g_memcfg;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,16 +73,13 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create window
-	ML_ASSERT(engine::get_window().create
-	(
+	ML_ASSERT(engine::get_window().create(
 		pmr::string{ WINDOW_TITLE },	// title
-		make_video_mode
-		(
+		make_video_mode(
 			vec2i{ 1280, 720 },			// resolution
 			32u							// color depth
 		),
-		make_context_settings
-		(
+		make_context_settings(
 			client_api::opengl,			// api
 			4,							// major version
 			6,							// minor version
@@ -136,7 +100,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// run main script
+	// run script
 	script{ engine::path_to("main.py") }();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -105,11 +105,12 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		private:
-			pmr::memory_resource *	m_resource				;
-			pointer	const			m_buffer				;
-			size_t	const			m_total_bytes			;
-			size_t					m_num_allocations	{}	;
-			size_t					m_bytes_used		{}	;
+			pmr::memory_resource * m_resource;
+			pointer const m_buffer;
+			size_t const m_total_bytes;
+
+			size_t m_num_allocations{};
+			size_t m_bytes_used		{};
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
