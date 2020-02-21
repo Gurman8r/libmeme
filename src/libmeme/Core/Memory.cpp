@@ -71,10 +71,42 @@ namespace ml
 		if (auto const it{ inst.m_records.find(addr) })
 		{
 			// free the allocation
-			inst.m_alloc.deallocate((*it->second).data, (*it->second).size);
+			inst.m_alloc.deallocate(it->second->data, it->second->size);
 
 			// erase the record
 			inst.m_records.erase(it->first);
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void * memory_manager::reallocate(void * const addr, size_t const size)
+	{
+		static auto & inst{ memory_manager::ref() };
+
+		if (size == 0)
+		{
+			deallocate(addr);
+			return nullptr;
+		}
+		else if (!addr)
+		{
+			return allocate(size);
+		}
+		else if (auto const it{ inst.m_records.find(addr) }; !it)
+		{
+			return nullptr;
+		}
+		else if (size <= it->second->size)
+		{
+			return addr;
+		}
+		else
+		{
+			void * temp{ allocate(size) };
+			std::memcpy(temp, it->second->data, it->second->size);
+			deallocate(*it->first);
+			return temp;
 		}
 	}
 

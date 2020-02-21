@@ -1,6 +1,10 @@
 #include <libmeme/Renderer/Image.hpp>
 #include <libmeme/Renderer/GL.hpp>
 
+#define STBI_MALLOC(s)		::ml::memory_manager::allocate(s)
+#define STBI_FREE(p)		::ml::memory_manager::deallocate(p)
+#define STBI_REALLOC(p, s)	::ml::memory_manager::reallocate(p, s)
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 

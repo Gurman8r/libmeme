@@ -143,6 +143,8 @@ namespace ml
 
 		static void deallocate(void * const addr);
 
+		ML_NODISCARD static void * reallocate(void * const addr, size_t const size);
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static inline auto const & get_allocator() noexcept { return cref().m_alloc; }
