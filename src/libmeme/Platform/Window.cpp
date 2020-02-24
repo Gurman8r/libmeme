@@ -82,7 +82,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t flags)
+	bool window::create(cstring const & title, video_mode const & video, context_settings const & context, int32_t flags)
 	{
 		if (m_window)
 		{
@@ -94,14 +94,17 @@ namespace ml
 			return debug::log_error("failed initializing glfw");
 		}
 
-		m_title		= title;
-		m_video		= video;
-		m_flags		= flags;
-		m_context	= context;
+		if (!(m_title = title)) return debug::log_error("");
+
+		if (!(m_video = video)) return debug::log_error("");
+		
+		if (!(m_context = context)) return debug::log_error("");
+		
+		m_flags = flags;
 		
 		// Client API
-		glfwWindowHint(GLFW_CLIENT_API, ([api = m_context.api]() {
-			switch (api)
+		glfwWindowHint(GLFW_CLIENT_API, ([&]() {
+			switch (m_context.api)
 			{
 			case client_api::opengl	: return GLFW_OPENGL_API;
 			case client_api::vulkan	:
@@ -111,8 +114,8 @@ namespace ml
 		})());
 
 		// API Profile
-		glfwWindowHint(GLFW_OPENGL_PROFILE, ([profile = m_context.profile]() {
-			switch (profile)
+		glfwWindowHint(GLFW_OPENGL_PROFILE, ([&]() {
+			switch (m_context.profile)
 			{
 			case client_api::core	: return GLFW_OPENGL_CORE_PROFILE;
 			case client_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
@@ -140,7 +143,7 @@ namespace ml
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
 			m_video.resolution[0],
 			m_video.resolution[1],
-			m_title.c_str(),
+			m_title,
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
 		))))
@@ -250,11 +253,11 @@ namespace ml
 		return set_position((vec2i)(get_desktop_mode().resolution - get_size()) / 2);
 	}
 
-	window & window::set_clipboard(pmr::string const & value)
+	window & window::set_clipboard(cstring const & value)
 	{
 		if (m_window)
 		{
-			glfwSetClipboardString(static_cast<GLFWwindow *>(m_window), value.c_str());
+			glfwSetClipboardString(static_cast<GLFWwindow *>(m_window), value);
 		}
 		return (*this);
 	}
@@ -364,11 +367,11 @@ namespace ml
 		return (*this);
 	}
 
-	window & window::set_title(pmr::string const & value)
+	window & window::set_title(cstring const & value)
 	{
-		if (m_window && !value.empty())
+		if (m_window && value)
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value).c_str());
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value));
 		}
 		return (*this);
 	}

@@ -231,8 +231,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(_DEBUG)
 #	define ML_DEBUG 1
+#   define ML_CONFIGURATION "debug"
 #else
 #	define ML_DEBUG 0
+#   define ML_CONFIGURATION "release"
 #endif
 
 #if (!ML_DEBUG)

@@ -57,8 +57,15 @@ namespace ml
 		return ([&, data = inst.m_alloc.allocate(size)]()
 		{
 			// create the record
-			return (*inst.m_records.insert(data, record{ ++inst.m_index, size, data }).first);
+			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
 		})();
+	}
+
+	ML_NODISCARD void * memory_manager::allocate(size_t count, size_t size)
+	{
+		void * const data{ allocate(count * size) };
+		std::memset(data, 0, count * size);
+		return data;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

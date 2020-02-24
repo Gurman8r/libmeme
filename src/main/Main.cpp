@@ -12,12 +12,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if ML_DEBUG
-#	define CONF_NAME "debug"
-#else
-#	define CONF_NAME "release"
+#ifndef MEMORY_RESERVED
+#define MEMORY_RESERVED 16.0_MiB
 #endif
-#define WINDOW_TITLE "libmeme | " ML_STRINGIFY(ML_ARCH) "-bit | " CONF_NAME
+
+#ifndef WINDOW_TITLE
+#define WINDOW_TITLE ("" ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,15 +33,15 @@ ml::int32_t main()
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
-		ds::array<byte_t, 16._MiB>			m_bytes	{};
-		pmr::monotonic_buffer_resource		m_mono	{ m_bytes.data(), m_bytes.size() };
+		ds::array<byte_t, MEMORY_RESERVED>	m_data	{};
+		pmr::monotonic_buffer_resource		m_mono	{ m_data.data(), m_data.size() };
 		pmr::unsynchronized_pool_resource	m_pool	{ &m_mono };
-		detail::test_resource				m_test	{ &m_pool, m_bytes.data(), m_bytes.size() };
+		detail::test_resource				m_test	{ &m_pool, m_data.data(), m_data.size() };
 
 		memory_config()
 		{
 			ML_ASSERT(pmr::set_default_resource(&m_test));
-			ML_ASSERT(memory_manager::startup(&m_test));
+			ML_ASSERT(memory_manager::set_test_resource(&m_test));
 		}
 
 	} g_memcfg;
@@ -74,7 +75,7 @@ ml::int32_t main()
 
 	// create window
 	ML_ASSERT(engine::get_window().create(
-		pmr::string{ WINDOW_TITLE },	// title
+		WINDOW_TITLE,					// title
 		make_video_mode(
 			vec2i{ 1280, 720 },			// resolution
 			32u							// color depth

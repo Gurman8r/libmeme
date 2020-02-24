@@ -24,6 +24,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD constexpr operator bool() const noexcept
+		{
+			return resolution[0] && resolution[1] && color_depth;
+		}
+
 		ML_NODISCARD constexpr bool operator==(video_mode const & other) const
 		{
 			return (resolution == other.resolution)

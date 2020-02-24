@@ -898,8 +898,7 @@ namespace ml
 			static auto * const testres{ memory_manager::get_testres() };
 
 			// setup memory editor
-			ML_ONCE_CALL
-			{
+			ML_ONCE_CALL{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
 				m_memory.Cols				= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
@@ -924,50 +923,76 @@ namespace ml
 				ImGui::Checkbox("read only", &m_memory.ReadOnly);
 				ImGui::Separator();
 
-				// goto
-				if (ImGui::BeginMenu("goto"))
+				// begin / end
+				if (ImGui::Button("begin")) highlight_memory(testres->begin());
+				if (ImGui::Button("end")) highlight_memory(testres->end() - sizeof(void *));
+				ImGui::Separator();
+
+				// records
+				ImGui::PushItemWidth(256);
+				static memory_manager::record const * selected_record{};
+				char selected_address[20] = "memory records";
+				if (selected_record)
 				{
-					auto jump_item = [&](cstring label, auto && v)
-					{
-						if (!ImGui::MenuItem(label)) return;
-						highlight_memory(ML_FWD(v));
-						ImGui::CloseCurrentPopup();
-					};
-					jump_item("begin", &testres->front());
-					jump_item("end", &testres->back());
-					ImGui::Separator();
-					jump_item("demo (this)", this);
-					ImGui::Separator();
-					jump_item("engine::context", engine::get_context());
-					jump_item("editor::context", editor::get_context());
-					ImGui::Separator();
-					jump_item("ImGuiContext", editor::get_imgui_context());
-					ImGui::EndMenu();
+					std::sprintf(selected_address, "%p", selected_record->data);
 				}
+				if (ImGui::BeginCombo("##records", selected_address, 0))
+				{
+					static auto const & records{ memory_manager::get_records() };
+
+					auto const width{ ImGui::GetContentRegionAvailWidth() };
+
+					ImGui::Columns(3);
+					ImGui::SetColumnWidth(-1, width * 0.5f);
+					ImGui::Text("address"); ImGui::NextColumn();
+					ImGui::SetColumnWidth(-1, width * 0.25f);
+					ImGui::Text("index"); ImGui::NextColumn();
+					ImGui::SetColumnWidth(-1, width * 0.25f);
+					ImGui::Text("size"); ImGui::NextColumn();
+					ImGui::Separator();
+					records.for_each([&](auto, memory_manager::record const & rec)
+					{
+						ML_ImGui_ScopeID(ML_ADDRESSOF(&rec));
+						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
+						bool const pressed{ ImGui::Selectable(addr, (size_t)rec.data == m_memory.GotoAddr)
+						}; ImGui::NextColumn();
+						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
+						ImGui::TextDisabled("%u", rec.size); ImGui::NextColumn();
+						if (pressed)
+						{
+							selected_record = &rec;
+							highlight_memory(rec.data, rec.size);
+						}
+
+					});
+					ImGui::Columns(1);
+					ImGui::EndCombo();
+				}
+				ImGui::PopItemWidth();
 				ImGui::Separator();
 
 				// progress
 				char progress[32] = "";
 				std::sprintf(progress, "%u / %u (%.2f%%)",
-					(uint32_t)testres->used(),
-					(uint32_t)testres->size(),
+					(uint32_t)testres->used_bytes(),
+					(uint32_t)testres->total_bytes(),
 					testres->percent()
 				);
 				ImGui::ProgressBar(testres->fraction(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
-					ImGui::Text("allocations: %u", testres->count());
-					ImGui::Text("total:       %u", testres->size());
-					ImGui::Text("in use:      %u", testres->used());
-					ImGui::Text("available:   %u", testres->free());
+					ImGui::Text("allocations: %u", testres->num_allocations());
+					ImGui::Text("total:       %u", testres->total_bytes());
+					ImGui::Text("in use:      %u", testres->used_bytes());
+					ImGui::Text("available:   %u", testres->free_bytes());
 				});
 				ImGui::Separator();
 
 				ImGui::EndMenuBar();
 			}
 
-			// memory assetss
-			m_memory.DrawContents(testres->data(), testres->size(), testres->addr());
+			// memory content
+			m_memory.DrawContents(testres->data(), testres->total_bytes(), testres->addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -26,41 +26,41 @@ namespace ml
 
 	bool ml_python::startup(fs::path const & name, fs::path const & home)
 	{
-		s_py_name = name;
-		s_py_home = home;
-		if (!s_py_init && !s_py_name.empty() && !s_py_home.empty())
-		{
-			Py_SetProgramName(s_py_name.c_str());
+		if (s_py_init) return false;
+		if ((s_py_name = name).empty()) return false;
+		if ((s_py_home = home).empty()) return false;
 
-			Py_SetPythonHome(s_py_home.c_str());
+		Py_SetProgramName(s_py_name.c_str());
+		Py_SetPythonHome(s_py_home.c_str());
+		Py_InitializeEx(Py_DontWriteBytecodeFlag);
 
-			Py_InitializeEx(Py_DontWriteBytecodeFlag);
+		static PyMemAllocatorEx mem_alloc{
+			nullptr,
+			[](auto, size_t s)				{ return memory_manager::allocate(s); },
+			[](auto, size_t n, size_t s)	{ return memory_manager::allocate(n, s); },
+			[](auto, void * p, size_t s)	{ return memory_manager::reallocate(p, s); },
+			[](auto, void * p)				{ return memory_manager::deallocate(p); },
+		};
+		//PyMem_SetAllocator(PYMEM_DOMAIN_MEM, &mem_alloc);
+		//PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, &mem_alloc);
 
-			s_py_init = true;
-
-			return true;
-		}
-		return false;
+		return (s_py_init = true);
 	}
 
 	bool ml_python::shutdown()
 	{
-		if (s_py_init)
-		{
-			Py_Finalize();
+		if (!s_py_init) return false;
 
-			s_py_init = false;
+		Py_Finalize();
 
-			return true;
-		}
-		return false;
+		return !(s_py_init = false);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int32_t ml_python::do_string(cstring value)
 	{
-		return (value && s_py_init) ? PyRun_SimpleString(value) : 0;
+		return (s_py_init && value) ? PyRun_SimpleString(value) : 0;
 	}
 
 	int32_t ml_python::do_string(pmr::string const & value)
@@ -70,7 +70,8 @@ namespace ml
 
 	int32_t ml_python::do_file(fs::path const & path)
 	{
-		if (auto o{ FS::read_file(path.string()) }; o && !o->empty())
+		if (!s_py_init) return 0;
+		if (auto const o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}
@@ -117,8 +118,8 @@ namespace ml::python_embedded
 			.def_static("print",	[](cstring s) { std::cout << s; })
 			.def_static("printl",	[](cstring s) { std::cout << s << '\n'; })
 			.def_static("clear",	[]() { return debug::clear(); })
-			.def_static("exit",		[]() { return debug::exit(0); })
-			.def_static("pause",	[]() { return debug::pause(0); })
+			.def_static("exit",		[]() { return debug::exit(); })
+			.def_static("pause",	[]() { return debug::pause(); })
 			.def_static("info",		[](cstring s) { return debug::log_info(s); })
 			.def_static("warning",	[](cstring s) { return debug::log_warning(s); })
 			.def_static("error",	[](cstring s) { return debug::log_error(s); });

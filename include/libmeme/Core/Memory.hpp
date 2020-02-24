@@ -44,13 +44,13 @@ namespace ml
 
 			inline const_pointer const data() const noexcept { return m_buffer; }
 
-			inline size_t size() const noexcept { return m_total_bytes; }
+			inline size_t num_allocations() const noexcept { return m_num_allocations; }
 
-			inline size_t count() const noexcept { return m_num_allocations; }
+			inline size_t total_bytes() const noexcept { return m_total_bytes; }
 
-			inline size_t used() const noexcept { return m_bytes_used; }
+			inline size_t used_bytes() const noexcept { return m_bytes_used; }
 
-			inline size_t free() const noexcept { return m_total_bytes - m_bytes_used; }
+			inline size_t free_bytes() const noexcept { return m_total_bytes - m_bytes_used; }
 
 			inline float_t fraction() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
 
@@ -107,7 +107,7 @@ namespace ml
 		private:
 			pmr::memory_resource * m_resource;
 			pointer const m_buffer;
-			size_t m_total_bytes;
+			size_t const m_total_bytes;
 
 			size_t m_num_allocations{};
 			size_t m_bytes_used		{};
@@ -132,7 +132,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool startup(detail::test_resource * res) noexcept
+		static inline bool set_test_resource(detail::test_resource * res) noexcept
 		{
 			return res && (*res) && (&(ref().m_testres = res));
 		}
@@ -140,6 +140,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static void * allocate(size_t size);
+
+		ML_NODISCARD static void * allocate(size_t count, size_t size);
 
 		static void deallocate(void * addr);
 

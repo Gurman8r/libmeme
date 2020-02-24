@@ -72,7 +72,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool create(
-			pmr::string const & title, 
+			cstring const & title, 
 			video_mode const & display,
 			context_settings const & context,
 			int32_t flags
@@ -102,7 +102,7 @@ namespace ml
 
 		window & set_centered();
 		
-		window & set_clipboard(pmr::string const & value);
+		window & set_clipboard(cstring const & value);
 		
 		window & set_cursor(void * value);
 		
@@ -120,7 +120,7 @@ namespace ml
 		
 		window & set_size(vec2i const & value);
 		
-		window & set_title(pmr::string const & value);
+		window & set_title(cstring const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -219,7 +219,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_flags() const -> int32_t const & { return m_flags; }
 
-		ML_NODISCARD inline auto get_title() const -> pmr::string const & { return m_title; }
+		ML_NODISCARD inline auto get_title() const -> cstring const & { return m_title; }
 
 		ML_NODISCARD inline auto get_video_mode() const -> video_mode const & { return m_video; }
 
@@ -245,7 +245,7 @@ namespace ml
 		void * 				m_window;
 		void * 				m_monitor;
 		void * 				m_share;
-		pmr::string			m_title;
+		cstring				m_title;
 		video_mode			m_video;
 		context_settings	m_context;
 		int32_t				m_flags;
