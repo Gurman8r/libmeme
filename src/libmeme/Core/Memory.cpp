@@ -63,7 +63,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD void * memory_manager::allocate(size_t count, size_t size)
+	void * memory_manager::allocate(size_t count, size_t size)
 	{
 		return std::memset(allocate(count * size), 0, count * size);
 	}

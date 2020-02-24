@@ -30,28 +30,28 @@ namespace ml
 		if ((s_py_name = name).empty()) return false;
 		if ((s_py_home = home).empty()) return false;
 
-		Py_SetProgramName(s_py_name.c_str());
-		Py_SetPythonHome(s_py_home.c_str());
-		Py_InitializeEx(Py_DontWriteBytecodeFlag);
-
-		static PyMemAllocatorEx mem_alloc{
+		static PyObjectArenaAllocator alloc{
 			nullptr,
-			[](auto, size_t s)				{ return memory_manager::allocate(s); },
-			[](auto, size_t n, size_t s)	{ return memory_manager::allocate(n, s); },
-			[](auto, void * p, size_t s)	{ return memory_manager::reallocate(p, s); },
-			[](auto, void * p)				{ return memory_manager::deallocate(p); },
+			[](auto, size_t s) { return pmr::get_default_resource()->allocate(s); },
+			[](auto, void * p, size_t s) { return pmr::get_default_resource()->deallocate(p, s); }
 		};
-		//PyMem_SetAllocator(PYMEM_DOMAIN_MEM, &mem_alloc);
-		//PyMem_SetAllocator(PYMEM_DOMAIN_OBJ, &mem_alloc);
+		PyObject_SetArenaAllocator(&alloc);
+
+		Py_SetProgramName(s_py_name.c_str());
+		
+		Py_SetPythonHome(s_py_home.c_str());
+		
+		Py_InitializeEx(Py_DontWriteBytecodeFlag);
 
 		return (s_py_init = true);
 	}
 
 	bool ml_python::shutdown()
 	{
+		Py_IsInitialized();
 		if (!s_py_init) return false;
 
-		Py_Finalize();
+		Py_FinalizeEx();
 
 		return !(s_py_init = false);
 	}
