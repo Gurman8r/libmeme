@@ -61,6 +61,8 @@ namespace ml
 		})();
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	ML_NODISCARD void * memory_manager::allocate(size_t count, size_t size)
 	{
 		void * const data{ allocate(count * size) };
@@ -91,6 +93,8 @@ namespace ml
 	{
 		return reallocate(addr, size, size);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void * memory_manager::reallocate(void * addr, size_t oldsz, size_t newsz)
 	{

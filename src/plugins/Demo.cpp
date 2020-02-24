@@ -938,24 +938,20 @@ namespace ml
 				}
 				if (ImGui::BeginCombo("##records", selected_address, 0))
 				{
-					static auto const & records{ memory_manager::get_records() };
-
 					auto const width{ ImGui::GetContentRegionAvailWidth() };
-
 					ImGui::Columns(3);
-					ImGui::SetColumnWidth(-1, width * 0.5f);
-					ImGui::Text("address"); ImGui::NextColumn();
-					ImGui::SetColumnWidth(-1, width * 0.25f);
-					ImGui::Text("index"); ImGui::NextColumn();
-					ImGui::SetColumnWidth(-1, width * 0.25f);
-					ImGui::Text("size"); ImGui::NextColumn();
+					ImGui::SetColumnWidth(-1, width * 0.50f); ImGui::Text("address");
+					ImGui::NextColumn();
+					ImGui::SetColumnWidth(-1, width * 0.25f); ImGui::Text("index");
+					ImGui::NextColumn();
+					ImGui::SetColumnWidth(-1, width * 0.25f); ImGui::Text("size");
+					ImGui::NextColumn();
 					ImGui::Separator();
-					records.for_each([&](auto, memory_manager::record const & rec)
+					for (auto const & rec : memory_manager::get_records().values())
 					{
 						ML_ImGui_ScopeID(ML_ADDRESSOF(&rec));
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
-						bool const pressed{ ImGui::Selectable(addr, (size_t)rec.data == m_memory.GotoAddr)
-						}; ImGui::NextColumn();
+						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.size); ImGui::NextColumn();
 						if (pressed)
@@ -963,8 +959,7 @@ namespace ml
 							selected_record = &rec;
 							highlight_memory(rec.data, rec.size);
 						}
-
-					});
+					}
 					ImGui::Columns(1);
 					ImGui::EndCombo();
 				}

@@ -219,6 +219,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline key_storage const & keys() const & noexcept
+		{
+			return m_pair.first;
+		}
+
+		ML_NODISCARD inline value_storage const & values() const & noexcept
+		{
+			return m_pair.second;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD inline size_type capacity() const noexcept
 		{
 			return m_pair.first.capacity();
@@ -418,8 +430,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class It, class Fn
-		> inline It for_each(It first, It last, Fn fn)
+		template <class Fn
+		> inline auto for_each(const_key_iterator first, const_key_iterator last, Fn fn)
 		{
 			for (; first != last; ++first)
 			{
@@ -429,45 +441,45 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, Fn fn)
+		> inline auto for_each(const_key_iterator first, Fn fn)
 		{
-			return this->for_each<const_key_iterator>(first, m_pair.first.end(), fn);
+			return this->for_each(first, m_pair.first.cend(), fn);
 		}
 
 		template <class Fn
-		> inline const_key_iterator for_each(Fn fn)
-		{
-			return this->for_each(m_pair.first.begin(), fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class It, class Fn
-		> inline It for_each(It first, It last, Fn fn) const
-		{
-			for (; first != last; ++first)
-			{
-				std::invoke(fn, *first, *this->fetch(first));
-			}
-			return first;
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each(const_key_iterator first, Fn fn) const
-		{
-			return this->for_each<const_key_iterator>(first, m_pair.first.cend(), fn);
-		}
-
-		template <class Fn
-		> inline const_key_iterator for_each(Fn fn) const
+		> inline auto for_each(Fn fn)
 		{
 			return this->for_each(m_pair.first.cbegin(), fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class It, class Fn
-		> inline It for_each_n(It first, ptrdiff_t count, Fn fn)
+		template <class Fn
+		> inline auto for_each(const_key_iterator first, const_key_iterator last, Fn fn) const
+		{
+			for (; first != last; ++first)
+			{
+				std::invoke(fn, *first, *this->fetch(first));
+			}
+			return first;
+		}
+
+		template <class Fn
+		> inline auto for_each(const_key_iterator first, Fn fn) const
+		{
+			return this->for_each(first, m_pair.first.cend(), fn);
+		}
+
+		template <class Fn
+		> inline auto for_each(Fn fn) const
+		{
+			return this->for_each(m_pair.first.cbegin(), fn);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> inline auto for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn)
 		{
 			if (0 < count)
 			{
@@ -481,20 +493,20 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn)
+		> inline auto for_each_n(ptrdiff_t count, Fn fn)
 		{
-			return this->for_each_n<const_key_iterator>(m_pair.first.begin(), count, fn);
+			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class It, class Fn
-		> inline It for_each_n(It first, ptrdiff_t count, Fn fn) const
+		template <class Fn
+		> inline auto for_each_n(const_key_iterator first, ptrdiff_t count, Fn fn) const
 		{
 			if (0 < count)
 			{
 				do {
-					std::invoke(fn, *first, *fetch(first));
+					std::invoke(fn, *first, *this->fetch(first));
 					--count;
 					++first;
 				} while (0 < count);
@@ -503,9 +515,9 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline const_key_iterator for_each_n(ptrdiff_t count, Fn fn) const
+		> inline auto for_each_n(ptrdiff_t count, Fn fn) const
 		{
-			return this->for_each_n<const_key_iterator>(m_pair.first.cbegin(), count, fn);
+			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
