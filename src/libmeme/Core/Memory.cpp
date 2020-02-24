@@ -65,9 +65,7 @@ namespace ml
 
 	ML_NODISCARD void * memory_manager::allocate(size_t count, size_t size)
 	{
-		void * const data{ allocate(count * size) };
-		std::memset(data, 0, count * size);
-		return data;
+		return std::memset(allocate(count * size), 0, count * size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
