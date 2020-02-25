@@ -20,7 +20,7 @@ namespace ml
 		struct config final : trackable, non_copyable
 		{
 			pmr::string			api_version		{}			; // 
-			fs::path			style			{}			; // 
+			pmr::string			style			{}			; // 
 			cstring				ini_file		{}			; // 
 			cstring				log_file		{}			; // 
 		};

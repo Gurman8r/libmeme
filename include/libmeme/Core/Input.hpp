@@ -256,7 +256,7 @@ namespace ml::impl
 namespace ml
 {
 	template <class T, class ... Args
-	> ML_NODISCARD static inline T input(Args && ... args)
+	> ML_NODISCARD static inline T input(Args && ... args) noexcept
 	{
 		return std::invoke(impl::input<T>{}, ML_FWD(args)...);
 	}

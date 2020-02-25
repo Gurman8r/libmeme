@@ -772,108 +772,8 @@ namespace ml
 			// SHOW FIELD
 			auto show_field = [&](cstring label, auto const & value)
 			{
-				ML_ImGui_ScopeID(label);
-				
-				using V = typename std::decay_t<decltype(value)>;
-				static constexpr auto info{ typeof_v<V> };
-				static constexpr auto type{ nameof<>::filter_all(info.name()) };
-
-				ImGui::AlignTextToFramePadding();
-				ImGui::TreeNodeEx("field node",
-					ImGuiTreeNodeFlags_Leaf |
-					ImGuiTreeNodeFlags_NoTreePushOnOpen |
-					ImGuiTreeNodeFlags_Bullet,
-					label
-				);
-
-				gui::tooltip(pmr::string{ type });
-
-				if (ImGui::BeginPopupContextItem())
-				{
-					gui::help_marker("WIP");
-					ImGui::EndPopup();
-				}
-				ImGui::NextColumn();
-				ImGui::SetNextItemWidth(-1);
-				show_value(value);
-				ImGui::NextColumn();
-			};
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			// SHOW COMPONENT
-			auto show_component = [&](auto & c)
-			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(&c));
-
-				using C = typename std::decay_t<decltype(c)>;
-				static constexpr auto info{ typeof_v<C> };
-				static constexpr auto type{ nameof<>::filter_all(info.name()) };
-
-				ImGui::AlignTextToFramePadding();
-				bool const node_open{ ImGui::TreeNode("component node",
-					"[%u] %.*s",
-					entity_traits::component_id<C>(),
-					type.size(), type.data()
-				) };
-
-				gui::tooltip(pmr::string{ info.name() });
-
-				if (ImGui::BeginPopupContextItem())
-				{
-					gui::help_marker("WIP");
-					ImGui::EndPopup();
-				}
-				ImGui::NextColumn();
-
-				ImGui::AlignTextToFramePadding();
-				show_value(&c);
-				gui::tooltip("address");
-				ImGui::NextColumn();
-
-				if (node_open)
-				{
-					show_field("size", sizeof(C));
-					show_field("align", alignof(C));
-					ImGui::TreePop();
-				}
-			};
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			// SHOW ENTITY
-			auto show_entity = [&](size_t const e)
-			{
-				ML_ImGui_ScopeID(static_cast<int32_t>(e));
-
-				ImGui::AlignTextToFramePadding();
-				bool const node_open{ ImGui::TreeNode("entity node",
-					"entity_%u", e
-				) };
-				if (ImGui::BeginPopupContextItem())
-				{
-					gui::help_marker("WIP");
-					ImGui::EndPopup();
-				}
-				ImGui::NextColumn();
-
-				ImGui::AlignTextToFramePadding();
-				ImGui::Text("");
-				ImGui::NextColumn();
-
-				if (node_open)
-				{
-					show_field("index", e);
-					show_field("alive", m_ecs.is_alive(e));
-					show_field("signature", m_ecs.get_signature(e));
-
-					m_ecs.for_components(e, [&](auto & c)
-					{
-						ImGui::Separator();
-						show_component(c);
-					});
-					ImGui::TreePop();
-				}
+				ImGui::Selectable(label); ImGui::NextColumn();
+				show_value(value); ImGui::NextColumn();
 			};
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -887,7 +787,47 @@ namespace ml
 			ImGui::Separator();
 			m_ecs.for_entities([&](size_t const e)
 			{
-				show_entity(e);
+				ML_ImGui_ScopeID(static_cast<int32_t>(e));
+				ImGui::AlignTextToFramePadding();
+				
+				bool const e_open{ ImGui::TreeNode(
+					"entity node", "entity_%u", e
+				) }; ImGui::NextColumn();
+
+				ImGui::AlignTextToFramePadding();
+				show_value(e); gui::tooltip("index");
+				ImGui::NextColumn();
+
+				if (e_open)
+				{
+					m_ecs.for_components(e, [&](auto & c)
+					{
+						ImGui::Separator();
+						ML_ImGui_ScopeID(&c);
+						using C = typename std::decay_t<decltype(c)>;
+						static constexpr auto cname{ nameof_v<C> };
+
+						bool const c_open{ ImGui::TreeNode(
+							"component node", "[%u] %.*s",
+							entity_traits::component_id<C>(),
+							cname.size(), cname.data()
+						) }; ImGui::NextColumn();
+
+						ImGui::AlignTextToFramePadding();
+						show_value(&c); gui::tooltip("address");
+						ImGui::NextColumn();
+
+						if (c_open)
+						{
+							show_field("size", sizeof(C));
+							show_field("alignment", alignof(C));
+
+							ImGui::TreePop();
+						}
+					});
+
+					ImGui::TreePop();
+				}
 			});
 			ImGui::Columns(1);
 			ImGui::Separator();

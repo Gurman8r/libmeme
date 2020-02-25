@@ -7,9 +7,9 @@
 
 namespace ml
 {
-	struct ML_EDITOR_API style_loader : non_copyable
+	struct ML_EDITOR_API style_loader final : non_copyable
 	{
-		style_loader();
+		style_loader() noexcept = default;
 
 		bool operator()(fs::path const & path);
 	};

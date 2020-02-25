@@ -67,7 +67,7 @@ ml::int32_t main()
 	// configure editor
 	auto & editor_cfg			= editor::get_config();
 	editor_cfg.api_version		= "#version 130";
-	editor_cfg.style			= engine::path_to("assets/styles/obsidian.style");
+	editor_cfg.style			= "assets/styles/obsidian.style";
 	editor_cfg.ini_file			= nullptr;
 	editor_cfg.log_file			= nullptr;
 

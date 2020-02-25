@@ -110,7 +110,7 @@ namespace ml::util::impl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch, class T, class = std::enable_if_t<std::is_integral_v<T>>
-	> ML_NODISCARD static inline pmr::basic_string<Ch> integral_to_string(T const value)
+	> ML_NODISCARD static inline pmr::basic_string<Ch> integral_to_string(T const value) noexcept
 	{
 		using		U		= typename std::make_unsigned_t<T>;
 		Ch			buf[21]	{};
@@ -156,7 +156,7 @@ namespace ml::util::impl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch, class T, class = std::enable_if_t<std::is_floating_point_v<T>>
-	> ML_NODISCARD static inline pmr::basic_string<Ch> floating_point_to_string(T const value)
+	> ML_NODISCARD static inline pmr::basic_string<Ch> floating_point_to_string(T const value) noexcept
 	{
 		auto const len{ static_cast<size_t>(_CSTD _scprintf("%f", value)) };
 		pmr::basic_string<Ch> str{ len, '\0', pmr::polymorphic_allocator<byte_t>{} };
