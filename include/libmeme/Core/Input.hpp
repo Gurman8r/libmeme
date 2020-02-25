@@ -3,7 +3,7 @@
 
 #include <libmeme/Core/Debug.hpp>
 
-namespace ml
+namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -263,6 +263,15 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+namespace ml
+{
+	template <class T, class ... Args
+	> ML_NODISCARD static inline T input(Args && ... args)
+	{
+		return std::invoke(impl::input<T>{}, ML_FWD(args)...);
+	}
 }
 
 #endif // !_ML_INPUT_HPP_

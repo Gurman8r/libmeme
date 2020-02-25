@@ -95,17 +95,15 @@ namespace ml::util::impl
 	template <class T, class Fn, class ... Args
 	> ML_NODISCARD static inline std::optional<T> string_convert(cstring ptr, Fn && fn, Args && ... args) noexcept
 	{
-		int32_t & err = errno;
 		char * end{};
-		err = 0;
 		auto const ans{ std::invoke(ML_FWD(fn), ptr, &end, ML_FWD(args)...) };
-		if ((ptr == end) || err == ERANGE)
+		if (!(*end != '\0' || end == ptr))
 		{
-			return std::nullopt;
+			return std::make_optional<T>(static_cast<T>(ans));
 		}
 		else
 		{
-			return std::make_optional<T>(static_cast<T>(ans));
+			return std::nullopt;
 		}
 	}
 
@@ -114,11 +112,11 @@ namespace ml::util::impl
 	template <class Ch, class T, class = std::enable_if_t<std::is_integral_v<T>>
 	> ML_NODISCARD static inline pmr::basic_string<Ch> integral_to_string(T const value)
 	{
-		using		U = typename std::make_unsigned_t<T>;
-		Ch			buf[21]{};
-		Ch * const	end{ _STD end(buf) };
-		Ch *		next{ end };
-		auto const	uval{ static_cast<U>(value) };
+		using		U		= typename std::make_unsigned_t<T>;
+		Ch			buf[21]	{};
+		Ch * const	end		{ _STD end(buf) };
+		Ch *		next	{ end };
+		auto const	uval	{ static_cast<U>(value) };
 
 		auto uint_to_string = [](Ch * next, auto uval)
 		{
