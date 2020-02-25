@@ -86,19 +86,19 @@ namespace ml
 	{
 		if (m_window)
 		{
-			return debug::log_error("window is already open");
+			return debug::log::error("window is already open");
 		}
 
 		if (!glfwInit())
 		{
-			return debug::log_error("failed initializing glfw");
+			return debug::log::error("failed initializing glfw");
 		}
 
-		if (!(m_title = title)) return debug::log_error("");
+		if (!(m_title = title)) return debug::log::error("");
 
-		if (!(m_video = video)) return debug::log_error("");
+		if (!(m_video = video)) return debug::log::error("");
 		
-		if (!(m_context = context)) return debug::log_error("");
+		if (!(m_context = context)) return debug::log::error("");
 		
 		m_flags = flags;
 		
@@ -148,7 +148,7 @@ namespace ml
 			static_cast<GLFWwindow *>(m_share)
 		))))
 		{
-			return debug::log_error("failed creating glfw window");
+			return debug::log::error("failed creating glfw window");
 		}
 
 		make_context_current();

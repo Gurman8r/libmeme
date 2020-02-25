@@ -3,17 +3,17 @@
 
 #include <libmeme/Core/Utility.hpp>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// STRING TRAITS
 namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch
-	> struct is_char : std::bool_constant<std::_Is_any_of_v<Ch
-		, char
-		, wchar_t
-		, char16_t
-		, char32_t
-	>> {};
+	> struct is_char : std::bool_constant<
+		std::_Is_any_of_v<Ch, char, wchar_t, char16_t, char32_t>
+	> {};
 
 	template <class Ch
 	> ML_USING is_char_t = typename _ML_UTIL is_char<Ch>;
@@ -24,15 +24,37 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char
-	> struct is_string : std::bool_constant<is_char_v<Ch> && std::_Is_any_of_v<T
-		, cstring
-		, cwstring
-		, c16string
-		, c32string
-		, std::basic_string<Ch, std::char_traits<Ch>, std::allocator<Ch>>
-		, pmr::basic_string<Ch>
-		, std::basic_string_view<Ch>
-	>> {};
+	> struct is_cstring : std::bool_constant<
+		_ML_UTIL is_char_v<Ch> &&
+		std::is_convertible_v<T const &, Ch const *>
+	> {};
+
+	template <class T, class Ch = char
+	> ML_USING is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
+
+	template <class T, class Ch = char
+	> static constexpr bool is_cstring_v{ _ML_UTIL is_cstring_t<T, Ch>::value };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Ch = char, class Traits = std::char_traits<Ch>
+	> struct is_string_view : std::bool_constant<
+		_ML_UTIL is_cstring_v<T, Ch> ||
+		std::is_convertible_v<T const &, std::basic_string_view<Ch, Traits>>
+	> {};
+
+	template <class T, class Ch = char
+	> ML_USING is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
+
+	template <class T, class Ch = char
+	> static constexpr bool is_string_view_v{ _ML_UTIL is_string_view_t<T, Ch>::value };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Ch = char
+	> struct is_string : std::bool_constant<
+		std::_Is_any_of_v<T, std::basic_string<Ch>, pmr::basic_string<Ch>>
+	> {};
 
 	template <class T, class Ch = char
 	> ML_USING is_string_t = typename _ML_UTIL is_string<T, Ch>;
@@ -40,6 +62,129 @@ namespace ml::util
 	template <class T, class Ch = char
 	> static constexpr bool is_string_v{ _ML_UTIL is_string_t<T, Ch>::value };
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// STRING IMPL
+namespace ml::util::impl
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline auto c_string(Str && str) noexcept
+	{
+		if constexpr (is_cstring_v<decltype(str)>)
+		{
+			return ML_FWD(str);
+		}
+		else if constexpr (is_string_v<Str>)
+		{
+			return ML_FWD(str).c_str();
+		}
+		else
+		{
+			static_assert(is_string_view_v<Str>);
+			return c_string(pmr::string{ ML_FWD(str) });
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class Fn, class ... Args
+	> ML_NODISCARD static inline std::optional<T> string_convert(cstring ptr, Fn && fn, Args && ... args) noexcept
+	{
+		int32_t & err = errno;
+		char * end{};
+		err = 0;
+		auto const ans{ std::invoke(ML_FWD(fn), ptr, &end, ML_FWD(args)...) };
+		if ((ptr == end) || err == ERANGE)
+		{
+			return std::nullopt;
+		}
+		else
+		{
+			return std::make_optional<T>(static_cast<T>(ans));
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Ch, class T, class = std::enable_if_t<std::is_integral_v<T>>
+	> ML_NODISCARD static inline pmr::basic_string<Ch> integral_to_string(T const value)
+	{
+		using		U = typename std::make_unsigned_t<T>;
+		Ch			buf[21]{};
+		Ch * const	end{ _STD end(buf) };
+		Ch *		next{ end };
+		auto const	uval{ static_cast<U>(value) };
+
+		auto uint_to_string = [](Ch * next, auto uval)
+		{
+			if constexpr (sizeof(U) > 4)
+			{
+				while (uval > 0xFFFFFFFFU)
+				{
+					auto chunk{ static_cast<unsigned long>(uval % 1000000000) };
+					uval /= 1000000000;
+					for (int32_t i = 0; i != 9; ++i)
+					{
+						*--next = static_cast<Ch>('0' + chunk % 10);
+						chunk /= 10;
+					}
+				}
+			}
+			auto trunc{ static_cast<unsigned long>(uval) };
+			do {
+				*--next = static_cast<Ch>('0' + trunc % 10);
+				trunc /= 10;
+			} while (trunc != 0);
+			return next;
+		};
+
+		if (value < 0)
+		{
+			next = uint_to_string(next, 0 - uval);
+			*--next = '-';
+		}
+		else
+		{
+			next = uint_to_string(next, uval);
+		}
+		return pmr::basic_string<Ch>{ next, end };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Ch, class T, class = std::enable_if_t<std::is_floating_point_v<T>>
+	> ML_NODISCARD static inline pmr::basic_string<Ch> floating_point_to_string(T const value)
+	{
+		auto const len{ static_cast<size_t>(_CSTD _scprintf("%f", value)) };
+		pmr::basic_string<Ch> str{ len, '\0', pmr::polymorphic_allocator<byte_t>{} };
+		_CSTD sprintf_s(str.data(), len + 1, "%f", value);
+		return str;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Arg0, class ... Args
+	> inline std::stringstream sink_stream(Arg0 && arg0, Args && ... args) noexcept
+	{
+		std::stringstream ss{};
+		ss << ML_FWD(arg0) << '\n';
+		int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
+		return ss;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// STRING UTILITY
+namespace ml::util
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_NODISCARD static inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
@@ -205,8 +350,8 @@ namespace ml::util
 		case hash("off"):
 		case hash("no"):
 			return true;
-
-		default: return false;
+		default:
+			return false;
 		}
 	}
 
@@ -248,148 +393,147 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool to_bool(pmr::string const & value, bool dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<bool> to_bool(Str && str) noexcept
 	{
-		switch (hash(to_lower(value)))
+		switch (hash(to_lower(ML_FWD(str))))
 		{
 		case hash("1"):
 		case hash("true"):
 		case hash("on"):
 		case hash("yes"):
-			return true;
-
+			return std::make_optional(true);
 		case hash("0"):
 		case hash("false"):
 		case hash("off"):
 		case hash("no"):
-			return false;
-
+			return std::make_optional(false);
 		default:
-			return dv;
+			return std::nullopt;
 		}
 	}
 
-	ML_NODISCARD static inline int32_t to_i8(pmr::string const & value, int8_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<int8_t> to_i8(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<int8_t>(std::stoi(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<int8_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	ML_NODISCARD static inline int32_t to_i16(pmr::string const & value, int16_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<int16_t> to_i16(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<int16_t>(std::stoi(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<int16_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	ML_NODISCARD static inline int32_t to_i32(pmr::string const & value, int32_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<int32_t> to_i32(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<int32_t>(std::stoi(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<int32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	ML_NODISCARD static inline int64_t to_i64(pmr::string const & value, int64_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<int64_t> to_i64(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<int64_t>(std::stoll(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<int64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoll, base);
 	}
 
-	ML_NODISCARD static inline uint8_t to_u8(pmr::string const & value, uint8_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<uint8_t> to_u8(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<uint8_t>(std::stoul(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<uint8_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	ML_NODISCARD static inline uint16_t to_u16(pmr::string const & value, uint16_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<uint16_t> to_u16(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<uint16_t>(std::stoul(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<uint16_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	ML_NODISCARD static inline uint32_t to_u32(pmr::string const & value, uint32_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<uint32_t> to_u32(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<uint32_t>(std::stoul(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<uint32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	ML_NODISCARD static inline uint64_t to_u64(pmr::string const & value, uint64_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<uint64_t> to_u64(Str && str, int32_t base = 10) noexcept
 	{
-		ML_TRY { return static_cast<uint64_t>(std::stoull(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<uint64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoull, base);
 	}
 
-	ML_NODISCARD static inline float32_t to_f32(pmr::string const & value, float32_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<float32_t> to_f32(Str && str) noexcept
 	{
-		ML_TRY { return static_cast<float32_t>(std::stof(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<float32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtod);
 	}
 
-	ML_NODISCARD static inline float64_t to_f64(pmr::string const & value, float64_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<float64_t> to_f64(Str && str) noexcept
 	{
-		ML_TRY { return static_cast<float64_t>(std::stod(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<float64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtod);
 	}
 
-	ML_NODISCARD static inline float80_t to_f80(pmr::string const & value, float80_t dv = 0) noexcept
+	template <class Str = pmr::string
+	> ML_NODISCARD static inline std::optional<float80_t> to_f80(Str && str) noexcept
 	{
-		ML_TRY { return static_cast<float80_t>(std::stold(value.c_str())); }
-		ML_CATCH (std::invalid_argument &) { return dv; }
+		return impl::string_convert<float80_t>(impl::c_string(ML_FWD(str)), &_CSTD strtold);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline pmr::string to_string(int8_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int8_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int16_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int16_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int32_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(int64_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint8_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint8_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint16_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint16_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint32_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(uint64_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float32_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float64_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::floating_point_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float64_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float32_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::floating_point_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float80_t value) noexcept
+	ML_NODISCARD static inline pmr::string to_string(float80_t const value) noexcept
 	{
-		return std::to_string(value).c_str();
+		return impl::floating_point_to_string<char>(value);
 	}
 
 	template <class T
@@ -397,24 +541,15 @@ namespace ml::util
 	{
 		std::stringstream ss{};
 		ss << value;
-		return pmr::string{ ss.str().begin(), ss.str().end() };
+		return pmr::string{ ss.str() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
-	> inline std::stringstream sink(Arg0 && arg0, Args && ... args) noexcept
+	> ML_NODISCARD static inline pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{};
-		ss << ML_FWD(arg0) << '\n';
-		int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
-		return ss;
-	}
-
-	template <class Arg0, class ... Args
-	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, Arg0 && arg0, Args && ... args) noexcept
-	{
-		std::stringstream ss{ sink(ML_FWD(arg0), ML_FWD(args)...) };
+		std::stringstream ss{ impl::sink_stream(ML_FWD(arg0), ML_FWD(args)...) };
 		return format(fmt, ss);
 	}
 
@@ -425,17 +560,42 @@ namespace ml::util
 			pmr::string line;
 			if (std::getline(ss, line))
 			{
-				fmt = replace_all(fmt, ("{" + to_string(i) + "}"), line);
+				auto const token = ([i]()
+				{
+					std::stringstream temp{};
+					temp << '{' << i << '}';
+					return pmr::string{ temp.str() };
+				})();
+
+				for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
+				{
+					fmt.replace(j, token.size(), line);
+
+					j += line.size();
+				}
 			}
 		}
 		return fmt;
 	}
 
-	template <class S> ML_NODISCARD static inline pmr::string format(pmr::string fmt, pmr::vector<S> const & args) noexcept
+	template <class S
+	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, pmr::vector<S> const & args) noexcept
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; ++i)
 		{
-			fmt = replace_all(fmt, ("{" + to_string(i) + "}"), args[i]);
+			auto const token = ([i]()
+			{
+				std::stringstream temp{};
+				temp << '{' << i << '}';
+				return pmr::string{ temp.str() };
+			})();
+
+			for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
+			{
+				fmt.replace(j, token.size(), args[i]);
+
+				j += args[i].size();
+			}
 		}
 		return fmt;
 	}
@@ -460,5 +620,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_STRING_UTILITY_HPP_

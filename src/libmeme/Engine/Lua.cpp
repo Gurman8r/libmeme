@@ -2,6 +2,20 @@
 #include <libmeme/Core/FileSystem.hpp>
 #include <libmeme/Core/Memory.hpp>
 
+namespace ml::impl
+{
+	template <class Fn
+	> static int32_t lua_for(lua_State * L, Fn && fn)
+	{
+		if (!L) return EXIT_FAILURE * 1;
+		for (int32_t i = 1, imax = lua_gettop(L); i <= imax; ++i)
+		{
+			std::invoke(ML_FWD(fn), i);
+		}
+		return EXIT_SUCCESS;
+	}
+}
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,44 +31,50 @@ namespace ml
 
 	bool ml_lua::startup()
 	{
-		// My Print
-		auto my_print{ ([](lua_State * L)
+		static constexpr struct luaL_Reg lib[] =
 		{
-			for (int32_t i = 1, imax = lua_gettop(L); i <= imax; ++i)
+			// print
+			luaL_Reg{ "print", ([](auto L)
 			{
-				std::cout << lua_tostring(L, i);
-			}
-			return EXIT_SUCCESS;
-		}) };
-
-		// Lib
-		static const struct luaL_Reg lib[] =
-		{
-			{ "print", my_print },
+				return impl::lua_for(L, [&](int32_t i)
+				{
+					std::puts(lua_tostring(L, i));
+				});
+			}) },
+			
+			// npos
 			{ nullptr, nullptr }
 		};
-
 		return startup(true, lib);
 	}
 
 
 	bool ml_lua::startup(bool openLibs, luaL_Reg const * userLib)
 	{
-		auto my_alloc = [](auto, auto ... x)
+		if (initialized()) return false;
+
+		// lua allocator
+		auto alloc = [](auto, void * p, size_t o, size_t n)
 		{
-			return memory_manager::reallocate(ML_FWD(x)...);
+			return memory_manager::reallocate(p, o, n);
 		};
 
-		if (!s_L && (s_L = lua_newstate(my_alloc, nullptr)))
+		// new state
+		if (!(s_L = lua_newstate(alloc, nullptr)))
 		{
-			if (openLibs) { luaL_openlibs(s_L); }
-
-			lua_getglobal(s_L, "_G");
-
-			if (userLib) { luaL_setfuncs(s_L, userLib, 0); }
-
-			lua_pop(s_L, 1);
+			return false;
 		}
+
+		// builtin libs
+		if (openLibs) { luaL_openlibs(s_L); }
+
+		lua_getglobal(s_L, "_G");
+
+		// custom libs
+		if (userLib) { luaL_setfuncs(s_L, userLib, 0); }
+
+		lua_pop(s_L, 1);
+
 		return s_L;
 	}
 

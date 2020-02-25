@@ -19,6 +19,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static inline std::ostream & out() noexcept { return std::cout; }
+
+		ML_NODISCARD static inline std::ostream & err() noexcept { return std::cerr; }
+
+		ML_NODISCARD static inline std::istream & in() noexcept { return std::cin; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		static inline int32_t clear(int32_t const exit_code = 0)
 		{
 #if ML_DEBUG
@@ -42,7 +50,7 @@ namespace ml
 #	ifdef ML_OS_WINDOWS
 			std::system("pause");
 #	else
-			std::cin.get();
+			debug::in().get();
 #	endif
 #endif
 			return exit_code;
@@ -50,47 +58,60 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Str
-		> static inline int32_t log_info(Str && value)
+		namespace log
 		{
-			std::cout << "[" << ML_MSG_LOG << "] " << ML_FWD(value) << "\n";
-			return ML_SUCCESS;
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			template <class Str
+			> static inline int32_t info(Str && value)
+			{
+				std::puts("[" ML_MSG_LOG "] ");
+				out() << ML_FWD(value);
+				std::puts("\n");
+				return ML_SUCCESS;
+			}
+
+			template <class Str
+			> static inline int32_t error(Str && value)
+			{
+				std::puts("[" ML_MSG_ERR "] ");
+				out() << ML_FWD(value);
+				std::puts("\n");
+				return ML_FAILURE;
+			}
+
+			template <class Str
+			> static inline int32_t warning(Str && value)
+			{
+				std::puts("[" ML_MSG_WRN "] ");
+				out() << ML_FWD(value);
+				std::puts("\n");
+				return ML_WARNING;
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			template <class Fmt, class Arg0, class ... Args
+			> static inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			{
+				return info(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+			}
+
+			template <class Fmt, class Arg0, class ... Args
+			> static inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			{
+				return error(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+			}
+
+			template <class Fmt, class Arg0, class ... Args
+			> static inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			{
+				return warning(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}
 
-		template <class Str
-		> static inline int32_t log_error(Str && value)
-		{
-			std::cout << "[" << ML_MSG_ERR << "] " << ML_FWD(value) << "\n";
-			return ML_FAILURE;
-		}
-
-		template <class Str
-		> static inline int32_t log_warning(Str && value)
-		{
-			std::cout << "[" << ML_MSG_WRN << "] " << ML_FWD(value) << "\n";
-			return ML_WARNING;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fmt, class Arg0, class ... Args
-		> static inline int32_t log_info(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return debug::log_info(util::format(fmt, arg0, ML_FWD(args)...));
-		}
-
-		template <class Fmt, class Arg0, class ... Args
-		> static inline int32_t log_error(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return debug::log_error(util::format(fmt, arg0, ML_FWD(args)...));
-		}
-
-		template <class Fmt, class Arg0, class ... Args
-		> static inline int32_t log_warning(Fmt const & fmt, Arg0 const & arg0, Args && ... args)
-		{
-			return debug::log_warning(util::format(fmt, arg0, ML_FWD(args)...));
-		}
-	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 

@@ -33,8 +33,14 @@ namespace ml
 		static PyObjectArenaAllocator arena
 		{
 			nullptr,
-			[](auto, auto ... x) { return pmr::get_default_resource()->allocate(ML_FWD(x)...); },
-			[](auto, auto ... x) { return pmr::get_default_resource()->deallocate(ML_FWD(x)...); }
+			[](auto, size_t s)
+			{
+				return pmr::get_default_resource()->allocate(s);
+			},
+			[](auto, void * p, size_t s)
+			{
+				return pmr::get_default_resource()->deallocate(p, s);
+			}
 		};
 		PyObject_SetArenaAllocator(&arena);
 		
@@ -119,14 +125,14 @@ namespace ml::python_embedded
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("print",	[](cstring s) { std::cout << s; })
-			.def_static("printl",	[](cstring s) { std::cout << s << '\n'; })
+			.def_static("print",	[](cstring s) { debug::out() << s; })
+			.def_static("printl",	[](cstring s) { debug::out() << s << '\n'; })
 			.def_static("clear",	[]() { return debug::clear(); })
 			.def_static("exit",		[]() { return debug::exit(); })
 			.def_static("pause",	[]() { return debug::pause(); })
-			.def_static("info",		[](cstring s) { return debug::log_info(s); })
-			.def_static("warning",	[](cstring s) { return debug::log_warning(s); })
-			.def_static("error",	[](cstring s) { return debug::log_error(s); });
+			.def_static("info",		[](cstring s) { return debug::log::info(s); })
+			.def_static("warning",	[](cstring s) { return debug::log::warning(s); })
+			.def_static("error",	[](cstring s) { return debug::log::error(s); });
 
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")

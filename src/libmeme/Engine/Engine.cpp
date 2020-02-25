@@ -46,7 +46,7 @@ namespace ml
 		// start lua
 		if (!ml_lua::startup())
 		{
-			return debug::log_error("engine failed initializing lua");
+			return debug::log::error("engine failed initializing lua");
 		}
 
 		// start python
@@ -55,7 +55,7 @@ namespace ml
 			path_to(g_engine->m_config.library_path)
 		))
 		{
-			return debug::log_error("engine failed initializing python");
+			return debug::log::error("engine failed initializing python");
 		}
 
 		// install window callbacks

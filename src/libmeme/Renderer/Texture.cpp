@@ -170,7 +170,7 @@ namespace ml
 		return other.m_handle
 			? create(other.size())
 				? update(other.copy_to_image())
-				: debug::log_error("Failed to copy texture, failed to create new texture")
+				: debug::log::error("Failed to copy texture, failed to create new texture")
 			: false;
 	}
 
@@ -236,13 +236,13 @@ namespace ml
 		// size cannot be zero
 		if (!w || !h)
 		{
-			return debug::log_error("texture size cannot be zero");
+			return debug::log::error("texture size cannot be zero");
 		}
 
 		// failed creating handle
 		if (!destroy() || !generate())
 		{
-			return debug::log_error("texture failed generating handle");
+			return debug::log::error("texture failed generating handle");
 		}
 
 		// set size
@@ -259,7 +259,7 @@ namespace ml
 		};
 		if ((m_realSize[0] > max_size) || (m_realSize[1] > max_size))
 		{
-			return debug::log_error("texture size is too large ({0}) max is: {1}",
+			return debug::log::error("texture size is too large ({0}) max is: {1}",
 				m_realSize, vec2u{ max_size , max_size }
 			);
 		}
@@ -350,7 +350,7 @@ namespace ml
 	{
 		if (!w || !h || !pixels)
 		{
-			return debug::log_error("Failed updating texture, invalid size: {0}", vec2u{ w, h });
+			return debug::log::error("Failed updating texture, invalid size: {0}", vec2u{ w, h });
 		}
 
 		// update

@@ -18,14 +18,14 @@ namespace ml
 #if ML_DEBUG
 		if (!m_records.empty())
 		{
-			debug::log_error("MEMORY LEAKS DETECTED");
+			debug::log::error("MEMORY LEAKS DETECTED");
 
 			static constexpr std::streamsize
 				indx_size{ 8 },
 				size_size{ sizeof(size_t) },
 				addr_size{ sizeof(size_t) * 3 };
 
-			std::cerr << std::left
+			debug::err() << std::left
 				<< std::setw(indx_size) << "Index"
 				<< std::setw(size_size) << "Size"
 				<< std::setw(addr_size) << "Address"
@@ -33,7 +33,7 @@ namespace ml
 
 			m_records.for_each([&](auto, auto const & rec)
 			{
-				std::cerr << std::left
+				debug::err() << std::left
 					<< std::setw(indx_size) << rec.index
 					<< std::setw(size_size) << rec.size
 					<< std::setw(addr_size) << rec.data
@@ -49,6 +49,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// malloc
 	void * memory_manager::allocate(size_t size)
 	{
 		static auto & inst{ memory_manager::ref() };
@@ -61,6 +62,9 @@ namespace ml
 		})();
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// calloc
 	void * memory_manager::allocate(size_t count, size_t size)
 	{
 		return std::memset(allocate(count * size), 0, count * size);
@@ -68,6 +72,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// free
 	void memory_manager::deallocate(void * addr)
 	{
 		static auto & inst{ memory_manager::ref() };
@@ -85,11 +90,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// realloc
 	void * memory_manager::reallocate(void * addr, size_t size)
 	{
 		return reallocate(addr, size, size);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// realloc (sized)
 	void * memory_manager::reallocate(void * addr, size_t oldsz, size_t newsz)
 	{
 		if (newsz == 0)

@@ -105,7 +105,7 @@ namespace ml
 		aiScene const * scene{ _ai.ReadFile(path.string().c_str(), flags) };
 		if (!scene)
 		{
-			return debug::log_error("Failed reading aiScene from file");
+			return debug::log::error("Failed reading aiScene from file");
 		}
 
 		// cleanup

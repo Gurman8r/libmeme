@@ -98,13 +98,13 @@ namespace ml
 		// already created
 		if (good())
 		{
-			return debug::log_error("mesh is already created");
+			return debug::log::error("mesh is already created");
 		}
 
 		// no vertices
 		if (vertices.empty())
 		{
-			return debug::log_error("no verticies provided to mesh");
+			return debug::log::error("no verticies provided to mesh");
 		}
 
 		// no indices
@@ -117,21 +117,21 @@ namespace ml
 		if (!m_vao.generate(GL::Triangles))
 		{
 			destroy();
-			return debug::log_error("mesh failed creating VAO");
+			return debug::log::error("mesh failed creating VAO");
 		}
 
 		// create vbo
 		if (!m_vbo.generate(GL::StaticDraw))
 		{
 			destroy();
-			return debug::log_error("mesh failed creating VBO");
+			return debug::log::error("mesh failed creating VBO");
 		}
 
 		// create ibo
 		if (!m_ibo.generate(GL::StaticDraw, GL::UnsignedInt))
 		{
 			destroy();
-			return debug::log_error("mesh failed creating IBO");
+			return debug::log::error("mesh failed creating IBO");
 		}
 		
 		// bind buffers
@@ -154,27 +154,27 @@ namespace ml
 		// already created
 		if (good())
 		{
-			return debug::log_error("mesh is already created");
+			return debug::log::error("mesh is already created");
 		}
 
 		// no vertices
 		if (vertices.empty())
 		{
-			return debug::log_error("no vertices provided to mesh");
+			return debug::log::error("no vertices provided to mesh");
 		}
 
 		// create vao
 		if (!m_vao.generate(GL::Triangles))
 		{
 			destroy();
-			return debug::log_error("mesh failed creating VAO");
+			return debug::log::error("mesh failed creating VAO");
 		}
 
 		// create vbo
 		if (!m_vbo.generate(GL::StaticDraw))
 		{
 			destroy();
-			return debug::log_error("mesh failed creating VBO");
+			return debug::log::error("mesh failed creating VBO");
 		}
 
 		// bind buffers

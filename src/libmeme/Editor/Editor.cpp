@@ -43,8 +43,14 @@ namespace ml
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions(
-			[](auto size, auto) { return memory_manager::allocate(size); },
-			[](auto addr, auto) { return memory_manager::deallocate(addr); },
+			[](size_t s, auto)
+			{
+				return memory_manager::allocate(s);
+			},
+			[](void * p, auto)
+			{
+				return memory_manager::deallocate(p);
+			},
 			nullptr
 		);
 
@@ -93,12 +99,12 @@ namespace ml
 			install_callbacks
 		))
 		{
-			return debug::log_error("Failed initializing ImGui platform");
+			return debug::log::error("Failed initializing ImGui platform");
 		}
 
 		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.c_str()))
 		{
-			return debug::log_error("Failed initializing ImGui renderer");
+			return debug::log::error("Failed initializing ImGui renderer");
 		}
 #else
 #endif

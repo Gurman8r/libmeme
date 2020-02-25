@@ -79,7 +79,8 @@ namespace ml
 				err_desc = "The object bound to framebuffer binding is not \'framebuffer complete\'";
 				break;
 			}
-			std::cerr
+
+			debug::err()
 				<< "OpenGL Error " << code << ":\n"
 				<< " \'" << file << "\' (" << line << ")\n"
 				<< "Expr:\n"
@@ -103,7 +104,7 @@ namespace ml
 	bool GL::startup()
 	{
 		if (is_init())
-			return debug::log_error("GL is already initialized");
+			return debug::log::error("GL is already initialized");
 
 #if defined(ML_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
@@ -128,39 +129,39 @@ namespace ml
 			{
 				major = version[0] - '0';
 				minor = version[2] - '0';
-				debug::log_warning("Using OpenGL Version: {0}.{1}", major, minor);
+				debug::log::warning("Using OpenGL Version: {0}.{1}", major, minor);
 			}
 			else
 			{
 				major = 1;
 				minor = 1;
-				debug::log_warning("Can't get the version number, assuming 1.1");
+				debug::log::warning("Can't get the version number, assuming 1.1");
 			}
 		}
 
 		if (!shadersAvailable())
 		{
-			debug::log_error("Shaders are not temp on your system.");
+			debug::log::error("Shaders are not temp on your system.");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			debug::log_error("Geometry shaders are not temp on your system.");
+			debug::log::error("Geometry shaders are not temp on your system.");
 		}
 
 		if (!framebuffersAvailable())
 		{
-			debug::log_warning("Framebuffers Unavailable");
+			debug::log::warning("Framebuffers Unavailable");
 		}
 
 		if (!edgeClampAvailable())
 		{
-			debug::log_warning("Texture Edge Clamp Unavailable");
+			debug::log::warning("Texture Edge Clamp Unavailable");
 		}
 
 		if (!textureSrgbAvailable())
 		{
-			debug::log_warning("Texture sRGB Unavailable");
+			debug::log::warning("Texture sRGB Unavailable");
 		}
 	}
 

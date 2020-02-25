@@ -84,24 +84,24 @@ namespace ml
 	bool render_texture::create()
 	{
 		if (good())
-			return debug::log_error("render texture already created");
+			return debug::log::error("render texture already created");
 
 		if (width() == 0)
-			return debug::log_error("render texture width negative or zero");
+			return debug::log::error("render texture width negative or zero");
 
 		if (height() == 0)
-			return debug::log_error("render texture height negative or zero");
+			return debug::log::error("render texture height negative or zero");
 
 		if (!m_fbo.generate(m_size))
 		{
 			destroy();
-			return debug::log_error("render texture failed creating framebuffer");
+			return debug::log::error("render texture failed creating framebuffer");
 		}
 
 		if (!m_rbo.generate(m_size))
 		{
 			destroy();
-			return debug::log_error("render texture failed creating renderbuffer");
+			return debug::log::error("render texture failed creating renderbuffer");
 		}
 
 		// bind framebuffer
@@ -121,14 +121,14 @@ namespace ml
 		if (!GL::checkFramebufferStatus(GL::Framebuffer))
 		{
 			destroy();
-			return debug::log_error("render texture framebuffer status check failed");
+			return debug::log::error("render texture framebuffer status check failed");
 		}
 
 		// recreate texture
 		if (!m_texture.destroy() || !m_texture.create(m_size))
 		{
 			destroy();
-			return debug::log_error("render texture failed creating texture");
+			return debug::log::error("render texture failed creating texture");
 		}
 
 		// attach texture to framebuffer

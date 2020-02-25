@@ -131,6 +131,12 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct render_pipeline
+		{
+			pmr::vector<render_texture> layers{};
+
+		} m_renderer;
+
 		ds::flat_map<pmr::string,	render_texture	> m_pipeline	{};
 		ds::flat_map<pmr::string,	font			> m_fonts		{};
 		ds::flat_map<pmr::string,	image			> m_images		{};
@@ -195,7 +201,7 @@ namespace ml
 				}
 			}
 
-		} m_plots{
+		} m_plots {
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
@@ -940,12 +946,12 @@ namespace ml
 				{
 					auto const width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
-					ImGui::SetColumnWidth(-1, width * 0.50f); ImGui::Text("address");
-					ImGui::NextColumn();
-					ImGui::SetColumnWidth(-1, width * 0.25f); ImGui::Text("index");
-					ImGui::NextColumn();
-					ImGui::SetColumnWidth(-1, width * 0.25f); ImGui::Text("size");
-					ImGui::NextColumn();
+					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.50f);
+					ImGui::Text("address"); ImGui::NextColumn();
+					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.25f);
+					ImGui::Text("index"); ImGui::NextColumn();
+					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.25f);
+					ImGui::Text("size"); ImGui::NextColumn();
 					ImGui::Separator();
 					for (auto const & rec : memory_manager::get_records().values())
 					{

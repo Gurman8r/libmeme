@@ -1,7 +1,7 @@
 #ifndef _ML_DURATION_HPP_
 #define _ML_DURATION_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml
 {
@@ -86,9 +86,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				base_type temp = std::move(m_base);
-				m_base = std::move(other.m_base);
-				other.m_base = std::move(m_base);
+				util::swap(m_base, other.m_base);
 			}
 		}
 
@@ -107,32 +105,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto nanoseconds() const noexcept
+		ML_NODISCARD constexpr nanoseconds_t nanoseconds() const noexcept
 		{
 			return chrono::duration_cast<nanoseconds_t>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto microseconds() const noexcept
+		ML_NODISCARD constexpr microseconds_t microseconds() const noexcept
 		{
 			return chrono::duration_cast<microseconds_t>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto milliseconds() const noexcept
+		ML_NODISCARD constexpr milliseconds_t milliseconds() const noexcept
 		{
 			return chrono::duration_cast<milliseconds_t>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto seconds() const noexcept
+		ML_NODISCARD constexpr seconds_t seconds() const noexcept
 		{
 			return chrono::duration_cast<seconds_t>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto minutes() const noexcept
+		ML_NODISCARD constexpr minutes_t minutes() const noexcept
 		{
 			return chrono::duration_cast<minutes_t>(m_base);
 		}
 
-		ML_NODISCARD constexpr auto hours() const noexcept
+		ML_NODISCARD constexpr hours_t hours() const noexcept
 		{
 			return chrono::duration_cast<hours_t>(m_base);
 		}
@@ -140,39 +138,110 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator==(T const & other) const
+		> ML_NODISCARD constexpr bool operator==(T const & other) const noexcept
 		{
 			return (m_base == other.m_base);
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator!=(T const & other) const
+		> ML_NODISCARD constexpr bool operator!=(T const & other) const noexcept
 		{
 			return (m_base != other.m_base);
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator<(T const & other) const
+		> ML_NODISCARD constexpr bool operator<(T const & other) const noexcept
 		{
 			return (m_base < other.m_base);
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator>(T const & other) const
+		> ML_NODISCARD constexpr bool operator>(T const & other) const noexcept
 		{
 			return (m_base > other.m_base);
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator<=(T const & other) const
+		> ML_NODISCARD constexpr bool operator<=(T const & other) const noexcept
 		{
 			return (m_base <= other.m_base);
 		}
 
 		template <class T
-		> ML_NODISCARD constexpr bool operator>=(T const & other) const
+		> ML_NODISCARD constexpr bool operator>=(T const & other) const noexcept
 		{
 			return (m_base >= other.m_base);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr duration operator+() const noexcept
+		{
+			return duration{ m_base.operator+() };
+		}
+
+		constexpr duration operator-() const noexcept
+		{
+			return duration{ m_base.operator-() };
+		}
+
+		constexpr duration operator++(int) noexcept
+		{
+			return duration{ m_base++ };
+		}
+
+		constexpr duration operator--(int) noexcept
+		{
+			return duration{ m_base-- };
+		}
+
+		constexpr duration & operator++() noexcept
+		{
+			++m_base;
+			return (*this);
+		}
+
+		constexpr duration & operator--() noexcept
+		{
+			--m_base;
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> constexpr duration & operator+=(T const & other) noexcept
+		{
+			m_base += other;
+			return (*this);
+		}
+
+		template <class T
+		> constexpr duration & operator-=(T const & other) noexcept
+		{
+			m_base -= other;
+			return (*this);
+		}
+
+		template <class T
+		> constexpr duration & operator*=(T const & other) noexcept
+		{
+			m_base *= other;
+			return (*this);
+		}
+
+		template <class T
+		> constexpr duration & operator/=(T const & other) noexcept
+		{
+			m_base /= other;
+			return (*this);
+		}
+
+		template <class T
+		> constexpr duration & operator%=(T const & other) noexcept
+		{
+			m_base %= other;
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
