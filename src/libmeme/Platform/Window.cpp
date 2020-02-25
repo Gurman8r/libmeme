@@ -348,10 +348,7 @@ namespace ml
 					GLFW_DONT_CARE
 				);
 
-				if (!(m_flags & WindowFlags_Maximized))
-				{
-					set_centered();
-				}
+				set_centered();
 			}
 		}
 		return (*this);
