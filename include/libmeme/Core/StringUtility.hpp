@@ -394,7 +394,7 @@ namespace ml::util
 	template <class Str = pmr::string
 	> ML_NODISCARD static inline std::optional<bool> to_bool(Str && str) noexcept
 	{
-		switch (hash(to_lower(ML_FWD(str))))
+		switch (hash(to_lower(str)))
 		{
 		case hash("1"):
 		case hash("true"):

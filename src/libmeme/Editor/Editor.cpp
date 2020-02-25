@@ -78,15 +78,15 @@ namespace ml
 		im_io.IniFilename = g_editor->m_config.log_file;
 
 		// style
-		switch (util::hash(util::to_lower(g_editor->m_config.style)))
+		switch (util::hash(util::to_lower(g_editor->m_config.style.string().c_str())))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
 		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
 		default:
-			if (fs::path const path{ g_editor->m_config.style }; fs::exists(path))
+			if (fs::exists(g_editor->m_config.style))
 			{
-				style_loader{}(path);
+				style_loader{}(g_editor->m_config.style);
 			}
 			break;
 		}

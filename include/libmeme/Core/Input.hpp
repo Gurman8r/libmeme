@@ -34,8 +34,7 @@ namespace ml::impl
 
 	template <> struct input<bool> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, bool dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, bool dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_bool(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -51,8 +50,7 @@ namespace ml::impl
 
 	template <> struct input<int8_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, int8_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, int8_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_i8(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -68,8 +66,7 @@ namespace ml::impl
 
 	template <> struct input<int16_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, int16_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, int16_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_i16(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -85,8 +82,7 @@ namespace ml::impl
 
 	template <> struct input<int32_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, int32_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, int32_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_i32(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -102,8 +98,7 @@ namespace ml::impl
 
 	template <> struct input<int64_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, int64_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, int64_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_i64(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -119,8 +114,7 @@ namespace ml::impl
 
 	template <> struct input<uint8_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, uint8_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, uint8_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_u8(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -136,8 +130,7 @@ namespace ml::impl
 
 	template <> struct input<uint16_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, uint16_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, uint16_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_u16(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -153,8 +146,7 @@ namespace ml::impl
 
 	template <> struct input<uint32_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, uint32_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, uint32_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_u32(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -170,8 +162,7 @@ namespace ml::impl
 
 	template <> struct input<uint64_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, uint64_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, uint64_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_u64(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -187,8 +178,7 @@ namespace ml::impl
 
 	template <> struct input<float32_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, float32_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, float32_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_f32(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -204,8 +194,7 @@ namespace ml::impl
 
 	template <> struct input<float64_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, float64_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, float64_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_f64(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }
@@ -221,8 +210,7 @@ namespace ml::impl
 
 	template <> struct input<float80_t> final
 	{
-		template <class Str = pmr::string
-		> ML_NODISCARD inline auto operator()(Str && str, float80_t dv = {}) const noexcept
+		ML_NODISCARD inline auto operator()(pmr::string && str, float80_t dv = {}) const noexcept
 		{
 			if (auto const o{ util::to_f80(ML_FWD(str)) }) { return (*o); }
 			else { return dv; }

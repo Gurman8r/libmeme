@@ -9,7 +9,6 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
-#include <libmeme/Core/Input.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -56,7 +55,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
-	engine::config & engine_cfg	= engine::get_config();
+	auto & engine_cfg			= engine::get_config();
 	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
 	engine_cfg.program_path		= fs::current_path();
@@ -66,9 +65,9 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure editor
-	editor::config & editor_cfg	= editor::get_config();
+	auto & editor_cfg			= editor::get_config();
 	editor_cfg.api_version		= "#version 130";
-	editor_cfg.style			= "dark";
+	editor_cfg.style			= engine::path_to("assets/styles/obsidian.style");
 	editor_cfg.ini_file			= nullptr;
 	editor_cfg.log_file			= nullptr;
 
