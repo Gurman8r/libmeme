@@ -43,8 +43,8 @@ namespace ml
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions(
-			[](size_t size, auto) { return memory_manager::allocate(size); },
-			[](void * addr, auto) { return memory_manager::deallocate(addr); },
+			[](auto size, auto) { return memory_manager::allocate(size); },
+			[](auto addr, auto) { return memory_manager::deallocate(addr); },
 			nullptr
 		);
 

@@ -61,8 +61,6 @@ namespace ml
 		})();
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void * memory_manager::allocate(size_t count, size_t size)
 	{
 		return std::memset(allocate(count * size), 0, count * size);
@@ -92,8 +90,6 @@ namespace ml
 		return reallocate(addr, size, size);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void * memory_manager::reallocate(void * addr, size_t oldsz, size_t newsz)
 	{
 		if (newsz == 0)
@@ -109,7 +105,7 @@ namespace ml
 		{
 			return addr;
 		}
-		else if (void * temp{ allocate(newsz) })
+		else if (void * const temp{ allocate(newsz) })
 		{
 			std::memcpy(temp, addr, oldsz);
 			deallocate(addr);

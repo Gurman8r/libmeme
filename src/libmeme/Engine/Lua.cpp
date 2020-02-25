@@ -1,5 +1,6 @@
 #include <libmeme/Engine/Lua.hpp>
 #include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
@@ -36,9 +37,15 @@ namespace ml
 		return startup(true, lib);
 	}
 
+
 	bool ml_lua::startup(bool openLibs, luaL_Reg const * userLib)
 	{
-		if (!s_L && (s_L = luaL_newstate()))
+		auto my_alloc = [](auto, auto ... x)
+		{
+			return memory_manager::reallocate(ML_FWD(x)...);
+		};
+
+		if (!s_L && (s_L = lua_newstate(my_alloc, nullptr)))
 		{
 			if (openLibs) { luaL_openlibs(s_L); }
 

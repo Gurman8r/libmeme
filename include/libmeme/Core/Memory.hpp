@@ -8,6 +8,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	struct ML_NODISCARD memory_allocators final
+	{
+		using malloc_t	= typename void *	(*)(size_t);
+		using calloc_t	= typename void *	(*)(size_t, size_t);
+		using realloc_t = typename void *	(*)(void *, size_t, size_t);
+		using free_t	= typename void		(*)(void *);
+		using dealloc_t = typename void		(*)(void *, size_t);
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// TEST RESOURCE
 	namespace detail
 	{
@@ -143,7 +154,11 @@ namespace ml
 
 		ML_NODISCARD static void * allocate(size_t count, size_t size);
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		static void deallocate(void * addr);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static void * reallocate(void * addr, size_t size);
 

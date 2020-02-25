@@ -27,20 +27,19 @@ namespace ml
 	bool ml_python::startup(fs::path const & name, fs::path const & home)
 	{
 		if (s_py_init) return false;
-		if ((s_py_name = name).empty()) return false;
-		if ((s_py_home = home).empty()) return false;
+		if (name.empty()) return false;
+		if (home.empty()) return false;
 
-		static PyObjectArenaAllocator alloc{
+		static PyObjectArenaAllocator arena
+		{
 			nullptr,
-			[](auto, size_t s) { return pmr::get_default_resource()->allocate(s); },
-			[](auto, void * p, size_t s) { return pmr::get_default_resource()->deallocate(p, s); }
+			[](auto, auto ... x) { return pmr::get_default_resource()->allocate(ML_FWD(x)...); },
+			[](auto, auto ... x) { return pmr::get_default_resource()->deallocate(ML_FWD(x)...); }
 		};
-		PyObject_SetArenaAllocator(&alloc);
-
-		Py_SetProgramName(s_py_name.c_str());
+		PyObject_SetArenaAllocator(&arena);
 		
-		Py_SetPythonHome(s_py_home.c_str());
-		
+		Py_SetProgramName((s_py_name = name).c_str());
+		Py_SetPythonHome((s_py_home = home).c_str());
 		Py_InitializeEx(Py_DontWriteBytecodeFlag);
 
 		return (s_py_init = true);
@@ -48,7 +47,6 @@ namespace ml
 
 	bool ml_python::shutdown()
 	{
-		Py_IsInitialized();
 		if (!s_py_init) return false;
 
 		Py_FinalizeEx();
@@ -70,12 +68,18 @@ namespace ml
 
 	int32_t ml_python::do_file(fs::path const & path)
 	{
-		if (!s_py_init) return 0;
-		if (auto const o{ FS::read_file(path.string()) }; o && !o->empty())
+		if (!s_py_init)
+		{
+			return 0;
+		}
+		else if (auto const o{ FS::read_file(path.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}
-		return 0;
+		else
+		{
+			return 0;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
