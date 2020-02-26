@@ -706,7 +706,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_ONCE_CALL{ m_console.printf("# type \"/lua\" to exit"); };
+						ML_ONCE_CALL{ m_console.printf("# type \'/lua\' to exit"); };
 					}
 					else if (m_console.overload && args.front() == "/lua")
 					{
@@ -729,7 +729,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_ONCE_CALL{ m_console.printf("# type \"/python\" to exit"); };
+						ML_ONCE_CALL{ m_console.printf("# type \'/python\' to exit"); };
 					}
 					else if (m_console.overload && args.front() == "/python")
 					{

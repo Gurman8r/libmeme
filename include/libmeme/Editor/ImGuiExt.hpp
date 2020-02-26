@@ -417,7 +417,7 @@ namespace ml::gui
 				}
 				else
 				{
-					this->printf("unknown command", args.front().c_str());
+					this->printf("unknown command: \'%s\'", args.front().c_str());
 				}
 			}
 
@@ -460,7 +460,7 @@ namespace ml::gui
 				if (candidates.size() == 0)
 				{
 					// No match
-					printf("No match for \"%.*s\"!\n", (size_t)(word_end - word_start), word_start);
+					printf("No match for \'%.*s\'!\n", (size_t)(word_end - word_start), word_start);
 				}
 				else if (candidates.size() == 1)
 				{
