@@ -125,17 +125,13 @@ namespace ml::python_embedded
 
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("print",	[](cstring s) { debug::out() << s; })
-			.def_static("printl",	[](cstring s) { debug::out() << s << '\n'; })
-			.def_static("clear",	[]() { return debug::clear(); })
-			.def_static("exit",		[]() { return debug::exit(); })
-			.def_static("pause",	[]() { return debug::pause(); })
-			.def_static("info",		[](cstring s) { return debug::log::info(s); })
-			.def_static("warning",	[](cstring s) { return debug::log::warning(s); })
-			.def_static("error",	[](cstring s) { return debug::log::error(s); });
+			.def_static("clear", []() { debug::clear(); })
+			.def_static("pause", []() { debug::pause(); })
+			.def_static("print", [](cstring s) { debug::out() << s; });
 
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")
+			.def_static("close", []() { engine::get_window().close(); })
 			.def_static("load_plugin", [](cstring s) { return engine::load_plugin(s); });
 
 	}

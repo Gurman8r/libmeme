@@ -210,7 +210,8 @@ namespace ml::gui
 		float_t			reg_zoom{ 4.f };
 		float_t			reg_size{ 32.f };
 
-		inline void render() noexcept
+		template <class Fn
+		> inline void render(Fn && fn) noexcept
 		{
 			if (!value) return;
 
@@ -224,6 +225,8 @@ namespace ml::gui
 				size[0] == 0.f ? reg_avail[0] : size[0],
 				size[1] == 0.f ? reg_avail[1] : size[1]
 			}) };
+
+			std::invoke(ML_FWD(fn));
 
 			ImGui::Image(
 				tex_addr, tex_size,

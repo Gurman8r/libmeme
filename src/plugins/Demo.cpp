@@ -167,15 +167,9 @@ namespace ml
 			std::ostream *			ptr{};
 			std::streambuf *		buf{};
 
-			stream_redirect(std::ostream * os = nullptr)
-			{
-				(*this)(os);
-			}
+			stream_redirect(std::ostream * os = {}) { (*this)(os); }
 
-			~stream_redirect()
-			{
-				(*this)(nullptr);
-			}
+			~stream_redirect() { (*this)(nullptr); }
 
 			inline void operator()(std::ostream * os)
 			{
@@ -190,12 +184,15 @@ namespace ml
 					ptr = os;
 				}
 			}
-
-		} m_cout;
-
-		gui::console m_console{};
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		stream_redirect m_cout{ &std::cout };
+
+		vec2 m_display_res{};
+
+		gui::console m_console{};
 
 		MemoryEditor m_memory{};
 
@@ -286,7 +283,7 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			m_cout(&std::cout);
+			//m_cout(&std::cout);
 
 			// GUI
 			setup_main_menu_bar();
@@ -471,6 +468,15 @@ namespace ml
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
 			m_ecs.update_system<x_apply_materials>();
+
+			// pipeline
+			if (m_display_res[0] > 0 && m_display_res[1] > 0)
+			{
+				m_pipeline.for_each([&](auto &, auto & value)
+				{
+					value.resize(m_display_res);
+				});
+			}
 		}
 
 		void on_draw(draw_event const & ev)
@@ -721,11 +727,23 @@ namespace ml
 		{
 			if (m_pipeline.empty()) return;
 
-			static gui::texture_preview preview{ nullptr, vec2{}, 4.f, 32.f };
+			gui::texture_preview preview{ nullptr, vec2{}, 4.f, 32.f };
 
 			preview.value = &m_pipeline.back().second.get_texture();
 
-			preview.render();
+			preview.render([&]()
+			{
+				auto maintain = [](auto target, auto old)
+				{
+					vec2 cmp = { target[0] / old[0], target[1] / old[1] };
+
+					float_t ratio = cmp[0] < cmp[1] ? cmp[0] : cmp[1];
+
+					return vec2{ old[0] * ratio, old[1] * ratio };
+				};
+
+				m_display_res = maintain(ImGui::GetContentRegionAvail(), m_display_res);
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
