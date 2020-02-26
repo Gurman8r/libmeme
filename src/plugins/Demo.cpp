@@ -687,6 +687,10 @@ namespace ml
 				{
 					m_console.clear();
 				}});
+				m_console.commands.push_back({ "exit", [&](auto args)
+				{
+					engine::get_window().close();
+				} });
 				m_console.commands.push_back({ "help", [&](auto args)
 				{
 					for (auto const & c : m_console.commands)
@@ -699,23 +703,45 @@ namespace ml
 				}});
 				m_console.commands.push_back({ "lua", [&](auto args)
 				{
-					if (args.empty()) return;
-					std::stringstream ss;
-					for (auto const & str : args)
-						ss << str << ' ';
-					std::invoke(script{ script::lua, pmr::string{ ss.str() } });
+					if (!m_console.overload && args.empty())
+					{
+						m_console.overload = "lua";
+						ML_ONCE_CALL{ m_console.printf("# type \"/lua\" to exit"); };
+					}
+					else if (m_console.overload && args.front() == "/lua")
+					{
+						m_console.overload = nullptr;
+					}
+					else
+					{
+						std::stringstream ss;
+						for (auto const & str : args)
+							ss << str << ' ';
+						std::invoke(script{ script::lua, pmr::string{ ss.str() } });
+					}
 				} });
 				m_console.commands.push_back({ "ping", [&](auto args)
 				{
 					std::cout << "pong\n";
 				} });
-				m_console.commands.push_back({ "py", [&](auto args)
+				m_console.commands.push_back({ "python", [&](auto args)
 				{
-					if (args.empty()) return;
-					std::stringstream ss;
-					for (auto const & str : args)
-						ss << str << ' ';
-					std::invoke(script{ script::python, pmr::string{ ss.str() } });
+					if (!m_console.overload && args.empty())
+					{
+						m_console.overload = "python";
+						ML_ONCE_CALL{ m_console.printf("# type \"/python\" to exit"); };
+					}
+					else if (m_console.overload && args.front() == "/python")
+					{
+						m_console.overload = nullptr;
+					}
+					else
+					{
+						std::stringstream ss;
+						for (auto const & str : args)
+							ss << str << ' ';
+						std::invoke(script{ script::python, pmr::string{ ss.str() } });
+					}
 				} });
 			}
 			m_console.render();

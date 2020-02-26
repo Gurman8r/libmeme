@@ -261,6 +261,7 @@ namespace ml::gui
 		}
 	};
 
+	// CONSOLE
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct console final
@@ -277,6 +278,7 @@ namespace ml::gui
 		ImGuiTextFilter				filter			{};
 		bool						auto_scroll		{ true };
 		bool						scroll_to_bot	{};
+		cstring						overload		{};
 
 		void clear()
 		{
@@ -401,8 +403,12 @@ namespace ml::gui
 
 			if (auto args{ util::tokenize(command_line, " ") }; !args.empty())
 			{
-				if (auto const it{ std::find_if(commands.begin(), commands.end(),
-					[&](auto && e) { return e.first == args.front(); }) }
+				if (overload) { args.insert(args.begin(), overload); }
+
+				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&](auto & e)
+				{
+					return e.first == args.front();
+				}) }
 				; it != commands.end())
 				{
 					args.erase(args.begin());
