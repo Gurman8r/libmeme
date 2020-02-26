@@ -43,7 +43,7 @@ namespace ml
 			}
 		};
 		PyObject_SetArenaAllocator(&arena);
-		
+
 		Py_SetProgramName((s_py_name = name).c_str());
 		Py_SetPythonHome((s_py_home = home).c_str());
 		Py_InitializeEx(Py_DontWriteBytecodeFlag);

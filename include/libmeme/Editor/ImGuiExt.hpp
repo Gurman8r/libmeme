@@ -263,7 +263,7 @@ namespace ml::gui
 	struct console final
 	{
 		using command = typename std::pair<cstring,
-			std::function<void(pmr::vector<pmr::string> const &)>
+			std::function<void(pmr::vector<pmr::string>)>
 		>;
 
 		ds::array<char, 256>		input			{};
@@ -280,45 +280,53 @@ namespace ml::gui
 			items.clear();
 		}
 
+		void print(pmr::string const & value)
+		{
+			items.push_back(value);
+		}
+
+		void prints(std::stringstream & value)
+		{
+			if (std::string const & text{ value.str() }; !text.empty())
+			{
+				std::stringstream ss{ text };
+				pmr::string	line;
+				while (std::getline(ss, line))
+				{
+					this->print(line);
+				}
+				value.str({});
+			}
+		}
+
 		void printf(cstring fmt, ...)
 		{
-			// FIXME-OPT
 			char buf[1024];
 			va_list args;
 			va_start(args, fmt);
 			vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
 			buf[IM_ARRAYSIZE(buf) - 1] = 0;
 			va_end(args);
-			items.push_back(buf);
+			this->print(buf);
 		}
 
 		void render()
 		{
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-			// Options menu
-			if (ImGui::BeginPopup("Options"))
-			{
-				ImGui::Checkbox("Auto-scroll", &auto_scroll);
-				ImGui::EndPopup();
-			}
-
-			// Options, filter
-			if (ImGui::Button("Options"))
-				ImGui::OpenPopup("Options");
-			ImGui::SameLine();
-			filter.Draw("filter (\"incl,-excl\") (\"error\")", 180);
+			filter.Draw("filter", 180); ImGui::SameLine();
+			if (ImGui::Selectable("clear")) clear(); ImGui::SameLine();
+			ImGui::Checkbox("auto-scroll", &auto_scroll);// ImGui::SameLine();
 			ImGui::Separator();
 
-			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
-			ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar); // Leave room for 1 separator + 1 InputText
-			if (ImGui::BeginPopupContextWindow())
-			{
-				if (ImGui::Selectable("Clear")) clear();
-				ImGui::EndPopup();
-			}
+			float_t const footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+			ImGui::BeginChild("ScrollingRegion", 
+				{ 0, -footer_height_to_reserve },
+				false,
+				ImGuiWindowFlags_HorizontalScrollbar
+			);
 
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4, 1 }); // Tighten spacing
 			for (size_t i = 0; i < items.size(); i++)
 			{
 				cstring item = items[i].c_str();
@@ -327,15 +335,25 @@ namespace ml::gui
 
 				// Normally you would store more information in your item (e.g. make items[] an array of structure, store color/type etc.)
 				bool pop_color = false;
-				if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
-				else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
+				if (std::strstr(item, "[error]"))
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.4f, 0.4f, 1.0f }); pop_color = true;
+				}
+				else if (std::strncmp(item, "# ", 2) == 0)
+				{
+					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
+				}
 				ImGui::TextUnformatted(item);
 				if (pop_color)
+				{
 					ImGui::PopStyleColor();
+				}
 			}
 
 			if (scroll_to_bot || (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
+			{
 				ImGui::SetScrollHereY(1.0f);
+			}
 			scroll_to_bot = false;
 
 			ImGui::PopStyleVar();
@@ -344,8 +362,14 @@ namespace ml::gui
 
 			// Command-line
 			bool reclaifocus = false;
-			if (ImGui::InputText("Input", &input[0], IM_ARRAYSIZE(input), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory,
-				&text_edit_callback_stub, (void *)this))
+			ImGui::TextDisabled("$:"); ImGui::SameLine();
+			if (ImGui::InputText("##input", &input[0], IM_ARRAYSIZE(input),
+				ImGuiInputTextFlags_EnterReturnsTrue |
+				ImGuiInputTextFlags_CallbackCompletion |
+				ImGuiInputTextFlags_CallbackHistory,
+				&text_edit_callback_stub, 
+				(void *)this
+			))
 			{
 				if (auto const s{ util::trim((cstring)input.data()) }; !s.empty())
 				{
@@ -380,7 +404,8 @@ namespace ml::gui
 				; it != commands.end())
 				{
 					args.erase(args.begin());
-					std::invoke(it->second, args);
+
+					std::invoke(it->second, std::move(args));
 				}
 				else
 				{
@@ -482,7 +507,7 @@ namespace ml::gui
 				else if (data->EventKey == ImGuiKey_DownArrow)
 				{
 					if (history_pos != -1)
-						if (++history_pos >= history.size())
+						if (++history_pos >= (int32_t)history.size())
 							history_pos = -1;
 				}
 

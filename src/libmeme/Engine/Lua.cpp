@@ -38,7 +38,7 @@ namespace ml
 			{
 				return impl::lua_for(L, [&](int32_t i)
 				{
-					std::puts(lua_tostring(L, i));
+					std::cout << lua_tostring(L, i);
 				});
 			}) },
 			

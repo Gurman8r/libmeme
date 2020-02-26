@@ -65,27 +65,21 @@ namespace ml
 			template <class Str
 			> static inline int32_t info(Str && value)
 			{
-				std::puts("[" ML_MSG_LOG "] ");
-				out() << ML_FWD(value);
-				std::puts("\n");
+				out() << "[" ML_MSG_LOG "] " << ML_FWD(value) << "\n";
 				return ML_SUCCESS;
 			}
 
 			template <class Str
 			> static inline int32_t error(Str && value)
 			{
-				std::puts("[" ML_MSG_ERR "] ");
-				out() << ML_FWD(value);
-				std::puts("\n");
+				out() << "[" ML_MSG_ERR "] " << ML_FWD(value) << "\n";
 				return ML_FAILURE;
 			}
 
 			template <class Str
 			> static inline int32_t warning(Str && value)
 			{
-				std::puts("[" ML_MSG_WRN "] ");
-				out() << ML_FWD(value);
-				std::puts("\n");
+				out() << "[" ML_MSG_WRN "] " << ML_FWD(value) << "\n";
 				return ML_WARNING;
 			}
 

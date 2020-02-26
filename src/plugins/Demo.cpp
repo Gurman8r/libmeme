@@ -152,7 +152,7 @@ namespace ml
 
 		gui::widget
 			m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None },
-			m_gui_console	{ "console"			, 0, "", ImGuiWindowFlags_None },
+			m_gui_console	{ "console"			, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None },
 			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
@@ -161,7 +161,41 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct stream_redirect
+		{
+			std::stringstream		str{};
+			std::ostream *			ptr{};
+			std::streambuf *		buf{};
+
+			stream_redirect(std::ostream * os = nullptr)
+			{
+				(*this)(os);
+			}
+
+			~stream_redirect()
+			{
+				(*this)(nullptr);
+			}
+
+			inline void operator()(std::ostream * os)
+			{
+				if (!os && buf && ptr)
+				{
+					ptr->rdbuf(buf);
+					ptr = nullptr;
+					buf = nullptr;
+				}
+				else if (os && (buf = os->rdbuf(str.rdbuf())))
+				{
+					ptr = os;
+				}
+			}
+
+		} m_cout;
+
 		gui::console m_console{};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		MemoryEditor m_memory{};
 
@@ -251,6 +285,8 @@ namespace ml
 		void on_enter(enter_event const & ev)
 		{
 			// load stuff, etc...
+
+			m_cout(&std::cout);
 
 			// GUI
 			setup_main_menu_bar();
@@ -357,18 +393,18 @@ namespace ml
 
 			// MODELS
 			{
-				m_models["sphere8x6"] = make_model(engine::path_to(
-					"assets/models/sphere8x6.obj"
-				));
+				m_models["sphere8x6"] = make_model(
+					engine::path_to("assets/models/sphere8x6.obj")
+				);
 
-				m_models["sphere32x24"] = make_model(engine::path_to(
-					"assets/models/sphere32x24.obj"
-				));
+				m_models["sphere32x24"] = make_model(
+					engine::path_to("assets/models/sphere32x24.obj")
+				);
 
 				// FIXME: upside down?
-				m_models["monkey"] = make_model(engine::path_to(
-					"assets/models/monkey.obj"
-				));
+				m_models["monkey"] = make_model(
+					engine::path_to("assets/models/monkey.obj")
+				);
 
 				// FIXME: ibo broken
 				m_models["triangle"] = make_model(make_mesh(
@@ -419,6 +455,9 @@ namespace ml
 		void on_update(update_event const & ev)
 		{
 			// update stuff, etc...
+
+			// console
+			if (m_cout.buf) { m_console.prints(m_cout.str); }
 
 			// runtime
 			static auto const & dt	{ engine::get_io().delta_time };
@@ -482,6 +521,7 @@ namespace ml
 				d.dock_window(m_gui_display.title	, d[left_up]);
 				d.dock_window(m_gui_assets.title	, d[left_dn]);
 				d.dock_window(m_gui_ecs.title		, d[left_dn]);
+				d.dock_window(m_gui_console.title	, d[left_dn]);
 				d.dock_window(m_gui_profiler.title	, d[left_dn2]);
 				d.dock_window(m_gui_memory.title	, d[right]);
 
@@ -501,45 +541,14 @@ namespace ml
 			// ASSETS
 			m_gui_assets.render([&](auto) noexcept { show_assets_gui(); });
 
-			// CONSOLE
-			ML_ONCE_CALL
-			{
-				m_console.commands.push_back({ "clear", [&](auto cmd)
-				{
-					m_console.clear();
-				}});
-				m_console.commands.push_back({ "help", [&](auto cmd)
-				{
-					for (auto const & c : m_console.commands)
-						m_console.printf(c.first);
-				} });
-				m_console.commands.push_back({ "history", [&](auto cmd)
-				{
-					for (auto const & h : m_console.history)
-						m_console.printf(h.c_str());
-				}});
-				m_console.commands.push_back({ "lua", [&](auto cmd)
-				{
-					std::stringstream ss;
-					for (auto const & str : cmd)
-						ss << str << ' ';
-					script{ script::lua, pmr::string{ ss.str() } };
-				} });
-				m_console.commands.push_back({ "py", [&](auto cmd)
-				{
-					std::stringstream ss;
-					for (auto const & str : cmd)
-						ss << str << ' ';
-					script{ script::python, pmr::string{ ss.str() } };
-				} });
-			}
-			m_gui_console.render([&](auto) noexcept { m_console.render(); });
-
 			// DISPLAY
 			m_gui_display.render([&](auto) noexcept { show_display_gui(); });
 
 			// ECS
 			m_gui_ecs.render([&](auto) noexcept { show_ecs_gui(); });
+
+			// CONSOLE
+			m_gui_console.render([&](auto) noexcept { show_console_gui(); });
 
 			// PROFILER
 			m_gui_profiler.render([&](auto) noexcept { show_profiler_gui(); });
@@ -660,6 +669,50 @@ namespace ml
 			ImGui::Columns(1);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_console_gui()
+		{
+			if (m_console.commands.empty())
+			{
+				m_console.commands.push_back({ "clear", [&](auto args)
+				{
+					m_console.clear();
+				}});
+				m_console.commands.push_back({ "help", [&](auto args)
+				{
+					for (auto const & c : m_console.commands)
+						m_console.printf(c.first);
+				} });
+				m_console.commands.push_back({ "history", [&](auto args)
+				{
+					for (auto const & h : m_console.history)
+						m_console.printf(h.c_str());
+				}});
+				m_console.commands.push_back({ "lua", [&](auto args)
+				{
+					if (args.empty()) return;
+					std::stringstream ss;
+					for (auto const & str : args)
+						ss << str << ' ';
+					std::invoke(script{ script::lua, pmr::string{ ss.str() } });
+				} });
+				m_console.commands.push_back({ "ping", [&](auto args)
+				{
+					std::cout << "pong\n";
+				} });
+				m_console.commands.push_back({ "py", [&](auto args)
+				{
+					if (args.empty()) return;
+					std::stringstream ss;
+					for (auto const & str : args)
+						ss << str << ' ';
+					std::invoke(script{ script::python, pmr::string{ ss.str() } });
+				} });
+			}
+			m_console.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
