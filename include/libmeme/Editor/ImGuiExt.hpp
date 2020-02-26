@@ -3,6 +3,7 @@
 
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Renderer/Texture.hpp>
+#include <libmeme/Core/StringUtility.hpp>
 
 namespace ml::gui
 {
@@ -254,6 +255,247 @@ namespace ml::gui
 					{ 1.f, 1.f, 1.f, .5f }
 				);
 			});
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct console final
+	{
+		using command = typename std::pair<cstring,
+			std::function<void(pmr::vector<pmr::string> const &)>
+		>;
+
+		ds::array<char, 256>		input			{};
+		pmr::vector<pmr::string>	items			{};
+		pmr::vector<command>		commands		{};
+		pmr::vector<pmr::string>	history			{};
+		int32_t						history_pos		{ -1 };
+		ImGuiTextFilter				filter			{};
+		bool						auto_scroll		{ true };
+		bool						scroll_to_bot	{};
+
+		void clear()
+		{
+			items.clear();
+		}
+
+		void printf(cstring fmt, ...)
+		{
+			// FIXME-OPT
+			char buf[1024];
+			va_list args;
+			va_start(args, fmt);
+			vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
+			buf[IM_ARRAYSIZE(buf) - 1] = 0;
+			va_end(args);
+			items.push_back(buf);
+		}
+
+		void render()
+		{
+			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+
+			// Options menu
+			if (ImGui::BeginPopup("Options"))
+			{
+				ImGui::Checkbox("Auto-scroll", &auto_scroll);
+				ImGui::EndPopup();
+			}
+
+			// Options, filter
+			if (ImGui::Button("Options"))
+				ImGui::OpenPopup("Options");
+			ImGui::SameLine();
+			filter.Draw("filter (\"incl,-excl\") (\"error\")", 180);
+			ImGui::Separator();
+
+			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing(); // 1 separator, 1 input text
+			ImGui::BeginChild("ScrollingRegion", ImVec2(0, -footer_height_to_reserve), false, ImGuiWindowFlags_HorizontalScrollbar); // Leave room for 1 separator + 1 InputText
+			if (ImGui::BeginPopupContextWindow())
+			{
+				if (ImGui::Selectable("Clear")) clear();
+				ImGui::EndPopup();
+			}
+
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
+			for (size_t i = 0; i < items.size(); i++)
+			{
+				cstring item = items[i].c_str();
+				if (!filter.PassFilter(item))
+					continue;
+
+				// Normally you would store more information in your item (e.g. make items[] an array of structure, store color/type etc.)
+				bool pop_color = false;
+				if (strstr(item, "[error]")) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f)); pop_color = true; }
+				else if (strncmp(item, "# ", 2) == 0) { ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.8f, 0.6f, 1.0f)); pop_color = true; }
+				ImGui::TextUnformatted(item);
+				if (pop_color)
+					ImGui::PopStyleColor();
+			}
+
+			if (scroll_to_bot || (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
+				ImGui::SetScrollHereY(1.0f);
+			scroll_to_bot = false;
+
+			ImGui::PopStyleVar();
+			ImGui::EndChild();
+			ImGui::Separator();
+
+			// Command-line
+			bool reclaifocus = false;
+			if (ImGui::InputText("Input", &input[0], IM_ARRAYSIZE(input), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory,
+				&text_edit_callback_stub, (void *)this))
+			{
+				if (auto const s{ util::trim((cstring)input.data()) }; !s.empty())
+				{
+					execute(s.c_str());
+				}
+				std::strcpy(input.data(), "");
+				reclaifocus = true;
+			}
+
+			// Auto-focus on window apparition
+			ImGui::SetItemDefaultFocus();
+			if (reclaifocus)
+				ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+		}
+
+		void execute(cstring command_line)
+		{
+			this->printf("# %s\n", command_line);
+
+			history_pos = -1;
+			if (auto const it{ std::find(history.begin(), history.end(), command_line) }
+			; it != history.end())
+			{
+				history.erase(it);
+			}
+			history.push_back(command_line);
+
+			if (auto args{ util::tokenize(command_line, " ") }; !args.empty())
+			{
+				if (auto const it{ std::find_if(commands.begin(), commands.end(),
+					[&](auto && e) { return e.first == args.front(); }) }
+				; it != commands.end())
+				{
+					args.erase(args.begin());
+					std::invoke(it->second, args);
+				}
+				else
+				{
+					this->printf("unknown command", args.front().c_str());
+				}
+			}
+
+			scroll_to_bot = true;
+		}
+
+	private:
+		static int32_t text_edit_callback_stub(ImGuiInputTextCallbackData * data) // In C++11 you are better off using lambdas for this sort of forwarding callbacks
+		{
+			console * c = (console *)data->UserData;
+			return c->text_edit_callback(data);
+		}
+
+		int32_t text_edit_callback(ImGuiInputTextCallbackData * data)
+		{
+			//printf("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
+			switch (data->EventFlag)
+			{
+			case ImGuiInputTextFlags_CallbackCompletion:
+			{
+				// Example of TEXT COMPLETION
+
+				// Locate beginning of current word
+				cstring word_end = data->Buf + data->CursorPos;
+				cstring word_start = word_end;
+				while (word_start > data->Buf)
+				{
+					const char c = word_start[-1];
+					if (c == ' ' || c == '\t' || c == ',' || c == ';')
+						break;
+					word_start--;
+				}
+
+				// Build a list of candidates
+				pmr::vector<cstring> candidates;
+				for (size_t i = 0; i < commands.size(); i++)
+					if (std::strncmp(commands[i].first, word_start, (size_t)(word_end - word_start)) == 0)
+						candidates.push_back(commands[i].first);
+
+				if (candidates.size() == 0)
+				{
+					// No match
+					printf("No match for \"%.*s\"!\n", (size_t)(word_end - word_start), word_start);
+				}
+				else if (candidates.size() == 1)
+				{
+					// Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
+					data->DeleteChars((int32_t)(word_start - data->Buf), (int32_t)(word_end - word_start));
+					data->InsertChars(data->CursorPos, candidates[0]);
+					data->InsertChars(data->CursorPos, " ");
+				}
+				else
+				{
+					// Multiple matches. Complete as much as we can, so inputing "C" will complete to "CL" and display "CLEAR" and "CLASSIFY"
+					size_t match_len = (size_t)(word_end - word_start);
+					for (;;)
+					{
+						size_t c = 0;
+						bool all_candidates_matches = true;
+						for (size_t i = 0; i < candidates.size() && all_candidates_matches; i++)
+							if (i == 0)
+								c = toupper(candidates[i][match_len]);
+							else if (c == 0 || c != toupper(candidates[i][match_len]))
+								all_candidates_matches = false;
+						if (!all_candidates_matches)
+							break;
+						match_len++;
+					}
+
+					if (match_len > 0)
+					{
+						data->DeleteChars((int32_t)(word_start - data->Buf), (int32_t)(word_end - word_start));
+						data->InsertChars(data->CursorPos, candidates[0], candidates[0] + match_len);
+					}
+
+					// List matches
+					printf("Possible matches:\n");
+					for (size_t i = 0; i < candidates.size(); i++)
+						printf("- %s\n", candidates[i]);
+				}
+
+				break;
+			}
+			case ImGuiInputTextFlags_CallbackHistory:
+			{
+				// Example of HISTORY
+				const size_t prev_history_pos = history_pos;
+				if (data->EventKey == ImGuiKey_UpArrow)
+				{
+					if (history_pos == -1)
+						history_pos = (int32_t)history.size() - 1;
+					else if (history_pos > 0)
+						history_pos--;
+				}
+				else if (data->EventKey == ImGuiKey_DownArrow)
+				{
+					if (history_pos != -1)
+						if (++history_pos >= history.size())
+							history_pos = -1;
+				}
+
+				// A better implementation would preserve the data on the current input line along with cursor position.
+				if (prev_history_pos != history_pos)
+				{
+					cstring history_str = (history_pos >= 0) ? history[history_pos].c_str() : "";
+					data->DeleteChars(0, data->BufTextLen);
+					data->InsertChars(0, history_str);
+				}
+			}
+			}
+			return 0;
 		}
 	};
 

@@ -152,6 +152,7 @@ namespace ml
 
 		gui::widget
 			m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None },
+			m_gui_console	{ "console"			, 0, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None },
 			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
@@ -160,7 +161,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		MemoryEditor m_memory;
+		gui::console m_console{};
+
+		MemoryEditor m_memory{};
 
 		inline auto highlight_memory(byte_t * ptr, size_t const size)
 		{
@@ -498,6 +501,40 @@ namespace ml
 			// ASSETS
 			m_gui_assets.render([&](auto) noexcept { show_assets_gui(); });
 
+			// CONSOLE
+			ML_ONCE_CALL
+			{
+				m_console.commands.push_back({ "clear", [&](auto cmd)
+				{
+					m_console.clear();
+				}});
+				m_console.commands.push_back({ "help", [&](auto cmd)
+				{
+					for (auto const & c : m_console.commands)
+						m_console.printf(c.first);
+				} });
+				m_console.commands.push_back({ "history", [&](auto cmd)
+				{
+					for (auto const & h : m_console.history)
+						m_console.printf(h.c_str());
+				}});
+				m_console.commands.push_back({ "lua", [&](auto cmd)
+				{
+					std::stringstream ss;
+					for (auto const & str : cmd)
+						ss << str << ' ';
+					script{ script::lua, pmr::string{ ss.str() } };
+				} });
+				m_console.commands.push_back({ "py", [&](auto cmd)
+				{
+					std::stringstream ss;
+					for (auto const & str : cmd)
+						ss << str << ' ';
+					script{ script::python, pmr::string{ ss.str() } };
+				} });
+			}
+			m_gui_console.render([&](auto) noexcept { m_console.render(); });
+
 			// DISPLAY
 			m_gui_display.render([&](auto) noexcept { show_display_gui(); });
 
@@ -545,6 +582,7 @@ namespace ml
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 				m_gui_assets.menu_item();
+				m_gui_console.menu_item();
 				m_gui_display.menu_item();
 				m_gui_ecs.menu_item();
 				m_gui_memory.menu_item();
