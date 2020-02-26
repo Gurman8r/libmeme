@@ -315,8 +315,7 @@ namespace ml::gui
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
 			filter.Draw("filter", 180); ImGui::SameLine();
-			if (ImGui::Selectable("clear")) clear(); ImGui::SameLine();
-			ImGui::Checkbox("auto-scroll", &auto_scroll);// ImGui::SameLine();
+			ImGui::Checkbox("auto-scroll", &auto_scroll);
 			ImGui::Separator();
 
 			float_t const footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
