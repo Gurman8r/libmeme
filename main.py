@@ -1,32 +1,34 @@
+# imports
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 import LIBMEME as ml
 import sys
 
-# init
+
+# setup library
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-class __ml_py_init__(object):
+class __ml_py_lib__(object):
     def __init__(self):
         sys.exit    = self.exit
         sys.stdout  = self
         sys.stderr  = self
     def exit(self, args = None) : ml.engine.close()
-    def write(self, data = None): ml.io.print(str(data))
-g_init = __ml_py_init__()
-exit = g_init.exit
+    def write(self, args = None): ml.io.print(str(args))
+g_lib = __ml_py_lib__()
+exit = g_lib.exit
 
 
 # load plugins
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-def load_plugin(path):
-    if ml.config.os() == "Windows":
-       ml.engine.load_plugin(path + ".dll")
+plugins = [ "demo", ]
+for p in plugins:
+    if ml.io.os() == "Windows":
+       ml.engine.load_plugin(p + ".dll")
     else:
-       ml.engine.load_plugin(path + ".so")
-
-load_plugin("demo")
-
+       ml.engine.load_plugin(p + ".so")
+	
 
 # messages
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-for e in ml.config.argv(): print("# " + e)
-
-print("# type \"help\" for a list of commands")
+print("# " + ml.io.name() + " | " + str(ml.io.arch()) + "-bit | " + ml.io.conf())
+print("# " + ml.io.url())
+print("# type \'help\' for a list of commands")
