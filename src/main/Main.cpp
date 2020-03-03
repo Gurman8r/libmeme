@@ -74,7 +74,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create window
-	ML_ASSERT(engine::get_window().create(
+	ML_ASSERT(engine::get_window()->create(
 		WINDOW_TITLE,					// title
 		make_video_mode(
 			vec2i{ 1280, 720 },			// resolution
@@ -110,7 +110,7 @@ ml::int32_t main()
 	event_system::fire_event<enter_event>();
 
 	// main loop
-	while (engine::get_window().is_open())
+	while (engine::get_window()->is_open())
 	{
 		ML_DEFER{ performance_tracker::swap_frames(); };
 

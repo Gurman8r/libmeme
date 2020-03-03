@@ -108,28 +108,28 @@ namespace ml::python_embedded
 	{
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("author",	[]() { return ML__AUTHOR; })
-			.def_static("date",		[]() { return ML__DATE; })
-			.def_static("name",		[]() { return ML__NAME; })
-			.def_static("time",		[]() { return ML__TIME; })
-			.def_static("url",		[]() { return ML__URL; })
-			.def_static("version",	[]() { return ML__VERSION; })
-			.def_static("argv",		[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
-			.def_static("conf",		[]() { return ML_CONFIGURATION; })
-			.def_static("arch",		[]() { return ML_ARCH; })
-			.def_static("arch_id",	[]() { return ML_ARCH_NAME; })
-			.def_static("cc_id",	[]() { return ML_CC_NAME; })
-			.def_static("cc_ver",	[]() { return ML_CC_VER; })
-			.def_static("cpp_ver",	[]() { return ML_LANG; })
-			.def_static("is_debug",	[]() { return ML_DEBUG; })
-			.def_static("os",		[]() { return ML_OS_NAME; })
-			.def_static("clear",	[]() { debug::clear(); })
-			.def_static("pause",	[]() { debug::pause(); })
-			.def_static("print",	[](cstring s) { debug::out() << s; });
+			.def_static("author",		[]() { return ML__AUTHOR; })
+			.def_static("date",			[]() { return ML__DATE; })
+			.def_static("name",			[]() { return ML__NAME; })
+			.def_static("time",			[]() { return ML__TIME; })
+			.def_static("url",			[]() { return ML__URL; })
+			.def_static("version",		[]() { return ML__VERSION; })
+			.def_static("debug",		[]() { return ML_DEBUG; })
+			.def_static("argv",			[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("conf",			[]() { return ML_CONFIGURATION; })
+			.def_static("arch",			[]() { return ML_ARCH; })
+			.def_static("arch_name",	[]() { return ML_ARCH_NAME; })
+			.def_static("cc_name",		[]() { return ML_CC_NAME; })
+			.def_static("cc_ver",		[]() { return ML_CC_VER; })
+			.def_static("lang",			[]() { return ML_LANG; })
+			.def_static("os",			[]() { return ML_OS_NAME; })
+			.def_static("clear",		[]() { debug::clear(); })
+			.def_static("pause",		[]() { debug::pause(); })
+			.def_static("print",		[](cstring s) { debug::out() << s; });
 
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")
-			.def_static("close", []() { engine::get_window().close(); })
+			.def_static("close", []() { engine::get_window()->close(); })
 			.def_static("load_plugin", [](cstring s) { return engine::load_plugin(s); });
 
 	}

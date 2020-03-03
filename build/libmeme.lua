@@ -42,8 +42,6 @@ project "libmeme"
 	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua",
-		"%{sln_dir}build/%{prj.name}.lua",
-		"%{sln_dir}assets/**.**", 
 		"%{sln_dir}include/libmeme/**.hpp",
 		"%{sln_dir}src/libmeme/**.cpp",
 		"%{sln_dir}tools/**.**",

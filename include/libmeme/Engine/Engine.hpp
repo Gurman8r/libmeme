@@ -13,6 +13,10 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		class context;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		using strings_t		= pmr::vector<pmr::string>;
 		using filenames_t	= ds::flat_set<fs::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
@@ -20,29 +24,35 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup
-		struct config final : trackable, non_copyable
+		class config final : trackable, non_copyable
 		{
+		public:
 			strings_t			command_line	{}			; // cli arguments
 			fs::path			program_name	{}			; // program name
 			fs::path			program_path	{}			; // program path
 			fs::path			content_path	{}			; // content path
 			fs::path			library_path	{}			; // script library path
+		
+		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime
-		struct io final : trackable, non_copyable
+		class io final : trackable, non_copyable
 		{
+		public:
 			float_t				delta_time		{}			; // frame time
 			size_t				frame_count		{}			; // frame count
 			float_t				frame_rate		{}			; // frame rate
+		
+		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// context
-		struct context final : trackable, non_copyable
+		class context final : trackable, non_copyable
 		{
 		private:
 			friend class		engine						;
@@ -105,9 +115,9 @@ namespace ml
 			return get_context()->m_main_timer.elapsed();
 		}
 
-		ML_NODISCARD static inline render_window & get_window() noexcept
+		ML_NODISCARD static inline render_window * const get_window() noexcept
 		{
-			return get_context()->m_window;
+			return &get_context()->m_window;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

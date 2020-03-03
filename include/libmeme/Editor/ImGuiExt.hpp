@@ -5,11 +5,9 @@
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
+// TOOLTIP
 namespace ml::gui
 {
-	// TOOLTIP
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Fn
 	> static inline void tooltip_ex(Fn && fn) noexcept
 	{
@@ -46,10 +44,11 @@ namespace ml::gui
 	{
 		tooltip(&(*value.begin()), &(*value.end()));
 	}
+}
 
-	// HELP MARKER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// HELP MARKER
+namespace ml::gui
+{
 	template <class Fn
 	> static inline void help_marker_ex(Fn && fn) noexcept
 	{
@@ -69,10 +68,11 @@ namespace ml::gui
 		ImGui::TextDisabled("(?)");
 		tooltip(value);
 	}
+}
 
-	// PLOT
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// PLOTS
+namespace ml::gui
+{
 	struct plot final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -147,10 +147,11 @@ namespace ml::gui
 			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_FWD(args)...
 		};
 	}
+}
 
-	// WIDGET
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// WIDGET
+namespace ml::gui
+{
 	struct widget final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -169,7 +170,7 @@ namespace ml::gui
 			ML_DEFER{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
-				std::invoke(ML_FWD(fn), flags);
+				std::invoke(ML_FWD(fn), *this);
 			}
 		}
 
@@ -199,10 +200,11 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+}
 
-	// PREVIEW
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// PREVIEW
+namespace ml::gui
+{
 	struct texture_preview final
 	{
 		texture const * value	{ nullptr };
@@ -260,10 +262,11 @@ namespace ml::gui
 			});
 		}
 	};
+}
 
-	// CONSOLE
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// CONSOLE
+namespace ml::gui
+{
 	struct console final
 	{
 		using command = typename std::pair<cstring,
@@ -320,7 +323,8 @@ namespace ml::gui
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
 			filter.Draw("filter", 180); ImGui::SameLine();
-			ImGui::Checkbox("auto-scroll", &auto_scroll);
+			ImGui::Checkbox("auto-scroll", &auto_scroll); ImGui::SameLine();
+			if (ImGui::Button("clear")) clear(); //ImGui::SameLine();
 			ImGui::Separator();
 
 			float_t const footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
@@ -367,6 +371,7 @@ namespace ml::gui
 			// Command-line
 			bool reclaifocus = false;
 			ImGui::TextDisabled("$:"); ImGui::SameLine();
+			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
 			if (ImGui::InputText("##input", &input[0], IM_ARRAYSIZE(input),
 				ImGuiInputTextFlags_EnterReturnsTrue |
 				ImGuiInputTextFlags_CallbackCompletion |
@@ -382,6 +387,7 @@ namespace ml::gui
 				std::strcpy(input.data(), "");
 				reclaifocus = true;
 			}
+			ImGui::PopItemWidth();
 
 			// Auto-focus on window apparition
 			ImGui::SetItemDefaultFocus();
@@ -531,8 +537,6 @@ namespace ml::gui
 			return 0;
 		}
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_IMGUI_EXT_HPP_

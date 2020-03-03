@@ -23,12 +23,6 @@ namespace ml
 
 	struct gui_dock_event final : T_event<gui_dock_event>
 	{
-		struct editor_dockspace & dockspace;
-
-		constexpr gui_dock_event(struct editor_dockspace & dockspace) noexcept
-			: dockspace{ dockspace }
-		{
-		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

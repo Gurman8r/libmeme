@@ -1,8 +1,10 @@
 #ifndef _ML_EDITOR_HPP_
 #define _ML_EDITOR_HPP_
 
+#include <libmeme/Editor/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Editor/Editor_Dockspace.hpp>
+#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/NonCopyable.hpp>
 
 namespace ml
 {
@@ -11,40 +13,94 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using menu_t = std::function<void()>;
-		using main_menu_bar_t = pmr::vector<std::pair<cstring, pmr::vector<menu_t>>>;
+		class context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup
-		struct config final : trackable, non_copyable
+		class config final : trackable, non_copyable
 		{
+		public:
+
 			pmr::string			api_version		{}			; // 
 			pmr::string			style			{}			; // 
 			cstring				ini_file		{}			; // 
 			cstring				log_file		{}			; // 
+		
+		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime
-		struct io final : trackable, non_copyable
+		class io final : trackable, non_copyable
 		{
-			bool				show_main_menu	{ true }	; // 
+		public:
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			class ML_EDITOR_API main_menu_t final : trackable, non_copyable
+			{
+			public:
+				using storage_type = typename pmr::vector<
+					std::pair<cstring, pmr::vector<std::function<void()>>>
+				>;
+
+				static constexpr auto title{ "libmeme##editor##main_menu" };
+
+				bool			open			{ true }	; // 
+				storage_type	menus			{}			; // 
+
+				main_menu_t & add_menu(cstring label, std::function<void()> && fn);
+
+			private: friend io;
+			} main_menu;
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			class ML_EDITOR_API dockspace_t final : trackable, non_copyable
+			{
+			public:
+				using storage_type = pmr::vector<uint32_t>;
+
+				static constexpr auto title{ "libmeme##editor##dockspace" };
+
+				bool			open			{ true }	; // 
+				float_t			border			{}			; // 
+				vec2			padding			{}			; // 
+				float_t			rounding		{}			; // 
+				vec2			size			{}			; // 
+				float_t			alpha			{ 1.f }		; // 
+				storage_type	nodes			{}			; // 
+
+				uint32_t begin_builder(int32_t flags = 0);
+				uint32_t end_builder(uint32_t root);
+				uint32_t dock(cstring name, uint32_t id);
+				uint32_t split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other);
+				uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other);
+				uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other);
+
+				inline auto & operator[](int32_t const i) { return nodes[(size_t)i]; }
+
+				inline auto const & operator[](int32_t const i) const { return nodes[(size_t)i]; }
+
+			private: friend io;
+			} dockspace;
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// context
-		struct context final : trackable, non_copyable
+		class context final : trackable, non_copyable
 		{
 		private:
 			friend class		editor						;
 			editor::config		m_config		{}			; // startup settings
 			editor::io			m_io			{}			; // runtime variables
 			void *				m_imgui_context	{}			; // current imgui context
-			editor_dockspace	m_dockspace		{}			; // dockspace
-			main_menu_bar_t		m_main_menu		{}			; // main menu bar
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,14 +129,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void add_menu(cstring label, menu_t && value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void show_imgui_demo(bool * p_open);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static inline editor::config & get_config() noexcept
 		{
 			return get_context()->m_config;
@@ -91,15 +139,13 @@ namespace ml
 			return get_context()->m_io;
 		}
 
-		ML_NODISCARD static inline auto * const get_imgui_context() noexcept
-		{
-			return static_cast<struct ImGuiContext * const>(get_context()->m_imgui_context);
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline editor_dockspace & get_dockspace() noexcept
-		{
-			return get_context()->m_dockspace;
-		}
+		static void show_imgui_demo(bool * p_open = {});
+
+		static void show_imgui_metrics(bool * p_open = {});
+
+		static void show_imgui_about(bool * p_open = {});
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

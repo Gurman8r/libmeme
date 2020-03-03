@@ -151,25 +151,27 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		gui::widget
-			m_imgui_demo	{ "Dear ImGui Demo"	, 0, "", ImGuiWindowFlags_None },
-			m_gui_console	{ "console"			, 1, "", ImGuiWindowFlags_None },
-			m_gui_profiler	{ "profiler"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_ecs		{ "ecs"				, 1, "", ImGuiWindowFlags_None },
-			m_gui_display	{ "display"			, 1, "", ImGuiWindowFlags_NoScrollbar },
-			m_gui_memory	{ "memory"			, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_assets	{ "assets"			, 1, "", ImGuiWindowFlags_None };
+			m_imgui_demo	{ "Dear ImGui Demo"		, 0, "", ImGuiWindowFlags_None },
+			m_imgui_metrics	{ "Dear ImGui Metrics"	, 0, "", ImGuiWindowFlags_None },
+			m_imgui_about	{ "About Dear ImGui"	, 0, "", ImGuiWindowFlags_None },
+			m_gui_console	{ "console"				, 1, "", ImGuiWindowFlags_None },
+			m_gui_profiler	{ "profiler"			, 1, "", ImGuiWindowFlags_None },
+			m_gui_ecs		{ "ecs"					, 1, "", ImGuiWindowFlags_None },
+			m_gui_display	{ "display"				, 1, "", ImGuiWindowFlags_NoScrollbar },
+			m_gui_memory	{ "memory"				, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_assets	{ "assets"				, 1, "", ImGuiWindowFlags_None };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct stream_redirect
+		struct stream_sniper final
 		{
 			std::stringstream		str{};
 			std::ostream *			ptr{};
 			std::streambuf *		buf{};
 
-			stream_redirect(std::ostream * os = {}) { (*this)(os); }
+			stream_sniper(std::ostream * os = {}) { (*this)(os); }
 
-			~stream_redirect() { (*this)(nullptr); }
+			~stream_sniper() { (*this)(nullptr); }
 
 			inline void operator()(std::ostream * os)
 			{
@@ -179,8 +181,10 @@ namespace ml
 					ptr = nullptr;
 					buf = nullptr;
 				}
-				else if (os && (buf = os->rdbuf(str.rdbuf())))
+				else if (os && !ptr && !buf)
 				{
+					str.str({});
+					buf = os->rdbuf(str.rdbuf());
 					ptr = os;
 				}
 			}
@@ -188,7 +192,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		stream_redirect m_cout{ &std::cout };
+		stream_sniper m_cout{ &std::cout };
 
 		vec2 m_display_res{};
 
@@ -279,11 +283,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_enter(enter_event const & ev)
+		void on_enter(enter_event const &)
 		{
 			// load stuff, etc...
-
-			//m_cout(&std::cout);
 
 			// GUI
 			setup_main_menu_bar();
@@ -292,7 +294,7 @@ namespace ml
 			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) }
 			; !icon.empty())
 			{
-				engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
+				engine::get_window()->set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
@@ -449,7 +451,7 @@ namespace ml
 			}
 		}
 
-		void on_update(update_event const & ev)
+		void on_update(update_event const &)
 		{
 			// update stuff, etc...
 
@@ -479,7 +481,7 @@ namespace ml
 			}
 		}
 
-		void on_draw(draw_event const & ev)
+		void on_draw(draw_event const &)
 		{
 			// draw stuff, etc...
 
@@ -498,72 +500,75 @@ namespace ml
 			}
 		}
 
-		void on_gui_dock(gui_dock_event const & ev)
+		void on_gui_dock(gui_dock_event const &)
 		{
-			// dock gui windows
+			// gui docking
 
-			static auto & d{ ev.dockspace };
-			enum { 
+			enum : int32_t // node ids
+			{ 
 				root,
 				left, left_up, left_dn, left_dn2,
 				right, right_up, right_dn,
 				MAX_DOCK_NODE
 			};
-			d.resize(MAX_DOCK_NODE);
 
+			auto & d{ editor::get_io().dockspace };
+			d.nodes.resize(MAX_DOCK_NODE);
 			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
-				d.split_node(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				d.split_node(left_up	, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				d.split_node(left_dn	, d[left]		, ImGuiDir_Down	, 0.5f	, &d[left]);	// left-down
-				d.split_node(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.5f	, &d[left_dn]);	// left-down2
+				d.split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				d.split(left_up		, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				d.split(left_dn		, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+				d.split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
 
-				d.split_node(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
-				d.split_node(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				d.split_node(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+				d.split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
+				d.split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				d.split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				d.dock_window(m_gui_display.title	, d[left_up]);
-				d.dock_window(m_gui_assets.title	, d[left_dn]);
-				d.dock_window(m_gui_ecs.title		, d[left_dn]);
-				d.dock_window(m_gui_console.title	, d[left_dn]);
-				d.dock_window(m_gui_profiler.title	, d[left_dn2]);
-				d.dock_window(m_gui_memory.title	, d[right]);
+				d.dock(m_gui_display.title	, d[left_up]);
+				d.dock(m_gui_assets.title	, d[left_dn]);
+				d.dock(m_gui_ecs.title		, d[left_dn]);
+				d.dock(m_gui_console.title	, d[left_dn]);
+				d.dock(m_gui_profiler.title	, d[left_dn2]);
+				d.dock(m_gui_memory.title	, d[right]);
 
 				d.end_builder(root);
 			}
 		}
 
-		void on_gui_draw(gui_draw_event const & ev)
+		void on_gui_draw(gui_draw_event const &)
 		{
 			// gui stuff, etc...
 
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-			// IMGUI DEMO
+			// IMGUI
 			if (m_imgui_demo.open) { editor::show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open) { editor::show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open) { editor::show_imgui_about(&m_imgui_about.open); }
 
 			// ASSETS
-			m_gui_assets.render([&](auto) noexcept { show_assets_gui(); });
+			m_gui_assets.render([&](auto &) { show_assets_gui(); });
 
 			// DISPLAY
-			m_gui_display.render([&](auto) noexcept { show_display_gui(); });
+			m_gui_display.render([&](auto &) { show_display_gui(); });
 
 			// ECS
-			m_gui_ecs.render([&](auto) noexcept { show_ecs_gui(); });
+			m_gui_ecs.render([&](auto &) { show_ecs_gui(); });
 
 			// CONSOLE
-			m_gui_console.render([&](auto) noexcept { show_console_gui(); });
+			m_gui_console.render([&](auto &) { show_console_gui(); });
 
 			// PROFILER
-			m_gui_profiler.render([&](auto) noexcept { show_profiler_gui(); });
+			m_gui_profiler.render([&](auto &) { show_profiler_gui(); });
 
 			// MEMORY
-			m_gui_memory.render([&](auto) noexcept { show_memory_gui(); });
+			m_gui_memory.render([&](auto &) { show_memory_gui(); });
 		}
 
-		void on_exit(exit_event const & ev)
+		void on_exit(exit_event const &)
 		{
 			// cleanup stuff, etc...
 
@@ -582,45 +587,43 @@ namespace ml
 
 		void setup_main_menu_bar()
 		{
-			// File Menu
-			editor::add_menu("file", [&]()
-			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-				if (ImGui::MenuItem("quit", "Alt+F4"))
+			editor::get_io().main_menu
+				.add_menu("file", [&]()
 				{
-					engine::get_window().close();
-				}
-			});
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
-			// Tools Menu
-			editor::add_menu("tools", [&]()
-			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-				m_gui_assets.menu_item();
-				m_gui_console.menu_item();
-				m_gui_display.menu_item();
-				m_gui_ecs.menu_item();
-				m_gui_memory.menu_item();
-				m_gui_profiler.menu_item();
-			});
-
-			// Window Menu
-			editor::add_menu("options", [&]()
-			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-				bool fullscreen{ engine::get_window().is_fullscreen() };
-				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
+					ImGui::Separator();
+					if (ImGui::MenuItem("quit", "Alt+F4"))
+					{
+						engine::get_window()->close();
+					}
+				})
+				.add_menu("tools", [&]()
 				{
-					engine::get_window().set_fullscreen(fullscreen);
-				}
-			});
-
-			// Help Menu
-			editor::add_menu("help", [&]()
-			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-				m_imgui_demo.menu_item();
-			});
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+					m_gui_assets.menu_item();
+					m_gui_console.menu_item();
+					m_gui_display.menu_item();
+					m_gui_ecs.menu_item();
+					m_gui_memory.menu_item();
+					m_gui_profiler.menu_item();
+				})
+				.add_menu("options", [&]()
+				{
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+					bool fullscreen{ engine::get_window()->is_fullscreen() };
+					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
+					{
+						engine::get_window()->set_fullscreen(fullscreen);
+					}
+				})
+				.add_menu("help", [&]()
+				{
+					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+					m_imgui_demo.menu_item();
+					m_imgui_metrics.menu_item();
+					m_imgui_about.menu_item();
+				});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -632,14 +635,14 @@ namespace ml
 			auto draw_item = [&](auto const & n, auto const & v)
 			{
 				ML_ImGui_ScopeID(ML_ADDRESSOF(&v));
-				using V = typename std::decay_t<decltype(v)>;
-				static constexpr auto tname{ nameof<>::filter_all(typeof_v<V>.name()) };
+				using T = typename std::decay_t<decltype(v)>;
+				static constexpr auto tname{ nameof<>::filter_all(typeof_v<T>.name()) };
 
 				char name[64] = "";
 				std::sprintf(name, "%.*s", (uint32_t)tname.size(), tname.data());
 
 				char size[20] = "";
-				std::sprintf(size, "%u", (uint32_t)sizeof(V));
+				std::sprintf(size, "%u", (uint32_t)sizeof(T));
 
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
@@ -689,7 +692,7 @@ namespace ml
 				}});
 				m_console.commands.push_back({ "exit", [&](auto args)
 				{
-					engine::get_window().close();
+					engine::get_window()->close();
 				} });
 				m_console.commands.push_back({ "help", [&](auto args)
 				{
@@ -839,7 +842,7 @@ namespace ml
 					if (ImGui::BeginPopupContextItem())
 					{
 						if (ImGui::MenuItem("copy"))
-							engine::get_window().set_clipboard(buf);
+							engine::get_window()->set_clipboard(buf);
 						ImGui::EndPopup();
 					}
 				}
@@ -982,7 +985,7 @@ namespace ml
 			ML_ONCE_CALL{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::get_window().get_flags() & WindowFlags_Maximized ? 32 : 16;
+				m_memory.Cols				= engine::get_window()->get_flags() & WindowFlags_Maximized ? 32 : 16;
 				m_memory.OptShowOptions		= true;
 				m_memory.OptShowDataPreview	= true;
 				m_memory.OptShowHexII		= false;
@@ -995,7 +998,7 @@ namespace ml
 				m_memory.ReadFn				= nullptr;
 				m_memory.WriteFn			= nullptr;
 				m_memory.HighlightFn		= nullptr;
-			}
+			};
 
 			// menu bar
 			if (ImGui::BeginMenuBar())
@@ -1009,10 +1012,10 @@ namespace ml
 				if (ImGui::Button("end")) highlight_memory(testres->end() - sizeof(void *));
 				ImGui::Separator();
 
-				// records
+				// highlight
 				ImGui::PushItemWidth(256);
 				static memory_manager::record const * selected_record{};
-				char selected_address[20] = "memory records";
+				char selected_address[20] = "highlight";
 				if (selected_record)
 				{
 					std::sprintf(selected_address, "%p", selected_record->data);
