@@ -17,7 +17,6 @@ git submodule add --force https://github.com/nigels-com/glew.git
 git submodule add --force https://github.com/lua/lua.git
 git submodule add --force https://github.com/facebookarchive/RakNet.git
 git submodule add --force https://github.com/madler/zlib
-git submodule add --force https://github.com/lloyd/yajl.git
 
 git submodule update --init --recursive
 git pull

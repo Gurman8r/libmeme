@@ -34,13 +34,6 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// args
-	auto const & argc{ ML_ARGC };
-	auto const & argv{ ML_ARGV };
-
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// setup memory
 	static struct memory_config final : non_copyable
 	{

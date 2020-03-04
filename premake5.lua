@@ -51,7 +51,6 @@ filter { "system:Windows" }
 dofile "./build/glfw.lua"
 dofile "./build/lua.lua"
 dofile "./build/imgui.lua"
---dofile "./build/raknet.lua"
 dofile "./build/libmeme.lua"
 dofile "./build/main.lua"
 dofile "./build/demo.lua"

@@ -94,7 +94,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Lhs, class Rhs
-	> constexpr auto clamp(T && v, Lhs && lhs, Rhs && rhs)
+	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
 	{
 		return _ML_UTIL min(_ML_UTIL max(ML_FWD(v), ML_FWD(lhs)), ML_FWD(rhs));
 	}
