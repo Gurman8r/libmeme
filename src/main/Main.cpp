@@ -21,12 +21,12 @@ using json = nlohmann::json;
 #define MEM_RESERVED 16.0_MiB
 #endif
 
-#ifndef WINDOW_TITLE
-#define WINDOW_TITLE (ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
-#endif
-
 #ifndef SETUP_SCRIPT
 #define SETUP_SCRIPT "assets/scripts/setup.py"
+#endif
+
+#ifndef WINDOW_TITLE
+#define WINDOW_TITLE (ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,9 +64,8 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
-	auto & engine_cfg			= engine::get_config();
-	engine_cfg.argv				= { ML_ARGV, ML_ARGV + ML_ARGC };
-	engine_cfg.wargv			= { ML_WARGV, ML_WARGV + ML_ARGC };
+	auto & engine_cfg			{ engine::get_config() };
+	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
 	engine_cfg.program_path		= fs::current_path();
 	engine_cfg.content_path		= "../../../../";
@@ -75,7 +74,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure editor
-	auto & editor_cfg			= editor::get_config();
+	auto & editor_cfg			{ editor::get_config() };
 	editor_cfg.api_version		= "#version 130";
 	editor_cfg.style			= "assets/styles/obsidian.style";
 	editor_cfg.ini_file			= nullptr;

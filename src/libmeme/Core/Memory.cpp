@@ -18,29 +18,26 @@ namespace ml
 #if ML_DEBUG
 		if (!m_records.empty())
 		{
-			debug::log::error("MEMORY LEAKS DETECTED");
+			debug::log::error("final allocations follow");
 
-			static constexpr std::streamsize
-				indx_size{ 8 },
-				size_size{ sizeof(size_t) },
-				addr_size{ sizeof(size_t) * 3 };
-
+			debug::pause();
+			
 			debug::err() << std::left
-				<< std::setw(indx_size) << "Index"
-				<< std::setw(size_size) << "Size"
-				<< std::setw(addr_size) << "Address"
+				<< std::setw(20) << "Index"
+				<< std::setw(20) << "Size"
+				<< std::setw(20) << "Address"
 				<< '\n';
 
 			m_records.for_each([&](auto, auto const & rec)
 			{
 				debug::err() << std::left
-					<< std::setw(indx_size) << rec.index
-					<< std::setw(size_size) << rec.size
-					<< std::setw(addr_size) << rec.data
+					<< std::setw(20) << rec.index
+					<< std::setw(20) << rec.size
+					<< std::setw(20) << rec.data
 					<< '\n';
 			});
 
-			debug::pause(1);
+			debug::pause();
 		}
 		ML_BREAK_IF(!m_records.empty());
 #endif

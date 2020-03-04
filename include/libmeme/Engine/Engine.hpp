@@ -18,7 +18,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using strings_t		= pmr::vector<pmr::string>;
-		using wstrings_t	= pmr::vector<pmr::wstring>;
 		using filenames_t	= ds::flat_set<fs::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
@@ -28,8 +27,7 @@ namespace ml
 		class config final : trackable, non_copyable
 		{
 		public:
-			strings_t			argv			{}			; // 
-			wstrings_t			wargv			{}			; // 
+			strings_t			command_line	{}			; // command line
 			fs::path			program_name	{}			; // program name
 			fs::path			program_path	{}			; // program path
 			fs::path			content_path	{}			; // content path
