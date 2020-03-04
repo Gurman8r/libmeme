@@ -30,6 +30,7 @@ project "libmeme"
 		"%{sln_dir}build/%{prj.name}.lua",
 		"%{sln_dir}include",
 		"%{ext_dir}",
+		"%{ext_dir}json/include",
 		"%{ext_dir}imgui",
 		"%{ext_dir}pybind11/include",
 		"%{ext_dir}cpython/Include",

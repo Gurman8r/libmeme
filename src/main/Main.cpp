@@ -1,5 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -17,7 +22,7 @@
 #endif
 
 #ifndef WINDOW_TITLE
-#define WINDOW_TITLE ("" ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
+#define WINDOW_TITLE (ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
 #endif
 
 #ifndef SETUP_SCRIPT

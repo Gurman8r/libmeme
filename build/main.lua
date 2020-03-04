@@ -19,12 +19,13 @@ project "main"
 		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 	}
 	includedirs {
-		"%{sln_dir}include", "%{ext_dir}",
+		"%{sln_dir}include",
+		"%{ext_dir}",
+		"%{ext_dir}json/include",
 	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua", 
 		"%{sln_dir}src/%{prj.name}/**.**",
-		"%{sln_dir}main.py", 
 		"%{sln_dir}assets/**.**", 
 	}
 	libdirs {

@@ -44,3 +44,6 @@
 [submodule "ext/imgui_club"]
 	path = ext/imgui_club
 	url = https://github.com/ocornut/imgui_club.git
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json.git
