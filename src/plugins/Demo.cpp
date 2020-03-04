@@ -377,6 +377,11 @@ namespace ml
 					make_uniform<vec3	>("u_scale",	vec3{})
 				);
 
+				// phong
+				auto const _phong = make_material(
+					make_uniform<float_t>("foo", 0.f)
+				);
+
 				// 2d
 				m_materials["2d"] = make_material(
 					make_uniform<color	>("u_color",	colors::white),

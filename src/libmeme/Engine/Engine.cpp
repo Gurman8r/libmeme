@@ -52,7 +52,7 @@ namespace ml
 		// start python
 		if (!ml_python::startup(
 			g_engine->m_config.program_name,
-			path_to(g_engine->m_config.library_path)
+			path_to(g_engine->m_config.library_home)
 		))
 		{
 			return debug::log::error("engine failed initializing python");

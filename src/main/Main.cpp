@@ -12,12 +12,16 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef MEMORY_RESERVED
-#define MEMORY_RESERVED 16.0_MiB
+#ifndef MEM_RESERVED
+#define MEM_RESERVED 16.0_MiB
 #endif
 
 #ifndef WINDOW_TITLE
 #define WINDOW_TITLE ("" ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
+#endif
+
+#ifndef SETUP_SCRIPT
+#define SETUP_SCRIPT "assets/scripts/setup.py"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,10 +34,18 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// args
+	auto const & argc{ ML_ARGC };
+	auto const & argv{ ML_ARGV };
+
+
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
-		ds::array<byte_t, MEMORY_RESERVED>	m_data	{};
+		ds::array<byte_t, MEM_RESERVED>	m_data	{};
 		pmr::monotonic_buffer_resource		m_mono	{ m_data.data(), m_data.size() };
 		pmr::unsynchronized_pool_resource	m_pool	{ &m_mono };
 		detail::test_resource				m_test	{ &m_pool, m_data.data(), m_data.size() };
@@ -56,11 +68,12 @@ ml::int32_t main()
 
 	// configure engine
 	auto & engine_cfg			= engine::get_config();
-	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
+	engine_cfg.argv				= { ML_ARGV, ML_ARGV + ML_ARGC };
+	engine_cfg.wargv			= { ML_WARGV, ML_WARGV + ML_ARGC };
 	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
 	engine_cfg.program_path		= fs::current_path();
 	engine_cfg.content_path		= "../../../../";
-	engine_cfg.library_path		= "";
+	engine_cfg.library_home		= "";
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -101,8 +114,8 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// run script
-	script{ engine::path_to("main.py") }();
+	// run main script
+	script{ engine::path_to(SETUP_SCRIPT) }();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

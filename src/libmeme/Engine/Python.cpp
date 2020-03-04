@@ -26,9 +26,9 @@ namespace ml
 
 	bool ml_python::startup(fs::path const & name, fs::path const & home)
 	{
-		if (s_py_init) return false;
-		if (name.empty()) return false;
-		if (home.empty()) return false;
+		if (s_py_init) return debug::log::error("");
+		if (name.empty()) return debug::log::error("");
+		if (home.empty()) return debug::log::error("");
 
 		static PyObjectArenaAllocator arena
 		{
@@ -42,8 +42,8 @@ namespace ml
 				return pmr::get_default_resource()->deallocate(p, s);
 			}
 		};
-		PyObject_SetArenaAllocator(&arena);
 
+		PyObject_SetArenaAllocator(&arena);
 		Py_SetProgramName((s_py_name = name).c_str());
 		Py_SetPythonHome((s_py_home = home).c_str());
 		Py_InitializeEx(Py_DontWriteBytecodeFlag);
@@ -54,9 +54,7 @@ namespace ml
 	bool ml_python::shutdown()
 	{
 		if (!s_py_init) return false;
-
 		Py_FinalizeEx();
-
 		return !(s_py_init = false);
 	}
 
@@ -91,7 +89,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-namespace ml::python_embedded
+namespace ml::py_embed
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,31 +104,34 @@ namespace ml::python_embedded
 
 	PYBIND11_EMBEDDED_MODULE(LIBMEME, m)
 	{
+		struct ml_py_cfg final {};
+		pybind11::class_<ml_py_cfg>(m, "cfg")
+			.def_static("author"		, []() { return ML__AUTHOR; })
+			.def_static("date"			, []() { return ML__DATE; })
+			.def_static("name"			, []() { return ML__NAME; })
+			.def_static("time"			, []() { return ML__TIME; })
+			.def_static("url"			, []() { return ML__URL; })
+			.def_static("version"		, []() { return ML__VERSION; })
+			.def_static("argv"			, []() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+			.def_static("arch"			, []() { return ML_ARCH; })
+			.def_static("arch_name"		, []() { return ML_ARCH_NAME; })
+			.def_static("cc_name"		, []() { return ML_CC_NAME; })
+			.def_static("cc_ver"		, []() { return ML_CC_VER; })
+			.def_static("config"		, []() { return ML_CONFIGURATION; })
+			.def_static("debug"			, []() { return ML_DEBUG; })
+			.def_static("lang"			, []() { return ML_LANG; })
+			.def_static("os"			, []() { return ML_OS_NAME; });
+
 		struct ml_py_io final {};
 		pybind11::class_<ml_py_io>(m, "io")
-			.def_static("author",		[]() { return ML__AUTHOR; })
-			.def_static("date",			[]() { return ML__DATE; })
-			.def_static("name",			[]() { return ML__NAME; })
-			.def_static("time",			[]() { return ML__TIME; })
-			.def_static("url",			[]() { return ML__URL; })
-			.def_static("version",		[]() { return ML__VERSION; })
-			.def_static("debug",		[]() { return ML_DEBUG; })
-			.def_static("argv",			[]() { return list_t{ ML_ARGV, ML_ARGV + ML_ARGC }; })
-			.def_static("conf",			[]() { return ML_CONFIGURATION; })
-			.def_static("arch",			[]() { return ML_ARCH; })
-			.def_static("arch_name",	[]() { return ML_ARCH_NAME; })
-			.def_static("cc_name",		[]() { return ML_CC_NAME; })
-			.def_static("cc_ver",		[]() { return ML_CC_VER; })
-			.def_static("lang",			[]() { return ML_LANG; })
-			.def_static("os",			[]() { return ML_OS_NAME; })
-			.def_static("clear",		[]() { debug::clear(); })
-			.def_static("pause",		[]() { debug::pause(); })
-			.def_static("print",		[](cstring s) { debug::out() << s; });
+			.def_static("clear"			, []() { debug::clear(); })
+			.def_static("pause"			, []() { debug::pause(); })
+			.def_static("print"			, [](cstring s) { debug::out() << s; });
 
 		struct ml_py_engine final {};
 		pybind11::class_<ml_py_engine>(m, "engine")
-			.def_static("close", []() { engine::get_window()->close(); })
-			.def_static("load_plugin", [](cstring s) { return engine::load_plugin(s); });
+			.def_static("close"			, []() { engine::get_window()->close(); })
+			.def_static("load_plugin"	, [](cstring s) { return engine::load_plugin(s); });
 
 	}
 
