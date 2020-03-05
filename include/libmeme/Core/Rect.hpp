@@ -132,9 +132,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING float_rect = rectangle<float_t>;
-	ML_USING int_rect	= rectangle<int32_t>;
-	ML_USING uint_rect	= rectangle<uint32_t>;
+	ML_ALIAS float_rect = rectangle<float_t>;
+	ML_ALIAS int_rect	= rectangle<int32_t>;
+	ML_ALIAS uint_rect	= rectangle<uint32_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

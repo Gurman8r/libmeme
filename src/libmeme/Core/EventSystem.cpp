@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static ds::flat_multimap<hash_t, event_listener *> s_listeners{};
+	static ds::flat_map<hash_t, ds::flat_set<event_listener *>> s_listeners{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

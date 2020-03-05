@@ -16,7 +16,7 @@ namespace ml::util
 	> {};
 
 	template <class Ch
-	> ML_USING is_char_t = typename _ML_UTIL is_char<Ch>;
+	> ML_ALIAS is_char_t = typename _ML_UTIL is_char<Ch>;
 
 	template <class Ch
 	> static constexpr bool is_char_v{ _ML_UTIL is_char_t<Ch>::value };
@@ -30,7 +30,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_USING is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
+	> ML_ALIAS is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_cstring_v{ _ML_UTIL is_cstring_t<T, Ch>::value };
@@ -44,7 +44,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_USING is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
+	> ML_ALIAS is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_view_v{ _ML_UTIL is_string_view_t<T, Ch>::value };
@@ -57,7 +57,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_USING is_string_t = typename _ML_UTIL is_string<T, Ch>;
+	> ML_ALIAS is_string_t = typename _ML_UTIL is_string<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_v{ _ML_UTIL is_string_t<T, Ch>::value };
@@ -187,27 +187,46 @@ namespace ml::util
 
 	ML_NODISCARD static inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
 	{
-		pmr::vector<pmr::string> out;
-		size_t pos = 0;
-		while ((pos = value.find(delim)) != pmr::string::npos)
+		if (value.empty()) return {};
+		if (delim.empty()) return { value };
+
+		pmr::vector<pmr::string> temp{};
+		size_t i{};
+		while ((i = value.find(delim)) != value.npos)
 		{
-			out.push_back(value.substr(0, pos));
-			value.erase(0, pos + delim.length());
+			temp.push_back(value.substr(0, i));
+			
+			value.erase(0, i + delim.size());
 		}
-		out.push_back(value);
-		return out;
+		temp.push_back(value);
+		return temp;
+	}
+
+	ML_NODISCARD static inline pmr::string detokenize(pmr::vector<pmr::string> const & value, pmr::string const & delim = " ")
+	{
+		if (value.size() == 1)
+			return value.front();
+		std::stringstream ss{};
+		for (auto const & str : value)
+		{
+			ss << str << delim;
+		}
+		return pmr::string{ ss.str() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch
-	> ML_NODISCARD static inline bool is_whitespace(Ch c) noexcept
+	> ML_NODISCARD static constexpr bool is_whitespace(Ch c) noexcept
 	{
-		return
-			c == static_cast<Ch>(' ') ||
-			c == static_cast<Ch>('\n') ||
-			c == static_cast<Ch>('\t') ||
-			c == static_cast<Ch>('\r');
+		switch (static_cast<char>(c))
+		{
+		case '\n':
+		case '\t':
+		case '\r':
+		case ' ' : return true;
+		default  : return false;
+		}
 	}
 
 	ML_NODISCARD static inline pmr::string trim_front(pmr::string value) noexcept
@@ -479,67 +498,84 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline pmr::string to_string(int8_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline auto const & to_string(pmr::basic_string<Ch> const & str)
+	{
+		return str;
+	}
+
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int8_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int16_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int16_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int32_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int32_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(int64_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int64_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint8_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint8_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint16_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint16_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint32_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint32_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(uint64_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint64_t const value) noexcept
 	{
 		return impl::integral_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float64_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float64_t const value) noexcept
 	{
 		return impl::floating_point_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float32_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float32_t const value) noexcept
 	{
 		return impl::floating_point_to_string<char>(value);
 	}
 
-	ML_NODISCARD static inline pmr::string to_string(float80_t const value) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float80_t const value) noexcept
 	{
 		return impl::floating_point_to_string<char>(value);
 	}
 
-	template <class T
-	> ML_NODISCARD static inline pmr::string to_string(T const & value) noexcept
+	template <class T, class Ch = char
+	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(T const & value) noexcept
 	{
 		std::stringstream ss{};
 		ss << value;
-		return pmr::string{ ss.str() };
+		return pmr::basic_string<Ch>{ ss.str() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

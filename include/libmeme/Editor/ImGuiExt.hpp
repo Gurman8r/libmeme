@@ -34,7 +34,7 @@ namespace ml::gui
 		char buf[1024] = "";
 		va_list args;
 		va_start(args, fmt);
-		vsnprintf(buf, ML_ARRAYSIZE(buf), fmt, args);
+		std::vsnprintf(buf, ML_ARRAYSIZE(buf), fmt, args);
 		va_end(args);
 		tooltip(buf);
 	}
@@ -147,6 +147,32 @@ namespace ml::gui
 			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_FWD(args)...
 		};
 	}
+
+	struct plot_controller final
+	{
+		pmr::vector<plot> m_plots{};
+		
+		float64_t m_ref_time{};
+
+		template <class Fn> inline auto for_each(Fn && fn) noexcept
+		{
+			return std::for_each(m_plots.begin(), m_plots.end(), ML_FWD(fn));
+		}
+
+		inline void update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
+		{
+			if (m_ref_time == 0.0)
+			{
+				m_ref_time = tt; return;
+			}
+			while (m_ref_time < tt)
+			{
+				this->for_each([&](auto & p) { p.update(); });
+
+				m_ref_time += dt;
+			}
+		}
+	};
 }
 
 // WIDGET
@@ -202,7 +228,7 @@ namespace ml::gui
 	};
 }
 
-// PREVIEW
+// TEXTURE PREVIEW
 namespace ml::gui
 {
 	struct texture_preview final
@@ -269,12 +295,15 @@ namespace ml::gui
 {
 	struct console final
 	{
-		using command = typename std::pair<cstring,
-			std::function<void(pmr::vector<pmr::string>)>
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using command = typename std::pair
+		<
+			cstring, std::function<void(pmr::vector<pmr::string>)>
 		>;
 
 		ds::array<char, 256>		input			{};
-		pmr::vector<pmr::string>	items			{};
+		pmr::vector<pmr::string>	lines			{};
 		pmr::vector<command>		commands		{};
 		pmr::vector<pmr::string>	history			{};
 		int32_t						history_pos		{ -1 };
@@ -283,101 +312,179 @@ namespace ml::gui
 		bool						scroll_to_bot	{};
 		cstring						overload		{};
 
-		void clear()
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline console & clear()
 		{
-			items.clear();
+			lines.clear();
+			return (*this);
 		}
 
-		void print(pmr::string const & value)
+		inline console & write(char value)
 		{
-			items.push_back(value);
-		}
-
-		void prints(std::stringstream & value)
-		{
-			if (std::string const & text{ value.str() }; !text.empty())
+			switch (value)
 			{
-				std::stringstream ss{ text };
-				pmr::string	line;
+			default:
+				if (lines.empty()) { lines.push_back({}); }
+				lines.back().push_back(value);
+				break;
+			case '\n':
+				lines.push_back({});
+				break;
+			}
+			return (*this);
+		}
+
+		inline console & printl(pmr::string const & value = {})
+		{
+			return this->print(value).write('\n');
+		}
+
+		inline console & print(pmr::string const & value)
+		{
+			if (value.empty())
+			{
+				return (*this);
+			}
+			else if (value.find('\n') == value.npos)
+			{
+				for (char const c : value)
+				{
+					this->write(c);
+				}
+			}
+			else if (auto const toks{ util::tokenize(value, "\n") }; !toks.empty())
+			{
+				auto it{ toks.begin() };
+				this->print(*it);
+				while (++it != toks.end())
+				{
+					this->printl(*it);
+				}
+			}
+			return (*this);
+		}
+
+		inline console & printss(std::stringstream & value)
+		{
+			if (auto const str{ value.str() }; !str.empty())
+			{
+				std::stringstream ss{ str };
+				pmr::string line{};
 				while (std::getline(ss, line))
 				{
-					this->print(line);
+					this->printl(line);
 				}
 				value.str({});
 			}
+			return (*this);
 		}
 
-		void printf(cstring fmt, ...)
+		inline console & printf(cstring fmt, ...)
 		{
-			char buf[1024];
+			ds::array<char, 1024> buf{};
 			va_list args;
 			va_start(args, fmt);
-			vsnprintf(buf, IM_ARRAYSIZE(buf), fmt, args);
-			buf[IM_ARRAYSIZE(buf) - 1] = 0;
+			std::vsnprintf(buf.data(), buf.size(), fmt, args);
+			buf.back() = 0;
 			va_end(args);
-			this->print(buf);
+			return this->print(buf.data());
 		}
 
-		void render()
+		inline console & execute(cstring value)
+		{
+			this->printf("# %s\n", value);
+
+			// update history
+			history_pos = -1;
+			if (auto const it{ std::find(history.begin(), history.end(), value) }
+			; it != history.end())
+			{
+				history.erase(it);
+			}
+			history.push_back(value);
+
+			// process command
+			if (auto toks{ util::tokenize(value, " ") }; !toks.empty())
+			{
+				if (overload) { toks.insert(toks.begin(), overload); }
+
+				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&](auto & e)
+				{
+					return e.first == toks.front();
+				}) }
+				; it != commands.end())
+				{
+					toks.erase(toks.begin());
+
+					std::invoke(it->second, std::move(toks));
+				}
+				else
+				{
+					this->printf("unknown command: \'%s\'\n", toks.front().c_str());
+				}
+			}
+
+			scroll_to_bot = true;
+			return (*this);
+		}
+
+		inline void render()
 		{
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
+			// HEADER
 			filter.Draw("filter", 180); ImGui::SameLine();
 			ImGui::Checkbox("auto-scroll", &auto_scroll); ImGui::SameLine();
 			if (ImGui::Button("clear")) clear(); //ImGui::SameLine();
 			ImGui::Separator();
 
-			float_t const footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-			ImGui::BeginChild("ScrollingRegion", 
-				{ 0, -footer_height_to_reserve },
-				false,
-				ImGuiWindowFlags_HorizontalScrollbar
+			float_t const footer_height{ ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing() };
+
+			// CONTENT
+			ImGui::BeginChild("console content area",
+				{ 0, -footer_height }, false, ImGuiWindowFlags_HorizontalScrollbar
 			);
-
-			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4, 1 }); // Tighten spacing
-			for (size_t i = 0; i < items.size(); i++)
+			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, { 4, 1 });
+			for (auto const & line : lines)
 			{
-				cstring item = items[i].c_str();
-				if (!filter.PassFilter(item))
-					continue;
+				auto const str{ line.c_str() };
+				if (!filter.PassFilter(str)) continue;
 
-				// Normally you would store more information in your item (e.g. make items[] an array of structure, store color/type etc.)
-				bool pop_color = false;
-				if (std::strstr(item, "[error]"))
+				bool pop_color{};
+				if (std::strstr(str, "[error]"))
 				{
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.4f, 0.4f, 1.0f }); pop_color = true;
 				}
-				else if (std::strncmp(item, "# ", 2) == 0)
+				else if (std::strncmp(str, "# ", 2) == 0)
 				{
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
 				}
-				ImGui::TextUnformatted(item);
+				ImGui::TextUnformatted(str);
 				if (pop_color)
 				{
 					ImGui::PopStyleColor();
 				}
 			}
-
 			if (scroll_to_bot || (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
 			{
 				ImGui::SetScrollHereY(1.0f);
 			}
 			scroll_to_bot = false;
-
 			ImGui::PopStyleVar();
 			ImGui::EndChild();
 			ImGui::Separator();
 
-			// Command-line
-			bool reclaifocus = false;
+			// COMMAND LINE
+			bool reclaim_focus{};
 			ImGui::TextDisabled("$:"); ImGui::SameLine();
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-			if (ImGui::InputText("##input", &input[0], IM_ARRAYSIZE(input),
+			if (ImGui::InputText("##input", &input[0], ML_ARRAYSIZE(input),
 				ImGuiInputTextFlags_EnterReturnsTrue |
 				ImGuiInputTextFlags_CallbackCompletion |
 				ImGuiInputTextFlags_CallbackHistory,
-				&text_edit_callback_stub, 
-				(void *)this
+				[](auto * u) { return ((console *)u->UserData)->text_edit_callback(u); },
+				this
 			))
 			{
 				if (auto const s{ util::trim((cstring)input.data()) }; !s.empty())
@@ -385,66 +492,28 @@ namespace ml::gui
 					execute(s.c_str());
 				}
 				std::strcpy(input.data(), "");
-				reclaifocus = true;
+				reclaim_focus = true;
 			}
 			ImGui::PopItemWidth();
 
 			// Auto-focus on window apparition
 			ImGui::SetItemDefaultFocus();
-			if (reclaifocus)
-				ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
+			if (reclaim_focus)
+			{
+				ImGui::SetKeyboardFocusHere(-1); // Auto focus previous window
+			}
 		}
 
-		void execute(cstring command_line)
-		{
-			this->printf("# %s\n", command_line);
-
-			history_pos = -1;
-			if (auto const it{ std::find(history.begin(), history.end(), command_line) }
-			; it != history.end())
-			{
-				history.erase(it);
-			}
-			history.push_back(command_line);
-
-			if (auto args{ util::tokenize(command_line, " ") }; !args.empty())
-			{
-				if (overload) { args.insert(args.begin(), overload); }
-
-				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&](auto & e)
-				{
-					return e.first == args.front();
-				}) }
-				; it != commands.end())
-				{
-					args.erase(args.begin());
-
-					std::invoke(it->second, std::move(args));
-				}
-				else
-				{
-					this->printf("unknown command: \'%s\'", args.front().c_str());
-				}
-			}
-
-			scroll_to_bot = true;
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static int32_t text_edit_callback_stub(ImGuiInputTextCallbackData * data) // In C++11 you are better off using lambdas for this sort of forwarding callbacks
+		inline int32_t text_edit_callback(ImGuiInputTextCallbackData * data)
 		{
-			console * c = (console *)data->UserData;
-			return c->text_edit_callback(data);
-		}
-
-		int32_t text_edit_callback(ImGuiInputTextCallbackData * data)
-		{
-			//printf("cursor: %d, selection: %d-%d", data->CursorPos, data->SelectionStart, data->SelectionEnd);
 			switch (data->EventFlag)
 			{
 			case ImGuiInputTextFlags_CallbackCompletion:
 			{
-				// Example of TEXT COMPLETION
+				// TEXT COMPLETION
 
 				// Locate beginning of current word
 				cstring word_end = data->Buf + data->CursorPos;
@@ -466,7 +535,7 @@ namespace ml::gui
 				if (candidates.size() == 0)
 				{
 					// No match
-					printf("No match for \'%.*s\'!\n", (size_t)(word_end - word_start), word_start);
+					this->printf("No match for \'%.*s\'!\n", (size_t)(word_end - word_start), word_start);
 				}
 				else if (candidates.size() == 1)
 				{
@@ -500,9 +569,9 @@ namespace ml::gui
 					}
 
 					// List matches
-					printf("Possible matches:\n");
+					this->printf("Possible matches:\n");
 					for (size_t i = 0; i < candidates.size(); i++)
-						printf("- %s\n", candidates[i]);
+						this->printf("- %s\n", candidates[i]);
 				}
 
 				break;
@@ -536,6 +605,8 @@ namespace ml::gui
 			}
 			return 0;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 

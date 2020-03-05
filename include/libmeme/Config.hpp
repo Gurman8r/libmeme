@@ -284,12 +284,12 @@
 
 // Aliases
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_USING            using
-#define ML_USING_VA(...)    template <##__VA_ARGS__> ML_USING
-#define ML_USING_X          ML_USING_VA(class X)
-#define ML_USING_XY         ML_USING_VA(class X, class Y)
-#define ML_USING_XYZ        ML_USING_VA(class X, class Y, class Z)
-#define ML_USING_Ts         ML_USING_VA(class ... Ts)
+#define ML_ALIAS            using
+#define ML_ALIAS_VA(...)    template <##__VA_ARGS__> ML_ALIAS
+#define ML_ALIAS_X          ML_ALIAS_VA(class X)
+#define ML_ALIAS_XY         ML_ALIAS_VA(class X, class Y)
+#define ML_ALIAS_XYZ        ML_ALIAS_VA(class X, class Y, class Z)
+#define ML_ALIAS_Ts         ML_ALIAS_VA(class ... Ts)
 
 
 // Attributes

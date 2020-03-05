@@ -12,7 +12,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using source_cache		= typename ds::array<pmr::string, 3>;
+		using source_cache		= typename std::tuple<pmr::string, pmr::string, pmr::string>;
 		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
 		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, struct texture const *>;

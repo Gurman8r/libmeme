@@ -4,7 +4,7 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Editor/StyleLoader.hpp>
-#include <libmeme/Editor/ImGuiExt.hpp>
+#include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -250,7 +250,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor::io::main_menu_t & editor::io::main_menu_t::add_menu(cstring label, std::function<void()> && fn)
+	void editor::io::main_menu_t::add_menu(cstring label, std::function<void()> && fn)
 	{
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto elem)
 		{
@@ -265,7 +265,6 @@ namespace ml
 		{
 			it->second.emplace_back(ML_FWD(fn));
 		}
-		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

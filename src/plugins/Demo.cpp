@@ -21,6 +21,52 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// UTILITY
+namespace ml
+{
+	template <class Ch = char, class Tr = std::char_traits<Ch>
+	> struct basic_stream_sniper final : trackable, non_copyable
+	{
+		using sstream_t		= std::basic_stringstream<Ch, Tr>;
+		using ostream_t		= std::basic_ostream<Ch, Tr>;
+		using streambuf_t	= std::basic_streambuf<Ch, Tr>;
+
+		ostream_t	*	ptr{};
+		streambuf_t	*	buf{};
+		sstream_t		str{};
+
+		basic_stream_sniper(ostream_t * value = {}) { (*this)(value); }
+
+		~basic_stream_sniper() { (*this)(nullptr); }
+
+		inline operator bool() const noexcept { return buf && ptr; }
+
+		inline operator sstream_t & () & noexcept { return str; }
+
+		inline operator sstream_t const & () const & noexcept { return str; }
+
+		inline void operator()(ostream_t * value)
+		{
+			if (value && !buf && !ptr)
+			{
+				ptr = value;
+				buf = ptr->rdbuf(str.rdbuf());
+				str.str({});
+			}
+			else if (!value && buf && ptr)
+			{
+				ptr->rdbuf(buf);
+				ptr = nullptr;
+				buf = nullptr;
+			}
+		}
+	};
+
+	ML_ALIAS stream_sniper = typename basic_stream_sniper<char>;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // ECS
 namespace ml
 {
@@ -127,17 +173,10 @@ namespace ml
 
 		pmr::vector<entity_manager::handle> m_handles;
 
-		
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct render_pipeline
-		{
-			pmr::vector<render_texture> layers{};
-
-		} m_renderer;
-
-		ds::flat_map<pmr::string,	render_texture	> m_pipeline	{};
+		ds::flat_map<int32_t	,	render_texture	> m_pipeline	{};
 		ds::flat_map<pmr::string,	font			> m_fonts		{};
 		ds::flat_map<pmr::string,	image			> m_images		{};
 		ds::flat_map<pmr::string,	material		> m_materials	{};
@@ -146,7 +185,6 @@ namespace ml
 		ds::flat_map<pmr::string,	shader			> m_shaders		{};
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
 
-
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -154,47 +192,19 @@ namespace ml
 			m_imgui_demo	{ "Dear ImGui Demo"		, 0, "", ImGuiWindowFlags_None },
 			m_imgui_metrics	{ "Dear ImGui Metrics"	, 0, "", ImGuiWindowFlags_None },
 			m_imgui_about	{ "About Dear ImGui"	, 0, "", ImGuiWindowFlags_None },
-			m_gui_console	{ "console"				, 1, "", ImGuiWindowFlags_None },
-			m_gui_profiler	{ "profiler"			, 1, "", ImGuiWindowFlags_None },
-			m_gui_ecs		{ "ecs"					, 1, "", ImGuiWindowFlags_None },
-			m_gui_display	{ "display"				, 1, "", ImGuiWindowFlags_NoScrollbar },
-			m_gui_memory	{ "memory"				, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_assets	{ "assets"				, 1, "", ImGuiWindowFlags_None };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct stream_sniper final
-		{
-			std::stringstream		str{};
-			std::ostream *			ptr{};
-			std::streambuf *		buf{};
-
-			stream_sniper(std::ostream * os = {}) { (*this)(os); }
-
-			~stream_sniper() { (*this)(nullptr); }
-
-			inline void operator()(std::ostream * os)
-			{
-				if (!os && buf && ptr)
-				{
-					ptr->rdbuf(buf);
-					ptr = nullptr;
-					buf = nullptr;
-				}
-				else if (os && !ptr && !buf)
-				{
-					str.str({});
-					buf = os->rdbuf(str.rdbuf());
-					ptr = os;
-				}
-			}
-		};
+			m_gui_assets	{ "assets##demo"		, 1, "", ImGuiWindowFlags_None },
+			m_gui_console	{ "console##demo"		, 1, "", ImGuiWindowFlags_None },
+			m_gui_display	{ "display##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar },
+			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
+			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		stream_sniper m_cout{ &std::cout };
 
-		vec2 m_display_res{};
+		vec2 m_display_size{};
 
 		gui::console m_console{};
 
@@ -213,33 +223,7 @@ namespace ml
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct plot_controller final
-		{
-			pmr::vector<gui::plot> m_plots{};
-			float64_t m_ref_time{};
-
-			template <class Fn> inline auto for_each(Fn && fn) noexcept
-			{
-				return std::for_each(m_plots.begin(), m_plots.end(), ML_FWD(fn));
-			}
-
-			inline void update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
-			{
-				if (m_ref_time == 0.0)
-				{
-					m_ref_time = tt; return;
-				}
-				while (m_ref_time < tt)
-				{
-					this->for_each([&](auto & p) { p.update(); });
-
-					m_ref_time += dt;
-				}
-			}
-
-		} m_plots {
+		gui::plot_controller m_plots{
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
@@ -299,37 +283,37 @@ namespace ml
 
 			// PIPELINE
 			{
-				(m_pipeline["1"] = make_render_texture(vec2i{ 1280, 720 })).create();
+				(m_pipeline[0] = make_render_texture(vec2i{ 1280, 720 })).create();
 			}
 
 			// TEXTURES
 			{
-				m_textures["doot"] = make_texture(engine::path_to(
-					"assets/textures/doot.png"
-				));
+				m_textures["doot"] = make_texture(
+					engine::path_to("assets/textures/doot.png")
+				);
 
-				m_textures["navball"] = make_texture(engine::path_to(
-					"assets/textures/navball.png"
-				));
+				m_textures["navball"] = make_texture(
+					engine::path_to("assets/textures/navball.png")
+				);
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"] = make_font(engine::path_to(
-					"assets/fonts/clacon.ttf"
-				));
+				m_fonts["clacon"] = make_font(
+					engine::path_to("assets/fonts/clacon.ttf")
+				);
 
-				m_fonts["consolas"] = make_font(engine::path_to(
-					"assets/fonts/consolas.ttf"
-				));
+				m_fonts["consolas"] = make_font(
+					engine::path_to("assets/fonts/consolas.ttf")
+				);
 
-				m_fonts["lucida_console"] = make_font(engine::path_to(
-					"assets/fonts/lucida_console.ttf"
-				));
+				m_fonts["lucida_console"] = make_font(
+					engine::path_to("assets/fonts/lucida_console.ttf")
+				);
 
-				m_fonts["minecraft"] = make_font(engine::path_to(
-					"assets/fonts/minecraft.ttf"
-				));
+				m_fonts["minecraft"] = make_font(
+					engine::path_to("assets/fonts/minecraft.ttf")
+				);
 			}
 
 			// SHADERS
@@ -461,7 +445,7 @@ namespace ml
 			// update stuff, etc...
 
 			// console
-			if (m_cout.buf) { m_console.prints(m_cout.str); }
+			if (m_cout) { m_console.printss(m_cout); }
 
 			// runtime
 			static auto const & dt	{ engine::get_io().delta_time };
@@ -477,11 +461,11 @@ namespace ml
 			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
-			if (m_display_res[0] > 0 && m_display_res[1] > 0)
+			if (m_display_size[0] > 0 && m_display_size[1] > 0)
 			{
 				m_pipeline.for_each([&](auto &, auto & value)
 				{
-					value.resize(m_display_res);
+					value.resize(m_display_size);
 				});
 			}
 		}
@@ -492,7 +476,7 @@ namespace ml
 
 			if (m_pipeline.empty()) return;
 
-			if (render_texture const & target{ m_pipeline["1"] })
+			if (render_texture const & target{ m_pipeline[0] })
 			{
 				target.bind();
 				target.clear_color(colors::magenta);
@@ -538,6 +522,7 @@ namespace ml
 				d.dock(m_gui_console.title	, d[left_dn]);
 				d.dock(m_gui_profiler.title	, d[left_dn2]);
 				d.dock(m_gui_memory.title	, d[right]);
+				d.dock(m_gui_docs.title		, d[right]);
 
 				d.end_builder(root);
 			}
@@ -559,6 +544,9 @@ namespace ml
 
 			// DISPLAY
 			m_gui_display.render([&](auto &) { show_display_gui(); });
+
+			// DOCUMENTS
+			m_gui_docs.render([&](auto &) { show_documents_gui(); });
 
 			// ECS
 			m_gui_ecs.render([&](auto &) { show_ecs_gui(); });
@@ -592,43 +580,43 @@ namespace ml
 
 		void setup_main_menu_bar()
 		{
-			editor::get_io().main_menu
-				.add_menu("file", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+			auto & m{ editor::get_io().main_menu };
 
-					ImGui::Separator();
-					if (ImGui::MenuItem("quit", "Alt+F4"))
-					{
-						engine::get_window()->close();
-					}
-				})
-				.add_menu("tools", [&]()
+			m.add_menu("file", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				if (ImGui::MenuItem("quit", "Alt+F4"))
 				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					m_gui_assets.menu_item();
-					m_gui_console.menu_item();
-					m_gui_display.menu_item();
-					m_gui_ecs.menu_item();
-					m_gui_memory.menu_item();
-					m_gui_profiler.menu_item();
-				})
-				.add_menu("options", [&]()
+					engine::get_window()->close();
+				}
+			});
+			m.add_menu("tools", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				m_gui_assets.menu_item();
+				m_gui_console.menu_item();
+				m_gui_display.menu_item();
+				m_gui_docs.menu_item();
+				m_gui_ecs.menu_item();
+				m_gui_memory.menu_item();
+				m_gui_profiler.menu_item();
+			});
+			m.add_menu("options", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				bool fullscreen{ engine::get_window()->is_fullscreen() };
+				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					bool fullscreen{ engine::get_window()->is_fullscreen() };
-					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
-					{
-						engine::get_window()->set_fullscreen(fullscreen);
-					}
-				})
-				.add_menu("help", [&]()
-				{
-					ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-					m_imgui_demo.menu_item();
-					m_imgui_metrics.menu_item();
-					m_imgui_about.menu_item();
-				});
+					engine::get_window()->set_fullscreen(fullscreen);
+				}
+			});
+			m.add_menu("help", [&]()
+			{
+				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				m_imgui_demo.menu_item();
+				m_imgui_metrics.menu_item();
+				m_imgui_about.menu_item();
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -652,8 +640,10 @@ namespace ml
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
 
+				pmr::string const s = util::to_string(n);
+
 				if (ImGui::Selectable(name))		highlight_memory(&v); ImGui::NextColumn();
-				if (ImGui::Selectable(n.c_str()))	highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(s.c_str()))	highlight_memory(&v); ImGui::NextColumn();
 				if (ImGui::Selectable(size))		highlight_memory(&v); ImGui::NextColumn();
 				if (ImGui::Selectable(addr))		highlight_memory(&v); ImGui::NextColumn();
 			};
@@ -689,69 +679,71 @@ namespace ml
 
 		void show_console_gui()
 		{
-			if (m_console.commands.empty())
+			// setup commands
+			if (auto & cmd{ m_console.commands }; cmd.empty())
 			{
-				m_console.commands.push_back({ "clear", [&](auto args)
+				cmd.push_back({ "clear", [&](auto args)
 				{
 					m_console.clear();
-				}});
-				m_console.commands.push_back({ "exit", [&](auto args)
+				} });
+
+				cmd.push_back({ "exit", [&](auto args)
 				{
 					engine::get_window()->close();
 				} });
-				m_console.commands.push_back({ "help", [&](auto args)
+
+				cmd.push_back({ "help", [&](auto args)
 				{
-					for (auto const & c : m_console.commands)
-						m_console.printf(c.first);
+					for (auto const & e : m_console.commands)
+					{
+						std::cout << e.first << "\n";
+					}
 				} });
-				m_console.commands.push_back({ "history", [&](auto args)
+
+				cmd.push_back({ "history", [&](auto args)
 				{
-					for (auto const & h : m_console.history)
-						m_console.printf(h.c_str());
-				}});
-				m_console.commands.push_back({ "lua", [&](auto args)
+					for (auto const & e : m_console.history)
+					{
+						std::cout << e << "\n";
+					}
+				} });
+
+				cmd.push_back({ "lua", [&](auto args)
 				{
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_ONCE_CALL{ m_console.printf("# type \'/\' to exit"); };
+						ML_ONCE_CALL{ std::cout << "# type \'/\' to exit\n"; };
 					}
-					else if (m_console.overload && args.front() == "/")
+					else if (m_console.overload && (args.front() == "/"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::stringstream ss;
-						for (auto const & str : args)
-							ss << str << ' ';
-						std::invoke(script{ script::lua, pmr::string{ ss.str() } });
+						std::invoke(script{}, script::lua, util::detokenize(args));
 					}
 				} });
-				m_console.commands.push_back({ "ping", [&](auto args)
-				{
-					std::cout << "pong\n";
-				} });
-				m_console.commands.push_back({ "python", [&](auto args)
+
+				cmd.push_back({ "python", [&](auto args)
 				{
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_ONCE_CALL{ m_console.printf("# type \'/\' to exit"); };
+						ML_ONCE_CALL{ std::cout << "# type \'/\' to exit\n"; };
 					}
-					else if (m_console.overload && args.front() == "/")
+					else if (m_console.overload && (args.front() == "/"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::stringstream ss;
-						for (auto const & str : args)
-							ss << str << ' ';
-						std::invoke(script{ script::python, pmr::string{ ss.str() } });
+						std::invoke(script{}, script::python, util::detokenize(args));
 					}
 				} });
 			}
+			
+			// render console
 			m_console.render();
 		}
 
@@ -761,23 +753,32 @@ namespace ml
 		{
 			if (m_pipeline.empty()) return;
 
-			gui::texture_preview preview{ nullptr, vec2{}, 4.f, 32.f };
+			gui::texture_preview pview{ nullptr, {}, 4.f, 32.f };
+			pview.value = &m_pipeline.back().second.get_texture();
 
-			preview.value = &m_pipeline.back().second.get_texture();
-
-			preview.render([&]()
+			pview.render([&]()
 			{
-				auto maintain = [](auto target, auto old)
-				{
-					vec2 cmp = { target[0] / old[0], target[1] / old[1] };
-
-					float_t ratio = cmp[0] < cmp[1] ? cmp[0] : cmp[1];
-
-					return vec2{ old[0] * ratio, old[1] * ratio };
-				};
-
-				m_display_res = maintain(ImGui::GetContentRegionAvail(), m_display_res);
+				m_display_size = util::maintain(m_display_size, ImGui::GetContentRegionAvail());
 			});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_documents_gui()
+		{
+			if (ImGui::BeginMenuBar())
+			{
+				if (ImGui::MenuItem("new")) {}
+				if (ImGui::MenuItem("open")) {}
+				if (ImGui::MenuItem("save")) {}
+				if (ImGui::MenuItem("save all")) {}
+				ImGui::EndMenuBar();
+			}
+
+			if (ImGui::BeginTabBar("##documents##tabs"))
+			{
+				ImGui::EndTabBar();
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

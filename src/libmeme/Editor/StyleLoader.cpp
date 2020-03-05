@@ -24,16 +24,12 @@ namespace ml
 			if (line.empty() || line.front() == '#')
 				continue;
 
-			// tokenize line
-			std::stringstream ss{}; ss << line;
-
 			// scan line
-			auto const tag = input<pmr::string>(ss);
-			auto const name = input<pmr::string>(ss);
-			switch (util::hash(tag))
+			std::stringstream ss{}; ss << line;
+			switch (util::hash(input<pmr::string>(ss)))
 			{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-			case util::hash("ImGuiStyle"): { switch (util::hash(name))
+			case util::hash("ImGuiStyle"): { switch (util::hash(input<pmr::string>(ss)))
 			{
 			case util::hash("Alpha")					: style.Alpha = input<float_t>(ss); break;
 			case util::hash("WindowPadding")			: style.WindowPadding = input<vec2>(ss); break;
@@ -69,7 +65,7 @@ namespace ml
 			case util::hash("CurveTessellationTol")		: style.CurveTessellationTol = input<float_t>(ss); break;
 			} } break;
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-			case util::hash("ImGuiCol"): { switch (util::hash(name))
+			case util::hash("ImGuiCol"): { switch (util::hash(input<pmr::string>(ss)))
 			{
 			case util::hash("Text")					: style.Colors[ImGuiCol_Text] = input<vec4>(ss); break;
 			case util::hash("TextDisabled")			: style.Colors[ImGuiCol_TextDisabled] = input<vec4>(ss); break;
@@ -121,7 +117,7 @@ namespace ml
 			case util::hash("NavWindowingHighlight"): style.Colors[ImGuiCol_NavWindowingHighlight] = input<vec4>(ss); break;
 			case util::hash("NavWindowingDimBg")	: style.Colors[ImGuiCol_NavWindowingDimBg] = input<vec4>(ss); break;
 			case util::hash("ModalWindowDimBg")		: style.Colors[ImGuiCol_ModalWindowDimBg] = input<vec4>(ss); break;
-			}} break;
+			} } break;
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 			}
 		}

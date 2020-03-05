@@ -12,7 +12,7 @@ namespace ml::ds
 		class	_Ty,	// value type
 		class	_Pr,	// comparator predicate type
 		bool	_Mt,	// true if multiple equivalent values are permitted
-		size_t	_Th		// threshold for selecting search algorithm
+		size_t	_Th		// algorithm selector threshold
 	> struct flat_set_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -203,17 +203,7 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD inline bool contains(Other const & other) const
 		{
-			// empty
-			if (empty()) { return false; }
-
-			// linear
-			if ((traits_type::thresh == 0) || (size() < traits_type::thresh))
-			{
-				return cend() != std::find(cbegin(), cend(), other);
-			}
-
-			// binary
-			return std::binary_search(cbegin(), cend(), other, compare_type{});
+			return this->impl_contains(begin(), end(), other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -221,19 +211,13 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD inline iterator find(Other const & other)
 		{
-			// empty
-			if (empty()) { return end(); }
-
-			return impl_find(begin(), end(), other);
+			return this->impl_find(begin(), end(), other);
 		}
 
 		template <class Other = value_type
 		> ML_NODISCARD inline const_iterator find(Other const & other) const
 		{
-			// empty
-			if (empty()) { return cend(); }
-
-			return impl_find(cbegin(), cend(), other);
+			return this->impl_find(cbegin(), cend(), other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -352,22 +336,55 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class It, class Other
-		> static inline auto impl_find(It first, It last, Other const & other)
+		> static inline bool impl_contains(It first, It last, Other const & other)
 		{
 			// linear
+			auto impl_contains_linear = [&]()
+			{
+				return std::find(first, last, other) != last;
+			};
+
+			// binary
+			auto impl_contains_binary = [&]()
+			{
+				return std::binary_search(first, last, other, compare_type{});
+			};
+
+			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return std::find(first, last, other);
+				return impl_contains_linear();
+			}
+			else if (auto const size{ std::distance(first, last) })
+			{
+				if (size < traits_type::thresh)
+				{
+					return impl_contains_linear();
+				}
+				else
+				{
+					return impl_contains_binary();
+				}
 			}
 			else
 			{
-				// linear
-				if (std::distance(first, last) < traits_type::thresh)
-				{
-					return std::find(first, last, other);
-				}
+				return false;
+			}
+		}
 
-				// binary
+		// find implementation
+		template <class It, class Other
+		> static inline auto impl_find(It first, It last, Other const & other)
+		{
+			// linear
+			auto impl_find_linear = [&]()
+			{
+				return std::find(first, last, other);
+			};
+
+			// binary
+			auto impl_find_binary = [&]()
+			{
 				if (auto const it{ std::equal_range(first, last, other, compare_type{}) }
 				; it.first != it.second)
 				{
@@ -377,9 +394,31 @@ namespace ml::ds
 				{
 					return last;
 				}
+			};
+
+			// impl
+			if constexpr (traits_type::thresh == 0)
+			{
+				return impl_find_linear();
+			}
+			else if (auto const size{ std::distance(first, last) })
+			{
+				if (size < traits_type::thresh)
+				{
+					return impl_find_linear();
+				}
+				else
+				{
+					return impl_find_binary();
+				}
+			}
+			else
+			{
+				return last;
 			}
 		}
 		
+		// sort implementation
 		inline void impl_sort() noexcept
 		{
 			// empty
@@ -394,10 +433,11 @@ namespace ml::ds
 			// remove duplicates
 			if constexpr (!traits_type::multi)
 			{
-				erase(std::unique(begin(), end()), end());
+				this->erase(std::unique(begin(), end()), end());
 			}
 		}
 
+		// insert implementation
 		template <class Other
 		> inline auto impl_insert(Other && other) -> std::conditional_t<
 			traits_type::multi, iterator, std::pair<iterator, bool>
@@ -431,31 +471,25 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* FLAT SET
-	sorted vector of unique elements */
+	// FLAT SET | sorted vector of unique elements
 	template <
-		class	_Ty,
-		class	_Pr = std::less<_Ty>,
-		size_t	_Th = 42
-	> ML_USING flat_set = typename basic_flat_set<flat_set_traits<
-		_Ty,
-		_Pr,
-		false,
-		_Th
-	>>;
+		class	_Ty,					// value type
+		class	_Pr = std::less<_Ty>,	// comparator predicate type
+		size_t	_Th = 42				// algorithm selector threshold
+	> ML_ALIAS flat_set = typename basic_flat_set
+	<
+		flat_set_traits<_Ty, _Pr, false, _Th>
+	>;
 
-	/* FLAT MULTISET
-	sorted vector of elements */
+	// FLAT MULTISET | sorted vector of elements
 	template <
-		class	_Ty,
-		class	_Pr = std::less<_Ty>,
-		size_t	_Th = 42
-	> ML_USING flat_multiset = typename basic_flat_set<flat_set_traits<
-		_Ty,
-		_Pr,
-		true,
-		_Th
-	>>;
+		class	_Ty,					// value type
+		class	_Pr = std::less<_Ty>,	// comparator predicate type
+		size_t	_Th = 42				// algorithm selector threshold
+	> ML_ALIAS flat_multiset = typename basic_flat_set
+	<
+		flat_set_traits<_Ty, _Pr, true, _Th>
+	>;
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -11,8 +11,7 @@ class ml_stdio(object):
         sys.stderr  = self
         sys.stdin   = None
     def write(self, args = None):
-        if not args == None:
-            ml.io.print(str(args))
+        if (not args == None): ml.io.print(str(args))
 ml_stdio()
 exit = ml.engine.close
 sys.exit = ml.engine.close

@@ -8,7 +8,6 @@ using json = nlohmann::json;
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -42,7 +41,7 @@ ml::int32_t main()
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
-		ds::array<byte_t, MEM_RESERVED>	m_data	{};
+		ds::array<byte_t, MEM_RESERVED>		m_data	{};
 		pmr::monotonic_buffer_resource		m_mono	{ m_data.data(), m_data.size() };
 		pmr::unsynchronized_pool_resource	m_pool	{ &m_mono };
 		detail::test_resource				m_test	{ &m_pool, m_data.data(), m_data.size() };

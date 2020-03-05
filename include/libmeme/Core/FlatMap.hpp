@@ -293,13 +293,13 @@ namespace ml::ds
 
 		inline iterator_pair erase(key_iterator it)
 		{
-			auto const result { m_pair.second.erase(this->fetch(it)) };
+			auto const result{ m_pair.second.erase(this->fetch(it)) };
 			return { m_pair.first.erase(it), result };
 		}
 
 		inline iterator_pair erase(key_iterator first, key_iterator last)
 		{
-			auto const result { m_pair.second.erase(this->fetch(first), this->fetch(last)) };
+			auto const result{ m_pair.second.erase(this->fetch(first), this->fetch(last)) };
 			return { m_pair.first.erase(first, last), result };
 		}
 
@@ -367,7 +367,7 @@ namespace ml::ds
 		template <class ... Args
 		> inline std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args)
 		{
-			if (auto const k{ m_pair.first.insert(std::move(key)) }; k.second)
+			if (auto const k{ m_pair.first.insert(ML_FWD(key)) }; k.second)
 			{
 				return { this->impl_emplace_hint(k.first, ML_FWD(args)...), true };
 			}
@@ -392,7 +392,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & at(key_type const & key)
+		ML_NODISCARD inline value_type & find_or_add(key_type const & key, value_type && value)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -400,20 +400,32 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(key, value_type{}).second);
+				return (*this->insert(key, ML_FWD(value)).second);
 			}
+		}
+
+		ML_NODISCARD inline value_type & find_or_add(key_type && key, value_type && value)
+		{
+			if (auto const it{ this->find(key) })
+			{
+				return (*it->second);
+			}
+			else
+			{
+				return (*this->insert(ML_FWD(key), ML_FWD(value)).second);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline value_type & at(key_type const & key)
+		{
+			return this->find_or_add(key, value_type{});
 		}
 
 		ML_NODISCARD inline value_type & at(key_type && key)
 		{
-			if (auto const it{ this->find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return (*this->insert(std::move(key), value_type{}).second);
-			}
+			return this->find_or_add(ML_FWD(key), value_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -425,7 +437,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & operator[](key_type && key) noexcept
 		{
-			return this->at(std::move(key));
+			return this->at(ML_FWD(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -561,10 +573,15 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		storage_type m_pair;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// emplace hint implementation
 		template <class ... Args
 		> inline iterator_pair impl_emplace_hint(const_key_iterator it, Args && ... args)
 		{
-			// needs to be private or the map could become unsorted
+			// needs to be private or else the map can become unsorted
 			return {
 				std::next(m_pair.first.begin(), std::distance(m_pair.first.cbegin(), it)),
 				m_pair.second.emplace(this->fetch(it), ML_FWD(args)...)
@@ -572,43 +589,19 @@ namespace ml::ds
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_pair;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* FLAT MAP
-	associative container with a unique set of keys */
+	// FLAT MAP | flat ordered associative container
 	template <
-		class	_Kty,
-		class	_Vty,
-		class	_Pr = std::less<_Kty>,
-		size_t	_Th = 42
-	> ML_USING flat_map = typename basic_flat_map<flat_map_traits<
-		_Kty,
-		_Vty,
-		_Pr,
-		_Th
-	>>;
-
-	/* FLAT MULTIMAP 
-	associative container which allows duplicate keys (implemented as map of set) */ 
-	template <
-		class	_Kty,
-		class	_Vty,
-		class	_Kpr = std::less<_Kty>,
-		class	_Vpr = std::less<_Vty>,
-		size_t	_Kth = 42,
-		size_t	_Vth = _Kth
-	> ML_USING flat_multimap = typename flat_map<
-		_Kty,
-		flat_set<_Vty, _Vpr, _Vth>,
-		_Kpr,
-		_Kth
+		class	_Kty,					// key type
+		class	_Vty,					// value type
+		class	_Pr = std::less<_Kty>,	// key comparator predicate type
+		size_t	_Th = 42				// algorithm selector threshold
+	> ML_ALIAS flat_map = typename basic_flat_map
+	<
+		flat_map_traits<_Kty, _Vty, _Pr, _Th>
 	>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

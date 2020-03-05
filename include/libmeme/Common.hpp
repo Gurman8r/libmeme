@@ -53,43 +53,43 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	int8_t		= typename ML_INT8;
-	ML_USING	int16_t		= typename ML_INT16;
-	ML_USING	int32_t		= typename ML_INT32;
-	ML_USING	int64_t		= typename ML_INT64;
+	ML_ALIAS	int8_t		= typename ML_INT8;
+	ML_ALIAS	int16_t		= typename ML_INT16;
+	ML_ALIAS	int32_t		= typename ML_INT32;
+	ML_ALIAS	int64_t		= typename ML_INT64;
 
-	ML_USING	uint8_t		= typename ML_UINT8;
-	ML_USING	uint16_t	= typename ML_UINT16;
-	ML_USING	uint32_t	= typename ML_UINT32;
-	ML_USING	uint64_t	= typename ML_UINT64;
+	ML_ALIAS	uint8_t		= typename ML_UINT8;
+	ML_ALIAS	uint16_t	= typename ML_UINT16;
+	ML_ALIAS	uint32_t	= typename ML_UINT32;
+	ML_ALIAS	uint64_t	= typename ML_UINT64;
 
-	ML_USING	byte_t		= typename ML_BYTE;
-	ML_USING	char_t		= typename ML_CHAR;
-	ML_USING	intmax_t	= typename ML_INTMAX;
-	ML_USING	uintmax_t	= typename ML_UINTMAX;
+	ML_ALIAS	byte_t		= typename ML_BYTE;
+	ML_ALIAS	char_t		= typename ML_CHAR;
+	ML_ALIAS	intmax_t	= typename ML_INTMAX;
+	ML_ALIAS	uintmax_t	= typename ML_UINTMAX;
 
-	ML_USING	float32_t	= typename ML_FLOAT32;
-	ML_USING	float64_t	= typename ML_FLOAT64;
-	ML_USING	float80_t	= typename ML_FLOAT80;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_USING	float_t		= typename float32_t;
-	ML_USING	hash_t		= typename uint64_t;
-	ML_USING	intptr_t	= typename intmax_t;
-	ML_USING	ptrdiff_t	= typename intmax_t;
-	ML_USING	max_align_t = typename float64_t;
-	ML_USING	size_t		= typename uintmax_t;
+	ML_ALIAS	float32_t	= typename ML_FLOAT32;
+	ML_ALIAS	float64_t	= typename ML_FLOAT64;
+	ML_ALIAS	float80_t	= typename ML_FLOAT80;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_USING	cstring		= typename char const *;
-	ML_USING	cwstring	= typename wchar_t const *;
+	ML_ALIAS	float_t		= typename float32_t;
+	ML_ALIAS	hash_t		= typename uint64_t;
+	ML_ALIAS	intptr_t	= typename intmax_t;
+	ML_ALIAS	ptrdiff_t	= typename intmax_t;
+	ML_ALIAS	max_align_t = typename float64_t;
+	ML_ALIAS	size_t		= typename uintmax_t;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_ALIAS	cstring		= typename char const *;
+	ML_ALIAS	cwstring	= typename wchar_t const *;
 #if ML_HAS_CXX20
-	ML_USING	c8string	= typename char8_t const *;
+	ML_ALIAS	c8string	= typename char8_t const *;
 #endif
-	ML_USING	c16string	= typename char16_t const *;
-	ML_USING	c32string	= typename char32_t const *;
+	ML_ALIAS	c16string	= typename char16_t const *;
+	ML_ALIAS	c32string	= typename char32_t const *;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

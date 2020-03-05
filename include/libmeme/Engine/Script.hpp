@@ -42,12 +42,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t execute(pmr::vector<pmr::string> const & args = {});
+		int32_t execute();
 
-		template <class ... Args
-		> inline int32_t operator()(Args && ... args)
+		inline int32_t operator()()
 		{
-			return execute({ ML_FWD(args)... });
+			return execute();
+		}
+
+		inline int32_t operator()(fs::path const & path)
+		{
+			if (!load_from_file(path)) return 0;
+			return execute();
+		}
+
+		inline int32_t operator()(int32_t lang, pmr::string const & text)
+		{
+			m_lang = lang;
+			m_text = text;
+			return execute();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

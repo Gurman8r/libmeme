@@ -76,7 +76,7 @@ namespace ml
 		{
 			return 0;
 		}
-		else if (auto const o{ FS::read_file(path.string()) }; o && !o->empty())
+		else if (auto const o{ FS::get_file_contents(path.string()) }; o && !o->empty())
 		{
 			return do_string(pmr::string{ o->begin(), o->end() });
 		}

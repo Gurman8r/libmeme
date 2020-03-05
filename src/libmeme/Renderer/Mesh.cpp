@@ -7,36 +7,36 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	mesh::mesh() noexcept
-		: m_layout{ make_buffer_layout() }
-		, m_vao{ make_vao() }
-		, m_vbo{ make_vbo() }
-		, m_ibo{ make_ibo() }
+	mesh::mesh(allocator_type const & alloc) noexcept
+		: m_vao		{ make_vao() }
+		, m_vbo		{ make_vbo() }
+		, m_ibo		{ make_ibo() }
+		, m_layout	{ make_buffer_layout() }
+		, m_vertices{ alloc }
+		, m_indices	{ alloc }
 	{
 	}
 
-	mesh::mesh(vertices_t const & vertices)
-		: mesh{}
+	mesh::mesh(vertices_t const & vertices, allocator_type const & alloc)
+		: mesh{ alloc }
 	{
 		load_from_memory(vertices);
 	}
 
-	mesh::mesh(vertices_t const & vertices, indices_t const & indices)
-		: mesh{}
+	mesh::mesh(vertices_t const & vertices, indices_t const & indices, allocator_type const & alloc)
+		: mesh{ alloc }
 	{
 		load_from_memory(vertices, indices);
 	}
 
-	mesh::mesh(mesh const & other)
-		: m_layout{ other.m_layout }
-		, m_vao{ other.m_vao }
-		, m_vbo{ other.m_vbo }
-		, m_ibo{ other.m_ibo }
+	mesh::mesh(mesh const & other, allocator_type const & alloc)
+		: mesh{ alloc }
 	{
+		load_from_memory(other);
 	}
 
-	mesh::mesh(mesh && other) noexcept
-		: mesh{}
+	mesh::mesh(mesh && other, allocator_type const & alloc) noexcept
+		: mesh{ alloc }
 	{
 		swap(std::move(other));
 	}
@@ -61,17 +61,6 @@ namespace ml
 		return (*this);
 	}
 
-	void mesh::swap(mesh & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			m_layout.swap(other.m_layout);
-			std::swap(m_vao, other.m_vao);
-			std::swap(m_vbo, other.m_vbo);
-			std::swap(m_ibo, other.m_ibo);
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void mesh::destroy()
@@ -81,7 +70,43 @@ namespace ml
 		ibo().destroy();
 	}
 
+	void mesh::swap(mesh & other) noexcept
+	{
+		if (this != std::addressof(other))
+		{
+			std::swap(m_vao, other.m_vao);
+			std::swap(m_vbo, other.m_vbo);
+			std::swap(m_ibo, other.m_ibo);
+			m_layout.swap(other.m_layout);
+			m_vertices.swap(other.m_vertices);
+			m_indices.swap(other.m_indices);
+		}
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool mesh::load_from_memory(mesh const & other)
+	{
+		if (this == std::addressof(other))
+		{
+			return false;
+		}
+		else if (!other.m_vertices.empty())
+		{
+			if (!other.m_indices.empty())
+			{
+				return load_from_memory(other.m_vertices, other.m_indices);
+			}
+			else
+			{
+				return load_from_memory(other.m_vertices);
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
 
 	bool mesh::load_from_memory(vertices_t const & vertices, indices_t const & indices)
 	{
@@ -146,6 +171,9 @@ namespace ml
 		// apply layout
 		layout().apply();
 		
+		// save geometry
+		m_vertices = vertices;
+		m_indices = indices;
 		return true;
 	}
 
@@ -187,6 +215,9 @@ namespace ml
 		// apply layout
 		layout().apply();
 
+		// save geometry
+		m_vertices = vertices;
+		m_indices = {};
 		return true;
 	}
 

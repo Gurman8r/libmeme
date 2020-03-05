@@ -12,34 +12,37 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline std::optional<pmr::vector<char>> read_file(fs::path const & path)
+		template <class Ch = char
+		> static inline std::optional<pmr::vector<Ch>> get_file_contents(fs::path const & path)
 		{
-			if (std::ifstream in{ path, std::ios_base::binary })
+			std::basic_ifstream<Ch, std::char_traits<Ch>> file{ path, std::ios_base::binary };
+			ML_DEFER{ file.close(); };
+			if (!file) { return std::nullopt; }
+			
+			pmr::vector<Ch> temp{};
+			file.seekg(0, std::ios_base::end);
+			if (std::streamsize size{ file.tellg() }; size > 0)
 			{
-				pmr::vector<char> temp{};
-				in.seekg(0, std::ios_base::end);
-				std::streamsize size;
-				if ((size = in.tellg()) > 0)
-				{
-					in.seekg(0, std::ios_base::beg);
-					temp.resize(static_cast<size_t>(size));
-					in.read(&temp[0], size);
-				}
-				in.close();
-				return std::make_optional(std::move(temp));
+				file.seekg(0, std::ios_base::beg);
+				temp.resize(static_cast<size_t>(size));
+				file.read(&temp[0], size);
 			}
-			return std::nullopt;
+			return std::make_optional(std::move(temp));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline pmr::string get_file_contents(fs::path const & path)
+		template <class Ch = char
+		> static inline pmr::basic_string<Ch> get_file_string(fs::path const & path)
 		{
-			if (auto const o{ FS::read_file(path.string()) })
+			if (auto const o{ FS::get_file_contents<Ch>(path.string()) })
 			{
-				return pmr::string{ o->cbegin(), o->cend() };
+				return pmr::basic_string<Ch>{ o->cbegin(), o->cend() };
 			}
-			return {};
+			else
+			{
+				return {};
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

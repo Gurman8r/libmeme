@@ -121,7 +121,7 @@ namespace ml
 		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const & mesh)
 		{
 			// mesh vertices
-			mesh::vertices_t verts{};
+			pmr::vector<vertex> verts{};
 
 			// for each face
 			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)

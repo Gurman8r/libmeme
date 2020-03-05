@@ -5,6 +5,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// MATRIX
 namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,9 +48,11 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
 
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+
 		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
 
-		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+		ML_NODISCARD constexpr operator storage_type const && () const && noexcept { return std::move(m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -86,9 +89,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
+		ML_NODISCARD constexpr operator pointer() noexcept { return (pointer)m_data; }
 
-		ML_NODISCARD constexpr auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
+		ML_NODISCARD constexpr operator const_pointer() const noexcept { return (const_pointer)m_data; }
+
+		ML_NODISCARD constexpr auto operator*() noexcept -> reference { return (*m_data); }
+
+		ML_NODISCARD constexpr auto operator*() const noexcept -> const_reference { return (*m_data); }
 
 		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
 		
@@ -172,94 +179,95 @@ namespace ml::ds
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// ALIASES
 namespace ml
 {
 	// BASE
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T, size_t N
-	> ML_USING tmatnxn = ds::matrix<T, N, N>;
+	> ML_ALIAS tmatnxn = ds::matrix<T, N, N>;
 
 	template <class T, size_t N
-	> ML_USING tvector = ds::matrix<T, N, 1>;
+	> ML_ALIAS tvector = ds::matrix<T, N, 1>;
 
 
 	// MATRIX 2x2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat2 = tmatnxn<X, 2>;
-	ML_USING	mat2b = tmat2<byte_t>;
-	ML_USING	mat2i = tmat2<int32_t>;
-	ML_USING	mat2u = tmat2<uint32_t>;
-	ML_USING	mat2f = tmat2<float32_t>;
-	ML_USING	mat2d = tmat2<float64_t>;
-	ML_USING	mat2s = tmat2<size_t>;
-	ML_USING	mat2 = mat2f;
+	ML_ALIAS_X	tmat2 = tmatnxn<X, 2>;
+	ML_ALIAS	mat2b = tmat2<byte_t>;
+	ML_ALIAS	mat2i = tmat2<int32_t>;
+	ML_ALIAS	mat2u = tmat2<uint32_t>;
+	ML_ALIAS	mat2f = tmat2<float32_t>;
+	ML_ALIAS	mat2d = tmat2<float64_t>;
+	ML_ALIAS	mat2s = tmat2<size_t>;
+	ML_ALIAS	mat2 = mat2f;
 
 
 	// MATRIX 3x3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat3 = tmatnxn<X, 3>;
-	ML_USING	mat3b = tmat3<byte_t>;
-	ML_USING	mat3i = tmat3<int32_t>;
-	ML_USING	mat3u = tmat3<uint32_t>;
-	ML_USING	mat3f = tmat3<float32_t>;
-	ML_USING	mat3d = tmat3<float64_t>;
-	ML_USING	mat3s = tmat3<size_t>;
-	ML_USING	mat3 = mat3f;
+	ML_ALIAS_X	tmat3 = tmatnxn<X, 3>;
+	ML_ALIAS	mat3b = tmat3<byte_t>;
+	ML_ALIAS	mat3i = tmat3<int32_t>;
+	ML_ALIAS	mat3u = tmat3<uint32_t>;
+	ML_ALIAS	mat3f = tmat3<float32_t>;
+	ML_ALIAS	mat3d = tmat3<float64_t>;
+	ML_ALIAS	mat3s = tmat3<size_t>;
+	ML_ALIAS	mat3 = mat3f;
 
 
 	// MATRIX 4x4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tmat4 = tmatnxn<X, 4>;
-	ML_USING	mat4b = tmat4<byte_t>;
-	ML_USING	mat4i = tmat4<int32_t>;
-	ML_USING	mat4u = tmat4<uint32_t>;
-	ML_USING	mat4f = tmat4<float32_t>;
-	ML_USING	mat4d = tmat4<float64_t>;
-	ML_USING	mat4s = tmat4<size_t>;
-	ML_USING	mat4 = mat4f;
+	ML_ALIAS_X	tmat4 = tmatnxn<X, 4>;
+	ML_ALIAS	mat4b = tmat4<byte_t>;
+	ML_ALIAS	mat4i = tmat4<int32_t>;
+	ML_ALIAS	mat4u = tmat4<uint32_t>;
+	ML_ALIAS	mat4f = tmat4<float32_t>;
+	ML_ALIAS	mat4d = tmat4<float64_t>;
+	ML_ALIAS	mat4s = tmat4<size_t>;
+	ML_ALIAS	mat4 = mat4f;
 
 
 	// VECTOR 2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec2 = tvector<X, 2>;
-	ML_USING	vec2b = tvec2<byte_t>;
-	ML_USING	vec2i = tvec2<int32_t>;
-	ML_USING	vec2u = tvec2<uint32_t>;
-	ML_USING	vec2f = tvec2<float32_t>;
-	ML_USING	vec2d = tvec2<float64_t>;
-	ML_USING	vec2s = tvec2<size_t>;
-	ML_USING	vec2 = vec2f;
+	ML_ALIAS_X	tvec2 = tvector<X, 2>;
+	ML_ALIAS	vec2b = tvec2<byte_t>;
+	ML_ALIAS	vec2i = tvec2<int32_t>;
+	ML_ALIAS	vec2u = tvec2<uint32_t>;
+	ML_ALIAS	vec2f = tvec2<float32_t>;
+	ML_ALIAS	vec2d = tvec2<float64_t>;
+	ML_ALIAS	vec2s = tvec2<size_t>;
+	ML_ALIAS	vec2 = vec2f;
 
 
 	// VECTOR 3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec3 = tvector<X, 3>;
-	ML_USING	vec3b = tvec3<byte_t>;
-	ML_USING	vec3i = tvec3<int32_t>;
-	ML_USING	vec3u = tvec3<uint32_t>;
-	ML_USING	vec3f = tvec3<float32_t>;
-	ML_USING	vec3d = tvec3<float64_t>;
-	ML_USING	vec3s = tvec3<size_t>;
-	ML_USING	vec3 = vec3f;
+	ML_ALIAS_X	tvec3 = tvector<X, 3>;
+	ML_ALIAS	vec3b = tvec3<byte_t>;
+	ML_ALIAS	vec3i = tvec3<int32_t>;
+	ML_ALIAS	vec3u = tvec3<uint32_t>;
+	ML_ALIAS	vec3f = tvec3<float32_t>;
+	ML_ALIAS	vec3d = tvec3<float64_t>;
+	ML_ALIAS	vec3s = tvec3<size_t>;
+	ML_ALIAS	vec3 = vec3f;
 
 
 	// VECTOR 4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_USING_X	tvec4 = tvector<X, 4>;
-	ML_USING	vec4b = tvec4<byte_t>;
-	ML_USING	vec4i = tvec4<int32_t>;
-	ML_USING	vec4u = tvec4<uint32_t>;
-	ML_USING	vec4f = tvec4<float32_t>;
-	ML_USING	vec4d = tvec4<float64_t>;
-	ML_USING	vec4s = tvec4<size_t>;
-	ML_USING	vec4 = vec4f;
+	ML_ALIAS_X	tvec4 = tvector<X, 4>;
+	ML_ALIAS	vec4b = tvec4<byte_t>;
+	ML_ALIAS	vec4i = tvec4<int32_t>;
+	ML_ALIAS	vec4u = tvec4<uint32_t>;
+	ML_ALIAS	vec4f = tvec4<float32_t>;
+	ML_ALIAS	vec4d = tvec4<float64_t>;
+	ML_ALIAS	vec4s = tvec4<size_t>;
+	ML_ALIAS	vec4 = vec4f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Matrix Operators
+// MATRIX OPERATORS
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -418,7 +426,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Vector Operators
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// VECTOR OPERATORS
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -503,5 +513,67 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// TUPLE INTERFACE
+namespace std
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <size_t I, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
+	{
+		return _STD get<I>(value.m_data);
+	}
+
+	template <size_t I, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T const & get(const _ML ds::matrix<T, W, H> & value) noexcept
+	{
+		return _STD get<I>(value.m_data);
+	}
+
+	template <size_t I, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
+	{
+		return _STD get<I>(value.m_data);
+	}
+
+	template <size_t I, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T const && get(const _ML ds::matrix<T, W, H> && value) noexcept
+	{
+		return _STD get<I>(value.m_data);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <size_t X, size_t Y, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
+	{
+		return _STD get<Y * W + X>(value.m_data);
+	}
+
+	template <size_t X, size_t Y, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T const & get(const _ML ds::matrix<T, W, H> & value) noexcept
+	{
+		return _STD get<Y * W + X>(value.m_data);
+	}
+
+	template <size_t X, size_t Y, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
+	{
+		return _STD get<Y * W + X>(value.m_data);
+	}
+
+	template <size_t X, size_t Y, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr T const && get(const _ML ds::matrix<T, W, H> && value) noexcept
+	{
+		return _STD get<Y * W + X>(value.m_data);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_MATRIX_HPP_

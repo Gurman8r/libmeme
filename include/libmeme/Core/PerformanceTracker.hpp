@@ -2,7 +2,6 @@
 #define _ML_PERFORMANCE_TRACKER_HPP_
 
 #include <libmeme/Core/Timer.hpp>
-#include <libmeme/Core/ScopeGuard.hpp>
 
 #define ML_IMPL_BENCHMARK(v, id)							\
 	auto v{ _ML timer{ true } };							\

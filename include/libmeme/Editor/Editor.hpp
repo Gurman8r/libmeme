@@ -50,7 +50,7 @@ namespace ml
 				bool			open			{ true }	; // 
 				storage_type	menus			{}			; // 
 
-				main_menu_t & add_menu(cstring label, std::function<void()> && fn);
+				void add_menu(cstring label, std::function<void()> && fn);
 
 			private: friend io;
 			} main_menu;

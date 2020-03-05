@@ -44,7 +44,7 @@ namespace ml
 
 			inline const_pointer const data() const noexcept { return m_buffer; }
 
-			inline size_t num_allocations() const noexcept { return m_num_allocations; }
+			inline size_t num_allocations() const noexcept { return m_num_alloc; }
 
 			inline size_t total_bytes() const noexcept { return m_total_bytes; }
 
@@ -85,14 +85,14 @@ namespace ml
 		protected:
 			inline void * do_allocate(size_t bytes, size_t align) override
 			{
-				++m_num_allocations;
+				++m_num_alloc;
 				m_bytes_used += bytes;
 				return m_resource->allocate(bytes, align);
 			}
 
 			inline void do_deallocate(void * ptr, size_t bytes, size_t align) override
 			{
-				--m_num_allocations;
+				--m_num_alloc;
 				m_bytes_used -= bytes;
 				return m_resource->deallocate(ptr, bytes, align);
 			}
@@ -109,8 +109,8 @@ namespace ml
 			pointer const m_buffer;
 			size_t const m_total_bytes;
 
-			size_t m_num_allocations{};
-			size_t m_bytes_used		{};
+			size_t m_num_alloc	{};
+			size_t m_bytes_used	{};
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};

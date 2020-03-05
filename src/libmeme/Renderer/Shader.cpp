@@ -47,7 +47,7 @@ namespace ml
 
 	shader::shader(allocator_type const & alloc)
 		: m_handle		{ NULL }
-		, m_source		{ pmr::string{ alloc }, pmr::string{ alloc }, pmr::string{ alloc } }
+		, m_source		{ std::allocator_arg, alloc }
 		, m_attributes	{ alloc }
 		, m_textures	{ alloc }
 		, m_uniforms	{ alloc }
@@ -94,29 +94,34 @@ namespace ml
 	bool shader::load_from_file(fs::path const & v_file, fs::path const & f_file)
 	{
 		return load_from_memory(
-			FS::get_file_contents(v_file).c_str(),
-			FS::get_file_contents(f_file).c_str()
+			FS::get_file_string(v_file).c_str(),
+			FS::get_file_string(f_file).c_str()
 		);
 	}
 
 	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
 	{
 		return load_from_memory(
-			FS::get_file_contents(v_file).c_str(),
-			FS::get_file_contents(g_file).c_str(),
-			FS::get_file_contents(f_file).c_str()
+			FS::get_file_string(v_file).c_str(),
+			FS::get_file_string(g_file).c_str(),
+			FS::get_file_string(f_file).c_str()
 		);
 	}
 
 	bool shader::load_from_source(source_cache const & value)
 	{
-		if (!value[0].empty() && !value[1].empty() && !value[2].empty())
+		auto const
+			& v{ std::get<0>(value) },
+			& g{ std::get<1>(value) },
+			& f{ std::get<2>(value) };
+
+		if (!v.empty() && !g.empty() && !f.empty())
 		{
-			return load_from_memory(value[0], value[1], value[2]);
+			return load_from_memory(v, g, f);
 		}
-		else if (!value[0].empty() && !value[2].empty())
+		else if (!v.empty() && !f.empty())
 		{
-			return load_from_memory(value[0], value[2]);
+			return load_from_memory(v, f);
 		}
 		else
 		{
@@ -172,7 +177,7 @@ namespace ml
 			m_handle = NULL;
 			GL::flush();
 			
-			for (auto & src : m_source) src.clear();
+			meta::for_tuple([&](auto & x) { x.clear(); }, m_source);
 			m_attributes.clear();
 			m_uniforms.clear();
 			m_textures.clear();

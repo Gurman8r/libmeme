@@ -14,21 +14,22 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using contiguous_t	= typename pmr::vector<float_t>;
-		using vertices_t	= typename pmr::vector<vertex>;
-		using indices_t		= typename pmr::vector<uint32_t>;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using contiguous_t		= typename pmr::vector<float_t>;
+		using vertices_t		= typename pmr::vector<vertex>;
+		using indices_t			= typename pmr::vector<uint32_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh() noexcept;
+		mesh(allocator_type const & alloc = {}) noexcept;
 		
-		mesh(vertices_t const & vertices);
+		mesh(vertices_t const & vertices, allocator_type const & alloc = {});
 		
-		mesh(vertices_t const & vertices, indices_t const & indices);
+		mesh(vertices_t const & vertices, indices_t const & indices, allocator_type const & alloc = {});
 		
-		mesh(mesh const & other);
+		mesh(mesh const & other, allocator_type const & alloc = {});
 		
-		mesh(mesh && other) noexcept;
+		mesh(mesh && other, allocator_type const & alloc = {}) noexcept;
 		
 		~mesh();
 
@@ -38,13 +39,15 @@ namespace ml
 		
 		mesh & operator=(mesh && other) noexcept;
 
-		void swap(mesh & other) noexcept;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void destroy();
 
+		void swap(mesh & other) noexcept;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool load_from_memory(mesh const & other);
 
 		bool load_from_memory(vertices_t const & vertices, indices_t const & indices);
 		
@@ -60,21 +63,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool good() const noexcept
-		{
-			return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo);
-		}
+		inline bool good() const noexcept { return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo); }
 
-		inline operator bool() const noexcept
-		{
-			return good();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto layout() noexcept -> buffer_layout & { return m_layout; }
-
-		ML_NODISCARD inline auto layout() const noexcept -> buffer_layout const & { return m_layout; }
+		inline operator bool() const noexcept { return good(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,11 +87,31 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD inline auto layout() noexcept -> buffer_layout & { return m_layout; }
+
+		ML_NODISCARD inline auto layout() const noexcept -> buffer_layout const & { return m_layout; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto vertices() noexcept -> contiguous_t & { return m_vertices; }
+
+		ML_NODISCARD inline auto vertices() const noexcept -> contiguous_t const & { return m_vertices; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline auto indices() noexcept -> indices_t & { return m_indices; }
+
+		ML_NODISCARD inline auto indices() const noexcept -> indices_t const & { return m_indices; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
-		buffer_layout m_layout;
-		VAO m_vao;
-		VBO m_vbo;
-		IBO m_ibo;
+		VAO				m_vao;
+		VBO				m_vbo;
+		IBO				m_ibo;
+		buffer_layout	m_layout;
+		contiguous_t	m_vertices;
+		indices_t		m_indices;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

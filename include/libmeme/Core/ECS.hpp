@@ -209,28 +209,22 @@ namespace ml::ecs::cfg
 namespace ml::ecs::cfg
 {
 	template <
-		size_t GrowAmt = 5,	// growth base amount
-		size_t MultNum = 2,	// growth multipler numerator
-		size_t MultDen = 1	// growth multipler denomenator
+		size_t	GrowBase = 5,
+		class	GrowMult = std::ratio<2, 1>
 	> struct options final
 	{
-		static_assert(0 < GrowAmt,
-			"growth amount negative or zero");
-		
-		static_assert(0 < MultDen,
-			"growth multiplier denomenator negative or zero");
-		
-		static_assert(MultDen <= MultNum,
-			"expression would result in negative growth");
+		// growth base amount
+		static constexpr auto grow_base{ GrowBase };
+		static_assert(0 < grow_base, "growth base negative or zero");
 
-		static constexpr size_t grow_amt
+		// growth multiplier
+		static constexpr auto grow_mult{ _ML_UTIL ratio_cast(1.f, GrowMult{}) };
+		static_assert(1.f <= grow_mult, "expression would result in negative growth");
+
+		static constexpr auto calc_growth(size_t const cap) noexcept
 		{
-			GrowAmt
-		};
-		static constexpr float_t grow_mul
-		{
-			_ML util::ratio_cast(1.f, std::ratio<MultNum, MultDen>{})
-		};
+			return static_cast<size_t>((cap + grow_base) * grow_mult);
+		}
 	};
 }
 
@@ -749,9 +743,7 @@ namespace ml::ecs
 			// grow if needed
 			if (m_capacity <= m_size_next)
 			{
-				constexpr auto amt{ traits_type::options::grow_amt };
-				constexpr auto mul{ traits_type::options::grow_mul };
-				this->grow_to(static_cast<size_t>((m_capacity + amt) * mul));
+				this->grow_to(traits_type::options::calc_growth(m_capacity));
 			}
 
 			size_t const i{ m_size_next++ };

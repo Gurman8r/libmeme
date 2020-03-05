@@ -113,7 +113,7 @@ namespace ml::meta
 	};
 
 	template <class ... Ts
-	> ML_USING concat = typename concat_impl<Ts...>::type;
+	> ML_ALIAS concat = typename concat_impl<Ts...>::type;
 
 	template <class ... Ts
 	> struct concat_impl<list<Ts...>>
@@ -142,7 +142,7 @@ namespace ml::meta
 	};
 
 	template <template <class> class Pr, class Ls
-	> ML_USING remap = typename remap_impl<Pr, Ls>::type;
+	> ML_ALIAS remap = typename remap_impl<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
 	> struct remap_impl<Pr, list<T, Ts...>>
@@ -174,7 +174,7 @@ namespace ml::meta
 
 	template<
 		template <class...> class To, class T
-	> ML_USING rename = typename rename_impl<To, T>::type;
+	> ML_ALIAS rename = typename rename_impl<To, T>::type;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -227,10 +227,10 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	template <class Ls
-	> ML_USING tuple = typename rename<std::tuple, Ls>;
+	> ML_ALIAS tuple = typename rename<std::tuple, Ls>;
 	
 	template <class Ls
-	> ML_USING tag_tuple = typename tuple<remap<tag, Ls>>;
+	> ML_ALIAS tag_tuple = typename tuple<remap<tag, Ls>>;
 
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
@@ -243,15 +243,15 @@ namespace ml::meta
 	template <class Ls
 	> constexpr size_t size() noexcept { return Ls::size; }
 
-	template <class Ls, class T> ML_USING push_back = typename concat<Ls, list<T>>;
+	template <class Ls, class T> ML_ALIAS push_back = typename concat<Ls, list<T>>;
 
-	template <class Ls, class T> ML_USING push_front = typename concat<list<T>, Ls>;
+	template <class Ls, class T> ML_ALIAS push_front = typename concat<list<T>, Ls>;
 
-	template <size_t I, class Ls> ML_USING nth = typename std::tuple_element_t<I, tuple<Ls>>;
+	template <size_t I, class Ls> ML_ALIAS nth = typename std::tuple_element_t<I, tuple<Ls>>;
 
-	template <class Ls> ML_USING head = typename nth<0, Ls>;
+	template <class Ls> ML_ALIAS head = typename nth<0, Ls>;
 
-	template <class Ls> ML_USING tail = typename nth<size<Ls>() - 1, Ls>;
+	template <class Ls> ML_ALIAS tail = typename nth<size<Ls>() - 1, Ls>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -274,7 +274,7 @@ namespace ml::meta
 	};
 
 	template <size_t N, class T
-	> ML_USING repeat = typename repeat_impl<N, T>::type;
+	> ML_ALIAS repeat = typename repeat_impl<N, T>::type;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -291,7 +291,7 @@ namespace ml::meta
 	};
 
 	template <template <class> class Pr, class Ls
-	> ML_USING filter = typename filter_impl<Pr, Ls>::type;
+	> ML_ALIAS filter = typename filter_impl<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
 	> struct filter_impl<Pr, list<T, Ts...>>
@@ -329,7 +329,7 @@ namespace ml::meta
 	};
 
 	template <template <class> class TMF, class TL
-	> ML_USING all_types = typename rename<bound_all<TMF>::template type, TL>;
+	> ML_ALIAS all_types = typename rename<bound_all<TMF>::template type, TL>;
 
 	// example
 	static_assert(all<std::is_const, const int>{});

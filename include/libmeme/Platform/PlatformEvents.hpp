@@ -54,8 +54,7 @@ namespace ml
 
 	struct cursor_pos_event final : T_event<cursor_pos_event>
 	{
-		float64_t const x;
-		float64_t const y;
+		float64_t const x, y;
 
 		constexpr cursor_pos_event(float64_t x, float64_t y) noexcept
 			: x{ x }
@@ -68,31 +67,28 @@ namespace ml
 
 	struct key_event final : T_event<key_event>
 	{
-		key_code const	key;
-		int32_t const	scan;
-		int32_t const	action;
-		int32_t const	mods;
+		int32_t const key, scan, action, mods;
 
 		constexpr key_event(int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
-			: key	{ (key_code)key }
+			: key	{ key }
 			, scan	{ scan }
 			, action{ action }
 			, mods	{ mods }
 		{
 		}
 
-		constexpr bool is_press(key_code k) const { return (key == k) && (action == ML_KEY_PRESS); }
-		constexpr bool is_repeat(key_code k) const { return (key == k) && (action == ML_KEY_REPEAT); }
-		constexpr bool is_release(key_code k) const { return (key == k) && (action == ML_KEY_RELEASE); }
+		constexpr bool is_press(int32_t k) const { return (key == k) && (action == ML_KEY_PRESS); }
+		constexpr bool is_repeat(int32_t k) const { return (key == k) && (action == ML_KEY_REPEAT); }
+		constexpr bool is_release(int32_t k) const { return (key == k) && (action == ML_KEY_RELEASE); }
 
-		constexpr bool is_press(key_code k, int32_t m) const { return is_press(k) && (mods == m); }
-		constexpr bool is_repeat(key_code k, int32_t m) const { return is_repeat(k) && (mods == m); }
-		constexpr bool is_release(key_code k, int32_t m) const { return is_release(k) && (mods == m); }
+		constexpr bool is_press(int32_t k, int32_t m) const { return is_press(k) && (mods == m); }
+		constexpr bool is_repeat(int32_t k, int32_t m) const { return is_repeat(k) && (mods == m); }
+		constexpr bool is_release(int32_t k, int32_t m) const { return is_release(k) && (mods == m); }
 
-		constexpr bool is_shift	(key_code k) const { return is_press(k, KeyMods_Shift); }
-		constexpr bool is_ctrl	(key_code k) const { return is_press(k, KeyMods_Ctrl); }
-		constexpr bool is_alt	(key_code k) const { return is_press(k, KeyMods_Alt); }
-		constexpr bool is_super	(key_code k) const { return is_press(k, KeyMods_Super); }
+		constexpr bool is_shift	(int32_t k) const { return is_press(k, KeyMods_Shift); }
+		constexpr bool is_ctrl	(int32_t k) const { return is_press(k, KeyMods_Ctrl); }
+		constexpr bool is_alt	(int32_t k) const { return is_press(k, KeyMods_Alt); }
+		constexpr bool is_super	(int32_t k) const { return is_press(k, KeyMods_Super); }
 
 		constexpr bool is_new	() const { return is_ctrl(key_code::N); }
 		constexpr bool is_open	() const { return is_ctrl(key_code::O); }
@@ -108,9 +104,7 @@ namespace ml
 
 	struct mouse_event final : T_event<mouse_event>
 	{
-		int32_t const key;
-		int32_t const action;
-		int32_t const mods;
+		int32_t const key, action, mods;
 
 		constexpr mouse_event(int32_t key, int32_t action, int32_t mods) noexcept
 			: key{ key }
@@ -124,8 +118,7 @@ namespace ml
 
 	struct scroll_event final : T_event<scroll_event>
 	{
-		float64_t const x;
-		float64_t const y;
+		float64_t const x, y;
 
 		constexpr scroll_event(float64_t x, float64_t y) noexcept
 			: x{ x }
@@ -138,8 +131,7 @@ namespace ml
 
 	struct frame_size_event final : T_event<frame_size_event>
 	{
-		int32_t const width;
-		int32_t const height;
+		int32_t const width, height;
 
 		constexpr frame_size_event(int32_t width, int32_t height) noexcept
 			: width{ width }
@@ -185,8 +177,7 @@ namespace ml
 
 	struct window_pos_event final : T_event<window_pos_event>
 	{
-		int32_t const x;
-		int32_t const y;
+		int32_t const x, y;
 
 		constexpr window_pos_event(int32_t x, int32_t y) noexcept
 			: x{ x }
@@ -199,8 +190,7 @@ namespace ml
 
 	struct window_size_event final : T_event<window_size_event>
 	{
-		int32_t const width;
-		int32_t const height;
+		int32_t const width, height;
 
 		constexpr window_size_event(int32_t width, int32_t height) noexcept
 			: width{ width }

@@ -405,7 +405,7 @@ namespace ml
 
 	vec2 window::get_cursor_pos() const
 	{
-		vec2d temp { 0 };
+		vec2d temp{};
 		if (m_window)
 		{
 			glfwGetCursorPos(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
@@ -415,7 +415,7 @@ namespace ml
 
 	vec2i window::get_frame_size() const
 	{
-		vec2i temp { 0 };
+		vec2i temp{};
 		if (m_window)
 		{
 			glfwGetFramebufferSize(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
@@ -445,7 +445,7 @@ namespace ml
 
 	vec2i window::get_position() const
 	{
-		vec2i temp { 0 };
+		vec2i temp{};
 		if (m_window)
 		{
 			glfwGetWindowPos(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
@@ -527,7 +527,7 @@ namespace ml
 
 	video_mode const & window::get_desktop_mode()
 	{
-		static video_mode temp {};
+		static video_mode temp{};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -548,7 +548,7 @@ namespace ml
 
 	pmr::vector<video_mode> const & window::get_fullscreen_modes()
 	{
-		static pmr::vector<video_mode> temp {};
+		static pmr::vector<video_mode> temp{};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -581,7 +581,7 @@ namespace ml
 
 	pmr::vector<void *> const & window::get_monitors()
 	{
-		static pmr::vector<void *> temp {};
+		static pmr::vector<void *> temp{};
 		if (temp.empty())
 		{
 			int32_t count { 0 };

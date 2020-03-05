@@ -2,6 +2,7 @@
 #define _ML_ALG_HPP_
 
 #include <libmeme/Core/Meta.hpp>
+#include <libmeme/Core/ScopeGuard.hpp>
 #include <gcem/include/gcem.hpp>
 
 #define _ML_UTIL _ML util::
@@ -203,7 +204,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto dot(const A<T, N...> & lhs, const A<T, N...> & rhs)
+	> ML_NODISCARD constexpr auto dot(A<T, N...> const & lhs, A<T, N...> const & rhs)
 	{
 		T temp{ 0 };
 		for (size_t i = 0; i < lhs.size(); ++i)
@@ -212,7 +213,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto determinant(const M<T, 4, 4> & v)
+	> ML_NODISCARD constexpr auto determinant(M<T, 4, 4> const & v)
 	{
 		return
 			v[0] * (v[15] * v[5] - v[7] * v[13]) -
@@ -221,7 +222,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto sqr_magnitude(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto sqr_magnitude(A<T, N...> const & value)
 	{
 		T temp{ (T)0 };
 		for (auto const & elem : value)
@@ -230,13 +231,13 @@ namespace ml::util
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto magnitude(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto magnitude(A<T, N...> const & value)
 	{
 		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto scale_to_fit(const M<T, 2, 1> & l, const M<T, 2, 1> & r)
+	> ML_NODISCARD constexpr auto scale_to_fit(M<T, 2, 1> const & l, M<T, 2, 1> const & r)
 	{
 		const M<T, 2, 1>
 			h{ { (r[0] / l[0]), (r[0] / l[0]) } },
@@ -244,16 +245,24 @@ namespace ml::util
 		return l * ((h < v) ? h : v);
 	}
 
+	template <class Src, class Dst
+	> ML_NODISCARD constexpr Src maintain(Src const & src, Dst const & dst)
+	{
+		auto const v = Dst{ dst[0] / src[0], dst[1] / src[1] };
+		auto const r = v[0] < v[1] ? v[0] : v[1];
+		return Src{ src[0] * r, src[1] * r };
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto normalize(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto normalize(A<T, N...> const & value)
 	{
 		return (value / magnitude<A, T, N...>(value));
 	}
 
 	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto transpose(const A<T, N...> & value)
+	> ML_NODISCARD constexpr auto transpose(A<T, N...> const & value)
 	{
 		A<T, N...> temp{ 0 };
 		for (size_t i = 0; i < value.size(); ++i)
@@ -268,7 +277,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto inverse(const M<T, 4, 4> & v)
+	> ML_NODISCARD constexpr auto inverse(M<T, 4, 4> const & v)
 	{
 		T const det{ determinant<M, T>(v) };
 		return ((det != (T)0)
@@ -288,7 +297,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 3> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 3> & v, M<T, 4, 4> const & m)
 	{
 		return M<T, 3, 3>
 		{
@@ -305,7 +314,7 @@ namespace ml::util
 	}
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, const M<T, 4, 4> & m)
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, M<T, 4, 4> const & m)
 	{
 		return M<T, 3, 1>
 		{
@@ -318,7 +327,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto cross(const M<T, 2, 1> & a, const M<T, 2, 1> & b)
+	> ML_NODISCARD constexpr auto cross(M<T, 2, 1> const & a, M<T, 2, 1> const & b)
 	{
 		return a[0] * b[1] - b[0] * a[1];
 	}
