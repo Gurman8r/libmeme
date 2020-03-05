@@ -39,7 +39,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::startup(bool install_callbacks)
+	bool engine::startup()
 	{
 		if (!initialized()) return false;
 
@@ -56,70 +56,6 @@ namespace ml
 		))
 		{
 			return debug::log::error("engine failed initializing python");
-		}
-
-		// install window callbacks
-		if (auto & win{ g_engine->m_window }; win.is_open() && install_callbacks)
-		{
-			win.set_char_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<char_event>(ML_FWD(args)...);
-			});
-
-			win.set_cursor_enter_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<cursor_enter_event>(ML_FWD(args)...);
-			});
-
-			win.set_cursor_pos_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<cursor_pos_event>(ML_FWD(args)...);
-			});
-
-			win.set_error_callback([](auto ... args)
-			{
-				event_system::fire_event<window_error_event>(ML_FWD(args)...);
-			});
-
-			win.set_frame_size_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<frame_size_event>(ML_FWD(args)...);
-			});
-
-			win.set_key_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<key_event>(ML_FWD(args)...);
-			});
-
-			win.set_mouse_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<mouse_event>(ML_FWD(args)...);
-			});
-
-			win.set_scroll_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<scroll_event>(ML_FWD(args)...);
-			});
-
-			win.set_window_close_callback([](auto)
-			{
-				event_system::fire_event<window_close_event>();
-			});
-
-			win.set_window_focus_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<window_focus_event>(ML_FWD(args)...);
-			});
-
-			win.set_window_pos_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<window_pos_event>(ML_FWD(args)...);
-			});
-
-			win.set_window_size_callback([](auto, auto ... args)
-			{
-				event_system::fire_event<window_size_event>(ML_FWD(args)...);
-			});
 		}
 		
 		return true;

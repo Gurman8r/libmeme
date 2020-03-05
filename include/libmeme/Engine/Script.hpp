@@ -34,31 +34,31 @@ namespace ml
 
 		script & operator=(script && other) noexcept;
 
-		void swap(script & other) noexcept;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool load_from_file(fs::path const & path);
 
+		void swap(script & other) noexcept;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t execute();
+		int32_t execute() noexcept;
 
-		inline int32_t operator()()
+		inline auto operator()() noexcept
 		{
 			return execute();
 		}
 
-		inline int32_t operator()(fs::path const & path)
+		inline auto operator()(fs::path const & path) noexcept
 		{
-			if (!load_from_file(path)) return 0;
+			load_from_file(path);
 			return execute();
 		}
 
-		inline int32_t operator()(int32_t lang, pmr::string const & text)
+		inline auto operator()(int32_t lang, pmr::string && text) noexcept
 		{
 			m_lang = lang;
-			m_text = text;
+			m_text = ML_FWD(text);
 			return execute();
 		}
 

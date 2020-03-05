@@ -115,7 +115,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool startup(bool install_callbacks);
+		ML_NODISCARD static bool startup();
 
 		static bool shutdown();
 

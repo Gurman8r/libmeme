@@ -42,7 +42,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool editor::startup(bool install_callbacks)
+	bool editor::startup()
 	{
 		if (!initialized()) return false;
 
@@ -100,10 +100,7 @@ namespace ml
 		// backend
 #ifdef ML_RENDERER_OPENGL
 
-		if (!ImGui_ImplGlfw_InitForOpenGL(
-			(struct GLFWwindow *)engine::get_window()->get_handle(),
-			install_callbacks
-		))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::get_window()->get_handle(), true))
 		{
 			return debug::log::error("Failed initializing ImGui platform");
 		}

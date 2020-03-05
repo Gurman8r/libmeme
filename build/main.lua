@@ -16,7 +16,8 @@ project "main"
 		"libmeme",
 	}
 	defines {
-		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
+		"_CRT_SECURE_NO_WARNINGS",
+		"NOMINMAX",
 	}
 	includedirs {
 		"%{sln_dir}include",

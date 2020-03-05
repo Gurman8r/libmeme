@@ -59,16 +59,6 @@ namespace ml
 		return (*this);
 	}
 
-	void script::swap(script & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_lang, other.m_lang);
-
-			m_text.swap(other.m_text);
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool script::load_from_file(fs::path const & path)
@@ -89,15 +79,25 @@ namespace ml
 		return true;
 	}
 
+	void script::swap(script & other) noexcept
+	{
+		if (this != std::addressof(other))
+		{
+			std::swap(m_lang, other.m_lang);
+
+			m_text.swap(other.m_text);
+		}
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t script::execute()
+	int32_t script::execute() noexcept
 	{
 		switch (m_lang)
 		{
 		default		: return 0;
-		case lua	: return ml_lua::do_string(m_text);
 		case python	: return ml_python::do_string(m_text);
+		case lua	: return ml_lua::do_string(m_text);
 		}
 	}
 

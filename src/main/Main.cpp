@@ -1,10 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -21,7 +17,7 @@ using json = nlohmann::json;
 #endif
 
 #ifndef SETUP_SCRIPT
-#define SETUP_SCRIPT "assets/scripts/setup.py"
+#define SETUP_SCRIPT L"assets/scripts/setup.py"
 #endif
 
 #ifndef WINDOW_TITLE
@@ -56,33 +52,25 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create context
+	// create engine context
 	ML_ASSERT(engine::create_context()); ML_DEFER{ ML_ASSERT(engine::destroy_context()); };
-	ML_ASSERT(editor::create_context()); ML_DEFER{ ML_ASSERT(editor::destroy_context()); };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
 	auto & engine_cfg			{ engine::get_config() };
 	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
 	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
 	engine_cfg.program_path		= fs::current_path();
-	engine_cfg.content_path		= "../../../../";
-	engine_cfg.library_home		= "";
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// configure editor
-	auto & editor_cfg			{ editor::get_config() };
-	editor_cfg.api_version		= "#version 130";
-	editor_cfg.style			= "assets/styles/obsidian.style";
-	editor_cfg.ini_file			= nullptr;
-	editor_cfg.log_file			= nullptr;
+	engine_cfg.content_path		= L"../../../../";
+	engine_cfg.library_home		= L"";
+	
+	// start engine
+	ML_ASSERT(engine::startup()); ML_DEFER{ ML_ASSERT(engine::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create window
-	ML_ASSERT(engine::get_window()->create(
+	ML_ASSERT(engine::get_window()->create
+	(
 		WINDOW_TITLE,					// title
 		make_video_mode(
 			vec2i{ 1280, 720 },			// resolution
@@ -101,16 +89,28 @@ ml::int32_t main()
 		WindowFlags_DefaultMaximized	// flags
 	));
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// startup
-	ML_ASSERT(engine::startup(true)); ML_DEFER{ ML_ASSERT(engine::shutdown()); };
-	ML_ASSERT(editor::startup(true)); ML_DEFER{ ML_ASSERT(editor::shutdown()); };
+	// install callbacks
+	window::install_default_callbacks(engine::get_window());
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// run main script
-	script{ engine::path_to(SETUP_SCRIPT) }();
+	// create editor context
+	ML_ASSERT(editor::create_context()); ML_DEFER{ ML_ASSERT(editor::destroy_context()); };
+
+	// configure editor
+	auto & editor_cfg			{ editor::get_config() };
+	editor_cfg.api_version		= "#version 130";
+	editor_cfg.style			= "assets/styles/obsidian.style";
+	editor_cfg.ini_file			= nullptr;
+	editor_cfg.log_file			= nullptr;
+	
+	// start editor
+	ML_ASSERT(editor::startup()); ML_DEFER{ ML_ASSERT(editor::shutdown()); };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// run setup script
+	std::invoke(script{}, engine::path_to(SETUP_SCRIPT));
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -197,6 +197,8 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
+		static void install_default_callbacks(window * win);
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
