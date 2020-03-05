@@ -13,7 +13,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef MEM_RESERVED
-#define MEM_RESERVED 16.0_MiB
+#define MEM_RESERVED 64.0_MiB
 #endif
 
 #ifndef SETUP_SCRIPT
