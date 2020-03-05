@@ -1,6 +1,5 @@
-import encodings
-import sys
 import LIBMEME as ml
+import sys
 
 
 # system setup

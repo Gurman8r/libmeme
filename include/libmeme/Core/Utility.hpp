@@ -236,6 +236,8 @@ namespace ml::util
 		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto scale_to_fit(M<T, 2, 1> const & l, M<T, 2, 1> const & r)
 	{
@@ -248,8 +250,8 @@ namespace ml::util
 	template <class Src, class Dst
 	> ML_NODISCARD constexpr Src maintain(Src const & src, Dst const & dst)
 	{
-		auto const v = Dst{ dst[0] / src[0], dst[1] / src[1] };
-		auto const r = v[0] < v[1] ? v[0] : v[1];
+		Dst const v{ dst[0] / src[0], dst[1] / src[1] };
+		auto const r{ v[0] < v[1] ? v[0] : v[1] };
 		return Src{ src[0] * r, src[1] * r };
 	}
 

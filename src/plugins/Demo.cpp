@@ -1,5 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Core/ECS.hpp>
@@ -21,59 +22,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// UTILITY
-namespace ml
-{
-	template <class Ch = char, class Tr = std::char_traits<Ch>
-	> struct basic_stream_sniper final : trackable, non_copyable
-	{
-		using sstream_t		= std::basic_stringstream<Ch, Tr>;
-		using ostream_t		= std::basic_ostream<Ch, Tr>;
-		using streambuf_t	= std::basic_streambuf<Ch, Tr>;
-
-		ostream_t	*	ptr{};
-		streambuf_t	*	buf{};
-		sstream_t		str{};
-
-		basic_stream_sniper(ostream_t * value = {}) { (*this)(value); }
-
-		~basic_stream_sniper() { (*this)(nullptr); }
-
-		inline operator bool() const noexcept { return buf && ptr; }
-
-		inline operator sstream_t & () & noexcept { return str; }
-
-		inline operator sstream_t const & () const & noexcept { return str; }
-
-		inline void operator()(ostream_t * value)
-		{
-			if (value && !buf && !ptr)
-			{
-				ptr = value;
-				buf = ptr->rdbuf(str.rdbuf());
-				str.str({});
-			}
-			else if (!value && buf && ptr)
-			{
-				ptr->rdbuf(buf);
-				ptr = nullptr;
-				buf = nullptr;
-			}
-		}
-	};
-
-	ML_ALIAS stream_sniper = typename basic_stream_sniper<char>;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// ECS
+// ECS CONFIG
 namespace ml
 {
 	// (T) TAGS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct t_object {};
+	struct t_renderer {};
 
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -137,7 +92,7 @@ namespace ml
 
 		// tags
 		ecs::cfg::tags<
-		t_object
+		t_renderer
 		>,
 
 		// components
@@ -155,6 +110,8 @@ namespace ml
 		x_apply_transforms, x_apply_materials, x_draw_renderers
 		>
 	>;
+
+	using entity_manager = ecs::manager<entity_traits>;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -164,15 +121,6 @@ namespace ml
 {
 	struct demo final : plugin
 	{
-		// ECS
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using entity_manager = ecs::manager<entity_traits>;
-
-		entity_manager m_ecs{};
-
-		pmr::vector<entity_manager::handle> m_handles;
-
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -184,6 +132,15 @@ namespace ml
 		ds::flat_map<pmr::string,	script			> m_scripts		{};
 		ds::flat_map<pmr::string,	shader			> m_shaders		{};
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
+
+
+		// ECS
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		entity_manager m_ecs{};
+
+		pmr::vector<entity_manager::handle> m_handles;
+
 
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -236,8 +193,6 @@ namespace ml
 			),
 		} };
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -272,7 +227,7 @@ namespace ml
 			// load stuff, etc...
 
 			// GUI
-			setup_main_menu_bar();
+			setup_menus();
 
 			// ICON
 			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) }
@@ -294,6 +249,14 @@ namespace ml
 
 				m_textures["navball"] = make_texture(
 					engine::path_to("assets/textures/navball.png")
+				);
+
+				m_textures["earth_dm_2k"] = make_texture(
+					engine::path_to("assets/textures/earth/earth_dm_2k.png")
+				);
+
+				m_textures["moon_dm_2k"] = make_texture(
+					engine::path_to("assets/textures/moon/moon_dm_2k.png")
 				);
 			}
 
@@ -355,15 +318,10 @@ namespace ml
 				);
 
 				// transform
-				auto const _transform = make_material(
+				auto const _tf = make_material(
 					make_uniform<vec3	>("u_position", vec3{}),
 					make_uniform<vec4	>("u_rotation", vec4{}),
 					make_uniform<vec3	>("u_scale",	vec3{})
-				);
-
-				// phong
-				auto const _phong = make_material(
-					make_uniform<float_t>("foo", 0.f)
 				);
 
 				// 2d
@@ -375,8 +333,14 @@ namespace ml
 				// 3d
 				m_materials["3d"] = make_material(
 					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<texture>("u_texture0", &m_textures["navball"])
-				) + _timers + _camera + _transform;
+					make_uniform<texture>("u_texture0", &m_textures["earth_dm_2k"])
+					//, make_uniform<texture>("u_texture1", &m_textures["moon_dm_2k"])
+				) + _timers + _camera + _tf;
+
+				// test
+				m_materials["test"] = (make_material() + m_materials["3d"])
+					.set<texture const *>("u_texture0", &m_textures["moon_dm_2k"]);
+
 			}
 
 			// MODELS
@@ -425,18 +389,28 @@ namespace ml
 			{
 				ML_DEFER{ m_ecs.refresh(); };
 
-				if (auto & h{ m_handles.emplace_back(m_ecs.create_handle()) })
+				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
 				{
-					h.add_tag<t_object>();
-					h.add_component<c_shader>	(m_shaders	["3d"]);
-					h.add_component<c_material>	(m_materials["3d"]);
-					h.add_component<c_model>	(m_models	["sphere32x24"]);
-					h.add_component<c_transform>(
-						vec3{ 0.f, 0.f, 0.f },
-						vec4{ 0.0f, 0.1f, 0.0f, 0.25f },
-						vec3{ 1.f, 1.f, 1.f }
-					);
-				}
+					auto & h{ m_handles.emplace_back(m_ecs.create_handle()) };
+					h.add_tag<t_renderer>();
+					h.add_component<c_shader>	(m_shaders	[shd]);
+					h.add_component<c_material>	(m_materials[mat]);
+					h.add_component<c_model>	(m_models	[mdl]);
+					h.add_component<c_transform>(tf);
+					return h;
+				};
+				
+				auto & earth = make_renderer("3d", "3d", "sphere32x24", c_transform{
+					vec3{ -.5f, 0.f, 0.f },
+					vec4{ 0.0f, 0.1f, 0.0f, .15f },
+					vec3{ 1.f, 1.f, 1.f }
+					});
+
+				auto & moon = make_renderer("3d", "test", "sphere8x6", c_transform{
+					vec3{ 1.f, 0.f, 0.f },
+					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
+					vec3::fill(.27f)
+					});
 			}
 		}
 
@@ -444,14 +418,14 @@ namespace ml
 		{
 			// update stuff, etc...
 
-			// console
-			if (m_cout) { m_console.printss(m_cout); }
-
-			// runtime
+			// timers
 			static auto const & dt	{ engine::get_io().delta_time };
 			static auto const & fps	{ engine::get_io().frame_rate };
 			static auto const & fc	{ engine::get_io().frame_count };
 			static auto const & tt	{ engine::get_time() };
+
+			// console
+			if (m_cout) { m_console.printss(m_cout); }
 
 			// plots
 			m_plots.update(tt.count());
@@ -578,7 +552,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void setup_main_menu_bar()
+		void setup_menus()
 		{
 			auto & m{ editor::get_io().main_menu };
 
@@ -753,7 +727,8 @@ namespace ml
 		{
 			if (m_pipeline.empty()) return;
 
-			gui::texture_preview pview{ nullptr, {}, 4.f, 32.f };
+			static gui::texture_preview pview{ nullptr, {}, 4.f, 32.f };
+			
 			pview.value = &m_pipeline.back().second.get_texture();
 
 			pview.render([&]()
@@ -766,6 +741,7 @@ namespace ml
 
 		void show_documents_gui()
 		{
+			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
 				if (ImGui::MenuItem("new")) {}
@@ -775,8 +751,10 @@ namespace ml
 				ImGui::EndMenuBar();
 			}
 
+			// tab bar
 			if (ImGui::BeginTabBar("##documents##tabs"))
 			{
+				gui::help_marker("WIP");
 				ImGui::EndTabBar();
 			}
 		}

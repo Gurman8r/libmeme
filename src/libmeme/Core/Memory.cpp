@@ -9,7 +9,7 @@ namespace ml
 		: m_alloc	{}
 		, m_index	{}
 		, m_records	{}
-		, m_testres	{ nullptr }
+		, m_testres	{}
 	{
 	}
 

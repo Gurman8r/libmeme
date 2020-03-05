@@ -185,17 +185,7 @@ namespace ml
 		{
 			if (uniform * u{ get<T>(name) })
 			{
-				u->set(data);
-			}
-			return (*this);
-		}
-
-		template <class T
-		> inline material & set(pmr::string const & name, T && data)
-		{
-			if (uniform * u{ get<T>(name) })
-			{
-				u->set(std::move(data));
+				u->set<T>(data);
 			}
 			return (*this);
 		}

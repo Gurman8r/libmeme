@@ -353,7 +353,7 @@ namespace ml::ecs
 			meta::for_types<typename signatures::type_list
 			>([&temp](auto s)
 			{
-				// get the signature's signature
+				// get the signature's bitset
 				auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
 
 				// enable component bits
@@ -1007,26 +1007,35 @@ namespace ml::ecs
 		> inline self_type & for_entities(Fn && fn)
 		{
 			// invoke function on every alive entity
-			for (size_t i = 0; i < m_size; ++i)
+			for (size_t e = 0, imax = m_size; e < imax; ++e)
 			{
-				std::invoke(ML_FWD(fn), i);
+				std::invoke(ML_FWD(fn), e);
 			}
 			return (*this);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class Fn
-		> inline self_type & for_components(size_t const i, Fn && fn)
+		> inline self_type & for_components(size_t const e, Fn && fn)
 		{
 			// invoke function on each of an entity's components
 			meta::for_types<typename traits_type::component_list>([&](auto c)
 			{
 				using C = typename decltype(c)::type;
-				if (this->has_component<C>(i))
+				if (this->has_component<C>(e))
 				{
-					std::invoke(ML_FWD(fn), this->get_component<C>(i));
+					std::invoke(ML_FWD(fn), this->get_component<C>(e));
 				}
 			});
 			return (*this);
+		}
+
+		template <class Fn
+		> inline self_type & for_components(handle const & h, Fn && fn)
+		{
+			// invoke function on each of a handle's components
+			return this->for_components(h.m_entity, ML_FWD(fn));
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1035,11 +1044,11 @@ namespace ml::ecs
 		> inline self_type & for_matching(Fn && fn)
 		{
 			// invoke function on all entities matching a signature
-			return this->for_entities([&](size_t const i)
+			return this->for_entities([&](size_t const e)
 			{
-				if (this->matches_signature<S>(i))
+				if (this->matches_signature<S>(e))
 				{
-					this->expand_call<S>(i, ML_FWD(fn));
+					this->expand_call<S>(e, ML_FWD(fn));
 				}
 			});
 		}
@@ -1073,24 +1082,24 @@ namespace ml::ecs
 		> struct expand_call_helper;
 
 		template <class S, class Fn
-		> inline void expand_call(size_t const i, Fn && fn)
+		> inline void expand_call(size_t const e, Fn && fn)
 		{
 			using req_comp = typename traits_type::components::template filter<S>;
 
 			using helper = meta::rename<expand_call_helper, req_comp>;
 
-			helper::call(i, *this, ML_FWD(fn));
+			helper::call(e, *this, ML_FWD(fn));
 		}
 
 		template <class ... Ts
 		> struct expand_call_helper
 		{
 			template <class Fn
-			> static inline void call(size_t const i, self_type & self, Fn && fn)
+			> static inline void call(size_t const e, self_type & self, Fn && fn)
 			{
-				auto const c{ std::get<ID_Index>(self.m_entities)[i] }; // component data index
+				auto const i{ std::get<ID_Index>(self.m_entities)[e] }; // component data index
 
-				std::invoke(ML_FWD(fn), i, std::get<pmr::vector<Ts>>(self.m_components)[c]...);
+				std::invoke(ML_FWD(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
 			}
 		};
 

@@ -255,25 +255,21 @@ namespace ml::ds
 
 		ML_NODISCARD inline reference_pair back() noexcept
 		{
-			ML_ASSERT(!empty());
 			return { m_pair.first.back(), m_pair.second.back() };
 		}
 
 		ML_NODISCARD inline const_reference_pair back() const noexcept
 		{
-			ML_ASSERT(!empty());
 			return { m_pair.first.back(), m_pair.second.back() };
 		}
 
 		ML_NODISCARD inline reference_pair front() noexcept
 		{
-			ML_ASSERT(!empty());
 			return { m_pair.first.front(), m_pair.second.front() };
 		}
 
 		ML_NODISCARD inline const_reference_pair front() const noexcept
 		{
-			ML_ASSERT(!empty());
 			return { m_pair.first.front(), m_pair.second.front() };
 		}
 

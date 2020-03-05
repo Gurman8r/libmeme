@@ -174,17 +174,12 @@ namespace ml
 			}
 		}
 
-		template <class Data
-		> inline uniform & set(Data && value)
-		{
-			m_data = ML_FWD(value);
-			return (*this);
-		}
-
 		template <class T, class Data
-		> inline uniform & set(Data && value)
+		> inline uniform & set(Data const & value) noexcept
 		{
-			return this->holds<T>() ? this->set<T>(ML_FWD(value)) : (*this);
+			if (this->holds<T>())
+				m_data = value;
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
