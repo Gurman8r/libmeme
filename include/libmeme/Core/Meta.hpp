@@ -279,6 +279,17 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+// ARRAY - a tuple containing N Ts
+namespace ml::meta
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, size_t N
+	> ML_ALIAS array = typename tuple<repeat<N, T>>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 // FILTER - remove types from list
 namespace ml::meta
 {

@@ -80,7 +80,7 @@ namespace ml
 				break;
 			}
 
-			debug::err()
+			std::cout
 				<< "OpenGL Error " << code << ":\n"
 				<< " \'" << file << "\' (" << line << ")\n"
 				<< "Expr:\n"

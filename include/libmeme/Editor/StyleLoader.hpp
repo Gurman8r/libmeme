@@ -11,7 +11,7 @@ namespace ml
 	{
 		style_loader() noexcept = default;
 
-		bool operator()(fs::path const & path);
+		bool operator()(filesystem::path const & path);
 	};
 }
 

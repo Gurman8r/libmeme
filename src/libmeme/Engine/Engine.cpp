@@ -1,8 +1,5 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/Python.hpp>
-#include <libmeme/Engine/Lua.hpp>
-#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
@@ -15,7 +12,7 @@ namespace ml
 
 	static engine::context * g_engine{};
 	
-	bool engine::initialized() noexcept
+	bool engine::is_initialized() noexcept
 	{
 		return g_engine;
 	}
@@ -41,29 +38,29 @@ namespace ml
 
 	bool engine::startup()
 	{
-		if (!initialized()) return false;
+		if (!g_engine) return false;
 
-		// start lua
-		if (!ml_lua::startup())
-		{
-			return debug::log::error("engine failed initializing lua");
-		}
-
-		// start python
-		if (!ml_python::startup(
-			g_engine->m_config.program_name,
-			path_to(g_engine->m_config.library_home)
+		// create window
+		if (g_engine->m_window.create(
+			g_engine->m_config.window_title,
+			g_engine->m_config.window_display,
+			g_engine->m_config.window_context,
+			g_engine->m_config.window_hints
 		))
 		{
-			return debug::log::error("engine failed initializing python");
+			window::install_default_callbacks(&g_engine->m_window);
 		}
-		
+		else
+		{
+			return debug::log::error("engine failed creating window");
+		}
+
 		return true;
 	}
 
 	bool engine::shutdown()
 	{
-		if (!initialized()) return false;
+		if (!g_engine) return false;
 
 		// cleanup plugins
 		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
@@ -78,10 +75,6 @@ namespace ml
 
 			window::terminate();
 		}
-
-		// shutdown scripting
-		if (ml_python::initialized()) { ml_python::shutdown(); }
-		if (ml_lua::initialized()) { ml_lua::shutdown(); }
 
 		return true;
 	}
@@ -118,16 +111,19 @@ namespace ml
 
 	void engine::end_draw()
 	{
-		if ML_UNLIKELY(g_engine->m_window & WindowFlags_DoubleBuffered)
+		if ML_LIKELY(!(g_engine->m_window & WindowHints_DoubleBuffered))
+		{
+			GL::flush();
+		}
+		else
 		{
 			g_engine->m_window.swap_buffers();
 		}
-		GL::flush();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::load_plugin(fs::path const & path)
+	bool engine::load_plugin(filesystem::path const & path)
 	{
 		// check file name already loaded
 		if (auto const file{ g_engine->m_plugin_files.insert(path.filename()) }; file.second)

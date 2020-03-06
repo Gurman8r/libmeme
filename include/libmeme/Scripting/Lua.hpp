@@ -1,30 +1,22 @@
 #ifndef _ML_LUA_HPP_
 #define _ML_LUA_HPP_
 
-#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Common.hpp>
-
-extern "C"
-{
-#	include <lua/lua.h>
-#	include <lua/lualib.h>
-#	include <lua/lauxlib.h>
-}
+#include <libmeme/Scripting/Export.hpp>
+#include <libmeme/Core/Singleton.hpp>
 
 namespace ml
 {
-	class ML_ENGINE_API ml_lua final
+	class ML_SCRIPTING_API ml_lua final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool initialized() noexcept;
+		static bool is_initialized() noexcept;
 
-		static bool startup();
+		static bool initialize();
 
-		static bool startup(bool openLibs, luaL_Reg const * userLib);
-
-		static bool shutdown();
+		static bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,7 +24,7 @@ namespace ml
 
 		static int32_t do_string(pmr::string const & value);
 
-		static int32_t do_file(fs::path const & path);
+		static int32_t do_file(filesystem::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

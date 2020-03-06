@@ -7,17 +7,10 @@
 
 #define _ML_UTIL _ML util::
 
-#define ML_BIT_READ(v, i)		((v >> i) & 1)
-#define ML_BIT_SET(v, i)		(v |= (1 << i))
-#define ML_BIT_CLEAR(v, i)		(v &= ~(1 << i))
-#define ML_BIT_WRITE(v, i, b)	(b ? ML_BIT_SET(v, i) : ML_BIT_CLEAR(v, i))
-
-#define ML_ASPECT(w, h)			((w != 0 && h != 0) ? ((float_t)w / (float_t)h) : 0.f)
-#define ML_ASPECT2(v)			ML_ASPECT(v[0], v[1])
-
-#define ML_MIN(lhs, rhs)		(lhs <= rhs ? lhs : rhs)
-#define ML_MAX(lhs, rhs)		(lhs >= rhs ? lhs : rhs)
-#define ML_CLAMP(v, lo, hi)		ML_MIN(ML_MAX(v, lo), hi)
+#define ML_bitread(v, i)		((v >> i) & 1)
+#define ML_bitset(v, i)			(v |= (1 << i))
+#define ML_bitclear(v, i)		(v &= ~(1 << i))
+#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
 
 // General
 namespace ml::util
@@ -35,7 +28,7 @@ namespace ml::util
 	template <class T
 	> constexpr void swap(T & lhs, T & rhs) noexcept
 	{
-		T temp = std::move(lhs);
+		T temp{ std::move(lhs) };
 		lhs = std::move(rhs);
 		rhs = std::move(temp);
 	}
@@ -60,6 +53,12 @@ namespace ml::util
 			: ((lBegin == lEnd) && (rBegin == rEnd));
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// Min / Max / Clamp
+namespace ml
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Lhs, class Rhs, class ... Rest
@@ -97,48 +96,8 @@ namespace ml::util
 	template <class T, class Lhs, class Rhs
 	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
 	{
+		// min(max(v, lhs), rhs)
 		return _ML_UTIL min(_ML_UTIL max(ML_FWD(v), ML_FWD(lhs)), ML_FWD(rhs));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, int64_t Num, int64_t Den
-	> ML_NODISCARD constexpr auto ratio_cast(T v, std::ratio<Num, Den> const & r)
-	{
-		auto const
-			one{ static_cast<T>(1) },
-			num{ static_cast<T>(r.num) },
-			den{ static_cast<T>(r.den) };
-		return ((num == one) && (den == one))
-			? v
-			: (((num != one) && (den == one))
-				? v * num
-				: (((num == one) && (den != one))
-					? v / den
-					: v * num / den));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T
-	> ML_NODISCARD constexpr auto power_of_2(T v)
-	{
-		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
-		if constexpr (std::is_floating_point_v<T>)
-		{
-			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
-		}
-		else if constexpr (std::is_integral_v<T>)
-		{
-			v--;
-			if constexpr (sizeof(T) >= 1)
-				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8
-			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16
-			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32
-			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64
-			v++;
-			return v;
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -198,7 +157,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Vector Math
+// Math
 namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -234,25 +193,6 @@ namespace ml::util
 	> ML_NODISCARD constexpr auto magnitude(A<T, N...> const & value)
 	{
 		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto scale_to_fit(M<T, 2, 1> const & l, M<T, 2, 1> const & r)
-	{
-		const M<T, 2, 1>
-			h{ { (r[0] / l[0]), (r[0] / l[0]) } },
-			v{ { (r[1] / l[1]), (r[1] / l[1]) } };
-		return l * ((h < v) ? h : v);
-	}
-
-	template <class Src, class Dst
-	> ML_NODISCARD constexpr Src maintain(Src const & src, Dst const & dst)
-	{
-		Dst const v{ dst[0] / src[0], dst[1] / src[1] };
-		auto const r{ v[0] < v[1] ? v[0] : v[1] };
-		return Src{ src[0] * r, src[1] * r };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -337,11 +277,75 @@ namespace ml::util
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
 	{
-		return M<T, 3, 1> {
+		return M<T, 3, 1>{
 			a[1] * b[2] - b[1] * a[2],
-				a[2] * b[0] - b[2] * a[0],
-				a[0] * b[1] - b[0] * a[1]
+			a[2] * b[0] - b[2] * a[0],
+			a[0] * b[1] - b[0] * a[1]
 		};
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class V2, class T = float_t
+	> ML_NODISCARD constexpr auto aspect(V2 const & v) noexcept
+	{
+		return (T{} < v[1]) ? (static_cast<T>(v[0]) / static_cast<T>(v[1])) : T{};
+	}
+
+	template <class V2
+	> ML_NODISCARD constexpr auto scale_to_fit(V2 const & lhs, V2 const & rhs) noexcept
+	{
+		auto const
+			h{ V2{ (rhs[0] / lhs[0]), (rhs[0] / lhs[0]) } },
+			v{ V2{ (rhs[1] / lhs[1]), (rhs[1] / lhs[1]) } };
+		return lhs * ((h < v) ? h : v);
+	}
+
+	template <class Src, class Dst
+	> ML_NODISCARD constexpr auto maintain(Src const & source, Dst const & target) noexcept
+	{
+		Dst const temp{ target[0] / source[0], target[1] / source[1] };
+		auto const ratio{ (temp[0] < temp[1]) ? temp[0] : temp[1] };
+		return Src{ source[0] * ratio, source[1] * ratio };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, int64_t Num, int64_t Den
+	> ML_NODISCARD constexpr auto ratio_cast(T v, std::ratio<Num, Den> const & r)
+	{
+		auto const
+			one{ static_cast<T>(1) },
+			num{ static_cast<T>(r.num) },
+			den{ static_cast<T>(r.den) };
+		return ((num == one) && (den == one))
+			? v
+			: (((num != one) && (den == one))
+				? v * num
+				: (((num == one) && (den != one))
+					? v / den
+					: v * num / den));
+	}
+
+	template <class T
+	> ML_NODISCARD constexpr auto power_of_2(T v)
+	{
+		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
+		if constexpr (std::is_floating_point_v<T>)
+		{
+			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
+		}
+		else if constexpr (std::is_integral_v<T>)
+		{
+			v--;
+			if constexpr (sizeof(T) >= 1)
+				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8
+			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16
+			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32
+			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64
+			v++;
+			return v;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

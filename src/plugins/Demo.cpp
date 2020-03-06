@@ -6,7 +6,6 @@
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/ImGuiExt.hpp>
 #include <libmeme/Editor/Editor.hpp>
@@ -19,6 +18,7 @@
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
+#include <libmeme/Scripting/Script.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -614,6 +614,7 @@ namespace ml
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
 
+				//using N = typename std::decay_t<decltype(n)>;
 				pmr::string const s = util::to_string(n);
 
 				if (ImGui::Selectable(name))		highlight_memory(&v); ImGui::NextColumn();
@@ -653,6 +654,9 @@ namespace ml
 
 		void show_console_gui()
 		{
+			// render console
+			ML_DEFER{ m_console.render(); };
+
 			// setup commands
 			if (auto & cmd{ m_console.commands }; cmd.empty())
 			{
@@ -687,15 +691,15 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_ONCE_CALL{ std::cout << "# type \'/\' to exit\n"; };
+						ML_ONCE_CALL{ std::cout << "# type \'/lua\' to exit\n"; };
 					}
-					else if (m_console.overload && (args.front() == "/"))
+					else if (m_console.overload && (args.front() == "/lua"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::invoke(script{}, script::lua, util::detokenize(args));
+						std::invoke(script{ script::api::lua, util::detokenize(args) });
 					}
 				} });
 
@@ -704,21 +708,18 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_ONCE_CALL{ std::cout << "# type \'/\' to exit\n"; };
+						ML_ONCE_CALL{ std::cout << "# type \'/python\' to exit\n"; };
 					}
-					else if (m_console.overload && (args.front() == "/"))
+					else if (m_console.overload && (args.front() == "/python"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::invoke(script{}, script::python, util::detokenize(args));
+						std::invoke(script{ script::api::python, util::detokenize(args) });
 					}
 				} });
 			}
-			
-			// render console
-			m_console.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -969,7 +970,7 @@ namespace ml
 			ML_ONCE_CALL{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::get_window()->get_flags() & WindowFlags_Maximized ? 32 : 16;
+				m_memory.Cols				= engine::get_window()->get_hints() & WindowHints_Maximized ? 32 : 16;
 				m_memory.OptShowOptions		= true;
 				m_memory.OptShowDataPreview	= true;
 				m_memory.OptShowHexII		= false;

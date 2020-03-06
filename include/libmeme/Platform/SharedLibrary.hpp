@@ -12,19 +12,17 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using function_map = typename ds::flat_map<fs::path, void *>;
+		using function_map = typename ds::flat_map<filesystem::path, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit shared_library(allocator_type const & alloc);
+		explicit shared_library(allocator_type const & alloc = {}) noexcept;
 
-		shared_library() noexcept;
-		
-		shared_library(fs::path const & path, allocator_type const & alloc = {});
+		shared_library(filesystem::path const & path, allocator_type const & alloc = {}) noexcept;
 		
 		shared_library(shared_library && other, allocator_type const & alloc = {}) noexcept;
 		
-		~shared_library();
+		~shared_library() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,7 +32,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool open(fs::path const & path);
+		bool open(filesystem::path const & path);
 
 		bool close();
 
@@ -73,7 +71,7 @@ namespace ml
 
 		ML_NODISCARD inline auto instance() const noexcept -> void const * { return m_instance; }
 
-		ML_NODISCARD inline auto path() const noexcept -> fs::path const & { return m_path; }
+		ML_NODISCARD inline auto path() const noexcept -> filesystem::path const & { return m_path; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -116,7 +114,7 @@ namespace ml
 
 	private:
 		void *			m_instance;
-		fs::path		m_path;
+		filesystem::path		m_path;
 		function_map	m_funcs;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

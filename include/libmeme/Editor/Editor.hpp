@@ -14,63 +14,65 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		class context;
+		class config;
+		class runtime;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// startup
+		// startup variables
 		class config final : trackable, non_copyable
 		{
+			friend class context;
 		public:
-
-			pmr::string			api_version		{}			; // 
-			pmr::string			style			{}			; // 
-			cstring				ini_file		{}			; // 
-			cstring				log_file		{}			; // 
-		
-		private: friend class context;
+			pmr::string			api_version		{}			; // shading language version
+			filesystem::path	style			{}			; // editor style config
+			cstring				ini_file		{}			; // imgui ini file
+			cstring				log_file		{}			; // imgui log file
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// runtime
-		class io final : trackable, non_copyable
+		// runtime variables
+		class runtime final : trackable, non_copyable
 		{
+			friend class context;
 		public:
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			class ML_EDITOR_API main_menu_t final : trackable, non_copyable
 			{
+				friend runtime;
 			public:
-				using storage_type = typename pmr::vector<
+				static constexpr auto title{ "libmeme##editor##main_menu" };
+				
+				using menus_t = typename pmr::vector<
 					std::pair<cstring, pmr::vector<std::function<void()>>>
 				>;
 
-				static constexpr auto title{ "libmeme##editor##main_menu" };
-
-				bool			open			{ true }	; // 
-				storage_type	menus			{}			; // 
+				bool	open		{ true }	; // 
+				menus_t	menus		{}			; // 
 
 				void add_menu(cstring label, std::function<void()> && fn);
 
-			private: friend io;
 			} main_menu;
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			class ML_EDITOR_API dockspace_t final : trackable, non_copyable
 			{
+				 friend runtime;
 			public:
-				using storage_type = pmr::vector<uint32_t>;
-
 				static constexpr auto title{ "libmeme##editor##dockspace" };
 
-				bool			open			{ true }	; // 
-				float_t			border			{}			; // 
-				vec2			padding			{}			; // 
-				float_t			rounding		{}			; // 
-				vec2			size			{}			; // 
-				float_t			alpha			{ 1.f }		; // 
-				storage_type	nodes			{}			; // 
+				using nodes_t = pmr::vector<uint32_t>;
+
+				bool	open		{ true }	; // 
+				float_t	border		{}			; // 
+				vec2	padding		{}			; // 
+				float_t	rounding	{}			; // 
+				vec2	size		{}			; // 
+				float_t	alpha		{ 1.f }		; // 
+				nodes_t	nodes		{}			; // 
 
 				uint32_t begin_builder(int32_t flags = 0);
 				uint32_t end_builder(uint32_t root);
@@ -83,33 +85,30 @@ namespace ml
 
 				inline auto const & operator[](int32_t const i) const { return nodes[(size_t)i]; }
 
-			private: friend io;
 			} dockspace;
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// context
+		// editor context
 		class context final : trackable, non_copyable
 		{
 		private:
 			friend class		editor						;
-			editor::config		m_config		{}			; // startup settings
-			editor::io			m_io			{}			; // runtime variables
+			editor::config		m_config		{}			; // startup variables
+			editor::runtime		m_io			{}			; // runtime variables
 			void *				m_imgui_context	{}			; // current imgui context
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool initialized() noexcept;
+		ML_NODISCARD static bool is_initialized() noexcept;
 
 		ML_NODISCARD static bool create_context();
 
-		static bool destroy_context();
+		ML_NODISCARD static bool destroy_context();
 
 		ML_NODISCARD static editor::context * const get_context() noexcept;
 
@@ -117,7 +116,7 @@ namespace ml
 
 		ML_NODISCARD static bool startup();
 
-		static bool shutdown();
+		ML_NODISCARD static bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -134,7 +133,7 @@ namespace ml
 			return get_context()->m_config;
 		}
 
-		ML_NODISCARD static inline editor::io & get_io() noexcept
+		ML_NODISCARD static inline editor::runtime & get_io() noexcept
 		{
 			return get_context()->m_io;
 		}

@@ -13,34 +13,34 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum WindowFlags_ : int32_t
+	enum WindowHints_ : int32_t
 	{
-		WindowFlags_None,
-		WindowFlags_Resizable		= (1 << 0),
-		WindowFlags_Visible			= (1 << 1),
-		WindowFlags_Decorated		= (1 << 2),
-		WindowFlags_Focused			= (1 << 3),
-		WindowFlags_AutoIconify		= (1 << 4),
-		WindowFlags_Floating		= (1 << 5),
-		WindowFlags_Maximized		= (1 << 6),
-		WindowFlags_Fullscreen		= (1 << 7),
-		WindowFlags_DoubleBuffered	= (1 << 8),
+		WindowHints_None,
+		WindowHints_Resizable		= (1 << 0),
+		WindowHints_Visible			= (1 << 1),
+		WindowHints_Decorated		= (1 << 2),
+		WindowHints_Focused			= (1 << 3),
+		WindowHints_AutoIconify		= (1 << 4),
+		WindowHints_Floating		= (1 << 5),
+		WindowHints_Maximized		= (1 << 6),
+		WindowHints_Fullscreen		= (1 << 7),
+		WindowHints_DoubleBuffered	= (1 << 8),
 
 		// Resizable / Visible / Decorated / Focused / Auto Iconify
-		WindowFlags_Default
-			= WindowFlags_Resizable
-			| WindowFlags_Visible
-			| WindowFlags_Decorated
-			| WindowFlags_Focused
-			| WindowFlags_AutoIconify,
+		WindowHints_Default
+			= WindowHints_Resizable
+			| WindowHints_Visible
+			| WindowHints_Decorated
+			| WindowHints_Focused
+			| WindowHints_AutoIconify,
 
 		// Resizable / Decorated / Focused / Auto Iconify / Maximized
-		WindowFlags_DefaultMaximized
-			= WindowFlags_Resizable
-			| WindowFlags_Decorated
-			| WindowFlags_Focused
-			| WindowFlags_AutoIconify
-			| WindowFlags_Maximized,
+		WindowHints_DefaultMaximized
+			= WindowHints_Resizable
+			| WindowHints_Decorated
+			| WindowHints_Focused
+			| WindowHints_AutoIconify
+			| WindowHints_Maximized,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -75,7 +75,7 @@ namespace ml
 			cstring const & title, 
 			video_mode const & display,
 			context_settings const & context,
-			int32_t flags
+			int32_t hints
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -201,11 +201,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto get_aspect() const -> float_t { return ML_ASPECT2(get_size()); };
+		ML_NODISCARD inline auto get_aspect() const -> float_t { return util::aspect(get_size()); };
 
 		ML_NODISCARD inline auto get_context() const -> context_settings const & { return m_context; }
 
-		ML_NODISCARD inline auto get_frame_aspect() const -> float_t { return ML_ASPECT2(get_frame_size()); };
+		ML_NODISCARD inline auto get_frame_aspect() const -> float_t { return util::aspect(get_frame_size()); };
 
 		ML_NODISCARD inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
 
@@ -219,7 +219,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_size() const -> vec2i const & { return get_video_mode().resolution; }
 
-		ML_NODISCARD inline auto get_flags() const -> int32_t const & { return m_flags; }
+		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_hints; }
 
 		ML_NODISCARD inline auto get_title() const -> cstring const & { return m_title; }
 
@@ -230,15 +230,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T = int32_t
-		> inline bool has_flags(T const flags) const noexcept
+		> inline bool has_flags(T const hints) const noexcept
 		{
-			return m_flags & static_cast<int32_t>(flags);
+			return m_hints & static_cast<int32_t>(hints);
 		}
 
 		template <class T = int32_t
-		> inline auto operator&(T const flags) const & noexcept
+		> inline auto operator&(T const hints) const & noexcept
 		{
-			return has_flags(flags);
+			return has_flags(hints);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -250,7 +250,7 @@ namespace ml
 		cstring				m_title;
 		video_mode			m_video;
 		context_settings	m_context;
-		int32_t				m_flags;
+		int32_t				m_hints;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

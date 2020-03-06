@@ -7,15 +7,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, render_target{}
+	bool render_window::create(cstring const & title, video_mode const & display, context_settings const & context, int32_t hints )
 	{
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool render_window::create(cstring const & title, video_mode const & display, context_settings const & context, int32_t flags)
-	{
-		if (!window::create(title, display, context, flags))
+		if (!window::create(title, display, context, hints))
 		{
 			return debug::log::error("failed initializing ml::render_window");
 		}

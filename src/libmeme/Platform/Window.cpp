@@ -54,7 +54,7 @@ namespace ml
 		, m_title	{}
 		, m_video	{}
 		, m_context	{}
-		, m_flags	{}
+		, m_hints	{}
 	{
 #ifdef ML_OS_WINDOWS
 		if (HWND window{ ::GetConsoleWindow() })
@@ -82,7 +82,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(cstring const & title, video_mode const & video, context_settings const & context, int32_t flags)
+	bool window::create(cstring const & title, video_mode const & video, context_settings const & context, int32_t hints)
 	{
 		if (m_window)
 		{
@@ -100,7 +100,7 @@ namespace ml
 		
 		if (!(m_context = context)) return debug::log::error("");
 		
-		m_flags = flags;
+		m_hints = hints;
 		
 		// Client API
 		glfwWindowHint(GLFW_CLIENT_API, ([&]() {
@@ -130,14 +130,14 @@ namespace ml
 		glfwWindowHint(GLFW_DEPTH_BITS,				m_context.depth_bits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			m_context.stencil_bits);
 		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_context.sRGB_capable);
-		glfwWindowHint(GLFW_RESIZABLE,				m_flags & WindowFlags_Resizable);
-		glfwWindowHint(GLFW_VISIBLE,				m_flags & WindowFlags_Visible);
-		glfwWindowHint(GLFW_DECORATED,				m_flags & WindowFlags_Decorated);
-		glfwWindowHint(GLFW_FOCUSED,				m_flags & WindowFlags_Focused);
-		glfwWindowHint(GLFW_AUTO_ICONIFY,			m_flags & WindowFlags_AutoIconify);
-		glfwWindowHint(GLFW_FLOATING,				m_flags & WindowFlags_Floating);
-		glfwWindowHint(GLFW_MAXIMIZED,				m_flags & WindowFlags_Maximized);
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_flags & WindowFlags_DoubleBuffered);
+		glfwWindowHint(GLFW_RESIZABLE,				m_hints & WindowHints_Resizable);
+		glfwWindowHint(GLFW_VISIBLE,				m_hints & WindowHints_Visible);
+		glfwWindowHint(GLFW_DECORATED,				m_hints & WindowHints_Decorated);
+		glfwWindowHint(GLFW_FOCUSED,				m_hints & WindowHints_Focused);
+		glfwWindowHint(GLFW_AUTO_ICONIFY,			m_hints & WindowHints_AutoIconify);
+		glfwWindowHint(GLFW_FLOATING,				m_hints & WindowHints_Floating);
+		glfwWindowHint(GLFW_MAXIMIZED,				m_hints & WindowHints_Maximized);
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_hints & WindowHints_DoubleBuffered);
 		
 		// Create Window
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
@@ -155,11 +155,11 @@ namespace ml
 
 		set_cursor_mode(cursor::mode::normal);
 
-		if (has_flags(WindowFlags_Fullscreen))
+		if (has_flags(WindowHints_Fullscreen))
 		{
 			set_fullscreen(true); // Fullscreen
 		}
-		else if (has_flags(WindowFlags_Maximized))
+		else if (has_flags(WindowHints_Maximized))
 		{
 			maximize(); // Maximized
 		}
@@ -221,7 +221,7 @@ namespace ml
 		{
 			glfwMaximizeWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_flags |= WindowFlags_Maximized;
+			m_hints |= WindowHints_Maximized;
 		}
 		return (*this);
 	}
@@ -232,7 +232,7 @@ namespace ml
 		{
 			glfwRestoreWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_flags &= ~WindowFlags_Maximized;
+			m_hints &= ~WindowHints_Maximized;
 		}
 		return (*this);
 	}

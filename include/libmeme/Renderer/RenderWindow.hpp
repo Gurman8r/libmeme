@@ -6,13 +6,9 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	struct ML_RENDERER_API render_window : window, render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		render_window() noexcept;
 
 		virtual ~render_window() noexcept = default;
 
@@ -22,7 +18,7 @@ namespace ml
 			cstring const & title,
 			video_mode const & display,
 			context_settings const & context,
-			int32_t flags
+			int32_t hints
 		) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -31,8 +27,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_RENDER_WINDOW_HPP_

@@ -1,9 +1,7 @@
 #ifndef _ML_ECS_HPP_
 #define _ML_ECS_HPP_
 
-// Data-Oriented Entity Component System
-
-// Sources:
+// Credit to Vittorio Romeo
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
@@ -267,7 +265,7 @@ namespace ml::ecs
 		using component_storage = typename components::storage_type;
 		using system_storage	= typename systems::template storage_type<self_type>;
 		using signature			= typename ds::bitset<component_count + tag_count>;
-		using signature_storage	= typename meta::tuple<meta::repeat<signature_count, signature>>;
+		using signature_storage	= typename meta::array<signature, signature_count>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

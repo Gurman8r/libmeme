@@ -21,7 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh(allocator_type const & alloc = {}) noexcept;
+		explicit mesh(allocator_type const & alloc = {}) noexcept;
 		
 		mesh(vertices_t const & vertices, allocator_type const & alloc = {});
 		

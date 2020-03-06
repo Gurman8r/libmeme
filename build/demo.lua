@@ -19,10 +19,7 @@ project "demo"
 		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 	}
 	includedirs {
-		"%{sln_dir}include",
-		"%{ext_dir}",
-		"%{ext_dir}json/include",
-		"%{sln_dir}plugins"
+		"%{sln_dir}include", "%{ext_dir}", "%{sln_dir}plugins"
 	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua",

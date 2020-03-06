@@ -294,23 +294,28 @@
 
 // Attributes
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// check
 #ifndef __has_cpp_attribute
 #    define ML_CPP_ATTRIBUTE(attr) 0
 #else
 #    define ML_CPP_ATTRIBUTE(attr) __has_cpp_attribute(attr)
 #endif
+
 // nodiscard
 #if ML_CPP_ATTRIBUTE(nodiscard) >= 201603L
 #   define ML_NODISCARD [[nodiscard]]
 #else
 #   define ML_NODISCARD
 #endif
+
 // likely
 #if ML_CPP_ATTRIBUTE(likely) >= 201907L
 #   define ML_LIKELY(...) (##__VA_ARGS__) [[likely]]
 #else
 #   define ML_LIKELY(...) (##__VA_ARGS__)
 #endif
+
 // unlikely
 #if ML_CPP_ATTRIBUTE(unlikely) >= 201907L
 #   define ML_UNLIKELY(...) (##__VA_ARGS__) [[unlikely]]
@@ -318,9 +323,7 @@
 #   define ML_UNLIKELY(...) (##__VA_ARGS__)
 #endif
 
-
-// Inlining
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// inline
 #ifdef ML_CC_MSVC
 #	define ML_ALWAYS_INLINE __forceinline
 #	define ML_NEVER_INLINE  __declspec(noinline)

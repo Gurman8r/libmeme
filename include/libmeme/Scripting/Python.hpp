@@ -1,21 +1,22 @@
 #ifndef _ML_PYTHON_HPP_
 #define _ML_PYTHON_HPP_
 
-#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Common.hpp>
+#include <libmeme/Scripting/Export.hpp>
+#include <libmeme/Core/Singleton.hpp>
 
 namespace ml
 {
-	class ML_ENGINE_API ml_python final
+	class ML_SCRIPTING_API ml_python final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool initialized() noexcept;
+		static bool is_initialized() noexcept;
 
-		static bool startup(fs::path const & name, fs::path const & home);
+		static bool initialize();
 		
-		static bool shutdown();
+		static bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -23,7 +24,7 @@ namespace ml
 
 		static int32_t do_string(pmr::string const & value);
 		
-		static int32_t do_file(fs::path const & path);
+		static int32_t do_file(filesystem::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

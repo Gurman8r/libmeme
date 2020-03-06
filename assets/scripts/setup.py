@@ -1,19 +1,21 @@
-import LIBMEME as ml
+import LIBMEME_CONFIG   as config
+import LIBMEME_STDIO    as stdio
+import LIBMEME_EDITOR   as editor
+import LIBMEME_ENGINE   as engine
 import sys
-
 
 # system setup
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-class ml_stdio(object):
+class ml_system_wrapper(object):
     def __init__(self):
         sys.stdout  = self
         sys.stderr  = self
         sys.stdin   = None
-    def write(self, args = None):
-        if (not args == None): ml.io.print(str(args))
-ml_stdio()
-exit = ml.engine.close
-sys.exit = ml.engine.close
+        sys.exit    = engine.close
+    def write(self, args):
+        stdio.write(str(args))
+ml_system_wrapper()
+exit = engine.close
 
 
 # load plugins
@@ -22,14 +24,13 @@ plugins = [
    "demo",
   ]
 for p in plugins:
-    if ml.cfg.os() == "Windows":
-        ml.engine.load_plugin(p + ".dll")
-    else:
-        ml.engine.load_plugin(p + ".so")
+    os = config.system()
+    if os == "Windows": engine.load_plugin(p + ".dll")
+    else: engine.load_plugin(p + ".so")
 
 
 # messages
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-print("# " + ml.cfg.name()+ " | " + str(ml.cfg.arch()) + "-bit | " + ml.cfg.config())
-print("# " + ml.cfg.url())
+print("# " + config.proj_name()+ " | " + str(config.arch()) + "-bit | " + config.config())
+print("# " + config.proj_url())
 print("# type \'help\' for a list of commands")

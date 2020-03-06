@@ -33,7 +33,7 @@ namespace ml
 	{
 	}
 
-	font::font(fs::path const & path, allocator_type const & alloc)
+	font::font(filesystem::path const & path, allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{ nullptr }
@@ -96,7 +96,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool font::load_from_file(fs::path const & path)
+	bool font::load_from_file(filesystem::path const & path)
 	{
 		if (m_library)
 			return false;

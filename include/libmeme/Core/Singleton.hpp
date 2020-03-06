@@ -15,11 +15,6 @@ namespace ml
 			static T instance{};
 			return instance;
 		}
-
-		ML_NODISCARD static inline T const & cref() noexcept
-		{
-			return static_cast<T const &>(ref());
-		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

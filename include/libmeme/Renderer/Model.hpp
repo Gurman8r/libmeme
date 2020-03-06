@@ -32,7 +32,7 @@ namespace ml
 		
 		model(std::initializer_list<mesh> init, allocator_type const & alloc = {});
 		
-		model(fs::path const & path, allocator_type const & alloc = {});
+		model(filesystem::path const & path, allocator_type const & alloc = {});
 		
 		model(storage_type const & storage, allocator_type const & alloc = {});
 		
@@ -54,9 +54,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & path);
+		bool load_from_file(filesystem::path const & path);
 
-		bool load_from_file(fs::path const & path, uint32_t flags);
+		bool load_from_file(filesystem::path const & path, uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

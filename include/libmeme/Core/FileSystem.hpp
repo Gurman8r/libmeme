@@ -3,52 +3,48 @@
 
 #include <libmeme/Core/StringUtility.hpp>
 
-namespace ml
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class FS final
+	template <class Ch = char, class Tr = std::char_traits<Ch>
+	> static inline std::optional<pmr::vector<Ch>> get_file_contents(filesystem::path const & path)
 	{
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		std::basic_ifstream<Ch, Tr> file{ path, std::ios_base::binary };
+		ML_DEFER{ file.close(); };
+		if (!file) { return std::nullopt; }
 
-		template <class Ch = char
-		> static inline std::optional<pmr::vector<Ch>> get_file_contents(fs::path const & path)
+		pmr::vector<Ch> temp{};
+		file.seekg(0, std::ios_base::end);
+		if (std::streamsize size{ file.tellg() }; size > 0)
 		{
-			std::basic_ifstream<Ch, std::char_traits<Ch>> file{ path, std::ios_base::binary };
-			ML_DEFER{ file.close(); };
-			if (!file) { return std::nullopt; }
-			
-			pmr::vector<Ch> temp{};
-			file.seekg(0, std::ios_base::end);
-			if (std::streamsize size{ file.tellg() }; size > 0)
-			{
-				file.seekg(0, std::ios_base::beg);
-				temp.resize(static_cast<size_t>(size));
-				file.read(&temp[0], size);
-			}
-			return std::make_optional(std::move(temp));
+			file.seekg(0, std::ios_base::beg);
+			temp.resize(static_cast<size_t>(size));
+			file.read(&temp[0], size);
 		}
+		return std::make_optional(std::move(temp));
+	}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Ch = char
-		> static inline pmr::basic_string<Ch> get_file_string(fs::path const & path)
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> inline Str read_file(filesystem::path const & path) noexcept
+	{
+		if (auto const o{ util::get_file_contents<Ch>(path.string()) })
 		{
-			if (auto const o{ FS::get_file_contents<Ch>(path.string()) })
-			{
-				return pmr::basic_string<Ch>{ o->cbegin(), o->cend() };
-			}
-			else
-			{
-				return {};
-			}
+			return Str{ o->begin(), o->end() };
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
+		else
+		{
+			return {};
+		}
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_FILE_SYSTEM_HPP_

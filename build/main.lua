@@ -20,9 +20,7 @@ project "main"
 		"NOMINMAX",
 	}
 	includedirs {
-		"%{sln_dir}include",
-		"%{ext_dir}",
-		"%{ext_dir}json/include",
+		"%{sln_dir}include", "%{ext_dir}",
 	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua", 

@@ -7,11 +7,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct client_api final
+	class client_api final
 	{
-		enum API { unknown, opengl, vulkan, directx };
+	public:
+		enum { unknown, opengl, vulkan, directx };
 
-		enum Profile { any, core, compat, debug };
+		enum { any, core, compat, debug };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -11,7 +11,7 @@ namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline void * load_library(fs::path const & path)
+	static inline void * load_library(filesystem::path const & path)
 	{
 #ifdef ML_OS_WINDOWS
 		return LoadLibraryExW(path.native().c_str(), nullptr, 0);
@@ -49,19 +49,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared_library::shared_library(allocator_type const & alloc)
-		: m_instance{ nullptr }
+	shared_library::shared_library(allocator_type const & alloc) noexcept
+		: m_instance{}
 		, m_path	{}
 		, m_funcs	{ alloc }
 	{
 	}
-	
-	shared_library::shared_library() noexcept
-		: shared_library{ allocator_type{} }
-	{
-	}
 
-	shared_library::shared_library(fs::path const & path, allocator_type const & alloc)
+	shared_library::shared_library(filesystem::path const & path, allocator_type const & alloc) noexcept
 		: shared_library{ alloc }
 	{
 		open(path);
@@ -73,7 +68,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	shared_library::~shared_library()
+	shared_library::~shared_library() noexcept
 	{
 		impl::free_library(m_instance);
 	}
@@ -100,7 +95,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::open(fs::path const & path)
+	bool shared_library::open(filesystem::path const & path)
 	{
 		// already opened
 		if (good()) return false;

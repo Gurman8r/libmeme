@@ -1,14 +1,15 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Scripting/Script.hpp>
+
+using namespace ml;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -16,12 +17,12 @@
 #define MEM_RESERVED 64.0_MiB
 #endif
 
-#ifndef SETUP_SCRIPT
-#define SETUP_SCRIPT L"assets/scripts/setup.py"
-#endif
-
 #ifndef WINDOW_TITLE
 #define WINDOW_TITLE (ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
+#endif
+
+#ifndef SETUP_SCRIPT
+#define SETUP_SCRIPT L"assets/scripts/setup.py"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -29,11 +30,7 @@
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	using namespace ml;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
@@ -56,41 +53,34 @@ ml::int32_t main()
 	ML_ASSERT(engine::create_context()); ML_DEFER{ ML_ASSERT(engine::destroy_context()); };
 
 	// configure engine
-	auto & engine_cfg			{ engine::get_config() };
+	engine::config & engine_cfg	{ engine::get_config() };
 	engine_cfg.command_line		= { ML_ARGV, ML_ARGV + ML_ARGC };
-	engine_cfg.program_name		= fs::path{ ML_ARGV[0] }.filename();
-	engine_cfg.program_path		= fs::current_path();
+	engine_cfg.program_name		= filesystem::path{ ML_ARGV[0] }.filename();
+	engine_cfg.program_path		= filesystem::current_path();
 	engine_cfg.content_path		= L"../../../../";
-	engine_cfg.library_home		= L"";
+	engine_cfg.library_home		= L"../../../../";
+	engine_cfg.window_title		= WINDOW_TITLE;
+	engine_cfg.window_display	= make_video_mode(
+		vec2i{ 1280, 720 },		// resolution
+		32u						// color depth
+	);
+	engine_cfg.window_context	= make_context_settings(
+		client_api::opengl,		// api
+		4,						// major version
+		6,						// minor version
+		client_api::compat,		// profile
+		24,						// depth bits
+		8,						// stencil bits
+		false,					// multisample
+		false					// sRGB capable
+	);
+	engine_cfg.window_hints		= WindowHints_DefaultMaximized;
+
+	// initialize scripting
+	ML_ASSERT(script::startup()); ML_DEFER{ ML_ASSERT(script::shutdown()); };
 	
-	// start engine
+	// initialize engine
 	ML_ASSERT(engine::startup()); ML_DEFER{ ML_ASSERT(engine::shutdown()); };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// create window
-	ML_ASSERT(engine::get_window()->create
-	(
-		WINDOW_TITLE,					// title
-		make_video_mode(
-			vec2i{ 1280, 720 },			// resolution
-			32u							// color depth
-		),
-		make_context_settings(
-			client_api::opengl,			// api
-			4,							// major version
-			6,							// minor version
-			client_api::compat,			// profile
-			24,							// depth bits
-			8,							// stencil bits
-			false,						// multisample
-			false						// sRGB capable
-		),
-		WindowFlags_DefaultMaximized	// flags
-	));
-
-	// install callbacks
-	window::install_default_callbacks(engine::get_window());
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -98,21 +88,19 @@ ml::int32_t main()
 	ML_ASSERT(editor::create_context()); ML_DEFER{ ML_ASSERT(editor::destroy_context()); };
 
 	// configure editor
-	auto & editor_cfg			{ editor::get_config() };
+	editor::config & editor_cfg	{ editor::get_config() };
 	editor_cfg.api_version		= "#version 130";
-	editor_cfg.style			= "assets/styles/obsidian.style";
+	editor_cfg.style			= L"assets/styles/obsidian.style";
 	editor_cfg.ini_file			= nullptr;
 	editor_cfg.log_file			= nullptr;
 	
-	// start editor
+	// initialize editor
 	ML_ASSERT(editor::startup()); ML_DEFER{ ML_ASSERT(editor::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// run setup script
-	std::invoke(script{}, engine::path_to(SETUP_SCRIPT));
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	std::invoke(script{ engine::path_to(SETUP_SCRIPT) });
 
 	// enter event
 	event_system::fire_event<enter_event>();

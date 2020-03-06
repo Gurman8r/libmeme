@@ -19,14 +19,6 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline std::ostream & out() noexcept { return std::cout; }
-
-		ML_NODISCARD static inline std::ostream & err() noexcept { return std::cerr; }
-
-		ML_NODISCARD static inline std::istream & in() noexcept { return std::cin; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static inline int32_t clear(int32_t const exit_code = 0)
 		{
 #if ML_DEBUG
@@ -50,7 +42,7 @@ namespace ml
 #	ifdef ML_OS_WINDOWS
 			std::system("pause");
 #	else
-			debug::in().get();
+			std::cin.get();
 #	endif
 #endif
 			return exit_code;
@@ -65,21 +57,21 @@ namespace ml
 			template <class Str
 			> static inline int32_t info(Str && value)
 			{
-				out() << "[" ML_MSG_LOG "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_LOG "] " << ML_FWD(value) << "\n";
 				return ML_SUCCESS;
 			}
 
 			template <class Str
 			> static inline int32_t error(Str && value)
 			{
-				out() << "[" ML_MSG_ERR "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_ERR "] " << ML_FWD(value) << "\n";
 				return ML_FAILURE;
 			}
 
 			template <class Str
 			> static inline int32_t warning(Str && value)
 			{
-				out() << "[" ML_MSG_WRN "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_WRN "] " << ML_FWD(value) << "\n";
 				return ML_WARNING;
 			}
 

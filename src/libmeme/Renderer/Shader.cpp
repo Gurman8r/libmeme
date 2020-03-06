@@ -54,19 +54,19 @@ namespace ml
 	{
 	}
 
-	shader::shader(source_cache const & source, allocator_type const & alloc)
+	shader::shader(shader_source const & source, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_source(source);
 	}
 
-	shader::shader(fs::path const & v, fs::path const & f, allocator_type const & alloc)
+	shader::shader(filesystem::path const & v, filesystem::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc)
+	shader::shader(filesystem::path const & v, filesystem::path const & g, filesystem::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, g, f);
@@ -91,29 +91,29 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shader::load_from_file(fs::path const & v_file, fs::path const & f_file)
+	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const & f_file)
 	{
 		return load_from_memory(
-			FS::get_file_string(v_file).c_str(),
-			FS::get_file_string(f_file).c_str()
+			util::read_file(v_file).c_str(),
+			util::read_file(f_file).c_str()
 		);
 	}
 
-	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
+	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const g_file, filesystem::path const & f_file)
 	{
 		return load_from_memory(
-			FS::get_file_string(v_file).c_str(),
-			FS::get_file_string(g_file).c_str(),
-			FS::get_file_string(f_file).c_str()
+			util::read_file(v_file).c_str(),
+			util::read_file(g_file).c_str(),
+			util::read_file(f_file).c_str()
 		);
 	}
 
-	bool shader::load_from_source(source_cache const & value)
+	bool shader::load_from_source(shader_source const & value)
 	{
 		auto const
-			& v{ std::get<0>(value) },
-			& g{ std::get<1>(value) },
-			& f{ std::get<2>(value) };
+			& v{ std::get<ID_Vert>(value) },
+			& g{ std::get<ID_Geom>(value) },
+			& f{ std::get<ID_Frag>(value) };
 
 		if (!v.empty() && !g.empty() && !f.empty())
 		{

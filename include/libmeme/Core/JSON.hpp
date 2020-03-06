@@ -1,7 +1,7 @@
 #ifndef _ML_JSON_HPP_
 #define _ML_JSON_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Config.hpp>
 #include <nlohmann/json.hpp>
 
 namespace ml

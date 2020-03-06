@@ -164,13 +164,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & get_allocator() noexcept { return cref().m_alloc; }
+		ML_NODISCARD static inline auto const & get_allocator() noexcept { return ref().m_alloc; }
 
-		ML_NODISCARD static inline auto const & get_index() noexcept { return cref().m_index; }
+		ML_NODISCARD static inline auto const & get_index() noexcept { return ref().m_index; }
 
-		ML_NODISCARD static inline auto const & get_records() noexcept { return cref().m_records; }
+		ML_NODISCARD static inline auto const & get_records() noexcept { return ref().m_records; }
 
-		ML_NODISCARD static inline auto const & get_testres() noexcept { return cref().m_testres; }
+		ML_NODISCARD static inline auto const & get_testres() noexcept { return ref().m_testres; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

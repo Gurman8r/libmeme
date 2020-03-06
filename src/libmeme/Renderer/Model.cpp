@@ -32,7 +32,7 @@ namespace ml
 	{
 	}
 
-	model::model(fs::path const & path, allocator_type const & alloc)
+	model::model(filesystem::path const & path, allocator_type const & alloc)
 		: m_storage{ alloc }
 	{
 		load_from_file(path);
@@ -86,7 +86,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool model::load_from_file(fs::path const & path)
+	bool model::load_from_file(filesystem::path const & path)
 	{
 		return load_from_file(path,
 			aiProcess_CalcTangentSpace |
@@ -98,7 +98,7 @@ namespace ml
 		);
 	}
 
-	bool model::load_from_file(fs::path const & path, uint32_t flags)
+	bool model::load_from_file(filesystem::path const & path, uint32_t flags)
 	{
 		// open scene
 		Assimp::Importer _ai;

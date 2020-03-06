@@ -10,7 +10,7 @@ namespace ml
 
 	// event cast
 	template <class Ev
-	> ML_NODISCARD static constexpr auto ev_cast(struct event const & value) noexcept
+	> ML_NODISCARD static constexpr auto event_cast(struct event const & value) noexcept
 	{
 		static_assert(std::is_base_of_v<struct event, Ev>, "bad event cast");
 		return (value.id() == hashof_v<Ev>)
@@ -38,7 +38,7 @@ namespace ml
 		template <class Ev
 		> ML_NODISCARD constexpr Ev const * as() const noexcept
 		{
-			return ev_cast<Ev>(*this);
+			return event_cast<Ev>(*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

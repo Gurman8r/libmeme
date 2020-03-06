@@ -1,6 +1,8 @@
 #ifndef _ML_RENDER_STATES_HPP_
 #define _ML_RENDER_STATES_HPP_
 
+// this whole system needs another rework
+
 #include <libmeme/Renderer/GL.hpp>
 
 namespace ml

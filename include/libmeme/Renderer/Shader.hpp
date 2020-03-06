@@ -11,8 +11,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		enum { ID_Vert, ID_Geom, ID_Frag };
+
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using source_cache		= typename std::tuple<pmr::string, pmr::string, pmr::string>;
+		using shader_source		= typename meta::array<pmr::string, 3>;
 		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
 		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, struct texture const *>;
@@ -23,11 +25,11 @@ namespace ml
 		
 		explicit shader(allocator_type const & alloc);
 		
-		shader(source_cache const & source, allocator_type const & alloc = {});
+		shader(shader_source const & source, allocator_type const & alloc = {});
 		
-		shader(fs::path const & v, fs::path const & f, allocator_type const & alloc = {});
+		shader(filesystem::path const & v, filesystem::path const & f, allocator_type const & alloc = {});
 		
-		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc = {});
+		shader(filesystem::path const & v, filesystem::path const & g, filesystem::path const & f, allocator_type const & alloc = {});
 		
 		shader(shader const & other, allocator_type const & alloc = {});
 		
@@ -52,11 +54,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & v_file, fs::path const & f_file);
+		bool load_from_file(filesystem::path const & v_file, filesystem::path const & f_file);
 
-		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
+		bool load_from_file(filesystem::path const & v_file, filesystem::path const g_file, filesystem::path const & f_file);
 
-		bool load_from_source(source_cache const & value);
+		bool load_from_source(shader_source const & value);
 
 		bool load_from_memory(pmr::string const & v, pmr::string const & f);
 
@@ -112,7 +114,7 @@ namespace ml
 
 		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
-		ML_NODISCARD inline auto source() const noexcept -> source_cache const & { return m_source; }
+		ML_NODISCARD inline auto source() const noexcept -> shader_source const & { return m_source; }
 
 		ML_NODISCARD inline auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
 
@@ -136,7 +138,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uint32_t		m_handle;
-		source_cache	m_source;
+		shader_source	m_source;
 		attribute_cache	m_attributes;
 		uniform_cache	m_uniforms;
 		texture_cache	m_textures;

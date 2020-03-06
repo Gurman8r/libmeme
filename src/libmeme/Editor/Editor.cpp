@@ -15,10 +15,9 @@ namespace ml
 
 	static editor::context * g_editor{};
 
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool editor::initialized() noexcept
+	bool editor::is_initialized() noexcept
 	{
 		return g_editor;
 	}
@@ -44,7 +43,7 @@ namespace ml
 	
 	bool editor::startup()
 	{
-		if (!initialized()) return false;
+		if (!g_editor) return false;
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions(
@@ -83,14 +82,14 @@ namespace ml
 		im_io.IniFilename = g_editor->m_config.log_file;
 
 		// style
-		switch (util::hash(util::to_lower(g_editor->m_config.style)))
+		switch (util::hash(util::to_lower(g_editor->m_config.style.string())))
 		{
 		case util::hash("light"): ImGui::StyleColorsLight(); break;
 		case util::hash("dark"): ImGui::StyleColorsDark(); break;
 		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
 		default:
 			if (auto const path{ engine::path_to(g_editor->m_config.style) }
-			; fs::exists(path))
+			; filesystem::exists(path))
 			{
 				style_loader{}(path);
 			}
@@ -116,7 +115,7 @@ namespace ml
 
 	bool editor::shutdown()
 	{
-		if (!initialized()) return false;
+		if (!g_editor) return false;
 
 		g_editor->m_io.main_menu.menus.clear();
 
@@ -145,7 +144,7 @@ namespace ml
 
 	void editor::render()
 	{
-		ML_ASSERT(initialized());
+		ML_ASSERT(is_initialized());
 		ML_ImGui_ScopeID(ML_ADDRESSOF(g_editor));
 
 		auto do_render = [&](auto & x, auto && fn)
@@ -247,7 +246,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor::io::main_menu_t::add_menu(cstring label, std::function<void()> && fn)
+	void editor::runtime::main_menu_t::add_menu(cstring label, std::function<void()> && fn)
 	{
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto elem)
 		{
@@ -266,7 +265,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t editor::io::dockspace_t::begin_builder(int32_t flags)
+	uint32_t editor::runtime::dockspace_t::begin_builder(int32_t flags)
 	{
 		if (uint32_t root{ ImGui::GetID(this->title) })
 		{
@@ -282,7 +281,7 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::io::dockspace_t::end_builder(uint32_t root)
+	uint32_t editor::runtime::dockspace_t::end_builder(uint32_t root)
 	{
 		if (root)
 		{
@@ -291,7 +290,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t editor::io::dockspace_t::dock(cstring name, uint32_t id)
+	uint32_t editor::runtime::dockspace_t::dock(cstring name, uint32_t id)
 	{
 		if (name && id)
 		{
@@ -301,17 +300,17 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::io::dockspace_t::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::runtime::dockspace_t::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
 		return this->nodes[(size_t)i] = split(id, dir, ratio, other);
 	}
 
-	uint32_t editor::io::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::runtime::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
 		return split(id, dir, ratio, nullptr, other);
 	}
 
-	uint32_t editor::io::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
+	uint32_t editor::runtime::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, other);
 	}

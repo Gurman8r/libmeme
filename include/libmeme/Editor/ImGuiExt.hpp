@@ -90,28 +90,28 @@ namespace ml::gui
 		vec2		graph_size	{};
 		vec2		graph_scale	{ FLT_MAX, FLT_MAX };
 		getter_t	getter		{ []() { return 0.f; } };
-
 		int32_t		offset		{};
 		overlay_t	overlay		{};
 		bool		animate		{ true };
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void update() noexcept
+		inline plot & update() noexcept
 		{
 			ML_ASSERT(getter);
-			update(std::invoke(getter));
+			return update(std::invoke(getter));
 		}
 
-		inline void update(float_t const v) noexcept
+		inline plot & update(float_t const v) noexcept
 		{
-			if (!animate || buffer.empty()) return;
+			if (!animate || buffer.empty()) return (*this);
 			std::sprintf(overlay.data(), format, v);
 			buffer[offset] = v;
 			offset = (offset + 1) % buffer.size();
+			return (*this);
 		}
 
-		inline void render() const noexcept
+		inline plot const & render() const noexcept
 		{
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
@@ -135,6 +135,8 @@ namespace ml::gui
 				{ width, graph_size[1] }, sizeof(float_t)
 			); break;
 			}
+
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -159,11 +161,12 @@ namespace ml::gui
 			return std::for_each(m_plots.begin(), m_plots.end(), ML_FWD(fn));
 		}
 
-		inline void update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
+		inline plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
 		{
 			if (m_ref_time == 0.0)
 			{
-				m_ref_time = tt; return;
+				m_ref_time = tt;
+				return (*this);
 			}
 			while (m_ref_time < tt)
 			{
@@ -171,6 +174,7 @@ namespace ml::gui
 
 				m_ref_time += dt;
 			}
+			return (*this);
 		}
 	};
 }
@@ -189,15 +193,16 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn> inline void render(Fn && fn) noexcept
+		template <class Fn> inline widget & render(Fn && fn) noexcept
 		{
-			if (!open) return;
+			if (!open) return (*this);
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 			ML_DEFER{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
 				std::invoke(ML_FWD(fn), *this);
 			}
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -239,9 +244,9 @@ namespace ml::gui
 		float_t			reg_size{ 32.f };
 
 		template <class Fn
-		> inline void render(Fn && fn) noexcept
+		> inline texture_preview & render(Fn && fn) noexcept
 		{
-			if (!value) return;
+			if (!value) return (*this);
 
 			auto const & io{ ImGui::GetIO() };
 
@@ -286,6 +291,8 @@ namespace ml::gui
 					{ 1.f, 1.f, 1.f, .5f }
 				);
 			});
+
+			return (*this);
 		}
 	};
 }
@@ -297,9 +304,10 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using command = typename std::pair
-		<
-			cstring, std::function<void(pmr::vector<pmr::string>)>
+		using arguments = typename pmr::vector<pmr::string>;
+
+		using command = typename std::pair<
+			cstring, std::function<void(arguments)>
 		>;
 
 		ds::array<char, 256>		input			{};
@@ -429,7 +437,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline void render()
+		inline console & render()
 		{
 			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
 
@@ -487,7 +495,7 @@ namespace ml::gui
 				this
 			))
 			{
-				if (auto const s{ util::trim((cstring)input.data()) }; !s.empty())
+				if (auto const s{ util::trim((pmr::string)input.data()) }; !s.empty())
 				{
 					execute(s.c_str());
 				}
@@ -502,6 +510,8 @@ namespace ml::gui
 			{
 				ImGui::SetKeyboardFocusHere(-1); // Auto focus previous window
 			}
+
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -520,7 +530,7 @@ namespace ml::gui
 				cstring word_start = word_end;
 				while (word_start > data->Buf)
 				{
-					const char c = word_start[-1];
+					char const c = word_start[-1];
 					if (c == ' ' || c == '\t' || c == ',' || c == ';')
 						break;
 					word_start--;
@@ -578,7 +588,7 @@ namespace ml::gui
 			}
 			case ImGuiInputTextFlags_CallbackHistory:
 			{
-				// Example of HISTORY
+				// HISTORY
 				const size_t prev_history_pos = history_pos;
 				if (data->EventKey == ImGuiKey_UpArrow)
 				{
@@ -594,7 +604,6 @@ namespace ml::gui
 							history_pos = -1;
 				}
 
-				// A better implementation would preserve the data on the current input line along with cursor position.
 				if (prev_history_pos != history_pos)
 				{
 					cstring history_str = (history_pos >= 0) ? history[history_pos].c_str() : "";

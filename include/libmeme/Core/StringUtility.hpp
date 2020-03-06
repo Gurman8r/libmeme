@@ -3,6 +3,18 @@
 
 #include <libmeme/Core/Utility.hpp>
 
+#define ML_STD_STRING_TEMPLATE(C, T, A, S)	\
+	class C = char,							\
+	class T = std::char_traits	<C>,		\
+	class A = std::allocator	<C>,		\
+	class S = std::basic_string	<C, T, A>
+
+#define ML_PMR_STRING_TEMPLATE(C, T, S)		\
+	class C = char,							\
+	class T = std::char_traits	<C>,		\
+	class S = pmr::basic_string	<C, T>
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // STRING TRAITS
@@ -67,13 +79,13 @@ namespace ml::util
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// STRING IMPL
+// STRING CONVERTER IMPLEMENTATIONS
 namespace ml::util::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Str = pmr::string
-	> ML_NODISCARD static inline auto c_string(Str && str) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline auto to_cstr(Str && str) noexcept
 	{
 		if constexpr (is_cstring_v<decltype(str)>)
 		{
@@ -86,16 +98,16 @@ namespace ml::util::impl
 		else
 		{
 			static_assert(is_string_view_v<Str>);
-			return c_string(pmr::string{ ML_FWD(str) });
+			return to_cstr(pmr::string{ ML_FWD(str) });
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, class Fn, class ... Args
-	> ML_NODISCARD static inline std::optional<T> string_convert(cstring ptr, Fn && fn, Args && ... args) noexcept
+	template <class T, class Ch, class Fn, class ... Args
+	> ML_NODISCARD static inline std::optional<T> str_apply(Ch const * ptr, Fn && fn, Args && ... args) noexcept
 	{
-		char * end{};
+		Ch * end{};
 		auto const ans{ std::invoke(ML_FWD(fn), ptr, &end, ML_FWD(args)...) };
 		if (!(*end != '\0' || end == ptr))
 		{
@@ -109,9 +121,11 @@ namespace ml::util::impl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch, class T, class = std::enable_if_t<std::is_integral_v<T>>
+	template <class Ch, class T
 	> ML_NODISCARD static inline pmr::basic_string<Ch> integral_to_string(T const value) noexcept
 	{
+		static_assert(std::is_integral_v<T>);
+
 		using		U		= typename std::make_unsigned_t<T>;
 		Ch			buf[21]	{};
 		Ch * const	end		{ _STD end(buf) };
@@ -155,9 +169,10 @@ namespace ml::util::impl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch, class T, class = std::enable_if_t<std::is_floating_point_v<T>>
+	template <class Ch, class T
 	> ML_NODISCARD static inline pmr::basic_string<Ch> floating_point_to_string(T const value) noexcept
 	{
+		static_assert(std::is_floating_point_v<T>);
 		auto const len{ static_cast<size_t>(_CSTD _scprintf("%f", value)) };
 		pmr::basic_string<Ch> str{ len, '\0', pmr::polymorphic_allocator<byte_t>{} };
 		_CSTD sprintf_s(str.data(), len + 1, "%f", value);
@@ -185,6 +200,28 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline auto widen(Str const & value) noexcept
+	{
+		pmr::wstring temp{};
+		temp.reserve(value.size());
+		for (auto const c : value)
+			temp.push_back(static_cast<wchar_t>(c));
+		return temp;
+	}
+
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline auto narrow(Str const & value) noexcept
+	{
+		pmr::string temp{};
+		temp.reserve(value.size());
+		for (auto const c : value)
+			temp.push_back(static_cast<char>(c));
+		return temp;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	ML_NODISCARD static inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
 	{
 		if (value.empty()) return {};
@@ -204,6 +241,8 @@ namespace ml::util
 
 	ML_NODISCARD static inline pmr::string detokenize(pmr::vector<pmr::string> const & value, pmr::string const & delim = " ")
 	{
+		if (value.empty())
+			return {};
 		if (value.size() == 1)
 			return value.front();
 		std::stringstream ss{};
@@ -216,8 +255,8 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch
-	> ML_NODISCARD static constexpr bool is_whitespace(Ch c) noexcept
+	template <class Ch = char
+	> ML_NODISCARD static constexpr bool is_whitespace(Ch const c) noexcept
 	{
 		switch (static_cast<char>(c))
 		{
@@ -229,7 +268,8 @@ namespace ml::util
 		}
 	}
 
-	ML_NODISCARD static inline pmr::string trim_front(pmr::string value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str trim_front(Str value) noexcept
 	{
 		while (!value.empty() && is_whitespace(value.front()))
 		{
@@ -238,7 +278,8 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline pmr::string trim_back(pmr::string value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str trim_back(Str value) noexcept
 	{
 		while (!value.empty() && is_whitespace(value.back()))
 		{
@@ -247,18 +288,20 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline pmr::string trim(pmr::string value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str trim(Str value) noexcept
 	{
 		return trim_front(trim_back(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline pmr::string replace_all(pmr::string value, pmr::string const & toFind, pmr::string const & replaceWith) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str replace_all(Str value, Str const & toFind, Str const & replaceWith) noexcept
 	{
 		if (!value.empty() && !toFind.empty())
 		{
-			for (size_t i = 0; (i = value.find(toFind, i)) != pmr::string::npos;)
+			for (size_t i = 0; (i = value.find(toFind, i)) != Str::npos;)
 			{
 				value.replace(i, toFind.size(), replaceWith);
 				i += replaceWith.size();
@@ -267,14 +310,16 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline pmr::string remove_all(pmr::string value, pmr::string const & toRemove) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str remove_all(Str value, Str const & toRemove) noexcept
 	{
 		return replace_all(value, toRemove, {});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_alpha(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_alpha(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -284,7 +329,8 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_alnum(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_alnum(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -294,7 +340,8 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_graph(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_graph(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -304,7 +351,8 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_print(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_print(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -314,7 +362,8 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_lower(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_lower(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -324,7 +373,8 @@ namespace ml::util
 		return true;
 	}
 
-	ML_NODISCARD static inline bool is_upper(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_upper(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -336,7 +386,8 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline pmr::string to_lower(pmr::string value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_lower(Str value) noexcept
 	{
 		std::locale loc{};
 		for (auto & elem : value)
@@ -344,7 +395,8 @@ namespace ml::util
 		return value;
 	}
 
-	ML_NODISCARD static inline pmr::string to_upper(pmr::string value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_upper(Str value) noexcept
 	{
 		std::locale loc{};
 		for (auto & elem : value)
@@ -354,7 +406,8 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline bool is_bool(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_bool(Str const & value) noexcept
 	{
 		switch (hash(to_lower(value)))
 		{
@@ -372,7 +425,8 @@ namespace ml::util
 		}
 	}
 
-	ML_NODISCARD static inline bool is_integer(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_integer(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -382,7 +436,8 @@ namespace ml::util
 		return (it == std::end(value));
 	}
 
-	ML_NODISCARD static inline bool is_decimal(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_decimal(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		char * endptr{ nullptr };
@@ -390,7 +445,8 @@ namespace ml::util
 		return !(*endptr != '\0' || endptr == value);
 	}
 
-	ML_NODISCARD static inline bool is_name(pmr::string const & value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline bool is_name(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
 		std::locale loc{};
@@ -410,7 +466,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<bool> to_bool(Str && str) noexcept
 	{
 		switch (hash(to_lower(str)))
@@ -430,152 +486,144 @@ namespace ml::util
 		}
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int8_t> to_i8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<int8_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
+		return impl::str_apply<int8_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int16_t> to_i16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<int16_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
+		return impl::str_apply<int16_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int32_t> to_i32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<int32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtol, base);
+		return impl::str_apply<int32_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtol, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int64_t> to_i64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<int64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoll, base);
+		return impl::str_apply<int64_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtoll, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint8_t> to_u8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<uint8_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint8_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint16_t> to_u16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<uint16_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint16_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint32_t> to_u32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<uint32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint32_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtoul, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint64_t> to_u64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::string_convert<uint64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtoull, base);
+		return impl::str_apply<uint64_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtoull, base);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float32_t> to_f32(Str && str) noexcept
 	{
-		return impl::string_convert<float32_t>(impl::c_string(ML_FWD(str)), &_CSTD strtod);
+		return impl::str_apply<float32_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtod);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float64_t> to_f64(Str && str) noexcept
 	{
-		return impl::string_convert<float64_t>(impl::c_string(ML_FWD(str)), &_CSTD strtod);
+		return impl::str_apply<float64_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtod);
 	}
 
-	template <class Str = pmr::string
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float80_t> to_f80(Str && str) noexcept
 	{
-		return impl::string_convert<float80_t>(impl::c_string(ML_FWD(str)), &_CSTD strtold);
+		return impl::str_apply<float80_t>(impl::to_cstr(ML_FWD(str)), &_CSTD strtold);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch = char
-	> ML_NODISCARD static inline auto const & to_string(pmr::basic_string<Ch> const & str)
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline auto const & to_string(Str const & str)
 	{
 		return str;
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int8_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(int8_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int16_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(int16_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int32_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(int32_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(int64_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(int64_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint8_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(uint8_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint16_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(uint16_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint32_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(uint32_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(uint64_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(uint64_t const value) noexcept
 	{
-		return impl::integral_to_string<char>(value);
+		return impl::integral_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float64_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(float64_t const value) noexcept
 	{
-		return impl::floating_point_to_string<char>(value);
+		return impl::floating_point_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float32_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(float32_t const value) noexcept
 	{
-		return impl::floating_point_to_string<char>(value);
+		return impl::floating_point_to_string<Ch>(value);
 	}
 
-	template <class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(float80_t const value) noexcept
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_string(float80_t const value) noexcept
 	{
-		return impl::floating_point_to_string<char>(value);
-	}
-
-	template <class T, class Ch = char
-	> ML_NODISCARD static inline pmr::basic_string<Ch> to_string(T const & value) noexcept
-	{
-		std::stringstream ss{};
-		ss << value;
-		return pmr::basic_string<Ch>{ ss.str() };
+		return impl::floating_point_to_string<Ch>(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -612,8 +660,8 @@ namespace ml::util
 		return fmt;
 	}
 
-	template <class S
-	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, pmr::vector<S> const & args) noexcept
+	template <class Str
+	> ML_NODISCARD static inline pmr::string format(pmr::string fmt, pmr::vector<Str> const & args) noexcept
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; ++i)
 		{
@@ -636,16 +684,16 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T
-	> ML_NODISCARD static inline pmr::string to_hex(T const & value)
+	template <class T, ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_hex(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::hex << value;
 		return ss.str();
 	}
 
-	template <class T
-	> ML_NODISCARD static inline pmr::string to_oct(T const & value)
+	template <class T, ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static inline Str to_oct(T const & value)
 	{
 		std::stringstream ss{};
 		ss << std::oct << value;

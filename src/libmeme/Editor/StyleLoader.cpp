@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	bool style_loader::operator()(fs::path const & path)
+	bool style_loader::operator()(filesystem::path const & path)
 	{
 		// open file
 		std::ifstream file{ path };

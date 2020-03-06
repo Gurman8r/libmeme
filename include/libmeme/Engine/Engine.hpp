@@ -3,7 +3,7 @@
 
 #include <libmeme/Core/Timer.hpp>
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Engine/FPS_Tracker.hpp>
+#include <libmeme/Engine/FrameTracker.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
 namespace ml
@@ -14,50 +14,56 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		class context;
+		class config;
+		class runtime;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using strings_t		= pmr::vector<pmr::string>;
-		using filenames_t	= ds::flat_set<fs::path>;
+		using arguments_t	= pmr::vector<pmr::string>;
+		using warguments_t	= pmr::vector<pmr::wstring>;
+		using filenames_t	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// startup
+		// startup variables
 		class config final : trackable, non_copyable
 		{
+			friend class context;
 		public:
-			strings_t			command_line	{}			; // command line
-			fs::path			program_name	{}			; // program name
-			fs::path			program_path	{}			; // program path
-			fs::path			content_path	{}			; // content path
-			fs::path			library_home	{}			; // script library path
-		
-		private: friend class context;
+			arguments_t			command_line	{}			; // command line
+			filesystem::path	program_name	{}			; // programe name
+			filesystem::path	program_path	{}			; // program path
+			filesystem::path	content_path	{}			; // content path
+			filesystem::path	library_home	{}			; // script library path
+
+			cstring				window_title	{}			; // 
+			video_mode			window_display	{}			; // 
+			context_settings	window_context	{}			; // 
+			int32_t				window_hints	{}			; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// runtime
-		class io final : trackable, non_copyable
+		// runtime variables
+		class runtime final : trackable, non_copyable
 		{
+			friend class context;
 		public:
 			float_t				delta_time		{}			; // frame time
 			size_t				frame_count		{}			; // frame count
 			float_t				frame_rate		{}			; // frame rate
-		
-		private: friend class context;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// context
+		// engine context
 		class context final : trackable, non_copyable
 		{
 		private:
 			friend class		engine						;
-			engine::config		m_config		{}			; // startup settings
-			engine::io			m_io			{}			; // runtime variables
+			engine::config		m_config		{}			; // startup variables
+			engine::runtime		m_io			{}			; // runtime variables
 			timer				m_main_timer	{ true }	; // master timer
 			timer				m_loop_timer	{}			; // frame timer
 			frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
@@ -68,11 +74,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool initialized() noexcept;
+		ML_NODISCARD static bool is_initialized() noexcept;
 
 		ML_NODISCARD static bool create_context();
 
-		static bool destroy_context();
+		ML_NODISCARD static bool destroy_context();
 
 		ML_NODISCARD static engine::context * const get_context() noexcept;
 
@@ -80,7 +86,7 @@ namespace ml
 
 		ML_NODISCARD static bool startup();
 
-		static bool shutdown();
+		ML_NODISCARD static bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,7 +102,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool load_plugin(fs::path const & path);
+		static bool load_plugin(filesystem::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -105,7 +111,7 @@ namespace ml
 			return get_context()->m_config;
 		}
 
-		ML_NODISCARD static inline engine::io & get_io() noexcept
+		ML_NODISCARD static inline engine::runtime & get_io() noexcept
 		{
 			return get_context()->m_io;
 		}
@@ -122,10 +128,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline fs::path path_to(fs::path const & path)
+		ML_NODISCARD static inline filesystem::path path_to(filesystem::path const & value = {})
 		{
-			if (path.empty()) return get_config().content_path;
-			return fs::path{ get_config().content_path.string() + path.string() };
+			auto const & cpath{ get_config().content_path };
+			if (cpath.empty()) return value;
+			if (value.empty()) return cpath;
+			return filesystem::path{ cpath.native() + value.native() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
