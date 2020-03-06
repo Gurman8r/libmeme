@@ -39,19 +39,19 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifndef ML_assert
+#define ML_assert(expr) assert(expr)
+#endif
+
 #define ML_argc		__argc
 #define ML_argv		__argv
 #define ML_wargv	__wargv
 #define ML_envp		_environ
 #define ML_wenvp	_wenviron
 
-#ifndef ML_assert
-#define ML_assert(expr) assert(expr)
-#endif
-
 #define ML_addressof(ptr)	((void *)(ML_INTMAX)ptr)
 #define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
-#define ML_fwd(value)		std::forward<decltype(value)>(value)
+#define ML_forward(value)	std::forward<decltype(value)>(value)
 #define ML_deserialize		std::istream & operator >>
 #define ML_serialize		std::ostream & operator <<
 
@@ -116,7 +116,6 @@ namespace ml
 		using namespace _ML std::string_literals;
 		using namespace _ML std::string_view_literals;
 	}
-
 	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

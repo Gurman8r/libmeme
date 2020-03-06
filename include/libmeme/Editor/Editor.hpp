@@ -25,7 +25,6 @@ namespace ml
 			friend class context;
 		public:
 			pmr::string			api_version		{}			; // shading language version
-			filesystem::path	style			{}			; // editor style config
 			cstring				ini_file		{}			; // imgui ini file
 			cstring				log_file		{}			; // imgui log file
 		};
@@ -95,7 +94,6 @@ namespace ml
 		// editor context
 		class context final : trackable, non_copyable
 		{
-		private:
 			friend class		editor						;
 			editor::config		m_config		{}			; // startup variables
 			editor::runtime		m_io			{}			; // runtime variables
@@ -104,7 +102,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool is_initialized() noexcept;
+		ML_NODISCARD static bool running() noexcept;
 
 		ML_NODISCARD static bool create_context();
 
@@ -130,11 +128,13 @@ namespace ml
 
 		ML_NODISCARD static inline editor::config & get_config() noexcept
 		{
+			ML_assert(running());
 			return get_context()->m_config;
 		}
 
 		ML_NODISCARD static inline editor::runtime & get_io() noexcept
 		{
+			ML_assert(running());
 			return get_context()->m_io;
 		}
 

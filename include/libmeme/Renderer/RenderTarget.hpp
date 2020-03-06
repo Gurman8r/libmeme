@@ -34,13 +34,13 @@ namespace ml
 		template <class T, class ... Args
 		> inline void draw(T const * value, Args && ... args) const
 		{
-			T::draw(*this, value, ML_fwd(args)...);
+			T::draw(*this, value, ML_forward(args)...);
 		}
 
 		template <class T, class ... Args
 		> inline void draw(T const & value, Args && ... args) const
 		{
-			this->draw(&value, ML_fwd(args)...);
+			this->draw(&value, ML_forward(args)...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

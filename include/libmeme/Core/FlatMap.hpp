@@ -352,7 +352,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.insert(key) }; k.second)
 			{
-				return { this->impl_emplace_hint(k.first, ML_fwd(args)...), true };
+				return { this->impl_emplace_hint(k.first, ML_forward(args)...), true };
 			}
 			else
 			{
@@ -365,7 +365,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.insert(std::move(key)) }; k.second)
 			{
-				return { this->impl_emplace_hint(k.first, ML_fwd(args)...), true };
+				return { this->impl_emplace_hint(k.first, ML_forward(args)...), true };
 			}
 			else
 			{
@@ -378,12 +378,12 @@ namespace ml::ds
 		template <class Key, class Value
 		> inline iterator_pair insert(Key && key, Value && value)
 		{
-			return this->try_emplace(ML_fwd(key), ML_fwd(value)).first;
+			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
 		}
 
 		inline iterator_pair insert(keyval_pair && pair)
 		{
-			return this->try_emplace(ML_fwd(pair.first), ML_fwd(pair.second)).first;
+			return this->try_emplace(ML_forward(pair.first), ML_forward(pair.second)).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -396,7 +396,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(key, ML_fwd(value)).second);
+				return (*this->insert(key, ML_forward(value)).second);
 			}
 		}
 
@@ -408,7 +408,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(ML_fwd(key), ML_fwd(value)).second);
+				return (*this->insert(ML_forward(key), ML_forward(value)).second);
 			}
 		}
 
@@ -421,7 +421,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & at(key_type && key)
 		{
-			return this->find_or_add(ML_fwd(key), value_type{});
+			return this->find_or_add(ML_forward(key), value_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -433,7 +433,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & operator[](key_type && key) noexcept
 		{
-			return this->at(ML_fwd(key));
+			return this->at(ML_forward(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -580,7 +580,7 @@ namespace ml::ds
 			// needs to be private or else the map can become unsorted
 			return {
 				std::next(m_pair.first.begin(), std::distance(m_pair.first.cbegin(), it)),
-				m_pair.second.emplace(this->fetch(it), ML_fwd(args)...)
+				m_pair.second.emplace(this->fetch(it), ML_forward(args)...)
 			};
 		}
 

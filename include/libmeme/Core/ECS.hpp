@@ -444,7 +444,7 @@ namespace ml::ecs::impl
 		> inline auto & add_component(Args && ... args) noexcept
 		{
 			ML_assert(m_manager);
-			return m_manager->template add_component<C>(*this, ML_fwd(args)...);
+			return m_manager->template add_component<C>(*this, ML_forward(args)...);
 		}
 
 		template <class C
@@ -875,7 +875,7 @@ namespace ml::ecs
 			>(true);
 
 			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
-			c = C{ ML_fwd(args)... };
+			c = C{ ML_forward(args)... };
 			return c;
 		}
 
@@ -888,7 +888,7 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> inline auto & add_component(handle const & h, Args && ... args) noexcept
 		{
-			return this->add_component<C>(h.m_entity, ML_fwd(args)...);
+			return this->add_component<C>(h.m_entity, ML_forward(args)...);
 		}
 
 		template <class C
@@ -1007,7 +1007,7 @@ namespace ml::ecs
 			// invoke function on every alive entity
 			for (size_t e = 0, imax = m_size; e < imax; ++e)
 			{
-				std::invoke(ML_fwd(fn), e);
+				std::invoke(ML_forward(fn), e);
 			}
 			return (*this);
 		}
@@ -1023,7 +1023,7 @@ namespace ml::ecs
 				using C = typename decltype(c)::type;
 				if (this->has_component<C>(e))
 				{
-					std::invoke(ML_fwd(fn), this->get_component<C>(e));
+					std::invoke(ML_forward(fn), this->get_component<C>(e));
 				}
 			});
 			return (*this);
@@ -1033,7 +1033,7 @@ namespace ml::ecs
 		> inline self_type & for_components(handle const & h, Fn && fn)
 		{
 			// invoke function on each of a handle's components
-			return this->for_components(h.m_entity, ML_fwd(fn));
+			return this->for_components(h.m_entity, ML_forward(fn));
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1046,7 +1046,7 @@ namespace ml::ecs
 			{
 				if (this->matches_signature<S>(e))
 				{
-					this->expand_call<S>(e, ML_fwd(fn));
+					this->expand_call<S>(e, ML_forward(fn));
 				}
 			});
 		}
@@ -1059,7 +1059,7 @@ namespace ml::ecs
 			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp)
 			{
-				std::invoke(ML_fwd(fn), x, ML_fwd(req_comp)...);
+				std::invoke(ML_forward(fn), x, ML_forward(req_comp)...);
 			});
 		}
 
@@ -1069,7 +1069,7 @@ namespace ml::ecs
 			// invoke update on all systems matching a signature
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp)
 			{
-				x.update(ML_fwd(args)..., ML_fwd(req_comp)...);
+				x.update(ML_forward(args)..., ML_forward(req_comp)...);
 			});
 		}
 
@@ -1086,7 +1086,7 @@ namespace ml::ecs
 
 			using helper = meta::rename<expand_call_helper, req_comp>;
 
-			helper::call(e, *this, ML_fwd(fn));
+			helper::call(e, *this, ML_forward(fn));
 		}
 
 		template <class ... Ts
@@ -1097,7 +1097,7 @@ namespace ml::ecs
 			{
 				auto const i{ std::get<ID_Index>(self.m_entities)[e] }; // component data index
 
-				std::invoke(ML_fwd(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
+				std::invoke(ML_forward(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
 			}
 		};
 

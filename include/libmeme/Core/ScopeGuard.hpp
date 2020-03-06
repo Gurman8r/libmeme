@@ -25,7 +25,7 @@ namespace ml::detail
 	enum class scope_guard_on_exit {};
 
 	template <class Fn
-	> inline scope_guard<Fn> operator+(scope_guard_on_exit, Fn fn) noexcept
+	> inline scope_guard<Fn> operator +(scope_guard_on_exit, Fn fn) noexcept
 	{
 		return scope_guard<Fn>{ fn };
 	}

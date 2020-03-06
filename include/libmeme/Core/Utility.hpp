@@ -1,6 +1,7 @@
 #ifndef _ML_ALG_HPP_
 #define _ML_ALG_HPP_
 
+#include <libmeme/Core/Hash.hpp>
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 #include <gcem/include/gcem.hpp>
@@ -71,14 +72,14 @@ namespace ml::util
 	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs < rhs
-			? _ML_UTIL min(ML_fwd(lhs), ML_fwd(rest)...)
-			: _ML_UTIL min(ML_fwd(rhs), ML_fwd(rest)...);
+			? _ML_UTIL min(ML_forward(lhs), ML_forward(rest)...)
+			: _ML_UTIL min(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
 	> constexpr decltype(auto) min(Only && only)
 	{
-		return ML_fwd(only);
+		return ML_forward(only);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -87,14 +88,14 @@ namespace ml::util
 	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs > rhs
-			? _ML_UTIL max(ML_fwd(lhs), ML_fwd(rest)...)
-			: _ML_UTIL max(ML_fwd(rhs), ML_fwd(rest)...);
+			? _ML_UTIL max(ML_forward(lhs), ML_forward(rest)...)
+			: _ML_UTIL max(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
 	> constexpr decltype(auto) max(Only && only)
 	{
-		return ML_fwd(only);
+		return ML_forward(only);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -103,61 +104,7 @@ namespace ml::util
 	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
 	{
 		// min(max(v, lhs), rhs)
-		return _ML_UTIL min(_ML_UTIL max(ML_fwd(v), ML_fwd(lhs)), ML_fwd(rhs));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// Hash
-namespace ml::util
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static constexpr auto fnv1a_basis{ static_cast<hash_t>(14695981039346656037ULL) };
-
-	static constexpr auto fnv1a_prime{ static_cast<hash_t>(1099511628211ULL) };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T
-	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size, hash_t seed) noexcept
-	{
-		return (size > 0)
-			? _ML_UTIL hash(arr + 1, size - 1, (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
-			: seed;
-	}
-
-	template <class T
-	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size) noexcept
-	{
-		return _ML_UTIL hash(arr, size, fnv1a_basis);
-	}
-
-	template <class T, hash_t N
-	> ML_NODISCARD constexpr hash_t hash(const T(&value)[N]) noexcept
-	{
-		return _ML_UTIL hash(value, N - 1);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Arr
-	> ML_NODISCARD constexpr hash_t hash(Arr const & value) noexcept
-	{
-		return _ML_UTIL hash(value.data(), static_cast<hash_t>(value.size()));
-	}
-
-	template <template <class, hash_t...> class Arr, class T, hash_t ... N
-	> ML_NODISCARD constexpr hash_t hash(Arr<T, N...> const & value) noexcept
-	{
-		return _ML_UTIL hash(value.data(), static_cast<hash_t>(value.size()));
-	}
-
-	template <template <class...> class Arr, class ... Ts
-	> ML_NODISCARD constexpr hash_t hash(Arr<Ts...> const & value) noexcept
-	{
-		return _ML_UTIL hash(value.data(), static_cast<hash_t>(value.size()));
+		return _ML_UTIL min(_ML_UTIL max(ML_forward(v), ML_forward(lhs)), ML_forward(rhs));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

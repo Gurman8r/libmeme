@@ -17,7 +17,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool editor::is_initialized() noexcept
+	bool editor::running() noexcept
 	{
 		return g_editor;
 	}
@@ -81,25 +81,10 @@ namespace ml
 		im_io.LogFilename = g_editor->m_config.ini_file;
 		im_io.IniFilename = g_editor->m_config.log_file;
 
-		// style
-		switch (util::hash(util::to_lower(g_editor->m_config.style.string())))
-		{
-		case util::hash("light"): ImGui::StyleColorsLight(); break;
-		case util::hash("dark"): ImGui::StyleColorsDark(); break;
-		case util::hash("classic"): ImGui::StyleColorsClassic(); break;
-		default:
-			if (auto const path{ engine::path_to(g_editor->m_config.style) }
-			; filesystem::exists(path))
-			{
-				style_loader{}(path);
-			}
-			break;
-		}
-
 		// backend
 #ifdef ML_RENDERER_OPENGL
 
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::get_window()->get_handle(), true))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::get_window().get_handle(), true))
 		{
 			return debug::log::error("Failed initializing ImGui platform");
 		}
@@ -144,7 +129,7 @@ namespace ml
 
 	void editor::render()
 	{
-		ML_assert(is_initialized());
+		ML_assert(running());
 		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
 		auto do_render = [&](auto & x, auto && fn)
@@ -152,7 +137,7 @@ namespace ml
 			if (!x.open) return;
 			ML_ImGui_ScopeID(ML_addressof(&x));
 			ML_ImGui_ScopeID(x.title);
-			std::invoke(ML_fwd(fn), x);
+			std::invoke(ML_forward(fn), x);
 		};
 
 		// RENDER DOCKSPACE
@@ -259,7 +244,7 @@ namespace ml
 		}
 		if (fn)
 		{
-			it->second.emplace_back(ML_fwd(fn));
+			it->second.emplace_back(ML_forward(fn));
 		}
 	}
 

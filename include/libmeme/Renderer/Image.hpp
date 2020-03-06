@@ -174,7 +174,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_image(Args && ... args)
 	{
-		return image{ ML_fwd(args)... };
+		return image{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

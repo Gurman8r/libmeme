@@ -54,7 +54,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_video_mode(Args && ... args) noexcept
 	{
-		return video_mode{ ML_fwd(args)... };
+		return video_mode{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

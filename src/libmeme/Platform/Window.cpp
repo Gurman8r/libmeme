@@ -57,11 +57,11 @@ namespace ml
 		, m_hints	{}
 	{
 #ifdef ML_OS_WINDOWS
-		if (HWND window{ ::GetConsoleWindow() })
+		if (HWND window{ GetConsoleWindow() })
 		{
-			if (HMENU menu{ ::GetSystemMenu(window, false) })
+			if (HMENU menu{ GetSystemMenu(window, false) })
 			{
-				::EnableMenuItem(menu, SC_CLOSE, MF_GRAYED);
+				EnableMenuItem(menu, SC_CLOSE, MF_GRAYED);
 			}
 		}
 #endif
@@ -70,11 +70,11 @@ namespace ml
 	window::~window() noexcept
 	{
 #ifdef ML_OS_WINDOWS
-		if (HWND window{ ::GetConsoleWindow() })
+		if (HWND window{ GetConsoleWindow() })
 		{
-			if (HMENU menu{ ::GetSystemMenu(window, false) })
+			if (HMENU menu{ GetSystemMenu(window, false) })
 			{
-				::EnableMenuItem(menu, SC_CLOSE, MF_ENABLED);
+				EnableMenuItem(menu, SC_CLOSE, MF_ENABLED);
 			}
 		}
 #endif
@@ -175,6 +175,7 @@ namespace ml
 
 	void window::on_event(event const & value)
 	{
+		// nothing to do here
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -366,9 +367,10 @@ namespace ml
 
 	window & window::set_title(cstring const & value)
 	{
-		if (m_window && value)
+		m_title = value;
+		if (m_window && m_title)
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), (m_title = value));
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_title);
 		}
 		return (*this);
 	}
@@ -387,20 +389,20 @@ namespace ml
 
 	bool window::is_open() const
 	{
-		return m_window && !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
+		if (!m_window) return false;
+		return !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
 	}
 	
 	int32_t window::get_attribute(int32_t value) const
 	{
-		return (m_window ? glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value) : 0);
+		if (!m_window) return 0;
+		return glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value);
 	}
 
 	cstring window::get_clipboard() const
 	{
-		return (m_window 
-			? glfwGetClipboardString(static_cast<GLFWwindow *>(m_window)) 
-			: nullptr
-		);
+		if (!m_window) return nullptr;
+		return glfwGetClipboardString(static_cast<GLFWwindow *>(m_window));
 	}
 
 	vec2 window::get_cursor_pos() const
@@ -430,17 +432,20 @@ namespace ml
 
 	int32_t	window::get_key(int32_t value) const
 	{
-		return (m_window ? glfwGetKey(static_cast<GLFWwindow *>(m_window), value) : 0);
+		if (!m_window) return 0;
+		return glfwGetKey(static_cast<GLFWwindow *>(m_window), value);
 	}
 
 	int32_t window::get_input_mode(int32_t value) const
 	{
-		return (m_window ? glfwGetInputMode(static_cast<GLFWwindow *>(m_window), value) : 0);
+		if (!m_window) return 0;
+		return glfwGetInputMode(static_cast<GLFWwindow *>(m_window), value);
 	}
 
 	int32_t	window::get_mouse_button(int32_t value) const
 	{
-		return (m_window ? glfwGetMouseButton(static_cast<GLFWwindow *>(m_window), value) : 0);
+		if (!m_window) return 0;
+		return glfwGetMouseButton(static_cast<GLFWwindow *>(m_window), value);
 	}
 
 	vec2i window::get_position() const
@@ -713,42 +718,42 @@ namespace ml
 
 		win->set_char_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<char_event>(ML_fwd(args)...);
+			event_system::fire_event<char_event>(ML_forward(args)...);
 		});
 
 		win->set_cursor_enter_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<cursor_enter_event>(ML_fwd(args)...);
+			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
 		});
 
 		win->set_cursor_pos_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<cursor_pos_event>(ML_fwd(args)...);
+			event_system::fire_event<cursor_pos_event>(ML_forward(args)...);
 		});
 
 		win->set_error_callback([](auto ... args)
 		{
-			event_system::fire_event<window_error_event>(ML_fwd(args)...);
+			event_system::fire_event<window_error_event>(ML_forward(args)...);
 		});
 
 		win->set_frame_size_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<frame_size_event>(ML_fwd(args)...);
+			event_system::fire_event<frame_size_event>(ML_forward(args)...);
 		});
 
 		win->set_key_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<key_event>(ML_fwd(args)...);
+			event_system::fire_event<key_event>(ML_forward(args)...);
 		});
 
 		win->set_mouse_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<mouse_event>(ML_fwd(args)...);
+			event_system::fire_event<mouse_event>(ML_forward(args)...);
 		});
 
 		win->set_scroll_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<scroll_event>(ML_fwd(args)...);
+			event_system::fire_event<scroll_event>(ML_forward(args)...);
 		});
 
 		win->set_window_close_callback([](auto)
@@ -758,17 +763,17 @@ namespace ml
 
 		win->set_window_focus_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<window_focus_event>(ML_fwd(args)...);
+			event_system::fire_event<window_focus_event>(ML_forward(args)...);
 		});
 
 		win->set_window_pos_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<window_pos_event>(ML_fwd(args)...);
+			event_system::fire_event<window_pos_event>(ML_forward(args)...);
 		});
 
 		win->set_window_size_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<window_size_event>(ML_fwd(args)...);
+			event_system::fire_event<window_size_event>(ML_forward(args)...);
 		});
 	}
 

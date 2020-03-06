@@ -40,7 +40,7 @@ namespace ml
 
 		inline timer & start() noexcept
 		{
-			if (!this->running())
+			if (!this->is_initialized())
 			{
 				m_current = m_previous = clock::now();
 				m_elapsed = 0.0;
@@ -51,7 +51,7 @@ namespace ml
 
 		inline timer & stop() noexcept
 		{
-			if (this->running())
+			if (this->is_initialized())
 			{
 				m_current = clock::now();
 				m_elapsed = (m_current - m_previous);
@@ -62,14 +62,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool running() const noexcept
+		ML_NODISCARD inline bool is_initialized() const noexcept
 		{
 			return (m_flags & TimerFlags_Running);
 		}
 
 		ML_NODISCARD inline duration const & elapsed() const & noexcept
 		{
-			return this->running() ? (m_elapsed = (clock::now() - m_previous)) : m_elapsed;
+			return this->is_initialized() ? (m_elapsed = (clock::now() - m_previous)) : m_elapsed;
 		}
 
 		ML_NODISCARD inline operator duration const & () const & noexcept

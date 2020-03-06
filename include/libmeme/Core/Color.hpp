@@ -146,13 +146,13 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color(Args && ... args)
 	{
-		return color{ ML_fwd(args)... };
+		return color{ ML_forward(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color32(Args && ... args)
 	{
-		return color32{ ML_fwd(args)... };
+		return color32{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

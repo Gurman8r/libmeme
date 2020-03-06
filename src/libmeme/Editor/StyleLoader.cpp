@@ -1,12 +1,25 @@
 #include <libmeme/Editor/StyleLoader.hpp>
 #include <libmeme/Editor/ImGui.hpp>
-#include <libmeme/Core/FileSystem.hpp>
+#include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Input.hpp>
 
 namespace ml
 {
 	bool style_loader::operator()(filesystem::path const & path)
 	{
+		// defaults
+		if (!filesystem::exists(path))
+		{
+			switch (util::hash(util::to_lower(path.string())))
+			{
+			default: return false;
+			case util::hash("classic")	: ImGui::StyleColorsClassic();
+			case util::hash("dark")		: ImGui::StyleColorsDark();
+			case util::hash("light")	: ImGui::StyleColorsLight(); 
+			}
+			return true;
+		}
+
 		// open file
 		std::ifstream file{ path };
 		ML_defer{ file.close(); };

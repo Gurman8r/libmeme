@@ -11,10 +11,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum { ID_Vert, ID_Geom, ID_Frag };
+		enum : size_t { ID_Vert, ID_Geom, ID_Frag, ID_MAX };
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using shader_source		= typename meta::array<pmr::string, 3>;
+		using shader_source		= typename meta::array<pmr::string, ID_MAX>;
 		using attribute_cache	= typename ds::flat_map<pmr::string, int32_t>;
 		using uniform_cache		= typename ds::flat_map<pmr::string, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, struct texture const *>;
@@ -151,7 +151,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_shader(Args && ... args)
 	{
-		return shader{ ML_fwd(args)... };
+		return shader{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

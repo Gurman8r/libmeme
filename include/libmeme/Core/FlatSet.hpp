@@ -448,7 +448,7 @@ namespace ml::ds
 				// insert multi
 				return m_storage.emplace(
 					std::upper_bound(begin(), end(), other, compare_type{}),
-					ML_fwd(other)
+					ML_forward(other)
 				);
 			}
 			else
@@ -457,7 +457,7 @@ namespace ml::ds
 				if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
 				; it.first == it.second)
 				{
-					return { m_storage.emplace(it.second, ML_fwd(other)), true };
+					return { m_storage.emplace(it.second, ML_forward(other)), true };
 				}
 				else
 				{

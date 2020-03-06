@@ -27,7 +27,7 @@ namespace ml
 		template <class Ev, class ... Args
 		> static inline void fire_event(Args && ... args)
 		{
-			return fire_event(Ev{ ML_fwd(args)... });
+			return fire_event(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

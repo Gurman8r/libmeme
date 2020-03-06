@@ -63,9 +63,9 @@ namespace ml
 		}
 
 		uniform(type_t && type, name_t && name, data_t && data, allocator_type const & alloc = {}) noexcept
-			: m_type{ ML_fwd(type) }
-			, m_name{ ML_fwd(name), alloc }
-			, m_data{ ML_fwd(data) }
+			: m_type{ ML_forward(type) }
+			, m_name{ ML_forward(name), alloc }
+			, m_data{ ML_forward(data) }
 		{
 		}
 
@@ -77,9 +77,9 @@ namespace ml
 		}
 
 		uniform(uniform && other, allocator_type const & alloc = {}) noexcept
-			: m_type{ ML_fwd(other.m_type) }
-			, m_name{ ML_fwd(other.m_name), alloc }
-			, m_data{ ML_fwd(other.m_data) }
+			: m_type{ ML_forward(other.m_type) }
+			, m_name{ ML_forward(other.m_name), alloc }
+			, m_data{ ML_forward(other.m_data) }
 		{
 		}
 
@@ -234,7 +234,7 @@ namespace ml
 	template <class Type, class Name, class ... Args
 	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
-		return uniform{ typeof_v<Type>, ML_fwd(name), ML_fwd(args)... };
+		return uniform{ typeof_v<Type>, ML_forward(name), ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -33,7 +33,7 @@ namespace ml
 		template <class ... Args
 		> static inline decltype(auto) push_frame(Args && ... args) noexcept
 		{
-			return m_curr.emplace_back(ML_fwd(args)...);
+			return m_curr.emplace_back(ML_forward(args)...);
 		}
 
 		static inline void swap_frames() noexcept

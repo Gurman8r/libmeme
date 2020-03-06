@@ -14,7 +14,7 @@ namespace ml::gui
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
-			std::invoke(ML_fwd(fn));
+			std::invoke(ML_forward(fn));
 			ImGui::EndTooltip();
 		}
 	}
@@ -53,7 +53,7 @@ namespace ml::gui
 	> static inline void help_marker_ex(Fn && fn) noexcept
 	{
 		ImGui::TextDisabled("(?)");
-		tooltip_ex(ML_fwd(fn));
+		tooltip_ex(ML_forward(fn));
 	}
 
 	static inline void help_marker(cstring first, cstring last = nullptr) noexcept
@@ -146,7 +146,7 @@ namespace ml::gui
 	> static inline auto make_plot(size_t const cap, Args && ... args) noexcept
 	{
 		return plot{
-			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_fwd(args)...
+			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_forward(args)...
 		};
 	}
 
@@ -158,7 +158,7 @@ namespace ml::gui
 
 		template <class Fn> inline auto for_each(Fn && fn) noexcept
 		{
-			return std::for_each(m_plots.begin(), m_plots.end(), ML_fwd(fn));
+			return std::for_each(m_plots.begin(), m_plots.end(), ML_forward(fn));
 		}
 
 		inline plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
@@ -200,7 +200,7 @@ namespace ml::gui
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
-				std::invoke(ML_fwd(fn), *this);
+				std::invoke(ML_forward(fn), *this);
 			}
 			return (*this);
 		}
@@ -259,7 +259,7 @@ namespace ml::gui
 				size[1] == 0.f ? reg_avail[1] : size[1]
 			}) };
 
-			std::invoke(ML_fwd(fn));
+			std::invoke(ML_forward(fn));
 
 			ImGui::Image(
 				tex_addr, tex_size,

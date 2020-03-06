@@ -23,9 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		font();
-		
-		explicit font(allocator_type const & alloc);
+		font(allocator_type const & alloc = {});
 		
 		font(filesystem::path const & path, allocator_type const & alloc = {});
 		
@@ -83,7 +81,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_font(Args && ... args)
 	{
-		return font{ ML_fwd(args)... };
+		return font{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -146,7 +146,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_buffer_layout(Args && ... args)
 	{
-		return buffer_layout{ ML_fwd(args)... };
+		return buffer_layout{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

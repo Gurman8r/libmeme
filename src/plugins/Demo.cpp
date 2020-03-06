@@ -4,6 +4,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Core/ECS.hpp>
+#include <libmeme/Engine/Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -18,7 +19,6 @@
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
-#include <libmeme/Scripting/Script.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -129,7 +129,6 @@ namespace ml
 		ds::flat_map<pmr::string,	image			> m_images		{};
 		ds::flat_map<pmr::string,	material		> m_materials	{};
 		ds::flat_map<pmr::string,	model			> m_models		{};
-		ds::flat_map<pmr::string,	script			> m_scripts		{};
 		ds::flat_map<pmr::string,	shader			> m_shaders		{};
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
 
@@ -233,7 +232,7 @@ namespace ml
 			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) }
 			; !icon.empty())
 			{
-				engine::get_window()->set_icon(icon.width(), icon.height(), icon.data());
+				engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
@@ -468,7 +467,7 @@ namespace ml
 			// gui docking
 
 			enum : int32_t // node ids
-			{ 
+			{
 				root,
 				left, left_up, left_dn, left_dn2,
 				right, right_up, right_dn,
@@ -547,7 +546,6 @@ namespace ml
 			m_textures.clear();
 			m_fonts.clear();
 			m_pipeline.clear();
-			m_scripts.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -561,7 +559,7 @@ namespace ml
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
 				{
-					engine::get_window()->close();
+					engine::close();
 				}
 			});
 			m.add_menu("tools", [&]()
@@ -578,10 +576,10 @@ namespace ml
 			m.add_menu("options", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
-				bool fullscreen{ engine::get_window()->is_fullscreen() };
+				bool fullscreen{ engine::get_window().is_fullscreen() };
 				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 				{
-					engine::get_window()->set_fullscreen(fullscreen);
+					engine::get_window().set_fullscreen(fullscreen);
 				}
 			});
 			m.add_menu("help", [&]()
@@ -640,7 +638,6 @@ namespace ml
 			m_images.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_materials.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_models.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_scripts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_shaders.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 			m_textures.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
 
@@ -666,7 +663,7 @@ namespace ml
 
 				cmd.push_back({ "exit", [&](auto args)
 				{
-					engine::get_window()->close();
+					engine::close();
 				} });
 
 				cmd.push_back({ "help", [&](auto args)
@@ -690,15 +687,15 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_ONCE_CALL{ std::cout << "# type \'/lua\' to exit\n"; };
+						ML_ONCE_CALL{ std::cout << "# type \'\\\' to exit\n"; };
 					}
-					else if (m_console.overload && (args.front() == "/lua"))
+					else if (m_console.overload && (args.front() == "\\"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::invoke(script{ script::api::lua, util::detokenize(args) });
+						engine::do_script<embed::api::lua>(util::detokenize(args));
 					}
 				} });
 
@@ -707,15 +704,15 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_ONCE_CALL{ std::cout << "# type \'/python\' to exit\n"; };
+						ML_ONCE_CALL{ std::cout << "# type \'\\\' to exit\n"; };
 					}
-					else if (m_console.overload && (args.front() == "/python"))
+					else if (m_console.overload && (args.front() == "\\"))
 					{
 						m_console.overload = nullptr;
 					}
 					else
 					{
-						std::invoke(script{ script::api::python, util::detokenize(args) });
+						engine::do_script<embed::api::python>(util::detokenize(args));
 					}
 				} });
 			}
@@ -826,7 +823,7 @@ namespace ml
 					if (ImGui::BeginPopupContextItem())
 					{
 						if (ImGui::MenuItem("copy"))
-							engine::get_window()->set_clipboard(buf);
+							engine::get_window().set_clipboard(buf);
 						ImGui::EndPopup();
 					}
 				}
@@ -969,7 +966,7 @@ namespace ml
 			ML_ONCE_CALL{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::get_window()->get_hints() & WindowHints_Maximized ? 32 : 16;
+				m_memory.Cols				= engine::get_window().get_hints() & WindowHints_Maximized ? 32 : 16;
 				m_memory.OptShowOptions		= true;
 				m_memory.OptShowDataPreview	= true;
 				m_memory.OptShowHexII		= false;

@@ -7,9 +7,12 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
-#include <libmeme/Scripting/Script.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 using namespace ml;
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef MEM_RESERVED
 #define MEM_RESERVED 64.0_MiB
@@ -23,10 +26,10 @@ using namespace ml;
 #define SETUP_SCRIPT L"assets/scripts/setup.py"
 #endif
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 ml::int32_t main()
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
@@ -35,7 +38,7 @@ ml::int32_t main()
 		pmr::unsynchronized_pool_resource	m_pool	{ &m_mono };
 		detail::test_resource				m_test	{ &m_pool, m_data.data(), m_data.size() };
 
-		memory_config()
+		memory_config() noexcept
 		{
 			ML_assert(pmr::set_default_resource(&m_test));
 			ML_assert(memory_manager::set_test_resource(&m_test));
@@ -45,55 +48,52 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create engine context
+	// create engine
 	ML_assert(engine::create_context()); ML_defer{ ML_assert(engine::destroy_context()); };
 
 	// configure engine
-	engine::config & engine_cfg	{ engine::get_config() };
+	auto & engine_cfg			{ engine::get_config() };
 	engine_cfg.command_line		= { ML_argv, ML_argv + ML_argc };
 	engine_cfg.program_name		= filesystem::path{ ML_argv[0] }.filename();
 	engine_cfg.program_path		= filesystem::current_path();
 	engine_cfg.content_path		= L"../../../../";
 	engine_cfg.library_home		= L"../../../../";
 
-	// start interpreter
-	ML_assert(script::startup()); ML_defer{ ML_assert(script::shutdown()); };
-	
 	// start engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
 	// create window
-	ML_assert(engine::get_window()->create(
-		WINDOW_TITLE,
+	ML_assert(engine::get_window().create
+	(
+		WINDOW_TITLE,					// title
 		make_video_mode(
-			vec2i{ 1280, 720 },		// resolution
-			32u						// color depth
+			vec2i{ 1280, 720 },			// resolution
+			32u							// color depth
 		),
 		make_context_settings(
-			client_api::opengl,		// api
-			4,						// major version
-			6,						// minor version
-			client_api::compat,		// profile
-			24,						// depth bits
-			8,						// stencil bits
-			false,					// multisample
-			false					// sRGB capable
+			client_api::opengl,			// api
+			4,							// major version
+			6,							// minor version
+			client_api::compat,			// profile
+			24,							// depth bits
+			8,							// stencil bits
+			false,						// multisample
+			false						// sRGB capable
 		),
-		WindowHints_DefaultMaximized
+		WindowHints_DefaultMaximized	// hints
 	));
 
 	// install window callbacks
-	window::install_default_callbacks(engine::get_window());
+	window::install_default_callbacks(&engine::get_window());
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create editor context
+	// create editor
 	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
 
 	// configure editor
-	editor::config & editor_cfg	{ editor::get_config() };
+	auto & editor_cfg			{ editor::get_config() };
 	editor_cfg.api_version		= "#version 130";
-	editor_cfg.style			= L"assets/styles/obsidian.style";
 	editor_cfg.ini_file			= nullptr;
 	editor_cfg.log_file			= nullptr;
 	
@@ -103,13 +103,13 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// run setup script
-	std::invoke(script{ engine::path_to(SETUP_SCRIPT) });
+	engine::do_script(engine::path_to(SETUP_SCRIPT));
 
 	// enter event
 	event_system::fire_event<enter_event>();
 
 	// main loop
-	while (engine::get_window()->is_open())
+	while (engine::is_open())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };
 
@@ -172,6 +172,4 @@ ml::int32_t main()
 
 	// goodbye!
 	return EXIT_SUCCESS;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

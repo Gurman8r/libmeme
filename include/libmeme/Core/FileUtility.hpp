@@ -1,9 +1,7 @@
-#ifndef _ML_FILE_SYSTEM_HPP_
-#define _ML_FILE_SYSTEM_HPP_
+#ifndef _ML_FILE_UTILITY_HPP_
+#define _ML_FILE_UTILITY_HPP_
 
 #include <libmeme/Core/StringUtility.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::util
 {
@@ -45,6 +43,4 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#endif // !_ML_FILE_SYSTEM_HPP_
+#endif // !_ML_FILE_UTILITY_HPP_

@@ -19,8 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using arguments_t	= pmr::vector<pmr::string>;
-		using warguments_t	= pmr::vector<pmr::wstring>;
+		using arguments_t	= pmr::vector<cstring>;
 		using filenames_t	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
@@ -55,7 +54,6 @@ namespace ml
 		// engine context
 		class context final : trackable, non_copyable
 		{
-		private:
 			friend class		engine						;
 			engine::config		m_config		{}			; // startup variables
 			engine::runtime		m_io			{}			; // runtime variables
@@ -69,7 +67,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool is_initialized() noexcept;
+		ML_NODISCARD static bool running() noexcept;
 
 		ML_NODISCARD static bool create_context();
 
@@ -101,24 +99,53 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static int32_t do_script(int32_t lang, pmr::string const & text);
+
+		ML_NODISCARD static int32_t do_script(filesystem::path const & path);
+
+		template <int32_t Lang
+		> ML_NODISCARD inline static int32_t do_script(pmr::string const & text)
+		{
+			return do_script(Lang, text);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD static inline engine::config & get_config() noexcept
 		{
+			ML_assert(running());
 			return get_context()->m_config;
 		}
 
 		ML_NODISCARD static inline engine::runtime & get_io() noexcept
 		{
+			ML_assert(running());
 			return get_context()->m_io;
 		}
 
 		ML_NODISCARD static inline duration const & get_time() noexcept
 		{
+			ML_assert(running());
 			return get_context()->m_main_timer.elapsed();
 		}
 
-		ML_NODISCARD static inline render_window * const get_window() noexcept
+		ML_NODISCARD static inline render_window & get_window() noexcept
 		{
-			return &get_context()->m_window;
+			ML_assert(running());
+			return get_context()->m_window;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static inline bool is_open() noexcept
+		{
+			if (!running()) return false;
+			return get_window().is_open();
+		}
+
+		static inline void close() noexcept
+		{
+			if (running()) { get_window().close(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

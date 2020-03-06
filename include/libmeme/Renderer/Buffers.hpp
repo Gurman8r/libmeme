@@ -32,7 +32,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vao(Args && ... args)
 	{
-		return VAO{ ML_fwd(args)... };
+		return VAO{ ML_forward(args)... };
 	}
 
 	// VBO
@@ -69,7 +69,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vbo(Args && ... args)
 	{
-		return VBO{ ML_fwd(args)... };
+		return VBO{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -103,7 +103,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_ibo(Args && ... args)
 	{
-		return IBO{ ML_fwd(args)... };
+		return IBO{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -141,7 +141,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_fbo(Args && ... args)
 	{
-		return FBO{ ML_fwd(args)... };
+		return FBO{ ML_forward(args)... };
 	}
 
 	// RBO
@@ -173,7 +173,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_rbo(Args && ... args)
 	{
-		return RBO{ ML_fwd(args)... };
+		return RBO{ ML_forward(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
