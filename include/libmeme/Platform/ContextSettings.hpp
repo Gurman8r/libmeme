@@ -32,14 +32,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr context_settings() noexcept = default;
-		constexpr context_settings(context_settings const &) = default;
-		constexpr context_settings(context_settings &&) noexcept = default;
-		constexpr context_settings & operator=(context_settings const &) = default;
-		constexpr context_settings & operator=(context_settings &&) noexcept = default;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD constexpr operator bool() const noexcept
 		{
 			return api && major && minor && depth_bits && stencil_bits;

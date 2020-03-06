@@ -51,12 +51,6 @@ namespace ml
 		video_mode			video	{}; // 
 		context_settings	context	{}; // 
 		int32_t				hints	{}; // 
-
-		constexpr window_settings() noexcept = default;
-		constexpr window_settings(window_settings const &) = default;
-		constexpr window_settings(window_settings &&) noexcept = default;
-		constexpr window_settings & operator=(window_settings const &) = default;
-		constexpr window_settings & operator=(window_settings &&) noexcept = default;
 	};
 
 	template <class ... Args

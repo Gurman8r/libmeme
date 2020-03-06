@@ -16,14 +16,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr video_mode() noexcept = default;
-		constexpr video_mode(video_mode const &) = default;
-		constexpr video_mode(video_mode &&) noexcept = default;
-		constexpr video_mode & operator=(video_mode const &) = default;
-		constexpr video_mode & operator=(video_mode &&) noexcept = default;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD constexpr operator bool() const noexcept
 		{
 			return resolution[0] && resolution[1] && color_depth;

@@ -86,6 +86,7 @@ namespace ml
 				lua_pop(embed::g_L, 1);
 			}
 			return embed::g_L;
+
 		})()) return debug::log::error("engine failed starting lua");
 
 		// PYTHON STARTUP
@@ -114,6 +115,7 @@ namespace ml
 			Py_InitializeEx(1);
 			
 			return Py_IsInitialized();
+
 		})()) return debug::log::error("engine failed starting python");
 
 		return true;

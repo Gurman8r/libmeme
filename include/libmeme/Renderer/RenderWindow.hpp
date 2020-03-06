@@ -10,6 +10,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		render_window() noexcept;
+
 		virtual ~render_window() noexcept = default;
 
 		ML_NODISCARD virtual bool open() override;

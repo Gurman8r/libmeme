@@ -20,11 +20,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup variables
-		class config final : trackable, non_copyable
+		class config final
 		{
 			friend class context;
 		public:
-			pmr::string			api_version		{}			; // shading language version
+			cstring				api_version		{}			; // shading language version
 			cstring				ini_file		{}			; // imgui ini file
 			cstring				log_file		{}			; // imgui log file
 		};
@@ -32,7 +32,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime variables
-		class runtime final : trackable, non_copyable
+		class runtime final
 		{
 			friend class context;
 		public:

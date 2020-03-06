@@ -83,13 +83,12 @@ namespace ml
 
 		// backend
 #ifdef ML_RENDERER_OPENGL
-
 		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::get_window().get_handle(), true))
 		{
 			return debug::log::error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.c_str()))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version))
 		{
 			return debug::log::error("Failed initializing ImGui renderer");
 		}

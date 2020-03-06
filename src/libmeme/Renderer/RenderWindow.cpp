@@ -7,6 +7,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	render_window::render_window() noexcept : window{}
+	{
+		// subscribe to events
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool render_window::open()
 	{
 		if (!window::open())

@@ -26,7 +26,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup variables
-		class config final : trackable, non_copyable
+		class config final
 		{
 			friend class context;
 		public:
@@ -40,7 +40,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime variables
-		class runtime final : trackable, non_copyable
+		class runtime final
 		{
 			friend class context;
 		public:
@@ -52,7 +52,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// engine context
-		class context final : trackable, non_copyable
+		class context final
 		{
 			friend class		engine						;
 			engine::config		m_config		{}			; // startup variables
