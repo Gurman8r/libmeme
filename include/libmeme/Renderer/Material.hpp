@@ -325,13 +325,13 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_material(material::storage_type && s)
 	{
-		return material{ ML_FWD(s) };
+		return material{ ML_fwd(s) };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_material(Args && ... args)
 	{
-		return material{ material::storage_type{ ML_FWD(args)... } };
+		return material{ material::storage_type{ ML_fwd(args)... } };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -39,9 +39,8 @@ namespace ml
 
 			debug::pause();
 		}
-		ML_BREAK_IF(!m_records.empty());
 #endif
-		ML_ASSERT("MEMORY LEAKS DETECTED" && m_records.empty());
+		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

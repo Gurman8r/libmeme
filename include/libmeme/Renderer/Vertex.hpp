@@ -132,18 +132,18 @@ namespace ml
 
 	ML_NODISCARD static constexpr auto make_vertex(vec3 && p, vec3 && n, vec2 && t)
 	{
-		return vertex{ ML_FWD(p), ML_FWD(n), ML_FWD(t) };
+		return vertex{ ML_fwd(p), ML_fwd(n), ML_fwd(t) };
 	}
 
 	ML_NODISCARD static constexpr auto make_vertex(vertex::storage_type && s)
 	{
-		return vertex{ ML_FWD(s) };
+		return vertex{ ML_fwd(s) };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_vertex(Args && ... args)
 	{
-		return vertex{ ML_FWD(args)... };
+		return vertex{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

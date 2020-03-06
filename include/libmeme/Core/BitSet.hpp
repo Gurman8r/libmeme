@@ -297,7 +297,7 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <size_t N> inline ML_SERIALIZE(std::ostream & out, bitset<N> const & value)
+	template <size_t N> inline ML_serialize(std::ostream & out, bitset<N> const & value)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -306,7 +306,7 @@ namespace ml::ds
 		return out;
 	}
 
-	template <size_t N> inline ML_DESERIALIZE(std::istream & in, bitset<N> & value)
+	template <size_t N> inline ML_deserialize(std::istream & in, bitset<N> & value)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{

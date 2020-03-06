@@ -59,35 +59,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t startup();
+		ML_NODISCARD static int32_t startup() noexcept;
 
-		static int32_t shutdown();
+		ML_NODISCARD static int32_t shutdown() noexcept;
 
-		static int32_t execute(int32_t lang, pmr::string const & text) noexcept;
+		ML_NODISCARD static int32_t execute(int32_t lang, pmr::string const & text) noexcept;
 
-		static int32_t execute(filesystem::path const & path) noexcept;
+		ML_NODISCARD static int32_t execute(filesystem::path const & path) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline int32_t execute() noexcept
+		ML_NODISCARD inline int32_t execute() noexcept
 		{
 			return execute(m_lang, m_text);
 		}
 
-		inline int32_t operator()() noexcept
+		ML_NODISCARD inline int32_t operator()() noexcept
 		{
 			return execute();
 		}
 
-		inline int32_t operator()(filesystem::path const & path) noexcept
+		ML_NODISCARD inline int32_t operator()(filesystem::path const & path) noexcept
 		{
-			load_from_file(path);
-			return execute();
+			return load_from_file(path).execute();
 		}
 
-		inline int32_t operator()(int32_t lang, pmr::string && text) noexcept
+		ML_NODISCARD inline int32_t operator()(int32_t lang, pmr::string && text) noexcept
 		{
-			return set_lang(lang).set_text(ML_FWD(text)).execute();
+			return set_lang(lang).set_text(ML_fwd(text)).execute();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -97,13 +96,25 @@ namespace ml
 			return ((m_lang != script::api::unknown) && !m_text.empty());
 		}
 
-		ML_NODISCARD inline auto get_lang() const noexcept -> int32_t { return m_lang; }
+		ML_NODISCARD inline int32_t get_lang() const noexcept
+		{
+			return m_lang;
+		}
 
-		ML_NODISCARD inline auto get_text() const noexcept -> pmr::string const & { return m_text; }
+		ML_NODISCARD inline pmr::string const & get_text() const noexcept
+		{
+			return m_text;
+		}
 
-		inline auto set_lang(int32_t value) noexcept -> script & { m_lang = value; return (*this); }
+		inline script & set_lang(int32_t value) noexcept
+		{
+			m_lang = value; return (*this);
+		}
 
-		inline auto set_text(pmr::string && value) noexcept -> script & { m_text = ML_FWD(value); return (*this); }
+		inline script & set_text(pmr::string && value) noexcept
+		{
+			m_text = ML_fwd(value); return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

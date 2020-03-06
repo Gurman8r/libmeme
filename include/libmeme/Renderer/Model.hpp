@@ -126,13 +126,13 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_model(mesh && m)
 	{
-		return model{ std::initializer_list<mesh>{ ML_FWD(m) } };
+		return model{ std::initializer_list<mesh>{ ML_fwd(m) } };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_model(Args && ... args)
 	{
-		return model{ ML_FWD(args)... };
+		return model{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

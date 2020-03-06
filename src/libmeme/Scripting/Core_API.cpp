@@ -30,7 +30,7 @@ namespace ml::embedded
 
 	PYBIND11_EMBEDDED_MODULE(LIBMEME_STDIO, inst)
 	{
-		inst.def("args"			, []()			{ return pmr::vector<cstring>{ ML_ARGV, ML_ARGV + ML_ARGC }; })
+		inst.def("args"			, []()			{ return pmr::vector<cstring>{ ML_argv, ML_argv + ML_argc }; })
 			.def("clear"		, []()			{ debug::clear(); })
 			.def("pause"		, []()			{ debug::pause(); })
 			.def("write"		, [](cstring s) { std::cout << s; })

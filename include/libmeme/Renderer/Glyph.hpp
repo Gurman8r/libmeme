@@ -40,16 +40,16 @@ namespace ml
 	> ML_NODISCARD static inline auto make_glyph(texture && t, Bounds && b, Advance && a) noexcept
 	{
 		glyph g;
-		g.graphic = ML_FWD(t);
-		g.bounds = ML_FWD(b);
-		g.advance = ML_FWD(a);
+		g.graphic = ML_fwd(t);
+		g.bounds = ML_fwd(b);
+		g.advance = ML_fwd(a);
 		return g;
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
 	{
-		return glyph{ ML_FWD(args)... };
+		return glyph{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

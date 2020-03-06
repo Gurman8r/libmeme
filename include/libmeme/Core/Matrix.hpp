@@ -271,7 +271,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t X, size_t Y
-	> inline ML_SERIALIZE(std::ostream & out, ds::matrix<T, X, Y> const & value)
+	> inline ML_serialize(std::ostream & out, ds::matrix<T, X, Y> const & value)
 	{
 		for (auto const & elem : value)
 			out << elem << ' ';
@@ -279,7 +279,7 @@ namespace ml
 	}
 
 	template <class T, size_t X, size_t Y
-	> inline ML_DESERIALIZE(std::istream & in, ds::matrix<T, X, Y> & value)
+	> inline ML_deserialize(std::istream & in, ds::matrix<T, X, Y> & value)
 	{
 		for (auto & elem : value)
 			if (in.good())

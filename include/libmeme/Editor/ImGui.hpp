@@ -46,7 +46,7 @@
 
 #define ML_ImGui_ScopeID(id)	\
 	ImGui::PushID(id);			\
-	ML_DEFER{ ImGui::PopID(); };
+	ML_defer{ ImGui::PopID(); };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -9,7 +9,7 @@ namespace ml
 	{
 		// open file
 		std::ifstream file{ path };
-		ML_DEFER{ file.close(); };
+		ML_defer{ file.close(); };
 		if (!file) return false;
 
 		// style ref

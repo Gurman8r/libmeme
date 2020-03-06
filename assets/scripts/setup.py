@@ -24,9 +24,10 @@ plugins = [
    "demo",
   ]
 for p in plugins:
-    os = config.system()
-    if os == "Windows": engine.load_plugin(p + ".dll")
-    else: engine.load_plugin(p + ".so")
+    if config.system() == "Windows":
+       engine.load_plugin(p + ".dll")
+    else:
+       engine.load_plugin(p + ".so")
 
 
 # messages

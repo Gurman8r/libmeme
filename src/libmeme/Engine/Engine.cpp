@@ -40,20 +40,7 @@ namespace ml
 	{
 		if (!g_engine) return false;
 
-		// create window
-		if (g_engine->m_window.create(
-			g_engine->m_config.window_title,
-			g_engine->m_config.window_display,
-			g_engine->m_config.window_context,
-			g_engine->m_config.window_hints
-		))
-		{
-			window::install_default_callbacks(&g_engine->m_window);
-		}
-		else
-		{
-			return debug::log::error("engine failed creating window");
-		}
+		// nothing to do here
 
 		return true;
 	}

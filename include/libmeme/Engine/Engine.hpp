@@ -36,11 +36,6 @@ namespace ml
 			filesystem::path	program_path	{}			; // program path
 			filesystem::path	content_path	{}			; // content path
 			filesystem::path	library_home	{}			; // script library path
-
-			cstring				window_title	{}			; // 
-			video_mode			window_display	{}			; // 
-			context_settings	window_context	{}			; // 
-			int32_t				window_hints	{}			; // 
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -15,7 +15,7 @@ namespace ml::impl
 		if (!L) return EXIT_FAILURE * 1;
 		for (int32_t i = 1, imax = lua_gettop(L); i <= imax; ++i)
 		{
-			std::invoke(ML_FWD(fn), i);
+			std::invoke(ML_fwd(fn), i);
 		}
 		return EXIT_SUCCESS;
 	}

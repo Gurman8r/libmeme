@@ -144,15 +144,15 @@ namespace ml
 
 	void editor::render()
 	{
-		ML_ASSERT(is_initialized());
-		ML_ImGui_ScopeID(ML_ADDRESSOF(g_editor));
+		ML_assert(is_initialized());
+		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
 		auto do_render = [&](auto & x, auto && fn)
 		{
 			if (!x.open) return;
-			ML_ImGui_ScopeID(ML_ADDRESSOF(&x));
+			ML_ImGui_ScopeID(ML_addressof(&x));
 			ML_ImGui_ScopeID(x.title);
-			std::invoke(ML_FWD(fn), x);
+			std::invoke(ML_fwd(fn), x);
 		};
 
 		// RENDER DOCKSPACE
@@ -259,7 +259,7 @@ namespace ml
 		}
 		if (fn)
 		{
-			it->second.emplace_back(ML_FWD(fn));
+			it->second.emplace_back(ML_fwd(fn));
 		}
 	}
 

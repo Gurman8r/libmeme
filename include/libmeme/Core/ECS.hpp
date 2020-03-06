@@ -402,13 +402,13 @@ namespace ml::ecs::impl
 
 		ML_NODISCARD inline bool alive() const noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->is_alive(*this);
 		}
 
 		inline handle & kill() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			m_manager->kill(*this);
 			return (*this);
 		}
@@ -418,7 +418,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline handle & add_tag() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			m_manager->template add_tag<T>(*this);
 			return (*this);
 		}
@@ -426,7 +426,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline handle & del_tag() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			m_manager->template del_tag<T>(*this);
 			return (*this);
 		}
@@ -434,7 +434,7 @@ namespace ml::ecs::impl
 		template <class T
 		> inline bool has_tag() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template has_tag<T>(*this);
 		}
 
@@ -443,21 +443,21 @@ namespace ml::ecs::impl
 		template <class C, class ... Args
 		> inline auto & add_component(Args && ... args) noexcept
 		{
-			ML_ASSERT(m_manager);
-			return m_manager->template add_component<C>(*this, ML_FWD(args)...);
+			ML_assert(m_manager);
+			return m_manager->template add_component<C>(*this, ML_fwd(args)...);
 		}
 
 		template <class C
 		> inline auto & add_component() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template add_component<C>(*this);
 		}
 
 		template <class C
 		> inline handle & del_component() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			m_manager->template del_component<C>(*this);
 			return (*this);
 		}
@@ -465,21 +465,21 @@ namespace ml::ecs::impl
 		template <class C
 		> ML_NODISCARD inline auto & get_component() noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template get_component<C>(*this);
 		}
 
 		template <class C
 		> ML_NODISCARD inline auto const & get_component() const noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template get_component<C>(*this);
 		}
 
 		template <class C
 		> ML_NODISCARD inline bool has_component() const noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template has_component<C>(*this);
 		}
 
@@ -488,14 +488,14 @@ namespace ml::ecs::impl
 		template <class C
 		> ML_NODISCARD inline bool matches_signature() const noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template matches_signature<C>(*this);
 		}
 
 		template <template <class> class X
 		> ML_NODISCARD inline bool matches_system() const noexcept
 		{
-			ML_ASSERT(m_manager);
+			ML_assert(m_manager);
 			return m_manager->template matches_system<X>();
 		}
 
@@ -687,8 +687,8 @@ namespace ml::ecs
 					}
 
 					// found two entities that need to be swapped
-					ML_ASSERT(std::get<ID_Alive>(m_entities)[alive]);
-					ML_ASSERT(!std::get<ID_Alive>(m_entities)[dead]);
+					ML_assert(std::get<ID_Alive>(m_entities)[alive]);
+					ML_assert(!std::get<ID_Alive>(m_entities)[dead]);
 
 					this->swap(alive, dead);
 
@@ -788,7 +788,7 @@ namespace ml::ecs
 			temp.m_entity	= h.m_entity = i;
 			temp.m_self		= e;
 			temp.m_counter	= h.m_counter;
-			ML_ASSERT(temp);
+			ML_assert(temp);
 			return temp;
 		}
 
@@ -875,7 +875,7 @@ namespace ml::ecs
 			>(true);
 
 			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
-			c = C{ ML_FWD(args)... };
+			c = C{ ML_fwd(args)... };
 			return c;
 		}
 
@@ -888,7 +888,7 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> inline auto & add_component(handle const & h, Args && ... args) noexcept
 		{
-			return this->add_component<C>(h.m_entity, ML_FWD(args)...);
+			return this->add_component<C>(h.m_entity, ML_fwd(args)...);
 		}
 
 		template <class C
@@ -1007,7 +1007,7 @@ namespace ml::ecs
 			// invoke function on every alive entity
 			for (size_t e = 0, imax = m_size; e < imax; ++e)
 			{
-				std::invoke(ML_FWD(fn), e);
+				std::invoke(ML_fwd(fn), e);
 			}
 			return (*this);
 		}
@@ -1023,7 +1023,7 @@ namespace ml::ecs
 				using C = typename decltype(c)::type;
 				if (this->has_component<C>(e))
 				{
-					std::invoke(ML_FWD(fn), this->get_component<C>(e));
+					std::invoke(ML_fwd(fn), this->get_component<C>(e));
 				}
 			});
 			return (*this);
@@ -1033,7 +1033,7 @@ namespace ml::ecs
 		> inline self_type & for_components(handle const & h, Fn && fn)
 		{
 			// invoke function on each of a handle's components
-			return this->for_components(h.m_entity, ML_FWD(fn));
+			return this->for_components(h.m_entity, ML_fwd(fn));
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1046,7 +1046,7 @@ namespace ml::ecs
 			{
 				if (this->matches_signature<S>(e))
 				{
-					this->expand_call<S>(e, ML_FWD(fn));
+					this->expand_call<S>(e, ML_fwd(fn));
 				}
 			});
 		}
@@ -1059,7 +1059,7 @@ namespace ml::ecs
 			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp)
 			{
-				std::invoke(ML_FWD(fn), x, ML_FWD(req_comp)...);
+				std::invoke(ML_fwd(fn), x, ML_fwd(req_comp)...);
 			});
 		}
 
@@ -1069,7 +1069,7 @@ namespace ml::ecs
 			// invoke update on all systems matching a signature
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp)
 			{
-				x.update(ML_FWD(args)..., ML_FWD(req_comp)...);
+				x.update(ML_fwd(args)..., ML_fwd(req_comp)...);
 			});
 		}
 
@@ -1086,7 +1086,7 @@ namespace ml::ecs
 
 			using helper = meta::rename<expand_call_helper, req_comp>;
 
-			helper::call(e, *this, ML_FWD(fn));
+			helper::call(e, *this, ML_fwd(fn));
 		}
 
 		template <class ... Ts
@@ -1097,7 +1097,7 @@ namespace ml::ecs
 			{
 				auto const i{ std::get<ID_Index>(self.m_entities)[e] }; // component data index
 
-				std::invoke(ML_FWD(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
+				std::invoke(ML_fwd(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
 			}
 		};
 

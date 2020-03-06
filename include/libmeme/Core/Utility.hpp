@@ -12,12 +12,12 @@
 #define ML_bitclear(v, i)		(v &= ~(1 << i))
 #define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
 
-// General
+// Misc
 namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch
+	template <class Ch = char
 	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
 	{
 		return ((*value) ? (1 + _ML_UTIL strlen(value + 1)) : 0);
@@ -33,6 +33,12 @@ namespace ml::util
 		rhs = std::move(temp);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// Compare
+namespace ml::util
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class LI, class RI
@@ -57,7 +63,7 @@ namespace ml::util
 }
 
 // Min / Max / Clamp
-namespace ml
+namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -65,14 +71,14 @@ namespace ml
 	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs < rhs
-			? _ML_UTIL min(ML_FWD(lhs), ML_FWD(rest)...)
-			: _ML_UTIL min(ML_FWD(rhs), ML_FWD(rest)...);
+			? _ML_UTIL min(ML_fwd(lhs), ML_fwd(rest)...)
+			: _ML_UTIL min(ML_fwd(rhs), ML_fwd(rest)...);
 	}
 
 	template <class Only
 	> constexpr decltype(auto) min(Only && only)
 	{
-		return ML_FWD(only);
+		return ML_fwd(only);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -81,14 +87,14 @@ namespace ml
 	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs > rhs
-			? _ML_UTIL max(ML_FWD(lhs), ML_FWD(rest)...)
-			: _ML_UTIL max(ML_FWD(rhs), ML_FWD(rest)...);
+			? _ML_UTIL max(ML_fwd(lhs), ML_fwd(rest)...)
+			: _ML_UTIL max(ML_fwd(rhs), ML_fwd(rest)...);
 	}
 
 	template <class Only
 	> constexpr decltype(auto) max(Only && only)
 	{
-		return ML_FWD(only);
+		return ML_fwd(only);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -97,7 +103,7 @@ namespace ml
 	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
 	{
 		// min(max(v, lhs), rhs)
-		return _ML_UTIL min(_ML_UTIL max(ML_FWD(v), ML_FWD(lhs)), ML_FWD(rhs));
+		return _ML_UTIL min(_ML_UTIL max(ML_fwd(v), ML_fwd(lhs)), ML_fwd(rhs));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

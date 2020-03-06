@@ -66,6 +66,8 @@
 #	elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #		define ML_OS_FREEBSD 1
 #		define ML_OS_NAME "FreeBSD"
+#   else
+#       error This Unix system is not supported.
 #	endif
 #else
 #	error This system is not supported.
@@ -181,143 +183,130 @@
 
 // integer
 #if defined(ML_CC_MSVC)
-#	define	ML_INT8     signed __int8
-#	define	ML_INT16    signed __int16
-#	define	ML_INT32    signed __int32
-#	define	ML_INT64    signed __int64
-#	define	ML_UINT8    unsigned __int8
-#	define	ML_UINT16   unsigned __int16
-#	define	ML_UINT32   unsigned __int32
-#	define	ML_UINT64   unsigned __int64
+#	define	ML_INT8             signed __int8
+#	define	ML_INT16            signed __int16
+#	define	ML_INT32            signed __int32
+#	define	ML_INT64            signed __int64
+#	define	ML_UINT8            unsigned __int8
+#	define	ML_UINT16           unsigned __int16
+#	define	ML_UINT32           unsigned __int32
+#	define	ML_UINT64           unsigned __int64
 #else
-#	define	ML_INT8     signed char
-#	define	ML_INT16    signed short
-#	define	ML_INT32    signed int
-#	define	ML_INT64    signed long long
-#	define	ML_UINT8    unsigned char
-#	define	ML_UINT16   unsigned short
-#	define	ML_UINT32   unsigned int
-#	define	ML_UINT64   unsigned long long
+#	define	ML_INT8             signed char
+#	define	ML_INT16            signed short
+#	define	ML_INT32            signed int
+#	define	ML_INT64            signed long long
+#	define	ML_UINT8            unsigned char
+#	define	ML_UINT16           unsigned short
+#	define	ML_UINT32           unsigned int
+#	define	ML_UINT64           unsigned long long
 #endif
+#define	ML_FLOAT32              float
+#define	ML_FLOAT64              double
+#define	ML_FLOAT80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
 
-// float
-#define	ML_FLOAT32 float
-#define	ML_FLOAT64 double
-#define	ML_FLOAT80 long double // 8, 10, 12, or 16 bytes (CC Dependant)
-
-// byte
 #ifndef ML_BYTE
-#   define ML_BYTE unsigned char
+#   define ML_BYTE              unsigned char
 #endif
 
-// char
 #if !ML_HAS_CXX20
-#   define ML_CHAR char
+#   define ML_CHAR              char
 #else
-#   define ML_CHAR char8_t
+#   define ML_CHAR              char8_t
 #endif
 
-// max
 #if (ML_ARCH == 32)
-#	define ML_INTMAX    ML_INT32
-#	define ML_UINTMAX   ML_UINT32
+#	define ML_INTMAX            ML_INT32
+#	define ML_UINTMAX           ML_UINT32
 #else
-#	define ML_INTMAX    ML_INT64
-#	define ML_UINTMAX   ML_UINT64
+#	define ML_INTMAX            ML_INT64
+#	define ML_UINTMAX           ML_UINT64
 #endif
 
 
 // Debug
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(_DEBUG)
-#	define ML_DEBUG 1
-#   define ML_CONFIGURATION "debug"
+#	define ML_DEBUG             1
+#   define ML_CONFIGURATION     "debug"
 #else
-#	define ML_DEBUG 0
-#   define ML_CONFIGURATION "release"
+#	define ML_DEBUG             0
+#   define ML_CONFIGURATION     "release"
 #endif
 
+// breakpoint
 #if (!ML_DEBUG)
 #	define ML_BREAKPOINT()
 #elif defined(ML_CC_MSVC)
-#	define ML_BREAKPOINT() ::__debugbreak()
+#	define ML_BREAKPOINT()      ::__debugbreak()
 #else
-#	define ML_BREAKPOINT() ::raise(SIGTRAP)
-#endif
-
-#if ML_DEBUG
-#	define ML_BREAK_IF(expr) if (!!(expr)) ML_BREAKPOINT()
-#else
-#	define ML_BREAK_IF(expr)
+#	define ML_BREAKPOINT()      ::raise(SIGTRAP)
 #endif
 
 
-// Misc
+// Exceptions
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#define ML_throw                throw
+#define ML_catch                catch
+#define ML_try                  try
+
+
+// Namespace
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define _ML                     ::ml::
-#define ML_ADDRESSOF(ptr)       ((void *)(ML_INTMAX)ptr)
-#define ML_ARRAYSIZE(arr)       (sizeof(arr) / sizeof(*arr))
+#define _ML_BEGIN               namespace ml {
+#define _ML_END                 }
+
+
+// Preprocessor
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML_CONCAT_IMPL(a, b)    a##b
 #define ML_CONCAT(a, b)         ML_CONCAT_IMPL(a, b)
 #define ML_TOSTRING(str)        #str
 #define ML_STRINGIFY(str)       ML_TOSTRING(str)
 
 
-// Exceptions
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_THROW                throw
-#define ML_TRY                  try
-#define ML_CATCH                catch
-
-
 // Anonymous Variables
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__COUNTER__)
-#	define ML_ANONYMOUS(expr) ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
+#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
 #elif defined(__LINE__)
-#	define ML_ANONYMOUS(expr) ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
+#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
 #endif
 
-#define ML_IMPL_ONCE(once)  static bool once{ false }; if (!once && (once = true))
-#define ML_ONCE_CALL        ML_IMPL_ONCE(ML_ANONYMOUS(once))
+#define ML_IMPL_ONCE(once)      static bool once{ false }; if (!once && (once = true))
+#define ML_ONCE_CALL            ML_IMPL_ONCE(ML_ANONYMOUS(once))
 
 
 // Aliases
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_ALIAS            using
-#define ML_ALIAS_VA(...)    template <##__VA_ARGS__> ML_ALIAS
-#define ML_ALIAS_X          ML_ALIAS_VA(class X)
-#define ML_ALIAS_XY         ML_ALIAS_VA(class X, class Y)
-#define ML_ALIAS_XYZ        ML_ALIAS_VA(class X, class Y, class Z)
-#define ML_ALIAS_Ts         ML_ALIAS_VA(class ... Ts)
+#define ML_ALIAS                using
+#define ML_ALIAS_VA(...)        template <##__VA_ARGS__> ML_ALIAS
+#define ML_ALIAS_X              ML_ALIAS_VA(class X)
+#define ML_ALIAS_XY             ML_ALIAS_VA(class X, class Y)
+#define ML_ALIAS_XYZ            ML_ALIAS_VA(class X, class Y, class Z)
+#define ML_ALIAS_Ts             ML_ALIAS_VA(class ... Ts)
 
 
 // Attributes
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// check
-#ifndef __has_cpp_attribute
-#    define ML_CPP_ATTRIBUTE(attr) 0
-#else
-#    define ML_CPP_ATTRIBUTE(attr) __has_cpp_attribute(attr)
-#endif
-
 // nodiscard
-#if ML_CPP_ATTRIBUTE(nodiscard) >= 201603L
+#if __has_cpp_attribute(nodiscard) >= 201603L
 #   define ML_NODISCARD [[nodiscard]]
 #else
 #   define ML_NODISCARD
 #endif
 
 // likely
-#if ML_CPP_ATTRIBUTE(likely) >= 201907L
+#if __has_cpp_attribute(likely) >= 201907L
 #   define ML_LIKELY(...) (##__VA_ARGS__) [[likely]]
 #else
 #   define ML_LIKELY(...) (##__VA_ARGS__)
 #endif
 
 // unlikely
-#if ML_CPP_ATTRIBUTE(unlikely) >= 201907L
+#if __has_cpp_attribute(unlikely) >= 201907L
 #   define ML_UNLIKELY(...) (##__VA_ARGS__) [[unlikely]]
 #else
 #   define ML_UNLIKELY(...) (##__VA_ARGS__)
@@ -335,9 +324,7 @@
 #	define ML_NEVER_INLINE
 #endif
 
-
-// API Visibility
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// visibility
 #ifdef ML_CC_MSVC
 #	define ML_API_EXPORT __declspec(dllexport)
 #	define ML_API_IMPORT __declspec(dllimport)
@@ -350,7 +337,7 @@
 #endif
 
 
-// Disable Warnings
+// Disable Compiler Warnings
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #ifdef ML_CC_MSVC
 #	pragma warning(disable: 4031)	// second formal parameter list longer than the first list
@@ -366,6 +353,7 @@
 #	pragma warning(disable: 26451)	// arithmetic overflow
 #	pragma warning(disable: 26495)	// value may be uninitialized
 #	pragma warning(disable: 26812)	// unscoped enum
+#else
 #endif
 
 #endif // !_ML_CONFIG_HPP_

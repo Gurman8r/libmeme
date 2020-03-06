@@ -44,22 +44,22 @@ namespace ml::meta
 		template <class Fn, class Tp, size_t ... Is
 		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tp && tp, std::index_sequence<Is...>)
 		{
-			return ML_FWD(fn)(std::get<Is>(ML_FWD(tp))...);
+			return ML_fwd(fn)(std::get<Is>(ML_fwd(tp))...);
 		}
 
 		template <class Fn, class Tp
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 		{
 			return _ML_META impl::tuple_apply_impl(
-				ML_FWD(fn),
-				ML_FWD(tp),
+				ML_fwd(fn),
+				ML_fwd(tp),
 				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{});
 		}
 
 		template <class Fn, class ... Args
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
-			return (void)std::initializer_list<int>{ (ML_FWD(fn)(ML_FWD(args)), 0)... };
+			return (void)std::initializer_list<int>{ (ML_fwd(fn)(ML_fwd(args)), 0)... };
 		}
 
 		template <class Fn, class Tp
@@ -67,9 +67,9 @@ namespace ml::meta
 		{
 			return _ML_META impl::tuple_apply([&fn](auto && ... rest)
 			{
-				_ML_META impl::for_args(fn, ML_FWD(rest)...);
+				_ML_META impl::for_args(fn, ML_fwd(rest)...);
 			},
-			ML_FWD(tp));
+			ML_fwd(tp));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -81,21 +81,21 @@ namespace ml::meta
 	template <class Fn, class Tp
 	> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 	{
-		return impl::tuple_apply(fn, ML_FWD(tp));
+		return impl::tuple_apply(fn, ML_fwd(tp));
 	}
 
 	// Invokes a function on every passed object.
 	template <class Fn, class ... Args
 	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 	{
-		return impl::for_args(fn, ML_FWD(args)...);
+		return impl::for_args(fn, ML_fwd(args)...);
 	}
 
 	// Invokes a function on every element of a tuple.
 	template <class Fn, class Tp
 	> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 	{
-		return impl::for_tuple(fn, ML_FWD(tp));
+		return impl::for_tuple(fn, ML_fwd(tp));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

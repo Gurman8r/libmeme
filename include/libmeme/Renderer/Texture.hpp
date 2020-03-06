@@ -136,7 +136,7 @@ namespace ml
 
 		ML_NODISCARD inline operator bool() const noexcept { return m_handle; }
 
-		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_ADDRESSOF(m_handle); }
+		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 
 		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
 		
@@ -187,7 +187,7 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_texture(Args && ... args)
 	{
-		return texture{ ML_FWD(args)... };
+		return texture{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

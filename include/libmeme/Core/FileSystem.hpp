@@ -13,7 +13,7 @@ namespace ml::util
 	> static inline std::optional<pmr::vector<Ch>> get_file_contents(filesystem::path const & path)
 	{
 		std::basic_ifstream<Ch, Tr> file{ path, std::ios_base::binary };
-		ML_DEFER{ file.close(); };
+		ML_defer{ file.close(); };
 		if (!file) { return std::nullopt; }
 
 		pmr::vector<Ch> temp{};

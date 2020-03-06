@@ -120,18 +120,18 @@ namespace ml
 
 	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v)
 	{
-		return mesh{ ML_FWD(v) };
+		return mesh{ ML_fwd(v) };
 	}
 
 	ML_NODISCARD static inline auto make_mesh(mesh::vertices_t && v, mesh::indices_t && i)
 	{
-		return mesh{ ML_FWD(v), ML_FWD(i) };
+		return mesh{ ML_fwd(v), ML_fwd(i) };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static inline auto make_mesh(Args && ... args)
 	{
-		return mesh{ ML_FWD(args)... };
+		return mesh{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

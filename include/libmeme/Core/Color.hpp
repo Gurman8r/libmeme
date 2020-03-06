@@ -131,12 +131,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> inline ML_SERIALIZE(std::ostream & out, basic_color<T> const & value)
+	template <class T> inline ML_serialize(std::ostream & out, basic_color<T> const & value)
 	{
 		return out << value.rgba();
 	}
 
-	template <class T> inline ML_DESERIALIZE(std::istream & in, basic_color<T> & value)
+	template <class T> inline ML_deserialize(std::istream & in, basic_color<T> & value)
 	{
 		return in >> value.rgba();
 	}
@@ -146,13 +146,13 @@ namespace ml
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color(Args && ... args)
 	{
-		return color{ ML_FWD(args)... };
+		return color{ ML_fwd(args)... };
 	}
 
 	template <class ... Args
 	> ML_NODISCARD static constexpr auto make_color32(Args && ... args)
 	{
-		return color32{ ML_FWD(args)... };
+		return color32{ ML_fwd(args)... };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -5,6 +5,6 @@
 
 #define ML_BIND_SCOPE(var, ...)	\
 	var.bind(##__VA_ARGS__);	\
-	ML_DEFER{ var.unbind(); }
+	ML_defer{ var.unbind(); }
 
 #endif // !_ML_BINDER_HPP_

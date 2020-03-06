@@ -36,7 +36,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, bool dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_bool(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_bool(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -52,7 +52,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, int8_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_i8(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_i8(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -68,7 +68,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, int16_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_i16(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_i16(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -84,7 +84,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, int32_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_i32(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_i32(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -100,7 +100,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, int64_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_i64(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_i64(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -116,7 +116,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, uint8_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_u8(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_u8(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -132,7 +132,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, uint16_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_u16(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_u16(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -148,7 +148,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, uint32_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_u32(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_u32(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -164,7 +164,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, uint64_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_u64(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_u64(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -180,7 +180,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, float32_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_f32(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_f32(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -196,7 +196,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, float64_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_f64(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_f64(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -212,7 +212,7 @@ namespace ml::impl
 	{
 		ML_NODISCARD inline auto operator()(pmr::string && str, float80_t dv = {}) const noexcept
 		{
-			if (auto const o{ util::to_f80(ML_FWD(str)) }) { return (*o); }
+			if (auto const o{ util::to_f80(ML_fwd(str)) }) { return (*o); }
 			else { return dv; }
 		}
 
@@ -258,7 +258,7 @@ namespace ml
 	template <class T, class ... Args
 	> ML_NODISCARD static inline T input(Args && ... args) noexcept
 	{
-		return std::invoke(impl::input<T>{}, ML_FWD(args)...);
+		return std::invoke(impl::input<T>{}, ML_fwd(args)...);
 	}
 }
 

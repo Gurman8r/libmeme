@@ -14,7 +14,7 @@ namespace ml::gui
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
-			std::invoke(ML_FWD(fn));
+			std::invoke(ML_fwd(fn));
 			ImGui::EndTooltip();
 		}
 	}
@@ -34,7 +34,7 @@ namespace ml::gui
 		char buf[1024] = "";
 		va_list args;
 		va_start(args, fmt);
-		std::vsnprintf(buf, ML_ARRAYSIZE(buf), fmt, args);
+		std::vsnprintf(buf, ML_arraysize(buf), fmt, args);
 		va_end(args);
 		tooltip(buf);
 	}
@@ -53,7 +53,7 @@ namespace ml::gui
 	> static inline void help_marker_ex(Fn && fn) noexcept
 	{
 		ImGui::TextDisabled("(?)");
-		tooltip_ex(ML_FWD(fn));
+		tooltip_ex(ML_fwd(fn));
 	}
 
 	static inline void help_marker(cstring first, cstring last = nullptr) noexcept
@@ -98,7 +98,7 @@ namespace ml::gui
 
 		inline plot & update() noexcept
 		{
-			ML_ASSERT(getter);
+			ML_assert(getter);
 			return update(std::invoke(getter));
 		}
 
@@ -113,7 +113,7 @@ namespace ml::gui
 
 		inline plot const & render() const noexcept
 		{
-			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+			ML_ImGui_ScopeID(ML_addressof(this));
 
 			float_t width{ graph_size[0] };
 			if ((width == 0.f) && (label && label[0] == '#' && label[1] == '#'))
@@ -146,7 +146,7 @@ namespace ml::gui
 	> static inline auto make_plot(size_t const cap, Args && ... args) noexcept
 	{
 		return plot{
-			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_FWD(args)...
+			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_fwd(args)...
 		};
 	}
 
@@ -158,7 +158,7 @@ namespace ml::gui
 
 		template <class Fn> inline auto for_each(Fn && fn) noexcept
 		{
-			return std::for_each(m_plots.begin(), m_plots.end(), ML_FWD(fn));
+			return std::for_each(m_plots.begin(), m_plots.end(), ML_fwd(fn));
 		}
 
 		inline plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
@@ -196,11 +196,11 @@ namespace ml::gui
 		template <class Fn> inline widget & render(Fn && fn) noexcept
 		{
 			if (!open) return (*this);
-			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
-			ML_DEFER{ ImGui::End(); };
+			ML_ImGui_ScopeID(ML_addressof(this));
+			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
-				std::invoke(ML_FWD(fn), *this);
+				std::invoke(ML_fwd(fn), *this);
 			}
 			return (*this);
 		}
@@ -259,7 +259,7 @@ namespace ml::gui
 				size[1] == 0.f ? reg_avail[1] : size[1]
 			}) };
 
-			std::invoke(ML_FWD(fn));
+			std::invoke(ML_fwd(fn));
 
 			ImGui::Image(
 				tex_addr, tex_size,
@@ -439,7 +439,7 @@ namespace ml::gui
 
 		inline console & render()
 		{
-			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+			ML_ImGui_ScopeID(ML_addressof(this));
 
 			// HEADER
 			filter.Draw("filter", 180); ImGui::SameLine();
@@ -487,7 +487,7 @@ namespace ml::gui
 			bool reclaim_focus{};
 			ImGui::TextDisabled("$:"); ImGui::SameLine();
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
-			if (ImGui::InputText("##input", &input[0], ML_ARRAYSIZE(input),
+			if (ImGui::InputText("##input", &input[0], ML_arraysize(input),
 				ImGuiInputTextFlags_EnterReturnsTrue |
 				ImGuiInputTextFlags_CallbackCompletion |
 				ImGuiInputTextFlags_CallbackHistory,

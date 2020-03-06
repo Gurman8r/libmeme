@@ -5,11 +5,11 @@
 
 #define ML_IMPL_BENCHMARK(v, id)							\
 	auto v{ _ML timer{ true } };							\
-	ML_DEFER{												\
+	ML_defer{												\
 	_ML performance_tracker::push_frame(id, v.elapsed());	\
 	};
 
-#define ML_BENCHMARK(id) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), id)
+#define ML_benchmark(id) ML_IMPL_BENCHMARK(ML_ANONYMOUS(timer), id)
 
 namespace ml
 {
@@ -33,7 +33,7 @@ namespace ml
 		template <class ... Args
 		> static inline decltype(auto) push_frame(Args && ... args) noexcept
 		{
-			return m_curr.emplace_back(ML_FWD(args)...);
+			return m_curr.emplace_back(ML_fwd(args)...);
 		}
 
 		static inline void swap_frames() noexcept

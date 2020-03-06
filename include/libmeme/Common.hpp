@@ -39,16 +39,21 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ML_ASSERT
-#define ML_ASSERT assert
+#define ML_argc		__argc
+#define ML_argv		__argv
+#define ML_wargv	__wargv
+#define ML_envp		_environ
+#define ML_wenvp	_wenviron
+
+#ifndef ML_assert
+#define ML_assert(expr) assert(expr)
 #endif
 
-#define ML_ARGC			__argc
-#define ML_ARGV			__argv
-#define ML_WARGV		__wargv
-#define ML_SERIALIZE	std::ostream & operator <<
-#define ML_DESERIALIZE	std::istream & operator >>
-#define ML_FWD(var)		std::forward<decltype(var)>(var)
+#define ML_addressof(ptr)	((void *)(ML_INTMAX)ptr)
+#define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
+#define ML_fwd(value)		std::forward<decltype(value)>(value)
+#define ML_deserialize		std::istream & operator >>
+#define ML_serialize		std::ostream & operator <<
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

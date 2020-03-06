@@ -85,7 +85,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t script::startup()
+	int32_t script::startup() noexcept
 	{
 		int32_t status{};
 
@@ -96,7 +96,7 @@ namespace ml
 		return status;
 	}
 
-	int32_t script::shutdown()
+	int32_t script::shutdown() noexcept
 	{
 		int32_t status{};
 

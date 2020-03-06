@@ -57,21 +57,21 @@ namespace ml
 			template <class Str
 			> static inline int32_t info(Str && value)
 			{
-				std::cout << "[" ML_MSG_LOG "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_LOG "] " << ML_fwd(value) << "\n";
 				return ML_SUCCESS;
 			}
 
 			template <class Str
 			> static inline int32_t error(Str && value)
 			{
-				std::cout << "[" ML_MSG_ERR "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_ERR "] " << ML_fwd(value) << "\n";
 				return ML_FAILURE;
 			}
 
 			template <class Str
 			> static inline int32_t warning(Str && value)
 			{
-				std::cout << "[" ML_MSG_WRN "] " << ML_FWD(value) << "\n";
+				std::cout << "[" ML_MSG_WRN "] " << ML_fwd(value) << "\n";
 				return ML_WARNING;
 			}
 
@@ -80,19 +80,19 @@ namespace ml
 			template <class Fmt, class Arg0, class ... Args
 			> static inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
-				return info(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+				return info(util::format(ML_fwd(fmt), ML_fwd(arg0), ML_fwd(args)...));
 			}
 
 			template <class Fmt, class Arg0, class ... Args
 			> static inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
-				return error(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+				return error(util::format(ML_fwd(fmt), ML_fwd(arg0), ML_fwd(args)...));
 			}
 
 			template <class Fmt, class Arg0, class ... Args
 			> static inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
-				return warning(util::format(ML_FWD(fmt), ML_FWD(arg0), ML_FWD(args)...));
+				return warning(util::format(ML_fwd(fmt), ML_fwd(arg0), ML_fwd(args)...));
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

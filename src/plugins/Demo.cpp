@@ -387,7 +387,7 @@ namespace ml
 
 			// ENTITIES
 			{
-				ML_DEFER{ m_ecs.refresh(); };
+				ML_defer{ m_ecs.refresh(); };
 
 				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
 				{
@@ -506,7 +506,7 @@ namespace ml
 		{
 			// gui stuff, etc...
 
-			ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+			ML_ImGui_ScopeID(ML_addressof(this));
 
 			// IMGUI
 			if (m_imgui_demo.open) { editor::show_imgui_demo(&m_imgui_demo.open); }
@@ -558,7 +558,7 @@ namespace ml
 
 			m.add_menu("file", [&]()
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
 				{
 					engine::get_window()->close();
@@ -566,7 +566,7 @@ namespace ml
 			});
 			m.add_menu("tools", [&]()
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				ML_ImGui_ScopeID(ML_addressof(this));
 				m_gui_assets.menu_item();
 				m_gui_console.menu_item();
 				m_gui_display.menu_item();
@@ -577,7 +577,7 @@ namespace ml
 			});
 			m.add_menu("options", [&]()
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				ML_ImGui_ScopeID(ML_addressof(this));
 				bool fullscreen{ engine::get_window()->is_fullscreen() };
 				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 				{
@@ -586,7 +586,7 @@ namespace ml
 			});
 			m.add_menu("help", [&]()
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(this));
+				ML_ImGui_ScopeID(ML_addressof(this));
 				m_imgui_demo.menu_item();
 				m_imgui_metrics.menu_item();
 				m_imgui_about.menu_item();
@@ -601,7 +601,7 @@ namespace ml
 
 			auto draw_item = [&](auto const & n, auto const & v)
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(&v));
+				ML_ImGui_ScopeID(ML_addressof(&v));
 				using T = typename std::decay_t<decltype(v)>;
 				static constexpr auto tname{ nameof<>::filter_all(typeof_v<T>.name()) };
 
@@ -614,7 +614,6 @@ namespace ml
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
 
-				//using N = typename std::decay_t<decltype(n)>;
 				pmr::string const s = util::to_string(n);
 
 				if (ImGui::Selectable(name))		highlight_memory(&v); ImGui::NextColumn();
@@ -655,7 +654,7 @@ namespace ml
 		void show_console_gui()
 		{
 			// render console
-			ML_DEFER{ m_console.render(); };
+			ML_defer{ m_console.render(); };
 
 			// setup commands
 			if (auto & cmd{ m_console.commands }; cmd.empty())
@@ -769,7 +768,7 @@ namespace ml
 			// SHOW VALUE
 			auto show_value = [&](auto const & value)
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(&value));
+				ML_ImGui_ScopeID(ML_addressof(&value));
 
 				using T = typename std::decay_t<decltype(value)>;
 				static constexpr auto info{ typeof_v<T> };
@@ -843,7 +842,7 @@ namespace ml
 					{
 						std::sprintf(buf, "%.*s", (int32_t)value.size(), value.data());
 					}
-					ImGui::InputText("##value", buf, ML_ARRAYSIZE(buf),
+					ImGui::InputText("##value", buf, ML_arraysize(buf),
 						ImGuiInputTextFlags_ReadOnly
 					);
 				}
@@ -1018,7 +1017,7 @@ namespace ml
 					ImGui::Separator();
 					for (auto const & rec : memory_manager::get_records().values())
 					{
-						ML_ImGui_ScopeID(ML_ADDRESSOF(&rec));
+						ML_ImGui_ScopeID(ML_addressof(&rec));
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
 						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
@@ -1077,7 +1076,7 @@ namespace ml
 			// plots
 			m_plots.for_each([&](gui::plot & p)
 			{
-				ML_ImGui_ScopeID(ML_ADDRESSOF(&p));
+				ML_ImGui_ScopeID(ML_addressof(&p));
 				p.render();
 				if (ImGui::BeginPopupContextItem("plot settings"))
 				{
