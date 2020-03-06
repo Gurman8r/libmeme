@@ -38,18 +38,18 @@ namespace ml
 		public:
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+			// EDITOR MAIN MENU BAR
 			class ML_EDITOR_API main_menu_t final : trackable, non_copyable
-			{
-				friend runtime;
+			{ friend runtime;
 			public:
 				static constexpr auto title{ "libmeme##editor##main_menu" };
 				
-				using menus_t = typename pmr::vector<
-					std::pair<cstring, pmr::vector<std::function<void()>>>
-				>;
+				using menus_t = typename pmr::vector<std::pair<
+					cstring, pmr::vector<std::function<void()>>
+				>>;
 
-				bool	open		{ true }	; // 
-				menus_t	menus		{}			; // 
+				bool	open	{ true };
+				menus_t	menus	{};
 
 				void add_menu(cstring label, std::function<void()> && fn);
 
@@ -57,21 +57,21 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+			// EDITOR DOCKSPACE
 			class ML_EDITOR_API dockspace_t final : trackable, non_copyable
-			{
-				 friend runtime;
+			{ friend runtime;
 			public:
 				static constexpr auto title{ "libmeme##editor##dockspace" };
 
 				using nodes_t = pmr::vector<uint32_t>;
 
-				bool	open		{ true }	; // 
-				float_t	border		{}			; // 
-				vec2	padding		{}			; // 
-				float_t	rounding	{}			; // 
-				vec2	size		{}			; // 
-				float_t	alpha		{ 1.f }		; // 
-				nodes_t	nodes		{}			; // 
+				bool	open		{ true };
+				float_t	border		{};
+				vec2	padding		{};
+				float_t	rounding	{};
+				vec2	size		{};
+				float_t	alpha		{ 1.f };
+				nodes_t	nodes		{};
 
 				uint32_t begin_builder(int32_t flags = 0);
 				uint32_t end_builder(uint32_t root);

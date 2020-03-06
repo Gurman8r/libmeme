@@ -7,26 +7,26 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::create(cstring const & title, video_mode const & display, context_settings const & context, int32_t hints )
+	bool render_window::open()
 	{
-		if (!window::create(title, display, context, hints))
+		if (!window::open())
 		{
-			return debug::log::error("failed initializing ml::render_window");
+			return debug::log::error("render_window failed initializing platform");
 		}
 
 		if (!GL::startup())
 		{
-			return debug::log::error("failed initializing OpenGL");
+			return debug::log::error("render_window failed initializing renderer");
 		}
 
-		GL::validateVersion(m_context.major, m_context.minor);
+		GL::validateVersion(m_settings.context.major, m_settings.context.minor);
 
 		constexpr render_states states{
 		}; states();
 
-		GL::enable(GL::Multisample, m_context.multisample);
+		GL::enable(GL::Multisample, m_settings.context.multisample);
 
-		GL::enable(GL::FramebufferSRGB, m_context.sRGB_capable);
+		GL::enable(GL::FramebufferSRGB, m_settings.context.sRGB_capable);
 
 		return true;
 	}
@@ -35,6 +35,7 @@ namespace ml
 
 	void render_window::on_event(event const & value)
 	{
+		// nothing to do here
 		window::on_event(value);
 	}
 

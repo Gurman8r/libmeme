@@ -12,16 +12,7 @@ namespace ml
 
 		virtual ~render_window() noexcept = default;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual bool create(
-			cstring const & title,
-			video_mode const & display,
-			context_settings const & context,
-			int32_t hints
-		) override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD virtual bool open() override;
 
 		virtual void on_event(event const & value) override;
 

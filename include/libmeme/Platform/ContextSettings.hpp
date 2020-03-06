@@ -21,14 +21,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t		api				{ client_api::unknown };
-		int32_t		major			{ 0 };
-		int32_t		minor			{ 0 };
-		int32_t		profile			{ client_api::any };
-		int32_t		depth_bits		{ 0 };
-		int32_t		stencil_bits	{ 0 };
-		bool		multisample		{ false };
-		bool		sRGB_capable	{ false };
+		int32_t		api				{};
+		int32_t		major			{};
+		int32_t		minor			{};
+		int32_t		profile			{};
+		int32_t		depth_bits		{};
+		int32_t		stencil_bits	{};
+		bool		multisample		{};
+		bool		sRGB_capable	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

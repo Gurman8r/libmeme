@@ -11,8 +11,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2i		resolution	{ 0, 0 };
-		uint32_t	color_depth	{ 0 };
+		vec2i		resolution	{};
+		uint32_t	color_depth	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

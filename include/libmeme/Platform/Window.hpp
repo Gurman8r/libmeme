@@ -45,6 +45,28 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	struct ML_NODISCARD window_settings final
+	{
+		cstring				title	{}; // 
+		video_mode			video	{}; // 
+		context_settings	context	{}; // 
+		int32_t				hints	{}; // 
+
+		constexpr window_settings() noexcept = default;
+		constexpr window_settings(window_settings const &) = default;
+		constexpr window_settings(window_settings &&) noexcept = default;
+		constexpr window_settings & operator=(window_settings const &) = default;
+		constexpr window_settings & operator=(window_settings &&) noexcept = default;
+	};
+
+	template <class ... Args
+	> ML_NODISCARD constexpr auto make_window_settings(Args && ... args) noexcept
+	{
+		return window_settings{ ML_forward(args)... };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct ML_PLATFORM_API window : trackable, non_copyable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,14 +93,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool create(
-			cstring const & title, 
+		ML_NODISCARD bool create(
+			cstring title, 
 			video_mode const & display,
 			context_settings const & context,
 			int32_t hints
-		);
+		) noexcept;
+
+		ML_NODISCARD bool create(window_settings const & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD virtual bool open();
 
 		virtual void on_event(event const & value) override;
 
@@ -201,56 +227,47 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto get_aspect() const -> float_t { return util::aspect(get_size()); };
+		ML_NODISCARD inline auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
 
-		ML_NODISCARD inline auto get_context() const -> context_settings const & { return m_context; }
+		ML_NODISCARD inline auto get_context() const noexcept -> context_settings const & { return m_settings.context; }
 
-		ML_NODISCARD inline auto get_frame_aspect() const -> float_t { return util::aspect(get_frame_size()); };
+		ML_NODISCARD inline auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
 
-		ML_NODISCARD inline auto get_frame_height() const -> int32_t { return get_frame_size()[1]; }
+		ML_NODISCARD inline auto get_frame_height() const noexcept -> int32_t { return get_frame_size()[1]; }
 
-		ML_NODISCARD inline auto get_frame_width() const -> int32_t { return get_frame_size()[0]; }
+		ML_NODISCARD inline auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
 
-		ML_NODISCARD inline auto get_height() const -> int32_t const & { return get_size()[1]; }
+		ML_NODISCARD inline auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
 
-		ML_NODISCARD inline auto get_monitor() const -> void * { return m_monitor; }
+		ML_NODISCARD inline auto get_monitor() const noexcept -> void * { return m_monitor; }
 
-		ML_NODISCARD inline auto get_share() const -> void * { return m_share; }
+		ML_NODISCARD inline auto get_settings() & noexcept -> window_settings & { return m_settings; }
 
-		ML_NODISCARD inline auto get_size() const -> vec2i const & { return get_video_mode().resolution; }
+		ML_NODISCARD inline auto get_settings() const & noexcept -> window_settings const & { return m_settings; }
 
-		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_hints; }
+		ML_NODISCARD inline auto get_share() const noexcept -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_title() const -> cstring const & { return m_title; }
+		ML_NODISCARD inline auto get_size() const noexcept -> vec2i const & { return get_video_mode().resolution; }
 
-		ML_NODISCARD inline auto get_video_mode() const -> video_mode const & { return m_video; }
+		ML_NODISCARD inline auto get_title() const noexcept -> cstring const & { return m_settings.title; }
 
-		ML_NODISCARD inline auto get_width() const -> int32_t const & { return get_size()[0]; }
+		ML_NODISCARD inline auto get_video_mode() const noexcept -> video_mode const & { return m_settings.video; }
+
+		ML_NODISCARD inline auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T = int32_t
-		> inline bool has_flags(T const hints) const noexcept
-		{
-			return m_hints & static_cast<int32_t>(hints);
-		}
+		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_settings.hints; }
 
-		template <class T = int32_t
-		> inline auto operator&(T const hints) const & noexcept
-		{
-			return has_flags(hints);
-		}
+		ML_NODISCARD inline bool has_hint(int32_t i) const noexcept { return m_settings.hints & i; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		void * 				m_window;
-		void * 				m_monitor;
-		void * 				m_share;
-		cstring				m_title;
-		video_mode			m_video;
-		context_settings	m_context;
-		int32_t				m_hints;
+		void *			m_window	; // 
+		void * 			m_monitor	; // 
+		void * 			m_share		; // 
+		window_settings	m_settings	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

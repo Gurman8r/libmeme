@@ -48,13 +48,10 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	window::window() noexcept
-		: m_window	{ nullptr }
-		, m_monitor	{ nullptr }
-		, m_share	{ nullptr }
-		, m_title	{}
-		, m_video	{}
-		, m_context	{}
-		, m_hints	{}
+		: m_window	{}
+		, m_monitor	{}
+		, m_share	{}
+		, m_settings{}
 	{
 #ifdef ML_OS_WINDOWS
 		if (HWND window{ GetConsoleWindow() })
@@ -82,29 +79,33 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(cstring const & title, video_mode const & video, context_settings const & context, int32_t hints)
+	bool window::create(cstring title, video_mode const & video, context_settings const & context, int32_t hints) noexcept
 	{
-		if (m_window)
+		return create(window_settings{ title, video, context, hints });
+	}
+
+	bool window::create(window_settings const & value) noexcept
+	{
+		if (is_open()) return debug::log::error("window is already open");
+		m_settings = value;
+		return open();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool window::open()
+	{
+		// validate
+		if (is_open())				return debug::log::error("window is already open");
+		if (!glfwInit())			return debug::log::error("failed initializing glfw");
+		if (!m_settings.title)		return debug::log::error("invalid window title");
+		if (!m_settings.video)		return debug::log::error("invalid window video mode");
+		if (!m_settings.context)	return debug::log::error("invalid window context settings");
+		
+		// context api
+		glfwWindowHint(GLFW_CLIENT_API, ([&]()
 		{
-			return debug::log::error("window is already open");
-		}
-
-		if (!glfwInit())
-		{
-			return debug::log::error("failed initializing glfw");
-		}
-
-		if (!(m_title = title)) return debug::log::error("");
-
-		if (!(m_video = video)) return debug::log::error("");
-		
-		if (!(m_context = context)) return debug::log::error("");
-		
-		m_hints = hints;
-		
-		// Client API
-		glfwWindowHint(GLFW_CLIENT_API, ([&]() {
-			switch (m_context.api)
+			switch (m_settings.context.api)
 			{
 			case client_api::opengl	: return GLFW_OPENGL_API;
 			case client_api::vulkan	:
@@ -112,10 +113,12 @@ namespace ml
 			default					: return GLFW_NO_API;
 			}
 		})());
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	m_settings.context.major);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	m_settings.context.minor);
 
-		// API Profile
+		// context profile
 		glfwWindowHint(GLFW_OPENGL_PROFILE, ([&]() {
-			switch (m_context.profile)
+			switch (m_settings.context.profile)
 			{
 			case client_api::core	: return GLFW_OPENGL_CORE_PROFILE;
 			case client_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
@@ -124,26 +127,25 @@ namespace ml
 			default					: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());
+		glfwWindowHint(GLFW_DEPTH_BITS,				m_settings.context.depth_bits);
+		glfwWindowHint(GLFW_STENCIL_BITS,			m_settings.context.stencil_bits);
+		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_settings.context.sRGB_capable);
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	m_context.major);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	m_context.minor);
-		glfwWindowHint(GLFW_DEPTH_BITS,				m_context.depth_bits);
-		glfwWindowHint(GLFW_STENCIL_BITS,			m_context.stencil_bits);
-		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_context.sRGB_capable);
-		glfwWindowHint(GLFW_RESIZABLE,				m_hints & WindowHints_Resizable);
-		glfwWindowHint(GLFW_VISIBLE,				m_hints & WindowHints_Visible);
-		glfwWindowHint(GLFW_DECORATED,				m_hints & WindowHints_Decorated);
-		glfwWindowHint(GLFW_FOCUSED,				m_hints & WindowHints_Focused);
-		glfwWindowHint(GLFW_AUTO_ICONIFY,			m_hints & WindowHints_AutoIconify);
-		glfwWindowHint(GLFW_FLOATING,				m_hints & WindowHints_Floating);
-		glfwWindowHint(GLFW_MAXIMIZED,				m_hints & WindowHints_Maximized);
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			m_hints & WindowHints_DoubleBuffered);
+		// style hints
+		glfwWindowHint(GLFW_RESIZABLE,				has_hint(WindowHints_Resizable));
+		glfwWindowHint(GLFW_VISIBLE,				has_hint(WindowHints_Visible));
+		glfwWindowHint(GLFW_DECORATED,				has_hint(WindowHints_Decorated));
+		glfwWindowHint(GLFW_FOCUSED,				has_hint(WindowHints_Focused));
+		glfwWindowHint(GLFW_AUTO_ICONIFY,			has_hint(WindowHints_AutoIconify));
+		glfwWindowHint(GLFW_FLOATING,				has_hint(WindowHints_Floating));
+		glfwWindowHint(GLFW_MAXIMIZED,				has_hint(WindowHints_Maximized));
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			has_hint(WindowHints_DoubleBuffered));
 		
-		// Create Window
+		// create window
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
-			m_video.resolution[0],
-			m_video.resolution[1],
-			m_title,
+			m_settings.video.resolution[0],
+			m_settings.video.resolution[1],
+			m_settings.title,
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
 		))))
@@ -155,17 +157,17 @@ namespace ml
 
 		set_cursor_mode(cursor::mode::normal);
 
-		if (has_flags(WindowHints_Fullscreen))
+		if (has_hint(WindowHints_Fullscreen))
 		{
-			set_fullscreen(true); // Fullscreen
+			set_fullscreen(true); // fullscreen
 		}
-		else if (has_flags(WindowHints_Maximized))
+		else if (has_hint(WindowHints_Maximized))
 		{
-			maximize(); // Maximized
+			maximize(); // maximized
 		}
 		else
 		{
-			set_centered(); // Centered
+			set_centered(); // centered
 		}
 
 		return true;
@@ -222,7 +224,7 @@ namespace ml
 		{
 			glfwMaximizeWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_hints |= WindowHints_Maximized;
+			m_settings.hints |= WindowHints_Maximized;
 		}
 		return (*this);
 	}
@@ -233,7 +235,7 @@ namespace ml
 		{
 			glfwRestoreWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_hints &= ~WindowHints_Maximized;
+			m_settings.hints &= ~WindowHints_Maximized;
 		}
 		return (*this);
 	}
@@ -357,7 +359,7 @@ namespace ml
 
 	window & window::set_size(vec2i const & value)
 	{
-		m_video.resolution = value;
+		m_settings.video.resolution = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
@@ -367,10 +369,10 @@ namespace ml
 
 	window & window::set_title(cstring const & value)
 	{
-		m_title = value;
-		if (m_window && m_title)
+		m_settings.title = value;
+		if (m_window && m_settings.title)
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_title);
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_settings.title);
 		}
 		return (*this);
 	}

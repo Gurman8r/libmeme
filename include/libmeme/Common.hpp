@@ -110,6 +110,8 @@ namespace ml
 	namespace views			= _ML std::ranges::views;
 #endif
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	namespace literals
 	{
 		using namespace _ML std::chrono_literals;

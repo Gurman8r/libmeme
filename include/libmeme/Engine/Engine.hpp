@@ -99,12 +99,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static int32_t do_script(int32_t lang, pmr::string const & text);
+		static int32_t do_script(int32_t lang, pmr::string const & text);
 
-		ML_NODISCARD static int32_t do_script(filesystem::path const & path);
+		static int32_t do_script(filesystem::path const & path);
 
 		template <int32_t Lang
-		> ML_NODISCARD inline static int32_t do_script(pmr::string const & text)
+		> inline static int32_t do_script(pmr::string const & text)
 		{
 			return do_script(Lang, text);
 		}
