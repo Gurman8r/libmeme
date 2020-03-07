@@ -22,7 +22,7 @@ exit = engine.close
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-# editor setup
+# editor style
 editor.load_style(engine.path_to("assets/styles/obsidian.style"))
 
 # load plugins
