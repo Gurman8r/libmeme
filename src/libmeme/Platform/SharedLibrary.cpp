@@ -7,13 +7,21 @@
 // https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #endif
 
+#ifdef ML_OS_WINDOWS
+#	define LIB_EXT ".dll"
+#else
+#	define LIB_EXT ".so"
+#endif
+
 namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline void * load_library(filesystem::path const & path)
+	static inline void * load_library(filesystem::path path)
 	{
 #ifdef ML_OS_WINDOWS
+		if (path.extension().empty()) { path += LIB_EXT; }
+		else if (path.extension() != LIB_EXT) { return nullptr; }
 		return LoadLibraryExW(path.native().c_str(), nullptr, 0);
 #else
 		return nullptr;

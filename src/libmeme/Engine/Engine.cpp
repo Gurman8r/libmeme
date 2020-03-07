@@ -222,8 +222,7 @@ namespace ml
 
 	int32_t engine::do_script(int32_t lang, pmr::string const & text)
 	{
-		if (!running() || text.empty())
-			return 0;
+		if (!running() || text.empty()) return 0;
 		switch (lang)
 		{
 		default: return 0;
@@ -240,8 +239,7 @@ namespace ml
 
 	int32_t engine::do_script(filesystem::path const & path)
 	{
-		if (!running() || !filesystem::exists(path))
-			return 0;
+		if (!running() || !filesystem::exists(path)) return 0;
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
 		{
 		default: return 0;

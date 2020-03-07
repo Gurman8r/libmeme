@@ -22,16 +22,14 @@ exit = engine.close
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-# editor style
+# editor settings
 editor.load_style(engine.path_to("assets/styles/obsidian.style"))
 
 # load plugins
 plugins = [
    "demo",
   ]
-for p in plugins:
-    if config.os() == "Windows": engine.load_plugin(p + ".dll")
-    else: engine.load_plugin(p + ".so")
+for p in plugins: engine.load_plugin(p)
 
 # messages
 print("# " + config.proj_name()+ " | " + str(config.arch()) + "-bit | " + config.config())

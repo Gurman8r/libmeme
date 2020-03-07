@@ -63,6 +63,8 @@ namespace ml::embed
 			.def("is_open"		, []() { return engine::is_open(); })
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 			.def("path_to"		, [](cstring s) { return engine::path_to(s).native(); })
+			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_script(l, s); })
+			.def("do_file"		, [](cstring s) { return engine::do_script(s); })
 			
 			// config
 			.def("library_home"	, []() { return engine::get_config().library_home; })
@@ -71,7 +73,7 @@ namespace ml::embed
 			.def("program_name"	, []() { return engine::get_config().program_name; })
 			.def("program_path"	, []() { return engine::get_config().program_path; })
 			
-			// timers
+			// runtime
 			.def("total_time"	, []() { return engine::get_time().count(); })
 			.def("delta_time"	, []() { return engine::get_io().delta_time; })
 			.def("frame_count"	, []() { return engine::get_io().frame_count; })

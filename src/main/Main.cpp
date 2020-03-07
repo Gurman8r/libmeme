@@ -1,8 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/JSON.hpp>
-#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -19,52 +18,41 @@ using namespace ml;
 #define MEM_RESERVED 64.0_MiB
 #endif
 
-static struct memory_setup final : non_copyable
-{
-	ds::array<byte_t, MEM_RESERVED>		m_data{};
-	pmr::monotonic_buffer_resource		m_mono{ m_data.data(), m_data.size() };
-	pmr::unsynchronized_pool_resource	m_pool{ &m_mono };
-	detail::test_resource				m_test{ &m_pool, m_data.data(), m_data.size() };
-
-	memory_setup() noexcept
-	{
-		ML_assert(pmr::set_default_resource(&m_test));
-		ML_assert(memory_manager::set_test_resource(&m_test));
-	}
-
-} g_memcfg;
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-static auto const g_config{ R"(
-{
-	"content_home":		"../../../../",
-	"library_home":		"../../../../",
-	"setup_script":		"assets/scripts/setup.py",
-
-	"win_title":		"libmeme",
-	"win_resolution":	[ 1280, 720 ],
-	"win_color_depth":	32,
-	"win_hints":		93,
-	"win_api":			1,
-	"win_api_major":	4,
-	"win_api_minor":	6,
-	"win_api_profile":	2,
-	"win_depth_bits":	24,
-	"win_stencil_bits": 8,
-	"win_multisample":	false,
-	"win_srgb_capable": false,
-
-	"imgui_shading":	"#version 130",
-	"use_imgui_ini":	false,
-	"use_imgui_log":	false
-}
-)"_json };
+#ifndef CONFIG_FILE
+#define CONFIG_FILE L"../../../../libmeme.json"
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 ml::int32_t main()
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// setup memory
+	static struct memory_config final : non_copyable
+	{
+		ds::array<byte_t, MEM_RESERVED>		m_data{};
+		pmr::monotonic_buffer_resource		m_mono{ m_data.data(), m_data.size() };
+		pmr::unsynchronized_pool_resource	m_pool{ &m_mono };
+		detail::test_resource				m_test{ &m_pool, m_data.data(), m_data.size() };
+
+		memory_config() noexcept
+		{
+			ML_assert(pmr::set_default_resource(&m_test));
+			ML_assert(memory_manager::set_test_resource(&m_test));
+		}
+
+	} g_memcfg;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// load config
+	json g_config{};
+	std::ifstream file{ CONFIG_FILE };
+	ML_assert("CONFIG FILE NOT FOUND" && file);
+	file >> g_config;
+	file.close();
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create contexts

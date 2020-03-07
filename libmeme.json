@@ -1,0 +1,22 @@
+{
+	"content_home":		"../../../../",
+	"library_home":		"../../../../",
+	"setup_script":		"assets/scripts/setup.py",
+
+	"imgui_shading":	"#version 130",
+	"use_imgui_ini":	false,
+	"use_imgui_log":	false,
+
+	"win_title":		"libmeme",
+	"win_resolution":	[ 1280, 720 ],
+	"win_color_depth":	32,
+	"win_api":			1,
+	"win_api_major":	4,
+	"win_api_minor":	6,
+	"win_api_profile":	2,
+	"win_depth_bits":	24,
+	"win_stencil_bits": 8,
+	"win_multisample":	false,
+	"win_srgb_capable": false,
+	"win_hints":		93
+}

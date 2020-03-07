@@ -244,18 +244,23 @@
 #endif
 
 
-// Exceptions
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_throw                throw
-#define ML_catch                catch
-#define ML_try                  try
-
-
 // Namespace
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define _ML                     ::ml::
 #define _ML_BEGIN               namespace ml {
 #define _ML_END                 }
+
+
+// Alias
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#define ML_ALIAS                using
+
+
+// Exceptions
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#define ML_THROW                throw
+#define ML_CATCH                catch
+#define ML_TRY                  try
 
 
 // Preprocessor
@@ -276,16 +281,6 @@
 
 #define ML_IMPL_ONCE(once)      static bool once{ false }; if (!once && (once = true))
 #define ML_ONCE_CALL            ML_IMPL_ONCE(ML_ANONYMOUS(once))
-
-
-// Aliases
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_ALIAS                using
-#define ML_ALIAS_VA(...)        template <##__VA_ARGS__> ML_ALIAS
-#define ML_ALIAS_X              ML_ALIAS_VA(class X)
-#define ML_ALIAS_XY             ML_ALIAS_VA(class X, class Y)
-#define ML_ALIAS_XYZ            ML_ALIAS_VA(class X, class Y, class Z)
-#define ML_ALIAS_Ts             ML_ALIAS_VA(class ... Ts)
 
 
 // Attributes

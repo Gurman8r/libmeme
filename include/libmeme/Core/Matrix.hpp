@@ -191,7 +191,8 @@ namespace ml
 
 	// MATRIX 2x2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tmat2 = tmatnxn<X, 2>;
+	template <class T
+	> ML_ALIAS	tmat2 = tmatnxn<T, 2>;
 	ML_ALIAS	mat2b = tmat2<byte_t>;
 	ML_ALIAS	mat2i = tmat2<int32_t>;
 	ML_ALIAS	mat2u = tmat2<uint32_t>;
@@ -203,7 +204,8 @@ namespace ml
 
 	// MATRIX 3x3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tmat3 = tmatnxn<X, 3>;
+	template <class T
+	> ML_ALIAS	tmat3 = tmatnxn<T, 3>;
 	ML_ALIAS	mat3b = tmat3<byte_t>;
 	ML_ALIAS	mat3i = tmat3<int32_t>;
 	ML_ALIAS	mat3u = tmat3<uint32_t>;
@@ -215,7 +217,8 @@ namespace ml
 
 	// MATRIX 4x4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tmat4 = tmatnxn<X, 4>;
+	template <class T
+	> ML_ALIAS	tmat4 = tmatnxn<T, 4>;
 	ML_ALIAS	mat4b = tmat4<byte_t>;
 	ML_ALIAS	mat4i = tmat4<int32_t>;
 	ML_ALIAS	mat4u = tmat4<uint32_t>;
@@ -227,7 +230,8 @@ namespace ml
 
 	// VECTOR 2
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tvec2 = tvector<X, 2>;
+	template <class T
+	> ML_ALIAS	tvec2 = tvector<T, 2>;
 	ML_ALIAS	vec2b = tvec2<byte_t>;
 	ML_ALIAS	vec2i = tvec2<int32_t>;
 	ML_ALIAS	vec2u = tvec2<uint32_t>;
@@ -239,7 +243,8 @@ namespace ml
 
 	// VECTOR 3
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tvec3 = tvector<X, 3>;
+	template <class T
+	> ML_ALIAS	tvec3 = tvector<T, 3>;
 	ML_ALIAS	vec3b = tvec3<byte_t>;
 	ML_ALIAS	vec3i = tvec3<int32_t>;
 	ML_ALIAS	vec3u = tvec3<uint32_t>;
@@ -251,7 +256,8 @@ namespace ml
 
 	// VECTOR 4
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	ML_ALIAS_X	tvec4 = tvector<X, 4>;
+	template <class T
+	> ML_ALIAS	tvec4 = tvector<T, 4>;
 	ML_ALIAS	vec4b = tvec4<byte_t>;
 	ML_ALIAS	vec4i = tvec4<int32_t>;
 	ML_ALIAS	vec4u = tvec4<uint32_t>;

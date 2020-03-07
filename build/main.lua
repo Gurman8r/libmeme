@@ -28,6 +28,7 @@ project "main"
 		"%{sln_dir}build/%{prj.name}.lua", 
 		"%{sln_dir}src/%{prj.name}/**.**",
 		"%{sln_dir}assets/**.**", 
+		"%{sln_dir}libmeme.json", 
 	}
 	libdirs {
 		"%{bin_lib}", "%{bin_lib}%{cfg.platform}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
