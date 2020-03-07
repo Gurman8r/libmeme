@@ -1,23 +1,23 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import sys
-import LIBMEME_CONFIG   as config
-import LIBMEME_STDIO    as stdio
-import LIBMEME_EDITOR   as editor
-import LIBMEME_ENGINE   as engine
+import LIBMEME_CONFIG as config
+import LIBMEME_SYSTEM as system
+import LIBMEME_EDITOR as editor
+import LIBMEME_ENGINE as engine
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 # system setup
-class ml_sys_wrapper(object):
+class ml_setup(object):
     def __init__(self):
+        import sys
         sys.stdout  = self
         sys.stderr  = self
         sys.stdin   = None
         sys.exit    = engine.close
     def write(self, args):
-        stdio.write(str(args))
-ml_sys_wrapper()
+        system.write(args)
+ml_setup()
 exit = engine.close
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

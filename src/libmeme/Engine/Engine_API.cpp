@@ -41,21 +41,13 @@ namespace ml::embed
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	PYBIND11_EMBEDDED_MODULE(LIBMEME_STDIO, m)
+	PYBIND11_EMBEDDED_MODULE(LIBMEME_SYSTEM, m)
 	{
-		m /* LIBMEME_STDIO */
+		m /* LIBMEME_SYSTEM */
 
-			// stdio
-			.def("write"		, [](cstring s) { std::cout << s; })
-			
-			// console
 			.def("clear"		, []() { debug::clear(); })
 			.def("pause"		, []() { debug::pause(); })
-
-			// logging
-			.def("info"			, [](cstring s) { debug::log::info(s); })
-			.def("error"		, [](cstring s) { debug::log::error(s); })
-			.def("warning"		, [](cstring s) { debug::log::warning(s); })
+			.def("write"		, [](py::object s) { std::cout << s; })
 
 			;
 	};
@@ -65,6 +57,12 @@ namespace ml::embed
 	PYBIND11_EMBEDDED_MODULE(LIBMEME_ENGINE, m)
 	{
 		m /* LIBMEME_ENGINE */
+			
+			// general
+			.def("close"		, []() { return engine::close(); })
+			.def("is_open"		, []() { return engine::is_open(); })
+			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
+			.def("path_to"		, [](cstring s) { return engine::path_to(s).native(); })
 			
 			// config
 			.def("library_home"	, []() { return engine::get_config().library_home; })
@@ -78,14 +76,6 @@ namespace ml::embed
 			.def("delta_time"	, []() { return engine::get_io().delta_time; })
 			.def("frame_count"	, []() { return engine::get_io().frame_count; })
 			.def("frame_rate"	, []() { return engine::get_io().frame_rate; })
-			
-			// general
-			.def("is_open"		, []() { return engine::is_open(); })
-			.def("close"		, []() { return engine::close(); })
-			.def("path_to"		, [](cstring s) { return engine::path_to(s).native(); })
-
-			// plugins
-			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 
 			;
 	};

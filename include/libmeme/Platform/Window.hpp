@@ -235,9 +235,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_monitor() const noexcept -> void * { return m_monitor; }
 
-		ML_NODISCARD inline auto get_settings() & noexcept -> window_settings & { return m_settings; }
-
-		ML_NODISCARD inline auto get_settings() const & noexcept -> window_settings const & { return m_settings; }
+		ML_NODISCARD inline auto get_settings() const noexcept -> window_settings const & { return m_settings; }
 
 		ML_NODISCARD inline auto get_share() const noexcept -> void * { return m_share; }
 
