@@ -31,9 +31,9 @@ namespace ml
 			friend class context;
 		public:
 			arguments_t			command_line	{}			; // command line
-			filesystem::path	program_name	{}			; // programe name
 			filesystem::path	program_path	{}			; // program path
-			filesystem::path	content_path	{}			; // content path
+			filesystem::path	program_name	{}			; // programe name
+			filesystem::path	content_home	{}			; // content path
 			filesystem::path	library_home	{}			; // script library path
 		};
 
@@ -152,7 +152,7 @@ namespace ml
 
 		ML_NODISCARD static inline filesystem::path path_to(filesystem::path const & value = {})
 		{
-			auto const & cpath{ get_config().content_path };
+			auto const & cpath{ get_config().content_home };
 			if (cpath.empty()) return value;
 			if (value.empty()) return cpath;
 			return filesystem::path{ cpath.native() + value.native() };

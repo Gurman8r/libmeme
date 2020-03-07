@@ -966,7 +966,7 @@ namespace ml
 			ML_ONCE_CALL{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::get_window().get_hints() & WindowHints_Maximized ? 32 : 16;
+				m_memory.Cols				= engine::get_window().has_hint(window_hints_maximized) ? 32 : 16;
 				m_memory.OptShowOptions		= true;
 				m_memory.OptShowDataPreview	= true;
 				m_memory.OptShowHexII		= false;

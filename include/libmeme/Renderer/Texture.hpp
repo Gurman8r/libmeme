@@ -7,17 +7,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum TextureFlags_ : int32_t
+	enum texture_flags_ : int32_t
 	{
-		TextureFlags_None,
-		TextureFlags_Smooth		= (1 << 0),
-		TextureFlags_Repeated	= (1 << 1),
-		TextureFlags_Mipmapped	= (1 << 2),
+		texture_flags_none		= (0 << 0), // none
+		texture_flags_smooth	= (1 << 0), // smooth
+		texture_flags_repeated	= (1 << 1), // repeated
+		texture_flags_mipmapped	= (1 << 2), // mipmapped
 
-		// Smooth / Repeated
-		TextureFlags_Default
-			= TextureFlags_Smooth
-			| TextureFlags_Repeated,
+		// smooth / repeated
+		texture_flags_default
+			= texture_flags_smooth
+			| texture_flags_repeated,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -160,11 +160,11 @@ namespace ml
 
 		ML_NODISCARD inline auto height() const noexcept -> uint32_t { return m_size[1]; }
 
-		ML_NODISCARD inline bool is_smooth() const noexcept { return m_flags & TextureFlags_Smooth; }
+		ML_NODISCARD inline bool is_smooth() const noexcept { return m_flags & texture_flags_smooth; }
 
-		ML_NODISCARD inline bool is_repeated() const noexcept { return m_flags & TextureFlags_Repeated; }
+		ML_NODISCARD inline bool is_repeated() const noexcept { return m_flags & texture_flags_repeated; }
 
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return m_flags & TextureFlags_Mipmapped; }
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return m_flags & texture_flags_mipmapped; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

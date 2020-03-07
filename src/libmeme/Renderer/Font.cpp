@@ -207,7 +207,7 @@ namespace ml
 			GL::Texture2D,
 			GL::RGBA,
 			GL::Red,
-			TextureFlags_Default
+			texture_flags_default
 		);
 
 		g.bounds = float_rect{

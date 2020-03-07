@@ -13,41 +13,41 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum WindowHints_ : int32_t
+	enum window_hints_ : int32_t
 	{
-		WindowHints_None,
-		WindowHints_Resizable		= (1 << 0),
-		WindowHints_Visible			= (1 << 1),
-		WindowHints_Decorated		= (1 << 2),
-		WindowHints_Focused			= (1 << 3),
-		WindowHints_AutoIconify		= (1 << 4),
-		WindowHints_Floating		= (1 << 5),
-		WindowHints_Maximized		= (1 << 6),
-		WindowHints_Fullscreen		= (1 << 7),
-		WindowHints_DoubleBuffered	= (1 << 8),
+		window_hints_none				= (0 << 0), // none
+		window_hints_resizable			= (1 << 0), // resizable
+		window_hints_visible			= (1 << 1), // visible
+		window_hints_decorated			= (1 << 2), // decorated
+		window_hints_focused			= (1 << 3), // focused
+		window_hints_auto_iconify		= (1 << 4), // auto_iconify
+		window_hints_floating			= (1 << 5), // floating
+		window_hints_maximized			= (1 << 6), // maximized
+		window_hints_fullscreen			= (1 << 7), // fullscreen
+		window_hints_double_buffered	= (1 << 8), // double buffered
 
-		// Resizable / Visible / Decorated / Focused / Auto Iconify
-		WindowHints_Default
-			= WindowHints_Resizable
-			| WindowHints_Visible
-			| WindowHints_Decorated
-			| WindowHints_Focused
-			| WindowHints_AutoIconify,
+		// resizable / visible / decorated / focused / auto iconify
+		window_hints_default
+			= window_hints_resizable
+			| window_hints_visible
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify,
 
-		// Resizable / Decorated / Focused / Auto Iconify / Maximized
-		WindowHints_DefaultMaximized
-			= WindowHints_Resizable
-			| WindowHints_Decorated
-			| WindowHints_Focused
-			| WindowHints_AutoIconify
-			| WindowHints_Maximized,
+		// resizable / decorated / focused / auto iconify / maximized
+		window_hints_default_max 
+			= window_hints_resizable
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify
+			| window_hints_maximized,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_NODISCARD window_settings final
 	{
-		cstring				title	{}; // 
+		pmr::string			title	{}; // 
 		video_mode			video	{}; // 
 		context_settings	context	{}; // 
 		int32_t				hints	{}; // 
@@ -88,7 +88,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD bool create(
-			cstring title, 
+			pmr::string const & title,
 			video_mode const & display,
 			context_settings const & context,
 			int32_t hints
@@ -243,7 +243,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_size() const noexcept -> vec2i const & { return get_video_mode().resolution; }
 
-		ML_NODISCARD inline auto get_title() const noexcept -> cstring const & { return m_settings.title; }
+		ML_NODISCARD inline auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 
 		ML_NODISCARD inline auto get_video_mode() const noexcept -> video_mode const & { return m_settings.video; }
 
@@ -253,7 +253,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_settings.hints; }
 
-		ML_NODISCARD inline bool has_hint(int32_t i) const noexcept { return m_settings.hints & i; }
+		ML_NODISCARD inline bool has_hint(int32_t const i) const noexcept { return m_settings.hints & i; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

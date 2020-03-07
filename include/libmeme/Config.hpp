@@ -5,7 +5,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML__AUTHOR  "Melody Gurman"
 #define ML__NAME    "libmeme"
-#define ML__VERSION "00.00.01"
+#define ML__VERSION "0.0.0"
 #define ML__URL     "https://www.github.com/Gurman8r/libmeme"
 #define ML__DATE    __DATE__
 #define ML__TIME    __TIME__

@@ -78,8 +78,8 @@ namespace ml
 		}
 
 		// paths
-		im_io.LogFilename = g_editor->m_config.ini_file;
-		im_io.IniFilename = g_editor->m_config.log_file;
+		im_io.LogFilename = g_editor->m_config.ini_filename;
+		im_io.IniFilename = g_editor->m_config.log_filename;
 
 		// backend
 #ifdef ML_RENDERER_OPENGL
@@ -88,7 +88,7 @@ namespace ml
 			return debug::log::error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.string().c_str()))
 		{
 			return debug::log::error("Failed initializing ImGui renderer");
 		}

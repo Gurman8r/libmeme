@@ -69,7 +69,7 @@ namespace ml::embed
 			// config
 			.def("library_home"	, []() { return engine::get_config().library_home; })
 			.def("command_line"	, []() { return engine::get_config().command_line; })
-			.def("content_path"	, []() { return engine::get_config().content_path; })
+			.def("content_home"	, []() { return engine::get_config().content_home; })
 			.def("program_name"	, []() { return engine::get_config().program_name; })
 			.def("program_path"	, []() { return engine::get_config().program_path; })
 			

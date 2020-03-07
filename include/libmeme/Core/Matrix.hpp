@@ -574,4 +574,25 @@ namespace std
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// JSON INTERFACE
+namespace ml::ds
+{
+	template <class T, size_t W, size_t H
+	> static void to_json(json & j, matrix<T, W, H> const & value)
+	{
+		j = json::parse(value.begin(), value.end());
+	}
+
+	template <class T, size_t W, size_t H
+	> static void from_json(json const & j, matrix<T, W, H> & value)
+	{
+		for (size_t i = 0; i < W * H; ++i)
+		{
+			value[i] = j.at(i).get<T>();
+		}
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #endif // !_ML_MATRIX_HPP_

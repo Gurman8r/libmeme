@@ -24,9 +24,9 @@ namespace ml
 		{
 			friend class context;
 		public:
-			cstring				api_version		{}			; // shading language version
-			cstring				ini_file		{}			; // imgui ini file
-			cstring				log_file		{}			; // imgui log file
+			filesystem::path	api_version		{}			; // shading language version
+			cstring				ini_filename	{}			; // imgui ini file name
+			cstring				log_filename	{}			; // imgui log file name
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

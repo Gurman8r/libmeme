@@ -1,5 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -14,29 +15,12 @@ using namespace ml;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// memory settings
+
 #ifndef MEM_RESERVED
 #define MEM_RESERVED 64.0_MiB
 #endif
 
-#ifndef CONTENT_PATH
-#define CONTENT_PATH L"../../../../"
-#endif
-
-#ifndef LIBRARY_HOME
-#define LIBRARY_HOME L"../../../../"
-#endif
-
-#ifndef WINDOW_TITLE
-#define WINDOW_TITLE (ML__NAME " | " ML_STRINGIFY(ML_ARCH) "-bit | " ML_CONFIGURATION)
-#endif
-
-#ifndef SETUP_SCRIPT
-#define SETUP_SCRIPT L"assets/scripts/setup.py"
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// memory settings
 static struct memory_config final : non_copyable
 {
 	ds::array<byte_t, MEM_RESERVED>		m_data{};
@@ -54,28 +38,31 @@ static struct memory_config final : non_copyable
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// window settings
-static constexpr auto window_cfg = make_window_settings
-(
-	WINDOW_TITLE,					// title
-	make_video_mode
-	(
-		vec2i{ 1280, 720 },			// resolution
-		32u							// color depth
-	),
-	make_context_settings
-	(
-		client_api::opengl,			// api
-		4,							// major version
-		6,							// minor version
-		client_api::compat,			// profile
-		24,							// depth bits
-		8,							// stencil bits
-		false,						// multisample
-		false						// sRGB capable
-	),
-	WindowHints_DefaultMaximized	// hints
-);
+// config
+static auto const g_config{ R"(
+{
+	"content_home":		"../../../../",
+	"library_home":		"../../../../",
+	"setup_script":		"assets/scripts/setup.py",
+
+	"imgui_shading":	"#version 130",
+	"use_imgui_ini":	false,
+	"use_imgui_log":	false,
+
+	"win_title":		"libmeme",
+	"win_resolution":	[ 1280, 720 ],
+	"win_color_depth":	32,
+	"win_hints":		93,
+	"win_api":			1,
+	"win_api_major":	4,
+	"win_api_minor":	6,
+	"win_api_profile":	2,
+	"win_depth_bits":	24,
+	"win_stencil_bits": 8,
+	"win_multisample":	false,
+	"win_srgb_capable": false
+}
+)"_json };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -83,48 +70,68 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create engine
+	// create contexts
 	ML_assert(engine::create_context()); ML_defer{ ML_assert(engine::destroy_context()); };
+	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
 	auto & engine_cfg			{ engine::get_config() };
 	engine_cfg.command_line		= { ML_argv, ML_argv + ML_argc };
-	engine_cfg.program_name		= filesystem::path{ ML_argv[0] }.filename();
 	engine_cfg.program_path		= filesystem::current_path();
-	engine_cfg.content_path		= CONTENT_PATH;
-	engine_cfg.library_home		= LIBRARY_HOME;
+	engine_cfg.program_name		= filesystem::path{ ML_argv[0] }.filename();
+	engine_cfg.content_home		= g_config["content_home"].get<pmr::string>();
+	engine_cfg.library_home		= g_config["library_home"].get<pmr::string>();
+
+	// configure editor
+	auto & editor_cfg			{ editor::get_config() };
+	editor_cfg.api_version		= g_config["imgui_shading"].get<pmr::string>();
+	editor_cfg.ini_filename		= g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
+	editor_cfg.log_filename		= g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// start engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
 	// create window
-	ML_assert(engine::get_window().create(window_cfg));
+	ML_assert(engine::get_window().create(make_window_settings(
+		g_config["win_title"].get<pmr::string>(),
+		make_video_mode(
+			g_config["win_resolution"].get<vec2i>(),
+			g_config["win_color_depth"].get<uint32_t>()
+		),
+		make_context_settings(
+			g_config["win_api"].get<int32_t>(),
+			g_config["win_api_major"].get<int32_t>(),
+			g_config["win_api_minor"].get<int32_t>(),
+			g_config["win_api_profile"].get<int32_t>(),
+			g_config["win_depth_bits"].get<int32_t>(),
+			g_config["win_stencil_bits"].get<int32_t>(),
+			g_config["win_multisample"].get<bool>(),
+			g_config["win_srgb_capable"].get<bool>()
+		),
+		g_config["win_hints"].get<int32_t>()
+	)));
 
 	// install window callbacks
 	window::install_default_callbacks(&engine::get_window());
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// create editor
-	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
-
-	// configure editor
-	auto & editor_cfg			{ editor::get_config() };
-	editor_cfg.api_version		= "#version 130";
-	editor_cfg.ini_file			= nullptr;
-	editor_cfg.log_file			= nullptr;
-	
 	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
+	// run setup script
+	engine::do_script(engine::path_to(g_config["setup_script"].get<pmr::string>()));
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// run setup script
-	engine::do_script(engine::path_to(SETUP_SCRIPT));
-
 	// main sequence
+
 	event_system::fire_event<enter_event>();
+
 	ML_defer{ event_system::fire_event<exit_event>(); };
+	
 	while (engine::is_open())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };
@@ -172,7 +179,11 @@ ml::int32_t main()
 			event_system::fire_event<frame_end_event>();
 		}
 	}
-	
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// goodbye!
 	return EXIT_SUCCESS;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

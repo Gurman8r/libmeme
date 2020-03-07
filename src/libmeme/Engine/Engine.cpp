@@ -187,7 +187,7 @@ namespace ml
 	void engine::end_draw()
 	{
 		// 
-		if ML_LIKELY(!(g_engine->m_window.has_hint(WindowHints_DoubleBuffered)))
+		if ML_LIKELY(!(g_engine->m_window.has_hint(window_hints_double_buffered)))
 		{
 			GL::flush();
 		}

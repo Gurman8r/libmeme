@@ -1,12 +1,13 @@
-#ifndef _ML_ALG_HPP_
-#define _ML_ALG_HPP_
+#ifndef _ML_UTILITY_HPP_
+#define _ML_UTILITY_HPP_
 
+#define _ML_UTIL _ML util::
+
+#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Hash.hpp>
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 #include <gcem/include/gcem.hpp>
-
-#define _ML_UTIL _ML util::
 
 #define ML_bitread(v, i)		((v >> i) & 1)
 #define ML_bitset(v, i)			(v |= (1 << i))
@@ -18,6 +19,7 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// constexpr strlen
 	template <class Ch = char
 	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
 	{
@@ -26,6 +28,7 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// constexpr swap
 	template <class T
 	> constexpr void swap(T & lhs, T & rhs) noexcept
 	{
@@ -304,4 +307,4 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_ALG_HPP_
+#endif // !_ML_UTILITY_HPP_

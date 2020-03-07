@@ -47,7 +47,7 @@ namespace ml
 
 	struct ML_CORE_API event_listener
 	{
-		virtual ~event_listener()
+		virtual ~event_listener() noexcept
 		{
 			event_system::remove_listener(this);
 		}

@@ -5,12 +5,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// ARRAY
+// FIXED SIZE ARRAY
 namespace ml::ds
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// fixed size array
 	template <class _Ty, size_t _Size> struct array
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -77,10 +74,13 @@ namespace ml::ds
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// zero size array
+// ZERO SIZE ARRAY
+namespace ml::ds
+{
 	template <class _Ty> struct array<_Ty, 0>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -147,8 +147,6 @@ namespace ml::ds
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -233,6 +231,27 @@ namespace std
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// JSON INTERFACE
+namespace ml::ds
+{
+	template <class T, size_t N
+	> static void to_json(json & j, array<T, N> const & value)
+	{
+		j = json::parse(value.begin(), value.end());
+	}
+
+	template <class T, size_t N
+	> static void from_json(json const & j, array<T, N> & value)
+	{
+		for (size_t i = 0; i < N; ++i)
+		{
+			value[i] = j.at(i).get<T>();
+		}
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -4,13 +4,6 @@
 #include <libmeme/Config.hpp>
 #include <nlohmann/json.hpp>
 
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_ALIAS json = typename nlohmann::json;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
+namespace ml { ML_ALIAS json = typename nlohmann::json; }
 
 #endif // !_ML_JSON_HPP_

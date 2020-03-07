@@ -75,7 +75,7 @@ namespace ml
 	}
 
 	texture::texture(uint32_t sampler)
-		: texture{ sampler, TextureFlags_Default }
+		: texture{ sampler, texture_flags_default }
 	{
 	}
 
@@ -387,8 +387,8 @@ namespace ml
 		else
 		{
 			m_flags = value
-				? (m_flags | TextureFlags_Mipmapped)
-				: (m_flags & ~TextureFlags_Mipmapped);
+				? (m_flags | texture_flags_mipmapped)
+				: (m_flags & ~texture_flags_mipmapped);
 
 			ML_BIND_SCOPE((*this));
 
@@ -407,8 +407,8 @@ namespace ml
 		else
 		{
 			m_flags = value
-				? (m_flags | TextureFlags_Repeated)
-				: (m_flags & ~TextureFlags_Repeated);
+				? (m_flags | texture_flags_repeated)
+				: (m_flags & ~texture_flags_repeated);
 
 			ML_BIND_SCOPE((*this));
 
@@ -427,8 +427,8 @@ namespace ml
 		else
 		{
 			m_flags = value
-				? (m_flags | TextureFlags_Smooth)
-				: (m_flags & ~TextureFlags_Smooth);
+				? (m_flags | texture_flags_smooth)
+				: (m_flags & ~texture_flags_smooth);
 
 			ML_BIND_SCOPE((*this));
 

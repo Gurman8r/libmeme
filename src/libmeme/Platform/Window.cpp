@@ -79,7 +79,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(cstring title, video_mode const & video, context_settings const & context, int32_t hints) noexcept
+	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t hints) noexcept
 	{
 		return create(window_settings{ title, video, context, hints });
 	}
@@ -96,11 +96,17 @@ namespace ml
 	bool window::open()
 	{
 		// validate
-		if (is_open())				return debug::log::error("window is already open");
-		if (!glfwInit())			return debug::log::error("failed initializing glfw");
-		if (!m_settings.title)		return debug::log::error("invalid window title");
-		if (!m_settings.video)		return debug::log::error("invalid window video mode");
-		if (!m_settings.context)	return debug::log::error("invalid window context settings");
+		{
+			if (is_open()) return debug::log::error("window is already open");
+
+			if (!glfwInit()) return debug::log::error("failed initializing glfw");
+
+			if (m_settings.title.empty()) return debug::log::error("invalid window title");
+
+			if (!m_settings.video) return debug::log::error("invalid window video mode");
+
+			if (!m_settings.context) return debug::log::error("invalid window context settings");
+		}
 		
 		// context api
 		glfwWindowHint(GLFW_CLIENT_API, ([&]()
@@ -132,20 +138,20 @@ namespace ml
 		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_settings.context.sRGB_capable);
 
 		// style hints
-		glfwWindowHint(GLFW_RESIZABLE,				has_hint(WindowHints_Resizable));
-		glfwWindowHint(GLFW_VISIBLE,				has_hint(WindowHints_Visible));
-		glfwWindowHint(GLFW_DECORATED,				has_hint(WindowHints_Decorated));
-		glfwWindowHint(GLFW_FOCUSED,				has_hint(WindowHints_Focused));
-		glfwWindowHint(GLFW_AUTO_ICONIFY,			has_hint(WindowHints_AutoIconify));
-		glfwWindowHint(GLFW_FLOATING,				has_hint(WindowHints_Floating));
-		glfwWindowHint(GLFW_MAXIMIZED,				has_hint(WindowHints_Maximized));
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			has_hint(WindowHints_DoubleBuffered));
+		glfwWindowHint(GLFW_RESIZABLE,				has_hint(window_hints_resizable));
+		glfwWindowHint(GLFW_VISIBLE,				has_hint(window_hints_visible));
+		glfwWindowHint(GLFW_DECORATED,				has_hint(window_hints_decorated));
+		glfwWindowHint(GLFW_FOCUSED,				has_hint(window_hints_focused));
+		glfwWindowHint(GLFW_AUTO_ICONIFY,			has_hint(window_hints_auto_iconify));
+		glfwWindowHint(GLFW_FLOATING,				has_hint(window_hints_floating));
+		glfwWindowHint(GLFW_MAXIMIZED,				has_hint(window_hints_maximized));
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			has_hint(window_hints_double_buffered));
 		
 		// create window
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
 			m_settings.video.resolution[0],
 			m_settings.video.resolution[1],
-			m_settings.title,
+			m_settings.title.c_str(),
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
 		))))
@@ -157,11 +163,11 @@ namespace ml
 
 		set_cursor_mode(cursor::mode::normal);
 
-		if (has_hint(WindowHints_Fullscreen))
+		if (has_hint(window_hints_fullscreen))
 		{
 			set_fullscreen(true); // fullscreen
 		}
-		else if (has_hint(WindowHints_Maximized))
+		else if (has_hint(window_hints_maximized))
 		{
 			maximize(); // maximized
 		}
@@ -224,7 +230,7 @@ namespace ml
 		{
 			glfwMaximizeWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_settings.hints |= WindowHints_Maximized;
+			m_settings.hints |= window_hints_maximized;
 		}
 		return (*this);
 	}
@@ -235,7 +241,7 @@ namespace ml
 		{
 			glfwRestoreWindow(static_cast<GLFWwindow *>(m_window));
 
-			m_settings.hints &= ~WindowHints_Maximized;
+			m_settings.hints &= ~window_hints_maximized;
 		}
 		return (*this);
 	}
@@ -370,9 +376,9 @@ namespace ml
 	window & window::set_title(cstring const & value)
 	{
 		m_settings.title = value;
-		if (m_window && m_settings.title)
+		if (m_window && m_settings.title.c_str())
 		{
-			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_settings.title);
+			glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), m_settings.title.c_str());
 		}
 		return (*this);
 	}

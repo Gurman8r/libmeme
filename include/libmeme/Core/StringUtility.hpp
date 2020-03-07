@@ -181,7 +181,7 @@ namespace ml::util::impl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
-	> inline std::stringstream sink_stream(Arg0 && arg0, Args && ... args) noexcept
+	> inline std::stringstream args_to_sstream(Arg0 && arg0, Args && ... args) noexcept
 	{
 		std::stringstream ss{};
 		ss << ML_forward(arg0) << '\n';
@@ -630,7 +630,7 @@ namespace ml::util
 	template <class Arg0, class ... Args
 	> ML_NODISCARD static inline pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{ impl::sink_stream(ML_forward(arg0), ML_forward(args)...) };
+		std::stringstream ss{ impl::args_to_sstream(ML_forward(arg0), ML_forward(args)...) };
 		return format(fmt, ss);
 	}
 

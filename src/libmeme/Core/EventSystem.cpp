@@ -4,18 +4,19 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static ds::flat_map<hash_t, ds::flat_set<event_listener *>> s_listeners{};
+	static ds::flat_map<hash_t, ds::flat_set<event_listener *>
+	> g_event_system{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool event_system::add_listener(hash_t type, event_listener * value)
 	{
-		return value && s_listeners[type].insert(value).second;
+		return value && g_event_system[type].insert(value).second;
 	}
 
 	void event_system::fire_event(event const & value)
 	{
-		if (auto const it{ s_listeners.find(value.id()) })
+		if (auto const it{ g_event_system.find(value.id()) })
 		{
 			for (auto const & listener : (*it->second))
 			{
@@ -26,7 +27,7 @@ namespace ml
 
 	void event_system::remove_listener(hash_t type, event_listener * value)
 	{
-		if (auto it{ s_listeners.find(type) })
+		if (auto it{ g_event_system.find(type) })
 		{
 			if (auto listener{ it->second->find(value) }; listener != it->second->end())
 			{
@@ -37,7 +38,7 @@ namespace ml
 
 	void event_system::remove_listener(event_listener * value)
 	{
-		s_listeners.for_each([value](auto, auto & it)
+		g_event_system.for_each([value](auto, auto & it)
 		{
 			if (auto listener{ it.find(value) }; listener != it.end())
 			{
