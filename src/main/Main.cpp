@@ -55,11 +55,8 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create contexts
+	// create engine context
 	ML_assert(engine::create_context()); ML_defer{ ML_assert(engine::destroy_context()); };
-	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// configure engine
 	auto & engine_cfg			{ engine::get_config() };
@@ -69,16 +66,10 @@ ml::int32_t main()
 	engine_cfg.content_home		= g_config["content_home"].get<pmr::string>();
 	engine_cfg.library_home		= g_config["library_home"].get<pmr::string>();
 
-	// configure editor
-	auto & editor_cfg			{ editor::get_config() };
-	editor_cfg.api_version		= g_config["imgui_shading"].get<pmr::string>();
-	editor_cfg.ini_filename		= g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
-	editor_cfg.log_filename		= g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// start engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create window
 	ML_assert(engine::get_window().create(make_window_settings
@@ -103,11 +94,24 @@ ml::int32_t main()
 		g_config["win_hints"].get<int32_t>()
 	)));
 
-	// install callbacks
+	// install window callbacks
 	window::install_default_callbacks(&engine::get_window());
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	// create editor context
+	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
+
+	// configure editor
+	auto & editor_cfg{ editor::get_config() };
+	editor_cfg.api_version = g_config["imgui_shading"].get<pmr::string>();
+	editor_cfg.ini_filename = g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
+	editor_cfg.log_filename = g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
 
 	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// run setup script
 	engine::do_script(engine::path_to(g_config["setup_script"].get<pmr::string>()));
