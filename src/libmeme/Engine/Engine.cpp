@@ -27,6 +27,8 @@ namespace ml
 	
 	bool engine::is_initialized() noexcept
 	{
+		std::ios_base::cur;
+		uint64_t foo = std::cout.tellp();
 		return g_engine;
 	}
 

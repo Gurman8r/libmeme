@@ -5,7 +5,9 @@
 
 namespace ml
 {
-	bool style_loader::operator()(filesystem::path const & path)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool style_loader::load_from_file(filesystem::path const & path)
 	{
 		// defaults
 		if (!filesystem::exists(path))
@@ -136,4 +138,6 @@ namespace ml
 		}
 		return true;
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

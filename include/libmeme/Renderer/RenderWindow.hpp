@@ -16,8 +16,6 @@ namespace ml
 
 		ML_NODISCARD virtual bool open() override;
 
-		virtual void on_event(event const & value) override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

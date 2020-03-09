@@ -10,8 +10,8 @@ namespace ml::embed
 	{
 		m /* LIBMEME_EDITOR */
 
-			// general
-			.def("load_style", [](cstring s) { style_loader()(s); })
+			// style
+			.def("load_style", [](cstring s) { return style_loader::load_from_file(s); })
 			
 			;
 	};

@@ -43,10 +43,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static constexpr auto make_video_mode(Args && ... args) noexcept
+	static void from_json(json const & j, video_mode & value)
 	{
-		return video_mode{ ML_forward(args)... };
+		j.at("resolution").get_to(value.resolution);
+		j.at("color_depth").get_to(value.color_depth);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

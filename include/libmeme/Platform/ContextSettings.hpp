@@ -42,10 +42,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... Args
-	> ML_NODISCARD static constexpr auto make_context_settings(Args && ... args)
+	static void from_json(json const & j, context_settings & value)
 	{
-		return context_settings{ ML_forward(args)... };
+		j.at("api").get_to(value.api);
+		j.at("major").get_to(value.major);
+		j.at("minor").get_to(value.minor);
+		j.at("profile").get_to(value.profile);
+		j.at("depth_bits").get_to(value.depth_bits);
+		j.at("stencil_bits").get_to(value.stencil_bits);
+		j.at("multisample").get_to(value.multisample);
+		j.at("srgb_capable").get_to(value.sRGB_capable);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

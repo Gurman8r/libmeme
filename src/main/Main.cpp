@@ -8,11 +8,7 @@
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 using namespace ml;
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef MEM_RESERVED
 #define MEM_RESERVED 64.0_MiB
@@ -21,8 +17,6 @@ using namespace ml;
 #ifndef CONFIG_FILE
 #define CONFIG_FILE L"../../../../libmeme.json"
 #endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 ml::int32_t main()
 {
@@ -72,27 +66,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// create window
-	ML_assert(engine::get_window().create(make_window_settings
-	(
-		g_config["win_title"].get<pmr::string>(),
-		make_video_mode
-		(
-			g_config["win_resolution"].get<vec2i>(),
-			g_config["win_color_depth"].get<uint32_t>()
-		),
-		make_context_settings
-		(
-			g_config["win_api"].get<int32_t>(),
-			g_config["win_api_major"].get<int32_t>(),
-			g_config["win_api_minor"].get<int32_t>(),
-			g_config["win_api_profile"].get<int32_t>(),
-			g_config["win_depth_bits"].get<int32_t>(),
-			g_config["win_stencil_bits"].get<int32_t>(),
-			g_config["win_multisample"].get<bool>(),
-			g_config["win_srgb_capable"].get<bool>()
-		),
-		g_config["win_hints"].get<int32_t>()
-	)));
+	ML_assert(engine::get_window().create(g_config["window"].get<window_settings>()));
 
 	// install window callbacks
 	window::install_default_callbacks(&engine::get_window());

@@ -2,66 +2,16 @@
 #define _ML_WINDOW_HPP_
 
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Platform/ContextSettings.hpp>
 #include <libmeme/Platform/Cursor.hpp>
-#include <libmeme/Platform/VideoMode.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
+#include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum window_hints_ : int32_t
-	{
-		window_hints_none				= (0 << 0), // none
-		window_hints_resizable			= (1 << 0), // resizable
-		window_hints_visible			= (1 << 1), // visible
-		window_hints_decorated			= (1 << 2), // decorated
-		window_hints_focused			= (1 << 3), // focused
-		window_hints_auto_iconify		= (1 << 4), // auto_iconify
-		window_hints_floating			= (1 << 5), // floating
-		window_hints_maximized			= (1 << 6), // maximized
-		window_hints_fullscreen			= (1 << 7), // fullscreen
-		window_hints_double_buffered	= (1 << 8), // double buffered
-
-		// resizable / visible / decorated / focused / auto iconify
-		window_hints_default
-			= window_hints_resizable
-			| window_hints_visible
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify,
-
-		// resizable / decorated / focused / auto iconify / maximized
-		window_hints_default_max 
-			= window_hints_resizable
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify
-			| window_hints_maximized,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct ML_NODISCARD window_settings final
-	{
-		pmr::string			title	{}; // 
-		video_mode			video	{}; // 
-		context_settings	context	{}; // 
-		int32_t				hints	{}; // 
-	};
-
-	template <class ... Args
-	> ML_NODISCARD constexpr auto make_window_settings(Args && ... args) noexcept
-	{
-		return window_settings{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct ML_PLATFORM_API window : trackable, non_copyable, event_listener
+	struct ML_PLATFORM_API window : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,8 +49,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD virtual bool open();
-
-		virtual void on_event(event const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -140,7 +88,7 @@ namespace ml
 		
 		window & set_size(vec2i const & value);
 		
-		window & set_title(cstring const & value);
+		window & set_title(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

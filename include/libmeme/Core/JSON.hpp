@@ -1,7 +1,7 @@
 #ifndef _ML_JSON_HPP_
 #define _ML_JSON_HPP_
 
-#include <libmeme/Config.hpp>
+#include <libmeme/Common.hpp>
 #include <nlohmann/json.hpp>
 
 namespace ml { ML_ALIAS json = typename nlohmann::json; }

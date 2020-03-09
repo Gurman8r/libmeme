@@ -2,16 +2,18 @@
 #define _ML_STYLE_LOADER_HPP_
 
 #include <libmeme/Editor/Export.hpp>
-#include <libmeme/Core/NonCopyable.hpp>
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/JSON.hpp>
 
 namespace ml
 {
-	struct ML_EDITOR_API style_loader final : non_copyable
+	class ML_EDITOR_API style_loader final
 	{
-		style_loader() noexcept = default;
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool operator()(filesystem::path const & path);
+		static bool load_from_file(filesystem::path const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 

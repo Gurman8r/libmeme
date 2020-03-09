@@ -8,17 +8,12 @@ import LIBMEME_ENGINE as engine
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 # system setup
-class ml_setup(object):
-    def __init__(self):
-        import sys
-        sys.stdout  = self
-        sys.stderr  = self
-        sys.stdin   = None
-        sys.exit    = engine.close
-    def write(self, args):
-        system.write(args)
-ml_setup()
-exit = engine.close
+import sys
+sys.stdout  = system.cout()
+sys.stderr  = system.cout()
+sys.stdin   = None
+sys.exit    = engine.close
+exit        = engine.close
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 

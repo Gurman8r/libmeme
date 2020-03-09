@@ -83,26 +83,6 @@ namespace ml::util::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
-	> ML_NODISCARD static inline auto to_cstr(Str && str) noexcept
-	{
-		if constexpr (is_cstring_v<decltype(str)>)
-		{
-			return ML_forward(str);
-		}
-		else if constexpr (is_string_v<Str>)
-		{
-			return ML_forward(str).c_str();
-		}
-		else
-		{
-			static_assert(is_string_view_v<Str>);
-			return to_cstr(pmr::string{ ML_forward(str) });
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class T, class Ch, class Fn, class ... Args
 	> ML_NODISCARD static inline std::optional<T> str_apply(Ch const * ptr, Fn && fn, Args && ... args) noexcept
 	{
@@ -197,6 +177,26 @@ namespace ml::util::impl
 // STRING UTILITY
 namespace ml::util
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	> ML_NODISCARD static constexpr auto to_cstr(Str && str) noexcept
+	{
+		if constexpr (is_cstring_v<decltype(str)>)
+		{
+			return ML_forward(str);
+		}
+		else if constexpr (is_string_v<Str>)
+		{
+			return ML_forward(str).c_str();
+		}
+		else
+		{
+			static_assert(is_string_view_v<Str>);
+			return to_cstr(pmr::string{ ML_forward(str) });
+		}
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
@@ -488,67 +488,67 @@ namespace ml::util
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int8_t> to_i8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int8_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return impl::str_apply<int8_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int16_t> to_i16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int16_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return impl::str_apply<int16_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int32_t> to_i32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int32_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return impl::str_apply<int32_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<int64_t> to_i64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int64_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtoll, base);
+		return impl::str_apply<int64_t>(to_cstr(ML_forward(str)), &_CSTD strtoll, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint8_t> to_u8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint8_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint8_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint16_t> to_u16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint16_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint16_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint32_t> to_u32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint32_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return impl::str_apply<uint32_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<uint64_t> to_u64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint64_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtoull, base);
+		return impl::str_apply<uint64_t>(to_cstr(ML_forward(str)), &_CSTD strtoull, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float32_t> to_f32(Str && str) noexcept
 	{
-		return impl::str_apply<float32_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtod);
+		return impl::str_apply<float32_t>(to_cstr(ML_forward(str)), &_CSTD strtod);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float64_t> to_f64(Str && str) noexcept
 	{
-		return impl::str_apply<float64_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtod);
+		return impl::str_apply<float64_t>(to_cstr(ML_forward(str)), &_CSTD strtod);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static inline std::optional<float80_t> to_f80(Str && str) noexcept
 	{
-		return impl::str_apply<float80_t>(impl::to_cstr(ML_forward(str)), &_CSTD strtold);
+		return impl::str_apply<float80_t>(to_cstr(ML_forward(str)), &_CSTD strtold);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
