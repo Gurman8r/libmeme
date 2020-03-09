@@ -25,7 +25,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool engine::running() noexcept
+	bool engine::is_initialized() noexcept
 	{
 		return g_engine;
 	}
@@ -42,9 +42,30 @@ namespace ml
 		return !(g_engine = nullptr);
 	}
 
-	engine::context * const engine::get_context() noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	engine::config & engine::get_config() noexcept
 	{
-		return g_engine;
+		ML_assert(g_engine);
+		return g_engine->m_config;
+	}
+
+	engine::runtime & engine::get_runtime() noexcept
+	{
+		ML_assert(g_engine);
+		return g_engine->m_io;
+	}
+
+	duration const & engine::get_time() noexcept
+	{
+		ML_assert(is_initialized());
+		return g_engine->m_main_timer.elapsed();
+	}
+
+	render_window & engine::get_window() noexcept
+	{
+		ML_assert(is_initialized());
+		return g_engine->m_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -222,7 +243,7 @@ namespace ml
 
 	int32_t engine::do_script(int32_t lang, pmr::string const & text)
 	{
-		if (!running() || text.empty()) return 0;
+		if (!is_initialized() || text.empty()) return 0;
 		switch (lang)
 		{
 		default: return 0;
@@ -239,7 +260,7 @@ namespace ml
 
 	int32_t engine::do_script(filesystem::path const & path)
 	{
-		if (!running() || !filesystem::exists(path)) return 0;
+		if (!is_initialized() || !filesystem::exists(path)) return 0;
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
 		{
 		default: return 0;

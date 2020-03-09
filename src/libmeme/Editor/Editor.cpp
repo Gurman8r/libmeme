@@ -15,9 +15,7 @@ namespace ml
 
 	static editor::context * g_editor{};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool editor::running() noexcept
+	bool editor::is_initialized() noexcept
 	{
 		return g_editor;
 	}
@@ -34,9 +32,18 @@ namespace ml
 		return !(g_editor = nullptr);
 	}
 
-	editor::context * const editor::get_context() noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	editor::config & editor::get_config() noexcept
 	{
-		return g_editor;
+		ML_assert(g_editor);
+		return g_editor->m_config;
+	}
+
+	editor::runtime & editor::get_runtime() noexcept
+	{
+		ML_assert(g_editor);
+		return g_editor->m_io;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -101,7 +108,7 @@ namespace ml
 	{
 		if (!g_editor) return false;
 
-		g_editor->m_io.main_menu.menus.clear();
+		g_editor->m_io.main_menus.clear();
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -118,6 +125,8 @@ namespace ml
 
 	void editor::new_frame()
 	{
+		if (!g_editor) return;
+
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #else
@@ -128,36 +137,30 @@ namespace ml
 
 	void editor::render()
 	{
-		ML_assert(running());
+		if (!g_editor) return;
 		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
-		auto do_render = [&](auto & x, auto && fn)
+		// DOCKSPACE
+		if (auto & io{ g_editor->m_io }; io.show_dockspace)
 		{
-			if (!x.open) return;
-			ML_ImGui_ScopeID(ML_addressof(&x));
-			ML_ImGui_ScopeID(x.title);
-			std::invoke(ML_forward(fn), x);
-		};
-
-		// RENDER DOCKSPACE
-		do_render(g_editor->m_io.dockspace, [&](auto & d)
-		{
+			ML_ImGui_ScopeID(dockspace_title);
+			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
 				// bounds
-				ImGuiViewport const * viewport = ImGui::GetMainViewport();
+				ImGuiViewport const * viewport{ ImGui::GetMainViewport() };
 				ImGui::SetNextWindowPos(viewport->Pos);
 				ImGui::SetNextWindowSize(viewport->Size);
 				ImGui::SetNextWindowViewport(viewport->ID);
 
 				// style
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, d.rounding);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, d.border);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, d.padding);
-				ImGui::SetNextWindowBgAlpha(d.alpha);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, io.dock_rounding);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, io.dock_border);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, io.dock_padding);
+				ImGui::SetNextWindowBgAlpha(io.dock_alpha);
 
 				// begin
-				if (ImGui::Begin(d.title, &d.open,
+				if (ImGui::Begin(dockspace_title, &io.show_dockspace,
 					ImGuiWindowFlags_NoTitleBar |
 					ImGuiWindowFlags_NoCollapse |
 					ImGuiWindowFlags_NoResize |
@@ -166,19 +169,19 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(g_editor->m_io.main_menu.open ? ImGuiWindowFlags_MenuBar : 0)
+					(io.show_main_menu ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
 
-					if (d.nodes.empty())
+					if (io.dock_nodes.empty())
 					{
 						event_system::fire_event<gui_dock_event>();
 					}
 
 					ImGui::DockSpace(
-						ImGui::GetID(d.title),
-						d.size,
+						ImGui::GetID(dockspace_title),
+						io.dock_size,
 						ImGuiDockNodeFlags_PassthruCentralNode |
 						ImGuiDockNodeFlags_AutoHideTabBar
 					);
@@ -186,14 +189,14 @@ namespace ml
 					ImGui::End();
 				}
 			}
-		});
+		}
 
-		// RENDER MAIN MENU BAR
-		do_render(g_editor->m_io.main_menu, [&](auto & m)
+		// MAIN MENU
+		if (auto & io{ g_editor->m_io }; io.show_main_menu)
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
-				for (auto const & pair : m.menus)
+				for (auto const & pair : io.main_menus)
 				{
 					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
 					{
@@ -206,11 +209,13 @@ namespace ml
 				}
 				ImGui::EndMainMenuBar();
 			}
-		});
+		}
 	}
 
 	void editor::render_frame()
 	{
+		if (!g_editor) return;
+
 		ImGui::Render();
 
 #ifdef ML_RENDERER_OPENGL
@@ -230,8 +235,26 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor::runtime::main_menu_t::add_menu(cstring label, std::function<void()> && fn)
+	void editor::show_imgui_demo(bool * p_open)
 	{
+		ImGui::ShowDemoWindow(p_open);
+	}
+
+	void editor::show_imgui_metrics(bool * p_open)
+	{
+		ImGui::ShowMetricsWindow(p_open);
+	}
+
+	void editor::show_imgui_about(bool * p_open)
+	{
+		ImGui::ShowAboutWindow(p_open);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void editor::add_menu(cstring label, menu_t && fn)
+	{
+		auto & menus{ g_editor->m_io.main_menus };
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto elem)
 		{
 			return (elem.first == label);
@@ -249,9 +272,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t editor::runtime::dockspace_t::begin_builder(int32_t flags)
+	uint32_t editor::begin_builder(int32_t flags)
 	{
-		if (uint32_t root{ ImGui::GetID(this->title) })
+		if (uint32_t root{ ImGui::GetID(dockspace_title) })
 		{
 			if (!ImGui::DockBuilderGetNode(root))
 			{
@@ -265,7 +288,7 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::runtime::dockspace_t::end_builder(uint32_t root)
+	uint32_t editor::end_builder(uint32_t root)
 	{
 		if (root)
 		{
@@ -274,7 +297,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t editor::runtime::dockspace_t::dock(cstring name, uint32_t id)
+	uint32_t editor::dock(cstring name, uint32_t id)
 	{
 		if (name && id)
 		{
@@ -284,36 +307,19 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::runtime::dockspace_t::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
-		return this->nodes[(size_t)i] = split(id, dir, ratio, other);
+		return g_editor->m_io.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
 	}
 
-	uint32_t editor::runtime::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
 		return split(id, dir, ratio, nullptr, other);
 	}
 
-	uint32_t editor::runtime::dockspace_t::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
+	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, other);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void editor::show_imgui_demo(bool * p_open)
-	{
-		ImGui::ShowDemoWindow(p_open);
-	}
-
-	void editor::show_imgui_metrics(bool * p_open)
-	{
-		ImGui::ShowMetricsWindow(p_open);
-	}
-
-	void editor::show_imgui_about(bool * p_open)
-	{
-		ImGui::ShowAboutWindow(p_open);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -26,9 +26,7 @@ exit = engine.close
 editor.load_style(engine.path_to("assets/styles/obsidian.style"))
 
 # load plugins
-plugins = [
-   "demo",
-  ]
+plugins = [ "demo", ]
 for p in plugins: engine.load_plugin(p)
 
 # messages

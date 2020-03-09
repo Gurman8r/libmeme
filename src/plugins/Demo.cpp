@@ -183,12 +183,12 @@ namespace ml
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & dt{ engine::get_io().delta_time }; return dt * 1000.f; }
+			[]() { static auto const & dt{ engine::get_runtime().delta_time }; return dt * 1000.f; }
 			),
 
 			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & fps{ engine::get_io().frame_rate }; return fps; }
+			[]() { static auto const & fps{ engine::get_runtime().frame_rate }; return fps; }
 			),
 		} };
 
@@ -296,7 +296,7 @@ namespace ml
 				// timers
 				auto const _timers = make_material(
 					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_io().delta_time; })
+					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; })
 				);
 
 				// MVP
@@ -417,17 +417,11 @@ namespace ml
 		{
 			// update stuff, etc...
 
-			// timers
-			static auto const & dt	{ engine::get_io().delta_time };
-			static auto const & fps	{ engine::get_io().frame_rate };
-			static auto const & fc	{ engine::get_io().frame_count };
-			static auto const & tt	{ engine::get_time() };
-
 			// console
 			if (m_cout) { m_console.printss(m_cout); }
 
 			// plots
-			m_plots.update(tt.count());
+			m_plots.update(engine::get_time().count());
 			
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
@@ -474,30 +468,30 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ editor::get_io().dockspace };
-			d.nodes.resize(MAX_DOCK_NODE);
-			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			auto & d{ editor::get_runtime().dock_nodes };
+			d.resize(MAX_DOCK_NODE);
+			if (d[root] = editor::begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
-				d.split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				d.split(left_up		, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				d.split(left_dn		, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-				d.split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+				editor::split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				editor::split(left_up	, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				editor::split(left_dn	, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+				editor::split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
 
-				d.split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
-				d.split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				d.split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+				editor::split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
+				editor::split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				editor::split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				d.dock(m_gui_display.title	, d[left_up]);
-				d.dock(m_gui_assets.title	, d[left_dn]);
-				d.dock(m_gui_ecs.title		, d[left_dn]);
-				d.dock(m_gui_console.title	, d[left_dn]);
-				d.dock(m_gui_profiler.title	, d[left_dn2]);
-				d.dock(m_gui_memory.title	, d[right]);
-				d.dock(m_gui_docs.title		, d[right]);
+				editor::dock(m_gui_display.title	, d[left_up]);
+				editor::dock(m_gui_assets.title		, d[left_dn]);
+				editor::dock(m_gui_ecs.title		, d[left_dn]);
+				editor::dock(m_gui_console.title	, d[left_dn]);
+				editor::dock(m_gui_profiler.title	, d[left_dn2]);
+				editor::dock(m_gui_memory.title		, d[right]);
+				editor::dock(m_gui_docs.title		, d[right]);
 
-				d.end_builder(root);
+				editor::end_builder(root);
 			}
 		}
 
@@ -552,9 +546,7 @@ namespace ml
 
 		void setup_menus()
 		{
-			auto & m{ editor::get_io().main_menu };
-
-			m.add_menu("file", [&]()
+			editor::add_menu("file", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
@@ -562,7 +554,7 @@ namespace ml
 					engine::close();
 				}
 			});
-			m.add_menu("tools", [&]()
+			editor::add_menu("tools", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_gui_assets.menu_item();
@@ -573,7 +565,7 @@ namespace ml
 				m_gui_memory.menu_item();
 				m_gui_profiler.menu_item();
 			});
-			m.add_menu("options", [&]()
+			editor::add_menu("options", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				bool fullscreen{ engine::get_window().is_fullscreen() };
@@ -582,7 +574,7 @@ namespace ml
 					engine::get_window().set_fullscreen(fullscreen);
 				}
 			});
-			m.add_menu("help", [&]()
+			editor::add_menu("help", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_imgui_demo.menu_item();

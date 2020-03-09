@@ -14,8 +14,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		class context;
-		class config;
-		class runtime;
+		struct config;
+		struct runtime;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -26,13 +26,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// startup variables
-		class config final
+		struct config final : trackable
 		{
-			friend class context;
-		public:
 			arguments_t			command_line	{}			; // command line
 			filesystem::path	program_path	{}			; // program path
-			filesystem::path	program_name	{}			; // programe name
+			filesystem::path	program_name	{}			; // program name
 			filesystem::path	content_home	{}			; // content path
 			filesystem::path	library_home	{}			; // script library path
 		};
@@ -40,10 +38,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// runtime variables
-		class runtime final
+		struct runtime final : trackable
 		{
-			friend class context;
-		public:
 			float_t				delta_time		{}			; // frame time
 			size_t				frame_count		{}			; // frame count
 			float_t				frame_rate		{}			; // frame rate
@@ -52,7 +48,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// engine context
-		class context final
+		class context final : trackable, non_copyable
 		{
 			friend class		engine						;
 			engine::config		m_config		{}			; // startup variables
@@ -67,13 +63,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool running() noexcept;
+		ML_NODISCARD static bool is_initialized() noexcept;
 
 		ML_NODISCARD static bool create_context();
 
 		ML_NODISCARD static bool destroy_context();
 
-		ML_NODISCARD static engine::context * const get_context() noexcept;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static engine::config & get_config() noexcept;
+
+		ML_NODISCARD static engine::runtime & get_runtime() noexcept;
+
+		ML_NODISCARD static duration const & get_time() noexcept;
+
+		ML_NODISCARD static render_window & get_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -111,51 +115,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline engine::config & get_config() noexcept
-		{
-			ML_assert(running());
-			return get_context()->m_config;
-		}
-
-		ML_NODISCARD static inline engine::runtime & get_io() noexcept
-		{
-			ML_assert(running());
-			return get_context()->m_io;
-		}
-
-		ML_NODISCARD static inline duration const & get_time() noexcept
-		{
-			ML_assert(running());
-			return get_context()->m_main_timer.elapsed();
-		}
-
-		ML_NODISCARD static inline render_window & get_window() noexcept
-		{
-			ML_assert(running());
-			return get_context()->m_window;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static inline bool is_open() noexcept
 		{
-			if (!running()) return false;
+			if (!is_initialized()) return false;
 			return get_window().is_open();
 		}
 
 		static inline void close() noexcept
 		{
-			if (running()) { get_window().close(); }
+			if (is_initialized()) { get_window().close(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static inline filesystem::path path_to(filesystem::path const & value = {})
 		{
-			auto const & cpath{ get_config().content_home };
-			if (cpath.empty()) return value;
-			if (value.empty()) return cpath;
-			return filesystem::path{ cpath.native() + value.native() };
+			auto const & home{ get_config().content_home };
+			if (home.empty()) return value;
+			if (value.empty()) return home;
+			return filesystem::path{ home.native() + value.native() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

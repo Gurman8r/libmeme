@@ -75,9 +75,9 @@ namespace ml::embed
 			
 			// runtime
 			.def("total_time"	, []() { return engine::get_time().count(); })
-			.def("delta_time"	, []() { return engine::get_io().delta_time; })
-			.def("frame_count"	, []() { return engine::get_io().frame_count; })
-			.def("frame_rate"	, []() { return engine::get_io().frame_rate; })
+			.def("delta_time"	, []() { return engine::get_runtime().delta_time; })
+			.def("frame_count"	, []() { return engine::get_runtime().frame_count; })
+			.def("frame_rate"	, []() { return engine::get_runtime().frame_rate; })
 
 			;
 	};

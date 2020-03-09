@@ -55,7 +55,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create engine context
+	// create engine
 	ML_assert(engine::create_context()); ML_defer{ ML_assert(engine::destroy_context()); };
 
 	// configure engine
@@ -99,14 +99,14 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// create editor context
+	// create editor
 	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
 
 	// configure editor
-	auto & editor_cfg{ editor::get_config() };
-	editor_cfg.api_version = g_config["imgui_shading"].get<pmr::string>();
-	editor_cfg.ini_filename = g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
-	editor_cfg.log_filename = g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
+	auto & editor_cfg			{ editor::get_config() };
+	editor_cfg.api_version 		= g_config["imgui_shading"].get<pmr::string>();
+	editor_cfg.ini_filename 	= g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
+	editor_cfg.log_filename 	= g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
 
 	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
