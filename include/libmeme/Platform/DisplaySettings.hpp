@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct video_mode final
+	struct display_settings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -21,18 +21,18 @@ namespace ml
 			return resolution[0] && resolution[1] && color_depth;
 		}
 
-		ML_NODISCARD constexpr bool operator==(video_mode const & other) const
+		ML_NODISCARD constexpr bool operator==(display_settings const & other) const
 		{
 			return (resolution == other.resolution)
 				&& (color_depth == other.color_depth);
 		}
 
-		ML_NODISCARD constexpr bool operator!=(video_mode const & other) const
+		ML_NODISCARD constexpr bool operator!=(display_settings const & other) const
 		{
 			return !(*this == other);
 		}
 
-		ML_NODISCARD constexpr bool operator<(video_mode const & other) const
+		ML_NODISCARD constexpr bool operator<(display_settings const & other) const
 		{
 			return (resolution < other.resolution)
 				|| (color_depth < other.color_depth);
@@ -43,7 +43,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void from_json(json const & j, video_mode & value)
+	static void from_json(json const & j, display_settings & value)
 	{
 		j.at("resolution").get_to(value.resolution);
 		j.at("color_depth").get_to(value.color_depth);

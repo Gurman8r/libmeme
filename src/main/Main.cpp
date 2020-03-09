@@ -95,7 +95,7 @@ ml::int32_t main()
 	// main sequence
 	event_system::fire_event<enter_event>();
 	ML_defer{ event_system::fire_event<exit_event>(); };
-	while (engine::is_open())
+	while (engine::is_running())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };
 		{

@@ -67,7 +67,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(pmr::string const & title, video_mode const & video, context_settings const & context, int32_t hints) noexcept
+	bool window::create(pmr::string const & title, display_settings const & video, context_settings const & context, int32_t hints) noexcept
 	{
 		return create(window_settings{ title, video, context, hints });
 	}
@@ -91,7 +91,7 @@ namespace ml
 
 			if (m_settings.title.empty()) return debug::log::error("invalid window title");
 
-			if (!m_settings.video) return debug::log::error("invalid window video mode");
+			if (!m_settings.display) return debug::log::error("invalid window video mode");
 
 			if (!m_settings.context) return debug::log::error("invalid window context settings");
 		}
@@ -137,8 +137,8 @@ namespace ml
 		
 		// create window
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
-			m_settings.video.resolution[0],
-			m_settings.video.resolution[1],
+			m_settings.display.resolution[0],
+			m_settings.display.resolution[1],
 			m_settings.title.c_str(),
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
@@ -346,7 +346,7 @@ namespace ml
 
 	window & window::set_size(vec2i const & value)
 	{
-		m_settings.video.resolution = value;
+		m_settings.display.resolution = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
@@ -519,16 +519,16 @@ namespace ml
 		return glfwGetCurrentContext();
 	}
 
-	video_mode const & window::get_desktop_mode()
+	display_settings const & window::get_desktop_mode()
 	{
-		static video_mode temp{};
+		static display_settings temp{};
 		static bool once { true };
 		if (once && !(once = false))
 		{
 #ifdef ML_OS_WINDOWS
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = video_mode{ vec2i{
+			temp = display_settings{ vec2i{
 				(int32_t)dm.dmPelsWidth,
 				(int32_t)dm.dmPelsHeight },
 				dm.dmBitsPerPel
@@ -540,9 +540,9 @@ namespace ml
 		return temp;
 	}
 
-	pmr::vector<video_mode> const & window::get_fullscreen_modes()
+	pmr::vector<display_settings> const & window::get_fullscreen_modes()
 	{
-		static pmr::vector<video_mode> temp{};
+		static pmr::vector<display_settings> temp{};
 		static bool once { true };
 		if (once && !(once = false))
 		{
@@ -550,7 +550,7 @@ namespace ml
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				auto const vm{ video_mode{ vec2i{
+				auto const vm{ display_settings{ vec2i{
 					(int32_t)dm.dmPelsWidth,
 					(int32_t)dm.dmPelsHeight },
 					dm.dmBitsPerPel

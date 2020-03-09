@@ -79,30 +79,30 @@
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
 #	define ML_X64 1
 #	define ML_ARCH 64
-#	define ML_ARCH_NAME "x64"
+#	define ML_PLATFORM "x64"
 #elif defined(__i386__) || defined(_M_IX86)
 #	define ML_X86 1
 #	define ML_ARCH 32
-#	define ML_ARCH_NAME "x86"
+#	define ML_PLATFORM "x86"
 #elif defined(__arm__) || defined(_M_ARM) || defined(__aarch64__)
 #	if defined(__aarch64__)
 #		define ML_ARM64 1
 #		define ML_ARCH 64
-#		define ML_ARCH_NAME "arm64"
+#		define ML_PLATFORM "arm64"
 #	else
 #		define ML_ARM32 1
 #		define ML_ARCH 32
-#		define ML_ARCH_NAME "arm32"
+#		define ML_PLATFORM "arm32"
 #	endif
 #elif defined(ppc) || defined(_M_PPC) || defined(__ppc64__)
 #	if defined(__ppc64__)
 #		define ML_PPC64 1
 #		define ML_ARCH 64
-#		define ML_ARCH_NAME "ppc64"
+#		define ML_PLATFORM "ppc64"
 #	else
 #		define ML_PPC32 1
 #		define ML_ARCH 32
-#		define ML_ARCH_NAME "ppc32"
+#		define ML_PLATFORM "ppc32"
 #	endif
 #else
 #	error Unable to detect platform architecture.

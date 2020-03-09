@@ -39,7 +39,7 @@ namespace ml
 
 		ML_NODISCARD bool create(
 			pmr::string const & title,
-			video_mode const & display,
+			display_settings const & display,
 			context_settings const & context,
 			int32_t hints
 		) noexcept;
@@ -140,9 +140,9 @@ namespace ml
 
 		ML_NODISCARD static void * get_context_current();
 
-		ML_NODISCARD static video_mode const & get_desktop_mode();
+		ML_NODISCARD static display_settings const & get_desktop_mode();
 		
-		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
+		ML_NODISCARD static pmr::vector<display_settings> const & get_fullscreen_modes();
 
 		ML_NODISCARD static proc_fn get_proc_address(cstring value);
 		
@@ -171,7 +171,7 @@ namespace ml
 
 		ML_NODISCARD inline auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
 
-		ML_NODISCARD inline auto get_context() const noexcept -> context_settings const & { return m_settings.context; }
+		ML_NODISCARD inline auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
 
 		ML_NODISCARD inline auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
 
@@ -180,6 +180,8 @@ namespace ml
 		ML_NODISCARD inline auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
 
 		ML_NODISCARD inline auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
+		
+		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_settings.hints; }
 
 		ML_NODISCARD inline auto get_monitor() const noexcept -> void * { return m_monitor; }
 
@@ -187,19 +189,17 @@ namespace ml
 
 		ML_NODISCARD inline auto get_share() const noexcept -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_size() const noexcept -> vec2i const & { return get_video_mode().resolution; }
+		ML_NODISCARD inline auto get_size() const noexcept -> vec2i const & { return get_display_settings().resolution; }
 
 		ML_NODISCARD inline auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 
-		ML_NODISCARD inline auto get_video_mode() const noexcept -> video_mode const & { return m_settings.video; }
+		ML_NODISCARD inline auto get_display_settings() const noexcept -> display_settings const & { return m_settings.display; }
 
 		ML_NODISCARD inline auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_settings.hints; }
-
-		ML_NODISCARD inline bool has_hint(int32_t const i) const noexcept { return m_settings.hints & i; }
+		ML_NODISCARD inline bool has_hint(int32_t const i) const noexcept { return get_hints() & i; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

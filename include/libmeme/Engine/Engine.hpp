@@ -115,10 +115,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline bool is_open() noexcept
+		ML_NODISCARD static inline bool is_running() noexcept
 		{
-			if (!is_initialized()) return false;
-			return get_window().is_open();
+			return is_initialized() && get_window().is_open();
 		}
 
 		static inline void close() noexcept

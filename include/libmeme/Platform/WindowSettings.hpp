@@ -2,7 +2,7 @@
 #define _ML_WINDOW_SETTINGS_HPP_
 
 #include <libmeme/Platform/ContextSettings.hpp>
-#include <libmeme/Platform/VideoMode.hpp>
+#include <libmeme/Platform/DisplaySettings.hpp>
 
 namespace ml
 {
@@ -45,7 +45,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		pmr::string			title	{}; // 
-		video_mode			video	{}; // 
+		display_settings	display	{}; // 
 		context_settings	context	{}; // 
 		int32_t				hints	{}; // 
 
@@ -57,7 +57,7 @@ namespace ml
 	static void from_json(json const & j, window_settings & value)
 	{
 		j.at("title").get_to(value.title);
-		j.at("video").get_to(value.video);
+		j.at("display").get_to(value.display);
 		j.at("context").get_to(value.context);
 		j.at("hints").get_to(value.hints);
 	}
