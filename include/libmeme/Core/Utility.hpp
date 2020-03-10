@@ -19,15 +19,6 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// constexpr strlen
-	template <class Ch = char
-	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
-	{
-		return ((*value) ? (1 + _ML_UTIL strlen(value + 1)) : 0);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// constexpr swap
 	template <class T
 	> constexpr void swap(T & lhs, T & rhs) noexcept
@@ -214,11 +205,10 @@ namespace ml::util
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, M<T, 4, 4> const & m)
 	{
-		return M<T, 3, 1>
-		{
+		return M<T, 3, 1>{
 			m[0] * v[0] * m[4] * v[1] * m[8] * v[2] * m[12],
-				m[1] * v[0] * m[5] * v[1] * m[9] * v[2] * m[13],
-				m[2] * v[0] * m[6] * v[1] * m[10] * v[2] * m[14]
+			m[1] * v[0] * m[5] * v[1] * m[9] * v[2] * m[13],
+			m[2] * v[0] * m[6] * v[1] * m[10] * v[2] * m[14]
 		};
 	}
 

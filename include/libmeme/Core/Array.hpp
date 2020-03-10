@@ -152,42 +152,42 @@ namespace ml::ds
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // OPERATORS
-namespace ml
+namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator==(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator==(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return util::equal_to(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator!=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator!=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return !(lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator<(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator<(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return util::less(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator<=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator<=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return (lhs < rhs) || (lhs == rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator>(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator>(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return !(lhs < rhs) && (lhs != rhs);
 	}
 
 	template <class Tx, class Ty, size_t N
-	> constexpr bool operator>=(ds::array<Tx, N> const & lhs, ds::array<Ty, N> const & rhs)
+	> constexpr bool operator>=(array<Tx, N> const & lhs, array<Ty, N> const & rhs)
 	{
 		return (lhs > rhs) || (lhs == rhs);
 	}
@@ -239,13 +239,45 @@ namespace std
 namespace ml::ds
 {
 	template <class T, size_t N
+	> static void to_json(json & j, array<T, N> const & value)
+	{
+		// SPAGHET: json wants iterators
+		j = *reinterpret_cast<_STD array<T, N> const *>(&value);
+	}
+
+	template <class T, size_t N
 	> static void from_json(json const & j, array<T, N> & value)
 	{
-		for (size_t i = 0; i < N; ++i)
-		{
-			j.at(i).get_to(value[i]);
-		}
+		// SPAGHET: json wants iterators
+		j.get_to(*reinterpret_cast<_STD array<T, N> *>(&value));
 	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// STREAM INTERFACE
+namespace ml::ds
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, size_t N
+	> inline ML_serialize(std::ostream & out, array<T, N> const & value)
+	{
+		return out << json{ value };
+	}
+
+	template <class T, size_t N
+	> inline ML_deserialize(std::istream & in, array<T, N> & value)
+	{
+		if (in.good())
+		{
+			json j; in >> j;
+			j.get_to(value);
+		}
+		return in;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

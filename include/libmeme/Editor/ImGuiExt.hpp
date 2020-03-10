@@ -200,7 +200,7 @@ namespace ml::gui
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
-				std::invoke(ML_forward(fn), *this);
+				std::invoke(ML_forward(fn));
 			}
 			return (*this);
 		}

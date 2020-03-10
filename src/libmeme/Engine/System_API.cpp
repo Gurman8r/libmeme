@@ -59,7 +59,7 @@ namespace ml::embed
 		m.attr("compiler_lang")	= ML_CC_LANG;
 		m.attr("compiler_ver")	= ML_CC_VER;
 		m.attr("configuration")	= ML_CONFIGURATION;
-		m.attr("debug")			= ML_DEBUG;
+		m.attr("debug")			= ML_IS_DEBUG;
 		m.attr("lib_author")	= ML__AUTHOR;
 		m.attr("lib_name")		= ML__NAME;
 		m.attr("lib_url")		= ML__URL;

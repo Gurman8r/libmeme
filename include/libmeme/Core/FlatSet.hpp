@@ -9,7 +9,7 @@ namespace ml::ds
 
 	// FLAT SET TRAITS
 	template <
-		class	_Ty,	// value type
+		class	_Vt,	// value type
 		class	_Pr,	// comparator predicate type
 		bool	_Mt,	// true if multiple equivalent values are permitted
 		size_t	_Th		// algorithm selector threshold
@@ -17,7 +17,7 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename _Ty;
+		using value_type		= typename _Vt;
 		using compare_type		= typename _Pr;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using difference_type	= typename ptrdiff_t;
@@ -126,6 +126,20 @@ namespace ml::ds
 		inline self_type & operator=(std::initializer_list<value_type> init)
 		{
 			self_type temp{ init };
+			swap(temp);
+			return (*this);
+		}
+
+		inline storage_type & operator=(storage_type const & other)
+		{
+			self_type temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		inline storage_type & operator=(storage_type && other) noexcept
+		{
+			self_type temp{ std::move(other) };
 			swap(temp);
 			return (*this);
 		}
@@ -473,22 +487,22 @@ namespace ml::ds
 
 	// FLAT SET | sorted vector of unique elements
 	template <
-		class	_Ty,					// value type
-		class	_Pr = std::less<_Ty>,	// comparator predicate type
+		class	_Vt,					// value type
+		class	_Pr = std::less<_Vt>,	// comparator predicate type
 		size_t	_Th = 42				// algorithm selector threshold
 	> ML_ALIAS flat_set = typename basic_flat_set
 	<
-		flat_set_traits<_Ty, _Pr, false, _Th>
+		flat_set_traits<_Vt, _Pr, false, _Th>
 	>;
 
 	// FLAT MULTISET | sorted vector of elements
 	template <
-		class	_Ty,					// value type
-		class	_Pr = std::less<_Ty>,	// comparator predicate type
+		class	_Vt,					// value type
+		class	_Pr = std::less<_Vt>,	// comparator predicate type
 		size_t	_Th = 42				// algorithm selector threshold
 	> ML_ALIAS flat_multiset = typename basic_flat_set
 	<
-		flat_set_traits<_Ty, _Pr, true, _Th>
+		flat_set_traits<_Vt, _Pr, true, _Th>
 	>;
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

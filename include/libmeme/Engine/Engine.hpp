@@ -20,7 +20,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using arguments_t	= pmr::vector<cstring>;
-		using filenames_t 	= ds::flat_set<filesystem::path>;
+		using file_list_t	= pmr::vector<filesystem::path>;
+		using file_set_t	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -59,7 +60,7 @@ namespace ml
 			timer				m_loop_timer	{}			; // frame timer
 			frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
 			render_window		m_window		{}			; // main window
-			filenames_t			m_plugin_files	{}			; // plugin filenames
+			file_set_t			m_plugin_files	{}			; // plugin filenames
 			libraries_t			m_plugin_libs	{}			; // plugin instances
 		};
 
@@ -67,7 +68,7 @@ namespace ml
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static engine::context * const create_context(json const & j);
+		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
 

@@ -132,9 +132,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool set_test_resource(detail::test_resource * res) noexcept
+		static inline bool initialize(detail::test_resource * resource) noexcept
 		{
-			return res && (*res) && (&(ref().m_testres = res));
+			static auto & inst{ get_instance() };
+
+			if (!resource || !(*resource) || inst.m_testres) return false;
+			
+			inst.m_testres = resource;
+
+			return pmr::set_default_resource(resource);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -164,13 +170,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & get_allocator() noexcept { return ref().m_alloc; }
+		ML_NODISCARD static inline auto const & get_allocator() noexcept
+		{
+			return get_instance().m_alloc;
+		}
 
-		ML_NODISCARD static inline auto const & get_index() noexcept { return ref().m_index; }
+		ML_NODISCARD static inline auto const & get_index() noexcept
+		{
+			return get_instance().m_index;
+		}
 
-		ML_NODISCARD static inline auto const & get_records() noexcept { return ref().m_records; }
+		ML_NODISCARD static inline auto const & get_records() noexcept
+		{
+			return get_instance().m_records;
+		}
 
-		ML_NODISCARD static inline auto const & get_testres() noexcept { return ref().m_testres; }
+		ML_NODISCARD static inline auto const & get_testres() noexcept
+		{
+			return get_instance().m_testres;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

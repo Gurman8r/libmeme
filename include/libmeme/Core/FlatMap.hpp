@@ -9,17 +9,17 @@ namespace ml::ds
 
 	// FLAT MAP TRAITS
 	template <
-		class	_Kty,	// key type
-		class	_Vty,	// value type
+		class	_Kt,	// key type
+		class	_Vt,	// value type
 		class	_Pr,	// key comparator predicate type
-		size_t	_Th		// threshold for selecting search algorithm
+		size_t	_Th		// search algorithm selector threshold
 	> struct flat_map_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using key_type			= typename _Kty;
-		using value_type		= typename _Vty;
+		using key_type			= typename _Kt;
+		using value_type		= typename _Vt;
 		using compare_type		= typename _Pr;
 		using difference_type	= typename ptrdiff_t;
 		using size_type			= typename size_t;
@@ -591,13 +591,13 @@ namespace ml::ds
 
 	// FLAT MAP | flat ordered associative container
 	template <
-		class	_Kty,					// key type
-		class	_Vty,					// value type
-		class	_Pr = std::less<_Kty>,	// key comparator predicate type
-		size_t	_Th = 42				// algorithm selector threshold
+		class	_Kt,					// key type
+		class	_Vt,					// value type
+		class	_Pr = std::less<_Kt>,	// key comparator predicate type
+		size_t	_Th = 42				// search algorithm selector threshold
 	> ML_ALIAS flat_map = typename basic_flat_map
 	<
-		flat_map_traits<_Kty, _Vty, _Pr, _Th>
+		flat_map_traits<_Kt, _Vt, _Pr, _Th>
 	>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

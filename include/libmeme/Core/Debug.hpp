@@ -3,13 +3,24 @@
 
 #include <libmeme/Core/StringUtility.hpp>
 
+// codes
 #define ML_WARNING	-1
 #define ML_FAILURE	 0
 #define ML_SUCCESS	+1
 
+// messages
 #define ML_MSG_WRN "warning"
 #define ML_MSG_ERR "error"
 #define ML_MSG_LOG "info"
+
+// breakpoint
+#if (!ML_IS_DEBUG)
+#	define ML_breakpoint() ((void)0)
+#elif defined(ML_CC_MSVC)
+#	define ML_breakpoint() _CSTD __debugbreak()
+#else
+#	define ML_breakpoint() _CSTD raise(SIGTRAP)
+#endif
 
 namespace ml
 {
@@ -21,7 +32,7 @@ namespace ml
 
 		static inline int32_t clear(int32_t const exit_code = 0)
 		{
-#if ML_DEBUG
+#if ML_IS_DEBUG
 #	ifdef ML_OS_WINDOWS
 			return std::system("cls");
 #	else
@@ -38,7 +49,7 @@ namespace ml
 
 		static inline int32_t pause(int32_t const exit_code = 0)
 		{
-#if ML_DEBUG
+#if ML_IS_DEBUG
 #	ifdef ML_OS_WINDOWS
 			std::system("pause");
 #	else

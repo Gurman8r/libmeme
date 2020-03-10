@@ -56,7 +56,7 @@
 #	define ML_OS_APPLE 1
 #	define ML_OS_NAME "Apple"
 #elif defined(__unix__)
-#	define ML_OS_UNIX
+#	define ML_OS_UNIX 1
 #	if defined(__ANDROID__)
 #		define ML_OS_ANDROID 1
 #		define ML_OS_NAME "Android"
@@ -227,20 +227,11 @@
 // Debug
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(_DEBUG)
-#	define ML_DEBUG             1
+#	define ML_IS_DEBUG          1
 #   define ML_CONFIGURATION     "debug"
 #else
-#	define ML_DEBUG             0
+#	define ML_IS_DEBUG          0
 #   define ML_CONFIGURATION     "release"
-#endif
-
-// breakpoint
-#if (!ML_DEBUG)
-#	define ML_BREAKPOINT()
-#elif defined(ML_CC_MSVC)
-#	define ML_BREAKPOINT()      ::__debugbreak()
-#else
-#	define ML_BREAKPOINT()      ::raise(SIGTRAP)
 #endif
 
 

@@ -1,7 +1,7 @@
 #ifndef _ML_INPUT_HPP_
 #define _ML_INPUT_HPP_
 
-#include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/StringUtility.hpp>
 
 namespace ml::impl
 {

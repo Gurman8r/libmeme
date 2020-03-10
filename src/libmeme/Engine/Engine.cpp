@@ -28,31 +28,29 @@ namespace ml
 		return g_engine;
 	}
 
-	engine::context * const engine::create_context(json const & j)
+	bool engine::create_context(json const & j)
 	{
-		if (g_engine) { return nullptr; }
-		else
+		if (!g_engine && (g_engine = new engine::context{}))
 		{
-			g_engine = new engine::context{};
-
-			auto & cfg{ g_engine->m_config };
+			auto & cfg{ get_config() };
 
 			cfg.arguments = { ML_argv, ML_argv + ML_argc };
-			
+
 			cfg.program_path = filesystem::current_path();
-			
+
 			cfg.program_name = filesystem::path{ ML_argv[0] }.filename();
-			
-			cfg.content_home = j["content_home"].get<pmr::string>();
 
-			cfg.library_home = j["library_home"].get<pmr::string>();
+			j["content_home"].get_to(cfg.content_home);
 
-			cfg.setup_script = j["setup_script"].get<pmr::string>();
+			j["library_home"].get_to(cfg.library_home);
+
+			j["setup_script"].get_to(cfg.setup_script);
 
 			j.at("window_settings").get_to(cfg.window_settings);
-			
+
 			return g_engine;
 		}
+		return false;
 	}
 
 	bool engine::destroy_context()
@@ -253,6 +251,8 @@ namespace ml
 
 	bool engine::load_plugin(filesystem::path const & path)
 	{
+		if (path.empty()) return false;
+
 		// check file name already loaded
 		if (auto const file{ g_engine->m_plugin_files.insert(path.filename()) }; file.second)
 		{

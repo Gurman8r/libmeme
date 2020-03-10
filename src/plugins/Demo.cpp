@@ -484,12 +484,12 @@ namespace ml
 				editor::split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
 				editor::dock(m_gui_display.title	, d[left_up]);
-				editor::dock(m_gui_assets.title		, d[left_dn]);
 				editor::dock(m_gui_ecs.title		, d[left_dn]);
-				editor::dock(m_gui_console.title	, d[left_dn]);
+				editor::dock(m_gui_assets.title		, d[left_dn]);
 				editor::dock(m_gui_profiler.title	, d[left_dn2]);
-				editor::dock(m_gui_memory.title		, d[right]);
 				editor::dock(m_gui_docs.title		, d[right]);
+				editor::dock(m_gui_memory.title		, d[right]);
+				editor::dock(m_gui_console.title	, d[right]);
 
 				editor::end_builder(root);
 			}
@@ -506,26 +506,14 @@ namespace ml
 			if (m_imgui_metrics.open) { editor::show_imgui_metrics(&m_imgui_metrics.open); }
 			if (m_imgui_about.open) { editor::show_imgui_about(&m_imgui_about.open); }
 
-			// ASSETS
-			m_gui_assets.render([&](auto &) { show_assets_gui(); });
-
-			// DISPLAY
-			m_gui_display.render([&](auto &) { show_display_gui(); });
-
-			// DOCUMENTS
-			m_gui_docs.render([&](auto &) { show_documents_gui(); });
-
-			// ECS
-			m_gui_ecs.render([&](auto &) { show_ecs_gui(); });
-
-			// CONSOLE
-			m_gui_console.render([&](auto &) { show_console_gui(); });
-
-			// PROFILER
-			m_gui_profiler.render([&](auto &) { show_profiler_gui(); });
-
-			// MEMORY
-			m_gui_memory.render([&](auto &) { show_memory_gui(); });
+			// DEMO
+			m_gui_display.render([&]()	{ show_display_gui(); });	// DISPLAY
+			m_gui_ecs.render([&]()		{ show_ecs_gui(); });		// ECS
+			m_gui_assets.render([&]()	{ show_assets_gui(); });	// ASSETS
+			m_gui_profiler.render([&]() { show_profiler_gui(); });	// PROFILER
+			m_gui_docs.render([&]()		{ show_documents_gui(); });	// DOCS
+			m_gui_memory.render([&]()	{ show_memory_gui(); });	// MEMORY
+			m_gui_console.render([&]()	{ show_console_gui(); });	// CONSOLE
 		}
 
 		void on_exit(exit_event const &)

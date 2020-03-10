@@ -1,3 +1,4 @@
+#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -30,8 +31,7 @@ ml::int32_t main()
 
 		memory_config() noexcept
 		{
-			ML_assert(pmr::set_default_resource(&m_test));
-			ML_assert(memory_manager::set_test_resource(&m_test));
+			ML_assert(memory_manager::initialize(&m_test));
 		}
 
 	} g_memcfg;

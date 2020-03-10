@@ -276,25 +276,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, size_t X, size_t Y
-	> inline ML_serialize(std::ostream & out, ds::matrix<T, X, Y> const & value)
-	{
-		for (auto const & elem : value)
-			out << elem << ' ';
-		return out;
-	}
-
-	template <class T, size_t X, size_t Y
-	> inline ML_deserialize(std::istream & in, ds::matrix<T, X, Y> & value)
-	{
-		for (auto & elem : value)
-			if (in.good())
-				in >> elem;
-		return in;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Tx, class Ty, size_t W, size_t H
 	> ML_NODISCARD constexpr bool operator==(ds::matrix<Tx, W, H> const & lhs, ds::matrix<Ty, W, H> const & rhs) noexcept
 	{
@@ -584,13 +565,38 @@ namespace std
 namespace ml::ds
 {
 	template <class T, size_t W, size_t H
+	> static void to_json(json & j, matrix<T, W, H> const & value)
+	{
+		j = value.m_data;
+	}
+
+	template <class T, size_t W, size_t H
 	> static void from_json(json const & j, matrix<T, W, H> & value)
 	{
-		for (size_t i = 0; i < W * H; ++i)
-		{
-			j.at(i).get_to(value[i]);
-		}
+		j.get_to(value.m_data);
 	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// STREAM INTERFACE
+namespace ml::ds
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, size_t W, size_t H
+	> inline ML_serialize(std::ostream & out, matrix<T, W, H> const & value)
+	{
+		return out << value.m_data;
+	}
+
+	template <class T, size_t W, size_t H
+	> inline ML_deserialize(std::istream & in, matrix<T, W, H> & value)
+	{
+		return in >> value.m_data;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

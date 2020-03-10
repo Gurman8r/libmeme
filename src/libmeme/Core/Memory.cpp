@@ -15,7 +15,7 @@ namespace ml
 
 	memory_manager::~memory_manager()
 	{
-#if ML_DEBUG
+#if ML_IS_DEBUG
 		if (!m_records.empty())
 		{
 			debug::log::error("final allocations follow");
@@ -48,7 +48,7 @@ namespace ml
 	// malloc
 	void * memory_manager::allocate(size_t size)
 	{
-		static auto & inst{ memory_manager::ref() };
+		static auto & inst{ memory_manager::get_instance() };
 
 		// allocate the requested bytes
 		return ([&, data = inst.m_alloc.allocate(size)]()
@@ -71,7 +71,7 @@ namespace ml
 	// free
 	void memory_manager::deallocate(void * addr)
 	{
-		static auto & inst{ memory_manager::ref() };
+		static auto & inst{ memory_manager::get_instance() };
 
 		// find the entry
 		if (auto const it{ inst.m_records.find(addr) })

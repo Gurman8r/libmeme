@@ -39,16 +39,19 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// assert
 #ifndef ML_assert
 #define ML_assert(expr) assert(expr)
 #endif
 
+// environment
 #define ML_argc		__argc
 #define ML_argv		__argv
 #define ML_wargv	__wargv
 #define ML_envp		_environ
 #define ML_wenvp	_wenviron
 
+// utils
 #define ML_addressof(ptr)	((void *)(ML_INTMAX)ptr)
 #define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
 #define ML_forward(value)	std::forward<decltype(value)>(value)
@@ -72,7 +75,6 @@ namespace ml
 	ML_ALIAS	uint64_t	= typename ML_UINT64;
 
 	ML_ALIAS	byte_t		= typename ML_BYTE;
-	ML_ALIAS	char_t		= typename ML_CHAR;
 	ML_ALIAS	intmax_t	= typename ML_INTMAX;
 	ML_ALIAS	uintmax_t	= typename ML_UINTMAX;
 

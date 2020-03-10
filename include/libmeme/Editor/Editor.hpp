@@ -72,7 +72,7 @@ namespace ml
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static editor::context * const create_context(json const & j);
+		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
 

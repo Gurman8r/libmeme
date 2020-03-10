@@ -179,6 +179,15 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// constexpr strlen
+	template <class Ch = char
+	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
+	{
+		return ((*value) ? (1 + _ML_UTIL strlen(value + 1)) : 0);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
 	> ML_NODISCARD static constexpr auto to_cstr(Str && str) noexcept
 	{

@@ -20,25 +20,23 @@ namespace ml
 		return g_editor;
 	}
 
-	editor::context * const editor::create_context(json const & j)
+	bool editor::create_context(json const & j)
 	{
-		if (g_editor) { return nullptr; }
-		else
+		if (!g_editor && (g_editor = new editor::context{}))
 		{
-			g_editor = new editor::context{};
-			
-			auto & cfg{ g_editor->m_config };
+			auto & cfg{ get_config() };
 
-			cfg.style_config = j["imgui_style"].get<pmr::string>();
+			j["imgui_style"].get_to(cfg.style_config);
 
-			cfg.api_version = j["imgui_api_version"].get<pmr::string>();
-			
+			j["imgui_api_version"].get_to(cfg.api_version);
+
 			cfg.ini_filename = j["imgui_enable_ini"].get<bool>() ? "imgui.ini" : nullptr;
-			
+
 			cfg.log_filename = j["imgui_enable_log"].get<bool>() ? "imgui.log" : nullptr;
-			
+
 			return g_editor;
 		}
+		return false;
 	}
 
 	bool editor::destroy_context()
@@ -86,21 +84,14 @@ namespace ml
 		auto & im_io{ ImGui::GetIO() };
 		auto & im_style{ ImGui::GetStyle() };
 
+		// paths
+		im_io.LogFilename = g_editor->m_config.ini_filename;
+		im_io.IniFilename = g_editor->m_config.log_filename;
+
 		// config flags
 		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-		
-		// viewports
-		if (im_io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			im_style.WindowRounding = 0.0f;
-			im_style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
-
-		// paths
-		im_io.LogFilename = g_editor->m_config.ini_filename;
-		im_io.IniFilename = g_editor->m_config.log_filename;
 
 		// style
 		style_loader::load_from_file(engine::path_to(g_editor->m_config.style_config));

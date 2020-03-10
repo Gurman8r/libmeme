@@ -10,10 +10,10 @@ namespace ml
 	template <class T
 	> struct singleton : non_copyable
 	{
-		ML_NODISCARD static inline T & ref() noexcept
+		ML_NODISCARD static inline T & get_instance() noexcept
 		{
-			static T instance{};
-			return instance;
+			static T inst{};
+			return inst;
 		}
 	};
 

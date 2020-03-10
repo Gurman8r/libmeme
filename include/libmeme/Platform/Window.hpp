@@ -46,8 +46,6 @@ namespace ml
 
 		ML_NODISCARD bool create(window_settings const & value) noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD virtual bool open();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
