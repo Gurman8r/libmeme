@@ -39,9 +39,9 @@ namespace ml
 
 			cfg.arguments = { ML_argv, ML_argv + ML_argc };
 			
-			cfg.program_path = filesystem::current_path().native();
+			cfg.program_path = filesystem::current_path();
 			
-			cfg.program_name = filesystem::path{ ML_argv[0] }.filename().native();
+			cfg.program_name = filesystem::path{ ML_argv[0] }.filename();
 			
 			cfg.content_home = j["content_home"].get<pmr::string>();
 
