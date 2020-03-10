@@ -30,7 +30,7 @@ namespace ml
 		// startup variables
 		struct config final : trackable
 		{
-			filesystem::path	api_version		{}			; // shading language version
+			pmr::string			api_version		{}			; // shading language version
 			cstring				ini_filename	{}			; // imgui ini file name
 			cstring				log_filename	{}			; // imgui log file name
 		};
@@ -71,7 +71,7 @@ namespace ml
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static bool create_context();
+		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
 

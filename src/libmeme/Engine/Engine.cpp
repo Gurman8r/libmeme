@@ -23,25 +23,46 @@ namespace ml
 
 	static engine::context * g_engine{};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
 	bool engine::is_initialized() noexcept
 	{
-		std::ios_base::cur;
-		uint64_t foo = std::cout.tellp();
 		return g_engine;
 	}
 
-	bool engine::create_context()
+	bool engine::create_context(json const & j)
 	{
-		return !g_engine && (g_engine = new engine::context{});
+		if (g_engine) { return false; }
+		else
+		{
+			g_engine = new engine::context{};
+
+			auto & cfg{ g_engine->m_config };
+
+			cfg.arguments = { ML_argv, ML_argv + ML_argc };
+			
+			cfg.program_path = filesystem::current_path().native();
+			
+			cfg.program_name = filesystem::path{ ML_argv[0] }.filename().native();
+			
+			cfg.content_home = j["content_home"].get<pmr::string>();
+
+			cfg.library_home = j["library_home"].get<pmr::string>();
+
+			cfg.setup_script = j["setup_script"].get<pmr::string>();
+
+			j.at("window_settings").get_to(cfg.window_settings);
+			
+			return g_engine;
+		}
 	}
 
 	bool engine::destroy_context()
 	{
-		if (!g_engine) return false;
-		delete g_engine;
-		return !(g_engine = nullptr);
+		if (!g_engine) { return false; }
+		else
+		{
+			delete g_engine;
+			return !(g_engine = nullptr);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -74,8 +95,6 @@ namespace ml
 
 	bool engine::startup()
 	{
-		if (!g_engine) return false;
-
 		// LUA STARTUP
 		if (!embed::g_L && !([&]()
 		{
@@ -140,6 +159,16 @@ namespace ml
 			return Py_IsInitialized();
 
 		})()) return debug::log::error("engine failed starting python");
+
+		// CREATE WINDOW
+		if (g_engine->m_window.create(get_config().window_settings))
+		{
+			window::install_default_callbacks(&g_engine->m_window);
+		}
+		else
+		{
+			return debug::log::error("engine failed creating window");
+		}
 
 		return true;
 	}

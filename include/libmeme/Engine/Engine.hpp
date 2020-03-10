@@ -28,11 +28,13 @@ namespace ml
 		// startup variables
 		struct config final : trackable
 		{
-			arguments_t			command_line	{}			; // command line
+			arguments_t			arguments		{}			; // arguments
 			filesystem::path	program_path	{}			; // program path
 			filesystem::path	program_name	{}			; // program name
-			filesystem::path	content_home	{}			; // content path
-			filesystem::path	library_home	{}			; // script library path
+			filesystem::path	content_home	{}			; // content home
+			filesystem::path	library_home	{}			; // library home
+			filesystem::path	setup_script	{}			; // setup script
+			window_settings		window_settings	{}			; // window settings
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,7 +67,7 @@ namespace ml
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static bool create_context();
+		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
 

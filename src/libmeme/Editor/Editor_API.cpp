@@ -8,11 +8,14 @@ namespace ml::embed
 {
 	PYBIND11_EMBEDDED_MODULE(LIBMEME_EDITOR, m)
 	{
-		m /* LIBMEME_EDITOR */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			// style
+		m /* FUNCTIONS */
+
 			.def("load_style", [](cstring s) { return style_loader::load_from_file(s); })
 			
 			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

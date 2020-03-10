@@ -1,6 +1,5 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import LIBMEME_SYSTEM as system
 import LIBMEME_EDITOR as editor
 import LIBMEME_ENGINE as engine
 import sys
@@ -10,22 +9,20 @@ import sys
 # system setup
 exit        = engine.close
 sys.exit    = engine.close
-sys.stdout  = system.cout()
-sys.stderr  = system.cout()
+sys.stdout  = engine.cout
+sys.stderr  = engine.cout
 sys.stdin   = None
 
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-
-# editor setup
+# load style
 editor.load_style(engine.path_to("assets/styles/obsidian.style"))
 
-# plugin setup
+# load plugins
 plugins = [ "demo", ]
 for p in plugins: engine.load_plugin(p)
 
 # messages
-print("# " + system.prj.name()+ " | " + str(system.cfg.arch()) + "-bit | " + system.cfg.config())
-print("# " + system.prj.url())
+print("# %r | %r-bit | %r" % (engine.lib_name, engine.arch, engine.configuration))
+print("# %r" % (engine.lib_url))
 print("# type \'help\' for a list of commands")
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

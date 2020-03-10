@@ -1,5 +1,3 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
@@ -41,54 +39,29 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load config
-	json g_config{};
-	std::ifstream file{ CONFIG_FILE };
-	ML_assert("CONFIG FILE NOT FOUND" && file);
-	file >> g_config;
-	file.close();
+	auto config = ([&temp = json{}, &file = std::ifstream{ CONFIG_FILE }]()
+	{
+		if (file) { file >> temp; }
+		file.close();
+		return temp;
+	})();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// create engine
-	ML_assert(engine::create_context()); ML_defer{ ML_assert(engine::destroy_context()); };
+	// create context
+	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
+	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
 
-	// configure engine
-	auto & engine_cfg			{ engine::get_config() };
-	engine_cfg.command_line		= { ML_argv, ML_argv + ML_argc };
-	engine_cfg.program_path		= filesystem::current_path();
-	engine_cfg.program_name		= filesystem::path{ ML_argv[0] }.filename();
-	engine_cfg.content_home		= g_config["content_home"].get<pmr::string>();
-	engine_cfg.library_home		= g_config["library_home"].get<pmr::string>();
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// start engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// create window
-	ML_assert(engine::get_window().create(g_config["window"].get<window_settings>()));
-
-	// install window callbacks
-	window::install_default_callbacks(&engine::get_window());
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-	// create editor
-	ML_assert(editor::create_context()); ML_defer{ ML_assert(editor::destroy_context()); };
-
-	// configure editor
-	auto & editor_cfg			{ editor::get_config() };
-	editor_cfg.api_version 		= g_config["imgui_shading"].get<pmr::string>();
-	editor_cfg.ini_filename 	= g_config["use_imgui_ini"].get<bool>() ? "imgui.ini" : nullptr;
-	editor_cfg.log_filename 	= g_config["use_imgui_ini"].get<bool>() ? "imgui.log" : nullptr;
-
 	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// run setup script
-	engine::do_script(engine::path_to(g_config["setup_script"].get<pmr::string>()));
+	engine::do_script(engine::path_to(config["setup_script"].get<pmr::string>()));
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

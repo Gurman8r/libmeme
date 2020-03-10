@@ -20,16 +20,33 @@ namespace ml
 		return g_editor;
 	}
 
-	bool editor::create_context()
+	bool editor::create_context(json const & j)
 	{
-		return !g_editor && (g_editor = new editor::context{});
+		if (g_editor) { return false; }
+		else
+		{
+			g_editor = new editor::context{};
+			
+			auto & cfg{ g_editor->m_config };
+
+			cfg.api_version = j["imgui_api_version"].get<pmr::string>();
+			
+			cfg.ini_filename = j["imgui_enable_ini"].get<bool>() ? "imgui.ini" : nullptr;
+			
+			cfg.log_filename = j["imgui_enable_log"].get<bool>() ? "imgui.log" : nullptr;
+			
+			return g_editor;
+		}
 	}
 
 	bool editor::destroy_context()
 	{
-		if (!g_editor) return false;
-		delete g_editor;
-		return !(g_editor = nullptr);
+		if (!g_editor) { return false; }
+		else
+		{
+			delete g_editor;
+			return !(g_editor = nullptr);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,18 +67,11 @@ namespace ml
 	
 	bool editor::startup()
 	{
-		if (!g_editor) return false;
-
 		// set allocator functions
-		ImGui::SetAllocatorFunctions(
-			[](size_t s, auto)
-			{
-				return memory_manager::allocate(s);
-			},
-			[](void * p, auto)
-			{
-				return memory_manager::deallocate(p);
-			},
+		ImGui::SetAllocatorFunctions
+		(
+			[](size_t s, auto) { return memory_manager::allocate(s); },
+			[](void * p, auto) { return memory_manager::deallocate(p); },
 			nullptr
 		);
 
@@ -95,7 +105,7 @@ namespace ml
 			return debug::log::error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.string().c_str()))
+		if (!ImGui_ImplOpenGL3_Init(g_editor->m_config.api_version.c_str()))
 		{
 			return debug::log::error("Failed initializing ImGui renderer");
 		}
