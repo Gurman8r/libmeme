@@ -1,11 +1,10 @@
 #ifndef _ML_EMBED_HPP_
 #define _ML_EMBED_HPP_
 
-#include <libmeme/Core/Hash.hpp>
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// API
+#include <libmeme/Core/Hash.hpp>
+
 namespace ml::embed
 {
 	class api final

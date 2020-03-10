@@ -5,7 +5,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define ML__AUTHOR  "Melody Gurman"
 #define ML__NAME    "libmeme"
-#define ML__VERSION "0.0.0"
+#define ML__VERSION 0
 #define ML__URL     "https://www.github.com/Gurman8r/libmeme"
 #define ML__DATE    __DATE__
 #define ML__TIME    __TIME__
@@ -15,26 +15,26 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__cplusplus)
 #	if defined(_MSVC_LANG)
-#		define ML_LANG _MSVC_LANG
+#		define ML_CC_LANG _MSVC_LANG
 #	else
-#		define ML_LANG __cplusplus
+#		define ML_CC_LANG __cplusplus
 #	endif
-#	if (ML_LANG >= 201907L)     // C++20
+#	if (ML_CC_LANG >= 201907L)     // C++20
 #		define ML_HAS_CXX20 1
 #       define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201703L)   // C++17
+#   elif (ML_CC_LANG >= 201703L)   // C++17
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201402L)   // C++14
+#   elif (ML_CC_LANG >= 201402L)   // C++14
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201103L)   // C++11
+#   elif (ML_CC_LANG >= 201103L)   // C++11
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 0

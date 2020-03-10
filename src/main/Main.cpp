@@ -46,28 +46,23 @@ ml::int32_t main()
 		return temp;
 	})();
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// create context
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// start engine
+	// startup
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
-
-	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
-
-	// run setup script
-	engine::do_script(engine::path_to(config["setup_script"].get<pmr::string>()));
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// main sequence
+	engine::do_script(engine::path_to(engine::get_config().setup_script));
+	
 	event_system::fire_event<enter_event>();
+
 	ML_defer{ event_system::fire_event<exit_event>(); };
+	
 	while (engine::is_running())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };

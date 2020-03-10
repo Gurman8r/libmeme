@@ -10,7 +10,7 @@ namespace ml::embed
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		m /* FUNCTIONS */
+		m // EDITOR FUNCTIONS
 
 			.def("load_style", [](cstring s) { return style_loader::load_from_file(s); })
 			

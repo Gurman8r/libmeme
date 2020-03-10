@@ -20,14 +20,16 @@ namespace ml
 		return g_editor;
 	}
 
-	bool editor::create_context(json const & j)
+	editor::context * const editor::create_context(json const & j)
 	{
-		if (g_editor) { return false; }
+		if (g_editor) { return nullptr; }
 		else
 		{
 			g_editor = new editor::context{};
 			
 			auto & cfg{ g_editor->m_config };
+
+			cfg.style_config = j["imgui_style"].get<pmr::string>();
 
 			cfg.api_version = j["imgui_api_version"].get<pmr::string>();
 			
@@ -67,6 +69,8 @@ namespace ml
 	
 	bool editor::startup()
 	{
+		if (!g_editor) return false;
+
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
 		(
@@ -97,6 +101,9 @@ namespace ml
 		// paths
 		im_io.LogFilename = g_editor->m_config.ini_filename;
 		im_io.IniFilename = g_editor->m_config.log_filename;
+
+		// style
+		style_loader::load_from_file(engine::path_to(g_editor->m_config.style_config));
 
 		// backend
 #ifdef ML_RENDERER_OPENGL

@@ -20,7 +20,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using arguments_t	= pmr::vector<cstring>;
-		using filenames_t	= ds::flat_set<filesystem::path>;
+		using filenames_t 	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -29,10 +29,10 @@ namespace ml
 		struct config final : trackable
 		{
 			arguments_t			arguments		{}			; // arguments
-			filesystem::path	program_path	{}			; // program path
-			filesystem::path	program_name	{}			; // program name
 			filesystem::path	content_home	{}			; // content home
 			filesystem::path	library_home	{}			; // library home
+			filesystem::path	program_path	{}			; // program path
+			filesystem::path	program_name	{}			; // program name
 			filesystem::path	setup_script	{}			; // setup script
 			window_settings		window_settings	{}			; // window settings
 		};
@@ -67,7 +67,7 @@ namespace ml
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static bool create_context(json const & j);
+		ML_NODISCARD static engine::context * const create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
 
@@ -131,10 +131,12 @@ namespace ml
 
 		ML_NODISCARD static inline filesystem::path path_to(filesystem::path const & value = {})
 		{
-			auto const & home{ get_config().content_home };
-			if (home.empty()) return value;
-			if (value.empty()) return home;
-			return filesystem::path{ home.native() + value.native() };
+			if (value.empty())
+				return {};
+			else if (auto const & home{ get_config().content_home }; home.empty())
+				return value;
+			else
+				return filesystem::path{ home.native() + value.native() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

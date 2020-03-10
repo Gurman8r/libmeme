@@ -28,9 +28,9 @@ namespace ml
 		return g_engine;
 	}
 
-	bool engine::create_context(json const & j)
+	engine::context * const engine::create_context(json const & j)
 	{
-		if (g_engine) { return false; }
+		if (g_engine) { return nullptr; }
 		else
 		{
 			g_engine = new engine::context{};
@@ -155,7 +155,7 @@ namespace ml
 			Py_SetPythonHome(g_engine->m_config.library_home.c_str());
 			
 			Py_InitializeEx(1);
-			
+
 			return Py_IsInitialized();
 
 		})()) return debug::log::error("engine failed starting python");

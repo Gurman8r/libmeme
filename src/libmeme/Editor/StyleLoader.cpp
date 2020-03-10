@@ -9,6 +9,9 @@ namespace ml
 
 	bool style_loader::load_from_file(filesystem::path const & path)
 	{
+		// empty
+		if (path.empty()) return false;
+
 		// defaults
 		if (!filesystem::exists(path))
 		{
