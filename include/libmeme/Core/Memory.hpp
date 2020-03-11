@@ -140,7 +140,7 @@ namespace ml
 			
 			inst.m_testres = resource;
 
-			return pmr::set_default_resource(resource);
+			return true;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -9,10 +9,6 @@
 
 using namespace ml;
 
-#ifndef MEM_RESERVED
-#define MEM_RESERVED 64.0_MiB
-#endif
-
 #ifndef CONFIG_FILE
 #define CONFIG_FILE L"../../../../libmeme.json"
 #endif
@@ -24,13 +20,14 @@ ml::int32_t main()
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
-		ds::array<byte_t, MEM_RESERVED>		m_data{};
+		ds::array<byte_t, 64.0_MiB>			m_data{};
 		pmr::monotonic_buffer_resource		m_mono{ m_data.data(), m_data.size() };
 		pmr::unsynchronized_pool_resource	m_pool{ &m_mono };
 		detail::test_resource				m_test{ &m_pool, m_data.data(), m_data.size() };
 
 		memory_config() noexcept
 		{
+			ML_assert(pmr::set_default_resource(&m_test));
 			ML_assert(memory_manager::initialize(&m_test));
 		}
 
