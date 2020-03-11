@@ -42,12 +42,9 @@ namespace ml::embed
 			.def("writelines"	, &output_wrapper::writelines)
 			;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// STDIO ATTRIBS
+		// STANDARD OUTPUT
 		m.attr("cout") = output_wrapper{ std::cout };
 		m.attr("cerr") = output_wrapper{ std::cerr };
-		m.attr("cin") = py::none{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

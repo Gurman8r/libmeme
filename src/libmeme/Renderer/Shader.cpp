@@ -94,17 +94,17 @@ namespace ml
 	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const & f_file)
 	{
 		return load_from_memory(
-			util::read_file(v_file).c_str(),
-			util::read_file(f_file).c_str()
+			util::get_file_string(v_file).c_str(),
+			util::get_file_string(f_file).c_str()
 		);
 	}
 
 	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const g_file, filesystem::path const & f_file)
 	{
 		return load_from_memory(
-			util::read_file(v_file).c_str(),
-			util::read_file(g_file).c_str(),
-			util::read_file(f_file).c_str()
+			util::get_file_string(v_file).c_str(),
+			util::get_file_string(g_file).c_str(),
+			util::get_file_string(f_file).c_str()
 		);
 	}
 

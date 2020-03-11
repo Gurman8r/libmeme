@@ -12,7 +12,7 @@ namespace ml
 		// empty
 		if (path.empty()) return false;
 
-		// defaults
+		// builtins
 		if (!filesystem::exists(path))
 		{
 			switch (util::hash(util::to_lower(path.string())))

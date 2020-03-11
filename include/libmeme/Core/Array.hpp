@@ -255,31 +255,4 @@ namespace ml::ds
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// STREAM INTERFACE
-namespace ml::ds
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, size_t N
-	> inline ML_serialize(std::ostream & out, array<T, N> const & value)
-	{
-		return out << json{ value };
-	}
-
-	template <class T, size_t N
-	> inline ML_deserialize(std::istream & in, array<T, N> & value)
-	{
-		if (in.good())
-		{
-			json j; in >> j;
-			j.get_to(value);
-		}
-		return in;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #endif // !_ML_ARRAY_HPP_

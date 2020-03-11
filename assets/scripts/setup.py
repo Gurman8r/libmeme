@@ -1,5 +1,6 @@
 import LIBMEME_SYSTEM as system
 import LIBMEME_EDITOR as editor
+import LIBMEME_ENGINE as engine
 import sys
 
 # system setup

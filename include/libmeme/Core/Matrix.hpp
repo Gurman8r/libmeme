@@ -564,6 +564,8 @@ namespace std
 // JSON INTERFACE
 namespace ml::ds
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class T, size_t W, size_t H
 	> static void to_json(json & j, matrix<T, W, H> const & value)
 	{
@@ -575,6 +577,8 @@ namespace ml::ds
 	{
 		j.get_to(value.m_data);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -587,13 +591,19 @@ namespace ml::ds
 	template <class T, size_t W, size_t H
 	> inline ML_serialize(std::ostream & out, matrix<T, W, H> const & value)
 	{
-		return out << value.m_data;
+		for (auto const & e : value)
+			if (out.good())
+				out << value << ' ';
+		return out;
 	}
 
 	template <class T, size_t W, size_t H
 	> inline ML_deserialize(std::istream & in, matrix<T, W, H> & value)
 	{
-		return in >> value.m_data;
+		for (auto & e : value)
+			if (in.good())
+				in >> e;
+		return in;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
