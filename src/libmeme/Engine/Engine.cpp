@@ -48,6 +48,9 @@ namespace ml
 
 			j.at("window_settings").get_to(cfg.window_settings);
 
+			ds::flat_set<int> foo;
+			j.at("").get_to(foo);
+
 			return g_engine;
 		}
 		return false;

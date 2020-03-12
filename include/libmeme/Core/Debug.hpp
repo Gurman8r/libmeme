@@ -30,7 +30,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline int32_t clear(int32_t const exit_code = 0)
+		inline int32_t clear(int32_t const exit_code = 0)
 		{
 #if ML_IS_DEBUG
 #	ifdef ML_OS_WINDOWS
@@ -42,12 +42,12 @@ namespace ml
 			return exit_code;
 		}
 
-		static inline void exit(int32_t const exit_code = 0)
+		inline void exit(int32_t const exit_code = 0)
 		{
 			return std::exit(exit_code);
 		}
 
-		static inline int32_t pause(int32_t const exit_code = 0)
+		inline int32_t pause(int32_t const exit_code = 0)
 		{
 #if ML_IS_DEBUG
 #	ifdef ML_OS_WINDOWS
@@ -66,21 +66,21 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			template <class Str
-			> static inline int32_t info(Str && value)
+			> inline int32_t info(Str && value)
 			{
 				std::cout << "[" ML_MSG_LOG "] " << ML_forward(value) << "\n";
 				return ML_SUCCESS;
 			}
 
 			template <class Str
-			> static inline int32_t error(Str && value)
+			> inline int32_t error(Str && value)
 			{
 				std::cout << "[" ML_MSG_ERR "] " << ML_forward(value) << "\n";
 				return ML_FAILURE;
 			}
 
 			template <class Str
-			> static inline int32_t warning(Str && value)
+			> inline int32_t warning(Str && value)
 			{
 				std::cout << "[" ML_MSG_WRN "] " << ML_forward(value) << "\n";
 				return ML_WARNING;
@@ -89,19 +89,19 @@ namespace ml
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			template <class Fmt, class Arg0, class ... Args
-			> static inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			> inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
 				return info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 			}
 
 			template <class Fmt, class Arg0, class ... Args
-			> static inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			> inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
 				return error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 			}
 
 			template <class Fmt, class Arg0, class ... Args
-			> static inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
+			> inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
 			{
 				return warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 			}
