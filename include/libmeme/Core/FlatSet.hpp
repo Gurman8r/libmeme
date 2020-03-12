@@ -32,6 +32,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using storage_type				= typename pmr::vector<value_type>;
+		using init_type					= typename std::initializer_list<value_type>;
 		using pointer					= typename storage_type::pointer;
 		using reference					= typename storage_type::reference;
 		using const_pointer				= typename storage_type::const_pointer;
@@ -63,6 +64,7 @@ namespace ml::ds
 		using size_type					= typename traits_type::size_type;
 
 		using storage_type				= typename traits_type::storage_type;
+		using init_type					= typename traits_type::init_type;
 		using pointer					= typename traits_type::pointer;
 		using reference					= typename traits_type::reference;
 		using const_pointer				= typename traits_type::const_pointer;
@@ -76,92 +78,127 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_flat_set() noexcept
-			: m_storage{}
-		{
-		}
-
-		explicit basic_flat_set(allocator_type const & alloc) noexcept
+		basic_flat_set(allocator_type const & alloc = {}) noexcept
 			: m_storage{ alloc }
 		{
 		}
 
-		basic_flat_set(std::initializer_list<value_type> init, allocator_type const & alloc = {})
-			: m_storage{ init, alloc }
+		basic_flat_set(init_type value, allocator_type const & alloc = {})
+			: self_type{ alloc }
 		{
-			impl_sort();
+			this->assign(value);
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
-			: m_storage{ first, last, alloc }
+			: self_type{ alloc }
 		{
-			impl_sort();
+			this->assign(first, last);
 		}
 
-		explicit basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
-			: m_storage{ value, alloc }
+		basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
+			: self_type{ alloc }
 		{
-			impl_sort();
+			this->assign(value);
 		}
 
-		explicit basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
-			: m_storage{ std::move(value), alloc }
+		basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
+			: self_type{ alloc }
 		{
-			impl_sort();
+			this->swap(std::move(value));
 		}
 
 		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
-			: m_storage{ other.m_storage, alloc }
+			: self_type{ alloc }
 		{
+			this->assign(other);
 		}
 
 		basic_flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
-			: m_storage{ std::move(other.m_storage), alloc }
+			: self_type{ alloc }
 		{
+			this->swap(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(std::initializer_list<value_type> init)
+		inline self_type & operator=(init_type value)
 		{
-			self_type temp{ init };
-			swap(temp);
+			self_type temp{ value };
+			this->swap(temp);
 			return (*this);
 		}
 
 		inline storage_type & operator=(storage_type const & other)
 		{
-			self_type temp{ other };
-			swap(temp);
+			self_type temp{ value };
+			this->swap(temp);
 			return (*this);
 		}
 
-		inline storage_type & operator=(storage_type && other) noexcept
+		inline storage_type & operator=(storage_type && value) noexcept
 		{
-			self_type temp{ std::move(other) };
-			swap(temp);
+			self_type temp{ std::move(value) };
+			this->swap(temp);
 			return (*this);
 		}
 	
 		inline self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		inline self_type & operator=(self_type && other) noexcept
 		{
-			swap(std::move(other));
+			this->swap(std::move(other));
 			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class It> inline void assign(It first, It last)
+		{
+			if (!this->empty()) { this->clear(); }
+
+			if (0 < std::distance(first, last))
+			{
+				m_storage.assign(first, last);
+
+				this->impl_sort();
+			}
+		}
+
+		inline void assign(init_type value)
+		{
+			this->assign(value.begin(), value.end());
+		}
+
+		inline void assign(storage_type const & value)
+		{
+			if (std::addressof(m_storage) != std::addressof(value))
+			{
+				this->assign(value.begin(), value.end());
+			}
+		}
+
+		inline void assign(self_type const & other)
+		{
+			if (this != std::addressof(other))
+			{
+				m_storage = other.m_storage;
+			}
+		}
+
 		inline void clear() noexcept
 		{
 			m_storage.clear();
+		}
+
+		inline void pop_back() noexcept
+		{
+			m_storage.pop_back();
 		}
 
 		inline void reserve(size_type const cap)
@@ -184,6 +221,16 @@ namespace ml::ds
 			if (this != std::addressof(other))
 			{
 				m_storage.swap(other.m_storage);
+			}
+		}
+
+		inline void swap(storage_type & value) noexcept
+		{
+			if (std::addressof(m_storage) != std::addressof(value))
+			{
+				m_storage.swap(value);
+
+				this->impl_sort();
 			}
 		}
 
@@ -349,17 +396,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// contains implementation
 		template <class It, class Other
 		> static inline bool impl_contains(It first, It last, Other const & other)
 		{
 			// linear
-			auto impl_contains_linear = [&]()
+			auto impl_contains_linear = [&]() noexcept
 			{
 				return std::find(first, last, other) != last;
 			};
 
 			// binary
-			auto impl_contains_binary = [&]()
+			auto impl_contains_binary = [&]() noexcept
 			{
 				return std::binary_search(first, last, other, compare_type{});
 			};
@@ -367,17 +415,17 @@ namespace ml::ds
 			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_contains_linear();
+				return impl_contains_linear(); // linear
 			}
 			else if (auto const size{ std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
-					return impl_contains_linear();
+					return impl_contains_linear(); // linear
 				}
 				else
 				{
-					return impl_contains_binary();
+					return impl_contains_binary(); // binary
 				}
 			}
 			else
@@ -386,18 +434,20 @@ namespace ml::ds
 			}
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// find implementation
 		template <class It, class Other
 		> static inline auto impl_find(It first, It last, Other const & other)
 		{
 			// linear
-			auto impl_find_linear = [&]()
+			auto impl_find_linear = [&]() noexcept
 			{
 				return std::find(first, last, other);
 			};
 
 			// binary
-			auto impl_find_binary = [&]()
+			auto impl_find_binary = [&]() noexcept
 			{
 				if (auto const it{ std::equal_range(first, last, other, compare_type{}) }
 				; it.first != it.second)
@@ -413,17 +463,17 @@ namespace ml::ds
 			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_find_linear();
+				return impl_find_linear(); // linear
 			}
 			else if (auto const size{ std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
-					return impl_find_linear();
+					return impl_find_linear(); // linear
 				}
 				else
 				{
-					return impl_find_binary();
+					return impl_find_binary(); // binary
 				}
 			}
 			else
@@ -432,11 +482,13 @@ namespace ml::ds
 			}
 		}
 		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// sort implementation
 		inline void impl_sort() noexcept
 		{
 			// empty
-			if (empty()) return;
+			if (this->empty()) return;
 
 			// sort
 			if constexpr (0 < traits_type::thresh)
@@ -451,10 +503,12 @@ namespace ml::ds
 			}
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// insert implementation
 		template <class Other
-		> inline auto impl_insert(Other && other) -> std::conditional_t<
-			traits_type::multi, iterator, std::pair<iterator, bool>
+		> inline auto impl_insert(Other && other) -> std::conditional_t<traits_type::multi,
+			iterator, std::pair<iterator, bool>
 		>
 		{
 			if constexpr (traits_type::multi)

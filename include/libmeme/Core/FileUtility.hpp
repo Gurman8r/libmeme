@@ -31,7 +31,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load file contents into string
-	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Str)
+	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> inline Str get_file_string(filesystem::path const & path) noexcept
 	{
 		if (auto const contents{ util::get_file_contents<Ch>(path) })

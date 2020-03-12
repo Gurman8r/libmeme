@@ -19,6 +19,11 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class T, class ... Ts
+	> constexpr bool is_any_of_v = std::disjunction_v<std::is_same<T, Ts>...>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// constexpr swap
 	template <class T
 	> constexpr void swap(T & lhs, T & rhs) noexcept

@@ -48,6 +48,7 @@ namespace ml::ds
 
 		using storage_type					= typename std::pair<key_storage, value_storage>;
 		using keyval_pair					= typename std::pair<key_type, value_type>;
+		using init_type						= typename std::initializer_list<keyval_pair>;
 		using pointer_pair					= typename std::pair<key_pointer, value_pointer>;
 		using const_pointer_pair			= typename std::pair<const_key_pointer, const_value_pointer>;
 		using reference_pair				= typename std::pair<key_reference, value_reference>;
@@ -99,6 +100,7 @@ namespace ml::ds
 		
 		using storage_type					= typename traits_type::storage_type;
 		using keyval_pair					= typename traits_type::keyval_pair;
+		using init_type						= typename traits_type::init_type;
 		using pointer_pair					= typename traits_type::pointer_pair;
 		using const_pointer_pair			= typename traits_type::const_pointer_pair;
 		using reference_pair				= typename traits_type::reference_pair;
@@ -110,79 +112,81 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_flat_map() noexcept
-			: m_pair{}
+		basic_flat_map(allocator_type const & alloc = {})
+			: m_pair{ key_storage{ alloc }, value_storage{ alloc } }
 		{
 		}
 
-		explicit basic_flat_map(allocator_type const & alloc) : m_pair{
-			key_storage{ alloc },
-			value_storage{ alloc }
-		}
+		basic_flat_map(init_type value, allocator_type const & alloc = {})
+			: self_type{ alloc }
 		{
-		}
-
-		basic_flat_map(std::initializer_list<keyval_pair> init, allocator_type const & alloc = {})
-			: m_pair{ alloc }
-		{
-			for (auto pair = init.begin(); pair != init.end(); ++pair)
-			{
-				this->insert(pair->first, pair->second);
-			}
-		}
-
-		basic_flat_map(storage_type const & value, allocator_type const & alloc = {}) : m_pair{
-			key_storage{ value.first, alloc },
-			value_storage{ value.second, alloc }
-		}
-		{
-		}
-
-		basic_flat_map(storage_type && value, allocator_type const & alloc = {}) noexcept : m_pair{
-			key_storage{ std::move(value.first), alloc },
-			value_storage{ std::move(value.second), alloc }
-		}
-		{
+			this->assign(value);
 		}
 
 		basic_flat_map(self_type const & other, allocator_type const & alloc = {})
-			: self_type{ other.m_pair, alloc }
+			: self_type{ alloc }
 		{
+			this->assign(other);
 		}
 
 		basic_flat_map(self_type && other, allocator_type const & alloc = {}) noexcept
-			: self_type{ std::move(other.m_pair), alloc }
+			: self_type{ alloc }
 		{
+			this->swap(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(std::initializer_list<keyval_pair> init)
+		inline self_type & operator=(init_type value)
 		{
-			self_type temp{ init };
-			swap(temp);
+			self_type temp{ value };
+			this->swap(temp);
 			return (*this);
 		}
 
 		inline self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		inline self_type & operator=(self_type && other) noexcept
 		{
-			swap(std::move(other));
+			this->swap(std::move(other));
 			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		inline void assign(init_type value)
+		{
+			if (!this->empty()) { this->clear(); }
+
+			for (auto it = init.begin(); it != init.end(); ++it)
+			{
+				this->insert(it->first, it->second);
+			}
+		}
+
+		inline void assign(self_type const & other)
+		{
+			if (this != std::addressof(other))
+			{
+				m_pair = other.m_pair;
+			}
+		}
+
 		inline void clear() noexcept
 		{
 			m_pair.first.clear();
 			m_pair.second.clear();
+		}
+
+		inline void pop_back() noexcept
+		{
+			m_pair.first.pop_back();
+			m_pair.second.pop_back();
 		}
 
 		inline void reserve(size_type const count)
@@ -573,11 +577,11 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// emplace hint implementation
+		// emplace_hint implementation
 		template <class ... Args
 		> inline iterator_pair impl_emplace_hint(const_key_iterator it, Args && ... args)
 		{
-			// needs to be private or else the map can become unsorted
+			// must be private or the map could become unsorted
 			return {
 				std::next(m_pair.first.begin(), std::distance(m_pair.first.cbegin(), it)),
 				m_pair.second.emplace(this->fetch(it), ML_forward(args)...)
