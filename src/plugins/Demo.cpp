@@ -22,7 +22,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// ECS CONFIG
+// RENDERER CONFIG
 namespace ml
 {
 	// (T) TAGS
@@ -85,10 +85,10 @@ namespace ml
 	};
 
 
-	// (M) MANAGER
+	// (U) TRAITS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using entity_traits = ecs::traits<
+	using renderer_traits = ecs::traits<
 
 		// tags
 		ecs::cfg::tags<
@@ -111,7 +111,11 @@ namespace ml
 		>
 	>;
 
-	using entity_manager = ecs::manager<entity_traits>;
+
+	// (M) MANAGER
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	using renderer_manager = ecs::manager<renderer_traits>;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -136,9 +140,9 @@ namespace ml
 		// ECS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		entity_manager m_ecs{};
+		renderer_manager m_ecs{};
 
-		pmr::vector<entity_manager::handle> m_handles;
+		pmr::vector<renderer_manager::handle> m_handles;
 
 
 		// GUI
@@ -445,14 +449,13 @@ namespace ml
 
 			if (render_texture const & target{ m_pipeline[0] })
 			{
-				target.bind();
+				ML_BIND_SCOPE(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
 				m_ecs.update_system<x_draw_renderers>(target);
-				target.unbind();
 			}
 		}
 
@@ -824,7 +827,7 @@ namespace ml
 					);
 				}
 				// SIGNATURE
-				else if constexpr (std::is_same_v<T, entity_traits::signature>)
+				else if constexpr (std::is_same_v<T, renderer_traits::signature>)
 				{
 					auto const & style			{ ImGui::GetStyle() };
 					auto const button_width		{ ImGui::GetFrameHeight() };
@@ -832,14 +835,14 @@ namespace ml
 					auto const window_visible	{ ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x };
 
 					int32_t i{};
-					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
+					meta::for_types<meta::concat<renderer_traits::component_list, renderer_traits::tag_list>
 					>([&](auto type)
 					{
 						ML_ImGui_ScopeID(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
-						using U = typename entity_traits;
+						using U = typename renderer_traits;
 						using T = typename decltype(type)::type;
 						using S = typename U::signature;
 						static constexpr bool
@@ -908,7 +911,7 @@ namespace ml
 
 						bool const c_open{ ImGui::TreeNode(
 							"component node", "[%u] %.*s",
-							entity_traits::component_id<C>(),
+							renderer_traits::component_id<C>(),
 							cname.size(), cname.data()
 						) }; ImGui::NextColumn();
 

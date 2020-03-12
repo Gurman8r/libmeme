@@ -6,7 +6,6 @@
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
 #include <libmeme/Core/BitSet.hpp>
-#include <libmeme/Core/Typeof.hpp>
 
 #define _ML_ECS _ML ecs::
 
@@ -176,8 +175,8 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<_ML_ECS util::template x_wrapper<Systems>...>;
 
-		template <class M
-		> using storage_type = typename meta::tuple<meta::list<Systems<M>...>>;
+		template <class U
+		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -543,10 +542,10 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit manager(allocator_type const & alloc) noexcept
-			: m_capacity	{ 0 }
-			, m_size		{ 0 }
-			, m_size_next	{ 0 }
+		manager(allocator_type const & alloc = {}) noexcept
+			: m_capacity	{}
+			, m_size		{}
+			, m_size_next	{}
 			, m_entities	{ std::allocator_arg, alloc }
 			, m_components	{ std::allocator_arg, alloc }
 			, m_handles		{ alloc }
@@ -571,8 +570,6 @@ namespace ml::ecs
 		{
 			this->grow_to(cap);
 		}
-
-		manager() noexcept : self_type{ 0 } {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1012,8 +1009,6 @@ namespace ml::ecs
 			return (*this);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class Fn
 		> inline self_type & for_components(size_t const e, Fn && fn)
 		{
@@ -1028,15 +1023,6 @@ namespace ml::ecs
 			});
 			return (*this);
 		}
-
-		template <class Fn
-		> inline self_type & for_components(handle const & h, Fn && fn)
-		{
-			// invoke function on each of a handle's components
-			return this->for_components(h.m_entity, ML_forward(fn));
-		}
-		
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class S, class Fn
 		> inline self_type & for_matching(Fn && fn)
