@@ -23,8 +23,7 @@ namespace ml
 		using file_list_t	= pmr::vector<filesystem::path>;
 		using file_set_t	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
-		using script_fun_t	= std::function<int32_t()>;
-		using script_lib_t	= ds::flat_map<hash_t, pmr::vector<script_fun_t>>;
+		using script_lib_t	= ds::flat_map<hash_t, pmr::vector<std::function<void()>>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -104,7 +103,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_callback(pmr::string const & id, script_fun_t const & fn);
+		static bool add_callback(pmr::string const & id, std::function<void()> const & fn);
 
 		static void run_callback(pmr::string const & id);
 

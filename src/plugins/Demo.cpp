@@ -202,30 +202,30 @@ namespace ml
 
 		demo()
 		{
-			event_system::add_listener<enter_event		>(this);
+			event_system::add_listener<load_event		>(this);
 			event_system::add_listener<update_event		>(this);
 			event_system::add_listener<draw_event		>(this);
 			event_system::add_listener<gui_dock_event	>(this);
 			event_system::add_listener<gui_draw_event	>(this);
-			event_system::add_listener<exit_event		>(this);
+			event_system::add_listener<unload_event		>(this);
 		}
 
 		void on_event(event const & value) override
 		{
 			switch (value.id())
 			{
-			case hashof_v<enter_event	> : on_enter	(*value.as<	enter_event		>()); break;
+			case hashof_v<load_event	> : on_load		(*value.as<	load_event		>()); break;
 			case hashof_v<update_event	> : on_update	(*value.as<	update_event	>()); break;
 			case hashof_v<draw_event	> : on_draw		(*value.as<	draw_event		>()); break;
 			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<	gui_dock_event	>()); break;
 			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<	gui_draw_event	>()); break;
-			case hashof_v<exit_event	> : on_exit		(*value.as<	exit_event		>()); break;
+			case hashof_v<unload_event	> : on_unload	(*value.as<	unload_event	>()); break;
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_enter(enter_event const &)
+		void on_load(load_event const &)
 		{
 			// load stuff, etc...
 
@@ -519,7 +519,7 @@ namespace ml
 			m_gui_console.render([&]()	{ show_console_gui(); });	// CONSOLE
 		}
 
-		void on_exit(exit_event const &)
+		void on_unload(unload_event const &)
 		{
 			// cleanup stuff, etc...
 

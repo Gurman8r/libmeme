@@ -160,9 +160,6 @@ namespace ml
 		// run setup script
 		do_script(path_to(get_config().setup_script));
 
-		// awake callback
-		run_callback("awake");
-
 		// create window
 		if (g_engine->m_window.create(get_config().window_settings))
 		{
@@ -279,7 +276,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::add_callback(pmr::string const & id, script_fun_t const & fn)
+	bool engine::add_callback(pmr::string const & id, std::function<void()> const & fn)
 	{
 		if (!g_engine) { return false; }
 

@@ -76,8 +76,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		m /* FUNCTIONS */
-			.def("add_callback"	, &engine::add_callback)
-			.def("close"		, &engine::close)
+			.def("add_callback"	, engine::add_callback)
 			.def("exit"			, [](int32_t code = 0) { engine::close(); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_script(l, s); })
 			.def("do_file"		, [](cstring s) { return engine::do_script(s); })

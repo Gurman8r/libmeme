@@ -51,21 +51,31 @@ ml::int32_t main()
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
 
-	// startup
-	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
-	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// start engine
+	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
+	
+	// awake
+	engine::run_callback("awake");
+	
+	// start editor
+	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
 	// load
 	engine::run_callback("load");
-	event_system::fire_event<enter_event>();
+	event_system::fire_event<load_event>();
 	
 	// unload
 	ML_defer{
 		engine::run_callback("unload");
-		event_system::fire_event<exit_event>();
+		event_system::fire_event<unload_event>();
 	};
+
+	// start
+	engine::run_callback("start");
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// main loop
 	while (engine::is_running())
@@ -116,6 +126,7 @@ ml::int32_t main()
 		}
 	}
 
+	// goodbye!
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

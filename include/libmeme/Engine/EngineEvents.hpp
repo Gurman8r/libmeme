@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(enter_event)
+	ML_EVENT(load_event)
 	{
 	};
 
@@ -35,7 +35,7 @@ namespace ml
 	{
 	};
 
-	ML_EVENT(exit_event)
+	ML_EVENT(unload_event)
 	{
 	};
 
