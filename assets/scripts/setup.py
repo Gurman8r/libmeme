@@ -1,41 +1,42 @@
-import LIBMEME_SYSTEM as system
-import LIBMEME_EDITOR as editor
 import LIBMEME_ENGINE as engine
+import LIBMEME_EDITOR as editor
 import sys
 
+# awake
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
+def on_awake():
 
-# system setup
-exit        = system.exit
-sys.exit    = system.exit
-sys.stdout  = system.cout
-sys.stderr  = system.cout
-sys.stdin   = None
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-
-def on_startup():
-    system.load_plugin("demo")
+    # system setup
+    __builtins__.exit   = engine.exit
+    sys.exit            = engine.exit
+    sys.stdout          = engine.cout
+    sys.stderr          = engine.cout
+    sys.stdin           = None
+    
     return 0
 
+# load
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 def on_load():
-    print(f"# {system.lib_name} | {system.architecture!r}-bit | {system.configuration}")
-    print(f"# {system.lib_url}")
+
+    # load plugins
+    engine.load_plugin("demo")
+
+    # messages
+    print(f"# {engine.lib_name} | {engine.architecture!r}-bit | {engine.configuration}")
+    print(f"# {engine.lib_url}")
     print(f"# type \'help\' for a list of commands")
+
     return 0
 
+# unload
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 def on_unload():
     return 0
 
-def on_shutdown():
-    return 0
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 # install callbacks
-engine.add_callback("startup",   on_startup)
-engine.add_callback("load",      on_load)
-engine.add_callback("unload",    on_unload)
-engine.add_callback("shutdown",  on_shutdown)
-
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
+engine.add_callback("awake", on_awake)
+engine.add_callback("load", on_load)
+engine.add_callback("unload", on_unload)

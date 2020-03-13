@@ -57,16 +57,17 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// main sequence
-	
+	// load
 	engine::run_callback("load");
 	event_system::fire_event<enter_event>();
-
+	
+	// unload
 	ML_defer{
 		engine::run_callback("unload");
 		event_system::fire_event<exit_event>();
 	};
 	
+	// main loop
 	while (engine::is_running())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };

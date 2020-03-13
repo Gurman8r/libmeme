@@ -160,6 +160,9 @@ namespace ml
 		// run setup script
 		do_script(path_to(get_config().setup_script));
 
+		// awake callback
+		run_callback("awake");
+
 		// create window
 		if (g_engine->m_window.create(get_config().window_settings))
 		{
@@ -170,17 +173,12 @@ namespace ml
 			return debug::log::error("engine failed creating window");
 		}
 
-		// script callbacks
-		run_callback("startup");
 		return true;
 	}
 
 	bool engine::shutdown()
 	{
 		if (!g_engine) return false;
-
-		// script callbacks
-		run_callback("shutdown");
 
 		// shutdown plugins
 		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
