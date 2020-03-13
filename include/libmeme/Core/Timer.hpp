@@ -70,10 +70,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool	m_running;
-		time_point	m_previous;
-		time_point	m_current;
-		mutable duration m_elapsed;
+		bool				m_running;
+		time_point			m_previous;
+		time_point			m_current;
+		mutable duration	m_elapsed;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

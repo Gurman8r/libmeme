@@ -7,35 +7,35 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct enter_event final : T_event<enter_event>
+	ML_EVENT(enter_event)
 	{
 	};
 
-	struct frame_begin_event final : T_event<frame_begin_event>
+	ML_EVENT(frame_begin_event)
 	{
 	};
 
-	struct update_event final : T_event<update_event>
+	ML_EVENT(update_event)
 	{
 	};
 
-	struct begin_draw_event final : T_event<begin_draw_event>
+	ML_EVENT(begin_draw_event)
 	{
 	};
 
-	struct draw_event final : T_event<draw_event>
+	ML_EVENT(draw_event)
 	{
 	};
 
-	struct end_draw_event final : T_event<draw_event>
+	ML_EVENT(end_draw_event)
 	{
 	};
 
-	struct frame_end_event final : T_event<frame_end_event>
+	ML_EVENT(frame_end_event)
 	{
 	};
 
-	struct exit_event final : T_event<exit_event>
+	ML_EVENT(exit_event)
 	{
 	};
 

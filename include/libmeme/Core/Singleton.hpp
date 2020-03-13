@@ -7,12 +7,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	template <class T
-	> struct singleton : non_copyable
+	template <class T> struct singleton : non_copyable
 	{
-		ML_NODISCARD static inline T & get_instance() noexcept
+		using self_type = typename T;
+
+		ML_NODISCARD static inline self_type & get() noexcept
 		{
-			static T inst{};
+			static self_type inst{};
 			return inst;
 		}
 	};

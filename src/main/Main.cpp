@@ -10,7 +10,7 @@
 using namespace ml;
 
 #ifndef MEM_RESERVED
-#define MEM_RESERVED 64.0_MiB
+#define MEM_RESERVED 64._MiB
 #endif
 
 #ifndef CONFIG_FILE
@@ -27,7 +27,7 @@ ml::int32_t main()
 		ds::array<byte_t, MEM_RESERVED>		m_data{};
 		pmr::monotonic_buffer_resource		m_mono{ m_data.data(), m_data.size() };
 		pmr::unsynchronized_pool_resource	m_pool{ &m_mono };
-		detail::test_resource				m_test{ &m_pool, m_data.data(), m_data.size() };
+		util::test_resource					m_test{ &m_pool, m_data.data(), m_data.size() };
 
 		memory_config() noexcept
 		{
@@ -58,11 +58,14 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// main sequence
-	engine::do_script(engine::path_to(engine::get_config().setup_script));
 	
+	engine::run_callback("load");
 	event_system::fire_event<enter_event>();
 
-	ML_defer{ event_system::fire_event<exit_event>(); };
+	ML_defer{
+		engine::run_callback("unload");
+		event_system::fire_event<exit_event>();
+	};
 	
 	while (engine::is_running())
 	{
@@ -112,9 +115,6 @@ ml::int32_t main()
 		}
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// goodbye!
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

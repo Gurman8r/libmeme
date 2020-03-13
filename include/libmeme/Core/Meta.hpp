@@ -53,13 +53,18 @@ namespace ml::meta
 			return _ML_META impl::tuple_apply_impl(
 				ML_forward(fn),
 				ML_forward(tp),
-				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{});
+				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
+			);
 		}
 
 		template <class Fn, class ... Args
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
+#if ML_HAS_CXX20
+			return (void)std::initializer_list<int>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
+#else
 			return (void)std::initializer_list<int>{ (ML_forward(fn)(ML_forward(args)), 0)... };
+#endif // ML_HAS_CXX20
 		}
 
 		template <class Fn, class Tp

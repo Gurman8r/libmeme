@@ -6,20 +6,29 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #define ML_EMBED_LUA
 #define ML_EMBED_PYTHON
 #include <libmeme/Engine/Embed.hpp>
 
-// global lua state
-namespace ml::embed { static lua_State * g_L{}; }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// engine context
+	class engine::context final : trackable, non_copyable
+	{
+		friend class		engine						;
+		engine::config		m_config		{}			; // startup variables
+		engine::runtime		m_io			{}			; // runtime variables
+		timer				m_main_timer	{ true }	; // master timer
+		timer				m_loop_timer	{}			; // frame timer
+		frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
+		render_window		m_window		{}			; // main window
+		file_set_t			m_plugin_files	{}			; // plugin filenames
+		libraries_t			m_plugin_libs	{}			; // plugin instances
+		lua_State *			m_lua			{}			; // lua state
+		script_lib_t		m_scr			{}			; // scripts
+	};
 
 	static engine::context * g_engine{};
 
@@ -30,7 +39,11 @@ namespace ml
 
 	bool engine::create_context(json const & j)
 	{
-		if (!g_engine && (g_engine = new engine::context{}))
+		if (is_initialized() || !(g_engine = new engine::context{}))
+		{
+			return debug::log::error("engine is already initialized");
+		}
+		else
 		{
 			auto & cfg{ get_config() };
 
@@ -50,7 +63,6 @@ namespace ml
 
 			return g_engine;
 		}
-		return false;
 	}
 
 	bool engine::destroy_context()
@@ -93,16 +105,13 @@ namespace ml
 
 	bool engine::startup()
 	{
-		// LUA STARTUP
-		if (!embed::g_L && !([&]()
+		// start lua
+		if (!g_engine->m_lua && !([&]()
 		{
-			// allocator
 			auto alloc = [](auto, void * p, size_t o, size_t n) noexcept
 			{
 				return memory_manager::reallocate(p, o, n);
 			};
-
-			// libs
 			static constexpr struct luaL_Reg lua_defaults[] =
 			{
 			luaL_Reg{ "exit", [](auto L) { engine::close(); return 0; } },
@@ -114,25 +123,20 @@ namespace ml
 			} },
 			luaL_Reg{ nullptr, nullptr },
 			};
-
-			if (embed::g_L = lua_newstate(alloc, nullptr))
+			if (g_engine->m_lua = lua_newstate(alloc, nullptr))
 			{
-				luaL_openlibs(embed::g_L);
-				
-				lua_getglobal(embed::g_L, "_G");
-				
-				luaL_setfuncs(embed::g_L, lua_defaults, 0);
-				
-				lua_pop(embed::g_L, 1);
+				luaL_openlibs(g_engine->m_lua);
+				lua_getglobal(g_engine->m_lua, "_G");
+				luaL_setfuncs(g_engine->m_lua, lua_defaults, 0);
+				lua_pop(g_engine->m_lua, 1);
 			}
-			return embed::g_L;
+			return g_engine->m_lua;
 
 		})()) return debug::log::error("engine failed starting lua");
 
-		// PYTHON STARTUP
+		// start python
 		if (!Py_IsInitialized() && !([&]()
 		{
-			// allocator
 			static PyObjectArenaAllocator alloc
 			{
 				nullptr,
@@ -145,20 +149,18 @@ namespace ml
 					return pmr::get_default_resource()->deallocate(p, s);
 				}
 			};
-			
 			PyObject_SetArenaAllocator(&alloc);
-			
 			Py_SetProgramName(g_engine->m_config.program_name.c_str());
-			
 			Py_SetPythonHome(g_engine->m_config.library_home.c_str());
-			
 			Py_InitializeEx(1);
-
 			return Py_IsInitialized();
 
 		})()) return debug::log::error("engine failed starting python");
 
-		// CREATE WINDOW
+		// run setup script
+		do_script(path_to(get_config().setup_script));
+
+		// create window
 		if (g_engine->m_window.create(get_config().window_settings))
 		{
 			window::install_default_callbacks(&g_engine->m_window);
@@ -168,6 +170,8 @@ namespace ml
 			return debug::log::error("engine failed creating window");
 		}
 
+		// script callbacks
+		run_callback("startup");
 		return true;
 	}
 
@@ -175,13 +179,16 @@ namespace ml
 	{
 		if (!g_engine) return false;
 
-		// PLUGINS SHUTDOWN
+		// script callbacks
+		run_callback("shutdown");
+
+		// shutdown plugins
 		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
 		{
 			memory_manager::deallocate(p);
 		});
 
-		// WINDOW SHUTDOWN
+		// destroy window
 		if (g_engine->m_window.is_open())
 		{
 			g_engine->m_window.destroy();
@@ -189,11 +196,14 @@ namespace ml
 			window::terminate();
 		}
 
-		// PYTHON SHUTDOWN
+		// destroy scripts
+		g_engine->m_scr.clear();
+
+		// shutdown python
 		if (Py_IsInitialized()) { Py_FinalizeEx(); }
 
-		// LUA SHUTDOWN
-		if (embed::g_L) { lua_close(embed::g_L); embed::g_L = nullptr; }
+		// shutdown lua
+		if (g_engine->m_lua) { lua_close(g_engine->m_lua); g_engine->m_lua = nullptr; }
 		
 		return true;
 	}
@@ -236,7 +246,6 @@ namespace ml
 
 	void engine::end_draw()
 	{
-		// 
 		if ML_LIKELY(!(g_engine->m_window.has_hint(window_hints_double_buffered)))
 		{
 			GL::flush();
@@ -272,39 +281,64 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool engine::add_callback(pmr::string const & id, script_fun_t const & fn)
+	{
+		if (!g_engine) { return false; }
+
+		return (bool)g_engine->m_scr.at(util::hash(id)).emplace_back(fn);
+	}
+
+	void engine::run_callback(pmr::string const & id)
+	{
+		if (!g_engine) { return; }
+
+		if (auto const functions{ g_engine->m_scr.find(util::hash(id)) })
+		{
+			for (auto const & fn : (*functions->second))
+			{
+				if (fn)
+				{
+					std::invoke(fn);
+				}
+			}
+		}
+	}
+
 	int32_t engine::do_script(int32_t lang, pmr::string const & text)
 	{
-		if (!is_initialized() || text.empty()) return 0;
+		if (!is_initialized() || text.empty()) { return 0; }
+		
 		switch (lang)
 		{
-		default: return 0;
 		case embed::api::lua:
 		{
-			return luaL_dostring(embed::g_L, text.c_str());
+			return luaL_dostring(g_engine->m_lua, text.c_str());
 		}
 		case embed::api::python:
 		{
 			return PyRun_SimpleStringFlags(text.c_str(), nullptr);
 		}
 		}
+		return 0;
 	}
 
 	int32_t engine::do_script(filesystem::path const & path)
 	{
-		if (!is_initialized() || !filesystem::exists(path)) return 0;
+		if (!is_initialized() || !filesystem::exists(path)) { return 0; }
+
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
 		{
-		default: return 0;
 		case embed::api::lua:
 		{
-			return luaL_dofile(embed::g_L, path.string().c_str());
+			return luaL_dofile(g_engine->m_lua, path.string().c_str()); 
 		}
 		case embed::api::python:
 		{
-			std::FILE * fp{ std::fopen(path.string().c_str(), "r") };
-			return PyRun_SimpleFileExFlags(fp, path.string().c_str(), true, nullptr);
+			auto file{ std::fopen(path.string().c_str(), "r") };
+			return PyRun_SimpleFileExFlags(file, path.string().c_str(), true, nullptr);
 		}
 		}
+		return 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

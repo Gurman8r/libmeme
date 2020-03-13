@@ -102,7 +102,7 @@ namespace ml::util::impl
 
 		using		U		= typename std::make_unsigned_t<T>;
 		Ch			buf[21]	{};
-		Ch * const	end		{ _STD end(buf) };
+		Ch * const	end		{ std::end(buf) };
 		Ch *		next	{ end };
 		auto const	uval	{ static_cast<U>(value) };
 
@@ -112,7 +112,7 @@ namespace ml::util::impl
 			{
 				while (uval > 0xFFFFFFFFU)
 				{
-					auto chunk{ static_cast<unsigned long>(uval % 1000000000) };
+					auto chunk{ static_cast<ulong_t>(uval % 1000000000) };
 					uval /= 1000000000;
 					for (int32_t i = 0; i != 9; ++i)
 					{
@@ -121,7 +121,7 @@ namespace ml::util::impl
 					}
 				}
 			}
-			auto trunc{ static_cast<unsigned long>(uval) };
+			auto trunc{ static_cast<ulong_t>(uval) };
 			do {
 				*--next = static_cast<Ch>('0' + trunc % 10);
 				trunc /= 10;
@@ -184,7 +184,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD static constexpr auto to_cstr(Str && str) noexcept
+	> ML_NODISCARD constexpr auto to_cstr(Str && str) noexcept
 	{
 		if constexpr (is_cstring_v<decltype(str)>)
 		{

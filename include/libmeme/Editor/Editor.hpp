@@ -27,7 +27,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// startup variables
+		// editor config
 		struct config final : trackable
 		{
 			filesystem::path	style_config	{}			; // style config
@@ -38,7 +38,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// runtime variables
+		// editor runtime
 		struct runtime final : trackable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,17 +55,6 @@ namespace ml
 			dock_nodes_t		dock_nodes		{}			; // dockspace dock-nodes
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// editor context
-		class context final : trackable, non_copyable
-		{
-			friend class		editor						;
-			editor::config		m_config		{}			; // startup variables
-			editor::runtime		m_io			{}			; // runtime variables
-			void *				m_imgui_context	{}			; // current imgui context
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

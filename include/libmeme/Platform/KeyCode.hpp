@@ -5,15 +5,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum KeyMods_
+	enum key_mods_
 	{
-		KeyMods_None,
-		KeyMods_Shift		= (0 << 1),
-		KeyMods_Ctrl		= (1 << 1),
-		KeyMods_Alt			= (1 << 2),
-		KeyMods_Super		= (1 << 3),
-		KeyMods_CapsLock	= (1 << 4),
-		KeyMods_NumLock		= (1 << 5)
+		key_mods_none		= (0 << 0), // none
+		key_mods_shift		= (0 << 1), // shift
+		key_mods_ctrl		= (1 << 1), // ctrl
+		key_mods_alt		= (1 << 2), // alt
+		key_mods_super		= (1 << 3), // super
+		key_mods_caps_lock	= (1 << 4), // caps
+		key_mods_num_lock	= (1 << 5)	// numlock
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

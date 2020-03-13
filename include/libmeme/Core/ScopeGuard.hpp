@@ -3,8 +3,10 @@
 
 #include <libmeme/Config.hpp>
 
-#define ML_defer auto ML_ANONYMOUS(scope_guard_on_exit) \
+#define ML_defer_v ML_ANONYMOUS(scope_guard_on_exit) \
 	= ::ml::detail::scope_guard_on_exit() + [&]() noexcept
+
+#define ML_defer auto ML_defer_v
 
 namespace ml::detail
 {

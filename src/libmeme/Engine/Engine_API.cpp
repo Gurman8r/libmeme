@@ -10,6 +10,10 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		m /* FUNCTIONS */
+			.def("add_callback", [](cstring id, std::function<int32_t()> const & fn)
+			{
+				return engine::add_callback(id, fn);
+			})
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -11,38 +11,40 @@ namespace ml
 
 	bool event_system::add_listener(hash_t type, event_listener * value)
 	{
-		return value && g_event_system[type].insert(value).second;
+		return value && g_event_system.at(type).insert(value).second;
 	}
 
 	void event_system::fire_event(event const & value)
 	{
-		if (auto const it{ g_event_system.find(value.id()) })
+		if (auto const listeners{ g_event_system.find(value.id()) })
 		{
-			for (auto const & listener : (*it->second))
+			for (auto const & elem : (*listeners->second))
 			{
-				listener->on_event(value);
+				elem->on_event(value);
 			}
 		}
 	}
 
 	void event_system::remove_listener(hash_t type, event_listener * value)
 	{
-		if (auto it{ g_event_system.find(type) })
+		if (!value) return;
+		if (auto listeners{ g_event_system.find(type) })
 		{
-			if (auto listener{ it->second->find(value) }; listener != it->second->end())
+			if (auto const it{ listeners->second->find(value) }; it != listeners->second->end())
 			{
-				it->second->erase(listener);
+				listeners->second->erase(it);
 			}
 		}
 	}
 
 	void event_system::remove_listener(event_listener * value)
 	{
-		g_event_system.for_each([value](auto, auto & it)
+		if (!value) return;
+		g_event_system.for_each([value](hash_t, auto & listeners)
 		{
-			if (auto listener{ it.find(value) }; listener != it.end())
+			if (auto const it{ listeners.find(value) }; it != listeners.end())
 			{
-				it.erase(listener);
+				listeners.erase(it);
 			}
 		});
 	}

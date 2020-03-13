@@ -20,7 +20,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class ... Ts
-	> constexpr bool is_any_of_v = std::disjunction_v<std::is_same<T, Ts>...>;
+	> constexpr bool is_any_of_v{ std::disjunction_v<std::is_same<T, Ts>...> };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -297,6 +297,80 @@ namespace ml::util
 			v++;
 			return v;
 		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// SIZE LITERALS
+namespace ml::literals
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// kibibyte
+	ML_NODISCARD constexpr uint64_t operator"" _KiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::kilo{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _KiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::kilo{})));
+	}
+
+	// mebibyte
+	ML_NODISCARD constexpr uint64_t operator"" _MiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::mega{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _MiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::mega{})));
+	}
+
+	// gibibyte
+	ML_NODISCARD constexpr uint64_t operator"" _GiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::giga{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _GiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::giga{})));
+	}
+
+	// tebibyte
+	ML_NODISCARD constexpr uint64_t operator"" _TiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::tera{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _TiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::tera{})));
+	}
+
+	// pebibyte
+	ML_NODISCARD constexpr uint64_t operator"" _PiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::peta{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _PiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::peta{})));
+	}
+
+	// exbibyte
+	ML_NODISCARD constexpr uint64_t operator"" _EiB(uint64_t n) noexcept
+	{
+		return util::power_of_2(util::ratio_cast(n, std::exa{}));
+	}
+
+	ML_NODISCARD constexpr uint64_t operator"" _EiB(float80_t n) noexcept
+	{
+		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::exa{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

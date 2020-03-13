@@ -28,7 +28,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct char_event final : T_event<char_event>
+	ML_EVENT(char_event)
 	{
 		uint32_t const value;
 
@@ -40,7 +40,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct cursor_enter_event final : T_event<cursor_enter_event>
+	ML_EVENT(cursor_enter_event)
 	{
 		int32_t const entered;
 
@@ -52,7 +52,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct cursor_pos_event final : T_event<cursor_pos_event>
+	ML_EVENT(cursor_pos_event)
 	{
 		float64_t const x, y;
 
@@ -65,7 +65,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct key_event final : T_event<key_event>
+	ML_EVENT(key_event)
 	{
 		int32_t const key, scan, action, mods;
 
@@ -77,32 +77,30 @@ namespace ml
 		{
 		}
 
-		constexpr bool is_press(int32_t k) const { return (key == k) && (action == ML_KEY_PRESS); }
-		constexpr bool is_repeat(int32_t k) const { return (key == k) && (action == ML_KEY_REPEAT); }
-		constexpr bool is_release(int32_t k) const { return (key == k) && (action == ML_KEY_RELEASE); }
+		constexpr bool is_press(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_PRESS); }
+		constexpr bool is_repeat(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_REPEAT); }
+		constexpr bool is_release(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_RELEASE); }
 
-		constexpr bool is_press(int32_t k, int32_t m) const { return is_press(k) && (mods == m); }
-		constexpr bool is_repeat(int32_t k, int32_t m) const { return is_repeat(k) && (mods == m); }
-		constexpr bool is_release(int32_t k, int32_t m) const { return is_release(k) && (mods == m); }
+		constexpr bool is_shift	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_shift);  }
+		constexpr bool is_ctrl	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_ctrl); }
+		constexpr bool is_alt	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_alt); }
+		constexpr bool is_super	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_super); }
+		constexpr bool is_caps	(int32_t k) const noexcept { return is_press(k) && (mods & key_mods_caps_lock); }
+		constexpr bool is_numlk	(int32_t k) const noexcept { return is_press(k) && (mods & key_mods_num_lock); }
 
-		constexpr bool is_shift	(int32_t k) const { return is_press(k, KeyMods_Shift); }
-		constexpr bool is_ctrl	(int32_t k) const { return is_press(k, KeyMods_Ctrl); }
-		constexpr bool is_alt	(int32_t k) const { return is_press(k, KeyMods_Alt); }
-		constexpr bool is_super	(int32_t k) const { return is_press(k, KeyMods_Super); }
-
-		constexpr bool is_new	() const { return is_ctrl(key_code::N); }
-		constexpr bool is_open	() const { return is_ctrl(key_code::O); }
-		constexpr bool is_save	() const { return is_ctrl(key_code::S) || is_press(key_code::S, KeyMods_Ctrl | KeyMods_Shift); }
-		constexpr bool is_undo	() const { return is_ctrl(key_code::Z); }
-		constexpr bool is_redo	() const { return is_ctrl(key_code::Y) || is_press(key_code::Z, KeyMods_Ctrl | KeyMods_Shift); }
-		constexpr bool is_cut	() const { return is_ctrl(key_code::X) || is_shift(key_code::Delete); }
-		constexpr bool is_copy	() const { return is_ctrl(key_code::C) || is_ctrl(key_code::Insert); }
-		constexpr bool is_paste	() const { return is_ctrl(key_code::V) || is_shift(key_code::Insert); }
+		constexpr bool is_new	() const noexcept { return is_ctrl(key_code::N); }
+		constexpr bool is_open	() const noexcept { return is_ctrl(key_code::O); }
+		constexpr bool is_save	() const noexcept { return is_ctrl(key_code::S) || is_press(key_code::S) && (mods & (key_mods_ctrl | key_mods_shift)); }
+		constexpr bool is_undo	() const noexcept { return is_ctrl(key_code::Z); }
+		constexpr bool is_redo	() const noexcept { return is_ctrl(key_code::Y) || is_press(key_code::Z) && (mods & (key_mods_ctrl | key_mods_shift)); }
+		constexpr bool is_cut	() const noexcept { return is_ctrl(key_code::X) || is_shift(key_code::Delete); }
+		constexpr bool is_copy	() const noexcept { return is_ctrl(key_code::C) || is_ctrl(key_code::Insert); }
+		constexpr bool is_paste	() const noexcept { return is_ctrl(key_code::V) || is_shift(key_code::Insert); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct mouse_event final : T_event<mouse_event>
+	ML_EVENT(mouse_event)
 	{
 		int32_t const key, action, mods;
 
@@ -116,7 +114,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct scroll_event final : T_event<scroll_event>
+	ML_EVENT(scroll_event)
 	{
 		float64_t const x, y;
 
@@ -129,7 +127,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct frame_size_event final : T_event<frame_size_event>
+	ML_EVENT(frame_size_event)
 	{
 		int32_t const width, height;
 
@@ -142,14 +140,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_close_event final : T_event<window_close_event>
+	ML_EVENT(window_close_event)
 	{
 		window_close_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_error_event final : T_event<window_error_event>
+	ML_EVENT(window_error_event)
 	{
 		int32_t const code;
 		cstring const desc;
@@ -163,7 +161,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_focus_event final : T_event<window_focus_event>
+	ML_EVENT(window_focus_event)
 	{
 		int32_t const focused;
 		
@@ -175,7 +173,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_pos_event final : T_event<window_pos_event>
+	ML_EVENT(window_pos_event)
 	{
 		int32_t const x, y;
 
@@ -188,7 +186,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_size_event final : T_event<window_size_event>
+	ML_EVENT(window_size_event)
 	{
 		int32_t const width, height;
 

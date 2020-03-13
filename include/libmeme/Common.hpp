@@ -90,6 +90,7 @@ namespace ml
 	ML_ALIAS	ptrdiff_t	= typename intmax_t;
 	ML_ALIAS	max_align_t = typename float64_t;
 	ML_ALIAS	size_t		= typename uintmax_t;
+	ML_ALIAS	ulong_t		= typename unsigned long;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -76,7 +76,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		m /* FUNCTIONS */
-			.def("exit"			, [](int32_t ec = {}) { engine::close(); })
+			.def("exit"			, [](int32_t code = 0) { engine::close(); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_script(l, s); })
 			.def("do_file"		, [](cstring s) { return engine::do_script(s); })
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })

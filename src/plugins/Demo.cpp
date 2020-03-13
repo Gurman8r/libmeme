@@ -337,7 +337,7 @@ namespace ml
 				m_materials["3d"] = make_material(
 					make_uniform<color	>("u_color",	colors::white),
 					make_uniform<texture>("u_texture0", &m_textures["earth_dm_2k"])
-					//, make_uniform<texture>("u_texture1", &m_textures["moon_dm_2k"])
+					//, make_uniform<texture>("u_texture1", &m_textures["earth_sm_2k"])
 				) + _timers + _camera + _tf;
 
 				// test
@@ -1019,9 +1019,9 @@ namespace ml
 				std::sprintf(progress, "%u / %u (%.2f%%)",
 					(uint32_t)testres->used_bytes(),
 					(uint32_t)testres->total_bytes(),
-					testres->percent()
+					testres->percent_used()
 				);
-				ImGui::ProgressBar(testres->fraction(), { 256.f, 0.f }, progress);
+				ImGui::ProgressBar(testres->fraction_used(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
 					ImGui::Text("allocations: %u", testres->num_allocations());

@@ -48,14 +48,13 @@ namespace ml
 	// malloc
 	void * memory_manager::allocate(size_t size)
 	{
-		static auto & inst{ memory_manager::get_instance() };
+		static auto & inst{ self_type::get() };
 
 		// allocate the requested bytes
-		return ([&, data = inst.m_alloc.allocate(size)]()
-		{
-			// create the record
-			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
-		})();
+		byte_t * const data{ inst.m_alloc.allocate(size) };
+		
+		// create the record
+		return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -63,7 +62,7 @@ namespace ml
 	// calloc
 	void * memory_manager::allocate(size_t count, size_t size)
 	{
-		return std::memset(allocate(count * size), 0, count * size);
+		return std::memset(self_type::allocate(count * size), 0, count * size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,7 +70,7 @@ namespace ml
 	// free
 	void memory_manager::deallocate(void * addr)
 	{
-		static auto & inst{ memory_manager::get_instance() };
+		static auto & inst{ self_type::get() };
 
 		// find the entry
 		if (auto const it{ inst.m_records.find(addr) })
@@ -89,7 +88,7 @@ namespace ml
 	// realloc
 	void * memory_manager::reallocate(void * addr, size_t size)
 	{
-		return reallocate(addr, size, size);
+		return self_type::reallocate(addr, size, size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -99,26 +98,28 @@ namespace ml
 	{
 		if (newsz == 0)
 		{
-			deallocate(addr);
+			self_type::deallocate(addr);
+			
 			return nullptr;
 		}
 		else if (!addr)
 		{
-			return allocate(newsz);
+			return self_type::allocate(newsz);
 		}
 		else if (newsz <= oldsz)
 		{
 			return addr;
 		}
-		else if (void * const temp{ allocate(newsz) })
-		{
-			std::memcpy(temp, addr, oldsz);
-			deallocate(addr);
-			return temp;
-		}
 		else
 		{
-			return nullptr;
+			void * const temp{ self_type::allocate(newsz) };
+			if (temp)
+			{
+				std::memcpy(temp, addr, oldsz);
+
+				self_type::deallocate(addr);
+			}
+			return temp;
 		}
 	}
 

@@ -509,25 +509,25 @@ namespace std
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
 	{
-		return _STD get<I>(value.m_data);
+		return std::get<I>(value.m_data);
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const & get(_ML ds::matrix<T, W, H> const & value) noexcept
 	{
-		return _STD get<I>(value.m_data);
+		return std::get<I>(value.m_data);
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
 	{
-		return _STD get<I>(value.m_data);
+		return std::get<I>(value.m_data);
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const && get(_ML ds::matrix<T, W, H> const && value) noexcept
 	{
-		return _STD get<I>(value.m_data);
+		return std::get<I>(value.m_data);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -535,25 +535,25 @@ namespace std
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
 	{
-		return _STD get<Y * W + X>(value);
+		return std::get<Y * W + X>(value);
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const & get(_ML ds::matrix<T, W, H> const & value) noexcept
 	{
-		return _STD get<Y * W + X>(value);
+		return std::get<Y * W + X>(value);
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
 	{
-		return _STD get<Y * W + X>(value);
+		return std::get<Y * W + X>(value);
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const && get(_ML ds::matrix<T, W, H> const && value) noexcept
 	{
-		return _STD get<Y * W + X>(value);
+		return std::get<Y * W + X>(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

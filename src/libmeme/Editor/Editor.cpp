@@ -13,6 +13,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// editor context
+	class editor::context final : trackable, non_copyable
+	{
+		friend class		editor						;
+		editor::config		m_config		{}			; // startup variables
+		editor::runtime		m_io			{}			; // runtime variables
+		void *				m_imgui_context	{}			; // current imgui context
+	};
+
 	static editor::context * g_editor{};
 
 	bool editor::is_initialized() noexcept
@@ -22,7 +31,11 @@ namespace ml
 
 	bool editor::create_context(json const & j)
 	{
-		if (!g_editor && (g_editor = new editor::context{}))
+		if (is_initialized() || !(g_editor = new editor::context{}))
+		{
+			return debug::log::error("editor is already initialized");
+		}
+		else
 		{
 			auto & cfg{ get_config() };
 
@@ -36,7 +49,6 @@ namespace ml
 
 			return g_editor;
 		}
-		return false;
 	}
 
 	bool editor::destroy_context()

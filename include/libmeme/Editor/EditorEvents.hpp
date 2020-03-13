@@ -7,21 +7,19 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct gui_begin_event final : T_event<gui_begin_event>
+	ML_EVENT(gui_begin_event)
 	{
 	};
 
-	struct gui_draw_event final : T_event<gui_draw_event>
+	ML_EVENT(gui_dock_event)
 	{
 	};
 
-	struct gui_end_event final : T_event<gui_end_event>
+	ML_EVENT(gui_draw_event)
 	{
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	struct gui_dock_event final : T_event<gui_dock_event>
+	ML_EVENT(gui_end_event)
 	{
 	};
 

@@ -20,8 +20,8 @@ project "demo"
 	}
 	includedirs {
 		"%{sln_dir}include",
-		"%{ext_dir}",
 		"%{sln_dir}plugins",
+		"%{ext_dir}",
 		"%{ext_dir}json/include",
 	}
 	files {

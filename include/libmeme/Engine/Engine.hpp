@@ -23,10 +23,12 @@ namespace ml
 		using file_list_t	= pmr::vector<filesystem::path>;
 		using file_set_t	= ds::flat_set<filesystem::path>;
 		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
+		using script_fun_t	= std::function<int32_t()>;
+		using script_lib_t	= ds::flat_map<hash_t, pmr::vector<script_fun_t>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// startup variables
+		// engine config
 		struct config final : trackable
 		{
 			arguments_t			arguments		{}			; // arguments
@@ -40,28 +42,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// runtime variables
+		// engine runtime
 		struct runtime final : trackable
 		{
 			float_t				delta_time		{}			; // frame time
 			size_t				frame_count		{}			; // frame count
 			float_t				frame_rate		{}			; // frame rate
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// engine context
-		class context final : trackable, non_copyable
-		{
-			friend class		engine						;
-			engine::config		m_config		{}			; // startup variables
-			engine::runtime		m_io			{}			; // runtime variables
-			timer				m_main_timer	{ true }	; // master timer
-			timer				m_loop_timer	{}			; // frame timer
-			frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
-			render_window		m_window		{}			; // main window
-			file_set_t			m_plugin_files	{}			; // plugin filenames
-			libraries_t			m_plugin_libs	{}			; // plugin instances
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -102,9 +88,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static inline bool is_running() noexcept
+		{
+			return is_initialized() && get_window().is_open();
+		}
+
+		static inline void close() noexcept
+		{
+			if (is_initialized()) { get_window().close(); }
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		static bool load_plugin(filesystem::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool add_callback(pmr::string const & id, script_fun_t const & fn);
+
+		static void run_callback(pmr::string const & id);
 
 		static int32_t do_script(int32_t lang, pmr::string const & text);
 
@@ -114,18 +116,6 @@ namespace ml
 		> inline static int32_t do_script(pmr::string const & text)
 		{
 			return do_script(Lang, text);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static inline bool is_running() noexcept
-		{
-			return is_initialized() && get_window().is_open();
-		}
-
-		static inline void close() noexcept
-		{
-			if (is_initialized()) { get_window().close(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

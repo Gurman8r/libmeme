@@ -4,13 +4,15 @@
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
+#define ML_EVENT(type) struct type final : _ML T_event<type>
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// event cast
 	template <class Ev
-	> ML_NODISCARD static constexpr auto event_cast(struct event const & value) noexcept
+	> ML_NODISCARD constexpr auto event_cast(struct event const & value) noexcept
 	{
 		static_assert(std::is_base_of_v<struct event, Ev>, "bad event cast");
 		return (value.id() == hashof_v<Ev>)

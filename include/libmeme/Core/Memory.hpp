@@ -5,7 +5,7 @@
 #include <libmeme/Core/FlatMap.hpp>
 
 // TEST RESOURCE
-namespace ml::detail
+namespace ml::util
 {
 	// passthrough memory resource for collecting metrics
 	struct test_resource final : public pmr::memory_resource, non_copyable
@@ -26,9 +26,12 @@ namespace ml::detail
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool valid() const noexcept { return m_resource && m_buffer && m_total_bytes; }
+		inline bool good() const noexcept
+		{
+			return m_resource && m_buffer && (0 < m_total_bytes);
+		}
 
-		inline operator bool() const noexcept { return valid(); }
+		inline operator bool() const noexcept { return good(); }
 
 		inline pmr::memory_resource * upstream_resource() const noexcept { return m_resource; }
 
@@ -36,11 +39,7 @@ namespace ml::detail
 
 		inline size_t addr() const noexcept { return (size_t)m_buffer; }
 
-		inline pointer const data() noexcept { return m_buffer; }
-
-		inline const_pointer const data() const noexcept { return m_buffer; }
-
-		inline size_t num_allocations() const noexcept { return m_num_alloc; }
+		inline size_t num_allocations() const noexcept { return m_alloc_count; }
 
 		inline size_t total_bytes() const noexcept { return m_total_bytes; }
 
@@ -48,9 +47,15 @@ namespace ml::detail
 
 		inline size_t free_bytes() const noexcept { return m_total_bytes - m_bytes_used; }
 
-		inline float_t fraction() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
+		inline float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
 
-		inline float_t percent() const noexcept { return fraction() * 100.f; }
+		inline float_t percent_used() const noexcept { return fraction_used() * 100.f; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		inline pointer const data() noexcept { return m_buffer; }
+
+		inline const_pointer const data() const noexcept { return m_buffer; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,14 +86,14 @@ namespace ml::detail
 	protected:
 		inline void * do_allocate(size_t bytes, size_t align) override
 		{
-			++m_num_alloc;
+			++m_alloc_count;
 			m_bytes_used += bytes;
 			return m_resource->allocate(bytes, align);
 		}
 
 		inline void do_deallocate(void * ptr, size_t bytes, size_t align) override
 		{
-			--m_num_alloc;
+			--m_alloc_count;
 			m_bytes_used -= bytes;
 			return m_resource->deallocate(ptr, bytes, align);
 		}
@@ -105,8 +110,8 @@ namespace ml::detail
 		pointer const m_buffer;
 		size_t const m_total_bytes;
 
-		size_t m_num_alloc	{};
-		size_t m_bytes_used	{};
+		size_t m_alloc_count {};
+		size_t m_bytes_used {};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -126,17 +131,24 @@ namespace ml
 			size_t index; size_t size; byte_t * data;
 		};
 
+		using record_map = typename ds::flat_map<void *, record>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool initialize(detail::test_resource * resource) noexcept
+		static inline bool initialize(util::test_resource * resource) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & inst{ self_type::get() };
 
-			if (!resource || !(*resource) || inst.m_testres) return false;
-			
-			inst.m_testres = resource;
+			if (inst.m_testres || !resource || !(*resource))
+			{
+				return false;
+			}
+			else
+			{
+				inst.m_testres = resource;
 
-			return true;
+				return (pmr::get_default_resource() == inst.m_testres);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -166,24 +178,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline auto const & get_allocator() noexcept
+		ML_NODISCARD static inline allocator_type get_allocator() noexcept
 		{
-			return get_instance().m_alloc;
+			return self_type::get().m_alloc;
 		}
 
-		ML_NODISCARD static inline auto const & get_index() noexcept
+		ML_NODISCARD static inline size_t const & get_index() noexcept
 		{
-			return get_instance().m_index;
+			return self_type::get().m_index;
 		}
 
-		ML_NODISCARD static inline auto const & get_records() noexcept
+		ML_NODISCARD static inline record_map const & get_records() noexcept
 		{
-			return get_instance().m_records;
+			return self_type::get().m_records;
 		}
 
-		ML_NODISCARD static inline auto const & get_testres() noexcept
+		ML_NODISCARD static inline util::test_resource * const get_testres() noexcept
 		{
-			return get_instance().m_testres;
+			return self_type::get().m_testres;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -194,10 +206,10 @@ namespace ml
 		memory_manager() noexcept;
 		~memory_manager();
 
-		allocator_type					m_alloc;
-		size_t							m_index;
-		ds::flat_map<void *, record>	m_records;
-		detail::test_resource *			m_testres;
+		allocator_type			m_alloc;
+		size_t					m_index;
+		record_map				m_records;
+		util::test_resource *	m_testres;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -236,78 +248,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-}
-
-// LITERALS
-namespace ml::literals
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// kibibyte
-	ML_NODISCARD constexpr uint64_t operator"" _KiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::kilo{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _KiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::kilo{})));
-	}
-
-	// mebibyte
-	ML_NODISCARD constexpr uint64_t operator"" _MiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::mega{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _MiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::mega{})));
-	}
-
-	// gibibyte
-	ML_NODISCARD constexpr uint64_t operator"" _GiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::giga{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _GiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::giga{})));
-	}
-
-	// tebibyte
-	ML_NODISCARD constexpr uint64_t operator"" _TiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::tera{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _TiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::tera{})));
-	}
-
-	// pebibyte
-	ML_NODISCARD constexpr uint64_t operator"" _PiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::peta{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _PiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::peta{})));
-	}
-
-	// exbibyte
-	ML_NODISCARD constexpr uint64_t operator"" _EiB(uint64_t n) noexcept
-	{
-		return util::power_of_2(util::ratio_cast(n, std::exa{}));
-	}
-
-	ML_NODISCARD constexpr uint64_t operator"" _EiB(float80_t n) noexcept
-	{
-		return util::power_of_2(static_cast<uint64_t>(util::ratio_cast(n, std::exa{})));
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -220,14 +220,14 @@ namespace std
 	> ML_NODISCARD constexpr T && get(_ML ds::array<T, N> && value) noexcept
 	{
 		static_assert(I < N, "array index out of bounds");
-		return _STD move(value.m_data[I]);
+		return std::move(value.m_data[I]);
 	}
 
 	template <size_t I, class T, size_t N
 	> ML_NODISCARD constexpr T const && get(const _ML ds::array<T, N> && value) noexcept
 	{
 		static_assert(I < N, "array index out of bounds");
-		return _STD move(value.m_data[I]);
+		return std::move(value.m_data[I]);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -242,14 +242,14 @@ namespace ml::ds
 	> static void to_json(json & j, array<T, N> const & value)
 	{
 		// SPAGHET: json wants iterators
-		j = *reinterpret_cast<_STD array<T, N> const *>(&value);
+		j = *reinterpret_cast<std::array<T, N> const *>(&value);
 	}
 
 	template <class T, size_t N
 	> static void from_json(json const & j, array<T, N> & value)
 	{
 		// SPAGHET: json wants iterators
-		j.get_to(*reinterpret_cast<_STD array<T, N> *>(&value));
+		j.get_to(*reinterpret_cast<std::array<T, N> *>(&value));
 	}
 }
 

@@ -88,40 +88,38 @@ namespace ml::ds
 		}
 
 		basic_flat_set(init_type value, allocator_type const & alloc = {})
-			: self_type{ alloc }
+			: m_data{ value, alloc }
 		{
-			this->assign(value);
+			this->impl_sort();
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
-			: self_type{ alloc }
+			: m_data{ first, last, alloc }
 		{
-			this->assign(first, last);
+			this->impl_sort();
 		}
 
 		basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
-			: self_type{ alloc }
+			: m_data{ value, alloc }
 		{
-			this->assign(value);
+			this->impl_sort();
 		}
 
 		basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
-			: self_type{ alloc }
+			: m_data{ std::move(value), alloc }
 		{
-			this->swap(std::move(value));
+			this->impl_sort();
 		}
 
 		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
-			: self_type{ alloc }
+			: m_data{ other.m_data, alloc }
 		{
-			this->assign(other);
 		}
 
 		basic_flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
-			: self_type{ alloc }
+			: m_data{ std::move(other.m_data), alloc }
 		{
-			this->swap(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -172,7 +170,9 @@ namespace ml::ds
 
 		inline void assign(init_type value)
 		{
-			this->assign(value.begin(), value.end());
+			m_data.assign(value);
+
+			this->impl_sort();
 		}
 
 		inline void assign(storage_type const & value)
@@ -180,6 +180,8 @@ namespace ml::ds
 			if (std::addressof(m_data) != std::addressof(value))
 			{
 				m_data = value;
+
+				this->impl_sort();
 			}
 		}
 
@@ -190,28 +192,6 @@ namespace ml::ds
 				m_data = other.m_data;
 			}
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		inline void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_data.swap(other.m_data);
-			}
-		}
-
-		inline void swap(storage_type & value) noexcept
-		{
-			if (std::addressof(m_data) != std::addressof(value))
-			{
-				m_data.swap(value);
-
-				this->impl_sort();
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		inline void clear() noexcept
 		{
@@ -236,6 +216,24 @@ namespace ml::ds
 		inline void shrink_to_fit()
 		{
 			m_data.shrink_to_fit();
+		}
+
+		inline void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_data.swap(other.m_data);
+			}
+		}
+
+		inline void swap(storage_type & value) noexcept
+		{
+			if (std::addressof(m_data) != std::addressof(value))
+			{
+				m_data.swap(value);
+
+				this->impl_sort();
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
