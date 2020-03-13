@@ -3,7 +3,7 @@ import LIBMEME_EDITOR as editor
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-class test():
+class ml_setup():
     def awake():
         import builtins
         import sys
@@ -30,9 +30,9 @@ class test():
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-engine.add_callback("awake",    test.awake)
-engine.add_callback("load",     test.load)
-engine.add_callback("unload",   test.unload)
-engine.add_callback("start",    test.start)
+engine.add_callback("awake",    ml_setup.awake)
+engine.add_callback("load",     ml_setup.load)
+engine.add_callback("unload",   ml_setup.unload)
+engine.add_callback("start",    ml_setup.start)
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
