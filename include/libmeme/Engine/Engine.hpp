@@ -19,11 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using arguments_t	= pmr::vector<cstring>;
-		using file_list_t	= pmr::vector<filesystem::path>;
-		using file_set_t	= ds::flat_set<filesystem::path>;
-		using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
-		using script_lib_t	= ds::flat_map<hash_t, pmr::vector<std::function<void()>>>;
+		using arguments_t = pmr::vector<cstring>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -87,15 +83,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static inline bool is_running() noexcept
-		{
-			return is_initialized() && get_window().is_open();
-		}
+		ML_NODISCARD static bool is_running() noexcept;
 
-		static inline void close() noexcept
-		{
-			if (is_initialized()) { get_window().close(); }
-		}
+		static void close() noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static filesystem::path path_to(filesystem::path const & value = {});
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -103,31 +97,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_callback(pmr::string const & id, std::function<void()> const & fn);
+		static int32_t do_string(int32_t lang, pmr::string const & text);
 
-		static void run_callback(pmr::string const & id);
+		static int32_t do_file(filesystem::path const & path);
 
-		static int32_t do_script(int32_t lang, pmr::string const & text);
-
-		static int32_t do_script(filesystem::path const & path);
-
-		template <int32_t Lang
-		> inline static int32_t do_script(pmr::string const & text)
+		template <int32_t Lang> inline static int32_t do_string(pmr::string const & text)
 		{
-			return do_script(Lang, text);
+			return do_string(Lang, text);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static bool add_hook(pmr::string const & id, std::function<void()> const & fn);
 
-		ML_NODISCARD static inline filesystem::path path_to(filesystem::path const & value = {})
-		{
-			if (value.empty())
-				return {};
-			else if (auto const & home{ get_config().content_home }; home.empty())
-				return value;
-			else
-				return filesystem::path{ home.native() + value.native() };
-		}
+		static void run_hook(pmr::string const & id);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

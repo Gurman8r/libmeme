@@ -39,7 +39,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// load config
+	// read config
 	auto config = ([&temp = json{}, &file = std::ifstream{ CONFIG_FILE }]()
 	{
 		if (file) { file >> temp; }
@@ -51,29 +51,17 @@ ml::int32_t main()
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// start engine
+	// startup
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
-	
-	// awake
-	engine::run_callback("awake");
-	
-	// start editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
-	// load
-	engine::run_callback("load");
-	event_system::fire_event<load_event>();
-	
-	// unload
-	ML_defer{
-		engine::run_callback("unload");
-		event_system::fire_event<unload_event>();
-	};
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// start
-	engine::run_callback("start");
+	event_system::fire_event<load_event>();
+
+	engine::run_hook("start");
+
+	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	

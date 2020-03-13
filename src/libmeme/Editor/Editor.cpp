@@ -24,6 +24,8 @@ namespace ml
 
 	static editor::context * g_editor{};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool editor::is_initialized() noexcept
 	{
 		return g_editor;

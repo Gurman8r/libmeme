@@ -678,7 +678,7 @@ namespace ml
 					}
 					else
 					{
-						engine::do_script<embed::api::lua>(util::detokenize(args));
+						engine::do_string<embed::api::lua>(util::detokenize(args));
 					}
 				} });
 
@@ -695,7 +695,7 @@ namespace ml
 					}
 					else
 					{
-						engine::do_script<embed::api::python>(util::detokenize(args));
+						engine::do_string<embed::api::python>(util::detokenize(args));
 					}
 				} });
 			}

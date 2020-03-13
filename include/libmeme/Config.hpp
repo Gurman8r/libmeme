@@ -15,26 +15,26 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(__cplusplus)
 #	if defined(_MSVC_LANG)
-#		define ML_CC_LANG _MSVC_LANG
+#		define ML_LANG _MSVC_LANG
 #	else
-#		define ML_CC_LANG __cplusplus
+#		define ML_LANG __cplusplus
 #	endif
-#	if (ML_CC_LANG >= 201907L)     // C++20
+#	if (ML_LANG >= 201907L)     // C++20
 #		define ML_HAS_CXX20 1
 #       define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_CC_LANG >= 201703L)   // C++17
+#   elif (ML_LANG >= 201703L)   // C++17
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 1
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_CC_LANG >= 201402L)   // C++14
+#   elif (ML_LANG >= 201402L)   // C++14
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 1
 #       define ML_HAS_CXX11 1
-#   elif (ML_CC_LANG >= 201103L)   // C++11
+#   elif (ML_LANG >= 201103L)   // C++11
 #		define ML_HAS_CXX20 0
 #		define ML_HAS_CXX17 0
 #       define ML_HAS_CXX14 0
@@ -227,10 +227,10 @@
 // Debug
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #if defined(_DEBUG)
-#	define ML_IS_DEBUG          1
+#	define ML_IS_DEBUG          true
 #   define ML_CONFIGURATION     "debug"
 #else
-#	define ML_IS_DEBUG          0
+#	define ML_IS_DEBUG          false
 #   define ML_CONFIGURATION     "release"
 #endif
 

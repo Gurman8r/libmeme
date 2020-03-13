@@ -1,5 +1,6 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
+#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
@@ -13,6 +14,11 @@
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	using file_list_t	= pmr::vector<filesystem::path>;
+	using file_set_t	= ds::flat_set<filesystem::path>;
+	using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
+	using script_lib_t	= ds::flat_map<hash_t, pmr::vector<std::function<void()>>>;
 
 	// engine context
 	class engine::context final : trackable, non_copyable
@@ -27,10 +33,12 @@ namespace ml
 		file_set_t			m_plugin_files	{}			; // plugin filenames
 		libraries_t			m_plugin_libs	{}			; // plugin instances
 		lua_State *			m_lua			{}			; // lua state
-		script_lib_t		m_scr			{}			; // scripts
+		script_lib_t		m_hooks			{}			; // hooks
 	};
 
 	static engine::context * g_engine{};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool engine::is_initialized() noexcept
 	{
@@ -59,7 +67,7 @@ namespace ml
 
 			j["setup_script"].get_to(cfg.setup_script);
 
-			j.at("window_settings").get_to(cfg.window_settings);
+			j["window_settings"].get_to(cfg.window_settings);
 
 			return g_engine;
 		}
@@ -158,7 +166,7 @@ namespace ml
 		})()) return debug::log::error("engine failed starting python");
 
 		// run setup script
-		do_script(path_to(get_config().setup_script));
+		do_file(path_to(get_config().setup_script));
 
 		// create window
 		if (g_engine->m_window.create(get_config().window_settings))
@@ -192,7 +200,7 @@ namespace ml
 		}
 
 		// destroy scripts
-		g_engine->m_scr.clear();
+		g_engine->m_hooks.clear();
 
 		// shutdown python
 		if (Py_IsInitialized()) { Py_FinalizeEx(); }
@@ -253,6 +261,39 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool engine::is_running() noexcept
+	{
+		return is_initialized() && get_window().is_open();
+	}
+
+	void engine::close() noexcept
+	{
+		if (is_initialized())
+		{
+			get_window().close();
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	filesystem::path engine::path_to(filesystem::path const & value)
+	{
+		if (value.empty())
+		{
+			return {};
+		}
+		else if (auto const & home{ get_config().content_home }; home.empty())
+		{
+			return value;
+		}
+		else
+		{
+			return filesystem::path{ home.native() + value.native() };
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool engine::load_plugin(filesystem::path const & path)
 	{
 		if (path.empty()) return false;
@@ -276,30 +317,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::add_callback(pmr::string const & id, std::function<void()> const & fn)
-	{
-		if (!g_engine) { return false; }
-
-		return (bool)g_engine->m_scr.at(util::hash(id)).emplace_back(fn);
-	}
-
-	void engine::run_callback(pmr::string const & id)
-	{
-		if (!g_engine) { return; }
-
-		if (auto const functions{ g_engine->m_scr.find(util::hash(id)) })
-		{
-			for (auto const & fn : (*functions->second))
-			{
-				if (fn)
-				{
-					std::invoke(fn);
-				}
-			}
-		}
-	}
-
-	int32_t engine::do_script(int32_t lang, pmr::string const & text)
+	int32_t engine::do_string(int32_t lang, pmr::string const & text)
 	{
 		if (!is_initialized() || text.empty()) { return 0; }
 		
@@ -317,7 +335,7 @@ namespace ml
 		return 0;
 	}
 
-	int32_t engine::do_script(filesystem::path const & path)
+	int32_t engine::do_file(filesystem::path const & path)
 	{
 		if (!is_initialized() || !filesystem::exists(path)) { return 0; }
 
@@ -334,6 +352,29 @@ namespace ml
 		}
 		}
 		return 0;
+	}
+
+	bool engine::add_hook(pmr::string const & id, std::function<void()> const & fn)
+	{
+		if (!g_engine) { return false; }
+
+		return (bool)g_engine->m_hooks.at(util::hash(id)).emplace_back(fn);
+	}
+
+	void engine::run_hook(pmr::string const & id)
+	{
+		if (!g_engine) { return; }
+
+		if (auto const functions{ g_engine->m_hooks.find(util::hash(id)) })
+		{
+			for (auto const & fn : (*functions->second))
+			{
+				if (fn)
+				{
+					std::invoke(fn);
+				}
+			}
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
