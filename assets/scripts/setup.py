@@ -15,11 +15,15 @@ engine.hook("start", on_start)
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-class ml_test(engine.script):
-    def awake(self):
-        return
+class scr_test(engine.script):
+    def __init__(self, *args, **kwargs):
+        return super(scr_test, self).__init__(self, *args, **kwargs)
+    
+    def invoke(self, *args, **kwargs):
+        print(f"# args:   {args}")
+        print(f"# kwargs: {kwargs}")
+        return 0
 
-    def start(self):
-        return
+scr_test('Hello')('Welcome')
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

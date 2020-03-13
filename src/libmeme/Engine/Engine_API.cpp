@@ -115,15 +115,38 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct impl_script {};
+		// SCRIPT
+		struct impl_script
+		{
+			using callback_t = typename std::function<py::object(py::args, py::kwargs)>;
+			
+			py::object	m_self;
+			py::args	m_args;
+			py::kwargs	m_kwargs;
+			callback_t	m_clbk;
+
+			impl_script(py::object self, py::args args, py::kwargs kwargs)
+				: m_self	{ self }
+				, m_args	{ args }
+				, m_kwargs	{ kwargs }
+				, m_clbk	{ m_self.attr("invoke").cast<callback_t>() }
+			{
+			}
+
+			py::object operator()(py::args args, py::kwargs kwargs)
+			{
+				return m_clbk ? std::invoke(m_clbk, args, kwargs) : py::none{};
+			}
+		};
 		py::class_<impl_script>(m, "script")
-			.def(py::init<>())
+			.def(py::init<py::object, py::args, py::kwargs>())
+			.def("__call__", &impl_script::operator(), py::is_operator())
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		m // FUNCTIONS
-			.def("exit"			, []() { return engine::close(); })
+			.def("close"		, []() { return engine::close(); })
 			.def("path_to"		, [](cstring s) { return engine::path_to(s).native(); })
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_string(l, s); })
@@ -139,8 +162,8 @@ namespace ml::embed
 			, sys = py::module::import("sys")
 		]()
 		{
-			builtins.attr("exit")	= m.attr("exit");
-			sys.attr("exit")		= m.attr("exit");
+			builtins.attr("exit")	= m.attr("close");
+			sys.attr("exit")		= m.attr("close");
 			sys.attr("stdout")		= m.attr("cout");
 			sys.attr("stderr")		= m.attr("cout");
 			sys.attr("stdin")		= py::none{};
