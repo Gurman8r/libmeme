@@ -21,7 +21,6 @@ namespace ml
 	using file_list_t	= pmr::vector<filesystem::path>;
 	using file_set_t	= ds::flat_set<filesystem::path>;
 	using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
-	using script_lib_t	= ds::flat_map<hash_t, pmr::vector<std::function<void()>>>;
 
 	// engine context
 	class engine::context final : trackable, non_copyable
@@ -36,7 +35,6 @@ namespace ml
 		file_set_t			m_plugin_files	{}			; // plugin filenames
 		libraries_t			m_plugin_libs	{}			; // plugin instances
 		lua_State *			m_lua			{}			; // lua state
-		script_lib_t		m_hooks			{}			; // hooks
 	};
 
 	static engine::context * g_engine{};
@@ -202,9 +200,6 @@ namespace ml
 			window::terminate();
 		}
 
-		// destroy scripts
-		g_engine->m_hooks.clear();
-
 		// shutdown python
 		if (Py_IsInitialized()) { Py_FinalizeEx(); }
 
@@ -355,29 +350,6 @@ namespace ml
 		}
 		}
 		return 0;
-	}
-
-	bool engine::add_hook(pmr::string const & id, std::function<void()> const & fn)
-	{
-		if (!g_engine) { return false; }
-
-		return (bool)g_engine->m_hooks.at(util::hash(id)).emplace_back(fn);
-	}
-
-	void engine::run_hook(pmr::string const & id)
-	{
-		if (!g_engine) { return; }
-
-		if (auto const functions{ g_engine->m_hooks.find(util::hash(id)) })
-		{
-			for (auto const & fn : (*functions->second))
-			{
-				if (fn)
-				{
-					std::invoke(fn);
-				}
-			}
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

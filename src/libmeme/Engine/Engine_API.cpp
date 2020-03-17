@@ -113,7 +113,6 @@ namespace ml::embed
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_string(l, s); })
 			.def("do_file"		, [](cstring s) { return engine::do_file(s); })
-			.def("hook"			, &engine::add_hook)
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

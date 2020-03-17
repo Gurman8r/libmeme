@@ -106,10 +106,6 @@ namespace ml
 			return do_string(Lang, text);
 		}
 
-		static bool add_hook(pmr::string const & id, std::function<void()> const & fn);
-
-		static void run_hook(pmr::string const & id);
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

@@ -18,8 +18,7 @@ namespace ml::embed
 	{
 		scriptable_flags_invalid	= -1,		// invalid
 		scriptable_flags_none		= 0,		// none
-		scriptable_flags_active		= 1 << 0,	// active
-		scriptable_flags_enabled	= 1 << 1,	// enabled
+		scriptable_flags_enabled	= 1 << 0,	// enabled
 		scriptable_flags_default	= 0			// default
 	};
 
@@ -45,25 +44,19 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const;
-
-		ML_NODISCARD py::str repr() const;
-
-		ML_NODISCARD py::str str() const;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		py::object enter();
 
 		py::object exit();
 
 		bool hook(cstring name);
 
-		py::object operator()(cstring name);
+		py::object broadcast(cstring name);
 
 		void set_flag(int32_t i, bool b);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline operator bool() const { return (bool)m_self; }
 
 		ML_NODISCARD inline auto self() noexcept -> py::object const & { return m_self; }
 
@@ -79,15 +72,13 @@ namespace ml::embed
 
 		ML_NODISCARD inline auto callbacks() const noexcept -> fn_table const & { return m_clbk; }
 
-		ML_NODISCARD inline bool get_flag(int32_t const i) const noexcept { return m_flags & i; }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool is_active() const noexcept { return get_flag(scriptable_flags_active); }
+		ML_NODISCARD inline bool get_flag(int32_t const i) const noexcept { return m_flags & i; }
 
 		ML_NODISCARD inline bool is_enabled() const noexcept { return get_flag(scriptable_flags_enabled); }
 
-		ML_NODISCARD inline auto set_active(bool b) noexcept { return set_flag(scriptable_flags_active, b); }
-
-		ML_NODISCARD inline auto set_enabled(bool b) noexcept { return set_flag(scriptable_flags_enabled, b); }
+		ML_NODISCARD inline void set_enabled(bool b) noexcept { return set_flag(scriptable_flags_enabled, b); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

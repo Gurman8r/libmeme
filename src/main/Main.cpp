@@ -59,8 +59,6 @@ ml::int32_t main()
 
 	event_system::fire_event<load_event>();
 
-	engine::run_hook("start");
-
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
