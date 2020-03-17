@@ -13,12 +13,12 @@ namespace ml::embed
 			.def("__nonzero__"	, &self_type::operator bool, py::is_operator())
 			.def("__enter__"	, &self_type::enter)
 			.def("__exit__"		, [](self_type & self, py::args) { return self.exit(); })
-			.def("__call__"		, &self_type::broadcast, py::is_operator())
+			.def("__call__"		, &self_type::call, py::is_operator())
 
-			.def_readwrite("args"	, &self_type::m_args)
-			.def_readwrite("kwargs"	, &self_type::m_kwargs)
-			.def_property("enabled"	, &self_type::is_enabled, &self_type::set_enabled)
-
+			.def_readwrite(			"args"		, &self_type::m_args)
+			.def_readwrite(			"kwargs"	, &self_type::m_kwargs)
+			.def_readonly(			"flags"		, &self_type::m_flags)
+			.def_property(			"enabled"	, &self_type::is_enabled, &self_type::set_enabled)
 			;
 	}
 
@@ -26,24 +26,19 @@ namespace ml::embed
 
 	scriptable_object::scriptable_object(py::object self, py::args args, py::kwargs kwargs)
 		: m_self{ self }
-		, m_args{ args }, m_kwargs{ kwargs }, m_flags{ scriptable_flags_default }
+		, m_args{ args }, m_kwargs{ kwargs }
+		, m_flags{ scriptable_flags_none }
 		, m_clbk{}
 	{
-		broadcast("awake");
-		
+		call("awake");
 		set_enabled(!m_kwargs.contains("enabled") || py::bool_{ m_kwargs["enabled"] });
-
-		if (is_enabled())
-		{
-			broadcast("start");
-		}
 	}
 
 	scriptable_object::~scriptable_object()
 	{
 		set_enabled(false);
 
-		broadcast("on_destroy");
+		call("on_destroy");
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -58,23 +53,29 @@ namespace ml::embed
 		return py::none{};
 	}
 
-	bool scriptable_object::hook(cstring name)
+	py::object scriptable_object::call(cstring name)
 	{
-		return name && py::hasattr(m_self, name) && m_clbk.try_emplace(
-			util::hash(name, util::strlen(name)),
-			m_self.attr(name).cast<callback>()
-		).second;
-	}
+		auto const code{ util::hash(name, util::strlen(name)) };
 
-	py::object scriptable_object::broadcast(cstring name)
-	{
-		if (auto const it{ m_clbk.find(util::hash(name, util::strlen(name))) })
+		if (auto const it{ m_clbk.find(code) })
 		{
-			return std::invoke(*it->second);
+			switch (code)
+			{
+			case util::hash("update"):
+				if (set_flag(scriptable_flags_active, true))
+				{
+					call("start");
+					return call("update");
+				}
+				break;
+			}
+			return (*it->second) ? std::invoke(*it->second) : py::none{};
 		}
-		else if (hook(name))
+		else if (py::hasattr(m_self, name) && m_clbk.find_or_add(
+			code, m_self.attr(name).cast<callback>()
+		))
 		{
-			return broadcast(name);
+			return call(name);
 		}
 		else
 		{
@@ -82,17 +83,17 @@ namespace ml::embed
 		}
 	}
 
-	void scriptable_object::set_flag(int32_t i, bool b)
+	bool scriptable_object::set_flag(int32_t i, bool b)
 	{
-		if (get_flag(i) == b) return;
+		if (get_flag(i) == b) return false;
 		m_flags = b ? (m_flags | i) : (m_flags & ~i);
 		switch (i)
 		{
 		case scriptable_flags_enabled:
-			if (b) broadcast("on_enable");
-			else broadcast("on_disable");
+			if (b) call("on_enable"); else call("on_disable");
 			break;
 		}
+		return true;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

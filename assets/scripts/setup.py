@@ -1,14 +1,16 @@
-import LIBMEME_ENGINE as engine
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-engine.load_plugin("demo")
+import LIBMEME_ENGINE as ml
 
-print(f"# {engine.lib.name()} | {engine.lib.arch()!r}-bit | {engine.lib.config()}")
-print(f"# {engine.lib.url()}")
+ml.load_plugin("demo")
+
+print(f"# {ml.lib.name()} | {ml.lib.arch()!r}-bit | {ml.lib.config()}")
+print(f"# {ml.lib.url()}")
 print(f"# type \'help\' for a list of commands")
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-class scr_test(engine.scriptable_object):
+class scr_test(ml.scriptable_object):
     def __init__(self, *args, **kwargs):
         return super(scr_test, self).__init__(self, *args, **kwargs)
 
@@ -24,6 +26,6 @@ with scr_test(enabled = True) as test:
     print(f"args    | {test.args}")
     print(f"kwargs  | {test.kwargs}")
     print(f"enabled | {test.enabled}")
-
+    test("update")
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
