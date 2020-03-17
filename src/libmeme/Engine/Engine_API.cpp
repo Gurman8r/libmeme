@@ -1,9 +1,10 @@
 #include <libmeme/Engine/Engine.hpp>
-#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Core/Debug.hpp>
 
+#ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
-#include <libmeme/Engine/Embed.hpp>
+#endif
+#include <libmeme/Engine/ScriptableObject.hpp>
 
 // OUTPUT WRAPPER
 namespace ml::embed
@@ -49,35 +50,6 @@ namespace ml::embed
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// LIBMEME_PROJECT
-namespace ml::embed
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	PYBIND11_EMBEDDED_MODULE(LIBMEME_PROJECT, m)
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		m.attr("arch")			= ML_ARCH;
-		m.attr("author")		= ML__AUTHOR;
-		m.attr("build_date")	= ML__DATE;
-		m.attr("build_time")	= ML__TIME;
-		m.attr("cc")			= ML_CC_NAME;
-		m.attr("cc_ver")		= ML_CC_VER;
-		m.attr("config")		= ML_CONFIGURATION;
-		m.attr("is_debug")		= ML_IS_DEBUG;
-		m.attr("lang")			= ML_LANG;
-		m.attr("name")			= ML__NAME;
-		m.attr("platform")		= ML_PLATFORM;
-		m.attr("url")			= ML__URL;
-		m.attr("ver")			= ML__VERSION;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
 // LIBMEME_ENGINE
 namespace ml::embed
 {
@@ -86,11 +58,32 @@ namespace ml::embed
 	PYBIND11_EMBEDDED_MODULE(LIBMEME_ENGINE, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// LIB
+		struct ml_lib {};
+		py::class_<ml_lib>(m, "lib")
+			.def("arch"			, []() { return ML_ARCH; })
+			.def("author"		, []() { return ML__AUTHOR; })
+			.def("cc"			, []() { return ML_CC_NAME; })
+			.def("cc_ver"		, []() { return ML_CC_VER; })
+			.def("config"		, []() { return ML_CONFIGURATION; })
+			.def("date"			, []() { return ML__DATE; })
+			.def("is_debug"		, []() { return ML_IS_DEBUG; })
+			.def("lang"			, []() { return ML_LANG; })
+			.def("name"			, []() { return ML__NAME; })
+			.def("platform"		, []() { return ML_PLATFORM; })
+			.def("time"			, []() { return ML__TIME; })
+			.def("url"			, []() { return ML__URL; })
+			.def("version"		, []() { return ML__VERSION; })
+			;
 		
 		// OUTPUT
 		output_wrapper::install(m, "output_wrapper");
 		m.attr("cout") = output_wrapper{ std::cout };
 		m.attr("cerr") = output_wrapper{ std::cerr };
+
+		// SCRIPTING
+		scriptable_object::install(m, "scriptable_object");
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -115,39 +108,8 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// SCRIPT
-		struct impl_script
-		{
-			using callback_t = typename std::function<py::object(py::args, py::kwargs)>;
-			
-			py::object	m_self;
-			py::args	m_args;
-			py::kwargs	m_kwargs;
-			callback_t	m_clbk;
-
-			impl_script(py::object self, py::args args, py::kwargs kwargs)
-				: m_self	{ self }
-				, m_args	{ args }
-				, m_kwargs	{ kwargs }
-				, m_clbk	{ m_self.attr("invoke").cast<callback_t>() }
-			{
-			}
-
-			py::object operator()(py::args args, py::kwargs kwargs)
-			{
-				return m_clbk ? std::invoke(m_clbk, args, kwargs) : py::none{};
-			}
-		};
-		py::class_<impl_script>(m, "script")
-			.def(py::init<py::object, py::args, py::kwargs>())
-			.def("__call__", &impl_script::operator(), py::is_operator())
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		m // FUNCTIONS
 			.def("close"		, []() { return engine::close(); })
-			.def("path_to"		, [](cstring s) { return engine::path_to(s).native(); })
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_string(l, s); })
 			.def("do_file"		, [](cstring s) { return engine::do_file(s); })
@@ -157,7 +119,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// INSTALL
-		m.attr("__ml_install__") = ([&
+		m.attr("__good__") = ([&
 			, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")
 		]()

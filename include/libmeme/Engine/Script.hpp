@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct script final : trackable
+	struct ML_ENGINE_API script final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -39,16 +39,16 @@ namespace ml
 			return (*this);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(script & other) noexcept;
+		inline void swap(script & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend class engine;
-
-		ds::flat_map<hash_t, callback_type> m_hooks;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

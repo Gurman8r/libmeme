@@ -1,15 +1,18 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/Script.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
 
+#ifndef ML_EMBED_LUA
 #define ML_EMBED_LUA
+#endif
+#ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
-#include <libmeme/Engine/Embed.hpp>
+#endif
+#include <libmeme/Engine/ScriptableObject.hpp>
 
 namespace ml
 {

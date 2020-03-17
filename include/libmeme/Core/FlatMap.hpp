@@ -388,7 +388,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & find_or_add(key_type const & key, value_type && value)
+		template <class ... Args
+		> ML_NODISCARD inline value_type & find_or_add(key_type const & key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -396,11 +397,12 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(key, ML_forward(value)).second);
+				return (*this->insert(key, ML_forward(args)...).second);
 			}
 		}
 
-		ML_NODISCARD inline value_type & find_or_add(key_type && key, value_type && value)
+		template <class ... Args
+		> ML_NODISCARD inline value_type & find_or_add(key_type && key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -408,7 +410,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(ML_forward(key), ML_forward(value)).second);
+				return (*this->insert(std::move(key), ML_forward(args)...).second);
 			}
 		}
 
@@ -421,7 +423,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & at(key_type && key)
 		{
-			return this->find_or_add(ML_forward(key), value_type{});
+			return this->find_or_add(std::move(key), value_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -433,7 +435,7 @@ namespace ml::ds
 
 		ML_NODISCARD inline value_type & operator[](key_type && key) noexcept
 		{
-			return this->at(ML_forward(key));
+			return this->at(std::move(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

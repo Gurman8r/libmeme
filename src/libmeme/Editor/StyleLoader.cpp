@@ -2,6 +2,7 @@
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Input.hpp>
+#include <libmeme/Core/Hash.hpp>
 
 namespace ml
 {
