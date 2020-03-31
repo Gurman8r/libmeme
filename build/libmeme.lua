@@ -18,13 +18,13 @@ project "libmeme"
 		"lua",
 	}
 	defines {
+		"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 		"ML_API=ML_API_EXPORT",
 		"ML_RENDERER_OPENGL",
 		"ML_OPENGL_LOADER_GLEW",
+		"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 		--"ML_OPENGL_LOADER_GLAD",
 		"GLEW_STATIC",
-		"_CRT_SECURE_NO_WARNINGS",
-		"NOMINMAX",
 	}
 	includedirs {
 		"%{sln_dir}build/%{prj.name}.lua",
@@ -48,20 +48,32 @@ project "libmeme"
 		"%{sln_dir}tools/**.**",
 		"%{sln_dir}premake5.lua",
 		"%{sln_dir}README.md",
+		
+		-- ImGui
+		"%{ext_dir}imgui/*.h",
+		"%{ext_dir}imgui/*.cpp",
+		"%{ext_dir}imgui/examples/imgui_impl_glfw.h",
+		"%{ext_dir}imgui/examples/imgui_impl_glfw.cpp",
+		"%{ext_dir}imgui/examples/imgui_impl_opengl3.h",
+		"%{ext_dir}imgui/examples/imgui_impl_opengl3.cpp",
+		"%{ext_dir}ImGuiColorTextEdit/*.h",
+		"%{ext_dir}ImGuiColorTextEdit/*.cpp",
+		"%{ext_dir}ImGuizmo/*.h",
+		"%{ext_dir}ImGuizmo/*.cpp",
+		"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 	}
 	libdirs {
 		"%{bin_lib}", "%{bin_lib}%{cfg.platform}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"glfw",
-		"imgui",
-		"lua",
+		"glfw", "lua",
 		"opengl32", "glew32s",
 		 "freetype", "assimp", "IrrXML", "zlibstatic",
 	}
 	
 	filter { "system:Windows" }
+		defines { "IMGUI_API=__declspec(dllexport)" }
 		includedirs {
 			"%{ext_dir}cpython/PC"
 		}

@@ -19,6 +19,7 @@
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
+#include <ImGuiColorTextEdit/TextEditor.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -157,6 +158,7 @@ namespace ml
 			m_gui_display	{ "display##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar },
 			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
+			m_gui_files		{ "files##demo"			, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None };
 
@@ -449,13 +451,14 @@ namespace ml
 
 			if (render_texture const & target{ m_pipeline[0] })
 			{
-				ML_BIND_SCOPE(target);
+				target.bind();
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
 				m_ecs.update_system<x_draw_renderers>(target);
+				target.unbind();
 			}
 		}
 
@@ -490,6 +493,7 @@ namespace ml
 				editor::dock(m_gui_ecs.title		, d[left_dn]);
 				editor::dock(m_gui_assets.title		, d[left_dn]);
 				editor::dock(m_gui_profiler.title	, d[left_dn2]);
+				editor::dock(m_gui_files.title		, d[right]);
 				editor::dock(m_gui_docs.title		, d[right]);
 				editor::dock(m_gui_memory.title		, d[right]);
 				editor::dock(m_gui_console.title	, d[right]);
@@ -514,6 +518,7 @@ namespace ml
 			m_gui_ecs.render([&]()		{ show_ecs_gui(); });		// ECS
 			m_gui_assets.render([&]()	{ show_assets_gui(); });	// ASSETS
 			m_gui_profiler.render([&]() { show_profiler_gui(); });	// PROFILER
+			m_gui_files.render([&]()	{ show_files_gui(); });		// FILES
 			m_gui_docs.render([&]()		{ show_documents_gui(); });	// DOCS
 			m_gui_memory.render([&]()	{ show_memory_gui(); });	// MEMORY
 			m_gui_console.render([&]()	{ show_console_gui(); });	// CONSOLE
@@ -732,11 +737,17 @@ namespace ml
 			}
 
 			// tab bar
-			if (ImGui::BeginTabBar("##documents##tabs"))
+			if (ImGui::BeginTabBar("##docs##tabs"))
 			{
 				gui::help_marker("WIP");
 				ImGui::EndTabBar();
 			}
+
+			static ImGui::TextEditor text;
+			ML_ONCE_CALL{
+				text.SetText("here");
+			};
+			text.Render("##docs##text");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -937,6 +948,89 @@ namespace ml
 			ImGui::EndChildFrame();
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_files_gui()
+		{ 
+			if (ImGui::BeginMenuBar())
+			{
+				gui::help_marker("WIP");
+				ImGui::EndMenuBar();
+			}
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
+			ImGui::Columns(2);
+			ImGui::Separator();
+
+			struct funcs
+			{
+				static void show_item(filesystem::directory_entry value)
+				{
+					auto value_name{ value.path().string().c_str() };
+					if (!value_name || !*value_name) return;
+					ML_ImGui_ScopeID((int32_t)util::hash(value.path().string()));
+
+					if (value.is_directory())
+					{
+						ImGui::PushStyleColor(ImGuiCol_Text, { .0f, .0f, 1.f, 1.f });
+						ImGui::AlignTextToFramePadding();
+						bool const node_open{ ImGui::TreeNode("dir", "%s", value_name) };
+						ImGui::NextColumn();
+						ImGui::AlignTextToFramePadding();
+						{
+							ImGui::Text("directory");
+						}
+						ImGui::NextColumn();
+						if (node_open)
+						{
+							render(value.path());
+
+							ImGui::TreePop();
+						}
+						ImGui::PopStyleColor();
+					}
+					else
+					{
+						ImGui::PushStyleColor(ImGuiCol_Text, { 0.f, 1.f, 0.f, 1.f });
+						ImGui::AlignTextToFramePadding();
+						ImGui::TreeNodeEx("file",
+							ImGuiTreeNodeFlags_Leaf |
+							ImGuiTreeNodeFlags_NoTreePushOnOpen |
+							ImGuiTreeNodeFlags_Bullet,
+							"%s",
+							value.path().filename().string().c_str()
+							);
+						ImGui::NextColumn();
+						ImGui::SetNextItemWidth(-1);
+						if (ImGui::Button("open")) {}
+						ImGui::SameLine();
+						if (ImGui::Button("edit")) {}
+						ImGui::NextColumn();
+						ImGui::PopStyleColor();
+					}
+				}
+
+				static void render(filesystem::path const & path)
+				{
+					for (auto it : filesystem::directory_iterator{ path })
+					{
+						if (it.is_directory()) { funcs::show_item(it); }
+					}
+					for (auto it : filesystem::directory_iterator{ path })
+					{
+						if (it.is_regular_file()) { funcs::show_item(it); }
+					}
+				}
+			};
+
+			static auto path{ engine::path_to("") };
+			funcs::render(path);
+
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::PopStyleVar();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

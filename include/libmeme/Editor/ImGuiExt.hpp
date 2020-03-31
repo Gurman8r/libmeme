@@ -145,9 +145,9 @@ namespace ml::gui
 	template <class ... Args
 	> static inline auto make_plot(size_t const cap, Args && ... args) noexcept
 	{
-		return plot{
-			pmr::vector<float_t>{ cap, pmr::polymorphic_allocator<byte_t>{} }, ML_forward(args)...
-		};
+		using V = pmr::vector<float_t>;
+		using A = pmr::polymorphic_allocator<byte_t>;
+		return plot{ V{ cap, A{} }, ML_forward(args)... };
 	}
 
 	struct plot_controller final

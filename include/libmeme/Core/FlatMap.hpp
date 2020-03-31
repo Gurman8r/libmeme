@@ -389,7 +389,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> ML_NODISCARD inline value_type & find_or_add(key_type const & key, Args && ... args)
+		> inline value_type & find_or_add(key_type const & key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -402,7 +402,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> ML_NODISCARD inline value_type & find_or_add(key_type && key, Args && ... args)
+		> inline value_type & find_or_add(key_type && key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{

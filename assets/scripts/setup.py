@@ -15,7 +15,6 @@ class scr_test(ml.scriptable_object):
         return super(scr_test, self).__init__(self, *args, **kwargs)
 
     def awake(self):        return print(">> awake")
-    def on_destroy(self):   return print(">> on_destroy")
     def on_disable(self):   return print(">> on_disable")
     def on_enable(self):    return print(">> on_enable")
     def reset(self):        return print(">> reset")
@@ -25,7 +24,9 @@ class scr_test(ml.scriptable_object):
 with scr_test(enabled = True) as test:
     print(f"args    | {test.args}")
     print(f"kwargs  | {test.kwargs}")
+    print(f"flags   | {test.flags}")
     print(f"enabled | {test.enabled}")
+    print(f"active  | {test.active}")
     test("update")
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

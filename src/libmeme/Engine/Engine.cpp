@@ -276,13 +276,10 @@ namespace ml
 
 	filesystem::path engine::path_to(filesystem::path const & value)
 	{
+		auto const & home{ get_config().content_home };
 		if (value.empty())
 		{
-			return {};
-		}
-		else if (auto const & home{ get_config().content_home }; home.empty())
-		{
-			return value;
+			return home;
 		}
 		else
 		{

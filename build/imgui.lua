@@ -30,17 +30,6 @@ project "imgui"
 	}
 	files {
 		"%{sln_dir}build/%{prj.name}.lua",
-		"%{ext_dir}imgui/*.h",
-		"%{ext_dir}imgui/*.cpp",
-		"%{ext_dir}imgui/examples/imgui_impl_glfw.h",
-		"%{ext_dir}imgui/examples/imgui_impl_glfw.cpp",
-		"%{ext_dir}imgui/examples/imgui_impl_opengl3.h",
-		"%{ext_dir}imgui/examples/imgui_impl_opengl3.cpp",
-		"%{ext_dir}ImGuiColorTextEdit/*.h",
-		"%{ext_dir}ImGuiColorTextEdit/*.cpp",
-		"%{ext_dir}ImGuizmo/*.h",
-		"%{ext_dir}ImGuizmo/*.cpp",
-		"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 	}
 	libdirs {
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",

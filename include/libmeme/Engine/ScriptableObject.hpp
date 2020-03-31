@@ -12,9 +12,7 @@
 
 namespace ml::embed
 {
-	struct scriptable_object;
-
-	enum scriptable_flags_ : hash_t
+	enum scriptable_flags_ : int32_t
 	{
 		scriptable_flags_none		= 0,		// none
 		scriptable_flags_enabled	= 1 << 0,	// enabled
@@ -31,9 +29,7 @@ namespace ml::embed
 
 		using self_type = scriptable_object;
 
-		using callback = std::function<py::object()>;
-
-		using fn_table = ds::flat_map<hash_t, callback>;
+		using callback = std::function<void()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -43,13 +39,13 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		py::object enter();
+		bool operator()(cstring name);
 
-		py::object exit();
+		bool call_fn(cstring name);
 
-		py::object call(cstring name);
+		bool load_fn(callback & fn, cstring name, callback pre = 0, callback post = 0);
 
-		bool set_flag(int32_t i, bool b);
+		void on_flag(int32_t i, bool b);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,22 +59,53 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class T
+		> ML_NODISCARD inline T get_opt(cstring name, T const & dv = {}) const
+		{
+			if (m_kwargs.contains(name))
+			{
+				return m_kwargs[name].cast<T>();
+			}
+			else
+			{
+				return dv;
+			}
+		}
+
 		ML_NODISCARD inline bool get_flag(int32_t const i) const noexcept { return m_flags & i; }
+
+		ML_NODISCARD inline bool is_active() const noexcept { return get_flag(scriptable_flags_active); }
 
 		ML_NODISCARD inline bool is_enabled() const noexcept { return get_flag(scriptable_flags_enabled); }
 
-		ML_NODISCARD inline bool is_active() const noexcept { return get_flag(scriptable_flags_active); }
+		inline bool set_flag(int32_t i, bool b) noexcept
+		{
+			if (get_flag(i) != b)
+			{
+				m_flags = b ? (m_flags | i) : (m_flags & ~i);
+				on_flag(i, b);
+				return true;
+			}
+			return false;
+		}
 
 		inline void set_enabled(bool b) noexcept { set_flag(scriptable_flags_enabled, b); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		py::object	m_self		; // self
-		py::args	m_args		; // args
-		py::kwargs	m_kwargs	; // kwargs
-		int32_t		m_flags		; // flags
-		fn_table	m_clbk		; // callbacks
+		py::object	m_self		;	// self
+		py::args	m_args		;	// args
+		py::kwargs	m_kwargs	;	// kwargs
+		int32_t		m_flags		;	// flags
+		callback					// callbacks
+			m_awake,
+			m_on_destroy,
+			m_on_disable,
+			m_on_enable,
+			m_reset,
+			m_start,
+			m_update;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -33,7 +33,7 @@ project "demo"
 		"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	}
 	links {
-		"libmeme", "imgui",
+		"libmeme"
 	}
 	
 	filter "configurations:Debug"

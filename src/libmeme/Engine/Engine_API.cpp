@@ -32,7 +32,7 @@ namespace ml::embed
 
 		static decltype(auto) install(py::module m, cstring name)
 		{
-			return py::class_<output_wrapper>(m, name)
+			return py::class_<output_wrapper>{ m, name }
 				.def(py::init<>())
 				.def("closed"		, []() { return false; })
 				.def("isatty"		, []() { return false; })
@@ -61,7 +61,7 @@ namespace ml::embed
 
 		// LIB
 		struct ml_lib {};
-		py::class_<ml_lib>(m, "lib")
+		py::class_<ml_lib>{ m, "lib" }
 			.def("arch"			, []() { return ML_ARCH; })
 			.def("author"		, []() { return ML__AUTHOR; })
 			.def("cc"			, []() { return ML_CC_NAME; })
@@ -88,7 +88,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// CONFIG
-		py::class_<engine::config>(m, "config")
+		py::class_<engine::config>{ m, "config" }
 			.def("arguments"	, []() { return engine::get_config().arguments; })
 			.def("content_home"	, []() { return engine::get_config().content_home.native(); })
 			.def("library_home"	, []() { return engine::get_config().library_home.native(); })
@@ -100,7 +100,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// RUNTIME
-		py::class_<engine::runtime>(m, "runtime")
+		py::class_<engine::runtime>{ m, "runtime" }
 			.def("delta_time"	, []() { return engine::get_runtime().delta_time; })
 			.def("frame_count"	, []() { return engine::get_runtime().frame_count; })
 			.def("frame_rate"	, []() { return engine::get_runtime().frame_rate; })
@@ -109,7 +109,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		m // FUNCTIONS
-			.def("close"		, []() { return engine::close(); })
+			.def("close"		, [](py::args) { return engine::close(); })
 			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
 			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_string(l, s); })
 			.def("do_file"		, [](cstring s) { return engine::do_file(s); })
