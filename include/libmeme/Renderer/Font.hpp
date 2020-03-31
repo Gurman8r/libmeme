@@ -15,7 +15,7 @@ namespace ml
 		
 		using page_table = typename ds::flat_map<uint32_t, page>;
 
-		struct info final
+		struct ML_NODISCARD info final
 		{
 			pmr::string family;
 			std::locale locale;
@@ -61,9 +61,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto get_info() const noexcept -> info const & { return m_info; }
+		ML_NODISCARD auto get_info() const noexcept -> info const & { return m_info; }
 
-		ML_NODISCARD inline auto get_pages() const noexcept -> page_table const & { return m_pages; }
+		ML_NODISCARD auto get_pages() const noexcept -> page_table const & { return m_pages; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -217,20 +217,8 @@ namespace ml
 		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
 		g_engine->m_loop_timer.start();
 
-		// poll window events
 		window::poll_events();
 	}
-
-	void engine::end_loop()
-	{
-		// increment frame count
-		++g_engine->m_io.frame_count;
-
-		// update fps tracker
-		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void engine::begin_draw()
 	{
@@ -255,6 +243,15 @@ namespace ml
 		{
 			g_engine->m_window.swap_buffers();
 		}
+	}
+
+	void engine::end_loop()
+	{
+		// increment frame count
+		++g_engine->m_io.frame_count;
+
+		// update fps tracker
+		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

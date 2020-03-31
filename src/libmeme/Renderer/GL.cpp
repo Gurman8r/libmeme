@@ -485,29 +485,6 @@ namespace ml
 		return temp;
 	}
 
-	bool GL::textureSrgbAvailable()
-	{
-		static bool temp{ false };
-#ifdef GL_EXT_texture_sRGB
-		ML_ONCE_CALL {
-			temp = true;
-		}
-#endif
-		return temp;
-	}
-
-	bool GL::nonPowerOfTwoAvailable()
-	{
-		static bool temp{ false };
-#if defined(GLEW_ARB_texture_non_power_of_two) \
-|| defined(GL_ARB_texture_non_power_of_two)
-		ML_ONCE_CALL {
-			temp = true;
-		}
-#endif
-		return temp;
-	}
-
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
 		static int32_t temp{ 0 };
@@ -535,6 +512,29 @@ namespace ml
 	auto GL::getValidTextureSize(uint32_t value) -> uint32_t
 	{
 		return nonPowerOfTwoAvailable() ? value : util::power_of_2(value);
+	}
+
+	bool GL::nonPowerOfTwoAvailable()
+	{
+		static bool temp{ false };
+#if defined(GLEW_ARB_texture_non_power_of_two) \
+|| defined(GL_ARB_texture_non_power_of_two)
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
+		return temp;
+	}
+
+	bool GL::textureSrgbAvailable()
+	{
+		static bool temp{ false };
+#ifdef GL_EXT_texture_sRGB
+		ML_ONCE_CALL {
+			temp = true;
+		}
+#endif
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

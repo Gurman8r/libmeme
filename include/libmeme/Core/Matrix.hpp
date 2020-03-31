@@ -11,46 +11,38 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// fixed size matrix
-	template <class _Ty, size_t _Width, size_t _Height
+	template <class _T, size_t _W, size_t _H
 	> struct matrix
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(
-			0 < (_Width * _Height),
+		static_assert(0 < (_W * _H),
 			"matrix size negative or zero"
 		);
 
-		static_assert(
-			std::is_integral_v<_Ty> || std::is_floating_point_v<_Ty>,
+		static_assert(std::is_integral_v<_T> || std::is_floating_point_v<_T>,
 			"matrix only supports integral and floating point types"
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename _Ty;
-		using self_type			= typename matrix<value_type, _Width, _Height>;
-		using storage_type		= typename array<value_type, _Width * _Height>;
-		using size_type			= typename storage_type::size_type;
-		using difference_type	= typename storage_type::difference_type;
-		using pointer			= typename storage_type::pointer;
-		using reference			= typename storage_type::reference;
-		using const_pointer		= typename storage_type::const_pointer;
-		using const_reference	= typename storage_type::const_reference;
-		using iterator			= typename storage_type::iterator;
-		using const_iterator	= typename storage_type::const_iterator;
+		using value_type				= typename _T;
+		using self_type					= typename matrix<value_type, _W, _H>;
+		using storage_type				= typename array<value_type, _W * _H>;
+		using size_type					= typename storage_type::size_type;
+		using difference_type			= typename storage_type::difference_type;
+		using pointer					= typename storage_type::pointer;
+		using reference					= typename storage_type::reference;
+		using const_pointer				= typename storage_type::const_pointer;
+		using const_reference			= typename storage_type::const_reference;
+		using iterator					= typename storage_type::iterator;
+		using const_iterator			= typename storage_type::const_iterator;
+		using reverse_iterator			= typename storage_type::reverse_iterator;
+		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		storage_type m_data; // aggregate initializer
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
-
-		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
-
-		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,13 +55,13 @@ namespace ml::ds
 			}
 			else
 			{
-				auto temp{ matrix<U, W, H>::zero() };
-				if constexpr (W == _Width && H == _Height)
+				matrix<U, W, H> temp{};
+				if constexpr ((W == _W) && (H == _H))
 				{
 					// same dimensions
 					for (size_t i = 0; i < (W * H); ++i)
 					{
-						temp[i] = (U)at(i);
+						temp[i] = static_cast<U>(at(i));
 					}
 				}
 				else
@@ -77,8 +69,10 @@ namespace ml::ds
 					// different dimensions
 					for (size_t i = 0; i < (W * H); ++i)
 					{
-						size_t const x{ i % W }, y{ i / W };
-						temp[i] = (y < _Height && x < _Width) ? (U)at(x, y) : (U)0;
+						if (size_t const x{ i % W }, y{ i / W }; (x < _W) && (y < _H))
+						{
+							temp[i] = static_cast<U>(at(x, y));
+						}
 					}
 				}
 				return temp;
@@ -87,33 +81,47 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator pointer() noexcept { return (pointer)m_data; }
+		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
 
-		ML_NODISCARD constexpr operator const_pointer() const noexcept { return (const_pointer)m_data; }
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
 
-		ML_NODISCARD constexpr auto operator*() noexcept -> reference { return (*m_data); }
+		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
 
-		ML_NODISCARD constexpr auto operator*() const noexcept -> const_reference { return (*m_data); }
+		ML_NODISCARD constexpr operator storage_type const && () const && noexcept { return std::move(m_data); }
 
-		ML_NODISCARD constexpr auto at(size_type const i) -> reference { return m_data.at(i); }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr operator pointer() noexcept { return m_data; }
+
+		ML_NODISCARD constexpr operator const_pointer() const noexcept { return m_data; }
+
+		ML_NODISCARD constexpr auto operator*() & noexcept -> reference { return (*m_data); }
+
+		ML_NODISCARD constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr auto at(size_t const i) & noexcept -> reference { return m_data.at(i); }
 		
-		ML_NODISCARD constexpr auto at(size_type const i) const -> const_reference { return m_data.at(i); }
+		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data.at(i); }
 
-		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) -> reference { return m_data.at(y * _Width + x); }
+		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> value_type && { return std::move(m_data.at(i)); }
 
-		ML_NODISCARD constexpr auto at(size_type const x, size_type const y) const -> const_reference { return m_data.at(y * _Width + x); }
+		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> value_type const && { return std::move(m_data.at(i)); }
 
-		ML_NODISCARD constexpr auto back() noexcept -> reference { return m_data.back(); }
+		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) & noexcept -> reference { return at(y * _W + x); }
+
+		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const & noexcept -> const_reference { return at(y * _W + x); }
+
+		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) && noexcept -> value_type && { return std::move(at(y * _W + x)); }
+
+		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const && noexcept -> value_type const && { return std::move(at(y * _W + x)); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data.back(); }
 		
-		ML_NODISCARD constexpr auto back() const noexcept -> const_reference { return m_data.back(); }
-		
-		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
-		
-		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
-		
-		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
-		
-		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data.back(); }
 
 		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
 		
@@ -121,50 +129,73 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
 		
-		ML_NODISCARD constexpr auto end() noexcept -> iterator { return m_data.end(); }
+		ML_NODISCARD constexpr auto front() & noexcept -> reference { return m_data.front(); }
 		
-		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
-		
-		ML_NODISCARD constexpr auto front() noexcept -> reference { return m_data.front(); }
-		
-		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return m_data.front(); }
+		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data.front(); }
 
-		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _Height; }
+		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _H; }
 
 		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
 
 		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
 
-		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _Width; }
+		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _W; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
+
+		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
+
+		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
+
+		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+
+		ML_NODISCARD constexpr auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin(); }
+
+		ML_NODISCARD constexpr auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
+		
+		ML_NODISCARD constexpr auto end() noexcept -> iterator { return m_data.end(); }
+
+		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
+
+		ML_NODISCARD constexpr auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin(); }
+
+		ML_NODISCARD constexpr auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin(); }
+
+		ML_NODISCARD constexpr auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
+
+		ML_NODISCARD constexpr auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static constexpr self_type zero() noexcept
 		{
-			return self_type{ 0 };
+			return self_type{};
 		}
 
-		ML_NODISCARD static constexpr self_type fill(value_type const v) noexcept
+		ML_NODISCARD static constexpr self_type fill(value_type const value) noexcept
 		{
-			auto temp{ zero() };
-			for (auto & e : temp)
-				e = v;
+			self_type temp{};
+			for (auto & elem : temp)
+				elem = value;
 			return temp;
 		}
 
 		ML_NODISCARD static constexpr self_type one() noexcept
 		{
-			return self_type::fill(value_type{ 1 });
+			return fill(value_type{ 1 });
 		}
 
 		ML_NODISCARD static constexpr self_type identity() noexcept
 		{
-			auto temp{ zero() };
-			for (size_t i = 0; i < temp.size(); ++i)
+			self_type temp{};
+			for (size_t i = 0; i < (_W * _H); ++i)
 			{
-				temp[i] = (i / temp.width()) == (i % temp.width())
-					? static_cast<value_type>(1)
-					: static_cast<value_type>(0);
+				if ((i / _W) == (i % _W))
+				{
+					temp[i] = value_type{ 1 };
+				}
 			}
 			return temp;
 		}
@@ -180,91 +211,93 @@ namespace ml::ds
 // ALIASES
 namespace ml
 {
-	// BASE
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// MATRIX NxN
 	template <class T, size_t N
 	> ML_ALIAS tmatnxn = ds::matrix<T, N, N>;
 
+	// MATRIX Nx1
 	template <class T, size_t N
 	> ML_ALIAS tvector = ds::matrix<T, N, 1>;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 2x2
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tmat2 = tmatnxn<T, 2>;
-	ML_ALIAS	mat2b = tmat2<byte_t>;
-	ML_ALIAS	mat2i = tmat2<int32_t>;
-	ML_ALIAS	mat2u = tmat2<uint32_t>;
-	ML_ALIAS	mat2f = tmat2<float32_t>;
-	ML_ALIAS	mat2d = tmat2<float64_t>;
-	ML_ALIAS	mat2s = tmat2<size_t>;
-	ML_ALIAS	mat2 = mat2f;
+	> ML_ALIAS	tmat2	= tmatnxn<T, 2>;
+	ML_ALIAS	mat2b	= tmat2<byte_t>;
+	ML_ALIAS	mat2i	= tmat2<int32_t>;
+	ML_ALIAS	mat2u	= tmat2<uint32_t>;
+	ML_ALIAS	mat2f	= tmat2<float32_t>;
+	ML_ALIAS	mat2d	= tmat2<float64_t>;
+	ML_ALIAS	mat2s	= tmat2<size_t>;
+	ML_ALIAS	mat2	= mat2f;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 3x3
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tmat3 = tmatnxn<T, 3>;
-	ML_ALIAS	mat3b = tmat3<byte_t>;
-	ML_ALIAS	mat3i = tmat3<int32_t>;
-	ML_ALIAS	mat3u = tmat3<uint32_t>;
-	ML_ALIAS	mat3f = tmat3<float32_t>;
-	ML_ALIAS	mat3d = tmat3<float64_t>;
-	ML_ALIAS	mat3s = tmat3<size_t>;
-	ML_ALIAS	mat3 = mat3f;
+	> ML_ALIAS	tmat3	= tmatnxn<T, 3>;
+	ML_ALIAS	mat3b	= tmat3<byte_t>;
+	ML_ALIAS	mat3i	= tmat3<int32_t>;
+	ML_ALIAS	mat3u	= tmat3<uint32_t>;
+	ML_ALIAS	mat3f	= tmat3<float32_t>;
+	ML_ALIAS	mat3d	= tmat3<float64_t>;
+	ML_ALIAS	mat3s	= tmat3<size_t>;
+	ML_ALIAS	mat3	= mat3f;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 4x4
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tmat4 = tmatnxn<T, 4>;
-	ML_ALIAS	mat4b = tmat4<byte_t>;
-	ML_ALIAS	mat4i = tmat4<int32_t>;
-	ML_ALIAS	mat4u = tmat4<uint32_t>;
-	ML_ALIAS	mat4f = tmat4<float32_t>;
-	ML_ALIAS	mat4d = tmat4<float64_t>;
-	ML_ALIAS	mat4s = tmat4<size_t>;
-	ML_ALIAS	mat4 = mat4f;
+	> ML_ALIAS	tmat4	= tmatnxn<T, 4>;
+	ML_ALIAS	mat4b	= tmat4<byte_t>;
+	ML_ALIAS	mat4i	= tmat4<int32_t>;
+	ML_ALIAS	mat4u	= tmat4<uint32_t>;
+	ML_ALIAS	mat4f	= tmat4<float32_t>;
+	ML_ALIAS	mat4d	= tmat4<float64_t>;
+	ML_ALIAS	mat4s	= tmat4<size_t>;
+	ML_ALIAS	mat4	= mat4f;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 2
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tvec2 = tvector<T, 2>;
-	ML_ALIAS	vec2b = tvec2<byte_t>;
-	ML_ALIAS	vec2i = tvec2<int32_t>;
-	ML_ALIAS	vec2u = tvec2<uint32_t>;
-	ML_ALIAS	vec2f = tvec2<float32_t>;
-	ML_ALIAS	vec2d = tvec2<float64_t>;
-	ML_ALIAS	vec2s = tvec2<size_t>;
-	ML_ALIAS	vec2 = vec2f;
+	> ML_ALIAS	tvec2	= tvector<T, 2>;
+	ML_ALIAS	vec2b	= tvec2<byte_t>;
+	ML_ALIAS	vec2i	= tvec2<int32_t>;
+	ML_ALIAS	vec2u	= tvec2<uint32_t>;
+	ML_ALIAS	vec2f	= tvec2<float32_t>;
+	ML_ALIAS	vec2d	= tvec2<float64_t>;
+	ML_ALIAS	vec2s	= tvec2<size_t>;
+	ML_ALIAS	vec2	= vec2f;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 3
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tvec3 = tvector<T, 3>;
-	ML_ALIAS	vec3b = tvec3<byte_t>;
-	ML_ALIAS	vec3i = tvec3<int32_t>;
-	ML_ALIAS	vec3u = tvec3<uint32_t>;
-	ML_ALIAS	vec3f = tvec3<float32_t>;
-	ML_ALIAS	vec3d = tvec3<float64_t>;
-	ML_ALIAS	vec3s = tvec3<size_t>;
-	ML_ALIAS	vec3 = vec3f;
+	> ML_ALIAS	tvec3	= tvector<T, 3>;
+	ML_ALIAS	vec3b	= tvec3<byte_t>;
+	ML_ALIAS	vec3i	= tvec3<int32_t>;
+	ML_ALIAS	vec3u	= tvec3<uint32_t>;
+	ML_ALIAS	vec3f	= tvec3<float32_t>;
+	ML_ALIAS	vec3d	= tvec3<float64_t>;
+	ML_ALIAS	vec3s	= tvec3<size_t>;
+	ML_ALIAS	vec3	= vec3f;
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 4
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	template <class T
-	> ML_ALIAS	tvec4 = tvector<T, 4>;
-	ML_ALIAS	vec4b = tvec4<byte_t>;
-	ML_ALIAS	vec4i = tvec4<int32_t>;
-	ML_ALIAS	vec4u = tvec4<uint32_t>;
-	ML_ALIAS	vec4f = tvec4<float32_t>;
-	ML_ALIAS	vec4d = tvec4<float64_t>;
-	ML_ALIAS	vec4s = tvec4<size_t>;
-	ML_ALIAS	vec4 = vec4f;
+	> ML_ALIAS	tvec4	= tvector<T, 4>;
+	ML_ALIAS	vec4b	= tvec4<byte_t>;
+	ML_ALIAS	vec4i	= tvec4<int32_t>;
+	ML_ALIAS	vec4u	= tvec4<uint32_t>;
+	ML_ALIAS	vec4f	= tvec4<float32_t>;
+	ML_ALIAS	vec4d	= tvec4<float64_t>;
+	ML_ALIAS	vec4s	= tvec4<size_t>;
+	ML_ALIAS	vec4	= vec4f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -509,25 +542,29 @@ namespace std
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
 	{
-		return std::get<I>(value.m_data);
+		static_assert(I < W * H, "matrix index out of bounds");
+		return value.at(I);
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const & get(_ML ds::matrix<T, W, H> const & value) noexcept
 	{
-		return std::get<I>(value.m_data);
+		static_assert(I < W * H, "matrix index out of bounds");
+		return value.at(I);
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
 	{
-		return std::get<I>(value.m_data);
+		static_assert(I < W * H, "matrix index out of bounds");
+		return std::move(value.at(I));
 	}
 
 	template <size_t I, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const && get(_ML ds::matrix<T, W, H> const && value) noexcept
 	{
-		return std::get<I>(value.m_data);
+		static_assert(I < W * H, "matrix index out of bounds");
+		return std::move(value.at(I));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -535,25 +572,29 @@ namespace std
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T & get(_ML ds::matrix<T, W, H> & value) noexcept
 	{
-		return std::get<Y * W + X>(value);
+		static_assert(X * Y < W * H, "matrix index out of bounds");
+		return value.at(X, Y);
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const & get(_ML ds::matrix<T, W, H> const & value) noexcept
 	{
-		return std::get<Y * W + X>(value);
+		static_assert(X * Y < W * H, "matrix index out of bounds");
+		return value.at(X, Y);
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T && get(_ML ds::matrix<T, W, H> && value) noexcept
 	{
-		return std::get<Y * W + X>(value);
+		static_assert(X * Y < W * H, "matrix index out of bounds");
+		return std::move(value.at(X, Y));
 	}
 
 	template <size_t X, size_t Y, class T, size_t W, size_t H
 	> ML_NODISCARD constexpr T const && get(_ML ds::matrix<T, W, H> const && value) noexcept
 	{
-		return std::get<Y * W + X>(value);
+		static_assert(X * Y < W * H, "matrix index out of bounds");
+		return std::move(value.at(X, Y));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

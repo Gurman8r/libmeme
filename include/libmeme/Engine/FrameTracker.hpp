@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline float_t update(float_t const dt) noexcept
+		float_t update(float_t const dt) noexcept
 		{
 			accum += dt - frames[index];
 			frames[index] = dt;
@@ -25,7 +25,7 @@ namespace ml
 			return (value = (accum > 0.f) ? (1.f / (accum / (float_t)N)) : FLT_MAX);
 		}
 
-		inline float_t operator()(float_t const dt) noexcept
+		float_t operator()(float_t const dt) noexcept
 		{
 			return this->update(dt);
 		}

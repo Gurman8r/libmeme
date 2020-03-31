@@ -294,7 +294,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t editor::begin_builder(int32_t flags)
+	uint32_t editor::begin_dock_builder(int32_t flags)
 	{
 		if (uint32_t root{ ImGui::GetID(dockspace_title) })
 		{
@@ -310,7 +310,7 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::end_builder(uint32_t root)
+	uint32_t editor::end_dock_builder(uint32_t root)
 	{
 		if (root)
 		{

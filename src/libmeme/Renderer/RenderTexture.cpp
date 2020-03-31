@@ -52,36 +52,20 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_texture & render_texture::operator=(render_texture const & other)
+	void render_texture::bind(render_texture const * value)
 	{
-		render_texture temp{ other };
-		swap(temp);
-		return (*this);
+		FBO::bind(value ? &value->fbo() : nullptr);
 	}
 
-	render_texture & render_texture::operator=(render_texture && other) noexcept
+	bool render_texture::destroy()
 	{
-		swap(std::move(other));
-		return (*this);
+		m_fbo.destroy();
+		m_rbo.destroy();
+		m_texture.destroy();
+		return true;
 	}
 
-	void render_texture::swap(render_texture & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_fbo, other.m_fbo);
-			std::swap(m_rbo, other.m_rbo);
-			std::swap(m_size, other.m_size);
-			std::swap(m_colorID, other.m_colorID);
-			std::swap(m_frameID, other.m_frameID);
-			std::swap(m_format, other.m_format);
-			std::swap(m_texture, other.m_texture);
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool render_texture::create()
+	bool render_texture::generate()
 	{
 		if (good())
 			return debug::log::error("render texture already created");
@@ -137,30 +121,32 @@ namespace ml
 		return good();
 	}
 
-	bool render_texture::destroy()
-	{
-		m_fbo.destroy();
-		m_rbo.destroy();
-		m_texture.destroy();
-		return true;
-	}
-
 	bool render_texture::resize(vec2i const & value)
 	{
-		if ((value[0] != 0) && (value[1] != 0) && (m_size != value))
+		if ((0 < value[0]) && (0 < value[1]) && (m_size != value))
 		{
 			m_size = value;
 
-			return destroy() && create();
+			return destroy() && generate();
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void render_texture::bind(render_texture const * value)
+	void render_texture::swap(render_texture & other) noexcept
 	{
-		FBO::bind(value ? &value->fbo() : nullptr);
+		if (this != std::addressof(other))
+		{
+			std::swap(m_fbo, other.m_fbo);
+			std::swap(m_rbo, other.m_rbo);
+			std::swap(m_size, other.m_size);
+			std::swap(m_colorID, other.m_colorID);
+			std::swap(m_frameID, other.m_frameID);
+			std::swap(m_format, other.m_format);
+			std::swap(m_texture, other.m_texture);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

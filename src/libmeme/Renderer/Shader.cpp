@@ -10,7 +10,7 @@ namespace ml
 	{
 		union { uint32_t program; uint32_t cached; int32_t location; };
 
-		explicit uniform_binder(shader & s, pmr::string const & name)
+		explicit uniform_binder(shader & s, pmr::string const & name) noexcept
 			: program	{ s ? s.handle() : NULL }
 			, cached	{ s ? GL::getProgramHandle(GL::ProgramObject) : NULL }
 			, location	{ s ? s.get_uniform_location(name) : -1 }
@@ -21,7 +21,7 @@ namespace ml
 			}
 		}
 
-		~uniform_binder()
+		~uniform_binder() noexcept
 		{
 			if (program && (program != cached))
 			{
@@ -29,7 +29,7 @@ namespace ml
 			}
 		}
 
-		inline operator bool() const noexcept
+		operator bool() const noexcept
 		{
 			return (location != -1);
 		}

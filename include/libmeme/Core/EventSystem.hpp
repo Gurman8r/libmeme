@@ -19,13 +19,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
-		> static inline bool add_listener(event_listener * value)
+		> static bool add_listener(event_listener * value)
 		{
 			return add_listener(hashof_v<Ev>, value);
 		}
 
 		template <class Ev, class ... Args
-		> static inline void fire_event(Args && ... args)
+		> static void fire_event(Args && ... args)
 		{
 			return fire_event(Ev{ ML_forward(args)... });
 		}

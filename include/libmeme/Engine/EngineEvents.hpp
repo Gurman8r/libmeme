@@ -11,11 +11,15 @@ namespace ml
 	{
 	};
 
-	ML_EVENT(frame_begin_event)
+	ML_EVENT(loop_begin_event)
 	{
 	};
 
 	ML_EVENT(update_event)
+	{
+	};
+
+	ML_EVENT(fixed_update_event)
 	{
 	};
 
@@ -31,7 +35,7 @@ namespace ml
 	{
 	};
 
-	ML_EVENT(frame_end_event)
+	ML_EVENT(loop_end_event)
 	{
 	};
 

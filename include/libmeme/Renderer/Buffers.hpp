@@ -14,15 +14,15 @@ namespace ml
 		uint32_t	m_handle{};
 		uint32_t	m_mode	{};
 
-		inline operator bool() const { return m_handle; }
+		operator bool() const { return m_handle; }
 
-		inline operator uint32_t() const { return m_handle; }
+		operator uint32_t() const { return m_handle; }
 
 		static void bind(VAO const * value);
 
-		inline void bind() const { bind(this); }
+		void bind() const { bind(this); }
 
-		inline void unbind() const { bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		VAO & generate(uint32_t mode);
 
@@ -47,15 +47,15 @@ namespace ml
 		uint32_t	m_count	{};
 		uint32_t	m_offset{};
 
-		inline operator bool() const { return m_handle; }
+		operator bool() const { return m_handle; }
 
-		inline operator uint32_t() const { return m_handle; }
+		operator uint32_t() const { return m_handle; }
 
 		static void bind(VBO const * value);
 
-		inline void bind() const { bind(this); }
+		void bind() const { bind(this); }
 
-		inline void unbind() const { bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		VBO & generate(uint32_t usage);
 
@@ -83,15 +83,15 @@ namespace ml
 		void *		m_data	{};
 		uint32_t	m_count	{};
 
-		inline operator bool() const { return m_handle; }
+		operator bool() const { return m_handle; }
 
-		inline operator uint32_t() const { return m_handle; }
+		operator uint32_t() const { return m_handle; }
 
 		static void bind(IBO const * value);
 
-		inline void bind() const { bind(this); }
+		void bind() const { bind(this); }
 
-		inline void unbind() const { bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		IBO & generate(uint32_t usage, uint32_t type);
 
@@ -119,15 +119,15 @@ namespace ml
 		uint32_t	m_texture_handle	{};
 		uint32_t	m_texture_level		{};
 
-		inline operator bool() const { return m_handle; }
+		operator bool() const { return m_handle; }
 
-		inline operator uint32_t() const { return m_handle; }
+		operator uint32_t() const { return m_handle; }
 
 		static void bind(FBO const * value);
 
-		inline void bind() const { bind(this); }
+		void bind() const { bind(this); }
 
-		inline void unbind() const { bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		FBO & generate(vec2i const & size);
 
@@ -153,15 +153,15 @@ namespace ml
 		vec2i		m_size	{};
 		uint32_t	m_format{};
 
-		inline operator bool() const { return m_handle; }
+		operator bool() const { return m_handle; }
 
-		inline operator uint32_t() const { return m_handle; }
+		operator uint32_t() const { return m_handle; }
 
 		static void bind(RBO const * value);
 
-		inline void bind() const { bind(this); }
+		void bind() const { bind(this); }
 
-		inline void unbind() const { bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		RBO & generate(vec2i const & size);
 

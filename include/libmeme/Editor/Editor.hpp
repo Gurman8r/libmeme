@@ -99,9 +99,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static uint32_t begin_builder(int32_t flags = 0);
+		static uint32_t begin_dock_builder(int32_t flags = 0);
 		
-		static uint32_t end_builder(uint32_t root);
+		static uint32_t end_dock_builder(uint32_t root);
 		
 		static uint32_t dock(cstring name, uint32_t id);
 		

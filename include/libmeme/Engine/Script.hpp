@@ -26,20 +26,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline script & operator=(script const & other)
+		script & operator=(script const & other)
 		{
 			script temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline script & operator=(script && other) noexcept
+		script & operator=(script && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(script & other) noexcept
+		void swap(script & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{

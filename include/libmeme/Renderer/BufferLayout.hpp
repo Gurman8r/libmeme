@@ -10,44 +10,36 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct attribute final
+		struct ML_RENDERER_API attribute final
 		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			uint32_t	index		{}; // 
+			uint32_t	size		{}; // 
+			uint32_t	type		{}; // 
+			bool		normalize	{}; // 
+			uint32_t	stride		{}; // 
+			uint32_t	offset		{}; // 
+			uint32_t	width		{}; // 
 
-			uint32_t	index		{ 0 };
-			uint32_t	size		{ 0 };
-			uint32_t	type		{ 0 };
-			bool		normalize	{ false };
-			uint32_t	stride		{ 0 };
-			uint32_t	offset		{ 0 };
-			uint32_t	width		{ 0 };
-
-			constexpr attribute() noexcept = default;
-			constexpr attribute(attribute const &) = default;
-			constexpr attribute(attribute &&) noexcept = default;
-			constexpr attribute & operator=(attribute const &) = default;
-			constexpr attribute & operator=(attribute &&) noexcept = default;
-
-			attribute const & operator()() const noexcept;
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			void apply() const noexcept;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type		= typename attribute;
-		using self_type			= typename buffer_layout;
-		using initializer_type	= typename std::initializer_list<value_type>;
-		using pointer			= typename value_type *;
-		using reference			= typename value_type &;
-		using const_pointer		= typename value_type const *;
-		using const_reference	= typename value_type const &;
-		using iterator			= typename pointer;
-		using const_iterator	= typename const_pointer;
+		using self_type					= typename buffer_layout;
+		using value_type				= typename attribute;
+		using pointer					= typename value_type *;
+		using reference					= typename value_type &;
+		using const_pointer				= typename value_type const *;
+		using const_reference			= typename value_type const &;
+		using iterator					= typename pointer;
+		using const_iterator			= typename const_pointer;
+		using reverse_iterator			= typename std::reverse_iterator<iterator>;
+		using const_reverse_iterator	= typename std::reverse_iterator<const_iterator>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr const value_type Default[] = {
+		static constexpr value_type default_3d[] =
+		{
 			{ 0, 3, GL::Float, false, vertex::size, 0, sizeof(float_t) },
 			{ 1, 3, GL::Float, false, vertex::size, 3, sizeof(float_t) },
 			{ 2, 2, GL::Float, false, vertex::size, 6, sizeof(float_t) },
@@ -55,34 +47,47 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr buffer_layout() noexcept
-			: self_type{ Default }
+		explicit constexpr buffer_layout(const_pointer data, size_t size) noexcept
+			: m_data{ data }, m_size{ size }
 		{
 		}
 
 		template <size_t N
-		> constexpr buffer_layout(const value_type(&data)[N]) noexcept
+		> constexpr buffer_layout(const value_type(&data)[N])
 			: self_type{ &data[0], N }
 		{
 		}
 
-		constexpr buffer_layout(const_iterator first, const_iterator last) noexcept
-			: self_type{ first, (size_t)(last - first) }
+		constexpr buffer_layout() noexcept
+			: self_type{ default_3d }
 		{
 		}
 
-		constexpr buffer_layout(self_type const & copy) noexcept
+		constexpr buffer_layout(self_type const & copy)
 			: self_type{ copy.m_data, copy.m_size }
 		{
 		}
 
-		constexpr buffer_layout(const_pointer data, size_t size) noexcept
-			: m_data{ data }
-			, m_size{ size }
+		constexpr buffer_layout(self_type && copy) noexcept
+			: self_type{}
 		{
+			swap(std::move(copy));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr self_type & operator=(self_type const & other)
+		{
+			self_type temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		constexpr self_type & operator=(self_type && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
 		constexpr void swap(buffer_layout & other) noexcept
 		{
@@ -95,20 +100,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type const & apply() const noexcept
-		{
-			for (auto const & elem : (*this))
-			{
-				elem();
-			}
-			return (*this);
-		}
+		buffer_layout const & apply() const noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr operator bool() const { return !empty(); }
 
-		ML_NODISCARD constexpr auto operator[](size_t i) const -> const_reference { return at(i); }
+		ML_NODISCARD constexpr auto operator[](size_t i) const  noexcept-> const_reference { return at(i); }
 
 		ML_NODISCARD constexpr auto at(size_t i) const -> const_reference { return *(cbegin() + i); }
 
@@ -120,6 +118,10 @@ namespace ml
 
 		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data + m_size; }
 
+		ML_NODISCARD constexpr auto crbegin() const noexcept -> const_reverse_iterator { return rbegin(); }
+
+		ML_NODISCARD constexpr auto crend() const noexcept -> const_reverse_iterator { return rend(); }
+
 		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data; }
 
 		ML_NODISCARD constexpr bool empty() const noexcept { return (m_size == 0); }
@@ -128,15 +130,17 @@ namespace ml
 
 		ML_NODISCARD constexpr auto front() const noexcept -> const_reference { return (*cbegin()); }
 
+		ML_NODISCARD constexpr auto rbegin() const noexcept -> const_reverse_iterator { return std::make_reverse_iterator(cend()); }
+
+		ML_NODISCARD constexpr auto rend() const noexcept -> const_reverse_iterator { return std::make_reverse_iterator(cbegin()); }
+
 		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_size; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
-		const_pointer m_data;
-		size_t m_size;
+		const_pointer	m_data; // layout data
+		size_t			m_size; // layout size
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

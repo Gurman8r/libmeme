@@ -4,7 +4,7 @@
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
-#define ML_EVENT(type) struct type final : _ML T_event<type>
+#define ML_EVENT(name) struct name final : _ML T_event<name>
 
 namespace ml
 {

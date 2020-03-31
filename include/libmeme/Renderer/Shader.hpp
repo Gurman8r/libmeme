@@ -39,16 +39,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline shader & shader::operator=(shader const & other)
+		shader & shader::operator=(shader const & other)
 		{
 			shader temp{ other };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
-		inline shader & shader::operator=(shader && other) noexcept
+		shader & shader::operator=(shader && other) noexcept
 		{
-			this->swap(std::move(other));
+			swap(std::move(other));
 			return (*this);
 		}
 
@@ -68,9 +68,9 @@ namespace ml
 
 		static void bind(shader const * value, bool bindTextures = true);
 
-		inline void bind(bool bindTextures = true) const { bind(this, bindTextures); }
+		void bind(bool bindTextures = true) const { bind(this, bindTextures); }
 
-		inline void unbind() const { bind(nullptr, false); }
+		void unbind() const { bind(nullptr, false); }
 
 		bool destroy();
 		
@@ -108,19 +108,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return m_handle; }
+		ML_NODISCARD operator bool() const noexcept { return m_handle; }
 
-		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_addressof(m_handle); }
+		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 
-		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
+		ML_NODISCARD auto handle() const noexcept -> uint32_t const & { return m_handle; }
 
-		ML_NODISCARD inline auto source() const noexcept -> shader_source const & { return m_source; }
+		ML_NODISCARD auto source() const noexcept -> shader_source const & { return m_source; }
 
-		ML_NODISCARD inline auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
+		ML_NODISCARD auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
 
-		ML_NODISCARD inline auto textures() const noexcept -> texture_cache const & { return m_textures; }
+		ML_NODISCARD auto textures() const noexcept -> texture_cache const & { return m_textures; }
 
-		ML_NODISCARD inline auto uniforms() const noexcept -> uniform_cache const & { return m_uniforms; }
+		ML_NODISCARD auto uniforms() const noexcept -> uniform_cache const & { return m_uniforms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

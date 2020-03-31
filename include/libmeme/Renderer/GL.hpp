@@ -91,12 +91,12 @@ namespace ml
 
 		// Textures
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static bool edgeClampAvailable();
 		static auto getMaxTextureUnits() -> int32_t;
 		static auto getMaxTextureSize() -> uint32_t;
 		static auto getValidTextureSize(uint32_t value) -> uint32_t;
-		static bool edgeClampAvailable();
-		static bool textureSrgbAvailable();
 		static bool nonPowerOfTwoAvailable();
+		static bool textureSrgbAvailable();
 
 		static auto genTexture() -> uint32_t;
 		static auto genTextures(uint32_t count) -> uint32_t;

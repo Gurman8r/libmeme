@@ -124,35 +124,35 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(init_type value)
+		self_type & operator=(init_type value)
 		{
 			self_type temp{ value };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(storage_type const & value)
+		self_type & operator=(storage_type const & value)
 		{
 			self_type temp{ value };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(storage_type && value) noexcept
+		self_type & operator=(storage_type && value) noexcept
 		{
 			self_type temp{ std::move(value) };
 			this->swap(temp);
 			return (*this);
 		}
 	
-		inline self_type & operator=(self_type const & other)
+		self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		self_type & operator=(self_type && other) noexcept
 		{
 			this->swap(std::move(other));
 			return (*this);
@@ -161,21 +161,21 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class It
-		> inline void assign(It first, It last)
+		> void assign(It first, It last)
 		{
 			m_data.assign(first, last);
 
 			this->impl_sort();
 		}
 
-		inline void assign(init_type value)
+		void assign(init_type value)
 		{
 			m_data.assign(value);
 
 			this->impl_sort();
 		}
 
-		inline void assign(storage_type const & value)
+		void assign(storage_type const & value)
 		{
 			if (std::addressof(m_data) != std::addressof(value))
 			{
@@ -185,7 +185,7 @@ namespace ml::ds
 			}
 		}
 
-		inline void assign(self_type const & other)
+		void assign(self_type const & other)
 		{
 			if (this != std::addressof(other))
 			{
@@ -193,32 +193,32 @@ namespace ml::ds
 			}
 		}
 
-		inline void clear() noexcept
+		void clear() noexcept
 		{
 			m_data.clear();
 		}
 
-		inline void pop_back() noexcept
+		void pop_back() noexcept
 		{
 			m_data.pop_back();
 		}
 
-		inline void reserve(size_type const cap)
+		void reserve(size_type const cap)
 		{
 			m_data.reserve(cap);
 		}
 
-		inline void resize(size_type const cap)
+		void resize(size_type const cap)
 		{
 			m_data.resize(cap);
 		}
 
-		inline void shrink_to_fit()
+		void shrink_to_fit()
 		{
 			m_data.shrink_to_fit();
 		}
 
-		inline void swap(self_type & other) noexcept
+		void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -226,7 +226,7 @@ namespace ml::ds
 			}
 		}
 
-		inline void swap(storage_type & value) noexcept
+		void swap(storage_type & value) noexcept
 		{
 			if (std::addressof(m_data) != std::addressof(value))
 			{
@@ -238,12 +238,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator erase(iterator it)
+		iterator erase(iterator it)
 		{
 			return m_data.erase(it);
 		}
 
-		inline iterator erase(iterator first, iterator last)
+		iterator erase(iterator first, iterator last)
 		{
 			return m_data.erase(first, last);
 		}
@@ -251,7 +251,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD inline auto compare(Other const & other) const
+		> ML_NODISCARD auto compare(Other const & other) const
 		{
 			if constexpr (std::is_same_v<Other, self_type>)
 			{
@@ -264,7 +264,7 @@ namespace ml::ds
 		}
 
 		template <class Other = value_type
-		> ML_NODISCARD inline bool contains(Other const & other) const
+		> ML_NODISCARD bool contains(Other const & other) const
 		{
 			return this->impl_contains(begin(), end(), other);
 		}
@@ -272,13 +272,13 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = value_type
-		> ML_NODISCARD inline iterator find(Other const & other)
+		> ML_NODISCARD iterator find(Other const & other)
 		{
 			return this->impl_find(begin(), end(), other);
 		}
 
 		template <class Other = value_type
-		> ML_NODISCARD inline const_iterator find(Other const & other) const
+		> ML_NODISCARD const_iterator find(Other const & other) const
 		{
 			return this->impl_find(cbegin(), cend(), other);
 		}
@@ -286,107 +286,107 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = value_type
-		> ML_NODISCARD inline auto insert(Other const & other)
+		> ML_NODISCARD auto insert(Other const & other)
 		{
 			return this->impl_insert(other);
 		}
 
 		template <class Other = value_type
-		> ML_NODISCARD inline auto insert(Other && other)
+		> ML_NODISCARD auto insert(Other && other)
 		{
 			return this->impl_insert(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
+		ML_NODISCARD auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
 
-		ML_NODISCARD inline auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
+		ML_NODISCARD auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
 
-		ML_NODISCARD inline auto at(size_type const i) -> reference { return m_data.at(i); }
+		ML_NODISCARD auto at(size_type const i) -> reference { return m_data.at(i); }
 
-		ML_NODISCARD inline auto at(size_type const i) const -> const_reference { return m_data.at(i); }
+		ML_NODISCARD auto at(size_type const i) const -> const_reference { return m_data.at(i); }
 
-		ML_NODISCARD inline auto back() noexcept -> reference { return m_data.back(); }
+		ML_NODISCARD auto back() noexcept -> reference { return m_data.back(); }
 
-		ML_NODISCARD inline auto back() const noexcept -> const_reference { return m_data.back(); }
+		ML_NODISCARD auto back() const noexcept -> const_reference { return m_data.back(); }
 
-		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_data.begin(); }
+		ML_NODISCARD auto begin() noexcept -> iterator { return m_data.begin(); }
 
-		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_data.begin(); }
+		ML_NODISCARD auto begin() const noexcept -> const_iterator { return m_data.begin(); }
 
-		ML_NODISCARD inline auto capacity() const noexcept -> size_type { return m_data.capacity(); }
+		ML_NODISCARD auto capacity() const noexcept -> size_type { return m_data.capacity(); }
 
-		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
+		ML_NODISCARD auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
 
-		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+		ML_NODISCARD auto cend() const noexcept -> const_iterator { return m_data.cend(); }
 
-		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin(); }
+		ML_NODISCARD auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin(); }
 
-		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
+		ML_NODISCARD auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
 
-		ML_NODISCARD inline auto data() noexcept -> pointer { return m_data.data(); }
+		ML_NODISCARD auto data() noexcept -> pointer { return m_data.data(); }
 
-		ML_NODISCARD inline auto data() const noexcept -> const_pointer { return m_data.data(); }
+		ML_NODISCARD auto data() const noexcept -> const_pointer { return m_data.data(); }
 
-		ML_NODISCARD inline bool empty() const noexcept { return m_data.empty(); }
+		ML_NODISCARD bool empty() const noexcept { return m_data.empty(); }
 
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_data.end(); }
+		ML_NODISCARD auto end() noexcept -> iterator { return m_data.end(); }
 
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_data.end(); }
+		ML_NODISCARD auto end() const noexcept -> const_iterator { return m_data.end(); }
 
-		ML_NODISCARD inline auto front() noexcept -> reference { return m_data.front(); }
+		ML_NODISCARD auto front() noexcept -> reference { return m_data.front(); }
 
-		ML_NODISCARD inline auto front() const noexcept -> const_reference { return m_data.front(); }
+		ML_NODISCARD auto front() const noexcept -> const_reference { return m_data.front(); }
 
-		ML_NODISCARD inline auto get_allocator() const noexcept -> allocator_type { return m_data.get_allocator(); }
+		ML_NODISCARD auto get_allocator() const noexcept -> allocator_type { return m_data.get_allocator(); }
 
-		ML_NODISCARD inline auto max_size() const noexcept -> size_type { return m_data.max_size(); }
+		ML_NODISCARD auto max_size() const noexcept -> size_type { return m_data.max_size(); }
 
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin(); }
+		ML_NODISCARD auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin(); }
 
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin(); }
+		ML_NODISCARD auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin(); }
 
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
+		ML_NODISCARD auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
 
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
+		ML_NODISCARD auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
 
-		ML_NODISCARD inline auto size() const noexcept -> size_type { return m_data.size(); }
+		ML_NODISCARD auto size() const noexcept -> size_type { return m_data.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator==(Other const & other) const
+		> ML_NODISCARD bool operator==(Other const & other) const
 		{
 			return this->compare(other) == 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator!=(Other const & other) const
+		> ML_NODISCARD bool operator!=(Other const & other) const
 		{
 			return this->compare(other) != 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator<(Other const & other) const
+		> ML_NODISCARD bool operator<(Other const & other) const
 		{
 			return this->compare(other) < 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator>(Other const & other) const
+		> ML_NODISCARD bool operator>(Other const & other) const
 		{
 			return this->compare(other) > 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator<=(Other const & other) const
+		> ML_NODISCARD bool operator<=(Other const & other) const
 		{
 			return this->compare(other) <= 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator>=(Other const & other) const
+		> ML_NODISCARD bool operator>=(Other const & other) const
 		{
 			return this->compare(other) >= 0;
 		}
@@ -400,7 +400,7 @@ namespace ml::ds
 
 		// contains implementation
 		template <class It, class Other
-		> static inline bool impl_contains(It first, It last, Other const & other)
+		> static bool impl_contains(It first, It last, Other const & other)
 		{
 			// linear
 			auto impl_contains_linear = [&]() noexcept
@@ -440,7 +440,7 @@ namespace ml::ds
 
 		// find implementation
 		template <class It, class Other
-		> static inline auto impl_find(It first, It last, Other const & other)
+		> static auto impl_find(It first, It last, Other const & other)
 		{
 			// linear
 			auto impl_find_linear = [&]() noexcept
@@ -487,7 +487,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// sort implementation
-		inline void impl_sort() noexcept
+		void impl_sort() noexcept
 		{
 			// empty
 			if (this->empty()) return;
@@ -509,7 +509,7 @@ namespace ml::ds
 
 		// insert implementation
 		template <class Other
-		> inline auto impl_insert(Other && other) -> std::conditional_t<traits_type::multi,
+		> auto impl_insert(Other && other) -> std::conditional_t<traits_type::multi,
 			iterator, std::pair<iterator, bool>
 		>
 		{

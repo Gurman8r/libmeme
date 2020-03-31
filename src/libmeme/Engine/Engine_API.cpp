@@ -11,11 +11,11 @@ namespace ml::embed
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class output_wrapper final
+	class output_handler final
 	{
 		std::ostream & m_os; int32_t m_no;
 	public:
-		explicit output_wrapper(std::ostream & os = std::cout) noexcept : m_os{ os }
+		explicit output_handler(std::ostream & os = std::cout) noexcept : m_os{ os }
 		{
 			if (auto const addr{ std::addressof(m_os) }; !addr) { m_no = -2; }
 			else if (addr == std::addressof(std::cout)) { m_no = 1; }
@@ -32,17 +32,17 @@ namespace ml::embed
 
 		static decltype(auto) install(py::module m, cstring name)
 		{
-			return py::class_<output_wrapper>{ m, name }
+			return py::class_<output_handler>{ m, name }
 				.def(py::init<>())
 				.def("closed"		, []() { return false; })
 				.def("isatty"		, []() { return false; })
 				.def("readable"		, []() { return false; })
 				.def("seekable"		, []() { return false; })
 				.def("writable"		, []() { return true; })
-				.def("fileno"		, &output_wrapper::fileno)
-				.def("flush"		, &output_wrapper::flush)
-				.def("write"		, &output_wrapper::write)
-				.def("writelines"	, &output_wrapper::writelines)
+				.def("fileno"		, &output_handler::fileno)
+				.def("flush"		, &output_handler::flush)
+				.def("write"		, &output_handler::write)
+				.def("writelines"	, &output_handler::writelines)
 				;
 		}
 	};
@@ -78,9 +78,9 @@ namespace ml::embed
 			;
 		
 		// OUTPUT
-		output_wrapper::install(m, "output_wrapper");
-		m.attr("cout") = output_wrapper{ std::cout };
-		m.attr("cerr") = output_wrapper{ std::cerr };
+		output_handler::install(m, "output_handler");
+		m.attr("cout") = output_handler{ std::cout };
+		m.attr("cerr") = output_handler{ std::cerr };
 
 		// SCRIPTING
 		scriptable_object::install(m, "scriptable_object");

@@ -96,13 +96,13 @@ namespace ml::gui
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline plot & update() noexcept
+		plot & update() noexcept
 		{
 			ML_assert(getter);
 			return update(std::invoke(getter));
 		}
 
-		inline plot & update(float_t const v) noexcept
+		plot & update(float_t const v) noexcept
 		{
 			if (!animate || buffer.empty()) return (*this);
 			std::sprintf(overlay.data(), format, v);
@@ -111,7 +111,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline plot const & render() const noexcept
+		plot const & render() const noexcept
 		{
 			ML_ImGui_ScopeID(ML_addressof(this));
 
@@ -156,12 +156,12 @@ namespace ml::gui
 		
 		float64_t m_ref_time{};
 
-		template <class Fn> inline auto for_each(Fn && fn) noexcept
+		template <class Fn> auto for_each(Fn && fn) noexcept
 		{
 			return std::for_each(m_plots.begin(), m_plots.end(), ML_forward(fn));
 		}
 
-		inline plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
+		plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
 		{
 			if (m_ref_time == 0.0)
 			{
@@ -207,24 +207,24 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uint32_t get_id() const noexcept
+		uint32_t get_id() const noexcept
 		{
 			return ImGui::GetID(title);
 		}
 
-		inline widget & set_focused() noexcept
+		widget & set_focused() noexcept
 		{
 			open = true;
 			ImGui::SetWindowFocus(title);
 			return (*this);
 		}
 
-		inline bool menu_item() noexcept
+		bool menu_item() noexcept
 		{
 			return ImGui::MenuItem(title, shortcut, &open);
 		}
 
-		inline bool selectable(int32_t selectable_flags = 0, vec2 const & size = {}) noexcept
+		bool selectable(int32_t selectable_flags = 0, vec2 const & size = {}) noexcept
 		{
 			return ImGui::Selectable(title, &open, selectable_flags, size);
 		}
@@ -244,7 +244,7 @@ namespace ml::gui
 		float_t			reg_size{ 32.f };
 
 		template <class Fn
-		> inline texture_preview & render(Fn && fn) noexcept
+		> texture_preview & render(Fn && fn) noexcept
 		{
 			if (!value) return (*this);
 
@@ -322,13 +322,13 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline console & clear()
+		console & clear()
 		{
 			lines.clear();
 			return (*this);
 		}
 
-		inline console & write(char value)
+		console & write(char value)
 		{
 			switch (value)
 			{
@@ -343,12 +343,12 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline console & printl(pmr::string const & value = {})
+		console & printl(pmr::string const & value = {})
 		{
 			return this->print(value).write('\n');
 		}
 
-		inline console & print(pmr::string const & value)
+		console & print(pmr::string const & value)
 		{
 			if (value.empty())
 			{
@@ -373,7 +373,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline console & printss(std::stringstream & value)
+		console & printss(std::stringstream & value)
 		{
 			if (auto const str{ value.str() }; !str.empty())
 			{
@@ -388,7 +388,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline console & printf(cstring fmt, ...)
+		console & printf(cstring fmt, ...)
 		{
 			ds::array<char, 1024> buf{};
 			va_list args;
@@ -399,7 +399,7 @@ namespace ml::gui
 			return this->print(buf.data());
 		}
 
-		inline console & execute(cstring value)
+		console & execute(cstring value)
 		{
 			this->printf("# %s\n", value);
 
@@ -437,7 +437,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		inline console & render()
+		console & render()
 		{
 			ML_ImGui_ScopeID(ML_addressof(this));
 
@@ -517,7 +517,7 @@ namespace ml::gui
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		inline int32_t text_edit_callback(ImGuiInputTextCallbackData * data)
+		int32_t text_edit_callback(ImGuiInputTextCallbackData * data)
 		{
 			switch (data->EventFlag)
 			{

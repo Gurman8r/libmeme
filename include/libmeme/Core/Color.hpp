@@ -91,13 +91,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline operator rgba_t &() { return m_value; }
+		operator rgba_t &() { return m_value; }
 
 		constexpr operator rgba_t const &() const { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline type & operator[](size_t i) { return m_value[i]; }
+		type & operator[](size_t i) { return m_value[i]; }
 
 		constexpr type const & operator[](size_t i) const { return m_value[i]; }
 
@@ -131,12 +131,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> inline ML_serialize(std::ostream & out, basic_color<T> const & value)
+	template <class T> ML_serialize(std::ostream & out, basic_color<T> const & value)
 	{
 		return out << value.rgba();
 	}
 
-	template <class T> inline ML_deserialize(std::istream & in, basic_color<T> & value)
+	template <class T> ML_deserialize(std::istream & in, basic_color<T> & value)
 	{
 		return in >> value.rgba();
 	}

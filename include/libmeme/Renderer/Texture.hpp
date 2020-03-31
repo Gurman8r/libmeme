@@ -52,11 +52,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		texture & operator=(texture const & other);
+		texture & operator=(texture const & other)
+		{
+			texture temp{ other };
+			swap(temp);
+			return (*this);
+		}
 
-		texture & operator=(texture && other) noexcept;
-
-		void swap(texture & other) noexcept;
+		texture & operator=(texture && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,15 +75,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool generate();
+		static void bind(texture const * value);
+
+		void bind() const { bind(this); }
+
+		void unbind() const { bind(nullptr); }
 
 		bool destroy();
 
-		static void bind(texture const * value);
+		bool generate();
 
-		inline void bind() const { bind(this); }
-
-		inline void unbind() const { bind(nullptr); }
+		void swap(texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -98,8 +107,6 @@ namespace ml
 		
 		bool update(texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		bool update(image const & image);
 		
 		bool update(image const & image, uint_rect const & area);
@@ -107,8 +114,6 @@ namespace ml
 		bool update(image const & image, vec2u const & position, vec2u const & size);
 		
 		bool update(image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool update(byte_t const * pixels);
 		
@@ -134,37 +139,37 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return m_handle; }
+		ML_NODISCARD operator bool() const noexcept { return m_handle; }
 
-		ML_NODISCARD inline auto address() const noexcept -> void * { return ML_addressof(m_handle); }
+		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 
-		ML_NODISCARD inline auto handle() const noexcept -> uint32_t const & { return m_handle; }
+		ML_NODISCARD auto handle() const noexcept -> uint32_t const & { return m_handle; }
 		
-		ML_NODISCARD inline auto sampler() const noexcept -> uint32_t { return m_sampler; }
+		ML_NODISCARD auto sampler() const noexcept -> uint32_t { return m_sampler; }
 		
-		ML_NODISCARD inline auto level() const noexcept -> int32_t { return m_level; }
+		ML_NODISCARD auto level() const noexcept -> int32_t { return m_level; }
 		
-		ML_NODISCARD inline auto internal_format() const noexcept -> uint32_t { return m_internalFormat; }
+		ML_NODISCARD auto internal_format() const noexcept -> uint32_t { return m_intl_format; }
 		
-		ML_NODISCARD inline auto color_format() const noexcept -> uint32_t { return m_colorFormat; }
+		ML_NODISCARD auto color_format() const noexcept -> uint32_t { return m_col_format; }
 		
-		ML_NODISCARD inline auto pixel_type() const noexcept -> uint32_t { return m_pixelType; }
+		ML_NODISCARD auto pixel_type() const noexcept -> uint32_t { return m_pixel_type; }
 		
-		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
+		ML_NODISCARD auto size() const noexcept -> vec2u const & { return m_size; }
 		
-		ML_NODISCARD inline auto real_size() const noexcept -> vec2u const & { return m_realSize; }
+		ML_NODISCARD auto real_size() const noexcept -> vec2u const & { return m_real_size; }
 		
-		ML_NODISCARD inline auto flags() const noexcept -> uint32_t { return m_flags; }
+		ML_NODISCARD auto flags() const noexcept -> uint32_t { return m_flags; }
 
-		ML_NODISCARD inline auto width() const noexcept -> uint32_t { return m_size[0]; }
+		ML_NODISCARD auto width() const noexcept -> uint32_t { return m_size[0]; }
 
-		ML_NODISCARD inline auto height() const noexcept -> uint32_t { return m_size[1]; }
+		ML_NODISCARD auto height() const noexcept -> uint32_t { return m_size[1]; }
 
-		ML_NODISCARD inline bool is_smooth() const noexcept { return m_flags & texture_flags_smooth; }
+		ML_NODISCARD bool is_smooth() const noexcept { return m_flags & texture_flags_smooth; }
 
-		ML_NODISCARD inline bool is_repeated() const noexcept { return m_flags & texture_flags_repeated; }
+		ML_NODISCARD bool is_repeated() const noexcept { return m_flags & texture_flags_repeated; }
 
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return m_flags & texture_flags_mipmapped; }
+		ML_NODISCARD bool is_mipmapped() const noexcept { return m_flags & texture_flags_mipmapped; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -172,11 +177,11 @@ namespace ml
 		uint32_t	m_handle;
 		uint32_t	m_sampler;
 		int32_t		m_level;
-		uint32_t	m_internalFormat;
-		uint32_t	m_colorFormat;
-		uint32_t	m_pixelType;
+		uint32_t	m_intl_format;
+		uint32_t	m_col_format;
+		uint32_t	m_pixel_type;
 		vec2u		m_size;
-		vec2u		m_realSize;
+		vec2u		m_real_size;
 		int32_t		m_flags;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

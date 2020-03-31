@@ -107,57 +107,59 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_t i) -> byte_t & { return m_pixels.at(i); }
+		ML_NODISCARD operator bool() const noexcept { return !m_pixels.empty(); }
 
-		ML_NODISCARD inline auto operator[](size_t i) const -> byte_t const & { return m_pixels.at(i); }
+		ML_NODISCARD auto operator[](size_t i) -> byte_t & { return m_pixels.at(i); }
 
-		ML_NODISCARD inline auto bounds() const noexcept -> uint_rect { return uint_rect { { 0, 0 }, size() }; }
-		
-		ML_NODISCARD inline auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
-		
-		ML_NODISCARD inline auto channels() const noexcept -> size_t { return m_channels; }
+		ML_NODISCARD auto operator[](size_t i) const -> byte_t const & { return m_pixels.at(i); }
 
-		ML_NODISCARD inline auto data() noexcept -> byte_t * { return m_pixels.data(); }
+		ML_NODISCARD auto bounds() const noexcept -> uint_rect { return uint_rect { { 0, 0 }, size() }; }
 		
-		ML_NODISCARD inline auto data() const noexcept -> byte_t const * { return m_pixels.data(); }
+		ML_NODISCARD auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
 		
-		ML_NODISCARD inline bool empty() const noexcept { return m_pixels.empty(); }
-		
-		ML_NODISCARD inline auto height() const noexcept -> size_t { return m_size[1]; }
+		ML_NODISCARD auto channels() const noexcept -> size_t { return m_channels; }
 
-		ML_NODISCARD inline auto pixels() noexcept -> storage_type & { return m_pixels; }
+		ML_NODISCARD auto data() noexcept -> byte_t * { return m_pixels.data(); }
 		
-		ML_NODISCARD inline auto pixels() const noexcept -> storage_type const & { return m_pixels; }
+		ML_NODISCARD auto data() const noexcept -> byte_t const * { return m_pixels.data(); }
 		
-		ML_NODISCARD inline auto size() const noexcept -> vec2u const & { return m_size; }
+		ML_NODISCARD bool empty() const noexcept { return m_pixels.empty(); }
 		
-		ML_NODISCARD inline auto width() const noexcept -> size_t { return m_size[0]; }
+		ML_NODISCARD auto height() const noexcept -> size_t { return m_size[1]; }
+
+		ML_NODISCARD auto pixels() noexcept -> storage_type & { return m_pixels; }
+		
+		ML_NODISCARD auto pixels() const noexcept -> storage_type const & { return m_pixels; }
+		
+		ML_NODISCARD auto size() const noexcept -> vec2u const & { return m_size; }
+		
+		ML_NODISCARD auto width() const noexcept -> size_t { return m_size[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_pixels.begin(); }
+		ML_NODISCARD auto begin() noexcept -> iterator { return m_pixels.begin(); }
 		
-		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_pixels.begin(); }
+		ML_NODISCARD auto begin() const noexcept -> const_iterator { return m_pixels.begin(); }
 		
-		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_pixels.cbegin(); }
+		ML_NODISCARD auto cbegin() const noexcept -> const_iterator { return m_pixels.cbegin(); }
 
-		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_pixels.cend(); }
+		ML_NODISCARD auto cend() const noexcept -> const_iterator { return m_pixels.cend(); }
 
-		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_pixels.crbegin(); }
+		ML_NODISCARD auto crbegin() const noexcept -> const_reverse_iterator { return m_pixels.crbegin(); }
 
-		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_pixels.crend(); }
+		ML_NODISCARD auto crend() const noexcept -> const_reverse_iterator { return m_pixels.crend(); }
 
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_pixels.end(); }
+		ML_NODISCARD auto end() noexcept -> iterator { return m_pixels.end(); }
 		
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_pixels.end(); }
+		ML_NODISCARD auto end() const noexcept -> const_iterator { return m_pixels.end(); }
 
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
+		ML_NODISCARD auto rbegin() noexcept -> reverse_iterator { return m_pixels.rbegin(); }
 		
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
+		ML_NODISCARD auto rbegin() const noexcept -> const_reverse_iterator { return m_pixels.rbegin(); }
 
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
+		ML_NODISCARD auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
 		
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
+		ML_NODISCARD auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -68,9 +68,9 @@ ml::int32_t main()
 	{
 		ML_defer{ performance_tracker::swap_frames(); };
 		{
-			ML_benchmark("| begin frame");
+			ML_benchmark("| begin loop");
 			engine::begin_loop();
-			event_system::fire_event<frame_begin_event>();
+			event_system::fire_event<loop_begin_event>();
 		}
 		{
 			ML_benchmark("|  update");
@@ -106,9 +106,9 @@ ml::int32_t main()
 			event_system::fire_event<end_draw_event>();
 		}
 		{
-			ML_benchmark("| end frame");
+			ML_benchmark("| end loop");
 			engine::end_loop();
-			event_system::fire_event<frame_end_event>();
+			event_system::fire_event<loop_end_event>();
 		}
 	}
 

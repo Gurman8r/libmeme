@@ -49,18 +49,18 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const { return (bool)m_self; }
+		ML_NODISCARD operator bool() const { return (bool)m_self; }
 
-		ML_NODISCARD inline auto args() const noexcept -> py::args { return m_args; }
+		ML_NODISCARD auto args() const noexcept -> py::args { return m_args; }
 
-		ML_NODISCARD inline auto kwargs() const noexcept -> py::kwargs { return m_kwargs; }
+		ML_NODISCARD auto kwargs() const noexcept -> py::kwargs { return m_kwargs; }
 
-		ML_NODISCARD inline auto flags() const noexcept -> int32_t { return m_flags; }
+		ML_NODISCARD auto flags() const noexcept -> int32_t { return m_flags; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD inline T get_opt(cstring name, T const & dv = {}) const
+		> ML_NODISCARD T get_opt(cstring name, T const & dv = {}) const
 		{
 			if (m_kwargs.contains(name))
 			{
@@ -72,13 +72,13 @@ namespace ml::embed
 			}
 		}
 
-		ML_NODISCARD inline bool get_flag(int32_t const i) const noexcept { return m_flags & i; }
+		ML_NODISCARD bool get_flag(int32_t const i) const noexcept { return m_flags & i; }
 
-		ML_NODISCARD inline bool is_active() const noexcept { return get_flag(scriptable_flags_active); }
+		ML_NODISCARD bool is_active() const noexcept { return get_flag(scriptable_flags_active); }
 
-		ML_NODISCARD inline bool is_enabled() const noexcept { return get_flag(scriptable_flags_enabled); }
+		ML_NODISCARD bool is_enabled() const noexcept { return get_flag(scriptable_flags_enabled); }
 
-		inline bool set_flag(int32_t i, bool b) noexcept
+		bool set_flag(int32_t i, bool b) noexcept
 		{
 			if (get_flag(i) != b)
 			{
@@ -89,7 +89,7 @@ namespace ml::embed
 			return false;
 		}
 
-		inline void set_enabled(bool b) noexcept { set_flag(scriptable_flags_enabled, b); }
+		void set_enabled(bool b) noexcept { set_flag(scriptable_flags_enabled, b); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

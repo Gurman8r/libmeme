@@ -41,17 +41,17 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> ML_NODISCARD inline decltype(auto) load_function(cstring name)
+		> ML_NODISCARD decltype(auto) load_function(cstring name)
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> inline std::optional<Ret> call_function(cstring name, Args && ... args)
+		> std::optional<Ret> call_function(cstring name, Args && ... args)
 		{
 			if (auto const fn{ load_function<Ret, Args...>(name) })
 			{
-				return std::make_optional(std::move(std::invoke(fn, ML_forward(args)...)));
+				return std::make_optional(std::invoke(fn, ML_forward(args)...));
 			}
 			else
 			{
@@ -61,51 +61,51 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return good(); }
+		ML_NODISCARD operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD inline auto address() const noexcept -> void * const * { return std::addressof(m_instance); }
+		ML_NODISCARD auto address() const noexcept -> void * const * { return std::addressof(m_instance); }
 
-		ML_NODISCARD inline auto functions() const noexcept -> function_map const & { return m_funcs; }
+		ML_NODISCARD auto functions() const noexcept -> function_map const & { return m_funcs; }
 
-		ML_NODISCARD inline bool good() const noexcept { return m_instance; }
+		ML_NODISCARD bool good() const noexcept { return m_instance; }
 
-		ML_NODISCARD inline auto instance() const noexcept -> void const * { return m_instance; }
+		ML_NODISCARD auto instance() const noexcept -> void const * { return m_instance; }
 
-		ML_NODISCARD inline auto path() const noexcept -> filesystem::path const & { return m_path; }
+		ML_NODISCARD auto path() const noexcept -> filesystem::path const & { return m_path; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto compare(shared_library const & other) const noexcept
+		ML_NODISCARD auto compare(shared_library const & other) const noexcept
 		{
 			return m_path.compare(other.m_path);
 		}
 
-		ML_NODISCARD inline bool operator==(shared_library const & other) const
+		ML_NODISCARD bool operator==(shared_library const & other) const
 		{
 			return compare(other) == 0;
 		}
 
-		ML_NODISCARD inline bool operator!=(shared_library const & other) const
+		ML_NODISCARD bool operator!=(shared_library const & other) const
 		{
 			return compare(other) != 0;
 		}
 
-		ML_NODISCARD inline bool operator<(shared_library const & other) const
+		ML_NODISCARD bool operator<(shared_library const & other) const
 		{
 			return compare(other) < 0;
 		}
 
-		ML_NODISCARD inline bool operator>(shared_library const & other) const
+		ML_NODISCARD bool operator>(shared_library const & other) const
 		{
 			return compare(other) > 0;
 		}
 
-		ML_NODISCARD inline bool operator<=(shared_library const & other) const
+		ML_NODISCARD bool operator<=(shared_library const & other) const
 		{
 			return compare(other) <= 0;
 		}
 
-		ML_NODISCARD inline bool operator>=(shared_library const & other) const
+		ML_NODISCARD bool operator>=(shared_library const & other) const
 		{
 			return compare(other) >= 0;
 		}

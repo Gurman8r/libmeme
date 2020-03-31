@@ -48,7 +48,7 @@ namespace ml
 	// malloc
 	void * memory_manager::allocate(size_t size)
 	{
-		static auto & inst{ self_type::get() };
+		static auto & inst{ get_instance() };
 
 		// allocate the requested bytes
 		byte_t * const data{ inst.m_alloc.allocate(size) };
@@ -62,7 +62,7 @@ namespace ml
 	// calloc
 	void * memory_manager::allocate(size_t count, size_t size)
 	{
-		return std::memset(self_type::allocate(count * size), 0, count * size);
+		return std::memset(allocate(count * size), 0, count * size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,7 +70,7 @@ namespace ml
 	// free
 	void memory_manager::deallocate(void * addr)
 	{
-		static auto & inst{ self_type::get() };
+		static auto & inst{ get_instance() };
 
 		// find the entry
 		if (auto const it{ inst.m_records.find(addr) })
@@ -88,7 +88,7 @@ namespace ml
 	// realloc
 	void * memory_manager::reallocate(void * addr, size_t size)
 	{
-		return self_type::reallocate(addr, size, size);
+		return reallocate(addr, size, size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -98,13 +98,13 @@ namespace ml
 	{
 		if (newsz == 0)
 		{
-			self_type::deallocate(addr);
-			
+			deallocate(addr);
+
 			return nullptr;
 		}
 		else if (!addr)
 		{
-			return self_type::allocate(newsz);
+			return allocate(newsz);
 		}
 		else if (newsz <= oldsz)
 		{
@@ -112,12 +112,12 @@ namespace ml
 		}
 		else
 		{
-			void * const temp{ self_type::allocate(newsz) };
+			void * const temp{ allocate(newsz) };
 			if (temp)
 			{
 				std::memcpy(temp, addr, oldsz);
 
-				self_type::deallocate(addr);
+				deallocate(addr);
 			}
 			return temp;
 		}

@@ -63,45 +63,45 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool good() const noexcept { return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo); }
+		bool good() const noexcept { return (m_ibo && m_vao && m_vbo) || (m_vao && m_vbo); }
 
-		inline operator bool() const noexcept { return good(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto vao() noexcept -> VAO & { return m_vao; }
-
-		ML_NODISCARD inline auto vao() const noexcept -> VAO const & { return m_vao; }
+		operator bool() const noexcept { return good(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto vbo() noexcept -> VBO & { return m_vbo; }
+		ML_NODISCARD auto vao() noexcept -> VAO & { return m_vao; }
 
-		ML_NODISCARD inline auto vbo() const noexcept -> VBO const & { return m_vbo; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto ibo() noexcept -> IBO & { return m_ibo; }
-
-		ML_NODISCARD inline auto ibo() const noexcept -> IBO const & { return m_ibo; }
+		ML_NODISCARD auto vao() const noexcept -> VAO const & { return m_vao; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto layout() noexcept -> buffer_layout & { return m_layout; }
+		ML_NODISCARD auto vbo() noexcept -> VBO & { return m_vbo; }
 
-		ML_NODISCARD inline auto layout() const noexcept -> buffer_layout const & { return m_layout; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline auto vertices() noexcept -> contiguous_t & { return m_vertices; }
-
-		ML_NODISCARD inline auto vertices() const noexcept -> contiguous_t const & { return m_vertices; }
+		ML_NODISCARD auto vbo() const noexcept -> VBO const & { return m_vbo; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto indices() noexcept -> indices_t & { return m_indices; }
+		ML_NODISCARD auto ibo() noexcept -> IBO & { return m_ibo; }
 
-		ML_NODISCARD inline auto indices() const noexcept -> indices_t const & { return m_indices; }
+		ML_NODISCARD auto ibo() const noexcept -> IBO const & { return m_ibo; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto layout() noexcept -> buffer_layout & { return m_layout; }
+
+		ML_NODISCARD auto layout() const noexcept -> buffer_layout const & { return m_layout; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto vertices() noexcept -> contiguous_t & { return m_vertices; }
+
+		ML_NODISCARD auto vertices() const noexcept -> contiguous_t const & { return m_vertices; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto indices() noexcept -> indices_t & { return m_indices; }
+
+		ML_NODISCARD auto indices() const noexcept -> indices_t const & { return m_indices; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

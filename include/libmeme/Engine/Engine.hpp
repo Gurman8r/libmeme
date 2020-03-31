@@ -73,13 +73,11 @@ namespace ml
 
 		static void begin_loop();
 
-		static void end_loop();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static void begin_draw();
 
 		static void end_draw();
+
+		static void end_loop();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

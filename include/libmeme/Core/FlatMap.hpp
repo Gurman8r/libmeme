@@ -133,21 +133,21 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline self_type & operator=(init_type value)
+		self_type & operator=(init_type value)
 		{
 			self_type temp{ value };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type const & other)
+		self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
 			this->swap(temp);
 			return (*this);
 		}
 
-		inline self_type & operator=(self_type && other) noexcept
+		self_type & operator=(self_type && other) noexcept
 		{
 			this->swap(std::move(other));
 			return (*this);
@@ -155,7 +155,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void assign(init_type value)
+		void assign(init_type value)
 		{
 			if (!this->empty()) { this->clear(); }
 
@@ -165,7 +165,7 @@ namespace ml::ds
 			}
 		}
 
-		inline void assign(self_type const & other)
+		void assign(self_type const & other)
 		{
 			if (this != std::addressof(other))
 			{
@@ -173,43 +173,43 @@ namespace ml::ds
 			}
 		}
 
-		inline void clear() noexcept
+		void clear() noexcept
 		{
 			m_pair.first.clear();
 			m_pair.second.clear();
 		}
 
-		inline void pop_back() noexcept
+		void pop_back() noexcept
 		{
 			m_pair.first.pop_back();
 			m_pair.second.pop_back();
 		}
 
-		inline void reserve(size_type const count)
+		void reserve(size_type const count)
 		{
 			m_pair.first.reserve(count);
 			m_pair.second.reserve(count);
 		}
 
-		inline void resize(size_type const count)
+		void resize(size_type const count)
 		{
 			m_pair.first.resize(count);
 			m_pair.second.resize(count);
 		}
 
-		inline void resize(size_type const count, value_type const & value)
+		void resize(size_type const count, value_type const & value)
 		{
 			m_pair.first.resize(count);
 			m_pair.second.resize(count, value);
 		}
 
-		inline void shrink_to_fit()
+		void shrink_to_fit()
 		{
 			m_pair.first.shrink_to_fit();
 			m_pair.second.shrink_to_fit();
 		}
 
-		inline void swap(self_type & other) noexcept
+		void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -219,81 +219,81 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline key_storage const & keys() const & noexcept
+		ML_NODISCARD key_storage const & keys() const & noexcept
 		{
 			return m_pair.first;
 		}
 
-		ML_NODISCARD inline value_storage const & values() const & noexcept
+		ML_NODISCARD value_storage const & values() const & noexcept
 		{
 			return m_pair.second;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline size_type capacity() const noexcept
+		ML_NODISCARD size_type capacity() const noexcept
 		{
 			return m_pair.first.capacity();
 		}
 
-		ML_NODISCARD inline bool empty() const noexcept
+		ML_NODISCARD bool empty() const noexcept
 		{
 			return m_pair.first.empty();
 		}
 
-		ML_NODISCARD inline size_type max_size() const noexcept
+		ML_NODISCARD size_type max_size() const noexcept
 		{
 			return m_pair.first.max_size();
 		}
 
-		ML_NODISCARD inline size_type size() const noexcept
+		ML_NODISCARD size_type size() const noexcept
 		{
 			return m_pair.first.size();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline reference_pair back() noexcept
+		ML_NODISCARD reference_pair back() noexcept
 		{
 			return { m_pair.first.back(), m_pair.second.back() };
 		}
 
-		ML_NODISCARD inline const_reference_pair back() const noexcept
+		ML_NODISCARD const_reference_pair back() const noexcept
 		{
 			return { m_pair.first.back(), m_pair.second.back() };
 		}
 
-		ML_NODISCARD inline reference_pair front() noexcept
+		ML_NODISCARD reference_pair front() noexcept
 		{
 			return { m_pair.first.front(), m_pair.second.front() };
 		}
 
-		ML_NODISCARD inline const_reference_pair front() const noexcept
+		ML_NODISCARD const_reference_pair front() const noexcept
 		{
 			return { m_pair.first.front(), m_pair.second.front() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_iterator fetch(key_const_iterator it) noexcept
+		ML_NODISCARD value_iterator fetch(key_const_iterator it) noexcept
 		{
 			return std::next(m_pair.second.begin(), std::distance(m_pair.first.cbegin(), it));
 		}
 
-		ML_NODISCARD inline value_const_iterator fetch(key_const_iterator it) const noexcept
+		ML_NODISCARD value_const_iterator fetch(key_const_iterator it) const noexcept
 		{
 			return std::next(m_pair.second.cbegin(), std::distance(m_pair.first.cbegin(), it));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator_pair erase(key_iterator it)
+		iterator_pair erase(key_iterator it)
 		{
 			auto const result{ m_pair.second.erase(this->fetch(it)) };
 			return { m_pair.first.erase(it), result };
 		}
 
-		inline iterator_pair erase(key_iterator first, key_iterator last)
+		iterator_pair erase(key_iterator first, key_iterator last)
 		{
 			auto const result{ m_pair.second.erase(this->fetch(first), this->fetch(last)) };
 			return { m_pair.first.erase(first, last), result };
@@ -302,7 +302,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD inline auto compare(Other const & other) const
+		> ML_NODISCARD auto compare(Other const & other) const
 		{
 			if constexpr (std::is_same_v<Other, self_type>)
 			{
@@ -314,14 +314,14 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD inline bool contains(key_type const & key) const
+		ML_NODISCARD bool contains(key_type const & key) const
 		{
 			return m_pair.first.contains(key);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline optl_iterator_pair find(key_type const & key)
+		ML_NODISCARD optl_iterator_pair find(key_type const & key)
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.end())
 			{
@@ -333,7 +333,7 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD inline optl_const_iterator_pair find(key_type const & key) const
+		ML_NODISCARD optl_const_iterator_pair find(key_type const & key) const
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.cend())
 			{
@@ -348,7 +348,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args)
+		> std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args)
 		{
 			if (auto const k{ m_pair.first.insert(key) }; k.second)
 			{
@@ -361,7 +361,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> inline std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args)
+		> std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args)
 		{
 			if (auto const k{ m_pair.first.insert(std::move(key)) }; k.second)
 			{
@@ -376,12 +376,12 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Key, class Value
-		> inline iterator_pair insert(Key && key, Value && value)
+		> iterator_pair insert(Key && key, Value && value)
 		{
 			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
 		}
 
-		inline iterator_pair insert(keyval_pair && pair)
+		iterator_pair insert(keyval_pair && pair)
 		{
 			return this->try_emplace(ML_forward(pair.first), ML_forward(pair.second)).first;
 		}
@@ -389,7 +389,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> inline value_type & find_or_add(key_type const & key, Args && ... args)
+		> value_type & find_or_add(key_type const & key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -402,7 +402,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> inline value_type & find_or_add(key_type && key, Args && ... args)
+		> value_type & find_or_add(key_type && key, Args && ... args)
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -416,24 +416,24 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & at(key_type const & key)
+		ML_NODISCARD value_type & at(key_type const & key)
 		{
 			return this->find_or_add(key, value_type{});
 		}
 
-		ML_NODISCARD inline value_type & at(key_type && key)
+		ML_NODISCARD value_type & at(key_type && key)
 		{
 			return this->find_or_add(std::move(key), value_type{});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline value_type & operator[](key_type const & key) noexcept
+		ML_NODISCARD value_type & operator[](key_type const & key) noexcept
 		{
 			return this->at(key);
 		}
 
-		ML_NODISCARD inline value_type & operator[](key_type && key) noexcept
+		ML_NODISCARD value_type & operator[](key_type && key) noexcept
 		{
 			return this->at(std::move(key));
 		}
@@ -441,13 +441,13 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline decltype(auto) apply(key_const_iterator it, Fn && fn)
+		> decltype(auto) apply(key_const_iterator it, Fn && fn)
 		{
 			return std::invoke(ML_forward(fn), *it, *this->fetch(it));
 		}
 
 		template <class Fn
-		> inline decltype(auto) apply(key_const_iterator it, Fn && fn) const
+		> decltype(auto) apply(key_const_iterator it, Fn && fn) const
 		{
 			return std::invoke(ML_forward(fn), *it, *this->fetch(it));
 		}
@@ -455,7 +455,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) noexcept
 		{
 			for (; first != last; ++first)
 			{
@@ -465,13 +465,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline auto for_each(key_const_iterator first, Fn fn) noexcept
+		> auto for_each(key_const_iterator first, Fn fn) noexcept
 		{
 			return this->for_each(first, m_pair.first.cend(), fn);
 		}
 
 		template <class Fn
-		> inline auto for_each(Fn fn) noexcept
+		> auto for_each(Fn fn) noexcept
 		{
 			return this->for_each(m_pair.first.cbegin(), fn);
 		}
@@ -479,7 +479,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) const noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) const noexcept
 		{
 			for (; first != last; ++first)
 			{
@@ -489,13 +489,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline auto for_each(key_const_iterator first, Fn fn) const noexcept
+		> auto for_each(key_const_iterator first, Fn fn) const noexcept
 		{
 			return this->for_each(first, m_pair.first.cend(), fn);
 		}
 
 		template <class Fn
-		> inline auto for_each(Fn fn) const noexcept
+		> auto for_each(Fn fn) const noexcept
 		{
 			return this->for_each(m_pair.first.cbegin(), fn);
 		}
@@ -503,7 +503,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) noexcept
 		{
 			if (0 < count)
 			{
@@ -517,7 +517,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline auto for_each_n(ptrdiff_t count, Fn fn) noexcept
+		> auto for_each_n(ptrdiff_t count, Fn fn) noexcept
 		{
 			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}
@@ -525,7 +525,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> inline auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) const noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) const noexcept
 		{
 			if (0 < count)
 			{
@@ -539,7 +539,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> inline auto for_each_n(ptrdiff_t count, Fn fn) const noexcept
+		> auto for_each_n(ptrdiff_t count, Fn fn) const noexcept
 		{
 			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}
@@ -547,37 +547,37 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator==(Other const & other) const
+		> ML_NODISCARD bool operator==(Other const & other) const
 		{
 			return this->compare(other) == 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator!=(Other const & other) const
+		> ML_NODISCARD bool operator!=(Other const & other) const
 		{
 			return this->compare(other) != 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator<(Other const & other) const
+		> ML_NODISCARD bool operator<(Other const & other) const
 		{
 			return this->compare(other) < 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator>(Other const & other) const
+		> ML_NODISCARD bool operator>(Other const & other) const
 		{
 			return this->compare(other) > 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator<=(Other const & other) const
+		> ML_NODISCARD bool operator<=(Other const & other) const
 		{
 			return this->compare(other) <= 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD inline bool operator>=(Other const & other) const
+		> ML_NODISCARD bool operator>=(Other const & other) const
 		{
 			return this->compare(other) >= 0;
 		}
@@ -591,7 +591,7 @@ namespace ml::ds
 
 		// emplace_hint implementation
 		template <class ... Args
-		> inline iterator_pair impl_emplace_hint(key_const_iterator it, Args && ... args)
+		> iterator_pair impl_emplace_hint(key_const_iterator it, Args && ... args)
 		{
 			// must be private or the map could become unsorted
 			return {

@@ -85,20 +85,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline uniform & operator=(uniform const & other)
+		uniform & operator=(uniform const & other)
 		{
 			uniform temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline uniform & operator=(uniform && other) noexcept
+		uniform & operator=(uniform && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(uniform & other) noexcept
+		void swap(uniform & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -110,15 +110,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline type_t const & type() const noexcept { return m_type; }
+		ML_NODISCARD type_t const & type() const noexcept { return m_type; }
 		
-		ML_NODISCARD inline name_t const & name() const noexcept { return m_name; }
+		ML_NODISCARD name_t const & name() const noexcept { return m_name; }
 		
-		ML_NODISCARD inline data_t const & data() const noexcept { return m_data; }
+		ML_NODISCARD data_t const & data() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto compare(uniform const & other) const noexcept
+		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
 			if (m_type != other.m_type)
 			{
@@ -130,17 +130,17 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline bool is_variable() const noexcept
+		ML_NODISCARD bool is_variable() const noexcept
 		{
 			return (m_data.index() == ID_Variable);
 		}
 
-		ML_NODISCARD inline bool is_function() const noexcept
+		ML_NODISCARD bool is_function() const noexcept
 		{
 			return (m_data.index() == ID_Function);
 		}
 
-		ML_NODISCARD inline variable_type var() const
+		ML_NODISCARD variable_type get_var() const
 		{
 			switch (m_data.index())
 			{
@@ -150,21 +150,21 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD inline size_t index() const noexcept
+		ML_NODISCARD size_t index() const noexcept
 		{
-			return this->var().index();
+			return get_var().index();
 		}
 
 		template <class T
-		> ML_NODISCARD inline bool holds() const noexcept
+		> ML_NODISCARD bool holds() const noexcept
 		{
-			return std::holds_alternative<T>(this->var());
+			return std::holds_alternative<T>(get_var());
 		}
 
 		template <class T
-		> ML_NODISCARD inline std::optional<T> get() const
+		> ML_NODISCARD std::optional<T> get() const
 		{
-			if (auto const v{ this->var() }; std::holds_alternative<T>(v))
+			if (auto const v{ get_var() }; std::holds_alternative<T>(v))
 			{
 				return std::make_optional<T>(std::get<T>(v));
 			}
@@ -175,46 +175,48 @@ namespace ml
 		}
 
 		template <class T, class Data
-		> inline uniform & set(Data const & value) noexcept
+		> uniform & set(Data const & value) noexcept
 		{
 			if (this->holds<T>())
+			{
 				m_data = value;
+			}
 			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool const() const noexcept
+		ML_NODISCARD operator bool const() const noexcept
 		{
 			return !m_name.empty();
 		}
 
-		ML_NODISCARD inline bool operator==(uniform const & other) const noexcept
+		ML_NODISCARD bool operator==(uniform const & other) const noexcept
 		{
 			return compare(other) == 0;
 		}
 
-		ML_NODISCARD inline bool operator!=(uniform const & other) const noexcept
+		ML_NODISCARD bool operator!=(uniform const & other) const noexcept
 		{
 			return compare(other) != 0;
 		}
 
-		ML_NODISCARD inline bool operator<(uniform const & other) const noexcept
+		ML_NODISCARD bool operator<(uniform const & other) const noexcept
 		{
 			return compare(other) < 0;
 		}
 
-		ML_NODISCARD inline bool operator>(uniform const & other) const noexcept
+		ML_NODISCARD bool operator>(uniform const & other) const noexcept
 		{
 			return compare(other) > 0;
 		}
 
-		ML_NODISCARD inline bool operator<=(uniform const & other) const noexcept
+		ML_NODISCARD bool operator<=(uniform const & other) const noexcept
 		{
 			return compare(other) <= 0;
 		}
 
-		ML_NODISCARD inline bool operator>=(uniform const & other) const noexcept
+		ML_NODISCARD bool operator>=(uniform const & other) const noexcept
 		{
 			return compare(other) >= 0;
 		}
@@ -222,9 +224,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		type_t m_type;
-		name_t m_name;
-		data_t m_data;
+		type_t m_type; // type info
+		name_t m_name; // uniform name
+		data_t m_data; // variant data
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

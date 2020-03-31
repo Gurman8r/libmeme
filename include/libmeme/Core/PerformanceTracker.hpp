@@ -26,18 +26,18 @@ namespace ml
 		static frame_type m_prev;
 
 	public:
-		ML_NODISCARD static inline frame_type const & last_frame() noexcept
+		ML_NODISCARD static frame_type const & last_frame() noexcept
 		{
 			return m_prev;
 		}
 
 		template <class ... Args
-		> static inline decltype(auto) push_frame(Args && ... args) noexcept
+		> static decltype(auto) push_frame(Args && ... args) noexcept
 		{
 			return m_curr.emplace_back(ML_forward(args)...);
 		}
 
-		static inline void swap_frames() noexcept
+		static void swap_frames() noexcept
 		{
 			m_prev.swap(m_curr);
 

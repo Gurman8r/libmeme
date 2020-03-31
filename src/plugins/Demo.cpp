@@ -138,10 +138,10 @@ namespace ml
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
 
 
-		// ECS
+		// RENDERER
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		renderer_manager m_ecs{};
+		renderer_manager m_renderer{};
 
 		pmr::vector<renderer_manager::handle> m_handles;
 
@@ -204,24 +204,24 @@ namespace ml
 
 		demo()
 		{
-			event_system::add_listener<load_event		>(this);
-			event_system::add_listener<update_event		>(this);
-			event_system::add_listener<draw_event		>(this);
-			event_system::add_listener<gui_dock_event	>(this);
-			event_system::add_listener<gui_draw_event	>(this);
-			event_system::add_listener<unload_event		>(this);
+			event_system::add_listener<	load_event		>(this);
+			event_system::add_listener<	update_event	>(this);
+			event_system::add_listener<	draw_event		>(this);
+			event_system::add_listener<	gui_dock_event	>(this);
+			event_system::add_listener<	gui_draw_event	>(this);
+			event_system::add_listener<	unload_event	>(this);
 		}
 
 		void on_event(event const & value) override
 		{
 			switch (value.id())
 			{
-			case hashof_v<load_event	> : on_load		(*value.as<	load_event		>()); break;
-			case hashof_v<update_event	> : on_update	(*value.as<	update_event	>()); break;
-			case hashof_v<draw_event	> : on_draw		(*value.as<	draw_event		>()); break;
-			case hashof_v<gui_dock_event> : on_gui_dock	(*value.as<	gui_dock_event	>()); break;
-			case hashof_v<gui_draw_event> : on_gui_draw	(*value.as<	gui_draw_event	>()); break;
-			case hashof_v<unload_event	> : on_unload	(*value.as<	unload_event	>()); break;
+			case hashof_v<	load_event		>: return on_load		(*value.as<	load_event		>());
+			case hashof_v<	update_event	>: return on_update		(*value.as<	update_event	>());
+			case hashof_v<	draw_event		>: return on_draw		(*value.as<	draw_event		>());
+			case hashof_v<	gui_dock_event	>: return on_gui_dock	(*value.as<	gui_dock_event	>());
+			case hashof_v<	gui_draw_event	>: return on_gui_draw	(*value.as<	gui_draw_event	>());
+			case hashof_v<	unload_event	>: return on_unload		(*value.as<	unload_event	>());
 			}
 		}
 
@@ -235,15 +235,14 @@ namespace ml
 			setup_menus();
 
 			// ICON
-			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) }
-			; !icon.empty())
+			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) })
 			{
 				engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
 			{
-				(m_pipeline[0] = make_render_texture(vec2i{ 1280, 720 })).create();
+				(m_pipeline[0] = make_render_texture(vec2i{ 1280, 720 })).generate();
 			}
 
 			// TEXTURES
@@ -392,11 +391,11 @@ namespace ml
 
 			// ENTITIES
 			{
-				ML_defer{ m_ecs.refresh(); };
+				ML_defer{ m_renderer.refresh(); };
 
 				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
 				{
-					auto & h{ m_handles.emplace_back(m_ecs.create_handle()) };
+					auto & h{ m_handles.emplace_back(m_renderer.create_handle()) };
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
@@ -430,8 +429,8 @@ namespace ml
 			m_plots.update(engine::get_time().count());
 			
 			// systems
-			m_ecs.update_system<x_apply_transforms>();
-			m_ecs.update_system<x_apply_materials>();
+			m_renderer.update_system<x_apply_transforms>();
+			m_renderer.update_system<x_apply_materials>();
 
 			// pipeline
 			if (m_display_size[0] > 0 && m_display_size[1] > 0)
@@ -451,14 +450,13 @@ namespace ml
 
 			if (render_texture const & target{ m_pipeline[0] })
 			{
-				target.bind();
+				ML_BIND_SCOPE(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_ecs.update_system<x_draw_renderers>(target);
-				target.unbind();
+				m_renderer.update_system<x_draw_renderers>(target);
 			}
 		}
 
@@ -476,7 +474,7 @@ namespace ml
 
 			auto & d{ editor::get_runtime().dock_nodes };
 			d.resize(MAX_DOCK_NODE);
-			if (d[root] = editor::begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			if (d[root] = editor::begin_dock_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
@@ -498,7 +496,7 @@ namespace ml
 				editor::dock(m_gui_memory.title		, d[right]);
 				editor::dock(m_gui_console.title	, d[right]);
 
-				editor::end_builder(root);
+				editor::end_dock_builder(root);
 			}
 		}
 
@@ -528,7 +526,7 @@ namespace ml
 		{
 			// cleanup stuff, etc...
 
-			m_ecs.clear();
+			m_renderer.clear();
 			m_images.clear();
 			m_shaders.clear();
 			m_materials.clear();
@@ -898,7 +896,7 @@ namespace ml
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 			ImGui::Columns(2);
 			ImGui::Separator();
-			m_ecs.for_entities([&](size_t const e)
+			m_renderer.for_entities([&](size_t const e)
 			{
 				ML_ImGui_ScopeID(static_cast<int32_t>(e));
 				ImGui::AlignTextToFramePadding();
@@ -913,7 +911,7 @@ namespace ml
 
 				if (e_open)
 				{
-					m_ecs.for_components(e, [&](auto & c)
+					m_renderer.for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
 						ML_ImGui_ScopeID(&c);
@@ -966,66 +964,80 @@ namespace ml
 
 			struct funcs
 			{
-				static void show_item(filesystem::directory_entry value)
+				static void show_entry(filesystem::directory_entry const & value)
 				{
-					auto value_name{ value.path().string().c_str() };
-					if (!value_name || !*value_name) return;
-					ML_ImGui_ScopeID((int32_t)util::hash(value.path().string()));
+					auto const path{ value.path() };
+					if (path.empty()) return;
+					ML_ImGui_ScopeID((int32_t)util::hash(path.string()));
 
-					if (value.is_directory())
+					switch (value.status().type())
 					{
-						ImGui::PushStyleColor(ImGuiCol_Text, { .0f, .0f, 1.f, 1.f });
+					// DIRECTORY
+					case filesystem::file_type::directory:
+					{
 						ImGui::AlignTextToFramePadding();
-						bool const node_open{ ImGui::TreeNode("dir", "%s", value_name) };
+						ImGui::PushStyleColor(ImGuiCol_Text, { .0f, 1.f, 1.f, 1.f });
+						bool const dir_open
+						{
+							ImGui::TreeNode("directory", "%s", path.stem().string().c_str())
+						};
+						ImGui::PopStyleColor();
 						ImGui::NextColumn();
 						ImGui::AlignTextToFramePadding();
 						{
-							ImGui::Text("directory");
+							ImGui::Text("sample text");
 						}
 						ImGui::NextColumn();
-						if (node_open)
+						if (dir_open)
 						{
-							render(value.path());
-
+							render(path);
 							ImGui::TreePop();
 						}
-						ImGui::PopStyleColor();
-					}
-					else
+					} break;
+
+					// REGULAR
+					case filesystem::file_type::regular:
 					{
-						ImGui::PushStyleColor(ImGuiCol_Text, { 0.f, 1.f, 0.f, 1.f });
 						ImGui::AlignTextToFramePadding();
-						ImGui::TreeNodeEx("file",
+						ImGui::PushStyleColor(ImGuiCol_Text, { 0.f, 1.f, 0.f, 1.f });
+						ImGui::TreeNodeEx(
+							"regular",
 							ImGuiTreeNodeFlags_Leaf |
 							ImGuiTreeNodeFlags_NoTreePushOnOpen |
 							ImGuiTreeNodeFlags_Bullet,
 							"%s",
-							value.path().filename().string().c_str()
-							);
+							path.filename().string().c_str()
+						);
+						ImGui::PopStyleColor();
 						ImGui::NextColumn();
 						ImGui::SetNextItemWidth(-1);
-						if (ImGui::Button("open")) {}
-						ImGui::SameLine();
-						if (ImGui::Button("edit")) {}
+						{
+							if (ImGui::Button("open")) {}
+							ImGui::SameLine();
+							if (ImGui::Button("edit")) {}
+						}
 						ImGui::NextColumn();
-						ImGui::PopStyleColor();
+					} break;
 					}
 				}
 
 				static void render(filesystem::path const & path)
 				{
+					if (!filesystem::is_directory(path)) { return; }
+
 					for (auto it : filesystem::directory_iterator{ path })
 					{
-						if (it.is_directory()) { funcs::show_item(it); }
+						if (it.is_directory()) { show_entry(it); }
 					}
+
 					for (auto it : filesystem::directory_iterator{ path })
 					{
-						if (it.is_regular_file()) { funcs::show_item(it); }
+						if (it.is_regular_file()) { show_entry(it); }
 					}
 				}
 			};
 
-			static auto path{ engine::path_to("") };
+			static auto path{ engine::path_to() };
 			funcs::render(path);
 
 			ImGui::Columns(1);

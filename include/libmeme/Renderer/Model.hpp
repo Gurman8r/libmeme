@@ -64,55 +64,55 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_type const i) -> reference { return m_storage[i]; }
+		ML_NODISCARD auto operator[](size_type const i) -> reference { return m_storage[i]; }
 
-		ML_NODISCARD inline auto operator[](size_type const i) const -> const_reference { return m_storage[i]; }
+		ML_NODISCARD auto operator[](size_type const i) const -> const_reference { return m_storage[i]; }
 
-		ML_NODISCARD inline auto back() noexcept -> reference { return m_storage.back(); }
+		ML_NODISCARD auto back() noexcept -> reference { return m_storage.back(); }
 
-		ML_NODISCARD inline auto back() const noexcept -> const_reference { return m_storage.back(); }
+		ML_NODISCARD auto back() const noexcept -> const_reference { return m_storage.back(); }
 
-		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
+		ML_NODISCARD auto begin() noexcept -> iterator { return m_storage.begin(); }
 
-		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
+		ML_NODISCARD auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
 
-		ML_NODISCARD inline auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
+		ML_NODISCARD auto capacity() const noexcept -> size_type { return m_storage.capacity(); }
 
-		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
+		ML_NODISCARD auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
 
-		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
+		ML_NODISCARD auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 
-		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
+		ML_NODISCARD auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 
-		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
+		ML_NODISCARD auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
 
-		ML_NODISCARD inline auto data() noexcept -> pointer { return m_storage.data(); }
+		ML_NODISCARD auto data() noexcept -> pointer { return m_storage.data(); }
 
-		ML_NODISCARD inline auto data() const noexcept -> const_pointer { return m_storage.data(); }
+		ML_NODISCARD auto data() const noexcept -> const_pointer { return m_storage.data(); }
 
-		ML_NODISCARD inline bool empty() const noexcept { return m_storage.empty(); }
+		ML_NODISCARD bool empty() const noexcept { return m_storage.empty(); }
 
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_storage.end(); }
+		ML_NODISCARD auto end() noexcept -> iterator { return m_storage.end(); }
 
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+		ML_NODISCARD auto end() const noexcept -> const_iterator { return m_storage.end(); }
 
-		ML_NODISCARD inline auto front() noexcept -> reference { return m_storage.front(); }
+		ML_NODISCARD auto front() noexcept -> reference { return m_storage.front(); }
 
-		ML_NODISCARD inline auto front() const noexcept -> const_reference { return m_storage.front(); }
+		ML_NODISCARD auto front() const noexcept -> const_reference { return m_storage.front(); }
 
-		ML_NODISCARD inline auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
+		ML_NODISCARD auto get_allocator() const noexcept -> allocator_type { return m_storage.get_allocator(); }
 
-		ML_NODISCARD inline auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
+		ML_NODISCARD auto max_size() const noexcept -> size_type { return m_storage.max_size(); }
 
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
 
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
 
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
 
-		ML_NODISCARD inline auto size() const noexcept -> size_type { return m_storage.size(); }
+		ML_NODISCARD auto size() const noexcept -> size_type { return m_storage.size(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

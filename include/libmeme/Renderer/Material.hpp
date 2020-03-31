@@ -60,14 +60,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline material & operator=(material const & other)
+		material & operator=(material const & other)
 		{
 			material temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		inline material & operator=(material && other) noexcept
+		material & operator=(material && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
@@ -79,12 +79,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void clear() noexcept
+		void clear() noexcept
 		{
 			m_storage.clear();
 		}
 
-		inline void swap(material & other) noexcept
+		void swap(material & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -94,7 +94,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline iterator find(pmr::string const & name)
+		ML_NODISCARD iterator find(pmr::string const & name)
 		{
 			if (name.empty()) return end();
 
@@ -104,7 +104,7 @@ namespace ml
 			});
 		}
 
-		ML_NODISCARD inline const_iterator find(pmr::string const & name) const
+		ML_NODISCARD const_iterator find(pmr::string const & name) const
 		{
 			if (name.empty()) return cend();
 			
@@ -117,7 +117,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD inline iterator find(pmr::string const & name)
+		> ML_NODISCARD iterator find(pmr::string const & name)
 		{
 			if (auto const it{ find(name) }; it != end() && it->holds<T>())
 			{
@@ -127,7 +127,7 @@ namespace ml
 		}
 
 		template <class T
-		> ML_NODISCARD inline const_iterator find(pmr::string const & name) const
+		> ML_NODISCARD const_iterator find(pmr::string const & name) const
 		{
 			if (auto const it{ find(name) }; it != cend() && it->holds<T>())
 			{
@@ -138,7 +138,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline uniform * get(pmr::string const & name)
+		ML_NODISCARD uniform * get(pmr::string const & name)
 		{
 			if (auto const it{ find(name) }; it != end())
 			{
@@ -147,7 +147,7 @@ namespace ml
 			return nullptr;
 		}
 
-		ML_NODISCARD inline uniform const * get(pmr::string const & name) const
+		ML_NODISCARD uniform const * get(pmr::string const & name) const
 		{
 			if (auto const it{ find(name) }; it != end())
 			{
@@ -159,7 +159,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD inline uniform * get(pmr::string const & name)
+		> ML_NODISCARD uniform * get(pmr::string const & name)
 		{
 			if (auto const it{ find<T>(name) }; it != end())
 			{
@@ -169,7 +169,7 @@ namespace ml
 		}
 
 		template <class T
-		> ML_NODISCARD inline uniform const * get(pmr::string const & name) const
+		> ML_NODISCARD uniform const * get(pmr::string const & name) const
 		{
 			if (auto const it{ find<T>(name) }; it != cend())
 			{
@@ -181,7 +181,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> inline material & set(pmr::string const & name, T const & data)
+		> material & set(pmr::string const & name, T const & data)
 		{
 			if (uniform * u{ get<T>(name) })
 			{
@@ -192,42 +192,42 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline bool insert(uniform const & value)
+		bool insert(uniform const & value)
 		{
 			return value && m_storage.insert(value).second;
 		}
 
-		inline bool insert(uniform && value)
+		bool insert(uniform && value)
 		{
 			return value && m_storage.insert(std::move(value)).second;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline iterator erase(iterator it)
+		iterator erase(iterator it)
 		{
 			return m_storage.erase(it);
 		}
 
-		inline iterator erase(iterator first, iterator last)
+		iterator erase(iterator first, iterator last)
 		{
 			return m_storage.erase(first, last);
 		}
 
-		inline iterator erase(pmr::string const & name)
+		iterator erase(pmr::string const & name)
 		{
 			return m_storage.erase(this->find(name));
 		}
 
 		template <class T
-		> inline iterator erase(pmr::string const & name)
+		> iterator erase(pmr::string const & name)
 		{
 			return m_storage.erase(this->find<T>(name));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline material & concat(material const & other)
+		material & concat(material const & other)
 		{
 			for (auto const & u : other)
 			{
@@ -236,7 +236,7 @@ namespace ml
 			return (*this);
 		}
 
-		inline material & concat(material && other)
+		material & concat(material && other)
 		{
 			for (auto && u : other)
 			{
@@ -245,13 +245,13 @@ namespace ml
 			return (*this);
 		}
 
-		inline material concat(material const & other) const
+		material concat(material const & other) const
 		{
 			material temp{ *this };
 			return temp.concat(other);
 		}
 
-		inline material concat(material && other) const
+		material concat(material && other) const
 		{
 			material temp{ *this };
 			return temp.concat(std::move(other));
@@ -259,59 +259,59 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline material & operator+=(material const & other)
+		material & operator+=(material const & other)
 		{
 			return this->concat(other);
 		}
 
-		inline material & operator+=(material && other)
+		material & operator+=(material && other)
 		{
 			return this->concat(std::move(other));
 		}
 
-		inline material operator+(material const & other) const
+		material operator+(material const & other) const
 		{
 			return this->concat(other);
 		}
 
-		inline material operator+(material && other) const
+		material operator+(material && other) const
 		{
 			return this->concat(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto operator[](size_t const i) noexcept -> uniform & { return m_storage[i]; }
+		ML_NODISCARD auto operator[](size_t const i) noexcept -> uniform & { return m_storage[i]; }
 
-		ML_NODISCARD inline auto operator[](size_t const i) const noexcept -> uniform const & { return m_storage[i]; }
+		ML_NODISCARD auto operator[](size_t const i) const noexcept -> uniform const & { return m_storage[i]; }
 
-		ML_NODISCARD inline auto at(size_t const i) -> uniform & { return m_storage[i]; }
+		ML_NODISCARD auto at(size_t const i) -> uniform & { return m_storage[i]; }
 
-		ML_NODISCARD inline auto at(size_t const i) const -> uniform const & { return m_storage[i]; }
+		ML_NODISCARD auto at(size_t const i) const -> uniform const & { return m_storage[i]; }
 
-		ML_NODISCARD inline auto begin() noexcept -> iterator { return m_storage.begin(); }
+		ML_NODISCARD auto begin() noexcept -> iterator { return m_storage.begin(); }
 		
-		ML_NODISCARD inline auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
+		ML_NODISCARD auto begin() const noexcept -> const_iterator { return m_storage.begin(); }
 
-		ML_NODISCARD inline auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
+		ML_NODISCARD auto cbegin() const noexcept -> const_iterator { return m_storage.cbegin(); }
 		
-		ML_NODISCARD inline auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
+		ML_NODISCARD auto cend() const noexcept -> const_iterator { return m_storage.cend(); }
 		
-		ML_NODISCARD inline auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
+		ML_NODISCARD auto crbegin() const noexcept -> const_reverse_iterator { return m_storage.crbegin(); }
 		
-		ML_NODISCARD inline auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
+		ML_NODISCARD auto crend() const noexcept -> const_reverse_iterator { return m_storage.crend(); }
 		
-		ML_NODISCARD inline auto end() noexcept -> iterator { return m_storage.end(); }
+		ML_NODISCARD auto end() noexcept -> iterator { return m_storage.end(); }
 		
-		ML_NODISCARD inline auto end() const noexcept -> const_iterator { return m_storage.end(); }
+		ML_NODISCARD auto end() const noexcept -> const_iterator { return m_storage.end(); }
 
-		ML_NODISCARD inline auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD auto rbegin() noexcept -> reverse_iterator { return m_storage.rbegin(); }
 		
-		ML_NODISCARD inline auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
+		ML_NODISCARD auto rbegin() const noexcept -> const_reverse_iterator { return m_storage.rbegin(); }
 
-		ML_NODISCARD inline auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD auto rend() noexcept -> reverse_iterator { return m_storage.rend(); }
 		
-		ML_NODISCARD inline auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
+		ML_NODISCARD auto rend() const noexcept -> const_reverse_iterator { return m_storage.rend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

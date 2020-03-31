@@ -8,44 +8,38 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class _Clock = chrono::high_resolution_clock
+	template <class Clock = chrono::high_resolution_clock
 	> struct basic_timer final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using clock_type = typename _Clock;
+		using clock_type = typename Clock;
 		using time_point = typename clock_type::time_point;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer() noexcept
+		basic_timer(bool start_me = {}) noexcept
 			: m_running	{}
 			, m_current	{}
 			, m_previous{}
 			, m_elapsed	{}
-		{
-		}
-
-		basic_timer(bool start_me) noexcept : basic_timer{}
 		{
 			if (start_me) { this->start(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool running() const noexcept
-		{
-			return m_running;
-		}
-
-		ML_NODISCARD inline duration const & elapsed() const & noexcept
+		ML_NODISCARD duration const & elapsed() const & noexcept
 		{
 			return m_running ? (m_elapsed = (clock_type::now() - m_previous)) : m_elapsed;
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD bool running() const noexcept
+		{
+			return m_running;
+		}
 
-		inline basic_timer & start() noexcept
+		basic_timer & start() noexcept
 		{
 			if (!m_running)
 			{
@@ -56,7 +50,7 @@ namespace ml
 			return (*this);
 		}
 
-		inline basic_timer & stop() noexcept
+		basic_timer & stop() noexcept
 		{
 			if (m_running)
 			{

@@ -56,34 +56,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline decltype(auto) codes() noexcept { return std::get<ID_Codes>(m_storage); }
+		static decltype(auto) codes() noexcept { return std::get<ID_Codes>(m_storage); }
 		
-		static inline decltype(auto) names() noexcept { return std::get<ID_Names>(m_storage); }
+		static decltype(auto) names() noexcept { return std::get<ID_Names>(m_storage); }
 		
-		static inline decltype(auto) factories() noexcept { return std::get<ID_Factories>(m_storage); }
+		static decltype(auto) factories() noexcept { return std::get<ID_Factories>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline std::optional<std::any> generate(name_type const & name)
+		static std::optional<std::any> generate(name_type const & name)
 		{
 			auto const fn{ get_factory(name) };
 			return fn ? std::invoke(fn.value()) : std::nullopt;
 		}
 
-		static inline std::optional<std::any> generate(code_type const & code)
+		static std::optional<std::any> generate(code_type const & code)
 		{
 			auto const fn{ get_factory(code) };
 			return fn ? std::invoke(fn.value()) : std::nullopt;
 		}
 
-		template <class T> static inline std::optional<std::any> generate()
+		template <class T> static std::optional<std::any> generate()
 		{
 			return generate(hashof_v<T>);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline bool registrate(name_type const & name, code_type const & code, func_type const & fn)
+		static bool registrate(name_type const & name, code_type const & code, func_type const & fn)
 		{
 			if (factories().contains(name)) { return false; }
 			std::get<ID_Codes>(m_storage).insert(name, code);
@@ -93,14 +93,14 @@ namespace ml
 		}
 
 		template <class T, class Fn
-		> static inline bool registrate(Fn fn)
+		> static bool registrate(Fn fn)
 		{
 			return registrate(nameof_v<T>, hashof_v<T>, fn);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static inline std::optional<code_type> get_code(name_type const & name)
+		static std::optional<code_type> get_code(name_type const & name)
 		{
 			if (auto const it{ codes().find(name) })
 			{
@@ -112,7 +112,7 @@ namespace ml
 			}
 		}
 
-		static inline std::optional<name_type> get_name(code_type code)
+		static std::optional<name_type> get_name(code_type code)
 		{
 			if (auto const it{ names().find(code) })
 			{
@@ -124,7 +124,7 @@ namespace ml
 			}
 		}
 
-		static inline std::optional<func_type> get_factory(name_type const & name)
+		static std::optional<func_type> get_factory(name_type const & name)
 		{
 			if (auto const it{ factories().find(name) })
 			{
@@ -136,7 +136,7 @@ namespace ml
 			}
 		}
 
-		static inline std::optional<func_type> get_factory(code_type code)
+		static std::optional<func_type> get_factory(code_type code)
 		{
 			if (auto const it{ names().find(code) })
 			{

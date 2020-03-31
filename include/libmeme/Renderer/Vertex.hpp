@@ -19,34 +19,36 @@ namespace ml
 		{
 		}
 
-		constexpr vertex(std::initializer_list<float_t> init)
-			: m_data{}
+		constexpr vertex(std::initializer_list<float_t> init) : m_data{}
 		{
 			for (auto it{ init.begin() }; it != init.end(); ++it)
 			{
-				m_data[std::distance(init.begin(), it)] = (*it);
+				if (auto const i{ (size_t)std::distance(init.begin(), it) }; i < size)
+				{
+					m_data[i] = (*it);
+				}
 			}
 		}
 
-		constexpr vertex(storage_type const & storage)
-			: m_data{ storage }
+		constexpr vertex(storage_type const & storage) : m_data{ storage }
 		{
 		}
 
-		constexpr vertex(storage_type && storage) noexcept
-			: m_data{ std::move(storage) }
+		constexpr vertex(storage_type && storage) noexcept : m_data{ std::move(storage) }
 		{
 		}
 
-		constexpr vertex(vertex const & other)
-			: m_data{ other.m_data }
+		constexpr vertex(vertex const & other) : m_data{ other.m_data }
 		{
 		}
 
-		constexpr vertex(vertex && other) noexcept
-			: m_data{}
+		constexpr vertex(vertex && other) noexcept : m_data{}
 		{
 			swap(std::move(other));
+		}
+
+		constexpr vertex() noexcept : m_data{}
+		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -123,7 +125,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type m_data{ 0 };
+		storage_type m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -153,9 +155,9 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline auto const & contiguous(pmr::vector<vertex> const & v)
+	ML_NODISCARD static inline auto contiguous(pmr::vector<vertex> const & v)
 	{
-		static pmr::vector<float_t> temp{};
+		pmr::vector<float_t> temp{};
 
 		if (size_t const imax{ v.size() * vertex::size })
 		{
@@ -165,10 +167,6 @@ namespace ml::util
 			{
 				temp[i] = v[i / vertex::size][i % vertex::size];
 			}
-		}
-		else if (!temp.empty())
-		{
-			temp.clear();
 		}
 		return temp;
 	}

@@ -27,53 +27,60 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		render_texture & operator=(render_texture const & other);
+		render_texture & operator=(render_texture const & other)
+		{
+			render_texture temp{ other };
+			swap(temp);
+			return (*this);
+		}
 
-		render_texture & operator=(render_texture && other) noexcept;
-
-		void swap(render_texture & other) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool create();
-
-		bool destroy();
-
-		bool resize(vec2i const & value);
+		render_texture & operator=(render_texture && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(render_texture const * value);
 
-		inline void bind() const { return bind(this); }
+		void bind() const { return bind(this); }
 
-		inline void unbind() const { return bind(nullptr); }
+		void unbind() const { return bind(nullptr); }
+
+		bool generate();
+
+		bool destroy();
+
+		bool resize(vec2i const & value);
+
+		void swap(render_texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return good(); }
+		ML_NODISCARD operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD inline bool good() const noexcept { return m_fbo && m_rbo && m_texture; }
+		ML_NODISCARD bool good() const noexcept { return m_fbo && m_rbo && m_texture; }
 
-		ML_NODISCARD inline auto fbo() const noexcept -> FBO const & { return m_fbo; }
+		ML_NODISCARD auto fbo() const noexcept -> FBO const & { return m_fbo; }
 
-		ML_NODISCARD inline auto rbo() const noexcept -> RBO const & { return m_rbo; }
+		ML_NODISCARD auto rbo() const noexcept -> RBO const & { return m_rbo; }
 
-		ML_NODISCARD inline auto size() const noexcept -> vec2i const & { return m_size; }
+		ML_NODISCARD auto size() const noexcept -> vec2i const & { return m_size; }
 
-		ML_NODISCARD inline auto width() const noexcept -> int32_t { return m_size[0]; }
+		ML_NODISCARD auto width() const noexcept -> int32_t { return m_size[0]; }
 
-		ML_NODISCARD inline auto height() const noexcept -> int32_t { return m_size[1]; }
+		ML_NODISCARD auto height() const noexcept -> int32_t { return m_size[1]; }
 
-		ML_NODISCARD inline auto bounds() const noexcept -> int_rect { return int_rect{ 0, 0, width(), height() }; }
+		ML_NODISCARD auto bounds() const noexcept -> int_rect { return int_rect{ 0, 0, width(), height() }; }
 
-		ML_NODISCARD inline auto colorID() const noexcept -> uint32_t { return m_colorID; }
+		ML_NODISCARD auto colorID() const noexcept -> uint32_t { return m_colorID; }
 
-		ML_NODISCARD inline auto frameID() const noexcept -> uint32_t { return m_frameID; }
+		ML_NODISCARD auto frameID() const noexcept -> uint32_t { return m_frameID; }
 
-		ML_NODISCARD inline auto format() const noexcept -> uint32_t { return m_format; }
+		ML_NODISCARD auto format() const noexcept -> uint32_t { return m_format; }
 
-		ML_NODISCARD inline auto get_texture() const noexcept -> texture const & { return m_texture; }
+		ML_NODISCARD auto get_texture() const noexcept -> texture const & { return m_texture; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

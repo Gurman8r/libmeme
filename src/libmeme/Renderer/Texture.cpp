@@ -47,15 +47,15 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	texture::texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags)
-		: m_handle			{ NULL }
-		, m_sampler			{ sampler }
-		, m_level			{ level }
-		, m_internalFormat	{ internal_format }
-		, m_colorFormat		{ color_format }
-		, m_pixelType		{ pixel_type }
-		, m_size			{ 0, 0 }
-		, m_realSize		{ 0, 0 }
-		, m_flags			{ flags }
+		: m_handle		{ NULL }
+		, m_sampler		{ sampler }
+		, m_level		{ level }
+		, m_intl_format	{ internal_format }
+		, m_col_format	{ color_format }
+		, m_pixel_type	{ pixel_type }
+		, m_size		{ 0, 0 }
+		, m_real_size	{ 0, 0 }
+		, m_flags		{ flags }
 	{
 	}
 
@@ -101,9 +101,9 @@ namespace ml
 	texture::texture(texture const & other) : texture{
 		other.m_sampler,
 		other.m_level,
-		other.m_internalFormat,
-		other.m_colorFormat,
-		other.m_pixelType,
+		other.m_intl_format,
+		other.m_col_format,
+		other.m_pixel_type,
 		other.m_flags
 	}
 	{
@@ -120,37 +120,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	texture & texture::operator=(texture const & other)
-	{
-		texture temp{ other };
-		swap(temp);
-		return (*this);
-	}
-
-	texture & texture::operator=(texture && other) noexcept
-	{
-		swap(std::move(other));
-		return (*this);
-	}
-
-	void texture::swap(texture & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_handle,			other.m_handle);
-			std::swap(m_sampler,		other.m_sampler);
-			std::swap(m_level,			other.m_level);
-			std::swap(m_internalFormat, other.m_internalFormat);
-			std::swap(m_colorFormat,	other.m_colorFormat);
-			std::swap(m_pixelType,		other.m_pixelType);
-			std::swap(m_size,			other.m_size);
-			std::swap(m_realSize,		other.m_realSize);
-			std::swap(m_flags,			other.m_flags);
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool texture::load_from_file(filesystem::path const & path)
 	{
 		return load_from_image(make_image(path));
@@ -160,7 +129,7 @@ namespace ml
 	{
 		if (!image.channels()) { return false; }
 
-		m_internalFormat = m_colorFormat = image.get_format();
+		m_intl_format = m_col_format = image.get_format();
 
 		return create(image.size()) && update(image);
 	}
@@ -209,6 +178,22 @@ namespace ml
 		}
 	}
 
+	void texture::swap(texture & other) noexcept
+	{
+		if (this != std::addressof(other))
+		{
+			std::swap(m_handle,			other.m_handle);
+			std::swap(m_sampler,		other.m_sampler);
+			std::swap(m_level,			other.m_level);
+			std::swap(m_intl_format,	other.m_intl_format);
+			std::swap(m_col_format,	other.m_col_format);
+			std::swap(m_pixel_type,		other.m_pixel_type);
+			std::swap(m_size,			other.m_size);
+			std::swap(m_real_size,		other.m_real_size);
+			std::swap(m_flags,			other.m_flags);
+		}
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool texture::create(vec2u const & size)
@@ -247,7 +232,7 @@ namespace ml
 
 		// set size
 		m_size = { w, h };
-		m_realSize = {
+		m_real_size = {
 			GL::getValidTextureSize(m_size[0]),
 			GL::getValidTextureSize(m_size[1])
 		};
@@ -257,10 +242,10 @@ namespace ml
 		{
 			GL::getMaxTextureSize()
 		};
-		if ((m_realSize[0] > max_size) || (m_realSize[1] > max_size))
+		if ((m_real_size[0] > max_size) || (m_real_size[1] > max_size))
 		{
 			return debug::log::error("texture size is too large ({0}) max is: {1}",
-				m_realSize, vec2u{ max_size , max_size }
+				m_real_size, vec2u{ max_size , max_size }
 			);
 		}
 
@@ -271,12 +256,12 @@ namespace ml
 			GL::texImage2D(
 				m_sampler,
 				m_level,
-				m_internalFormat,
+				m_intl_format,
 				m_size[0],
 				m_size[1],
 				0, // border: "This value must be 0" -khronos.org
-				m_colorFormat,
-				m_pixelType,
+				m_col_format,
+				m_pixel_type,
 				(void *)pixels
 			);
 
@@ -307,8 +292,6 @@ namespace ml
 		return update(other.copy_to_image(), x, y, w, h);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool texture::update(image const & image)
 	{
 		return update(image.data(), image.bounds());
@@ -328,8 +311,6 @@ namespace ml
 	{
 		return update(image.data(), x, y, w, h);
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool texture::update(byte_t const * pixels)
 	{
@@ -361,8 +342,8 @@ namespace ml
 				m_sampler,
 				m_level,
 				x, y, w, h,
-				m_internalFormat,
-				m_pixelType,
+				m_intl_format,
+				m_pixel_type,
 				(void *)pixels
 			);
 
@@ -380,10 +361,7 @@ namespace ml
 
 	bool texture::set_mipmapped(bool value)
 	{
-		if (!m_handle)
-		{
-			return false;
-		}
+		if (!m_handle) { return false; }
 		else
 		{
 			m_flags = value
@@ -400,10 +378,7 @@ namespace ml
 
 	bool texture::set_repeated(bool value)
 	{
-		if (!m_handle)
-		{
-			return false;
-		}
+		if (!m_handle) { return false; }
 		else
 		{
 			m_flags = value
@@ -420,10 +395,7 @@ namespace ml
 
 	bool texture::set_smooth(bool value)
 	{
-		if (!m_handle)
-		{
-			return false;
-		}
+		if (!m_handle) { return false; }
 		else
 		{
 			m_flags = value
@@ -442,7 +414,7 @@ namespace ml
 
 	uint32_t texture::channels() const noexcept
 	{
-		switch (m_internalFormat)
+		switch (m_intl_format)
 		{
 		case GL::Red: return 1;
 		case GL::RGB: return 3;
@@ -461,8 +433,8 @@ namespace ml
 			GL::getTexImage(
 				GL::Texture2D,
 				m_level,
-				m_internalFormat,
-				m_pixelType,
+				m_intl_format,
+				m_pixel_type,
 				&temp[0]
 			);
 		}

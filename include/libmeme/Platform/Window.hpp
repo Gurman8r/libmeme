@@ -167,37 +167,37 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
+		ML_NODISCARD auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
 
-		ML_NODISCARD inline auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
+		ML_NODISCARD auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
 
-		ML_NODISCARD inline auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
+		ML_NODISCARD auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
 
-		ML_NODISCARD inline auto get_frame_height() const noexcept -> int32_t { return get_frame_size()[1]; }
+		ML_NODISCARD auto get_frame_height() const noexcept -> int32_t { return get_frame_size()[1]; }
 
-		ML_NODISCARD inline auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
+		ML_NODISCARD auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
 
-		ML_NODISCARD inline auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
+		ML_NODISCARD auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
 		
-		ML_NODISCARD inline auto get_hints() const -> int32_t const & { return m_settings.hints; }
+		ML_NODISCARD auto get_hints() const -> int32_t const & { return m_settings.hints; }
 
-		ML_NODISCARD inline auto get_monitor() const noexcept -> void * { return m_monitor; }
+		ML_NODISCARD auto get_monitor() const noexcept -> void * { return m_monitor; }
 
-		ML_NODISCARD inline auto get_settings() const noexcept -> window_settings const & { return m_settings; }
+		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
 
-		ML_NODISCARD inline auto get_share() const noexcept -> void * { return m_share; }
+		ML_NODISCARD auto get_share() const noexcept -> void * { return m_share; }
 
-		ML_NODISCARD inline auto get_size() const noexcept -> vec2i const & { return get_display_settings().resolution; }
+		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_display_settings().resolution; }
 
-		ML_NODISCARD inline auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
+		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 
-		ML_NODISCARD inline auto get_display_settings() const noexcept -> display_settings const & { return m_settings.display; }
+		ML_NODISCARD auto get_display_settings() const noexcept -> display_settings const & { return m_settings.display; }
 
-		ML_NODISCARD inline auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
+		ML_NODISCARD auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline bool has_hint(int32_t const i) const noexcept { return get_hints() & i; }
+		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return get_hints() & i; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

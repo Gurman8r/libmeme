@@ -7,15 +7,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch = char, class Tr = std::char_traits<Ch>, class Al = std::allocator<Ch>
+	template <class Ch = char, class Al = std::allocator<Ch>
 	> struct basic_stream_sniper final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type		= typename basic_stream_sniper		<Ch, Tr, Al>;
-		using sstream_t		= typename std::basic_stringstream	<Ch, Tr, Al>;
-		using ostream_t		= typename std::basic_ostream		<Ch, Tr>;
-		using streambuf_t	= typename std::basic_streambuf		<Ch, Tr>;
+		using self_type		= typename basic_stream_sniper		<Ch, Al>;
+		using traits_t		= typename std::char_traits			<Ch>;
+		using sstream_t		= typename std::basic_stringstream	<Ch, traits_t, Al>;
+		using ostream_t		= typename std::basic_ostream		<Ch, traits_t>;
+		using streambuf_t	= typename std::basic_streambuf		<Ch, traits_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,13 +37,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline basic_stream_sniper & operator=(self_type && other) noexcept
+		basic_stream_sniper & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		inline void swap(self_type & other) noexcept
+		void swap(self_type & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -54,7 +55,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline void operator()(ostream_t * value) noexcept
+		void operator()(ostream_t * value) noexcept
 		{
 			if (value && !m_cur && !m_old)
 			{
@@ -72,11 +73,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline operator bool() const noexcept { return m_cur && m_old; }
+		ML_NODISCARD operator bool() const noexcept { return m_cur && m_old; }
 
-		ML_NODISCARD inline operator sstream_t & () & noexcept { return m_str; }
+		ML_NODISCARD operator sstream_t & () & noexcept { return m_str; }
 		
-		ML_NODISCARD inline operator sstream_t const & () const & noexcept { return m_str; }
+		ML_NODISCARD operator sstream_t const & () const & noexcept { return m_str; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
