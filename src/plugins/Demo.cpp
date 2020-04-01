@@ -488,11 +488,11 @@ namespace ml
 				editor::dock(m_gui_display.title	, d[left_up]);
 				editor::dock(m_gui_ecs.title		, d[left_dn]);
 				editor::dock(m_gui_assets.title		, d[left_dn]);
+				editor::dock(m_gui_files.title		, d[left_dn]);
+				editor::dock(m_gui_console.title	, d[left_dn]);
 				editor::dock(m_gui_profiler.title	, d[left_dn2]);
-				editor::dock(m_gui_files.title		, d[right]);
-				editor::dock(m_gui_docs.title		, d[right]);
 				editor::dock(m_gui_memory.title		, d[right]);
-				editor::dock(m_gui_console.title	, d[right]);
+				editor::dock(m_gui_docs.title		, d[right]);
 
 				editor::end_dock_builder(root);
 			}
@@ -513,10 +513,10 @@ namespace ml
 			m_gui_display.render([&]()	{ show_display_gui(); });	// DISPLAY
 			m_gui_ecs.render([&]()		{ show_ecs_gui(); });		// ECS
 			m_gui_assets.render([&]()	{ show_assets_gui(); });	// ASSETS
-			m_gui_profiler.render([&]() { show_profiler_gui(); });	// PROFILER
 			m_gui_files.render([&]()	{ show_files_gui(); });		// FILES
-			m_gui_docs.render([&]()		{ show_documents_gui(); });	// DOCS
+			m_gui_profiler.render([&]() { show_profiler_gui(); });	// PROFILER
 			m_gui_memory.render([&]()	{ show_memory_gui(); });	// MEMORY
+			m_gui_docs.render([&]()		{ show_documents_gui(); });	// DOCS
 			m_gui_console.render([&]()	{ show_console_gui(); });	// CONSOLE
 		}
 
@@ -725,25 +725,35 @@ namespace ml
 			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
+				gui::help_marker("WIP");
+				ImGui::Separator();
 				if (ImGui::MenuItem("new")) {}
 				if (ImGui::MenuItem("open")) {}
 				if (ImGui::MenuItem("save")) {}
-				if (ImGui::MenuItem("save all")) {}
+				ImGui::Separator();
+				if (ImGui::MenuItem("undo")) {}
+				if (ImGui::MenuItem("redo")) {}
+				ImGui::Separator();
+				if (ImGui::MenuItem("cut")) {}
+				if (ImGui::MenuItem("copy")) {}
+				if (ImGui::MenuItem("paste")) {}
+				ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
 
-			// tab bar
-			if (ImGui::BeginTabBar("##docs##tabs"))
+			static ImGui::TextEditor test{};
+			ML_once_call{ test.SetText("sample text"); };
+
+			if (ImGui::BeginTabBar("documents##tabs"))
 			{
-				gui::help_marker("WIP");
+				if (ImGui::BeginTabItem("test document"))
+				{
+					test.Render("##document##text_editor");
+
+					ImGui::EndTabItem();
+				}
 				ImGui::EndTabBar();
 			}
-
-			static ImGui::TextEditor text;
-			ML_once_call{
-				text.SetText("here");
-			};
-			text.Render("##docs##text");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

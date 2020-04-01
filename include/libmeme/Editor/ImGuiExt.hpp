@@ -632,12 +632,11 @@ namespace ml::gui
 
 		void render() const
 		{
-			if (m_path.empty() || !filesystem::is_directory(m_path)) return;
+			if (m_path.empty() || !filesystem::is_directory(m_path)) { return; }
 
 			ML_ImGui_ScopeID(ML_addressof(this));
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
-			ImGui::Columns(2);
 			ImGui::Separator();
 
 			for (auto const & e : filesystem::directory_iterator{ m_path })
@@ -650,7 +649,6 @@ namespace ml::gui
 				if (e.is_regular_file()) { show_regular(e); }
 			}
 
-			ImGui::Columns(1);
 			ImGui::Separator();
 			ImGui::PopStyleVar();
 		}
@@ -659,6 +657,7 @@ namespace ml::gui
 
 		static void show_directory(filesystem::directory_entry const & value)
 		{
+			// check
 			if (value.path().empty() || !filesystem::is_directory(value)) { return; }
 
 			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
@@ -675,26 +674,20 @@ namespace ml::gui
 			// context popup
 			if (ImGui::BeginPopupContextItem("directory##context_popup"))
 			{
-				help_marker("WIP");
+				if (ImGui::Button("WIP")) { ImGui::CloseCurrentPopup(); }
 				ImGui::EndPopup();
 			}
-			ImGui::NextColumn();
-
-			// details
-			ImGui::AlignTextToFramePadding();
-			{
-				ImGui::Text("directory");
-			}
-			ImGui::NextColumn();
 
 			// contents
 			if (node_open)
 			{
+				// directories
 				for (auto const & e : filesystem::directory_iterator{ value })
 				{
 					if (e.is_directory()) { show_directory(e); }
 				}
 
+				// regular files
 				for (auto const & e : filesystem::directory_iterator{ value })
 				{
 					if (e.is_regular_file()) { show_regular(e); }
@@ -706,6 +699,7 @@ namespace ml::gui
 
 		static void show_regular(filesystem::directory_entry const & value)
 		{
+			// check
 			if (value.path().empty() || !filesystem::is_regular_file(value)) { return; }
 
 			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
@@ -726,17 +720,9 @@ namespace ml::gui
 			// context popup
 			if (ImGui::BeginPopupContextItem("regular_file##context_popup"))
 			{
-				help_marker("WIP");
+				if (ImGui::Button("WIP")) { ImGui::CloseCurrentPopup(); }
 				ImGui::EndPopup();
 			}
-			ImGui::NextColumn();
-
-			// details
-			ImGui::SetNextItemWidth(-1);
-			{
-				ImGui::Text("regular file");
-			}
-			ImGui::NextColumn();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

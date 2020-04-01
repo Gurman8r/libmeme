@@ -347,7 +347,7 @@
 
 // once call
 #define ML_impl_once_call(cond) static bool cond{}; if (!cond && (cond = true))
-#define ML_once_call            ML_impl_once_call(ML_anon(var))
+#define ML_once_call            ML_impl_once_call(ML_anon(once))
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
