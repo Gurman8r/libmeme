@@ -136,7 +136,7 @@ namespace ml
 
 	bool texture::load_from_texture(texture const & other)
 	{
-		return other.m_handle
+		return other
 			? create(other.size())
 				? update(other.copy_to_image())
 				: debug::log::error("Failed to copy texture, failed to create new texture")
@@ -153,16 +153,12 @@ namespace ml
 	bool texture::destroy()
 	{
 		unbind();
-
 		if (m_handle)
 		{
 			GL::deleteTexture(&m_handle);
-			
 			m_handle = NULL;
-			
 			GL::flush();
 		}
-
 		return !(m_handle);
 	}
 
@@ -251,7 +247,7 @@ namespace ml
 
 		// create
 		{
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 
 			GL::texImage2D(
 				m_sampler,
@@ -336,7 +332,7 @@ namespace ml
 
 		// update
 		{
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 
 			GL::texSubImage2D(
 				m_sampler,
@@ -368,7 +364,7 @@ namespace ml
 				? (m_flags | texture_flags_mipmapped)
 				: (m_flags & ~texture_flags_mipmapped);
 
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 
 			impl::set_mipmapped(value, m_sampler, is_smooth());
 		}
@@ -385,7 +381,7 @@ namespace ml
 				? (m_flags | texture_flags_repeated)
 				: (m_flags & ~texture_flags_repeated);
 
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 
 			impl::set_repeated(value, m_sampler);
 		}
@@ -402,7 +398,7 @@ namespace ml
 				? (m_flags | texture_flags_smooth)
 				: (m_flags & ~texture_flags_smooth);
 
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 
 			impl::set_smooth(value, m_sampler, is_mipmapped());
 		}
@@ -428,7 +424,7 @@ namespace ml
 		auto temp{ make_image(size(), channels()) };
 		if (m_handle)
 		{
-			ML_bind_scope((*this));
+			ML_bind_scope(*this);
 			
 			GL::getTexImage(
 				GL::Texture2D,

@@ -143,8 +143,6 @@ namespace ml
 
 		renderer_manager m_renderer{};
 
-		pmr::vector<renderer_manager::handle> m_handles{};
-
 
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -341,8 +339,7 @@ namespace ml
 
 				// test
 				m_materials["test"] = (make_material() + m_materials["3d"])
-					.set<texture const *>("u_texture0", &m_textures["moon_dm_2k"]);
-
+					.set<texture>("u_texture0", &m_textures["moon_dm_2k"]);
 			}
 
 			// MODELS
@@ -393,7 +390,7 @@ namespace ml
 
 				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
 				{
-					auto & h{ m_handles.emplace_back(m_renderer.create_handle()) };
+					auto & h{ m_renderer.create_handle() };
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
@@ -671,7 +668,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
+						ML_once{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -688,7 +685,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
+						ML_once{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -742,7 +739,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			ML_once_call{ test.SetText("sample text"); };
+			ML_once{ test.SetText("sample text"); };
 
 			if (ImGui::BeginTabBar("documents##tabs"))
 			{
@@ -979,7 +976,7 @@ namespace ml
 			static auto * const testres{ memory_manager::get_testres() };
 
 			// setup memory editor
-			ML_once_call{
+			ML_once{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
 				m_memory.Cols				= engine::get_window().has_hint(window_hints_maximized) ? 32 : 16;
@@ -1021,12 +1018,16 @@ namespace ml
 				{
 					auto const width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
-					ML_once_call ImGui::SetColumnWidth(-1, width * 0.50f);
+
+					ML_once{ ImGui::SetColumnWidth(-1, width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
-					ML_once_call ImGui::SetColumnWidth(-1, width * 0.25f);
+
+					ML_once{ ImGui::SetColumnWidth(-1, width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
-					ML_once_call ImGui::SetColumnWidth(-1, width * 0.25f);
+
+					ML_once{ ImGui::SetColumnWidth(-1, width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
+
 					ImGui::Separator();
 					for (auto const & rec : memory_manager::get_records().values())
 					{

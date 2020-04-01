@@ -9,7 +9,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if ML_is_debug
-# 	define glCheck(expr) do { expr; GL::checkError(__FILE__, __LINE__, #expr); } while (0)
+# 	define glCheck(expr) do { expr; _ML GL::checkError(__FILE__, __LINE__, #expr); } while (0)
 #else
 # 	define glCheck(expr) (expr)
 #endif
@@ -22,16 +22,16 @@ namespace ml
 	{
 	public:
 
-		// Errors
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static auto getError() -> uint32_t;
-		static void checkError(cstring file, uint32_t line, cstring expr);
-
 		// Initialization
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static bool is_init() noexcept;
 		static bool startup();
 		static void validateVersion(int32_t & major, int32_t & minor);
+
+		// Errors
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static auto getError() -> uint32_t;
+		static void checkError(cstring file, uint32_t line, cstring expr);
 
 		// Flags
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

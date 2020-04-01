@@ -123,7 +123,10 @@ namespace ml
 			{
 				return it;
 			}
-			return end();
+			else
+			{
+				return end();
+			}
 		}
 
 		template <class T
@@ -133,7 +136,10 @@ namespace ml
 			{
 				return it;
 			}
-			return cend();
+			else
+			{
+				return cend();
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -144,7 +150,10 @@ namespace ml
 			{
 				return &(*it);
 			}
-			return nullptr;
+			else
+			{
+				return nullptr;
+			}
 		}
 
 		ML_NODISCARD uniform const * get(pmr::string const & name) const
@@ -153,7 +162,10 @@ namespace ml
 			{
 				return &(*it);
 			}
-			return nullptr;
+			else
+			{
+				return nullptr;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -165,7 +177,10 @@ namespace ml
 			{
 				return &(*it);
 			}
-			return nullptr;
+			else
+			{
+				return nullptr;
+			}
 		}
 
 		template <class T
@@ -175,15 +190,18 @@ namespace ml
 			{
 				return &(*it);
 			}
-			return nullptr;
+			else
+			{
+				return nullptr;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T
-		> material & set(pmr::string const & name, T const & data)
+		template <class T, class Data
+		> material & set(pmr::string const & name, Data const & data)
 		{
-			if (uniform * u{ get<T>(name) })
+			if (uniform * u{ get(name) })
 			{
 				u->set<T>(data);
 			}
@@ -329,7 +347,7 @@ namespace ml
 	}
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_material(Args && ... args)
+	> ML_NODISCARD inline auto make_material(Args && ... args)
 	{
 		return material{ material::storage_type{ ML_forward(args)... } };
 	}

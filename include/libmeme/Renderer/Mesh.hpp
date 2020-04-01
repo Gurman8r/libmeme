@@ -129,7 +129,7 @@ namespace ml
 	}
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_mesh(Args && ... args)
+	> ML_NODISCARD inline auto make_mesh(Args && ... args)
 	{
 		return mesh{ ML_forward(args)... };
 	}

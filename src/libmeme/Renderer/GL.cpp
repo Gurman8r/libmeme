@@ -32,6 +32,79 @@ namespace ml
 	static bool s_gl_init{ false };
 
 
+	// Initialization
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool GL::is_init() noexcept
+	{
+		return s_gl_init;
+	}
+
+	bool GL::startup()
+	{
+		if (is_init())
+			return debug::log::error("GL is already initialized");
+
+#if defined(ML_OPENGL_LOADER_GLEW)
+		glewExperimental = true;
+		return (s_gl_init = (glewInit() == GLEW_OK));
+#elif defined(ML_OPENGL_LOADER_GL3W)
+		return (s_gl_init = (gl3wInit() != 0));
+#elif defined(ML_OPENGL_LOADER_GLAD)
+		return (s_gl_init = (gladLoadGL() != 0));
+#elif defined(ML_OPENGL_LOADER_CUSTOM)
+		return (s_gl_init = false);
+#endif
+	}
+
+	void GL::validateVersion(int32_t & major, int32_t & minor)
+	{
+		major = getInteger(GL::MajorVersion);
+		minor = getInteger(GL::MinorVersion);
+
+		if (getError() == GL::InvalidEnum)
+		{
+			if (auto version{ getString(GL::Version) })
+			{
+				major = version[0] - '0';
+				minor = version[2] - '0';
+				debug::log::warning("Using OpenGL Version: {0}.{1}", major, minor);
+			}
+			else
+			{
+				major = 1;
+				minor = 1;
+				debug::log::warning("Can't get the version number, assuming 1.1");
+			}
+		}
+
+		if (!shadersAvailable())
+		{
+			debug::log::warning("Shaders are not available on your system.");
+		}
+
+		if (!geometryShadersAvailable())
+		{
+			debug::log::warning("Geometry shaders are not available on your system.");
+		}
+
+		if (!framebuffersAvailable())
+		{
+			debug::log::warning("Framebuffers Unavailable");
+		}
+
+		if (!edgeClampAvailable())
+		{
+			debug::log::warning("Texture Edge Clamp Unavailable");
+		}
+
+		if (!textureSrgbAvailable())
+		{
+			debug::log::warning("Texture sRGB Unavailable");
+		}
+	}
+
+
 	// Errors
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,80 +163,7 @@ namespace ml
 				<< "\t" << err_desc << "\n"
 				<< "\n\n";
 		}
-	}
-
-
-	// Initialization
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool GL::is_init() noexcept
-	{
-		return s_gl_init;
-	}
-
-	bool GL::startup()
-	{
-		if (is_init())
-			return debug::log::error("GL is already initialized");
-
-#if defined(ML_OPENGL_LOADER_GLEW)
-		glewExperimental = true;
-		return (s_gl_init = (glewInit() == GLEW_OK));
-#elif defined(ML_OPENGL_LOADER_GL3W)
-		return (s_gl_init = (gl3wInit() != 0));
-#elif defined(ML_OPENGL_LOADER_GLAD)
-		return (s_gl_init = (gladLoadGL() != 0));
-#elif defined(ML_OPENGL_LOADER_CUSTOM)
-		return (s_gl_init = false);
-#endif
-	}
-
-	void GL::validateVersion(int32_t & major, int32_t & minor)
-	{
-		major = getInteger(GL::MajorVersion);
-		minor = getInteger(GL::MinorVersion);
-
-		if (getError() == GL::InvalidEnum)
-		{
-			if (auto version{ getString(GL::Version) })
-			{
-				major = version[0] - '0';
-				minor = version[2] - '0';
-				debug::log::warning("Using OpenGL Version: {0}.{1}", major, minor);
-			}
-			else
-			{
-				major = 1;
-				minor = 1;
-				debug::log::warning("Can't get the version number, assuming 1.1");
-			}
-		}
-
-		if (!shadersAvailable())
-		{
-			debug::log::error("Shaders are not available on your system.");
-		}
-
-		if (!geometryShadersAvailable())
-		{
-			debug::log::error("Geometry shaders are not available on your system.");
-		}
-
-		if (!framebuffersAvailable())
-		{
-			debug::log::warning("Framebuffers Unavailable");
-		}
-
-		if (!edgeClampAvailable())
-		{
-			debug::log::warning("Texture Edge Clamp Unavailable");
-		}
-
-		if (!textureSrgbAvailable())
-		{
-			debug::log::warning("Texture sRGB Unavailable");
-		}
-	}
+}
 
 
 	// Flags
@@ -218,7 +218,7 @@ namespace ml
 
 	auto GL::getBool(uint32_t name) -> uint8_t
 	{
-		uint8_t temp{ 0 };
+		uint8_t temp{};
 		getBool(name, &temp);
 		return temp;
 	}
@@ -231,7 +231,7 @@ namespace ml
 
 	auto GL::getDouble(uint32_t name) -> float64_t
 	{
-		float64_t temp{ 0 };
+		float64_t temp{};
 		getDouble(name, &temp);
 		return temp;
 	}
@@ -244,7 +244,7 @@ namespace ml
 
 	auto GL::getFloat(uint32_t name) -> float32_t
 	{
-		float32_t temp{ 0 };
+		float32_t temp{};
 		getFloat(name, &temp);
 		return temp;
 	}
@@ -257,7 +257,7 @@ namespace ml
 
 	auto GL::getInteger(uint32_t name) -> int32_t
 	{
-		int32_t temp{ 0 };
+		int32_t temp{};
 		getInteger(name, &temp);
 		return temp;
 	}
@@ -354,7 +354,7 @@ namespace ml
 
 	auto GL::genBuffers(uint32_t count) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(glGenBuffers(count, &temp));
 		return temp;
 	}
@@ -366,7 +366,7 @@ namespace ml
 
 	auto GL::genVertexArrays(uint32_t count) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(glGenVertexArrays(count, &temp));
 		return temp;
 	}
@@ -474,37 +474,31 @@ namespace ml
 
 	bool GL::edgeClampAvailable()
 	{
-		static bool temp{ false };
+		static bool temp{};
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
 
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
-		static int32_t temp{ 0 };
+		static int32_t temp{};
 		if (is_init())
 		{
-			ML_once_call {
-				temp = getInteger(GL::MaxCombTexImgUnits);
-			}
+			ML_once{ temp = getInteger(GL::MaxCombTexImgUnits); };
 		}
 		return temp;
 	}
 
 	auto GL::getMaxTextureSize() -> uint32_t
 	{
-		static uint32_t temp{ 0 };
+		static uint32_t temp{};
 		if (is_init())
 		{
-			ML_once_call {
-				temp = (uint32_t)getInteger(GL::MaxTextureSize);
-			}
+			ML_once{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
 		}
 		return temp;
 	}
@@ -516,23 +510,19 @@ namespace ml
 
 	bool GL::nonPowerOfTwoAvailable()
 	{
-		static bool temp{ false };
+		static bool temp{};
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
 
 	bool GL::textureSrgbAvailable()
 	{
-		static bool temp{ false };
+		static bool temp{};
 #ifdef GL_EXT_texture_sRGB
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
@@ -546,7 +536,7 @@ namespace ml
 
 	auto GL::genTextures(uint32_t count) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(glGenTextures(count, &temp));
 		return temp;
 	}
@@ -616,12 +606,10 @@ namespace ml
 
 	bool GL::framebuffersAvailable()
 	{
-		static bool temp{ false };
+		static bool temp{};
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
@@ -633,14 +621,14 @@ namespace ml
 
 	auto GL::genFramebuffers(uint32_t count) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(glGenFramebuffers(count, &temp));
 		return temp;
 	}
 
 	auto GL::checkFramebufferStatus(uint32_t target) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(temp = glCheckFramebufferStatus(target));
 		return temp;
 	}
@@ -690,7 +678,7 @@ namespace ml
 
 	auto GL::genRenderbuffers(uint32_t count) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 		glCheck(glGenRenderbuffers(count, &temp));
 		return temp;
 	}
@@ -731,15 +719,13 @@ namespace ml
 
 	bool GL::shadersAvailable()
 	{
-		static bool temp{ false };
+		static bool temp{};
 #if defined(GL_ARB_multitexture) \
 || defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
@@ -748,9 +734,7 @@ namespace ml
 	{
 		static bool temp{ shadersAvailable() };
 #if defined(GL_ARB_geometry_shader4)
-		ML_once_call {
-			temp = true;
-		}
+		ML_once{ temp = true; };
 #endif
 		return temp;
 	}
@@ -770,7 +754,7 @@ namespace ml
 
 	auto GL::getProgramHandle(uint32_t name) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetHandleARB(name));
 #else
@@ -781,7 +765,7 @@ namespace ml
 
 	auto GL::createProgram() -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(temp = glCreateProgramObjectARB());
 #else
@@ -792,7 +776,7 @@ namespace ml
 
 	auto GL::createShader(uint32_t type) -> uint32_t
 	{
-		uint32_t temp{ 0 };
+		uint32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(temp = glCreateShaderObjectARB(type));
 #else
@@ -803,7 +787,7 @@ namespace ml
 
 	auto GL::getProgramParameter(int32_t obj, uint32_t param) -> int32_t
 	{
-		int32_t temp{ 0 };
+		int32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(glGetObjectParameterivARB(obj, param, &temp));
 #else
@@ -814,7 +798,7 @@ namespace ml
 
 	auto GL::getAttribLocation(uint32_t program, cstring name) -> int32_t
 	{
-		int32_t temp{ 0 };
+		int32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetAttribLocationARB(program, name));
 #else
@@ -825,7 +809,7 @@ namespace ml
 
 	auto GL::getUniformLocation(uint32_t program, cstring name) -> int32_t
 	{
-		int32_t temp{ 0 };
+		int32_t temp{};
 #ifdef GL_ARB_shader_objects
 		glCheck(temp = glGetUniformLocationARB(program, name));
 #else

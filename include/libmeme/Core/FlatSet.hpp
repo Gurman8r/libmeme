@@ -78,7 +78,7 @@ namespace ml::ds
 		using reverse_iterator			= typename traits_type::reverse_iterator;
 		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
 		using iterator_pair				= typename traits_type::iterator_pair;
-		using const_iterator_pair		= typename traits_type::const_iterator_pair	;
+		using const_iterator_pair		= typename traits_type::const_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -417,7 +417,7 @@ namespace ml::ds
 			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_contains_linear(); // linear
+				return impl_contains_linear(); // always linear
 			}
 			else if (auto const size{ std::distance(first, last) })
 			{
@@ -465,7 +465,7 @@ namespace ml::ds
 			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_find_linear(); // linear
+				return impl_find_linear(); // always linear
 			}
 			else if (auto const size{ std::distance(first, last) })
 			{

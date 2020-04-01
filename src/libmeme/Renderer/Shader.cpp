@@ -239,7 +239,7 @@ namespace ml
 		case hashof_v<mat4>: if (auto const v{ value.get<mat4>() })
 			return set_uniform(value.name(), v.value());
 		
-		case hashof_v<texture>: if (auto const v{ value.get<texture const *>() })
+		case hashof_v<texture>: if (auto const v{ value.get<texture>() })
 			return set_uniform(value.name(), v.value());
 		}
 		return false;

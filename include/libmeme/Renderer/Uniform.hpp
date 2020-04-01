@@ -12,24 +12,16 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allowed_types = typename meta::list<
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		using variable_type = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			struct texture const *
 		>;
 
-		using variable_type = typename meta::rename<
-			std::variant, allowed_types
-		>;
-
-		using function_type = typename std::function<
-			variable_type()
-		>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		using function_type = typename std::function<variable_type()>;
 
 		using type_t = typename typeof<>;
 
@@ -39,16 +31,15 @@ namespace ml
 
 		enum : size_t { ID_Variable, ID_Function };
 
+		template <class T> static constexpr bool is_texture_v
+		{
+			std::is_convertible_v<T, struct texture const *> ||
+			std::is_convertible_v<std::decay_t<T> const *, struct texture const *>
+		};
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uniform() noexcept
-			: m_type{}
-			, m_name{}
-			, m_data{}
-		{
-		}
-
-		explicit uniform(allocator_type const & alloc)
+		uniform(allocator_type const & alloc = {}) noexcept
 			: m_type{}
 			, m_name{ alloc }
 			, m_data{}
@@ -118,6 +109,73 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD operator bool const() const noexcept
+		{
+			return !m_name.empty();
+		}
+
+		ML_NODISCARD variable_type var() const
+		{
+			switch (m_data.index())
+			{
+			case ID_Variable: return std::get<variable_type>(m_data);
+			case ID_Function: return std::invoke(std::get<function_type>(m_data));
+			}
+			return variable_type{};
+		}
+
+		template <class T
+		> ML_NODISCARD bool holds() const noexcept
+		{
+			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			{
+				return this->holds<T const *>();
+			}
+			else
+			{
+				return std::holds_alternative<T>(var());
+			}
+		}
+
+		template <class T
+		> ML_NODISCARD auto get() const
+		{
+			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			{
+				return this->get<T const *>();
+			}
+			else
+			{
+				if (auto const v{ var() }; std::holds_alternative<T>(v))
+				{
+					return std::make_optional<T>(std::get<T>(v));
+				}
+				else
+				{
+					return (std::optional<T>)std::nullopt;
+				}
+			}
+		}
+
+		template <class T, class Data
+		> uniform & set(Data const & value) noexcept
+		{
+			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			{
+				return this->set<T const *>(value);
+			}
+			else
+			{
+				if (this->holds<T>())
+				{
+					m_data = value;
+				}
+				return (*this);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
 			if (m_type != other.m_type)
@@ -130,101 +188,40 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD bool is_variable() const noexcept
-		{
-			return (m_data.index() == ID_Variable);
-		}
-
-		ML_NODISCARD bool is_function() const noexcept
-		{
-			return (m_data.index() == ID_Function);
-		}
-
-		ML_NODISCARD variable_type get_var() const
-		{
-			switch (m_data.index())
-			{
-			case ID_Variable: return std::get<variable_type>(m_data);
-			case ID_Function: return std::invoke(std::get<function_type>(m_data));
-			default: return variable_type{};
-			}
-		}
-
-		ML_NODISCARD size_t index() const noexcept
-		{
-			return get_var().index();
-		}
-
-		template <class T
-		> ML_NODISCARD bool holds() const noexcept
-		{
-			return std::holds_alternative<T>(get_var());
-		}
-
-		template <class T
-		> ML_NODISCARD std::optional<T> get() const
-		{
-			if (auto const v{ get_var() }; std::holds_alternative<T>(v))
-			{
-				return std::make_optional<T>(std::get<T>(v));
-			}
-			else
-			{
-				return std::nullopt;
-			}
-		}
-
-		template <class T, class Data
-		> uniform & set(Data const & value) noexcept
-		{
-			if (this->holds<T>())
-			{
-				m_data = value;
-			}
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD operator bool const() const noexcept
-		{
-			return !m_name.empty();
-		}
-
 		ML_NODISCARD bool operator==(uniform const & other) const noexcept
 		{
-			return compare(other) == 0;
+			return this->compare(other) == 0;
 		}
 
 		ML_NODISCARD bool operator!=(uniform const & other) const noexcept
 		{
-			return compare(other) != 0;
+			return this->compare(other) != 0;
 		}
 
 		ML_NODISCARD bool operator<(uniform const & other) const noexcept
 		{
-			return compare(other) < 0;
+			return this->compare(other) < 0;
 		}
 
 		ML_NODISCARD bool operator>(uniform const & other) const noexcept
 		{
-			return compare(other) > 0;
+			return this->compare(other) > 0;
 		}
 
 		ML_NODISCARD bool operator<=(uniform const & other) const noexcept
 		{
-			return compare(other) <= 0;
+			return this->compare(other) <= 0;
 		}
 
 		ML_NODISCARD bool operator>=(uniform const & other) const noexcept
 		{
-			return compare(other) >= 0;
+			return this->compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		type_t m_type; // type info
+		type_t m_type; // type details
 		name_t m_name; // uniform name
 		data_t m_data; // variant data
 
@@ -234,7 +231,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Type, class Name, class ... Args
-	> ML_NODISCARD static inline auto make_uniform(Name && name, Args && ... args) noexcept
+	> ML_NODISCARD inline auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return uniform{ typeof_v<Type>, ML_forward(name), ML_forward(args)... };
 	}

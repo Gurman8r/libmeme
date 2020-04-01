@@ -113,7 +113,7 @@ namespace ml
 
 		ML_NODISCARD auto operator[](size_t i) const -> byte_t const & { return m_pixels.at(i); }
 
-		ML_NODISCARD auto bounds() const noexcept -> uint_rect { return uint_rect { { 0, 0 }, size() }; }
+		ML_NODISCARD auto bounds() const noexcept -> uint_rect { return uint_rect { {}, size() }; }
 		
 		ML_NODISCARD auto capacity() const noexcept -> size_t { return width() * height() * channels(); }
 		
@@ -174,7 +174,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_image(Args && ... args)
+	> ML_NODISCARD inline auto make_image(Args && ... args)
 	{
 		return image{ ML_forward(args)... };
 	}

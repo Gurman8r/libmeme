@@ -37,7 +37,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Bounds, class Advance
-	> ML_NODISCARD static inline auto make_glyph(texture && t, Bounds && b, Advance && a) noexcept
+	> ML_NODISCARD inline auto make_glyph(texture && t, Bounds && b, Advance && a) noexcept
 	{
 		glyph g;
 		g.graphic = ML_forward(t);
@@ -47,7 +47,7 @@ namespace ml
 	}
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_glyph(Args && ... args)
+	> ML_NODISCARD inline auto make_glyph(Args && ... args)
 	{
 		return glyph{ ML_forward(args)... };
 	}

@@ -17,37 +17,37 @@
 // LANGUAGE
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* * * * * * * * * * * * * * * * CXX */
+/* * * * * * * * * * * * * * * * Lang */
 #if defined(__cplusplus)
 #   if defined(_MSVC_LANG)
-#       define ML_cxx           _MSVC_LANG
+#       define ML_lang           _MSVC_LANG
 #   else
-#       define ML_cxx           __cplusplus
+#       define ML_lang           __cplusplus
 #   endif
 
 /* * * * * * * * * * * * * * * * C++20 */
-#   if (ML_cxx >= 201907L)
+#   if (ML_lang >= 201907L)
 #       define ML_has_cxx20     1
 #       define ML_has_cxx17     1
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 /* * * * * * * * * * * * * * * * C++17 */
-#   elif (ML_cxx >= 201703L)
+#   elif (ML_lang >= 201703L)
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     1
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 /* * * * * * * * * * * * * * * * C++14 */
-#   elif (ML_cxx >= 201402L)
+#   elif (ML_lang >= 201402L)
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     0
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 /* * * * * * * * * * * * * * * * C++11 */
-#   elif (ML_cxx >= 201103L)
+#   elif (ML_lang >= 201103L)
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     0
 #       define ML_has_cxx14     0
@@ -95,8 +95,8 @@
 
 /* * * * * * * * * * * * * * * * FreeBSD */
 #   elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-#       define ML_OS_FREEBSD    3
-#       define ML_os_unix		ML_OS_FREEBSD
+#       define ML_os_freebsd    3
+#       define ML_os_unix		ML_os_freebsd
 #       define ML_os_name       "FreeBSD"
 
 /* * * * * * * * * * * * * * * * Unknown Unix */
@@ -116,24 +116,24 @@
 
 /* * * * * * * * * * * * * * * * x64 */
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
-#   define ML_X64               1
+#   define ML_x64               1
 #   define ML_arch              64
 #   define ML_platform          "x64"
 
 /* * * * * * * * * * * * * * * * x86 */
 #elif defined(__i386__) || defined(_M_IX86)
-#   define ML_X86               1
+#   define ML_x86               1
 #   define ML_arch              32
 #   define ML_platform          "x86"
 
 /* * * * * * * * * * * * * * * * ARM */
 #elif defined(__arm__) || defined(_M_ARM) || defined(__aarch64__)
 #   if defined(__aarch64__)
-#       define ML_ARM64         1
+#       define ML_arm64         1
 #       define ML_arch          64
 #       define ML_platform      "arm64"
 #   else
-#       define ML_ARM32         1
+#       define ML_arm32         1
 #       define ML_arch          32
 #       define ML_platform      "arm32"
 #   endif
@@ -141,11 +141,11 @@
 /* * * * * * * * * * * * * * * * PowerPC */
 #elif defined(ppc) || defined(_M_PPC) || defined(__ppc64__)
 #   if defined(__ppc64__)
-#       define ML_PPC64         1
+#       define ML_ppc64         1
 #       define ML_arch          64
 #       define ML_platform      "ppc64"
 #   else
-#       define ML_PPC32         1
+#       define ML_ppc32         1
 #       define ML_arch          32
 #       define ML_platform      "ppc32"
 #   endif
@@ -342,12 +342,8 @@
 #elif defined(__LINE__)
 #	define ML_anon(expr)        ML_concat(_ML_, ML_concat(expr, ML_concat(_, __LINE__)))
 #else
-#   define ML_anon(expr)        expr
+#   define ML_anon(expr)        (expr)
 #endif
-
-// once call
-#define ML_impl_once_call(cond) static bool cond{}; if (!cond && (cond = true))
-#define ML_once_call            ML_impl_once_call(ML_anon(once))
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -363,28 +359,27 @@
 
 // likely
 #if __has_cpp_attribute(likely) >= 201907L
-#   define ML_LIKELY(...)       (##__VA_ARGS__) [[likely]]
+#   define ML_LIKELY(expr)      ((expr)) [[likely]]
 #else
-#   define ML_LIKELY(...)       (##__VA_ARGS__)
+#   define ML_LIKELY(expr)      ((expr))
 #endif
 
 // unlikely
 #if __has_cpp_attribute(unlikely) >= 201907L
-#   define ML_UNLIKELY(...)     (##__VA_ARGS__) [[unlikely]]
+#   define ML_UNLIKELY(expr)    ((expr)) [[unlikely]]
 #else
-#   define ML_UNLIKELY(...)     (##__VA_ARGS__)
+#   define ML_UNLIKELY(expr)    ((expr))
 #endif
 
 // inlining
 #ifdef ML_CC_msvc
 #   define ML_ALWAYS_INLINE     __forceinline
 #   define ML_NEVER_INLINE      __declspec(noinline)
-
 #elif defined(ML_CC_gcc) || defined(ML_CC_clang)
 #   define ML_ALWAYS_INLINE     inline __attribute__((always_inline))
 #   define ML_NEVER_INLINE      __attribute__ ((noinline))
 #else
-#   define ML_ALWAYS_INLINE
+#   define ML_ALWAYS_INLINE     inline
 #   define ML_NEVER_INLINE
 #endif
 

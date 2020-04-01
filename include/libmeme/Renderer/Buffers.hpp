@@ -14,9 +14,9 @@ namespace ml
 		uint32_t	m_handle{};
 		uint32_t	m_mode	{};
 
-		operator bool() const { return m_handle; }
+		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const { return m_handle; }
+		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(VAO const * value);
 
@@ -47,9 +47,9 @@ namespace ml
 		uint32_t	m_count	{};
 		uint32_t	m_offset{};
 
-		operator bool() const { return m_handle; }
+		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const { return m_handle; }
+		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(VBO const * value);
 
@@ -83,9 +83,9 @@ namespace ml
 		void *		m_data	{};
 		uint32_t	m_count	{};
 
-		operator bool() const { return m_handle; }
+		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const { return m_handle; }
+		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(IBO const * value);
 
@@ -119,9 +119,9 @@ namespace ml
 		uint32_t	m_texture_handle	{};
 		uint32_t	m_texture_level		{};
 
-		operator bool() const { return m_handle; }
+		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const { return m_handle; }
+		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(FBO const * value);
 
@@ -153,9 +153,9 @@ namespace ml
 		vec2i		m_size	{};
 		uint32_t	m_format{};
 
-		operator bool() const { return m_handle; }
+		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const { return m_handle; }
+		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(RBO const * value);
 

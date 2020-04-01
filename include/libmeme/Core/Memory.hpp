@@ -73,13 +73,13 @@ namespace ml::util
 
 		const_pointer const begin() const noexcept { return m_buffer; }
 
-		const_pointer const cbegin() const noexcept { return m_buffer; }
+		const_pointer const cbegin() const noexcept { return begin(); }
 
 		pointer const end() noexcept { return m_buffer + m_total_bytes; }
 
 		const_pointer const end() const noexcept { return m_buffer + m_total_bytes; }
 
-		const_pointer const cend() const noexcept { return m_buffer + m_total_bytes; }
+		const_pointer const cend() const noexcept { return end(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -135,17 +135,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool initialize(util::test_resource * resource) noexcept
+		// setup
+		ML_NODISCARD static bool set_test_resource(util::test_resource * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres || !resource || !(*resource))
+			if (inst.m_testres || !value || !*value)
 			{
 				return false;
 			}
 			else
 			{
-				inst.m_testres = resource;
+				inst.m_testres = value;
 
 				return (pmr::get_default_resource() == inst.m_testres);
 			}
@@ -154,27 +155,80 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// malloc
-		ML_NODISCARD static void * allocate(size_t size);
+		ML_NODISCARD static void * allocate(size_t size)
+		{
+			static auto & inst{ get_instance() };
+
+			// allocate the requested bytes
+			byte_t * const data{ inst.m_alloc.allocate(size) };
+
+			// create the record
+			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// calloc
-		ML_NODISCARD static void * allocate(size_t count, size_t size);
+		ML_NODISCARD static void * allocate(size_t count, size_t size)
+		{
+			return std::memset(allocate(count * size), 0, count * size);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// free
-		static void deallocate(void * addr);
+		static void deallocate(void * addr)
+		{
+			static auto & inst{ get_instance() };
+
+			// find the entry
+			if (auto const it{ inst.m_records.find(addr) })
+			{
+				// free the allocation
+				inst.m_alloc.deallocate(it->second->data, it->second->size);
+
+				// erase the record
+				inst.m_records.erase(it->first);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc
-		ML_NODISCARD static void * reallocate(void * addr, size_t size);
+		ML_NODISCARD static void * reallocate(void * addr, size_t size)
+		{
+			return reallocate(addr, size, size);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc (sized)
-		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz);
+		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz)
+		{
+			if (!newsz)
+			{
+				deallocate(addr);
+				return nullptr;
+			}
+			else if (!addr)
+			{
+				return allocate(newsz);
+			}
+			else if (newsz <= oldsz)
+			{
+				return addr;
+			}
+			else
+			{
+				void * const temp{ allocate(newsz) };
+				if (temp)
+				{
+					std::memcpy(temp, addr, oldsz);
+					deallocate(addr);
+				}
+				return temp;
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

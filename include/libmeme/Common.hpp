@@ -54,9 +54,9 @@
 // utils
 #define ML_addressof(ptr)	((void *)(ML_intmax)ptr)
 #define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
-#define ML_forward(value)	std::forward<decltype(value)>(value)
-#define ML_deserialize		std::istream & operator >>
-#define ML_serialize		std::ostream & operator <<
+#define ML_forward(value)	_ML std::forward<decltype(value)>(value)
+#define ML_deserialize		_ML std::istream & operator >>
+#define ML_serialize		_ML std::ostream & operator <<
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

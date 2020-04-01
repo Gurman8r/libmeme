@@ -1,6 +1,5 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -32,7 +31,7 @@ ml::int32_t main()
 		memory_config() noexcept
 		{
 			ML_assert(pmr::set_default_resource(&m_test));
-			ML_assert(memory_manager::initialize(&m_test));
+			ML_assert(memory_manager::set_test_resource(&m_test));
 		}
 
 	} g_memcfg;
@@ -40,11 +39,11 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// read config
-	auto config = ([&temp = json{}, &file = std::ifstream{ CONFIG_FILE }]()
+	auto config = ([&j = json{}, &file = std::ifstream{ CONFIG_FILE }]()
 	{
-		if (file) { file >> temp; }
+		if (file) { file >> j; }
 		file.close();
-		return temp;
+		return j;
 	})();
 
 	// create context

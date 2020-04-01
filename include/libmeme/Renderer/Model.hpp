@@ -10,9 +10,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using value_type				= typename mesh;
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type				= typename pmr::vector<value_type>;
+		using storage_type				= typename pmr::vector<mesh>;
 		using difference_type			= typename storage_type::difference_type;
 		using size_type					= typename storage_type::size_type;
 		using pointer					= typename storage_type::pointer;
@@ -130,7 +129,7 @@ namespace ml
 	}
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_model(Args && ... args)
+	> ML_NODISCARD inline auto make_model(Args && ... args)
 	{
 		return model{ ML_forward(args)... };
 	}

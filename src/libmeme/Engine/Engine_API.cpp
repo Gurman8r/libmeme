@@ -69,7 +69,7 @@ namespace ml::embed
 			.def("config"		, []() { return ML_configuration; })
 			.def("date"			, []() { return ML__date; })
 			.def("is_debug"		, []() { return ML_is_debug; })
-			.def("lang"			, []() { return ML_cxx; })
+			.def("lang"			, []() { return ML_lang; })
 			.def("name"			, []() { return ML__name; })
 			.def("platform"		, []() { return ML_platform; })
 			.def("time"			, []() { return ML__time; })

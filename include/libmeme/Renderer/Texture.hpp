@@ -190,7 +190,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_texture(Args && ... args)
+	> ML_NODISCARD inline auto make_texture(Args && ... args)
 	{
 		return texture{ ML_forward(args)... };
 	}

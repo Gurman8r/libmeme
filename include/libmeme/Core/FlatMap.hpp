@@ -325,7 +325,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.end())
 			{
-				return std::make_optional(iterator_pair{ k, this->fetch(k) });
+				return iterator_pair{ k, this->fetch(k) };
 			}
 			else
 			{
@@ -337,7 +337,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.cend())
 			{
-				return std::make_optional(const_iterator_pair{ k, this->fetch(k) });
+				return const_iterator_pair{ k, this->fetch(k) };
 			}
 			else
 			{
@@ -455,7 +455,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) noexcept
 		{
 			for (; first != last; ++first)
 			{
@@ -465,13 +465,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, Fn fn) noexcept
+		> auto for_each(key_const_iterator first, Fn && fn) noexcept
 		{
 			return this->for_each(first, m_pair.first.cend(), fn);
 		}
 
 		template <class Fn
-		> auto for_each(Fn fn) noexcept
+		> auto for_each(Fn && fn) noexcept
 		{
 			return this->for_each(m_pair.first.cbegin(), fn);
 		}
@@ -479,7 +479,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn fn) const noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const noexcept
 		{
 			for (; first != last; ++first)
 			{
@@ -489,13 +489,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, Fn fn) const noexcept
+		> auto for_each(key_const_iterator first, Fn && fn) const noexcept
 		{
 			return this->for_each(first, m_pair.first.cend(), fn);
 		}
 
 		template <class Fn
-		> auto for_each(Fn fn) const noexcept
+		> auto for_each(Fn && fn) const noexcept
 		{
 			return this->for_each(m_pair.first.cbegin(), fn);
 		}
@@ -503,7 +503,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) noexcept
 		{
 			if (0 < count)
 			{
@@ -517,7 +517,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> auto for_each_n(ptrdiff_t count, Fn fn) noexcept
+		> auto for_each_n(ptrdiff_t count, Fn && fn) noexcept
 		{
 			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}
@@ -525,7 +525,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn fn) const noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const noexcept
 		{
 			if (0 < count)
 			{
@@ -539,7 +539,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> auto for_each_n(ptrdiff_t count, Fn fn) const noexcept
+		> auto for_each_n(ptrdiff_t count, Fn && fn) const noexcept
 		{
 			return this->for_each_n(m_pair.first.cbegin(), count, fn);
 		}

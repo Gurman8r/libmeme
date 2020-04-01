@@ -123,7 +123,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... Args
-	> ML_NODISCARD static inline auto make_shared_library(Args && ... args)
+	> ML_NODISCARD inline auto make_shared_library(Args && ... args)
 	{
 		return shared_library{ ML_forward(args)... };
 	}

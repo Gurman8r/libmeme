@@ -8,10 +8,10 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	mesh::mesh(allocator_type const & alloc) noexcept
-		: m_vao		{ make_vao() }
-		, m_vbo		{ make_vbo() }
-		, m_ibo		{ make_ibo() }
-		, m_layout	{ make_buffer_layout() }
+		: m_vao		{}
+		, m_vbo		{}
+		, m_ibo		{}
+		, m_layout	{}
 		, m_vertices{ alloc }
 		, m_indices	{ alloc }
 	{
