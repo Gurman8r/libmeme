@@ -1,7 +1,7 @@
 #ifndef _ML_PRETTY_FUNCTION_HPP_
 #define _ML_PRETTY_FUNCTION_HPP_
 
-#include <libmeme/Core/Utility.hpp>
+#include <libmeme/Core/Hash.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -80,9 +80,11 @@ namespace ml
 
 		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
 
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+
 		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
 
-		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+		ML_NODISCARD constexpr operator storage_type const && () const && noexcept { return std::move(m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

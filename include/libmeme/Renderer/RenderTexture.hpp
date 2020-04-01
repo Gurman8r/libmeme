@@ -3,9 +3,7 @@
 
 #include <libmeme/Renderer/Material.hpp>
 #include <libmeme/Renderer/Model.hpp>
-#include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/RenderTarget.hpp>
-#include <libmeme/Renderer/Texture.hpp>
 
 namespace ml
 {

@@ -17,11 +17,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	model::model()
-		: m_storage{}
-	{
-	}
-
 	model::model(allocator_type const & alloc)
 		: m_storage{ alloc }
 	{

@@ -9,6 +9,7 @@
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/OnceCall.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
+#include <libmeme/Core/TypeOf.hpp>
 
 #define ML_bitread(v, i)		((v >> i) & 1)
 #define ML_bitset(v, i)			(v |= (1 << i))
@@ -20,6 +21,7 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// is any of
 	template <class T, class ... Ts
 	> constexpr bool is_any_of_v{ std::disjunction_v<std::is_same<T, Ts>...> };
 
@@ -118,7 +120,7 @@ namespace ml::util
 	template <template <class, size_t ...> class A, class T, size_t ... N
 	> ML_NODISCARD constexpr auto dot(A<T, N...> const & lhs, A<T, N...> const & rhs)
 	{
-		T temp{ 0 };
+		T temp{};
 		for (size_t i = 0; i < lhs.size(); ++i)
 			temp += (lhs[i] * rhs[i]);
 		return temp;
@@ -136,7 +138,7 @@ namespace ml::util
 	template <template <class, size_t ...> class A, class T, size_t ... N
 	> ML_NODISCARD constexpr auto sqr_magnitude(A<T, N...> const & value)
 	{
-		T temp{ (T)0 };
+		T temp{};
 		for (auto const & elem : value)
 			temp += (elem * elem);
 		return temp;
@@ -159,7 +161,7 @@ namespace ml::util
 	template <template <class, size_t ...> class A, class T, size_t ... N
 	> ML_NODISCARD constexpr auto transpose(A<T, N...> const & value)
 	{
-		A<T, N...> temp{ 0 };
+		A<T, N...> temp{};
 		for (size_t i = 0; i < value.size(); ++i)
 		{
 			size_t const y{ i % value.width() };
@@ -174,21 +176,21 @@ namespace ml::util
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto inverse(M<T, 4, 4> const & v)
 	{
-		T const det{ determinant<M, T>(v) };
-		return ((det != (T)0)
-			? M<T, 4, 4> {
-			+(v[15] * v[5] - v[7] * v[13]) / det,
+		auto const det{ determinant<M, T>(v) };
+		return (det == T{})
+			? M<T, 4, 4>::identity()
+			: M<T, 4, 4>
+			{
+				+(v[15] * v[5] - v[7] * v[13]) / det,
 				-(v[15] * v[4] - v[7] * v[12]) / det,
 				+(v[13] * v[4] - v[5] * v[12]) / det,
 				-(v[15] * v[1] - v[3] * v[13]) / det,
 				+(v[15] * v[0] - v[3] * v[12]) / det,
 				-(v[13] * v[0] - v[1] * v[12]) / det,
-				+(v[7] * v[1] - v[3] * v[5]) / det,
-				-(v[7] * v[0] - v[3] * v[4]) / det,
-				+(v[5] * v[0] - v[1] * v[4]) / det
-		}
-		: M<T, 4, 4>::identity()
-			);
+				+(v[ 7] * v[1] - v[3] * v[ 5]) / det,
+				-(v[ 7] * v[0] - v[3] * v[ 4]) / det,
+				+(v[ 5] * v[0] - v[1] * v[ 4]) / det
+			};
 	}
 
 	template <template <class, size_t, size_t> class M, class T
@@ -197,21 +199,22 @@ namespace ml::util
 		return M<T, 3, 3>
 		{
 			m[0] * v[0] + m[4] * v[3] + m[8] * v[6],
-				m[1] * v[0] + m[5] * v[3] + m[9] * v[6],
-				m[2] * v[0] + m[6] * v[3] + m[10] * v[6],
-				m[0] * v[1] + m[4] * v[4] + m[8] * v[7],
-				m[1] * v[1] + m[5] * v[4] + m[9] * v[7],
-				m[2] * v[1] + m[6] * v[4] + m[10] * v[7],
-				m[0] * v[2] + m[4] * v[5] + m[8] * v[8],
-				m[1] * v[2] + m[5] * v[5] + m[9] * v[8],
-				m[2] * v[2] + m[6] * v[5] + m[10] * v[8]
+			m[1] * v[0] + m[5] * v[3] + m[9] * v[6],
+			m[2] * v[0] + m[6] * v[3] + m[10] * v[6],
+			m[0] * v[1] + m[4] * v[4] + m[8] * v[7],
+			m[1] * v[1] + m[5] * v[4] + m[9] * v[7],
+			m[2] * v[1] + m[6] * v[4] + m[10] * v[7],
+			m[0] * v[2] + m[4] * v[5] + m[8] * v[8],
+			m[1] * v[2] + m[5] * v[5] + m[9] * v[8],
+			m[2] * v[2] + m[6] * v[5] + m[10] * v[8]
 		};
 	}
 
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, M<T, 4, 4> const & m)
 	{
-		return M<T, 3, 1>{
+		return M<T, 3, 1>
+		{
 			m[0] * v[0] * m[4] * v[1] * m[8] * v[2] * m[12],
 			m[1] * v[0] * m[5] * v[1] * m[9] * v[2] * m[13],
 			m[2] * v[0] * m[6] * v[1] * m[10] * v[2] * m[14]
@@ -229,7 +232,8 @@ namespace ml::util
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
 	{
-		return M<T, 3, 1>{
+		return M<T, 3, 1>
+		{
 			a[1] * b[2] - b[1] * a[2],
 			a[2] * b[0] - b[2] * a[0],
 			a[0] * b[1] - b[0] * a[1]

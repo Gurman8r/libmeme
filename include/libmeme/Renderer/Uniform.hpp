@@ -1,10 +1,7 @@
 #ifndef _ML_UNIFORM_HPP_
 #define _ML_UNIFORM_HPP_
 
-#include <libmeme/Renderer/Export.hpp>
-#include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/TypeOf.hpp>
+#include <libmeme/Renderer/Texture.hpp>
 
 namespace ml
 {
@@ -14,64 +11,67 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using variable_type = typename std::variant<
+		using sampler_type = typename texture const *;
+
+		using allowed_types = typename meta::list<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
-			struct texture const *
+			sampler_type
 		>;
+
+		using variable_type = typename meta::rename<std::variant, allowed_types>;
 
 		using function_type = typename std::function<variable_type()>;
 
-		using type_t = typename typeof<>;
+		using info_type = typename typeof<>;
 
-		using name_t = typename pmr::string;
+		using name_type = typename pmr::string;
 
-		using data_t = typename std::variant<variable_type, function_type>;
+		using data_type = typename std::variant<variable_type, function_type>;
 
 		enum : size_t { ID_Variable, ID_Function };
 
-		template <class T> static constexpr bool is_texture_v
+		template <class T> static constexpr bool is_sampler_v
 		{
-			std::is_convertible_v<T, struct texture const *> ||
-			std::is_convertible_v<std::decay_t<T> const *, struct texture const *>
+			std::is_convertible_v<T, sampler_type> ||
+			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler_type>
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uniform(allocator_type const & alloc = {}) noexcept
-			: m_type{}
+			: m_info{}
 			, m_name{ alloc }
 			, m_data{}
 		{
 		}
 
-		uniform(type_t const & type, name_t const & name, data_t const & data, allocator_type const & alloc = {})
-			: m_type{ type }
+		uniform(info_type const & info, name_type const & name, data_type const & data, allocator_type const & alloc = {})
+			: m_info{ info }
 			, m_name{ name, alloc }
 			, m_data{ data }
 		{
 		}
 
-		uniform(type_t && type, name_t && name, data_t && data, allocator_type const & alloc = {}) noexcept
-			: m_type{ ML_forward(type) }
+		uniform(info_type && info, name_type && name, data_type && data, allocator_type const & alloc = {}) noexcept
+			: m_info{ ML_forward(info) }
 			, m_name{ ML_forward(name), alloc }
 			, m_data{ ML_forward(data) }
 		{
 		}
 
 		uniform(uniform const & other, allocator_type const & alloc = {})
-			: m_type{ other.m_type }
+			: m_info{ other.m_info }
 			, m_name{ other.m_name, alloc }
 			, m_data{ other.m_data }
 		{
 		}
 
 		uniform(uniform && other, allocator_type const & alloc = {}) noexcept
-			: m_type{ ML_forward(other.m_type) }
-			, m_name{ ML_forward(other.m_name), alloc }
-			, m_data{ ML_forward(other.m_data) }
+			: uniform{ alloc }
 		{
+			swap(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -93,7 +93,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_type, other.m_type);
+				std::swap(m_info, other.m_info);
 				std::swap(m_name, other.m_name);
 				std::swap(m_data, other.m_data);
 			}
@@ -101,11 +101,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD type_t const & type() const noexcept { return m_type; }
+		ML_NODISCARD info_type const & info() const noexcept { return m_info; }
 		
-		ML_NODISCARD name_t const & name() const noexcept { return m_name; }
+		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
 		
-		ML_NODISCARD data_t const & data() const noexcept { return m_data; }
+		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -114,12 +114,16 @@ namespace ml
 			return !m_name.empty();
 		}
 
-		ML_NODISCARD variable_type var() const
+		ML_NODISCARD variable_type var() const noexcept
 		{
 			switch (m_data.index())
 			{
-			case ID_Variable: return std::get<variable_type>(m_data);
-			case ID_Function: return std::invoke(std::get<function_type>(m_data));
+			case ID_Variable:
+				return std::get<variable_type>(m_data);
+
+			case ID_Function:
+				if (auto const & fn{ std::get<function_type>(m_data) })
+					return std::invoke(fn);
 			}
 			return variable_type{};
 		}
@@ -127,50 +131,48 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
-			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->holds<T const *>();
+				return this->holds<sampler_type>();
 			}
 			else
 			{
-				return std::holds_alternative<T>(var());
+				return std::holds_alternative<T>(this->var());
 			}
 		}
 
 		template <class T
-		> ML_NODISCARD auto get() const
+		> ML_NODISCARD decltype(auto) get() const noexcept
 		{
-			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->get<T const *>();
+				return this->get<sampler_type>();
+			}
+			else if (auto const v{ this->var() }; std::holds_alternative<T>(v))
+			{
+				return std::make_optional<T>(std::get<T>(v));
 			}
 			else
 			{
-				if (auto const v{ var() }; std::holds_alternative<T>(v))
-				{
-					return std::make_optional<T>(std::get<T>(v));
-				}
-				else
-				{
-					return (std::optional<T>)std::nullopt;
-				}
+				return (std::optional<T>)std::nullopt;
 			}
 		}
 
-		template <class T, class Data
-		> uniform & set(Data const & value) noexcept
+		template <class T, class ... Args
+		> bool set(Args && ... args) noexcept
 		{
-			if constexpr (is_texture_v<T> && !std::is_pointer_v<T>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->set<T const *>(value);
+				return this->set<sampler_type>(ML_forward(args)...);
+			}
+			else if (this->holds<T>())
+			{
+				m_data = data_type{ ML_forward(args)... };
+				return true;
 			}
 			else
 			{
-				if (this->holds<T>())
-				{
-					m_data = value;
-				}
-				return (*this);
+				return false;
 			}
 		}
 
@@ -178,9 +180,9 @@ namespace ml
 
 		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
-			if (m_type != other.m_type)
+			if (m_info != other.m_info)
 			{
-				return m_type.compare(other.m_type);
+				return m_info.compare(other.m_info);
 			}
 			else
 			{
@@ -221,9 +223,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		type_t m_type; // type details
-		name_t m_name; // uniform name
-		data_t m_data; // variant data
+		info_type m_info; // info
+		name_type m_name; // name
+		data_type m_data; // data
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

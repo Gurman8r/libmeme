@@ -13,32 +13,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image const image::Default{ ([]()
+	image const image::default_rgba{ ([]()
 	{
-		image img { vec2u{ 512, 512 }, 3 };
-		for (size_t y = 0; y < img.height(); y++)
+		image temp { vec2u{ 512, 512 }, 3 };
+		for (size_t y = 0; y < temp.height(); ++y)
 		{
-			for (size_t x = 0; x < img.width(); x++)
+			for (size_t x = 0; x < temp.width(); ++x)
 			{
-				img.set_pixel(x, y,
-					(((y < img.height() / 2) && (x < img.width() / 2)) ||
-					((y >= img.height() / 2) && (x >= img.width() / 2))
-						? color(color(0.1f).rgb(), 1.0)
-						: (((y >= img.height() / 2) || (x >= img.width() / 2))
+				temp.set_pixel(x, y,
+					(((y < temp.height() / 2) && (x < temp.width() / 2)) ||
+					((y >= temp.height() / 2) && (x >= temp.width() / 2))
+						? color{ color{ 0.1f }.rgb(), 1.0 }
+						: (((y >= temp.height() / 2) || (x >= temp.width() / 2))
 							? colors::magenta
 							: colors::green
 							)));
 			}
 		}
-		return img;
+		return temp;
 	})() };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	image::image()
-		: image{ allocator_type{} }
-	{
-	}
 
 	image::image(allocator_type const & alloc)
 		: m_size	{ 0 }
@@ -146,21 +141,18 @@ namespace ml
 			std::memcpy(&m_pixels[0], temp, capacity());
 
 			::stbi_image_free(temp);
-			
-			return !empty();
 		}
-		else
+		else if (!empty())
 		{
 			clear();
-			return false;
 		}
+		return !empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	image & image::create_from_color(vec2u const & size, color32 const & col)
 	{
-		constexpr auto foo = sizeof(float);
 		return create_from_color(size, channels(), col);
 	}
 

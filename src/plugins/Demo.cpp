@@ -1,25 +1,23 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/StreamSniper.hpp>
-#include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Core/ECS.hpp>
+#include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/StreamSniper.hpp>
+#include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
-#include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/ImGuiExt.hpp>
+#include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
-#include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/Binder.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
-#include <libmeme/Renderer/Model.hpp>
-#include <libmeme/Renderer/Shader.hpp>
-#include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Font.hpp>
-#include <ImGuiColorTextEdit/TextEditor.h>
+#include <libmeme/Renderer/Model.hpp>
+#include <libmeme/Renderer/RenderStates.hpp>
+#include <libmeme/Renderer/RenderTexture.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,10 +66,11 @@ namespace ml
 	{
 		void update(c_shader & shd, c_material const & mat)
 		{
-			shd->bind(false);
-			for (uniform const & u : *mat)
+			ML_bind_scope(*shd, false);
+			for (auto const & u : *mat)
+			{
 				shd->set_uniform(u);
-			shd->unbind();
+			}
 		}
 	};
 
@@ -79,9 +78,8 @@ namespace ml
 	{
 		void update(render_target const & target, c_shader const & shd, c_model const & mdl)
 		{
-			shd->bind(true);
+			ML_bind_scope(*shd, true);
 			target.draw(*mdl);
-			shd->unbind();
 		}
 	};
 
@@ -554,7 +552,7 @@ namespace ml
 				m_gui_memory.menu_item();
 				m_gui_profiler.menu_item();
 			});
-			editor::add_menu("options", [&]()
+			editor::add_menu("settings", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				bool fullscreen{ engine::get_window().is_fullscreen() };
@@ -635,19 +633,19 @@ namespace ml
 			ML_defer{ m_console.render(); };
 
 			// setup commands
-			if (auto & cmd{ m_console.commands }; cmd.empty())
+			if (m_console.commands.empty())
 			{
-				cmd.push_back({ "clear", [&](auto args)
+				m_console.commands.push_back({ "clear", [&](auto args)
 				{
 					m_console.clear();
 				} });
 
-				cmd.push_back({ "exit", [&](auto args)
+				m_console.commands.push_back({ "exit", [&](auto args)
 				{
 					engine::close();
 				} });
 
-				cmd.push_back({ "help", [&](auto args)
+				m_console.commands.push_back({ "help", [&](auto args)
 				{
 					for (auto const & e : m_console.commands)
 					{
@@ -655,7 +653,7 @@ namespace ml
 					}
 				} });
 
-				cmd.push_back({ "history", [&](auto args)
+				m_console.commands.push_back({ "history", [&](auto args)
 				{
 					for (auto const & e : m_console.history)
 					{
@@ -663,7 +661,7 @@ namespace ml
 					}
 				} });
 
-				cmd.push_back({ "lua", [&](auto args)
+				m_console.commands.push_back({ "lua", [&](auto args)
 				{
 					if (!m_console.overload && args.empty())
 					{
@@ -680,7 +678,7 @@ namespace ml
 					}
 				} });
 
-				cmd.push_back({ "python", [&](auto args)
+				m_console.commands.push_back({ "python", [&](auto args)
 				{
 					if (!m_console.overload && args.empty())
 					{

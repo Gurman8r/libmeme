@@ -50,7 +50,7 @@ namespace ml
 		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept
-			: m_name{ "" }, m_guid{ 0 }
+			: m_name{}, m_guid{}
 		{
 		}
 

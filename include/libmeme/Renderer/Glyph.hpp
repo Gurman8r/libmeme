@@ -10,8 +10,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		texture		graphic	{};
-		float_rect	bounds	{ 0 };
-		uint32_t	advance	{ 0 };
+		float_rect	bounds	{};
+		uint32_t	advance	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

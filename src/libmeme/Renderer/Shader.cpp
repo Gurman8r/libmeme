@@ -207,40 +207,40 @@ namespace ml
 	bool shader::set_uniform(uniform const & value)
 	{
 		if (!value) { return false; }
-		switch (value.type().guid())
+		switch (value.info().guid())
 		{
-		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<bool>: if (auto const o{ value.get<bool>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<int32_t>: if (auto const v{ value.get<int32_t>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<int32_t>: if (auto const o{ value.get<int32_t>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<float_t>: if (auto const v{ value.get<float_t>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<float_t>: if (auto const o{ value.get<float_t>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<vec2>: if (auto const v{ value.get<vec2>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<vec2>: if (auto const o{ value.get<vec2>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<vec3>: if (auto const v{ value.get<vec3>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<vec3>: if (auto const o{ value.get<vec3>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<vec4>: if (auto const v{ value.get<vec4>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<vec4>: if (auto const o{ value.get<vec4>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<color>: if (auto const v{ value.get<color>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<color>: if (auto const o{ value.get<color>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<mat2>: if (auto const v{ value.get<mat2>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<mat2>: if (auto const o{ value.get<mat2>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<mat3>: if (auto const v{ value.get<mat3>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<mat3>: if (auto const o{ value.get<mat3>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<mat4>: if (auto const v{ value.get<mat4>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<mat4>: if (auto const o{ value.get<mat4>() })
+			return set_uniform(value.name(), o.value());
 		
-		case hashof_v<texture>: if (auto const v{ value.get<texture>() })
-			return set_uniform(value.name(), v.value());
+		case hashof_v<texture>: if (auto const o{ value.get<texture>() })
+			return set_uniform(value.name(), o.value());
 		}
 		return false;
 	}
@@ -311,6 +311,11 @@ namespace ml
 		return u;
 	}
 
+	bool shader::set_uniform(pmr::string const & name, texture const * value)
+	{
+		return value ? set_uniform(name, (*value)) : false;
+	}
+
 	bool shader::set_uniform(pmr::string const & name, texture const & value)
 	{
 		uniform_binder const u{ *this, name };
@@ -337,42 +342,29 @@ namespace ml
 		return u;
 	}
 
-	bool shader::set_uniform(pmr::string const & name, texture const * value)
-	{
-		return value ? set_uniform(name, (*value)) : false;
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		if (auto const it{ m_attributes.find(value) })
+		if (auto const code{ util::hash(value) }; auto const it{ m_attributes.find(code) })
 		{
 			return (*it->second);
 		}
-		else if (auto const loc{ GL::getAttribLocation(m_handle, value.c_str()) }; loc != -1)
-		{
-			return (*m_attributes.insert(value, loc).second);
-		}
 		else
 		{
-			return -1;
+			return (*m_attributes.insert(code, GL::getAttribLocation(m_handle, value.c_str())).second);
 		}
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		if (auto const it{ m_uniforms.find(value) })
+		if (auto const code{ util::hash(value) }; auto const it{ m_uniforms.find(code) })
 		{
 			return (*it->second);
 		}
-		else if (auto const loc{ GL::getUniformLocation(m_handle, value.c_str()) }; loc != -1)
-		{
-			return (*m_uniforms.insert(value, loc).second);
-		}
 		else
 		{
-			return -1;
+			return (*m_uniforms.insert(code, GL::getUniformLocation(m_handle, value.c_str())).second);
 		}
 	}
 

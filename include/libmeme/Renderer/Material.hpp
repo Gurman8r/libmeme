@@ -1,7 +1,7 @@
 #ifndef _ML_MATERIAL_HPP_
 #define _ML_MATERIAL_HPP_
 
-#include <libmeme/Renderer/Uniform.hpp>
+#include <libmeme/Renderer/Shader.hpp>
 
 namespace ml
 {
@@ -19,9 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material() noexcept : m_storage{} {}
-
-		explicit material(allocator_type const & alloc)
+		material(allocator_type const & alloc = {})
 			: m_storage{ alloc }
 		{
 		}

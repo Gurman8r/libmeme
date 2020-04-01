@@ -21,13 +21,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static image const Default;
+		static image const default_rgba;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image();
-		
-		explicit image(allocator_type const & alloc);
+		image(allocator_type const & alloc = {});
 		
 		image(vec2u const & size, allocator_type const & alloc = {});
 		

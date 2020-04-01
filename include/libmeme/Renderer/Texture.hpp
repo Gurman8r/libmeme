@@ -69,7 +69,7 @@ namespace ml
 
 		bool load_from_file(filesystem::path const & path);
 
-		bool load_from_image(image const & image);
+		bool load_from_image(image const & img);
 
 		bool load_from_texture(texture const & other);
 
@@ -90,52 +90,32 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool create(vec2u const & size);
-		
-		bool create(image const & image, vec2u const & size);
-		
-		bool create(image const & image, uint32_t w, uint32_t h);
-		
+
 		bool create(byte_t const * pixels, vec2u const & size);
 		
 		bool create(byte_t const * pixels, uint32_t w, uint32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool update(texture const & other, uint_rect const & area);
-		
-		bool update(texture const & other, vec2u const & position, vec2u const & size);
-		
-		bool update(texture const & other, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-
-		bool update(image const & image);
-		
-		bool update(image const & image, uint_rect const & area);
-		
-		bool update(image const & image, vec2u const & position, vec2u const & size);
-		
-		bool update(image const & image, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-
-		bool update(byte_t const * pixels);
-		
 		bool update(byte_t const * pixels, uint_rect const & area);
 		
-		bool update(byte_t const * pixels, vec2u const & position, vec2u const & size);
+		bool update(byte_t const * pixels, vec2u const & pos, vec2u const & size);
 		
 		bool update(byte_t const * pixels, uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		bool set_mipmapped(bool value);
-
-		bool set_repeated(bool value);
-
-		bool set_smooth(bool value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD uint32_t channels() const noexcept;
 
 		ML_NODISCARD image copy_to_image() const;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool set_mipmapped(bool value);
+
+		bool set_repeated(bool value);
+
+		bool set_smooth(bool value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

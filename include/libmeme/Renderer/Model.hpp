@@ -25,9 +25,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		model();
-		
-		explicit model(allocator_type const & alloc);
+		model(allocator_type const & alloc = {});
 		
 		model(std::initializer_list<mesh> init, allocator_type const & alloc = {});
 		

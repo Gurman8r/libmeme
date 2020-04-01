@@ -441,25 +441,11 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> decltype(auto) apply(key_const_iterator it, Fn && fn)
-		{
-			return std::invoke(ML_forward(fn), *it, *this->fetch(it));
-		}
-
-		template <class Fn
-		> decltype(auto) apply(key_const_iterator it, Fn && fn) const
-		{
-			return std::invoke(ML_forward(fn), *it, *this->fetch(it));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
 		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) noexcept
 		{
 			for (; first != last; ++first)
 			{
-				this->apply(first, ML_forward(fn));
+				std::invoke(ML_forward(fn), *first, *this->fetch(first));
 			}
 			return first;
 		}
@@ -483,7 +469,7 @@ namespace ml::ds
 		{
 			for (; first != last; ++first)
 			{
-				this->apply(first, ML_forward(fn));
+				std::invoke(ML_forward(fn), *first, *this->fetch(first));
 			}
 			return first;
 		}
@@ -508,7 +494,7 @@ namespace ml::ds
 			if (0 < count)
 			{
 				do {
-					this->apply(first, ML_forward(fn));
+					std::invoke(ML_forward(fn), *first, *this->fetch(first));
 					--count;
 					++first;
 				} while (0 < count);
@@ -530,7 +516,7 @@ namespace ml::ds
 			if (0 < count)
 			{
 				do {
-					this->apply(first, ML_forward(fn));
+					std::invoke(ML_forward(fn), *first, *this->fetch(first));
 					--count;
 					++first;
 				} while (0 < count);
