@@ -109,11 +109,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool const() const noexcept
-		{
-			return !m_name.empty();
-		}
-
 		ML_NODISCARD variable_type var() const noexcept
 		{
 			switch (m_data.index())
@@ -177,6 +172,8 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD operator bool const() const noexcept { return !m_name.empty(); }
 
 		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
