@@ -123,6 +123,8 @@ namespace ml
 			return variable_type{};
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
@@ -135,6 +137,8 @@ namespace ml
 				return std::holds_alternative<T>(this->var());
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> ML_NODISCARD decltype(auto) get() const noexcept
@@ -152,6 +156,8 @@ namespace ml
 				return (std::optional<T>)std::nullopt;
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T, class ... Args
 		> bool set(Args && ... args) noexcept

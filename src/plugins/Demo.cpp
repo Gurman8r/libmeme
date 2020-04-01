@@ -737,13 +737,16 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			ML_once{ test.SetText("sample text"); };
+			ML_once{
+				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
+				test.SetText("sample text");
+			};
 
 			if (ImGui::BeginTabBar("documents##tabs"))
 			{
 				if (ImGui::BeginTabItem("test document"))
 				{
-					test.Render("##document##text_editor");
+					test.Render("##document##text_editor", {}, true);
 
 					ImGui::EndTabItem();
 				}
