@@ -611,7 +611,7 @@ namespace ml::ds
 		class	_Vt,					// value type
 		class	_Pr = std::less<_Kt>,	// key comparator predicate type
 		size_t	_Th = 42				// search algorithm selector threshold
-	> ML_ALIAS flat_map = typename basic_flat_map
+	> ML_alias flat_map = typename basic_flat_map
 	<
 		flat_map_traits<_Kt, _Vt, _Pr, _Th>
 	>;

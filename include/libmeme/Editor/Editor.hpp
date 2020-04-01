@@ -67,9 +67,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static editor::config & get_config() noexcept;
+		ML_NODISCARD static config & get_config() noexcept;
 
-		ML_NODISCARD static editor::runtime & get_runtime() noexcept;
+		ML_NODISCARD static runtime & get_runtime() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

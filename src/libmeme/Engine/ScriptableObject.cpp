@@ -40,7 +40,7 @@ namespace ml::embed
 
 		call_fn("awake");
 
-		set_enabled(get_opt<bool>("enabled"));
+		set_enabled(get_opt<bool>("enabled", true));
 	}
 
 	scriptable_object::~scriptable_object()
@@ -59,6 +59,8 @@ namespace ml::embed
 
 	bool scriptable_object::call_fn(cstring name)
 	{
+		if (!name || !*name) { return false; }
+
 		auto const o{ ([&]() noexcept -> std::optional<std::reference_wrapper<callback>>
 		{
 			switch (util::hash(name, util::strlen(name)))
@@ -77,10 +79,12 @@ namespace ml::embed
 		if (!o.has_value()) { return false; }
 
 		auto & fn{ o->get() };
+
 		if (fn || (!fn && load_fn(fn, name)))
 		{
 			std::invoke(fn);
 		}
+
 		return (bool)fn;
 	}
 

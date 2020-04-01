@@ -6,7 +6,7 @@
 #include <libmeme/Common.hpp>
 #include <nlohmann/json.hpp>
 
-namespace ml { ML_ALIAS json = typename nlohmann::json; }
+namespace ml { ML_alias json = typename nlohmann::json; }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

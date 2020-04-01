@@ -22,7 +22,7 @@ namespace ml::util
 	> {};
 
 	template <class Ch
-	> ML_ALIAS is_char_t = typename _ML_UTIL is_char<Ch>;
+	> ML_alias is_char_t = typename _ML_UTIL is_char<Ch>;
 
 	template <class Ch
 	> static constexpr bool is_char_v{ _ML_UTIL is_char_t<Ch>::value };
@@ -36,7 +36,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_ALIAS is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
+	> ML_alias is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_cstring_v{ _ML_UTIL is_cstring_t<T, Ch>::value };
@@ -50,7 +50,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_ALIAS is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
+	> ML_alias is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_view_v{ _ML_UTIL is_string_view_t<T, Ch>::value };
@@ -63,7 +63,7 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_ALIAS is_string_t = typename _ML_UTIL is_string<T, Ch>;
+	> ML_alias is_string_t = typename _ML_UTIL is_string<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_v{ _ML_UTIL is_string_t<T, Ch>::value };

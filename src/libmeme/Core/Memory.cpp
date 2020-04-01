@@ -15,7 +15,7 @@ namespace ml
 
 	memory_manager::~memory_manager()
 	{
-#if ML_IS_DEBUG
+#if ML_is_debug
 		if (!m_records.empty())
 		{
 			debug::log::error("final allocations follow");

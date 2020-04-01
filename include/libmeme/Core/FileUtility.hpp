@@ -8,14 +8,14 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load file contents into vector
-	template <class Ch = char, class Tr = std::char_traits<Ch>, class Buffer = pmr::vector<Ch>
-	> static inline std::optional<Buffer> get_file_contents(filesystem::path const & path)
+	template <class Ch = char, class Buf = pmr::vector<Ch>
+	> ML_NODISCARD static inline std::optional<Buf> get_file_contents(filesystem::path const & path)
 	{
-		std::basic_ifstream<Ch, Tr> file{ path, std::ios_base::binary };
+		std::basic_ifstream<Ch, std::char_traits<Ch>> file{ path, std::ios_base::binary };
 		ML_defer{ file.close(); };
 		if (!file) { return std::nullopt; }
 
-		Buffer temp{};
+		Buf temp{};
 		file.seekg(0, std::ios_base::end);
 		if (std::streamsize size{ file.tellg() }; size > 0)
 		{
@@ -32,7 +32,7 @@ namespace ml::util
 
 	// load file contents into string
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> inline Str get_file_string(filesystem::path const & path) noexcept
+	> ML_NODISCARD static inline Str get_file_string(filesystem::path const & path) noexcept
 	{
 		if (auto const contents{ util::get_file_contents<Ch>(path) })
 		{

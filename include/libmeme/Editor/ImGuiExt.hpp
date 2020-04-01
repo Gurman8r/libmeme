@@ -619,4 +619,128 @@ namespace ml::gui
 	};
 }
 
+// FILE TREE
+namespace ml::gui
+{
+	struct file_tree final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		filesystem::path m_path{};
+
+		file_tree() noexcept = default;
+
+		void render() const
+		{
+			if (m_path.empty() || !filesystem::is_directory(m_path)) return;
+
+			ML_ImGui_ScopeID(ML_addressof(this));
+
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
+			ImGui::Columns(2);
+			ImGui::Separator();
+
+			for (auto const & e : filesystem::directory_iterator{ m_path })
+			{
+				if (e.is_directory()) { show_directory(e); }
+			}
+
+			for (auto const & e : filesystem::directory_iterator{ m_path })
+			{
+				if (e.is_regular_file()) { show_regular(e); }
+			}
+
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void show_directory(filesystem::directory_entry const & value)
+		{
+			if (value.path().empty() || !filesystem::is_directory(value)) { return; }
+
+			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
+
+			// tree node
+			ImGui::AlignTextToFramePadding();
+			ImGui::PushStyleColor(ImGuiCol_Text, { .0f, 1.f, 1.f, 1.f });
+			bool const node_open
+			{
+				ImGui::TreeNode("directory", "%s", value.path().stem().string().c_str())
+			};
+			ImGui::PopStyleColor();
+
+			// context popup
+			if (ImGui::BeginPopupContextItem("directory##context_popup"))
+			{
+				help_marker("WIP");
+				ImGui::EndPopup();
+			}
+			ImGui::NextColumn();
+
+			// details
+			ImGui::AlignTextToFramePadding();
+			{
+				ImGui::Text("directory");
+			}
+			ImGui::NextColumn();
+
+			// contents
+			if (node_open)
+			{
+				for (auto const & e : filesystem::directory_iterator{ value })
+				{
+					if (e.is_directory()) { show_directory(e); }
+				}
+
+				for (auto const & e : filesystem::directory_iterator{ value })
+				{
+					if (e.is_regular_file()) { show_regular(e); }
+				}
+
+				ImGui::TreePop();
+			}
+		}
+
+		static void show_regular(filesystem::directory_entry const & value)
+		{
+			if (value.path().empty() || !filesystem::is_regular_file(value)) { return; }
+
+			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
+
+			// tree node
+			ImGui::AlignTextToFramePadding();
+			ImGui::PushStyleColor(ImGuiCol_Text, { 0.f, 1.f, 0.f, 1.f });
+			ImGui::TreeNodeEx(
+				"regular",
+				ImGuiTreeNodeFlags_Leaf |
+				ImGuiTreeNodeFlags_NoTreePushOnOpen |
+				ImGuiTreeNodeFlags_Bullet,
+				"%s",
+				value.path().filename().string().c_str()
+				);
+			ImGui::PopStyleColor();
+
+			// context popup
+			if (ImGui::BeginPopupContextItem("regular_file##context_popup"))
+			{
+				help_marker("WIP");
+				ImGui::EndPopup();
+			}
+			ImGui::NextColumn();
+
+			// details
+			ImGui::SetNextItemWidth(-1);
+			{
+				ImGui::Text("regular file");
+			}
+			ImGui::NextColumn();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
 #endif // !_ML_IMGUI_EXT_HPP_

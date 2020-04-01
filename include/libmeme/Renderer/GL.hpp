@@ -8,7 +8,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if ML_IS_DEBUG
+#if ML_is_debug
 # 	define glCheck(expr) do { expr; GL::checkError(__FILE__, __LINE__, #expr); } while (0)
 #else
 # 	define glCheck(expr) (expr)

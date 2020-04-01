@@ -1,13 +1,13 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 #	include <Windows.h>
 #else
 // https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #endif
 
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 #	define LIB_EXT ".dll"
 #else
 #	define LIB_EXT ".so"
@@ -19,7 +19,7 @@ namespace ml::impl
 
 	static inline void * load_library(filesystem::path path)
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		if (path.extension().empty()) { path += LIB_EXT; }
 		else if (path.extension() != LIB_EXT) { return nullptr; }
 		return LoadLibraryExW(path.native().c_str(), nullptr, 0);
@@ -32,7 +32,7 @@ namespace ml::impl
 
 	static inline bool free_library(void * instance)
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		return FreeLibrary(static_cast<HINSTANCE>(instance));
 #else
 		return false;
@@ -43,7 +43,7 @@ namespace ml::impl
 
 	static inline void * load_function(void * instance, cstring name)
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		return GetProcAddress(static_cast<HINSTANCE>(instance), name);
 #else
 		return nullptr;

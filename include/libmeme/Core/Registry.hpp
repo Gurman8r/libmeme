@@ -12,7 +12,7 @@
 	std::optional<std::any> factory()
 
 #define ML_REGISTER(T) \
-	ML_REGISTER_EX(T, ML_CONCAT(ML_FACTORY_, T))
+	ML_REGISTER_EX(T, ML_concat(ML_FACTORY_, T))
 
 // example:
 // ML_REGISTER(MyType) { return std::make_optional(MyType{}); }

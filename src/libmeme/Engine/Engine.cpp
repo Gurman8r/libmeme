@@ -26,10 +26,10 @@ namespace ml
 	class engine::context final : trackable, non_copyable
 	{
 		friend class		engine						;
-		engine::config		m_config		{}			; // startup variables
-		engine::runtime		m_io			{}			; // runtime variables
-		timer				m_main_timer	{ true }	; // master timer
-		timer				m_loop_timer	{}			; // frame timer
+		engine::config		m_config		{}			; // public startup variables
+		engine::runtime		m_runtime		{}			; // public runtime variables
+		timer				m_main_timer	{ true }	; // main timer
+		timer				m_loop_timer	{}			; // loop timer
 		frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
 		render_window		m_window		{}			; // main window
 		file_set_t			m_plugin_files	{}			; // plugin filenames
@@ -88,32 +88,34 @@ namespace ml
 
 	engine::config & engine::get_config() noexcept
 	{
-		ML_assert(g_engine);
-		return g_engine->m_config;
+		ML_assert(is_initialized());
+		return (*g_engine).m_config;
 	}
 
 	engine::runtime & engine::get_runtime() noexcept
 	{
-		ML_assert(g_engine);
-		return g_engine->m_io;
+		ML_assert(is_initialized());
+		return (*g_engine).m_runtime;
 	}
 
 	duration const & engine::get_time() noexcept
 	{
 		ML_assert(is_initialized());
-		return g_engine->m_main_timer.elapsed();
+		return (*g_engine).m_main_timer.elapsed();
 	}
 
 	render_window & engine::get_window() noexcept
 	{
 		ML_assert(is_initialized());
-		return g_engine->m_window;
+		return (*g_engine).m_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool engine::startup()
 	{
+		if (!is_initialized()) { return false; }
+
 		// start lua
 		if (!g_engine->m_lua && !([&]()
 		{
@@ -139,7 +141,7 @@ namespace ml
 				luaL_setfuncs(g_engine->m_lua, lua_defaults, 0);
 				lua_pop(g_engine->m_lua, 1);
 			}
-			return g_engine->m_lua;
+			return (*g_engine).m_lua;
 
 		})()) return debug::log::error("engine failed starting lua");
 
@@ -184,7 +186,7 @@ namespace ml
 
 	bool engine::shutdown()
 	{
-		if (!g_engine) return false;
+		if (!is_initialized()) { return false; }
 
 		// shutdown plugins
 		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
@@ -214,7 +216,7 @@ namespace ml
 	void engine::begin_loop()
 	{
 		// update delta time
-		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
+		g_engine->m_runtime.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
 		g_engine->m_loop_timer.start();
 
 		window::poll_events();
@@ -248,40 +250,10 @@ namespace ml
 	void engine::end_loop()
 	{
 		// increment frame count
-		++g_engine->m_io.frame_count;
+		++g_engine->m_runtime.frame_count;
 
 		// update fps tracker
-		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool engine::is_running() noexcept
-	{
-		return is_initialized() && get_window().is_open();
-	}
-
-	void engine::close() noexcept
-	{
-		if (is_initialized())
-		{
-			get_window().close();
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	filesystem::path engine::path_to(filesystem::path const & value)
-	{
-		auto const & home{ get_config().content_home };
-		if (value.empty())
-		{
-			return home;
-		}
-		else
-		{
-			return filesystem::path{ home.native() + value.native() };
-		}
+		g_engine->m_runtime.frame_rate = g_engine->m_fps_tracker(g_engine->m_runtime.delta_time);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -297,9 +269,9 @@ namespace ml
 			if (auto lib{ make_shared_library(*file.first) })
 			{
 				// load plugin
-				if (auto const inst{ lib.call_function<plugin *>("ml_plugin_main") })
+				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return (*g_engine->m_plugin_libs.insert(std::move(lib), *inst).second);
+					return (*g_engine->m_plugin_libs.insert(std::move(lib), *ptr).second);
 				}
 			}
 			g_engine->m_plugin_files.erase(file.first);
@@ -311,8 +283,8 @@ namespace ml
 
 	int32_t engine::do_string(int32_t lang, pmr::string const & text)
 	{
-		if (!is_initialized() || text.empty()) { return 0; }
-		
+		if (!is_initialized() || text.empty())
+			return 0;
 		switch (lang)
 		{
 		case embed::api::lua:
@@ -329,8 +301,8 @@ namespace ml
 
 	int32_t engine::do_file(filesystem::path const & path)
 	{
-		if (!is_initialized() || !filesystem::exists(path)) { return 0; }
-
+		if (!is_initialized() || !filesystem::exists(path))
+			return 0;
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
 		{
 		case embed::api::lua:

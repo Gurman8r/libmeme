@@ -2,7 +2,7 @@
 
 #include <libmeme/Config.hpp>
 
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 
 #include <Windows.h>
 

@@ -80,13 +80,10 @@ namespace ml::embed
 
 		bool set_flag(int32_t i, bool b) noexcept
 		{
-			if (get_flag(i) != b)
-			{
-				m_flags = b ? (m_flags | i) : (m_flags & ~i);
-				on_flag(i, b);
-				return true;
-			}
-			return false;
+			if (get_flag(i) == b) { return false; }
+			m_flags = b ? (m_flags | i) : (m_flags & ~i);
+			on_flag(i, b);
+			return true;
 		}
 
 		void set_enabled(bool b) noexcept { set_flag(scriptable_flags_enabled, b); }

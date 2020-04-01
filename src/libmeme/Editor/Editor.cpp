@@ -17,9 +17,9 @@ namespace ml
 	class editor::context final : trackable, non_copyable
 	{
 		friend class		editor						;
-		editor::config		m_config		{}			; // startup variables
-		editor::runtime		m_io			{}			; // runtime variables
-		void *				m_imgui_context	{}			; // current imgui context
+		editor::config		m_config		{}			; // public startup variables
+		editor::runtime		m_runtime		{}			; // public runtime variables
+		void *				m_imgui			{}			; // active imgui context
 	};
 
 	static editor::context * g_editor{};
@@ -67,21 +67,21 @@ namespace ml
 
 	editor::config & editor::get_config() noexcept
 	{
-		ML_assert(g_editor);
-		return g_editor->m_config;
+		ML_assert(is_initialized());
+		return (*g_editor).m_config;
 	}
 
 	editor::runtime & editor::get_runtime() noexcept
 	{
-		ML_assert(g_editor);
-		return g_editor->m_io;
+		ML_assert(is_initialized());
+		return (*g_editor).m_runtime;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	bool editor::startup()
 	{
-		if (!g_editor) return false;
+		if (!is_initialized()) { return false; }
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
@@ -93,7 +93,7 @@ namespace ml
 
 		// create context
 		IMGUI_CHECKVERSION();
-		g_editor->m_imgui_context = ImGui::CreateContext();
+		g_editor->m_imgui = ImGui::CreateContext();
 
 		auto & im_io{ ImGui::GetIO() };
 		auto & im_style{ ImGui::GetStyle() };
@@ -128,9 +128,9 @@ namespace ml
 
 	bool editor::shutdown()
 	{
-		if (!g_editor) return false;
+		if (!is_initialized()) { return false; }
 
-		g_editor->m_io.main_menus.clear();
+		g_editor->m_runtime.main_menus.clear();
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -163,7 +163,7 @@ namespace ml
 		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
 		// DOCKSPACE
-		if (auto & io{ g_editor->m_io }; io.show_dockspace)
+		if (auto & io{ g_editor->m_runtime }; io.show_dockspace)
 		{
 			ML_ImGui_ScopeID(dockspace_title);
 			
@@ -214,7 +214,7 @@ namespace ml
 		}
 
 		// MAIN MENU
-		if (auto & io{ g_editor->m_io }; io.show_main_menu)
+		if (auto & io{ g_editor->m_runtime }; io.show_main_menu)
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
@@ -276,7 +276,7 @@ namespace ml
 
 	void editor::add_menu(cstring label, menu_t && fn)
 	{
-		auto & menus{ g_editor->m_io.main_menus };
+		auto & menus{ g_editor->m_runtime.main_menus };
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto elem)
 		{
 			return (elem.first == label);
@@ -331,7 +331,7 @@ namespace ml
 
 	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
-		return g_editor->m_io.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
+		return (*g_editor).m_runtime.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
 	}
 
 	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)

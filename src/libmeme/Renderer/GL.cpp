@@ -10,7 +10,7 @@
 #if defined(ML_OPENGL_ES2)
 #	include <GLES2/gl2.h>
 #elif defined(ML_OPENGL_ES3)
-#	if defined(ML_OS_APPLE && (TARGET_OS_IOS || TARGET_OS_TV))
+#	if defined(ML_os_apple && (TARGET_OS_IOS || TARGET_OS_TV))
 #		include <OpenGLES/ES3/gl.h>
 #	else
 #		include <GLES3/gl3.h>
@@ -141,12 +141,12 @@ namespace ml
 
 		if (!shadersAvailable())
 		{
-			debug::log::error("Shaders are not temp on your system.");
+			debug::log::error("Shaders are not available on your system.");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			debug::log::error("Geometry shaders are not temp on your system.");
+			debug::log::error("Geometry shaders are not available on your system.");
 		}
 
 		if (!framebuffersAvailable())
@@ -204,14 +204,14 @@ namespace ml
 
 	auto GL::getString(uint32_t name) -> cstring
 	{
-		cstring temp{ nullptr };
+		cstring temp{};
 		glCheck(temp = reinterpret_cast<cstring>(glGetString(name)));
 		return temp;
 	}
 
 	auto GL::getString(uint32_t name, uint32_t index) -> cstring
 	{
-		cstring temp{ nullptr };
+		cstring temp{};
 		glCheck(temp = reinterpret_cast<cstring>(glGetStringi(name, index)));
 		return temp;
 	}
@@ -421,7 +421,7 @@ namespace ml
 
 	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
 	{
-#ifdef ML_CC_MSVC
+#ifdef ML_CC_msvc
 #	pragma warning(push)
 #	pragma warning(disable: 4312) // conversion from 'type1' to 'type2' of greater size
 #	pragma warning(disable: 26451)
@@ -435,7 +435,7 @@ namespace ml
 			// causes a warning in 64-bit
 			reinterpret_cast<void *>(offset * width)
 		);
-#ifdef ML_CC_MSVC
+#ifdef ML_CC_msvc
 #	pragma warning(pop)
 #endif
 	}
@@ -478,7 +478,7 @@ namespace ml
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -490,7 +490,7 @@ namespace ml
 		static int32_t temp{ 0 };
 		if (is_init())
 		{
-			ML_ONCE_CALL {
+			ML_once_call {
 				temp = getInteger(GL::MaxCombTexImgUnits);
 			}
 		}
@@ -502,7 +502,7 @@ namespace ml
 		static uint32_t temp{ 0 };
 		if (is_init())
 		{
-			ML_ONCE_CALL {
+			ML_once_call {
 				temp = (uint32_t)getInteger(GL::MaxTextureSize);
 			}
 		}
@@ -519,7 +519,7 @@ namespace ml
 		static bool temp{ false };
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -530,7 +530,7 @@ namespace ml
 	{
 		static bool temp{ false };
 #ifdef GL_EXT_texture_sRGB
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -619,7 +619,7 @@ namespace ml
 		static bool temp{ false };
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -737,7 +737,7 @@ namespace ml
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -748,7 +748,7 @@ namespace ml
 	{
 		static bool temp{ shadersAvailable() };
 #if defined(GL_ARB_geometry_shader4)
-		ML_ONCE_CALL {
+		ML_once_call {
 			temp = true;
 		}
 #endif
@@ -889,7 +889,7 @@ namespace ml
 
 	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source) -> int32_t
 	{
-		cstring log{ nullptr };
+		cstring log{};
 		return compileShader(obj, type, count, source, log);
 	}
 

@@ -122,7 +122,7 @@ namespace ml
 		static constexpr auto value{ nameof<>::filter_type(pretty_function::type<T>()) };
 	};
 
-#ifdef ML_CC_MSVC
+#ifdef ML_CC_msvc
 	template <> struct nameof<int64_t> final
 	{
 		static constexpr auto value{ "long long"sv }; // __int64

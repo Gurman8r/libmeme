@@ -14,9 +14,9 @@
 #define ML_MSG_LOG "info"
 
 // breakpoint
-#if (!ML_IS_DEBUG)
+#if (!ML_is_debug)
 #	define ML_breakpoint() ((void)0)
-#elif defined(ML_CC_MSVC)
+#elif defined(ML_CC_msvc)
 #	define ML_breakpoint() _CSTD __debugbreak()
 #else
 #	define ML_breakpoint() _CSTD raise(SIGTRAP)
@@ -32,8 +32,8 @@ namespace ml
 
 		inline int32_t clear(int32_t const exit_code = 0)
 		{
-#if ML_IS_DEBUG
-#	ifdef ML_OS_WINDOWS
+#if ML_is_debug
+#	ifdef ML_os_windows
 			return std::system("cls");
 #	else
 			return std::system("clear");
@@ -49,8 +49,8 @@ namespace ml
 
 		inline int32_t pause(int32_t const exit_code = 0)
 		{
-#if ML_IS_DEBUG
-#	ifdef ML_OS_WINDOWS
+#if ML_is_debug
+#	ifdef ML_os_windows
 			std::system("pause");
 #	else
 			std::cin.get();

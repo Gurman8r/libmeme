@@ -251,7 +251,7 @@ namespace ml
 
 		// create
 		{
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 
 			GL::texImage2D(
 				m_sampler,
@@ -336,7 +336,7 @@ namespace ml
 
 		// update
 		{
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 
 			GL::texSubImage2D(
 				m_sampler,
@@ -368,7 +368,7 @@ namespace ml
 				? (m_flags | texture_flags_mipmapped)
 				: (m_flags & ~texture_flags_mipmapped);
 
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 
 			impl::set_mipmapped(value, m_sampler, is_smooth());
 		}
@@ -385,7 +385,7 @@ namespace ml
 				? (m_flags | texture_flags_repeated)
 				: (m_flags & ~texture_flags_repeated);
 
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 
 			impl::set_repeated(value, m_sampler);
 		}
@@ -402,7 +402,7 @@ namespace ml
 				? (m_flags | texture_flags_smooth)
 				: (m_flags & ~texture_flags_smooth);
 
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 
 			impl::set_smooth(value, m_sampler, is_mipmapped());
 		}
@@ -428,7 +428,7 @@ namespace ml
 		auto temp{ make_image(size(), channels()) };
 		if (m_handle)
 		{
-			ML_BIND_SCOPE((*this));
+			ML_bind_scope((*this));
 			
 			GL::getTexImage(
 				GL::Texture2D,

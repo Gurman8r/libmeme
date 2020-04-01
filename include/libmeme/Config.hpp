@@ -1,344 +1,423 @@
 #ifndef _ML_CONFIG_HPP_
 #define _ML_CONFIG_HPP_
 
-// Project Information
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML__AUTHOR  "Melody Gurman"
-#define ML__NAME    "libmeme"
-#define ML__VERSION 0
-#define ML__URL     "https://www.github.com/Gurman8r/libmeme"
-#define ML__DATE    __DATE__
-#define ML__TIME    __TIME__
+// PROJECT
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#define ML__author              "Melody Gurman"
+#define ML__name                "libmeme"
+#define ML__version             0
+#define ML__url                 "https://www.github.com/Gurman8r/libmeme"
+#define ML__date                __DATE__
+#define ML__time                __TIME__
 
 
-// Language
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// LANGUAGE
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* * * * * * * * * * * * * * * * CXX */
 #if defined(__cplusplus)
-#	if defined(_MSVC_LANG)
-#		define ML_LANG _MSVC_LANG
-#	else
-#		define ML_LANG __cplusplus
-#	endif
-#	if (ML_LANG >= 201907L)     // C++20
-#		define ML_HAS_CXX20 1
-#       define ML_HAS_CXX17 1
-#       define ML_HAS_CXX14 1
-#       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201703L)   // C++17
-#		define ML_HAS_CXX20 0
-#		define ML_HAS_CXX17 1
-#       define ML_HAS_CXX14 1
-#       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201402L)   // C++14
-#		define ML_HAS_CXX20 0
-#		define ML_HAS_CXX17 0
-#       define ML_HAS_CXX14 1
-#       define ML_HAS_CXX11 1
-#   elif (ML_LANG >= 201103L)   // C++11
-#		define ML_HAS_CXX20 0
-#		define ML_HAS_CXX17 0
-#       define ML_HAS_CXX14 0
-#       define ML_HAS_CXX11 1
-#	endif
+#   if defined(_MSVC_LANG)
+#       define ML_cxx           _MSVC_LANG
+#   else
+#       define ML_cxx           __cplusplus
+#   endif
+
+/* * * * * * * * * * * * * * * * C++20 */
+#   if (ML_cxx >= 201907L)
+#       define ML_has_cxx20     1
+#       define ML_has_cxx17     1
+#       define ML_has_cxx14     1
+#       define ML_has_cxx11     1
+
+/* * * * * * * * * * * * * * * * C++17 */
+#   elif (ML_cxx >= 201703L)
+#       define ML_has_cxx20     0
+#       define ML_has_cxx17     1
+#       define ML_has_cxx14     1
+#       define ML_has_cxx11     1
+
+/* * * * * * * * * * * * * * * * C++14 */
+#   elif (ML_cxx >= 201402L)
+#       define ML_has_cxx20     0
+#       define ML_has_cxx17     0
+#       define ML_has_cxx14     1
+#       define ML_has_cxx11     1
+
+/* * * * * * * * * * * * * * * * C++11 */
+#   elif (ML_cxx >= 201103L)
+#       define ML_has_cxx20     0
+#       define ML_has_cxx17     0
+#       define ML_has_cxx14     0
+#       define ML_has_cxx11     1
+
+/* * * * * * * * * * * * * * * * Unknown C++ */
+#   else
+#       error This version of C++ is not supported.
+#   endif
+
+/* * * * * * * * * * * * * * * * C++ Unsupported */
 #else
-#	error This system does not support C++.
+#   error This system does not support C++.
 #endif
 
 
-// Operating System
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#if defined(_WIN32) || defined(_WIN64) \
-  || defined(WIN32) || defined(WIN64) \
-  || defined(__MINGW32__) || defined(__MINGW64__)
-#	define ML_OS_WINDOWS 1
-#	define ML_OS_NAME "Windows"
+// OPERATING SYSTEM
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* * * * * * * * * * * * * * * * Windows */
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
+#   define ML_os_windows        1
+#   define ML_os_name           "Windows"
+
+/* * * * * * * * * * * * * * * * Apple */
 #elif defined(__APPLE__) && defined(__MACH__)
-#	define ML_OS_APPLE 1
-#	define ML_OS_NAME "Apple"
+#   define ML_os_apple          1
+#   define ML_os_name           "Apple"
+
+/* * * * * * * * * * * * * * * * Unix */
 #elif defined(__unix__)
-#	define ML_OS_UNIX 1
-#	if defined(__ANDROID__)
-#		define ML_OS_ANDROID 1
-#		define ML_OS_NAME "Android"
-#	elif defined(__linux__)
-#		define ML_OS_LINUX 1
-#		define ML_OS_NAME "Linux"
-#	elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-#		define ML_OS_FREEBSD 1
-#		define ML_OS_NAME "FreeBSD"
+
+/* * * * * * * * * * * * * * * * Android */
+#   if defined(__ANDROID__)
+#       define ML_os_android    1
+#       define ML_os_unix		ML_os_android
+#       define ML_os_name       "Android"
+
+/* * * * * * * * * * * * * * * * Linux */
+#   elif defined(__linux__)
+#       define ML_os_linux      2
+#       define ML_os_unix		ML_os_linux
+#       define ML_os_name       "Linux"
+
+/* * * * * * * * * * * * * * * * FreeBSD */
+#   elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#       define ML_OS_FREEBSD    3
+#       define ML_os_unix		ML_OS_FREEBSD
+#       define ML_os_name       "FreeBSD"
+
+/* * * * * * * * * * * * * * * * Unknown Unix */
 #   else
 #       error This Unix system is not supported.
-#	endif
+#   endif
+
+/* * * * * * * * * * * * * * * * Unknown Operating System */
 #else
-#	error This system is not supported.
+#   error This operating system is not supported.
 #endif
 
 
-// Architecture
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// ARCHITECTURE
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* * * * * * * * * * * * * * * * x64 */
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
-#	define ML_X64 1
-#	define ML_ARCH 64
-#	define ML_PLATFORM "x64"
+#   define ML_X64               1
+#   define ML_arch              64
+#   define ML_platform          "x64"
+
+/* * * * * * * * * * * * * * * * x86 */
 #elif defined(__i386__) || defined(_M_IX86)
-#	define ML_X86 1
-#	define ML_ARCH 32
-#	define ML_PLATFORM "x86"
+#   define ML_X86               1
+#   define ML_arch              32
+#   define ML_platform          "x86"
+
+/* * * * * * * * * * * * * * * * ARM */
 #elif defined(__arm__) || defined(_M_ARM) || defined(__aarch64__)
-#	if defined(__aarch64__)
-#		define ML_ARM64 1
-#		define ML_ARCH 64
-#		define ML_PLATFORM "arm64"
-#	else
-#		define ML_ARM32 1
-#		define ML_ARCH 32
-#		define ML_PLATFORM "arm32"
-#	endif
+#   if defined(__aarch64__)
+#       define ML_ARM64         1
+#       define ML_arch          64
+#       define ML_platform      "arm64"
+#   else
+#       define ML_ARM32         1
+#       define ML_arch          32
+#       define ML_platform      "arm32"
+#   endif
+
+/* * * * * * * * * * * * * * * * PowerPC */
 #elif defined(ppc) || defined(_M_PPC) || defined(__ppc64__)
-#	if defined(__ppc64__)
-#		define ML_PPC64 1
-#		define ML_ARCH 64
-#		define ML_PLATFORM "ppc64"
-#	else
-#		define ML_PPC32 1
-#		define ML_ARCH 32
-#		define ML_PLATFORM "ppc32"
-#	endif
+#   if defined(__ppc64__)
+#       define ML_PPC64         1
+#       define ML_arch          64
+#       define ML_platform      "ppc64"
+#   else
+#       define ML_PPC32         1
+#       define ML_arch          32
+#       define ML_platform      "ppc32"
+#   endif
+
+/* * * * * * * * * * * * * * * * Unknown Architecture */
 #else
-#	error Unable to detect platform architecture.
+#   error Unable to detect platform architecture.
 #endif
 
 
-// Compiler
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// COMPILER
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* * * * * * * * * * * * * * * * Visual Studio */
 #if defined(_MSC_VER)
-//  Visual Studio
-#	define ML_CC_MSVC _MSC_VER
-#	define ML_CC_VER ML_CC_MSVC
-#	if (ML_CC_VER >= 1920)
-#	    define ML_CC_NAME "Visual Studio 2019"
-#	elif (ML_CC_VER >= 1910)
-#	    define ML_CC_NAME "Visual Studio 2017"
-#	elif (ML_CC_VER >= 1900)
-#	    define ML_CC_NAME "Visual Studio 2015"
-#	elif (ML_CC_VER >= 1800)
-#	    define ML_CC_NAME "Visual Studio 2013"
-#	else
-#		error This version of Visual Studio is not supported.
-#	endif
+#   define ML_CC_msvc           _MSC_VER
+#   define ML_CC_version        ML_CC_msvc
+#   if (ML_CC_version >= 1920)
+#       define ML_CC_name       "Visual Studio 2019"
+#   elif (ML_CC_version >= 1910)
+#       define ML_CC_name       "Visual Studio 2017"
+#   elif (ML_CC_version >= 1900)
+#       define ML_CC_name       "Visual Studio 2015"
+#   elif (ML_CC_version >= 1800)
+#       define ML_CC_name       "Visual Studio 2013"
+#   else
+#       error This version of Visual Studio is not supported.
+#   endif
+
+/* * * * * * * * * * * * * * * * Clang / LLVM */
 #elif defined(__clang__)
-//  Clang/LLVM
-#	define ML_CC_CLANG __clang__
-#	define ML_CC_VER ML_CC_CLANG
-#	define ML_CC_NAME "Clang/LLVM"
+#   define ML_CC_clang          __clang__
+#   define ML_CC_version        ML_CC_clang
+#   define ML_CC_name           "Clang/LLVM"
+
+/* * * * * * * * * * * * * * * * GCC */
 #elif (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
-//  GCC
-#	if defined(__GNUC__)
-#		define ML_CC_GCC __GNUC__
-#	else
-#		define ML_CC_GCC __GNUG__
-#	endif
-#	define ML_CC_VER ML_CC_GCC
-#	define ML_CC_NAME "GCC"
+#   if defined(__GNUC__)
+#       define ML_CC_gcc        __GNUC__
+#   else
+#       define ML_CC_gcc        __GNUG__
+#   endif
+#   define ML_CC_version        ML_CC_gcc
+#   define ML_CC_name           "GCC"
+
+/* * * * * * * * * * * * * * * * Intel */
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
-//  Intel
-#	if defined(__ICC)
-#		define ML_CC_INTEL __ICC
-#	else
-#		define ML_CC_INTEL __INTEL_COMPILER
-#	endif
-#	define ML_CC_VER ML_CC_INTEL
-#	define ML_CC_NAME "Intel"
+#   if defined(__ICC)
+#       define ML_CC_intel      __ICC
+#   else
+#       define ML_CC_intel      __INTEL_COMPILER
+#   endif
+#   define ML_CC_version        ML_CC_intel
+#   define ML_CC_name           "Intel"
+
+/* * * * * * * * * * * * * * * * MinGW */
 #elif defined(__MINGW32__) || defined(__MINGW64__)
-//  MinGW
-#	if defined(__MINGW64__)
-#		define ML_CC_MINGW __MINGW64__
-#	else
-#		define ML_CC_MINGW __MINGW32__
-#	endif
-#	define ML_CC_VER ML_CC_MINGW
-#	define ML_CC_NAME "MinGW"
+#   if defined(__MINGW64__)
+#       define ML_CC_mingw      __MINGW64__
+#   else
+#       define ML_CC_mingw      __MINGW32__
+#   endif
+#   define ML_CC_version        ML_CC_mingw
+#   define ML_CC_name           "MinGW"
+
+/* * * * * * * * * * * * * * * * Emscripten */
 #elif defined(__EMSCRIPTEN__)
-//  Emscripten
-#	define ML_CC_EMSCRIPTEN
-#	define ML_CC_VER ML_CC_EMSCRIPTEN
-#	define ML_CC_NAME "Emscripten"
+#   define ML_CC_emscripten     __EMSCRIPTEN__
+#   define ML_CC_version        ML_CC_emscripten
+#   define ML_CC_name           "Emscripten"
+
+/* * * * * * * * * * * * * * * * asm.js */
 #elif defined(__asmjs__)
-//  asm.js
-#	define ML_CC_ASMJS
-#	define ML_CC_VER ML_CC_ASMJS
-#	define ML_CC_NAME "asm.js"
+#   define ML_CC_asmjs          __asmjs__
+#   define ML_CC_version        ML_CC_asmjs
+#   define ML_CC_name           "asm.js"
+
+/* * * * * * * * * * * * * * * * WebAssembly */
 #elif defined(__wasm__)
-//  WebAssembly
-#	define ML_CC_WASM
-#	define ML_CC_VER ML_CC_WASM
-#	define ML_CC_NAME "WebAssembly"
+#   define ML_CC_wasm           __wasm__
+#   define ML_CC_version        ML_CC_wasm
+#   define ML_CC_name           "WebAssembly"
+
+/* * * * * * * * * * * * * * * * Unknown Compiler */
 #else
-#	error This compiler is not supported.
+#   error This compiler is not supported.
 #endif
 
 
-// Types
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// TYPES
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// integer
-#if defined(ML_CC_MSVC)
-#	define	ML_INT8             signed __int8
-#	define	ML_INT16            signed __int16
-#	define	ML_INT32            signed __int32
-#	define	ML_INT64            signed __int64
-#	define	ML_UINT8            unsigned __int8
-#	define	ML_UINT16           unsigned __int16
-#	define	ML_UINT32           unsigned __int32
-#	define	ML_UINT64           unsigned __int64
+// integers
+#if defined(ML_CC_msvc)
+#   define  ML_int8             signed __int8
+#   define  ML_int16            signed __int16
+#   define  ML_int32            signed __int32
+#   define  ML_int64            signed __int64
+#   define  ML_uint8            unsigned __int8
+#   define  ML_uint16           unsigned __int16
+#   define  ML_uint32           unsigned __int32
+#   define  ML_uint64           unsigned __int64
 #else
-#	define	ML_INT8             signed char
-#	define	ML_INT16            signed short
-#	define	ML_INT32            signed int
-#	define	ML_INT64            signed long long
-#	define	ML_UINT8            unsigned char
-#	define	ML_UINT16           unsigned short
-#	define	ML_UINT32           unsigned int
-#	define	ML_UINT64           unsigned long long
-#endif
-#define	ML_FLOAT32              float
-#define	ML_FLOAT64              double
-#define	ML_FLOAT80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
-
-#ifndef ML_BYTE
-#   define ML_BYTE              unsigned char
+#   define  ML_int8             signed char
+#   define  ML_int16            signed short
+#   define  ML_int32            signed int
+#   define  ML_int64            signed long long
+#   define  ML_uint8            unsigned char
+#   define  ML_uint16           unsigned short
+#   define  ML_uint32           unsigned int
+#   define  ML_uint64           unsigned long long
 #endif
 
-#if !ML_HAS_CXX20
-#   define ML_CHAR              char
+// floating
+#define ML_float32              float
+#define ML_float64              double
+#define ML_float80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
+
+// char
+#ifndef ML_char
+#   if !ML_has_cxx20
+#       define ML_char          char
+#   else
+#       define ML_char          char8_t
+#   endif
+#endif
+
+// byte
+#ifndef ML_byte
+#   define ML_byte              unsigned ML_char
+#endif
+
+// intmax
+#if (ML_arch == 32)
+#   define ML_intmax            ML_int32
+#   define ML_uintmax           ML_uint32
 #else
-#   define ML_CHAR              char8_t
+#   define ML_intmax            ML_int64
+#   define ML_uintmax           ML_uint64
 #endif
 
-#if (ML_ARCH == 32)
-#	define ML_INTMAX            ML_INT32
-#	define ML_UINTMAX           ML_UINT32
-#else
-#	define ML_INTMAX            ML_INT64
-#	define ML_UINTMAX           ML_UINT64
+// ulong
+#ifndef ML_ulong
+#   define ML_ulong             unsigned long
 #endif
 
 
-// Debug
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// GENERAL
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// debug
 #if defined(_DEBUG)
-#	define ML_IS_DEBUG          true
-#   define ML_CONFIGURATION     "debug"
+#   define ML_is_debug          true
+#   define ML_configuration     "debug"
 #else
-#	define ML_IS_DEBUG          false
-#   define ML_CONFIGURATION     "release"
+#   define ML_is_debug          false
+#   define ML_configuration     "release"
 #endif
 
-
-// Namespace
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// namespace
 #define _ML                     ::ml::
 #define _ML_BEGIN               namespace ml {
 #define _ML_END                 }
 
+// alias
+#define ML_alias                using
 
-// Alias
+// exceptions
+#define ML_throw                throw
+#define ML_catch                catch
+#define ML_try                  try
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_ALIAS                using
-
-
-// Exceptions
+// PREPROCESSOR
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_THROW                throw
-#define ML_CATCH                catch
-#define ML_TRY                  try
 
+// concat
+#define ML_impl_concat(a, b)    a##b
+#define ML_concat(a, b)         ML_impl_concat(a, b)
 
-// Preprocessor
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#define ML_CONCAT_IMPL(a, b)    a##b
-#define ML_CONCAT(a, b)         ML_CONCAT_IMPL(a, b)
-#define ML_TOSTRING(str)        #str
-#define ML_STRINGIFY(str)       ML_TOSTRING(str)
+// to string
+#define ML_to_string(str)       #str
 
+// stringify
+#define ML_stringify(str)       ML_to_string(str)
 
-// Anonymous Variables
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// anon
 #if defined(__COUNTER__)
-#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __COUNTER__)))
+#	define ML_anon(expr)        ML_concat(_ML_, ML_concat(expr, ML_concat(_, __COUNTER__)))
 #elif defined(__LINE__)
-#	define ML_ANONYMOUS(expr)   ML_CONCAT(_ML_, ML_CONCAT(expr, ML_CONCAT(_, __LINE__)))
+#	define ML_anon(expr)        ML_concat(_ML_, ML_concat(expr, ML_concat(_, __LINE__)))
+#else
+#   define ML_anon(expr)        expr
 #endif
 
-#define ML_IMPL_ONCE(once)      static bool once{ false }; if (!once && (once = true))
-#define ML_ONCE_CALL            ML_IMPL_ONCE(ML_ANONYMOUS(once))
+// once call
+#define ML_impl_once_call(cond) static bool cond{}; if (!cond && (cond = true))
+#define ML_once_call            ML_impl_once_call(ML_anon(var))
 
 
-// Attributes
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// ATTRIBUTES
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // nodiscard
 #if __has_cpp_attribute(nodiscard) >= 201603L
-#   define ML_NODISCARD [[nodiscard]]
+#   define ML_NODISCARD         [[nodiscard]]
 #else
 #   define ML_NODISCARD
 #endif
 
 // likely
 #if __has_cpp_attribute(likely) >= 201907L
-#   define ML_LIKELY(...) (##__VA_ARGS__) [[likely]]
+#   define ML_LIKELY(...)       (##__VA_ARGS__) [[likely]]
 #else
-#   define ML_LIKELY(...) (##__VA_ARGS__)
+#   define ML_LIKELY(...)       (##__VA_ARGS__)
 #endif
 
 // unlikely
 #if __has_cpp_attribute(unlikely) >= 201907L
-#   define ML_UNLIKELY(...) (##__VA_ARGS__) [[unlikely]]
+#   define ML_UNLIKELY(...)     (##__VA_ARGS__) [[unlikely]]
 #else
-#   define ML_UNLIKELY(...) (##__VA_ARGS__)
+#   define ML_UNLIKELY(...)     (##__VA_ARGS__)
 #endif
 
-// inline
-#ifdef ML_CC_MSVC
-#	define ML_ALWAYS_INLINE __forceinline
-#	define ML_NEVER_INLINE  __declspec(noinline)
-#elif defined(ML_CC_GCC) || defined(ML_CC_CLANG)
-#	define ML_ALWAYS_INLINE inline __attribute__((always_inline))
-#	define ML_NEVER_INLINE  __attribute__ ((noinline))
+// inlining
+#ifdef ML_CC_msvc
+#   define ML_ALWAYS_INLINE     __forceinline
+#   define ML_NEVER_INLINE      __declspec(noinline)
+
+#elif defined(ML_CC_gcc) || defined(ML_CC_clang)
+#   define ML_ALWAYS_INLINE     inline __attribute__((always_inline))
+#   define ML_NEVER_INLINE      __attribute__ ((noinline))
 #else
-#	define ML_ALWAYS_INLINE
-#	define ML_NEVER_INLINE
+#   define ML_ALWAYS_INLINE
+#   define ML_NEVER_INLINE
 #endif
 
 // visibility
-#ifdef ML_CC_MSVC
-#	define ML_API_EXPORT __declspec(dllexport)
-#	define ML_API_IMPORT __declspec(dllimport)
-#elif (defined(ML_CC_CLANG) || defined(ML_CC_GCC)) && (ML_CC_VER >= 4)
-#	define ML_API_EXPORT __attribute__ ((visibility ("default")))
-#	define ML_API_IMPORT __attribute__ ((visibility ("hidden")))
+#ifdef ML_CC_msvc
+#   define ML_API_EXPORT        __declspec(dllexport)
+#   define ML_API_IMPORT        __declspec(dllimport)
+#elif (defined(ML_CC_clang) || defined(ML_CC_gcc)) && (ML_CC_version >= 4)
+#   define ML_API_EXPORT        __attribute__ ((visibility ("default")))
+#   define ML_API_IMPORT        __attribute__ ((visibility ("hidden")))
 #else
 #   define ML_API_EXPORT
 #   define ML_API_IMPORT
 #endif
 
 
-// Disable Compiler Warnings
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifdef ML_CC_MSVC
-#	pragma warning(disable: 4031)	// second formal parameter list longer than the first list
-#	pragma warning(disable: 4067)	// unexpected tokens following preprocessor directive - expected a newline
-#	pragma warning(disable: 4251)	// type1 needs to have dll-interface to be used by type2
-#	pragma warning(disable: 4307)	// integral constant overflow
-#	pragma warning(disable: 4308)	// negative integral constant converted to unsigned type
-#	pragma warning(disable: 4309)	// truncation of constant value
-#	pragma warning(disable: 4723)	// potential divide by zero
-#	pragma warning(disable: 6282)	// incorrect operator
-#	pragma warning(disable: 26437)	// do not slice
-#	pragma warning(disable: 26444)	// avoid unnamed objecs with custom construction and destruction
-#	pragma warning(disable: 26451)	// arithmetic overflow
-#	pragma warning(disable: 26495)	// value may be uninitialized
-#	pragma warning(disable: 26812)	// unscoped enum
+// WARNINGS
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#ifdef ML_CC_msvc
+#   pragma warning(disable: 4031)   // second formal parameter list longer than the first list
+#   pragma warning(disable: 4067)   // unexpected tokens following preprocessor directive - expected a newline
+#   pragma warning(disable: 4251)   // type1 needs to have dll-interface to be used by type2
+#   pragma warning(disable: 4307)   // integral constant overflow
+#   pragma warning(disable: 4308)   // negative integral constant converted to unsigned type
+#   pragma warning(disable: 4309)   // truncation of constant value
+#   pragma warning(disable: 4723)   // potential divide by zero
+#   pragma warning(disable: 6282)   // incorrect operator
+#   pragma warning(disable: 26437)  // do not slice
+#   pragma warning(disable: 26444)  // avoid unnamed objecs with custom construction and destruction
+#   pragma warning(disable: 26451)  // arithmetic overflow
+#   pragma warning(disable: 26495)  // value may be uninitialized
+#   pragma warning(disable: 26812)  // unscoped enum
 #else
 #endif
 

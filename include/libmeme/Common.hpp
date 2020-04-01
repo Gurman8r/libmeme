@@ -7,7 +7,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if (ML_HAS_CXX11 && ML_HAS_CXX14)
+#if (ML_has_cxx11 && ML_has_cxx14)
 #	include <cassert>
 #	include <chrono>
 #	include <cstdarg>
@@ -21,7 +21,7 @@
 #	include <vector>
 #endif
 
-#if ML_HAS_CXX17
+#if ML_has_cxx17
 #	include <any>
 #	include <filesystem>
 #	include <memory_resource>
@@ -30,7 +30,7 @@
 #	include <variant>
 #endif
 
-#if ML_HAS_CXX20
+#if ML_has_cxx20
 #	include <compare>
 #	include <concepts>
 #	include <format>
@@ -52,7 +52,7 @@
 #define ML_wenvp	_wenviron
 
 // utils
-#define ML_addressof(ptr)	((void *)(ML_INTMAX)ptr)
+#define ML_addressof(ptr)	((void *)(ML_intmax)ptr)
 #define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
 #define ML_forward(value)	std::forward<decltype(value)>(value)
 #define ML_deserialize		std::istream & operator >>
@@ -64,43 +64,44 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_ALIAS	int8_t		= typename ML_INT8;
-	ML_ALIAS	int16_t		= typename ML_INT16;
-	ML_ALIAS	int32_t		= typename ML_INT32;
-	ML_ALIAS	int64_t		= typename ML_INT64;
+	ML_alias	int8_t		= typename ML_int8;
+	ML_alias	int16_t		= typename ML_int16;
+	ML_alias	int32_t		= typename ML_int32;
+	ML_alias	int64_t		= typename ML_int64;
 
-	ML_ALIAS	uint8_t		= typename ML_UINT8;
-	ML_ALIAS	uint16_t	= typename ML_UINT16;
-	ML_ALIAS	uint32_t	= typename ML_UINT32;
-	ML_ALIAS	uint64_t	= typename ML_UINT64;
+	ML_alias	uint8_t		= typename ML_uint8;
+	ML_alias	uint16_t	= typename ML_uint16;
+	ML_alias	uint32_t	= typename ML_uint32;
+	ML_alias	uint64_t	= typename ML_uint64;
 
-	ML_ALIAS	byte_t		= typename ML_BYTE;
-	ML_ALIAS	intmax_t	= typename ML_INTMAX;
-	ML_ALIAS	uintmax_t	= typename ML_UINTMAX;
+	ML_alias	byte_t		= typename ML_byte;
+	ML_alias	char_t		= typename ML_char;
+	ML_alias	intmax_t	= typename ML_intmax;
+	ML_alias	uintmax_t	= typename ML_uintmax;
+	ML_alias	ulong_t		= typename ML_ulong;
 
-	ML_ALIAS	float32_t	= typename ML_FLOAT32;
-	ML_ALIAS	float64_t	= typename ML_FLOAT64;
-	ML_ALIAS	float80_t	= typename ML_FLOAT80;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_ALIAS	float_t		= typename float32_t;
-	ML_ALIAS	hash_t		= typename uint64_t;
-	ML_ALIAS	intptr_t	= typename intmax_t;
-	ML_ALIAS	ptrdiff_t	= typename intmax_t;
-	ML_ALIAS	max_align_t = typename float64_t;
-	ML_ALIAS	size_t		= typename uintmax_t;
-	ML_ALIAS	ulong_t		= typename unsigned long;
+	ML_alias	float32_t	= typename ML_float32;
+	ML_alias	float64_t	= typename ML_float64;
+	ML_alias	float80_t	= typename ML_float80;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_ALIAS	cstring		= typename char const *;
-	ML_ALIAS	cwstring	= typename wchar_t const *;
-#if ML_HAS_CXX20
-	ML_ALIAS	c8string	= typename char8_t const *;
+	ML_alias	float_t		= typename float32_t;
+	ML_alias	hash_t		= typename uint64_t;
+	ML_alias	intptr_t	= typename intmax_t;
+	ML_alias	ptrdiff_t	= typename intmax_t;
+	ML_alias	max_align_t = typename float64_t;
+	ML_alias	size_t		= typename uintmax_t;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_alias	cstring		= typename char const *;
+	ML_alias	cwstring	= typename wchar_t const *;
+#if ML_has_cxx20
+	ML_alias	c8string	= typename char8_t const *;
 #endif
-	ML_ALIAS	c16string	= typename char16_t const *;
-	ML_ALIAS	c32string	= typename char32_t const *;
+	ML_alias	c16string	= typename char16_t const *;
+	ML_alias	c32string	= typename char32_t const *;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -108,7 +109,7 @@ namespace ml
 	namespace chrono		= _ML std::chrono;
 	namespace filesystem	= _ML std::filesystem;
 	namespace pmr			= _ML std::pmr;
-#if ML_HAS_CXX20
+#if ML_has_cxx20
 	namespace ranges		= _ML std::ranges;
 	namespace views			= _ML std::ranges::views;
 #endif

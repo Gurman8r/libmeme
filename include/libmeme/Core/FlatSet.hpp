@@ -546,7 +546,7 @@ namespace ml::ds
 		class	_Ty,					// value type
 		class	_Pr = std::less<_Ty>,	// comparator predicate type
 		size_t	_Th = 42				// algorithm selector threshold
-	> ML_ALIAS flat_set = typename basic_flat_set
+	> ML_alias flat_set = typename basic_flat_set
 	<
 		flat_set_traits<_Ty, _Pr, false, _Th>
 	>;
@@ -556,7 +556,7 @@ namespace ml::ds
 		class	_Ty,					// value type
 		class	_Pr = std::less<_Ty>,	// comparator predicate type
 		size_t	_Th = 42				// algorithm selector threshold
-	> ML_ALIAS flat_multiset = typename basic_flat_set
+	> ML_alias flat_multiset = typename basic_flat_set
 	<
 		flat_set_traits<_Ty, _Pr, true, _Th>
 	>;

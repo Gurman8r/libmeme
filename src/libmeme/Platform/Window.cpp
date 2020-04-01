@@ -8,7 +8,7 @@
 
 #include <glfw/glfw3.h>
 
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 #	undef APIENTRY
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
@@ -41,7 +41,7 @@ namespace ml
 		, m_share	{}
 		, m_settings{}
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		if (HWND window{ GetConsoleWindow() })
 		{
 			if (HMENU menu{ GetSystemMenu(window, false) })
@@ -54,7 +54,7 @@ namespace ml
 	
 	window::~window() noexcept
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		if (HWND window{ GetConsoleWindow() })
 		{
 			if (HMENU menu{ GetSystemMenu(window, false) })
@@ -449,7 +449,7 @@ namespace ml
 
 	void * window::get_raw_handle() const
 	{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 		return glfwGetWin32Window(static_cast<GLFWwindow *>(m_window));
 #else
 		return m_window;
@@ -525,7 +525,7 @@ namespace ml
 		static bool once { true };
 		if (once && !(once = false))
 		{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
 			temp = display_settings{ vec2i{
@@ -546,7 +546,7 @@ namespace ml
 		static bool once { true };
 		if (once && !(once = false))
 		{
-#ifdef ML_OS_WINDOWS
+#ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{

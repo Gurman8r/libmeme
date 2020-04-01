@@ -143,7 +143,7 @@ namespace ml
 
 		renderer_manager m_renderer{};
 
-		pmr::vector<renderer_manager::handle> m_handles;
+		pmr::vector<renderer_manager::handle> m_handles{};
 
 
 		// GUI
@@ -162,8 +162,6 @@ namespace ml
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None };
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		stream_sniper m_cout{ &std::cout };
 
 		vec2 m_display_size{};
@@ -171,19 +169,6 @@ namespace ml
 		gui::console m_console{};
 
 		MemoryEditor m_memory{};
-
-		inline auto highlight_memory(byte_t * ptr, size_t const size)
-		{
-			static auto * const testres{ memory_manager::get_testres() };
-			auto const addr{ std::distance(testres->begin(), ptr) };
-			m_gui_memory.set_focused();
-			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
-		}
-
-		template <class T> inline auto highlight_memory(T const * ptr)
-		{
-			highlight_memory((byte_t *)ptr, sizeof(T));
-		}
 
 		gui::plot_controller m_plots{
 		{
@@ -197,6 +182,19 @@ namespace ml
 			[]() { static auto const & fps{ engine::get_runtime().frame_rate }; return fps; }
 			),
 		} };
+
+		inline auto highlight_memory(byte_t * ptr, size_t const size)
+		{
+			static auto * const testres{ memory_manager::get_testres() };
+			auto const addr{ std::distance(testres->begin(), ptr) };
+			m_gui_memory.set_focused();
+			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
+		}
+
+		template <class T> inline auto highlight_memory(T const * ptr)
+		{
+			highlight_memory((byte_t *)ptr, sizeof(T));
+		}
 
 
 		// DEMO
@@ -450,7 +448,7 @@ namespace ml
 
 			if (render_texture const & target{ m_pipeline[0] })
 			{
-				ML_BIND_SCOPE(target);
+				ML_bind_scope(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
@@ -673,7 +671,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "lua";
-						ML_ONCE_CALL{ std::cout << "# type \'\\\' to exit\n"; };
+						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -690,7 +688,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_ONCE_CALL{ std::cout << "# type \'\\\' to exit\n"; };
+						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -742,7 +740,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor text;
-			ML_ONCE_CALL{
+			ML_once_call{
 				text.SetText("here");
 			};
 			text.Render("##docs##text");
@@ -951,98 +949,17 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void show_files_gui()
-		{ 
+		{
+			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
 				gui::help_marker("WIP");
 				ImGui::EndMenuBar();
 			}
 
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
-			ImGui::Columns(2);
-			ImGui::Separator();
-
-			struct funcs
-			{
-				static void show_entry(filesystem::directory_entry const & value)
-				{
-					auto const path{ value.path() };
-					if (path.empty()) return;
-					ML_ImGui_ScopeID((int32_t)util::hash(path.string()));
-
-					switch (value.status().type())
-					{
-					// DIRECTORY
-					case filesystem::file_type::directory:
-					{
-						ImGui::AlignTextToFramePadding();
-						ImGui::PushStyleColor(ImGuiCol_Text, { .0f, 1.f, 1.f, 1.f });
-						bool const dir_open
-						{
-							ImGui::TreeNode("directory", "%s", path.stem().string().c_str())
-						};
-						ImGui::PopStyleColor();
-						ImGui::NextColumn();
-						ImGui::AlignTextToFramePadding();
-						{
-							ImGui::Text("sample text");
-						}
-						ImGui::NextColumn();
-						if (dir_open)
-						{
-							render(path);
-							ImGui::TreePop();
-						}
-					} break;
-
-					// REGULAR
-					case filesystem::file_type::regular:
-					{
-						ImGui::AlignTextToFramePadding();
-						ImGui::PushStyleColor(ImGuiCol_Text, { 0.f, 1.f, 0.f, 1.f });
-						ImGui::TreeNodeEx(
-							"regular",
-							ImGuiTreeNodeFlags_Leaf |
-							ImGuiTreeNodeFlags_NoTreePushOnOpen |
-							ImGuiTreeNodeFlags_Bullet,
-							"%s",
-							path.filename().string().c_str()
-						);
-						ImGui::PopStyleColor();
-						ImGui::NextColumn();
-						ImGui::SetNextItemWidth(-1);
-						{
-							if (ImGui::Button("open")) {}
-							ImGui::SameLine();
-							if (ImGui::Button("edit")) {}
-						}
-						ImGui::NextColumn();
-					} break;
-					}
-				}
-
-				static void render(filesystem::path const & path)
-				{
-					if (!filesystem::is_directory(path)) { return; }
-
-					for (auto it : filesystem::directory_iterator{ path })
-					{
-						if (it.is_directory()) { show_entry(it); }
-					}
-
-					for (auto it : filesystem::directory_iterator{ path })
-					{
-						if (it.is_regular_file()) { show_entry(it); }
-					}
-				}
-			};
-
-			static auto path{ engine::path_to() };
-			funcs::render(path);
-
-			ImGui::Columns(1);
-			ImGui::Separator();
-			ImGui::PopStyleVar();
+			// file list
+			static gui::file_tree file_tree{ engine::path_to() };
+			file_tree.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1052,7 +969,7 @@ namespace ml
 			static auto * const testres{ memory_manager::get_testres() };
 
 			// setup memory editor
-			ML_ONCE_CALL{
+			ML_once_call{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
 				m_memory.Cols				= engine::get_window().has_hint(window_hints_maximized) ? 32 : 16;
@@ -1094,11 +1011,11 @@ namespace ml
 				{
 					auto const width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
-					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.50f);
+					ML_once_call ImGui::SetColumnWidth(-1, width * 0.50f);
 					ImGui::Text("address"); ImGui::NextColumn();
-					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.25f);
+					ML_once_call ImGui::SetColumnWidth(-1, width * 0.25f);
 					ImGui::Text("index"); ImGui::NextColumn();
-					ML_ONCE_CALL ImGui::SetColumnWidth(-1, width * 0.25f);
+					ML_once_call ImGui::SetColumnWidth(-1, width * 0.25f);
 					ImGui::Text("size"); ImGui::NextColumn();
 					ImGui::Separator();
 					for (auto const & rec : memory_manager::get_records().values())

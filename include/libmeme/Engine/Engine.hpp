@@ -55,9 +55,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static engine::config & get_config() noexcept;
+		ML_NODISCARD static config & get_config() noexcept;
 
-		ML_NODISCARD static engine::runtime & get_runtime() noexcept;
+		ML_NODISCARD static runtime & get_runtime() noexcept;
 
 		ML_NODISCARD static duration const & get_time() noexcept;
 
@@ -81,13 +81,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool is_running() noexcept;
+		ML_NODISCARD static bool is_running() noexcept
+		{
+			return is_initialized() && get_window().is_open();
+		}
 
-		static void close() noexcept;
+		static void close() noexcept
+		{
+			if (is_initialized())
+			{
+				get_window().close();
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static filesystem::path path_to(filesystem::path const & value = {});
+		ML_NODISCARD static filesystem::path path_to(filesystem::path const & value = {})
+		{
+			if (value.empty())
+			{
+				return get_config().content_home;
+			}
+			else
+			{
+				return get_config().content_home.native() + value.native();
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,7 +118,7 @@ namespace ml
 
 		static int32_t do_file(filesystem::path const & path);
 
-		template <int32_t Lang> inline static int32_t do_string(pmr::string const & text)
+		template <int32_t Lang> static int32_t do_string(pmr::string const & text)
 		{
 			return do_string(Lang, text);
 		}

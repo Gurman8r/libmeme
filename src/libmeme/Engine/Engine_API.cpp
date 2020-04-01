@@ -6,7 +6,7 @@
 #endif
 #include <libmeme/Engine/ScriptableObject.hpp>
 
-// OUTPUT WRAPPER
+// OUTPUT HANDLER
 namespace ml::embed
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -62,19 +62,19 @@ namespace ml::embed
 		// LIB
 		struct ml_lib {};
 		py::class_<ml_lib>{ m, "lib" }
-			.def("arch"			, []() { return ML_ARCH; })
-			.def("author"		, []() { return ML__AUTHOR; })
-			.def("cc"			, []() { return ML_CC_NAME; })
-			.def("cc_ver"		, []() { return ML_CC_VER; })
-			.def("config"		, []() { return ML_CONFIGURATION; })
-			.def("date"			, []() { return ML__DATE; })
-			.def("is_debug"		, []() { return ML_IS_DEBUG; })
-			.def("lang"			, []() { return ML_LANG; })
-			.def("name"			, []() { return ML__NAME; })
-			.def("platform"		, []() { return ML_PLATFORM; })
-			.def("time"			, []() { return ML__TIME; })
-			.def("url"			, []() { return ML__URL; })
-			.def("version"		, []() { return ML__VERSION; })
+			.def("arch"			, []() { return ML_arch; })
+			.def("author"		, []() { return ML__author; })
+			.def("cc"			, []() { return ML_CC_name; })
+			.def("cc_ver"		, []() { return ML_CC_version; })
+			.def("config"		, []() { return ML_configuration; })
+			.def("date"			, []() { return ML__date; })
+			.def("is_debug"		, []() { return ML_is_debug; })
+			.def("lang"			, []() { return ML_cxx; })
+			.def("name"			, []() { return ML__name; })
+			.def("platform"		, []() { return ML_platform; })
+			.def("time"			, []() { return ML__time; })
+			.def("url"			, []() { return ML__url; })
+			.def("version"		, []() { return ML__version; })
 			;
 		
 		// OUTPUT
@@ -101,9 +101,9 @@ namespace ml::embed
 
 		// RUNTIME
 		py::class_<engine::runtime>{ m, "runtime" }
-			.def("delta_time"	, []() { return engine::get_runtime().delta_time; })
-			.def("frame_count"	, []() { return engine::get_runtime().frame_count; })
-			.def("frame_rate"	, []() { return engine::get_runtime().frame_rate; })
+			.def_property_readonly_static("delta_time"	, []() { return engine::get_runtime().delta_time; })
+			.def_property_readonly_static("frame_count"	, []() { return engine::get_runtime().frame_count; })
+			.def_property_readonly_static("frame_rate"	, []() { return engine::get_runtime().frame_rate; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

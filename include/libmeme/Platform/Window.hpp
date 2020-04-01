@@ -195,8 +195,6 @@ namespace ml
 
 		ML_NODISCARD auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return get_hints() & i; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

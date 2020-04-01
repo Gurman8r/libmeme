@@ -26,8 +26,8 @@ namespace ml
 	void render_target::draw(VAO const & vao, VBO const & vbo) const
 	{
 		if (!vao || !vbo) return;
-		ML_BIND_SCOPE(vao);
-		ML_BIND_SCOPE(vbo);
+		ML_bind_scope(vao);
+		ML_bind_scope(vbo);
 		GL::drawArrays(vao.m_mode, 0, vbo.m_size);
 		GL::flush();
 	}
@@ -35,9 +35,9 @@ namespace ml
 	void render_target::draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const
 	{
 		if (!vao || !vbo || !ibo) return;
-		ML_BIND_SCOPE(vao);
-		ML_BIND_SCOPE(vbo);
-		ML_BIND_SCOPE(ibo);
+		ML_bind_scope(vao);
+		ML_bind_scope(vbo);
+		ML_bind_scope(ibo);
 		GL::drawElements(vao.m_mode, ibo.m_usage, ibo.m_type, nullptr);
 		GL::flush();
 	}

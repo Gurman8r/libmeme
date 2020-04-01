@@ -160,9 +160,9 @@ namespace ml
 		}
 		
 		// bind buffers
-		ML_BIND_SCOPE(m_vao);
-		ML_BIND_SCOPE(m_vbo);
-		ML_BIND_SCOPE(m_ibo);
+		ML_bind_scope(m_vao);
+		ML_bind_scope(m_vbo);
+		ML_bind_scope(m_ibo);
 		
 		// update buffers
 		m_vbo.update((void *)vertices.data(), (uint32_t)vertices.size());
@@ -206,8 +206,8 @@ namespace ml
 		}
 
 		// bind buffers
-		ML_BIND_SCOPE(m_vao);
-		ML_BIND_SCOPE(m_vbo);
+		ML_bind_scope(m_vao);
+		ML_bind_scope(m_vbo);
 
 		// update buffers
 		m_vbo.update((void *)vertices.data(), (uint32_t)vertices.size());

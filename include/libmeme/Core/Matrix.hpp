@@ -215,89 +215,89 @@ namespace ml
 
 	// MATRIX NxN
 	template <class T, size_t N
-	> ML_ALIAS tmatnxn = ds::matrix<T, N, N>;
+	> ML_alias tmatnxn = ds::matrix<T, N, N>;
 
 	// MATRIX Nx1
 	template <class T, size_t N
-	> ML_ALIAS tvector = ds::matrix<T, N, 1>;
+	> ML_alias tvector = ds::matrix<T, N, 1>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 2x2
 	template <class T
-	> ML_ALIAS	tmat2	= tmatnxn<T, 2>;
-	ML_ALIAS	mat2b	= tmat2<byte_t>;
-	ML_ALIAS	mat2i	= tmat2<int32_t>;
-	ML_ALIAS	mat2u	= tmat2<uint32_t>;
-	ML_ALIAS	mat2f	= tmat2<float32_t>;
-	ML_ALIAS	mat2d	= tmat2<float64_t>;
-	ML_ALIAS	mat2s	= tmat2<size_t>;
-	ML_ALIAS	mat2	= mat2f;
+	> ML_alias	tmat2	= tmatnxn<T, 2>;
+	ML_alias	mat2b	= tmat2<byte_t>;
+	ML_alias	mat2i	= tmat2<int32_t>;
+	ML_alias	mat2u	= tmat2<uint32_t>;
+	ML_alias	mat2f	= tmat2<float32_t>;
+	ML_alias	mat2d	= tmat2<float64_t>;
+	ML_alias	mat2s	= tmat2<size_t>;
+	ML_alias	mat2	= mat2f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 3x3
 	template <class T
-	> ML_ALIAS	tmat3	= tmatnxn<T, 3>;
-	ML_ALIAS	mat3b	= tmat3<byte_t>;
-	ML_ALIAS	mat3i	= tmat3<int32_t>;
-	ML_ALIAS	mat3u	= tmat3<uint32_t>;
-	ML_ALIAS	mat3f	= tmat3<float32_t>;
-	ML_ALIAS	mat3d	= tmat3<float64_t>;
-	ML_ALIAS	mat3s	= tmat3<size_t>;
-	ML_ALIAS	mat3	= mat3f;
+	> ML_alias	tmat3	= tmatnxn<T, 3>;
+	ML_alias	mat3b	= tmat3<byte_t>;
+	ML_alias	mat3i	= tmat3<int32_t>;
+	ML_alias	mat3u	= tmat3<uint32_t>;
+	ML_alias	mat3f	= tmat3<float32_t>;
+	ML_alias	mat3d	= tmat3<float64_t>;
+	ML_alias	mat3s	= tmat3<size_t>;
+	ML_alias	mat3	= mat3f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// MATRIX 4x4
 	template <class T
-	> ML_ALIAS	tmat4	= tmatnxn<T, 4>;
-	ML_ALIAS	mat4b	= tmat4<byte_t>;
-	ML_ALIAS	mat4i	= tmat4<int32_t>;
-	ML_ALIAS	mat4u	= tmat4<uint32_t>;
-	ML_ALIAS	mat4f	= tmat4<float32_t>;
-	ML_ALIAS	mat4d	= tmat4<float64_t>;
-	ML_ALIAS	mat4s	= tmat4<size_t>;
-	ML_ALIAS	mat4	= mat4f;
+	> ML_alias	tmat4	= tmatnxn<T, 4>;
+	ML_alias	mat4b	= tmat4<byte_t>;
+	ML_alias	mat4i	= tmat4<int32_t>;
+	ML_alias	mat4u	= tmat4<uint32_t>;
+	ML_alias	mat4f	= tmat4<float32_t>;
+	ML_alias	mat4d	= tmat4<float64_t>;
+	ML_alias	mat4s	= tmat4<size_t>;
+	ML_alias	mat4	= mat4f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 2
 	template <class T
-	> ML_ALIAS	tvec2	= tvector<T, 2>;
-	ML_ALIAS	vec2b	= tvec2<byte_t>;
-	ML_ALIAS	vec2i	= tvec2<int32_t>;
-	ML_ALIAS	vec2u	= tvec2<uint32_t>;
-	ML_ALIAS	vec2f	= tvec2<float32_t>;
-	ML_ALIAS	vec2d	= tvec2<float64_t>;
-	ML_ALIAS	vec2s	= tvec2<size_t>;
-	ML_ALIAS	vec2	= vec2f;
+	> ML_alias	tvec2	= tvector<T, 2>;
+	ML_alias	vec2b	= tvec2<byte_t>;
+	ML_alias	vec2i	= tvec2<int32_t>;
+	ML_alias	vec2u	= tvec2<uint32_t>;
+	ML_alias	vec2f	= tvec2<float32_t>;
+	ML_alias	vec2d	= tvec2<float64_t>;
+	ML_alias	vec2s	= tvec2<size_t>;
+	ML_alias	vec2	= vec2f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 3
 	template <class T
-	> ML_ALIAS	tvec3	= tvector<T, 3>;
-	ML_ALIAS	vec3b	= tvec3<byte_t>;
-	ML_ALIAS	vec3i	= tvec3<int32_t>;
-	ML_ALIAS	vec3u	= tvec3<uint32_t>;
-	ML_ALIAS	vec3f	= tvec3<float32_t>;
-	ML_ALIAS	vec3d	= tvec3<float64_t>;
-	ML_ALIAS	vec3s	= tvec3<size_t>;
-	ML_ALIAS	vec3	= vec3f;
+	> ML_alias	tvec3	= tvector<T, 3>;
+	ML_alias	vec3b	= tvec3<byte_t>;
+	ML_alias	vec3i	= tvec3<int32_t>;
+	ML_alias	vec3u	= tvec3<uint32_t>;
+	ML_alias	vec3f	= tvec3<float32_t>;
+	ML_alias	vec3d	= tvec3<float64_t>;
+	ML_alias	vec3s	= tvec3<size_t>;
+	ML_alias	vec3	= vec3f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// VECTOR 4
 	template <class T
-	> ML_ALIAS	tvec4	= tvector<T, 4>;
-	ML_ALIAS	vec4b	= tvec4<byte_t>;
-	ML_ALIAS	vec4i	= tvec4<int32_t>;
-	ML_ALIAS	vec4u	= tvec4<uint32_t>;
-	ML_ALIAS	vec4f	= tvec4<float32_t>;
-	ML_ALIAS	vec4d	= tvec4<float64_t>;
-	ML_ALIAS	vec4s	= tvec4<size_t>;
-	ML_ALIAS	vec4	= vec4f;
+	> ML_alias	tvec4	= tvector<T, 4>;
+	ML_alias	vec4b	= tvec4<byte_t>;
+	ML_alias	vec4i	= tvec4<int32_t>;
+	ML_alias	vec4u	= tvec4<uint32_t>;
+	ML_alias	vec4f	= tvec4<float32_t>;
+	ML_alias	vec4d	= tvec4<float64_t>;
+	ML_alias	vec4s	= tvec4<size_t>;
+	ML_alias	vec4	= vec4f;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

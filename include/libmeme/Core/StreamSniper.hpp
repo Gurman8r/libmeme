@@ -22,24 +22,22 @@ namespace ml
 
 		basic_stream_sniper(ostream_t * value = {}) noexcept
 		{
-			operator()(value);
+			(*this)(value);
 		}
 
 		basic_stream_sniper(self_type && other) noexcept
 		{
-			swap(std::move(other));
+			this->swap(std::move(other));
 		}
 
 		~basic_stream_sniper() noexcept
 		{
-			operator()(nullptr);
+			(*this)(nullptr);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		basic_stream_sniper & operator=(self_type && other) noexcept
 		{
-			swap(std::move(other));
+			this->swap(std::move(other));
 			return (*this);
 		}
 
@@ -49,11 +47,9 @@ namespace ml
 			{
 				std::swap(m_cur, other.m_cur);
 				std::swap(m_old, other.m_old);
-				m_str.swap(other.m_str);
+				std::swap(m_str, other.m_str);
 			}
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void operator()(ostream_t * value) noexcept
 		{
@@ -79,6 +75,10 @@ namespace ml
 		
 		ML_NODISCARD operator sstream_t const & () const & noexcept { return m_str; }
 
+		ML_NODISCARD operator sstream_t && () && noexcept { return std::move(m_str); }
+
+		ML_NODISCARD operator sstream_t const && () const & noexcept { return std::move(m_str); }
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_ALIAS stream_sniper = typename basic_stream_sniper<char>;
+	ML_alias stream_sniper = typename basic_stream_sniper<char>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -3,8 +3,8 @@
 
 #include <libmeme/Core/ScopeGuard.hpp>
 
-#define ML_BIND_SCOPE(var, ...)	\
-	var.bind(##__VA_ARGS__);	\
-	ML_defer{ var.unbind(); }
+#define ML_bind_scope(value, ...)	\
+	value.bind(##__VA_ARGS__);		\
+	ML_defer{ value.unbind(); }
 
 #endif // !_ML_BINDER_HPP_
