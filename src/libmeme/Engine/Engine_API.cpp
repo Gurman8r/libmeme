@@ -64,8 +64,8 @@ namespace ml::embed
 		py::class_<ml_lib>{ m, "lib" }
 			.def("arch"			, []() { return ML_arch; })
 			.def("author"		, []() { return ML__author; })
-			.def("cc"			, []() { return ML_CC_name; })
-			.def("cc_ver"		, []() { return ML_CC_version; })
+			.def("cc"			, []() { return ML_cc_name; })
+			.def("cc_ver"		, []() { return ML_cc_version; })
 			.def("config"		, []() { return ML_configuration; })
 			.def("date"			, []() { return ML__date; })
 			.def("is_debug"		, []() { return ML_is_debug; })

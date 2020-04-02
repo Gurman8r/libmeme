@@ -162,73 +162,73 @@
 
 /* * * * * * * * * * * * * * * * Visual Studio */
 #if defined(_MSC_VER)
-#   define ML_CC_msvc           _MSC_VER
-#   define ML_CC_version        ML_CC_msvc
-#   if (ML_CC_version >= 1920)
-#       define ML_CC_name       "Visual Studio 2019"
-#   elif (ML_CC_version >= 1910)
-#       define ML_CC_name       "Visual Studio 2017"
-#   elif (ML_CC_version >= 1900)
-#       define ML_CC_name       "Visual Studio 2015"
-#   elif (ML_CC_version >= 1800)
-#       define ML_CC_name       "Visual Studio 2013"
+#   define ML_cc_msvc           _MSC_VER
+#   define ML_cc_version        ML_cc_msvc
+#   if (ML_cc_version >= 1920)
+#       define ML_cc_name       "Visual Studio 2019"
+#   elif (ML_cc_version >= 1910)
+#       define ML_cc_name       "Visual Studio 2017"
+#   elif (ML_cc_version >= 1900)
+#       define ML_cc_name       "Visual Studio 2015"
+#   elif (ML_cc_version >= 1800)
+#       define ML_cc_name       "Visual Studio 2013"
 #   else
 #       error This version of Visual Studio is not supported.
 #   endif
 
 /* * * * * * * * * * * * * * * * Clang / LLVM */
 #elif defined(__clang__)
-#   define ML_CC_clang          __clang__
-#   define ML_CC_version        ML_CC_clang
-#   define ML_CC_name           "Clang/LLVM"
+#   define ML_cc_clang          __clang__
+#   define ML_cc_version        ML_cc_clang
+#   define ML_cc_name           "Clang/LLVM"
 
 /* * * * * * * * * * * * * * * * GCC */
 #elif (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
 #   if defined(__GNUC__)
-#       define ML_CC_gcc        __GNUC__
+#       define ML_cc_gcc        __GNUC__
 #   else
-#       define ML_CC_gcc        __GNUG__
+#       define ML_cc_gcc        __GNUG__
 #   endif
-#   define ML_CC_version        ML_CC_gcc
-#   define ML_CC_name           "GCC"
+#   define ML_cc_version        ML_cc_gcc
+#   define ML_cc_name           "GCC"
 
 /* * * * * * * * * * * * * * * * Intel */
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
 #   if defined(__ICC)
-#       define ML_CC_intel      __ICC
+#       define ML_cc_intel      __ICC
 #   else
-#       define ML_CC_intel      __INTEL_COMPILER
+#       define ML_cc_intel      __INTEL_COMPILER
 #   endif
-#   define ML_CC_version        ML_CC_intel
-#   define ML_CC_name           "Intel"
+#   define ML_cc_version        ML_cc_intel
+#   define ML_cc_name           "Intel"
 
 /* * * * * * * * * * * * * * * * MinGW */
 #elif defined(__MINGW32__) || defined(__MINGW64__)
 #   if defined(__MINGW64__)
-#       define ML_CC_mingw      __MINGW64__
+#       define ML_cc_mingw      __MINGW64__
 #   else
-#       define ML_CC_mingw      __MINGW32__
+#       define ML_cc_mingw      __MINGW32__
 #   endif
-#   define ML_CC_version        ML_CC_mingw
-#   define ML_CC_name           "MinGW"
+#   define ML_cc_version        ML_cc_mingw
+#   define ML_cc_name           "MinGW"
 
 /* * * * * * * * * * * * * * * * Emscripten */
 #elif defined(__EMSCRIPTEN__)
-#   define ML_CC_emscripten     __EMSCRIPTEN__
-#   define ML_CC_version        ML_CC_emscripten
-#   define ML_CC_name           "Emscripten"
+#   define ML_cc_emscripten     __EMSCRIPTEN__
+#   define ML_cc_version        ML_cc_emscripten
+#   define ML_cc_name           "Emscripten"
 
 /* * * * * * * * * * * * * * * * asm.js */
 #elif defined(__asmjs__)
-#   define ML_CC_asmjs          __asmjs__
-#   define ML_CC_version        ML_CC_asmjs
-#   define ML_CC_name           "asm.js"
+#   define ML_cc_asmjs          __asmjs__
+#   define ML_cc_version        ML_cc_asmjs
+#   define ML_cc_name           "asm.js"
 
 /* * * * * * * * * * * * * * * * WebAssembly */
 #elif defined(__wasm__)
-#   define ML_CC_wasm           __wasm__
-#   define ML_CC_version        ML_CC_wasm
-#   define ML_CC_name           "WebAssembly"
+#   define ML_cc_wasm           __wasm__
+#   define ML_cc_version        ML_cc_wasm
+#   define ML_cc_name           "WebAssembly"
 
 /* * * * * * * * * * * * * * * * Unknown Compiler */
 #else
@@ -241,7 +241,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // integers
-#if defined(ML_CC_msvc)
+#if defined(ML_cc_msvc)
 #   define  ML_int8             signed __int8
 #   define  ML_int16            signed __int16
 #   define  ML_int32            signed __int32
@@ -375,10 +375,10 @@
 #endif
 
 // inlining
-#ifdef ML_CC_msvc
+#ifdef ML_cc_msvc
 #   define ML_ALWAYS_INLINE     __forceinline
 #   define ML_NEVER_INLINE      __declspec(noinline)
-#elif defined(ML_CC_clang) || defined(ML_CC_gcc)
+#elif defined(ML_cc_clang) || defined(ML_cc_gcc)
 #   define ML_ALWAYS_INLINE     inline __attribute__((always_inline))
 #   define ML_NEVER_INLINE      __attribute__ ((noinline))
 #else
@@ -387,10 +387,10 @@
 #endif
 
 // visibility
-#ifdef ML_CC_msvc
+#ifdef ML_cc_msvc
 #   define ML_API_EXPORT        __declspec(dllexport)
 #   define ML_API_IMPORT        __declspec(dllimport)
-#elif (defined(ML_CC_clang) || defined(ML_CC_gcc)) && (ML_CC_version >= 4)
+#elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
 #   define ML_API_EXPORT        __attribute__ ((visibility ("default")))
 #   define ML_API_IMPORT        __attribute__ ((visibility ("hidden")))
 #else
@@ -402,7 +402,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // WARNINGS
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifdef ML_CC_msvc
+#ifdef ML_cc_msvc
 #   pragma warning(disable: 4031)   // second formal parameter list longer than the first list
 #   pragma warning(disable: 4067)   // unexpected tokens following preprocessor directive - expected a newline
 #   pragma warning(disable: 4251)   // type1 needs to have dll-interface to be used by type2

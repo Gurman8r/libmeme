@@ -430,7 +430,7 @@ namespace ml
 
 	void GL::vertexAttribPointer(uint32_t index, uint32_t size, uint32_t type, bool normalized, uint32_t stride, uint32_t offset, uint32_t width)
 	{
-#ifdef ML_CC_msvc
+#ifdef ML_cc_msvc
 #	pragma warning(push)
 #	pragma warning(disable: 4312) // conversion from 'type1' to 'type2' of greater size
 #	pragma warning(disable: 26451)
@@ -444,7 +444,7 @@ namespace ml
 			// causes a warning in 64-bit
 			reinterpret_cast<void *>(offset * width)
 		);
-#ifdef ML_CC_msvc
+#ifdef ML_cc_msvc
 #	pragma warning(pop)
 #endif
 	}

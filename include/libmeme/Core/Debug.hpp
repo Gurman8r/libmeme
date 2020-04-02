@@ -16,7 +16,7 @@
 // breakpoint
 #if (!ML_is_debug)
 #	define ML_breakpoint() ((void)0)
-#elif defined(ML_CC_msvc)
+#elif defined(ML_cc_msvc)
 #	define ML_breakpoint() _CSTD __debugbreak()
 #else
 #	define ML_breakpoint() _CSTD raise(SIGTRAP)
