@@ -7,10 +7,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace detail
+	namespace util
 	{
-		template <
-			class To, class From
+		template <class To, class From
 		> static constexpr tvec4<To> color_cast(const tvec4<From> & value)
 		{
 			return (tvec4<To>)value;
@@ -39,11 +38,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	template <class T> struct basic_color final
+	template <class _T
+	> struct basic_color final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type		= typename T;
+		using type		= typename _T;
 		using rgb_t		= typename tvec3<type>;
 		using rgba_t	= typename tvec4<type>;
 
@@ -75,12 +75,12 @@ namespace ml
 		}
 
 		template <class U> constexpr basic_color(tvec4<U> const & value)
-			: m_value{ detail::color_cast(value) }
+			: m_value{ util::color_cast(value) }
 		{
 		}
 
 		template <class U> constexpr basic_color(basic_color<U> const & other)
-			: m_value{ detail::color_cast(other.rgba()) }
+			: m_value{ util::color_cast(other.rgba()) }
 		{
 		}
 
@@ -91,29 +91,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		operator rgba_t &() { return m_value; }
+		operator rgba_t & () & noexcept { return m_value; }
 
-		constexpr operator rgba_t const &() const { return m_value; }
+		operator rgba_t && () && noexcept { return std::move(m_value); }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		constexpr operator rgba_t const & () const & noexcept { return m_value; }
 
-		type & operator[](size_t i) { return m_value[i]; }
-
-		constexpr type const & operator[](size_t i) const { return m_value[i]; }
+		constexpr operator rgba_t const && () const && noexcept { return std::move(m_value); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto r() const -> type const & { return m_value[0]; }
+		constexpr type & operator[](size_t i) & noexcept { return m_value[i]; }
+
+		constexpr type const & operator[](size_t i) const & noexcept { return m_value[i]; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto r() const  noexcept-> type const & { return m_value[0]; }
 		
-		constexpr auto g() const -> type const & { return m_value[1]; }
+		constexpr auto g() const  noexcept-> type const & { return m_value[1]; }
 		
-		constexpr auto b() const -> type const & { return m_value[2]; }
+		constexpr auto b() const  noexcept-> type const & { return m_value[2]; }
 		
-		constexpr auto a() const -> type const & { return m_value[3]; }
+		constexpr auto a() const  noexcept-> type const & { return m_value[3]; }
 		
-		constexpr auto rgb() const -> rgb_t { return (rgb_t)m_value; }
+		constexpr auto rgb() const  noexcept-> rgb_t { return (rgb_t)m_value; }
 		
-		constexpr auto rgba() const -> rgba_t const & { return m_value; }
+		constexpr auto rgba() const & noexcept-> rgba_t const & { return m_value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -131,12 +135,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> std::ostream & operator <<(std::ostream & out, basic_color<T> const & value)
+	template <class _T> std::ostream & operator <<(std::ostream & out, basic_color<_T> const & value)
 	{
 		return out << value.rgba();
 	}
 
-	template <class T> std::istream & operator >>(std::istream & in, basic_color<T> & value)
+	template <class _T> std::istream & operator >>(std::istream & in, basic_color<_T> & value)
 	{
 		return in >> value.rgba();
 	}

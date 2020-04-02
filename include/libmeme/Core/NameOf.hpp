@@ -52,17 +52,17 @@ namespace ml
 		ML_NODISCARD static constexpr auto filter_type(view_type s) noexcept
 		{
 			constexpr auto const
-				& a{ std::get<0>(pretty_function::detail::type) },
-				& b{ std::get<1>(pretty_function::detail::type) };
+				a{ ML_PRETTY_TYPE_PREFIX },
+				b{ ML_PRETTY_TYPE_SUFFIX };
 			return filter_suffix(filter_prefix(s, a), b);
 		}
 
 		ML_NODISCARD static constexpr auto filter_value(view_type s) noexcept
 		{
 			constexpr auto const
-				& a{ std::get<0>(pretty_function::detail::value) },
-				& b{ std::get<1>(pretty_function::detail::value) },
-				& c{ std::get<2>(pretty_function::detail::value) };
+				a{ ML_PRETTY_VALUE_PREFIX },
+				b{ ML_PRETTY_VALUE_DELIM },
+				c{ ML_PRETTY_VALUE_SUFFIX };
 			return s; // NYI
 		}
 

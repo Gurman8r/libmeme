@@ -7,8 +7,6 @@
 
 #include <libmeme/Common.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #define ML_NAMEOF_VIEW_TYPE std::string_view
 #define ML_NAMEOF_VIEW_NAME "std::basic_string_view<char,struct std::char_traits<char> >"
 
@@ -37,8 +35,6 @@
 #	error Type information is not available.
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 namespace ml::pretty_function
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,26 +56,6 @@ namespace ml::pretty_function
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	namespace detail
-	{
-		static constexpr std::tuple<view_type, view_type> type
-		{
-			ML_PRETTY_TYPE_PREFIX,
-			ML_PRETTY_TYPE_SUFFIX
-		};
-
-		static constexpr std::tuple<view_type, view_type, view_type> value
-		{
-			ML_PRETTY_VALUE_PREFIX,
-			ML_PRETTY_VALUE_DELIM,
-			ML_PRETTY_VALUE_SUFFIX
-		};
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_PRETTY_FUNCTION_HPP_

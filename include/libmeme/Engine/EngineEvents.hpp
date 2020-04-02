@@ -19,10 +19,6 @@ namespace ml
 	{
 	};
 
-	ML_event(fixed_update_event)
-	{
-	};
-
 	ML_event(begin_draw_event)
 	{
 	};
