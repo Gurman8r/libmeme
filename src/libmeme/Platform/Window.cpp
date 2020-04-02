@@ -717,7 +717,7 @@ namespace ml
 
 		win->set_cursor_pos_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<cursor_pos_event>(ML_forward(args)...);
+			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
 		});
 
 		win->set_error_callback([](auto ... args)
@@ -757,7 +757,7 @@ namespace ml
 
 		win->set_window_pos_callback([](auto, auto ... args)
 		{
-			event_system::fire_event<window_pos_event>(ML_forward(args)...);
+			event_system::fire_event<window_position_event>(ML_forward(args)...);
 		});
 
 		win->set_window_size_callback([](auto, auto ... args)

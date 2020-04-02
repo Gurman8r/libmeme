@@ -39,24 +39,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// assert
-#ifndef ML_assert
-#define ML_assert(expr) assert(expr)
-#endif
-
-// environment
-#define ML_argc		__argc
-#define ML_argv		__argv
-#define ML_wargv	__wargv
-#define ML_envp		_environ
-#define ML_wenvp	_wenviron
-
-// utils
-#define ML_addressof(ptr)	((void *)(ML_intmax)ptr)
-#define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
-#define ML_forward(value)	_ML std::forward<decltype(value)>(value)
-#define ML_deserialize		_ML std::istream & operator >>
-#define ML_serialize		_ML std::ostream & operator <<
+#define ML_addressof(p)			((void *)(_ML intmax_t)p)
+#define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
+#define ML_bitread(v, i)		((v >> i) & 1)
+#define ML_bitset(v, i)			(v |= (1 << i))
+#define ML_bitclear(v, i)		(v &= ~(1 << i))
+#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
+#define ML_forward(v)			_ML std::forward<decltype(v)>(v)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -113,8 +102,6 @@ namespace ml
 	namespace ranges		= _ML std::ranges;
 	namespace views			= _ML std::ranges::views;
 #endif
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace literals
 	{

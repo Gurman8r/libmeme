@@ -105,17 +105,9 @@ namespace ml::ds
 		
 		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data.at(i); }
 
-		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> value_type && { return std::move(m_data.at(i)); }
-
-		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> value_type const && { return std::move(m_data.at(i)); }
-
 		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) & noexcept -> reference { return at(y * _W + x); }
 
 		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const & noexcept -> const_reference { return at(y * _W + x); }
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) && noexcept -> value_type && { return std::move(at(y * _W + x)); }
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const && noexcept -> value_type const && { return std::move(at(y * _W + x)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -630,7 +622,7 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t W, size_t H
-	> inline ML_serialize(std::ostream & out, matrix<T, W, H> const & value)
+	> inline std::ostream & operator <<(std::ostream & out, matrix<T, W, H> const & value)
 	{
 		for (auto const & e : value)
 			if (out.good())
@@ -639,7 +631,7 @@ namespace ml::ds
 	}
 
 	template <class T, size_t W, size_t H
-	> inline ML_deserialize(std::istream & in, matrix<T, W, H> & value)
+	> inline std::istream & operator >>(std::istream & in, matrix<T, W, H> & value)
 	{
 		for (auto & e : value)
 			if (in.good())

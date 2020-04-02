@@ -1,20 +1,12 @@
 #ifndef _ML_UTILITY_HPP_
 #define _ML_UTILITY_HPP_
 
-#define _ML_UTIL _ML util::
-
 #include <gcem/include/gcem.hpp>
-#include <libmeme/Core/Hash.hpp>
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/OnceCall.hpp>
 #include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Core/TypeOf.hpp>
-
-#define ML_bitread(v, i)		((v >> i) & 1)
-#define ML_bitset(v, i)			(v |= (1 << i))
-#define ML_bitclear(v, i)		(v &= ~(1 << i))
-#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
 
 // Misc
 namespace ml::util
@@ -49,7 +41,7 @@ namespace ml::util
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) == (*rBegin))
-				&& _ML_UTIL equal_to((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+				&& _ML util::equal_to((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd));
 	}
 
@@ -58,7 +50,7 @@ namespace ml::util
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
 			? (((*lBegin) < (*rBegin))
-				&& _ML_UTIL less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
+				&& _ML util::less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
 			: ((lBegin == lEnd) && (rBegin == rEnd));
 	}
 
@@ -74,8 +66,8 @@ namespace ml::util
 	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs < rhs
-			? _ML_UTIL min(ML_forward(lhs), ML_forward(rest)...)
-			: _ML_UTIL min(ML_forward(rhs), ML_forward(rest)...);
+			? _ML util::min(ML_forward(lhs), ML_forward(rest)...)
+			: _ML util::min(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
@@ -90,8 +82,8 @@ namespace ml::util
 	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs > rhs
-			? _ML_UTIL max(ML_forward(lhs), ML_forward(rest)...)
-			: _ML_UTIL max(ML_forward(rhs), ML_forward(rest)...);
+			? _ML util::max(ML_forward(lhs), ML_forward(rest)...)
+			: _ML util::max(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
@@ -106,7 +98,7 @@ namespace ml::util
 	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
 	{
 		// min(max(v, lhs), rhs)
-		return _ML_UTIL min(_ML_UTIL max(ML_forward(v), ML_forward(lhs)), ML_forward(rhs));
+		return _ML util::min(_ML util::max(ML_forward(v), ML_forward(lhs)), ML_forward(rhs));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

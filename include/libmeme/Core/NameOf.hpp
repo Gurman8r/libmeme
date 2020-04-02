@@ -1,16 +1,13 @@
 #ifndef _ML_NAMEOF_HPP_
 #define _ML_NAMEOF_HPP_
 
-#include <libmeme/Core/PrettyFunction.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // Based on CTTI
 // https://github.com/Manu343726/ctti
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/nameof.hpp
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/name_filters.hpp
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <libmeme/Core/PrettyFunction.hpp>
+#include <libmeme/Core/Hash.hpp>
 
 namespace ml
 {
@@ -18,49 +15,51 @@ namespace ml
 
 	template <class ... T> struct nameof;
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <> struct nameof<> final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using name_type = typename pretty_function::detail::name;
-
-		using guid_type = typename decltype(util::hash(name_type{}));
 
 		nameof() = delete;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_prefix(name_type const & s, name_type const & pre)
+		using view_type = typename pretty_function::view_type;
+
+		using guid_type = typename decltype(util::hash(view_type{}));
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static constexpr auto filter_prefix(view_type s, view_type v)
 		{
-			bool const match{
-				(s.size() >= pre.size() && (s.substr(0, pre.size()) == pre))
+			bool const match
+			{
+				(s.size() >= v.size() && (s.substr(0, v.size()) == v))
 			};
-			return match ? s.substr(pre.size()) : s;
+			return match ? s.substr(v.size()) : s;
 		}
 
-		ML_NODISCARD static constexpr auto filter_suffix(name_type const & s, name_type const & suf)
+		ML_NODISCARD static constexpr auto filter_suffix(view_type s, view_type v)
 		{
-			bool const match{
-				(s.size() >= suf.size()) && ((s.substr(s.size() - suf.size(), suf.size()) == suf))
+			bool const match
+			{
+				(s.size() >= v.size()) && (s.substr(s.size() - v.size(), v.size()) == v)
 			};
-			return match ? s.substr(0, (s.size() - suf.size())) : s;
+			return match ? s.substr(0, (s.size() - v.size())) : s;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_type(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_type(view_type s) noexcept
 		{
-			auto const
+			constexpr auto const
 				& a{ std::get<0>(pretty_function::detail::type) },
 				& b{ std::get<1>(pretty_function::detail::type) };
 			return filter_suffix(filter_prefix(s, a), b);
 		}
 
-		ML_NODISCARD static constexpr auto filter_value(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_value(view_type s) noexcept
 		{
-			auto const
+			constexpr auto const
 				& a{ std::get<0>(pretty_function::detail::value) },
 				& b{ std::get<1>(pretty_function::detail::value) },
 				& c{ std::get<2>(pretty_function::detail::value) };
@@ -69,13 +68,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_template(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_template(view_type s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') };
 			return (t != s.npos) ? s.substr(0, t) : s;
 		}
 
-		ML_NODISCARD static constexpr auto filter_namespace(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_namespace(view_type s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') }; // check for template
 			return (t != s.npos)
@@ -83,24 +82,24 @@ namespace ml
 				: s.substr(s.find_last_of(':') + 1);
 		}
 
-		ML_NODISCARD static constexpr auto filter_struct(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_struct(view_type s) noexcept
 		{
 			return filter_prefix(s, "struct ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_class(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_class(view_type s) noexcept
 		{
 			return filter_prefix(s, "class ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_union(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_union(view_type s) noexcept
 		{
 			return filter_prefix(s, "union ");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_all(name_type const & s) noexcept
+		ML_NODISCARD static constexpr auto filter_all(view_type s) noexcept
 		{
 			return
 				filter_class(
@@ -151,7 +150,7 @@ namespace ml::tests
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static_assert("Test Static Type Info"
+	static_assert("tests"
 		&& nameof_v<bool>			== "bool"
 		&& nameof_v<int8_t>			== "signed char"
 		&& nameof_v<int16_t>		== "short"
@@ -177,7 +176,7 @@ namespace ml::tests
 		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
 		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
 	
-		, "nameof<>");
+		, "test nameof<>");
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -88,48 +88,50 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto left() const -> value_type { return m_data.at(0); }
+		ML_NODISCARD constexpr auto left() const noexcept -> value_type { return m_data.at(0); }
 		
-		ML_NODISCARD constexpr auto top() const -> value_type { return m_data.at(1); }
+		ML_NODISCARD constexpr auto top() const noexcept -> value_type { return m_data.at(1); }
 		
-		ML_NODISCARD constexpr auto width() const -> value_type { return m_data.at(2); }
+		ML_NODISCARD constexpr auto width() const noexcept -> value_type { return m_data.at(2); }
 		
-		ML_NODISCARD constexpr auto height() const -> value_type { return m_data.at(3); }
+		ML_NODISCARD constexpr auto height() const noexcept -> value_type { return m_data.at(3); }
 		
-		ML_NODISCARD constexpr auto bot() const -> value_type { return (top() + height()); }
+		ML_NODISCARD constexpr auto bot() const noexcept -> value_type { return (top() + height()); }
 		
-		ML_NODISCARD constexpr auto right() const -> value_type { return (left() + width()); }
+		ML_NODISCARD constexpr auto right() const noexcept -> value_type { return (left() + width()); }
 		
-		ML_NODISCARD constexpr auto position() const -> coord_type { return { left(), top() }; }
+		ML_NODISCARD constexpr auto position() const noexcept -> coord_type { return { left(), top() }; }
 		
-		ML_NODISCARD constexpr auto size() const -> coord_type { return { width(), height() }; }
+		ML_NODISCARD constexpr auto size() const noexcept -> coord_type { return { width(), height() }; }
 		
-		ML_NODISCARD constexpr auto center() const -> coord_type { return (position() + (size() / (T)2)); }
+		ML_NODISCARD constexpr auto center() const noexcept -> coord_type { return (position() + (size() / (T)2)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr auto left(value_type value) -> self_type & { m_data.at(0) = value; return (*this); }
+		constexpr auto left(value_type value) noexcept -> self_type & { m_data.at(0) = value; return (*this); }
 		
-		constexpr auto top(value_type value) -> self_type & { m_data.at(1) = value; return (*this); }
+		constexpr auto top(value_type value) noexcept -> self_type & { m_data.at(1) = value; return (*this); }
 		
-		constexpr auto width(value_type value) -> self_type & { m_data.at(2) = value; return (*this); }
+		constexpr auto width(value_type value) noexcept -> self_type & { m_data.at(2) = value; return (*this); }
 		
-		constexpr auto height(value_type value) -> self_type & { m_data.at(3) = value; return (*this); }
+		constexpr auto height(value_type value) noexcept -> self_type & { m_data.at(3) = value; return (*this); }
 		
-		constexpr auto bot(value_type value) -> self_type & { return height(value - top()); }
+		constexpr auto bot(value_type value) noexcept -> self_type & { return height(value - top()); }
 		
-		constexpr auto right(value_type value) -> self_type & { return width(value - left()); }
+		constexpr auto right(value_type value) noexcept -> self_type & { return width(value - left()); }
 		
-		constexpr auto position(coord_type const & value) -> self_type & { return left(value[0]).top(value[1]); }
+		constexpr auto position(coord_type const & value) noexcept -> self_type & { return left(value[0]).top(value[1]); }
 		
-		constexpr auto size(coord_type const & value) -> self_type & { return width(value[0]).height(value[1]); }
+		constexpr auto size(coord_type const & value) noexcept -> self_type & { return width(value[0]).height(value[1]); }
 		
-		constexpr auto center(coord_type const & value) -> self_type & { return position(value - (size() / (T)2)); }
+		constexpr auto center(coord_type const & value) noexcept -> self_type & { return position(value - (size() / (T)2)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		storage_type m_data;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

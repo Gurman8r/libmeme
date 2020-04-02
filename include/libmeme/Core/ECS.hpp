@@ -7,8 +7,6 @@
 
 #include <libmeme/Core/BitSet.hpp>
 
-#define _ML_ECS _ML ecs::
-
 // ECS
 namespace ml::ecs
 {
@@ -173,7 +171,7 @@ namespace ml::ecs::cfg
 
 		using self_type = typename systems<Systems...>;
 
-		using type_list = typename meta::list<_ML_ECS util::template x_wrapper<Systems>...>;
+		using type_list = typename meta::list<_ML ecs::util::template x_wrapper<Systems>...>;
 
 		template <class U
 		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
@@ -188,14 +186,14 @@ namespace ml::ecs::cfg
 		template <template <class> class X
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<_ML_ECS util::x_wrapper<X>, type_list>();
+			return meta::contains<_ML ecs::util::x_wrapper<X>, type_list>();
 		}
 
 		template <template <class> class X
 		> static constexpr size_t index() noexcept
 		{
 			static_assert(self_type::contains<X>(), "system not found");
-			return meta::index_of<_ML_ECS util::x_wrapper<X>, type_list>();
+			return meta::index_of<_ML ecs::util::x_wrapper<X>, type_list>();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -215,7 +213,7 @@ namespace ml::ecs::cfg
 		static_assert(0 < grow_base, "growth base negative or zero");
 
 		// growth multiplier
-		static constexpr auto grow_mult{ _ML_UTIL ratio_cast(1.f, GrowMult{}) };
+		static constexpr auto grow_mult{ _ML util::ratio_cast(1.f, GrowMult{}) };
 		static_assert(1.f <= grow_mult, "expression would result in negative growth");
 
 		static constexpr auto calc_growth(size_t const cap) noexcept

@@ -101,14 +101,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD info_type const & info() const noexcept { return m_info; }
-		
-		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
-		
-		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD variable_type var() const noexcept
 		{
 			switch (m_data.index())
@@ -141,7 +133,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD decltype(auto) get() const noexcept
+		> ML_NODISCARD auto get() const noexcept
 		{
 			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
 			{
@@ -179,8 +171,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool const() const noexcept { return !m_name.empty(); }
-
 		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
 			if (m_info != other.m_info)
@@ -193,35 +183,27 @@ namespace ml
 			}
 		}
 
-		ML_NODISCARD bool operator==(uniform const & other) const noexcept
-		{
-			return this->compare(other) == 0;
-		}
+		ML_NODISCARD bool operator==(uniform const & other) const noexcept { return compare(other) == 0; }
 
-		ML_NODISCARD bool operator!=(uniform const & other) const noexcept
-		{
-			return this->compare(other) != 0;
-		}
+		ML_NODISCARD bool operator!=(uniform const & other) const noexcept { return compare(other) != 0; }
 
-		ML_NODISCARD bool operator<(uniform const & other) const noexcept
-		{
-			return this->compare(other) < 0;
-		}
+		ML_NODISCARD bool operator<(uniform const & other) const noexcept { return compare(other) < 0; }
 
-		ML_NODISCARD bool operator>(uniform const & other) const noexcept
-		{
-			return this->compare(other) > 0;
-		}
+		ML_NODISCARD bool operator>(uniform const & other) const noexcept { return compare(other) > 0; }
 
-		ML_NODISCARD bool operator<=(uniform const & other) const noexcept
-		{
-			return this->compare(other) <= 0;
-		}
+		ML_NODISCARD bool operator<=(uniform const & other) const noexcept { return compare(other) <= 0; }
 
-		ML_NODISCARD bool operator>=(uniform const & other) const noexcept
-		{
-			return this->compare(other) >= 0;
-		}
+		ML_NODISCARD bool operator>=(uniform const & other) const noexcept { return compare(other) >= 0; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD operator bool const() const noexcept { return !m_name.empty(); }
+
+		ML_NODISCARD info_type const & info() const noexcept { return m_info; }
+
+		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
+
+		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

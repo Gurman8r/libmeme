@@ -258,7 +258,7 @@ namespace ml
 	template <class T, class ... Args
 	> ML_NODISCARD static T input(Args && ... args) noexcept
 	{
-		return std::invoke(impl::input<T>{}, ML_forward(args)...);
+		return std::invoke(_ML impl::input<T>{}, ML_forward(args)...);
 	}
 }
 

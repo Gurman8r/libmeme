@@ -1,20 +1,8 @@
 #ifndef _ML_GL_HPP_
 #define _ML_GL_HPP_
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#if ML_is_debug
-# 	define glCheck(expr) do { expr; _ML GL::checkError(__FILE__, __LINE__, #expr); } while (0)
-#else
-# 	define glCheck(expr) (expr)
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -534,7 +522,5 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_GL_HPP_

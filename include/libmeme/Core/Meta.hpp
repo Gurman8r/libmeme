@@ -16,8 +16,6 @@
 
 #include <libmeme/Common.hpp>
 
-#define _ML_META _ML meta::
-
 // DS
 namespace ml::meta
 {
@@ -50,7 +48,7 @@ namespace ml::meta
 		template <class Fn, class Tp
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 		{
-			return _ML_META impl::tuple_apply_impl(
+			return _ML meta::impl::tuple_apply_impl(
 				ML_forward(fn),
 				ML_forward(tp),
 				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
@@ -70,9 +68,9 @@ namespace ml::meta
 		template <class Fn, class Tp
 		> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
 		{
-			return _ML_META impl::tuple_apply([&fn](auto && ... rest)
+			return _ML meta::impl::tuple_apply([&fn](auto && ... rest)
 			{
-				_ML_META impl::for_args(fn, ML_forward(rest)...);
+				_ML meta::impl::for_args(fn, ML_forward(rest)...);
 			},
 			ML_forward(tp));
 		}
@@ -240,7 +238,7 @@ namespace ml::meta
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return _ML_META for_tuple(fn, tag_tuple<Ls>{});
+		return _ML meta::for_tuple(fn, tag_tuple<Ls>{});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

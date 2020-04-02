@@ -15,7 +15,7 @@ namespace ml::impl
     {
         explicit once_call(Fn && fn) noexcept
         {
-            static bool check{}; if ML_UNLIKELY(!check && (check = true))
+            static bool sanity{}; if ML_UNLIKELY(!sanity && (sanity = true))
             {
                 std::invoke(ML_forward(fn));
             }
@@ -24,7 +24,7 @@ namespace ml::impl
 
     enum class once_call_tag {};
 
-    template <class Fn> inline auto operator+(once_call_tag, Fn && fn) noexcept
+    template <class Fn> inline auto operator +(once_call_tag, Fn && fn) noexcept
     {
         return once_call<Fn>{ ML_forward(fn) };
     }

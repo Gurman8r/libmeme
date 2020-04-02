@@ -131,12 +131,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> ML_serialize(std::ostream & out, basic_color<T> const & value)
+	template <class T> std::ostream & operator <<(std::ostream & out, basic_color<T> const & value)
 	{
 		return out << value.rgba();
 	}
 
-	template <class T> ML_deserialize(std::istream & in, basic_color<T> & value)
+	template <class T> std::istream & operator >>(std::istream & in, basic_color<T> & value)
 	{
 		return in >> value.rgba();
 	}

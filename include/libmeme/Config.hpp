@@ -261,10 +261,10 @@
 #   define  ML_uint64           unsigned long long
 #endif
 
-// floating
-#define ML_float32              float
-#define ML_float64              double
-#define ML_float80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
+// byte
+#ifndef ML_byte
+#   define ML_byte              unsigned char
+#endif
 
 // char
 #ifndef ML_char
@@ -273,11 +273,6 @@
 #   else
 #       define ML_char          char8_t
 #   endif
-#endif
-
-// byte
-#ifndef ML_byte
-#   define ML_byte              unsigned ML_char
 #endif
 
 // intmax
@@ -294,10 +289,18 @@
 #   define ML_ulong             unsigned long
 #endif
 
+// floats
+#define ML_float32              float
+#define ML_float64              double
+#define ML_float80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // GENERAL
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// namespace
+#define _ML                     ::ml::
 
 // debug
 #if defined(_DEBUG)
@@ -308,11 +311,6 @@
 #   define ML_configuration     "release"
 #endif
 
-// namespace
-#define _ML                     ::ml::
-#define _ML_BEGIN               namespace ml {
-#define _ML_END                 }
-
 // alias
 #define ML_alias                using
 
@@ -320,6 +318,11 @@
 #define ML_throw                throw
 #define ML_catch                catch
 #define ML_try                  try
+
+// assert
+#ifndef ML_assert
+#   define ML_assert(expr)      assert(expr)
+#endif
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -331,18 +334,18 @@
 #define ML_concat(a, b)         ML_impl_concat(a, b)
 
 // to string
-#define ML_to_string(str)       #str
+#define ML_to_string(expr)      #expr
 
 // stringify
-#define ML_stringify(str)       ML_to_string(str)
+#define ML_stringify(expr)      ML_to_string(expr)
 
-// anon
+// anonymous
 #if defined(__COUNTER__)
-#	define ML_anon(expr)        ML_concat(_ML_, ML_concat(expr, ML_concat(_, __COUNTER__)))
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon(expr)        ML_concat(_ML_, ML_concat(expr, ML_concat(_, __LINE__)))
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
 #else
-#   define ML_anon(expr)        (expr)
+#   define ML_anon(expr)        expr
 #endif
 
 
@@ -375,7 +378,7 @@
 #ifdef ML_CC_msvc
 #   define ML_ALWAYS_INLINE     __forceinline
 #   define ML_NEVER_INLINE      __declspec(noinline)
-#elif defined(ML_CC_gcc) || defined(ML_CC_clang)
+#elif defined(ML_CC_clang) || defined(ML_CC_gcc)
 #   define ML_ALWAYS_INLINE     inline __attribute__((always_inline))
 #   define ML_NEVER_INLINE      __attribute__ ((noinline))
 #else

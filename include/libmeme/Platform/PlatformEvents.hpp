@@ -1,34 +1,15 @@
 #ifndef _ML_PLATFORM_EVENTS_HPP_
 #define _ML_PLATFORM_EVENTS_HPP_
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <libmeme/Core/Event.hpp>
 #include <libmeme/Platform/KeyCode.hpp>
 #include <libmeme/Platform/MouseButton.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// Input States
-#define ML_KEY_RELEASE	0 // High -> Low
-#define ML_KEY_PRESS	1 // Low  -> High
-#define ML_KEY_REPEAT	2 // High -> High
-
-// Keyboard Input Modifiers
-#define ML_MOD_SHIFT	(0 << 1)
-#define ML_MOD_CTRL		(1 << 1)
-#define ML_MOD_ALT		(1 << 2)
-#define ML_MOD_SUPER	(1 << 3)
-#define ML_MOD_CAPSLOCK	(1 << 4)
-#define ML_MOD_NUMLOCK	(1 << 5)
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(char_event)
+	ML_event(char_event)
 	{
 		uint32_t const value;
 
@@ -40,7 +21,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(cursor_enter_event)
+	ML_event(cursor_enter_event)
 	{
 		int32_t const entered;
 
@@ -52,11 +33,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(cursor_pos_event)
+	ML_event(cursor_position_event)
 	{
 		float64_t const x, y;
 
-		constexpr cursor_pos_event(float64_t x, float64_t y) noexcept
+		constexpr cursor_position_event(float64_t x, float64_t y) noexcept
 			: x{ x }
 			, y{ y }
 		{
@@ -65,7 +46,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(key_event)
+	ML_event(key_event)
 	{
 		int32_t const key, scan, action, mods;
 
@@ -77,9 +58,9 @@ namespace ml
 		{
 		}
 
-		constexpr bool is_press(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_PRESS); }
-		constexpr bool is_repeat(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_REPEAT); }
-		constexpr bool is_release(int32_t k) const noexcept { return (key == k) && (action == ML_KEY_RELEASE); }
+		constexpr bool is_release(int32_t k) const noexcept { return (key == k) && (action == key_state_release); }
+		constexpr bool is_press(int32_t k) const noexcept { return (key == k) && (action == key_state_press); }
+		constexpr bool is_repeat(int32_t k) const noexcept { return (key == k) && (action == key_state_repeat); }
 
 		constexpr bool is_shift	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_shift);  }
 		constexpr bool is_ctrl	(int32_t k) const noexcept { return is_press(k) && (mods == key_mods_ctrl); }
@@ -100,7 +81,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(mouse_event)
+	ML_event(mouse_event)
 	{
 		int32_t const key, action, mods;
 
@@ -114,7 +95,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(scroll_event)
+	ML_event(scroll_event)
 	{
 		float64_t const x, y;
 
@@ -127,7 +108,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(frame_size_event)
+	ML_event(frame_size_event)
 	{
 		int32_t const width, height;
 
@@ -140,14 +121,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(window_close_event)
+	ML_event(window_close_event)
 	{
 		window_close_event() noexcept = default;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(window_error_event)
+	ML_event(window_error_event)
 	{
 		int32_t const code;
 		cstring const desc;
@@ -161,7 +142,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(window_focus_event)
+	ML_event(window_focus_event)
 	{
 		int32_t const focused;
 		
@@ -173,11 +154,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(window_pos_event)
+	ML_event(window_position_event)
 	{
 		int32_t const x, y;
 
-		constexpr window_pos_event(int32_t x, int32_t y) noexcept
+		constexpr window_position_event(int32_t x, int32_t y) noexcept
 			: x{ x }
 			, y{ y }
 		{
@@ -186,7 +167,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(window_size_event)
+	ML_event(window_size_event)
 	{
 		int32_t const width, height;
 

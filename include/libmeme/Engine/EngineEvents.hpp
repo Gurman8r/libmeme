@@ -7,39 +7,39 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_EVENT(load_event)
+	ML_event(load_event)
 	{
 	};
 
-	ML_EVENT(loop_begin_event)
+	ML_event(loop_begin_event)
 	{
 	};
 
-	ML_EVENT(update_event)
+	ML_event(update_event)
 	{
 	};
 
-	ML_EVENT(fixed_update_event)
+	ML_event(fixed_update_event)
 	{
 	};
 
-	ML_EVENT(begin_draw_event)
+	ML_event(begin_draw_event)
 	{
 	};
 
-	ML_EVENT(draw_event)
+	ML_event(draw_event)
 	{
 	};
 
-	ML_EVENT(end_draw_event)
+	ML_event(end_draw_event)
 	{
 	};
 
-	ML_EVENT(loop_end_event)
+	ML_event(loop_end_event)
 	{
 	};
 
-	ML_EVENT(unload_event)
+	ML_event(unload_event)
 	{
 	};
 

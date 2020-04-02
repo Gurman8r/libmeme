@@ -22,7 +22,7 @@ namespace ml::impl
 
 	enum class scope_guard_tag {};
 
-	template <class Fn> inline auto operator+(scope_guard_tag, Fn && fn) noexcept
+	template <class Fn> inline auto operator +(scope_guard_tag, Fn && fn) noexcept
 	{
 		return scope_guard<Fn>{ ML_forward(fn) };
 	}

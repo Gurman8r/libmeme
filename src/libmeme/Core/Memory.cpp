@@ -5,14 +5,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_manager::memory_manager() noexcept
-		: m_alloc	{}
-		, m_index	{}
-		, m_records	{}
-		, m_testres	{}
-	{
-	}
-
 	memory_manager::~memory_manager()
 	{
 #if ML_is_debug
@@ -20,8 +12,6 @@ namespace ml
 		{
 			debug::log::error("final allocations follow");
 
-			debug::pause();
-			
 			std::cout << std::left
 				<< std::setw(20) << "Index"
 				<< std::setw(20) << "Size"

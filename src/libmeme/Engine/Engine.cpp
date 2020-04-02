@@ -56,11 +56,11 @@ namespace ml
 		{
 			auto & cfg{ get_config() };
 
-			cfg.arguments = { ML_argv, ML_argv + ML_argc };
+			cfg.arguments = { __argv, __argv + __argc };
 
 			cfg.program_path = filesystem::current_path();
 
-			cfg.program_name = filesystem::path{ ML_argv[0] }.filename();
+			cfg.program_name = filesystem::path{ __argv[0] }.filename();
 
 			j["content_home"].get_to(cfg.content_home);
 

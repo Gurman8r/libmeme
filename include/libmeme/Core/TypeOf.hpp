@@ -13,13 +13,13 @@ namespace ml
 
 	template <class T> struct typeof<T> final
 	{
-		using name_type = typename nameof<>::name_type;
+		using view_type = typename nameof<>::view_type;
 
 		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept = default;
 
-		ML_NODISCARD static constexpr name_type const & name() noexcept
+		ML_NODISCARD static constexpr view_type const & name() noexcept
 		{
 			return m_name;
 		}
@@ -36,7 +36,7 @@ namespace ml
 		}
 
 	private:
-		static constexpr name_type m_name{ nameof_v<T> };
+		static constexpr view_type m_name{ nameof_v<T> };
 
 		static constexpr guid_type m_guid{ hashof_v<T> };
 	};
@@ -45,7 +45,7 @@ namespace ml
 
 	template <> struct typeof<> final
 	{
-		using name_type = typename nameof<>::name_type;
+		using view_type = typename nameof<>::view_type;
 
 		using guid_type = typename nameof<>::guid_type;
 
@@ -60,7 +60,7 @@ namespace ml
 		{
 		}
 
-		ML_NODISCARD constexpr name_type const & name() const noexcept
+		ML_NODISCARD constexpr view_type const & name() const noexcept
 		{
 			return m_name;
 		}
@@ -77,7 +77,7 @@ namespace ml
 		}
 
 	private:
-		name_type m_name;
+		view_type m_name;
 		guid_type m_guid;
 	};
 	

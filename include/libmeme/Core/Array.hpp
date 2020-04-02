@@ -46,10 +46,6 @@ namespace ml::ds
 
 		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> value_type && { return std::move(m_data[i]); }
-
-		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> value_type const && { return std::move(m_data[i]); }
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data[_N - 1]; }

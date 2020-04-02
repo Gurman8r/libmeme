@@ -27,8 +27,17 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#if ML_is_debug
+# 	define glCheck(expr) do { expr; _ML GL::checkError(__FILE__, __LINE__, #expr); } while (0)
+#else
+# 	define glCheck(expr) (expr)
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 namespace ml
 {
+	// global init flag
 	static bool s_gl_init{ false };
 
 
@@ -879,7 +888,7 @@ namespace ml
 
 	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source, cstring & log) -> int32_t
 	{
-		if ((count < 1) || !source || !(*source))
+		if ((count < 1) || !source || !*source)
 		{
 			return -1; // true
 		}

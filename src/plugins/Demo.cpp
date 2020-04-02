@@ -67,7 +67,7 @@ namespace ml
 		void update(c_shader & shd, c_material const & mat)
 		{
 			ML_bind_scope(*shd, false);
-			for (auto const & u : *mat)
+			for (uniform const & u : *mat)
 			{
 				shd->set_uniform(u);
 			}

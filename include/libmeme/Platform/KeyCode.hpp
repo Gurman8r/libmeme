@@ -5,6 +5,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum key_state_
+	{
+		key_state_release,
+		key_state_press,
+		key_state_repeat
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum key_mods_
 	{
 		key_mods_none		= (0 << 0), // none

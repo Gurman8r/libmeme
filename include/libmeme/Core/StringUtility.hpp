@@ -11,7 +11,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// STRING TRAITS
 namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,38 +21,38 @@ namespace ml::util
 	> {};
 
 	template <class Ch
-	> ML_alias is_char_t = typename _ML_UTIL is_char<Ch>;
+	> ML_alias is_char_t = typename _ML util::is_char<Ch>;
 
 	template <class Ch
-	> static constexpr bool is_char_v{ _ML_UTIL is_char_t<Ch>::value };
+	> static constexpr bool is_char_v{ _ML util::is_char_t<Ch>::value };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char
 	> struct is_cstring : std::bool_constant<
-		_ML_UTIL is_char_v<Ch> &&
+		_ML util::is_char_v<Ch> &&
 		std::is_convertible_v<T const &, Ch const *>
 	> {};
 
 	template <class T, class Ch = char
-	> ML_alias is_cstring_t = typename _ML_UTIL is_cstring<T, Ch>;
+	> ML_alias is_cstring_t = typename _ML util::is_cstring<T, Ch>;
 
 	template <class T, class Ch = char
-	> static constexpr bool is_cstring_v{ _ML_UTIL is_cstring_t<T, Ch>::value };
+	> static constexpr bool is_cstring_v{ _ML util::is_cstring_t<T, Ch>::value };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char, class Traits = std::char_traits<Ch>
 	> struct is_string_view : std::bool_constant<
-		_ML_UTIL is_cstring_v<T, Ch> ||
+		_ML util::is_cstring_v<T, Ch> ||
 		std::is_convertible_v<T const &, std::basic_string_view<Ch, Traits>>
 	> {};
 
 	template <class T, class Ch = char
-	> ML_alias is_string_view_t = typename _ML_UTIL is_string_view<T, Ch>;
+	> ML_alias is_string_view_t = typename _ML util::is_string_view<T, Ch>;
 
 	template <class T, class Ch = char
-	> static constexpr bool is_string_view_v{ _ML_UTIL is_string_view_t<T, Ch>::value };
+	> static constexpr bool is_string_view_v{ _ML util::is_string_view_t<T, Ch>::value };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,23 +62,15 @@ namespace ml::util
 	> {};
 
 	template <class T, class Ch = char
-	> ML_alias is_string_t = typename _ML_UTIL is_string<T, Ch>;
+	> ML_alias is_string_t = typename _ML util::is_string<T, Ch>;
 
 	template <class T, class Ch = char
-	> static constexpr bool is_string_v{ _ML_UTIL is_string_t<T, Ch>::value };
+	> static constexpr bool is_string_v{ _ML util::is_string_t<T, Ch>::value };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// STRING CONVERTER IMPLEMENTATIONS
-namespace ml::util::impl
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch, class Fn, class ... Args
-	> ML_NODISCARD inline std::optional<T> str_apply(Ch const * ptr, Fn && fn, Args && ... args) noexcept
+	> ML_NODISCARD inline auto parse_answer(Ch const * ptr, Fn && fn, Args && ... args) noexcept
 	{
 		Ch * end{};
 		auto const answer{ std::invoke(ML_forward(fn), ptr, &end, ML_forward(args)...) };
@@ -89,7 +80,7 @@ namespace ml::util::impl
 		}
 		else
 		{
-			return std::nullopt;
+			return (std::optional<T>)std::nullopt;
 		}
 	}
 
@@ -156,7 +147,7 @@ namespace ml::util::impl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
-	> inline std::stringstream args_to_sstream(Arg0 && arg0, Args && ... args) noexcept
+	> ML_NODISCARD inline std::stringstream args_to_sstream(Arg0 && arg0, Args && ... args) noexcept
 	{
 		std::stringstream ss{};
 		ss << ML_forward(arg0) << '\n';
@@ -165,40 +156,11 @@ namespace ml::util::impl
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// STRING UTILITY
-namespace ml::util
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// constexpr strlen
 	template <class Ch = char
 	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
 	{
-		return ((*value) ? (1 + _ML_UTIL strlen(value + 1)) : 0);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD constexpr auto to_cstr(Str && str) noexcept
-	{
-		if constexpr (is_cstring_v<decltype(str)>)
-		{
-			return ML_forward(str);
-		}
-		else if constexpr (is_string_v<Str>)
-		{
-			return ML_forward(str).c_str();
-		}
-		else
-		{
-			static_assert(is_string_view_v<Str>);
-			return to_cstr(pmr::string{ ML_forward(str) });
-		}
+		return ((*value) ? (1 + _ML util::strlen(value + 1)) : 0);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -259,7 +221,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch = char
-	> ML_NODISCARD static constexpr bool is_whitespace(Ch const c) noexcept
+	> ML_NODISCARD constexpr bool is_whitespace(Ch const c) noexcept
 	{
 		switch (static_cast<char>(c))
 		{
@@ -492,67 +454,67 @@ namespace ml::util
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<int8_t> to_i8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int8_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return _ML util::parse_answer<int8_t>(ML_forward(str).c_str(), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<int16_t> to_i16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int16_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return _ML util::parse_answer<int16_t>(ML_forward(str).c_str(), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<int32_t> to_i32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int32_t>(to_cstr(ML_forward(str)), &_CSTD strtol, base);
+		return _ML util::parse_answer<int32_t>(ML_forward(str).c_str(), &_CSTD strtol, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<int64_t> to_i64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<int64_t>(to_cstr(ML_forward(str)), &_CSTD strtoll, base);
+		return _ML util::parse_answer<int64_t>(ML_forward(str).c_str(), &_CSTD strtoll, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<uint8_t> to_u8(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint8_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return _ML util::parse_answer<uint8_t>(ML_forward(str).c_str(), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<uint16_t> to_u16(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint16_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return _ML util::parse_answer<uint16_t>(ML_forward(str).c_str(), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<uint32_t> to_u32(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint32_t>(to_cstr(ML_forward(str)), &_CSTD strtoul, base);
+		return _ML util::parse_answer<uint32_t>(ML_forward(str).c_str(), &_CSTD strtoul, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<uint64_t> to_u64(Str && str, int32_t base = 10) noexcept
 	{
-		return impl::str_apply<uint64_t>(to_cstr(ML_forward(str)), &_CSTD strtoull, base);
+		return _ML util::parse_answer<uint64_t>(ML_forward(str).c_str(), &_CSTD strtoull, base);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<float32_t> to_f32(Str && str) noexcept
 	{
-		return impl::str_apply<float32_t>(to_cstr(ML_forward(str)), &_CSTD strtod);
+		return _ML util::parse_answer<float32_t>(ML_forward(str).c_str(), &_CSTD strtod);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<float64_t> to_f64(Str && str) noexcept
 	{
-		return impl::str_apply<float64_t>(to_cstr(ML_forward(str)), &_CSTD strtod);
+		return _ML util::parse_answer<float64_t>(ML_forward(str).c_str(), &_CSTD strtod);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline std::optional<float80_t> to_f80(Str && str) noexcept
 	{
-		return impl::str_apply<float80_t>(to_cstr(ML_forward(str)), &_CSTD strtold);
+		return _ML util::parse_answer<float80_t>(ML_forward(str).c_str(), &_CSTD strtold);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -566,67 +528,67 @@ namespace ml::util
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(int8_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(int16_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(int32_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(int64_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(uint8_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(uint16_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(uint32_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(uint64_t const value) noexcept
 	{
-		return impl::integral_to_string<Ch>(value);
+		return _ML util::integral_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(float64_t const value) noexcept
 	{
-		return impl::floating_point_to_string<Ch>(value);
+		return _ML util::floating_point_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(float32_t const value) noexcept
 	{
-		return impl::floating_point_to_string<Ch>(value);
+		return _ML util::floating_point_to_string<Ch>(value);
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline Str to_string(float80_t const value) noexcept
 	{
-		return impl::floating_point_to_string<Ch>(value);
+		return _ML util::floating_point_to_string<Ch>(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -634,7 +596,7 @@ namespace ml::util
 	template <class Arg0, class ... Args
 	> ML_NODISCARD inline pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{ impl::args_to_sstream(ML_forward(arg0), ML_forward(args)...) };
+		std::stringstream ss{ _ML util::args_to_sstream(ML_forward(arg0), ML_forward(args)...) };
 		return format(fmt, ss);
 	}
 
@@ -705,7 +667,5 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_STRING_UTILITY_HPP_

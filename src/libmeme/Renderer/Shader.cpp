@@ -393,7 +393,7 @@ namespace ml
 		}
 
 		// Compile Vertex
-		uint32_t vert{ 0 };
+		uint32_t vert{};
 		switch (GL::compileShader(vert, GL::VertexShader, 1, &v))
 		{
 		case ML_SUCCESS:
@@ -406,7 +406,7 @@ namespace ml
 		}
 
 		// Compile Geometry
-		uint32_t geom{ 0 };
+		uint32_t geom{};
 		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g))
 		{
 		case ML_SUCCESS:
@@ -419,7 +419,7 @@ namespace ml
 		}
 
 		// Compile Fragment
-		uint32_t frag{ 0 };
+		uint32_t frag{};
 		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f))
 		{
 		case ML_SUCCESS:

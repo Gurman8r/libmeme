@@ -140,16 +140,11 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres || !value || !*value)
-			{
-				return false;
-			}
-			else
-			{
-				inst.m_testres = value;
+			if (inst.m_testres || !value || !*value) { return false; }
 
-				return (pmr::get_default_resource() == inst.m_testres);
-			}
+			inst.m_testres = value;
+
+			return (pmr::get_default_resource() == inst.m_testres);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -160,7 +155,7 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate requested bytes
-			byte_t * const temp{ inst.m_alloc.allocate(size) };
+			auto const temp{ inst.m_alloc.allocate(size) };
 
 			// create record
 			return (*inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first);
@@ -187,7 +182,7 @@ namespace ml
 				// free allocation
 				inst.m_alloc.deallocate(it->second->data, it->second->size);
 
-				// remove record
+				// erase record
 				inst.m_records.erase(it->first);
 			}
 		}
@@ -220,7 +215,7 @@ namespace ml
 			}
 			else
 			{
-				void * const temp{ allocate(newsz) };
+				auto const temp{ allocate(newsz) };
 				if (temp)
 				{
 					std::memcpy(temp, addr, oldsz);
@@ -245,14 +240,12 @@ namespace ml
 	private:
 		friend singleton<memory_manager>;
 
-		memory_manager() noexcept;
-
 		~memory_manager();
 
-		allocator_type			m_alloc;	// allocator
-		size_t					m_index;	// record index
-		record_map				m_records;	// record table
-		util::test_resource *	m_testres;	// test resource
+		allocator_type			m_alloc		{};	// allocator
+		size_t					m_index		{};	// record index
+		record_map				m_records	{};	// record table
+		util::test_resource *	m_testres	{};	// test resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -291,8 +284,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_MEMORY_HPP_
