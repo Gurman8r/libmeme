@@ -15,10 +15,7 @@ namespace ml::impl
     {
         explicit once_call(Fn && fn) noexcept
         {
-            static bool sanity{}; if ML_UNLIKELY(!sanity && (sanity = true))
-            {
-                std::invoke(ML_forward(fn));
-            }
+            std::invoke(ML_forward(fn));
         }
     };
 
