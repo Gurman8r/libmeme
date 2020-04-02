@@ -163,7 +163,7 @@ namespace ml::gui
 
 		plot_controller & update(float_t const tt, float_t const dt = 1.f / 60.f) noexcept
 		{
-			if (m_ref_time == 0.0)
+			if (m_ref_time == 0.f)
 			{
 				m_ref_time = tt;
 				return (*this);
