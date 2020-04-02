@@ -419,7 +419,7 @@ namespace ml
 			if (m_cout) { m_console.printss(m_cout); }
 
 			// plots
-			m_plots.update(engine::get_time().count());
+			m_plots.update(engine::get_time().count<float_t>());
 			
 			// systems
 			m_renderer.update_system<x_apply_transforms>();
@@ -739,7 +739,7 @@ namespace ml
 			static ImGui::TextEditor test{};
 			ML_once{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
-				test.SetText("sample text");
+				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
 
 			if (ImGui::BeginTabBar("documents##tabs"))

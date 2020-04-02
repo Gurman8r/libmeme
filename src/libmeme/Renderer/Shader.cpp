@@ -29,10 +29,9 @@ namespace ml
 			}
 		}
 
-		operator bool() const noexcept
-		{
-			return (location != -1);
-		}
+		operator bool() const noexcept { return location != -1; }
+
+		operator int32_t() const noexcept { return location; }
 	};
 }
 
@@ -40,8 +39,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader::shader()
-		: shader{ allocator_type{} }
+	shader::shader() : shader{ allocator_type{} }
 	{
 	}
 
@@ -253,35 +251,35 @@ namespace ml
 	bool shader::set_uniform(pmr::string const & name, int32_t value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniform1i(u.location, value); }
+		if (u) { GL::uniform1i(u, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniform1f(u.location, value); }
+		if (u) { GL::uniform1f(u, value); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniform2f(u.location, value[0], value[1]); }
+		if (u) { GL::uniform2f(u, value[0], value[1]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniform3f(u.location, value[0], value[1], value[2]); }
+		if (u) { GL::uniform3f(u, value[0], value[1], value[2]); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniform4f(u.location, value[0], value[1], value[2], value[3]); }
+		if (u) { GL::uniform4f(u, value[0], value[1], value[2], value[3]); }
 		return u;
 	}
 
@@ -293,21 +291,21 @@ namespace ml
 	bool shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniformMatrix2fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix2fv(u, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniformMatrix3fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix3fv(u, 1, false, value.data()); }
 		return u;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
 		uniform_binder const u{ *this, name };
-		if (u) { GL::uniformMatrix4fv(u.location, 1, false, value.data()); }
+		if (u) { GL::uniformMatrix4fv(u, 1, false, value.data()); }
 		return u;
 	}
 
@@ -326,13 +324,13 @@ namespace ml
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
 
-			if (auto const it{ m_textures.find(u.location) })
+			if (auto const it{ m_textures.find(u) })
 			{
 				(*it->second) = &value;
 			}
 			else if ((m_textures.size() + 1) < max_textures)
 			{
-				m_textures.insert(u.location, &value);
+				m_textures.insert(u, &value);
 			}
 			else
 			{

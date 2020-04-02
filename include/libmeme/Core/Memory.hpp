@@ -159,11 +159,11 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			// allocate the requested bytes
-			byte_t * const data{ inst.m_alloc.allocate(size) };
+			// allocate requested bytes
+			byte_t * const temp{ inst.m_alloc.allocate(size) };
 
-			// create the record
-			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
+			// create record
+			return (*inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -181,13 +181,13 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			// find the entry
+			// find the record
 			if (auto const it{ inst.m_records.find(addr) })
 			{
-				// free the allocation
+				// free allocation
 				inst.m_alloc.deallocate(it->second->data, it->second->size);
 
-				// erase the record
+				// remove record
 				inst.m_records.erase(it->first);
 			}
 		}

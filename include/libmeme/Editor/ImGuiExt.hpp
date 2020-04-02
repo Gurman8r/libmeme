@@ -154,14 +154,14 @@ namespace ml::gui
 	{
 		pmr::vector<plot> m_plots{};
 		
-		float64_t m_ref_time{};
+		float_t m_ref_time{};
 
 		template <class Fn> auto for_each(Fn && fn) noexcept
 		{
 			return std::for_each(m_plots.begin(), m_plots.end(), ML_forward(fn));
 		}
 
-		plot_controller & update(float64_t const tt, float_t const dt = 1.f / 60.f) noexcept
+		plot_controller & update(float_t const tt, float_t const dt = 1.f / 60.f) noexcept
 		{
 			if (m_ref_time == 0.0)
 			{
