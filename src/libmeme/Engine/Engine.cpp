@@ -20,14 +20,14 @@ namespace ml
 	
 	using file_list_t	= pmr::vector<filesystem::path>;
 	using file_set_t	= ds::flat_set<filesystem::path>;
-	using libraries_t	= ds::flat_map<struct shared_library, struct plugin *>;
+	using libraries_t	= ds::flat_map<shared_library, plugin *>;
 
 	// engine context
 	class engine::context final : trackable, non_copyable
 	{
 		friend class		engine						;
 		engine::config		m_config		{}			; // public startup variables
-		engine::runtime		m_runtime		{}			; // public runtime variables
+		engine::io			m_runtime		{}			; // public io variables
 		timer				m_main_timer	{ true }	; // main timer
 		timer				m_loop_timer	{}			; // loop timer
 		frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
@@ -56,7 +56,7 @@ namespace ml
 		{
 			auto & cfg{ get_config() };
 
-			cfg.arguments = { __argv, __argv + __argc };
+			cfg.command_line = { __argv, __argv + __argc };
 
 			cfg.program_path = filesystem::current_path();
 
@@ -92,7 +92,7 @@ namespace ml
 		return (*g_engine).m_config;
 	}
 
-	engine::runtime & engine::get_runtime() noexcept
+	engine::io & engine::get_io() noexcept
 	{
 		ML_assert(is_initialized());
 		return (*g_engine).m_runtime;
@@ -125,7 +125,7 @@ namespace ml
 			};
 			static constexpr struct luaL_Reg lua_defaults[] =
 			{
-			luaL_Reg{ "exit", [](auto L) { engine::close(); return 0; } },
+			luaL_Reg{ "exit", [](auto L) { engine::get_window().close(); return 0; } },
 			luaL_Reg{ "print", [](auto L)
 			{
 				for (int32_t i = 1; i <= lua_gettop(L); ++i)

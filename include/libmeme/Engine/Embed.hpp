@@ -28,7 +28,7 @@ namespace ml::embed
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // LUA
-#ifdef ML_EMBED_LUA
+#if defined(ML_EMBED_LUA) || defined(ML_EMBED_ALL)
 extern "C"
 {
 #include <lua/lua.h>
@@ -40,7 +40,7 @@ extern "C"
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // PYTHON
-#ifdef ML_EMBED_PYTHON
+#if defined(ML_EMBED_PYTHON) || defined(ML_EMBED_ALL)
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>

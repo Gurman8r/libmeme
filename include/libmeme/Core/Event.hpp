@@ -2,7 +2,7 @@
 #define _ML_EVENT_HPP_
 
 #include <libmeme/Core/NonCopyable.hpp>
-#include <libmeme/Core/TypeOf.hpp>
+#include <libmeme/Core/NameOf.hpp>
 
 #define ML_event(name) struct name final : _ML T_event<name>
 

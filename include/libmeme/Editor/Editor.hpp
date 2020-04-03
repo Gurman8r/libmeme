@@ -15,7 +15,7 @@ namespace ml
 
 		class context;
 		struct config;
-		struct runtime;
+		struct io;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,8 +38,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// editor runtime
-		struct runtime final : trackable
+		// editor io
+		struct io final : trackable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -69,7 +69,7 @@ namespace ml
 
 		ML_NODISCARD static config & get_config() noexcept;
 
-		ML_NODISCARD static runtime & get_runtime() noexcept;
+		ML_NODISCARD static io & get_io() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

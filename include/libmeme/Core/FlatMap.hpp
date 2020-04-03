@@ -301,27 +301,14 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = self_type
-		> ML_NODISCARD auto compare(Other const & other) const
-		{
-			if constexpr (std::is_same_v<Other, self_type>)
-			{
-				return this->compare(other.m_pair);
-			}
-			else
-			{
-				return (m_pair != other) ? ((m_pair < other) ? -1 : 1) : 0;
-			}
-		}
-
-		ML_NODISCARD bool contains(key_type const & key) const
+		ML_NODISCARD bool contains(key_type const & key) const noexcept
 		{
 			return m_pair.first.contains(key);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD optl_iterator_pair find(key_type const & key)
+		ML_NODISCARD optl_iterator_pair find(key_type const & key) noexcept
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.end())
 			{
@@ -333,7 +320,7 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD optl_const_iterator_pair find(key_type const & key) const
+		ML_NODISCARD optl_const_iterator_pair find(key_type const & key) const noexcept
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.cend())
 			{
@@ -348,7 +335,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args)
+		> std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args) noexcept
 		{
 			if (auto const k{ m_pair.first.insert(key) }; k.second)
 			{
@@ -361,7 +348,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args)
+		> std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args) noexcept
 		{
 			if (auto const k{ m_pair.first.insert(std::move(key)) }; k.second)
 			{
@@ -376,12 +363,12 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Key, class Value
-		> iterator_pair insert(Key && key, Value && value)
+		> iterator_pair insert(Key && key, Value && value) noexcept
 		{
 			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
 		}
 
-		iterator_pair insert(keyval_pair && pair)
+		iterator_pair insert(keyval_pair && pair) noexcept
 		{
 			return this->try_emplace(ML_forward(pair.first), ML_forward(pair.second)).first;
 		}
@@ -389,7 +376,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ... Args
-		> value_type & find_or_add(key_type const & key, Args && ... args)
+		> value_type & find_or_add(key_type const & key, Args && ... args) noexcept
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -402,7 +389,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> value_type & find_or_add(key_type && key, Args && ... args)
+		> value_type & find_or_add(key_type && key, Args && ... args) noexcept
 		{
 			if (auto const it{ this->find(key) })
 			{
@@ -416,12 +403,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD value_type & at(key_type const & key)
+		ML_NODISCARD value_type & at(key_type const & key) noexcept
 		{
 			return this->find_or_add(key, value_type{});
 		}
 
-		ML_NODISCARD value_type & at(key_type && key)
+		ML_NODISCARD value_type & at(key_type && key) noexcept
 		{
 			return this->find_or_add(std::move(key), value_type{});
 		}
@@ -441,7 +428,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
 		{
 			for (; first != last; ++first)
 			{
@@ -465,7 +452,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const
 		{
 			for (; first != last; ++first)
 			{
@@ -489,7 +476,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
 		{
 			if (0 < count)
 			{
@@ -511,7 +498,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
 		{
 			if (0 < count)
 			{
@@ -533,37 +520,50 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator==(Other const & other) const
+		> ML_NODISCARD auto compare(Other const & other) const
+		{
+			if constexpr (std::is_same_v<Other, self_type>)
+			{
+				return this->compare(other.m_pair);
+			}
+			else
+			{
+				return (m_pair != other) ? ((m_pair < other) ? -1 : 1) : 0;
+			}
+		}
+
+		template <class Other = self_type
+		> ML_NODISCARD bool operator==(Other const & other) const noexcept
 		{
 			return this->compare(other) == 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator!=(Other const & other) const
+		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
 		{
 			return this->compare(other) != 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator<(Other const & other) const
+		> ML_NODISCARD bool operator<(Other const & other) const noexcept
 		{
 			return this->compare(other) < 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator>(Other const & other) const
+		> ML_NODISCARD bool operator>(Other const & other) const noexcept
 		{
 			return this->compare(other) > 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator<=(Other const & other) const
+		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
 		{
 			return this->compare(other) <= 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator>=(Other const & other) const
+		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
 		{
 			return this->compare(other) >= 0;
 		}

@@ -23,13 +23,11 @@ namespace ml::embed
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static py::class_<scriptable_object> & install(py::module & m, cstring name);
+		using callback = std::function<void()>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = scriptable_object;
-
-		using callback = std::function<void()>;
+		static py::class_<scriptable_object> install(py::module & m);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -60,7 +58,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD T get_opt(cstring name, T const & dv = {}) const
+		> ML_NODISCARD auto get_opt(cstring name, T const & dv = {}) const
 		{
 			if (m_kwargs.contains(name))
 			{

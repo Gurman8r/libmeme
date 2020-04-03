@@ -4,23 +4,23 @@ namespace ml::embed
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	py::class_<scriptable_object> & scriptable_object::install(py::module & m, cstring name)
+	py::class_<scriptable_object> scriptable_object::install(py::module & m)
 	{
-		return py::class_<self_type>{ m, name }
+		return py::class_<scriptable_object>(m, "scriptable_object")
 			.def(py::init<py::object, py::args, py::kwargs>())
 
-			.def("__bool__"		, &self_type::operator bool, py::is_operator())
-			.def("__nonzero__"	, &self_type::operator bool, py::is_operator())
-			.def("__call__"		, &self_type::operator(), py::is_operator())
+			.def("__bool__"		, &scriptable_object::operator bool, py::is_operator())
+			.def("__nonzero__"	, &scriptable_object::operator bool, py::is_operator())
+			.def("__call__"		, &scriptable_object::operator(), py::is_operator())
 
-			.def("__enter__"	, [](self_type & self) { return self.m_self; })
-			.def("__exit__"		, [](self_type & self, py::args) { return py::none{}; })
+			.def("__enter__"	, [](scriptable_object & self) { return self.m_self; })
+			.def("__exit__"		, [](scriptable_object & self, py::args) { return py::none{}; })
 
-			.def_readwrite(			"args"		, &self_type::m_args)
-			.def_readwrite(			"kwargs"	, &self_type::m_kwargs)
-			.def_readonly(			"flags"		, &self_type::m_flags)
-			.def_property(			"enabled"	, &self_type::is_enabled, &self_type::set_enabled)
-			.def_property_readonly(	"active"	, &self_type::is_active)
+			.def_readwrite(			"args"		, &scriptable_object::m_args)
+			.def_readwrite(			"kwargs"	, &scriptable_object::m_kwargs)
+			.def_readonly(			"flags"		, &scriptable_object::m_flags)
+			.def_property(			"enabled"	, &scriptable_object::is_enabled, &scriptable_object::set_enabled)
+			.def_property_readonly(	"active"	, &scriptable_object::is_active)
 			;
 	}
 
@@ -32,7 +32,6 @@ namespace ml::embed
 		load_fn(m_awake		, "awake");
 		load_fn(m_on_disable, "on_disable");
 		load_fn(m_on_enable	, "on_enable");
-		load_fn(m_reset		, "reset");
 		load_fn(m_start		, "start");
 		load_fn(m_update	, "update",
 			[&]() { if (set_flag(scriptable_flags_active, true)) { call_fn("start"); } }

@@ -7,8 +7,6 @@
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,7 +16,7 @@ namespace ml
 	{
 		friend class		editor						;
 		editor::config		m_config		{}			; // public startup variables
-		editor::runtime		m_runtime		{}			; // public runtime variables
+		editor::io			m_runtime		{}			; // public io variables
 		void *				m_imgui			{}			; // active imgui context
 	};
 
@@ -71,7 +69,7 @@ namespace ml
 		return (*g_editor).m_config;
 	}
 
-	editor::runtime & editor::get_runtime() noexcept
+	editor::io & editor::get_io() noexcept
 	{
 		ML_assert(is_initialized());
 		return (*g_editor).m_runtime;
@@ -147,19 +145,21 @@ namespace ml
 
 	void editor::new_frame()
 	{
-		if (!g_editor) return;
+		ML_assert(is_initialized());
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_NewFrame();
 #else
 #endif
 		ImGui_ImplGlfw_NewFrame();
+
 		ImGui::NewFrame();
 	}
 
 	void editor::render()
 	{
-		if (!g_editor) return;
+		ML_assert(is_initialized());
+
 		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
 		// DOCKSPACE
@@ -236,7 +236,7 @@ namespace ml
 
 	void editor::render_frame()
 	{
-		if (!g_editor) return;
+		ML_assert(is_initialized());
 
 		ImGui::Render();
 
@@ -259,16 +259,19 @@ namespace ml
 
 	void editor::show_imgui_demo(bool * p_open)
 	{
+		ML_assert(is_initialized());
 		ImGui::ShowDemoWindow(p_open);
 	}
 
 	void editor::show_imgui_metrics(bool * p_open)
 	{
+		ML_assert(is_initialized());
 		ImGui::ShowMetricsWindow(p_open);
 	}
 
 	void editor::show_imgui_about(bool * p_open)
 	{
+		ML_assert(is_initialized());
 		ImGui::ShowAboutWindow(p_open);
 	}
 
@@ -276,16 +279,18 @@ namespace ml
 
 	void editor::add_menu(cstring label, menu_t && fn)
 	{
+		ML_assert(is_initialized());
+		
 		auto & menus{ g_editor->m_runtime.main_menus };
-		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto elem)
-		{
-			return (elem.first == label);
-		}) };
+		
+		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e) { return (e.first == label); }) };
+		
 		if (it == menus.end())
 		{
 			menus.push_back({ label, {} });
 			it = (menus.end() - 1);
 		}
+		
 		if (fn)
 		{
 			it->second.emplace_back(ML_forward(fn));
@@ -296,22 +301,22 @@ namespace ml
 
 	uint32_t editor::begin_dock_builder(int32_t flags)
 	{
-		if (uint32_t root{ ImGui::GetID(dockspace_title) })
+		ML_assert(is_initialized());
+		
+		if (uint32_t root{ ImGui::GetID(dockspace_title) }; !ImGui::DockBuilderGetNode(root))
 		{
-			if (!ImGui::DockBuilderGetNode(root))
-			{
-				ImGui::DockBuilderRemoveNode(root);
+			ImGui::DockBuilderRemoveNode(root);
 
-				ImGui::DockBuilderAddNode(root, flags);
+			ImGui::DockBuilderAddNode(root, flags);
 
-				return root;
-			}
+			return root;
 		}
 		return NULL;
 	}
 
 	uint32_t editor::end_dock_builder(uint32_t root)
 	{
+		ML_assert(is_initialized());
 		if (root)
 		{
 			ImGui::DockBuilderFinish(root);
@@ -321,6 +326,7 @@ namespace ml
 
 	uint32_t editor::dock(cstring name, uint32_t id)
 	{
+		ML_assert(is_initialized());
 		if (name && id)
 		{
 			ImGui::DockBuilderDockWindow(name, id);
@@ -331,16 +337,19 @@ namespace ml
 
 	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
+		ML_assert(is_initialized());
 		return (*g_editor).m_runtime.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
 	}
 
 	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
+		ML_assert(is_initialized());
 		return split(id, dir, ratio, nullptr, other);
 	}
 
 	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
 	{
+		ML_assert(is_initialized());
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, other);
 	}
 

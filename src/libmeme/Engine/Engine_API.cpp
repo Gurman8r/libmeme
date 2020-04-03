@@ -6,129 +6,193 @@
 #endif
 #include <libmeme/Engine/ScriptableObject.hpp>
 
-// OUTPUT HANDLER
+// libmeme
 namespace ml::embed
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	class output_handler final
-	{
-		std::ostream & m_os; int32_t m_no;
-	public:
-		explicit output_handler(std::ostream & os = std::cout) noexcept : m_os{ os }
-		{
-			if (auto const addr{ std::addressof(m_os) }; !addr) { m_no = -2; }
-			else if (addr == std::addressof(std::cout)) { m_no = 1; }
-			else if (addr == std::addressof(std::cerr)) { m_no = 2; }
-		}
-
-		inline int32_t fileno() const noexcept { return m_no; }
-
-		inline void flush() { m_os.flush(); }
-
-		inline void write(py::object const & o) { m_os << o; }
-
-		inline void writelines(py::list const & l) { for (auto const & e : l) m_os << e; }
-
-		static decltype(auto) install(py::module m, cstring name)
-		{
-			return py::class_<output_handler>{ m, name }
-				.def(py::init<>())
-				.def("closed"		, []() { return false; })
-				.def("isatty"		, []() { return false; })
-				.def("readable"		, []() { return false; })
-				.def("seekable"		, []() { return false; })
-				.def("writable"		, []() { return true; })
-				.def("fileno"		, &output_handler::fileno)
-				.def("flush"		, &output_handler::flush)
-				.def("write"		, &output_handler::write)
-				.def("writelines"	, &output_handler::writelines)
-				;
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// LIBMEME_ENGINE
-namespace ml::embed
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	PYBIND11_EMBEDDED_MODULE(LIBMEME_ENGINE, m)
+	PYBIND11_EMBEDDED_MODULE(libmeme, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// LIB
-		struct ml_lib {};
-		py::class_<ml_lib>{ m, "lib" }
-			.def("arch"			, []() { return ML_arch; })
-			.def("author"		, []() { return ML__author; })
-			.def("cc"			, []() { return ML_cc_name; })
-			.def("cc_ver"		, []() { return ML_cc_version; })
-			.def("config"		, []() { return ML_configuration; })
-			.def("date"			, []() { return ML__date; })
-			.def("is_debug"		, []() { return ML_is_debug; })
-			.def("lang"			, []() { return ML_lang; })
-			.def("name"			, []() { return ML__name; })
-			.def("platform"		, []() { return ML_platform; })
-			.def("time"			, []() { return ML__time; })
-			.def("url"			, []() { return ML__url; })
-			.def("version"		, []() { return ML__version; })
-			;
+		struct ml_lib
+		{
+			static void install(py::module & m)
+			{
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+				py::class_<ml_lib>(m, "lib")
+					.def_property_readonly_static("arch"	, [](py::object) { return ML_arch; })
+					.def_property_readonly_static("author"	, [](py::object) { return ML__author; })
+					.def_property_readonly_static("cc_name"	, [](py::object) { return ML_cc_name; })
+					.def_property_readonly_static("cc_ver"	, [](py::object) { return ML_cc_version; })
+					.def_property_readonly_static("cfg"		, [](py::object) { return ML_configuration; })
+					.def_property_readonly_static("date"	, [](py::object) { return ML__date; })
+					.def_property_readonly_static("is_debug", [](py::object) { return ML_is_debug; })
+					.def_property_readonly_static("lang"	, [](py::object) { return ML_lang; })
+					.def_property_readonly_static("name"	, [](py::object) { return ML__name; })
+					.def_property_readonly_static("platform", [](py::object) { return ML_platform; })
+					.def_property_readonly_static("time"	, [](py::object) { return ML__time; })
+					.def_property_readonly_static("url"		, [](py::object) { return ML__url; })
+					.def_property_readonly_static("version"	, [](py::object) { return ML__version; })
+					;
+
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			}
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// OUTPUT
-		output_handler::install(m, "output_handler");
-		m.attr("cout") = output_handler{ std::cout };
-		m.attr("cerr") = output_handler{ std::cerr };
+		// STDIO
+		struct ml_stdio
+		{
+			static void install(py::module & m)
+			{
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// SCRIPTING
-		scriptable_object::install(m, "scriptable_object");
+				struct ml_output
+				{
+					std::reference_wrapper<std::ostream> m_os;
+
+					ml_output(std::ostream & os = std::cout) : m_os{ std::ref(os) }
+					{
+					}
+
+					int32_t fileno() const noexcept
+					{
+						if (auto const addr{ std::addressof(m_os.get()) }; !addr) { return -2; }
+						else if (addr == std::addressof(std::cout)) { return 1; }
+						else if (addr == std::addressof(std::cerr)) { return 2; }
+						else return 0;
+					}
+
+					void flush() { m_os.get().flush(); }
+
+					void write(py::object o) { m_os << o; }
+
+					void writelines(py::list l) { for (auto const & e : l) { m_os << e; } }
+				};
+				py::class_<ml_output>(m, "output")
+					.def(py::init<>())
+					.def("closed"		, []() { return false; })
+					.def("isatty"		, []() { return false; })
+					.def("readable"		, []() { return false; })
+					.def("seekable"		, []() { return false; })
+					.def("writable"		, []() { return true; })
+					.def("fileno"		, &ml_output::fileno)
+					.def("flush"		, &ml_output::flush)
+					.def("write"		, &ml_output::write)
+					.def("writelines"	, &ml_output::writelines)
+					;
+
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+				py::class_<ml_stdio>(m, "stdio")
+
+					.def_property_readonly_static("cerr"
+						, [](py::object) { return ml_output{ std::cerr }; })
+					
+					.def_property_readonly_static("cout"
+						, [](py::object) { return ml_output{ std::cout }; })
+					
+					;
+
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			}
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// CONFIG
-		py::class_<engine::config>{ m, "config" }
-			.def("arguments"	, []() { return engine::get_config().arguments; })
-			.def("content_home"	, []() { return engine::get_config().content_home.native(); })
-			.def("library_home"	, []() { return engine::get_config().library_home.native(); })
-			.def("program_name"	, []() { return engine::get_config().program_name.native(); })
-			.def("program_path"	, []() { return engine::get_config().program_path.native(); })
-			.def("setup_script"	, []() { return engine::get_config().setup_script.native(); })
-			;
+		// ENGINE
+		struct ml_engine
+		{
+			static void install(py::module & m)
+			{
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+				struct ml_engine_config {};
+				py::class_<ml_engine_config>(m, "engine_config")
 
-		// RUNTIME
-		py::class_<engine::runtime>{ m, "runtime" }
-			.def_property_readonly_static("delta_time"	, []() { return engine::get_runtime().delta_time; })
-			.def_property_readonly_static("frame_count"	, []() { return engine::get_runtime().frame_count; })
-			.def_property_readonly_static("frame_rate"	, []() { return engine::get_runtime().frame_rate; })
-			;
+					.def_property_readonly_static("command_line"
+						, [](py::object) { return engine::get_config().command_line; })
+					
+					.def_property_readonly_static("content_home"
+						, [](py::object) { return engine::get_config().content_home.native(); })
+					
+					.def_property_readonly_static("library_home"
+						, [](py::object) { return engine::get_config().library_home.native(); })
+					
+					.def_property_readonly_static("program_name"
+						, [](py::object) { return engine::get_config().program_name.native(); })
+					
+					.def_property_readonly_static("program_path"
+						, [](py::object) { return engine::get_config().program_path.native(); })
+					
+					.def_property_readonly_static("setup_script"
+						, [](py::object) { return engine::get_config().setup_script.native(); })
+					;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		m // FUNCTIONS
-			.def("close"		, [](py::args) { return engine::close(); })
-			.def("load_plugin"	, [](cstring s) { return engine::load_plugin(s); })
-			.def("do_string"	, [](int32_t l, cstring s) { return engine::do_string(l, s); })
-			.def("do_file"		, [](cstring s) { return engine::do_file(s); })
-			;
+				struct ml_engine_io {};
+				py::class_<ml_engine_io>(m, "engine_io")
+
+					.def_property_readonly_static("delta_time"
+						, [](py::object) { return engine::get_io().delta_time; })
+					
+					.def_property_readonly_static("frame_count"
+						, [](py::object) { return engine::get_io().frame_count; })
+					
+					.def_property_readonly_static("frame_rate"
+						, [](py::object) { return engine::get_io().frame_rate; })
+					;
+
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+				py::class_<ml_engine>(m, "engine")
+
+					.def_property_readonly_static("config"
+						, [](py::object) { return ml_engine_config{}; })
+
+					.def_property_readonly_static("io"
+						, [](py::object) { return ml_engine_io{}; })
+
+					.def_static("do_string"
+						, [](int32_t l, cstring s) { return engine::do_string(l, s); })
+					
+					.def_static("do_file"
+						, [](cstring s) { return engine::do_file(s); })
+					
+					.def_static("exit"
+						, [](py::args) { engine::get_window().close(); })
+					
+					.def_static("get_time"
+						, []() { return engine::get_time().count(); })
+					
+					.def_static("load_plugin"
+						, [](cstring s) { return engine::load_plugin(s); })
+					;
+
+				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			}
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// INSTALL
-		m.attr("__good__") = ([&
-			, builtins = py::module::import("builtins")
+		([&	, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")
 		]()
 		{
-			builtins.attr("exit")	= m.attr("close");
-			sys.attr("exit")		= m.attr("close");
-			sys.attr("stdout")		= m.attr("cout");
-			sys.attr("stderr")		= m.attr("cout");
+			ml_lib::install(m);
+			ml_stdio::install(m);
+			ml_engine::install(m);
+			scriptable_object::install(m);
+
+			builtins.attr("exit")	= m.attr("engine").attr("exit");
+			sys.attr("exit")		= m.attr("engine").attr("exit");
+			sys.attr("stdout")		= m.attr("stdio").attr("cout");
+			sys.attr("stderr")		= m.attr("stdio").attr("cout");
 			sys.attr("stdin")		= py::none{};
-			return true;
 		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -15,7 +15,7 @@ namespace ml
 
 		class context;
 		struct config;
-		struct runtime;
+		struct io;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,9 +24,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// engine config
-		struct config final : trackable
+		struct config final
 		{
-			arguments_t			arguments		{}			; // arguments
+			arguments_t			command_line	{}			; // command line
 			filesystem::path	content_home	{}			; // content home
 			filesystem::path	library_home	{}			; // library home
 			filesystem::path	program_path	{}			; // program path
@@ -37,8 +37,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// engine runtime
-		struct runtime final : trackable
+		// engine io
+		struct io final
 		{
 			float_t				delta_time		{}			; // frame time
 			size_t				frame_count		{}			; // frame count
@@ -57,7 +57,7 @@ namespace ml
 
 		ML_NODISCARD static config & get_config() noexcept;
 
-		ML_NODISCARD static runtime & get_runtime() noexcept;
+		ML_NODISCARD static io & get_io() noexcept;
 
 		ML_NODISCARD static duration const & get_time() noexcept;
 
@@ -78,21 +78,6 @@ namespace ml
 		static void end_draw();
 
 		static void end_loop();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static bool is_running() noexcept
-		{
-			return is_initialized() && get_window().is_open();
-		}
-
-		static void close() noexcept
-		{
-			if (is_initialized())
-			{
-				get_window().close();
-			}
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

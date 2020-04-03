@@ -170,12 +170,12 @@ namespace ml
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & dt{ engine::get_runtime().delta_time }; return dt * 1000.f; }
+			[]() { static auto const & dt{ engine::get_io().delta_time }; return dt * 1000.f; }
 			),
 
 			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & fps{ engine::get_runtime().frame_rate }; return fps; }
+			[]() { static auto const & fps{ engine::get_io().frame_rate }; return fps; }
 			),
 		} };
 
@@ -295,7 +295,7 @@ namespace ml
 				// timers
 				auto const _timers = make_material(
 					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_runtime().delta_time; })
+					make_uniform<float_t>("u_delta",	[]() { return engine::get_io().delta_time; })
 				);
 
 				// MVP
@@ -465,7 +465,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ editor::get_runtime().dock_nodes };
+			auto & d{ editor::get_io().dock_nodes };
 			d.resize(MAX_DOCK_NODE);
 			if (d[root] = editor::begin_dock_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
@@ -538,7 +538,7 @@ namespace ml
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
 				{
-					engine::close();
+					engine::get_window().close();
 				}
 			});
 			editor::add_menu("tools", [&]()
@@ -642,7 +642,7 @@ namespace ml
 
 				m_console.commands.push_back({ "exit", [&](auto args)
 				{
-					engine::close();
+					engine::get_window().close();
 				} });
 
 				m_console.commands.push_back({ "help", [&](auto args)
