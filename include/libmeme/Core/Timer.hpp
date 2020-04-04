@@ -8,21 +8,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Clock = chrono::high_resolution_clock
+	template <class _Clock = chrono::high_resolution_clock
 	> struct basic_timer final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using clock_type = typename Clock;
+		using clock_type = typename _Clock;
 		using time_point = typename clock_type::time_point;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		basic_timer(bool start_me = {}) noexcept
-			: m_running	{}
-			, m_current	{}
-			, m_previous{}
-			, m_elapsed	{}
 		{
 			if (start_me) { this->start(); }
 		}
@@ -39,7 +35,7 @@ namespace ml
 			return m_running;
 		}
 
-		basic_timer & start() noexcept
+		basic_timer & start() & noexcept
 		{
 			if (!m_running)
 			{
@@ -50,7 +46,7 @@ namespace ml
 			return (*this);
 		}
 
-		basic_timer & stop() noexcept
+		basic_timer & stop() & noexcept
 		{
 			if (m_running)
 			{
@@ -64,10 +60,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool				m_running;
-		time_point			m_previous;
-		time_point			m_current;
-		mutable duration	m_elapsed;
+		bool				m_running	{};
+		time_point			m_previous	{};
+		time_point			m_current	{};
+		mutable duration	m_elapsed	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

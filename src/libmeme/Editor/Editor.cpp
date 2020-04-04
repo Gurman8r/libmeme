@@ -16,7 +16,7 @@ namespace ml
 	{
 		friend class		editor						;
 		editor::config		m_config		{}			; // public startup variables
-		editor::io			m_runtime		{}			; // public io variables
+		editor::io			m_io			{}			; // public io variables
 		void *				m_imgui			{}			; // active imgui context
 	};
 
@@ -72,7 +72,7 @@ namespace ml
 	editor::io & editor::get_io() noexcept
 	{
 		ML_assert(is_initialized());
-		return (*g_editor).m_runtime;
+		return (*g_editor).m_io;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -128,7 +128,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return false; }
 
-		g_editor->m_runtime.main_menus.clear();
+		g_editor->m_io.main_menus.clear();
 
 #ifdef ML_RENDERER_OPENGL
 		ImGui_ImplOpenGL3_Shutdown();
@@ -163,7 +163,7 @@ namespace ml
 		ML_ImGui_ScopeID(ML_addressof(g_editor));
 
 		// DOCKSPACE
-		if (auto & io{ g_editor->m_runtime }; io.show_dockspace)
+		if (auto & io{ g_editor->m_io }; io.show_dockspace)
 		{
 			ML_ImGui_ScopeID(dockspace_title);
 			
@@ -214,7 +214,7 @@ namespace ml
 		}
 
 		// MAIN MENU
-		if (auto & io{ g_editor->m_runtime }; io.show_main_menu)
+		if (auto & io{ g_editor->m_io }; io.show_main_menu)
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
@@ -281,7 +281,7 @@ namespace ml
 	{
 		ML_assert(is_initialized());
 		
-		auto & menus{ g_editor->m_runtime.main_menus };
+		auto & menus{ g_editor->m_io.main_menus };
 		
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e) { return (e.first == label); }) };
 		
@@ -338,7 +338,7 @@ namespace ml
 	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
 	{
 		ML_assert(is_initialized());
-		return (*g_editor).m_runtime.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
+		return (*g_editor).m_io.dock_nodes[(size_t)i] = split(id, dir, ratio, other);
 	}
 
 	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)

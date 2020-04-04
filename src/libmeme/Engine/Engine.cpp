@@ -27,7 +27,7 @@ namespace ml
 	{
 		friend class		engine						;
 		engine::config		m_config		{}			; // public startup variables
-		engine::io			m_runtime		{}			; // public io variables
+		engine::io			m_io			{}			; // public io variables
 		timer				m_main_timer	{ true }	; // main timer
 		timer				m_loop_timer	{}			; // loop timer
 		frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
@@ -95,7 +95,7 @@ namespace ml
 	engine::io & engine::get_io() noexcept
 	{
 		ML_assert(is_initialized());
-		return (*g_engine).m_runtime;
+		return (*g_engine).m_io;
 	}
 
 	duration const & engine::get_time() noexcept
@@ -215,15 +215,20 @@ namespace ml
 
 	void engine::begin_loop()
 	{
+		ML_assert(is_initialized());
+
 		// update delta time
-		g_engine->m_runtime.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
+		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
 		g_engine->m_loop_timer.start();
 
+		// update window
 		window::poll_events();
 	}
 
 	void engine::begin_draw()
 	{
+		ML_assert(is_initialized());
+
 		// clear color
 		g_engine->m_window.clear_color(colors::black);
 
@@ -237,6 +242,8 @@ namespace ml
 
 	void engine::end_draw()
 	{
+		ML_assert(is_initialized());
+
 		if ML_LIKELY(!(g_engine->m_window.has_hint(window_hints_double_buffered)))
 		{
 			GL::flush();
@@ -249,17 +256,21 @@ namespace ml
 
 	void engine::end_loop()
 	{
+		ML_assert(is_initialized());
+
 		// increment frame count
-		++g_engine->m_runtime.frame_count;
+		++g_engine->m_io.frame_count;
 
 		// update fps tracker
-		g_engine->m_runtime.frame_rate = g_engine->m_fps_tracker(g_engine->m_runtime.delta_time);
+		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool engine::load_plugin(filesystem::path const & path)
 	{
+		ML_assert(is_initialized());
+
 		if (path.empty()) return false;
 
 		// check file name already loaded
@@ -283,6 +294,8 @@ namespace ml
 
 	int32_t engine::do_string(int32_t lang, pmr::string const & text)
 	{
+		ML_assert(is_initialized());
+
 		if (!is_initialized() || text.empty())
 			return 0;
 		switch (lang)
@@ -301,6 +314,8 @@ namespace ml
 
 	int32_t engine::do_file(filesystem::path const & path)
 	{
+		ML_assert(is_initialized());
+
 		if (!is_initialized() || !filesystem::exists(path))
 			return 0;
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
