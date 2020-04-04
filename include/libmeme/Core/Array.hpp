@@ -301,14 +301,14 @@ namespace ml::ds
 	template <class T, size_t N
 	> static void to_json(json & j, array<T, N> const & value)
 	{
-		// SPAGHET: json wants iterators
+		// so sue me
 		j = *reinterpret_cast<std::array<T, N> const *>(&value);
 	}
 
 	template <class T, size_t N
 	> static void from_json(json const & j, array<T, N> & value)
 	{
-		// SPAGHET: json wants iterators
+		// so sue me
 		j.get_to(*reinterpret_cast<std::array<T, N> *>(&value));
 	}
 }
