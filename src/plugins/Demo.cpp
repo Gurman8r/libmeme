@@ -336,7 +336,7 @@ namespace ml
 				) + _timers + _camera + _tf;
 
 				// test
-				m_materials["test"] = (make_material() + m_materials["3d"])
+				m_materials["moon"] = (make_material() + m_materials["3d"])
 					.set<texture>("u_texture0", &m_textures["moon_dm_2k"]);
 			}
 
@@ -350,12 +350,10 @@ namespace ml
 					engine::path_to("assets/models/sphere32x24.obj")
 				);
 
-				// FIXME: upside down?
 				m_models["monkey"] = make_model(
 					engine::path_to("assets/models/monkey.obj")
 				);
 
-				// FIXME: ibo broken
 				m_models["triangle"] = make_model(make_mesh(
 					{
 						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
@@ -367,7 +365,6 @@ namespace ml
 					}
 				));
 
-				// FIXME: ibo broken
 				m_models["quad"] = make_model(make_mesh(
 					{
 						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
@@ -400,12 +397,12 @@ namespace ml
 				auto & earth = make_renderer("3d", "3d", "sphere32x24", c_transform{
 					vec3{ -.5f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .15f },
-					vec3{ 1.f, 1.f, 1.f }
+					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3d", "test", "sphere8x6", c_transform{
+				auto & moon = make_renderer("3d", "moon", "sphere8x6", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
-					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
+					vec4{ 0.0f, 0.1f, 0.0f, .25f },
 					vec3::fill(.27f)
 					});
 			}

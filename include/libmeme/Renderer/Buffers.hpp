@@ -45,7 +45,6 @@ namespace ml
 		void *		m_data	{};
 		uint32_t	m_size	{};
 		uint32_t	m_count	{};
-		uint32_t	m_offset{};
 
 		operator bool() const noexcept { return m_handle; }
 

@@ -93,7 +93,7 @@ namespace ml
 		);
 	}
 
-	bool model::load_from_file(filesystem::path const & path, uint32_t flags)
+	bool model::load_from_file(filesystem::path const & path, int32_t flags)
 	{
 		// open scene
 		Assimp::Importer _ai;
@@ -113,30 +113,30 @@ namespace ml
 		);
 
 		// for each mesh
-		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const & mesh)
+		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const m)
 		{
 			// mesh vertices
 			pmr::vector<vertex> verts{};
 
 			// for each face
-			std::for_each(&mesh->mFaces[0], &mesh->mFaces[mesh->mNumFaces], [&](aiFace const & face)
+			std::for_each(&m->mFaces[0], &m->mFaces[m->mNumFaces], [&](aiFace const & f)
 			{
 				// reserve space
 				verts.reserve(verts.capacity()
-					+ std::distance(&face.mIndices[0], &face.mIndices[face.mNumIndices])
+					+ std::distance(&f.mIndices[0], &f.mIndices[f.mNumIndices])
 				);
 
 				// for each index
-				std::for_each(&face.mIndices[0], &face.mIndices[face.mNumIndices], [&](uint32_t const & i)
+				std::for_each(&f.mIndices[0], &f.mIndices[f.mNumIndices], [&](uint32_t i)
 				{
 					auto const vp{ // position
-						mesh->mVertices ? &mesh->mVertices[i] : nullptr
+						m->mVertices ? &m->mVertices[i] : nullptr
 					};
 					auto const vn{ // normal
-						mesh->mNormals ? &mesh->mNormals[i] : nullptr
+						m->mNormals ? &m->mNormals[i] : nullptr
 					};
 					auto const uv{ // texcoord
-						mesh->HasTextureCoords(0) ? &mesh->mTextureCoords[0][i] : nullptr
+						m->HasTextureCoords(0) ? &m->mTextureCoords[0][i] : nullptr
 					};
 
 					// make vertex

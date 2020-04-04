@@ -53,7 +53,7 @@ namespace ml
 
 		bool load_from_file(filesystem::path const & path);
 
-		bool load_from_file(filesystem::path const & path, uint32_t flags);
+		bool load_from_file(filesystem::path const & path, int32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -12,6 +12,8 @@ namespace ml
 		GL::enableVertexAttribArray(index);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	buffer_layout const & buffer_layout::apply() const noexcept
 	{
 		for (auto const & e : (*this))

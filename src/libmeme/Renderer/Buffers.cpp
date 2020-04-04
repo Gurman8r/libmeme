@@ -69,12 +69,11 @@ namespace ml
 			m_data = data;
 			m_size = size;
 			m_count = size / vertex::size;
-			m_offset = 0;
 
 			GL::bufferData(
 				GL::ArrayBuffer,
-				size * sizeof(float_t),
-				data,
+				sizeof(float_t) * m_size,
+				m_data,
 				m_usage
 			);
 		}
@@ -88,13 +87,12 @@ namespace ml
 			m_data = data;
 			m_size = size;
 			m_count = size / vertex::size;
-			m_offset = offset;
 
 			GL::bufferSubData(
 				GL::ArrayBuffer,
 				offset,
-				size * sizeof(float_t),
-				data
+				m_size * sizeof(float_t),
+				m_data
 			);
 		}
 		return (*this);
@@ -139,8 +137,8 @@ namespace ml
 
 			GL::bufferData(
 				GL::ElementArrayBuffer,
-				count * sizeof(uint32_t),
-				data,
+				m_count * sizeof(uint32_t),
+				m_data,
 				m_usage
 			);
 		}
