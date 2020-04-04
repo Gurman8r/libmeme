@@ -39,10 +39,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader::shader() : shader{ allocator_type{} }
-	{
-	}
-
 	shader::shader(allocator_type const & alloc)
 		: m_handle		{ NULL }
 		, m_source		{ std::allocator_arg, alloc }
@@ -149,26 +145,31 @@ namespace ml
 	{
 		if (!value || !value->m_handle)
 		{
-			return GL::useProgram(NULL);
+			GL::useProgram(NULL);
 		}
-
-		GL::useProgram(value->m_handle);
-
-		if (bindTextures)
+		else
 		{
-			uint32_t index = 0;
-			value->m_textures.for_each([&index](int32_t location, auto const & tex)
+			GL::useProgram(value->m_handle);
+
+			if (bindTextures)
 			{
-				GL::uniform1i(location, index);
-				GL::activeTexture(GL::Texture0 + (index++));
-				texture::bind(tex);
-			});
+				uint32_t index{};
+
+				value->m_textures.for_each([&index](int32_t location, texture const * tex)
+				{
+					GL::uniform1i(location, index);
+
+					GL::activeTexture(GL::Texture0 + (index++));
+
+					texture::bind(tex);
+				});
+			}
 		}
 	}
 
 	bool shader::destroy()
 	{
-		shader::bind(nullptr);
+		unbind();
 		if (m_handle)
 		{
 			GL::deleteShader(m_handle);
@@ -311,7 +312,7 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, texture const * value)
 	{
-		return value ? set_uniform(name, (*value)) : false;
+		return value ? set_uniform(name, *value) : false;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, texture const & value)

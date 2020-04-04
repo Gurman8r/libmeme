@@ -206,16 +206,16 @@ namespace ml
 			event_system::add_listener<	unload_event	>(this);
 		}
 
-		void on_event(event const & value) override
+		void on_event(event const & ev) override
 		{
-			switch (value.id())
+			switch (ev.id())
 			{
-			case hashof_v<	load_event		>: return on_load		(*value.as<	load_event		>());
-			case hashof_v<	update_event	>: return on_update		(*value.as<	update_event	>());
-			case hashof_v<	draw_event		>: return on_draw		(*value.as<	draw_event		>());
-			case hashof_v<	gui_dock_event	>: return on_gui_dock	(*value.as<	gui_dock_event	>());
-			case hashof_v<	gui_draw_event	>: return on_gui_draw	(*value.as<	gui_draw_event	>());
-			case hashof_v<	unload_event	>: return on_unload		(*value.as<	unload_event	>());
+			case hashof_v<load_event	>: return on_load		(*ev.as<load_event		>());
+			case hashof_v<update_event	>: return on_update		(*ev.as<update_event	>());
+			case hashof_v<draw_event	>: return on_draw		(*ev.as<draw_event		>());
+			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.as<gui_dock_event	>());
+			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.as<gui_draw_event	>());
+			case hashof_v<unload_event	>: return on_unload		(*ev.as<unload_event	>());
 			}
 		}
 
@@ -1104,7 +1104,7 @@ namespace ml
 
 			// benchmarks
 			ImGui::Columns(2);
-			if (static auto const & bench{ performance_tracker::last_frame() }; !bench.empty())
+			if (static auto const & bench{ performance_tracker::prev() }; !bench.empty())
 			{
 				ImGui::Separator();
 				for (auto const & elem : bench)

@@ -173,13 +173,13 @@ namespace ml
 
 	void texture::bind(texture const * value)
 	{
-		if (value && value->m_handle)
+		if (!value || !value->m_handle)
 		{
-			GL::bindTexture(value->m_sampler, value->m_handle);
+			GL::bindTexture(GL::Texture2D, NULL);
 		}
 		else
 		{
-			GL::bindTexture(GL::Texture2D, NULL);
+			GL::bindTexture(value->m_sampler, value->m_handle);
 		}
 	}
 
@@ -327,8 +327,7 @@ namespace ml
 				m_level,
 				m_intl_format,
 				m_pixel_type,
-				&temp[0]
-				);
+				temp.data());
 		}
 		return temp;
 	}

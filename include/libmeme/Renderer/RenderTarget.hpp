@@ -32,13 +32,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T, class ... Args
-		> void draw(T const * value, Args && ... args) const
+		> void draw(T const * value, Args && ... args) const noexcept
 		{
 			T::draw(*this, value, ML_forward(args)...);
 		}
 
 		template <class T, class ... Args
-		> void draw(T const & value, Args && ... args) const
+		> void draw(T const & value, Args && ... args) const noexcept
 		{
 			this->draw(&value, ML_forward(args)...);
 		}

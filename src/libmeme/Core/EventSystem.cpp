@@ -18,9 +18,9 @@ namespace ml
 	{
 		if (auto const listeners{ g_event_system.find(value.id()) })
 		{
-			for (auto const & elem : (*listeners->second))
+			for (event_listener * const & e : (*listeners->second))
 			{
-				elem->on_event(value);
+				e->on_event(value);
 			}
 		}
 	}
@@ -29,7 +29,7 @@ namespace ml
 	{
 		if (!value) return;
 
-		if (auto listeners{ g_event_system.find(type) })
+		if (auto const listeners{ g_event_system.find(type) })
 		{
 			if (auto const it{ listeners->second->find(value) }; it != listeners->second->end())
 			{

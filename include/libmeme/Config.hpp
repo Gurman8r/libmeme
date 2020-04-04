@@ -296,11 +296,8 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// GENERAL
+// CONFIGURATION
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// namespace
-#define _ML                     ::ml::
 
 // debug
 #if defined(_DEBUG)
@@ -309,19 +306,6 @@
 #else
 #   define ML_is_debug          false
 #   define ML_configuration     "release"
-#endif
-
-// alias
-#define ML_alias                using
-
-// exceptions
-#define ML_throw                throw
-#define ML_catch                catch
-#define ML_try                  try
-
-// assert
-#ifndef ML_assert
-#   define ML_assert(expr)      assert(expr)
 #endif
 
 

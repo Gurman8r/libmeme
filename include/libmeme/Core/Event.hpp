@@ -10,14 +10,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// is event
+	template <class Ev
+	> static constexpr bool is_event_v{ std::is_base_of_v<struct event, Ev> };
+
 	// event cast
 	template <class Ev
 	> ML_NODISCARD constexpr auto event_cast(struct event const & value) noexcept
 	{
-		static_assert(std::is_base_of_v<struct event, Ev>, "invalid event cast");
-		return (value.id() == hashof_v<Ev>)
-			? static_cast<Ev const *>(&value)
-			: nullptr;
+		static_assert(is_event_v<Ev>, "invalid event type");
+		return (value.id() == hashof_v<Ev>) ? static_cast<Ev const *>(&value) : nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

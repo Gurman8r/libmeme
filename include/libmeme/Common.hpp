@@ -39,13 +39,15 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define _ML						::ml::
 #define ML_addressof(p)			((void *)(_ML intmax_t)p)
+#define ML_alias                using
 #define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
-#define ML_bitread(v, i)		((v >> i) & 1)
-#define ML_bitset(v, i)			(v |= (1 << i))
-#define ML_bitclear(v, i)		(v &= ~(1 << i))
-#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
 #define ML_forward(v)			_ML std::forward<decltype(v)>(v)
+
+#ifndef ML_assert
+#   define ML_assert(expr)		assert(expr)
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

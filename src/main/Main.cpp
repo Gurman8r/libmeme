@@ -65,7 +65,7 @@ ml::int32_t main()
 	// main loop
 	while (engine::get_window().is_open())
 	{
-		ML_defer{ performance_tracker::swap_frames(); };
+		ML_defer{ performance_tracker::refresh(); };
 		{
 			ML_benchmark("| begin loop");
 			engine::begin_loop();

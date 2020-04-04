@@ -405,8 +405,12 @@ namespace ml
 		if (value)
 		{
 			deleteBuffers(1, value);
+			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	void GL::deleteBuffers(uint32_t count, uint32_t const * buffers)
@@ -419,8 +423,12 @@ namespace ml
 		if (value)
 		{
 			deleteVertexArrays(1, value);
+			return true;
 		}
-		return value;
+		else
+		{
+			return false;
+		}
 	}
 
 	void GL::deleteVertexArrays(uint32_t count, uint32_t const * arrays)
@@ -555,8 +563,12 @@ namespace ml
 		if (value)
 		{
 			deleteTextures(1, value);
+			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	void GL::deleteTextures(uint32_t count, uint32_t const * id)
@@ -652,8 +664,12 @@ namespace ml
 		if (value)
 		{
 			deleteFramebuffers(1, value);
+			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	void GL::deleteFramebuffers(uint32_t count, uint32_t const * framebuffers)
@@ -697,8 +713,12 @@ namespace ml
 		if (value)
 		{
 			deleteRenderbuffers(1, value);
+			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	void GL::deleteRenderbuffers(uint32_t count, uint32_t const * renderbuffers)

@@ -21,7 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader();
+		shader() noexcept : shader{ allocator_type{} } {}
 		
 		explicit shader(allocator_type const & alloc);
 		

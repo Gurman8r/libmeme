@@ -23,11 +23,32 @@ namespace ml::ds
 		using difference_type	= typename ptrdiff_t;
 		using size_type			= typename size_t;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static constexpr bool multi{ _Mt };
 
 		static constexpr size_type thresh{ _Th };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// BASIC FLAT SET
+	template <class _Traits
+	> struct basic_flat_set final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using traits_type		= typename _Traits;
+		using self_type			= typename basic_flat_set<traits_type>;
+		using value_type		= typename traits_type::value_type;
+		using compare_type		= typename traits_type::compare_type;
+		using allocator_type	= typename traits_type::allocator_type;
+		using difference_type	= typename traits_type::difference_type;
+		using size_type			= typename traits_type::size_type;
+
+		static constexpr bool multi{ traits_type::multi };
+
+		static constexpr size_type thresh{ traits_type::thresh };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -43,42 +64,9 @@ namespace ml::ds
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;
 		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+
 		using iterator_pair				= typename std::pair<iterator, iterator>;
 		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// BASIC FLAT SET
-	template <class _Traits
-	> struct basic_flat_set final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type				= typename _Traits;
-		using self_type					= typename basic_flat_set<traits_type>;
-		using value_type				= typename traits_type::value_type;
-		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
-
-		using storage_type				= typename traits_type::storage_type;
-		using init_type					= typename traits_type::init_type;
-		
-		using pointer					= typename traits_type::pointer;
-		using reference					= typename traits_type::reference;
-		using const_pointer				= typename traits_type::const_pointer;
-		using const_reference			= typename traits_type::const_reference;
-		
-		using iterator					= typename traits_type::iterator;
-		using const_iterator			= typename traits_type::const_iterator;
-		using reverse_iterator			= typename traits_type::reverse_iterator;
-		using const_reverse_iterator	= typename traits_type::const_reverse_iterator;
-		using iterator_pair				= typename traits_type::iterator_pair;
-		using const_iterator_pair		= typename traits_type::const_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

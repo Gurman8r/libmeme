@@ -24,9 +24,37 @@ namespace ml::ds
 		using difference_type	= typename ptrdiff_t;
 		using size_type			= typename size_t;
 
+		static constexpr bool multi{ false };
+
+		static constexpr size_type thresh{ _Th };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// BASIC FLAT MAP
+	template <class _Traits
+	> struct basic_flat_map final
+	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using key_storage				= typename ds::flat_set<key_type, compare_type, _Th>;
+		using traits_type		= typename _Traits;
+		using self_type			= typename basic_flat_map<traits_type>;
+		using key_type			= typename traits_type::key_type;
+		using value_type		= typename traits_type::value_type;
+		using compare_type		= typename traits_type::compare_type;
+		using allocator_type	= typename traits_type::allocator_type;
+		using difference_type	= typename traits_type::difference_type;
+		using size_type			= typename traits_type::size_type;
+
+		static constexpr bool multi{ traits_type::multi };
+
+		static constexpr size_type thresh{ traits_type::thresh };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using key_storage				= typename ds::flat_set<key_type, compare_type, thresh>;
 		using key_pointer				= typename key_storage::pointer;
 		using key_const_pointer			= typename key_storage::const_pointer;
 		using key_reference				= typename key_storage::reference;
@@ -55,56 +83,6 @@ namespace ml::ds
 		using const_iterator_pair		= typename std::pair<key_const_iterator, value_const_iterator>;
 		using optl_iterator_pair		= typename std::optional<iterator_pair>;
 		using optl_const_iterator_pair	= typename std::optional<const_iterator_pair>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// BASIC FLAT MAP
-	template <class _Traits
-	> struct basic_flat_map final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using traits_type				= typename _Traits;
-		using self_type					= typename basic_flat_map<traits_type>;
-		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
-
-		using key_type					= typename traits_type::key_type;
-		using key_storage				= typename traits_type::key_storage;
-		using key_pointer				= typename traits_type::key_pointer;
-		using key_const_pointer			= typename traits_type::key_const_pointer;
-		using key_reference				= typename traits_type::key_reference;
-		using key_const_reference		= typename traits_type::key_const_reference;
-		using key_iterator				= typename traits_type::key_iterator;
-		using key_const_iterator		= typename traits_type::key_const_iterator;
-
-		using value_type				= typename traits_type::value_type;
-		using value_storage				= typename traits_type::value_storage;
-		using value_pointer				= typename traits_type::value_pointer;
-		using value_const_pointer		= typename traits_type::value_const_pointer;
-		using value_reference			= typename traits_type::value_reference;
-		using value_const_reference		= typename traits_type::value_const_reference;
-		using value_iterator			= typename traits_type::value_iterator;
-		using value_const_iterator		= typename traits_type::value_const_iterator;
-
-		using storage_type				= typename traits_type::storage_type;
-		using keyval_pair				= typename traits_type::keyval_pair;
-		using init_type					= typename traits_type::init_type;
-
-		using pointer_pair				= typename traits_type::pointer_pair;
-		using const_pointer_pair		= typename traits_type::const_pointer_pair;
-		using reference_pair			= typename traits_type::reference_pair;
-		using const_reference_pair		= typename traits_type::const_reference_pair;
-
-		using iterator_pair				= typename traits_type::iterator_pair;
-		using const_iterator_pair		= typename traits_type::const_iterator_pair;
-		using optl_iterator_pair		= typename traits_type::optl_iterator_pair;
-		using optl_const_iterator_pair	= typename traits_type::optl_const_iterator_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

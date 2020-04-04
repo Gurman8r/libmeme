@@ -355,16 +355,14 @@ namespace ml::ecs
 				meta::for_types<components::template filter<decltype(s)::type>
 				>([&b](auto c)
 				{
-					b.write<self_type::component_bit<decltype(c)::type>()
-					>(true);
+					b.set<self_type::component_bit<decltype(c)::type>()>();
 				});
 
 				// enable tag bits
 				meta::for_types<tags::template filter<decltype(s)::type>
 				>([&b](auto t)
 				{
-					b.write<self_type::tag_bit<decltype(t)::type>()
-					>(true);
+					b.set<self_type::tag_bit<decltype(t)::type>()>();
 				});
 			});
 			return temp;
@@ -819,8 +817,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & add_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
-			>(true);
+			std::get<ID_Bitset>(m_entities)[i].set<traits_type::template tag_bit<T>()>();
 			return (*this);
 		}
 
@@ -835,8 +832,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & del_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template tag_bit<T>()
-			>(false);
+			std::get<ID_Bitset>(m_entities)[i].clear<traits_type::template tag_bit<T>()>();
 			return (*this);
 		}
 
@@ -851,8 +847,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD bool has_tag(size_t const i) const noexcept
 		{
-			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()
-			>();
+			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -866,8 +861,7 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> auto & add_component(size_t const i, Args && ... args) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
-			>(true);
+			std::get<ID_Bitset>(m_entities)[i].set<traits_type::template component_bit<C>()>();
 
 			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
 			c = C{ ML_forward(args)... };
@@ -897,8 +891,7 @@ namespace ml::ecs
 		template <class C
 		> self_type & del_component(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].write<traits_type::template component_bit<C>()
-			>(false);
+			std::get<ID_Bitset>(m_entities)[i].clear<traits_type::template component_bit<C>()>();
 			return (*this);
 		}
 
@@ -939,8 +932,7 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD bool has_component(size_t const i) const noexcept
 		{
-			return this->get_signature(i).read<traits_type::template component_bit<C>()
-			>();
+			return this->get_signature(i).read<traits_type::template component_bit<C>()>();
 		}
 
 		template <class C
@@ -996,10 +988,10 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// invoke function on every alive entity
 		template <class Fn
-		> self_type & for_entities(Fn && fn)
+		> self_type & for_entities(Fn && fn) noexcept
 		{
-			// invoke function on every alive entity
 			for (size_t e = 0, imax = m_size; e < imax; ++e)
 			{
 				std::invoke(ML_forward(fn), e);
@@ -1007,11 +999,11 @@ namespace ml::ecs
 			return (*this);
 		}
 
+		// invoke function on each of an entity's components
 		template <class Fn
-		> self_type & for_components(size_t const e, Fn && fn)
+		> self_type & for_components(size_t const e, Fn && fn) noexcept
 		{
-			// invoke function on each of an entity's components
-			meta::for_types<typename traits_type::component_list>([&](auto c)
+			meta::for_types<typename traits_type::component_list>([&](auto c) noexcept
 			{
 				using C = typename decltype(c)::type;
 				if (this->has_component<C>(e))
@@ -1022,11 +1014,11 @@ namespace ml::ecs
 			return (*this);
 		}
 
+		// invoke function on all alive entities matching a signature
 		template <class S, class Fn
-		> self_type & for_matching(Fn && fn)
+		> self_type & for_matching(Fn && fn) noexcept
 		{
-			// invoke function on all entities matching a signature
-			return this->for_entities([&](size_t const e)
+			return this->for_entities([&](size_t const e) noexcept
 			{
 				if (this->matches_signature<S>(e))
 				{
@@ -1035,23 +1027,23 @@ namespace ml::ecs
 			});
 		}
 
+		// invoke function on all systems matching a signature
 		template <template <class> class X, class Fn
-		> self_type & for_system(Fn && fn)
+		> self_type & for_system(Fn && fn) noexcept
 		{
-			// invoke function on all systems matching a signature
 			return this->for_matching<typename X<traits_type>::signature
 			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
-			](size_t, auto && ... req_comp)
+			](size_t, auto && ... req_comp) noexcept
 			{
 				std::invoke(ML_forward(fn), x, ML_forward(req_comp)...);
 			});
 		}
 
+		// invoke update on all systems matching a signature
 		template <template <class> class X, class ... Args
-		> self_type & update_system(Args && ... args)
+		> self_type & update_system(Args && ... args) noexcept
 		{
-			// invoke update on all systems matching a signature
-			return this->for_system<X>([&args...](auto & x, auto && ... req_comp)
+			return this->for_system<X>([&args...](auto & x, auto && ... req_comp) noexcept
 			{
 				x.update(ML_forward(args)..., ML_forward(req_comp)...);
 			});
@@ -1064,7 +1056,7 @@ namespace ml::ecs
 		> struct expand_call_helper;
 
 		template <class S, class Fn
-		> void expand_call(size_t const e, Fn && fn)
+		> void expand_call(size_t const e, Fn && fn) noexcept
 		{
 			using req_comp = typename traits_type::components::template filter<S>;
 
@@ -1077,7 +1069,7 @@ namespace ml::ecs
 		> struct expand_call_helper
 		{
 			template <class Fn
-			> static void call(size_t const e, self_type & self, Fn && fn)
+			> static void call(size_t const e, self_type & self, Fn && fn) noexcept
 			{
 				auto const i{ std::get<ID_Index>(self.m_entities)[e] }; // component data index
 

@@ -4,9 +4,9 @@
 #include <libmeme/Core/StringUtility.hpp>
 
 // codes
-#define ML_WARNING	-1
-#define ML_FAILURE	 0
-#define ML_SUCCESS	+1
+#define ML_WARNING	(-1)
+#define ML_FAILURE	( 0)
+#define ML_SUCCESS	(+1)
 
 // messages
 #define ML_MSG_WRN "warning"

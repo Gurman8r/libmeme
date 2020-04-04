@@ -161,11 +161,11 @@ namespace ml::util
 
 		if (size_t const imax{ v.size() * vertex::size })
 		{
-			temp.resize(imax);
+			temp.reserve(imax);
 
-			for (size_t i = 0; i < imax; i++)
+			for (size_t i = 0; i < imax; ++i)
 			{
-				temp[i] = v[i / vertex::size][i % vertex::size];
+				temp.push_back(v[i / vertex::size][i % vertex::size]);
 			}
 		}
 		return temp;

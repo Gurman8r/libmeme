@@ -18,38 +18,38 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	model::model(allocator_type const & alloc)
-		: m_storage{ alloc }
+		: m_meshes{ alloc }
 	{
 	}
 
 	model::model(std::initializer_list<mesh> init, allocator_type const & alloc)
-		: m_storage{ init, alloc }
+		: m_meshes{ init, alloc }
 	{
 	}
 
 	model::model(filesystem::path const & path, allocator_type const & alloc)
-		: m_storage{ alloc }
+		: m_meshes{ alloc }
 	{
 		load_from_file(path);
 	}
 
 	model::model(storage_type const & storage, allocator_type const & alloc)
-		: m_storage{ storage, alloc }
+		: m_meshes{ storage, alloc }
 	{
 	}
 
 	model::model(storage_type && storage, allocator_type const & alloc) noexcept
-		: m_storage{ std::move(storage), alloc }
+		: m_meshes{ std::move(storage), alloc }
 	{
 	}
 
 	model::model(model const & other, allocator_type const & alloc)
-		: m_storage{ other.m_storage, alloc }
+		: m_meshes{ other.m_meshes, alloc }
 	{
 	}
 
 	model::model(model && other, allocator_type const & alloc) noexcept
-		: m_storage{ alloc }
+		: m_meshes{ alloc }
 	{
 		swap(std::move(other));
 	}
@@ -75,7 +75,7 @@ namespace ml
 	{
 		if (this != std::addressof(other))
 		{
-			m_storage.swap(other.m_storage);
+			m_meshes.swap(other.m_meshes);
 		}
 	}
 
@@ -100,15 +100,15 @@ namespace ml
 		aiScene const * scene{ _ai.ReadFile(path.string().c_str(), flags) };
 		if (!scene)
 		{
-			return debug::log::error("Failed reading aiScene from file");
+			return debug::log::error("model failed reading assimp scene");
 		}
 
 		// cleanup
-		if (!m_storage.empty())
-			m_storage.clear();
+		if (!m_meshes.empty())
+			m_meshes.clear();
 
 		// reserve space
-		m_storage.reserve(
+		m_meshes.reserve(
 			std::distance(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes])
 		);
 
@@ -150,11 +150,11 @@ namespace ml
 			});
 
 			// create the mesh
-			m_storage.emplace_back(make_mesh(verts));
+			m_meshes.emplace_back(make_mesh(verts));
 
 		});
 
-		return !m_storage.empty();
+		return !m_meshes.empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -163,9 +163,9 @@ namespace ml
 	{
 		if (!value) { return; }
 		
-		for (auto const & elem : (*value))
+		for (mesh const & e : (*value))
 		{
-			target.draw(elem);
+			target.draw(e);
 		}
 	}
 

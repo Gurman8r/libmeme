@@ -17,20 +17,20 @@ namespace ml::util
 	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size, hash_t seed) noexcept
 	{
 		return (size > 0)
-			? _ML util::hash(arr + 1, size - 1, (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
+			? hash(arr + 1, size - 1, (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
 			: seed;
 	}
 
 	template <class T
 	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size) noexcept
 	{
-		return _ML util::hash(arr, size, fnv1a_basis);
+		return hash(arr, size, fnv1a_basis);
 	}
 
 	template <class T, hash_t N
 	> ML_NODISCARD constexpr hash_t hash(const T(&value)[N]) noexcept
 	{
-		return _ML util::hash(value, N - 1);
+		return hash(value, N - 1);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,19 +38,19 @@ namespace ml::util
 	template <class Arr
 	> ML_NODISCARD constexpr hash_t hash(Arr const & value) noexcept
 	{
-		return _ML util::hash(value.data(), static_cast<hash_t>(value.size()));
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
 	template <template <class, hash_t...> class Arr, class T, hash_t ... N
 	> ML_NODISCARD constexpr hash_t hash(Arr<T, N...> const & value) noexcept
 	{
-		return _ML util::hash(value.data(), static_cast<hash_t>(value.size()));
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
 	template <template <class...> class Arr, class ... Ts
 	> ML_NODISCARD constexpr hash_t hash(Arr<Ts...> const & value) noexcept
 	{
-		return _ML util::hash(value.data(), static_cast<hash_t>(value.size()));
+		return hash(value.data(), static_cast<hash_t>(value.size()));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
