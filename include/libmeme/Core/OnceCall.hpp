@@ -21,7 +21,7 @@ namespace ml::impl
 
     enum class once_call_tag {};
 
-    template <class Fn> inline auto operator +(once_call_tag, Fn && fn) noexcept
+    template <class Fn> inline auto operator+(once_call_tag, Fn && fn) noexcept
     {
         return once_call<Fn>{ ML_forward(fn) };
     }
