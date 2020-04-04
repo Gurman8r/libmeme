@@ -407,7 +407,7 @@ namespace ml::ds
 			{
 				return impl_contains_linear(); // always linear
 			}
-			else if (auto const size{ std::distance(first, last) })
+			else if (auto const size{ (size_t)std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
@@ -455,7 +455,7 @@ namespace ml::ds
 			{
 				return impl_find_linear(); // always linear
 			}
-			else if (auto const size{ std::distance(first, last) })
+			else if (auto const size{ (size_t)std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
