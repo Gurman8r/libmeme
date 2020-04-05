@@ -4,7 +4,7 @@
 #ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
 #endif
-#include <libmeme/Engine/ScriptableObject.hpp>
+#include <libmeme/Engine/ScriptObject.hpp>
 
 // libmeme
 namespace ml::embed
@@ -110,7 +110,7 @@ namespace ml::embed
 				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 				struct ml_engine_config {};
-				py::class_<ml_engine_config>(m, "engine_config")
+				py::class_<ml_engine_config>(m, "__ml_engine_config__")
 
 					.def_property_readonly_static("command_line"
 						, [](py::object) { return engine::get_config().command_line; })
@@ -134,7 +134,7 @@ namespace ml::embed
 				/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 				struct ml_engine_io {};
-				py::class_<ml_engine_io>(m, "engine_io")
+				py::class_<ml_engine_io>(m, "__ml_engine_io__")
 
 					.def_property_readonly_static("delta_time"
 						, [](py::object) { return engine::get_io().delta_time; })
@@ -186,7 +186,7 @@ namespace ml::embed
 			ml_lib::install(m);
 			ml_stdio::install(m);
 			ml_engine::install(m);
-			scriptable_object::install(m);
+			script_object::install(m);
 
 			builtins.attr("exit")	= m.attr("engine").attr("exit");
 			sys.attr("exit")		= m.attr("engine").attr("exit");

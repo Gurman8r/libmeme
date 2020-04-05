@@ -340,10 +340,15 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key, class Value
-		> iterator_pair insert(Key && key, Value && value) noexcept
+		template <class Key, class ... Args
+		> iterator_pair insert(Key && key, Args && ... args) noexcept
 		{
-			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
+			return this->try_emplace(ML_forward(key), ML_forward(args)...).first;
+		}
+
+		iterator_pair insert(keyval_pair const & pair)
+		{
+			return this->try_emplace(pair.first, pair.second).first;
 		}
 
 		iterator_pair insert(keyval_pair && pair) noexcept

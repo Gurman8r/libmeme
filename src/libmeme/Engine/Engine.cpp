@@ -6,13 +6,10 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
 
-#ifndef ML_EMBED_LUA
-#define ML_EMBED_LUA
+#ifndef ML_EMBED_ALL
+#define ML_EMBED_ALL
 #endif
-#ifndef ML_EMBED_PYTHON
-#define ML_EMBED_PYTHON
-#endif
-#include <libmeme/Engine/ScriptableObject.hpp>
+#include <libmeme/Engine/Embed.hpp>
 
 namespace ml
 {

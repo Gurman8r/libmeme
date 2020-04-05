@@ -107,17 +107,22 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr operator uint64_t const & () const noexcept
+		ML_NODISCARD constexpr operator bool() const noexcept
 		{
 			return m_words;
 		}
 
-		constexpr bool operator[](size_t const i) const noexcept
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept
+		{
+			return m_words;
+		}
+
+		ML_NODISCARD constexpr bool operator[](size_t const i) const noexcept
 		{
 			return read(i);
 		}
 
-		constexpr array<bool, _Count> arr() const noexcept
+		ML_NODISCARD constexpr array<bool, _Count> arr() const noexcept
 		{
 			array<bool, _Count> temp{};
 			for (size_t i = 0; i < _Count; ++i)
@@ -125,48 +130,46 @@ namespace ml::ds
 			return temp;
 		}
 
-		template <size_t I> constexpr self_type & clear() noexcept
+		template <size_t I> constexpr bool clear() noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
 			return clear(I);
 		}
 
-		constexpr self_type & clear(size_t const i) noexcept
+		constexpr bool clear(size_t const i) noexcept
 		{
+			bool const b{ read(i) };
 			m_words[i / bitsperword] &= ~(value_type{ 1 } << i % bitsperword);
-			return (*this);
+			return b;
 		}
 
-		template <size_t I> constexpr bool read() const noexcept
+		template <size_t I> ML_NODISCARD constexpr bool read() const noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
 			return read(I);
 		}
 
-		constexpr bool read(size_t const i) const noexcept
+		ML_NODISCARD constexpr bool read(size_t const i) const noexcept
 		{
 			return m_words[i / bitsperword] & (value_type{ 1 } << i % bitsperword);
 		}
 
-		constexpr self_type & reset() noexcept
-		{
-			m_words = { 0 };
-			return (*this);
-		}
+		constexpr void reset() noexcept { m_words = { 0 }; }
 
-		template <size_t I> constexpr self_type & set() noexcept
+		template <size_t I> constexpr bool set() noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
 			return set(I);
 		}
 
-		constexpr self_type & set(size_t const i) noexcept
+		constexpr bool set(size_t const i) noexcept
 		{
+			bool const b{ !read(i) };
 			m_words[i / bitsperword] |= (value_type{ 1 } << i % bitsperword);
-			return (*this);
+			return b;
 		}
 
-		constexpr size_t size() const noexcept
+		ML_NODISCARD constexpr size_t size() const noexcept
 		{
 			return _Count;
 		}
@@ -179,71 +182,25 @@ namespace ml::ds
 			}
 		}
 
-		constexpr storage_type & words() noexcept
+		ML_NODISCARD constexpr storage_type & words() noexcept
 		{
 			return m_words;
 		}
 
-		constexpr storage_type const & words() const noexcept
+		ML_NODISCARD constexpr storage_type const & words() const noexcept
 		{
 			return m_words;
 		}
 
-		template <size_t I> constexpr self_type & write(bool b) noexcept
+		template <size_t I> constexpr bool write(bool b) noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
 			return write(I, b);
 		}
 
-		constexpr self_type & write(size_t const i, bool b) noexcept
+		constexpr bool write(size_t const i, bool b) noexcept
 		{
 			return b ? set(i) : clear(i);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T> constexpr self_type & operator&=(T other)
-		{
-			if constexpr (std::is_same_v<T, self_type>)
-			{
-				size_t i{};
-				for (auto & elem : m_words)
-					elem &= other.m_words[i++];
-				return (*this);
-			}
-			else
-			{
-				return (*this) &= self_type{ other };
-			}
-		}
-
-		template <class T> constexpr self_type operator&(T other) const
-		{
-			self_type temp{ other };
-			return temp &= (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T> constexpr self_type & operator|=(T other)
-		{
-			if constexpr (std::is_same_v<T, self_type>)
-			{
-				size_t i{};
-				for (auto & elem : m_words)
-					elem |= other.m_words[i++];
-				return (*this);
-			}
-			else
-			{
-				return (*this) |= self_type{ other };
-			}
-		}
-
-		template <class T> constexpr self_type operator|(T other) const
-		{
-			self_type temp{ other };
-			return temp |= (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
