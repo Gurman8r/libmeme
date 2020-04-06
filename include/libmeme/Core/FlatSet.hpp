@@ -38,19 +38,13 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type		= typename _Traits;
-		using self_type			= typename basic_flat_set<traits_type>;
-		using value_type		= typename traits_type::value_type;
-		using compare_type		= typename traits_type::compare_type;
-		using allocator_type	= typename traits_type::allocator_type;
-		using difference_type	= typename traits_type::difference_type;
-		using size_type			= typename traits_type::size_type;
-
-		static constexpr bool multi{ traits_type::multi };
-
-		static constexpr size_type thresh{ traits_type::thresh };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using traits_type				= typename _Traits;
+		using self_type					= typename basic_flat_set<traits_type>;
+		using value_type				= typename traits_type::value_type;
+		using compare_type				= typename traits_type::compare_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using difference_type			= typename traits_type::difference_type;
+		using size_type					= typename traits_type::size_type;
 
 		using storage_type				= typename pmr::vector<value_type>;
 		using init_type					= typename std::initializer_list<value_type>;

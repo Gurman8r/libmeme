@@ -28,7 +28,7 @@ namespace ml::util
 	}
 
 	template <class T, hash_t N
-	> ML_NODISCARD constexpr hash_t hash(const T(&value)[N]) noexcept
+	> ML_NODISCARD constexpr hash_t hash(T const(&value)[N]) noexcept
 	{
 		return hash(value, N - 1);
 	}

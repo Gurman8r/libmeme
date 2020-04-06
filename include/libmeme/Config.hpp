@@ -394,6 +394,7 @@
 #   pragma warning(disable: 4308)   // negative integral constant converted to unsigned type
 #   pragma warning(disable: 4309)   // truncation of constant value
 #   pragma warning(disable: 4723)   // potential divide by zero
+#   pragma warning(disable: 6011)   // dereferencing NULL pointer
 #   pragma warning(disable: 6282)   // incorrect operator
 #   pragma warning(disable: 26437)  // do not slice
 #   pragma warning(disable: 26444)  // avoid unnamed objecs with custom construction and destruction

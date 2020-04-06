@@ -18,7 +18,7 @@ namespace ml
 	template <class Ev
 	> ML_NODISCARD constexpr auto event_cast(struct event const & value) noexcept
 	{
-		static_assert(is_event_v<Ev>, "invalid event type");
+		static_assert(is_event_v<Ev>, "invalid event cast");
 		return (value.id() == hashof_v<Ev>) ? static_cast<Ev const *>(&value) : nullptr;
 	}
 

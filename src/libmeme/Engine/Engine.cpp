@@ -22,26 +22,23 @@ namespace ml
 	// engine context
 	class engine::context final : trackable, non_copyable
 	{
-		friend class		engine						;
-		engine::config		m_config		{}			; // public startup variables
-		engine::io			m_io			{}			; // public io variables
-		timer				m_main_timer	{ true }	; // main timer
-		timer				m_loop_timer	{}			; // loop timer
-		frame_tracker<120>	m_fps_tracker	{}			; // frame rate tracker
-		render_window		m_window		{}			; // main window
-		file_set_t			m_plugin_files	{}			; // plugin filenames
-		libraries_t			m_plugin_libs	{}			; // plugin instances
-		lua_State *			m_lua			{}			; // lua state
+		friend class		engine								;
+		engine::config		m_config		{}					; // public startup variables
+		engine::io			m_io			{}					; // public io variables
+		timer				m_main_timer	{ true }			; // main timer
+		timer				m_loop_timer	{}					; // loop timer
+		frame_tracker<120>	m_fps_tracker	{}					; // frame rate tracker
+		render_window		m_window		{}					; // main window
+		file_set_t			m_plugin_files	{}					; // plugin filenames
+		libraries_t			m_plugin_libs	{}					; // plugin instances
+		lua_State *			m_lua			{}					; // lua state
 	};
 
 	static engine::context * g_engine{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::is_initialized() noexcept
-	{
-		return g_engine;
-	}
+	bool engine::is_initialized() noexcept { return g_engine; }
 
 	bool engine::create_context(json const & j)
 	{
@@ -85,25 +82,25 @@ namespace ml
 
 	engine::config & engine::get_config() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return (*g_engine).m_config;
 	}
 
 	engine::io & engine::get_io() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return (*g_engine).m_io;
 	}
 
 	duration const & engine::get_time() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return (*g_engine).m_main_timer.elapsed();
 	}
 
 	render_window & engine::get_window() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return (*g_engine).m_window;
 	}
 
@@ -111,7 +108,7 @@ namespace ml
 
 	bool engine::startup()
 	{
-		if (!is_initialized()) { return false; }
+		ML_assert(g_engine);
 
 		// start lua
 		if (!g_engine->m_lua && !([&]()
@@ -183,7 +180,7 @@ namespace ml
 
 	bool engine::shutdown()
 	{
-		if (!is_initialized()) { return false; }
+		ML_assert(g_engine);
 
 		// shutdown plugins
 		g_engine->m_plugin_libs.for_each([](auto const &, plugin * p)
@@ -212,7 +209,7 @@ namespace ml
 
 	void engine::begin_loop()
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
 		// update delta time
 		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
@@ -224,7 +221,7 @@ namespace ml
 
 	void engine::begin_draw()
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
 		// clear color
 		g_engine->m_window.clear_color(colors::black);
@@ -239,7 +236,7 @@ namespace ml
 
 	void engine::end_draw()
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
 		if ML_LIKELY(!(g_engine->m_window.has_hint(window_hints_double_buffered)))
 		{
@@ -253,7 +250,7 @@ namespace ml
 
 	void engine::end_loop()
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
 		// increment frame count
 		++g_engine->m_io.frame_count;
@@ -266,7 +263,7 @@ namespace ml
 
 	bool engine::load_plugin(filesystem::path const & path)
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
 		if (path.empty()) return false;
 
@@ -291,10 +288,10 @@ namespace ml
 
 	int32_t engine::do_string(int32_t lang, pmr::string const & text)
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
-		if (!is_initialized() || text.empty())
-			return 0;
+		if (text.empty()) { return 0; }
+
 		switch (lang)
 		{
 		case embed::api::lua:
@@ -311,10 +308,10 @@ namespace ml
 
 	int32_t engine::do_file(filesystem::path const & path)
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 
-		if (!is_initialized() || !filesystem::exists(path))
-			return 0;
+		if (!filesystem::exists(path)) { return 0; }
+
 		switch (embed::api::ext_id(util::to_lower(path.extension().string())))
 		{
 		case embed::api::lua:

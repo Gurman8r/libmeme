@@ -129,7 +129,10 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	texture::~texture() { destroy(); }
+	texture::~texture()
+	{
+		destroy();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

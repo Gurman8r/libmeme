@@ -21,6 +21,8 @@ namespace ml::ds
 		using reference					= typename value_type &;
 		using const_pointer				= typename value_type const *;
 		using const_reference			= typename value_type const &;
+		using rvalue					= typename value_type &&;
+		using const_rvalue				= typename value_type const &&;
 		using iterator					= typename pointer;
 		using const_iterator			= typename const_pointer;
 		using reverse_iterator			= typename std::reverse_iterator<iterator>;
@@ -38,23 +40,23 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto operator*() & noexcept { return (*m_data); }
+		ML_NODISCARD constexpr auto operator*() & noexcept -> reference { return (*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() const & noexcept { return (*m_data); }
+		ML_NODISCARD constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() && noexcept { return std::move(*m_data); }
+		ML_NODISCARD constexpr auto operator*() && noexcept -> rvalue { return std::move(*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() const && noexcept { return std::move(*m_data); }
+		ML_NODISCARD constexpr auto operator*() const && noexcept -> const_rvalue { return std::move(*m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_t const i) & noexcept { return m_data[i]; }
+		ML_NODISCARD constexpr auto at(size_t const i) & noexcept -> reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept { return m_data[i]; }
+		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto at(size_t const i) && noexcept { return std::move(m_data[i]); }
+		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> rvalue { return std::move(m_data[i]); }
 
-		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept { return std::move(m_data[i]); }
+		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> const_rvalue { return std::move(m_data[i]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -301,14 +303,14 @@ namespace ml::ds
 	template <class T, size_t N
 	> static void to_json(json & j, array<T, N> const & value)
 	{
-		// so sue me
+		// sue me
 		j = *reinterpret_cast<std::array<T, N> const *>(&value);
 	}
 
 	template <class T, size_t N
 	> static void from_json(json const & j, array<T, N> & value)
 	{
-		// so sue me
+		// sue me
 		j.get_to(*reinterpret_cast<std::array<T, N> *>(&value));
 	}
 }

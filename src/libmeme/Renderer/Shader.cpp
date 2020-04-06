@@ -333,10 +333,6 @@ namespace ml
 			{
 				m_textures.insert(u, &value);
 			}
-			else
-			{
-				return false;
-			}
 		}
 		return u;
 	}

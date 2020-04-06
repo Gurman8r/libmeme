@@ -39,22 +39,16 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type		= typename _Traits;
-		using self_type			= typename basic_flat_map<traits_type>;
-		using key_type			= typename traits_type::key_type;
-		using value_type		= typename traits_type::value_type;
-		using compare_type		= typename traits_type::compare_type;
-		using allocator_type	= typename traits_type::allocator_type;
-		using difference_type	= typename traits_type::difference_type;
-		using size_type			= typename traits_type::size_type;
+		using traits_type				= typename _Traits;
+		using self_type					= typename basic_flat_map<traits_type>;
+		using key_type					= typename traits_type::key_type;
+		using value_type				= typename traits_type::value_type;
+		using compare_type				= typename traits_type::compare_type;
+		using allocator_type			= typename traits_type::allocator_type;
+		using difference_type			= typename traits_type::difference_type;
+		using size_type					= typename traits_type::size_type;
 
-		static constexpr bool multi{ traits_type::multi };
-
-		static constexpr size_type thresh{ traits_type::thresh };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using key_storage				= typename ds::flat_set<key_type, compare_type, thresh>;
+		using key_storage				= typename ds::flat_set<key_type, compare_type, traits_type::thresh>;
 		using key_pointer				= typename key_storage::pointer;
 		using key_const_pointer			= typename key_storage::const_pointer;
 		using key_reference				= typename key_storage::reference;
@@ -290,7 +284,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.end())
 			{
-				return iterator_pair{ k, this->fetch(k) };
+				return std::make_optional(iterator_pair{ k, this->fetch(k) });
 			}
 			else
 			{
@@ -302,7 +296,7 @@ namespace ml::ds
 		{
 			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.cend())
 			{
-				return const_iterator_pair{ k, this->fetch(k) };
+				return std::make_optional(const_iterator_pair{ k, this->fetch(k) });
 			}
 			else
 			{
@@ -367,7 +361,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(key, ML_forward(args)...).second);
+				return *this->insert(key, ML_forward(args)...).second;
 			}
 		}
 
@@ -380,7 +374,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return (*this->insert(std::move(key), ML_forward(args)...).second);
+				return *this->insert(std::move(key), ML_forward(args)...).second;
 			}
 		}
 

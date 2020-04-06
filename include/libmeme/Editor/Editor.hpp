@@ -30,10 +30,10 @@ namespace ml
 		// editor config
 		struct config final : trackable
 		{
-			filesystem::path	style_config	{}			; // style config
-			pmr::string			api_version		{}			; // imgui shading version
-			cstring				ini_filename	{}			; // imgui ini filename
-			cstring				log_filename	{}			; // imgui log filename
+			filesystem::path	style_config		{}				; // style config
+			pmr::string			api_version			{}				; // imgui shading version
+			cstring				ini_filename		{}				; // imgui ini filename
+			cstring				log_filename		{}				; // imgui log filename
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,16 +43,16 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			bool				show_main_menu	{ true }	; // show main meu bar
-			menu_bar_t			main_menus		{}			; // main menu bar menus
+			bool				show_main_menu		{ true }		; // show menus
+			menu_bar_t			main_menus			{}				; // menus
 
-			bool				show_dockspace	{ true }	; // show dockspace
-			float_t				dock_border		{}			; // dockspace border
-			vec2				dock_padding	{}			; // dockspace padding
-			float_t				dock_rounding	{}			; // dockspace rounding
-			vec2				dock_size		{}			; // dockspace size
-			float_t				dock_alpha		{ 1.f }		; // dockspace transparancy
-			dock_nodes_t		dock_nodes		{}			; // dockspace dock-nodes
+			bool				show_dockspace		{ true }		; // show dockspace
+			float_t				dockspace_border	{}				; // dockspace border
+			vec2				dockspace_padding	{}				; // dockspace padding
+			float_t				dockspace_rounding	{}				; // dockspace rounding
+			vec2				dockspace_size		{}				; // dockspace size
+			float_t				dockspace_alpha		{ 1.f }			; // dockspace transparancy
+			dock_nodes_t		dockspace_nodes		{}				; // dockspace nodes
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
@@ -99,9 +99,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static uint32_t begin_dock_builder(int32_t flags = 0);
+		static uint32_t begin_dockspace_builder(int32_t flags = 0);
 		
-		static uint32_t end_dock_builder(uint32_t root);
+		static uint32_t end_dockspace_builder(uint32_t root);
 		
 		static uint32_t dock(cstring name, uint32_t id);
 		

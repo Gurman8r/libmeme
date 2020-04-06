@@ -32,7 +32,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr bitset() noexcept : m_words{ 0 } {}
+		constexpr bitset() noexcept : m_words{} {}
 
 		template <class T, class = std::enable_if_t<
 			std::is_integral_v<T>
@@ -259,7 +259,8 @@ namespace ml::ds
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <size_t N> inline std::ostream & operator <<(std::ostream & out, bitset<N> const & value)
+	template <size_t N
+	> inline std::ostream & operator<<(std::ostream & out, bitset<N> const & value)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{
@@ -268,7 +269,8 @@ namespace ml::ds
 		return out;
 	}
 
-	template <size_t N> inline std::istream & operator >>(std::istream & in, bitset<N> & value)
+	template <size_t N
+	> inline std::istream & operator>>(std::istream & in, bitset<N> & value)
 	{
 		for (size_t i = 0; i < N; ++i)
 		{

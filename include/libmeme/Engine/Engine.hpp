@@ -26,13 +26,13 @@ namespace ml
 		// engine config
 		struct config final
 		{
-			arguments_t			command_line	{}			; // command line
-			filesystem::path	content_home	{}			; // content home
-			filesystem::path	library_home	{}			; // library home
-			filesystem::path	program_path	{}			; // program path
-			filesystem::path	program_name	{}			; // program name
-			filesystem::path	setup_script	{}			; // setup script
-			window_settings		window_settings	{}			; // window settings
+			arguments_t			command_line		{}				; // command line
+			filesystem::path	content_home		{}				; // content home
+			filesystem::path	library_home		{}				; // library home
+			filesystem::path	program_path		{}				; // program path
+			filesystem::path	program_name		{}				; // program name
+			filesystem::path	setup_script		{}				; // setup script
+			window_settings		window_settings		{}				; // window settings
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,9 +40,9 @@ namespace ml
 		// engine io
 		struct io final
 		{
-			float_t				delta_time		{}			; // frame time
-			size_t				frame_count		{}			; // frame count
-			float_t				frame_rate		{}			; // frame rate
+			float_t				delta_time			{}				; // frame time
+			size_t				frame_count			{}				; // frame count
+			float_t				frame_rate			{}				; // frame rate
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

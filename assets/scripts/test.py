@@ -18,6 +18,9 @@ class my_script(ml.script_object):
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
+test = my_script(enabled = True)
+test.call("on_tick")
+
 with ml.object.create("my_object") as obj:
     obj.add_script(my_script, enabled = True)
 

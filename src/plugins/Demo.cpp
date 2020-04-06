@@ -179,7 +179,7 @@ namespace ml
 			),
 		} };
 
-		inline auto highlight_memory(byte_t * ptr, size_t const size)
+		inline void highlight_memory(byte_t * ptr, size_t const size)
 		{
 			static auto * const testres{ memory_manager::get_testres() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
@@ -187,7 +187,7 @@ namespace ml
 			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
 		}
 
-		template <class T> inline auto highlight_memory(T const * ptr)
+		template <class T> inline void highlight_memory(T const * ptr)
 		{
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
@@ -462,9 +462,11 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ editor::get_io().dock_nodes };
+			auto & d{ editor::get_io().dockspace_nodes };
+			if (!d.empty()) { return; }
 			d.resize(MAX_DOCK_NODE);
-			if (d[root] = editor::begin_dock_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+
+			if (d[root] = editor::begin_dockspace_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
@@ -486,7 +488,7 @@ namespace ml
 				editor::dock(m_gui_memory.title		, d[right]);
 				editor::dock(m_gui_docs.title		, d[right]);
 
-				editor::end_dock_builder(root);
+				editor::end_dockspace_builder(root);
 			}
 		}
 

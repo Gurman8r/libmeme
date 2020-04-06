@@ -59,9 +59,9 @@ namespace ml::meta
 		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 		{
 #if ML_has_cxx20
-			return (void)std::initializer_list<int>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
+			return (void)std::initializer_list<int32_t>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
 #else
-			return (void)std::initializer_list<int>{ (ML_forward(fn)(ML_forward(args)), 0)... };
+			return (void)std::initializer_list<int32_t>{ (ML_forward(fn)(ML_forward(args)), 0)... };
 #endif // ML_has_cxx20
 		}
 

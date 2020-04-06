@@ -40,18 +40,18 @@ namespace ml::util
 	> ML_NODISCARD constexpr bool equal_to(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? (((*lBegin) == (*rBegin))
-				&& _ML util::equal_to((lBegin + 1), lEnd, (rBegin + 1), rEnd))
-			: ((lBegin == lEnd) && (rBegin == rEnd));
+			? (*lBegin == *rBegin && _ML util::equal_to(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			: (lBegin == lEnd && rBegin == rEnd);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class LI, class RI
 	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? (((*lBegin) < (*rBegin))
-				&& _ML util::less((lBegin + 1), lEnd, (rBegin + 1), rEnd))
-			: ((lBegin == lEnd) && (rBegin == rEnd));
+			? (*lBegin < *rBegin && _ML util::less(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			: (lBegin == lEnd && rBegin == rEnd);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -299,7 +299,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// SIZE LITERALS
+// Size Literals
 namespace ml::literals
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -154,17 +154,6 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Arg0, class ... Args
-	> ML_NODISCARD inline std::stringstream args_to_sstream(Arg0 && arg0, Args && ... args) noexcept
-	{
-		std::stringstream ss{};
-		ss << ML_forward(arg0) << '\n';
-		int32_t i[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)i;
-		return ss;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD inline auto widen(Str const & value) noexcept
 	{
@@ -596,7 +585,9 @@ namespace ml::util
 	template <class Arg0, class ... Args
 	> ML_NODISCARD inline pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{ args_to_sstream(ML_forward(arg0), ML_forward(args)...) };
+		std::stringstream ss{};
+		ss << ML_forward(arg0) << '\n';
+		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)sink;
 		return format(fmt, ss);
 	}
 
@@ -604,15 +595,9 @@ namespace ml::util
 	{
 		for (size_t i = 0; ss.good(); ++i)
 		{
-			pmr::string line;
-			if (std::getline(ss, line))
+			if (pmr::string line; std::getline(ss, line))
 			{
-				auto const token = ([i]()
-				{
-					std::stringstream temp{};
-					temp << '{' << i << '}';
-					return pmr::string{ temp.str() };
-				})();
+				pmr::string const token{ "{" + to_string(i) + "}" };
 
 				for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
 				{
@@ -630,12 +615,7 @@ namespace ml::util
 	{
 		for (size_t i = 0, imax = args.size(); i < imax; ++i)
 		{
-			auto const token = ([i]()
-			{
-				std::stringstream temp{};
-				temp << '{' << i << '}';
-				return pmr::string{ temp.str() };
-			})();
+			pmr::string const token{ "{" + to_string(i) + "}" };
 
 			for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
 			{
@@ -645,24 +625,6 @@ namespace ml::util
 			}
 		}
 		return fmt;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD inline Str to_hex(T const & value)
-	{
-		std::stringstream ss{};
-		ss << std::hex << value;
-		return ss.str();
-	}
-
-	template <class T, ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD inline Str to_oct(T const & value)
-	{
-		std::stringstream ss{};
-		ss << std::oct << value;
-		return ss.str();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
