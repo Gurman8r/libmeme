@@ -1,8 +1,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-from libmeme import ml_library  as lib
-from libmeme import ml_stdio    as stdio
-from libmeme import ml_engine   as engine
+import libmeme_core as core
+import libmeme_engine as engine
 
 class my_script(engine.script_object):
     def __init__(self, **kwargs):

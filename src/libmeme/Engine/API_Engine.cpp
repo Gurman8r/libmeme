@@ -40,7 +40,7 @@ namespace ml::embed
 
 		// ENGINE IO
 		struct ml_engine_io {};
-		py::class_<ml_engine_io>(m, "runtime")
+		py::class_<ml_engine_io>(m, "io")
 
 			.def_property_readonly_static("delta_time"
 				, [](py::object) { return engine::get_io().delta_time; })

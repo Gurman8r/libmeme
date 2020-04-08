@@ -36,7 +36,7 @@ namespace ml::embed
 			
 			.def_property("width"
 				, [&](display_settings & s) { return s.size[0]; }, [&](display_settings & s, int32_t v) { s.size[0] = v; })
-
+			
 			.def_property("height"
 				, [&](display_settings & s) { return s.size[1]; }, [&](display_settings & s, int32_t v) { s.size[1] = v; })
 			;
