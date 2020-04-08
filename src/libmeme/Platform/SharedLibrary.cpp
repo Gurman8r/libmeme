@@ -17,7 +17,7 @@ namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline void * load_library(filesystem::path path)
+	static inline void * load_library(fs::path path)
 	{
 #ifdef ML_os_windows
 		if (path.extension().empty()) { path += LIB_EXT; }
@@ -64,7 +64,7 @@ namespace ml
 	{
 	}
 
-	shared_library::shared_library(filesystem::path const & path, allocator_type const & alloc) noexcept
+	shared_library::shared_library(fs::path const & path, allocator_type const & alloc) noexcept
 		: shared_library{ alloc }
 	{
 		open(path);
@@ -103,10 +103,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::open(filesystem::path const & path)
+	bool shared_library::open(fs::path const & path)
 	{
 		// already opened
-		if (good()) return false;
+		if (good()) { return false; }
 
 		// set path
 		m_path = path;
@@ -118,7 +118,7 @@ namespace ml
 	bool shared_library::close()
 	{
 		// not opened
-		if (!good()) return false;
+		if (!good()) { return false; }
 
 		// cleanup
 		m_path.clear();
@@ -131,7 +131,7 @@ namespace ml
 	void * shared_library::load_function(cstring name)
 	{
 		// not opened
-		if (!good()) return nullptr;
+		if (!good()) { return nullptr; }
 
 		// already loaded
 		if (auto const it{ m_funcs.find(name) })

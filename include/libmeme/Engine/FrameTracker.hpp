@@ -6,7 +6,7 @@
 namespace ml
 {
 	template <size_t N = 120
-	> struct frame_tracker final : trackable, non_copyable
+	> struct frame_tracker final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

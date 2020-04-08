@@ -9,10 +9,12 @@
 
 #ifdef ML_API
 #	define ML_CORE_API ML_API
-#elif defined(ML_CORE_EXPORTS)
-#	define ML_CORE_API ML_API_EXPORT
 #else
-#	define ML_CORE_API ML_API_IMPORT
+#	ifdef ML_CORE_EXPORTS
+#		define ML_CORE_API ML_API_EXPORT
+#	else
+#		define ML_CORE_API ML_API_IMPORT
+#	endif
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -27,9 +27,9 @@ namespace ml
 		
 		shader(shader_source const & source, allocator_type const & alloc = {});
 		
-		shader(filesystem::path const & v, filesystem::path const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & f, allocator_type const & alloc = {});
 		
-		shader(filesystem::path const & v, filesystem::path const & g, filesystem::path const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc = {});
 		
 		shader(shader const & other, allocator_type const & alloc = {});
 		
@@ -54,9 +54,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(filesystem::path const & v_file, filesystem::path const & f_file);
+		bool load_from_file(fs::path const & v_file, fs::path const & f_file);
 
-		bool load_from_file(filesystem::path const & v_file, filesystem::path const g_file, filesystem::path const & f_file);
+		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
 
 		bool load_from_source(shader_source const & value);
 

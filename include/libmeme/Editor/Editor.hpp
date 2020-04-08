@@ -30,10 +30,10 @@ namespace ml
 		// editor config
 		struct config final : trackable
 		{
-			filesystem::path	style_config		{}				; // style config
-			pmr::string			api_version			{}				; // imgui shading version
-			cstring				ini_filename		{}				; // imgui ini filename
-			cstring				log_filename		{}				; // imgui log filename
+			fs::path		style_config		{}				; // style config
+			pmr::string		api_version			{}				; // imgui shading version
+			cstring			ini_filename		{}				; // imgui ini filename
+			cstring			log_filename		{}				; // imgui log filename
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,20 +41,16 @@ namespace ml
 		// editor io
 		struct io final : trackable
 		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			bool			show_main_menu		{ true }		; // show menus
+			menu_bar_t		main_menus			{}				; // menus
 
-			bool				show_main_menu		{ true }		; // show menus
-			menu_bar_t			main_menus			{}				; // menus
-
-			bool				show_dockspace		{ true }		; // show dockspace
-			float_t				dockspace_border	{}				; // dockspace border
-			vec2				dockspace_padding	{}				; // dockspace padding
-			float_t				dockspace_rounding	{}				; // dockspace rounding
-			vec2				dockspace_size		{}				; // dockspace size
-			float_t				dockspace_alpha		{ 1.f }			; // dockspace transparancy
-			dock_nodes_t		dockspace_nodes		{}				; // dockspace nodes
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			bool			show_dockspace		{ true }		; // show dockspace
+			float_t			dockspace_border	{}				; // dockspace border
+			vec2			dockspace_padding	{}				; // dockspace padding
+			float_t			dockspace_rounding	{}				; // dockspace rounding
+			vec2			dockspace_size		{}				; // dockspace size
+			float_t			dockspace_alpha		{ 1.f }			; // dockspace transparancy
+			dock_nodes_t	dockspace_nodes		{}				; // dockspace nodes
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,12 +60,6 @@ namespace ml
 		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static config & get_config() noexcept;
-
-		ML_NODISCARD static io & get_io() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -84,6 +74,12 @@ namespace ml
 		static void render();
 
 		static void render_frame();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static config & get_config() noexcept;
+
+		ML_NODISCARD static io & get_io() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -9,7 +9,7 @@ namespace ml::util
 
 	// load file contents into vector
 	template <class Ch = char, class Buf = pmr::vector<Ch>
-	> ML_NODISCARD static inline std::optional<Buf> get_file_contents(filesystem::path const & path)
+	> ML_NODISCARD static inline std::optional<Buf> get_file_contents(fs::path const & path)
 	{
 		std::basic_ifstream<Ch, std::char_traits<Ch>> file{ path, std::ios_base::binary };
 		ML_defer{ file.close(); };
@@ -32,7 +32,7 @@ namespace ml::util
 
 	// load file contents into string
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD static inline Str get_file_string(filesystem::path const & path) noexcept
+	> ML_NODISCARD static inline Str get_file_string(fs::path const & path) noexcept
 	{
 		if (auto const contents{ util::get_file_contents<Ch>(path) })
 		{

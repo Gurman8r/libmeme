@@ -25,7 +25,7 @@ namespace ml
 	{
 	}
 
-	font::font(filesystem::path const & path, allocator_type const & alloc)
+	font::font(fs::path const & path, allocator_type const & alloc)
 		: font{ alloc }
 	{
 		load_from_file(path);
@@ -82,7 +82,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool font::load_from_file(filesystem::path const & path)
+	bool font::load_from_file(fs::path const & path)
 	{
 		if (m_library)
 			return false;

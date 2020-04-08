@@ -6,19 +6,19 @@
 
 namespace ml
 {
-	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
+	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using function_map = typename ds::flat_map<filesystem::path, void *>;
+		using function_map = typename ds::flat_map<fs::path, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit shared_library(allocator_type const & alloc = {}) noexcept;
 
-		shared_library(filesystem::path const & path, allocator_type const & alloc = {}) noexcept;
+		shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept;
 		
 		shared_library(shared_library && other, allocator_type const & alloc = {}) noexcept;
 		
@@ -32,7 +32,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool open(filesystem::path const & path);
+		bool open(fs::path const & path);
 
 		bool close();
 
@@ -71,7 +71,7 @@ namespace ml
 
 		ML_NODISCARD auto instance() const noexcept -> void const * { return m_instance; }
 
-		ML_NODISCARD auto path() const noexcept -> filesystem::path const & { return m_path; }
+		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -114,7 +114,7 @@ namespace ml
 
 	private:
 		void *				m_instance;
-		filesystem::path	m_path;
+		fs::path	m_path;
 		function_map		m_funcs;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

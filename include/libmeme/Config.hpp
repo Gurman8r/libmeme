@@ -292,7 +292,7 @@
 // floats
 #define ML_float32              float
 #define ML_float64              double
-#define ML_float80              long double // 8, 10, 12, or 16 bytes (CC Dependant)
+#define ML_float80              long double // 8, 10, 12, or 16 bytes (cc dependant)
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -11,20 +11,20 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2i		resolution	{};
-		uint32_t	color_depth	{};
+		vec2i		size {};
+		uint32_t	depth{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr operator bool() const noexcept
 		{
-			return resolution[0] && resolution[1] && color_depth;
+			return size[0] && size[1] && depth;
 		}
 
 		ML_NODISCARD constexpr bool operator==(display_settings const & other) const
 		{
-			return (resolution == other.resolution)
-				&& (color_depth == other.color_depth);
+			return (size == other.size)
+				&& (depth == other.depth);
 		}
 
 		ML_NODISCARD constexpr bool operator!=(display_settings const & other) const
@@ -34,8 +34,8 @@ namespace ml
 
 		ML_NODISCARD constexpr bool operator<(display_settings const & other) const
 		{
-			return (resolution < other.resolution)
-				|| (color_depth < other.color_depth);
+			return (size < other.size)
+				|| (depth < other.depth);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -45,8 +45,8 @@ namespace ml
 
 	static void from_json(json const & j, display_settings & value)
 	{
-		j.at("resolution").get_to(value.resolution);
-		j.at("color_depth").get_to(value.color_depth);
+		j.at("size").get_to(value.size);
+		j.at("depth").get_to(value.depth);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

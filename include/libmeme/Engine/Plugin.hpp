@@ -9,7 +9,7 @@
 
 namespace ml
 {
-	struct plugin : trackable, non_copyable, event_listener
+	struct plugin : non_copyable, trackable, event_listener
 	{
 		virtual ~plugin() noexcept = default;
 

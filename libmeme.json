@@ -6,8 +6,8 @@
 	"window_settings": {
 		"title": "libmeme",
 		"display_settings": {
-			"resolution": [ 1280, 720 ],
-			"color_depth": 32
+			"size": [ 1280, 720 ],
+			"depth": 32
 		},
 		"context_settings": {
 			"api": 1,

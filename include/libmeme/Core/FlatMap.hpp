@@ -24,8 +24,6 @@ namespace ml::ds
 		using difference_type	= typename ptrdiff_t;
 		using size_type			= typename size_t;
 
-		static constexpr bool multi{ false };
-
 		static constexpr size_type thresh{ _Th };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -23,15 +23,15 @@ ml::int32_t main()
 	// setup memory
 	static struct memory_config final : non_copyable
 	{
-		ds::array<byte_t, MEM_RESERVED>		m_data{};
-		pmr::monotonic_buffer_resource		m_mono{ m_data.data(), m_data.size() };
-		pmr::unsynchronized_pool_resource	m_pool{ &m_mono };
-		util::test_resource					m_test{ &m_pool, m_data.data(), m_data.size() };
+		ds::array<byte_t, MEM_RESERVED>		data{};
+		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
+		pmr::unsynchronized_pool_resource	pool{ &mono };
+		util::test_resource					test{ &pool, data.data(), data.size() };
 
 		memory_config() noexcept
 		{
-			ML_assert(pmr::set_default_resource(&m_test));
-			ML_assert(memory_manager::set_test_resource(&m_test));
+			ML_assert(pmr::set_default_resource(&test));
+			ML_assert(memory_manager::set_test_resource(&test));
 		}
 
 	} g_memcfg;

@@ -1,12 +1,16 @@
-#ifndef _ML_SCRIPT_HPP_
-#define _ML_SCRIPT_HPP_
+#ifndef _ML_SCRIPT_OBJECT_HPP_
+#define _ML_SCRIPT_OBJECT_HPP_
+
+// WIP
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
+#ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
+#endif
 #include <libmeme/Engine/Embed.hpp>
 
 namespace ml::embed
@@ -39,9 +43,23 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		script_object(py::object self, py::kwargs kwargs);
+		script_object(py::object self, py::kwargs kwargs)
+			: m_self{ self }
+			, m_kwargs{ kwargs }
+			, m_flags{}
+			, m_funcs{}
+		{
+			for (cstring name : func_names) { load_fn(name); }
 
-		~script_object();
+			set_enabled(get_opt<bool>("enabled"));
+
+			call_fn("on_activate");
+		}
+
+		~script_object()
+		{
+			call_fn("on_deactivate");
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -91,7 +109,20 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void install(py::module & m);
+		static void install(py::module & m)
+		{
+			py::class_<script_object>(m, "script_object")
+
+				.def(py::init<py::object, py::kwargs>())
+
+				.def("get_flag", &script_object::get_flag)
+				.def("set_flag", &script_object::set_flag)
+				.def_property("enabled", &script_object::is_enabled, &script_object::set_enabled)
+
+				.def("call", &script_object::call_fn)
+				.def("load", &script_object::load_fn)
+				;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -105,4 +136,4 @@ namespace ml::embed
 	};
 }
 
-#endif // !_ML_SCRIPT_HPP_
+#endif // !_ML_SCRIPT_OBJECT_HPP_

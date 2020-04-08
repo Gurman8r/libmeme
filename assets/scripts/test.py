@@ -1,8 +1,10 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import libmeme as ml
+from libmeme import ml_library  as lib
+from libmeme import ml_stdio    as stdio
+from libmeme import ml_engine   as engine
 
-class my_script(ml.script_object):
+class my_script(engine.script_object):
     def __init__(self, **kwargs):
         super(my_script, self).__init__(self, **kwargs)
         return
@@ -16,12 +18,12 @@ class my_script(ml.script_object):
     def on_tick(self):
         return
 
+    def on_timer(self):
+        return
+
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
 test = my_script(enabled = True)
 test.call("on_tick")
-
-with ml.object.create("my_object") as obj:
-    obj.add_script(my_script, enabled = True)
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

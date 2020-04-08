@@ -54,13 +54,13 @@ namespace ml
 		load_from_source(source);
 	}
 
-	shader::shader(filesystem::path const & v, filesystem::path const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	shader::shader(filesystem::path const & v, filesystem::path const & g, filesystem::path const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, g, f);
@@ -85,7 +85,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const & f_file)
+	bool shader::load_from_file(fs::path const & v_file, fs::path const & f_file)
 	{
 		return load_from_memory(
 			util::get_file_string(v_file).c_str(),
@@ -93,7 +93,7 @@ namespace ml
 		);
 	}
 
-	bool shader::load_from_file(filesystem::path const & v_file, filesystem::path const g_file, filesystem::path const & f_file)
+	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
 	{
 		return load_from_memory(
 			util::get_file_string(v_file).c_str(),

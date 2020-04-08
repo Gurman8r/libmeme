@@ -96,13 +96,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace std			= ::std;
-	namespace chrono		= _ML std::chrono;
-	namespace filesystem	= _ML std::filesystem;
-	namespace pmr			= _ML std::pmr;
+	namespace std		= ::std;
+	namespace chrono	= _ML std::chrono;
+	namespace fs		= _ML std::filesystem;
+	namespace pmr		= _ML std::pmr;
 #if ML_has_cxx20
-	namespace ranges		= _ML std::ranges;
-	namespace views			= _ML std::ranges::views;
+	namespace ranges	= _ML std::ranges;
+	namespace views		= _ML std::ranges::views;
 #endif
 
 	namespace literals

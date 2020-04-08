@@ -15,18 +15,15 @@ systemversion	"latest"
 
 dependson{
 	"glfw",
-	"imgui",
-	"lua",
 }
 
 defines{
 	"_CRT_SECURE_NO_WARNINGS",
 	"ML_API=ML_API_EXPORT",
 	"ML_RENDERER_OPENGL",
+	--"ML_OPENGL_LOADER_GLAD",
 	"ML_OPENGL_LOADER_GLEW",
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
-	--"ML_OPENGL_LOADER_GLAD",
-	"GLEW_STATIC",
 }
 
 includedirs{
@@ -52,8 +49,8 @@ files{
 	"%{sln_dir}tools/**.**",
 	"%{sln_dir}premake5.lua",
 	"%{sln_dir}README.md",
-		
-	-- ImGui
+
+	-- imgui
 	"%{ext_dir}imgui/*.h",
 	"%{ext_dir}imgui/*.cpp",
 	"%{ext_dir}imgui/examples/imgui_impl_glfw.h",
@@ -73,10 +70,27 @@ libdirs{
 }
 
 links{
-	"glfw", "lua",
-	"opengl32", "glew32s",
-	"freetype", "assimp", "IrrXML", "zlibstatic",
+	"glfw",
+	"opengl32",
+	"freetype",
+	"assimp",
+	"IrrXML",
+	"zlibstatic",
 }
+
+filter { "configurations:Debug" }
+	symbols "On"
+	links{
+		"glew32d",
+		"python39_d",
+	}
+
+filter{ "configurations:Release" }
+	optimize "Speed"
+	links{
+		"glew32",
+		"python39",
+	}
 
 -- WINDOWS
 
@@ -94,12 +108,8 @@ filter{ "system:Windows" }
 	}
 	
 filter{ "system:Windows", "configurations:Debug" }
-	symbols "On"
-
-	links{
-		"python39_d",
-	}
 	postbuildcommands{	
+		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\glew32d.dll %{bin_out}",
 		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39_d.dll %{bin_out}",
 	}
 	linkoptions{
@@ -107,12 +117,8 @@ filter{ "system:Windows", "configurations:Debug" }
 	}
 	
 filter{ "system:Windows", "configurations:Release" }
-	optimize "Speed"
-
-	links{
-		"python39",
-	}
-	postbuildcommands{	
+	postbuildcommands{
+		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\glew32.dll %{bin_out}",
 		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39.dll %{bin_out}",
 	}
 	linkoptions{

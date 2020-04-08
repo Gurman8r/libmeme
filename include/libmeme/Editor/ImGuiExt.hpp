@@ -626,25 +626,25 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		filesystem::path m_path{};
+		fs::path m_path{};
 
 		file_tree() noexcept = default;
 
 		void render() const
 		{
-			if (m_path.empty() || !filesystem::is_directory(m_path)) { return; }
+			if (m_path.empty() || !fs::is_directory(m_path)) { return; }
 
 			ML_ImGui_ScopeID(ML_addressof(this));
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 			ImGui::Separator();
 
-			for (auto const & e : filesystem::directory_iterator{ m_path })
+			for (auto const & e : fs::directory_iterator{ m_path })
 			{
 				if (e.is_directory()) { show_directory(e); }
 			}
 
-			for (auto const & e : filesystem::directory_iterator{ m_path })
+			for (auto const & e : fs::directory_iterator{ m_path })
 			{
 				if (e.is_regular_file()) { show_regular(e); }
 			}
@@ -655,10 +655,10 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void show_directory(filesystem::directory_entry const & value)
+		static void show_directory(fs::directory_entry const & value)
 		{
 			// check
-			if (value.path().empty() || !filesystem::is_directory(value)) { return; }
+			if (value.path().empty() || !fs::is_directory(value)) { return; }
 
 			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
 
@@ -682,13 +682,13 @@ namespace ml::gui
 			if (node_open)
 			{
 				// directories
-				for (auto const & e : filesystem::directory_iterator{ value })
+				for (auto const & e : fs::directory_iterator{ value })
 				{
 					if (e.is_directory()) { show_directory(e); }
 				}
 
 				// regular files
-				for (auto const & e : filesystem::directory_iterator{ value })
+				for (auto const & e : fs::directory_iterator{ value })
 				{
 					if (e.is_regular_file()) { show_regular(e); }
 				}
@@ -697,10 +697,10 @@ namespace ml::gui
 			}
 		}
 
-		static void show_regular(filesystem::directory_entry const & value)
+		static void show_regular(fs::directory_entry const & value)
 		{
 			// check
-			if (value.path().empty() || !filesystem::is_regular_file(value)) { return; }
+			if (value.path().empty() || !fs::is_regular_file(value)) { return; }
 
 			ML_ImGui_ScopeID((int32_t)util::hash(value.path().native()));
 

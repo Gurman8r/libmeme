@@ -9,10 +9,12 @@
 
 #ifdef ML_API
 #	define ML_RENDERER_API ML_API
-#elif defined(ML_RENDERER_EXPORTS)
-#	define ML_RENDERER_API ML_API_EXPORT
 #else
-#	define ML_RENDERER_API ML_API_IMPORT
+#	ifdef ML_RENDERER_EXPORTS
+#		define ML_RENDERER_API ML_API_EXPORT
+#	else
+#		define ML_RENDERER_API ML_API_IMPORT
+#	endif
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

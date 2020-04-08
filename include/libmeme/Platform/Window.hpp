@@ -11,7 +11,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API window : trackable, non_copyable
+	struct ML_PLATFORM_API window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -187,7 +187,7 @@ namespace ml
 
 		ML_NODISCARD auto get_share() const noexcept -> void * { return m_share; }
 
-		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_display_settings().resolution; }
+		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_display_settings().size; }
 
 		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 

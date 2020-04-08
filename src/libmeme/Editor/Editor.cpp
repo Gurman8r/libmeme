@@ -12,11 +12,11 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// editor context
-	class editor::context final : trackable, non_copyable
+	class editor::context final : non_copyable, trackable
 	{
 		friend class		editor								;
 		editor::config		m_config		{}					; // public startup variables
-		editor::io			m_io			{}					; // public io variables
+		editor::io			m_io			{}					; // public runtime variables
 		void *				m_imgui			{}					; // active imgui context
 	};
 
@@ -28,9 +28,13 @@ namespace ml
 
 	bool editor::create_context(json const & j)
 	{
-		if (is_initialized() || !(g_editor = new editor::context{}))
+		if (g_editor)
 		{
 			return debug::log::error("editor is already initialized");
+		}
+		else if (!(g_editor = new editor::context{}))
+		{
+			return debug::log::error("failed initializing editor instance");
 		}
 		else
 		{
@@ -51,25 +55,8 @@ namespace ml
 	bool editor::destroy_context()
 	{
 		if (!g_editor) { return false; }
-		else
-		{
-			delete g_editor;
-			return !(g_editor = nullptr);
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	editor::config & editor::get_config() noexcept
-	{
-		ML_assert(g_editor);
-		return (*g_editor).m_config;
-	}
-
-	editor::io & editor::get_io() noexcept
-	{
-		ML_assert(g_editor);
-		return (*g_editor).m_io;
+		delete g_editor;
+		return !(g_editor = nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -250,6 +237,20 @@ namespace ml
 		}
 
 		GL::flush();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	editor::config & editor::get_config() noexcept
+	{
+		ML_assert(g_editor);
+		return (*g_editor).m_config;
+	}
+
+	editor::io & editor::get_io() noexcept
+	{
+		ML_assert(g_editor);
+		return (*g_editor).m_io;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

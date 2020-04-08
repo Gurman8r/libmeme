@@ -137,8 +137,8 @@ namespace ml
 		
 		// create window
 		if (!(m_window = static_cast<GLFWwindow *>(glfwCreateWindow(
-			m_settings.display.resolution[0],
-			m_settings.display.resolution[1],
+			m_settings.display.size[0],
+			m_settings.display.size[1],
 			m_settings.title.c_str(),
 			static_cast<GLFWmonitor *>(m_monitor),
 			static_cast<GLFWwindow *>(m_share)
@@ -240,7 +240,7 @@ namespace ml
 
 	window & window::set_centered()
 	{
-		return set_position((vec2i)(get_desktop_mode().resolution - get_size()) / 2);
+		return set_position((vec2i)(get_desktop_mode().size - get_size()) / 2);
 	}
 
 	window & window::set_clipboard(cstring const & value)
@@ -346,7 +346,7 @@ namespace ml
 
 	window & window::set_size(vec2i const & value)
 	{
-		m_settings.display.resolution = value;
+		m_settings.display.size = value;
 		if (m_window)
 		{
 			glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());

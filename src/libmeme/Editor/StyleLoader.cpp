@@ -8,13 +8,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool style_loader::load_from_file(filesystem::path const & path)
+	bool style_loader::load_from_file(fs::path const & path)
 	{
 		// empty
 		if (path.empty()) return false;
 
 		// builtins
-		if (!filesystem::exists(path))
+		if (!fs::exists(path))
 		{
 			switch (util::hash(util::to_lower(path.string())))
 			{

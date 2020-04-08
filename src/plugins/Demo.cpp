@@ -156,7 +156,8 @@ namespace ml
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
 			m_gui_files		{ "files##demo"			, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None };
+			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
+			m_gui_scripting	{ "scripting##demo"		, 1, "", ImGuiWindowFlags_MenuBar };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -487,6 +488,7 @@ namespace ml
 				editor::dock(m_gui_profiler.title	, d[left_dn2]);
 				editor::dock(m_gui_memory.title		, d[right]);
 				editor::dock(m_gui_docs.title		, d[right]);
+				editor::dock(m_gui_scripting.title	, d[right]);
 
 				editor::end_dockspace_builder(root);
 			}
@@ -504,14 +506,15 @@ namespace ml
 			if (m_imgui_about.open) { editor::show_imgui_about(&m_imgui_about.open); }
 
 			// DEMO
-			m_gui_display.render([&]()	{ show_display_gui(); });	// DISPLAY
-			m_gui_ecs.render([&]()		{ show_ecs_gui(); });		// ECS
-			m_gui_assets.render([&]()	{ show_assets_gui(); });	// ASSETS
-			m_gui_files.render([&]()	{ show_files_gui(); });		// FILES
-			m_gui_profiler.render([&]() { show_profiler_gui(); });	// PROFILER
-			m_gui_memory.render([&]()	{ show_memory_gui(); });	// MEMORY
-			m_gui_docs.render([&]()		{ show_documents_gui(); });	// DOCS
-			m_gui_console.render([&]()	{ show_console_gui(); });	// CONSOLE
+			m_gui_display.render([&]()		{ show_display_gui(); });	// DISPLAY
+			m_gui_ecs.render([&]()			{ show_ecs_gui(); });		// ECS
+			m_gui_assets.render([&]()		{ show_assets_gui(); });	// ASSETS
+			m_gui_files.render([&]()		{ show_files_gui(); });		// FILES
+			m_gui_profiler.render([&]()		{ show_profiler_gui(); });	// PROFILER
+			m_gui_memory.render([&]()		{ show_memory_gui(); });	// MEMORY
+			m_gui_docs.render([&]()			{ show_documents_gui(); });	// DOCS
+			m_gui_console.render([&]()		{ show_console_gui(); });	// CONSOLE
+			m_gui_scripting.render([&]()	{ show_scripting_gui(); });	// SCRIPTING
 		}
 
 		void on_unload(unload_event const &)
@@ -660,23 +663,6 @@ namespace ml
 					}
 				} });
 
-				m_console.commands.push_back({ "lua", [&](auto args)
-				{
-					if (!m_console.overload && args.empty())
-					{
-						m_console.overload = "lua";
-						ML_once{ std::cout << "# type \'\\\' to exit\n"; };
-					}
-					else if (m_console.overload && (args.front() == "\\"))
-					{
-						m_console.overload = nullptr;
-					}
-					else
-					{
-						engine::do_string<embed::api::lua>(util::detokenize(args));
-					}
-				} });
-
 				m_console.commands.push_back({ "python", [&](auto args)
 				{
 					if (!m_console.overload && args.empty())
@@ -690,7 +676,7 @@ namespace ml
 					}
 					else
 					{
-						engine::do_string<embed::api::python>(util::detokenize(args));
+						engine::get_scripts().do_string(util::detokenize(args));
 					}
 				} });
 			}
@@ -1118,6 +1104,18 @@ namespace ml
 			ImGui::Columns(1);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_scripting_gui()
+		{
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::EndMenuBar();
+			}
+
+
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

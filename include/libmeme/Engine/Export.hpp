@@ -9,10 +9,12 @@
 
 #ifdef ML_API
 #	define ML_ENGINE_API ML_API
-#elif defined(ML_ENGINE_EXPORTS)
-#	define ML_ENGINE_API ML_API_EXPORT
 #else
-#	define ML_ENGINE_API ML_API_IMPORT
+#	ifdef ML_ENGINE_EXPORTS
+#		define ML_ENGINE_API ML_API_EXPORT
+#	else
+#		define ML_ENGINE_API ML_API_IMPORT
+#	endif
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

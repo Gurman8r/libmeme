@@ -2,8 +2,10 @@
 #define _ML_ENGINE_HPP_
 
 #include <libmeme/Core/Timer.hpp>
-#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Engine/FrameTracker.hpp>
+#include <libmeme/Engine/AssetManager.hpp>
+#include <libmeme/Engine/PluginManager.hpp>
+#include <libmeme/Engine/ScriptManager.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
 namespace ml
@@ -24,25 +26,25 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// engine config
-		struct config final
+		struct config final : trackable
 		{
-			arguments_t			command_line		{}				; // command line
-			filesystem::path	content_home		{}				; // content home
-			filesystem::path	library_home		{}				; // library home
-			filesystem::path	program_path		{}				; // program path
-			filesystem::path	program_name		{}				; // program name
-			filesystem::path	setup_script		{}				; // setup script
-			window_settings		window_settings		{}				; // window settings
+			arguments_t		command_line		{}				; // command line
+			fs::path		content_home		{}				; // content home
+			fs::path		library_home		{}				; // library home
+			fs::path		program_path		{}				; // program path
+			fs::path		program_name		{}				; // program name
+			fs::path		setup_script		{}				; // setup script
+			window_settings	window_settings		{}				; // window settings
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// engine io
-		struct io final
+		struct io final : trackable
 		{
-			float_t				delta_time			{}				; // frame time
-			size_t				frame_count			{}				; // frame count
-			float_t				frame_rate			{}				; // frame rate
+			float_t			delta_time			{}				; // frame time
+			size_t			frame_count			{}				; // frame count
+			float_t			frame_rate			{}				; // frame rate
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,16 +54,6 @@ namespace ml
 		ML_NODISCARD static bool create_context(json const & j);
 
 		ML_NODISCARD static bool destroy_context();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static config & get_config() noexcept;
-
-		ML_NODISCARD static io & get_io() noexcept;
-
-		ML_NODISCARD static duration const & get_time() noexcept;
-
-		ML_NODISCARD static render_window & get_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,7 +73,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static filesystem::path path_to(filesystem::path const & value = {})
+		ML_NODISCARD static fs::path path_to(fs::path const & value = {})
 		{
 			if (value.empty())
 			{
@@ -95,18 +87,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool load_plugin(filesystem::path const & path);
+		ML_NODISCARD static asset_manager & get_assets() noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD static config & get_config() noexcept;
 
-		static int32_t do_string(int32_t lang, pmr::string const & text);
+		ML_NODISCARD static io & get_io() noexcept;
 
-		static int32_t do_file(filesystem::path const & path);
+		ML_NODISCARD static plugin_manager & get_plugins() noexcept;
 
-		template <int32_t Lang> static int32_t do_string(pmr::string const & text)
-		{
-			return do_string(Lang, text);
-		}
+		ML_NODISCARD static script_manager & get_scripts() noexcept;
+
+		ML_NODISCARD static duration const & get_time() noexcept;
+
+		ML_NODISCARD static render_window & get_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
