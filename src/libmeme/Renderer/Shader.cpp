@@ -125,17 +125,19 @@ namespace ml
 
 	bool shader::load_from_memory(pmr::string const & v, pmr::string const & f)
 	{
-		if (v.empty() || f.empty())
-			return false;
+		if (v.empty() || f.empty()) { return false; }
+		
 		m_source = { v, {}, f };
+		
 		return compile(v.c_str(), nullptr, f.c_str()) == EXIT_SUCCESS;
 	}
 
 	bool shader::load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f)
 	{
-		if (v.empty() || g.empty() || f.empty())
-			return false;
+		if (v.empty() || g.empty() || f.empty()) { return false; }
+		
 		m_source = { v, g, f };
+		
 		return compile(v.c_str(), g.c_str(), f.c_str()) == EXIT_SUCCESS;
 	}
 
@@ -357,31 +359,31 @@ namespace ml
 
 	int32_t shader::compile(cstring v, cstring g, cstring f)
 	{
-		// Shaders Available
+		// shaders available
 		if (!GL::shadersAvailable())
 		{
 			return EXIT_FAILURE * 1;
 		}
 
-		// Geometry Shaders Available
+		// geometry shaders available
 		if (g && !GL::geometryShadersAvailable())
 		{
 			return EXIT_FAILURE * 2;
 		}
 
-		// Destroy Program
+		// destroy program
 		if (!destroy())
 		{
 			return EXIT_FAILURE * 3;
 		}
 
-		// Generate Program
+		// generate program
 		if (!generate())
 		{
 			return EXIT_FAILURE * 4;
 		}
 
-		// Compile Vertex
+		// vertex
 		uint32_t vert{};
 		switch (GL::compileShader(vert, GL::VertexShader, 1, &v))
 		{
@@ -394,7 +396,7 @@ namespace ml
 			return EXIT_FAILURE * 5;
 		}
 
-		// Compile Geometry
+		// geometry
 		uint32_t geom{};
 		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g))
 		{
@@ -407,7 +409,7 @@ namespace ml
 			return EXIT_FAILURE * 6;
 		}
 
-		// Compile Fragment
+		// fragment
 		uint32_t frag{};
 		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f))
 		{
@@ -420,7 +422,7 @@ namespace ml
 			return EXIT_FAILURE * 7;
 		}
 
-		// Link Program
+		// link
 		if (!GL::linkProgram(m_handle))
 		{
 			cstring const log{ GL::getProgramInfoLog(m_handle) };
