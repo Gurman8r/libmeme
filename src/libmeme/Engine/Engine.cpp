@@ -6,19 +6,10 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
 
-#ifndef ML_EMBED_PYTHON
-#define ML_EMBED_PYTHON
-#endif
-#include <libmeme/Engine/Embed.hpp>
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	using file_list_t	= pmr::vector<fs::path>;
-	using file_set_t	= ds::flat_set<fs::path>;
-	using libraries_t	= ds::flat_map<shared_library, plugin *>;
-
 	// engine context
 	class engine::context final : non_copyable, trackable
 	{
@@ -49,7 +40,7 @@ namespace ml
 		}
 		else if (!(g_engine = new engine::context{}))
 		{
-			return debug::log::error("failed initializing engine instance");
+			return debug::log::error("failed initializing engine context");
 		}
 		else
 		{

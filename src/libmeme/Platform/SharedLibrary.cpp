@@ -8,9 +8,9 @@
 #endif
 
 #ifdef ML_os_windows
-#	define LIB_EXT ".dll"
+#	define LIB_EXT L".dll"
 #else
-#	define LIB_EXT ".so"
+#	define LIB_EXT L".so"
 #endif
 
 namespace ml::impl
@@ -19,10 +19,9 @@ namespace ml::impl
 
 	static inline void * load_library(fs::path path)
 	{
+		if (path.extension().empty()) { path += LIB_EXT; } // append extension
 #ifdef ML_os_windows
-		if (path.extension().empty()) { path += LIB_EXT; }
-		else if (path.extension() != LIB_EXT) { return nullptr; }
-		return LoadLibraryExW(path.native().c_str(), nullptr, 0);
+		return LoadLibraryExW(path.c_str(), nullptr, 0);
 #else
 		return nullptr;
 #endif
@@ -58,9 +57,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared_library::shared_library(allocator_type const & alloc) noexcept
-		: m_instance{}
-		, m_path	{}
-		, m_funcs	{ alloc }
+		: m_inst{}, m_path{}, m_funcs{ alloc }
 	{
 	}
 
@@ -78,27 +75,7 @@ namespace ml
 
 	shared_library::~shared_library() noexcept
 	{
-		impl::free_library(m_instance);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	shared_library & shared_library::operator=(shared_library && other) noexcept
-	{
-		swap(std::move(other));
-		return (*this);
-	}
-
-	void shared_library::swap(shared_library & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_instance, other.m_instance);
-			
-			m_path.swap(other.m_path);
-			
-			m_funcs.swap(other.m_funcs);
-		}
+		impl::free_library(m_inst);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -106,41 +83,43 @@ namespace ml
 	bool shared_library::open(fs::path const & path)
 	{
 		// already opened
-		if (good()) { return false; }
+		if (m_inst) { return false; }
 
 		// set path
 		m_path = path;
 
+		// clear functions
+		m_funcs.clear();
+
 		// open library
-		return (m_instance = impl::load_library(path));
+		return (m_inst = impl::load_library(path));
 	}
 
 	bool shared_library::close()
 	{
 		// not opened
-		if (!good()) { return false; }
+		if (!m_inst) { return false; }
 
-		// cleanup
+		// clear path
 		m_path.clear();
+
+		// clear functions
 		m_funcs.clear();
 
 		// free library
-		return impl::free_library(m_instance);
+		return impl::free_library(m_inst);
 	}
 
-	void * shared_library::load_function(cstring name)
+	void * shared_library::load_function(pmr::string const & name)
 	{
 		// not opened
-		if (!good()) { return nullptr; }
+		if (!m_inst) { return nullptr; }
 
-		// already loaded
-		if (auto const it{ m_funcs.find(name) })
-		{
-			return (*it->second);
-		}
-		
 		// load function
-		return (*m_funcs.insert(name, impl::load_function(m_instance, name)).second);
+		return m_funcs.find_or_invoke(name, [&]()
+		{
+			return impl::load_function(m_inst, name.c_str());
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -26,10 +26,7 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool good() const noexcept
-		{
-			return m_resource && m_buffer && (0 < m_total_bytes);
-		}
+		bool good() const noexcept { return (m_resource && m_buffer && (0 < m_total_bytes)); }
 
 		operator bool() const noexcept { return good(); }
 
@@ -39,15 +36,15 @@ namespace ml::util
 
 		size_t addr() const noexcept { return (size_t)m_buffer; }
 
-		size_t num_allocations() const noexcept { return m_alloc_count; }
+		size_t num_allocations() const noexcept { return m_num_alloc; }
 
 		size_t total_bytes() const noexcept { return m_total_bytes; }
 
-		size_t used_bytes() const noexcept { return m_bytes_used; }
+		size_t used_bytes() const noexcept { return m_used_bytes; }
 
-		size_t free_bytes() const noexcept { return m_total_bytes - m_bytes_used; }
+		size_t free_bytes() const noexcept { return m_total_bytes - m_used_bytes; }
 
-		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
+		float_t fraction_used() const noexcept { return (float_t)m_used_bytes / (float_t)m_total_bytes; }
 
 		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
 
@@ -86,15 +83,15 @@ namespace ml::util
 	protected:
 		void * do_allocate(size_t bytes, size_t align) override
 		{
-			++m_alloc_count;
-			m_bytes_used += bytes;
+			++m_num_alloc;
+			m_used_bytes += bytes;
 			return m_resource->allocate(bytes, align);
 		}
 
 		void do_deallocate(void * ptr, size_t bytes, size_t align) override
 		{
-			--m_alloc_count;
-			m_bytes_used -= bytes;
+			--m_num_alloc;
+			m_used_bytes -= bytes;
 			return m_resource->deallocate(ptr, bytes, align);
 		}
 
@@ -110,8 +107,8 @@ namespace ml::util
 		pointer const m_buffer;
 		size_t const m_total_bytes;
 
-		size_t m_alloc_count {};
-		size_t m_bytes_used {};
+		size_t m_num_alloc {};
+		size_t m_used_bytes {};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -155,10 +152,10 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate requested bytes
-			auto const temp{ inst.m_alloc.allocate(size) };
+			auto const data{ inst.m_allocator.allocate(size) };
 
 			// create record
-			return (*inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first);
+			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -180,7 +177,7 @@ namespace ml
 			if (auto const it{ inst.m_records.find(addr) })
 			{
 				// free allocation
-				inst.m_alloc.deallocate(it->second->data, it->second->size);
+				inst.m_allocator.deallocate(it->second->data, it->second->size);
 
 				// erase record
 				inst.m_records.erase(it->first);
@@ -227,7 +224,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_alloc; }
+		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
 
 		ML_NODISCARD static auto const & get_index() noexcept { return get_instance().m_index; }
 
@@ -242,7 +239,7 @@ namespace ml
 
 		~memory_manager();
 
-		allocator_type			m_alloc		{};	// allocator
+		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
 		record_map				m_records	{};	// record table
 		util::test_resource *	m_testres	{};	// test resource

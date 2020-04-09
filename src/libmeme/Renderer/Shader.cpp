@@ -320,7 +320,7 @@ namespace ml
 		uniform_binder const u{ *this, name };
 		if (u)
 		{
-			static auto const max_textures
+			static auto const max_texture_units
 			{
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
@@ -329,7 +329,7 @@ namespace ml
 			{
 				(*it->second) = &value;
 			}
-			else if ((m_textures.size() + 1) < max_textures)
+			else if ((m_textures.size() + 1) < max_texture_units)
 			{
 				m_textures.insert(u, &value);
 			}
@@ -341,26 +341,18 @@ namespace ml
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		if (auto const code{ util::hash(value) }; auto const it{ m_attributes.find(code) })
+		return m_attributes.find_or_invoke(util::hash(value), [&]()
 		{
-			return (*it->second);
-		}
-		else
-		{
-			return (*m_attributes.insert(code, GL::getAttribLocation(m_handle, value.c_str())).second);
-		}
+			return GL::getAttribLocation(m_handle, value.c_str());
+		});
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		if (auto const code{ util::hash(value) }; auto const it{ m_uniforms.find(code) })
+		return m_uniforms.find_or_invoke(util::hash(value), [&]()
 		{
-			return (*it->second);
-		}
-		else
-		{
-			return (*m_uniforms.insert(code, GL::getUniformLocation(m_handle, value.c_str())).second);
-		}
+			return GL::getUniformLocation(m_handle, value.c_str());
+		});
 	}
 
 	int32_t shader::compile(cstring v, cstring g, cstring f)

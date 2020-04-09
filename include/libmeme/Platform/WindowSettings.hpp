@@ -57,8 +57,8 @@ namespace ml
 	static void from_json(json const & j, window_settings & value)
 	{
 		j.at("title").get_to(value.title);
-		j.at("display_settings").get_to(value.display);
-		j.at("context_settings").get_to(value.context);
+		j.at("display").get_to(value.display);
+		j.at("context").get_to(value.context);
 		j.at("hints").get_to(value.hints);
 	}
 

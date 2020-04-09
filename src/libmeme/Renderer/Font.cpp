@@ -20,7 +20,7 @@ namespace ml
 	font::font(allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
-		, m_library	{}
+		, ml_lib	{}
 		, m_face	{}
 	{
 	}
@@ -34,7 +34,7 @@ namespace ml
 	font::font(font const & other, allocator_type const & alloc)
 		: m_pages	{ other.m_pages, alloc }
 		, m_info	{ { other.m_info.family, alloc }, other.m_info.locale }
-		, m_library	{ other.m_library }
+		, ml_lib	{ other.ml_lib }
 		, m_face	{ other.m_face }
 	{
 	}
@@ -51,50 +51,20 @@ namespace ml
 
 		if (m_face) { FT_Done_Face(static_cast<FT_Face>(m_face)); }
 
-		if (m_library) { FT_Done_FreeType(static_cast<FT_Library>(m_library)); }
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	font & font::operator=(font const & other)
-	{
-		font temp{ other };
-		swap(temp);
-		return (*this);
-	}
-
-	font & font::operator=(font && other) noexcept
-	{
-		swap(std::move(other));
-		return (*this);
-	}
-
-	void font::swap(font & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_pages, other.m_pages);
-			std::swap(m_library, other.m_library);
-			std::swap(m_face, other.m_face);
-			std::swap(m_info, other.m_info);
-		}
+		if (ml_lib) { FT_Done_FreeType(static_cast<FT_Library>(ml_lib)); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool font::load_from_file(fs::path const & path)
 	{
-		if (m_library)
-			return false;
+		if (ml_lib) { return false; }
 
 		// load freetype library instance
 		FT_Library library;
 		if (FT_Init_FreeType(&library) != 0)
 		{
-			return debug::log::error(
-				"Failed loading font \"{0}\" (failed to open FreeType)",
-				path
-			);
+			return debug::log::error("failed initializing FreeType: {0}", path);
 		}
 
 		// load the new fonts face from the specified file
@@ -121,7 +91,7 @@ namespace ml
 		}
 
 		// store loaded font library
-		m_library = library;
+		ml_lib = library;
 
 		// store the font faces
 		m_face = face;
@@ -134,59 +104,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	font::page const * font::get_page(uint32_t size) const
-	{
-		if (auto const p{ m_pages.find(size) })
-		{
-			return &(*p->second);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	font::page & font::get_page(uint32_t size)
-	{
-		return m_pages[size];
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	glyph const * font::get_glyph(uint32_t c, uint32_t size) const
-	{
-		if (auto const p{ get_page(size) }; auto const g{ p->find(c) })
-		{
-			return &(*g->second);
-		}
-		else
-		{
-			return nullptr;
-		}
-	}
-
-	glyph & font::get_glyph(uint32_t c, uint32_t size)
-	{
-		if (page & p{ get_page(size) }; auto it{ p.find(c) })
-		{
-			return (*it->second);
-		}
-		else
-		{
-			return (*p.insert(c, load_glyph(c, size)).second);
-		}
-	}
-
 	glyph font::load_glyph(uint32_t c, uint32_t size)
 	{
-		glyph g;
+		glyph g{};
 
+		auto face{ static_cast<FT_Face>(m_face) };
+		
 		// face not loaded
-		FT_Face face{ static_cast<FT_Face>(m_face) };
-		if (!face)
-		{
-			return g;
-		}
+		if (!face) { return g; }
 
 		// set size loading glyphs as
 		FT_Set_Pixel_Sizes(face, 0, size);
@@ -210,6 +135,7 @@ namespace ml
 			texture_flags_default
 		);
 
+		// set bounds
 		g.bounds = float_rect{
 			face->glyph->bitmap_left,
 			face->glyph->bitmap_top,
@@ -217,6 +143,7 @@ namespace ml
 			face->glyph->bitmap.rows
 		};
 
+		// set advance
 		g.advance = (uint32_t)face->glyph->advance.x;
 		
 		// only load a texture for characters requiring a graphic

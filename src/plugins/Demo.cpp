@@ -1126,8 +1126,8 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::plugin * p{ new ml::demo{} };
-	return p;
+	static auto temp{ new ml::demo{} };
+	return temp;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

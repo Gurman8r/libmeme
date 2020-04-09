@@ -35,11 +35,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		font & operator=(font const & other);
+		font & operator=(font const & other)
+		{
+			font temp{ other };
+			swap(temp);
+			return (*this);
+		}
 
-		font & operator=(font && other) noexcept;
+		font & operator=(font && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
-		void swap(font & other) noexcept;
+		void swap(font & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_pages, other.m_pages);
+				std::swap(ml_lib, other.ml_lib);
+				std::swap(m_face, other.m_face);
+				std::swap(m_info, other.m_info);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,17 +65,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD font::page const * get_page(uint32_t size) const;
-
-		ML_NODISCARD font::page & get_page(uint32_t size);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD glyph const * get_glyph(uint32_t c, uint32_t size) const;
-
-		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size);
-
 		ML_NODISCARD glyph load_glyph(uint32_t c, uint32_t size);
+
+		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size)
+		{
+			return m_pages.at(size).find_or_invoke(c, [&]()
+			{
+				return load_glyph(c, size);
+			});
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,7 +84,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *		m_library;
+		void *		ml_lib;
 		void *		m_face;
 		info		m_info;
 		page_table	m_pages;

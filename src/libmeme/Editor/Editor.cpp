@@ -34,7 +34,7 @@ namespace ml
 		}
 		else if (!(g_editor = new editor::context{}))
 		{
-			return debug::log::error("failed initializing editor instance");
+			return debug::log::error("failed initializing editor context");
 		}
 		else
 		{

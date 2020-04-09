@@ -10,7 +10,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		script_manager() noexcept;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+	
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		script_manager(allocator_type const & alloc = {}) noexcept;
 
 		~script_manager() noexcept;
 
@@ -25,6 +29,12 @@ namespace ml
 		int32_t do_file(fs::path const & path);
 
 		int32_t do_string(pmr::string const & text);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

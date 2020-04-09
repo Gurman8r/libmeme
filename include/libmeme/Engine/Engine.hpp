@@ -73,20 +73,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static fs::path path_to(fs::path const & value = {})
-		{
-			if (value.empty())
-			{
-				return get_config().content_home;
-			}
-			else
-			{
-				return get_config().content_home.native() + value.native();
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static asset_manager & get_assets() noexcept;
 
 		ML_NODISCARD static config & get_config() noexcept;
@@ -100,6 +86,20 @@ namespace ml
 		ML_NODISCARD static duration const & get_time() noexcept;
 
 		ML_NODISCARD static render_window & get_window() noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static fs::path path_to(fs::path const & value = {})
+		{
+			if (value.empty())
+			{
+				return get_config().content_home;
+			}
+			else
+			{
+				return get_config().content_home.native() + value.native();
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

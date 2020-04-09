@@ -5,11 +5,11 @@
 
 	"window_settings": {
 		"title": "libmeme",
-		"display_settings": {
+		"display": {
 			"size": [ 1280, 720 ],
 			"depth": 32
 		},
-		"context_settings": {
+		"context": {
 			"api": 1,
 			"major": 4,
 			"minor": 6,

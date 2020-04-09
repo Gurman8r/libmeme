@@ -69,14 +69,12 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// INSTALL
-		([&	, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
-		]()
+		// SETUP
+		([&, builtins = py::module::import("builtins"), sys = py::module::import("sys")]()
 		{
-			script_object::install(m);
 			builtins.attr("exit") = m.attr("close");
 			sys.attr("exit") = m.attr("close");
+			script_object::install(m);
 		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

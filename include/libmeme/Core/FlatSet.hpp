@@ -72,26 +72,26 @@ namespace ml::ds
 		basic_flat_set(init_type value, allocator_type const & alloc = {})
 			: m_data{ value, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
 			: m_data{ first, last, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
 			: m_data{ value, alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::move(value), alloc }
 		{
-			this->impl_sort();
+			impl_sort();
 		}
 
 		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
@@ -109,34 +109,34 @@ namespace ml::ds
 		self_type & operator=(init_type value)
 		{
 			self_type temp{ value };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(storage_type const & value)
 		{
 			self_type temp{ value };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(storage_type && value) noexcept
 		{
 			self_type temp{ std::move(value) };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 	
 		self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
-			this->swap(temp);
+			swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(self_type && other) noexcept
 		{
-			this->swap(std::move(other));
+			swap(std::move(other));
 			return (*this);
 		}
 
@@ -147,14 +147,14 @@ namespace ml::ds
 		{
 			m_data.assign(first, last);
 
-			this->impl_sort();
+			impl_sort();
 		}
 
 		void assign(init_type value)
 		{
 			m_data.assign(value);
 
-			this->impl_sort();
+			impl_sort();
 		}
 
 		void assign(storage_type const & value)
@@ -163,7 +163,7 @@ namespace ml::ds
 			{
 				m_data = value;
 
-				this->impl_sort();
+				impl_sort();
 			}
 		}
 
@@ -214,7 +214,7 @@ namespace ml::ds
 			{
 				m_data.swap(value);
 
-				this->impl_sort();
+				impl_sort();
 			}
 		}
 
@@ -237,7 +237,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_same_v<Other, self_type>)
 			{
-				return this->compare(other.m_data);
+				return compare(other.m_data);
 			}
 			else
 			{
@@ -248,7 +248,7 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD bool contains(Other const & other) const
 		{
-			return this->impl_contains(begin(), end(), other);
+			return impl_contains(begin(), end(), other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -256,13 +256,13 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD iterator find(Other const & other)
 		{
-			return this->impl_find(begin(), end(), other);
+			return impl_find(begin(), end(), other);
 		}
 
 		template <class Other = value_type
 		> ML_NODISCARD const_iterator find(Other const & other) const
 		{
-			return this->impl_find(cbegin(), cend(), other);
+			return impl_find(cbegin(), cend(), other);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -270,13 +270,13 @@ namespace ml::ds
 		template <class Other = value_type
 		> ML_NODISCARD auto insert(Other const & other)
 		{
-			return this->impl_insert(other);
+			return impl_insert(other);
 		}
 
 		template <class Other = value_type
 		> ML_NODISCARD auto insert(Other && other)
 		{
-			return this->impl_insert(std::move(other));
+			return impl_insert(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -340,37 +340,37 @@ namespace ml::ds
 		template <class Other = self_type
 		> ML_NODISCARD bool operator==(Other const & other) const
 		{
-			return this->compare(other) == 0;
+			return compare(other) == 0;
 		}
 
 		template <class Other = self_type
 		> ML_NODISCARD bool operator!=(Other const & other) const
 		{
-			return this->compare(other) != 0;
+			return compare(other) != 0;
 		}
 
 		template <class Other = self_type
 		> ML_NODISCARD bool operator<(Other const & other) const
 		{
-			return this->compare(other) < 0;
+			return compare(other) < 0;
 		}
 
 		template <class Other = self_type
 		> ML_NODISCARD bool operator>(Other const & other) const
 		{
-			return this->compare(other) > 0;
+			return compare(other) > 0;
 		}
 
 		template <class Other = self_type
 		> ML_NODISCARD bool operator<=(Other const & other) const
 		{
-			return this->compare(other) <= 0;
+			return compare(other) <= 0;
 		}
 
 		template <class Other = self_type
 		> ML_NODISCARD bool operator>=(Other const & other) const
 		{
-			return this->compare(other) >= 0;
+			return compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -472,7 +472,7 @@ namespace ml::ds
 		void impl_sort() noexcept
 		{
 			// empty
-			if (this->empty()) return;
+			if (empty()) return;
 
 			// sort
 			if constexpr (0 < traits_type::thresh)
@@ -483,7 +483,7 @@ namespace ml::ds
 			// remove duplicates
 			if constexpr (!traits_type::multi)
 			{
-				this->erase(std::unique(begin(), end()), end());
+				erase(std::unique(begin(), end()), end());
 			}
 		}
 

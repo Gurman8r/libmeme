@@ -13,21 +13,29 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// LIBRARY
-		struct ml_library{};
-		py::class_<ml_library>(m, "lib")
-			.def_property_readonly_static("arch"	, [](py::object) { return ML_arch; })
+		struct ml_library {};
+		py::class_<ml_library>(m, "library")
 			.def_property_readonly_static("author"	, [](py::object) { return ML__author; })
-			.def_property_readonly_static("cc_name"	, [](py::object) { return ML_cc_name; })
-			.def_property_readonly_static("cc_ver"	, [](py::object) { return ML_cc_version; })
-			.def_property_readonly_static("config"	, [](py::object) { return ML_configuration; })
 			.def_property_readonly_static("date"	, [](py::object) { return ML__date; })
-			.def_property_readonly_static("is_debug", [](py::object) { return ML_is_debug; })
-			.def_property_readonly_static("lang"	, [](py::object) { return ML_lang; })
 			.def_property_readonly_static("name"	, [](py::object) { return ML__name; })
-			.def_property_readonly_static("platform", [](py::object) { return ML_platform; })
 			.def_property_readonly_static("time"	, [](py::object) { return ML__time; })
 			.def_property_readonly_static("url"		, [](py::object) { return ML__url; })
 			.def_property_readonly_static("version"	, [](py::object) { return ML__version; })
+			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// BUILD
+		struct ml_build {};
+		py::class_<ml_build>(m, "build")
+			.def_property_readonly_static("arch"		, [](py::object) { return ML_arch; })
+			.def_property_readonly_static("cc"			, [](py::object) { return ML_cc_name; })
+			.def_property_readonly_static("cc_ver"		, [](py::object) { return ML_cc_version; })
+			.def_property_readonly_static("config"		, [](py::object) { return ML_configuration; })
+			.def_property_readonly_static("is_debug"	, [](py::object) { return ML_is_debug; })
+			.def_property_readonly_static("lang"		, [](py::object) { return ML_lang; })
+			.def_property_readonly_static("platform"	, [](py::object) { return ML_platform; })
+			.def_property_readonly_static("system"		, [](py::object) { return ML_os_name; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -69,23 +77,19 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// STDIO
-		struct ml_stdio{};
+		struct ml_stdio {};
 		py::class_<ml_stdio>(m, "stdio")
-			.def_static("clear", &debug::clear)
-			.def_static("pause", &debug::pause)
+
+			.def_property_readonly_static("cerr", [](py::object) { return ml_output{ std::cerr }; })
 			
-			.def_property_readonly_static("cerr"
-				, [](py::object) { return ml_output{ std::cerr }; })
-			.def_property_readonly_static("cout"
-				, [](py::object) { return ml_output{ std::cout }; })
+			.def_property_readonly_static("cout", [](py::object) { return ml_output{ std::cout }; })
+			
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// INSTALL
-		([&, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
-		]()
+		// SETUP
+		([&, sys = py::module::import("sys")]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
 			sys.attr("stderr") = m.attr("stdio").attr("cout");

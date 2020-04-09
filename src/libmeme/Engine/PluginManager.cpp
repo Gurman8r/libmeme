@@ -24,7 +24,7 @@ namespace ml
 
 	bool plugin_manager::load(fs::path const & path)
 	{
-		// validate path
+		// path empty
 		if (path.empty()) { return false; }
 
 		// check file name already loaded
@@ -36,7 +36,7 @@ namespace ml
 				// load plugin
 				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return *m_libs.insert(std::move(lib), *ptr).second;
+					return m_libs.find_or_add(std::move(lib), *ptr);
 				}
 			}
 			m_files.erase(file.first);

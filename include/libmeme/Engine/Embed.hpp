@@ -11,7 +11,10 @@
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
 
-namespace ml::embed { namespace py = pybind11; }
+namespace ml::embed
+{
+	namespace py = pybind11;
+}
 
 #endif
 

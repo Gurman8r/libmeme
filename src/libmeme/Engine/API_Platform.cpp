@@ -54,10 +54,8 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// INSTALL
-		([&, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
-		]()
+		// SETUP
+		([&, sys = py::module::import("sys")]()
 		{
 		})();
 

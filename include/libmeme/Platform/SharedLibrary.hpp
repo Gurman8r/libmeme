@@ -12,11 +12,13 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using function_map = typename ds::flat_map<fs::path, void *>;
+		using function_map = typename ds::flat_map<pmr::string, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit shared_library(allocator_type const & alloc = {}) noexcept;
+		shared_library() noexcept : shared_library{ allocator_type{} } {}
+
+		explicit shared_library(allocator_type const & alloc) noexcept;
 
 		shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept;
 		
@@ -26,9 +28,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared_library & operator=(shared_library && other) noexcept;
+		shared_library & operator=(shared_library && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
-		void swap(shared_library & other) noexcept;
+		void swap(shared_library & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_inst, other.m_inst);
+				m_path.swap(other.m_path);
+				m_funcs.swap(other.m_funcs);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,18 +50,18 @@ namespace ml
 
 		bool close();
 
-		void * load_function(cstring name);
+		void * load_function(pmr::string const & name);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> ML_NODISCARD decltype(auto) load_function(cstring name)
+		> ML_NODISCARD auto load_function(pmr::string const & name)
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> std::optional<Ret> call_function(cstring name, Args && ... args)
+		> std::optional<Ret> call_function(pmr::string const & name, Args && ... args)
 		{
 			if (auto const fn{ load_function<Ret, Args...>(name) })
 			{
@@ -63,13 +77,11 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD auto address() const noexcept -> void * const * { return std::addressof(m_instance); }
+		ML_NODISCARD bool good() const noexcept { return m_inst; }
 
 		ML_NODISCARD auto functions() const noexcept -> function_map const & { return m_funcs; }
 
-		ML_NODISCARD bool good() const noexcept { return m_instance; }
-
-		ML_NODISCARD auto instance() const noexcept -> void const * { return m_instance; }
+		ML_NODISCARD auto instance() const noexcept -> void const * { return m_inst; }
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
@@ -113,9 +125,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *				m_instance;
-		fs::path	m_path;
-		function_map		m_funcs;
+		void *			m_inst;
+		fs::path		m_path;
+		function_map	m_funcs;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

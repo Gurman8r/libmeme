@@ -9,9 +9,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	script_manager::script_manager() noexcept {}
+	script_manager::script_manager(allocator_type const & alloc) noexcept
+	{
+	}
 
-	script_manager::~script_manager() noexcept { shutdown(); }
+	script_manager::~script_manager() noexcept
+	{
+		shutdown();
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -19,20 +24,22 @@ namespace ml
 	{
 		if (Py_IsInitialized()) { return false; }
 
-		static PyObjectArenaAllocator alloc
+		PyObject_SetArenaAllocator(([&]()
 		{
-			nullptr,
-			[](auto, size_t s) noexcept
+			static PyObjectArenaAllocator alloc
 			{
-				return pmr::get_default_resource()->allocate(s);
-			},
-			[](auto, void * p, size_t s) noexcept
-			{
-				return pmr::get_default_resource()->deallocate(p, s);
-			}
-		};
-
-		PyObject_SetArenaAllocator(&alloc);
+				nullptr,
+				[](auto, size_t s) noexcept
+				{
+					return pmr::get_default_resource()->allocate(s);
+				},
+				[](auto, void * p, size_t s) noexcept
+				{
+					return pmr::get_default_resource()->deallocate(p, s);
+				}
+			};
+			return std::addressof(alloc);
+		})());
 
 		Py_SetProgramName(name.c_str());
 
