@@ -53,7 +53,7 @@ namespace ml
 			if (this != std::addressof(other))
 			{
 				std::swap(m_pages, other.m_pages);
-				std::swap(ml_lib, other.ml_lib);
+				std::swap(m_lib, other.m_lib);
 				std::swap(m_face, other.m_face);
 				std::swap(m_info, other.m_info);
 			}
@@ -84,7 +84,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *		ml_lib;
+		void *		m_lib;
 		void *		m_face;
 		info		m_info;
 		page_table	m_pages;

@@ -20,7 +20,7 @@ namespace ml
 	font::font(allocator_type const & alloc)
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
-		, ml_lib	{}
+		, m_lib		{}
 		, m_face	{}
 	{
 	}
@@ -34,7 +34,7 @@ namespace ml
 	font::font(font const & other, allocator_type const & alloc)
 		: m_pages	{ other.m_pages, alloc }
 		, m_info	{ { other.m_info.family, alloc }, other.m_info.locale }
-		, ml_lib	{ other.ml_lib }
+		, m_lib		{ other.m_lib }
 		, m_face	{ other.m_face }
 	{
 	}
@@ -51,14 +51,14 @@ namespace ml
 
 		if (m_face) { FT_Done_Face(static_cast<FT_Face>(m_face)); }
 
-		if (ml_lib) { FT_Done_FreeType(static_cast<FT_Library>(ml_lib)); }
+		if (m_lib) { FT_Done_FreeType(static_cast<FT_Library>(m_lib)); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool font::load_from_file(fs::path const & path)
 	{
-		if (ml_lib) { return false; }
+		if (m_lib) { return false; }
 
 		// load freetype library instance
 		FT_Library library;
@@ -91,7 +91,7 @@ namespace ml
 		}
 
 		// store loaded font library
-		ml_lib = library;
+		m_lib = library;
 
 		// store the font faces
 		m_face = face;
