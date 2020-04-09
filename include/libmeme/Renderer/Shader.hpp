@@ -60,9 +60,9 @@ namespace ml
 
 		bool load_from_source(shader_source const & value);
 
-		bool load_from_memory(pmr::string const & v, pmr::string const & f);
+		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src);
 
-		bool load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f);
+		bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

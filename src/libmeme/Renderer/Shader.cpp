@@ -123,22 +123,22 @@ namespace ml
 		}
 	}
 
-	bool shader::load_from_memory(pmr::string const & v, pmr::string const & f)
+	bool shader::load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
 	{
-		if (v.empty() || f.empty()) { return false; }
+		if (v_src.empty() || f_src.empty()) { return false; }
 		
-		m_source = { v, {}, f };
+		m_source = { v_src, {}, f_src };
 		
-		return compile(v.c_str(), nullptr, f.c_str()) == EXIT_SUCCESS;
+		return compile(v_src.c_str(), nullptr, f_src.c_str()) == EXIT_SUCCESS;
 	}
 
-	bool shader::load_from_memory(pmr::string const & v, pmr::string const & g, pmr::string const & f)
+	bool shader::load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src)
 	{
-		if (v.empty() || g.empty() || f.empty()) { return false; }
+		if (v_src.empty() || g_src.empty() || f_src.empty()) { return false; }
 		
-		m_source = { v, g, f };
+		m_source = { v_src, g_src, f_src };
 		
-		return compile(v.c_str(), g.c_str(), f.c_str()) == EXIT_SUCCESS;
+		return compile(v_src.c_str(), g_src.c_str(), f_src.c_str()) == EXIT_SUCCESS;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -210,38 +210,38 @@ namespace ml
 		if (!value) { return false; }
 		switch (value.info().guid())
 		{
-		case hashof_v<bool>: if (auto const o{ value.get<bool>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<int32_t>: if (auto const o{ value.get<int32_t>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<int32_t>: if (auto const v{ value.get<int32_t>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<float_t>: if (auto const o{ value.get<float_t>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<float_t>: if (auto const v{ value.get<float_t>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<vec2>: if (auto const o{ value.get<vec2>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<vec2>: if (auto const v{ value.get<vec2>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<vec3>: if (auto const o{ value.get<vec3>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<vec3>: if (auto const v{ value.get<vec3>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<vec4>: if (auto const o{ value.get<vec4>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<vec4>: if (auto const v{ value.get<vec4>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<color>: if (auto const o{ value.get<color>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<color>: if (auto const v{ value.get<color>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<mat2>: if (auto const o{ value.get<mat2>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<mat2>: if (auto const v{ value.get<mat2>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<mat3>: if (auto const o{ value.get<mat3>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<mat3>: if (auto const v{ value.get<mat3>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<mat4>: if (auto const o{ value.get<mat4>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<mat4>: if (auto const v{ value.get<mat4>() })
+			return set_uniform(value.name(), *v);
 		
-		case hashof_v<texture>: if (auto const o{ value.get<texture>() })
-			return set_uniform(value.name(), o.value());
+		case hashof_v<texture>: if (auto const v{ value.get<texture>() })
+			return set_uniform(value.name(), *v);
 		}
 		return false;
 	}

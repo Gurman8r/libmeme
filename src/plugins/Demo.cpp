@@ -403,7 +403,7 @@ namespace ml
 
 				auto & moon = make_renderer("3d", "moon", "sphere8x6", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
-					vec4{ 0.0f, 0.1f, 0.0f, .25f },
+					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)
 					});
 			}
