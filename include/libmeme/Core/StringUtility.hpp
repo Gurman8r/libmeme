@@ -178,8 +178,8 @@ namespace ml::util
 
 	ML_NODISCARD inline pmr::vector<pmr::string> tokenize(pmr::string value, pmr::string const & delim) noexcept
 	{
-		if (value.empty()) return {};
-		if (delim.empty()) return { value };
+		if (value.empty()) { return {}; }
+		if (delim.empty()) { return { value }; }
 
 		pmr::vector<pmr::string> temp{};
 		size_t i{};

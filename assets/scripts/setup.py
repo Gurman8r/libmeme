@@ -5,8 +5,8 @@ import libmeme_engine as engine
 
 engine.load_plugin("demo")
 
-print(f"# {core.library.name} | {core.build.arch!r}-bit | {core.build.config}")
-print(f"# {core.library.url}")
+print(f"# {core.project.name} | {core.build.arch!r}-bit | {core.build.config}")
+print(f"# {core.project.url}")
 print(f"# type \'help\' for a list of commands")
 print("")
 

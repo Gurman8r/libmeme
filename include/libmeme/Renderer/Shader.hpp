@@ -66,9 +66,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(shader const * value, bool bindTextures = true);
+		static void bind(shader const * value, bool bind_textures = true);
 
-		void bind(bool bindTextures = true) const { bind(this, bindTextures); }
+		void bind(bool bind_textures = true) const { bind(this, bind_textures); }
 
 		void unbind() const { bind(nullptr, false); }
 
@@ -104,8 +104,6 @@ namespace ml
 		
 		bool set_uniform(pmr::string const & name, texture const * value);
 		
-		bool set_uniform(pmr::string const & name, texture const & value);
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD operator bool() const noexcept { return m_handle; }
@@ -129,7 +127,7 @@ namespace ml
 
 		int32_t get_uniform_location(pmr::string const & value);
 
-		int32_t compile(cstring v, cstring g, cstring f);
+		int32_t compile(cstring v_src, cstring g_src, cstring f_src);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

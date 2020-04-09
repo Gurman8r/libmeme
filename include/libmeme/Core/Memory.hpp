@@ -147,7 +147,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// malloc
-		ML_NODISCARD static void * allocate(size_t size)
+		ML_NODISCARD static void * allocate(size_t size) noexcept
 		{
 			static auto & inst{ get_instance() };
 
@@ -155,13 +155,13 @@ namespace ml
 			auto const data{ inst.m_allocator.allocate(size) };
 
 			// create record
-			return (*inst.m_records.insert(data, record{ inst.m_index++, size, data }).first);
+			return *inst.m_records.insert(data, record{ inst.m_index++, size, data }).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// calloc
-		ML_NODISCARD static void * allocate(size_t count, size_t size)
+		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
 			return std::memset(allocate(count * size), 0, count * size);
 		}
@@ -169,7 +169,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// free
-		static void deallocate(void * addr)
+		static void deallocate(void * addr) noexcept
 		{
 			static auto & inst{ get_instance() };
 
@@ -187,7 +187,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc
-		ML_NODISCARD static void * reallocate(void * addr, size_t size)
+		ML_NODISCARD static void * reallocate(void * addr, size_t size) noexcept
 		{
 			return reallocate(addr, size, size);
 		}
@@ -195,7 +195,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc (sized)
-		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz)
+		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
 		{
 			if (!newsz)
 			{

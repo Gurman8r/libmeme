@@ -13,8 +13,8 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// LIBRARY
-		struct ml_library {};
-		py::class_<ml_library>(m, "library")
+		struct ml_project {};
+		py::class_<ml_project>(m, "project")
 			.def_property_readonly_static("author"	, [](py::object) { return ML__author; })
 			.def_property_readonly_static("date"	, [](py::object) { return ML__date; })
 			.def_property_readonly_static("name"	, [](py::object) { return ML__name; })

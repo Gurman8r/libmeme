@@ -69,10 +69,7 @@ namespace ml
 
 		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size)
 		{
-			return m_pages.at(size).find_or_invoke(c, [&]()
-			{
-				return load_glyph(c, size);
-			});
+			return m_pages[size].find_or_invoke(c, &font::load_glyph, this, c, size);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

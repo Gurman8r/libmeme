@@ -143,7 +143,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void shader::bind(shader const * value, bool bindTextures)
+	void shader::bind(shader const * value, bool bind_textures)
 	{
 		if (!value || !value->m_handle)
 		{
@@ -153,7 +153,7 @@ namespace ml
 		{
 			GL::useProgram(value->m_handle);
 
-			if (bindTextures)
+			if (bind_textures)
 			{
 				uint32_t index{};
 
@@ -183,7 +183,7 @@ namespace ml
 			m_uniforms.clear();
 			m_textures.clear();
 		}
-		return !(m_handle);
+		return !m_handle;
 	}
 
 	bool shader::generate()
@@ -314,26 +314,21 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, texture const * value)
 	{
-		return value ? set_uniform(name, *value) : false;
-	}
+		static auto const max_texture_units
+		{
+			static_cast<size_t>(GL::getMaxTextureUnits())
+		};
 
-	bool shader::set_uniform(pmr::string const & name, texture const & value)
-	{
 		uniform_binder const u{ *this, name };
 		if (u)
 		{
-			static auto const max_texture_units
-			{
-				static_cast<size_t>(GL::getMaxTextureUnits())
-			};
-
 			if (auto const it{ m_textures.find(u) })
 			{
-				(*it->second) = &value;
+				(*it->second) = value;
 			}
 			else if ((m_textures.size() + 1) < max_texture_units)
 			{
-				m_textures.insert(u, &value);
+				m_textures.insert(u, value);
 			}
 		}
 		return u;
@@ -343,30 +338,28 @@ namespace ml
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		return m_attributes.find_or_invoke(util::hash(value), [&]()
-		{
-			return GL::getAttribLocation(m_handle, value.c_str());
-		});
+		return m_attributes.find_or_invoke(
+			util::hash(value),
+			&GL::getAttribLocation, m_handle, value.c_str());
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		return m_uniforms.find_or_invoke(util::hash(value), [&]()
-		{
-			return GL::getUniformLocation(m_handle, value.c_str());
-		});
+		return m_uniforms.find_or_invoke(
+			util::hash(value),
+			&GL::getUniformLocation, m_handle, value.c_str());
 	}
 
-	int32_t shader::compile(cstring v, cstring g, cstring f)
+	int32_t shader::compile(cstring v_src, cstring g_src, cstring f_src)
 	{
-		// shaders available
+		// check shaders available
 		if (!GL::shadersAvailable())
 		{
 			return EXIT_FAILURE * 1;
 		}
 
-		// geometry shaders available
-		if (g && !GL::geometryShadersAvailable())
+		// check geometry shaders available
+		if (g_src && !GL::geometryShadersAvailable())
 		{
 			return EXIT_FAILURE * 2;
 		}
@@ -383,9 +376,9 @@ namespace ml
 			return EXIT_FAILURE * 4;
 		}
 
-		// vertex
+		// compile vertex
 		uint32_t vert{};
-		switch (GL::compileShader(vert, GL::VertexShader, 1, &v))
+		switch (GL::compileShader(vert, GL::VertexShader, 1, &v_src))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, vert);
@@ -396,9 +389,9 @@ namespace ml
 			return EXIT_FAILURE * 5;
 		}
 
-		// geometry
+		// compile geometry
 		uint32_t geom{};
-		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g))
+		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g_src))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, geom);
@@ -409,9 +402,9 @@ namespace ml
 			return EXIT_FAILURE * 6;
 		}
 
-		// fragment
+		// compile fragment
 		uint32_t frag{};
-		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f))
+		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f_src))
 		{
 		case ML_SUCCESS:
 			GL::attachShader(m_handle, frag);

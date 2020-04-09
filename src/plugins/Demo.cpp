@@ -157,7 +157,7 @@ namespace ml
 			m_gui_files		{ "files##demo"			, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_scripting	{ "scripting##demo"		, 1, "", ImGuiWindowFlags_MenuBar };
+			m_gui_scripting	{ "scripting##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -553,6 +553,7 @@ namespace ml
 				m_gui_ecs.menu_item();
 				m_gui_memory.menu_item();
 				m_gui_profiler.menu_item();
+				m_gui_scripting.menu_item();
 			});
 			editor::add_menu("settings", [&]()
 			{

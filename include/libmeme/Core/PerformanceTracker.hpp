@@ -3,8 +3,8 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_impl_benchmark(var, id)										\
-	auto var{ _ML timer{ true } };										\
+#define ML_impl_benchmark(var, id)									\
+	auto var{ _ML timer{ true } };									\
 	ML_defer{ _ML performance_tracker::push(id, var.elapsed()); };
 
 #define ML_benchmark(id) ML_impl_benchmark(ML_anon(benchmark), id)

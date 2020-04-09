@@ -40,8 +40,9 @@ namespace ml
 		{
 			// trim line
 			line = util::trim(line);
-			if (line.empty() || line.front() == '#')
-				continue;
+			
+			// skip line
+			if (line.empty() || line.front() == '#') { continue; }
 
 			// scan line
 			std::stringstream ss{}; ss << line;

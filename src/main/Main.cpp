@@ -41,8 +41,8 @@ ml::int32_t main()
 	// read config
 	auto config = ([&j = json{}, &file = std::ifstream{ CONFIG_FILE }]()
 	{
+		ML_defer{ file.close(); };
 		if (file) { file >> j; }
-		file.close();
 		return j;
 	})();
 

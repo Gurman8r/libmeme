@@ -17,22 +17,12 @@ namespace ml
 
 		static constexpr vec4b color_cast(vec4f const & value)
 		{
-			return {
-				static_cast<byte_t>(value[0] * 255.f),
-				static_cast<byte_t>(value[1] * 255.f),
-				static_cast<byte_t>(value[2] * 255.f),
-				static_cast<byte_t>(value[3] * 255.f)
-			};
+			return (vec4b)(value * 255.f);
 		}
 
 		static constexpr vec4f color_cast(vec4b const & value)
 		{
-			return {
-				static_cast<float_t>(value[0]) / 255.f,
-				static_cast<float_t>(value[1]) / 255.f,
-				static_cast<float_t>(value[2]) / 255.f,
-				static_cast<float_t>(value[3]) / 255.f
-			};
+			return ((vec4f)value) / 255.f;
 		}
 	}
 
@@ -43,9 +33,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using type		= typename _T;
-		using rgb_t		= typename tvec3<type>;
-		using rgba_t	= typename tvec4<type>;
+		using type = typename _T;
+		
+		using rgb_t = typename tvec3<type>;
+		
+		using rgba_t = typename tvec4<type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

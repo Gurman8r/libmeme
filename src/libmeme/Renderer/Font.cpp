@@ -127,7 +127,7 @@ namespace ml
 			return g;
 		}
 
-		// create the glyph
+		// set texture
 		g.graphic = make_texture(
 			GL::Texture2D,
 			GL::RGBA,
@@ -151,7 +151,7 @@ namespace ml
 		{
 			if (!g.graphic.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
 			{
-				debug::log::warning("font failed loading glyph texture: \'{0}\'", (char)c);
+				debug::log::warning("font failed loading glyph texture: {0}", c);
 
 				g.graphic.destroy();
 			}

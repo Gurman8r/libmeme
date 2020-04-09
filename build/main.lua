@@ -44,12 +44,12 @@ links{
 }
 
 filter{ "configurations:Debug" }
-	kind "ConsoleApp"
 	symbols "On"
+	kind "ConsoleApp"
 
 filter{ "configurations:Release" } 
-	kind "WindowedApp"
 	optimize "Speed"
+	kind "WindowedApp"
 
 -- WINDOWS
 
