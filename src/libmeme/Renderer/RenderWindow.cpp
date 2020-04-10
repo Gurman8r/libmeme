@@ -9,7 +9,7 @@ namespace ml
 
 	bool render_window::open()
 	{
-		if (!window::open())
+		if (!base_window::open())
 		{
 			return debug::log::error("render_window failed initializing platform");
 		}

@@ -1,7 +1,7 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import libmeme_core     as core
-import libmeme_engine   as engine
+import libmeme_core as core
+import libmeme_engine as engine
 
 class my_script(engine.script_object):
     def __init__(self, **kwargs):

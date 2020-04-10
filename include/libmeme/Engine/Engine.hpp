@@ -1,8 +1,7 @@
 #ifndef _ML_ENGINE_HPP_
 #define _ML_ENGINE_HPP_
 
-#include <libmeme/Core/Timer.hpp>
-#include <libmeme/Engine/FrameTracker.hpp>
+#include <libmeme/Engine/GameTime.hpp>
 #include <libmeme/Engine/AssetManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
@@ -15,9 +14,7 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		class context;
-		struct config;
-		struct io;
+		class engine_context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -25,8 +22,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// engine config
-		struct config final : trackable
+		// public startup variables
+		struct engine_config final : trackable
 		{
 			arguments_t		command_line		{}				; // command line
 			fs::path		content_home		{}				; // content home
@@ -39,8 +36,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// engine io
-		struct io final : trackable
+		// public runtime variables
+		struct engine_io final : trackable
 		{
 			float_t			delta_time			{}				; // frame time
 			size_t			frame_count			{}				; // frame count
@@ -73,19 +70,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static asset_manager & get_assets() noexcept;
+		ML_NODISCARD static asset_manager & assets() noexcept;
 
-		ML_NODISCARD static config & get_config() noexcept;
+		ML_NODISCARD static engine_config & config() noexcept;
 
-		ML_NODISCARD static io & get_io() noexcept;
+		ML_NODISCARD static engine_io & io() noexcept;
 
-		ML_NODISCARD static plugin_manager & get_plugins() noexcept;
+		ML_NODISCARD static plugin_manager & plugins() noexcept;
 
-		ML_NODISCARD static script_manager & get_scripts() noexcept;
+		ML_NODISCARD static script_manager & scripts() noexcept;
 
-		ML_NODISCARD static duration const & get_time() noexcept;
+		ML_NODISCARD static game_time & time() noexcept;
 
-		ML_NODISCARD static render_window & get_window() noexcept;
+		ML_NODISCARD static render_window & window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,11 +90,11 @@ namespace ml
 		{
 			if (value.empty())
 			{
-				return get_config().content_home;
+				return config().content_home;
 			}
 			else
 			{
-				return get_config().content_home.native() + value.native();
+				return config().content_home.native() + value.native();
 			}
 		}
 

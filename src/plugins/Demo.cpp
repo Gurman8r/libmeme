@@ -171,12 +171,12 @@ namespace ml
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & dt{ engine::get_io().delta_time }; return dt * 1000.f; }
+			[]() { static auto const & dt{ engine::io().delta_time }; return dt * 1000.f; }
 			),
 
 			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & fps{ engine::get_io().frame_rate }; return fps; }
+			[]() { static auto const & fps{ engine::io().frame_rate }; return fps; }
 			),
 		} };
 
@@ -232,7 +232,7 @@ namespace ml
 			// ICON
 			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) })
 			{
-				engine::get_window().set_icon(icon.width(), icon.height(), icon.data());
+				engine::window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
@@ -295,38 +295,38 @@ namespace ml
 			{
 				// timers
 				auto const _timers = make_material(
-					make_uniform<float_t>("u_time",		[]() { return engine::get_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta",	[]() { return engine::get_io().delta_time; })
+					make_uniform<float_t>("u_time"	, []() { return engine::time().total().count<float_t>(); }),
+					make_uniform<float_t>("u_delta"	, []() { return engine::time().delta().count<float_t>(); })
 				);
 
 				// MVP
 				auto const _mvp = make_material(
-					make_uniform<mat4	>("u_model",	mat4::identity()),
-					make_uniform<mat4	>("u_view",		mat4::identity()),
-					make_uniform<mat4	>("u_proj",		mat4::identity())
+					make_uniform<mat4	>("u_model"		, mat4::identity()),
+					make_uniform<mat4	>("u_view"		, mat4::identity()),
+					make_uniform<mat4	>("u_proj"		, mat4::identity())
 				);
 
 				// camera
 				auto const _camera = make_material(
-					make_uniform<vec3	>("u_cam.pos",	vec3{ 0, 0, 3.f }),
-					make_uniform<vec3	>("u_cam.dir",	vec3{ 0, 0, -1.f }),
-					make_uniform<float_t>("u_cam.fov",	45.0f),
-					make_uniform<float_t>("u_cam.near", 0.0001f),
-					make_uniform<float_t>("u_cam.far",	1000.0f),
-					make_uniform<vec2	>("u_cam.view", vec2{ 1280.f, 720.f })
+					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
+					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
+					make_uniform<float_t>("u_cam.fov"	, 45.0f),
+					make_uniform<float_t>("u_cam.near"	, 0.0001f),
+					make_uniform<float_t>("u_cam.far"	, 1000.0f),
+					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
 				);
 
 				// transform
 				auto const _tf = make_material(
-					make_uniform<vec3	>("u_position", vec3{}),
-					make_uniform<vec4	>("u_rotation", vec4{}),
-					make_uniform<vec3	>("u_scale",	vec3{})
+					make_uniform<vec3	>("u_position"	, vec3{}),
+					make_uniform<vec4	>("u_rotation"	, vec4{}),
+					make_uniform<vec3	>("u_scale"		, vec3{})
 				);
 
 				// 2d
 				m_materials["2d"] = make_material(
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<texture>("u_texture0", &m_textures["doot"])
+					make_uniform<color	>("u_color"		, colors::white),
+					make_uniform<texture>("u_texture0"	, &m_textures["doot"])
 				) + _timers + _mvp;
 
 				// 3d
@@ -417,7 +417,7 @@ namespace ml
 			if (m_cout) { m_console.printss(m_cout); }
 
 			// plots
-			m_plots.update(engine::get_time().count<float_t>());
+			m_plots.update(engine::time().total().count<float_t>());
 			
 			// systems
 			m_renderer.update_system<x_apply_transforms>();
@@ -463,7 +463,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ editor::get_io().dockspace_nodes };
+			auto & d{ editor::io().dockspace_nodes };
 			if (!d.empty()) { return; }
 			d.resize(MAX_DOCK_NODE);
 
@@ -540,7 +540,7 @@ namespace ml
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
 				{
-					engine::get_window().close();
+					engine::window().close();
 				}
 			});
 			editor::add_menu("tools", [&]()
@@ -558,10 +558,10 @@ namespace ml
 			editor::add_menu("settings", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
-				bool fullscreen{ engine::get_window().is_fullscreen() };
+				bool fullscreen{ engine::window().is_fullscreen() };
 				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 				{
-					engine::get_window().set_fullscreen(fullscreen);
+					engine::window().set_fullscreen(fullscreen);
 				}
 			});
 			editor::add_menu("help", [&]()
@@ -645,7 +645,7 @@ namespace ml
 
 				m_console.commands.push_back({ "exit", [&](auto args)
 				{
-					engine::get_window().close();
+					engine::window().close();
 				} });
 
 				m_console.commands.push_back({ "help", [&](auto args)
@@ -677,7 +677,7 @@ namespace ml
 					}
 					else
 					{
-						engine::get_scripts().do_string(util::detokenize(args));
+						engine::scripts().do_string(util::detokenize(args));
 					}
 				} });
 			}
@@ -807,7 +807,7 @@ namespace ml
 					if (ImGui::BeginPopupContextItem())
 					{
 						if (ImGui::MenuItem("copy"))
-							engine::get_window().set_clipboard(buf);
+							engine::window().set_clipboard(buf);
 						ImGui::EndPopup();
 					}
 				}
@@ -966,7 +966,7 @@ namespace ml
 			ML_once{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::get_window().has_hint(window_hints_maximized) ? 32 : 16;
+				m_memory.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
 				m_memory.OptShowOptions		= true;
 				m_memory.OptShowDataPreview	= true;
 				m_memory.OptShowHexII		= false;
@@ -1065,7 +1065,7 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			static auto const & tt{ engine::get_time() };
+			static auto const & tt{ engine::time().total() };
 
 			// total time
 			ImGui::Columns(2);

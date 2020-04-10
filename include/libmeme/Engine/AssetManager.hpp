@@ -12,7 +12,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using categories_type	= typename ds::flat_map<hash_t, ds::flat_map<hash_t, asset_data>>;
+		using storage_type		= typename ds::flat_map<hash_t, ds::flat_map<hash_t, asset>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -22,7 +22,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear() noexcept { m_data.clear(); }
+		void clear() noexcept
+		{
+			m_data.clear();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -67,7 +70,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		categories_type m_data;
+		storage_type m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

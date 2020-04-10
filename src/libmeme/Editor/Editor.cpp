@@ -11,16 +11,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// editor context
-	class editor::context final : non_copyable, trackable
+	// editor editor_context
+	class editor::editor_context final : non_copyable, trackable
 	{
 		friend class		editor								;
-		editor::config		m_config		{}					; // public startup variables
-		editor::io			m_io			{}					; // public runtime variables
-		void *				m_imgui			{}					; // active imgui context
+		editor_config		m_config		{}					; // public startup variables
+		editor_io			m_io			{}					; // public runtime variables
+		ImGuiContext *		m_imgui			{}					; // active imgui context
 	};
 
-	static editor::context * g_editor{};
+	static editor::editor_context * g_editor{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,13 +32,13 @@ namespace ml
 		{
 			return debug::log::error("editor is already initialized");
 		}
-		else if (!(g_editor = new editor::context{}))
+		else if (!(g_editor = new editor_context{}))
 		{
-			return debug::log::error("failed initializing editor context");
+			return debug::log::error("failed initializing editor editor_context");
 		}
 		else
 		{
-			auto & cfg{ get_config() };
+			auto & cfg{ config() };
 
 			j["imgui_style"].get_to(cfg.style_config);
 
@@ -73,7 +73,7 @@ namespace ml
 			nullptr
 		);
 
-		// create context
+		// create editor_context
 		IMGUI_CHECKVERSION();
 		g_editor->m_imgui = ImGui::CreateContext();
 
@@ -94,7 +94,7 @@ namespace ml
 
 		// backend
 #ifdef ML_RENDERER_OPENGL
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::get_window().get_handle(), true))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::window().get_handle(), true))
 		{
 			return debug::log::error("Failed initializing ImGui platform");
 		}
@@ -230,10 +230,10 @@ namespace ml
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ window::get_context_current() };
+			auto backup_context{ base_window::get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			window::make_context_current(backup_context);
+			base_window::make_context_current(backup_context);
 		}
 
 		GL::flush();
@@ -241,13 +241,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor::config & editor::get_config() noexcept
+	editor::editor_config & editor::config() noexcept
 	{
 		ML_assert(g_editor);
 		return (*g_editor).m_config;
 	}
 
-	editor::io & editor::get_io() noexcept
+	editor::editor_io & editor::io() noexcept
 	{
 		ML_assert(g_editor);
 		return (*g_editor).m_io;

@@ -129,7 +129,7 @@ namespace ml
 		
 		m_source = { v_src, {}, f_src };
 		
-		return compile(v_src.c_str(), nullptr, f_src.c_str()) == EXIT_SUCCESS;
+		return EXIT_SUCCESS == compile(v_src.c_str(), nullptr, f_src.c_str());
 	}
 
 	bool shader::load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src)
@@ -138,7 +138,7 @@ namespace ml
 		
 		m_source = { v_src, g_src, f_src };
 		
-		return compile(v_src.c_str(), g_src.c_str(), f_src.c_str()) == EXIT_SUCCESS;
+		return EXIT_SUCCESS == compile(v_src.c_str(), g_src.c_str(), f_src.c_str());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -178,7 +178,7 @@ namespace ml
 			m_handle = NULL;
 			GL::flush();
 			
-			meta::for_tuple([&](auto & x) { x.clear(); }, m_source);
+			meta::for_tuple([&](auto & s) { s.clear(); }, m_source);
 			m_attributes.clear();
 			m_uniforms.clear();
 			m_textures.clear();
@@ -338,14 +338,14 @@ namespace ml
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		return m_attributes.find_or_invoke(
+		return m_attributes.find_or_add_fn(
 			util::hash(value),
 			&GL::getAttribLocation, m_handle, value.c_str());
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		return m_uniforms.find_or_invoke(
+		return m_uniforms.find_or_add_fn(
 			util::hash(value),
 			&GL::getUniformLocation, m_handle, value.c_str());
 	}

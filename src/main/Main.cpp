@@ -63,7 +63,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// main loop
-	while (engine::get_window().is_open())
+	while (engine::window().is_open())
 	{
 		ML_defer{ performance_tracker::refresh(); };
 		{

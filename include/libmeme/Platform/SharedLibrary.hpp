@@ -12,7 +12,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using function_map = typename ds::flat_map<pmr::string, void *>;
+		using function_map = typename ds::flat_map<hash_t, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -87,37 +87,51 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto compare(shared_library const & other) const noexcept
+		template <class Other = shared_library
+		> ML_NODISCARD auto compare(Other const & other) const noexcept
 		{
-			return m_path.compare(other.m_path);
+			if constexpr (std::is_same_v<Other, shared_library>)
+			{
+				return compare(other.m_path);
+			}
+			else
+			{
+				return m_path.compare(other);
+			}
 		}
 
-		ML_NODISCARD bool operator==(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator==(Other const & other) const noexcept
 		{
 			return compare(other) == 0;
 		}
 
-		ML_NODISCARD bool operator!=(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
 		{
 			return compare(other) != 0;
 		}
 
-		ML_NODISCARD bool operator<(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator<(Other const & other) const noexcept
 		{
 			return compare(other) < 0;
 		}
 
-		ML_NODISCARD bool operator>(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator>(Other const & other) const noexcept
 		{
 			return compare(other) > 0;
 		}
 
-		ML_NODISCARD bool operator<=(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
 		{
 			return compare(other) <= 0;
 		}
 
-		ML_NODISCARD bool operator>=(shared_library const & other) const
+		template <class Other = shared_library
+		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
 		{
 			return compare(other) >= 0;
 		}

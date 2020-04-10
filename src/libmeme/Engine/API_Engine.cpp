@@ -18,22 +18,22 @@ namespace ml::embed
 		py::class_<ml_engine_config>(m, "config")
 
 			.def_property_readonly_static("command_line"
-				, [](py::object) { return engine::get_config().command_line; })
+				, [](py::object) { return engine::config().command_line; })
 					
 			.def_property_readonly_static("content_home"
-				, [](py::object) { return engine::get_config().content_home.native(); })
+				, [](py::object) { return engine::config().content_home.native(); })
 					
 			.def_property_readonly_static("library_home"
-				, [](py::object) { return engine::get_config().library_home.native(); })
+				, [](py::object) { return engine::config().library_home.native(); })
 					
 			.def_property_readonly_static("program_name"
-				, [](py::object) { return engine::get_config().program_name.native(); })
+				, [](py::object) { return engine::config().program_name.native(); })
 					
 			.def_property_readonly_static("program_path"
-				, [](py::object) { return engine::get_config().program_path.native(); })
+				, [](py::object) { return engine::config().program_path.native(); })
 					
 			.def_property_readonly_static("setup_script"
-				, [](py::object) { return engine::get_config().setup_script.native(); })
+				, [](py::object) { return engine::config().setup_script.native(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,38 +43,57 @@ namespace ml::embed
 		py::class_<ml_engine_io>(m, "io")
 
 			.def_property_readonly_static("delta_time"
-				, [](py::object) { return engine::get_io().delta_time; })
+				, [](py::object) { return engine::io().delta_time; })
 					
 			.def_property_readonly_static("frame_count"
-				, [](py::object) { return engine::get_io().frame_count; })
+				, [](py::object) { return engine::io().frame_count; })
 					
 			.def_property_readonly_static("frame_rate"
-				, [](py::object) { return engine::get_io().frame_rate; })
+				, [](py::object) { return engine::io().frame_rate; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		
-		m // FUNCTIONS
-			.def("close", [](py::args) { engine::get_window().close(); })
-				
-			.def("do_file", [](cstring s) { return engine::get_scripts().do_file(s); })
+		// ASSET MANAGER
+		struct ml_asset_manager {};
+		py::class_<ml_asset_manager>(m, "assets")
+			;
 
-			.def("do_string", [](cstring s) { return engine::get_scripts().do_string(s); })
-				
-			.def("get_time", []() { return engine::get_time().count(); })
-				
-			.def("load_plugin", [](cstring s) { return engine::get_plugins().load(s); })
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// PLUGIN MANAGER
+		struct ml_plugin_manager {};
+		py::class_<ml_plugin_manager>(m, "plugins")
+			.def_static("load", [](cstring s) { return engine::plugins().load(s); })
+			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// SCRIPT MANAGER
+		struct ml_script_manager {};
+		py::class_<ml_script_manager>(m, "scripts")
+			.def_static("do_file", [](cstring s) { return engine::scripts().do_file(s); })
+			.def_static("do_string", [](cstring s) { return engine::scripts().do_string(s); })
+			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		m // FUNCTIONS
+			.def("close", [](py::args) { engine::window().close(); })
+			.def("time", []() { return engine::time().total().count(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&, builtins = py::module::import("builtins"), sys = py::module::import("sys")]()
+		m.attr("__good__") = ([&
+			, builtins = py::module::import("builtins")
+			, sys = py::module::import("sys")]()
 		{
 			builtins.attr("exit") = m.attr("close");
 			sys.attr("exit") = m.attr("close");
 			script_object::install(m);
+			return true;
 		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

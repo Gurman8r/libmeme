@@ -3,7 +3,7 @@
 import libmeme_core as core
 import libmeme_engine as engine
 
-engine.load_plugin("demo")
+engine.plugins.load("demo")
 
 print(f"# {core.project.name} | {core.build.arch!r}-bit | {core.build.config}")
 print(f"# {core.project.url}")

@@ -232,19 +232,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = self_type
-		> ML_NODISCARD auto compare(Other const & other) const
-		{
-			if constexpr (std::is_same_v<Other, self_type>)
-			{
-				return compare(other.m_data);
-			}
-			else
-			{
-				return (m_data != other) ? ((m_data < other) ? -1 : 1) : 0;
-			}
-		}
-
 		template <class Other = value_type
 		> ML_NODISCARD bool contains(Other const & other) const
 		{
@@ -338,37 +325,50 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator==(Other const & other) const
+		> ML_NODISCARD auto compare(Other const & other) const noexcept
+		{
+			if constexpr (std::is_same_v<Other, self_type>)
+			{
+				return compare(other.m_data);
+			}
+			else
+			{
+				return (m_data != other) ? ((m_data < other) ? -1 : 1) : 0;
+			}
+		}
+
+		template <class Other = self_type
+		> ML_NODISCARD bool operator==(Other const & other) const noexcept
 		{
 			return compare(other) == 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator!=(Other const & other) const
+		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
 		{
 			return compare(other) != 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator<(Other const & other) const
+		> ML_NODISCARD bool operator<(Other const & other) const noexcept
 		{
 			return compare(other) < 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator>(Other const & other) const
+		> ML_NODISCARD bool operator>(Other const & other) const noexcept
 		{
 			return compare(other) > 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator<=(Other const & other) const
+		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
 		{
 			return compare(other) <= 0;
 		}
 
 		template <class Other = self_type
-		> ML_NODISCARD bool operator>=(Other const & other) const
+		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
 		{
 			return compare(other) >= 0;
 		}

@@ -24,6 +24,8 @@ namespace ml
 
 		void clear();
 
+		bool free(fs::path const & path);
+
 		bool load(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

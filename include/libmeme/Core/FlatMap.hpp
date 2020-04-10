@@ -350,34 +350,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class ... Args
-		> value_type & find_or_invoke(key_type const & key, Fn && fn, Args && ... args) noexcept
-		{
-			if (auto const it{ find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return *insert(key, std::invoke(ML_forward(fn), ML_forward(args)...)).second;
-			}
-		}
-
-		template <class Fn, class ... Args
-		> value_type & find_or_invoke(key_type && key, Fn && fn, Args && ... args) noexcept
-		{
-			if (auto const it{ find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return *insert(std::move(key), std::invoke(ML_forward(fn), ML_forward(args)...)).second;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class ... Args
 		> value_type & find_or_add(key_type const & key, Args && ... args) noexcept
 		{
@@ -401,6 +373,34 @@ namespace ml::ds
 			else
 			{
 				return *insert(std::move(key), ML_forward(args)...).second;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn, class ... Args
+		> value_type & find_or_add_fn(key_type const & key, Fn && fn, Args && ... args) noexcept
+		{
+			if (auto const it{ find(key) })
+			{
+				return (*it->second);
+			}
+			else
+			{
+				return *insert(key, std::invoke(ML_forward(fn), ML_forward(args)...)).second;
+			}
+		}
+
+		template <class Fn, class ... Args
+		> value_type & find_or_add_fn(key_type && key, Fn && fn, Args && ... args) noexcept
+		{
+			if (auto const it{ find(key) })
+			{
+				return (*it->second);
+			}
+			else
+			{
+				return *insert(std::move(key), std::invoke(ML_forward(fn), ML_forward(args)...)).second;
 			}
 		}
 
@@ -431,7 +431,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
 		{
 			for (; first != last; ++first)
 			{
@@ -455,7 +455,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const noexcept
+		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const
 		{
 			for (; first != last; ++first)
 			{
@@ -479,7 +479,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
 		{
 			if (0 < count)
 			{
@@ -501,7 +501,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const noexcept
+		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
 		{
 			if (0 < count)
 			{

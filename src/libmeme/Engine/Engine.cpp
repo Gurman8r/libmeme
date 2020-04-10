@@ -11,22 +11,20 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// engine context
-	class engine::context final : non_copyable, trackable
+	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine								;
-		engine::config		m_config		{}					; // public startup variables
-		engine::io			m_io			{}					; // public runtime variables
-		timer				m_main_timer	{ true }			; // main timer
-		timer				m_loop_timer	{}					; // loop timer
-		frame_tracker<120>	m_fps_tracker	{}					; // frame rate tracker
-		render_window		m_window		{}					; // main window
-
+		engine_config		m_config		{}					; // public startup variables
+		engine_io			m_io			{}					; // public runtime variables
+		
 		asset_manager		m_assets		{}					; // asset manager
+		game_time			m_time			{}					; // game time
 		plugin_manager		m_plugins		{}					; // plugin manager
 		script_manager		m_scripts		{}					; // script manager
+		render_window		m_window		{}					; // main window
 	};
 
-	static engine::context * g_engine{};
+	static engine::engine_context * g_engine{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,13 +36,13 @@ namespace ml
 		{
 			return debug::log::error("engine is already initialized");
 		}
-		else if (!(g_engine = new engine::context{}))
+		else if (!(g_engine = new engine_context{}))
 		{
 			return debug::log::error("failed initializing engine context");
 		}
 		else
 		{
-			auto & cfg{ get_config() };
+			auto & cfg{ config() };
 
 			cfg.command_line = { __argv, __argv + __argc };
 
@@ -84,12 +82,12 @@ namespace ml
 			return debug::log::error("engine failed starting python");
 
 		// run setup script
-		g_engine->m_scripts.do_file(path_to(get_config().setup_script));
+		g_engine->m_scripts.do_file(path_to(config().setup_script));
 
 		// create window
-		if (g_engine->m_window.create(get_config().window_settings))
+		if (g_engine->m_window.create(config().window_settings))
 		{
-			window::install_default_callbacks(&g_engine->m_window);
+			base_window::install_default_callbacks(&g_engine->m_window);
 		}
 		else
 		{
@@ -111,7 +109,7 @@ namespace ml
 		{
 			g_engine->m_window.destroy();
 
-			window::terminate();
+			base_window::terminate();
 		}
 
 		// shutdown python
@@ -126,12 +124,9 @@ namespace ml
 	{
 		ML_assert(g_engine);
 
-		// update delta time
-		g_engine->m_io.delta_time = g_engine->m_loop_timer.stop().elapsed().count<float_t>();
-		g_engine->m_loop_timer.start();
+		g_engine->m_time.begin_loop();
 
-		// update window
-		window::poll_events();
+		base_window::poll_events();
 	}
 
 	void engine::begin_draw()
@@ -153,13 +148,13 @@ namespace ml
 	{
 		ML_assert(g_engine);
 
-		if ML_LIKELY(!(g_engine->m_window.has_hint(window_hints_double_buffered)))
+		if ML_UNLIKELY(g_engine->m_window.has_hint(window_hints_double_buffered))
 		{
-			GL::flush();
+			g_engine->m_window.swap_buffers();
 		}
 		else
 		{
-			g_engine->m_window.swap_buffers();
+			GL::flush();
 		}
 	}
 
@@ -167,53 +162,50 @@ namespace ml
 	{
 		ML_assert(g_engine);
 
-		// increment frame count
-		++g_engine->m_io.frame_count;
-
-		// update fps tracker
-		g_engine->m_io.frame_rate = g_engine->m_fps_tracker(g_engine->m_io.delta_time);
+		g_engine->m_time.end_loop();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	asset_manager & engine::get_assets() noexcept
+	asset_manager & engine::assets() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_assets;
 	}
 
-	engine::config & engine::get_config() noexcept
+	engine::engine_config & engine::config() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_config;
 	}
 
-	engine::io & engine::get_io() noexcept
+	engine::engine_io & engine::io() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_io;
 	}
 
-	plugin_manager & engine::get_plugins() noexcept
+	plugin_manager & engine::plugins() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_plugins;
 	}
 
-	script_manager & engine::get_scripts() noexcept
+	script_manager & engine::scripts() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_scripts;
 	}
 
-	duration const & engine::get_time() noexcept
+	game_time & engine::time() noexcept
 	{
 		ML_assert(g_engine);
-		return g_engine->m_main_timer.elapsed();
+		return g_engine->m_time;
 	}
 
-	render_window & engine::get_window() noexcept
+	render_window & engine::window() noexcept
 	{
+		ML_assert(g_engine);
 		return g_engine->m_window;
 	}
 

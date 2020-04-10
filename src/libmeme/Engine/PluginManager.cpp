@@ -22,6 +22,11 @@ namespace ml
 		m_files.clear();
 	}
 
+	bool plugin_manager::free(fs::path const & path)
+	{
+		return false;
+	}
+
 	bool plugin_manager::load(fs::path const & path)
 	{
 		// path empty

@@ -69,6 +69,7 @@ namespace ml
 			m_data = data;
 			m_size = size;
 			m_count = size / vertex::size;
+			m_offset = 0;
 
 			GL::bufferData(
 				GL::ArrayBuffer,
@@ -87,10 +88,11 @@ namespace ml
 			m_data = data;
 			m_size = size;
 			m_count = size / vertex::size;
+			m_offset = offset;
 
 			GL::bufferSubData(
 				GL::ArrayBuffer,
-				offset,
+				m_offset,
 				m_size * sizeof(float_t),
 				m_data
 			);
@@ -182,8 +184,8 @@ namespace ml
 			m_buffer_handle = handle;
 
 			GL::framebufferRenderbuffer(
-				GL::Framebuffer, attachment,
-				GL::Renderbuffer, handle
+				GL::Framebuffer, m_buffer_attachment,
+				GL::Renderbuffer, m_buffer_handle
 			);
 		}
 		return (*this);
@@ -198,8 +200,8 @@ namespace ml
 			m_texture_level = level;
 
 			GL::framebufferTexture2D(
-				GL::Framebuffer, attachment,
-				GL::Texture2D, handle, level
+				GL::Framebuffer, m_texture_attachment,
+				GL::Texture2D, m_handle, m_texture_level
 			);
 		}
 		return (*this);
@@ -241,7 +243,7 @@ namespace ml
 			m_format = format;
 
 			GL::renderbufferStorage(
-				GL::Renderbuffer, format, m_size[0], m_size[1]
+				GL::Renderbuffer, m_format, m_size[0], m_size[1]
 			);
 		}
 		return (*this);

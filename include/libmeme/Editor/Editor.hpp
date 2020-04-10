@@ -13,9 +13,7 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		class context;
-		struct config;
-		struct io;
+		class editor_context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -27,10 +25,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// editor config
-		struct config final : trackable
+		// public startup variables
+		struct editor_config final : trackable
 		{
-			fs::path		style_config		{}				; // style config
+			fs::path		style_config		{}				; // style editor_config
 			pmr::string		api_version			{}				; // imgui shading version
 			cstring			ini_filename		{}				; // imgui ini filename
 			cstring			log_filename		{}				; // imgui log filename
@@ -38,8 +36,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// editor io
-		struct io final : trackable
+		// public runtime variables
+		struct editor_io final : trackable
 		{
 			bool			show_main_menu		{ true }		; // show menus
 			menu_bar_t		main_menus			{}				; // menus
@@ -77,9 +75,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static config & get_config() noexcept;
+		ML_NODISCARD static editor_config & config() noexcept;
 
-		ML_NODISCARD static io & get_io() noexcept;
+		ML_NODISCARD static editor_io & io() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

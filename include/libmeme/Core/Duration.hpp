@@ -137,40 +137,53 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator==(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD constexpr auto compare(Other const & other) const noexcept
 		{
-			return (m_base == other.m_base);
+			if constexpr (std::is_same_v<Other, duration>)
+			{
+				return compare(other.m_base);
+			}
+			else
+			{
+				return (m_base != other) ? ((m_base < other) ? -1 : 1) : 0;
+			}
 		}
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator!=(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD bool operator==(Other const & other) const noexcept
 		{
-			return (m_base != other.m_base);
+			return compare(other) == 0;
 		}
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator<(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
 		{
-			return (m_base < other.m_base);
+			return compare(other) != 0;
 		}
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator>(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD bool operator<(Other const & other) const noexcept
 		{
-			return (m_base > other.m_base);
+			return compare(other) < 0;
 		}
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator<=(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD bool operator>(Other const & other) const noexcept
 		{
-			return (m_base <= other.m_base);
+			return compare(other) > 0;
 		}
 
-		template <class T
-		> ML_NODISCARD constexpr bool operator>=(T const & other) const noexcept
+		template <class Other = duration
+		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
 		{
-			return (m_base >= other.m_base);
+			return compare(other) <= 0;
+		}
+
+		template <class Other = duration
+		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
+		{
+			return compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

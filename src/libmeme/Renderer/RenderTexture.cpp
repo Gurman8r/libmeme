@@ -68,13 +68,19 @@ namespace ml
 	bool render_texture::generate()
 	{
 		if (good())
+		{
 			return debug::log::error("render texture already created");
+		}
 
 		if (width() == 0)
+		{
 			return debug::log::error("render texture width negative or zero");
+		}
 
 		if (height() == 0)
+		{
 			return debug::log::error("render texture height negative or zero");
+		}
 
 		if (!m_fbo.generate(m_size))
 		{
@@ -132,20 +138,6 @@ namespace ml
 		else
 		{
 			return false;
-		}
-	}
-
-	void render_texture::swap(render_texture & other) noexcept
-	{
-		if (this != std::addressof(other))
-		{
-			std::swap(m_fbo, other.m_fbo);
-			std::swap(m_rbo, other.m_rbo);
-			std::swap(m_size, other.m_size);
-			std::swap(m_colorID, other.m_colorID);
-			std::swap(m_frameID, other.m_frameID);
-			std::swap(m_format, other.m_format);
-			std::swap(m_texture, other.m_texture);
 		}
 	}
 

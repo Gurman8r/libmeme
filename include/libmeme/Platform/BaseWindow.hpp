@@ -11,7 +11,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API window : non_copyable, trackable
+	struct ML_PLATFORM_API base_window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -31,9 +31,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window() noexcept;
+		base_window() noexcept;
 
-		virtual ~window() noexcept;
+		virtual ~base_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -50,43 +50,43 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window & close();
+		base_window & close();
 		
-		window & destroy();
+		base_window & destroy();
 
-		window & iconify();
+		base_window & iconify();
 		
-		window & make_context_current();
+		base_window & make_context_current();
 		
-		window & maximize();
+		base_window & maximize();
 		
-		window & restore();
+		base_window & restore();
 		
-		window & swap_buffers();
+		base_window & swap_buffers();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window & set_centered();
+		base_window & set_centered();
 		
-		window & set_clipboard(cstring const & value);
+		base_window & set_clipboard(cstring const & value);
 		
-		window & set_cursor(void * value);
+		base_window & set_cursor(void * value);
 		
-		window & set_cursor_mode(cursor::mode value);
+		base_window & set_cursor_mode(cursor::mode value);
 		
-		window & set_cursor_pos(vec2d const & value);
+		base_window & set_cursor_pos(vec2d const & value);
 		
-		window & set_fullscreen(bool value);
+		base_window & set_fullscreen(bool value);
 		
-		window & set_icon(size_t w, size_t h, byte_t const * pixels);
+		base_window & set_icon(size_t w, size_t h, byte_t const * pixels);
 		
-		window & set_position(vec2i const & value);
+		base_window & set_position(vec2i const & value);
 		
-		window & set_monitor(void * value);
+		base_window & set_monitor(void * value);
 		
-		window & set_size(vec2i const & value);
+		base_window & set_size(vec2i const & value);
 		
-		window & set_title(pmr::string const & value);
+		base_window & set_title(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -163,7 +163,7 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
-		static void install_default_callbacks(window * win);
+		static void install_default_callbacks(base_window * win);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

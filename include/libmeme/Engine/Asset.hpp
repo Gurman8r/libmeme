@@ -8,63 +8,22 @@
 
 namespace ml
 {
-	struct asset_data
+	struct asset final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type			= typename asset_data;
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		std::optional<std::any> m_data{};
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		asset_data() noexcept : self_type{ allocator_type{} }
+		ML_NODISCARD bool has_value() const noexcept
 		{
+			return m_data.has_value();
 		}
 
-		explicit asset_data(allocator_type const & alloc) noexcept
+		template <class T
+		> ML_NODISCARD bool holds() const noexcept
 		{
+			return false;
 		}
-
-		asset_data(self_type const & other, allocator_type const & alloc = {})
-			: self_type{ alloc }
-		{
-		}
-
-		asset_data(self_type && other, allocator_type const & alloc = {}) noexcept
-			: self_type{ alloc }
-		{
-			swap(std::move(other));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		asset_data & operator=(self_type const & other)
-		{
-			self_type temp{ other };
-			swap(temp);
-			return (*this);
-		}
-
-		asset_data & operator=(self_type && other) noexcept
-		{
-			swap(std::move(other));
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

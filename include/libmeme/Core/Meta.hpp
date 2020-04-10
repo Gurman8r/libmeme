@@ -2,6 +2,7 @@
 #define _ML_META_HPP_
 
 // Sources:
+//
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 // https://github.com/SuperV1234/cppcon2015
 // https://github.com/SuperV1234/cppcon2015/tree/master/Other/ecs/Utils/MPL
@@ -40,7 +41,7 @@ namespace ml::meta
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, class Tp, size_t ... Is
-		> constexpr decltype(auto) tuple_apply_impl(Fn && fn, Tp && tp, std::index_sequence<Is...>)
+		> constexpr decltype(auto) impl_tuple_apply(Fn && fn, Tp && tp, std::index_sequence<Is...>)
 		{
 			return ML_forward(fn)(std::get<Is>(ML_forward(tp))...);
 		}
@@ -48,7 +49,7 @@ namespace ml::meta
 		template <class Fn, class Tp
 		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
 		{
-			return _ML meta::impl::tuple_apply_impl(
+			return _ML meta::impl::impl_tuple_apply(
 				ML_forward(fn),
 				ML_forward(tp),
 				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
@@ -110,22 +111,22 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ...
-	> struct concat_impl
+	> struct impl_concat
 	{
 		using type = typename list<>;
 	};
 
 	template <class ... Ts
-	> ML_alias concat = typename concat_impl<Ts...>::type;
+	> ML_alias concat = typename impl_concat<Ts...>::type;
 
 	template <class ... Ts
-	> struct concat_impl<list<Ts...>>
+	> struct impl_concat<list<Ts...>>
 	{
 		using type = typename list<Ts...>;
 	};
 
 	template <class ... Ts0, class ... Ts1, class ... Rest
-	> struct concat_impl<list<Ts0...>, list<Ts1...>, Rest...>
+	> struct impl_concat<list<Ts0...>, list<Ts1...>, Rest...>
 	{
 		using type = typename concat<list<Ts0..., Ts1...>, Rest...>;
 	};
@@ -139,16 +140,16 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Pr, class
-	> struct remap_impl
+	> struct impl_remap
 	{
 		using type = typename list<>;
 	};
 
 	template <template <class> class Pr, class Ls
-	> ML_alias remap = typename remap_impl<Pr, Ls>::type;
+	> ML_alias remap = typename impl_remap<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
-	> struct remap_impl<Pr, list<T, Ts...>>
+	> struct impl_remap<Pr, list<T, Ts...>>
 	{
 		using type = typename concat<
 			list<Pr<T>>, remap<Pr, list<Ts...>>
@@ -164,20 +165,20 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class...> class To, class T
-	> struct rename_impl;
+	> struct impl_rename;
 
 	template <
 		template <class ...> class To,
 		template <class...> class From,
 		class ... Ts
-	> struct rename_impl<To, From<Ts...>>
+	> struct impl_rename<To, From<Ts...>>
 	{
 		using type = typename To<Ts...>;
 	};
 
 	template<
 		template <class...> class To, class T
-	> ML_alias rename = typename rename_impl<To, T>::type;
+	> ML_alias rename = typename impl_rename<To, T>::type;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -265,19 +266,19 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <size_t N, class T
-	> struct repeat_impl
+	> struct impl_repeat
 	{
-		using type = typename push_back<typename repeat_impl<N - 1, T>::type, T>;
+		using type = typename push_back<typename impl_repeat<N - 1, T>::type, T>;
 	};
 
 	template <class T
-	> struct repeat_impl<0, T>
+	> struct impl_repeat<0, T>
 	{
 		using type = typename list<>;
 	};
 
 	template <size_t N, class T
-	> ML_alias repeat = typename repeat_impl<N, T>::type;
+	> ML_alias repeat = typename impl_repeat<N, T>::type;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -299,16 +300,16 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <template <class> class Pr, class
-	> struct filter_impl
+	> struct impl_filter
 	{
 		using type = typename list<>;
 	};
 
 	template <template <class> class Pr, class Ls
-	> ML_alias filter = typename filter_impl<Pr, Ls>::type;
+	> ML_alias filter = typename impl_filter<Pr, Ls>::type;
 
 	template <template <class> class Pr, class T, class ... Ts
-	> struct filter_impl<Pr, list<T, Ts...>>
+	> struct impl_filter<Pr, list<T, Ts...>>
 	{
 		using next = typename filter<Pr, list<Ts...>>;
 

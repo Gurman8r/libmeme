@@ -17,17 +17,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear_color(color const & col) const;
+		void clear_color(color const & col) const noexcept;
 
-		void clear_color(color const & col, uint32_t flags) const;
+		void clear_color(color const & col, uint32_t flags) const noexcept;
 
-		void clear_flags(uint32_t flags) const;
+		void clear_flags(uint32_t flags) const noexcept;
 		
-		void draw(VAO const & vao, VBO const & vbo) const;
+		void draw(VAO const & vao, VBO const & vbo) const noexcept;
 
-		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
+		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const noexcept;
 		
-		void viewport(int_rect const & bounds) const;
+		void viewport(int_rect const & bounds) const noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

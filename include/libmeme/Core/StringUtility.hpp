@@ -97,6 +97,8 @@ namespace ml::util
 	template <class Ch, class T
 	> ML_NODISCARD inline pmr::basic_string<Ch> integral_to_string(T const value) noexcept
 	{
+		// from <string>
+
 		static_assert(std::is_integral_v<T>);
 
 		using		U		= typename std::make_unsigned_t<T>;

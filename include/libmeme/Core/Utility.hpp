@@ -156,8 +156,8 @@ namespace ml::util
 		A<T, N...> temp{};
 		for (size_t i = 0; i < value.size(); ++i)
 		{
-			size_t const y{ i % value.width() };
-			size_t const x{ i / value.width() };
+			size_t const y{ i % value.width() }, x{ i / value.width() };
+			
 			temp[i] = value[y * value.width() + x];
 		}
 		return temp;

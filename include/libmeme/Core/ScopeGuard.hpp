@@ -5,7 +5,7 @@
 
 // defer
 #define ML_defer \
-	 auto ML_anon(scope_guard) = _ML impl::scope_guard_tag{} + [&]() noexcept
+	 auto const ML_anon(scope_guard) = _ML impl::scope_guard_tag{} + [&]() noexcept
 
 namespace ml::impl
 {

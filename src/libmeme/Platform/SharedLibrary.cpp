@@ -8,18 +8,17 @@
 #endif
 
 #ifdef ML_os_windows
-#	define LIB_EXT L".dll"
+#	define ML_LIB_EXT L".dll"
 #else
-#	define LIB_EXT L".so"
+#	define ML_LIB_EXT L".so"
 #endif
 
 namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static inline void * load_library(fs::path path)
+	static inline void * load_library(fs::path const & path)
 	{
-		if (path.extension().empty()) { path += LIB_EXT; } // append extension
 #ifdef ML_os_windows
 		return LoadLibraryExW(path.c_str(), nullptr, 0);
 #else
@@ -86,13 +85,16 @@ namespace ml
 		if (m_inst) { return false; }
 
 		// set path
-		m_path = path;
+		if ((m_path = path).extension().empty())
+		{
+			m_path += ML_LIB_EXT;
+		}
 
 		// clear functions
 		m_funcs.clear();
 
 		// open library
-		return (m_inst = impl::load_library(path));
+		return (m_inst = impl::load_library(m_path));
 	}
 
 	bool shared_library::close()
@@ -116,10 +118,9 @@ namespace ml
 		if (!m_inst) { return nullptr; }
 
 		// load function
-		return m_funcs.find_or_invoke(name, [&]()
-		{
-			return impl::load_function(m_inst, name.c_str());
-		});
+		return m_funcs.find_or_add_fn(
+			util::hash(name),
+			&impl::load_function, m_inst, name.c_str());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

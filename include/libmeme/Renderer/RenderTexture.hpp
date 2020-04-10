@@ -38,6 +38,20 @@ namespace ml
 			return (*this);
 		}
 
+		void swap(render_texture & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				std::swap(m_fbo, other.m_fbo);
+				std::swap(m_rbo, other.m_rbo);
+				std::swap(m_size, other.m_size);
+				std::swap(m_colorID, other.m_colorID);
+				std::swap(m_frameID, other.m_frameID);
+				std::swap(m_format, other.m_format);
+				std::swap(m_texture, other.m_texture);
+			}
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(render_texture const * value);
@@ -51,8 +65,6 @@ namespace ml
 		bool destroy();
 
 		bool resize(vec2i const & value);
-
-		void swap(render_texture & other) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

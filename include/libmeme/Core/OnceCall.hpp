@@ -5,7 +5,7 @@
 
 // once
 #define ML_once \
-    static auto ML_anon(once_call) = _ML impl::once_call_tag{} + [&]() noexcept
+    static auto const ML_anon(once_call) = _ML impl::once_call_tag{} + [&]() noexcept
 
 namespace ml::impl
 {

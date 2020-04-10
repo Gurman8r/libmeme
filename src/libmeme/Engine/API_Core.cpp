@@ -12,7 +12,7 @@ namespace ml::embed
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// LIBRARY
+		// PROJECT
 		struct ml_project {};
 		py::class_<ml_project>(m, "project")
 			.def_property_readonly_static("author"	, [](py::object) { return ML__author; })
@@ -77,23 +77,33 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// STDIO
-		struct ml_stdio {};
-		py::class_<ml_stdio>(m, "stdio")
+		struct ml_stdio
+		{
+			static auto & err(py::object) noexcept
+			{
+				static ml_output temp{ std::cerr }; return temp;
+			}
 
-			.def_property_readonly_static("cerr", [](py::object) { return ml_output{ std::cerr }; })
-			
-			.def_property_readonly_static("cout", [](py::object) { return ml_output{ std::cout }; })
-			
+			static auto & out(py::object) noexcept
+			{
+				static ml_output temp{ std::cout }; return temp;
+			}
+		};
+		py::class_<ml_stdio>(m, "stdio")
+			.def_property_readonly_static("cerr", &ml_stdio::err)
+			.def_property_readonly_static("cout", &ml_stdio::out)
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&, sys = py::module::import("sys")]()
+		m.attr("__good__") = ([&
+			, sys = py::module::import("sys")]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
 			sys.attr("stderr") = m.attr("stdio").attr("cout");
 			sys.attr("stdin") = py::none{};
+			return true;
 		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

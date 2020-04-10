@@ -55,8 +55,10 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&, sys = py::module::import("sys")]()
+		m.attr("__good__") = ([&
+			, sys = py::module::import("sys")]()
 		{
+			return true;
 		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
