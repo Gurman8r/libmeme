@@ -123,7 +123,7 @@ namespace ml
 		})());
 		glfwWindowHint(GLFW_DEPTH_BITS,				m_settings.context.depth_bits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			m_settings.context.stencil_bits);
-		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_settings.context.sRGB_capable);
+		glfwWindowHint(GLFW_SRGB_CAPABLE,			m_settings.context.srgb_capable);
 
 		// style hints
 		glfwWindowHint(GLFW_RESIZABLE,				has_hint(window_hints_resizable));

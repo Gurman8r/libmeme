@@ -8,8 +8,6 @@
 
 namespace ml
 {
-	struct render_target;
-
 	struct ML_RENDERER_API mesh final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -59,7 +57,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw(render_target const & target, mesh const * value);
+		static void draw(struct render_target const & target, mesh const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -39,9 +39,6 @@ namespace ml
 		// public runtime variables
 		struct engine_io final : trackable
 		{
-			float_t			delta_time			{}				; // frame time
-			size_t			frame_count			{}				; // frame count
-			float_t			frame_rate			{}				; // frame rate
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -86,16 +83,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static fs::path path_to(fs::path const & value = {})
+		ML_NODISCARD static fs::path path_to(fs::path const & value = {}) noexcept
 		{
-			if (value.empty())
-			{
-				return config().content_home;
-			}
-			else
-			{
-				return config().content_home.native() + value.native();
-			}
+			return config().content_home.native() + value.native();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

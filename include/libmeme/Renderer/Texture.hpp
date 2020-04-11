@@ -131,7 +131,7 @@ namespace ml
 		
 		ML_NODISCARD auto internal_format() const noexcept -> uint32_t { return m_intl_format; }
 		
-		ML_NODISCARD auto color_format() const noexcept -> uint32_t { return m_col_format; }
+		ML_NODISCARD auto color_format() const noexcept -> uint32_t { return m_color_format; }
 		
 		ML_NODISCARD auto pixel_type() const noexcept -> uint32_t { return m_pixel_type; }
 		
@@ -158,7 +158,7 @@ namespace ml
 		uint32_t	m_sampler;
 		int32_t		m_level;
 		uint32_t	m_intl_format;
-		uint32_t	m_col_format;
+		uint32_t	m_color_format;
 		uint32_t	m_pixel_type;
 		vec2u		m_size;
 		vec2u		m_real_size;

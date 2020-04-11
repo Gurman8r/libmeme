@@ -14,13 +14,12 @@ namespace ml
 	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine								;
+		asset_manager		m_assets		{}					; // asset manager
 		engine_config		m_config		{}					; // public startup variables
 		engine_io			m_io			{}					; // public runtime variables
-		
-		asset_manager		m_assets		{}					; // asset manager
-		game_time			m_time			{}					; // game time
 		plugin_manager		m_plugins		{}					; // plugin manager
 		script_manager		m_scripts		{}					; // script manager
+		game_time			m_time			{}					; // game time
 		render_window		m_window		{}					; // main window
 	};
 

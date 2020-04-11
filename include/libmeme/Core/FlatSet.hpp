@@ -472,7 +472,7 @@ namespace ml::ds
 		void impl_sort() noexcept
 		{
 			// empty
-			if (empty()) return;
+			if (empty()) { return; }
 
 			// sort
 			if constexpr (0 < traits_type::thresh)
@@ -491,8 +491,8 @@ namespace ml::ds
 
 		// insert implementation
 		template <class Other
-		> auto impl_insert(Other && other) -> std::conditional_t<traits_type::multi,
-			iterator, std::pair<iterator, bool>
+		> auto impl_insert(Other && other) -> std::conditional_t<
+			traits_type::multi, iterator, std::pair<iterator, bool>
 		>
 		{
 			if constexpr (traits_type::multi)

@@ -92,7 +92,14 @@ namespace ml
 		{
 			if constexpr (std::is_same_v<Other, shared_library>)
 			{
-				return compare(other.m_path);
+				if (this != std::addressof(other))
+				{
+					return compare(other.m_path);
+				}
+				else
+				{
+					return 0;
+				}
 			}
 			else
 			{

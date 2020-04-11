@@ -3,13 +3,9 @@
 
 #ifdef ML_os_windows
 #	include <Windows.h>
-#else
-// https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
-#endif
-
-#ifdef ML_os_windows
 #	define ML_LIB_EXT L".dll"
 #else
+// https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #	define ML_LIB_EXT L".so"
 #endif
 

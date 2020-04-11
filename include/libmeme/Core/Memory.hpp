@@ -230,7 +230,7 @@ namespace ml
 
 		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
 
-		ML_NODISCARD static auto const & get_testres() noexcept { return get_instance().m_testres; }
+		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_instance().m_testres; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

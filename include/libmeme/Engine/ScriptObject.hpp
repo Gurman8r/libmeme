@@ -17,7 +17,6 @@ namespace ml::embed
 {
 	enum script_object_flags_
 	{
-		script_object_flags_none,
 		script_object_flags_enabled,
 		script_object_flags_MAX
 	};

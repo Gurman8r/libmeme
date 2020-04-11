@@ -7,7 +7,7 @@ namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void set_mipmapped(bool value, uint32_t sampler, bool smooth)
+	static void set_mipmapped(bool value, uint32_t sampler, bool smooth) noexcept
 	{
 		if (value) GL::generateMipmap(sampler);
 		GL::texParameter(sampler, GL::TexMagFilter, value
@@ -16,7 +16,7 @@ namespace ml::impl
 		);
 	}
 
-	static void set_repeated(bool value, uint32_t sampler)
+	static void set_repeated(bool value, uint32_t sampler) noexcept
 	{
 		GL::texParameter(sampler, GL::TexWrapS, value
 			? GL::Repeat
@@ -28,7 +28,7 @@ namespace ml::impl
 		);
 	}
 
-	static void set_smooth(bool value, uint32_t sampler, bool mipmapped)
+	static void set_smooth(bool value, uint32_t sampler, bool mipmapped) noexcept
 	{
 		GL::texParameter(sampler, GL::TexMagFilter,
 			value ? GL::Linear : GL::Nearest
@@ -64,7 +64,7 @@ namespace ml
 		, m_sampler		{ sampler }
 		, m_level		{ level }
 		, m_intl_format	{ internal_format }
-		, m_col_format	{ color_format }
+		, m_color_format{ color_format }
 		, m_pixel_type	{ pixel_type }
 		, m_size		{}
 		, m_real_size	{}
@@ -115,7 +115,7 @@ namespace ml
 		other.m_sampler,
 		other.m_level,
 		other.m_intl_format,
-		other.m_col_format,
+		other.m_color_format,
 		other.m_pixel_type,
 		other.m_flags
 	}
@@ -145,7 +145,7 @@ namespace ml
 	{
 		if (!img.channels()) { return false; }
 
-		m_intl_format = m_col_format = img.get_format();
+		m_intl_format = m_color_format = img.get_format();
 
 		return create(img.data(), img.size());
 	}
@@ -194,7 +194,7 @@ namespace ml
 			std::swap(m_sampler,		other.m_sampler);
 			std::swap(m_level,			other.m_level);
 			std::swap(m_intl_format,	other.m_intl_format);
-			std::swap(m_col_format,		other.m_col_format);
+			std::swap(m_color_format,		other.m_color_format);
 			std::swap(m_pixel_type,		other.m_pixel_type);
 			std::swap(m_size,			other.m_size);
 			std::swap(m_real_size,		other.m_real_size);
@@ -255,7 +255,7 @@ namespace ml
 			m_size[0],
 			m_size[1],
 			0, // "border must be 0" -khronos
-			m_col_format,
+			m_color_format,
 			m_pixel_type,
 			(void *)pixels);
 

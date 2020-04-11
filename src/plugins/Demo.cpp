@@ -52,9 +52,9 @@ namespace ml
 	// (X) SYSTEMS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class> struct x_apply_transforms final : ecs::util::x_base<s_apply_transforms>
+	template <class> struct x_apply_transforms final : ecs::detail::x_base<s_apply_transforms>
 	{
-		void update(c_material & mat, c_transform const & tf)
+		void operator()(c_material & mat, c_transform const & tf)
 		{
 			mat->set<vec3>("u_position", tf.pos)
 				.set<vec4>("u_rotation", tf.rot)
@@ -62,9 +62,9 @@ namespace ml
 		}
 	};
 
-	template <class> struct x_apply_materials final : ecs::util::x_base<s_apply_materials>
+	template <class> struct x_apply_materials final : ecs::detail::x_base<s_apply_materials>
 	{
-		void update(c_shader & shd, c_material const & mat)
+		void operator()(c_shader & shd, c_material const & mat)
 		{
 			ML_bind_scope(*shd, false);
 			for (uniform const & u : *mat)
@@ -74,9 +74,9 @@ namespace ml
 		}
 	};
 
-	template <class> struct x_draw_renderers final : ecs::util::x_base<s_draw_renderers>
+	template <class> struct x_draw_renderers final : ecs::detail::x_base<s_draw_renderers>
 	{
-		void update(render_target const & target, c_shader const & shd, c_model const & mdl)
+		void operator()(render_target const & target, c_shader const & shd, c_model const & mdl)
 		{
 			ML_bind_scope(*shd, true);
 			target.draw(*mdl);
@@ -171,24 +171,24 @@ namespace ml
 		{
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & dt{ engine::io().delta_time }; return dt * 1000.f; }
+			[]() { return engine::time().delta().count<float_t>() * 1000.f; }
 			),
 
 			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
-			[]() { static auto const & fps{ engine::io().frame_rate }; return fps; }
+			[]() { return (float_t)engine::time().frame_rate(); }
 			),
 		} };
 
-		inline void highlight_memory(byte_t * ptr, size_t const size)
+		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto * const testres{ memory_manager::get_testres() };
+			static auto * const & testres{ memory_manager::get_test_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
 		}
 
-		template <class T> inline void highlight_memory(T const * ptr)
+		template <class T> void highlight_memory(T const * ptr)
 		{
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
@@ -252,6 +252,10 @@ namespace ml
 
 				m_textures["earth_dm_2k"] = make_texture(
 					engine::path_to("assets/textures/earth/earth_dm_2k.png")
+				);
+
+				m_textures["earth_sm_2k"] = make_texture(
+					engine::path_to("assets/textures/earth/earth_sm_2k.png")
 				);
 
 				m_textures["moon_dm_2k"] = make_texture(
@@ -420,8 +424,8 @@ namespace ml
 			m_plots.update(engine::time().total().count<float_t>());
 			
 			// systems
-			m_renderer.update_system<x_apply_transforms>();
-			m_renderer.update_system<x_apply_materials>();
+			m_renderer.invoke_system<x_apply_transforms>();
+			m_renderer.invoke_system<x_apply_materials>();
 
 			// pipeline
 			if (m_display_size[0] > 0 && m_display_size[1] > 0)
@@ -447,7 +451,7 @@ namespace ml
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_renderer.update_system<x_draw_renderers>(target);
+				m_renderer.invoke_system<x_draw_renderers>(target);
 			}
 		}
 
@@ -501,9 +505,9 @@ namespace ml
 			ML_ImGui_ScopeID(ML_addressof(this));
 
 			// IMGUI
-			if (m_imgui_demo.open) { editor::show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open) { editor::show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open) { editor::show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ editor::show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ editor::show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ editor::show_imgui_about(&m_imgui_about.open); }
 
 			// DEMO
 			m_gui_display.render([&]()		{ show_display_gui(); });	// DISPLAY
@@ -960,7 +964,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto * const testres{ memory_manager::get_testres() };
+			static auto * const & testres{ memory_manager::get_test_resource() };
 
 			// setup memory editor
 			ML_once{
@@ -1087,7 +1091,6 @@ namespace ml
 				}
 			});
 
-
 			// benchmarks
 			ImGui::Columns(2);
 			if (static auto const & bench{ performance_tracker::prev() }; !bench.empty())
@@ -1116,7 +1119,7 @@ namespace ml
 				ImGui::EndMenuBar();
 			}
 
-
+			// WIP
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

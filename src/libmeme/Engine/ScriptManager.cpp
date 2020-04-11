@@ -38,7 +38,7 @@ namespace ml
 					return pmr::get_default_resource()->deallocate(p, s);
 				}
 			};
-			return std::addressof(alloc);
+			return &alloc;
 		})());
 
 		Py_SetProgramName(name.c_str());

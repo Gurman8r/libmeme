@@ -73,7 +73,7 @@ namespace ml
 
 			GL::bufferData(
 				GL::ArrayBuffer,
-				sizeof(float_t) * m_size,
+				m_size * sizeof(float_t),
 				m_data,
 				m_usage
 			);

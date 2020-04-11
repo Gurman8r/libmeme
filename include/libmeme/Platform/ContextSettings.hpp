@@ -28,7 +28,7 @@ namespace ml
 		int32_t		depth_bits		{};
 		int32_t		stencil_bits	{};
 		bool		multisample		{};
-		bool		sRGB_capable	{};
+		bool		srgb_capable	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,7 +51,7 @@ namespace ml
 		j.at("depth_bits").get_to(value.depth_bits);
 		j.at("stencil_bits").get_to(value.stencil_bits);
 		j.at("multisample").get_to(value.multisample);
-		j.at("srgb_capable").get_to(value.sRGB_capable);
+		j.at("srgb_capable").get_to(value.srgb_capable);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

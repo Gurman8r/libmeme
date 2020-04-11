@@ -17,7 +17,7 @@ namespace ml
 		friend class		editor								;
 		editor_config		m_config		{}					; // public startup variables
 		editor_io			m_io			{}					; // public runtime variables
-		ImGuiContext *		m_imgui			{}					; // active imgui context
+		ImGuiContext *		m_imgui			{}					; // imgui context
 	};
 
 	static editor::editor_context * g_editor{};
@@ -65,6 +65,9 @@ namespace ml
 	{
 		ML_assert(g_editor);
 
+		// check imgui version
+		IMGUI_CHECKVERSION();
+
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
 		(
@@ -74,7 +77,6 @@ namespace ml
 		);
 
 		// create editor_context
-		IMGUI_CHECKVERSION();
 		g_editor->m_imgui = ImGui::CreateContext();
 
 		auto & im_io{ ImGui::GetIO() };
@@ -281,7 +283,10 @@ namespace ml
 		
 		auto & menus{ g_editor->m_io.main_menus };
 		
-		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e) { return (e.first == label); }) };
+		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e)
+		{
+			return (e.first == label); })
+		};
 		
 		if (it == menus.end())
 		{

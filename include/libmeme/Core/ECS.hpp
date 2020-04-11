@@ -1,6 +1,7 @@
 #ifndef _ML_ECS_HPP_
 #define _ML_ECS_HPP_
 
+// Data Oriented ECS
 // Credit to Vittorio Romeo
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
@@ -15,7 +16,7 @@ namespace ml::ecs
 }
 
 // UTILITY
-namespace ml::ecs::util
+namespace ml::ecs::detail
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -171,7 +172,7 @@ namespace ml::ecs::cfg
 
 		using self_type = typename systems<Systems...>;
 
-		using type_list = typename meta::list<_ML ecs::util::template x_wrapper<Systems>...>;
+		using type_list = typename meta::list<detail::template x_wrapper<Systems>...>;
 
 		template <class U
 		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
@@ -186,14 +187,14 @@ namespace ml::ecs::cfg
 		template <template <class> class X
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<_ML ecs::util::x_wrapper<X>, type_list>();
+			return meta::contains<detail::x_wrapper<X>, type_list>();
 		}
 
 		template <template <class> class X
 		> static constexpr size_t index() noexcept
 		{
 			static_assert(self_type::contains<X>(), "system not found");
-			return meta::index_of<_ML ecs::util::x_wrapper<X>, type_list>();
+			return meta::index_of<detail::x_wrapper<X>, type_list>();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -213,7 +214,7 @@ namespace ml::ecs::cfg
 		static_assert(0 < grow_base, "growth base negative or zero");
 
 		// growth multiplier
-		static constexpr auto grow_mult{ _ML util::ratio_cast(1.f, GrowMult{}) };
+		static constexpr auto grow_mult{ util::ratio_cast(1.f, GrowMult{}) };
 		static_assert(1.f <= grow_mult, "expression would result in negative growth");
 
 		static constexpr auto calc_growth(size_t const cap) noexcept
@@ -1039,13 +1040,13 @@ namespace ml::ecs
 			});
 		}
 
-		// invoke update on all systems matching a signature
+		// invoke all systems matching a signature
 		template <template <class> class X, class ... Args
-		> self_type & update_system(Args && ... args) noexcept
+		> self_type & invoke_system(Args && ... args) noexcept
 		{
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp) noexcept
 			{
-				x.update(ML_forward(args)..., ML_forward(req_comp)...);
+				std::invoke(x, ML_forward(args)..., ML_forward(req_comp)...);
 			});
 		}
 

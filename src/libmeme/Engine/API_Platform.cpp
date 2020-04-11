@@ -23,7 +23,7 @@ namespace ml::embed
 			.def_readwrite("depth_bits"		, &context_settings::depth_bits)
 			.def_readwrite("stencil_bits"	, &context_settings::stencil_bits)
 			.def_readwrite("multisample"	, &context_settings::multisample)
-			.def_readwrite("sRGB_capable"	, &context_settings::sRGB_capable)
+			.def_readwrite("srgb_capable"	, &context_settings::srgb_capable)
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -31,14 +31,13 @@ namespace ml::embed
 		// DISPLAY SETTINGS
 		py::class_<display_settings>(m, "display_settings")
 			.def(py::init<>())
-			
 			.def_readwrite("depth", &display_settings::depth)
-			
-			.def_property("width"
-				, [&](display_settings & s) { return s.size[0]; }, [&](display_settings & s, int32_t v) { s.size[0] = v; })
-			
-			.def_property("height"
-				, [&](display_settings & s) { return s.size[1]; }, [&](display_settings & s, int32_t v) { s.size[1] = v; })
+			.def_property("width",
+				[&](display_settings & s) { return s.size[0]; },
+				[&](display_settings & s, int32_t v) { s.size[0] = v; })
+			.def_property("height",
+				[&](display_settings & s) { return s.size[1]; },
+				[&](display_settings & s, int32_t v) { s.size[1] = v; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

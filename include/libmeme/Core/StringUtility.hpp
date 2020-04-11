@@ -16,12 +16,9 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch
-	> struct is_char : std::bool_constant<
+	> struct is_char_t : std::bool_constant<
 		is_any_of_v<Ch, char, wchar_t, char16_t, char32_t>
 	> {};
-
-	template <class Ch
-	> ML_alias is_char_t = typename is_char<Ch>;
 
 	template <class Ch
 	> static constexpr bool is_char_v{ is_char_t<Ch>::value };
@@ -29,13 +26,10 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char
-	> struct is_cstring : std::bool_constant<
+	> struct is_cstring_t : std::bool_constant<
 		is_char_v<Ch> &&
 		std::is_convertible_v<T const &, Ch const *>
 	> {};
-
-	template <class T, class Ch = char
-	> ML_alias is_cstring_t = typename is_cstring<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_cstring_v{ is_cstring_t<T, Ch>::value };
@@ -43,13 +37,10 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char, class Traits = std::char_traits<Ch>
-	> struct is_string_view : std::bool_constant<
+	> struct is_string_view_t : std::bool_constant<
 		is_cstring_v<T, Ch> ||
 		std::is_convertible_v<T const &, std::basic_string_view<Ch, Traits>>
 	> {};
-
-	template <class T, class Ch = char
-	> ML_alias is_string_view_t = typename is_string_view<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_view_v{ is_string_view_t<T, Ch>::value };
@@ -57,12 +48,9 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch = char
-	> struct is_string : std::bool_constant<
+	> struct is_string_t : std::bool_constant<
 		is_any_of_v<T, std::basic_string<Ch>, pmr::basic_string<Ch>>
 	> {};
-
-	template <class T, class Ch = char
-	> ML_alias is_string_t = typename is_string<T, Ch>;
 
 	template <class T, class Ch = char
 	> static constexpr bool is_string_v{ is_string_t<T, Ch>::value };

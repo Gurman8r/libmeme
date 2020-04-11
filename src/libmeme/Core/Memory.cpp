@@ -12,6 +12,8 @@ namespace ml
 		{
 			debug::log::error("final allocations follow");
 
+			debug::pause();
+
 			std::cout << std::left
 				<< std::setw(20) << "Index"
 				<< std::setw(20) << "Size"

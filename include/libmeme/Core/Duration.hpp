@@ -7,13 +7,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using nanoseconds_t		= typename chrono::duration<float64_t, std::nano>;
-	using microseconds_t	= typename chrono::duration<float64_t, std::micro>;
-	using milliseconds_t	= typename chrono::duration<float64_t, std::milli>;
-	using seconds_t			= typename chrono::duration<float64_t, std::ratio<1>>;
-	using minutes_t			= typename chrono::duration<float64_t, std::ratio<60>>;
-	using hours_t			= typename chrono::duration<float64_t, std::ratio<60 * 60>>;
-	using days_t			= typename chrono::duration<float64_t, std::ratio<60 * 60 * 24>>;
+	ML_alias nanoseconds_t	= typename chrono::duration<float64_t, std::nano>;
+	ML_alias microseconds_t	= typename chrono::duration<float64_t, std::micro>;
+	ML_alias milliseconds_t	= typename chrono::duration<float64_t, std::milli>;
+	ML_alias seconds_t		= typename chrono::duration<float64_t, std::ratio<1>>;
+	ML_alias minutes_t		= typename chrono::duration<float64_t, std::ratio<60>>;
+	ML_alias hours_t		= typename chrono::duration<float64_t, std::ratio<60 * 60>>;
+	ML_alias days_t			= typename chrono::duration<float64_t, std::ratio<60 * 60 * 24>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -98,7 +98,7 @@ namespace ml
 		}
 
 		template <class T = float64_t
-		> ML_NODISCARD constexpr T count() const noexcept
+		> ML_NODISCARD constexpr auto count() const noexcept
 		{
 			return static_cast<T>(m_base.count());
 		}
