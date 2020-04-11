@@ -20,7 +20,10 @@ namespace ml
 
 		basic_timer(bool start_me = {}) noexcept
 		{
-			if (start_me) { this->start(); }
+			if (start_me)
+			{
+				this->start();
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
