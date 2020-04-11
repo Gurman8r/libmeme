@@ -253,7 +253,7 @@ namespace ml::impl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-namespace ml
+namespace ml::util
 {
 	template <class T, class ... Args
 	> ML_NODISCARD static T input(Args && ... args) noexcept
