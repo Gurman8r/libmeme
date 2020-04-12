@@ -1,6 +1,12 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
+/* WIP
+	- base_window -> abstract
+		- native_window -> impl
+			- render_window -> user
+*/
+
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Platform/Cursor.hpp>
 #include <libmeme/Platform/KeyCode.hpp>

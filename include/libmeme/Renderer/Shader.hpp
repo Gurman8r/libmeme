@@ -35,7 +35,7 @@ namespace ml
 		
 		shader(shader && other, allocator_type const & alloc = {}) noexcept;
 		
-		~shader();
+		~shader() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

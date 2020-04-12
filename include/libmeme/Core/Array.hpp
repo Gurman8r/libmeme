@@ -18,8 +18,8 @@ namespace ml::ds
 		using size_type					= typename size_t;
 		using difference_type			= typename ptrdiff_t;
 		using pointer					= typename value_type *;
-		using reference					= typename value_type &;
 		using const_pointer				= typename value_type const *;
+		using reference					= typename value_type &;
 		using const_reference			= typename value_type const &;
 		using rvalue					= typename value_type &&;
 		using const_rvalue				= typename value_type const &&;
@@ -50,13 +50,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_t const i) & noexcept -> reference { return m_data[i]; }
+		ML_NODISCARD constexpr auto at(size_type const i) & noexcept -> reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data[i]; }
+		ML_NODISCARD constexpr auto at(size_type const i) const & noexcept -> const_reference { return m_data[i]; }
 
-		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> rvalue { return std::move(m_data[i]); }
+		ML_NODISCARD constexpr auto at(size_type const i) && noexcept -> rvalue { return std::move(m_data[i]); }
 
-		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> const_rvalue { return std::move(m_data[i]); }
+		ML_NODISCARD constexpr auto at(size_type const i) const && noexcept -> const_rvalue { return std::move(m_data[i]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -74,9 +74,9 @@ namespace ml::ds
 		
 		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return _N; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return _N; }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return _N; }
+		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return _N; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -123,9 +123,11 @@ namespace ml::ds
 		using size_type					= typename size_t;
 		using difference_type			= typename ptrdiff_t;
 		using pointer					= typename value_type *;
-		using reference					= typename value_type &;
 		using const_pointer				= typename value_type const *;
+		using reference					= typename value_type &;
 		using const_reference			= typename value_type const &;
+		using rvalue					= typename value_type &&;
+		using const_rvalue				= typename value_type const &&;
 		using iterator					= typename pointer;
 		using const_iterator			= typename const_pointer;
 		using reverse_iterator			= typename std::reverse_iterator<iterator>;
@@ -143,23 +145,23 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto operator*() & noexcept { return (*m_data); }
+		ML_NODISCARD constexpr auto operator*() & noexcept -> reference { return (*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() const & noexcept { return (*m_data); }
+		ML_NODISCARD constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() && noexcept { return std::move(*m_data); }
+		ML_NODISCARD constexpr auto operator*() && noexcept -> rvalue { return std::move(*m_data); }
 
-		ML_NODISCARD constexpr auto operator*() const && noexcept { return std::move(*m_data); }
+		ML_NODISCARD constexpr auto operator*() const && noexcept -> const_rvalue { return std::move(*m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_t) & noexcept { return m_data[0]; }
-		
-		ML_NODISCARD constexpr auto at(size_t) const & noexcept { return m_data[0]; }
+		ML_NODISCARD constexpr auto at(size_type) & noexcept -> reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto at(size_t) && noexcept { return std::move(m_data[0]); }
+		ML_NODISCARD constexpr auto at(size_type) const & noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto at(size_t) const && noexcept { return std::move(m_data[0]); }
+		ML_NODISCARD constexpr auto at(size_type) && noexcept -> rvalue { return std::move(m_data[0]); }
+
+		ML_NODISCARD constexpr auto at(size_type) const && noexcept -> const_rvalue { return std::move(m_data[0]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -177,9 +179,9 @@ namespace ml::ds
 		
 		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return 0; }
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return 0; }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return 0; }
+		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return 0; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

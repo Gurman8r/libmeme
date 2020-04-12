@@ -16,8 +16,6 @@ namespace ml
 
 		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const noexcept { return m_handle; }
-
 		static void bind(VAO const * value);
 
 		void bind() const { bind(this); }
@@ -48,8 +46,6 @@ namespace ml
 		uint32_t	m_offset{};
 
 		operator bool() const noexcept { return m_handle; }
-
-		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(VBO const * value);
 
@@ -85,8 +81,6 @@ namespace ml
 
 		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const noexcept { return m_handle; }
-
 		static void bind(IBO const * value);
 
 		void bind() const { bind(this); }
@@ -121,8 +115,6 @@ namespace ml
 
 		operator bool() const noexcept { return m_handle; }
 
-		operator uint32_t() const noexcept { return m_handle; }
-
 		static void bind(FBO const * value);
 
 		void bind() const { bind(this); }
@@ -154,8 +146,6 @@ namespace ml
 		uint32_t	m_format{};
 
 		operator bool() const noexcept { return m_handle; }
-
-		operator uint32_t() const noexcept { return m_handle; }
 
 		static void bind(RBO const * value);
 

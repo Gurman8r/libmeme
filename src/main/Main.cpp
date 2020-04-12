@@ -5,6 +5,8 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Editor/Editor.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Renderer/Uniform.hpp>
+#include <libmeme/Core/ECS.hpp>
 
 using namespace ml;
 

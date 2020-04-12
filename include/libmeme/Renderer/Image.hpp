@@ -37,9 +37,9 @@ namespace ml
 		
 		image(fs::path const & path, allocator_type const & alloc = {});
 		
-		image(fs::path const & path, bool flip, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip_v, allocator_type const & alloc = {});
 		
-		image(fs::path const & path, bool flip, size_t req_channels, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type const & alloc = {});
 		
 		image(image const & other, allocator_type const & alloc = {});
 		
@@ -55,9 +55,9 @@ namespace ml
 		
 		bool load_from_file(fs::path const & path);
 		
-		bool load_from_file(fs::path const & path, bool flip);
+		bool load_from_file(fs::path const & path, bool flip_v);
 		
-		bool load_from_file(fs::path const & path, bool flip, size_t req_channels);
+		bool load_from_file(fs::path const & path, bool flip_v, size_t req_channels);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -105,7 +105,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return !m_pixels.empty(); }
+		ML_NODISCARD bool good() const noexcept { return !m_pixels.empty(); }
+
+		ML_NODISCARD operator bool() const noexcept { return good(); }
 
 		ML_NODISCARD auto operator[](size_t i) -> byte_t & { return m_pixels.at(i); }
 

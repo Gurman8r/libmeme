@@ -91,9 +91,12 @@ namespace ml::embed
 		{
 			if (auto const it{ m_funcs.find(util::hash(name, util::strlen(name))) })
 			{
-				if (*it->second) { std::invoke(*it->second); }
-
-				return true;
+				if (*it->second)
+				{
+					std::invoke(*it->second);
+					
+					return true;
+				}
 			}
 			return false;
 		}
@@ -102,8 +105,7 @@ namespace ml::embed
 		{
 			return py::hasattr(m_self, name) && m_funcs.try_emplace(
 				util::hash(name, util::strlen(name)),
-				m_self.attr(name).cast<callback>()
-			).second;
+				m_self.attr(name).cast<callback>()).second;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

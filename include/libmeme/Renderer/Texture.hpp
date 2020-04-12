@@ -48,7 +48,7 @@ namespace ml
 		
 		texture(texture && other) noexcept;
 		
-		~texture();
+		~texture() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

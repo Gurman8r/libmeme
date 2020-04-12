@@ -21,7 +21,7 @@ namespace ml
 
 		render_texture(render_texture && other) noexcept;
 
-		~render_texture();
+		~render_texture() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -56,9 +56,9 @@ namespace ml
 
 		static void bind(render_texture const * value);
 
-		void bind() const { return bind(this); }
+		void bind() const { bind(this); }
 
-		void unbind() const { return bind(nullptr); }
+		void unbind() const { bind(nullptr); }
 
 		bool generate();
 

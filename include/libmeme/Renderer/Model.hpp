@@ -1,6 +1,8 @@
 #ifndef _ML_MODEL_HPP_
 #define _ML_MODEL_HPP_
 
+// should be optimized (data oriented?)
+
 #include <libmeme/Renderer/Mesh.hpp>
 
 namespace ml
@@ -25,7 +27,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		model(allocator_type const & alloc = {});
+		model(allocator_type const & alloc = {}) noexcept;
 		
 		model(std::initializer_list<mesh> init, allocator_type const & alloc = {});
 		
@@ -57,7 +59,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw(struct render_target const & target, model const * value);
+		static void draw(struct render_target & target, model const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -45,7 +45,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	render_texture::~render_texture()
+	render_texture::~render_texture() noexcept
 	{
 		destroy();
 	}
@@ -104,7 +104,7 @@ namespace ml
 			m_rbo.update(m_format);
 
 			// attach renderbuffer to framebuffer
-			m_fbo.attach_buffer(m_frameID, m_rbo);
+			m_fbo.attach_buffer(m_frameID, m_rbo.m_handle);
 		}
 
 		// check framebuffer status

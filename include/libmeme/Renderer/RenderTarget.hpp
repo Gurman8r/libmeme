@@ -9,6 +9,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// object-oriented interface to renderer api
 	struct ML_RENDERER_API render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,30 +18,34 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear_color(color const & col) const;
+		void clear_color(color const & value);
 
-		void clear_color(color const & col, uint32_t flags) const;
+		void clear_color(color const & value, uint32_t flags);
 
-		void clear_flags(uint32_t flags) const;
-		
-		void draw(VAO const & vao, VBO const & vbo) const;
-
-		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo) const;
-		
-		void viewport(int_rect const & bounds) const;
+		void clear_flags(uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T, class ... Args
-		> void draw(T const * value, Args && ... args) const noexcept
+		void viewport(int_rect const & bounds);
+		
+		void viewport(vec2i const & pos, vec2i const & size);
+
+		void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		void draw(VAO const & vao, VBO const & vbo);
+
+		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo);
+
+		template <class T> void draw(T const * value)
 		{
-			T::draw(*this, value, ML_forward(args)...);
+			T::draw(*this, value);
 		}
 
-		template <class T, class ... Args
-		> void draw(T const & value, Args && ... args) const noexcept
+		template <class T> void draw(T const & value)
 		{
-			this->draw(&value, ML_forward(args)...);
+			this->draw(&value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

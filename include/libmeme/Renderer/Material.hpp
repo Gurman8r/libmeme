@@ -1,7 +1,7 @@
 #ifndef _ML_MATERIAL_HPP_
 #define _ML_MATERIAL_HPP_
 
-// should be data oriented
+// should be optimized (data oriented?)
 
 #include <libmeme/Renderer/Shader.hpp>
 

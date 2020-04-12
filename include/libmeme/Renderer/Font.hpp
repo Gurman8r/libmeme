@@ -23,7 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		font(allocator_type const & alloc = {});
+		font(allocator_type const & alloc = {}) noexcept;
 		
 		font(fs::path const & path, allocator_type const & alloc = {});
 		
@@ -31,7 +31,7 @@ namespace ml
 		
 		font(font && other, allocator_type const & alloc = {}) noexcept;
 		
-		~font();
+		~font() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

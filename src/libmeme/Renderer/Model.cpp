@@ -17,7 +17,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	model::model(allocator_type const & alloc)
+	model::model(allocator_type const & alloc) noexcept
 		: m_meshes{ alloc }
 	{
 	}
@@ -159,13 +159,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void model::draw(render_target const & target, model const * value)
+	void model::draw(render_target & target, model const * value)
 	{
 		if (!value) { return; }
 		
-		for (mesh const & e : (*value))
+		for (mesh const & elem : (*value))
 		{
-			target.draw(e);
+			target.draw(elem);
 		}
 	}
 

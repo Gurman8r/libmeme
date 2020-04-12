@@ -78,7 +78,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	shader::~shader()
+	shader::~shader() noexcept
 	{
 		destroy();
 	}
@@ -208,7 +208,7 @@ namespace ml
 	bool shader::set_uniform(uniform const & value)
 	{
 		if (!value) { return false; }
-		switch (value.info().guid())
+		switch (value.type().guid())
 		{
 		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
 			return set_uniform(value.name(), *v);

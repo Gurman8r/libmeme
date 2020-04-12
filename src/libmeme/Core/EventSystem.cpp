@@ -16,7 +16,7 @@ namespace ml
 
 	void event_system::fire_event(event const & value)
 	{
-		if (auto const listeners{ g_event_system.find(value.id()) })
+		if (auto const listeners{ g_event_system.find(value.ID) })
 		{
 			for (event_listener * l : (*listeners->second))
 			{
@@ -33,7 +33,7 @@ namespace ml
 		{
 			if (auto const it{ listeners->second->find(value) }; it != listeners->second->end())
 			{
-				listeners->second->erase(it);
+				(*listeners->second).erase(it);
 			}
 		}
 	}

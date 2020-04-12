@@ -17,7 +17,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	font::font(allocator_type const & alloc)
+	font::font(allocator_type const & alloc) noexcept
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_lib		{}
@@ -45,7 +45,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	font::~font()
+	font::~font() noexcept
 	{
 		if (!m_pages.empty()) { m_pages.clear(); }
 

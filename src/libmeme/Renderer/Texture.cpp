@@ -129,7 +129,7 @@ namespace ml
 		swap(std::move(other));
 	}
 
-	texture::~texture()
+	texture::~texture() noexcept
 	{
 		destroy();
 	}

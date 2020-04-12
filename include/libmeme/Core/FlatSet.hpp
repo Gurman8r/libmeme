@@ -113,20 +113,6 @@ namespace ml::ds
 			return (*this);
 		}
 
-		self_type & operator=(storage_type const & value)
-		{
-			self_type temp{ value };
-			swap(temp);
-			return (*this);
-		}
-
-		self_type & operator=(storage_type && value) noexcept
-		{
-			self_type temp{ std::move(value) };
-			swap(temp);
-			return (*this);
-		}
-	
 		self_type & operator=(self_type const & other)
 		{
 			self_type temp{ other };
@@ -134,9 +120,23 @@ namespace ml::ds
 			return (*this);
 		}
 
+		self_type & operator=(storage_type const & value)
+		{
+			self_type temp{ value };
+			swap(temp);
+			return (*this);
+		}
+
 		self_type & operator=(self_type && other) noexcept
 		{
 			swap(std::move(other));
+			return (*this);
+		}
+
+		self_type & operator=(storage_type && value) noexcept
+		{
+			self_type temp{ std::move(value) };
+			swap(temp);
 			return (*this);
 		}
 

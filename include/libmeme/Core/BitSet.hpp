@@ -154,7 +154,10 @@ namespace ml::ds
 			return m_words[i / bitsperword] & (value_type{ 1 } << i % bitsperword);
 		}
 
-		constexpr void reset() noexcept { m_words = { 0 }; }
+		constexpr void reset() noexcept
+		{
+			m_words = {};
+		}
 
 		template <size_t I> constexpr bool set() noexcept
 		{

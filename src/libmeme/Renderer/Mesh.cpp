@@ -223,10 +223,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void mesh::draw(render_target const & target, mesh const * value)
+	void mesh::draw(render_target & target, mesh const * value)
 	{
-		if (!value || !value->m_vao || !value->m_vbo)
-			return;
+		if (!value || !value->m_vao || !value->m_vbo) { return; }
 
 		if (value->m_ibo)
 		{

@@ -16,19 +16,14 @@ namespace ml
 	image const image::default_rgba{ ([]()
 	{
 		image temp { vec2u{ 512, 512 }, 3 };
-		for (size_t y = 0; y < temp.height(); ++y)
+		for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)
 		{
-			for (size_t x = 0; x < temp.width(); ++x)
-			{
-				temp.set_pixel(x, y,
-					(((y < temp.height() / 2) && (x < temp.width() / 2)) ||
-					((y >= temp.height() / 2) && (x >= temp.width() / 2))
-						? color{ color{ 0.1f }.rgb(), 1.0 }
-						: (((y >= temp.height() / 2) || (x >= temp.width() / 2))
-							? colors::magenta
-							: colors::green
-							)));
-			}
+			size_t const y{ i % w }, x{ i / w };
+
+			temp.set_pixel(x, y, ((y < h / 2) && (x < w / 2)) || ((y >= h / 2) && (x >= w / 2))
+				? color{ color{ 0.1f }.rgb(), 1.0 }
+				: (y >= h / 2) || (x >= w / 2) ? colors::magenta : colors::green
+			);
 		}
 		return temp;
 	})() };
@@ -73,15 +68,15 @@ namespace ml
 	{
 	}
 
-	image::image(fs::path const & path, bool flip, allocator_type const & alloc)
-		: image{ path, flip, 0, alloc }
+	image::image(fs::path const & path, bool flip_v, allocator_type const & alloc)
+		: image{ path, flip_v, 0, alloc }
 	{
 	}
 
-	image::image(fs::path const & path, bool flip, size_t req_channels, allocator_type const & alloc)
+	image::image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type const & alloc)
 		: image{ alloc }
 	{
-		load_from_file(path, flip, req_channels);
+		load_from_file(path, flip_v, req_channels);
 	}
 
 	image::image(image const & other, allocator_type const & alloc)
@@ -119,34 +114,33 @@ namespace ml
 		return load_from_file(path, true);
 	}
 
-	bool image::load_from_file(fs::path const & path, bool flip)
+	bool image::load_from_file(fs::path const & path, bool flip_v)
 	{
-		return load_from_file(path, flip, 0);
+		return load_from_file(path, flip_v, 0);
 	}
 
-	bool image::load_from_file(fs::path const & path, bool flip, size_t req_channels)
+	bool image::load_from_file(fs::path const & path, bool flip_v, size_t req_channels)
 	{
-		::stbi_set_flip_vertically_on_load(flip);
+		::stbi_set_flip_vertically_on_load(flip_v);
 
-		if (byte_t * const temp{ ::stbi_load(
+		byte_t * const temp{ ::stbi_load(
 			path.string().c_str(),
 			reinterpret_cast<int32_t *>(&m_size[0]),
 			reinterpret_cast<int32_t *>(&m_size[1]),
 			reinterpret_cast<int32_t *>(&m_channels),
 			static_cast<int32_t>(req_channels)
-		) })
+		) };
+		
+		ML_defer{ ::stbi_image_free(temp); };
+
+		if (temp)
 		{
 			m_pixels.resize(capacity());
 
 			std::memcpy(&m_pixels[0], temp, capacity());
+		}
 
-			::stbi_image_free(temp);
-		}
-		else if (!empty())
-		{
-			clear();
-		}
-		return !empty();
+		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -76,7 +76,7 @@ namespace ml
 
 	template <class> struct x_draw_renderers final : ecs::detail::x_base<s_draw_renderers>
 	{
-		void operator()(render_target const & target, c_shader const & shd, c_model const & mdl)
+		void operator()(c_shader const & shd, c_model const & mdl, render_target & target)
 		{
 			ML_bind_scope(*shd, true);
 			target.draw(*mdl);
@@ -154,7 +154,7 @@ namespace ml
 			m_gui_display	{ "display##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar },
 			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
-			m_gui_files		{ "files##demo"			, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_files		{ "files##demo"			, 0, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_scripting	{ "scripting##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
@@ -209,14 +209,14 @@ namespace ml
 
 		void on_event(event const & ev) override
 		{
-			switch (ev.id())
+			switch (ev.ID)
 			{
-			case hashof_v<load_event	>: return on_load		(*ev.as<load_event		>());
-			case hashof_v<update_event	>: return on_update		(*ev.as<update_event	>());
-			case hashof_v<draw_event	>: return on_draw		(*ev.as<draw_event		>());
-			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.as<gui_dock_event	>());
-			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.as<gui_draw_event	>());
-			case hashof_v<unload_event	>: return on_unload		(*ev.as<unload_event	>());
+			case hashof_v<load_event	>: return on_load		(*ev.cast<load_event	>());
+			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
+			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
+			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.cast<gui_dock_event>());
+			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.cast<gui_draw_event>());
+			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
 			}
 		}
 
@@ -405,7 +405,7 @@ namespace ml
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3d", "moon", "sphere8x6", c_transform{
+				auto & moon = make_renderer("3d", "moon", "quad", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)
@@ -441,9 +441,9 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			if (m_pipeline.empty()) return;
+			if (m_pipeline.empty()) { return; }
 
-			if (render_texture const & target{ m_pipeline[0] })
+			if (render_texture & target{ m_pipeline[0] })
 			{
 				ML_bind_scope(target);
 				target.clear_color(colors::magenta);

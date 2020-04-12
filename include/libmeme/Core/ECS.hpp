@@ -210,16 +210,16 @@ namespace ml::ecs::cfg
 	> struct options final
 	{
 		// growth base amount
-		static constexpr auto grow_base{ GrowBase };
+		static constexpr size_t grow_base{ GrowBase };
 		static_assert(0 < grow_base, "growth base negative or zero");
 
 		// growth multiplier
-		static constexpr auto grow_mult{ util::ratio_cast(1.f, GrowMult{}) };
+		static constexpr float_t grow_mult{ util::ratio_cast(1.f, GrowMult{}) };
 		static_assert(1.f <= grow_mult, "expression would result in negative growth");
 
-		static constexpr auto calc_growth(size_t const cap) noexcept
+		static constexpr size_t calc_growth(size_t const cap) noexcept
 		{
-			return static_cast<size_t>((cap + grow_base) * grow_mult);
+			return (size_t)((float_t)(cap + grow_base) * grow_mult);
 		}
 	};
 }
@@ -517,14 +517,15 @@ namespace ml::ecs
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type		= typename U;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using traits_type		= typename U;
 		using self_type			= typename manager<traits_type>;
+		using options_type		= typename traits_type::options;
 		using signature			= typename traits_type::signature;
 		using component_storage	= typename traits_type::component_storage;
+		using system_storage	= typename traits_type::system_storage;
 		using handle			= typename impl::handle<self_type>;
 		using handle_storage	= typename pmr::vector<handle>;
-		using system_storage	= typename traits_type::system_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -623,7 +624,6 @@ namespace ml::ecs
 				m_capacity	= other.m_capacity;
 				m_size		= other.m_size;
 				m_size_next = other.m_size_next;
-
 				m_components= other.m_components;
 				m_entities	= other.m_entities;
 				m_handles	= other.m_handles;
@@ -633,7 +633,7 @@ namespace ml::ecs
 
 		void grow_to(size_t const cap)
 		{
-			if (cap <= m_capacity) return;
+			if (cap <= m_capacity) { return; }
 
 			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_components);
 			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_entities);
@@ -663,7 +663,7 @@ namespace ml::ecs
 			else m_size = m_size_next = ([&]()
 			{
 				// arrange all alive entities towards the left
-				size_t dead{ 0 }, alive{ m_size_next - 1 };
+				size_t dead{}, alive{ m_size_next - 1 };
 				while (true)
 				{
 					// find dead entity from the left
@@ -719,13 +719,12 @@ namespace ml::ecs
 
 		void swap(size_t const lhs, size_t const rhs) noexcept
 		{
-			if (lhs != rhs)
-			{
-				std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
-				std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
-				std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
-				std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
-			}
+			if (lhs == rhs) { return; }
+
+			std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
+			std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
+			std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
+			std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -993,9 +992,9 @@ namespace ml::ecs
 		template <class Fn
 		> self_type & for_entities(Fn && fn) noexcept
 		{
-			for (size_t e = 0, imax = m_size; e < imax; ++e)
+			for (size_t i = 0; i < m_size; ++i)
 			{
-				std::invoke(ML_forward(fn), e);
+				std::invoke(ML_forward(fn), i);
 			}
 			return (*this);
 		}
@@ -1046,7 +1045,7 @@ namespace ml::ecs
 		{
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp) noexcept
 			{
-				std::invoke(x, ML_forward(args)..., ML_forward(req_comp)...);
+				std::invoke(x, ML_forward(req_comp)..., ML_forward(args)...);
 			});
 		}
 

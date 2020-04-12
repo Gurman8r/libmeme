@@ -41,28 +41,28 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		uniform(allocator_type const & alloc = {}) noexcept
-			: m_info{}
+			: m_type{}
 			, m_name{ alloc }
 			, m_data{}
 		{
 		}
 
 		uniform(info_type const & info, name_type const & name, data_type const & data, allocator_type const & alloc = {})
-			: m_info{ info }
+			: m_type{ info }
 			, m_name{ name, alloc }
 			, m_data{ data }
 		{
 		}
 
 		uniform(info_type && info, name_type && name, data_type && data, allocator_type const & alloc = {}) noexcept
-			: m_info{ ML_forward(info) }
+			: m_type{ ML_forward(info) }
 			, m_name{ ML_forward(name), alloc }
 			, m_data{ ML_forward(data) }
 		{
 		}
 
 		uniform(uniform const & other, allocator_type const & alloc = {})
-			: m_info{ other.m_info }
+			: m_type{ other.m_type }
 			, m_name{ other.m_name, alloc }
 			, m_data{ other.m_data }
 		{
@@ -93,7 +93,7 @@ namespace ml
 		{
 			if (this != std::addressof(other))
 			{
-				std::swap(m_info, other.m_info);
+				std::swap(m_type, other.m_type);
 				std::swap(m_name, other.m_name);
 				std::swap(m_data, other.m_data);
 			}
@@ -173,9 +173,9 @@ namespace ml
 
 		ML_NODISCARD auto compare(uniform const & other) const noexcept
 		{
-			if (m_info != other.m_info)
+			if (m_type != other.m_type)
 			{
-				return m_info.compare(other.m_info);
+				return m_type.compare(other.m_type);
 			}
 			else
 			{
@@ -199,7 +199,7 @@ namespace ml
 
 		ML_NODISCARD operator bool const() const noexcept { return !m_name.empty(); }
 
-		ML_NODISCARD info_type const & info() const noexcept { return m_info; }
+		ML_NODISCARD info_type const & type() const noexcept { return m_type; }
 
 		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
 
@@ -208,7 +208,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		info_type m_info; // info
+		info_type m_type; // info
 		name_type m_name; // name
 		data_type m_data; // data
 

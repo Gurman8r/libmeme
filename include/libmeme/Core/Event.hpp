@@ -14,15 +14,6 @@ namespace ml
 	template <class Ev
 	> static constexpr bool is_event_v{ std::is_base_of_v<struct event, Ev> };
 
-	// event cast
-	template <class Ev
-	> ML_NODISCARD constexpr auto event_cast(struct event const & value) noexcept
-	{
-		static_assert(is_event_v<Ev>, "invalid event type");
-
-		return (value.id() == hashof_v<Ev>) ? static_cast<Ev const *>(&value) : nullptr;
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base event
@@ -30,25 +21,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr explicit event(hash_t const value) noexcept : m_id{ value }
-		{
-		}
+		hash_t const ID;
 
-		ML_NODISCARD constexpr hash_t id() const noexcept
+		constexpr explicit event(hash_t const id) noexcept : ID{ id }
 		{
-			return m_id;
 		}
 
 		template <class Ev
-		> ML_NODISCARD constexpr Ev const * as() const noexcept
+		> ML_NODISCARD constexpr Ev const * cast() const noexcept
 		{
-			return event_cast<Ev>(*this);
+			static_assert(is_event_v<Ev>, "invalid event type");
+
+			return (ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		hash_t const m_id;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

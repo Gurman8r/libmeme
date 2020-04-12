@@ -19,7 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit mesh(allocator_type const & alloc = {}) noexcept;
+		mesh(allocator_type const & alloc = {}) noexcept;
 		
 		mesh(vertices_t const & vertices, allocator_type const & alloc = {});
 		
@@ -57,7 +57,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void draw(struct render_target const & target, mesh const * value);
+		static void draw(struct render_target & target, mesh const * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
