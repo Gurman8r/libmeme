@@ -8,7 +8,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	render_texture::render_texture()
-		: render_texture{ vec2i::zero() }
+		: render_texture{ vec2i{} }
 	{
 	}
 
@@ -18,13 +18,13 @@ namespace ml
 	}
 
 	render_texture::render_texture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format)
-		: m_fbo		{ make_fbo() }
-		, m_rbo		{ make_rbo() }
+		: m_fbo		{}
+		, m_rbo		{}
 		, m_size	{ size }
 		, m_colorID	{ colorID }
 		, m_frameID	{ frameID }
 		, m_format	{ format }
-		, m_texture	{ make_texture(GL::Texture2D) }
+		, m_texture	{}
 	{
 	}
 

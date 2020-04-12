@@ -30,7 +30,7 @@ namespace ml
 			| window_hints_auto_iconify,
 
 		// resizable / decorated / focused / auto iconify / maximized
-		window_hints_default_max 
+		window_hints_default_max
 			= window_hints_resizable
 			| window_hints_decorated
 			| window_hints_focused

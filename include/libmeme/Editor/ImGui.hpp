@@ -34,10 +34,19 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifdef ML_RENDERER_OPENGL
 #	include <imgui/examples/imgui_impl_glfw.h>
-#	include <imgui/examples/imgui_impl_opengl3.h>
+#else
 #endif
+
+#ifdef ML_PLATFORM_GLFW
+#	include <imgui/examples/imgui_impl_opengl3.h>
+#else
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <ImGuiColorTextEdit/TextEditor.h>
 #include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>

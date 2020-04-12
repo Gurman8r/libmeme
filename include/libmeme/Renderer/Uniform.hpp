@@ -11,13 +11,13 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using sampler_type = typename texture const *;
+		using sampler = typename texture const *;
 
 		using allowed_types = typename meta::list<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
-			sampler_type
+			sampler
 		>;
 
 		using variable_type = typename meta::rename<std::variant, allowed_types>;
@@ -34,8 +34,8 @@ namespace ml
 
 		template <class T> static constexpr bool is_sampler_v
 		{
-			std::is_convertible_v<T, sampler_type> ||
-			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler_type>
+			std::is_convertible_v<T, sampler> ||
+			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler>
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -120,9 +120,9 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
 			{
-				return this->holds<sampler_type>();
+				return this->holds<sampler>();
 			}
 			else
 			{
@@ -135,9 +135,9 @@ namespace ml
 		template <class T
 		> ML_NODISCARD auto get() const noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
 			{
-				return this->get<sampler_type>();
+				return this->get<sampler>();
 			}
 			else if (auto const v{ this->var() }; std::holds_alternative<T>(v))
 			{
@@ -154,9 +154,9 @@ namespace ml
 		template <class T, class ... Args
 		> bool set(Args && ... args) noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler_type>)
+			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
 			{
-				return this->set<sampler_type>(ML_forward(args)...);
+				return this->set<sampler>(ML_forward(args)...);
 			}
 			else if (this->holds<T>())
 			{

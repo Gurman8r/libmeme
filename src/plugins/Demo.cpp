@@ -673,7 +673,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_once{ std::cout << "# type \'\\\' to exit\n"; };
+						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -727,7 +727,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			ML_once{
+			ML_once_call{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
@@ -967,7 +967,7 @@ namespace ml
 			static auto * const & testres{ memory_manager::get_test_resource() };
 
 			// setup memory editor
-			ML_once{
+			ML_once_call{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
 				m_memory.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
@@ -1010,13 +1010,13 @@ namespace ml
 					auto const width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					ML_once{ ImGui::SetColumnWidth(-1, width * 0.50f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					ML_once{ ImGui::SetColumnWidth(-1, width * 0.25f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					ML_once{ ImGui::SetColumnWidth(-1, width * 0.25f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();

@@ -1,23 +1,17 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-/* WIP
-	- base_window -> abstract
-		- native_window -> impl
-			- render_window -> user
-*/
-
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Platform/Cursor.hpp>
-#include <libmeme/Platform/KeyCode.hpp>
-#include <libmeme/Platform/MouseButton.hpp>
+#include <libmeme/Platform/Keyboard.hpp>
+#include <libmeme/Platform/Mouse.hpp>
 #include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API base_window : non_copyable, trackable
+	struct ML_PLATFORM_API window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -37,62 +31,55 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		base_window() noexcept;
+		window() noexcept;
 
-		virtual ~base_window() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool create(
-			pmr::string const & title,
-			display_settings const & display,
-			context_settings const & context,
-			int32_t hints
-		) noexcept;
-
-		ML_NODISCARD bool create(window_settings const & value) noexcept;
-
-		ML_NODISCARD virtual bool open();
+		virtual ~window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		base_window & close();
-		
-		base_window & destroy();
-
-		base_window & iconify();
-		
-		base_window & make_context_current();
-		
-		base_window & maximize();
-		
-		base_window & restore();
-		
-		base_window & swap_buffers();
+		ML_NODISCARD virtual bool create(window_settings const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		base_window & set_centered();
+		void close();
 		
-		base_window & set_clipboard(cstring const & value);
+		void destroy();
+
+		void iconify();
 		
-		base_window & set_cursor(void * value);
+		void make_context_current();
 		
-		base_window & set_cursor_mode(cursor::mode value);
+		void maximize();
 		
-		base_window & set_cursor_pos(vec2d const & value);
+		void restore();
 		
-		base_window & set_fullscreen(bool value);
+		void swap_buffers();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_centered();
 		
-		base_window & set_icon(size_t w, size_t h, byte_t const * pixels);
+		void set_clipboard(cstring const & value);
 		
-		base_window & set_position(vec2i const & value);
+		void set_cursor(void * value);
 		
-		base_window & set_monitor(void * value);
+		void set_cursor_mode(cursor::mode value);
 		
-		base_window & set_size(vec2i const & value);
+		void set_cursor_pos(vec2d const & value);
 		
-		base_window & set_title(pmr::string const & value);
+		void set_fullscreen(bool value);
+		
+		void set_icon(size_t w, size_t h, byte_t const * pixels);
+
+		void set_input_mode(int32_t mode, int32_t value);
+		
+		void set_position(vec2i const & value);
+		
+		void set_monitor(void * value);
+		
+		void set_size(vec2i const & value);
+		
+		void set_title(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -112,15 +99,15 @@ namespace ml
 		
 		ML_NODISCARD void * get_handle() const;
 
-		ML_NODISCARD int32_t get_key(int32_t value) const;
+		ML_NODISCARD int32_t get_key(int32_t key) const;
 		
-		ML_NODISCARD int32_t get_input_mode(int32_t value) const;
+		ML_NODISCARD int32_t get_input_mode(int32_t mode) const;
 		
-		ML_NODISCARD int32_t get_mouse_button(int32_t value) const;
+		ML_NODISCARD int32_t get_mouse_button(int32_t button) const;
+
+		ML_NODISCARD void * get_native_handle() const;
 		
 		ML_NODISCARD vec2i get_position() const;
-		
-		ML_NODISCARD void * get_raw_handle() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -169,7 +156,7 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
-		static void install_default_callbacks(base_window * win);
+		static void install_default_callbacks(window * win);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

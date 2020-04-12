@@ -8,20 +8,16 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class mouse_button final
+	enum mouse_button_ : int32_t
 	{
-	public:
-		enum : int32_t
-		{
-			Button0,
-			Button1,
-			Button2,
-			Button3,
-			Button4,
-			Button5,
-			Button6,
-			Button7,
-		};
+		mouse_button_0,
+		mouse_button_1,
+		mouse_button_2,
+		mouse_button_3,
+		mouse_button_4,
+		mouse_button_5,
+		mouse_button_6,
+		mouse_button_7,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

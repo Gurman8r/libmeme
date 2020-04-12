@@ -128,12 +128,7 @@ namespace ml
 		}
 
 		// set texture
-		g.graphic = make_texture(
-			GL::Texture2D,
-			GL::RGBA,
-			GL::Red,
-			texture_flags_default
-		);
+		g.graphic = make_texture(GL::Texture2D, GL::RGBA, GL::Red, texture_flags_default);
 
 		// set bounds
 		g.bounds = float_rect{

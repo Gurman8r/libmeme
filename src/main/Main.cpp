@@ -43,8 +43,8 @@ ml::int32_t main()
 	// read config
 	auto config = ([&j = json{}, &file = std::ifstream{ CONFIG_FILE }]() noexcept
 	{
-		ML_defer{ file.close(); };
 		if (file) { file >> j; }
+		file.close();
 		return j;
 	})();
 
@@ -62,8 +62,6 @@ ml::int32_t main()
 
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
 	// main loop
 	while (engine::window().is_open())
 	{

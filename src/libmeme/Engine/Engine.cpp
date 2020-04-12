@@ -81,12 +81,12 @@ namespace ml
 			return debug::log::error("engine failed starting python");
 
 		// run setup script
-		g_engine->m_scripts.do_file(path_to(config().setup_script));
+		g_engine->m_scripts.do_file(path_to(g_engine->m_config.setup_script));
 
 		// create window
-		if (g_engine->m_window.create(config().window_settings))
+		if (g_engine->m_window.create(g_engine->m_config.window_settings))
 		{
-			base_window::install_default_callbacks(&g_engine->m_window);
+			window::install_default_callbacks(&g_engine->m_window);
 		}
 		else
 		{
@@ -106,9 +106,9 @@ namespace ml
 		// destroy window
 		if (g_engine->m_window.is_open())
 		{
+			g_engine->m_window.close();
 			g_engine->m_window.destroy();
-
-			base_window::terminate();
+			window::terminate();
 		}
 
 		// shutdown python
@@ -125,7 +125,7 @@ namespace ml
 
 		g_engine->m_time.begin_loop();
 
-		base_window::poll_events();
+		window::poll_events();
 	}
 
 	void engine::begin_draw()
@@ -147,14 +147,9 @@ namespace ml
 	{
 		ML_assert(g_engine);
 
-		if ML_UNLIKELY(g_engine->m_window.has_hint(window_hints_double_buffered))
-		{
-			g_engine->m_window.swap_buffers();
-		}
-		else
-		{
-			GL::flush();
-		}
+		g_engine->m_window.swap_buffers();
+
+		GL::flush();
 	}
 
 	void engine::end_loop()

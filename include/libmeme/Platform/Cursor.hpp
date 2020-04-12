@@ -3,8 +3,9 @@
 
 namespace ml
 {
-	struct cursor final
+	class cursor final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum class mode
@@ -13,8 +14,6 @@ namespace ml
 			hidden,
 			disabled,
 		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		enum class shape
 		{

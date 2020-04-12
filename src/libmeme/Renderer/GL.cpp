@@ -44,14 +44,14 @@ namespace ml
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool GL::is_init() noexcept
+	bool GL::is_initialized() noexcept
 	{
 		return s_gl_init;
 	}
 
-	bool GL::startup()
+	bool GL::initialize()
 	{
-		if (is_init())
+		if (is_initialized())
 			return debug::log::error("GL is already initialized");
 
 #if defined(ML_OPENGL_LOADER_GLEW)
@@ -495,7 +495,7 @@ namespace ml
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}
@@ -503,9 +503,9 @@ namespace ml
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
 		static int32_t temp{};
-		if (is_init())
+		if (is_initialized())
 		{
-			ML_once{ temp = getInteger(GL::MaxCombTexImgUnits); };
+			ML_once_call{ temp = getInteger(GL::MaxCombTexImgUnits); };
 		}
 		return temp;
 	}
@@ -513,9 +513,9 @@ namespace ml
 	auto GL::getMaxTextureSize() -> uint32_t
 	{
 		static uint32_t temp{};
-		if (is_init())
+		if (is_initialized())
 		{
-			ML_once{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
+			ML_once_call{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
 		}
 		return temp;
 	}
@@ -530,7 +530,7 @@ namespace ml
 		static bool temp{};
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}
@@ -539,7 +539,7 @@ namespace ml
 	{
 		static bool temp{};
 #ifdef GL_EXT_texture_sRGB
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}
@@ -630,7 +630,7 @@ namespace ml
 		static bool temp{};
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}
@@ -754,16 +754,16 @@ namespace ml
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}
 
 	bool GL::geometryShadersAvailable()
 	{
-		static bool temp{ shadersAvailable() };
+		static bool temp{};
 #if defined(GL_ARB_geometry_shader4)
-		ML_once{ temp = true; };
+		ML_once_call{ temp = true; };
 #endif
 		return temp;
 	}

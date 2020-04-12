@@ -2,8 +2,8 @@
 #define _ML_PLATFORM_EVENTS_HPP_
 
 #include <libmeme/Core/Event.hpp>
-#include <libmeme/Platform/KeyCode.hpp>
-#include <libmeme/Platform/MouseButton.hpp>
+#include <libmeme/Platform/Keyboard.hpp>
+#include <libmeme/Platform/Mouse.hpp>
 
 namespace ml
 {
@@ -85,14 +85,14 @@ namespace ml
 		constexpr bool is_caps		(int32_t k) const noexcept { return is_press(k) && is_caps(); }
 		constexpr bool is_numlk		(int32_t k) const noexcept { return is_press(k) && is_numlk(); }
 
-		constexpr bool is_new		() const noexcept { return is_ctrl(key_code::N); }
-		constexpr bool is_open		() const noexcept { return is_ctrl(key_code::O); }
-		constexpr bool is_save		() const noexcept { return is_ctrl(key_code::S) || (is_press(key_code::S) && has_mods(key_mods_ctrl | key_mods_shift)); }
-		constexpr bool is_undo		() const noexcept { return is_ctrl(key_code::Z); }
-		constexpr bool is_redo		() const noexcept { return is_ctrl(key_code::Y) || (is_press(key_code::Z) && has_mods(key_mods_ctrl | key_mods_shift)); }
-		constexpr bool is_cut		() const noexcept { return is_ctrl(key_code::X) || is_shift(key_code::Delete); }
-		constexpr bool is_copy		() const noexcept { return is_ctrl(key_code::C) || is_ctrl(key_code::Insert); }
-		constexpr bool is_paste		() const noexcept { return is_ctrl(key_code::V) || is_shift(key_code::Insert); }
+		constexpr bool is_new		() const noexcept { return is_ctrl(key_code::n); }
+		constexpr bool is_open		() const noexcept { return is_ctrl(key_code::o); }
+		constexpr bool is_save		() const noexcept { return is_ctrl(key_code::s) || (is_press(key_code::s) && has_mods(key_mods_ctrl | key_mods_shift)); }
+		constexpr bool is_undo		() const noexcept { return is_ctrl(key_code::z); }
+		constexpr bool is_redo		() const noexcept { return is_ctrl(key_code::y) || (is_press(key_code::z) && has_mods(key_mods_ctrl | key_mods_shift)); }
+		constexpr bool is_cut		() const noexcept { return is_ctrl(key_code::x) || is_shift(key_code::del); }
+		constexpr bool is_copy		() const noexcept { return is_ctrl(key_code::c) || is_ctrl(key_code::insert); }
+		constexpr bool is_paste		() const noexcept { return is_ctrl(key_code::v) || is_shift(key_code::insert); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

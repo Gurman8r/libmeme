@@ -25,23 +25,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void render_target::viewport(int_rect const & bounds)
-	{
-		this->viewport(bounds.left(), bounds.top(), bounds.width(), bounds.height());
-	}
-
-	void render_target::viewport(vec2i const & pos, vec2i const & size)
-	{
-		this->viewport(pos[0], pos[1], size[0], size[1]);
-	}
-
-	void render_target::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
-	{
-		GL::viewport(x, y, w, h);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void render_target::draw(VAO const & vao, VBO const & vbo)
 	{
 		if (!vao || !vbo) { return; }
@@ -59,6 +42,30 @@ namespace ml
 		ML_bind_scope(vbo);
 		ML_bind_scope(ibo);
 		GL::drawElements(vao.m_mode, ibo.m_count, ibo.m_type, nullptr);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void render_target::flush()
+	{
+		GL::flush();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void render_target::viewport(int_rect const & bounds)
+	{
+		this->viewport(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+	}
+
+	void render_target::viewport(vec2i const & pos, vec2i const & size)
+	{
+		this->viewport(pos[0], pos[1], size[0], size[1]);
+	}
+
+	void render_target::viewport(int32_t x, int32_t y, int32_t w, int32_t h)
+	{
+		GL::viewport(x, y, w, h);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

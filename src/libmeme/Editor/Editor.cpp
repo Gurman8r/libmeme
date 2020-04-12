@@ -2,7 +2,6 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Engine/Engine.hpp>
-#include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Editor/StyleLoader.hpp>
 #include <libmeme/Editor/ImGui.hpp>
 #include <libmeme/Editor/EditorEvents.hpp>
@@ -95,7 +94,8 @@ namespace ml
 		style_loader::load_from_file(engine::path_to(g_editor->m_config.style_config));
 
 		// backend
-#ifdef ML_RENDERER_OPENGL
+#if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
+		
 		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)engine::window().get_handle(), true))
 		{
 			return debug::log::error("Failed initializing ImGui platform");
@@ -105,7 +105,6 @@ namespace ml
 		{
 			return debug::log::error("Failed initializing ImGui renderer");
 		}
-#else
 #endif
 		return true;
 	}
@@ -116,11 +115,15 @@ namespace ml
 
 		g_editor->m_io.main_menus.clear();
 
-#ifdef ML_RENDERER_OPENGL
+#if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
 #else
 #endif
+
+#if defined(ML_PLATFORM_GLFW)
 		ImGui_ImplGlfw_Shutdown();
+#else
+#endif
 
 		ImGui::DestroyContext();
 
@@ -133,11 +136,15 @@ namespace ml
 	{
 		ML_assert(g_editor);
 
-#ifdef ML_RENDERER_OPENGL
+#if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_NewFrame();
 #else
 #endif
+
+#if defined(ML_PLATFORM_GLFW)
 		ImGui_ImplGlfw_NewFrame();
+#else
+#endif
 
 		ImGui::NewFrame();
 	}
@@ -226,19 +233,17 @@ namespace ml
 
 		ImGui::Render();
 
-#ifdef ML_RENDERER_OPENGL
+#if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #else
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ base_window::get_context_current() };
+			auto backup_context{ window::get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			base_window::make_context_current(backup_context);
+			window::make_context_current(backup_context);
 		}
-
-		GL::flush();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

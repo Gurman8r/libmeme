@@ -7,14 +7,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::open()
+	bool render_window::create(window_settings const & settings)
 	{
-		if (!base_window::open())
+		if (!window::create(settings))
 		{
 			return debug::log::error("render_window failed initializing platform");
 		}
 
-		if (!GL::startup())
+		if (!GL::initialize())
 		{
 			return debug::log::error("render_window failed initializing renderer");
 		}

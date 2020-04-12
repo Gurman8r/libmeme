@@ -25,14 +25,6 @@ namespace ml
 		void clear_flags(uint32_t flags);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void viewport(int_rect const & bounds);
-		
-		void viewport(vec2i const & pos, vec2i const & size);
-
-		void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		void draw(VAO const & vao, VBO const & vbo);
 
@@ -47,6 +39,18 @@ namespace ml
 		{
 			this->draw(&value);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void flush();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void viewport(int_rect const & bounds);
+
+		void viewport(vec2i const & pos, vec2i const & size);
+
+		void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -4,7 +4,7 @@
 #include <libmeme/Common.hpp>
 
 // once
-#define ML_once \
+#define ML_once_call \
     static auto ML_anon(once_call) = _ML impl::once_call_tag{} + [&]() noexcept
 
 namespace ml::impl
