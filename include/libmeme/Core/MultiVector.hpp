@@ -164,6 +164,28 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <size_t ... Is, class Fn> void at(size_t const i, Fn && fn) noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
+		template <size_t ... Is, class Fn> void at(size_t const i, Fn && fn) const noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
+		template <class ... Ts, class Fn> void at(size_t const i, Fn && fn) noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
+		}
+
+		template <class ... Ts, class Fn> void at(size_t const i, Fn && fn) const noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class Fn> void for_each(Fn && fn) noexcept
 		{
 			meta::for_tuple(ML_forward(fn), m_data);
@@ -179,11 +201,6 @@ namespace ml::ds
 		void clear() noexcept
 		{
 			this->for_each([&](auto & v) { v.clear(); });
-		}
-
-		void pop_back()
-		{
-			this->for_each([&](auto & v) { v.pop_back(); });
 		}
 
 		void reserve(size_t const cap)
@@ -216,11 +233,6 @@ namespace ml::ds
 			this->get<I>().clear();
 		}
 
-		template <size_t I> void pop_back()
-		{
-			this->get<I>().pop_back();
-		}
-
 		template <size_t I> void reserve(size_t const cap)
 		{
 			this->get<I>().reserve(cap);
@@ -246,11 +258,6 @@ namespace ml::ds
 		template <class T> void clear() noexcept
 		{
 			this->get<T>().clear();
-		}
-
-		template <class T> void pop_back()
-		{
-			this->get<T>().pop_back();
 		}
 
 		template <class T> void reserve(size_t const cap)

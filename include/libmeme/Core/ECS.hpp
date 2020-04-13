@@ -1072,9 +1072,10 @@ namespace ml::ecs
 			template <class Fn
 			> static void call(size_t const e, self_type & self, Fn && fn) noexcept
 			{
-				auto const i{ self.m_entities.get<id_index>(e) }; // component data index
-
-				std::invoke(ML_forward(fn), e, self.m_components.get<Ts>(i)...);
+				self.m_components.at<Ts...>(self.m_entities.get<id_index>(e), [&](auto && ... args)
+				{
+					std::invoke(ML_forward(fn), e, ML_forward(args)...);
+				});
 			}
 		};
 
