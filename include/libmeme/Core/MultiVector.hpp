@@ -16,6 +16,7 @@ namespace ml::ds
 		using self_type			= typename multi_vector<_Ts...>;
 		using type_list			= typename meta::list<_Ts...>;
 		using vector_types		= typename meta::remap<pmr::vector, type_list>;
+		using tuple_type		= typename meta::tuple<type_list>;
 		using storage_type		= typename meta::tuple<vector_types>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 
@@ -513,7 +514,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
-				return this->get<I>().emplace(this->begin<I>() + loc, ML_forward(args)...);
+				return this->emplace<I>(this->begin<I>() + loc, ML_forward(args)...);
 			}
 			else
 			{
@@ -526,7 +527,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
-				return this->get<T>().emplace(this->begin<T>() + loc, ML_forward(args)...);
+				return this->emplace<T>(this->begin<T>() + loc, ML_forward(args)...);
 			}
 			else
 			{
@@ -555,7 +556,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
-				return this->get<I>().insert(this->begin<I>() + loc, ML_forward(value));
+				return this->insert<I>(this->begin<I>() + loc, ML_forward(value));
 			}
 			else
 			{
@@ -568,12 +569,29 @@ namespace ml::ds
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
-				return this->get<T>().insert(this->begin<T>() + loc, ML_forward(value));
+				return this->insert<T>(this->begin<T>() + loc, ML_forward(value));
 			}
 			else
 			{
 				return this->get<T>().insert(loc, ML_forward(value));
 			}
+		}
+
+		template <class It, class Tp, size_t I, size_t N = std::tuple_size_v<tuple_type>
+		> void insert(It loc, Tp && value)
+		{
+			if constexpr (I < N)
+			{
+				this->insert<I>(loc, ML_forward(std::get<I>(ML_forward(value))));
+
+				this->insert<It, Tp, I + 1, N>(loc, ML_forward(value));
+			}
+		}
+
+		template <class It, class Tp = tuple_type
+		> void insert(It loc, Tp && value)
+		{
+			this->insert<It, Tp, 0, std::tuple_size_v<Tp>>(loc, ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -588,6 +606,23 @@ namespace ml::ds
 		> void push_back(U && value) noexcept
 		{
 			this->get<T>().push_back(ML_forward(value));
+		}
+
+		template <class Tp, size_t I, size_t N = std::tuple_size_v<tuple_type>
+		> void push_back(Tp && value)
+		{
+			if constexpr (I < N)
+			{
+				this->push_back<I>(ML_forward(std::get<I>(ML_forward(value))));
+
+				this->push_back<Tp, I + 1, N>(ML_forward(value));
+			}
+		}
+
+		template <class Tp = tuple_type
+		> void push_back(Tp && value)
+		{
+			this->push_back<Tp, 0, std::tuple_size_v<Tp>>(ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
