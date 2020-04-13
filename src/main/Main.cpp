@@ -9,7 +9,7 @@
 using namespace ml;
 
 #ifndef MEM_RESERVED
-#define MEM_RESERVED 64._MiB
+#define MEM_RESERVED 128._MiB
 #endif
 
 #ifndef CONFIG_FILE
