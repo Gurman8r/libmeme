@@ -9,7 +9,7 @@ namespace ml::impl
 
 	static void set_mipmapped(bool value, uint32_t sampler, bool smooth) noexcept
 	{
-		if (value) GL::generateMipmap(sampler);
+		if (value) { GL::generateMipmap(sampler); }
 		GL::texParameter(sampler, GL::TexMagFilter, value
 			? smooth ? GL::LinearMipmapLinear : GL::NearestMipmapLinear
 			: smooth ? GL::Linear : GL::Nearest

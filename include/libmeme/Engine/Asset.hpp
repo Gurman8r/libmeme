@@ -22,7 +22,19 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
+			if (!has_value()) { return false; }
+			
 			return false;
+		}
+
+		template <class T
+		> ML_NODISCARD auto get() noexcept
+		{
+		}
+
+		template <class T
+		> ML_NODISCARD auto get() const noexcept
+		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -149,7 +149,7 @@ namespace ml::ds
 			m_pair.second.clear();
 		}
 
-		void pop_back() noexcept
+		void pop_back()
 		{
 			m_pair.first.pop_back();
 			m_pair.second.pop_back();

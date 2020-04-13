@@ -12,7 +12,7 @@ namespace ml
 
 		// Initialization
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		static bool is_initialized() noexcept;
+		static bool is_initialized();
 		static bool initialize();
 		static void validateVersion(int32_t & major, int32_t & minor);
 

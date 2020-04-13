@@ -7,6 +7,7 @@
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
 #include <libmeme/Core/BitSet.hpp>
+#include <libmeme/Core/MultiVector.hpp>
 
 // ECS
 namespace ml::ecs
@@ -92,7 +93,7 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<Components...>;
 
-		using storage_type = typename meta::tuple<meta::remap<pmr::vector, type_list>>;
+		using storage_type = typename ds::multi_vector<Components...>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -529,13 +530,13 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Alive, ID_Index, ID_Handle, ID_Bitset };
+		enum : size_t { id_alive, id_index, id_handle, id_bitset };
 
-		using entity_storage = typename std::tuple<
-			pmr::vector<bool>,		// state of entity (alive / dead)
-			pmr::vector<size_t>,	// index of real component data
-			pmr::vector<size_t>,	// index of managing handle
-			pmr::vector<signature>	// entity signature bitset
+		using entity_storage = typename ds::multi_vector<
+			bool,	  // state of entity (alive / dead)
+			size_t,	  // index of real component data
+			size_t,	  // index of managing handle
+			signature // entity signature bitset
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -544,8 +545,8 @@ namespace ml::ecs
 			: m_capacity	{}
 			, m_size		{}
 			, m_size_next	{}
-			, m_entities	{ std::allocator_arg, alloc }
-			, m_components	{ std::allocator_arg, alloc }
+			, m_entities	{ alloc }
+			, m_components	{ alloc }
 			, m_handles		{ alloc }
 			, m_systems		{}
 		{
@@ -605,10 +606,10 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				std::get<ID_Alive>(m_entities)[i] = false;
-				std::get<ID_Index>(m_entities)[i] = i;
-				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Bitset>(m_entities)[i].reset();
+				m_entities.get<id_alive>(i) = false;
+				m_entities.get<id_index>(i) = i;
+				m_entities.get<id_handle>(i) = i;
+				m_entities.get<id_bitset>(i).reset();
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
@@ -635,16 +636,16 @@ namespace ml::ecs
 		{
 			if (cap <= m_capacity) { return; }
 
-			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_components);
-			meta::for_tuple([cap](auto & v) { v.resize(cap); }, m_entities);
+			m_components.resize(cap);
+			m_entities.resize(cap);
 			m_handles.resize(cap);
 
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
-				std::get<ID_Alive>(m_entities)[i] = false;
-				std::get<ID_Index>(m_entities)[i] = i;
-				std::get<ID_Handle>(m_entities)[i] = i;
-				std::get<ID_Bitset>(m_entities)[i].reset();
+				m_entities.get<id_alive>(i) = false;
+				m_entities.get<id_index>(i) = i;
+				m_entities.get<id_handle>(i) = i;
+				m_entities.get<id_bitset>(i).reset();
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
@@ -670,19 +671,19 @@ namespace ml::ecs
 					for (; true; ++dead)
 					{
 						if (dead > alive) return dead;
-						if (!std::get<ID_Alive>(m_entities)[dead]) break;
+						if (!m_entities.get<id_alive>()[dead]) break;
 					}
 
 					// find alive entity from the right
 					for (; true; --alive)
 					{
-						if (std::get<ID_Alive>(m_entities)[alive]) break;
+						if (m_entities.get<id_alive>()[alive]) break;
 						if (alive <= dead) return dead;
 					}
 
 					// found two entities that need to be swapped
-					ML_assert(std::get<ID_Alive>(m_entities)[alive]);
-					ML_assert(!std::get<ID_Alive>(m_entities)[dead]);
+					ML_assert(m_entities.get<id_alive>()[alive]);
+					ML_assert(!m_entities.get<id_alive>()[dead]);
 
 					this->swap(alive, dead);
 
@@ -721,10 +722,10 @@ namespace ml::ecs
 		{
 			if (lhs == rhs) { return; }
 
-			std::swap(std::get<ID_Alive>(m_entities)[lhs], std::get<ID_Alive>(m_entities)[rhs]);
-			std::swap(std::get<ID_Index>(m_entities)[lhs], std::get<ID_Index>(m_entities)[rhs]);
-			std::swap(std::get<ID_Handle>(m_entities)[lhs], std::get<ID_Handle>(m_entities)[rhs]);
-			std::swap(std::get<ID_Bitset>(m_entities)[lhs], std::get<ID_Bitset>(m_entities)[rhs]);
+			std::swap(m_entities.get<id_alive>()[lhs], m_entities.get<id_alive>()[rhs]);
+			std::swap(m_entities.get<id_index>()[lhs], m_entities.get<id_index>()[rhs]);
+			std::swap(m_entities.get<id_handle>()[lhs], m_entities.get<id_handle>()[rhs]);
+			std::swap(m_entities.get<id_bitset>()[lhs], m_entities.get<id_bitset>()[rhs]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -738,8 +739,8 @@ namespace ml::ecs
 			}
 
 			size_t const i{ m_size_next++ };
-			std::get<ID_Alive>(m_entities)[i] = true;
-			std::get<ID_Bitset>(m_entities)[i].reset();
+			m_entities.get<id_alive>(i) = true;
+			m_entities.get<id_bitset>(i).reset();
 			return i;
 		}
 
@@ -747,7 +748,7 @@ namespace ml::ecs
 
 		ML_NODISCARD bool is_alive(size_t const i) const
 		{
-			return std::get<ID_Alive>(m_entities)[i];
+			return m_entities.get<id_alive>(i);
 		}
 
 		ML_NODISCARD bool is_alive(handle const & h) const
@@ -759,7 +760,7 @@ namespace ml::ecs
 
 		self_type & kill(size_t const i)
 		{
-			std::get<ID_Alive>(m_entities)[i] = false;
+			m_entities.get<id_alive>(i) = false;
 			return (*this);
 		}
 
@@ -773,7 +774,7 @@ namespace ml::ecs
 		ML_NODISCARD handle create_handle()
 		{
 			size_t const i{ this->create_entity() };
-			size_t const e{ std::get<ID_Handle>(m_entities)[i] };
+			size_t const e{ m_entities.get<id_handle>(i) };
 			auto & h{ m_handles[e] };
 
 			handle temp{};
@@ -817,7 +818,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & add_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].set<traits_type::template tag_bit<T>()>();
+			m_entities.get<id_bitset>(i).set<traits_type::template tag_bit<T>()>();
 			return (*this);
 		}
 
@@ -832,7 +833,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & del_tag(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].clear<traits_type::template tag_bit<T>()>();
+			m_entities.get<id_bitset>(i).clear<traits_type::template tag_bit<T>()>();
 			return (*this);
 		}
 
@@ -847,7 +848,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD bool has_tag(size_t const i) const noexcept
 		{
-			return std::get<ID_Bitset>(m_entities)[i].read<traits_type::template tag_bit<T>()>();
+			return m_entities.get<id_bitset>(i).read<traits_type::template tag_bit<T>()>();
 		}
 
 		template <class T
@@ -861,9 +862,9 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> auto & add_component(size_t const i, Args && ... args) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].set<traits_type::template component_bit<C>()>();
+			m_entities.get<id_bitset>(i).set<traits_type::template component_bit<C>()>();
 
-			auto & c{ std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]] };
+			auto & c{ m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i)) };
 			c = C{ ML_forward(args)... };
 			return c;
 		}
@@ -891,7 +892,7 @@ namespace ml::ecs
 		template <class C
 		> self_type & del_component(size_t const i) noexcept
 		{
-			std::get<ID_Bitset>(m_entities)[i].clear<traits_type::template component_bit<C>()>();
+			m_entities.get<id_bitset>(i).clear<traits_type::template component_bit<C>()>();
 			return (*this);
 		}
 
@@ -906,13 +907,13 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD auto & get_component(size_t const i) noexcept
 		{
-			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
+			return m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i));
 		}
 
 		template <class C
 		> ML_NODISCARD auto const & get_component(size_t const i) const noexcept
 		{
-			return std::get<pmr::vector<C>>(m_components)[std::get<ID_Index>(m_entities)[i]];
+			return m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i));
 		}
 
 		template <class C
@@ -945,7 +946,7 @@ namespace ml::ecs
 
 		ML_NODISCARD signature const & get_signature(size_t const i) const noexcept
 		{
-			return std::get<ID_Bitset>(m_entities)[i];
+			return m_entities.get<id_bitset>(i);
 		}
 
 		ML_NODISCARD signature const & get_signature(handle const & h) const noexcept
@@ -1071,9 +1072,9 @@ namespace ml::ecs
 			template <class Fn
 			> static void call(size_t const e, self_type & self, Fn && fn) noexcept
 			{
-				auto const i{ std::get<ID_Index>(self.m_entities)[e] }; // component data index
+				auto const i{ self.m_entities.get<id_index>(e) }; // component data index
 
-				std::invoke(ML_forward(fn), e, std::get<pmr::vector<Ts>>(self.m_components)[i]...);
+				std::invoke(ML_forward(fn), e, self.m_components.get<pmr::vector<Ts>>(i)...);
 			}
 		};
 

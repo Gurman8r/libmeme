@@ -44,7 +44,7 @@ namespace ml
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool GL::is_initialized() noexcept
+	bool GL::is_initialized()
 	{
 		return s_gl_init;
 	}

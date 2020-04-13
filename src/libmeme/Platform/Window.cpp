@@ -567,108 +567,107 @@ namespace ml
 
 	window::error_fn window::set_error_callback(error_fn value)
 	{
-		return glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(value))
-			? value
-			: nullptr;
+		return glfwSetErrorCallback(
+			reinterpret_cast<GLFWerrorfun>(value)) ? value : nullptr;
 	}
 
 	window::char_fn window::set_char_callback(char_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetCharCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWcharfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+		
+		return glfwSetCharCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWcharfun>(value)) ? value : nullptr;
 	}
 	
 	window::cursor_enter_fn window::set_cursor_enter_callback(cursor_enter_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetCursorEnterCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWcursorenterfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetCursorEnterCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWcursorenterfun>(value)) ? value : nullptr;
 	}
 	
 	window::cursor_pos_fn window::set_cursor_pos_callback(cursor_pos_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetCursorPosCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWcursorposfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetCursorPosCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWcursorposfun>(value)) ? value : nullptr;
 	}
 
 	window::frame_size_fn window::set_frame_size_callback(frame_size_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetFramebufferSizeCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWframebuffersizefun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetFramebufferSizeCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWframebuffersizefun>(value)) ? value : nullptr;
 	}
 	
 	window::key_fn window::set_key_callback(key_fn value)
 	{
-		return m_window
-			? glfwSetKeyCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWkeyfun>(value)) ? value : nullptr
-			: nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetKeyCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWkeyfun>(value)) ? value : nullptr;
 	}
 	
 	window::mouse_fn window::set_mouse_callback(mouse_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetMouseButtonCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWmousebuttonfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetMouseButtonCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWmousebuttonfun>(value)) ? value : nullptr;
 	}
 	
 	window::scroll_fn window::set_scroll_callback(scroll_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetScrollCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWscrollfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetScrollCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWscrollfun>(value)) ? value : nullptr;
 	}
 	
 	window::close_fn window::set_window_close_callback(close_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetWindowCloseCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWwindowclosefun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetWindowCloseCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWwindowclosefun>(value)) ? value : nullptr;
 	}
 	
 	window::focus_fn window::set_window_focus_callback(focus_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetWindowFocusCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWwindowfocusfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetWindowFocusCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWwindowfocusfun>(value)) ? value : nullptr;
 	}
 	
 	window::position_fn window::set_window_pos_callback(position_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetWindowPosCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetWindowPosCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
 	}
 	
 	window::size_fn window::set_window_size_callback(size_fn value)
 	{
-		return !m_window
-			? nullptr
-			: glfwSetWindowSizeCallback(
-				static_cast<GLFWwindow *>(m_window),
-				reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
+		if (!m_window) { return nullptr; }
+
+		return glfwSetWindowSizeCallback(
+			static_cast<GLFWwindow *>(m_window),
+			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
 	}
 
 	void window::install_default_callbacks(window * win)
