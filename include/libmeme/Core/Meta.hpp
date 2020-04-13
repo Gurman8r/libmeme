@@ -17,6 +17,7 @@
 
 #include <libmeme/Common.hpp>
 
+// invoke
 #if ML_has_cxx20
 #	define ML_meta_invoke(fn, ...) (std::invoke(fn, ##__VA_ARGS__))
 #else
@@ -28,16 +29,18 @@ namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// type list
 	template <class ... Ts
 	> struct list { static constexpr size_t size{ sizeof...(Ts) }; };
 
+	// type tag
 	template <class T
 	> struct tag { using type = typename T; };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Loops
+// loops
 namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,7 +63,10 @@ namespace ml::meta
 	template <class Fn, class ... Args
 	> constexpr void impl_for_args(Fn && fn, Args && ... args)
 	{
-		(void)std::initializer_list<int32_t>{ (ML_meta_invoke(ML_forward(fn), ML_forward(args)), 0)... };
+		(void)std::initializer_list<int32_t>
+		{
+			(ML_meta_invoke(ML_forward(fn), ML_forward(args)), 0)...
+		};
 	}
 
 	template <class Tp, class Fn
