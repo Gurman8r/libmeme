@@ -26,12 +26,12 @@ namespace ml::ds
 		{
 		}
 
-		explicit multi_vector(storage_type const & value, allocator_type const & alloc = {})
+		multi_vector(storage_type const & value, allocator_type const & alloc = {})
 			: m_data{ std::allocator_arg, alloc, value }
 		{
 		}
 
-		explicit multi_vector(storage_type && value, allocator_type const & alloc = {}) noexcept
+		multi_vector(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc, std::move(value) }
 		{
 		}
@@ -144,22 +144,22 @@ namespace ml::ds
 
 		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) & noexcept
 		{
-			return std::get<T>(m_data)[i];
+			return std::get<pmr::vector<T>>(m_data)[i];
 		}
 
 		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) const & noexcept
 		{
-			return std::get<T>(m_data)[i];
+			return std::get<pmr::vector<T>>(m_data)[i];
 		}
 
 		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) && noexcept
 		{
-			return std::move(std::get<T>(m_data)[i]);
+			return std::move(std::get<pmr::vector<T>>(m_data)[i]);
 		}
 
 		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) const && noexcept
 		{
-			return std::move(std::get<T>(m_data)[i]);
+			return std::move(std::get<pmr::vector<T>>(m_data)[i]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

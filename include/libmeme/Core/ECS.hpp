@@ -864,7 +864,7 @@ namespace ml::ecs
 		{
 			m_entities.get<id_bitset>(i).set<traits_type::template component_bit<C>()>();
 
-			auto & c{ m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i)) };
+			auto & c{ m_components.get<C>(m_entities.get<id_index>(i)) };
 			c = C{ ML_forward(args)... };
 			return c;
 		}
@@ -907,13 +907,13 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD auto & get_component(size_t const i) noexcept
 		{
-			return m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i));
+			return m_components.get<C>(m_entities.get<id_index>(i));
 		}
 
 		template <class C
 		> ML_NODISCARD auto const & get_component(size_t const i) const noexcept
 		{
-			return m_components.get<pmr::vector<C>>(m_entities.get<id_index>(i));
+			return m_components.get<C>(m_entities.get<id_index>(i));
 		}
 
 		template <class C
@@ -1074,7 +1074,7 @@ namespace ml::ecs
 			{
 				auto const i{ self.m_entities.get<id_index>(e) }; // component data index
 
-				std::invoke(ML_forward(fn), e, self.m_components.get<pmr::vector<Ts>>(i)...);
+				std::invoke(ML_forward(fn), e, self.m_components.get<Ts>(i)...);
 			}
 		};
 
