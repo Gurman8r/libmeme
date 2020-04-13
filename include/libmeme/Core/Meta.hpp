@@ -36,70 +36,66 @@ namespace ml::meta
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace impl
+	template <class Tp, class Fn, size_t ... Is
+	> constexpr decltype(auto) impl_tuple_apply(Tp && tp, Fn && fn, std::index_sequence<Is...>)
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn, class Tp, size_t ... Is
-		> constexpr decltype(auto) impl_tuple_apply(Fn && fn, Tp && tp, std::index_sequence<Is...>)
-		{
-			return ML_forward(fn)(std::get<Is>(ML_forward(tp))...);
-		}
-
-		template <class Fn, class Tp
-		> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
-		{
-			return _ML meta::impl::impl_tuple_apply(
-				ML_forward(fn),
-				ML_forward(tp),
-				std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
-			);
-		}
-
-		template <class Fn, class ... Args
-		> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
-		{
 #if ML_has_cxx20
-			return (void)std::initializer_list<int32_t>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
+		return std::invoke(ML_forward(fn), std::get<Is>(ML_forward(tp))...);
 #else
-			return (void)std::initializer_list<int32_t>{ (ML_forward(fn)(ML_forward(args)), 0)... };
-#endif // ML_has_cxx20
-		}
+		return ML_forward(fn)(std::get<Is>(ML_forward(tp))...);
+#endif
+	}
 
-		template <class Fn, class Tp
-		> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
+	template <class Tp, class Fn
+	> constexpr decltype(auto) impl_tuple_apply(Tp && tp, Fn && fn)
+	{
+		return _ML meta::impl_tuple_apply(
+			ML_forward(tp),
+			ML_forward(fn),
+			std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
+		);
+	}
+
+	template <class Fn, class ... Args
+	> constexpr decltype(auto) impl_for_args(Fn && fn, Args && ... args)
+	{
+#if ML_has_cxx20
+		return (void)std::initializer_list<int32_t>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
+#else
+		return (void)std::initializer_list<int32_t>{ (ML_forward(fn)(ML_forward(args)), 0)... };
+#endif
+	}
+
+	template <class Tp, class Fn
+	> constexpr decltype(auto) impl_for_tuple(Tp && tp, Fn && fn)
+	{
+		return _ML meta::impl_tuple_apply(ML_forward(tp), [&fn](auto && ... rest)
 		{
-			return _ML meta::impl::tuple_apply([&fn](auto && ... rest)
-			{
-				_ML meta::impl::for_args(fn, ML_forward(rest)...);
-			},
-			ML_forward(tp));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			_ML meta::for_args(fn, ML_forward(rest)...);
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// "Unpacks" the contents of a tuple inside a function call.
-	template <class Fn, class Tp
-	> constexpr decltype(auto) tuple_apply(Fn && fn, Tp && tp)
+	// "unpacks" the contents of a tuple inside a function call
+	template <class Tp, class Fn
+	> constexpr decltype(auto) tuple_apply(Tp && tp, Fn && fn)
 	{
-		return impl::tuple_apply(fn, ML_forward(tp));
+		return _ML meta::impl_tuple_apply(ML_forward(tp), ML_forward(fn));
 	}
 
-	// Invokes a function on every passed object.
+	// invokes a function on every passed object
 	template <class Fn, class ... Args
 	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
 	{
-		return impl::for_args(fn, ML_forward(args)...);
+		return _ML meta::impl_for_args(ML_forward(fn), ML_forward(args)...);
 	}
 
-	// Invokes a function on every element of a tuple.
-	template <class Fn, class Tp
-	> constexpr decltype(auto) for_tuple(Fn && fn, Tp && tp)
+	// invokes a function on every element of a tuple
+	template <class Tp, class Fn
+	> constexpr decltype(auto) for_tuple(Tp && tp, Fn && fn)
 	{
-		return impl::for_tuple(fn, ML_forward(tp));
+		return _ML meta::impl_for_tuple(ML_forward(tp), ML_forward(fn));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -151,9 +147,7 @@ namespace ml::meta
 	template <template <class> class Pr, class T, class ... Ts
 	> struct impl_remap<Pr, list<T, Ts...>>
 	{
-		using type = typename concat<
-			list<Pr<T>>, remap<Pr, list<Ts...>>
-		>;
+		using type = typename concat<list<Pr<T>>, remap<Pr, list<Ts...>>>;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -239,7 +233,7 @@ namespace ml::meta
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return _ML meta::for_tuple(fn, tag_tuple<Ls>{});
+		return _ML meta::for_tuple(tag_tuple<Ls>{}, fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

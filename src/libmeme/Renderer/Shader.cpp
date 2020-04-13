@@ -178,7 +178,7 @@ namespace ml
 			m_handle = NULL;
 			GL::flush();
 			
-			meta::for_tuple([&](auto & s) { s.clear(); }, m_source);
+			meta::for_tuple(m_source, [&](auto & s) { s.clear(); });
 			m_attributes.clear();
 			m_uniforms.clear();
 			m_textures.clear();
