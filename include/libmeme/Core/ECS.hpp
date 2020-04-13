@@ -552,16 +552,16 @@ namespace ml::ecs
 		{
 		}
 
-		manager(self_type const & other, allocator_type const & alloc = {})
+		manager(self_type const & value, allocator_type const & alloc = {})
 			: self_type{ alloc }
 		{
-			this->deep_copy(other);
+			this->deep_copy(value);
 		}
 		
-		manager(self_type && other, allocator_type const & alloc = {}) noexcept
+		manager(self_type && value, allocator_type const & alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			this->swap(std::move(other));
+			this->swap(std::move(value));
 		}
 
 		manager(size_t const cap, allocator_type const & alloc = {})
@@ -572,15 +572,15 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		self_type & operator=(self_type const & other)
+		self_type & operator=(self_type const & value)
 		{
-			this->deep_copy(other);
+			this->deep_copy(value);
 			return (*this);
 		}
 
-		self_type & operator=(self_type && other) noexcept
+		self_type & operator=(self_type && value) noexcept
 		{
-			this->swap(std::move(other));
+			this->swap(std::move(value));
 			return (*this);
 		}
 
@@ -618,17 +618,17 @@ namespace ml::ecs
 			m_size = m_size_next = 0;
 		}
 
-		void deep_copy(self_type const & other)
+		void deep_copy(self_type const & value)
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_capacity	= other.m_capacity;
-				m_size		= other.m_size;
-				m_size_next = other.m_size_next;
-				m_components= other.m_components;
-				m_entities	= other.m_entities;
-				m_handles	= other.m_handles;
-				m_systems	= other.m_systems;
+				m_capacity	= value.m_capacity;
+				m_size		= value.m_size;
+				m_size_next = value.m_size_next;
+				m_components= value.m_components;
+				m_entities	= value.m_entities;
+				m_handles	= value.m_handles;
+				m_systems	= value.m_systems;
 			}
 		}
 
@@ -704,18 +704,18 @@ namespace ml::ecs
 			})();
 		}
 
-		void swap(self_type & other) noexcept
+		void swap(self_type & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_capacity,	other.m_capacity);
-				std::swap(m_size,		other.m_size);
-				std::swap(m_size_next,	other.m_size_next);
+				std::swap(m_capacity,	value.m_capacity);
+				std::swap(m_size,		value.m_size);
+				std::swap(m_size_next,	value.m_size_next);
 
-				m_components.swap(other.m_components);
-				m_entities	.swap(other.m_entities);
-				m_handles	.swap(other.m_handles);
-				m_systems	.swap(other.m_systems);
+				m_components.swap(value.m_components);
+				m_entities	.swap(value.m_entities);
+				m_handles	.swap(value.m_handles);
+				m_systems	.swap(value.m_systems);
 			}
 		}
 

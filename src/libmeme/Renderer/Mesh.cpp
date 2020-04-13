@@ -29,16 +29,16 @@ namespace ml
 		load_from_memory(vertices, indices);
 	}
 
-	mesh::mesh(mesh const & other, allocator_type const & alloc)
+	mesh::mesh(mesh const & value, allocator_type const & alloc)
 		: mesh{ alloc }
 	{
-		load_from_memory(other);
+		load_from_memory(value);
 	}
 
-	mesh::mesh(mesh && other, allocator_type const & alloc) noexcept
+	mesh::mesh(mesh && value, allocator_type const & alloc) noexcept
 		: mesh{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	mesh::~mesh()
@@ -48,16 +48,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	mesh & mesh::operator=(mesh const & other)
+	mesh & mesh::operator=(mesh const & value)
 	{
-		mesh temp{ other };
+		mesh temp{ value };
 		swap(temp);
 		return (*this);
 	}
 
-	mesh & mesh::operator=(mesh && other) noexcept
+	mesh & mesh::operator=(mesh && value) noexcept
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 		return (*this);
 	}
 
@@ -70,36 +70,36 @@ namespace ml
 		ibo().destroy();
 	}
 
-	void mesh::swap(mesh & other) noexcept
+	void mesh::swap(mesh & value) noexcept
 	{
-		if (this != std::addressof(other))
+		if (this != std::addressof(value))
 		{
-			std::swap(m_vao, other.m_vao);
-			std::swap(m_vbo, other.m_vbo);
-			std::swap(m_ibo, other.m_ibo);
-			m_layout.swap(other.m_layout);
-			m_vertices.swap(other.m_vertices);
-			m_indices.swap(other.m_indices);
+			std::swap(m_vao, value.m_vao);
+			std::swap(m_vbo, value.m_vbo);
+			std::swap(m_ibo, value.m_ibo);
+			m_layout.swap(value.m_layout);
+			m_vertices.swap(value.m_vertices);
+			m_indices.swap(value.m_indices);
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool mesh::load_from_memory(mesh const & other)
+	bool mesh::load_from_memory(mesh const & value)
 	{
-		if (this == std::addressof(other))
+		if (this == std::addressof(value))
 		{
 			return false;
 		}
-		else if (!other.m_vertices.empty())
+		else if (!value.m_vertices.empty())
 		{
-			if (!other.m_indices.empty())
+			if (!value.m_indices.empty())
 			{
-				return load_from_memory(other.m_vertices, other.m_indices);
+				return load_from_memory(value.m_vertices, value.m_indices);
 			}
 			else
 			{
-				return load_from_memory(other.m_vertices);
+				return load_from_memory(value.m_vertices);
 			}
 		}
 		else

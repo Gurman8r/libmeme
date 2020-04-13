@@ -61,41 +61,41 @@ namespace ml
 		{
 		}
 
-		uniform(uniform const & other, allocator_type const & alloc = {})
-			: m_type{ other.m_type }
-			, m_name{ other.m_name, alloc }
-			, m_data{ other.m_data }
+		uniform(uniform const & value, allocator_type const & alloc = {})
+			: m_type{ value.m_type }
+			, m_name{ value.m_name, alloc }
+			, m_data{ value.m_data }
 		{
 		}
 
-		uniform(uniform && other, allocator_type const & alloc = {}) noexcept
+		uniform(uniform && value, allocator_type const & alloc = {}) noexcept
 			: uniform{ alloc }
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uniform & operator=(uniform const & other)
+		uniform & operator=(uniform const & value)
 		{
-			uniform temp{ other };
+			uniform temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		uniform & operator=(uniform && other) noexcept
+		uniform & operator=(uniform && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(uniform & other) noexcept
+		void swap(uniform & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_type, other.m_type);
-				std::swap(m_name, other.m_name);
-				std::swap(m_data, other.m_data);
+				std::swap(m_type, value.m_type);
+				std::swap(m_name, value.m_name);
+				std::swap(m_data, value.m_data);
 			}
 		}
 
@@ -171,29 +171,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto compare(uniform const & other) const noexcept
+		ML_NODISCARD auto compare(uniform const & value) const noexcept
 		{
-			if (m_type != other.m_type)
+			if (m_type != value.m_type)
 			{
-				return m_type.compare(other.m_type);
+				return m_type.compare(value.m_type);
 			}
 			else
 			{
-				return m_name.compare(other.m_name);
+				return m_name.compare(value.m_name);
 			}
 		}
 
-		ML_NODISCARD bool operator==(uniform const & other) const noexcept { return compare(other) == 0; }
+		ML_NODISCARD bool operator==(uniform const & value) const noexcept { return compare(value) == 0; }
 
-		ML_NODISCARD bool operator!=(uniform const & other) const noexcept { return compare(other) != 0; }
+		ML_NODISCARD bool operator!=(uniform const & value) const noexcept { return compare(value) != 0; }
 
-		ML_NODISCARD bool operator<(uniform const & other) const noexcept { return compare(other) < 0; }
+		ML_NODISCARD bool operator<(uniform const & value) const noexcept { return compare(value) < 0; }
 
-		ML_NODISCARD bool operator>(uniform const & other) const noexcept { return compare(other) > 0; }
+		ML_NODISCARD bool operator>(uniform const & value) const noexcept { return compare(value) > 0; }
 
-		ML_NODISCARD bool operator<=(uniform const & other) const noexcept { return compare(other) <= 0; }
+		ML_NODISCARD bool operator<=(uniform const & value) const noexcept { return compare(value) <= 0; }
 
-		ML_NODISCARD bool operator>=(uniform const & other) const noexcept { return compare(other) >= 0; }
+		ML_NODISCARD bool operator>=(uniform const & value) const noexcept { return compare(value) >= 0; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

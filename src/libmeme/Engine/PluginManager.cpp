@@ -41,7 +41,7 @@ namespace ml
 				// load plugin
 				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					return m_libs.find_or_add(std::move(lib), *ptr);
+					m_libs[std::move(lib)] = *ptr;
 				}
 			}
 			m_files.erase(file.first);

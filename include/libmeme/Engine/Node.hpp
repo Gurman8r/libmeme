@@ -24,39 +24,39 @@ namespace ml
 		{
 		}
 
-		node(node const & other, allocator_type const & alloc = {})
+		node(node const & value, allocator_type const & alloc = {})
 			: node{ alloc }
 		{
 		}
 
-		node(node && other, allocator_type const & alloc = {}) noexcept
+		node(node && value, allocator_type const & alloc = {}) noexcept
 			: node{ alloc }
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		node & operator=(node const & other)
+		node & operator=(node const & value)
 		{
-			node temp{ other };
+			node temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		node & operator=(node && other) noexcept
+		node & operator=(node && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void swap(node & other) noexcept
+		void swap(node & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_children.swap(other.m_children);
+				m_children.swap(value.m_children);
 			}
 		}
 

@@ -27,35 +27,35 @@ namespace ml
 		
 		font(fs::path const & path, allocator_type const & alloc = {});
 		
-		font(font const & other, allocator_type const & alloc = {});
+		font(font const & value, allocator_type const & alloc = {});
 		
-		font(font && other, allocator_type const & alloc = {}) noexcept;
+		font(font && value, allocator_type const & alloc = {}) noexcept;
 		
 		~font() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		font & operator=(font const & other)
+		font & operator=(font const & value)
 		{
-			font temp{ other };
+			font temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		font & operator=(font && other) noexcept
+		font & operator=(font && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(font & other) noexcept
+		void swap(font & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_pages, other.m_pages);
-				std::swap(m_lib, other.m_lib);
-				std::swap(m_face, other.m_face);
-				std::swap(m_info, other.m_info);
+				std::swap(m_pages, value.m_pages);
+				std::swap(m_lib, value.m_lib);
+				std::swap(m_face, value.m_face);
+				std::swap(m_info, value.m_info);
 			}
 		}
 
@@ -69,7 +69,7 @@ namespace ml
 
 		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size)
 		{
-			return m_pages[size].find_or_add_fn(c, &font::load_glyph, this, c, size);
+			return m_pages[size].find_or_add(c, &font::load_glyph, this, c, size);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -95,9 +95,9 @@ namespace ml::util
 			return m_resource->deallocate(ptr, bytes, align);
 		}
 
-		bool do_is_equal(pmr::memory_resource const & other) const noexcept override
+		bool do_is_equal(pmr::memory_resource const & value) const noexcept override
 		{
-			return m_resource->is_equal(other);
+			return m_resource->is_equal(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

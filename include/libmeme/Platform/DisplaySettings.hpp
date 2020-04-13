@@ -21,21 +21,21 @@ namespace ml
 			return size[0] && size[1] && depth;
 		}
 
-		ML_NODISCARD constexpr bool operator==(display_settings const & other) const
+		ML_NODISCARD constexpr bool operator==(display_settings const & value) const
 		{
-			return (size == other.size)
-				&& (depth == other.depth);
+			return (size == value.size)
+				&& (depth == value.depth);
 		}
 
-		ML_NODISCARD constexpr bool operator!=(display_settings const & other) const
+		ML_NODISCARD constexpr bool operator!=(display_settings const & value) const
 		{
-			return !(*this == other);
+			return !(*this == value);
 		}
 
-		ML_NODISCARD constexpr bool operator<(display_settings const & other) const
+		ML_NODISCARD constexpr bool operator<(display_settings const & value) const
 		{
-			return (size < other.size)
-				|| (depth < other.depth);
+			return (size < value.size)
+				|| (depth < value.depth);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

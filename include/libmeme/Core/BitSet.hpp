@@ -41,25 +41,25 @@ namespace ml::ds
 		{
 		}
 
-		constexpr bitset(self_type const & other)
-			: m_words{ other.m_words }
+		constexpr bitset(self_type const & value)
+			: m_words{ value.m_words }
 		{
 		}
 
-		constexpr bitset(self_type && other) noexcept
-			: m_words{ std::move(other.m_words) }
-		{
-		}
-
-		template <size_t N
-		> constexpr bitset(bitset<N> const & other)
-			: m_words{ other.m_words }
+		constexpr bitset(self_type && value) noexcept
+			: m_words{ std::move(value.m_words) }
 		{
 		}
 
 		template <size_t N
-		> constexpr bitset(bitset<N> && other) noexcept
-			: m_words{ std::move(other.m_words) }
+		> constexpr bitset(bitset<N> const & value)
+			: m_words{ value.m_words }
+		{
+		}
+
+		template <size_t N
+		> constexpr bitset(bitset<N> && value) noexcept
+			: m_words{ std::move(value.m_words) }
 		{
 		}
 
@@ -83,16 +83,16 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & value)
 		{
-			self_type temp{ other };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -177,11 +177,11 @@ namespace ml::ds
 			return _Count;
 		}
 
-		constexpr void swap(self_type & other) noexcept
+		constexpr void swap(self_type & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				util::swap(m_words, other.m_words);
+				util::swap(m_words, value.m_words);
 			}
 		}
 
@@ -208,48 +208,48 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> ML_NODISCARD constexpr bool operator==(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator==(T value) const
 		{
 			if constexpr (std::is_same_v<T, self_type>)
 			{
-				return m_words == other.m_words;
+				return m_words == value.m_words;
 			}
 			else
 			{
-				return (*this) == self_type{ other };
+				return (*this) == self_type{ value };
 			}
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator!=(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator!=(T value) const
 		{
-			return !(*this == other);
+			return !(*this == value);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator<(T value) const
 		{
 			if constexpr (std::is_same_v<T, self_type>)
 			{
-				return m_words < other.m_words;
+				return m_words < value.m_words;
 			}
 			else
 			{
-				return (*this) < self_type{ other };
+				return (*this) < self_type{ value };
 			}
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator>(T value) const
 		{
-			return !(*this < other);
+			return !(*this < value);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<=(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator<=(T value) const
 		{
-			return (*this < other) || (*this == other);
+			return (*this < value) || (*this == value);
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>=(T other) const
+		template <class T> ML_NODISCARD constexpr bool operator>=(T value) const
 		{
-			return (*this > other) || (*this == other);
+			return (*this > value) || (*this == value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

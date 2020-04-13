@@ -30,9 +30,9 @@ namespace ml
 		}
 
 		template <class ... U
-		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) noexcept
+		> ML_NODISCARD constexpr auto compare(typeof<U...> const & value) noexcept
 		{
-			return (m_guid != other.guid()) ? (m_guid < other.guid()) ? -1 : 1 : 0;
+			return (m_guid != value.guid()) ? (m_guid < value.guid()) ? -1 : 1 : 0;
 		}
 
 	private:
@@ -55,8 +55,8 @@ namespace ml
 		}
 
 		template <class T
-		> constexpr typeof(typeof<T> const & other) noexcept
-			: m_name{ other.name() }, m_guid{ other.guid() }
+		> constexpr typeof(typeof<T> const & value) noexcept
+			: m_name{ value.name() }, m_guid{ value.guid() }
 		{
 		}
 
@@ -71,9 +71,9 @@ namespace ml
 		}
 
 		template <class ... U
-		> ML_NODISCARD constexpr auto compare(typeof<U...> const & other) const noexcept
+		> ML_NODISCARD constexpr auto compare(typeof<U...> const & value) const noexcept
 		{
-			return (m_guid != other.guid()) ? (m_guid < other.guid()) ? -1 : 1 : 0;
+			return util::compare(m_guid, value.guid());
 		}
 
 	private:

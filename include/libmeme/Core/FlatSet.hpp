@@ -94,13 +94,13 @@ namespace ml::ds
 			impl_sort();
 		}
 
-		basic_flat_set(self_type const & other, allocator_type const & alloc = {})
-			: m_data{ other.m_data, alloc }
+		basic_flat_set(self_type const & value, allocator_type const & alloc = {})
+			: m_data{ value.m_data, alloc }
 		{
 		}
 
-		basic_flat_set(self_type && other, allocator_type const & alloc = {}) noexcept
-			: m_data{ std::move(other.m_data), alloc }
+		basic_flat_set(self_type && value, allocator_type const & alloc = {}) noexcept
+			: m_data{ std::move(value.m_data), alloc }
 		{
 		}
 
@@ -113,9 +113,9 @@ namespace ml::ds
 			return (*this);
 		}
 
-		self_type & operator=(self_type const & other)
+		self_type & operator=(self_type const & value)
 		{
-			self_type temp{ other };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}
@@ -127,9 +127,9 @@ namespace ml::ds
 			return (*this);
 		}
 
-		self_type & operator=(self_type && other) noexcept
+		self_type & operator=(self_type && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -167,11 +167,11 @@ namespace ml::ds
 			}
 		}
 
-		void assign(self_type const & other)
+		void assign(self_type const & value)
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_data = other.m_data;
+				m_data = value.m_data;
 			}
 		}
 
@@ -200,11 +200,11 @@ namespace ml::ds
 			m_data.shrink_to_fit();
 		}
 
-		void swap(self_type & other) noexcept
+		void swap(self_type & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_data.swap(other.m_data);
+				m_data.swap(value.m_data);
 			}
 		}
 
@@ -232,38 +232,38 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = value_type
-		> ML_NODISCARD bool contains(Other const & other) const
+		template <class U = value_type
+		> ML_NODISCARD bool contains(U const & value) const
 		{
-			return impl_contains(begin(), end(), other);
+			return impl_contains(begin(), end(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = value_type
-		> ML_NODISCARD iterator find(Other const & other)
+		template <class U = value_type
+		> ML_NODISCARD iterator find(U const & value)
 		{
-			return impl_find(begin(), end(), other);
+			return impl_find(begin(), end(), value);
 		}
 
-		template <class Other = value_type
-		> ML_NODISCARD const_iterator find(Other const & other) const
+		template <class U = value_type
+		> ML_NODISCARD const_iterator find(U const & value) const
 		{
-			return impl_find(cbegin(), cend(), other);
+			return impl_find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = value_type
-		> ML_NODISCARD auto insert(Other const & other)
+		template <class U = value_type
+		> ML_NODISCARD auto insert(U const & value)
 		{
-			return impl_insert(other);
+			return impl_insert(value);
 		}
 
-		template <class Other = value_type
-		> ML_NODISCARD auto insert(Other && other)
+		template <class U = value_type
+		> ML_NODISCARD auto insert(U && value)
 		{
-			return impl_insert(std::move(other));
+			return impl_insert(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -322,53 +322,54 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = self_type
-		> ML_NODISCARD auto compare(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<Other, self_type>)
+			if constexpr (std::is_same_v<U, self_type>)
 			{
-				return compare(other.m_data);
+				return compare(value.m_data);
 			}
 			else
 			{
-				return (m_data != other) ? ((m_data < other) ? -1 : 1) : 0;
+				static_assert(std::is_same_v<U, storage_type>);
+				return util::compare(m_data, value.m_data);
 			}
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator==(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
-			return compare(other) == 0;
+			return compare(value) == 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
-			return compare(other) != 0;
+			return compare(value) != 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator<(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
-			return compare(other) < 0;
+			return compare(value) < 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator>(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
-			return compare(other) > 0;
+			return compare(value) > 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
-			return compare(other) <= 0;
+			return compare(value) <= 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
-			return compare(other) >= 0;
+			return compare(value) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -379,19 +380,19 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// contains implementation
-		template <class It, class Other
-		> static bool impl_contains(It first, It last, Other const & other)
+		template <class It, class U
+		> static bool impl_contains(It first, It last, U const & value)
 		{
 			// linear
 			auto impl_contains_linear = [&]() noexcept
 			{
-				return std::find(first, last, other) != last;
+				return std::find(first, last, value) != last;
 			};
 
 			// binary
 			auto impl_contains_binary = [&]() noexcept
 			{
-				return std::binary_search(first, last, other, compare_type{});
+				return std::binary_search(first, last, value, compare_type{});
 			};
 
 			// impl
@@ -419,19 +420,19 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// find implementation
-		template <class It, class Other
-		> static auto impl_find(It first, It last, Other const & other)
+		template <class It, class U
+		> static auto impl_find(It first, It last, U const & value)
 		{
 			// linear
 			auto impl_find_linear = [&]() noexcept
 			{
-				return std::find(first, last, other);
+				return std::find(first, last, value);
 			};
 
 			// binary
 			auto impl_find_binary = [&]() noexcept
 			{
-				if (auto const it{ std::equal_range(first, last, other, compare_type{}) }
+				if (auto const it{ std::equal_range(first, last, value, compare_type{}) }
 				; it.first != it.second)
 				{
 					return it.first;
@@ -488,8 +489,8 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// insert implementation
-		template <class Other
-		> auto impl_insert(Other && other) -> std::conditional_t<
+		template <class U
+		> auto impl_insert(U && value) -> std::conditional_t<
 			traits_type::multi, iterator, std::pair<iterator, bool>
 		>
 		{
@@ -497,17 +498,17 @@ namespace ml::ds
 			{
 				// insert multi
 				return m_data.emplace(
-					std::upper_bound(begin(), end(), other, compare_type{}),
-					ML_forward(other)
+					std::upper_bound(begin(), end(), value, compare_type{}),
+					ML_forward(value)
 				);
 			}
 			else
 			{
 				// insert unique
-				if (auto const it{ std::equal_range(begin(), end(), other, compare_type{}) }
+				if (auto const it{ std::equal_range(begin(), end(), value, compare_type{}) }
 				; it.first == it.second)
 				{
-					return { m_data.emplace(it.second, ML_forward(other)), true };
+					return { m_data.emplace(it.second, ML_forward(value)), true };
 				}
 				else
 				{

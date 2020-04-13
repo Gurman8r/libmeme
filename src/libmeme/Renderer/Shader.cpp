@@ -66,16 +66,16 @@ namespace ml
 		load_from_file(v, g, f);
 	}
 
-	shader::shader(shader const & other, allocator_type const & alloc)
+	shader::shader(shader const & value, allocator_type const & alloc)
 		: shader{ alloc }
 	{
-		load_from_source(other.m_source);
+		load_from_source(value.m_source);
 	}
 
-	shader::shader(shader && other, allocator_type const & alloc) noexcept
+	shader::shader(shader && value, allocator_type const & alloc) noexcept
 		: shader{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	shader::~shader() noexcept
@@ -191,15 +191,15 @@ namespace ml
 		return !m_handle && (m_handle = GL::createProgram());
 	}
 
-	void shader::swap(shader & other) noexcept
+	void shader::swap(shader & value) noexcept
 	{
-		if (this != std::addressof(other))
+		if (this != std::addressof(value))
 		{
-			std::swap(m_handle, other.m_handle);
-			std::swap(m_source, other.m_source);
-			m_attributes.swap(other.m_attributes);
-			m_uniforms.swap(other.m_uniforms);
-			m_textures.swap(other.m_textures);
+			std::swap(m_handle, value.m_handle);
+			std::swap(m_source, value.m_source);
+			m_attributes.swap(value.m_attributes);
+			m_uniforms.swap(value.m_uniforms);
+			m_textures.swap(value.m_textures);
 		}
 	}
 
@@ -338,14 +338,14 @@ namespace ml
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		return m_attributes.find_or_add_fn(
+		return m_attributes.find_or_add(
 			util::hash(value),
 			&GL::getAttribLocation, m_handle, value.c_str());
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		return m_uniforms.find_or_add_fn(
+		return m_uniforms.find_or_add(
 			util::hash(value),
 			&GL::getUniformLocation, m_handle, value.c_str());
 	}

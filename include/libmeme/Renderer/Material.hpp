@@ -47,29 +47,29 @@ namespace ml
 		{
 		}
 
-		material(material const & other, allocator_type const & alloc = {})
-			: m_storage{ other.m_storage, alloc }
+		material(material const & value, allocator_type const & alloc = {})
+			: m_storage{ value.m_storage, alloc }
 		{
 		}
 
-		material(material && other, allocator_type const & alloc = {}) noexcept
+		material(material && value, allocator_type const & alloc = {}) noexcept
 			: m_storage{ alloc }
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material & operator=(material const & other)
+		material & operator=(material const & value)
 		{
-			material temp{ other };
+			material temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		material & operator=(material && other) noexcept
+		material & operator=(material && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -84,11 +84,11 @@ namespace ml
 			m_storage.clear();
 		}
 
-		void swap(material & other) noexcept
+		void swap(material & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_storage, other.m_storage);
+				std::swap(m_storage, value.m_storage);
 			}
 		}
 
@@ -245,56 +245,56 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material & concat(material const & other)
+		material & concat(material const & value)
 		{
-			for (auto const & u : other)
+			for (auto const & u : value)
 			{
 				this->insert(u);
 			}
 			return (*this);
 		}
 
-		material & concat(material && other)
+		material & concat(material && value)
 		{
-			for (auto && u : other)
+			for (auto && u : value)
 			{
 				this->insert(std::move(u));
 			}
 			return (*this);
 		}
 
-		material concat(material const & other) const
+		material concat(material const & value) const
 		{
 			material temp{ *this };
-			return temp.concat(other);
+			return temp.concat(value);
 		}
 
-		material concat(material && other) const
+		material concat(material && value) const
 		{
 			material temp{ *this };
-			return temp.concat(std::move(other));
+			return temp.concat(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material & operator+=(material const & other)
+		material & operator+=(material const & value)
 		{
-			return this->concat(other);
+			return this->concat(value);
 		}
 
-		material & operator+=(material && other)
+		material & operator+=(material && value)
 		{
-			return this->concat(std::move(other));
+			return this->concat(std::move(value));
 		}
 
-		material operator+(material const & other) const
+		material operator+(material const & value) const
 		{
-			return this->concat(other);
+			return this->concat(value);
 		}
 
-		material operator+(material && other) const
+		material operator+(material && value) const
 		{
-			return this->concat(std::move(other));
+			return this->concat(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

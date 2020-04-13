@@ -22,25 +22,25 @@ namespace ml
 
 		shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept;
 		
-		shared_library(shared_library && other, allocator_type const & alloc = {}) noexcept;
+		shared_library(shared_library && value, allocator_type const & alloc = {}) noexcept;
 		
 		~shared_library() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared_library & operator=(shared_library && other) noexcept
+		shared_library & operator=(shared_library && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(shared_library & other) noexcept
+		void swap(shared_library & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_inst, other.m_inst);
-				m_path.swap(other.m_path);
-				m_funcs.swap(other.m_funcs);
+				std::swap(m_inst, value.m_inst);
+				m_path.swap(value.m_path);
+				m_funcs.swap(value.m_funcs);
 			}
 		}
 
@@ -87,60 +87,58 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = shared_library
-		> ML_NODISCARD auto compare(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<Other, shared_library>)
+			if constexpr (std::is_same_v<U, shared_library>)
 			{
-				if (this != std::addressof(other))
-				{
-					return compare(other.m_path);
-				}
-				else
-				{
-					return 0;
-				}
+				return (this != std::addressof(value)) ? compare(value.m_path) : 0;
+			}
+			else if constexpr (std::is_same_v<U, fs::path>)
+			{
+				return compare(util::hash(value.string()));
 			}
 			else
 			{
-				return m_path.compare(other);
+				static_assert(std::is_same_v<U, hash_t>);
+				return util::compare(util::hash(m_path.string()), value);
 			}
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator==(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
-			return compare(other) == 0;
+			return compare(value) == 0;
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
-			return compare(other) != 0;
+			return compare(value) != 0;
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator<(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
-			return compare(other) < 0;
+			return compare(value) < 0;
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator>(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
-			return compare(other) > 0;
+			return compare(value) > 0;
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
-			return compare(other) <= 0;
+			return compare(value) <= 0;
 		}
 
-		template <class Other = shared_library
-		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
+		template <class U = shared_library
+		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
-			return compare(other) >= 0;
+			return compare(value) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

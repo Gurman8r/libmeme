@@ -111,22 +111,22 @@ namespace ml
 		load_from_image(image);
 	}
 
-	texture::texture(texture const & other) : texture{
-		other.m_sampler,
-		other.m_level,
-		other.m_intl_format,
-		other.m_color_format,
-		other.m_pixel_type,
-		other.m_flags
+	texture::texture(texture const & value) : texture{
+		value.m_sampler,
+		value.m_level,
+		value.m_intl_format,
+		value.m_color_format,
+		value.m_pixel_type,
+		value.m_flags
 	}
 	{
-		load_from_texture(other);
+		load_from_texture(value);
 	}
 
-	texture::texture(texture && other) noexcept
+	texture::texture(texture && value) noexcept
 		: texture{}
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	texture::~texture() noexcept
@@ -150,9 +150,9 @@ namespace ml
 		return create(img.data(), img.size());
 	}
 
-	bool texture::load_from_texture(texture const & other)
+	bool texture::load_from_texture(texture const & value)
 	{
-		return load_from_image(other.copy_to_image());
+		return load_from_image(value.copy_to_image());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -186,19 +186,19 @@ namespace ml
 		}
 	}
 
-	void texture::swap(texture & other) noexcept
+	void texture::swap(texture & value) noexcept
 	{
-		if (this != std::addressof(other))
+		if (this != std::addressof(value))
 		{
-			std::swap(m_handle,			other.m_handle);
-			std::swap(m_sampler,		other.m_sampler);
-			std::swap(m_level,			other.m_level);
-			std::swap(m_intl_format,	other.m_intl_format);
-			std::swap(m_color_format,		other.m_color_format);
-			std::swap(m_pixel_type,		other.m_pixel_type);
-			std::swap(m_size,			other.m_size);
-			std::swap(m_real_size,		other.m_real_size);
-			std::swap(m_flags,			other.m_flags);
+			std::swap(m_handle,			value.m_handle);
+			std::swap(m_sampler,		value.m_sampler);
+			std::swap(m_level,			value.m_level);
+			std::swap(m_intl_format,	value.m_intl_format);
+			std::swap(m_color_format,		value.m_color_format);
+			std::swap(m_pixel_type,		value.m_pixel_type);
+			std::swap(m_size,			value.m_size);
+			std::swap(m_real_size,		value.m_real_size);
+			std::swap(m_flags,			value.m_flags);
 		}
 	}
 

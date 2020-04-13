@@ -99,11 +99,11 @@ namespace ml
 		
 		static uint32_t dock(cstring name, uint32_t id);
 		
-		static uint32_t split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other);
+		static uint32_t split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
 		
-		static uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other);
+		static uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
 		
-		static uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other);
+		static uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

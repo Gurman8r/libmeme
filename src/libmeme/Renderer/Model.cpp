@@ -43,39 +43,39 @@ namespace ml
 	{
 	}
 
-	model::model(model const & other, allocator_type const & alloc)
-		: m_meshes{ other.m_meshes, alloc }
+	model::model(model const & value, allocator_type const & alloc)
+		: m_meshes{ value.m_meshes, alloc }
 	{
 	}
 
-	model::model(model && other, allocator_type const & alloc) noexcept
+	model::model(model && value, allocator_type const & alloc) noexcept
 		: m_meshes{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	model & model::operator=(model const & other)
+	model & model::operator=(model const & value)
 	{
-		model temp{ other };
+		model temp{ value };
 		swap(temp);
 		return (*this);
 	}
 
-	model & model::operator=(model && other) noexcept
+	model & model::operator=(model && value) noexcept
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 		return (*this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void model::swap(model & other) noexcept
+	void model::swap(model & value) noexcept
 	{
-		if (this != std::addressof(other))
+		if (this != std::addressof(value))
 		{
-			m_meshes.swap(other.m_meshes);
+			m_meshes.swap(value.m_meshes);
 		}
 	}
 

@@ -79,31 +79,31 @@ namespace ml
 		load_from_file(path, flip_v, req_channels);
 	}
 
-	image::image(image const & other, allocator_type const & alloc)
-		: m_size	{ other.m_size }
-		, m_channels{ other.m_channels }
-		, m_pixels	{ other.m_pixels }
+	image::image(image const & value, allocator_type const & alloc)
+		: m_size	{ value.m_size }
+		, m_channels{ value.m_channels }
+		, m_pixels	{ value.m_pixels }
 	{
 	}
 
-	image::image(image && other, allocator_type const & alloc) noexcept
+	image::image(image && value, allocator_type const & alloc) noexcept
 		: image{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image & image::operator=(image const & other)
+	image & image::operator=(image const & value)
 	{
-		image temp{ other };
+		image temp{ value };
 		swap(temp);
 		return (*this);
 	}
 
-	image & image::operator=(image && other) noexcept
+	image & image::operator=(image && value) noexcept
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 		return (*this);
 	}
 
@@ -215,15 +215,15 @@ namespace ml
 		m_pixels.clear();
 	}
 
-	void image::swap(image & other) noexcept
+	void image::swap(image & value) noexcept
 	{
-		if (this != std::addressof(other))
+		if (this != std::addressof(value))
 		{
-			std::swap(m_pixels, other.m_pixels);
+			std::swap(m_pixels, value.m_pixels);
 
-			std::swap(m_size, other.m_size);
+			std::swap(m_size, value.m_size);
 
-			std::swap(m_channels, other.m_channels);
+			std::swap(m_channels, value.m_channels);
 		}
 	}
 

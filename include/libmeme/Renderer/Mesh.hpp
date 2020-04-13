@@ -25,27 +25,27 @@ namespace ml
 		
 		mesh(vertices_t const & vertices, indices_t const & indices, allocator_type const & alloc = {});
 		
-		mesh(mesh const & other, allocator_type const & alloc = {});
+		mesh(mesh const & value, allocator_type const & alloc = {});
 		
-		mesh(mesh && other, allocator_type const & alloc = {}) noexcept;
+		mesh(mesh && value, allocator_type const & alloc = {}) noexcept;
 		
 		~mesh();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh & operator=(mesh const & other);
+		mesh & operator=(mesh const & value);
 		
-		mesh & operator=(mesh && other) noexcept;
+		mesh & operator=(mesh && value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void destroy();
 
-		void swap(mesh & other) noexcept;
+		void swap(mesh & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_memory(mesh const & other);
+		bool load_from_memory(mesh const & value);
 
 		bool load_from_memory(vertices_t const & vertices, indices_t const & indices);
 		

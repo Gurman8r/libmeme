@@ -28,21 +28,21 @@ namespace ml
 	{
 	}
 
-	render_texture::render_texture(render_texture const & other)
-		: m_fbo		{ other.m_fbo }
-		, m_rbo		{ other.m_rbo }
-		, m_size	{ other.m_size }
-		, m_colorID	{ other.m_colorID }
-		, m_frameID	{ other.m_frameID }
-		, m_format	{ other.m_format }
-		, m_texture	{ other.m_texture }
+	render_texture::render_texture(render_texture const & value)
+		: m_fbo		{ value.m_fbo }
+		, m_rbo		{ value.m_rbo }
+		, m_size	{ value.m_size }
+		, m_colorID	{ value.m_colorID }
+		, m_frameID	{ value.m_frameID }
+		, m_format	{ value.m_format }
+		, m_texture	{ value.m_texture }
 	{
 	}
 
-	render_texture::render_texture(render_texture && other) noexcept
+	render_texture::render_texture(render_texture && value) noexcept
 		: render_texture{}
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	render_texture::~render_texture() noexcept

@@ -241,7 +241,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t ... Is, class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) noexcept
+		> void for_indices(Fn && fn, Args && ... args) noexcept
 		{
 			this->expand<Is...>([&](auto && ... vs)
 			{
@@ -254,7 +254,7 @@ namespace ml::ds
 		}
 
 		template <size_t ... Is, class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) const noexcept
+		> void for_indices(Fn && fn, Args && ... args) const noexcept
 		{
 			this->expand<Is...>([&](auto const && ... vs)
 			{
@@ -266,8 +266,10 @@ namespace ml::ds
 			});
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class ... Ts, class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) noexcept
+		> void for_types(Fn && fn, Args && ... args) noexcept
 		{
 			this->expand<Ts...>([&](auto && ... vs)
 			{
@@ -280,7 +282,7 @@ namespace ml::ds
 		}
 
 		template <class ... Ts, class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) const noexcept
+		> void for_types(Fn && fn, Args && ... args) const noexcept
 		{
 			this->expand<Ts...>([&](auto const && ... vs)
 			{
@@ -302,13 +304,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void clear() noexcept
 		{
-			this->for_each<Is...>([&](auto & v) { v.clear(); });
+			this->for_indices<Is...>([&](auto & v) { v.clear(); });
 		}
 
 		template <class ... Ts
 		> void clear() noexcept
 		{
-			this->for_each<Ts...>([&](auto & v) { v.clear(); });
+			this->for_types<Ts...>([&](auto & v) { v.clear(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -321,13 +323,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void pop_back() noexcept
 		{
-			this->for_each<Is...>([&](auto & v) { v.pop_back(); });
+			this->for_indices<Is...>([&](auto & v) { v.pop_back(); });
 		}
 
 		template <class ... Ts
 		> void pop_back() noexcept
 		{
-			this->for_each<Ts...>([&](auto & v) { v.pop_back(); });
+			this->for_types<Ts...>([&](auto & v) { v.pop_back(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -340,13 +342,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void reserve(size_t const value)
 		{
-			this->for_each<Is...>([&](auto & v) { v.reserve(value); });
+			this->for_indices<Is...>([&](auto & v) { v.reserve(value); });
 		}
 
 		template <class ... Ts
 		> void reserve(size_t const value)
 		{
-			this->for_each<Ts...>([&](auto & v) { v.reserve(value); });
+			this->for_types<Ts...>([&](auto & v) { v.reserve(value); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -359,13 +361,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void resize(size_t const value)
 		{
-			this->for_each<Is...>([&](auto & v) { v.resize(value); });
+			this->for_indices<Is...>([&](auto & v) { v.resize(value); });
 		}
 
 		template <class ... Ts
 		> void resize(size_t const value)
 		{
-			this->for_each<Ts...>([&](auto & v) { v.resize(value); });
+			this->for_types<Ts...>([&](auto & v) { v.resize(value); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -378,13 +380,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void shrink_to_fit() noexcept
 		{
-			this->for_each<Is...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_indices<Is...>([&](auto & v) { v.shrink_to_fit(); });
 		}
 
 		template <class ... Ts
 		> void shrink_to_fit() noexcept
 		{
-			this->for_each<Ts...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_types<Ts...>([&](auto & v) { v.shrink_to_fit(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -397,14 +399,14 @@ namespace ml::ds
 			}
 		}
 
-		template <size_t I, class Other = meta::nth<I, vector_types>
-		> void swap(Other & value) noexcept
+		template <size_t I, class U = meta::nth<I, vector_types>
+		> void swap(U & value) noexcept
 		{
 			this->get<I>().swap(value);
 		}
 
-		template <class T, class Other = T
-		> void swap(Other & value) noexcept
+		template <class T, class U = T
+		> void swap(U & value) noexcept
 		{
 			this->get<T>().swap(value);
 		}
@@ -417,13 +419,13 @@ namespace ml::ds
 		template <size_t ... Is
 		> void swap(size_t const lhs, size_t const rhs) noexcept
 		{
-			this->for_each<Is...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+			this->for_indices<Is...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
 		}
 
 		template <class ... Ts
 		> void swap(size_t const lhs, size_t const rhs) noexcept
 		{
-			this->for_each<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+			this->for_types<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -447,7 +449,7 @@ namespace ml::ds
 		template <size_t ... Is
 		> void erase(size_t const loc)
 		{
-			this->for_each<Is...>([&](auto & v)
+			this->for_indices<Is...>([&](auto & v)
 			{
 				v.erase(v.begin() + loc);
 			});
@@ -456,7 +458,7 @@ namespace ml::ds
 		template <size_t ... Is
 		> void erase(size_t const first, size_t const last)
 		{
-			this->for_each<Is...>([&](auto & v)
+			this->for_indices<Is...>([&](auto & v)
 			{
 				v.erase(v.begin() + first, v.begin() + last);
 			});
@@ -465,7 +467,7 @@ namespace ml::ds
 		template <class ... Ts
 		> void erase(size_t const loc)
 		{
-			this->for_each<Ts...>([&](auto & v)
+			this->for_types<Ts...>([&](auto & v)
 			{
 				v.erase(v.begin() + loc);
 			});
@@ -474,7 +476,7 @@ namespace ml::ds
 		template <class ... Ts
 		> void erase(size_t const first, size_t const last)
 		{
-			this->for_each<Ts...>([&](auto & v)
+			this->for_types<Ts...>([&](auto & v)
 			{
 				v.erase(v.begin() + first, v.begin() + last);
 			});
@@ -548,8 +550,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class It, class Other = meta::nth<I, type_list>
-		> auto insert(It loc, Other && value) noexcept
+		template <size_t I, class It, class U = meta::nth<I, type_list>
+		> auto insert(It loc, U && value) noexcept
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
@@ -561,8 +563,8 @@ namespace ml::ds
 			}
 		}
 
-		template <class T, class It, class Other = T
-		> auto insert(It loc, Other && value) noexcept
+		template <class T, class It, class U = T
+		> auto insert(It loc, U && value) noexcept
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
@@ -576,14 +578,14 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class Other = meta::nth<I, type_list>
-		> void push_back(Other && value) noexcept
+		template <size_t I, class U = meta::nth<I, type_list>
+		> void push_back(U && value) noexcept
 		{
 			this->get<I>().push_back(ML_forward(value));
 		}
 
-		template <class T, class Other = T
-		> void push_back(Other && value) noexcept
+		template <class T, class U = T
+		> void push_back(U && value) noexcept
 		{
 			this->get<T>().push_back(ML_forward(value));
 		}
@@ -634,6 +636,58 @@ namespace ml::ds
 		template <class T> ML_NODISCARD size_t size() const noexcept
 		{
 			return this->get<T>().size();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U = self_type
+		> ML_NODISCARD auto compare(U const & value) const noexcept
+		{
+			if constexpr (std::is_same_v<U, self_type>)
+			{
+				return compare(value.m_data);
+			}
+			else
+			{
+				static_assert(std::is_same_v<U, storage_type>);
+				return util::compare(m_data, value);
+			}
+		}
+
+		template <class U = self_type
+		> bool operator==(U const & value) const noexcept
+		{
+			return this->compare(value) == 0;
+		}
+
+		template <class U = self_type
+		> bool operator!=(U const & value) const noexcept
+		{
+			return this->compare(value) != 0;
+		}
+
+		template <class U = self_type
+		> bool operator<(U const & value) const noexcept
+		{
+			return this->compare(value) < 0;
+		}
+
+		template <class U = self_type
+		> bool operator>(U const & value) const noexcept
+		{
+			return this->compare(value) > 0;
+		}
+
+		template <class U = self_type
+		> bool operator<=(U const & value) const noexcept
+		{
+			return this->compare(value) <= 0;
+		}
+
+		template <class U = self_type
+		> bool operator>=(U const & value) const noexcept
+		{
+			return this->compare(value) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

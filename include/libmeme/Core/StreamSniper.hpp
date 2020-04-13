@@ -25,9 +25,9 @@ namespace ml
 			(*this)(value);
 		}
 
-		basic_stream_sniper(self_type && other) noexcept
+		basic_stream_sniper(self_type && value) noexcept
 		{
-			this->swap(std::move(other));
+			this->swap(std::move(value));
 		}
 
 		~basic_stream_sniper() noexcept
@@ -35,19 +35,19 @@ namespace ml
 			(*this)(nullptr);
 		}
 
-		basic_stream_sniper & operator=(self_type && other) noexcept
+		basic_stream_sniper & operator=(self_type && value) noexcept
 		{
-			this->swap(std::move(other));
+			this->swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(self_type & other) noexcept
+		void swap(self_type & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_cur, other.m_cur);
-				std::swap(m_old, other.m_old);
-				std::swap(m_str, other.m_str);
+				std::swap(m_cur, value.m_cur);
+				std::swap(m_old, value.m_old);
+				std::swap(m_str, value.m_str);
 			}
 		}
 

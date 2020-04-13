@@ -76,25 +76,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr self_type & operator=(self_type const & other)
+		constexpr self_type & operator=(self_type const & value)
 		{
-			self_type temp{ other };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr self_type & operator=(self_type && other) noexcept
+		constexpr self_type & operator=(self_type && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		constexpr void swap(buffer_layout & other) noexcept
+		constexpr void swap(buffer_layout & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				util::swap(m_data, other.m_data);
-				util::swap(m_size, other.m_size);
+				util::swap(m_data, value.m_data);
+				util::swap(m_size, value.m_size);
 			}
 		}
 

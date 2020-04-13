@@ -31,24 +31,24 @@ namespace ml
 		
 		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc = {});
 		
-		shader(shader const & other, allocator_type const & alloc = {});
+		shader(shader const & value, allocator_type const & alloc = {});
 		
-		shader(shader && other, allocator_type const & alloc = {}) noexcept;
+		shader(shader && value, allocator_type const & alloc = {}) noexcept;
 		
 		~shader() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader & shader::operator=(shader const & other)
+		shader & shader::operator=(shader const & value)
 		{
-			shader temp{ other };
+			shader temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		shader & shader::operator=(shader && other) noexcept
+		shader & shader::operator=(shader && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -76,7 +76,7 @@ namespace ml
 		
 		bool generate();
 
-		void swap(shader & other) noexcept;
+		void swap(shader & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

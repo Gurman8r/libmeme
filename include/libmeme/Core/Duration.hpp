@@ -35,13 +35,13 @@ namespace ml
 		{
 		}
 
-		constexpr explicit duration(base_type const & other)
-			: m_base{ other }
+		constexpr explicit duration(base_type const & value)
+			: m_base{ value }
 		{
 		}
 
-		constexpr explicit duration(base_type && other) noexcept
-			: m_base{ std::move(other) }
+		constexpr explicit duration(base_type && value) noexcept
+			: m_base{ std::move(value) }
 		{
 		}
 
@@ -57,36 +57,36 @@ namespace ml
 		{
 		}
 
-		constexpr duration(duration const & other)
-			: m_base{ other.m_base }
+		constexpr duration(duration const & value)
+			: m_base{ value.m_base }
 		{
 		}
 
-		constexpr duration(duration && other) noexcept
-			: m_base{ std::move(other.m_base) }
+		constexpr duration(duration && value) noexcept
+			: m_base{ std::move(value.m_base) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr duration & operator=(duration const & other)
+		constexpr duration & operator=(duration const & value)
 		{
-			duration temp{ other };
+			duration temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr duration & operator=(duration && other) noexcept
+		constexpr duration & operator=(duration && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		constexpr void swap(duration & other) noexcept
+		constexpr void swap(duration & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				util::swap(m_base, other.m_base);
+				util::swap(m_base, value.m_base);
 			}
 		}
 
@@ -137,54 +137,36 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = duration
-		> ML_NODISCARD constexpr auto compare(Other const & other) const noexcept
+		template <class U = duration
+		> ML_NODISCARD constexpr auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<Other, duration>)
+			if constexpr (std::is_same_v<U, duration>)
 			{
-				return compare(other.m_base);
+				return compare(value.m_base);
 			}
 			else
 			{
-				return (m_base != other) ? ((m_base < other) ? -1 : 1) : 0;
+				return util::compare(m_base, value);
 			}
 		}
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator==(Other const & other) const noexcept
-		{
-			return compare(other) == 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator==(U const & value) const noexcept { return compare(value) == 0; }
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
-		{
-			return compare(other) != 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator!=(U const & value) const noexcept { return compare(value) != 0; }
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator<(Other const & other) const noexcept
-		{
-			return compare(other) < 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator<(U const & value) const noexcept { return compare(value) < 0; }
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator>(Other const & other) const noexcept
-		{
-			return compare(other) > 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator>(U const & value) const noexcept { return compare(value) > 0; }
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
-		{
-			return compare(other) <= 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator<=(U const & value) const noexcept { return compare(value) <= 0; }
 
-		template <class Other = duration
-		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
-		{
-			return compare(other) >= 0;
-		}
+		template <class U = duration
+		> ML_NODISCARD bool operator>=(U const & value) const noexcept { return compare(value) >= 0; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -223,37 +205,37 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> constexpr duration & operator+=(T const & other) noexcept
+		> constexpr duration & operator+=(T const & value) noexcept
 		{
-			m_base += other;
+			m_base += value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator-=(T const & other) noexcept
+		> constexpr duration & operator-=(T const & value) noexcept
 		{
-			m_base -= other;
+			m_base -= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator*=(T const & other) noexcept
+		> constexpr duration & operator*=(T const & value) noexcept
 		{
-			m_base *= other;
+			m_base *= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator/=(T const & other) noexcept
+		> constexpr duration & operator/=(T const & value) noexcept
 		{
-			m_base /= other;
+			m_base /= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator%=(T const & other) noexcept
+		> constexpr duration & operator%=(T const & value) noexcept
 		{
-			m_base %= other;
+			m_base %= value;
 			return (*this);
 		}
 

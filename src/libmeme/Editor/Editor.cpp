@@ -344,22 +344,22 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		ML_assert(g_editor);
-		return (*g_editor).m_io.dockspace_nodes[(size_t)i] = split(id, dir, ratio, other);
+		return (*g_editor).m_io.dockspace_nodes[(size_t)i] = split(id, dir, ratio, value);
 	}
 
-	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * other)
+	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		ML_assert(g_editor);
-		return split(id, dir, ratio, nullptr, other);
+		return split(id, dir, ratio, nullptr, value);
 	}
 
-	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * other)
+	uint32_t editor::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
 	{
 		ML_assert(g_editor);
-		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, other);
+		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

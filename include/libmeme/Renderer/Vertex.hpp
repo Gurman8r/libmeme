@@ -38,13 +38,13 @@ namespace ml
 		{
 		}
 
-		constexpr vertex(vertex const & other) : m_data{ other.m_data }
+		constexpr vertex(vertex const & value) : m_data{ value.m_data }
 		{
 		}
 
-		constexpr vertex(vertex && other) noexcept : m_data{}
+		constexpr vertex(vertex && value) noexcept : m_data{}
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 		}
 
 		constexpr vertex() noexcept : m_data{}
@@ -53,24 +53,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vertex & operator=(vertex const & other)
+		vertex & operator=(vertex const & value)
 		{
-			vertex temp{ other };
+			vertex temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		vertex & operator=(vertex && other) noexcept
+		vertex & operator=(vertex && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		constexpr void swap(vertex & other) noexcept
+		constexpr void swap(vertex & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				util::swap(m_data, other.m_data);
+				util::swap(m_data, value.m_data);
 			}
 		}
 

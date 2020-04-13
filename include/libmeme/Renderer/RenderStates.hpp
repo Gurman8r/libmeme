@@ -24,8 +24,8 @@ namespace ml
 		{
 		}
 
-		constexpr alpha_state(alpha_state const & other) noexcept
-			: alpha_state{ other.enabled, other.func, other.coeff }
+		constexpr alpha_state(alpha_state const & value) noexcept
+			: alpha_state{ value.enabled, value.func, value.coeff }
 		{
 		}
 
@@ -65,8 +65,8 @@ namespace ml
 		{
 		}
 
-		constexpr blend_state(blend_state const & other) noexcept
-			: blend_state{ other.enabled, other.sfactorRGB, other.sfactorAlpha, other.dfactorRGB, other.dfactorAlpha }
+		constexpr blend_state(blend_state const & value) noexcept
+			: blend_state{ value.enabled, value.sfactorRGB, value.sfactorAlpha, value.dfactorRGB, value.dfactorAlpha }
 		{
 		}
 
@@ -102,8 +102,8 @@ namespace ml
 		{
 		}
 
-		constexpr cull_state(cull_state const & other) noexcept
-			: cull_state{ other.enabled, other.mode }
+		constexpr cull_state(cull_state const & value) noexcept
+			: cull_state{ value.enabled, value.mode }
 		{
 		}
 
@@ -142,8 +142,8 @@ namespace ml
 		{
 		}
 
-		constexpr depth_state(depth_state const & other) noexcept
-			: depth_state{ other.enabled, other.func, other.mask }
+		constexpr depth_state(depth_state const & value) noexcept
+			: depth_state{ value.enabled, value.func, value.mask }
 		{
 		}
 
@@ -190,12 +190,12 @@ namespace ml
 		{
 		}
 
-		constexpr render_states(render_states const & other) noexcept : render_states{
-			other.m_enabled,
-			other.m_alpha,
-			other.m_blend,
-			other.m_cull,
-			other.m_depth
+		constexpr render_states(render_states const & value) noexcept : render_states{
+			value.m_enabled,
+			value.m_alpha,
+			value.m_blend,
+			value.m_cull,
+			value.m_depth
 		}
 		{
 		}

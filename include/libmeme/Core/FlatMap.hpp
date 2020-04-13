@@ -89,16 +89,16 @@ namespace ml::ds
 			assign(value);
 		}
 
-		basic_flat_map(self_type const & other, allocator_type const & alloc = {})
+		basic_flat_map(self_type const & value, allocator_type const & alloc = {})
 			: self_type{ alloc }
 		{
-			assign(other);
+			assign(value);
 		}
 
-		basic_flat_map(self_type && other, allocator_type const & alloc = {}) noexcept
+		basic_flat_map(self_type && value, allocator_type const & alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -110,16 +110,16 @@ namespace ml::ds
 			return (*this);
 		}
 
-		self_type & operator=(self_type const & other)
+		self_type & operator=(self_type const & value)
 		{
-			self_type temp{ other };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		self_type & operator=(self_type && other) noexcept
+		self_type & operator=(self_type && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -135,11 +135,11 @@ namespace ml::ds
 			}
 		}
 
-		void assign(self_type const & other)
+		void assign(self_type const & value)
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_pair = other.m_pair;
+				m_pair = value.m_pair;
 			}
 		}
 
@@ -179,11 +179,11 @@ namespace ml::ds
 			m_pair.second.shrink_to_fit();
 		}
 
-		void swap(self_type & other) noexcept
+		void swap(self_type & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				m_pair.swap(other.m_pair);
+				m_pair.swap(value.m_pair);
 			}
 		}
 
@@ -350,36 +350,8 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> value_type & find_or_add(key_type const & key, Args && ... args) noexcept
-		{
-			if (auto const it{ find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return *insert(key, ML_forward(args)...).second;
-			}
-		}
-
-		template <class ... Args
-		> value_type & find_or_add(key_type && key, Args && ... args) noexcept
-		{
-			if (auto const it{ find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return *insert(std::move(key), ML_forward(args)...).second;
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class Fn, class ... Args
-		> value_type & find_or_add_fn(key_type const & key, Fn && fn, Args && ... args) noexcept
+		> value_type & find_or_add(key_type const & key, Fn && fn, Args && ... args) noexcept
 		{
 			if (auto const it{ find(key) })
 			{
@@ -392,7 +364,7 @@ namespace ml::ds
 		}
 
 		template <class Fn, class ... Args
-		> value_type & find_or_add_fn(key_type && key, Fn && fn, Args && ... args) noexcept
+		> value_type & find_or_add(key_type && key, Fn && fn, Args && ... args) noexcept
 		{
 			if (auto const it{ find(key) })
 			{
@@ -408,12 +380,12 @@ namespace ml::ds
 
 		ML_NODISCARD value_type & at(key_type const & key) noexcept
 		{
-			return find_or_add(key, value_type{});
+			return find_or_add(key, []() { return value_type{}; });
 		}
 
 		ML_NODISCARD value_type & at(key_type && key) noexcept
 		{
-			return find_or_add(std::move(key), value_type{});
+			return find_or_add(std::move(key), []() { return value_type{}; });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -522,53 +494,54 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Other = self_type
-		> ML_NODISCARD auto compare(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<Other, self_type>)
+			if constexpr (std::is_same_v<U, self_type>)
 			{
-				return compare(other.m_pair);
+				return compare(value.m_pair);
 			}
 			else
 			{
-				return (m_pair != other) ? ((m_pair < other) ? -1 : 1) : 0;
+				static_assert(std::is_same_v<U, storage_type>);
+				return util::compare(m_pair, value.m_pair);
 			}
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator==(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
-			return compare(other) == 0;
+			return compare(value) == 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator!=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
-			return compare(other) != 0;
+			return compare(value) != 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator<(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
-			return compare(other) < 0;
+			return compare(value) < 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator>(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
-			return compare(other) > 0;
+			return compare(value) > 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator<=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
-			return compare(other) <= 0;
+			return compare(value) <= 0;
 		}
 
-		template <class Other = self_type
-		> ML_NODISCARD bool operator>=(Other const & other) const noexcept
+		template <class U = self_type
+		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
-			return compare(other) >= 0;
+			return compare(value) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

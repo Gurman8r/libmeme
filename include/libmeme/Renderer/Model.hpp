@@ -37,19 +37,19 @@ namespace ml
 		
 		model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
 		
-		model(model const & other, allocator_type const & alloc = {});
+		model(model const & value, allocator_type const & alloc = {});
 		
-		model(model && other, allocator_type const & alloc = {}) noexcept;
+		model(model && value, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		model & operator=(model const & other);
+		model & operator=(model const & value);
 
-		model & operator=(model && other) noexcept;
+		model & operator=(model && value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void swap(model & other) noexcept;
+		void swap(model & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

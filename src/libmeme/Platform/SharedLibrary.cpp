@@ -62,10 +62,10 @@ namespace ml
 		open(path);
 	}
 
-	shared_library::shared_library(shared_library && other, allocator_type const & alloc) noexcept
+	shared_library::shared_library(shared_library && value, allocator_type const & alloc) noexcept
 		: shared_library{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	shared_library::~shared_library() noexcept
@@ -114,7 +114,7 @@ namespace ml
 		if (!m_inst) { return nullptr; }
 
 		// load function
-		return m_funcs.find_or_add_fn(
+		return m_funcs.find_or_add(
 			util::hash(name),
 			&impl::load_function, m_inst, name.c_str());
 	}

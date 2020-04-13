@@ -55,14 +55,14 @@ namespace ml
 		{
 		}
 
-		constexpr rectangle(self_type const & other) noexcept
-			: m_data{ other.m_data }
+		constexpr rectangle(self_type const & value) noexcept
+			: m_data{ value.m_data }
 		{
 		}
 
 		template <class U
-		> constexpr rectangle(tvec4<U> const & other) noexcept
-			: m_data{ other }
+		> constexpr rectangle(tvec4<U> const & value) noexcept
+			: m_data{ value }
 		{
 		}
 		

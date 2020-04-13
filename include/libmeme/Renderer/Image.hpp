@@ -41,15 +41,15 @@ namespace ml
 		
 		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type const & alloc = {});
 		
-		image(image const & other, allocator_type const & alloc = {});
+		image(image const & value, allocator_type const & alloc = {});
 		
-		image(image && other, allocator_type const & alloc = {}) noexcept;
+		image(image && value, allocator_type const & alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & operator=(image const & other);
+		image & operator=(image const & value);
 
-		image & operator=(image && other) noexcept;
+		image & operator=(image && value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -79,7 +79,7 @@ namespace ml
 
 		void clear() noexcept;
 
-		void swap(image & other) noexcept;
+		void swap(image & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

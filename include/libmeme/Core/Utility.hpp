@@ -40,7 +40,7 @@ namespace ml::util
 	> ML_NODISCARD constexpr bool equal_to(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? (*lBegin == *rBegin && _ML util::equal_to(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			? ((*lBegin == *rBegin) && _ML util::equal_to(lBegin + 1, lEnd, rBegin + 1, rEnd))
 			: (lBegin == lEnd && rBegin == rEnd);
 	}
 
@@ -50,8 +50,18 @@ namespace ml::util
 	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? (*lBegin < *rBegin && _ML util::less(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			? ((*lBegin < *rBegin) && _ML util::less(lBegin + 1, lEnd, rBegin + 1, rEnd))
 			: (lBegin == lEnd && rBegin == rEnd);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Lhs, class Rhs = Lhs
+	> ML_NODISCARD constexpr auto compare(Lhs && lhs, Rhs && rhs) noexcept
+	{
+		return (ML_forward(lhs) != ML_forward(rhs))
+			? ((ML_forward(lhs) < ML_forward(rhs)) ? -1 : 1)
+			: 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

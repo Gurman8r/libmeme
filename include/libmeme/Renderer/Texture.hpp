@@ -44,24 +44,24 @@ namespace ml
 		
 		texture(image const & image);
 		
-		texture(texture const & other);
+		texture(texture const & value);
 		
-		texture(texture && other) noexcept;
+		texture(texture && value) noexcept;
 		
 		~texture() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		texture & operator=(texture const & other)
+		texture & operator=(texture const & value)
 		{
-			texture temp{ other };
+			texture temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		texture & operator=(texture && other) noexcept
+		texture & operator=(texture && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
@@ -71,7 +71,7 @@ namespace ml
 
 		bool load_from_image(image const & img);
 
-		bool load_from_texture(texture const & other);
+		bool load_from_texture(texture const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -85,7 +85,7 @@ namespace ml
 
 		bool generate();
 
-		void swap(texture & other) noexcept;
+		void swap(texture & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

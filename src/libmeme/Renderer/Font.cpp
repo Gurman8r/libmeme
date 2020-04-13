@@ -31,18 +31,18 @@ namespace ml
 		load_from_file(path);
 	}
 
-	font::font(font const & other, allocator_type const & alloc)
-		: m_pages	{ other.m_pages, alloc }
-		, m_info	{ { other.m_info.family, alloc }, other.m_info.locale }
-		, m_lib		{ other.m_lib }
-		, m_face	{ other.m_face }
+	font::font(font const & value, allocator_type const & alloc)
+		: m_pages	{ value.m_pages, alloc }
+		, m_info	{ { value.m_info.family, alloc }, value.m_info.locale }
+		, m_lib		{ value.m_lib }
+		, m_face	{ value.m_face }
 	{
 	}
 
-	font::font(font && other, allocator_type const & alloc) noexcept
+	font::font(font && value, allocator_type const & alloc) noexcept
 		: font{ alloc }
 	{
-		swap(std::move(other));
+		swap(std::move(value));
 	}
 
 	font::~font() noexcept

@@ -71,8 +71,8 @@ namespace ml
 		{
 		}
 
-		template <class U> constexpr basic_color(basic_color<U> const & other)
-			: m_value{ util::color_cast(other.rgba()) }
+		template <class U> constexpr basic_color(basic_color<U> const & value)
+			: m_value{ util::color_cast(value.rgba()) }
 		{
 		}
 

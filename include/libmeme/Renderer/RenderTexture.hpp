@@ -17,38 +17,38 @@ namespace ml
 
 		render_texture(vec2i const & size, uint32_t colorID, uint32_t frameID, uint32_t format);
 
-		render_texture(render_texture const & other);
+		render_texture(render_texture const & value);
 
-		render_texture(render_texture && other) noexcept;
+		render_texture(render_texture && value) noexcept;
 
 		~render_texture() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		render_texture & operator=(render_texture const & other)
+		render_texture & operator=(render_texture const & value)
 		{
-			render_texture temp{ other };
+			render_texture temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		render_texture & operator=(render_texture && other) noexcept
+		render_texture & operator=(render_texture && value) noexcept
 		{
-			swap(std::move(other));
+			swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(render_texture & other) noexcept
+		void swap(render_texture & value) noexcept
 		{
-			if (this != std::addressof(other))
+			if (this != std::addressof(value))
 			{
-				std::swap(m_fbo, other.m_fbo);
-				std::swap(m_rbo, other.m_rbo);
-				std::swap(m_size, other.m_size);
-				std::swap(m_colorID, other.m_colorID);
-				std::swap(m_frameID, other.m_frameID);
-				std::swap(m_format, other.m_format);
-				std::swap(m_texture, other.m_texture);
+				std::swap(m_fbo, value.m_fbo);
+				std::swap(m_rbo, value.m_rbo);
+				std::swap(m_size, value.m_size);
+				std::swap(m_colorID, value.m_colorID);
+				std::swap(m_frameID, value.m_frameID);
+				std::swap(m_format, value.m_format);
+				std::swap(m_texture, value.m_texture);
 			}
 		}
 
