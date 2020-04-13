@@ -17,6 +17,12 @@
 
 #include <libmeme/Common.hpp>
 
+#if ML_has_cxx20
+#	define ML_meta_invoke(fn, ...) (std::invoke(fn, ##__VA_ARGS__))
+#else
+#	define ML_meta_invoke(fn, ...) ((fn)(##__VA_ARGS__))
+#endif
+
 // DS
 namespace ml::meta
 {
@@ -37,39 +43,30 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tp, class Fn, size_t ... Is
-	> constexpr decltype(auto) impl_tuple_apply(Tp && tp, Fn && fn, std::index_sequence<Is...>)
+	> constexpr void impl_tuple_apply(Tp && tp, Fn && fn, std::index_sequence<Is...>)
 	{
-#if ML_has_cxx20
-		return std::invoke(ML_forward(fn), std::get<Is>(ML_forward(tp))...);
-#else
-		return ML_forward(fn)(std::get<Is>(ML_forward(tp))...);
-#endif
+		ML_meta_invoke(ML_forward(fn), std::get<Is>(ML_forward(tp))...);
 	}
 
 	template <class Tp, class Fn
-	> constexpr decltype(auto) impl_tuple_apply(Tp && tp, Fn && fn)
+	> constexpr void impl_tuple_apply(Tp && tp, Fn && fn)
 	{
-		return _ML meta::impl_tuple_apply(
+		_ML meta::impl_tuple_apply(
 			ML_forward(tp),
 			ML_forward(fn),
-			std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>{}
-		);
+			std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>());
 	}
 
 	template <class Fn, class ... Args
-	> constexpr decltype(auto) impl_for_args(Fn && fn, Args && ... args)
+	> constexpr void impl_for_args(Fn && fn, Args && ... args)
 	{
-#if ML_has_cxx20
-		return (void)std::initializer_list<int32_t>{ (std::invoke(ML_forward(fn), ML_forward(args)), 0)... };
-#else
-		return (void)std::initializer_list<int32_t>{ (ML_forward(fn)(ML_forward(args)), 0)... };
-#endif
+		(void)std::initializer_list<int32_t>{ (ML_meta_invoke(ML_forward(fn), ML_forward(args)), 0)... };
 	}
 
 	template <class Tp, class Fn
-	> constexpr decltype(auto) impl_for_tuple(Tp && tp, Fn && fn)
+	> constexpr void impl_for_tuple(Tp && tp, Fn && fn)
 	{
-		return _ML meta::impl_tuple_apply(ML_forward(tp), [&fn](auto && ... rest)
+		_ML meta::impl_tuple_apply(ML_forward(tp), [&fn](auto && ... rest)
 		{
 			_ML meta::for_args(fn, ML_forward(rest)...);
 		});
@@ -79,23 +76,23 @@ namespace ml::meta
 
 	// "unpacks" the contents of a tuple inside a function call
 	template <class Tp, class Fn
-	> constexpr decltype(auto) tuple_apply(Tp && tp, Fn && fn)
+	> constexpr void tuple_apply(Tp && tp, Fn && fn)
 	{
-		return _ML meta::impl_tuple_apply(ML_forward(tp), ML_forward(fn));
+		_ML meta::impl_tuple_apply(ML_forward(tp), ML_forward(fn));
 	}
 
 	// invokes a function on every passed object
 	template <class Fn, class ... Args
-	> constexpr decltype(auto) for_args(Fn && fn, Args && ... args)
+	> constexpr void for_args(Fn && fn, Args && ... args)
 	{
-		return _ML meta::impl_for_args(ML_forward(fn), ML_forward(args)...);
+		_ML meta::impl_for_args(ML_forward(fn), ML_forward(args)...);
 	}
 
 	// invokes a function on every element of a tuple
 	template <class Tp, class Fn
-	> constexpr decltype(auto) for_tuple(Tp && tp, Fn && fn)
+	> constexpr void for_tuple(Tp && tp, Fn && fn)
 	{
-		return _ML meta::impl_for_tuple(ML_forward(tp), ML_forward(fn));
+		_ML meta::impl_for_tuple(ML_forward(tp), ML_forward(fn));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

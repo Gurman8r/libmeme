@@ -205,6 +205,35 @@ namespace ml
 			event_system::add_listener<	gui_dock_event	>(this);
 			event_system::add_listener<	gui_draw_event	>(this);
 			event_system::add_listener<	unload_event	>(this);
+
+
+			([&, &mv = ds::multi_vector<int, float, std::string>{}]()
+			{
+				mv.clear();
+				mv.clear<0>();
+				mv.clear<float, int>();
+				mv.get<int>().push_back(0);
+
+				size_t const index{};
+
+				mv.expand<int, std::string, float>(index, [&](int & i, auto & s, float & f)
+				{
+				});
+
+				mv.for_tuple([&](auto & v) { v.clear(); });
+
+				mv.for_types<int, std::string, float>([&](auto & v) { v.clear(); });
+
+				mv.for_indices<2, 0, 1>([&](auto & v) { v.clear(); });
+
+				mv.push_back<int>(0);
+				mv.push_back<float>(1.f);
+				mv.push_back<std::string>("");
+				mv.push_back(std::make_tuple(1, 2.3f, ""s));
+				mv.insert(0, std::make_tuple(1, 2.3f, ""s));
+				mv.emplace<std::string>(3, "");
+				mv.emplace_back<std::string>("");
+			})();
 		}
 
 		void on_event(event const & ev) override

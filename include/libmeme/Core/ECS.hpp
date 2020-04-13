@@ -670,22 +670,23 @@ namespace ml::ecs
 					// find dead entity from the left
 					for (; true; ++dead)
 					{
-						if (dead > alive) return dead;
-						if (!m_entities.get<id_alive>()[dead]) break;
+						if (dead > alive) { return dead; }
+						if (!m_entities.get<id_alive>(dead)) break;
 					}
 
 					// find alive entity from the right
 					for (; true; --alive)
 					{
-						if (m_entities.get<id_alive>()[alive]) break;
-						if (alive <= dead) return dead;
+						if (m_entities.get<id_alive>(alive)) break;
+						if (alive <= dead) { return dead; }
 					}
 
 					// found two entities that need to be swapped
-					ML_assert(m_entities.get<id_alive>()[alive]);
-					ML_assert(!m_entities.get<id_alive>()[dead]);
-
-					this->swap(alive, dead);
+					ML_assert(m_entities.get<id_alive>(alive));
+					ML_assert(!m_entities.get<id_alive>(dead));
+					
+					// swap the entities
+					m_entities.swap<id_alive, id_index, id_handle, id_bitset>(alive, dead);
 
 					// refresh alive entity
 					auto & a{ m_handles[alive] };
@@ -716,16 +717,6 @@ namespace ml::ecs
 				m_handles	.swap(other.m_handles);
 				m_systems	.swap(other.m_systems);
 			}
-		}
-
-		void swap(size_t const lhs, size_t const rhs) noexcept
-		{
-			if (lhs == rhs) { return; }
-
-			std::swap(m_entities.get<id_alive>()[lhs], m_entities.get<id_alive>()[rhs]);
-			std::swap(m_entities.get<id_index>()[lhs], m_entities.get<id_index>()[rhs]);
-			std::swap(m_entities.get<id_handle>()[lhs], m_entities.get<id_handle>()[rhs]);
-			std::swap(m_entities.get<id_bitset>()[lhs], m_entities.get<id_bitset>()[rhs]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

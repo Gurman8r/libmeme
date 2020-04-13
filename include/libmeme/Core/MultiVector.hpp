@@ -15,7 +15,9 @@ namespace ml::ds
 
 		using self_type			= typename multi_vector<_Ts...>;
 		using type_list			= typename meta::list<_Ts...>;
-		using storage_type		= typename meta::tuple<meta::remap<pmr::vector, type_list>>;
+		using vector_types		= typename meta::remap<pmr::vector, type_list>;
+		using tuple_type		= typename meta::tuple<type_list>;
+		using storage_type		= typename meta::tuple<vector_types>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -163,111 +165,121 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t ... Is, class Fn> void expand(Fn && fn) noexcept
+		template <size_t ... Is, class Fn
+		> void expand(Fn && fn) noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>()...);
 		}
 
-		template <size_t ... Is, class Fn> void expand(Fn && fn) const noexcept
+		template <size_t ... Is, class Fn
+		> void expand(Fn && fn) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>()...);
 		}
 
-		template <class ... Ts, class Fn> void expand(Fn && fn) noexcept
+		template <class ... Ts, class Fn
+		> void expand(Fn && fn) noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Ts>()...);
 		}
 
-		template <class ... Ts, class Fn> void expand(Fn && fn) const noexcept
+		template <class ... Ts, class Fn
+		> void expand(Fn && fn) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Ts>()...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t ... Is, class Fn> void expand(size_t const i, Fn && fn) noexcept
+		template <size_t ... Is, class Fn
+		> void expand(size_t const i, Fn && fn) noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>(i)...);
 		}
 
-		template <size_t ... Is, class Fn> void expand(size_t const i, Fn && fn) const noexcept
+		template <size_t ... Is, class Fn
+		> void expand(size_t const i, Fn && fn) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>(i)...);
 		}
 
-		template <class ... Ts, class Fn> void expand(size_t const i, Fn && fn) noexcept
+		template <class ... Ts, class Fn
+		> void expand(size_t const i, Fn && fn) noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
 		}
 
-		template <class ... Ts, class Fn> void expand(size_t const i, Fn && fn) const noexcept
+		template <class ... Ts, class Fn
+		> void expand(size_t const i, Fn && fn) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) noexcept
+		template <class Fn
+		> void for_tuple(Fn && fn) noexcept
 		{
-			meta::for_tuple(m_data, ML_forward(fn), ML_forward(args)...);
+			meta::for_tuple(m_data, ML_forward(fn));
 		}
 
-		template <class Fn, class ... Args
-		> void for_each(Fn && fn, Args && ... args) const noexcept
+		template <class Fn
+		> void for_tuple(Fn && fn) const noexcept
 		{
-			meta::for_tuple(m_data, ML_forward(fn), ML_forward(args)...);
+			meta::for_tuple(m_data, ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t ... Is, class Fn, class ... Args
-		> void for_(Fn && fn, Args && ... args) noexcept
+		template <size_t ... Is, class Fn
+		> void for_indices(Fn && fn) noexcept
 		{
 			this->expand<Is...>([&](auto && ... vs)
 			{
 				meta::for_args([&](auto & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
 		}
 
-		template <size_t ... Is, class Fn, class ... Args
-		> void for_(Fn && fn, Args && ... args) const noexcept
+		template <size_t ... Is, class Fn
+		> void for_indices(Fn && fn) const noexcept
 		{
 			this->expand<Is...>([&](auto const && ... vs)
 			{
 				meta::for_args([&](auto const & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
 		}
 
-		template <class ... Ts, class Fn, class ... Args
-		> void for_(Fn && fn, Args && ... args) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class ... Ts, class Fn
+		> void for_types(Fn && fn) noexcept
 		{
 			this->expand<Ts...>([&](auto && ... vs)
 			{
 				meta::for_args([&](auto & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
 		}
 
-		template <class ... Ts, class Fn, class ... Args
-		> void for_(Fn && fn, Args && ... args) const noexcept
+		template <class ... Ts, class Fn
+		> void for_types(Fn && fn) const noexcept
 		{
 			this->expand<Ts...>([&](auto const && ... vs)
 			{
 				meta::for_args([&](auto const & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
@@ -277,68 +289,95 @@ namespace ml::ds
 
 		void clear() noexcept
 		{
-			this->for_each([&](auto & v) { v.clear(); });
+			this->for_tuple([&](auto & v) { v.clear(); });
 		}
 
-		template <size_t ... Is> void clear() noexcept
+		template <size_t ... Is
+		> void clear() noexcept
 		{
-			this->for_<Is...>([&](auto & v) { v.clear(); });
+			this->for_indices<Is...>([&](auto & v) { v.clear(); });
 		}
 
-		template <class ... Ts> void clear() noexcept
+		template <class ... Ts
+		> void clear() noexcept
 		{
-			this->for_<Ts...>([&](auto & v) { v.clear(); });
+			this->for_types<Ts...>([&](auto & v) { v.clear(); });
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void pop_back() noexcept
+		{
+			this->for_tuple([&](auto & v) { v.pop_back(); });
+		}
+
+		template <size_t ... Is
+		> void pop_back() noexcept
+		{
+			this->for_indices<Is...>([&](auto & v) { v.pop_back(); });
+		}
+
+		template <class ... Ts
+		> void pop_back() noexcept
+		{
+			this->for_types<Ts...>([&](auto & v) { v.pop_back(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void reserve(size_t const value)
 		{
-			this->for_each([&](auto & v) { v.reserve(value); });
+			this->for_tuple([&](auto & v) { v.reserve(value); });
 		}
 
-		template <size_t ... Is> void reserve(size_t const value)
+		template <size_t ... Is
+		> void reserve(size_t const value)
 		{
-			this->for_<Is...>([&](auto & v) { v.reserve(value); });
+			this->for_indices<Is...>([&](auto & v) { v.reserve(value); });
 		}
 
-		template <class ... Ts> void reserve(size_t const value)
+		template <class ... Ts
+		> void reserve(size_t const value)
 		{
-			this->for_<Ts...>([&](auto & v) { v.reserve(value); });
+			this->for_types<Ts...>([&](auto & v) { v.reserve(value); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void resize(size_t const value)
 		{
-			this->for_each([&](auto & v) { v.resize(value); });
+			this->for_tuple([&](auto & v) { v.resize(value); });
 		}
 
-		template <size_t ... Is> void resize(size_t const value)
+		template <size_t ... Is
+		> void resize(size_t const value)
 		{
-			this->for_<Is...>([&](auto & v) { v.resize(value); });
+			this->for_indices<Is...>([&](auto & v) { v.resize(value); });
 		}
 
-		template <class ... Ts> void resize(size_t const value)
+		template <class ... Ts
+		> void resize(size_t const value)
 		{
-			this->for_<Ts...>([&](auto & v) { v.resize(value); });
+			this->for_types<Ts...>([&](auto & v) { v.resize(value); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void shrink_to_fit() noexcept
 		{
-			this->for_each([&](auto & v) { v.shrink_to_fit(); });
+			this->for_tuple([&](auto & v) { v.shrink_to_fit(); });
 		}
 
-		template <size_t ... Is> void shrink_to_fit() noexcept
+		template <size_t ... Is
+		> void shrink_to_fit() noexcept
 		{
-			this->for_<Is...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_indices<Is...>([&](auto & v) { v.shrink_to_fit(); });
 		}
 
-		template <class ... Ts> void shrink_to_fit() noexcept
+		template <class ... Ts
+		> void shrink_to_fit() noexcept
 		{
-			this->for_<Ts...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_types<Ts...>([&](auto & v) { v.shrink_to_fit(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -351,14 +390,197 @@ namespace ml::ds
 			}
 		}
 
-		template <size_t I, class Other> void swap(Other & value) noexcept
+		template <size_t I, class Other = meta::nth<I, vector_types>
+		> void swap(Other & value) noexcept
 		{
 			this->get<I>().swap(value);
 		}
 
-		template <class T, class Other> void swap(Other & value) noexcept
+		template <class T, class Other = T
+		> void swap(Other & value) noexcept
 		{
 			this->get<T>().swap(value);
+		}
+
+		void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_tuple([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+		}
+
+		template <size_t ... Is
+		> void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_indices<Is...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+		}
+
+		template <class ... Ts
+		> void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_types<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void erase(size_t const loc)
+		{
+			this->for_tuple([&](auto & v) { v.erase(v.begin() + loc); });
+		}
+
+		void erase(size_t const first, size_t const last)
+		{
+			this->for_tuple([&](auto & v) { v.erase(v.begin() + first, v.begin() + last); });
+		}
+
+		template <size_t ... Is
+		> void erase(size_t const loc)
+		{
+			this->for_indices<Is...>([&](auto & v) { v.erase(v.begin() + loc); });
+		}
+
+		template <size_t ... Is
+		> void erase(size_t const first, size_t const last)
+		{
+			this->for_indices<Is...>([&](auto & v) { v.erase(v.begin() + first, v.begin() + last); });
+		}
+
+		template <class ... Ts
+		> void erase(size_t const loc)
+		{
+			this->for_types<Ts...>([&](auto & v) { v.erase(v.begin() + loc); });
+		}
+
+		template <class ... Ts
+		> void erase(size_t const a, size_t const b)
+		{
+			this->for_types<Ts...>([&](auto & v) { v.erase(v.begin() + a, v.begin() + b); });
+		}
+
+		template <size_t I, class It
+		> auto erase(It loc)
+		{
+			return this->get<I>().erase(loc);
+		}
+
+		template <size_t I, class It
+		> auto erase(It first, It last)
+		{
+			return this->get<I>().erase(first, last);
+		}
+
+		template <class T, class It
+		> auto erase(It it)
+		{
+			return this->get<T>().erase(it);
+		}
+
+		template <class T, class It
+		> auto erase(It first, It last)
+		{
+			return this->get<T>().erase(first, last);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class It, class ... Args
+		> decltype(auto) emplace(It it, Args && ... args) noexcept
+		{
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<I>().emplace(this->begin<I>() + it, ML_forward(args)...);
+			}
+			else
+			{
+				return this->get<I>().emplace(it, ML_forward(args)...);
+			}
+		}
+
+		template <class T, class It, class ... Args
+		> decltype(auto) emplace(It it, Args && ... args) noexcept
+		{
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<T>().emplace(this->begin<T>() + it, ML_forward(args)...);
+			}
+			else
+			{
+				return this->get<T>().emplace(it, ML_forward(args)...);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class ... Args
+		> decltype(auto) emplace_back(Args && ... args) noexcept
+		{
+			return this->get<I>().emplace_back(ML_forward(args)...);
+		}
+
+		template <class T, class ... Args
+		> decltype(auto) emplace_back(Args && ... args) noexcept
+		{
+			return this->get<T>().emplace_back(ML_forward(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class It, class ... Args
+		> auto insert(It it, Args && ... args) noexcept
+		{
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<I>().insert(this->begin<I>() + it, ML_forward(args)...);
+			}
+			else
+			{
+				return this->get<I>().insert(it, ML_forward(args)...);
+			}
+		}
+
+		template <class T, class It, class ... Args
+		> auto insert(It it, Args && ... args) noexcept
+		{
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<T>().insert(this->begin<T>() + it, ML_forward(args)...);
+			}
+			else
+			{
+				return this->get<T>().insert(it, ML_forward(args)...);
+			}
+		}
+
+		void insert(size_t const it, tuple_type && value) noexcept
+		{
+			meta::for_types<type_list>([&](auto t)
+			{
+				using T = typename decltype(t)::type;
+
+				this->insert<T>(it, std::get<T>(ML_forward(value)));
+			});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class ... Args
+		> void push_back(Args && ... args) noexcept
+		{
+			this->get<I>().push_back(ML_forward(args)...);
+		}
+
+		template <class T, class ... Args
+		> void push_back(Args && ... args) noexcept
+		{
+			this->get<T>().push_back(ML_forward(args)...);
+		}
+
+		void push_back(tuple_type && value) noexcept
+		{
+			meta::for_types<type_list>([&](auto t)
+			{
+				using T = typename decltype(t)::type;
+
+				this->push_back<T>(std::get<T>(ML_forward(value)));
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -408,6 +630,146 @@ namespace ml::ds
 		{
 			return this->get<T>().size();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD decltype(auto) back() & noexcept
+		{
+			return this->get<I>().back();
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) back() const & noexcept
+		{
+			return this->get<I>().back();
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) back() && noexcept
+		{
+			return std::move(this->get<I>().back());
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) back() const && noexcept
+		{
+			return std::move(this->get<I>().back());
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) back() & noexcept
+		{
+			return this->get<T>().back();
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) back() const & noexcept
+		{
+			return this->get<T>().back();
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) back() && noexcept
+		{
+			return std::move(this->get<T>().back());
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) back() const && noexcept
+		{
+			return std::move(this->get<T>().back());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD decltype(auto) front() & noexcept
+		{
+			return this->get<I>().front();
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) front() const & noexcept
+		{
+			return this->get<I>().front();
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) front() && noexcept
+		{
+			return std::move(this->get<I>().front());
+		}
+
+		template <size_t I> ML_NODISCARD decltype(auto) front() const && noexcept
+		{
+			return std::move(this->get<I>().front());
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) front() & noexcept
+		{
+			return this->get<T>().front();
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) front() const & noexcept
+		{
+			return this->get<T>().front();
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) front() && noexcept
+		{
+			return std::move(this->get<T>().front());
+		}
+
+		template <class T> ML_NODISCARD decltype(auto) front() const && noexcept
+		{
+			return std::move(this->get<T>().front());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD auto begin() noexcept { return this->get<I>().begin(); }
+
+		template <size_t I> ML_NODISCARD auto begin() const noexcept { return this->get<I>().begin(); }
+
+		template <size_t I> ML_NODISCARD auto cbegin() noexcept { return this->get<I>().cbegin(); }
+
+		template <class T> ML_NODISCARD auto begin() noexcept { return this->get<T>().begin(); }
+
+		template <class T> ML_NODISCARD auto begin() const noexcept { return this->get<T>().begin(); }
+
+		template <class T> ML_NODISCARD auto cbegin() noexcept { return this->get<T>().cbegin(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD auto end() noexcept { return this->get<I>().end(); }
+
+		template <size_t I> ML_NODISCARD auto end() const noexcept { return this->get<I>().end(); }
+
+		template <size_t I> ML_NODISCARD auto cend() noexcept { return this->get<I>().cend(); }
+
+		template <class T> ML_NODISCARD auto end() noexcept { return this->get<T>().end(); }
+
+		template <class T> ML_NODISCARD auto end() const noexcept { return this->get<T>().end(); }
+
+		template <class T> ML_NODISCARD auto cend() noexcept { return this->get<T>().cend(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD auto rbegin() noexcept { return this->get<I>().rbegin(); }
+
+		template <size_t I> ML_NODISCARD auto rbegin() const noexcept { return this->get<I>().rbegin(); }
+
+		template <size_t I> ML_NODISCARD auto crbegin() noexcept { return this->get<I>().crbegin(); }
+
+		template <class T> ML_NODISCARD auto rbegin() noexcept { return this->get<T>().rbegin(); }
+
+		template <class T> ML_NODISCARD auto rbegin() const noexcept { return this->get<T>().rbegin(); }
+
+		template <class T> ML_NODISCARD auto crbegin() noexcept { return this->get<T>().crbegin(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD auto rend() noexcept { return this->get<I>().rend(); }
+
+		template <size_t I> ML_NODISCARD auto rend() const noexcept { return this->get<I>().rend(); }
+
+		template <size_t I> ML_NODISCARD auto crend() noexcept { return this->get<I>().crend(); }
+
+		template <class T> ML_NODISCARD auto rend() noexcept { return this->get<T>().rend(); }
+
+		template <class T> ML_NODISCARD auto rend() const noexcept { return this->get<T>().rend(); }
+
+		template <class T> ML_NODISCARD auto crend() noexcept { return this->get<T>().crend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
