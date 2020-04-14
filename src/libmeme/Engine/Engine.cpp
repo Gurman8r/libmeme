@@ -17,6 +17,7 @@ namespace ml
 		asset_manager		m_assets		{}					; // asset manager
 		engine_config		m_config		{}					; // public startup variables
 		engine_io			m_io			{}					; // public runtime variables
+		gui_manager			m_gui			{}					; // gui manager
 		plugin_manager		m_plugins		{}					; // plugin manager
 		script_manager		m_scripts		{}					; // script manager
 		game_time			m_time			{}					; // game time
@@ -165,6 +166,12 @@ namespace ml
 	{
 		ML_assert(g_engine);
 		return g_engine->m_io;
+	}
+
+	gui_manager & engine::gui() noexcept
+	{
+		ML_assert(g_engine);
+		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept

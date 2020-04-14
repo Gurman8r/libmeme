@@ -1,0 +1,10 @@
+{
+	"content_home": "../../../../",
+	"library_home": "../../../../",
+	"startup_script": "assets/scripts/startup.py",
+
+	"imgui_style": "assets/styles/obsidian.style",
+	"imgui_api_version": "#version 130",
+	"imgui_enable_ini": false,
+	"imgui_enable_log": false
+}

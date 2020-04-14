@@ -105,6 +105,7 @@ namespace ml
 		{
 			return debug::log::error("Failed initializing ImGui renderer");
 		}
+#else
 #endif
 		return true;
 	}

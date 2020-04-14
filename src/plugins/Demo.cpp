@@ -412,7 +412,7 @@ namespace ml
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3d", "moon", "quad", c_transform{
+				auto & moon = make_renderer("3d", "moon", "monkey", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)

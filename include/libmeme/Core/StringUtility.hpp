@@ -60,7 +60,7 @@ namespace ml::util
 	template <class Ch = char
 	> ML_NODISCARD constexpr size_t strlen(Ch const * value)
 	{
-		return ((*value) ? (1 + strlen(value + 1)) : 0);
+		return ((*value) ? (1 + _ML util::strlen(value + 1)) : 0);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

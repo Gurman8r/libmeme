@@ -129,12 +129,18 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// CLIENT API
-		py::class_<client_api>(m, "client_api")
+		// API
+		struct ml_client_api {};
+		py::class_<ml_client_api>(m, "api")
 			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)client_api::unknown; })
 			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)client_api::opengl; })
 			.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)client_api::vulkan; })
 			.def_property_readonly_static("directx"	, [](py::object) { return (int32_t)client_api::directx; })
+			;
+
+		// PROFILE
+		struct ml_client_profile {};
+		py::class_<ml_client_profile>(m, "profile")
 			.def_property_readonly_static("any"		, [](py::object) { return (int32_t)client_api::any; })
 			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)client_api::core; })
 			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)client_api::compat; })

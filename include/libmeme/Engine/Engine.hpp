@@ -3,6 +3,7 @@
 
 #include <libmeme/Engine/GameTime.hpp>
 #include <libmeme/Engine/AssetManager.hpp>
+#include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
@@ -71,6 +72,8 @@ namespace ml
 		ML_NODISCARD static engine_config & config() noexcept;
 
 		ML_NODISCARD static engine_io & io() noexcept;
+
+		ML_NODISCARD static gui_manager & gui() noexcept;
 
 		ML_NODISCARD static plugin_manager & plugins() noexcept;
 

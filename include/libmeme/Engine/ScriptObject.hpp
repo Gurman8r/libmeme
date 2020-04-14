@@ -89,14 +89,12 @@ namespace ml::embed
 
 		bool call_fn(cstring name)
 		{
-			if (auto const it{ m_funcs.find(util::hash(name, util::strlen(name))) })
+			if (auto const it{ m_funcs.find(util::hash(name, util::strlen(name))) }
+			; it && *it->second)
 			{
-				if (*it->second)
-				{
-					std::invoke(*it->second);
-					
-					return true;
-				}
+				std::invoke(*it->second);
+
+				return true;
 			}
 			return false;
 		}
