@@ -37,7 +37,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool create(window_settings const & value, bool install_callbacks);
+		ML_NODISCARD virtual bool create(window_settings const & value, bool install = true);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -156,7 +156,7 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
-		static void install_default_callbacks(window * win);
+		void install_default_callbacks();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

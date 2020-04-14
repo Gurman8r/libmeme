@@ -5,7 +5,8 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	plugin_manager::plugin_manager(allocator_type const & alloc) noexcept
-		: m_files{ alloc }, m_libs{ alloc }
+		: m_files{ alloc }
+		, m_libs{ alloc }
 	{
 	}
 
@@ -42,6 +43,8 @@ namespace ml
 				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
 					m_libs[std::move(lib)] = *ptr;
+
+					return true;
 				}
 			}
 			m_files.erase(file.first);

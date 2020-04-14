@@ -151,7 +151,7 @@ namespace ml
 		// install callbacks
 		if (install_callbacks)
 		{
-			install_default_callbacks(this);
+			install_default_callbacks();
 		}
 
 		return true;
@@ -676,66 +676,66 @@ namespace ml
 			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
 	}
 
-	void window::install_default_callbacks(window * win)
+	void window::install_default_callbacks()
 	{
-		if (!win || !win->is_open()) { return; }
+		if (!is_open()) { return; }
 
-		win->set_char_callback([](auto, auto ... args)
+		set_char_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<char_event>(ML_forward(args)...);
 		});
 
-		win->set_cursor_enter_callback([](auto, auto ... args)
+		set_cursor_enter_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
 		});
 
-		win->set_cursor_pos_callback([](auto, auto ... args)
+		set_cursor_pos_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
 		});
 
-		win->set_error_callback([](auto ... args)
+		set_error_callback([](auto ... args)
 		{
 			event_system::fire_event<window_error_event>(ML_forward(args)...);
 		});
 
-		win->set_frame_size_callback([](auto, auto ... args)
+		set_frame_size_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<frame_size_event>(ML_forward(args)...);
 		});
 
-		win->set_key_callback([](auto, auto ... args)
+		set_key_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<key_event>(ML_forward(args)...);
 		});
 
-		win->set_mouse_callback([](auto, auto ... args)
+		set_mouse_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<mouse_event>(ML_forward(args)...);
 		});
 
-		win->set_scroll_callback([](auto, auto ... args)
+		set_scroll_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<scroll_event>(ML_forward(args)...);
 		});
 
-		win->set_window_close_callback([](auto)
+		set_window_close_callback([](auto)
 		{
 			event_system::fire_event<window_close_event>();
 		});
 
-		win->set_window_focus_callback([](auto, auto ... args)
+		set_window_focus_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<window_focus_event>(ML_forward(args)...);
 		});
 
-		win->set_window_pos_callback([](auto, auto ... args)
+		set_window_pos_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<window_position_event>(ML_forward(args)...);
 		});
 
-		win->set_window_size_callback([](auto, auto ... args)
+		set_window_size_callback([](auto, auto ... args)
 		{
 			event_system::fire_event<window_size_event>(ML_forward(args)...);
 		});

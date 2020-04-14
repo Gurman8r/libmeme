@@ -8,7 +8,8 @@
 
 namespace ml::embed
 {
-	PYBIND11_EMBEDDED_MODULE(libmeme, m)
+	// CONFIG
+	PYBIND11_EMBEDDED_MODULE(libmeme_config, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,39 +31,48 @@ namespace ml::embed
 		// BUILD
 		struct ml_build {};
 		py::class_<ml_build>(m, "build")
-			.def_property_readonly_static("arch"		, [](py::object) { return ML_arch; })
-			.def_property_readonly_static("cc"			, [](py::object) { return ML_cc_name; })
-			.def_property_readonly_static("cc_ver"		, [](py::object) { return ML_cc_version; })
-			.def_property_readonly_static("config"		, [](py::object) { return ML_configuration; })
-			.def_property_readonly_static("is_debug"	, [](py::object) { return ML_is_debug; })
-			.def_property_readonly_static("lang"		, [](py::object) { return ML_lang; })
-			.def_property_readonly_static("platform"	, [](py::object) { return ML_platform; })
-			.def_property_readonly_static("system"		, [](py::object) { return ML_os_name; })
+			.def_property_readonly_static("arch",			[](py::object) { return ML_arch; })
+			.def_property_readonly_static("compiler",		[](py::object) { return ML_cc_name; })
+			.def_property_readonly_static("compiler_ver",	[](py::object) { return ML_cc_version; })
+			.def_property_readonly_static("configuration",	[](py::object) { return ML_configuration; })
+			.def_property_readonly_static("is_debug",		[](py::object) { return ML_is_debug; })
+			.def_property_readonly_static("lang",			[](py::object) { return ML_lang; })
+			.def_property_readonly_static("platform",		[](py::object) { return ML_platform; })
+			.def_property_readonly_static("system",			[](py::object) { return ML_os_name; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	}
 
-		// OUTPUT
+	// CORE
+	PYBIND11_EMBEDDED_MODULE(libmeme_core, m)
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// OUTPUT REDIRECT
 		struct ml_output_redirect
 		{
 			std::reference_wrapper<std::ostream> m_os;
 
-			ml_output_redirect(std::ostream & os = std::cout) : m_os{ std::ref(os) } {}
+			ml_output_redirect(std::ostream & os = std::cout) noexcept : m_os{ os }
+			{
+			}
 
 			int32_t fileno() const noexcept
 			{
 				if (auto const addr{ std::addressof(m_os.get()) }; !addr) { return -2; }
 				else if (addr == std::addressof(std::cout)) { return 1; }
 				else if (addr == std::addressof(std::cerr)) { return 2; }
-				else return -1;
+				else { return -1; }
 			}
 
-			void flush() { m_os.get().flush(); }
+			void flush() noexcept { m_os.get().flush(); }
 
-			void write(py::object o) { m_os << o; }
+			void write(py::object o) noexcept { m_os << o; }
 
-			void writelines(py::list l) { for (auto const & e : l) { m_os << e; } }
+			void writelines(py::list l) noexcept { for (auto const & e : l) { m_os << e; } }
 		};
 		py::class_<ml_output_redirect>(m, "output_redirect")
 			.def(py::init<>())
@@ -76,6 +86,9 @@ namespace ml::embed
 			.def("write"		, &ml_output_redirect::write)
 			.def("writelines"	, &ml_output_redirect::writelines)
 			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// STDIO
 		struct ml_stdio
@@ -98,9 +111,88 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// SETUP
+		([&	, builtins = py::module::import("builtins")
+			, sys = py::module::import("sys")]()
+		{
+			sys.attr("stdout") = m.attr("stdio").attr("cout");
+			sys.attr("stderr") = m.attr("stdio").attr("cout");
+			sys.attr("stdin") = py::none{};
+		})();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	}
+
+	// PLATFORM
+	PYBIND11_EMBEDDED_MODULE(libmeme_platform, m)
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// CLIENT API
+		py::class_<client_api>(m, "client_api")
+			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)client_api::unknown; })
+			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)client_api::opengl; })
+			.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)client_api::vulkan; })
+			.def_property_readonly_static("directx"	, [](py::object) { return (int32_t)client_api::directx; })
+			.def_property_readonly_static("any"		, [](py::object) { return (int32_t)client_api::any; })
+			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)client_api::core; })
+			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)client_api::compat; })
+			.def_property_readonly_static("debug"	, [](py::object) { return (int32_t)client_api::debug; })
+			;
+
+		// CONTEXT SETTINGS
+		py::class_<context_settings>(m, "context_settings")
+			.def(py::init<>())
+			.def(py::init<int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, bool, bool>())
+			.def("__nonzero__"				, &context_settings::operator bool, py::is_operator())
+			.def("__bool__"					, &context_settings::operator bool, py::is_operator())
+			.def_readwrite("api"			, &context_settings::api)
+			.def_readwrite("major"			, &context_settings::major)
+			.def_readwrite("minor"			, &context_settings::minor)
+			.def_readwrite("profile"		, &context_settings::profile)
+			.def_readwrite("depth_bits"		, &context_settings::depth_bits)
+			.def_readwrite("stencil_bits"	, &context_settings::stencil_bits)
+			.def_readwrite("multisample"	, &context_settings::multisample)
+			.def_readwrite("srgb_capable"	, &context_settings::srgb_capable)
+			;
+
+		// DISPLAY SETTINGS
+		py::class_<display_settings>(m, "display_settings")
+			.def(py::init<>())
+			.def(py::init<vec2i, uint32_t>())
+			.def("__nonzero__"		, &display_settings::operator bool, py::is_operator())
+			.def("__bool__"			, &display_settings::operator bool, py::is_operator())
+			.def_readwrite("size"	, &display_settings::size)
+			.def_readwrite("depth"	, &display_settings::depth)
+			;
+
+		// WINDOW SETTINGS
+		py::class_<window_settings>(m, "window_settings")
+			.def(py::init<>())
+			.def(py::init<pmr::string const &, display_settings const &, context_settings const &, int32_t>())
+			.def_readwrite("title"	, &window_settings::title)
+			.def_readwrite("display", &window_settings::display)
+			.def_readwrite("context", &window_settings::context)
+			.def_readwrite("hints"	, &window_settings::hints)
+			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	}
+
+	// ENGINE
+	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// ASSETS
 		struct ml_engine_assets {};
 		py::class_<ml_engine_assets>(m, "assets")
+			.def_static("load", [](cstring s) { return false; })
+			.def_static("free", [](cstring s) { return false; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -132,6 +224,7 @@ namespace ml::embed
 		struct ml_engine_plugins {};
 		py::class_<ml_engine_plugins>(m, "plugins")
 			.def_static("load", [](cstring s) { return engine::plugins().load(s); })
+			.def_static("free", [](cstring s) { return false; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -159,40 +252,6 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// CONTEXT SETTINGS
-		py::class_<context_settings>(m, "context_settings")
-			.def(py::init<>())
-			.def(py::init<int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, bool, bool>())
-			.def("__nonzero__"				, &context_settings::operator bool, py::is_operator())
-			.def("__bool__"					, &context_settings::operator bool, py::is_operator())
-			.def_readwrite("api"			, &context_settings::api)
-			.def_readwrite("major"			, &context_settings::major)
-			.def_readwrite("minor"			, &context_settings::minor)
-			.def_readwrite("profile"		, &context_settings::profile)
-			.def_readwrite("depth_bits"		, &context_settings::depth_bits)
-			.def_readwrite("stencil_bits"	, &context_settings::stencil_bits)
-			.def_readwrite("multisample"	, &context_settings::multisample)
-			.def_readwrite("srgb_capable"	, &context_settings::srgb_capable)
-			;
-
-		// DISPLAY SETTINGS
-		py::class_<display_settings>(m, "display_settings")
-			.def(py::init<>())
-			.def(py::init<vec2i, uint32_t>())
-			.def_readwrite("size", &display_settings::size)
-			.def_readwrite("depth", &display_settings::depth)
-			;
-
-		// WINDOW SETTINGS
-		py::class_<window_settings>(m, "window_settings")
-			.def(py::init<>())
-			.def(py::init<pmr::string const &, display_settings const &, context_settings const &, int32_t>())
-			.def_readwrite("title"	, &window_settings::title)
-			.def_readwrite("display", &window_settings::display)
-			.def_readwrite("context", &window_settings::context)
-			.def_readwrite("hints"	, &window_settings::hints)
-			;
-
 		// WINDOW
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
@@ -206,24 +265,12 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// ENGINE
-		struct ml_engine {};
-		py::class_<ml_engine>(m, "engine")
-			.def_property_readonly_static("window", [](py::object) { return ml_engine_window{}; })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		// SETUP
 		([&	, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")]()
 		{
-			builtins.attr("exit")	= m.attr("window").attr("close");
-			sys.attr("exit")		= m.attr("window").attr("close");
-			sys.attr("stdout")		= m.attr("stdio").attr("cout");
-			sys.attr("stderr")		= m.attr("stdio").attr("cout");
-			sys.attr("stdin")		= py::none{};
+			builtins.attr("exit") = m.attr("window").attr("close");
+			sys.attr("exit") = m.attr("window").attr("close");
 			script_object::install(m);
 		})();
 
