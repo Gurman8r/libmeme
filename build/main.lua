@@ -30,8 +30,8 @@ includedirs{
 files{
 	"%{sln_dir}build/%{prj.name}.lua", 
 	"%{sln_dir}src/%{prj.name}/**.**",
+
 	"%{sln_dir}assets/**.**", 
-	"%{sln_dir}libmeme.json", 
 }
 
 libdirs{

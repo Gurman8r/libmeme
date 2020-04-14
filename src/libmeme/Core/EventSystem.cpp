@@ -27,11 +27,12 @@ namespace ml
 
 	void event_system::remove_listener(hash_t type, event_listener * value)
 	{
-		if (!value) return;
+		if (!value) { return; }
 
 		if (auto const listeners{ g_event_system.find(type) })
 		{
-			if (auto const it{ listeners->second->find(value) }; it != listeners->second->end())
+			if (auto const it{ listeners->second->find(value) }
+			; it != listeners->second->end())
 			{
 				(*listeners->second).erase(it);
 			}
@@ -40,11 +41,12 @@ namespace ml
 
 	void event_system::remove_listener(event_listener * value)
 	{
-		if (!value) return;
+		if (!value) { return; }
 
 		g_event_system.for_each([value](hash_t, auto & listeners)
 		{
-			if (auto const it{ listeners.find(value) }; it != listeners.end())
+			if (auto const it{ listeners.find(value) }
+			; it != listeners.end())
 			{
 				listeners.erase(it);
 			}

@@ -35,6 +35,8 @@ namespace ml::ds
 		multi_vector(init_type value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
+			this->reserve(value.size());
+
 			for (auto & elem : value)
 			{
 				this->push_back(elem);
@@ -520,25 +522,53 @@ namespace ml::ds
 		template <size_t I, class It
 		> auto erase(It loc)
 		{
-			return this->get<I>().erase(loc);
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<I>().erase(this->begin<I>() + loc);
+			}
+			else
+			{
+				return this->get<I>().erase(loc);
+			}
 		}
 
 		template <size_t I, class It
 		> auto erase(It first, It last)
 		{
-			return this->get<I>().erase(first, last);
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<I>().erase(this->begin<I>() + first, this->begin<I>() + last);
+			}
+			else
+			{
+				return this->get<I>().erase(first, last);
+			}
 		}
 
 		template <class T, class It
 		> auto erase(It loc)
 		{
-			return this->get<T>().erase(loc);
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<T>().erase(this->begin<T>() + loc);
+			}
+			else
+			{
+				return this->get<T>().erase(loc);
+			}
 		}
 
 		template <class T, class It
 		> auto erase(It first, It last)
 		{
-			return this->get<T>().erase(first, last);
+			if constexpr (std::is_integral_v<It>)
+			{
+				return this->get<T>().erase(this->begin<T>() + first, this->begin<T>() + last);
+			}
+			else
+			{
+				return this->get<T>().erase(first, last);
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -762,7 +792,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_same_v<U, self_type>)
 			{
-				return compare(value.m_data);
+				return this->compare(value.m_data);
 			}
 			else
 			{

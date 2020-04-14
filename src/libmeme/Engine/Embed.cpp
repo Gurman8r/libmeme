@@ -52,11 +52,11 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// OUTPUT REDIRECT
-		struct ml_output_redirect
+		struct ml_output_facade
 		{
 			std::reference_wrapper<std::ostream> m_os;
 
-			ml_output_redirect(std::ostream & os = std::cout) noexcept : m_os{ os }
+			ml_output_facade(std::ostream & os = std::cout) noexcept : m_os{ os }
 			{
 			}
 
@@ -74,17 +74,17 @@ namespace ml::embed
 
 			void writelines(py::list l) noexcept { for (auto const & e : l) { m_os << e; } }
 		};
-		py::class_<ml_output_redirect>(m, "output_redirect")
+		py::class_<ml_output_facade>(m, "output_facade")
 			.def(py::init<>())
 			.def("closed"		, []() { return false; })
 			.def("isatty"		, []() { return false; })
 			.def("readable"		, []() { return false; })
 			.def("seekable"		, []() { return false; })
 			.def("writable"		, []() { return true; })
-			.def("fileno"		, &ml_output_redirect::fileno)
-			.def("flush"		, &ml_output_redirect::flush)
-			.def("write"		, &ml_output_redirect::write)
-			.def("writelines"	, &ml_output_redirect::writelines)
+			.def("fileno"		, &ml_output_facade::fileno)
+			.def("flush"		, &ml_output_facade::flush)
+			.def("write"		, &ml_output_facade::write)
+			.def("writelines"	, &ml_output_facade::writelines)
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,12 +95,12 @@ namespace ml::embed
 		{
 			static auto & err(py::object) noexcept
 			{
-				static ml_output_redirect temp{ std::cerr }; return temp;
+				static ml_output_facade temp{ std::cerr }; return temp;
 			}
 
 			static auto & out(py::object) noexcept
 			{
-				static ml_output_redirect temp{ std::cout }; return temp;
+				static ml_output_facade temp{ std::cout }; return temp;
 			}
 		};
 		py::class_<ml_stdio>(m, "stdio")
@@ -112,8 +112,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&	, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")]()
+		([&m, sys = py::module::import("sys")]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
 			sys.attr("stderr") = m.attr("stdio").attr("cout");
@@ -206,7 +205,7 @@ namespace ml::embed
 			.def_property_readonly_static("library_home", [](py::object) { return engine::config().library_home.native(); })
 			.def_property_readonly_static("program_name", [](py::object) { return engine::config().program_name.native(); })
 			.def_property_readonly_static("program_path", [](py::object) { return engine::config().program_path.native(); })
-			.def_property_readonly_static("setup_script", [](py::object) { return engine::config().setup_script.native(); })
+			.def_property_readonly_static("startup_script", [](py::object) { return engine::config().startup_script.native(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -266,7 +265,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&	, builtins = py::module::import("builtins")
+		([&m, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")]()
 		{
 			builtins.attr("exit") = m.attr("window").attr("close");

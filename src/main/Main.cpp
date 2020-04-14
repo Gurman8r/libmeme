@@ -13,7 +13,7 @@ using namespace ml;
 #endif
 
 #ifndef CONFIG_FILE
-#define CONFIG_FILE L"../../../../libmeme.json"
+#define CONFIG_FILE L"../../../../assets/libmeme.json"
 #endif
 
 ml::int32_t main()
@@ -38,7 +38,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// read config
+	// read config file
 	auto config = ([&j = json{}, &file = std::ifstream{ CONFIG_FILE }]() noexcept
 	{
 		if (file) { file >> j; }
@@ -46,23 +46,29 @@ ml::int32_t main()
 		return j;
 	})();
 
-	// create context
+	// create engine context
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
+
+	// create editor context
 	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
 
-	// startup
+	// startup engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
+
+	// nothing to do here
+	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
+
+	// startup editor
 	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
 
 	event_system::fire_event<load_event>();
 
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
-	do // main loop
+	// main loop
+	while (engine::window().is_open())
 	{
 		ML_defer{ performance_tracker::refresh(); };
 		{
@@ -108,7 +114,7 @@ ml::int32_t main()
 			engine::end_loop();
 			event_system::fire_event<loop_end_event>();
 		}
-	} while (engine::window().is_open());
+	}
 	
 	// goodbye!
 	return EXIT_SUCCESS;

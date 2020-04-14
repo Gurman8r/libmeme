@@ -114,7 +114,7 @@ namespace ml
 		if (!m_inst) { return nullptr; }
 
 		// load function
-		return m_funcs.find_or_add(
+		return m_funcs.find_or_add_fn(
 			util::hash(name),
 			&impl::load_function, m_inst, name.c_str());
 	}

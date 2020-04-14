@@ -338,14 +338,14 @@ namespace ml
 
 	int32_t shader::get_attribute_location(pmr::string const & value)
 	{
-		return m_attributes.find_or_add(
+		return m_attributes.find_or_add_fn(
 			util::hash(value),
 			&GL::getAttribLocation, m_handle, value.c_str());
 	}
 
 	int32_t shader::get_uniform_location(pmr::string const & value)
 	{
-		return m_uniforms.find_or_add(
+		return m_uniforms.find_or_add_fn(
 			util::hash(value),
 			&GL::getUniformLocation, m_handle, value.c_str());
 	}

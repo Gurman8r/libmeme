@@ -30,7 +30,7 @@ namespace ml
 			fs::path		library_home		{}				; // library home
 			fs::path		program_path		{}				; // program path
 			fs::path		program_name		{}				; // program name
-			fs::path		setup_script		{}				; // setup script
+			fs::path		startup_script		{}				; // setup script
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

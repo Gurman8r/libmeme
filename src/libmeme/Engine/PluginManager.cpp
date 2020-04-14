@@ -42,7 +42,7 @@ namespace ml
 				// load plugin
 				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
 				{
-					m_libs[std::move(lib)] = *ptr;
+					m_libs[std::move(lib)] = ptr.value();
 
 					return true;
 				}

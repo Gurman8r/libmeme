@@ -57,19 +57,22 @@ namespace ml
 		template <class Ret, class ... Args
 		> ML_NODISCARD auto load_function(pmr::string const & name)
 		{
-			return reinterpret_cast<Ret(*)(Args...)>(load_function(name));
+			return reinterpret_cast<Ret(*)(Args...)>(this->load_function(name));
 		}
 
 		template <class Ret, class ... Args
-		> std::optional<Ret> call_function(pmr::string const & name, Args && ... args)
+		> auto call_function(pmr::string const & name, Args && ... args)
 		{
-			if (auto const fn{ load_function<Ret, Args...>(name) })
+			if (auto const fn{ this->load_function<Ret, Args...>(name) })
 			{
-				return std::make_optional(std::invoke(fn, ML_forward(args)...));
+				if constexpr (!std::is_same_v<Ret, void>)
+				{
+					return std::make_optional<Ret>(std::invoke(fn, ML_forward(args)...));
+				}
 			}
-			else
+			else if constexpr (!std::is_same_v<Ret, void>)
 			{
-				return std::nullopt;
+				return (std::optional<Ret>)std::nullopt;
 			}
 		}
 

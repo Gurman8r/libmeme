@@ -53,7 +53,7 @@ namespace ml
 
 			j["library_home"].get_to(cfg.library_home);
 
-			j["setup_script"].get_to(cfg.setup_script);
+			j["startup_script"].get_to(cfg.startup_script);
 
 			return g_engine;
 		}
@@ -79,7 +79,7 @@ namespace ml
 			return debug::log::error("engine failed starting python");
 
 		// run setup script
-		g_engine->m_scripts.do_file(path_to(g_engine->m_config.setup_script));
+		g_engine->m_scripts.do_file(path_to(g_engine->m_config.startup_script));
 
 		return true;
 	}
