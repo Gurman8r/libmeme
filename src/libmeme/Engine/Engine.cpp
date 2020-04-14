@@ -55,8 +55,6 @@ namespace ml
 
 			j["setup_script"].get_to(cfg.setup_script);
 
-			j["window_settings"].get_to(cfg.window_settings);
-
 			return g_engine;
 		}
 	}
@@ -82,16 +80,6 @@ namespace ml
 
 		// run setup script
 		g_engine->m_scripts.do_file(path_to(g_engine->m_config.setup_script));
-
-		// create window
-		if (g_engine->m_window.create(g_engine->m_config.window_settings))
-		{
-			window::install_default_callbacks(&g_engine->m_window);
-		}
-		else
-		{
-			return debug::log::error("engine failed creating window");
-		}
 
 		return true;
 	}

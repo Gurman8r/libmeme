@@ -7,9 +7,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::create(window_settings const & settings)
+	bool render_window::create(window_settings const & settings, bool install_callbacks)
 	{
-		if (!window::create(settings))
+		if (!window::create(settings, install_callbacks))
 		{
 			return debug::log::error("render_window failed initializing platform");
 		}

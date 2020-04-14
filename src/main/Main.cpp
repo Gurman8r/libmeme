@@ -56,12 +56,13 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
+
 	event_system::fire_event<load_event>();
 
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
-	// main loop
-	while (engine::window().is_open())
+	do // main loop
 	{
 		ML_defer{ performance_tracker::refresh(); };
 		{
@@ -107,8 +108,8 @@ ml::int32_t main()
 			engine::end_loop();
 			event_system::fire_event<loop_end_event>();
 		}
-	}
-
+	} while (engine::window().is_open());
+	
 	// goodbye!
 	return EXIT_SUCCESS;
 

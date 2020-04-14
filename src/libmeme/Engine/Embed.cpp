@@ -44,11 +44,11 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// OUTPUT
-		struct ml_output
+		struct ml_output_redirect
 		{
 			std::reference_wrapper<std::ostream> m_os;
 
-			ml_output(std::ostream & os = std::cout) : m_os{ std::ref(os) } {}
+			ml_output_redirect(std::ostream & os = std::cout) : m_os{ std::ref(os) } {}
 
 			int32_t fileno() const noexcept
 			{
@@ -64,17 +64,17 @@ namespace ml::embed
 
 			void writelines(py::list l) { for (auto const & e : l) { m_os << e; } }
 		};
-		py::class_<ml_output>(m, "output_handler")
+		py::class_<ml_output_redirect>(m, "output_redirect")
 			.def(py::init<>())
 			.def("closed"		, []() { return false; })
 			.def("isatty"		, []() { return false; })
 			.def("readable"		, []() { return false; })
 			.def("seekable"		, []() { return false; })
 			.def("writable"		, []() { return true; })
-			.def("fileno"		, &ml_output::fileno)
-			.def("flush"		, &ml_output::flush)
-			.def("write"		, &ml_output::write)
-			.def("writelines"	, &ml_output::writelines)
+			.def("fileno"		, &ml_output_redirect::fileno)
+			.def("flush"		, &ml_output_redirect::flush)
+			.def("write"		, &ml_output_redirect::write)
+			.def("writelines"	, &ml_output_redirect::writelines)
 			;
 
 		// STDIO
@@ -82,12 +82,12 @@ namespace ml::embed
 		{
 			static auto & err(py::object) noexcept
 			{
-				static ml_output temp{ std::cerr }; return temp;
+				static ml_output_redirect temp{ std::cerr }; return temp;
 			}
 
 			static auto & out(py::object) noexcept
 			{
-				static ml_output temp{ std::cout }; return temp;
+				static ml_output_redirect temp{ std::cout }; return temp;
 			}
 		};
 		py::class_<ml_stdio>(m, "stdio")
@@ -196,10 +196,20 @@ namespace ml::embed
 		// WINDOW
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
-			.def_static("create", [](window_settings const & ws) { return false; })
+			.def(py::init<>())
+			.def_static("create", [](window_settings const & ws, bool ic) { return engine::window().create(ws, ic); })
 			.def_static("close", [](py::args) { engine::window().close(); })
 			.def_static("get_size", []() { return engine::window().get_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })
+			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// ENGINE
+		struct ml_engine {};
+		py::class_<ml_engine>(m, "engine")
+			.def_property_readonly_static("window", [](py::object) { return ml_engine_window{}; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -209,11 +219,11 @@ namespace ml::embed
 		([&	, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")]()
 		{
-			builtins.attr("exit") = m.attr("window").attr("close");
-			sys.attr("exit") = m.attr("window").attr("close");
-			sys.attr("stdout") = m.attr("stdio").attr("cout");
-			sys.attr("stderr") = m.attr("stdio").attr("cout");
-			sys.attr("stdin") = py::none{};
+			builtins.attr("exit")	= m.attr("window").attr("close");
+			sys.attr("exit")		= m.attr("window").attr("close");
+			sys.attr("stdout")		= m.attr("stdio").attr("cout");
+			sys.attr("stderr")		= m.attr("stdio").attr("cout");
+			sys.attr("stdin")		= py::none{};
 			script_object::install(m);
 		})();
 

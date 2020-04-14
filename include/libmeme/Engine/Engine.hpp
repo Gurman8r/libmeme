@@ -31,7 +31,6 @@ namespace ml
 			fs::path		program_path		{}				; // program path
 			fs::path		program_name		{}				; // program name
 			fs::path		setup_script		{}				; // setup script
-			window_settings	window_settings		{}				; // window settings
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

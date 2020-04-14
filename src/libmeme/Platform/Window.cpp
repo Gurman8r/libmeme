@@ -67,7 +67,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(window_settings const & value)
+	bool window::create(window_settings const & value, bool install_callbacks)
 	{
 		if (is_open()) { return debug::log::error("window is already open"); }
 		
@@ -146,6 +146,12 @@ namespace ml
 		else
 		{
 			set_centered(); // centered
+		}
+
+		// install callbacks
+		if (install_callbacks)
+		{
+			install_default_callbacks(this);
 		}
 
 		return true;
