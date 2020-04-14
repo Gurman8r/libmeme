@@ -18,13 +18,27 @@ namespace ml::ds
 		using vector_types		= typename meta::remap<pmr::vector, type_list>;
 		using tuple_type		= typename meta::tuple<type_list>;
 		using storage_type		= typename meta::tuple<vector_types>;
+		using init_type			= typename std::initializer_list<tuple_type>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+
+		enum : size_t { tuple_size = std::tuple_size_v<tuple_type> };
+
+		using make_index_sequence = std::make_index_sequence<tuple_size>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		multi_vector(allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
+		}
+
+		multi_vector(init_type value, allocator_type const & alloc = {}) noexcept
+			: m_data{ std::allocator_arg, alloc }
+		{
+			for (auto & elem : value)
+			{
+				this->push_back(elem);
+			}
 		}
 
 		multi_vector(storage_type const & value, allocator_type const & alloc = {})
@@ -48,6 +62,13 @@ namespace ml::ds
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		self_type & operator=(init_type value)
+		{
+			self_type temp{ init };
+			this->swap(temp);
+			return (*this);
+		}
 
 		self_type & operator=(storage_type const & value)
 		{
@@ -175,6 +196,58 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class Fn, size_t ... Is
+		> void expand_all(Fn && fn, std::index_sequence<Is...>) noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>()...);
+		}
+
+		template <class Fn
+		> void expand_all(Fn && fn) noexcept
+		{
+			this->expand_all(ML_forward(fn), make_index_sequence());
+		}
+
+		template <class Fn, size_t ... Is
+		> void expand_all(Fn && fn, std::index_sequence<Is...>) const noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>()...);
+		}
+
+		template <class Fn
+		> void expand_all(Fn && fn) const noexcept
+		{
+			this->expand_all(ML_forward(fn), make_index_sequence());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn, size_t ... Is
+		> void expand_all(size_t const i, Fn && fn, std::index_sequence<Is...>) noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
+		template <class Fn
+		> void expand_all(size_t const i, Fn && fn) noexcept
+		{
+			this->expand_all(i, ML_forward(fn), make_index_sequence());
+		}
+
+		template <class Fn, size_t ... Is
+		> void expand_all(size_t const i, Fn && fn, std::index_sequence<Is...>) const noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
+		template <class Fn
+		> void expand_all(size_t const i, Fn && fn) const noexcept
+		{
+			this->expand_all(i, ML_forward(fn), make_index_sequence());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <size_t ... Is, class Fn
 		> void expand(Fn && fn) noexcept
 		{
@@ -227,41 +300,41 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class ... Args
-		> void for_tuple(Fn && fn, Args && ... args) noexcept
+		template <class Fn
+		> void for_tuple(Fn && fn) noexcept
 		{
-			meta::for_tuple(m_data, ML_forward(fn), ML_forward(args)...);
+			meta::for_tuple(m_data, ML_forward(fn));
 		}
 
-		template <class Fn, class ... Args
-		> void for_tuple(Fn && fn, Args && ... args) const noexcept
+		template <class Fn
+		> void for_tuple(Fn && fn) const noexcept
 		{
-			meta::for_tuple(m_data, ML_forward(fn), ML_forward(args)...);
+			meta::for_tuple(m_data, ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t ... Is, class Fn, class ... Args
-		> void for_indices(Fn && fn, Args && ... args) noexcept
+		template <size_t ... Is, class Fn
+		> void for_indices(Fn && fn) noexcept
 		{
 			this->expand<Is...>([&](auto && ... vs)
 			{
 				meta::for_args([&](auto & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
 		}
 
-		template <size_t ... Is, class Fn, class ... Args
-		> void for_indices(Fn && fn, Args && ... args) const noexcept
+		template <size_t ... Is, class Fn
+		> void for_indices(Fn && fn) const noexcept
 		{
 			this->expand<Is...>([&](auto const && ... vs)
 			{
 				meta::for_args([&](auto const & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
@@ -269,27 +342,27 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Ts, class Fn, class ... Args
-		> void for_types(Fn && fn, Args && ... args) noexcept
+		template <class ... Ts, class Fn
+		> void for_types(Fn && fn) noexcept
 		{
 			this->expand<Ts...>([&](auto && ... vs)
 			{
 				meta::for_args([&](auto & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
 		}
 
-		template <class ... Ts, class Fn, class ... Args
-		> void for_types(Fn && fn, Args && ... args) const noexcept
+		template <class ... Ts, class Fn
+		> void for_types(Fn && fn) const noexcept
 		{
 			this->expand<Ts...>([&](auto const && ... vs)
 			{
 				meta::for_args([&](auto const & v)
 				{
-					std::invoke(ML_forward(fn), v, ML_forward(args)...);
+					std::invoke(ML_forward(fn), v);
 				}
 				, ML_forward(vs)...);
 			});
@@ -388,45 +461,6 @@ namespace ml::ds
 		> void shrink_to_fit() noexcept
 		{
 			this->for_types<Ts...>([&](auto & v) { v.shrink_to_fit(); });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(self_type & value) noexcept
-		{
-			if (this != std::addressof(value))
-			{
-				m_data.swap(value.m_data);
-			}
-		}
-
-		template <size_t I, class U = meta::nth<I, vector_types>
-		> void swap(U & value) noexcept
-		{
-			this->get<I>().swap(value);
-		}
-
-		template <class T, class U = T
-		> void swap(U & value) noexcept
-		{
-			this->get<T>().swap(value);
-		}
-
-		void swap(size_t const lhs, size_t const rhs) noexcept
-		{
-			this->for_tuple([&](auto & v) { std::swap(v[lhs], v[rhs]); });
-		}
-
-		template <size_t ... Is
-		> void swap(size_t const lhs, size_t const rhs) noexcept
-		{
-			this->for_indices<Is...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
-		}
-
-		template <class ... Ts
-		> void swap(size_t const lhs, size_t const rhs) noexcept
-		{
-			this->for_types<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -577,7 +611,7 @@ namespace ml::ds
 			}
 		}
 
-		template <class It, class Tp, size_t I, size_t N = std::tuple_size_v<tuple_type>
+		template <class It, class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
 		> void insert(It loc, Tp && value)
 		{
 			if constexpr (I < N)
@@ -608,9 +642,10 @@ namespace ml::ds
 			this->get<T>().push_back(ML_forward(value));
 		}
 
-		template <class Tp, size_t I, size_t N = std::tuple_size_v<tuple_type>
+		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
 		> void push_back(Tp && value)
 		{
+			static_assert(tuple_size <= N);
 			if constexpr (I < N)
 			{
 				this->push_back<I>(ML_forward(std::get<I>(ML_forward(value))));
@@ -623,6 +658,53 @@ namespace ml::ds
 		> void push_back(Tp && value)
 		{
 			this->push_back<Tp, 0, std::tuple_size_v<Tp>>(ML_forward(value));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void swap(self_type & value) noexcept
+		{
+			if (this != std::addressof(value))
+			{
+				m_data.swap(value.m_data);
+			}
+		}
+
+		void swap(storage_type & value) noexcept
+		{
+			if (std::addressof(m_data) != std::addressof(value))
+			{
+				m_data.swap(value);
+			}
+		}
+
+		template <size_t I, class U = meta::nth<I, vector_types>
+		> void swap(U & value) noexcept
+		{
+			this->get<I>().swap(value);
+		}
+
+		template <class T, class U = T
+		> void swap(U & value) noexcept
+		{
+			this->get<T>().swap(value);
+		}
+
+		void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_tuple([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+		}
+
+		template <size_t ... Is
+		> void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_indices<Is...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
+		}
+
+		template <class ... Ts
+		> void swap(size_t const lhs, size_t const rhs) noexcept
+		{
+			this->for_types<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

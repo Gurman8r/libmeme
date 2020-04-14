@@ -46,6 +46,22 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
+
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+
+		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+
+		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _H; }
+
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
+
+		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _W; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class U, size_t W, size_t H
 		> ML_NODISCARD constexpr operator matrix<U, W, H>() const noexcept
 		{
@@ -128,26 +144,22 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data.back(); }
-		
+
 		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data.back(); }
 
-		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
-		
-		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+		ML_NODISCARD constexpr auto back() && noexcept -> rvalue { return std::move(m_data.back()); }
 
-		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
-		
+		ML_NODISCARD constexpr auto back() const && noexcept -> const_rvalue { return std::move(m_data.back()); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD constexpr auto front() & noexcept -> reference { return m_data.front(); }
-		
+
 		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data.front(); }
 
-		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _H; }
+		ML_NODISCARD constexpr auto front() && noexcept -> rvalue { return std::move(m_data.front()); }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
-
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
-
-		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _W; }
+		ML_NODISCARD constexpr auto front() const && noexcept -> const_rvalue { return std::move(m_data.front()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

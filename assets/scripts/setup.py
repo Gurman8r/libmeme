@@ -1,13 +1,20 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import libmeme_core as core
-import libmeme_engine as engine
+import libmeme as ml
 
-engine.plugins.load("demo")
+ml.plugins.load("demo")
 
-print(f"# {core.project.name} | {core.build.arch!r}-bit | {core.build.config}")
-print(f"# {core.project.url}")
+ml.window.create(ml.window_settings(
+    "libmeme",
+    ml.display_settings([ 1280, 720 ], 32),
+    ml.context_settings(1, 4, 6, 2, 24, 8, False, False),
+    93
+    ))
+
+print(f"# {ml.project.name} | {ml.build.arch!r}-bit | {ml.build.config}")
+print(f"# {ml.project.url}")
 print(f"# type \'help\' for a list of commands")
 print("")
+
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

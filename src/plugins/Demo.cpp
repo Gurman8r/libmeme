@@ -240,8 +240,15 @@ namespace ml
 				(m_pipeline[0] = make_render_texture(vec2i{ 1280, 720 })).generate();
 			}
 
+			// IMAGES
+			{
+				m_images["default"] = make_image(image::default_rgba);
+			}
+
 			// TEXTURES
 			{
+				m_textures["default"] = make_texture(m_images["default"]);
+
 				m_textures["doot"] = make_texture(
 					engine::path_to("assets/textures/doot.png")
 				);
@@ -424,8 +431,8 @@ namespace ml
 			m_plots.update(engine::time().total().count<float_t>());
 			
 			// systems
-			m_renderer.invoke_system<x_apply_transforms>();
-			m_renderer.invoke_system<x_apply_materials>();
+			m_renderer.update_system<x_apply_transforms>();
+			m_renderer.update_system<x_apply_materials>();
 
 			// pipeline
 			if (m_display_size[0] > 0 && m_display_size[1] > 0)
@@ -451,7 +458,7 @@ namespace ml
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_renderer.invoke_system<x_draw_renderers>(target);
+				m_renderer.update_system<x_draw_renderers>(target);
 			}
 		}
 

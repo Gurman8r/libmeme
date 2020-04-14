@@ -606,10 +606,14 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				m_entities.get<id_alive>(i) = false;
-				m_entities.get<id_index>(i) = i;
-				m_entities.get<id_handle>(i) = i;
-				m_entities.get<id_bitset>(i).reset();
+				m_entities.expand_all(i, [&
+				](auto & alive, auto & index, auto & handle, auto & bitset)
+				{
+					alive = false;
+					index = i;
+					handle = i;
+					bitset.reset();
+				});
 				
 				auto & h{ m_handles[i] };
 				h.m_entity = i;
@@ -637,15 +641,12 @@ namespace ml::ecs
 			if (cap <= m_capacity) { return; }
 
 			m_components.resize(cap);
-			m_entities.resize(cap);
 			m_handles.resize(cap);
+			m_entities.reserve(cap);
 
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
-				m_entities.get<id_alive>(i) = false;
-				m_entities.get<id_index>(i) = i;
-				m_entities.get<id_handle>(i) = i;
-				m_entities.get<id_bitset>(i).reset();
+				m_entities.push_back({ false, i, i, signature{} });
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;
@@ -671,13 +672,13 @@ namespace ml::ecs
 					for (; true; ++dead)
 					{
 						if (dead > alive) { return dead; }
-						if (!m_entities.get<id_alive>(dead)) break;
+						if (!m_entities.get<id_alive>(dead)) { break; }
 					}
 
 					// find alive entity from the right
 					for (; true; --alive)
 					{
-						if (m_entities.get<id_alive>(alive)) break;
+						if (m_entities.get<id_alive>(alive)) { break; }
 						if (alive <= dead) { return dead; }
 					}
 
@@ -686,7 +687,7 @@ namespace ml::ecs
 					ML_assert(!m_entities.get<id_alive>(dead));
 					
 					// swap the entities
-					m_entities.swap<id_alive, id_index, id_handle, id_bitset>(alive, dead);
+					m_entities.swap(alive, dead);
 
 					// refresh alive entity
 					auto & a{ m_handles[alive] };
@@ -993,14 +994,14 @@ namespace ml::ecs
 
 		// invoke function on each of an entity's components
 		template <class Fn
-		> self_type & for_components(size_t const e, Fn && fn) noexcept
+		> self_type & for_components(size_t const i, Fn && fn) noexcept
 		{
 			meta::for_types<typename traits_type::component_list>([&](auto c) noexcept
 			{
 				using C = typename decltype(c)::type;
-				if (this->has_component<C>(e))
+				if (this->has_component<C>(i))
 				{
-					std::invoke(ML_forward(fn), this->get_component<C>(e));
+					std::invoke(ML_forward(fn), this->get_component<C>(i));
 				}
 			});
 			return (*this);
@@ -1010,11 +1011,11 @@ namespace ml::ecs
 		template <class S, class Fn
 		> self_type & for_matching(Fn && fn) noexcept
 		{
-			return this->for_entities([&](size_t const e) noexcept
+			return this->for_entities([&](size_t const i) noexcept
 			{
-				if (this->matches_signature<S>(e))
+				if (this->matches_signature<S>(i))
 				{
-					this->expand_call<S>(e, ML_forward(fn));
+					this->expand_call<S>(i, ML_forward(fn));
 				}
 			});
 		}
@@ -1033,7 +1034,7 @@ namespace ml::ecs
 
 		// invoke all systems matching a signature
 		template <template <class> class X, class ... Args
-		> self_type & invoke_system(Args && ... args) noexcept
+		> self_type & update_system(Args && ... args) noexcept
 		{
 			return this->for_system<X>([&args...](auto & x, auto && ... req_comp) noexcept
 			{
@@ -1048,25 +1049,25 @@ namespace ml::ecs
 		> struct expand_call_helper;
 
 		template <class S, class Fn
-		> void expand_call(size_t const e, Fn && fn) noexcept
+		> void expand_call(size_t const i, Fn && fn) noexcept
 		{
 			using req_comp = typename traits_type::components::template filter<S>;
 
 			using helper = meta::rename<expand_call_helper, req_comp>;
 
-			helper::call(e, *this, ML_forward(fn));
+			helper::call(i, *this, ML_forward(fn));
 		}
 
 		template <class ... Ts
 		> struct expand_call_helper
 		{
 			template <class Fn
-			> static void call(size_t const e, self_type & self, Fn && fn) noexcept
+			> static void call(size_t const i, self_type & self, Fn && fn) noexcept
 			{
-				self.m_components.expand<Ts...>(self.m_entities.get<id_index>(e), [&
+				self.m_components.expand<Ts...>(self.m_entities.get<id_index>(i), [&
 				](auto && ... req_comp)
 				{
-					std::invoke(ML_forward(fn), e, ML_forward(req_comp)...);
+					std::invoke(ML_forward(fn), i, ML_forward(req_comp)...);
 				});
 			}
 		};

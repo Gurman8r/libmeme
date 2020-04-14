@@ -33,6 +33,18 @@ namespace ml::ds
 		storage_type m_data; // aggregate initializer
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data; }
+		
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data; }
+		
+		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return _N; }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return _N; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr operator pointer() noexcept { return m_data; }
 
@@ -63,20 +75,20 @@ namespace ml::ds
 		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data[_N - 1]; }
 		
 		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data[_N - 1]; }
-		
-		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data; }
-		
-		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data; }
-		
-		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+
+		ML_NODISCARD constexpr auto back() && noexcept -> rvalue { return std::move(m_data[_N - 1]); }
+
+		ML_NODISCARD constexpr auto back() const && noexcept -> const_rvalue { return std::move(m_data[_N - 1]); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		ML_NODISCARD constexpr auto front() & noexcept -> reference { return m_data[0]; }
-		
+
 		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return _N; }
+		ML_NODISCARD constexpr auto front() && noexcept -> rvalue { return std::move(m_data[0]); }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return _N; }
+		ML_NODISCARD constexpr auto front() const && noexcept -> const_rvalue { return std::move(m_data[0]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -138,6 +150,18 @@ namespace ml::ds
 		storage_type m_data; // aggregate initializer
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		ML_NODISCARD constexpr auto data() noexcept -> pointer { return &m_data[0]; }
+
+		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return &m_data[0]; }
+
+		ML_NODISCARD constexpr bool empty() const noexcept { return true; }
+
+		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return 0; }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return 0; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr operator pointer() noexcept { return m_data; }
 
@@ -164,24 +188,24 @@ namespace ml::ds
 		ML_NODISCARD constexpr auto at(size_type) const && noexcept -> const_rvalue { return std::move(m_data[0]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+		
 		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data[0]; }
-		
-		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data[0]; }
-		
-		ML_NODISCARD constexpr auto data() noexcept -> pointer { return &m_data[0]; }
-		
-		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return &m_data[0]; }
 
-		ML_NODISCARD constexpr bool empty() const noexcept { return true; }
+		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data[0]; }
+
+		ML_NODISCARD constexpr auto back() && noexcept -> rvalue { return std::move(m_data[0]); }
+
+		ML_NODISCARD constexpr auto back() const && noexcept -> const_rvalue { return std::move(m_data[0]); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		ML_NODISCARD constexpr auto front() & noexcept -> reference { return m_data[0]; }
-		
+
 		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data[0]; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_type { return 0; }
+		ML_NODISCARD constexpr auto front() && noexcept -> rvalue { return std::move(m_data[0]); }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_type { return 0; }
+		ML_NODISCARD constexpr auto front() const && noexcept -> const_rvalue { return std::move(m_data[0]); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

@@ -21,6 +21,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using self_type = typename duration;
+
 		using base_type = typename chrono::duration<float64_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -150,23 +152,41 @@ namespace ml
 			}
 		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator==(U const & value) const noexcept { return compare(value) == 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator==(U const & value) const noexcept
+		{
+			return compare(value) == 0;
+		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator!=(U const & value) const noexcept { return compare(value) != 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator!=(U const & value) const noexcept
+		{
+			return compare(value) != 0;
+		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator<(U const & value) const noexcept { return compare(value) < 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator<(U const & value) const noexcept
+		{
+			return compare(value) < 0;
+		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator>(U const & value) const noexcept { return compare(value) > 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator>(U const & value) const noexcept
+		{
+			return compare(value) > 0;
+		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator<=(U const & value) const noexcept { return compare(value) <= 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator<=(U const & value) const noexcept
+		{
+			return compare(value) <= 0;
+		}
 
-		template <class U = duration
-		> ML_NODISCARD bool operator>=(U const & value) const noexcept { return compare(value) >= 0; }
+		template <class U = self_type
+		> ML_NODISCARD bool operator>=(U const & value) const noexcept
+		{
+			return compare(value) >= 0;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
