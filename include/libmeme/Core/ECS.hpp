@@ -1025,7 +1025,7 @@ namespace ml::ecs
 		> self_type & for_system(Fn && fn) noexcept
 		{
 			return this->for_matching<typename X<traits_type>::signature
-			>([&fn, &x = std::get<traits_type::template system_id<X>()>(m_systems)
+			>([&, &x = std::get<traits_type::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp) noexcept
 			{
 				std::invoke(ML_forward(fn), x, ML_forward(req_comp)...);
@@ -1036,7 +1036,7 @@ namespace ml::ecs
 		template <template <class> class X, class ... Args
 		> self_type & update_system(Args && ... args) noexcept
 		{
-			return this->for_system<X>([&args...](auto & x, auto && ... req_comp) noexcept
+			return this->for_system<X>([&](auto & x, auto && ... req_comp) noexcept
 			{
 				std::invoke(x, ML_forward(req_comp)..., ML_forward(args)...);
 			});
@@ -1065,7 +1065,7 @@ namespace ml::ecs
 			> static void call(size_t const i, self_type & self, Fn && fn) noexcept
 			{
 				self.m_components.expand<Ts...>(self.m_entities.get<id_index>(i), [&
-				](auto && ... req_comp)
+				](auto && ... req_comp) noexcept
 				{
 					std::invoke(ML_forward(fn), i, ML_forward(req_comp)...);
 				});

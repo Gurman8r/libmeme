@@ -122,6 +122,8 @@ namespace ml::ds
 			return read(i);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD constexpr array<bool, _Count> arr() const noexcept
 		{
 			array<bool, _Count> temp{};
@@ -129,6 +131,8 @@ namespace ml::ds
 				temp[i] = read(i);
 			return temp;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I> constexpr bool clear() noexcept
 		{
@@ -143,6 +147,8 @@ namespace ml::ds
 			return b;
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <size_t I> ML_NODISCARD constexpr bool read() const noexcept
 		{
 			static_assert(I < _Count, "bitset subscript out of range");
@@ -154,10 +160,14 @@ namespace ml::ds
 			return m_words[i / bitsperword] & (value_type{ 1 } << i % bitsperword);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr void reset() noexcept
 		{
 			m_words = {};
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I> constexpr bool set() noexcept
 		{
@@ -172,10 +182,14 @@ namespace ml::ds
 			return b;
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD constexpr size_t size() const noexcept
 		{
 			return _Count;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr void swap(self_type & value) noexcept
 		{
@@ -184,6 +198,8 @@ namespace ml::ds
 				util::swap(m_words, value.m_words);
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD constexpr storage_type & words() noexcept
 		{
@@ -194,6 +210,8 @@ namespace ml::ds
 		{
 			return m_words;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I> constexpr bool write(bool b) noexcept
 		{

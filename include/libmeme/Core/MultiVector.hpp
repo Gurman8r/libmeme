@@ -7,7 +7,7 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// tuple<vector<T>...>
+	// tuple<vector<Ts>...>
 	template <class ... _Ts
 	> struct multi_vector final
 	{
@@ -21,9 +21,12 @@ namespace ml::ds
 		using init_type			= typename std::initializer_list<tuple_type>;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 
-		enum : size_t { tuple_size = std::tuple_size_v<tuple_type> };
+		static constexpr auto tuple_size{ std::tuple_size_v<tuple_type> };
 
-		using make_index_sequence = std::make_index_sequence<tuple_size>;
+		static constexpr auto make_index_sequence() noexcept
+		{
+			return std::make_index_sequence<tuple_size>{};
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -655,7 +658,7 @@ namespace ml::ds
 		template <class It, class Tp = tuple_type
 		> void insert(It loc, Tp && value)
 		{
-			this->insert<It, Tp, 0, std::tuple_size_v<Tp>>(loc, ML_forward(value));
+			this->insert<It, Tp, 0>(loc, ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -687,7 +690,7 @@ namespace ml::ds
 		template <class Tp = tuple_type
 		> void push_back(Tp && value)
 		{
-			this->push_back<Tp, 0, std::tuple_size_v<Tp>>(ML_forward(value));
+			this->push_back<Tp, 0>(ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
