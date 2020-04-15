@@ -221,7 +221,7 @@ namespace ml::embed
 		// GUI
 		struct ml_engine_gui {};
 		py::class_<ml_engine_gui>(m, "gui")
-			.def_static("startup", [](cstring s) { return engine::gui().startup(engine::window(), s); })
+			.def_static("init", [](cstring s) { return engine::gui().startup(engine::window(), s); })
 			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
 			;
 

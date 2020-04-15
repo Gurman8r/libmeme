@@ -25,7 +25,7 @@ assert(engine.window.open(pfm.window_settings(
     )
 
 # setup imgui
-assert(engine.gui.startup("#version 130"))
+assert(engine.gui.init("#version 130"))
 engine.gui.load_style(engine.path_to("assets/styles/obsidian.style"))
 
 # load plugins
