@@ -1,8 +1,9 @@
 #ifndef _ML_ENGINE_HPP_
 #define _ML_ENGINE_HPP_
 
-#include <libmeme/Engine/GameTime.hpp>
 #include <libmeme/Engine/AssetManager.hpp>
+#include <libmeme/Engine/GameObjectManager.hpp>
+#include <libmeme/Engine/GameTime.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
@@ -10,17 +11,21 @@
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct ML_NODISCARD engine_config final : trackable
 	{
 		using arguments_t = pmr::vector<pmr::string>;
 
-		arguments_t		command_line		{}				; // command line
-		fs::path		content_home		{}				; // content home
-		fs::path		library_home		{}				; // library home
-		fs::path		program_path		{}				; // program path
-		fs::path		program_name		{}				; // program name
-		fs::path		startup_script		{}				; // setup script
+		arguments_t		command_line		{}; // command line
+		fs::path		content_home		{}; // content home
+		fs::path		library_home		{}; // library home
+		fs::path		program_path		{}; // program path
+		fs::path		program_name		{}; // program name
+		fs::path		startup_script		{}; // setup script
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	class ML_ENGINE_API engine final
 	{
@@ -58,6 +63,8 @@ namespace ml
 		ML_NODISCARD static asset_manager & assets() noexcept;
 
 		ML_NODISCARD static engine_config & config() noexcept;
+
+		ML_NODISCARD static game_object_manager & objects() noexcept;
 
 		ML_NODISCARD static gui_manager & gui() noexcept;
 

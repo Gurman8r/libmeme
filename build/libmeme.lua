@@ -50,6 +50,7 @@ files{
 	"%{sln_dir}tools/**.**",
 	"%{sln_dir}premake5.lua",
 	"%{sln_dir}README.md",
+	"%{sln_dir}TODO.txt",
 
 	-- imgui
 	"%{ext_dir}imgui/*.h",

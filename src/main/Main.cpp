@@ -93,7 +93,7 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("|   end gui");
-			engine::gui().render_frame();
+			engine::gui().end_frame();
 			event_system::fire_event<gui_end_event>();
 		}
 		{

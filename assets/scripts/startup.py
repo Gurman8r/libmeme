@@ -5,6 +5,9 @@ import libmeme_core     as core
 import libmeme_platform as pfm
 import libmeme_engine   as engine
 
+# load plugins
+assert(engine.plugins.load("demo"))
+
 # open window
 assert(engine.window.open(pfm.window_settings(
     "libmeme",              # title
@@ -24,12 +27,11 @@ assert(engine.window.open(pfm.window_settings(
     True)                   # install callbacks
     )
 
-# setup imgui
+# initialize gui
 assert(engine.gui.init("#version 130"))
-engine.gui.load_style(engine.path_to("assets/styles/obsidian.style"))
 
-# load plugins
-assert(engine.plugins.load("demo"))
+# load style
+engine.gui.load_style(engine.path_to("assets/styles/obsidian.style"))
 
 # print messages
 print(f"# {cfg.project.name} | {cfg.build.arch!r}-bit | {cfg.build.configuration}")

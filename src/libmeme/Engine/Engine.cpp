@@ -15,22 +15,35 @@ namespace ml
 	{
 		friend class		engine		;
 		asset_manager		m_assets	;
-		engine_config		m_config	;
+		engine_config		m_cfg		;
+		game_object_manager m_objects	;
 		gui_manager			m_gui		;
 		plugin_manager		m_plugins	;
 		script_manager		m_scripts	;
 		game_time			m_time		;
 		render_window		m_window	;
 
-		engine_context(json const & j) noexcept
-			: m_assets		{ j }
-			, m_config		{}
-			, m_gui			{ j }
-			, m_plugins		{ j }
-			, m_scripts		{ j }
-			, m_time		{}	
-			, m_window		{}
+		engine_context(json const & j)
+			: m_assets	{ j }
+			, m_cfg		{}
+			, m_objects	{}
+			, m_gui		{ j }
+			, m_plugins	{ j }
+			, m_scripts	{ j }
+			, m_time	{}	
+			, m_window	{}
 		{
+			m_cfg.command_line = { __argv, __argv + __argc };
+
+			m_cfg.program_path = fs::current_path();
+
+			m_cfg.program_name = fs::path{ __argv[0] }.filename();
+
+			j["content_home"].get_to(m_cfg.content_home);
+
+			j["library_home"].get_to(m_cfg.library_home);
+
+			j["startup_script"].get_to(m_cfg.startup_script);
 		}
 	};
 
@@ -52,20 +65,6 @@ namespace ml
 		}
 		else
 		{
-			auto & cfg{ config() };
-
-			cfg.command_line = { __argv, __argv + __argc };
-
-			cfg.program_path = fs::current_path();
-
-			cfg.program_name = fs::path{ __argv[0] }.filename();
-
-			j["content_home"].get_to(cfg.content_home);
-
-			j["library_home"].get_to(cfg.library_home);
-
-			j["startup_script"].get_to(cfg.startup_script);
-
 			return g_engine;
 		}
 	}
@@ -85,12 +84,12 @@ namespace ml
 
 		// start scripting
 		if (!g_engine->m_scripts.startup(
-			g_engine->m_config.program_name,
-			g_engine->m_config.library_home))
+			g_engine->m_cfg.program_name,
+			g_engine->m_cfg.library_home))
 			return debug::log::error("engine failed starting python");
 
 		// run setup script
-		g_engine->m_scripts.do_file(path_to(g_engine->m_config.startup_script));
+		g_engine->m_scripts.do_file(path_to(g_engine->m_cfg.startup_script));
 
 		return true;
 	}
@@ -110,14 +109,14 @@ namespace ml
 			window::terminate();
 		}
 
-		// shutdown python
-		g_engine->m_scripts.shutdown();
-
 		// shutdown gui
 		if (g_engine->m_gui.running() && !g_engine->m_gui.shutdown())
 		{
 			return debug::log::error("failed shutting down gui");
 		}
+
+		// shutdown python
+		g_engine->m_scripts.shutdown();
 
 		return true;
 	}
@@ -175,7 +174,13 @@ namespace ml
 	engine_config & engine::config() noexcept
 	{
 		ML_assert(g_engine);
-		return g_engine->m_config;
+		return g_engine->m_cfg;
+	}
+
+	game_object_manager & engine::objects() noexcept
+	{
+		ML_assert(g_engine);
+		return g_engine->m_objects;
 	}
 
 	gui_manager & engine::gui() noexcept

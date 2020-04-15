@@ -182,7 +182,7 @@ namespace ml
 		}
 	}
 
-	void gui_manager::render_frame()
+	void gui_manager::end_frame()
 	{
 		ImGui::Render();
 

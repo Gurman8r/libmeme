@@ -1,8 +1,6 @@
 #ifndef _ML_GUI_MANAGER_HPP_
 #define _ML_GUI_MANAGER_HPP_
 
-// WIP
-
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Matrix.hpp>
@@ -56,7 +54,7 @@ namespace ml
 
 		void render();
 
-		void render_frame();
+		void end_frame();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,9 +97,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		// imgui
-		void *			m_gui;
-		runtime			m_io;
+		void *	m_gui;
+		runtime	m_io;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
