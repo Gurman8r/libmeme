@@ -9,7 +9,7 @@ import libmeme_engine   as engine
 assert(engine.plugins.load("demo"))
 
 # create window
-assert(engine.window.create(pfm.window_settings(
+assert(engine.window.open(pfm.window_settings(
     "libmeme",              # title
     pfm.display_settings(
         [ 1280, 720 ],      # resolution

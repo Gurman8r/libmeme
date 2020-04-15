@@ -67,7 +67,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(window_settings const & value, bool install_callbacks)
+	bool window::open(window_settings const & value, bool install_callbacks)
 	{
 		if (is_open()) { return debug::log::error("window is already open"); }
 		

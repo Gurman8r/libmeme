@@ -112,7 +112,8 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&m, sys = py::module::import("sys")]()
+		([&m, sys = py::module::import("sys")
+		]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
 			sys.attr("stderr") = m.attr("stdio").attr("cout");
@@ -261,7 +262,7 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-			.def_static("create", [](window_settings const & ws, bool ic) { return engine::window().create(ws, ic); })
+			.def_static("open", [](window_settings const & ws, bool ic) { return engine::window().open(ws, ic); })
 			.def_static("close", [](py::args) { engine::window().close(); })
 			.def_static("get_size", []() { return engine::window().get_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })
@@ -272,7 +273,8 @@ namespace ml::embed
 
 		// SETUP
 		([&m, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")]()
+			, sys = py::module::import("sys")
+		]()
 		{
 			builtins.attr("exit") = m.attr("window").attr("close");
 			sys.attr("exit") = m.attr("window").attr("close");

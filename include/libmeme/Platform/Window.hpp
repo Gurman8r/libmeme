@@ -37,7 +37,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool create(window_settings const & value, bool install = true);
+		ML_NODISCARD virtual bool open(window_settings const & value, bool install = true);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

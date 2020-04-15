@@ -52,18 +52,23 @@ namespace ml
 	bool GL::initialize()
 	{
 		if (is_initialized())
+		{
 			return debug::log::error("GL is already initialized");
+		}
 
+		return s_gl_init = ([]()
+		{
 #if defined(ML_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
-		return (s_gl_init = (glewInit() == GLEW_OK));
+		return GLEW_OK == glewInit();
 #elif defined(ML_OPENGL_LOADER_GL3W)
-		return (s_gl_init = (gl3wInit() != 0));
+		return gl3wInit();
 #elif defined(ML_OPENGL_LOADER_GLAD)
-		return (s_gl_init = (gladLoadGL() != 0));
+		return gladLoadGL();
 #elif defined(ML_OPENGL_LOADER_CUSTOM)
-		return (s_gl_init = false);
+		return false;
 #endif
+		})();
 	}
 
 	void GL::validateVersion(int32_t & major, int32_t & minor)

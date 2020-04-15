@@ -12,7 +12,7 @@ namespace ml
 
 		virtual ~render_window() noexcept = default;
 
-		ML_NODISCARD virtual bool create(window_settings const & settings, bool install_callbacks);
+		ML_NODISCARD virtual bool open(window_settings const & settings, bool install_callbacks);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
