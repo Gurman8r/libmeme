@@ -16,7 +16,7 @@ namespace ml
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		script_manager(allocator_type const & alloc = {}) noexcept;
+		script_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
 		~script_manager() noexcept;
 

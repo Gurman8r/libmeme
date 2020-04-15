@@ -13,15 +13,25 @@ namespace ml
 	// engine context
 	class engine::engine_context final : non_copyable, trackable
 	{
-		friend class		engine								;
-		asset_manager		m_assets		{}					; // asset manager
-		engine_config		m_config		{}					; // public startup variables
-		engine_io			m_io			{}					; // public runtime variables
-		gui_manager			m_gui			{}					; // gui manager
-		plugin_manager		m_plugins		{}					; // plugin manager
-		script_manager		m_scripts		{}					; // script manager
-		game_time			m_time			{}					; // game time
-		render_window		m_window		{}					; // main window
+		friend class		engine		;
+		asset_manager		m_assets	;
+		engine_config		m_config	;
+		gui_manager			m_gui		;
+		plugin_manager		m_plugins	;
+		script_manager		m_scripts	;
+		game_time			m_time		;
+		render_window		m_window	;
+
+		engine_context(json const & j) noexcept
+			: m_assets		{ j }
+			, m_config		{}
+			, m_gui			{ j }
+			, m_plugins		{ j }
+			, m_scripts		{ j }
+			, m_time		{}	
+			, m_window		{}
+		{
+		}
 	};
 
 	static engine::engine_context * g_engine{};
@@ -36,7 +46,7 @@ namespace ml
 		{
 			return debug::log::error("engine is already initialized");
 		}
-		else if (!(g_engine = new engine_context{}))
+		else if (!(g_engine = new engine_context{ j }))
 		{
 			return debug::log::error("failed initializing engine context");
 		}
@@ -103,6 +113,12 @@ namespace ml
 		// shutdown python
 		g_engine->m_scripts.shutdown();
 
+		// shutdown gui
+		if (g_engine->m_gui.running() && !g_engine->m_gui.shutdown())
+		{
+			return debug::log::error("failed shutting down gui");
+		}
+
 		return true;
 	}
 
@@ -156,16 +172,10 @@ namespace ml
 		return g_engine->m_assets;
 	}
 
-	engine::engine_config & engine::config() noexcept
+	engine_config & engine::config() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_config;
-	}
-
-	engine::engine_io & engine::io() noexcept
-	{
-		ML_assert(g_engine);
-		return g_engine->m_io;
 	}
 
 	gui_manager & engine::gui() noexcept

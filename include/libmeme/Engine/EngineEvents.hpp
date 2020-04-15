@@ -40,6 +40,24 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(gui_begin_event)
+	{
+	};
+
+	ML_event(gui_dock_event)
+	{
+	};
+
+	ML_event(gui_draw_event)
+	{
+	};
+
+	ML_event(gui_end_event)
+	{
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_ENGINE_EVENTS_HPP_

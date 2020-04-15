@@ -3,8 +3,6 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Editor/Editor.hpp>
-#include <libmeme/Editor/EditorEvents.hpp>
 
 using namespace ml;
 
@@ -49,17 +47,11 @@ ml::int32_t main()
 	// create engine context
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 
-	// create editor context
-	ML_assert(editor::create_context(config)); ML_defer{ ML_assert(editor::destroy_context()); };
-
 	// startup engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
 	// nothing to do here
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
-
-	// startup editor
-	ML_assert(editor::startup()); ML_defer{ ML_assert(editor::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -91,17 +83,17 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("|   begin gui");
-			editor::new_frame();
+			engine::gui().new_frame();
 			event_system::fire_event<gui_begin_event>();
 		}
 		{
 			ML_benchmark("|    gui");
-			editor::render();
+			engine::gui().render();
 			event_system::fire_event<gui_draw_event>();
 		}
 		{
 			ML_benchmark("|   end gui");
-			editor::render_frame();
+			engine::gui().render_frame();
 			event_system::fire_event<gui_end_event>();
 		}
 		{

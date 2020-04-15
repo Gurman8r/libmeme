@@ -18,7 +18,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plugin_manager(allocator_type const & alloc = {}) noexcept;
+		plugin_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
 		~plugin_manager() noexcept;
 

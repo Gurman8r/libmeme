@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin_manager::plugin_manager(allocator_type const & alloc) noexcept
+	plugin_manager::plugin_manager(json const & j, allocator_type const & alloc) noexcept
 		: m_files{ alloc }
 		, m_libs{ alloc }
 	{

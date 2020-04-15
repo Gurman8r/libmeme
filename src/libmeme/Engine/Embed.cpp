@@ -218,9 +218,11 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// IO
-		struct ml_engine_io {};
-		py::class_<ml_engine_io>(m, "io")
+		// GUI
+		struct ml_engine_gui {};
+		py::class_<ml_engine_gui>(m, "gui")
+			.def_static("startup", [](cstring s) { return engine::gui().startup(engine::window(), s); })
+			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -267,6 +269,12 @@ namespace ml::embed
 			.def_static("get_size", []() { return engine::window().get_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })
 			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// FUNCTIONS
+		m.def("path_to", [](cstring s) { return engine::path_to(s).string(); });
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

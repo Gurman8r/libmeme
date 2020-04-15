@@ -1,14 +1,207 @@
-#include <libmeme/Editor/StyleLoader.hpp>
-#include <libmeme/Editor/ImGui.hpp>
+#include <libmeme/Engine/GuiManager.hpp>
+#include <libmeme/Engine/ImGui.hpp>
+#include <libmeme/Engine/EngineEvents.hpp>
+#include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Input.hpp>
-#include <libmeme/Core/Hash.hpp>
+#include <libmeme/Platform/Window.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool style_loader::load_from_file(fs::path const & path)
+	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
+		: m_gui	{}
+		, m_io	{}
+	{
+	}
+
+	gui_manager::~gui_manager() noexcept
+	{
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	bool gui_manager::startup(window const & win, cstring ver)
+	{
+		// check imgui version
+		IMGUI_CHECKVERSION();
+
+		// set allocator functions
+		ImGui::SetAllocatorFunctions
+		(
+			[](size_t s, auto) { return memory_manager::allocate(s); },
+			[](void * p, auto) { return memory_manager::deallocate(p); },
+			nullptr
+		);
+
+		// create editor_context
+		m_gui = ImGui::CreateContext();
+
+		auto & im_io{ ImGui::GetIO() };
+		auto & im_style{ ImGui::GetStyle() };
+
+		// imgui paths
+		im_io.LogFilename = nullptr;
+		im_io.IniFilename = nullptr;
+
+		// config flags
+		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+		// backend
+#if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
+		
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)win.get_handle(), true))
+		{
+			return debug::log::error("Failed initializing ImGui platform");
+		}
+
+		if (!ImGui_ImplOpenGL3_Init(ver))
+		{
+			return debug::log::error("Failed initializing ImGui renderer");
+		}
+#else
+#endif
+		return true;
+	}
+
+	bool gui_manager::shutdown()
+	{
+		m_io.main_menus.clear();
+
+#if defined(ML_RENDERER_OPENGL)
+		ImGui_ImplOpenGL3_Shutdown();
+#else
+#endif
+
+#if defined(ML_PLATFORM_GLFW)
+		ImGui_ImplGlfw_Shutdown();
+#else
+#endif
+
+		ImGui::DestroyContext();
+
+		m_gui = nullptr;
+
+		return true;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void gui_manager::new_frame()
+	{
+#if defined(ML_RENDERER_OPENGL)
+		ImGui_ImplOpenGL3_NewFrame();
+#else
+#endif
+
+#if defined(ML_PLATFORM_GLFW)
+		ImGui_ImplGlfw_NewFrame();
+#else
+#endif
+
+		ImGui::NewFrame();
+	}
+
+	void gui_manager::render()
+	{
+		ML_ImGui_ScopeID(ML_addressof(this));
+
+		// DOCKSPACE
+		if (m_io.show_dockspace)
+		{
+			ML_ImGui_ScopeID(dockspace_title);
+			
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+			{
+				// viewport
+				ImGuiViewport const * v{ ImGui::GetMainViewport() };
+				ImGui::SetNextWindowPos(v->Pos);
+				ImGui::SetNextWindowSize(v->Size);
+				ImGui::SetNextWindowViewport(v->ID);
+
+				// style
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_io.dockspace_rounding);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_io.dockspace_border);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_io.dockspace_padding);
+				ImGui::SetNextWindowBgAlpha(m_io.dockspace_alpha);
+
+				// begin
+				if (ImGui::Begin(dockspace_title, &m_io.show_dockspace,
+					ImGuiWindowFlags_NoTitleBar |
+					ImGuiWindowFlags_NoCollapse |
+					ImGuiWindowFlags_NoResize |
+					ImGuiWindowFlags_NoMove |
+					ImGuiWindowFlags_NoBringToFrontOnFocus |
+					ImGuiWindowFlags_NoNavFocus |
+					ImGuiWindowFlags_NoDocking |
+					ImGuiWindowFlags_NoBackground |
+					(m_io.show_main_menu ? ImGuiWindowFlags_MenuBar : 0)
+				))
+				{
+					ImGui::PopStyleVar(3);
+
+					if (m_io.dockspace_nodes.empty())
+					{
+						event_system::fire_event<gui_dock_event>();
+					}
+
+					ImGui::DockSpace(
+						ImGui::GetID(dockspace_title),
+						m_io.dockspace_size,
+						ImGuiDockNodeFlags_PassthruCentralNode |
+						ImGuiDockNodeFlags_AutoHideTabBar
+					);
+
+					ImGui::End();
+				}
+			}
+		}
+
+		// MAIN MENU
+		if (m_io.show_main_menu)
+		{
+			if (ImGui::BeginMainMenuBar())
+			{
+				for (auto const & pair : m_io.main_menus)
+				{
+					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
+					{
+						for (auto const & fn : pair.second)
+						{
+							std::invoke(fn);
+						}
+						ImGui::EndMenu();
+					}
+				}
+				ImGui::EndMainMenuBar();
+			}
+		}
+	}
+
+	void gui_manager::render_frame()
+	{
+		ImGui::Render();
+
+#if defined(ML_RENDERER_OPENGL)
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#else
+#endif
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			auto backup_context{ window::get_context_current() };
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			window::make_context_current(backup_context);
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool gui_manager::load_style(fs::path const & path)
 	{
 		using namespace util;
 
@@ -144,6 +337,96 @@ namespace ml
 			}
 		}
 		return true;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void gui_manager::show_imgui_demo(bool * p_open)
+	{
+		ImGui::ShowDemoWindow(p_open);
+	}
+
+	void gui_manager::show_imgui_metrics(bool * p_open)
+	{
+		ImGui::ShowMetricsWindow(p_open);
+	}
+
+	void gui_manager::show_imgui_about(bool * p_open)
+	{
+		ImGui::ShowAboutWindow(p_open);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void gui_manager::add_menu(cstring label, menu_t && fn)
+	{
+		auto & menus{ m_io.main_menus };
+
+		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e)
+		{
+			return (e.first == label); })
+		};
+
+		if (it == menus.end())
+		{
+			menus.push_back({ label, {} });
+
+			it = (menus.end() - 1);
+		}
+
+		if (fn)
+		{
+			it->second.emplace_back(ML_forward(fn));
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	uint32_t gui_manager::begin_dockspace_builder(int32_t flags)
+	{
+		if (uint32_t root{ ImGui::GetID(dockspace_title) }; !ImGui::DockBuilderGetNode(root))
+		{
+			ImGui::DockBuilderRemoveNode(root);
+
+			ImGui::DockBuilderAddNode(root, flags);
+
+			return root;
+		}
+		return NULL;
+	}
+
+	uint32_t gui_manager::end_dockspace_builder(uint32_t root)
+	{
+		if (root)
+		{
+			ImGui::DockBuilderFinish(root);
+		}
+		return root;
+	}
+
+	uint32_t gui_manager::dock(cstring name, uint32_t id)
+	{
+		if (name && id)
+		{
+			ImGui::DockBuilderDockWindow(name, id);
+			return id;
+		}
+		return NULL;
+	}
+
+	uint32_t gui_manager::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return m_io.dockspace_nodes[(size_t)i] = split(id, dir, ratio, value);
+	}
+
+	uint32_t gui_manager::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return split(id, dir, ratio, nullptr, value);
+	}
+
+	uint32_t gui_manager::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
+	{
+		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

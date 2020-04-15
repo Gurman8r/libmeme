@@ -7,10 +7,9 @@
 #include <libmeme/Engine/Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Editor/ImGuiExt.hpp>
+#include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Editor/Editor.hpp>
-#include <libmeme/Editor/EditorEvents.hpp>
+#include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/Font.hpp>
@@ -474,34 +473,36 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ editor::io().dockspace_nodes };
-			if (!d.empty()) { return; }
-			d.resize(MAX_DOCK_NODE);
+			auto & g{ engine::gui() };
+			auto & d{ g.io().dockspace_nodes };
 
-			if (d[root] = editor::begin_dockspace_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			if (!d.empty()) { return; }
+			else { d.resize(MAX_DOCK_NODE); }
+
+			if (d[root] = g.begin_dockspace_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
 
-				editor::split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				editor::split(left_up	, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				editor::split(left_dn	, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-				editor::split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+				g.split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				g.split(left_up		, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				g.split(left_dn		, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+				g.split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
 
-				editor::split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
-				editor::split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				editor::split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+				g.split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
+				g.split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				g.split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				editor::dock(m_gui_display.title	, d[left_up]);
-				editor::dock(m_gui_ecs.title		, d[left_dn]);
-				editor::dock(m_gui_assets.title		, d[left_dn]);
-				editor::dock(m_gui_files.title		, d[left_dn]);
-				editor::dock(m_gui_console.title	, d[left_dn]);
-				editor::dock(m_gui_profiler.title	, d[left_dn2]);
-				editor::dock(m_gui_memory.title		, d[right]);
-				editor::dock(m_gui_docs.title		, d[right]);
-				editor::dock(m_gui_scripting.title	, d[right]);
+				g.dock(m_gui_display.title		, d[left_up]);
+				g.dock(m_gui_ecs.title			, d[left_dn]);
+				g.dock(m_gui_assets.title		, d[left_dn]);
+				g.dock(m_gui_files.title		, d[left_dn]);
+				g.dock(m_gui_console.title		, d[left_dn]);
+				g.dock(m_gui_profiler.title		, d[left_dn2]);
+				g.dock(m_gui_memory.title		, d[right]);
+				g.dock(m_gui_docs.title			, d[right]);
+				g.dock(m_gui_scripting.title	, d[right]);
 
-				editor::end_dockspace_builder(root);
+				g.end_dockspace_builder(root);
 			}
 		}
 
@@ -512,9 +513,9 @@ namespace ml
 			ML_ImGui_ScopeID(ML_addressof(this));
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ editor::show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ editor::show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ editor::show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
 
 			// DEMO
 			m_gui_display.render([&]()		{ show_display_gui(); });	// DISPLAY
@@ -546,7 +547,7 @@ namespace ml
 
 		void setup_menus()
 		{
-			editor::add_menu("file", [&]()
+			engine::gui().add_menu("file", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
@@ -554,7 +555,7 @@ namespace ml
 					engine::window().close();
 				}
 			});
-			editor::add_menu("tools", [&]()
+			engine::gui().add_menu("tools", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_gui_assets.menu_item();
@@ -566,7 +567,7 @@ namespace ml
 				m_gui_profiler.menu_item();
 				m_gui_scripting.menu_item();
 			});
-			editor::add_menu("settings", [&]()
+			engine::gui().add_menu("settings", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				bool fullscreen{ engine::window().is_fullscreen() };
@@ -575,7 +576,7 @@ namespace ml
 					engine::window().set_fullscreen(fullscreen);
 				}
 			});
-			editor::add_menu("help", [&]()
+			engine::gui().add_menu("help", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_imgui_demo.menu_item();

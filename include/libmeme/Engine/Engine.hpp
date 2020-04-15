@@ -10,36 +10,24 @@
 
 namespace ml
 {
+	struct ML_NODISCARD engine_config final : trackable
+	{
+		using arguments_t = pmr::vector<pmr::string>;
+
+		arguments_t		command_line		{}				; // command line
+		fs::path		content_home		{}				; // content home
+		fs::path		library_home		{}				; // library home
+		fs::path		program_path		{}				; // program path
+		fs::path		program_name		{}				; // program name
+		fs::path		startup_script		{}				; // setup script
+	};
+
 	class ML_ENGINE_API engine final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		class engine_context;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using arguments_t = pmr::vector<cstring>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// public startup variables
-		struct engine_config final : trackable
-		{
-			arguments_t		command_line		{}				; // command line
-			fs::path		content_home		{}				; // content home
-			fs::path		library_home		{}				; // library home
-			fs::path		program_path		{}				; // program path
-			fs::path		program_name		{}				; // program name
-			fs::path		startup_script		{}				; // setup script
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// public runtime variables
-		struct engine_io final : trackable
-		{
-		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -70,8 +58,6 @@ namespace ml
 		ML_NODISCARD static asset_manager & assets() noexcept;
 
 		ML_NODISCARD static engine_config & config() noexcept;
-
-		ML_NODISCARD static engine_io & io() noexcept;
 
 		ML_NODISCARD static gui_manager & gui() noexcept;
 
