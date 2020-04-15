@@ -19,9 +19,9 @@
 
 // invoke
 #if ML_has_cxx20
-#	define ML_meta_invoke(fn, ...) (std::invoke(fn, ##__VA_ARGS__))
+#	define ML_meta_invoke(fn, ...) std::invoke(fn, ##__VA_ARGS__)
 #else
-#	define ML_meta_invoke(fn, ...) ((fn)(##__VA_ARGS__))
+#	define ML_meta_invoke(fn, ...) (fn)(##__VA_ARGS__)
 #endif
 
 // DS
