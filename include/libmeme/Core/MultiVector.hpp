@@ -651,7 +651,7 @@ namespace ml::ds
 			{
 				this->insert<I>(loc, ML_forward(std::get<I>(ML_forward(value))));
 
-				this->insert<It, Tp, I + 1, N>(loc, ML_forward(value));
+				this->insert<It, Tp, I + 1>(loc, ML_forward(value));
 			}
 		}
 
@@ -683,7 +683,7 @@ namespace ml::ds
 			{
 				this->push_back<I>(ML_forward(std::get<I>(ML_forward(value))));
 
-				this->push_back<Tp, I + 1, N>(ML_forward(value));
+				this->push_back<Tp, I + 1>(ML_forward(value));
 			}
 		}
 
