@@ -525,8 +525,8 @@ namespace ml::ds
 	// FLAT SET | sorted vector of unique elements
 	template <
 		class	_Ty,					// value type
-		class	_Pr = std::less<_Ty>,	// comparator predicate type
-		size_t	_Th = 42				// algorithm selector threshold
+		size_t	_Th = 42,				// algorithm selector threshold
+		class	_Pr = std::less<_Ty>	// comparator predicate type
 	> ML_alias flat_set = typename basic_flat_set
 	<
 		flat_set_traits<_Ty, _Pr, false, _Th>
@@ -535,8 +535,8 @@ namespace ml::ds
 	// FLAT MULTISET | sorted vector of elements
 	template <
 		class	_Ty,					// value type
-		class	_Pr = std::less<_Ty>,	// comparator predicate type
-		size_t	_Th = 42				// algorithm selector threshold
+		size_t	_Th = 42,				// algorithm selector threshold
+		class	_Pr = std::less<_Ty>	// comparator predicate type
 	> ML_alias flat_multiset = typename basic_flat_set
 	<
 		flat_set_traits<_Ty, _Pr, true, _Th>

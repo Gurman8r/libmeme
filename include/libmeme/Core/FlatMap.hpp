@@ -46,7 +46,7 @@ namespace ml::ds
 		using difference_type			= typename traits_type::difference_type;
 		using size_type					= typename traits_type::size_type;
 
-		using key_storage				= typename ds::flat_set<key_type, compare_type, traits_type::thresh>;
+		using key_storage				= typename ds::flat_set<key_type, traits_type::thresh, compare_type>;
 		using key_pointer				= typename key_storage::pointer;
 		using key_const_pointer			= typename key_storage::const_pointer;
 		using key_reference				= typename key_storage::reference;
@@ -610,8 +610,8 @@ namespace ml::ds
 	template <
 		class	_Kt,					// key type
 		class	_Vt,					// value type
-		class	_Pr = std::less<_Kt>,	// key comparator predicate type
-		size_t	_Th = 42				// search algorithm selector threshold
+		size_t	_Th = 42,				// search algorithm selector threshold
+		class	_Pr = std::less<_Kt>	// key comparator predicate type
 	> ML_alias flat_map = typename basic_flat_map
 	<
 		flat_map_traits<_Kt, _Vt, _Pr, _Th>

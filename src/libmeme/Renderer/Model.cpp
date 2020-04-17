@@ -93,7 +93,7 @@ namespace ml
 		);
 	}
 
-	bool model::load_from_file(fs::path const & path, uint32_t flags)
+	bool model::load_from_file(fs::path const & path, int32_t flags)
 	{
 		// open scene
 		Assimp::Importer _ai;
