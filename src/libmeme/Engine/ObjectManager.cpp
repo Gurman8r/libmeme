@@ -1,11 +1,10 @@
-#include <libmeme/Engine/AssetManager.hpp>
+#include <libmeme/Engine/ObjectManager.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	asset_manager::asset_manager(json const & j, allocator_type const & alloc) noexcept
-		: m_data{ alloc }
+	object_manager::object_manager(json const & j, allocator_type const & alloc) noexcept
 	{
 	}
 

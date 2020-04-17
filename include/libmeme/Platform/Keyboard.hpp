@@ -7,21 +7,21 @@ namespace ml
 
 	enum key_state_ : int32_t
 	{
-		key_state_release,
-		key_state_press,
-		key_state_repeat
+		key_state_release,	// high -> low
+		key_state_press,	// low -> high
+		key_state_repeat	// high -> high
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum key_mods_ : int32_t
 	{
-		key_mods_none		= (0 << 0), // none
-		key_mods_shift		= (0 << 1), // shift
-		key_mods_ctrl		= (1 << 1), // ctrl
-		key_mods_alt		= (1 << 2), // alt
-		key_mods_super		= (1 << 3), // super
-		key_mods_caps_lock	= (1 << 4), // caps
+		key_mods_none,					// none
+		key_mods_shift		= (0 << 1),	// shift
+		key_mods_ctrl		= (1 << 1),	// ctrl
+		key_mods_alt		= (1 << 2),	// alt
+		key_mods_super		= (1 << 3),	// super
+		key_mods_caps_lock	= (1 << 4),	// caps
 		key_mods_num_lock	= (1 << 5)	// numlock
 	};
 

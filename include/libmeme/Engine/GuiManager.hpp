@@ -11,29 +11,45 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using menu_t			= typename std::function<void()>;
-		using menu_bar_t		= typename pmr::vector<std::pair<cstring, pmr::vector<menu_t>>>;
-		using dock_nodes_t		= typename pmr::vector<uint32_t>;
-
-		static constexpr auto dockspace_title{ "dockspace##libmeme" };
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD runtime final : trackable
+		struct ML_NODISCARD dockspace_t final : non_copyable, trackable
 		{
-			// menu bar
-			bool			show_main_menu	{ true };
-			menu_bar_t		main_menus;
+			using nodes_t = typename pmr::vector<uint32_t>;
 
-			// dockspace
-			bool			show_dockspace	{ true };
-			float_t			dockspace_border;
-			vec2			dockspace_padding;
-			float_t			dockspace_rounding;
-			vec2			dockspace_size;
-			float_t			dockspace_alpha;
-			dock_nodes_t	dockspace_nodes;
+			static constexpr auto title{ "dockspace##libmeme" };
+
+			bool		visible	{ true };
+			float_t		border	{};
+			vec2		padding	{};
+			float_t		rounding{};
+			vec2		size	{};
+			float_t		alpha	{};
+			nodes_t		nodes	;
+
+			dockspace_t(allocator_type const & alloc = {}) noexcept : nodes{ alloc }
+			{
+			}
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct ML_NODISCARD main_menu_t final : non_copyable, trackable
+		{
+			using callback_t	= typename std::function<void()>;
+			using menu_t		= typename std::pair<cstring, pmr::vector<callback_t>>;
+			using menus_t		= typename pmr::vector<menu_t>;
+			
+			bool		visible	{ true };
+			menus_t		menus	;
+
+			main_menu_t(allocator_type const & alloc = {}) noexcept : menus{ alloc }
+			{
+			}
+
+			~main_menu_t() noexcept { menus.clear(); }
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,7 +86,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void add_menu(cstring label, menu_t && fn);
+		void add_menu(cstring label, std::function<void()> && fn);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,15 +106,20 @@ namespace ml
 
 		bool running() const noexcept { return m_gui; }
 
-		runtime & io() & noexcept { return m_io; }
+		auto & dockspace() & noexcept { return m_dockspace; }
 
-		runtime const & io() const & noexcept { return m_io; }
+		auto const & dockspace() const & noexcept { return m_dockspace; }
+
+		auto & main_menu() & noexcept { return m_main_menu; }
+
+		auto const & main_menu() const & noexcept { return m_main_menu; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *	m_gui;
-		runtime	m_io;
+		void *		m_gui;
+		main_menu_t	m_main_menu;
+		dockspace_t	m_dockspace;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

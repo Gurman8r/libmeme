@@ -10,14 +10,14 @@ namespace ml
 
 	enum mouse_button_ : int32_t
 	{
-		mouse_button_0,
-		mouse_button_1,
-		mouse_button_2,
-		mouse_button_3,
-		mouse_button_4,
-		mouse_button_5,
-		mouse_button_6,
-		mouse_button_7,
+		mouse_button_0,	 // 
+		mouse_button_1,	 // 
+		mouse_button_2,	 // 
+		mouse_button_3,	 // 
+		mouse_button_4,	 // 
+		mouse_button_5,	 // 
+		mouse_button_6,	 // 
+		mouse_button_7,	 // 
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

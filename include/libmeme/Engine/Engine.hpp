@@ -2,7 +2,7 @@
 #define _ML_ENGINE_HPP_
 
 #include <libmeme/Engine/AssetManager.hpp>
-#include <libmeme/Engine/GameObjectManager.hpp>
+#include <libmeme/Engine/ObjectManager.hpp>
 #include <libmeme/Engine/GameTime.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
@@ -13,7 +13,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_NODISCARD engine_config final : trackable
+	struct ML_NODISCARD engine_config final : non_copyable, trackable
 	{
 		using arguments_t = pmr::vector<pmr::string>;
 
@@ -34,11 +34,13 @@ namespace ml
 
 		class engine_context;
 
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static bool is_initialized() noexcept;
 
-		ML_NODISCARD static bool create_context(json const & j);
+		ML_NODISCARD static bool create_context(json const & j, allocator_type const & alloc = {});
 
 		ML_NODISCARD static bool destroy_context();
 
@@ -64,7 +66,7 @@ namespace ml
 
 		ML_NODISCARD static engine_config & config() noexcept;
 
-		ML_NODISCARD static game_object_manager & objects() noexcept;
+		ML_NODISCARD static object_manager & objects() noexcept;
 
 		ML_NODISCARD static gui_manager & gui() noexcept;
 

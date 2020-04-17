@@ -16,9 +16,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		game_time(allocator_type const & alloc = {}) noexcept;
+		game_time(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		~game_time() noexcept;
+		~game_time() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

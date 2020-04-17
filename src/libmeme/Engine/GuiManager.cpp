@@ -12,8 +12,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
-		: m_gui	{}
-		, m_io	{}
+		: m_gui			{}
+		, m_main_menu	{ alloc }
+		, m_dockspace	{ alloc }
 	{
 	}
 
@@ -70,7 +71,7 @@ namespace ml
 
 	bool gui_manager::shutdown()
 	{
-		m_io.main_menus.clear();
+		m_main_menu.menus.clear();
 
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
@@ -111,9 +112,9 @@ namespace ml
 		ML_ImGui_ScopeID(ML_addressof(this));
 
 		// DOCKSPACE
-		if (m_io.show_dockspace)
+		if (m_dockspace.visible)
 		{
-			ML_ImGui_ScopeID(dockspace_title);
+			ML_ImGui_ScopeID(m_dockspace.title);
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -124,13 +125,13 @@ namespace ml
 				ImGui::SetNextWindowViewport(v->ID);
 
 				// style
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_io.dockspace_rounding);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_io.dockspace_border);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_io.dockspace_padding);
-				ImGui::SetNextWindowBgAlpha(m_io.dockspace_alpha);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_dockspace.rounding);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_dockspace.border);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_dockspace.padding);
+				ImGui::SetNextWindowBgAlpha(m_dockspace.alpha);
 
 				// begin
-				if (ImGui::Begin(dockspace_title, &m_io.show_dockspace,
+				if (ImGui::Begin(m_dockspace.title, &m_dockspace.visible,
 					ImGuiWindowFlags_NoTitleBar |
 					ImGuiWindowFlags_NoCollapse |
 					ImGuiWindowFlags_NoResize |
@@ -139,19 +140,19 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(m_io.show_main_menu ? ImGuiWindowFlags_MenuBar : 0)
+					(m_main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
 
-					if (m_io.dockspace_nodes.empty())
+					if (m_dockspace.nodes.empty())
 					{
 						event_system::fire_event<gui_dock_event>();
 					}
 
 					ImGui::DockSpace(
-						ImGui::GetID(dockspace_title),
-						m_io.dockspace_size,
+						ImGui::GetID(m_dockspace.title),
+						m_dockspace.size,
 						ImGuiDockNodeFlags_PassthruCentralNode |
 						ImGuiDockNodeFlags_AutoHideTabBar
 					);
@@ -162,11 +163,11 @@ namespace ml
 		}
 
 		// MAIN MENU
-		if (m_io.show_main_menu)
+		if (m_main_menu.visible)
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
-				for (auto const & pair : m_io.main_menus)
+				for (auto const & pair : m_main_menu.menus)
 				{
 					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
 					{
@@ -358,9 +359,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::add_menu(cstring label, menu_t && fn)
+	void gui_manager::add_menu(cstring label, std::function<void()> && fn)
 	{
-		auto & menus{ m_io.main_menus };
+		auto & menus{ m_main_menu.menus };
 
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e)
 		{
@@ -384,7 +385,7 @@ namespace ml
 
 	uint32_t gui_manager::begin_dockspace_builder(int32_t flags)
 	{
-		if (uint32_t root{ ImGui::GetID(dockspace_title) }; !ImGui::DockBuilderGetNode(root))
+		if (uint32_t root{ ImGui::GetID(m_dockspace.title) }; !ImGui::DockBuilderGetNode(root))
 		{
 			ImGui::DockBuilderRemoveNode(root);
 
@@ -416,7 +417,7 @@ namespace ml
 
 	uint32_t gui_manager::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
-		return m_io.dockspace_nodes[(size_t)i] = split(id, dir, ratio, value);
+		return m_dockspace.nodes[(size_t)i] = split(id, dir, ratio, value);
 	}
 
 	uint32_t gui_manager::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)

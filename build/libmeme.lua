@@ -99,6 +99,8 @@ filter{ "configurations:Release" }
 filter{ "system:Windows" }
 	defines{
 		"NOMINMAX",
+
+		-- imgui
 		"IMGUI_API=__declspec(dllexport)",
 	}
 	includedirs{

@@ -474,7 +474,7 @@ namespace ml
 			};
 
 			auto & g{ engine::gui() };
-			auto & d{ g.io().dockspace_nodes };
+			auto & d{ g.dockspace().nodes };
 
 			if (!d.empty()) { return; }
 			else { d.resize(MAX_DOCK_NODE); }

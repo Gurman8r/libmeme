@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	game_time::game_time(allocator_type const & alloc) noexcept
+	game_time::game_time(json const & j, allocator_type const & alloc) noexcept
 		: m_main_timer	{ true }
 		, m_loop_timer	{}
 		, m_fps_accum	{}
@@ -14,10 +14,6 @@ namespace ml
 		, m_delta_time	{}
 		, m_frame_rate	{}
 		, m_frame_count	{}
-	{
-	}
-
-	game_time::~game_time() noexcept
 	{
 	}
 
@@ -34,7 +30,7 @@ namespace ml
 	{
 		++m_frame_count;
 
-		m_frame_rate = ([&, dt = m_delta_time.count()]()
+		m_frame_rate = ([&, dt = m_delta_time.count()]() noexcept
 		{
 			m_fps_accum += dt - m_fps_frames[m_fps_index];
 			

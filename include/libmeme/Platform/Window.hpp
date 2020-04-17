@@ -1,7 +1,7 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Platform/BaseWindow.hpp>
 #include <libmeme/Platform/Cursor.hpp>
 #include <libmeme/Platform/Keyboard.hpp>
 #include <libmeme/Platform/Mouse.hpp>
@@ -11,7 +11,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API window : non_copyable, trackable
+	struct ML_PLATFORM_API window : base_window
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

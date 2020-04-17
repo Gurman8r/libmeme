@@ -1,24 +1,19 @@
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
 
-import libmeme_config   as cfg
-import libmeme_core     as core
-import libmeme_platform as pfm
+import libmeme          as ml
 import libmeme_engine   as engine
 
-# load plugins
-assert(engine.plugins.load("demo"))
-
-# open window
-assert(engine.window.open(pfm.window_settings(
+# setup window
+assert(engine.window.open(ml.window_settings(
     "libmeme",              # title
-    pfm.display_settings(
+    ml.display_settings(
         [ 1280, 720 ],      # resolution
         32),                # color depth
-    pfm.context_settings(
-        pfm.api.opengl,     # api
+    ml.context_settings(
+        ml.platform.opengl, # api
         4,                  # major
         6,                  # minor
-        pfm.profile.compat, # profile
+        ml.platform.compat, # profile
         24,                 # depth bits
         8,                  # stencil bits
         False,              # multisample
@@ -27,16 +22,22 @@ assert(engine.window.open(pfm.window_settings(
     True)                   # install callbacks
     )
 
-# initialize gui
+# setup gui
 assert(engine.gui.init("#version 130"))
 
 # load style
-engine.gui.load_style(engine.path_to("assets/styles/obsidian.style"))
+engine.gui.load_style(ml.fs.path_to("assets/styles/obsidian.style"))
+
+# load plugins
+assert(engine.plugins.load("demo"))
 
 # print messages
-print(f"# {cfg.project.name} | {cfg.build.arch!r}-bit | {cfg.build.configuration}")
-print(f"# {cfg.project.url}")
+print(f"# {ml.project.name} | {ml.build.arch!r}-bit | {ml.build.configuration}")
+print(f"# {ml.project.url}")
 print(f"# type \'help\' for a list of commands")
 print("")
+
+engine.assets.load("image", "my_image", "../foo.png")
+engine.assets.load("texture", "my_texture", "my_image")
 
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

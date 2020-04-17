@@ -14,23 +14,23 @@ namespace ml
 	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine		;
-		asset_manager		m_assets	;
-		engine_config		m_cfg		;
-		game_object_manager m_objects	;
-		gui_manager			m_gui		;
-		plugin_manager		m_plugins	;
-		script_manager		m_scripts	;
-		game_time			m_time		;
-		render_window		m_window	;
+		asset_manager		m_assets	; // asset manager
+		engine_config		m_cfg		; // engine config
+		object_manager		m_objects	; // object manager
+		gui_manager			m_gui		; // gui manager
+		plugin_manager		m_plugins	; // plugin manager
+		script_manager		m_scripts	; // script manager
+		game_time			m_time		; // time manager
+		render_window		m_window	; // render window
 
-		engine_context(json const & j)
-			: m_assets	{ j }
+		engine_context(json const & j, allocator_type const & alloc)
+			: m_assets	{ j, alloc }
 			, m_cfg		{}
-			, m_objects	{}
-			, m_gui		{ j }
-			, m_plugins	{ j }
-			, m_scripts	{ j }
-			, m_time	{}	
+			, m_objects	{ j, alloc }
+			, m_gui		{ j, alloc }
+			, m_plugins	{ j, alloc }
+			, m_scripts	{ j, alloc }
+			, m_time	{ j, alloc }
 			, m_window	{}
 		{
 			m_cfg.command_line = { __argv, __argv + __argc };
@@ -53,13 +53,13 @@ namespace ml
 
 	bool engine::is_initialized() noexcept { return g_engine; }
 
-	bool engine::create_context(json const & j)
+	bool engine::create_context(json const & j, allocator_type const & alloc)
 	{
 		if (g_engine)
 		{
 			return debug::log::error("engine is already initialized");
 		}
-		else if (!(g_engine = new engine_context{ j }))
+		else if (!(g_engine = new engine_context{ j, alloc }))
 		{
 			return debug::log::error("failed initializing engine context");
 		}
@@ -177,7 +177,7 @@ namespace ml
 		return g_engine->m_cfg;
 	}
 
-	game_object_manager & engine::objects() noexcept
+	object_manager & engine::objects() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_objects;
