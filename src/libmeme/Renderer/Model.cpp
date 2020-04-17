@@ -97,23 +97,19 @@ namespace ml
 	{
 		// open scene
 		Assimp::Importer _ai;
-		aiScene const * scene{ _ai.ReadFile(path.string().c_str(), flags) };
-		if (!scene)
-		{
-			return debug::log::error("model failed reading assimp scene");
-		}
+		aiScene const * s{ _ai.ReadFile(path.string().c_str(), flags) };
+		ML_defer{ _ai.FreeScene(); };
+		if (!s) { return debug::log::error("model failed reading assimp scene"); }
 
-		// cleanup
-		if (!m_meshes.empty())
-			m_meshes.clear();
+		// clear existing
+		if (!m_meshes.empty()) { m_meshes.clear(); }
 
 		// reserve space
 		m_meshes.reserve(
-			std::distance(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes])
-		);
+			std::distance(&s->mMeshes[0], &s->mMeshes[s->mNumMeshes]));
 
 		// for each mesh
-		std::for_each(&scene->mMeshes[0], &scene->mMeshes[scene->mNumMeshes], [&](aiMesh * const m)
+		std::for_each(&s->mMeshes[0], &s->mMeshes[s->mNumMeshes], [&](aiMesh * const m)
 		{
 			// mesh vertices
 			pmr::vector<vertex> verts{};
@@ -122,9 +118,8 @@ namespace ml
 			std::for_each(&m->mFaces[0], &m->mFaces[m->mNumFaces], [&](aiFace const & f)
 			{
 				// reserve space
-				verts.reserve(verts.capacity()
-					+ std::distance(&f.mIndices[0], &f.mIndices[f.mNumIndices])
-				);
+				verts.reserve(
+					verts.capacity() + std::distance(&f.mIndices[0], &f.mIndices[f.mNumIndices]));
 
 				// for each index
 				std::for_each(&f.mIndices[0], &f.mIndices[f.mNumIndices], [&](uint32_t i)
@@ -154,7 +149,7 @@ namespace ml
 
 		});
 
-		return !m_meshes.empty();
+		return (!m_meshes.empty());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

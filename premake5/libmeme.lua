@@ -28,7 +28,7 @@ defines{
 }
 
 includedirs{
-	"%{sln_dir}build/%{prj.name}.lua",
+	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}include",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
@@ -44,13 +44,8 @@ includedirs{
 }
 
 files{
-	"%{sln_dir}build/%{prj.name}.lua",
 	"%{sln_dir}include/libmeme/**.hpp",
 	"%{sln_dir}src/libmeme/**.cpp",
-	"%{sln_dir}tools/**.**",
-	"%{sln_dir}premake5.lua",
-	"%{sln_dir}README.md",
-	"%{sln_dir}TODO.txt",
 
 	-- imgui
 	"%{ext_dir}imgui/*.h",

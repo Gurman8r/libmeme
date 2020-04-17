@@ -29,7 +29,7 @@ namespace ml
 			}
 		}
 
-		operator bool() const noexcept { return location != -1; }
+		operator bool() const noexcept { return (-1 < location); }
 
 		operator int32_t() const noexcept { return location; }
 	};

@@ -47,12 +47,14 @@ filter { "system:Windows" }
 -- Generate Project Files
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
---dofile "./build/glad.lua"
---dofile "./build/lua.lua"
---dofile "./build/imgui.lua"
-dofile "./build/glfw.lua"
-dofile "./build/libmeme.lua"
-dofile "./build/main.lua"
-dofile "./build/demo.lua"
+--dofile "./premake5/glad.lua"
+--dofile "./premake5/lua.lua"
+--dofile "./premake5/imgui.lua"
+dofile "./premake5/glfw.lua"
+
+dofile "./premake5/assets.lua"
+dofile "./premake5/libmeme.lua"
+dofile "./premake5/main.lua"
+dofile "./premake5/demo.lua"
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

@@ -606,13 +606,12 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				m_entities.expand_all(i, [&
-				](auto & alive, auto & index, auto & handle, auto & bitset)
+				m_entities.expand_all(i, [&](auto & a, auto & e, auto & h, auto & b)
 				{
-					alive = false;
-					index = i;
-					handle = i;
-					bitset.reset();
+					a = false;	// alive
+					e = i;		// index
+					h = i;		// handle
+					b.reset();	// bitset
 				});
 				
 				auto & h{ m_handles[i] };

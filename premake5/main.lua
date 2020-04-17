@@ -1,12 +1,12 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group			"plugins"
-project			"demo"
+group			""
+project			"main"
 targetname 		"%{prj.name}"
-targetdir		"%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/"
+targetdir		"%{bin_lib}/%{cfg.platform}/%{cfg.buildcfg}/"
 objdir			"%{bin_obj}"
-location		"%{prj_dir}plugins/%{prj.name}/"
-kind			"SharedLib"
+location		"%{prj_dir}%{prj.name}/"
+debugdir 		"%{bin_out}"
 language		"C++"
 cppdialect 		"C++17"
 staticruntime	"Off"
@@ -14,7 +14,7 @@ rtti			"Off"
 systemversion	"latest"
 
 dependson{
-	"main",
+	"libmeme",
 }
 
 defines{
@@ -23,14 +23,12 @@ defines{
 
 includedirs{
 	"%{sln_dir}include",
-	"%{sln_dir}plugins",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
 }
 
 files{
-	"%{sln_dir}build/%{prj.name}.lua",
-	"%{sln_dir}src/plugins/%{prj.name}.**",
+	"%{sln_dir}src/%{prj.name}/**.**",
 }
 
 libdirs{
@@ -42,11 +40,13 @@ links{
 	"libmeme",
 }
 
-filter "configurations:Debug"
+filter{ "configurations:Debug" }
 	symbols "On"
+	kind "ConsoleApp"
 
-filter "configurations:Release"
+filter{ "configurations:Release" } 
 	optimize "Speed"
+	kind "WindowedApp"
 
 -- WINDOWS
 
@@ -55,7 +55,7 @@ filter{ "system:Windows" }
 		"NOMINMAX",
 	}
 	postbuildcommands{
-		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
+		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.exe %{bin_out}",
 	}
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

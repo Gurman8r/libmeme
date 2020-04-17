@@ -24,7 +24,6 @@ includedirs{
 }
 
 files{
-	"%{sln_dir}build/%{prj.name}.lua",
 	"%{ext_dir}glfw/include/glfw/**.h",
 	"%{ext_dir}glfw/src/context.c", 
 	"%{ext_dir}glfw/src/egl_context.c",
