@@ -86,7 +86,6 @@ namespace ml::embed
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
-
 		py::class_<ml_stdio::output>(m, "stdio_output_facade")
 			.def(py::init<>())
 			.def("closed"		, []() { return false; })
