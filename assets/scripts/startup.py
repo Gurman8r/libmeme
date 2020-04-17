@@ -37,6 +37,7 @@ print(f"# {ml.project.url}")
 print(f"# type \'help\' for a list of commands")
 print("")
 
+# testing
 engine.assets.load("image", "my_image", "../foo.png")
 engine.assets.load("texture", "my_texture", "my_image")
 

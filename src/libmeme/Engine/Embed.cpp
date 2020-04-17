@@ -111,7 +111,7 @@ namespace ml::embed
 		py::class_<ml_fs>(m, "fs")
 			.def(py::init<>())
 			.def_static("path_to", [](cstring s) { return engine::path_to(s).string(); });
-		;
+			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
