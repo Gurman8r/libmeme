@@ -3,6 +3,13 @@
 
 #include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/Debug.hpp>
+
+#ifdef ML_os_windows
+#	define ML_LIB_EXT L".dll"
+#else
+#	define ML_LIB_EXT L".so"
+#endif
 
 namespace ml
 {
@@ -10,37 +17,56 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		using function_map = typename ds::flat_map<hash_t, void *>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		shared_library() noexcept : shared_library{ allocator_type{} } {}
-
-		explicit shared_library(allocator_type const & alloc) noexcept;
-
-		shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept;
-		
-		shared_library(shared_library && value, allocator_type const & alloc = {}) noexcept;
-		
-		~shared_library() noexcept;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using self_type			= typename shared_library;
+		using handle_type		= typename void *;
+		using symbols_type		= typename ds::flat_map<hash_t, handle_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared_library & operator=(shared_library && value) noexcept
+		shared_library() noexcept : self_type{ allocator_type{} }
 		{
-			swap(std::move(value));
+		}
+
+		explicit shared_library(allocator_type const & alloc) noexcept
+			: m_handle{}, m_path{}, m_symbols{ alloc }
+		{
+		}
+
+		explicit shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept
+			: self_type{ alloc }
+		{
+			this->open(path);
+		}
+
+		explicit shared_library(self_type && value, allocator_type const & alloc = {}) noexcept
+			: self_type{ alloc }
+		{
+			this->swap(std::move(value));
+		}
+
+		~shared_library() noexcept
+		{
+			this->close();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		self_type & operator=(self_type && value) noexcept
+		{
+			this->swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(shared_library & value) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void swap(self_type & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
-				std::swap(m_inst, value.m_inst);
+				std::swap(m_handle, value.m_handle);
 				m_path.swap(value.m_path);
-				m_funcs.swap(value.m_funcs);
+				m_symbols.swap(value.m_symbols);
 			}
 		}
 
@@ -50,29 +76,35 @@ namespace ml
 
 		bool close();
 
-		void * load_function(pmr::string const & name);
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD void * load_symbol(pmr::string const & name);
+
+		template <class T
+		> ML_NODISCARD auto load_symbol(pmr::string const & name)
+		{
+			return reinterpret_cast<T>(this->load_symbol(name));
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> ML_NODISCARD auto load_function(pmr::string const & name)
+		> auto call(pmr::string const & name, Args && ... args)
 		{
-			return reinterpret_cast<Ret(*)(Args...)>(this->load_function(name));
-		}
-
-		template <class Ret, class ... Args
-		> auto call_function(pmr::string const & name, Args && ... args)
-		{
-			if (auto const fn{ this->load_function<Ret, Args...>(name) })
+			if (auto const fn{ this->load_symbol<Ret(*)(Args...)>(name) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{
 					return std::make_optional<Ret>(std::invoke(fn, ML_forward(args)...));
 				}
+				else
+				{
+					return (void)std::invoke(fn, ML_forward(args)...);
+				}
 			}
 			else if constexpr (!std::is_same_v<Ret, void>)
 			{
-				return (std::optional<Ret>)std::nullopt;
+				return static_cast<std::optional<Ret>>(std::nullopt);
 			}
 		}
 
@@ -80,20 +112,20 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return good(); }
 
-		ML_NODISCARD bool good() const noexcept { return m_inst; }
+		ML_NODISCARD bool good() const noexcept { return m_handle; }
 
-		ML_NODISCARD auto functions() const noexcept -> function_map const & { return m_funcs; }
-
-		ML_NODISCARD auto instance() const noexcept -> void const * { return m_inst; }
+		ML_NODISCARD auto handle() const noexcept -> handle_type const & { return m_handle; }
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
+		ML_NODISCARD auto symbols() const noexcept -> symbols_type const & { return m_symbols; }
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<U, shared_library>)
+			if constexpr (std::is_same_v<U, self_type>)
 			{
 				return (this != std::addressof(value)) ? compare(value.m_path) : 0;
 			}
@@ -108,37 +140,37 @@ namespace ml
 			}
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
 			return compare(value) == 0;
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
 			return compare(value) != 0;
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
 			return compare(value) < 0;
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
 			return compare(value) > 0;
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
 			return compare(value) <= 0;
 		}
 
-		template <class U = shared_library
+		template <class U = self_type
 		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
 			return compare(value) >= 0;
@@ -147,9 +179,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *			m_inst;
+		handle_type		m_handle;
 		fs::path		m_path;
-		function_map	m_funcs;
+		symbols_type	m_symbols;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

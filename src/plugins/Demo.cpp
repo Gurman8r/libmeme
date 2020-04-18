@@ -31,9 +31,9 @@ namespace ml
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct c_shader		: ds::value_wrapper<shader	> {};
-	struct c_material	: ds::value_wrapper<material> {};
-	struct c_model		: ds::value_wrapper<model	> {};
+	struct c_shader		: ds::wrapper<shader>	{};
+	struct c_material	: ds::wrapper<material> {};
+	struct c_model		: ds::wrapper<model>	{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 

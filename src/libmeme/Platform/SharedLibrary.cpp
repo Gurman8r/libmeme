@@ -1,84 +1,19 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 #ifdef ML_os_windows
 #	include <Windows.h>
-#	define ML_LIB_EXT L".dll"
 #else
 // https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
-#	define ML_LIB_EXT L".so"
 #endif
-
-namespace ml::impl
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static inline void * load_library(fs::path const & path)
-	{
-#ifdef ML_os_windows
-		return LoadLibraryExW(path.c_str(), nullptr, 0);
-#else
-		return nullptr;
-#endif
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static inline bool free_library(void * instance)
-	{
-#ifdef ML_os_windows
-		return FreeLibrary(static_cast<HINSTANCE>(instance));
-#else
-		return false;
-#endif
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static inline void * load_function(void * instance, cstring name)
-	{
-#ifdef ML_os_windows
-		return GetProcAddress(static_cast<HINSTANCE>(instance), name);
-#else
-		return nullptr;
-#endif
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared_library::shared_library(allocator_type const & alloc) noexcept
-		: m_inst{}, m_path{}, m_funcs{ alloc }
-	{
-	}
-
-	shared_library::shared_library(fs::path const & path, allocator_type const & alloc) noexcept
-		: shared_library{ alloc }
-	{
-		open(path);
-	}
-
-	shared_library::shared_library(shared_library && value, allocator_type const & alloc) noexcept
-		: shared_library{ alloc }
-	{
-		swap(std::move(value));
-	}
-
-	shared_library::~shared_library() noexcept
-	{
-		impl::free_library(m_inst);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool shared_library::open(fs::path const & path)
 	{
 		// already opened
-		if (m_inst) { return false; }
+		if (m_handle) { return false; }
 
 		// set path
 		if ((m_path = path).extension().empty())
@@ -86,37 +21,58 @@ namespace ml
 			m_path += ML_LIB_EXT;
 		}
 
-		// clear functions
-		m_funcs.clear();
+		// clear symbols
+		m_symbols.clear();
 
 		// open library
-		return (m_inst = impl::load_library(m_path));
+		return m_handle = ([&]()
+		{
+#ifdef ML_os_windows
+			return LoadLibraryExW(m_path.c_str(), nullptr, 0);
+#else
+			return nullptr;
+#endif
+		})();
 	}
 
 	bool shared_library::close()
 	{
 		// not opened
-		if (!m_inst) { return false; }
+		if (!m_handle) { return false; }
 
 		// clear path
 		m_path.clear();
 
-		// clear functions
-		m_funcs.clear();
+		// clear symbols
+		m_symbols.clear();
 
 		// free library
-		return impl::free_library(m_inst);
+		return ([&]()
+		{
+#ifdef ML_os_windows
+			return FreeLibrary(static_cast<HINSTANCE>(m_handle));
+#else
+			return false;
+#endif
+		})();
 	}
 
-	void * shared_library::load_function(pmr::string const & name)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void * shared_library::load_symbol(pmr::string const & name)
 	{
 		// not opened
-		if (!m_inst) { return nullptr; }
+		if (!m_handle) { return nullptr; }
 
-		// load function
-		return m_funcs.find_or_add_fn(
-			util::hash(name),
-			&impl::load_function, m_inst, name.c_str());
+		// load symbol
+		return m_symbols.find_or_add_fn(util::hash(name), [&]()
+		{
+#ifdef ML_os_windows
+			return GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());
+#else
+			return nullptr;
+#endif
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -46,22 +46,22 @@ namespace ml::meta
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Tp, class Fn, size_t ... Is
-	> constexpr void impl_tuple_apply(Tp && tp, Fn && fn, std::index_sequence<Is...>)
+	> constexpr void impl_tuple_expand(Tp && tp, Fn && fn, std::index_sequence<Is...>) noexcept
 	{
 		ML_meta_invoke(ML_forward(fn), std::get<Is>(ML_forward(tp))...);
 	}
 
 	template <class Tp, class Fn
-	> constexpr void impl_tuple_apply(Tp && tp, Fn && fn)
+	> constexpr void impl_tuple_expand(Tp && tp, Fn && fn) noexcept
 	{
-		_ML meta::impl_tuple_apply(
+		meta::impl_tuple_expand(
 			ML_forward(tp),
 			ML_forward(fn),
 			std::make_index_sequence<std::tuple_size_v<std::decay_t<Tp>>>());
 	}
 
 	template <class Fn, class ... Args
-	> constexpr void impl_for_args(Fn && fn, Args && ... args)
+	> constexpr void impl_for_args(Fn && fn, Args && ... args) noexcept
 	{
 		(void)std::initializer_list<int32_t>
 		{
@@ -70,11 +70,11 @@ namespace ml::meta
 	}
 
 	template <class Tp, class Fn
-	> constexpr void impl_for_tuple(Tp && tp, Fn && fn)
+	> constexpr void impl_for_tuple(Tp && tp, Fn && fn) noexcept
 	{
-		_ML meta::impl_tuple_apply(ML_forward(tp), [&fn](auto && ... rest)
+		meta::impl_tuple_expand(ML_forward(tp), [&fn](auto && ... rest) noexcept
 		{
-			_ML meta::for_args(fn, ML_forward(rest)...);
+			meta::for_args(fn, ML_forward(rest)...);
 		});
 	}
 
@@ -82,23 +82,23 @@ namespace ml::meta
 
 	// "unpacks" the contents of a tuple inside a function call
 	template <class Tp, class Fn
-	> constexpr void tuple_apply(Tp && tp, Fn && fn)
+	> constexpr void tuple_expand(Tp && tp, Fn && fn) noexcept
 	{
-		_ML meta::impl_tuple_apply(ML_forward(tp), ML_forward(fn));
+		meta::impl_tuple_expand(ML_forward(tp), ML_forward(fn));
 	}
 
 	// invokes a function on every passed object
 	template <class Fn, class ... Args
-	> constexpr void for_args(Fn && fn, Args && ... args)
+	> constexpr void for_args(Fn && fn, Args && ... args) noexcept
 	{
-		_ML meta::impl_for_args(ML_forward(fn), ML_forward(args)...);
+		meta::impl_for_args(ML_forward(fn), ML_forward(args)...);
 	}
 
 	// invokes a function on every element of a tuple
 	template <class Tp, class Fn
-	> constexpr void for_tuple(Tp && tp, Fn && fn)
+	> constexpr void for_tuple(Tp && tp, Fn && fn) noexcept
 	{
-		_ML meta::impl_for_tuple(ML_forward(tp), ML_forward(fn));
+		meta::impl_for_tuple(ML_forward(tp), ML_forward(fn));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -236,7 +236,7 @@ namespace ml::meta
 	template <class Ls, class Fn
 	> constexpr void for_types(Fn && fn) noexcept
 	{
-		return _ML meta::for_tuple(tag_tuple<Ls>{}, fn);
+		return meta::for_tuple(tag_tuple<Ls>{}, fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

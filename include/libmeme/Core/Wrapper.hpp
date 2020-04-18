@@ -8,15 +8,15 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// value wrapper
-	template <class T> struct ML_NODISCARD value_wrapper
+	template <class T> struct ML_NODISCARD wrapper
 	{
 		using value_type		= typename T;
 		using pointer			= typename value_type *;
 		using const_pointer		= typename value_type const *;
 		using reference			= typename value_type &;
 		using const_reference	= typename value_type const &;
-		using rvalue_ref		= typename value_type &&;
-		using const_rvalue_ref	= typename value_type const &&;
+		using rvalue			= typename value_type &&;
+		using const_rvalue		= typename value_type const &&;
 		
 		value_type m_value;
 
@@ -28,9 +28,9 @@ namespace ml::ds
 		
 		constexpr auto operator *() const & noexcept -> const_reference { return m_value; }
 
-		constexpr auto operator *() && noexcept -> rvalue_ref { return std::move(m_value); }
+		constexpr auto operator *() && noexcept -> rvalue { return std::move(m_value); }
 		
-		constexpr auto operator *() const && noexcept -> const_rvalue_ref { return std::move(m_value); }
+		constexpr auto operator *() const && noexcept -> const_rvalue { return std::move(m_value); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -38,29 +38,28 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type				= typename _Traits;
-		using self_type					= typename basic_flat_set<traits_type>;
-		using value_type				= typename traits_type::value_type;
-		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
+		using traits_type					= typename _Traits;
+		using self_type						= typename basic_flat_set<traits_type>;
+		using value_type					= typename traits_type::value_type;
+		using compare_type					= typename traits_type::compare_type;
+		using allocator_type				= typename traits_type::allocator_type;
+		using difference_type				= typename traits_type::difference_type;
+		using size_type						= typename traits_type::size_type;
 
-		using storage_type				= typename pmr::vector<value_type>;
-		using init_type					= typename std::initializer_list<value_type>;
+		using storage_type					= typename pmr::vector<value_type>;
+		using init_type						= typename std::initializer_list<value_type>;
 		
-		using pointer					= typename storage_type::pointer;
-		using reference					= typename storage_type::reference;
-		using const_pointer				= typename storage_type::const_pointer;
-		using const_reference			= typename storage_type::const_reference;
+		using pointer						= typename storage_type::pointer;
+		using const_pointer					= typename storage_type::const_pointer;
+		using reference						= typename storage_type::reference;
+		using const_reference				= typename storage_type::const_reference;
+		using rvalue						= typename value_type &&;
+		using const_rvalue					= typename value_type const &&;
 		
-		using iterator					= typename storage_type::iterator;
-		using const_iterator			= typename storage_type::const_iterator;
-		using reverse_iterator			= typename storage_type::reverse_iterator;
-		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
-
-		using iterator_pair				= typename std::pair<iterator, iterator>;
-		using const_iterator_pair		= typename std::pair<const_iterator, const_iterator>;
+		using iterator						= typename storage_type::iterator;
+		using const_iterator				= typename storage_type::const_iterator;
+		using reverse_iterator				= typename storage_type::reverse_iterator;
+		using const_reverse_iterator		= typename storage_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -72,26 +71,26 @@ namespace ml::ds
 		basic_flat_set(init_type value, allocator_type const & alloc = {})
 			: m_data{ value, alloc }
 		{
-			impl_sort();
+			this->impl_sort();
 		}
 
 		template <class It
 		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
 			: m_data{ first, last, alloc }
 		{
-			impl_sort();
+			this->impl_sort();
 		}
 
 		basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
 			: m_data{ value, alloc }
 		{
-			impl_sort();
+			this->impl_sort();
 		}
 
 		basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::move(value), alloc }
 		{
-			impl_sort();
+			this->impl_sort();
 		}
 
 		basic_flat_set(self_type const & value, allocator_type const & alloc = {})
@@ -109,34 +108,34 @@ namespace ml::ds
 		self_type & operator=(init_type value)
 		{
 			self_type temp{ value };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(self_type const & value)
 		{
 			self_type temp{ value };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(storage_type const & value)
 		{
 			self_type temp{ value };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		self_type & operator=(self_type && value) noexcept
 		{
-			swap(std::move(value));
+			this->swap(std::move(value));
 			return (*this);
 		}
 
 		self_type & operator=(storage_type && value) noexcept
 		{
 			self_type temp{ std::move(value) };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
@@ -147,14 +146,14 @@ namespace ml::ds
 		{
 			m_data.assign(first, last);
 
-			impl_sort();
+			this->impl_sort();
 		}
 
 		void assign(init_type value)
 		{
 			m_data.assign(value);
 
-			impl_sort();
+			this->impl_sort();
 		}
 
 		void assign(storage_type const & value)
@@ -163,7 +162,7 @@ namespace ml::ds
 			{
 				m_data = value;
 
-				impl_sort();
+				this->impl_sort();
 			}
 		}
 
@@ -214,8 +213,22 @@ namespace ml::ds
 			{
 				m_data.swap(value);
 
-				impl_sort();
+				this->impl_sort();
 			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Out = difference_type
+		> ML_NODISCARD Out index_of(const_iterator it) const noexcept
+		{
+			return static_cast<Out>(std::distance(cbegin(), it));
+		}
+
+		template <class Out = difference_type
+		> ML_NODISCARD Out index_of(const_reverse_iterator it) const noexcept
+		{
+			return static_cast<Out>(std::distance(crbegin(), it));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -233,37 +246,37 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U = value_type
-		> ML_NODISCARD bool contains(U const & value) const
+		> ML_NODISCARD bool contains(U const & value) const noexcept
 		{
-			return impl_contains(begin(), end(), value);
+			return self_type::impl_contains(begin(), end(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U = value_type
-		> ML_NODISCARD iterator find(U const & value)
+		> ML_NODISCARD iterator find(U const & value) noexcept
 		{
-			return impl_find(begin(), end(), value);
+			return self_type::impl_find(begin(), end(), value);
 		}
 
 		template <class U = value_type
-		> ML_NODISCARD const_iterator find(U const & value) const
+		> ML_NODISCARD const_iterator find(U const & value) const noexcept
 		{
-			return impl_find(cbegin(), cend(), value);
+			return self_type::impl_find(cbegin(), cend(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U = value_type
-		> ML_NODISCARD auto insert(U const & value)
+		> ML_NODISCARD auto insert(U const & value) noexcept
 		{
-			return impl_insert(value);
+			return this->impl_insert(value);
 		}
 
 		template <class U = value_type
-		> ML_NODISCARD auto insert(U && value)
+		> ML_NODISCARD auto insert(U && value) noexcept
 		{
-			return impl_insert(std::move(value));
+			return this->impl_insert(std::move(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -327,7 +340,7 @@ namespace ml::ds
 		{
 			if constexpr (std::is_same_v<U, self_type>)
 			{
-				return compare(value.m_data);
+				return this->compare(value.m_data);
 			}
 			else
 			{
@@ -339,37 +352,37 @@ namespace ml::ds
 		template <class U = self_type
 		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
-			return compare(value) == 0;
+			return this->compare(value) == 0;
 		}
 
 		template <class U = self_type
 		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
-			return compare(value) != 0;
+			return this->compare(value) != 0;
 		}
 
 		template <class U = self_type
 		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
-			return compare(value) < 0;
+			return this->compare(value) < 0;
 		}
 
 		template <class U = self_type
 		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
-			return compare(value) > 0;
+			return this->compare(value) > 0;
 		}
 
 		template <class U = self_type
 		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
-			return compare(value) <= 0;
+			return this->compare(value) <= 0;
 		}
 
 		template <class U = self_type
 		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
-			return compare(value) >= 0;
+			return this->compare(value) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -381,7 +394,7 @@ namespace ml::ds
 
 		// contains implementation
 		template <class It, class U
-		> static bool impl_contains(It first, It last, U const & value)
+		> static bool impl_contains(It first, It last, U const & value) noexcept
 		{
 			// linear
 			auto impl_contains_linear = [&]() noexcept
@@ -421,7 +434,7 @@ namespace ml::ds
 
 		// find implementation
 		template <class It, class U
-		> static auto impl_find(It first, It last, U const & value)
+		> static iterator impl_find(It first, It last, U const & value) noexcept
 		{
 			// linear
 			auto impl_find_linear = [&]() noexcept
@@ -471,7 +484,7 @@ namespace ml::ds
 		void impl_sort() noexcept
 		{
 			// empty
-			if (empty()) { return; }
+			if (this->empty()) { return; }
 
 			// sort
 			if constexpr (0 < traits_type::thresh)
@@ -490,9 +503,8 @@ namespace ml::ds
 
 		// insert implementation
 		template <class U
-		> auto impl_insert(U && value) -> std::conditional_t<
-			traits_type::multi, iterator, std::pair<iterator, bool>
-		>
+		> auto impl_insert(U && value) noexcept
+			-> std::conditional_t<traits_type::multi, iterator, std::pair<iterator, bool>>
 		{
 			if constexpr (traits_type::multi)
 			{

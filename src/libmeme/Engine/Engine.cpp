@@ -98,6 +98,9 @@ namespace ml
 	{
 		if (!g_engine) { return false; }
 
+		// shutdown gui
+		if (!g_engine->m_gui.shutdown()) { return false; }
+
 		// clear plugins
 		g_engine->m_plugins.clear();
 
@@ -107,12 +110,6 @@ namespace ml
 			g_engine->m_window.close();
 			g_engine->m_window.destroy();
 			window::terminate();
-		}
-
-		// shutdown gui
-		if (g_engine->m_gui.running() && !g_engine->m_gui.shutdown())
-		{
-			return debug::log::error("failed shutting down gui");
 		}
 
 		// shutdown python

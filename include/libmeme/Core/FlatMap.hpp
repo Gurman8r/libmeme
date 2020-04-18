@@ -37,44 +37,59 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using traits_type				= typename _Traits;
-		using self_type					= typename basic_flat_map<traits_type>;
-		using key_type					= typename traits_type::key_type;
-		using value_type				= typename traits_type::value_type;
-		using compare_type				= typename traits_type::compare_type;
-		using allocator_type			= typename traits_type::allocator_type;
-		using difference_type			= typename traits_type::difference_type;
-		using size_type					= typename traits_type::size_type;
+		using traits_type						= typename _Traits;
+		using self_type							= typename basic_flat_map<traits_type>;
+		using key_type							= typename traits_type::key_type;
+		using value_type						= typename traits_type::value_type;
+		using compare_type						= typename traits_type::compare_type;
+		using allocator_type					= typename traits_type::allocator_type;
+		using difference_type					= typename traits_type::difference_type;
+		using size_type							= typename traits_type::size_type;
 
-		using key_storage				= typename ds::flat_set<key_type, traits_type::thresh, compare_type>;
-		using key_pointer				= typename key_storage::pointer;
-		using key_const_pointer			= typename key_storage::const_pointer;
-		using key_reference				= typename key_storage::reference;
-		using key_const_reference		= typename key_storage::const_reference;
-		using key_iterator				= typename key_storage::iterator;
-		using key_const_iterator		= typename key_storage::const_iterator;
+		using key_storage						= typename ds::flat_set<key_type, traits_type::thresh, compare_type>;
+		using key_pointer						= typename key_storage::pointer;
+		using key_const_pointer					= typename key_storage::const_pointer;
+		using key_reference						= typename key_storage::reference;
+		using key_const_reference				= typename key_storage::const_reference;
+		using key_rvalue						= typename key_storage::rvalue;
+		using key_const_rvalue					= typename key_storage::const_rvalue;
+		using key_iterator						= typename key_storage::iterator;
+		using key_const_iterator				= typename key_storage::const_iterator;
+		using key_reverse_iterator				= typename key_storage::reverse_iterator;
+		using key_const_reverse_iterator		= typename key_storage::const_reverse_iterator;
 
-		using value_storage				= typename pmr::vector<value_type>;
-		using value_pointer				= typename value_storage::pointer;
-		using value_const_pointer		= typename value_storage::const_pointer;
-		using value_reference			= typename value_storage::reference;
-		using value_const_reference		= typename value_storage::const_reference;
-		using value_iterator			= typename value_storage::iterator;
-		using value_const_iterator		= typename value_storage::const_iterator;
+		using value_storage						= typename pmr::vector<value_type>;
+		using value_pointer						= typename value_storage::pointer;
+		using value_const_pointer				= typename value_storage::const_pointer;
+		using value_reference					= typename value_storage::reference;
+		using value_const_reference				= typename value_storage::const_reference;
+		using value_rvalue						= typename value_type &&;
+		using value_const_rvalue				= typename value_type const &&;
+		using value_iterator					= typename value_storage::iterator;
+		using value_const_iterator				= typename value_storage::const_iterator;
+		using value_reverse_iterator			= typename value_storage::reverse_iterator;
+		using value_const_reverse_iterator		= typename value_storage::const_reverse_iterator;
 
-		using storage_type				= typename std::pair<key_storage, value_storage>;
-		using keyval_pair				= typename std::pair<key_type, value_type>;
-		using init_type					= typename std::initializer_list<keyval_pair>;
+		using storage_type						= typename std::pair<key_storage, value_storage>;
+		using keyval_pair						= typename std::pair<key_type, value_type>;
+		using init_type							= typename std::initializer_list<keyval_pair>;
 
-		using pointer_pair				= typename std::pair<key_pointer, value_pointer>;
-		using const_pointer_pair		= typename std::pair<key_const_pointer, value_const_pointer>;
-		using reference_pair			= typename std::pair<key_reference, value_reference>;
-		using const_reference_pair		= typename std::pair<key_const_reference, value_const_reference>;
+		using pointer_pair						= typename std::pair<key_pointer, value_pointer>;
+		using const_pointer_pair				= typename std::pair<key_const_pointer, value_const_pointer>;
+		using reference_pair					= typename std::pair<key_reference, value_reference>;
+		using const_reference_pair				= typename std::pair<key_const_reference, value_const_reference>;
+		using rvalue_pair						= typename std::pair<key_rvalue, value_rvalue>;
+		using const_rvalue_pair					= typename std::pair<key_const_rvalue, value_const_rvalue>;
 
-		using iterator_pair				= typename std::pair<key_iterator, value_iterator>;
-		using const_iterator_pair		= typename std::pair<key_const_iterator, value_const_iterator>;
-		using optl_iterator_pair		= typename std::optional<iterator_pair>;
-		using optl_const_iterator_pair	= typename std::optional<const_iterator_pair>;
+		using iterator_pair						= typename std::pair<key_iterator, value_iterator>;
+		using const_iterator_pair				= typename std::pair<key_const_iterator, value_const_iterator>;
+		using reverse_iterator_pair				= typename std::pair<key_reverse_iterator, value_reverse_iterator>;
+		using const_reverse_iterator_pair		= typename std::pair<key_const_reverse_iterator, value_const_reverse_iterator>;
+
+		using optl_iterator_pair				= typename std::optional<iterator_pair>;
+		using optl_const_iterator_pair			= typename std::optional<const_iterator_pair>;
+		using optl_reverse_iterator_pair		= typename std::optional<iterator_pair>;
+		using optl_const_reverse_iterator_pair	= typename std::optional<const_iterator_pair>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -245,19 +260,50 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class Out = difference_type
+		> ML_NODISCARD Out index_of(key_const_iterator it) const noexcept
+		{
+			return m_pair.first.index_of<Out>(it);
+		}
+
+		template <class Out = difference_type
+		> ML_NODISCARD Out index_of(key_const_reverse_iterator it) const noexcept
+		{
+			return m_pair.first.index_of<Out>(it);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD value_iterator fetch(key_const_iterator it) noexcept
 		{
-			return std::next(m_pair.second.begin(), std::distance(m_pair.first.cbegin(), it));
+			return std::next(m_pair.second.begin(), this->index_of(it));
 		}
 
 		ML_NODISCARD value_const_iterator fetch(key_const_iterator it) const noexcept
 		{
-			return std::next(m_pair.second.cbegin(), std::distance(m_pair.first.cbegin(), it));
+			return std::next(m_pair.second.cbegin(), this->index_of(it));
 		}
 
 		ML_NODISCARD value_const_iterator cfetch(key_const_iterator it) const noexcept
 		{
 			return this->fetch(it);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD value_reverse_iterator rfetch(key_const_reverse_iterator it) noexcept
+		{
+			return std::next(m_pair.second.rbegin(), this->index_of(it));
+		}
+
+		ML_NODISCARD value_const_reverse_iterator rfetch(key_const_reverse_iterator it) const noexcept
+		{
+			return std::next(m_pair.second.crbegin(), this->index_of(it));
+		}
+
+		ML_NODISCARD value_const_reverse_iterator crfetch(key_const_reverse_iterator it) const noexcept
+		{
+			return this->rfetch(it);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -429,12 +475,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD value_type & operator[](key_type const & key) noexcept
+		ML_NODISCARD value_type & operator[](key_type const & key) & noexcept
 		{
 			return this->at(key);
 		}
 
-		ML_NODISCARD value_type & operator[](key_type && key) noexcept
+		ML_NODISCARD value_type & operator[](key_type && key) & noexcept
 		{
 			return this->at(std::move(key));
 		}
@@ -442,93 +488,81 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
+		> void for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
 		{
-			for (; first != last; ++first)
+			std::for_each(first, last, [&](auto &) noexcept
 			{
 				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			}
-			return first;
+			});
 		}
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, Fn && fn) noexcept
+		> void for_each(key_const_iterator first, Fn && fn) noexcept
 		{
-			return this->for_each(first, m_pair.first.cend(), fn);
+			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
 		}
 
 		template <class Fn
-		> auto for_each(Fn && fn) noexcept
+		> void for_each(Fn && fn) noexcept
 		{
-			return this->for_each(m_pair.first.cbegin(), fn);
+			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const
+		> void for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const
 		{
-			for (; first != last; ++first)
+			std::for_each(first, last, [&](auto const &) noexcept
 			{
 				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			}
-			return first;
+			});
 		}
 
 		template <class Fn
-		> auto for_each(key_const_iterator first, Fn && fn) const noexcept
+		> void for_each(key_const_iterator first, Fn && fn) const noexcept
 		{
-			return this->for_each(first, m_pair.first.cend(), fn);
+			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
 		}
 
 		template <class Fn
-		> auto for_each(Fn && fn) const noexcept
+		> void for_each(Fn && fn) const noexcept
 		{
-			return this->for_each(m_pair.first.cbegin(), fn);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
-		{
-			if (0 < count)
-			{
-				do {
-					std::invoke(ML_forward(fn), *first, *this->fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
-			}
-			return first;
-		}
-
-		template <class Fn
-		> auto for_each_n(ptrdiff_t count, Fn && fn) noexcept
-		{
-			return this->for_each_n(m_pair.first.cbegin(), count, fn);
+			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> auto for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
+		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
 		{
-			if (0 < count)
+			std::for_each_n(first, count, [&](auto &) noexcept
 			{
-				do {
-					std::invoke(ML_forward(fn), *first, *this->fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
-			}
-			return first;
+				std::invoke(ML_forward(fn), *first, *this->fetch(first));
+			});
 		}
 
 		template <class Fn
-		> auto for_each_n(ptrdiff_t count, Fn && fn) const noexcept
+		> void for_each_n(ptrdiff_t count, Fn && fn) noexcept
 		{
-			return this->for_each_n(m_pair.first.cbegin(), count, fn);
+			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
+		{
+			std::for_each_n(first, count, [&](auto const &) noexcept
+			{
+				std::invoke(ML_forward(fn), *first, *this->fetch(first));
+			});
+		}
+
+		template <class Fn
+		> void for_each_n(ptrdiff_t count, Fn && fn) const noexcept
+		{
+			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -595,8 +629,9 @@ namespace ml::ds
 		> iterator_pair impl_emplace_hint(key_const_iterator it, Args && ... args)
 		{
 			// must be private or the map could become unsorted
-			return {
-				std::next(m_pair.first.begin(), std::distance(m_pair.first.cbegin(), it)),
+			return
+			{
+				std::next(m_pair.first.begin(), this->index_of(it)),
 				m_pair.second.emplace(this->fetch(it), ML_forward(args)...)
 			};
 		}

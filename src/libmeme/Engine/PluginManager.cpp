@@ -5,8 +5,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	plugin_manager::plugin_manager(json const & j, allocator_type const & alloc) noexcept
-		: m_files{ alloc }
-		, m_libs{ alloc }
+		: m_data{ alloc }
 	{
 	}
 
@@ -14,8 +13,12 @@ namespace ml
 
 	void plugin_manager::clear()
 	{
-		m_libs.for_each([](auto const &, plugin * p) { memory_manager::deallocate(p); });
-		m_files.clear();
+		for (auto & p : m_data.get<plugin *>())
+		{
+			memory_manager::deallocate(p);
+		}
+
+		m_data.clear();
 	}
 
 	bool plugin_manager::free(fs::path const & path)
@@ -25,24 +28,27 @@ namespace ml
 
 	bool plugin_manager::load(fs::path const & path)
 	{
-		// path empty
-		if (path.empty()) { return false; }
+		// filename
+		auto const fname{ path.filename() };
 
-		// check file name already loaded
-		if (auto const file{ m_files.insert(path.filename()) }; file.second)
+		// path empty
+		if (fname.empty()) { return false; }
+
+		// check already loaded
+		if (auto it{ std::find(m_data.begin<fs::path>(), m_data.end<fs::path>(), fname) }
+		; it == m_data.end<fs::path>())
 		{
 			// load library
-			if (auto lib{ make_shared_library(*file.first) })
+			if (auto && lib{ make_shared_library(path) })
 			{
 				// load plugin
-				if (auto const ptr{ lib.call_function<plugin *>("ml_plugin_main") })
+				if (auto const ptr{ lib.call<plugin *>("ml_plugin_main") })
 				{
-					m_libs[std::move(lib)] = ptr.value();
+					m_data.push_back(fname, std::move(lib), ptr.value());
 
 					return true;
 				}
 			}
-			m_files.erase(file.first);
 		}
 		return false;
 	}
