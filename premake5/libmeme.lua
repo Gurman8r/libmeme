@@ -14,7 +14,7 @@ staticruntime	"Off"
 systemversion	"latest"
 
 dependson{
-	"glfw",
+	"assets", "glfw",
 }
 
 defines{
@@ -24,6 +24,8 @@ defines{
 	"ML_RENDERER_OPENGL",
 	--"ML_OPENGL_LOADER_GLAD",
 	"ML_OPENGL_LOADER_GLEW",
+
+	-- imgui
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 }
 
@@ -103,25 +105,16 @@ filter{ "system:Windows" }
 	}
 	postbuildcommands{	
 		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
-		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\assimp.dll %{bin_out}",
 	}
-	
+
 filter{ "system:Windows", "configurations:Debug" }
-	postbuildcommands{	
-		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\glew32d.dll %{bin_out}",
-		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39_d.dll %{bin_out}",
+	linkoptions{ 
+		"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib"
 	}
-	linkoptions{
-		"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib",
-	}
-	
+
 filter{ "system:Windows", "configurations:Release" }
-	postbuildcommands{
-		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\glew32.dll %{bin_out}",
-		"%{ml_copy} %{ext_bin}%{cfg.platform}\\%{cfg.buildcfg}\\python39.dll %{bin_out}",
-	}
 	linkoptions{
-		"/NODEFAULTLIB:LIBCMT.lib",
+		"/NODEFAULTLIB:LIBCMT.lib"
 	}
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

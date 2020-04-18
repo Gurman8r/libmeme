@@ -1,60 +1,73 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group			"plugins"
-project			"demo"
+group			"vendor"
+project			"imgui"
 targetname 		"%{prj.name}"
-targetdir		"%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/"
+targetdir		"%{bin_lib}/%{cfg.platform}/%{cfg.buildcfg}/"
 objdir			"%{bin_obj}"
-location		"%{prj_dir}plugins/%{prj.name}/"
-kind			"SharedLib"
+location		"%{prj_dir}vendor/%{prj.name}/"
+kind			"StaticLib"
 language		"C++"
 cppdialect 		"C++17"
 staticruntime	"Off"
-rtti			"Off"
 systemversion	"latest"
 
 dependson{
-	"main",
+	"glfw", 
 }
 
 defines{
 	"_CRT_SECURE_NO_WARNINGS",
+	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 }
 
 includedirs{
-	"%{sln_dir}include",
-	"%{sln_dir}plugins",
 	"%{ext_dir}",
-	"%{ext_dir}json/include",
+	"%{ext_dir}imgui",
+	"%{ext_dir}imgui/examples",
+	"%{ext_dir}glfw/include",
 }
 
 files{
-	"%{sln_dir}src/plugins/%{prj.name}.**",
+	"%{ext_dir}imgui/*.h",
+	"%{ext_dir}imgui/*.cpp",
+	"%{ext_dir}imgui/examples/imgui_impl_glfw.h",
+	"%{ext_dir}imgui/examples/imgui_impl_glfw.cpp",
+	"%{ext_dir}imgui/examples/imgui_impl_opengl3.h",
+	"%{ext_dir}imgui/examples/imgui_impl_opengl3.cpp",
+	"%{ext_dir}ImGuiColorTextEdit/*.h",
+	"%{ext_dir}ImGuiColorTextEdit/*.cpp",
+	"%{ext_dir}ImGuizmo/*.h",
+	"%{ext_dir}ImGuizmo/*.cpp",
+	"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 }
 
 libdirs{
-	"%{bin_lib}", "%{bin_lib}%{cfg.platform}/", "%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 	"%{ext_lib}", "%{ext_lib}%{cfg.platform}/", "%{ext_lib}%{cfg.platform}/%{cfg.buildcfg}/",
 }
 
 links{
-	"libmeme",
+	"opengl32",
+	"glfw",
 }
 
 filter{ "configurations:Debug" }
 	symbols "On"
+	links{
+		"glew32d",
+	}
 
 filter{ "configurations:Release" }
 	optimize "Speed"
+	links{
+		"glew32",
+	}
 
 -- WINDOWS
 
 filter{ "system:Windows" }
 	defines{
-		"NOMINMAX",
-	}
-	postbuildcommands{
-		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
+		"IMGUI_API=__declspec(dllexport)"
 	}
 
 filter{ "system:Windows", "configurations:Debug" }

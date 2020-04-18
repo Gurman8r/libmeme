@@ -176,14 +176,9 @@ namespace ml
 
 	void texture::bind(texture const * value)
 	{
-		if (!value || !value->m_handle)
-		{
-			GL::bindTexture(GL::Texture2D, NULL);
-		}
-		else
-		{
-			GL::bindTexture(value->m_sampler, value->m_handle);
-		}
+		GL::bindTexture(
+			value ? value->m_sampler : GL::Texture2D,
+			value ? value->m_handle : NULL);
 	}
 
 	void texture::swap(texture & value) noexcept
@@ -194,7 +189,7 @@ namespace ml
 			std::swap(m_sampler,		value.m_sampler);
 			std::swap(m_level,			value.m_level);
 			std::swap(m_intl_format,	value.m_intl_format);
-			std::swap(m_color_format,		value.m_color_format);
+			std::swap(m_color_format,	value.m_color_format);
 			std::swap(m_pixel_type,		value.m_pixel_type);
 			std::swap(m_size,			value.m_size);
 			std::swap(m_real_size,		value.m_real_size);
