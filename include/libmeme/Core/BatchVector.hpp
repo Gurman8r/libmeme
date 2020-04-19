@@ -436,9 +436,9 @@ namespace ml::ds
 		template <size_t ... Is, class Fn
 		> void for_indices(Fn && fn) noexcept
 		{
-			this->expand<Is...>([&](auto && ... vs)
+			this->expand<Is...>([&](auto && ... vs) noexcept
 			{
-				meta::for_args([&](auto & v)
+				meta::for_args([&](auto & v) noexcept
 				{
 					std::invoke(ML_forward(fn), v);
 				}
@@ -449,9 +449,9 @@ namespace ml::ds
 		template <size_t ... Is, class Fn
 		> void for_indices(Fn && fn) const noexcept
 		{
-			this->expand<Is...>([&](auto const && ... vs)
+			this->expand<Is...>([&](auto const && ... vs) noexcept
 			{
-				meta::for_args([&](auto const & v)
+				meta::for_args([&](auto const & v) noexcept
 				{
 					std::invoke(ML_forward(fn), v);
 				}
@@ -464,9 +464,9 @@ namespace ml::ds
 		template <class ... Ts, class Fn
 		> void for_types(Fn && fn) noexcept
 		{
-			this->expand<Ts...>([&](auto && ... vs)
+			this->expand<Ts...>([&](auto && ... vs) noexcept
 			{
-				meta::for_args([&](auto & v)
+				meta::for_args([&](auto & v) noexcept
 				{
 					std::invoke(ML_forward(fn), v);
 				}
@@ -477,9 +477,9 @@ namespace ml::ds
 		template <class ... Ts, class Fn
 		> void for_types(Fn && fn) const noexcept
 		{
-			this->expand<Ts...>([&](auto const && ... vs)
+			this->expand<Ts...>([&](auto const && ... vs) noexcept
 			{
-				meta::for_args([&](auto const & v)
+				meta::for_args([&](auto const & v) noexcept
 				{
 					std::invoke(ML_forward(fn), v);
 				}
@@ -491,38 +491,38 @@ namespace ml::ds
 
 		void clear() noexcept
 		{
-			this->for_tuple([&](auto & v) { v.clear(); });
+			this->for_tuple([&](auto & v) noexcept { v.clear(); });
 		}
 
 		template <size_t ... Is
 		> void clear() noexcept
 		{
-			this->for_indices<Is...>([&](auto & v) { v.clear(); });
+			this->for_indices<Is...>([&](auto & v) noexcept { v.clear(); });
 		}
 
 		template <class ... Ts
 		> void clear() noexcept
 		{
-			this->for_types<Ts...>([&](auto & v) { v.clear(); });
+			this->for_types<Ts...>([&](auto & v) noexcept { v.clear(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void pop_back() noexcept
 		{
-			this->for_tuple([&](auto & v) { v.pop_back(); });
+			this->for_tuple([&](auto & v) noexcept { v.pop_back(); });
 		}
 
 		template <size_t ... Is
 		> void pop_back() noexcept
 		{
-			this->for_indices<Is...>([&](auto & v) { v.pop_back(); });
+			this->for_indices<Is...>([&](auto & v) noexcept { v.pop_back(); });
 		}
 
 		template <class ... Ts
 		> void pop_back() noexcept
 		{
-			this->for_types<Ts...>([&](auto & v) { v.pop_back(); });
+			this->for_types<Ts...>([&](auto & v) noexcept { v.pop_back(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -567,19 +567,19 @@ namespace ml::ds
 
 		void shrink_to_fit() noexcept
 		{
-			this->for_tuple([&](auto & v) { v.shrink_to_fit(); });
+			this->for_tuple([&](auto & v) noexcept { v.shrink_to_fit(); });
 		}
 
 		template <size_t ... Is
 		> void shrink_to_fit() noexcept
 		{
-			this->for_indices<Is...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_indices<Is...>([&](auto & v) noexcept { v.shrink_to_fit(); });
 		}
 
 		template <class ... Ts
 		> void shrink_to_fit() noexcept
 		{
-			this->for_types<Ts...>([&](auto & v) { v.shrink_to_fit(); });
+			this->for_types<Ts...>([&](auto & v) noexcept { v.shrink_to_fit(); });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
