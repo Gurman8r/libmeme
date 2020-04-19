@@ -532,7 +532,8 @@ namespace ml::ecs
 
 		enum : size_t { id_alive, id_index, id_handle, id_bitset };
 
-		using entity_storage = typename ds::batch_vector<
+		using entity_storage = typename ds::batch_vector
+		<
 			bool,	  // state of entity (alive / dead)
 			size_t,	  // index of real component data
 			size_t,	  // index of managing handle

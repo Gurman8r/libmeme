@@ -23,7 +23,10 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto tuple_size{ std::tuple_size_v<value_tuple> };
+		static constexpr size_t tuple_size
+		{
+			std::tuple_size_v<value_tuple>
+		};
 
 		static constexpr auto make_index_sequence() noexcept
 		{
@@ -159,104 +162,172 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I> ML_NODISCARD decltype(auto) get(size_t const i) & noexcept
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) get(size_t const i, std::index_sequence<Is...>) noexcept
 		{
-			return this->get<I>()[i];
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>()[i]...);
+			}
 		}
 
-		template <size_t I> ML_NODISCARD decltype(auto) get(size_t const i) const & noexcept
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) get(size_t const i, std::index_sequence<Is...>) const noexcept
 		{
-			return this->get<I>()[i];
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>()[i]...);
+			}
 		}
 
-		template <size_t I> ML_NODISCARD decltype(auto) get(size_t const i) && noexcept
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) get(size_t const i) noexcept
 		{
-			return std::move(this->get<I>()[i]);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>()[i]...);
+			}
 		}
 
-		template <size_t I> ML_NODISCARD decltype(auto) get(size_t const i) const && noexcept
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) get(size_t const i) const noexcept
 		{
-			return std::move(this->get<I>()[i]);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>()[i]...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) get(size_t const i) noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>()[i]...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) get(size_t const i) const noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>()[i];
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>()[i]...);
+			}
+		}
+
+		ML_NODISCARD auto get(size_t const i) noexcept
+		{
+			return this->get(i, make_index_sequence());
+		}
+
+		ML_NODISCARD auto get(size_t const i) const noexcept
+		{
+			return this->get(i, make_index_sequence());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) & noexcept
-		{
-			return this->get<T>()[i];
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) const & noexcept
-		{
-			return this->get<T>()[i];
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) && noexcept
-		{
-			return std::move(this->get<T>()[i]);
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) get(size_t const i) const && noexcept
-		{
-			return std::move(this->get<T>()[i]);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <size_t ... Is
-		> ML_NODISCARD auto extract(size_t const i, std::index_sequence<Is...>) noexcept
+		> ML_NODISCARD decltype(auto) back(std::index_sequence<Is...>) noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>(i)...);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().back()...);
+			}
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD auto extract(size_t const i, std::index_sequence<Is...>) const noexcept
+		> ML_NODISCARD decltype(auto) back(std::index_sequence<Is...>) const noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>(i)...);
-		}
-
-		ML_NODISCARD auto extract(size_t const i) noexcept
-		{
-			return this->extract(i, make_index_sequence());
-		}
-
-		ML_NODISCARD auto extract(size_t const i) const noexcept
-		{
-			return this->extract(i, make_index_sequence());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD decltype(auto) back() & noexcept
-		{
-			return this->get<I>().back();
-		}
-
-		template <size_t I> ML_NODISCARD decltype(auto) back() const & noexcept
-		{
-			return this->get<I>().back();
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) back() & noexcept
-		{
-			return this->get<T>().back();
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) back() const & noexcept
-		{
-			return this->get<T>().back();
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().back()...);
+			}
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD auto back(std::index_sequence<Is...>) noexcept
+		> ML_NODISCARD decltype(auto) back() noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>().back()...);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().back()...);
+			}
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD auto back(std::index_sequence<Is...>) const noexcept
+		> ML_NODISCARD decltype(auto) back() const noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>().back()...);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().back()...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) back() noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>().back()...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) back() const noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>().back();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>().back()...);
+			}
 		}
 
 		ML_NODISCARD auto back() noexcept
@@ -271,36 +342,82 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I> ML_NODISCARD decltype(auto) front() & noexcept
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) front(std::index_sequence<Is...>) noexcept
 		{
-			return this->get<I>().front();
-		}
-
-		template <size_t I> ML_NODISCARD decltype(auto) front() const & noexcept
-		{
-			return this->get<I>().front();
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) front() & noexcept
-		{
-			return this->get<T>().front();
-		}
-
-		template <class T> ML_NODISCARD decltype(auto) front() const & noexcept
-		{
-			return this->get<T>().front();
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().front()...);
+			}
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD auto front(std::index_sequence<Is...>) noexcept
+		> ML_NODISCARD decltype(auto) front(std::index_sequence<Is...>) const noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>().front()...);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().front()...);
+			}
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD auto front(std::index_sequence<Is...>) const noexcept
+		> ML_NODISCARD decltype(auto) front() noexcept
 		{
-			return std::forward_as_tuple(this->get<Is>().front()...);
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().front()...);
+			}
+		}
+
+		template <size_t ... Is
+		> ML_NODISCARD decltype(auto) front() const noexcept
+		{
+			if constexpr (1 == sizeof...(Is))
+			{
+				return this->get<Is...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Is>().front()...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) front() noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>().front()...);
+			}
+		}
+
+		template <class ... Ts
+		> ML_NODISCARD decltype(auto) front() const noexcept
+		{
+			if constexpr (1 == sizeof...(Ts))
+			{
+				return this->get<Ts...>().front();
+			}
+			else
+			{
+				return std::forward_as_tuple(this->get<Ts>().front()...);
+			}
 		}
 
 		ML_NODISCARD auto front() noexcept
@@ -316,56 +433,16 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, size_t ... Is
-		> void expand_all(Fn && fn, std::index_sequence<Is...>) noexcept
+		> void expand(Fn && fn, std::index_sequence<Is...>) noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>()...);
 		}
 
 		template <class Fn, size_t ... Is
-		> void expand_all(Fn && fn, std::index_sequence<Is...>) const noexcept
+		> void expand(Fn && fn, std::index_sequence<Is...>) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Is>()...);
 		}
-
-		template <class Fn
-		> void expand_all(Fn && fn) noexcept
-		{
-			this->expand_all(ML_forward(fn), make_index_sequence());
-		}
-
-		template <class Fn
-		> void expand_all(Fn && fn) const noexcept
-		{
-			this->expand_all(ML_forward(fn), make_index_sequence());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn, size_t ... Is
-		> void expand_all(size_t const i, Fn && fn, std::index_sequence<Is...>) noexcept
-		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
-		}
-
-		template <class Fn, size_t ... Is
-		> void expand_all(size_t const i, Fn && fn, std::index_sequence<Is...>) const noexcept
-		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
-		}
-
-		template <class Fn
-		> void expand_all(size_t const i, Fn && fn) noexcept
-		{
-			this->expand_all(i, ML_forward(fn), make_index_sequence());
-		}
-
-		template <class Fn
-		> void expand_all(size_t const i, Fn && fn) const noexcept
-		{
-			this->expand_all(i, ML_forward(fn), make_index_sequence());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t ... Is, class Fn
 		> void expand(Fn && fn) noexcept
@@ -391,8 +468,30 @@ namespace ml::ds
 			std::invoke(ML_forward(fn), this->get<Ts>()...);
 		}
 
+		template <class Fn> void expand_all(Fn && fn) noexcept
+		{
+			this->expand(ML_forward(fn), make_index_sequence());
+		}
+
+		template <class Fn> void expand_all(Fn && fn) const noexcept
+		{
+			this->expand(ML_forward(fn), make_index_sequence());
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class Fn, size_t ... Is
+		> void expand(size_t const i, Fn && fn, std::index_sequence<Is...>) noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
+		template <class Fn, size_t ... Is
+		> void expand(size_t const i, Fn && fn, std::index_sequence<Is...>) const noexcept
+		{
+			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+		}
+
 		template <size_t ... Is, class Fn
 		> void expand(size_t const i, Fn && fn) noexcept
 		{
@@ -415,6 +514,16 @@ namespace ml::ds
 		> void expand(size_t const i, Fn && fn) const noexcept
 		{
 			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
+		}
+
+		template <class Fn> void expand_all(size_t const i, Fn && fn) noexcept
+		{
+			this->expand(i, ML_forward(fn), make_index_sequence());
+		}
+
+		template <class Fn> void expand_all(size_t const i, Fn && fn) const noexcept
+		{
+			this->expand(i, ML_forward(fn), make_index_sequence());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -485,6 +594,54 @@ namespace ml::ds
 				}
 				, ML_forward(vs)...);
 			});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD size_t capacity() const noexcept
+		{
+			return this->get<I>().capacity();
+		}
+
+		template <class T> ML_NODISCARD size_t capacity() const noexcept
+		{
+			return this->get<T>().capacity();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD bool empty() const noexcept
+		{
+			return this->get<I>().empty();
+		}
+
+		template <class T> ML_NODISCARD bool empty() const noexcept
+		{
+			return this->get<T>().empty();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD size_t max_size() const noexcept
+		{
+			return this->get<I>().max_size();
+		}
+
+		template <class T> ML_NODISCARD size_t max_size() const noexcept
+		{
+			return this->get<T>().max_size();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD size_t size() const noexcept
+		{
+			return this->get<I>().size();
+		}
+
+		template <class T> ML_NODISCARD size_t size() const noexcept
+		{
+			return this->get<T>().size();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -662,7 +819,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return this->extract(i);
+				return this->get(i);
 			}
 		}
 
@@ -687,46 +844,14 @@ namespace ml::ds
 		}
 
 		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> void push_back(Tp && value) noexcept
+		> auto push_back(Tp && value) noexcept
 		{
 			static_assert(tuple_size <= N);
 			if constexpr (I < N)
 			{
 				this->push_back<I>(ML_forward(std::get<I>(ML_forward(value))));
 
-				this->push_back<Tp, I + 1, N>(ML_forward(value));
-			}
-		}
-
-		template <class ... Args
-		> void push_back(Args && ... args) noexcept
-		{
-			this->push_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I, class U = meta::nth<I, value_types>
-		> decltype(auto) emplace_back(U && value) noexcept
-		{
-			return this->get<I>().emplace_back(ML_forward(value));
-		}
-
-		template <class T, class U = T
-		> decltype(auto) emplace_back(U && value) noexcept
-		{
-			return this->get<T>().emplace_back(ML_forward(value));
-		}
-
-		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> auto emplace_back(Tp && value) noexcept
-		{
-			static_assert(tuple_size <= N);
-			if constexpr (I < N)
-			{
-				this->emplace_back<I>(ML_forward(std::get<I>(ML_forward(value))));
-
-				return this->emplace_back<Tp, I + 1, N>(ML_forward(value));
+				return this->push_back<Tp, I + 1, N>(ML_forward(value));
 			}
 			else
 			{
@@ -735,9 +860,9 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> auto emplace_back(Args && ... args) noexcept
+		> auto push_back(Args && ... args) noexcept
 		{
-			return this->emplace_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
+			return this->push_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -785,54 +910,6 @@ namespace ml::ds
 		> void swap(size_t const lhs, size_t const rhs) noexcept
 		{
 			this->for_types<Ts...>([&](auto & v) { std::swap(v[lhs], v[rhs]); });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD size_t capacity() const noexcept
-		{
-			return this->get<I>().capacity();
-		}
-
-		template <class T> ML_NODISCARD size_t capacity() const noexcept
-		{
-			return this->get<T>().capacity();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD bool empty() const noexcept
-		{
-			return this->get<I>().empty();
-		}
-
-		template <class T> ML_NODISCARD bool empty() const noexcept
-		{
-			return this->get<T>().empty();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD size_t max_size() const noexcept
-		{
-			return this->get<I>().max_size();
-		}
-
-		template <class T> ML_NODISCARD size_t max_size() const noexcept
-		{
-			return this->get<T>().max_size();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD size_t size() const noexcept
-		{
-			return this->get<I>().size();
-		}
-
-		template <class T> ML_NODISCARD size_t size() const noexcept
-		{
-			return this->get<T>().size();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
