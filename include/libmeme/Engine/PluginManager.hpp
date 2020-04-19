@@ -3,7 +3,7 @@
 
 #include <libmeme/Platform/SharedLibrary.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Core/MultiVector.hpp>
+#include <libmeme/Core/BatchVector.hpp>
 
 namespace ml
 {
@@ -25,12 +25,13 @@ namespace ml
 
 		bool free(fs::path const & path);
 
-		bool load(fs::path const & path);
+		hash_t load(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ds::multi_vector<
+		ds::batch_vector<
+			hash_t,
 			fs::path,
 			shared_library,
 			plugin *

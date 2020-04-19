@@ -17,26 +17,45 @@ namespace ml
 		{
 			memory_manager::deallocate(p);
 		}
-
 		m_data.clear();
 	}
 
 	bool plugin_manager::free(fs::path const & path)
 	{
+		// path empty
+		if (path.empty()) { return false; }
+
+		// code
+		auto const code{ util::hash(path.filename().string()) };
+
+		// lookup
+		if (auto const it{
+			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
+		}; it == m_data.end<hash_t>())
+		{
+			auto const i{ (size_t)std::distance(m_data.begin<hash_t>(), it) };
+
+			memory_manager::deallocate(m_data.get<plugin *>(i));
+
+			m_data.erase(i);
+
+			return true;
+		}
 		return false;
 	}
 
-	bool plugin_manager::load(fs::path const & path)
+	hash_t plugin_manager::load(fs::path const & path)
 	{
-		// filename
-		auto const fname{ path.filename() };
-
 		// path empty
-		if (fname.empty()) { return false; }
+		if (path.empty()) { return 0; }
 
-		// check already loaded
-		if (auto it{ std::find(m_data.begin<fs::path>(), m_data.end<fs::path>(), fname) }
-		; it == m_data.end<fs::path>())
+		// code
+		auto const code{ util::hash(path.filename().string()) };
+
+		// lookup
+		if (auto const it{
+			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
+		}; it == m_data.end<hash_t>())
 		{
 			// load library
 			if (auto && lib{ make_shared_library(path) })
@@ -44,13 +63,14 @@ namespace ml
 				// load plugin
 				if (auto const ptr{ lib.call<plugin *>("ml_plugin_main") })
 				{
-					m_data.push_back(fname, std::move(lib), ptr.value());
+					m_data.push_back(code, path, std::move(lib), ptr.value());
 
-					return true;
+					return code;
 				}
 			}
 		}
-		return false;
+
+		return 0;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

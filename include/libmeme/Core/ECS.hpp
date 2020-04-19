@@ -7,7 +7,7 @@
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
 #include <libmeme/Core/BitSet.hpp>
-#include <libmeme/Core/MultiVector.hpp>
+#include <libmeme/Core/BatchVector.hpp>
 
 // ECS
 namespace ml::ecs
@@ -93,7 +93,7 @@ namespace ml::ecs::cfg
 
 		using type_list = typename meta::list<Components...>;
 
-		using storage_type = typename ds::multi_vector<Components...>;
+		using storage_type = typename ds::batch_vector<Components...>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -532,7 +532,7 @@ namespace ml::ecs
 
 		enum : size_t { id_alive, id_index, id_handle, id_bitset };
 
-		using entity_storage = typename ds::multi_vector<
+		using entity_storage = typename ds::batch_vector<
 			bool,	  // state of entity (alive / dead)
 			size_t,	  // index of real component data
 			size_t,	  // index of managing handle

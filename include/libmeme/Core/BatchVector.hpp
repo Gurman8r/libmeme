@@ -1,5 +1,5 @@
-#ifndef _ML_MULTI_VECTOR_HPP_
-#define _ML_MULTI_VECTOR_HPP_
+#ifndef _ML_BATCH_VECTOR_HPP_
+#define _ML_BATCH_VECTOR_HPP_
 
 #include <libmeme/Core/Meta.hpp>
 
@@ -9,12 +9,12 @@ namespace ml::ds
 
 	// tuple<vector<Ts>...>
 	template <class ... _Ts
-	> struct multi_vector final
+	> struct batch_vector final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using self_type			= typename multi_vector<_Ts...>;
+		using self_type			= typename batch_vector<_Ts...>;
 		using value_types		= typename meta::list<_Ts...>;
 		using value_tuple		= typename meta::tuple<value_types>;
 		using vector_types		= typename meta::remap<pmr::vector, value_types>;
@@ -32,12 +32,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		multi_vector(allocator_type const & alloc = {}) noexcept
+		batch_vector(allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
 		}
 
-		multi_vector(init_type value, allocator_type const & alloc = {}) noexcept
+		batch_vector(init_type value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
 			this->reserve(value.size());
@@ -48,22 +48,22 @@ namespace ml::ds
 			}
 		}
 
-		multi_vector(vector_tuple const & value, allocator_type const & alloc = {})
+		batch_vector(vector_tuple const & value, allocator_type const & alloc = {})
 			: m_data{ std::allocator_arg, alloc, value }
 		{
 		}
 
-		multi_vector(vector_tuple && value, allocator_type const & alloc = {}) noexcept
+		batch_vector(vector_tuple && value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc, std::move(value) }
 		{
 		}
 
-		multi_vector(self_type const & value, allocator_type const & alloc = {})
+		batch_vector(self_type const & value, allocator_type const & alloc = {})
 			: m_data{ std::allocator_arg, alloc, value.m_data }
 		{
 		}
 
-		multi_vector(self_type && value, allocator_type const & alloc = {}) noexcept
+		batch_vector(self_type && value, allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc, std::move(value.m_data) }
 		{
 		}
@@ -660,13 +660,16 @@ namespace ml::ds
 
 				return this->insert<Tp, I + 1>(i, ML_forward(value));
 			}
-			return this->extract(i);
+			else
+			{
+				return this->extract(i);
+			}
 		}
 
 		template <class ... Args
 		> auto insert(size_t const i, Args && ... args)
 		{
-			this->insert<value_tuple, 0>(i, value_tuple{ ML_forward(args)... });
+			return this->insert<value_tuple, 0>(i, value_tuple{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -725,7 +728,10 @@ namespace ml::ds
 
 				return this->emplace_back<Tp, I + 1, N>(ML_forward(value));
 			}
-			return this->back();
+			else
+			{
+				return this->back();
+			}
 		}
 
 		template <class ... Args
@@ -948,4 +954,4 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_MULTI_VECTOR_HPP_
+#endif // !_ML_BATCH_VECTOR_HPP_
