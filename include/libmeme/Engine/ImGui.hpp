@@ -32,6 +32,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <imgui/imgui.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,6 +51,7 @@
 
 #include <ImGuiColorTextEdit/TextEditor.h>
 #include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>
+#include <imgui_node_editor.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

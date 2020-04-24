@@ -26,6 +26,8 @@ defines{
 	"ML_OPENGL_LOADER_GLEW",
 
 	-- imgui
+	"IMGUI_USER_CONFIG=<libmeme/Config.hpp>",
+	"IMGUI_API=ML_API_EXPORT",
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 }
 
@@ -34,7 +36,6 @@ includedirs{
 	"%{sln_dir}include",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
-	"%{ext_dir}imgui",
 	"%{ext_dir}pybind11/include",
 	"%{ext_dir}cpython/Include",
 	"%{ext_dir}cpython/Include/internal",
@@ -43,6 +44,10 @@ includedirs{
 	"%{ext_dir}freetype2/include/freetype",
 	"%{ext_dir}glfw/include",
 	"%{ext_dir}raknet/Source",
+
+	-- imgui
+	"%{ext_dir}imgui",
+	"%{ext_dir}imgui-node-editor/NodeEditor/Include",
 }
 
 files{
@@ -61,6 +66,8 @@ files{
 	"%{ext_dir}ImGuizmo/*.h",
 	"%{ext_dir}ImGuizmo/*.cpp",
 	"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
+	"%{ext_dir}imgui-node-editor/NodeEditor/Include/**.**",
+	"%{ext_dir}imgui-node-editor/NodeEditor/Source/**.**",
 }
 
 libdirs{
@@ -96,9 +103,6 @@ filter{ "configurations:Release" }
 filter{ "system:Windows" }
 	defines{
 		"NOMINMAX",
-
-		-- imgui
-		"IMGUI_API=__declspec(dllexport)",
 	}
 	includedirs{
 		"%{ext_dir}cpython/PC",

@@ -18,6 +18,8 @@
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
+namespace ed = ax::NodeEditor;
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // RENDERER CONFIG
@@ -155,6 +157,7 @@ namespace ml
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
 			m_gui_files		{ "files##demo"			, 0, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_scripting	{ "scripting##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
 
@@ -165,6 +168,8 @@ namespace ml
 		gui::console m_console{};
 
 		MemoryEditor m_memory{};
+
+		ed::EditorContext * m_node_editor{};
 
 		gui::plot_controller m_plots{
 		{
@@ -501,6 +506,7 @@ namespace ml
 				g.dock(m_gui_memory.title		, d[right]);
 				g.dock(m_gui_docs.title			, d[right]);
 				g.dock(m_gui_scripting.title	, d[right]);
+				g.dock(m_gui_nodes.title		, d[right]);
 
 				g.end_dockspace_builder(root);
 			}
@@ -527,6 +533,7 @@ namespace ml
 			m_gui_docs.render([&]()			{ show_documents_gui(); });	// DOCS
 			m_gui_console.render([&]()		{ show_console_gui(); });	// CONSOLE
 			m_gui_scripting.render([&]()	{ show_scripting_gui(); });	// SCRIPTING
+			m_gui_nodes.render([&]()		{ show_nodes_gui(); });		// NODES
 		}
 
 		void on_unload(unload_event const &)
@@ -541,6 +548,8 @@ namespace ml
 			m_textures.clear();
 			m_fonts.clear();
 			m_pipeline.clear();
+
+			ed::DestroyEditor(m_node_editor);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -564,6 +573,7 @@ namespace ml
 				m_gui_docs.menu_item();
 				m_gui_ecs.menu_item();
 				m_gui_memory.menu_item();
+				m_gui_nodes.menu_item();
 				m_gui_profiler.menu_item();
 				m_gui_scripting.menu_item();
 			});
@@ -1069,6 +1079,36 @@ namespace ml
 
 			// memory content
 			m_memory.DrawContents(testres->data(), testres->total_bytes(), testres->addr());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_nodes_gui()
+		{
+			ML_once_call{ m_node_editor = ed::CreateEditor(); };
+
+			//auto& io = ImGui::GetIO();
+			//
+			//ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+			//
+			//ImGui::Separator();
+			//
+			//ed::SetCurrentEditor(m_node_editor);
+			//ed::Begin("My Editor", ImVec2(0.0, 0.0f));
+			//int uniqueId = 1;
+			//// Start drawing nodes.
+			//ed::BeginNode(uniqueId++);
+			//	ImGui::Text("Node A");
+			//	ed::BeginPin(uniqueId++, ed::PinKind::Input);
+			//		ImGui::Text("-> In");
+			//	ed::EndPin();
+			//	ImGui::SameLine();
+			//	ed::BeginPin(uniqueId++, ed::PinKind::Output);
+			//		ImGui::Text("Out ->");
+			//	ed::EndPin();
+			//ed::EndNode();
+			//ed::End();
+			//ed::SetCurrentEditor(nullptr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
