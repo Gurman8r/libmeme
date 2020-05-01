@@ -31,7 +31,7 @@ namespace ml
 			, m_dtor{ ML_forward((dtor_type &&)dtor) }
 			, m_data{}
 		{
-			this->construct();
+			this->ctor();
 		}
 
 		raii_ptr() noexcept
@@ -47,7 +47,7 @@ namespace ml
 
 		~raii_ptr() noexcept
 		{
-			this->destruct();
+			this->dtor();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,20 +70,22 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void construct() noexcept
+		self_type & ctor() noexcept
 		{
 			if (!m_data && m_ctor)
 			{
 				m_data = (pointer)std::invoke(m_ctor);
 			}
+			return (*this);
 		}
 
-		void destruct() noexcept
+		self_type & dtor() noexcept
 		{
 			if (m_data && m_dtor)
 			{
 				std::invoke(m_dtor, m_data);
 			}
+			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
