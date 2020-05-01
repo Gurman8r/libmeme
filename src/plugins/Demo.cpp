@@ -1,5 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/RAII_Pointer.hpp>
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
@@ -17,8 +18,6 @@
 #include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
-
-namespace ed = ax::NodeEditor;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -169,7 +168,7 @@ namespace ml
 
 		MemoryEditor m_memory{};
 
-		ed::EditorContext * m_node_editor{};
+		ax::NodeEditor::EditorContext * m_node_editor{};
 
 		gui::plot_controller m_plots{
 		{
@@ -203,6 +202,22 @@ namespace ml
 
 		demo()
 		{
+			struct gizmo : trackable { int i; std::string s; };
+
+			auto ML_anon() = raii_ptr<gizmo>{};
+
+			auto ML_anon() = raii_ptr<gizmo>
+			{
+				[&]() { return new gizmo{}; },
+				[&](gizmo * addr) { delete addr; }
+			};
+
+			auto ML_anon() = raii_ptr<gizmo>
+			{
+				&memory_manager::allocate<gizmo>,
+				&memory_manager::deallocate
+			};
+
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
 			event_system::add_listener<	draw_event		>(this);
@@ -523,17 +538,16 @@ namespace ml
 			if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }
 			if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
 
-			// DEMO
-			m_gui_display.render([&]()		{ show_display_gui(); });	// DISPLAY
-			m_gui_ecs.render([&]()			{ show_ecs_gui(); });		// ECS
-			m_gui_assets.render([&]()		{ show_assets_gui(); });	// ASSETS
-			m_gui_files.render([&]()		{ show_files_gui(); });		// FILES
-			m_gui_profiler.render([&]()		{ show_profiler_gui(); });	// PROFILER
-			m_gui_memory.render([&]()		{ show_memory_gui(); });	// MEMORY
-			m_gui_docs.render([&]()			{ show_documents_gui(); });	// DOCS
-			m_gui_console.render([&]()		{ show_console_gui(); });	// CONSOLE
-			m_gui_scripting.render([&]()	{ show_scripting_gui(); });	// SCRIPTING
-			m_gui_nodes.render([&]()		{ show_nodes_gui(); });		// NODES
+			m_gui_display	.render(&demo::show_display_gui		, this); // DISPLAY
+			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
+			m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
+			m_gui_files		.render(&demo::show_files_gui		, this); // FILES
+			m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
+			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
+			m_gui_scripting	.render(&demo::show_scripting_gui	, this); // SCRIPTING
+			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
+			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+			m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
 		}
 
 		void on_unload(unload_event const &)
@@ -549,7 +563,8 @@ namespace ml
 			m_fonts.clear();
 			m_pipeline.clear();
 
-			ed::DestroyEditor(m_node_editor);
+			// destroy node editor
+			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -985,7 +1000,8 @@ namespace ml
 			static auto * const & testres{ memory_manager::get_test_resource() };
 
 			// setup memory editor
-			ML_once_call{
+			ML_once_call
+			{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
 				m_memory.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
@@ -1025,16 +1041,16 @@ namespace ml
 				}
 				if (ImGui::BeginCombo("##records", selected_address, 0))
 				{
-					auto const width{ ImGui::GetContentRegionAvailWidth() };
+					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.50f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.25f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, width * 0.25f); };
+					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
@@ -1085,17 +1101,20 @@ namespace ml
 
 		void show_nodes_gui()
 		{
-			ML_once_call{ m_node_editor = ed::CreateEditor(); };
+			// create node editor
+			ML_once_call{ m_node_editor = ax::NodeEditor::CreateEditor(); };
 
-			auto& io = ImGui::GetIO();
-			
-			ImGui::Text("FPS: %.2f (%.2gms)", io.Framerate, io.Framerate ? 1000.0f / io.Framerate : 0.0f);
+			namespace ed = ax::NodeEditor;
+
+			auto & io{ ImGui::GetIO() };
 			
 			ImGui::Separator();
 			
 			ed::SetCurrentEditor(m_node_editor);
 			ed::Begin("My Editor", { 0.f, 0.f });
-			int32_t uniqueId = 1;
+			
+			int32_t uniqueId{ 1 };
+
 			ed::BeginNode(uniqueId++);
 			{
 				ImGui::Text("Node A");
@@ -1112,6 +1131,7 @@ namespace ml
 				ed::EndPin();
 			}
 			ed::EndNode();
+
 			ed::End();
 			ed::SetCurrentEditor(nullptr);
 		}

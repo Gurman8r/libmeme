@@ -1,7 +1,7 @@
 #ifndef _ML_BINDER_HPP_
 #define _ML_BINDER_HPP_
 
-#include <libmeme/Core/ScopeGuard.hpp>
+#include <libmeme/Core/Flow.hpp>
 
 #define ML_bind_scope(value, ...)	\
 	(value).bind(##__VA_ARGS__);	\

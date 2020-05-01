@@ -3,11 +3,11 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_impl_benchmark(var, id)									\
+#define ML_impl_benchmark(var, name)								\
 	auto var{ _ML timer{ true } };									\
-	ML_defer{ _ML performance_tracker::push(id, var.elapsed()); };
+	ML_defer{ _ML performance_tracker::push(name, var.elapsed()); };
 
-#define ML_benchmark(id) ML_impl_benchmark(ML_anon(benchmark), id)
+#define ML_benchmark(name) ML_impl_benchmark(ML_anon(benchmark), name)
 
 namespace ml
 {

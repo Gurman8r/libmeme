@@ -96,22 +96,22 @@ namespace ml::gui
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plot & update() noexcept
+		plot & update() & noexcept
 		{
 			ML_assert(getter);
 			return update(std::invoke(getter));
 		}
 
-		plot & update(float_t const v) noexcept
+		plot & update(float_t const v) & noexcept
 		{
-			if (!animate || buffer.empty()) return (*this);
+			if (!animate || buffer.empty()) { return (*this); }
 			std::sprintf(overlay.data(), format, v);
 			buffer[offset] = v;
 			offset = (offset + 1) % buffer.size();
 			return (*this);
 		}
 
-		plot const & render() const noexcept
+		plot const & render() const & noexcept
 		{
 			ML_ImGui_ScopeID(ML_addressof(this));
 
@@ -120,7 +120,6 @@ namespace ml::gui
 			{
 				width = ImGui::GetContentRegionAvailWidth();
 			}
-
 			switch (mode)
 			{
 			case 0: ImGui::PlotLines(label,
@@ -135,7 +134,6 @@ namespace ml::gui
 				{ width, graph_size[1] }, sizeof(float_t)
 			); break;
 			}
-
 			return (*this);
 		}
 
@@ -193,14 +191,15 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn> inline widget & render(Fn && fn) noexcept
+		template <class Fn, class ... Args
+		> inline widget & render(Fn && fn, Args && ... args) noexcept
 		{
 			if (!open) return (*this);
 			ML_ImGui_ScopeID(ML_addressof(this));
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
-				std::invoke(ML_forward(fn));
+				std::invoke(ML_forward(fn), ML_forward(args)...);
 			}
 			return (*this);
 		}
@@ -246,10 +245,9 @@ namespace ml::gui
 		template <class Fn
 		> texture_preview & render(Fn && fn) noexcept
 		{
-			if (!value) return (*this);
+			if (!value) { return (*this); }
 
-			auto const & io{ ImGui::GetIO() };
-
+			auto const & io		{ ImGui::GetIO() };
 			auto const tex_addr	{ value->address() };
 			auto const reg_avail{ ImGui::GetContentRegionAvail() };
 			auto const scr_pos	{ ImGui::GetCursorScreenPos() };
@@ -268,7 +266,8 @@ namespace ml::gui
 				{ 1.f, 1.f, 1.f, .5f }
 			);
 
-			tooltip_ex([&]() noexcept
+			// zoom tooltip region
+			if ((0.f < reg_size) && (0.f < reg_zoom)) tooltip_ex([&]() noexcept
 			{
 				float_t region_x{ io.MousePos.x - scr_pos.x - reg_size * .5f };
 				if (region_x < 0.f) region_x = 0.f;
@@ -350,6 +349,7 @@ namespace ml::gui
 
 		console & print(pmr::string const & value)
 		{
+			// FIXME: inefficient
 			if (value.empty())
 			{
 				return (*this);
@@ -375,6 +375,7 @@ namespace ml::gui
 
 		console & printss(std::stringstream & value)
 		{
+			// FIXME: inefficient
 			if (auto const str{ value.str() }; !str.empty())
 			{
 				std::stringstream ss{ str };
@@ -415,12 +416,12 @@ namespace ml::gui
 			// process command
 			if (auto toks{ util::tokenize(value, " ") }; !toks.empty())
 			{
+				// FIXME: inefficient
+
 				if (overload) { toks.insert(toks.begin(), overload); }
 
-				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&](auto & e)
-				{
-					return e.first == toks.front();
-				}) }
+				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&
+				](auto & e) { return e.first == toks.front(); }) }
 				; it != commands.end())
 				{
 					toks.erase(toks.begin());

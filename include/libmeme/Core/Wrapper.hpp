@@ -11,12 +11,12 @@ namespace ml::ds
 	template <class T> struct ML_NODISCARD wrapper
 	{
 		using value_type		= typename T;
-		using pointer			= typename value_type *;
-		using const_pointer		= typename value_type const *;
-		using reference			= typename value_type &;
-		using const_reference	= typename value_type const &;
-		using rvalue			= typename value_type &&;
-		using const_rvalue		= typename value_type const &&;
+		using pointer			= typename T *;
+		using const_pointer		= typename T const *;
+		using reference			= typename T &;
+		using const_reference	= typename T const &;
+		using rvalue			= typename T &&;
+		using const_rvalue		= typename T const &&;
 		
 		value_type m_value;
 

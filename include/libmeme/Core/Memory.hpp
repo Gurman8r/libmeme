@@ -158,12 +158,40 @@ namespace ml
 			return *inst.m_records.insert(data, record{ inst.m_index++, size, data }).first;
 		}
 
+		// malloc (template size)
+		template <size_t Size
+		> ML_NODISCARD static void * allocate() noexcept
+		{
+			return allocate(Size);
+		}
+
+		// malloc (template type)
+		template <class Type
+		> ML_NODISCARD static void * allocate() noexcept
+		{
+			return allocate(sizeof(Type));
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
 			return std::memset(allocate(count * size), 0, count * size);
+		}
+
+		// calloc (template size)
+		template <size_t Count, size_t Size
+		> ML_NODISCARD static void * allocate() noexcept
+		{
+			return allocate(Count, Size);
+		}
+
+		// calloc (template type)
+		template <size_t Count, class Type
+		> ML_NODISCARD static void * allocate() noexcept
+		{
+			return allocate(Count, sizeof(Type));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -191,8 +219,6 @@ namespace ml
 		{
 			return reallocate(addr, size, size);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc (sized)
 		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
@@ -269,14 +295,14 @@ namespace ml
 			return memory_manager::allocate(size);
 		}
 
-		void operator delete(void * value) noexcept
+		void operator delete(void * addr) noexcept
 		{
-			return memory_manager::deallocate(value);
+			return memory_manager::deallocate(addr);
 		}
 
-		void operator delete[](void * value) noexcept
+		void operator delete[](void * addr) noexcept
 		{
-			return memory_manager::deallocate(value);
+			return memory_manager::deallocate(addr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

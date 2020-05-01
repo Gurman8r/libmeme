@@ -310,20 +310,20 @@ namespace ml::ds
 
 		iterator_pair erase(key_iterator it)
 		{
-			auto const second
+			auto const result
 			{
 				m_pair.second.erase(this->fetch(it))
 			};
-			return { m_pair.first.erase(it), second };
+			return { m_pair.first.erase(it), result };
 		}
 
 		iterator_pair erase(key_iterator first, key_iterator last)
 		{
-			auto const second
+			auto const result
 			{
 				m_pair.second.erase(this->fetch(first), this->fetch(last))
 			};
-			return { m_pair.first.erase(first, last), second };
+			return { m_pair.first.erase(first, last), result };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

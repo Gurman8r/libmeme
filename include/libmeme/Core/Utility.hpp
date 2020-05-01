@@ -2,10 +2,9 @@
 #define _ML_UTILITY_HPP_
 
 #include <gcem/include/gcem.hpp>
+#include <libmeme/Core/Flow.hpp>
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Meta.hpp>
-#include <libmeme/Core/OnceCall.hpp>
-#include <libmeme/Core/ScopeGuard.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
 // Misc

@@ -170,13 +170,11 @@ namespace ml::util
 	{
 		if (value.empty()) { return {}; }
 		if (delim.empty()) { return { value }; }
-
 		pmr::vector<pmr::string> temp{};
 		size_t i{};
 		while ((i = value.find(delim)) != value.npos)
 		{
 			temp.push_back(value.substr(0, i));
-			
 			value.erase(0, i + delim.size());
 		}
 		temp.push_back(value);
@@ -185,10 +183,8 @@ namespace ml::util
 
 	ML_NODISCARD inline pmr::string detokenize(pmr::vector<pmr::string> const & value, pmr::string const & delim = " ")
 	{
-		if (value.empty())
-			return {};
-		if (value.size() == 1)
-			return value.front();
+		if (value.empty()) { return {}; }
+		if (value.size() == 1) { return value.front(); }
 		std::stringstream ss{};
 		for (auto const & str : value)
 		{
