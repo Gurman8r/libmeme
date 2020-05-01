@@ -47,3 +47,6 @@
 [submodule "ext/ImGuizmo"]
 	path = ext/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "ext/imgui-node-editor"]
+	path = ext/imgui-node-editor
+	url = https://github.com/Gurman8r/imgui-node-editor.git
