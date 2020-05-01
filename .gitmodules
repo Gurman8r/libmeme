@@ -32,9 +32,6 @@
 [submodule "ext/glew"]
 	path = ext/glew
 	url = https://github.com/nigels-com/glew.git
-[submodule "ext/lua"]
-	path = ext/lua
-	url = https://github.com/lua/lua.git
 [submodule "ext/RakNet"]
 	path = ext/RakNet
 	url = https://github.com/facebookarchive/RakNet.git
