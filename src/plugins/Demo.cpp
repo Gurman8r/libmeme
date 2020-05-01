@@ -203,7 +203,7 @@ namespace ml
 		{
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
-			event_system::add_listener<	draw_event		>(this);
+			event_system::add_listener<	draw_event	>(this);
 			event_system::add_listener<	gui_dock_event	>(this);
 			event_system::add_listener<	gui_draw_event	>(this);
 			event_system::add_listener<	unload_event	>(this);
@@ -215,7 +215,7 @@ namespace ml
 			{
 			case hashof_v<load_event	>: return on_load		(*ev.cast<load_event	>());
 			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
-			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
+			case hashof_v<draw_event	>: return on_render		(*ev.cast<draw_event	>());
 			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.cast<gui_dock_event>());
 			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.cast<gui_draw_event>());
 			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
@@ -446,7 +446,7 @@ namespace ml
 			}
 		}
 
-		void on_draw(draw_event const &)
+		void on_render(draw_event const &)
 		{
 			// draw stuff, etc...
 
@@ -476,25 +476,25 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & g{ engine::gui() };
-			auto & d{ g.dockspace().nodes };
-
-			if (!d.empty()) { return; }
-			else { d.resize(MAX_DOCK_NODE); }
-
+			auto & g{ engine::gui() }; // gui manager
+			auto & d{ g.dockspace.nodes }; // dockspace nodes
+			if (d.empty()) { d.resize(MAX_DOCK_NODE); } else { return; } // resize or return
+			
+			// begin builder
 			if (d[root] = g.begin_dockspace_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
-				constexpr float_t lhs = 0.465f, rhs = 1.f - lhs;
+				constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
 
-				g.split(left		, d[root]		, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				g.split(left_up		, d[left]		, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				g.split(left_dn		, d[left]		, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-				g.split(left_dn2	, d[left_dn]	, ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+				// split nodes
+				g.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				g.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				g.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+				g.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+				g.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
+				g.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				g.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				g.split(right		, d[root]		, ImGuiDir_Right, rhs	, &d[root]);	// right
-				g.split(right_up	, d[right]		, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				g.split(right_dn	, d[right]		, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
-
+				// dock windows
 				g.dock(m_gui_display.title		, d[left_up]);
 				g.dock(m_gui_ecs.title			, d[left_dn]);
 				g.dock(m_gui_assets.title		, d[left_dn]);
@@ -506,6 +506,7 @@ namespace ml
 				g.dock(m_gui_scripting.title	, d[right]);
 				g.dock(m_gui_nodes.title		, d[right]);
 
+				// end builder
 				g.end_dockspace_builder(root);
 			}
 		}
@@ -689,7 +690,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						ML_once_call{ std::cout << "# type \'\\\' to exit\n"; };
+						static ML_call{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -743,7 +744,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			ML_once_call{
+			static ML_call{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
@@ -983,7 +984,7 @@ namespace ml
 			static auto * const & testres{ memory_manager::get_test_resource() };
 
 			// setup memory editor
-			ML_once_call
+			static ML_call
 			{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
@@ -1027,13 +1028,13 @@ namespace ml
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
+					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					ML_once_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
@@ -1085,7 +1086,7 @@ namespace ml
 		void show_nodes_gui()
 		{
 			// create node editor
-			ML_once_call{ m_node_editor = ax::NodeEditor::CreateEditor(); };
+			static ML_call{ m_node_editor = ax::NodeEditor::CreateEditor(); };
 
 			namespace ed = ax::NodeEditor;
 

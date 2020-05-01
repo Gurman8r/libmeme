@@ -3,7 +3,7 @@
 
 #include <libmeme/Engine/AssetManager.hpp>
 #include <libmeme/Engine/ObjectManager.hpp>
-#include <libmeme/Engine/GameTime.hpp>
+#include <libmeme/Engine/TimeManager.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
@@ -54,9 +54,9 @@ namespace ml
 
 		static void begin_loop();
 
-		static void begin_draw();
+		static void pre_render();
 
-		static void end_draw();
+		static void post_render();
 
 		static void end_loop();
 
@@ -74,7 +74,7 @@ namespace ml
 
 		ML_NODISCARD static script_manager & scripts() noexcept;
 
-		ML_NODISCARD static game_time & time() noexcept;
+		ML_NODISCARD static time_manager & time() noexcept;
 
 		ML_NODISCARD static render_window & window() noexcept;
 

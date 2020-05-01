@@ -1,10 +1,10 @@
-#include <libmeme/Engine/GameTime.hpp>
+#include <libmeme/Engine/TimeManager.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	game_time::game_time(json const & j, allocator_type const & alloc) noexcept
+	time_manager::time_manager(json const & j, allocator_type const & alloc) noexcept
 		: m_main_timer	{ true }
 		, m_loop_timer	{}
 		, m_fps_accum	{}
@@ -17,16 +17,20 @@ namespace ml
 	{
 	}
 
+	time_manager::~time_manager() noexcept
+	{
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void game_time::begin_loop() noexcept
+	void time_manager::begin_loop() noexcept
 	{
 		m_delta_time = m_loop_timer.stop().elapsed();
 
 		m_loop_timer.start();
 	}
 
-	void game_time::end_loop() noexcept
+	void time_manager::end_loop() noexcept
 	{
 		++m_frame_count;
 

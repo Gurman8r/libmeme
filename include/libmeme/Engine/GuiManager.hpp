@@ -15,11 +15,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD dockspace_t final : non_copyable, trackable
+		struct ML_NODISCARD gui_dockspace final : non_copyable, trackable
 		{
 			using nodes_t = typename pmr::vector<uint32_t>;
 
-			static constexpr auto title{ "dockspace##libmeme" };
+			static constexpr auto title{ "dockspace##libmeme##builtin" };
 
 			bool		visible	{ true };
 			float_t		border	{};
@@ -29,14 +29,16 @@ namespace ml
 			float_t		alpha	{};
 			nodes_t		nodes	;
 
-			dockspace_t(allocator_type const & alloc = {}) noexcept : nodes{ alloc }
-			{
-			}
-		};
+		private:
+			friend gui_manager;
+			
+			gui_dockspace(allocator_type const & alloc = {}) noexcept : nodes{ alloc } {}
+		
+		} dockspace;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD main_menu_t final : non_copyable, trackable
+		struct ML_NODISCARD gui_main_menu_bar final : non_copyable, trackable
 		{
 			using callback_t	= typename std::function<void()>;
 			using menu_t		= typename std::pair<cstring, pmr::vector<callback_t>>;
@@ -45,12 +47,14 @@ namespace ml
 			bool		visible	{ true };
 			menus_t		menus	;
 
-			main_menu_t(allocator_type const & alloc = {}) noexcept : menus{ alloc }
-			{
-			}
+		private:
+			friend gui_manager;
 
-			~main_menu_t() noexcept { menus.clear(); }
-		};
+			gui_main_menu_bar(allocator_type const & alloc = {}) noexcept : menus{ alloc } {}
+
+			~gui_main_menu_bar() noexcept { this->menus.clear(); }
+		
+		} main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,7 +72,7 @@ namespace ml
 
 		void new_frame();
 
-		void render();
+		void draw();
 
 		void end_frame();
 
@@ -104,22 +108,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool running() const noexcept { return m_gui; }
-
-		auto & dockspace() & noexcept { return m_dockspace; }
-
-		auto const & dockspace() const & noexcept { return m_dockspace; }
-
-		auto & main_menu() & noexcept { return m_main_menu; }
-
-		auto const & main_menu() const & noexcept { return m_main_menu; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
-		void *		m_gui;
-		main_menu_t	m_main_menu;
-		dockspace_t	m_dockspace;
+		void * m_imgui;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

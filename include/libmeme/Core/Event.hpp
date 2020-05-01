@@ -4,7 +4,7 @@
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/NameOf.hpp>
 
-#define ML_event(name) struct name final : _ML T_event<name>
+#define ML_event(name) struct name final : _ML event_impl<name>
 
 namespace ml
 {
@@ -19,8 +19,6 @@ namespace ml
 	// base event
 	struct event : non_copyable
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		hash_t const ID;
 
 		constexpr explicit event(hash_t const id) noexcept : ID{ id }
@@ -34,16 +32,14 @@ namespace ml
 
 			return (ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// template event interface
-	template <class T> struct T_event : event
+	template <class T> struct event_impl : event
 	{
-		constexpr T_event() noexcept : event{ hashof_v<T> }
+		constexpr event_impl() noexcept : event{ hashof_v<T> }
 		{
 		}
 	};

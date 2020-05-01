@@ -1,5 +1,5 @@
-#ifndef _ML_GAME_TIME_HPP_
-#define _ML_GAME_TIME_HPP_
+#ifndef _ML_TIME_MANAGER_HPP_
+#define _ML_TIME_MANAGER_HPP_
 
 // WIP
 
@@ -8,7 +8,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API game_time final : non_copyable, trackable
+	struct ML_ENGINE_API time_manager final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -16,9 +16,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		game_time(json const & j, allocator_type const & alloc = {}) noexcept;
+		time_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		~game_time() noexcept {}
+		~time_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -55,4 +55,4 @@ namespace ml
 	};
 }
 
-#endif // !_ML_GAME_TIME_HPP_
+#endif // !_ML_TIME_MANAGER_HPP_

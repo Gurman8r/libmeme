@@ -12,9 +12,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
-		: m_gui			{}
-		, m_main_menu	{ alloc }
-		, m_dockspace	{ alloc }
+		: m_imgui{}, main_menu{ alloc }, dockspace{ alloc }
 	{
 	}
 
@@ -38,7 +36,7 @@ namespace ml
 		);
 
 		// create editor_context
-		m_gui = ImGui::CreateContext();
+		m_imgui = ImGui::CreateContext();
 
 		auto & im_io{ ImGui::GetIO() };
 		auto & im_style{ ImGui::GetStyle() };
@@ -71,7 +69,7 @@ namespace ml
 
 	bool gui_manager::shutdown()
 	{
-		m_main_menu.menus.clear();
+		this->main_menu.menus.clear();
 
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
@@ -85,7 +83,7 @@ namespace ml
 
 		ImGui::DestroyContext();
 
-		m_gui = nullptr;
+		m_imgui = nullptr;
 
 		return true;
 	}
@@ -107,14 +105,14 @@ namespace ml
 		ImGui::NewFrame();
 	}
 
-	void gui_manager::render()
+	void gui_manager::draw()
 	{
 		ML_ImGui_ScopeID(ML_addressof(this));
 
 		// DOCKSPACE
-		if (m_dockspace.visible)
+		if (auto & d{ this->dockspace }; d.visible)
 		{
-			ML_ImGui_ScopeID(m_dockspace.title);
+			ML_ImGui_ScopeID(d.title);
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -125,13 +123,13 @@ namespace ml
 				ImGui::SetNextWindowViewport(v->ID);
 
 				// style
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_dockspace.rounding);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_dockspace.border);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_dockspace.padding);
-				ImGui::SetNextWindowBgAlpha(m_dockspace.alpha);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, d.rounding);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, d.border);
+				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, d.padding);
+				ImGui::SetNextWindowBgAlpha(d.alpha);
 
 				// begin
-				if (ImGui::Begin(m_dockspace.title, &m_dockspace.visible,
+				if (ImGui::Begin(d.title, &d.visible,
 					ImGuiWindowFlags_NoTitleBar |
 					ImGuiWindowFlags_NoCollapse |
 					ImGuiWindowFlags_NoResize |
@@ -140,19 +138,19 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(m_main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
+					(this->main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
 
-					if (m_dockspace.nodes.empty())
+					if (d.nodes.empty())
 					{
 						event_system::fire_event<gui_dock_event>();
 					}
 
 					ImGui::DockSpace(
-						ImGui::GetID(m_dockspace.title),
-						m_dockspace.size,
+						ImGui::GetID(d.title),
+						d.size,
 						ImGuiDockNodeFlags_PassthruCentralNode |
 						ImGuiDockNodeFlags_AutoHideTabBar
 					);
@@ -163,11 +161,11 @@ namespace ml
 		}
 
 		// MAIN MENU
-		if (m_main_menu.visible)
+		if (auto & m{ this->main_menu }; m.visible)
 		{
 			if (ImGui::BeginMainMenuBar())
 			{
-				for (auto const & pair : m_main_menu.menus)
+				for (auto const & pair : m.menus)
 				{
 					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
 					{
@@ -361,7 +359,7 @@ namespace ml
 
 	void gui_manager::add_menu(cstring label, std::function<void()> && fn)
 	{
-		auto & menus{ m_main_menu.menus };
+		auto & menus{ this->main_menu.menus };
 
 		auto it{ std::find_if(menus.begin(), menus.end(), [&](auto & e)
 		{
@@ -385,7 +383,7 @@ namespace ml
 
 	uint32_t gui_manager::begin_dockspace_builder(int32_t flags)
 	{
-		if (uint32_t root{ ImGui::GetID(m_dockspace.title) }; !ImGui::DockBuilderGetNode(root))
+		if (uint32_t root{ ImGui::GetID(this->dockspace.title) }; !ImGui::DockBuilderGetNode(root))
 		{
 			ImGui::DockBuilderRemoveNode(root);
 
@@ -417,7 +415,7 @@ namespace ml
 
 	uint32_t gui_manager::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
-		return m_dockspace.nodes[(size_t)i] = split(id, dir, ratio, value);
+		return this->dockspace.nodes[(size_t)i] = split(id, dir, ratio, value);
 	}
 
 	uint32_t gui_manager::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)

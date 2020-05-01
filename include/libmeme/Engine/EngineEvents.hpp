@@ -11,15 +11,33 @@ namespace ml
 	{
 	};
 
-	ML_event(loop_begin_event)
+	ML_event(unload_event)
 	{
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(pre_loop_event)
+	{
+	};
+
+	ML_event(post_loop_event)
+	{
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_event(update_event)
 	{
 	};
 
-	ML_event(begin_draw_event)
+	ML_event(late_update_event)
+	{
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(pre_draw_event)
 	{
 	};
 
@@ -27,21 +45,13 @@ namespace ml
 	{
 	};
 
-	ML_event(end_draw_event)
-	{
-	};
-
-	ML_event(loop_end_event)
-	{
-	};
-
-	ML_event(unload_event)
+	ML_event(post_draw_event)
 	{
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(gui_begin_event)
+	ML_event(pre_gui_event)
 	{
 	};
 
@@ -53,7 +63,7 @@ namespace ml
 	{
 	};
 
-	ML_event(gui_end_event)
+	ML_event(post_gui_event)
 	{
 	};
 

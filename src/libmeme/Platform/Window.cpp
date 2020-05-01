@@ -500,7 +500,7 @@ namespace ml
 	display_settings const & window::get_desktop_mode()
 	{
 		static display_settings temp{};
-		ML_once_call
+		static ML_call
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
@@ -520,7 +520,7 @@ namespace ml
 	pmr::vector<display_settings> const & window::get_fullscreen_modes()
 	{
 		static pmr::vector<display_settings> temp{};
-		ML_once_call
+		static ML_call
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);

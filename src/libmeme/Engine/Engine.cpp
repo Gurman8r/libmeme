@@ -14,24 +14,24 @@ namespace ml
 	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine		;
-		asset_manager		m_assets	; // asset manager
-		engine_config		m_cfg		; // engine config
-		object_manager		m_objects	; // object manager
-		gui_manager			m_gui		; // gui manager
-		plugin_manager		m_plugins	; // plugin manager
-		script_manager		m_scripts	; // script manager
-		game_time			m_time		; // time manager
+		engine_config		m_cfg		; // initial config
 		render_window		m_window	; // render window
+		asset_manager		m_assets	; // assets
+		object_manager		m_objects	; // objects
+		gui_manager			m_gui		; // gui
+		plugin_manager		m_plugins	; // plugins
+		script_manager		m_scripts	; // scripts
+		time_manager		m_time		; // time
 
 		engine_context(json const & j, allocator_type const & alloc)
-			: m_assets	{ j, alloc }
-			, m_cfg		{}
+			: m_cfg		{}
+			, m_window	{}
+			, m_assets	{ j, alloc }
 			, m_objects	{ j, alloc }
 			, m_gui		{ j, alloc }
 			, m_plugins	{ j, alloc }
 			, m_scripts	{ j, alloc }
 			, m_time	{ j, alloc }
-			, m_window	{}
 		{
 			m_cfg.command_line = { __argv, __argv + __argc };
 
@@ -71,7 +71,7 @@ namespace ml
 
 	bool engine::destroy_context()
 	{
-		if (!g_engine) { return false; }
+		if (!is_initialized()) { return false; }
 		delete g_engine;
 		return !(g_engine = nullptr);
 	}
@@ -80,7 +80,7 @@ namespace ml
 
 	bool engine::startup()
 	{
-		if (!g_engine) { return false; }
+		if (!is_initialized()) { return false; }
 
 		// start scripting
 		if (!g_engine->m_scripts.startup(
@@ -96,7 +96,7 @@ namespace ml
 
 	bool engine::shutdown()
 	{
-		if (!g_engine) { return false; }
+		if (!is_initialized()) { return false; }
 
 		// shutdown gui
 		if (!g_engine->m_gui.shutdown()) { return false; }
@@ -129,7 +129,7 @@ namespace ml
 		window::poll_events();
 	}
 
-	void engine::begin_draw()
+	void engine::pre_render()
 	{
 		ML_assert(g_engine);
 
@@ -144,7 +144,7 @@ namespace ml
 		}; states();
 	}
 
-	void engine::end_draw()
+	void engine::post_render()
 	{
 		ML_assert(g_engine);
 
@@ -198,7 +198,7 @@ namespace ml
 		return g_engine->m_scripts;
 	}
 
-	game_time & engine::time() noexcept
+	time_manager & engine::time() noexcept
 	{
 		ML_assert(g_engine);
 		return g_engine->m_time;

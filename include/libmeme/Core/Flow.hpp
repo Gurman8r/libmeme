@@ -5,56 +5,52 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// invoke lambda
-#define ML_call \
-    auto ML_anon(call_lambda) = _ML impl::ctor_lambda_tag{} + [&]() noexcept
+// flow struct helper
+#define ML_decl_flow_struct(Fn, T)                                                      \
+    template <class Fn> struct T;                                                       \
+    enum class ML_concat(T, _tag) {};                                                   \
+    template <class Fn> inline auto operator+(ML_concat(T, _tag), Fn && fn) noexcept    \
+    {                                                                                   \
+        return T<Fn>{ ML_forward(fn) };                                                 \
+    }                                                                                   \
+    template <class Fn> struct T final
 
-// invoke lambda ONCE
-#define ML_once_call \
-    static ML_call
-
-// invoke lambda on scope exit
-#define ML_defer \
-    auto ML_anon(defer_lambda) = _ML impl::dtor_lambda_tag{} + [&]() noexcept
+// flow variable helper
+#define ML_decl_flow_variable(T) \
+    auto ML_anon(T) = _ML impl:: ML_concat(T, _tag){} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::impl
 {
-    // invoke lambda on constructor
-    template <class Fn> struct ctor_lambda final
+    // invoke in constructor
+    ML_decl_flow_struct(Fn, immediate_call)
     {
-        explicit ctor_lambda(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
+        explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
-    enum class ctor_lambda_tag {};
-
-    template <class Fn> inline auto operator+(ctor_lambda_tag, Fn && fn) noexcept
-    {
-        return ctor_lambda<Fn>{ ML_forward(fn) };
-    }
+    // invoke lambda immediately
+#define ML_call \
+    ML_decl_flow_variable(immediate_call)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::impl
 {
-    // invoke lambda on destructor
-    template <class Fn> struct dtor_lambda final
+    // invoke in destructor
+    ML_decl_flow_struct(Fn, deferred_call)
     {
-        explicit dtor_lambda(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
+        explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~dtor_lambda() noexcept { std::invoke(m_fn); }
+        ~deferred_call() noexcept { std::invoke(m_fn); }
 
     private: Fn const m_fn;
     };
 
-    enum class dtor_lambda_tag {};
-
-    template <class Fn> inline auto operator+(dtor_lambda_tag, Fn && fn) noexcept
-    {
-        return dtor_lambda<Fn>{ ML_forward(fn) };
-    }
+    // invoke lambda on scope exit
+#define ML_defer \
+    ML_decl_flow_variable(deferred_call)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

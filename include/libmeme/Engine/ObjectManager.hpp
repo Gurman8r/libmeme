@@ -17,7 +17,7 @@ namespace ml
 
 		object_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		~object_manager() noexcept {}
+		~object_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
