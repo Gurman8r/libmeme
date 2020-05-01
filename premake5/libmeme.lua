@@ -84,7 +84,7 @@ links{
 	"zlibstatic",
 }
 
-filter { "configurations:Debug" }
+filter{ "configurations:Debug" }
 	symbols "On"
 	links{
 		"glew32d",
@@ -107,12 +107,12 @@ filter{ "system:Windows" }
 	includedirs{
 		"%{ext_dir}cpython/PC",
 	}
-	postbuildcommands{	
+	postbuildcommands{
 		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
 	}
 
 filter{ "system:Windows", "configurations:Debug" }
-	linkoptions{ 
+	linkoptions{
 		"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib"
 	}
 
