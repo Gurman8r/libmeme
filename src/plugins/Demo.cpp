@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/RAII_Pointer.hpp>
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
@@ -202,22 +201,6 @@ namespace ml
 
 		demo()
 		{
-			struct gizmo : trackable { int i; std::string s; };
-
-			auto ML_anon() = raii_ptr<gizmo>{};
-
-			auto ML_anon() = raii_ptr<gizmo>
-			{
-				[&]() { return new gizmo{}; },
-				[&](gizmo * addr) { delete addr; }
-			};
-
-			auto ML_anon() = raii_ptr<gizmo>
-			{
-				&memory_manager::allocate<gizmo>,
-				&memory_manager::deallocate
-			};
-
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
 			event_system::add_listener<	draw_event		>(this);

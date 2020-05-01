@@ -72,7 +72,7 @@ namespace ml
 
 		void construct() noexcept
 		{
-			if (m_ctor)
+			if (!m_data && m_ctor)
 			{
 				m_data = (pointer)std::invoke(m_ctor);
 			}
@@ -80,7 +80,7 @@ namespace ml
 
 		void destruct() noexcept
 		{
-			if (m_dtor)
+			if (m_data && m_dtor)
 			{
 				std::invoke(m_dtor, m_data);
 			}
@@ -96,7 +96,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		operator bool() const noexcept { return this->has_value(); }
+		operator bool() const noexcept { return m_data; }
+
+		operator pointer const() noexcept { return m_data; }
+
+		operator const_pointer const() const noexcept { return m_data; }
 
 		auto operator->() noexcept -> pointer const { return m_data; }
 
