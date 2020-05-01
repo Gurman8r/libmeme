@@ -50,9 +50,6 @@ ml::int32_t main()
 	// startup/shutdown engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
-	// load/unload content
-	event_system::fire_event<load_event>(); ML_defer{ event_system::fire_event<unload_event>(); };
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// window isn't open, nothing to do here
@@ -60,6 +57,9 @@ ml::int32_t main()
 	{
 		return EXIT_SUCCESS;
 	}
+
+	event_system::fire_event<load_event>();
+	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	do // main loop
 	{
@@ -88,7 +88,7 @@ ml::int32_t main()
 			event_system::fire_event<pre_gui_event>();
 		}
 		{
-			ML_benchmark("|    gui-draw");
+			ML_benchmark("|    gui");
 			engine::gui().draw();
 			event_system::fire_event<gui_draw_event>();
 		}
