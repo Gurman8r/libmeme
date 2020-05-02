@@ -7,6 +7,22 @@
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/TypeOf.hpp>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// flag manipulation
+#define ML_flag_read( v, f)		(v & f)
+#define ML_flag_set(  v, f)		(v |= f)
+#define ML_flag_clear(v, f)		(v &= ~f)
+#define ML_flag_write(v, f, b)	(b ? ML_flag_set(v, f) : ML_flag_clear(v, f))
+
+// bit manipulation
+#define ML_bit_read( v, i)		ML_flag_read(v >> i, 1)
+#define ML_bit_set(  v, i)		ML_flag_set(v, 1 << i)
+#define ML_bit_clear(v, i)		ML_flag_clear(v, 1 << i)
+#define ML_bit_write(v, i, b)	(b ? ML_bit_set(v, i) : ML_bit_clear(v, i))
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // Misc
 namespace ml::util
 {

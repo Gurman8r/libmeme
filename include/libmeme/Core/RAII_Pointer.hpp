@@ -34,13 +34,14 @@ namespace ml
 			this->ctor();
 		}
 
-		raii_ptr() noexcept
-			: self_type{ &memory_manager::allocate<value_type>, &memory_manager::deallocate }
+		raii_ptr() noexcept : self_type{
+			&memory_manager::allocate<value_type>,
+			&memory_manager::deallocate
+		}
 		{
 		}
 
-		raii_ptr(self_type && other) noexcept
-			: self_type{}
+		raii_ptr(self_type && other) noexcept : self_type{}
 		{
 			this->swap(std::move(other));
 		}

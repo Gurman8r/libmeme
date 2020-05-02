@@ -13,8 +13,8 @@ namespace ml
 
 		ML_NODISCARD static self_type & get_instance() noexcept
 		{
-			static self_type inst{};
-			return inst;
+			static self_type temp{};
+			return temp;
 		}
 	};
 

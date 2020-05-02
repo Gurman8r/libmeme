@@ -18,25 +18,27 @@ namespace ml
 
 		script_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		~script_manager() noexcept;
+		~script_manager() noexcept { shutdown(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool startup(fs::path const & name, fs::path const & home);
+		ML_NODISCARD bool is_initialized() const noexcept;
 
-		bool shutdown();
+		ML_NODISCARD bool startup();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		int32_t do_file(fs::path const & path);
-
-		int32_t do_string(pmr::string const & text);
+		ML_NODISCARD bool shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t do_file(fs::path const & value);
+
+		int32_t do_string(pmr::string const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		fs::path m_library_home{};
+		fs::path m_setup_script{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

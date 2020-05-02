@@ -14,6 +14,21 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// CONFIGURATION
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#if defined(_DEBUG)
+/* * * * * * * * * * * * * * * * Debug */
+#   define ML_is_debug          true
+#   define ML_configuration     "debug"
+#else
+/* * * * * * * * * * * * * * * * Release */
+#   define ML_is_debug          false
+#   define ML_configuration     "release"
+#endif
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // LANGUAGE
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -296,21 +311,6 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// CONFIGURATION
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#if defined(_DEBUG)
-/* * * * * * * * * * * * * * * * Debug */
-#   define ML_is_debug          true
-#   define ML_configuration     "debug"
-#else
-/* * * * * * * * * * * * * * * * Release */
-#   define ML_is_debug          false
-#   define ML_configuration     "release"
-#endif
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // PREPROCESSOR
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -328,9 +328,9 @@
 
 // anonymous variable
 #if defined(__COUNTER__)
-#	define ML_anon(...)         ML_concat(_ml_, ML_concat(##__VA_ARGS__, ML_concat(_, ML_concat(__COUNTER__, _))))
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon(...)         ML_concat(_ml_, ML_concat(##__VA_ARGS__, ML_concat(_, ML_concat(__LINE__, _))))
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
 #else
 #   define ML_anon(expr)        expr
 #endif

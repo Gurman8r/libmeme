@@ -3,11 +3,6 @@
 
 #include <libmeme/Core/Array.hpp>
 
-#define ML_bitread(v, i)		((v >> i) & 1)
-#define ML_bitset(v, i)			(v |= (1 << i))
-#define ML_bitclear(v, i)		(v &= ~(1 << i))
-#define ML_bitwrite(v, i, b)	(b ? ML_bitset(v, i) : ML_bitclear(v, i))
-
 namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

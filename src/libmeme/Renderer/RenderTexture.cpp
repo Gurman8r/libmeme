@@ -1,7 +1,6 @@
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
@@ -67,7 +66,7 @@ namespace ml
 
 	bool render_texture::generate()
 	{
-		if (good())
+		if (nonzero())
 		{
 			return debug::log::error("render texture already created");
 		}
@@ -95,10 +94,10 @@ namespace ml
 		}
 
 		// bind framebuffer
-		ML_bind_scope(m_fbo);
+		ML_bind_ref(m_fbo);
 		{
 			// bind renderbuffer
-			ML_bind_scope(m_rbo);
+			ML_bind_ref(m_rbo);
 
 			// update renderbuffer
 			m_rbo.update(m_format);
@@ -124,7 +123,7 @@ namespace ml
 		// attach texture to framebuffer
 		m_fbo.attach_texture(m_colorID, m_texture.handle(), m_texture.level());
 
-		return good();
+		return nonzero();
 	}
 
 	bool render_texture::resize(vec2i const & value)

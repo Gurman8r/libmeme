@@ -1,15 +1,14 @@
 #include <libmeme/Renderer/RenderWindow.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/RenderStates.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::open(window_settings const & settings, bool install_callbacks)
+	bool render_window::open(window_settings const & value)
 	{
-		if (!window::open(settings, install_callbacks))
+		if (!window::open(value))
 		{
 			return debug::log::error("render_window failed initializing platform");
 		}

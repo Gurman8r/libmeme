@@ -1,5 +1,4 @@
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {
@@ -14,7 +13,7 @@ namespace ml
 
 			debug::pause();
 
-			std::cout << std::left
+			debug::out() << std::left
 				<< std::setw(20) << "Index"
 				<< std::setw(20) << "Size"
 				<< std::setw(20) << "Address"
@@ -22,7 +21,7 @@ namespace ml
 
 			m_records.for_each([&](auto, auto const & rec)
 			{
-				std::cout << std::left
+				debug::out() << std::left
 					<< std::setw(20) << rec.index
 					<< std::setw(20) << rec.size
 					<< std::setw(20) << rec.data

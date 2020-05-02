@@ -3,7 +3,6 @@
 
 #include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 #ifdef ML_os_windows
 #	define ML_LIB_EXT L".dll"

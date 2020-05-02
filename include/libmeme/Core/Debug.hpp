@@ -3,114 +3,111 @@
 
 #include <libmeme/Core/StringUtility.hpp>
 
-// codes
+// exit codes
 #define ML_WARNING	(-1)
 #define ML_FAILURE	( 0)
 #define ML_SUCCESS	(+1)
 
-// messages
-#define ML_MSG_WRN "warning"
-#define ML_MSG_ERR "error"
-#define ML_MSG_LOG "info"
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// breakpoint
-#if (!ML_is_debug)
-#	define ML_breakpoint() ((void)0)
-#elif defined(ML_cc_msvc)
-#	define ML_breakpoint() _CSTD __debugbreak()
-#else
-#	define ML_breakpoint() _CSTD raise(SIGTRAP)
-#endif
-
-namespace ml
+namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace debug
+	static std::ostream & out() noexcept { return std::cout; }
+
+	static std::ostream & err() noexcept { return std::cerr; }
+
+	static std::istream & in() noexcept { return std::cin; }
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	inline int32_t clear(int32_t const exit_code = {})
+	{
+#if ML_is_debug
+#	ifdef ML_os_windows
+		std::system("cls");
+#	else
+		std::system("clear");
+#	endif
+#endif
+		return exit_code;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	inline int32_t exit(int32_t const exit_code = {})
+	{
+		std::exit(exit_code);
+
+		return exit_code;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	inline int32_t pause(int32_t const exit_code = {})
+	{
+#if ML_is_debug
+#	ifdef ML_os_windows
+		std::system("pause");
+#	else
+		std::cin.get();
+#	endif
+#endif
+		return exit_code;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	namespace log
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		inline int32_t clear(int32_t const exit_code = 0)
+		template <class Fmt
+		> inline int32_t info(Fmt && fmt)
 		{
-#if ML_is_debug
-#	ifdef ML_os_windows
-			return std::system("cls");
-#	else
-			return std::system("clear");
-#	endif
-#endif
-			return exit_code;
+			out() << "[ info ] " << ML_forward(fmt) << '\n';
+			return ML_SUCCESS;
 		}
 
-		inline void exit(int32_t const exit_code = 0)
+		template <class Fmt, class Arg0, class ... Args
+		> inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
 		{
-			return std::exit(exit_code);
-		}
-
-		inline int32_t pause(int32_t const exit_code = 0)
-		{
-#if ML_is_debug
-#	ifdef ML_os_windows
-			std::system("pause");
-#	else
-			std::cin.get();
-#	endif
-#endif
-			return exit_code;
+			return info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		namespace log
+		template <class Fmt
+		> inline int32_t error(Fmt && fmt)
 		{
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			out() << "[ error ] " << ML_forward(fmt) << '\n';
+			return ML_FAILURE;
+		}
 
-			template <class Str
-			> inline int32_t info(Str && value)
-			{
-				std::cout << "[" ML_MSG_LOG "] " << ML_forward(value) << "\n";
-				return ML_SUCCESS;
-			}
-
-			template <class Str
-			> inline int32_t error(Str && value)
-			{
-				std::cout << "[" ML_MSG_ERR "] " << ML_forward(value) << "\n";
-				return ML_FAILURE;
-			}
-
-			template <class Str
-			> inline int32_t warning(Str && value)
-			{
-				std::cout << "[" ML_MSG_WRN "] " << ML_forward(value) << "\n";
-				return ML_WARNING;
-			}
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			template <class Fmt, class Arg0, class ... Args
-			> inline int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args)
-			{
-				return info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
-			}
-
-			template <class Fmt, class Arg0, class ... Args
-			> inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
-			{
-				return error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
-			}
-
-			template <class Fmt, class Arg0, class ... Args
-			> inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
-			{
-				return warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
-			}
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		template <class Fmt, class Arg0, class ... Args
+		> inline int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args)
+		{
+			return error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
+
+		template <class Fmt
+		> inline int32_t warning(Fmt && fmt)
+		{
+			out() << "[ warn ] " << ML_forward(fmt) << '\n';
+			return ML_WARNING;
+		}
+
+		template <class Fmt, class Arg0, class ... Args
+		> inline int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args)
+		{
+			return warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

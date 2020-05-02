@@ -32,7 +32,7 @@ namespace ml
 
 		enum : size_t { ID_Variable, ID_Function };
 
-		template <class T> static constexpr bool is_sampler_v
+		template <class T> static constexpr bool is_sampler_ish
 		{
 			std::is_convertible_v<T, sampler> ||
 			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler>
@@ -120,7 +120,7 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
 			{
 				return this->holds<sampler>();
 			}
@@ -135,7 +135,7 @@ namespace ml
 		template <class T
 		> ML_NODISCARD auto get() const noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
 			{
 				return this->get<sampler>();
 			}
@@ -154,7 +154,7 @@ namespace ml
 		template <class T, class ... Args
 		> bool set(Args && ... args) noexcept
 		{
-			if constexpr (is_sampler_v<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
 			{
 				return this->set<sampler>(ML_forward(args)...);
 			}

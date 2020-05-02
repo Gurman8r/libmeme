@@ -1,5 +1,5 @@
-#ifndef _ML_DISPLAY_SETTINGS_HPP_
-#define _ML_DISPLAY_SETTINGS_HPP_
+#ifndef _ML_VIDEO_MODE_HPP_
+#define _ML_VIDEO_MODE_HPP_
 
 #include <libmeme/Core/Matrix.hpp>
 
@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_NODISCARD display_settings final
+	struct ML_NODISCARD video_mode final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -16,26 +16,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator bool() const noexcept
+		ML_NODISCARD constexpr bool nonzero() const noexcept
 		{
 			return size[0] && size[1] && depth;
 		}
 
-		ML_NODISCARD constexpr bool operator==(display_settings const & value) const
+		ML_NODISCARD constexpr operator bool() const noexcept
 		{
-			return (size == value.size)
-				&& (depth == value.depth);
+			return this->nonzero();
 		}
 
-		ML_NODISCARD constexpr bool operator!=(display_settings const & value) const
+		ML_NODISCARD constexpr bool operator==(video_mode const & other) const
 		{
-			return !(*this == value);
+			return (size == other.size) && (depth == other.depth);
 		}
 
-		ML_NODISCARD constexpr bool operator<(display_settings const & value) const
+		ML_NODISCARD constexpr bool operator!=(video_mode const & other) const
 		{
-			return (size < value.size)
-				|| (depth < value.depth);
+			return !(*this == other);
+		}
+
+		ML_NODISCARD constexpr bool operator<(video_mode const & other) const
+		{
+			return (size < other.size) || (depth < other.depth);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,7 +46,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void from_json(json const & j, display_settings & value)
+	static void from_json(json const & j, video_mode & value)
 	{
 		j.at("size").get_to(value.size);
 		j.at("depth").get_to(value.depth);
@@ -52,4 +55,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_DISPLAY_SETTINGS_HPP_
+#endif // !_ML_VIDEO_MODE_HPP_

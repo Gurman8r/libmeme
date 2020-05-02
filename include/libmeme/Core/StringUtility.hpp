@@ -68,6 +68,8 @@ namespace ml::util
 	template <class T, class Ch, class Fn, class ... Args
 	> ML_NODISCARD inline auto parse_answer(Ch const * ptr, Fn && fn, Args && ... args) noexcept
 	{
+		// from <string>
+
 		Ch * end{};
 		auto const answer{ std::invoke(ML_forward(fn), ptr, &end, ML_forward(args)...) };
 		if (!(*end != 0 || end == ptr))
@@ -135,6 +137,8 @@ namespace ml::util
 	template <class Ch, class T
 	> ML_NODISCARD inline pmr::basic_string<Ch> floating_point_to_string(T const value) noexcept
 	{
+		// from <string>
+
 		static_assert(std::is_floating_point_v<T>);
 		auto const len{ static_cast<size_t>(_CSTD _scprintf("%f", value)) };
 		pmr::basic_string<Ch> str{ len, 0, pmr::polymorphic_allocator<byte_t>{} };

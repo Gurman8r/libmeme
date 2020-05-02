@@ -3,15 +3,27 @@
 
 // WIP
 
-#include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Platform/Cursor.hpp>
+#include <libmeme/Platform/Keyboard.hpp>
+#include <libmeme/Platform/Mouse.hpp>
+#include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
 {
 	struct ML_PLATFORM_API base_window : non_copyable, trackable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~base_window() noexcept = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD virtual bool open(window_settings const &) = 0;
+
+		virtual bool close() = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 

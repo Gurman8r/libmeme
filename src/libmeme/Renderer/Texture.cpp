@@ -1,7 +1,7 @@
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Renderer/GL.hpp>
 #include <libmeme/Renderer/Binder.hpp>
-#include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/BitSet.hpp>
 
 namespace ml::impl
 {
@@ -241,7 +241,7 @@ namespace ml
 
 		ML_defer{ GL::flush(); };
 
-		ML_bind_scope(*this);
+		ML_bind_ref(*this);
 
 		GL::texImage2D(
 			m_sampler,
@@ -285,7 +285,7 @@ namespace ml
 
 		ML_defer{ GL::flush(); };
 
-		ML_bind_scope(*this);
+		ML_bind_ref(*this);
 
 		GL::texSubImage2D(
 			m_sampler,
@@ -318,7 +318,7 @@ namespace ml
 		auto temp{ make_image(size(), channels()) };
 		if (m_handle)
 		{
-			ML_bind_scope(*this);
+			ML_bind_ref(*this);
 
 			GL::getTexImage(
 				GL::Texture2D,
@@ -337,13 +337,11 @@ namespace ml
 		if (!m_handle) { return false; }
 		else
 		{
-			m_flags = value
-				? (m_flags | texture_flags_mipmapped)
-				: (m_flags & ~texture_flags_mipmapped);
+			ML_flag_write(m_flags, texture_flags_mipmapped, value);
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_scope(*this);
+			ML_bind_ref(*this);
 
 			impl::set_mipmapped(value, m_sampler, is_smooth());
 			
@@ -356,13 +354,11 @@ namespace ml
 		if (!m_handle) { return false; }
 		else
 		{
-			m_flags = value
-				? (m_flags | texture_flags_repeated)
-				: (m_flags & ~texture_flags_repeated);
+			ML_flag_write(m_flags, texture_flags_repeated, value);
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_scope(*this);
+			ML_bind_ref(*this);
 
 			impl::set_repeated(value, m_sampler);
 
@@ -375,13 +371,11 @@ namespace ml
 		if (!m_handle) { return false; }
 		else
 		{
-			m_flags = value
-				? (m_flags | texture_flags_smooth)
-				: (m_flags & ~texture_flags_smooth);
+			ML_flag_write(m_flags, texture_flags_smooth, value);
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_scope(*this);
+			ML_bind_ref(*this);
 
 			impl::set_smooth(value, m_sampler, is_mipmapped());
 			

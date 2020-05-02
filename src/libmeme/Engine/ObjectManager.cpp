@@ -8,9 +8,5 @@ namespace ml
 	{
 	}
 
-	object_manager::~object_manager() noexcept
-	{
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

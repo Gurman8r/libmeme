@@ -3,7 +3,7 @@
 #ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
 #endif
-#include <libmeme/Engine/Embed.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 
 namespace ml
 {
@@ -11,20 +11,22 @@ namespace ml
 
 	script_manager::script_manager(json const & j, allocator_type const & alloc) noexcept
 	{
-	}
-
-	script_manager::~script_manager() noexcept
-	{
-		shutdown();
+		j["library_home"].get_to(m_library_home);
+		j["setup_script"].get_to(m_setup_script);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script_manager::startup(fs::path const & name, fs::path const & home)
+	bool script_manager::is_initialized() const noexcept
 	{
-		if (Py_IsInitialized()) { return false; }
+		return Py_IsInitialized();
+	}
 
-		PyObject_SetArenaAllocator(([&]()
+	bool script_manager::startup()
+	{
+		if (is_initialized()) { return false; }
+
+		PyObject_SetArenaAllocator(([&]() noexcept
 		{
 			static PyObjectArenaAllocator alloc
 			{
@@ -41,40 +43,42 @@ namespace ml
 			return &alloc;
 		})());
 
-		Py_SetProgramName(name.c_str());
+		Py_SetProgramName(fs::path{ ML_argv[0] }.filename().c_str());
 
-		Py_SetPythonHome(home.c_str());
+		Py_SetPythonHome(m_library_home.c_str());
 
 		Py_InitializeEx(1);
 
-		return Py_IsInitialized();
+		this->do_file(m_setup_script);
+
+		return is_initialized();
 	}
 
 	bool script_manager::shutdown()
 	{
-		if (!Py_IsInitialized()) { return false; }
+		if (!is_initialized()) { return false; }
 
 		Py_FinalizeEx();
 
-		return !Py_IsInitialized();
+		return !is_initialized();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t script_manager::do_file(fs::path const & path)
+	int32_t script_manager::do_file(fs::path const & value)
 	{
-		if (path.empty() || !fs::exists(path)) { return 0; }
+		if (!is_initialized() || value.empty() || !fs::exists(value)) { return 0; }
 
-		auto file{ std::fopen(path.string().c_str(), "r") };
+		auto fp{ std::fopen(value.string().c_str(), "r") };
 
-		return PyRun_SimpleFileExFlags(file, path.string().c_str(), true, nullptr);
+		return PyRun_SimpleFileExFlags(fp, value.string().c_str(), true, nullptr);
 	}
 
-	int32_t script_manager::do_string(pmr::string const & text)
+	int32_t script_manager::do_string(pmr::string const & value)
 	{
-		if (text.empty()) { return 0; }
+		if (!is_initialized() || value.empty()) { return 0; }
 
-		return PyRun_SimpleStringFlags(text.c_str(), nullptr);
+		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

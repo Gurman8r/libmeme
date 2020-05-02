@@ -146,7 +146,7 @@ namespace ml::ds
 
 			for (auto it = value.begin(); it != value.end(); ++it)
 			{
-				insert(it->first, it->second);
+				this->insert(it->first, it->second);
 			}
 		}
 
@@ -188,7 +188,7 @@ namespace ml::ds
 			m_pair.second.resize(count, value);
 		}
 
-		void shrink_to_fit()
+		void shrink_to_fit() noexcept
 		{
 			m_pair.first.shrink_to_fit();
 			m_pair.second.shrink_to_fit();

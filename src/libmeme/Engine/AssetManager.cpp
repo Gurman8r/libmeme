@@ -9,10 +9,5 @@ namespace ml
 	{
 	}
 
-	asset_manager::~asset_manager() noexcept
-	{
-		clear();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

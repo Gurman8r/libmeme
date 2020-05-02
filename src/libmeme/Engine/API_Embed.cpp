@@ -1,5 +1,4 @@
 #include <libmeme/Engine/Engine.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 #ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
@@ -106,17 +105,8 @@ namespace ml::embed
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// FILESYSTEM
-		struct ml_fs {};
-		py::class_<ml_fs>(m, "fs")
-			.def(py::init<>())
-			.def_static("path_to", [](cstring s) { return engine::path_to(s).string(); });
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		// PLATFORM API
-		py::class_<platform_api>(m, "platform")
+		py::class_<platform_api>(m, "platform_api")
 			.def(py::init<>())
 			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)platform_api::unknown; })
 			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)platform_api::opengl; })
@@ -126,6 +116,23 @@ namespace ml::embed
 			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)platform_api::core; })
 			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)platform_api::compat; })
 			.def_property_readonly_static("debug"	, [](py::object) { return (int32_t)platform_api::debug; })
+			;
+
+		py::class_<window_hints_>(m, "window_hints")
+			.def(py::init<>())
+			.def_property_readonly_static("none"				, [](py::object) { return (int32_t)window_hints_none; })
+			.def_property_readonly_static("resizable"			, [](py::object) { return (int32_t)window_hints_resizable; })
+			.def_property_readonly_static("visible"				, [](py::object) { return (int32_t)window_hints_visible; })
+			.def_property_readonly_static("decorated"			, [](py::object) { return (int32_t)window_hints_decorated; })
+			.def_property_readonly_static("focused"				, [](py::object) { return (int32_t)window_hints_focused; })
+			.def_property_readonly_static("auto_iconify"		, [](py::object) { return (int32_t)window_hints_auto_iconify; })
+			.def_property_readonly_static("floating"			, [](py::object) { return (int32_t)window_hints_floating; })
+			.def_property_readonly_static("maximized"			, [](py::object) { return (int32_t)window_hints_maximized; })
+			.def_property_readonly_static("fullscreen"			, [](py::object) { return (int32_t)window_hints_fullscreen; })
+			.def_property_readonly_static("double_buffered"		, [](py::object) { return (int32_t)window_hints_double_buffered; })
+			.def_property_readonly_static("install_callbacks"	, [](py::object) { return (int32_t)window_hints_install_callbacks; })
+			.def_property_readonly_static("default"				, [](py::object) { return (int32_t)window_hints_default; })
+			.def_property_readonly_static("default_max"			, [](py::object) { return (int32_t)window_hints_default_max; })
 			;
 
 		// CONTEXT SETTINGS
@@ -145,21 +152,21 @@ namespace ml::embed
 			;
 
 		// DISPLAY SETTINGS
-		py::class_<display_settings>(m, "display_settings")
+		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
 			.def(py::init<vec2i, uint32_t>())
-			.def("__nonzero__"		, &display_settings::operator bool, py::is_operator())
-			.def("__bool__"			, &display_settings::operator bool, py::is_operator())
-			.def_readwrite("size"	, &display_settings::size)
-			.def_readwrite("depth"	, &display_settings::depth)
+			.def("__nonzero__"		, &video_mode::operator bool, py::is_operator())
+			.def("__bool__"			, &video_mode::operator bool, py::is_operator())
+			.def_readwrite("size"	, &video_mode::size)
+			.def_readwrite("depth"	, &video_mode::depth)
 			;
 
 		// WINDOW SETTINGS
 		py::class_<window_settings>(m, "window_settings")
 			.def(py::init<>())
-			.def(py::init<pmr::string const &, display_settings const &, context_settings const &, int32_t>())
+			.def(py::init<pmr::string const &, video_mode const &, context_settings const &, int32_t>())
 			.def_readwrite("title"	, &window_settings::title)
-			.def_readwrite("display", &window_settings::display)
+			.def_readwrite("video"	, &window_settings::video)
 			.def_readwrite("context", &window_settings::context)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
@@ -167,7 +174,8 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&m, sys = py::module::import("sys")
+		([&m, builtins = py::module::import("builtins")
+			, sys = py::module::import("sys")
 		]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
@@ -197,16 +205,11 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// CONFIG
-		struct ml_engine_config {};
-		py::class_<ml_engine_config>(m, "config")
+		// FILES
+		struct ml_engine_files {};
+		py::class_<ml_engine_files>(m, "fs")
 			.def(py::init<>())
-			.def_property_readonly_static("command_line", [](py::object) { return engine::config().command_line; })
-			.def_property_readonly_static("content_home", [](py::object) { return engine::config().content_home.native(); })
-			.def_property_readonly_static("library_home", [](py::object) { return engine::config().library_home.native(); })
-			.def_property_readonly_static("program_name", [](py::object) { return engine::config().program_name.native(); })
-			.def_property_readonly_static("program_path", [](py::object) { return engine::config().program_path.native(); })
-			.def_property_readonly_static("startup_script", [](py::object) { return engine::config().startup_script.native(); })
+			.def_static("path_to", [](cstring s) { return engine::fs().path_to(s).string(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -215,7 +218,7 @@ namespace ml::embed
 		struct ml_engine_gui {};
 		py::class_<ml_engine_gui>(m, "gui")
 			.def(py::init<>())
-			.def_static("init", [](cstring s) { return engine::gui().startup(engine::window(), s); })
+			.def_static("startup", [](cstring s) { return engine::gui().startup(engine::window(), s); })
 			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
 			;
 
@@ -233,8 +236,9 @@ namespace ml::embed
 		struct ml_engine_plugins {};
 		py::class_<ml_engine_plugins>(m, "plugins")
 			.def(py::init<>())
+			.def_static("clear", []() { engine::plugins().clear(); })
+			.def_static("free", [](cstring s) { return engine::plugins().free(s); })
 			.def_static("load", [](cstring s) { return engine::plugins().load(s); })
-			.def_static("free", [](cstring s) { return false; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -265,8 +269,8 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-			.def_static("open", [](window_settings const & ws, bool ic) { return engine::window().open(ws, ic); })
-			.def_static("close", [](py::args) { engine::window().close(); })
+			.def_static("open", [](window_settings const & ws) { return engine::window().open(ws); })
+			.def_static("close", [](py::args) { return engine::window().close(); })
 			.def_static("get_size", []() { return engine::window().get_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })
 			;

@@ -18,7 +18,7 @@ namespace ml
 
 		asset_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		~asset_manager() noexcept;
+		~asset_manager() noexcept { clear(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

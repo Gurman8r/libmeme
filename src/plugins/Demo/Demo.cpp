@@ -4,7 +4,7 @@
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
-#include <libmeme/Engine/Embed.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
@@ -65,7 +65,7 @@ namespace ml
 	{
 		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_scope(*shd, false);
+			ML_bind_ref(*shd, false);
 			for (uniform const & u : *mat)
 			{
 				shd->set_uniform(u);
@@ -77,7 +77,7 @@ namespace ml
 	{
 		void operator()(c_shader const & shd, c_model const & mdl, render_target & target)
 		{
-			ML_bind_scope(*shd, true);
+			ML_bind_ref(*shd, true);
 			target.draw(*mdl);
 		}
 	};
@@ -215,7 +215,7 @@ namespace ml
 			{
 			case hashof_v<load_event	>: return on_load		(*ev.cast<load_event	>());
 			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
-			case hashof_v<draw_event	>: return on_render		(*ev.cast<draw_event	>());
+			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
 			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.cast<gui_dock_event>());
 			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.cast<gui_draw_event>());
 			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
@@ -232,7 +232,7 @@ namespace ml
 			setup_menus();
 
 			// ICON
-			if (auto icon{ make_image(engine::path_to("assets/textures/icon.png")) })
+			if (auto icon{ make_image(engine::fs().path_to("assets/textures/icon.png")) })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
 			}
@@ -252,55 +252,55 @@ namespace ml
 				m_textures["default"] = make_texture(m_images["default"]);
 
 				m_textures["doot"] = make_texture(
-					engine::path_to("assets/textures/doot.png")
+					engine::fs().path_to("assets/textures/doot.png")
 				);
 
 				m_textures["navball"] = make_texture(
-					engine::path_to("assets/textures/navball.png")
+					engine::fs().path_to("assets/textures/navball.png")
 				);
 
 				m_textures["earth_dm_2k"] = make_texture(
-					engine::path_to("assets/textures/earth/earth_dm_2k.png")
+					engine::fs().path_to("assets/textures/earth/earth_dm_2k.png")
 				);
 
 				m_textures["earth_sm_2k"] = make_texture(
-					engine::path_to("assets/textures/earth/earth_sm_2k.png")
+					engine::fs().path_to("assets/textures/earth/earth_sm_2k.png")
 				);
 
 				m_textures["moon_dm_2k"] = make_texture(
-					engine::path_to("assets/textures/moon/moon_dm_2k.png")
+					engine::fs().path_to("assets/textures/moon/moon_dm_2k.png")
 				);
 			}
 
 			// FONTS
 			{
 				m_fonts["clacon"] = make_font(
-					engine::path_to("assets/fonts/clacon.ttf")
+					engine::fs().path_to("assets/fonts/clacon.ttf")
 				);
 
 				m_fonts["consolas"] = make_font(
-					engine::path_to("assets/fonts/consolas.ttf")
+					engine::fs().path_to("assets/fonts/consolas.ttf")
 				);
 
 				m_fonts["lucida_console"] = make_font(
-					engine::path_to("assets/fonts/lucida_console.ttf")
+					engine::fs().path_to("assets/fonts/lucida_console.ttf")
 				);
 
 				m_fonts["minecraft"] = make_font(
-					engine::path_to("assets/fonts/minecraft.ttf")
+					engine::fs().path_to("assets/fonts/minecraft.ttf")
 				);
 			}
 
 			// SHADERS
 			{
 				m_shaders["2d"] = make_shader(
-					engine::path_to("assets/shaders/2D.vs.shader"),
-					engine::path_to("assets/shaders/basic.fs.shader")
+					engine::fs().path_to("assets/shaders/2D.vs.shader"),
+					engine::fs().path_to("assets/shaders/basic.fs.shader")
 				);
 
 				m_shaders["3d"] = make_shader(
-					engine::path_to("assets/shaders/3D.vs.shader"),
-					engine::path_to("assets/shaders/basic.fs.shader")
+					engine::fs().path_to("assets/shaders/3D.vs.shader"),
+					engine::fs().path_to("assets/shaders/basic.fs.shader")
 				);
 			}
 
@@ -357,15 +357,15 @@ namespace ml
 			// MODELS
 			{
 				m_models["sphere8x6"] = make_model(
-					engine::path_to("assets/models/sphere8x6.obj")
+					engine::fs().path_to("assets/models/sphere8x6.obj")
 				);
 
 				m_models["sphere32x24"] = make_model(
-					engine::path_to("assets/models/sphere32x24.obj")
+					engine::fs().path_to("assets/models/sphere32x24.obj")
 				);
 
 				m_models["monkey"] = make_model(
-					engine::path_to("assets/models/monkey.obj")
+					engine::fs().path_to("assets/models/monkey.obj")
 				);
 
 				m_models["triangle"] = make_model(make_mesh(
@@ -446,7 +446,7 @@ namespace ml
 			}
 		}
 
-		void on_render(draw_event const &)
+		void on_draw(draw_event const &)
 		{
 			// draw stuff, etc...
 
@@ -454,7 +454,9 @@ namespace ml
 
 			if (render_texture & target{ m_pipeline[0] })
 			{
-				ML_bind_scope(target);
+				//gbinder foo{ target };
+
+				ML_bind_ref(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
@@ -694,7 +696,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						static ML_call{ std::cout << "# type \'\\\' to exit\n"; };
+						static ML_scope{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -748,7 +750,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			static ML_call{
+			static ML_scope{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
@@ -977,7 +979,7 @@ namespace ml
 			}
 
 			// file list
-			static gui::file_tree file_tree{ engine::path_to() };
+			static gui::file_tree file_tree{ engine::fs().path_to() };
 			file_tree.render();
 		}
 
@@ -987,7 +989,7 @@ namespace ml
 		{
 			static auto * const & testres{ memory_manager::get_test_resource() };
 
-			static ML_call // setup memory editor
+			static ML_scope // setup memory editor
 			{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;
@@ -1031,13 +1033,13 @@ namespace ml
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					static ML_call{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
@@ -1064,14 +1066,14 @@ namespace ml
 				char progress[32] = "";
 				std::sprintf(progress, "%u / %u (%.2f%%)",
 					(uint32_t)testres->used_bytes(),
-					(uint32_t)testres->total_bytes(),
+					(uint32_t)testres->capacity(),
 					testres->percent_used()
 				);
 				ImGui::ProgressBar(testres->fraction_used(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
 					ImGui::Text("allocations: %u", testres->num_allocations());
-					ImGui::Text("total:       %u", testres->total_bytes());
+					ImGui::Text("total:       %u", testres->capacity());
 					ImGui::Text("in use:      %u", testres->used_bytes());
 					ImGui::Text("available:   %u", testres->free_bytes());
 				});
@@ -1081,7 +1083,7 @@ namespace ml
 			}
 
 			// memory content
-			m_memory.DrawContents(testres->data(), testres->total_bytes(), testres->addr());
+			m_memory.DrawContents(testres->buffer(), testres->capacity(), testres->addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1089,7 +1091,7 @@ namespace ml
 		void show_nodes_gui()
 		{
 			// create node editor
-			static ML_call{ m_node_editor = ax::NodeEditor::CreateEditor(); };
+			static ML_scope{ m_node_editor = ax::NodeEditor::CreateEditor(); };
 
 			namespace ed = ax::NodeEditor;
 

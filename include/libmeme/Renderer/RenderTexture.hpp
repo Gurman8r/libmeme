@@ -68,9 +68,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return good(); }
+		ML_NODISCARD bool nonzero() const noexcept { return m_fbo && m_rbo && m_texture; }
 
-		ML_NODISCARD bool good() const noexcept { return m_fbo && m_rbo && m_texture; }
+		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
 
 		ML_NODISCARD auto fbo() const noexcept -> FBO const & { return m_fbo; }
 

@@ -1,5 +1,5 @@
-#ifndef _ML_EMBED_HPP_
-#define _ML_EMBED_HPP_
+#ifndef _ML_API_EMBED_HPP_
+#define _ML_API_EMBED_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -11,22 +11,13 @@ namespace ml::embed {}
 
 #ifdef ML_EMBED_PYTHON
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml::embed
-{
-    namespace py = pybind11;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+namespace ml::embed { namespace py = pybind11; }
 
 namespace pybind11::detail
 {
@@ -37,10 +28,8 @@ namespace pybind11::detail
         : array_caster<_ML ds::matrix<T, W, H>, T, false, W * H> {};
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #endif // ML_EMBED_PYTHON
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_EMBED_HPP_
+#endif // !_ML_API_EMBED_HPP_

@@ -11,7 +11,7 @@
 #ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
 #endif
-#include <libmeme/Engine/Embed.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 
 namespace ml::embed
 {

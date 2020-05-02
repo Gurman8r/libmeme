@@ -15,7 +15,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD gui_dockspace final : non_copyable, trackable
+		gui_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+
+		~gui_manager() noexcept {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct ML_NODISCARD dockspace_data final : non_copyable, trackable
 		{
 			using nodes_t = typename pmr::vector<uint32_t>;
 
@@ -32,13 +38,13 @@ namespace ml
 		private:
 			friend gui_manager;
 			
-			gui_dockspace(allocator_type const & alloc = {}) noexcept : nodes{ alloc } {}
+			dockspace_data(allocator_type const & alloc = {}) noexcept : nodes{ alloc } {}
 		
 		} dockspace;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD gui_main_menu_bar final : non_copyable, trackable
+		struct ML_NODISCARD main_menu_data final : non_copyable, trackable
 		{
 			using callback_t	= typename std::function<void()>;
 			using menu_t		= typename std::pair<cstring, pmr::vector<callback_t>>;
@@ -50,19 +56,15 @@ namespace ml
 		private:
 			friend gui_manager;
 
-			gui_main_menu_bar(allocator_type const & alloc = {}) noexcept : menus{ alloc } {}
+			main_menu_data(allocator_type const & alloc = {}) noexcept : menus{ alloc } {}
 
-			~gui_main_menu_bar() noexcept { this->menus.clear(); }
+			~main_menu_data() noexcept { this->menus.clear(); }
 		
 		} main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui_manager(json const & j, allocator_type const & alloc = {}) noexcept;
-
-		~gui_manager() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD bool is_initialized() const noexcept { return m_imgui; }
 
 		ML_NODISCARD bool startup(struct window const & win, cstring ver);
 

@@ -17,11 +17,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(pre_loop_event)
+	ML_event(begin_loop_event)
 	{
 	};
 
-	ML_event(post_loop_event)
+	ML_event(end_loop_event)
 	{
 	};
 

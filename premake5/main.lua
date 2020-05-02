@@ -19,8 +19,6 @@ dependson{
 
 defines{
 	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
-	"MAIN_MEMORY=128.0_MiB",
-	"MAIN_CONFIG=L\"../../../../assets/libmeme.json\"",
 }
 
 includedirs{

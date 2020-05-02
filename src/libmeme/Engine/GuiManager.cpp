@@ -1,7 +1,6 @@
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Input.hpp>
@@ -13,10 +12,6 @@ namespace ml
 
 	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
 		: m_imgui{}, main_menu{ alloc }, dockspace{ alloc }
-	{
-	}
-
-	gui_manager::~gui_manager() noexcept
 	{
 	}
 

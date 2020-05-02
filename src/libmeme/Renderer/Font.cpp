@@ -1,6 +1,5 @@
 #include <libmeme/Renderer/Font.hpp>
 #include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

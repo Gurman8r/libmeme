@@ -59,15 +59,16 @@ ml::int32_t main()
 	}
 
 	event_system::fire_event<load_event>();
+
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	do // main loop
 	{
 		ML_defer{ performance_tracker::refresh(); };
 		{
-			ML_benchmark("| pre-loop");
+			ML_benchmark("| begin loop");
 			engine::begin_loop();
-			event_system::fire_event<pre_loop_event>();
+			event_system::fire_event<begin_loop_event>();
 		}
 		{
 			ML_benchmark("|  update");
@@ -75,7 +76,7 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("|  pre-draw");
-			engine::pre_render();
+			engine::pre_draw();
 			event_system::fire_event<pre_draw_event>();
 		}
 		{
@@ -88,7 +89,7 @@ ml::int32_t main()
 			event_system::fire_event<pre_gui_event>();
 		}
 		{
-			ML_benchmark("|    gui");
+			ML_benchmark("|    draw-gui");
 			engine::gui().draw();
 			event_system::fire_event<gui_draw_event>();
 		}
@@ -99,7 +100,7 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("|  post-draw");
-			engine::post_render();
+			engine::post_draw();
 			event_system::fire_event<post_draw_event>();
 		}
 		{
@@ -107,9 +108,9 @@ ml::int32_t main()
 			event_system::fire_event<late_update_event>();
 		}
 		{
-			ML_benchmark("| post-loop");
+			ML_benchmark("| end loop");
 			engine::end_loop();
-			event_system::fire_event<post_loop_event>();
+			event_system::fire_event<end_loop_event>();
 		}
 	} while (engine::window().is_open());
 	

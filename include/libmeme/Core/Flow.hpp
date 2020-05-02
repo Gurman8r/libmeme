@@ -2,43 +2,36 @@
 #define _ML_FLOW_HPP_
 
 #include <libmeme/Common.hpp>
+#include <libmeme/Core/NonCopyable.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// flow struct helper
-#define ML_flow_decl(Fn, Type)                                                          \
+// lambda struct helper
+#define ML_lambda_decl(Fn, Type)                                                        \
     template <class Fn> struct Type;                                                    \
     enum class ML_concat(Type, _tag) {};                                                \
     template <class Fn> inline auto operator+(ML_concat(Type, _tag), Fn && fn) noexcept \
     {                                                                                   \
         return Type<Fn>{ ML_forward(fn) };                                              \
     }                                                                                   \
-    template <class Fn> struct Type final
+    template <class Fn> struct Type final : _ML non_copyable
 
-// flow variable helper
-#define ML_flow_impl(Type) \
+// lambda variable helper
+#define ML_lambda_impl(Type) \
     auto ML_anon(Type) = _ML impl:: ML_concat(Type, _tag){} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::impl
 {
-    // invoke lambda body in constructor
-    ML_flow_decl(Fn, immediate_call)
+    // invoke body in constructor
+    ML_lambda_decl(Fn, immediate_call)
     {
         explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
-    // invoke lambda body immediately
-#define ML_call ML_flow_impl(immediate_call)
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml::impl
-{
-    // invoke lambda body in destructor
-    ML_flow_decl(Fn, deferred_call)
+    // invoke body in destructor
+    ML_lambda_decl(Fn, deferred_call)
     {
         explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
@@ -46,9 +39,14 @@ namespace ml::impl
 
     private: Fn const m_fn;
     };
+}
 
-    // invoke lambda body on scope exit
-#define ML_defer ML_flow_impl(deferred_call)
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::impl
+{
+#define ML_scope ML_lambda_impl(immediate_call) // invoke body immediately
+#define ML_defer ML_lambda_impl(deferred_call)  // invoke body on scope exit
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

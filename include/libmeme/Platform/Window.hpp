@@ -2,10 +2,6 @@
 #define _ML_WINDOW_HPP_
 
 #include <libmeme/Platform/BaseWindow.hpp>
-#include <libmeme/Platform/Cursor.hpp>
-#include <libmeme/Platform/Keyboard.hpp>
-#include <libmeme/Platform/Mouse.hpp>
-#include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
 {
@@ -33,19 +29,21 @@ namespace ml
 
 		window() noexcept;
 
-		virtual ~window() noexcept;
+		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & value, bool install = true);
+		ML_NODISCARD virtual bool open(window_settings const & value) override;
+
+		virtual bool close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void close();
 		
 		void destroy();
 
 		void iconify();
+
+		void install_default_callbacks();
 		
 		void make_context_current();
 		
@@ -76,6 +74,8 @@ namespace ml
 		void set_position(vec2i const & value);
 		
 		void set_monitor(void * value);
+
+		void set_should_close(bool value);
 		
 		void set_size(vec2i const & value);
 		
@@ -131,15 +131,17 @@ namespace ml
 
 		ML_NODISCARD static void * get_context_current();
 
-		ML_NODISCARD static display_settings const & get_desktop_mode();
+		ML_NODISCARD static video_mode const & get_desktop_mode();
 		
-		ML_NODISCARD static pmr::vector<display_settings> const & get_fullscreen_modes();
+		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
 
 		ML_NODISCARD static proc_fn get_proc_address(cstring value);
 		
 		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
 
 		ML_NODISCARD static float64_t get_time();
+
+		ML_NODISCARD static bool initialize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -156,13 +158,11 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
-		void install_default_callbacks();
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
 
-		ML_NODISCARD auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
+		ML_NODISCARD auto get_context() const noexcept -> context_settings const & { return m_settings.context; }
 
 		ML_NODISCARD auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
 
@@ -180,23 +180,23 @@ namespace ml
 
 		ML_NODISCARD auto get_share() const noexcept -> void * { return m_share; }
 
-		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_display_settings().size; }
+		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_video().size; }
 
 		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 
-		ML_NODISCARD auto get_display_settings() const noexcept -> display_settings const & { return m_settings.display; }
+		ML_NODISCARD auto get_video() const noexcept -> video_mode const & { return m_settings.video; }
 
 		ML_NODISCARD auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
-		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return get_hints() & i; }
+		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return ML_flag_read(get_hints(), i); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		void *			m_window	; // 
-		void * 			m_monitor	; // 
-		void * 			m_share		; // 
-		window_settings	m_settings	; // 
+		void *			m_window	{}; // 
+		void * 			m_monitor	{}; // 
+		void * 			m_share		{}; // 
+		window_settings	m_settings	{}; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -17,10 +17,6 @@ namespace ml
 	{
 	}
 
-	time_manager::~time_manager() noexcept
-	{
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void time_manager::begin_loop() noexcept

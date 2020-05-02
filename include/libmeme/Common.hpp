@@ -39,14 +39,41 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// general
 #define _ML						::ml::
 #define ML_addressof(p)			((void *)(_ML intmax_t)p)
 #define ML_alias                using
 #define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
 #define ML_forward(v)			_ML std::forward<decltype(v)>(v)
 
+// assert
 #ifndef ML_assert
 #   define ML_assert(expr)		assert(expr)
+#endif
+
+// breakpoint
+#if (!ML_is_debug)
+#	define ML_breakpoint() ((void)0)
+#elif defined(ML_cc_msvc)
+#	define ML_breakpoint() _CSTD __debugbreak()
+#else
+#	define ML_breakpoint() _CSTD raise(SIGTRAP)
+#endif
+
+// environment
+#ifndef ML_DISABLE_LEGACY_ENV
+#	define ML_argc				__argc
+#	ifndef ML_WIDE_ENV
+#		define ML_argv			__argv
+#		define ML_envp			__envp
+#	else
+#		define ML_argv			__wargv
+#		define ML_envp			__wenvp
+#	endif
+#else
+#	define ML_argc
+#	define ML_argv
+#	define ML_envp
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

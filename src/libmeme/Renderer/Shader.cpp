@@ -1,7 +1,6 @@
 #include <libmeme/Renderer/Shader.hpp>
 #include <libmeme/Renderer/Texture.hpp>
 #include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 
 namespace ml

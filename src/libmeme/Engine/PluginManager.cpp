@@ -9,11 +9,6 @@ namespace ml
 	{
 	}
 
-	plugin_manager::~plugin_manager() noexcept
-	{
-		clear();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void plugin_manager::clear()

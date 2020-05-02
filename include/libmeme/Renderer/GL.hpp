@@ -2,7 +2,7 @@
 #define _ML_GL_HPP_
 
 #include <libmeme/Renderer/Export.hpp>
-#include <libmeme/Core/StringUtility.hpp>
+#include <libmeme/Common.hpp>
 
 namespace ml
 {

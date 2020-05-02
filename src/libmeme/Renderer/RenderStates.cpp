@@ -1,6 +1,5 @@
 #include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/GL.hpp>
-#include <libmeme/Core/Debug.hpp>
 
 namespace ml
 {

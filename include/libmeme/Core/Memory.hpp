@@ -1,8 +1,9 @@
 #ifndef _ML_MEMORY_HPP_
 #define _ML_MEMORY_HPP_
 
-#include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/FlatMap.hpp>
+#include <libmeme/Core/Singleton.hpp>
 
 // TEST RESOURCE
 namespace ml::util
@@ -19,18 +20,28 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit test_resource(pmr::memory_resource * r, pointer const d, size_t s) noexcept
-			: m_resource{ r }, m_buffer{ d }, m_total_bytes{ s }
+		explicit test_resource(pmr::memory_resource * u, pointer const b, size_t s) noexcept
+			: m_upstream{ u }, m_buffer{ b }, m_total_bytes{ s }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool good() const noexcept { return (m_resource && m_buffer && (0 < m_total_bytes)); }
+		pmr::memory_resource * upstream() const noexcept { return m_upstream; }
 
-		operator bool() const noexcept { return good(); }
+		pointer const buffer() noexcept { return m_buffer; }
 
-		pmr::memory_resource * upstream_resource() const noexcept { return m_resource; }
+		const_pointer const buffer() const noexcept { return m_buffer; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool has_buffer() const noexcept { return m_buffer && (0 < m_total_bytes); }
+
+		bool has_upstream() const noexcept { return m_upstream; }
+
+		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
+
+		bool is_valid_size() const noexcept { return (0 < m_total_bytes); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,21 +49,15 @@ namespace ml::util
 
 		size_t num_allocations() const noexcept { return m_num_alloc; }
 
-		size_t total_bytes() const noexcept { return m_total_bytes; }
+		size_t capacity() const noexcept { return m_total_bytes; }
 
-		size_t used_bytes() const noexcept { return m_used_bytes; }
+		size_t used_bytes() const noexcept { return m_bytes_used; }
 
-		size_t free_bytes() const noexcept { return m_total_bytes - m_used_bytes; }
+		size_t free_bytes() const noexcept { return m_total_bytes - m_bytes_used; }
 
-		float_t fraction_used() const noexcept { return (float_t)m_used_bytes / (float_t)m_total_bytes; }
+		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
 
 		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		pointer const data() noexcept { return m_buffer; }
-
-		const_pointer const data() const noexcept { return m_buffer; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -84,31 +89,31 @@ namespace ml::util
 		void * do_allocate(size_t bytes, size_t align) override
 		{
 			++m_num_alloc;
-			m_used_bytes += bytes;
-			return m_resource->allocate(bytes, align);
+			m_bytes_used += bytes;
+			return m_upstream->allocate(bytes, align);
 		}
 
 		void do_deallocate(void * ptr, size_t bytes, size_t align) override
 		{
 			--m_num_alloc;
-			m_used_bytes -= bytes;
-			return m_resource->deallocate(ptr, bytes, align);
+			m_bytes_used -= bytes;
+			return m_upstream->deallocate(ptr, bytes, align);
 		}
 
 		bool do_is_equal(pmr::memory_resource const & value) const noexcept override
 		{
-			return m_resource->is_equal(value);
+			return m_upstream->is_equal(value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		pmr::memory_resource * m_resource;
+		pmr::memory_resource * m_upstream;
 		pointer const m_buffer;
 		size_t const m_total_bytes;
 
 		size_t m_num_alloc {};
-		size_t m_used_bytes {};
+		size_t m_bytes_used {};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -137,11 +142,14 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres || !value || !*value) { return false; }
+			if (inst.m_testres)				{ return debug::log::error("resource already set"); }
+			if (!value)						{ return debug::log::error("resource cannot be null"); }
+			if (!value->upstream())			{ return debug::log::error("resource upstream cannot be null"); }
+			if (!value->buffer())			{ return debug::log::error("resource data cannot be null"); }
+			if (!value->is_valid_size())	{ return debug::log::error("resource size must be greater than zero"); }
+			if (!value->is_default())		{ return debug::log::error("resource is not the default resource"); }
 
-			inst.m_testres = value;
-
-			return (pmr::get_default_resource() == inst.m_testres);
+			return (inst.m_testres = value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -151,11 +159,11 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			// allocate requested bytes
-			auto const data{ inst.m_allocator.allocate(size) };
+			// allocate the requested bytes
+			auto const temp{ inst.m_allocator.allocate(size) };
 
-			// create record
-			return *inst.m_records.insert(data, record{ inst.m_index++, size, data }).first;
+			// insert a new record
+			return *inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first;
 		}
 
 		// malloc (template size)
@@ -204,10 +212,10 @@ namespace ml
 			// find the record
 			if (auto const it{ inst.m_records.find(addr) })
 			{
-				// free allocation
+				// free the allocation
 				inst.m_allocator.deallocate(it->second->data, it->second->size);
 
-				// erase record
+				// erase the record
 				inst.m_records.erase(it->first);
 			}
 		}

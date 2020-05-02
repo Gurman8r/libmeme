@@ -106,7 +106,9 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return m_handle; }
+		ML_NODISCARD bool nonzero() const noexcept { return m_handle; }
+
+		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
 
 		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 

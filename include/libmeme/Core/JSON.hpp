@@ -8,10 +8,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml
-{
-	ML_alias json = typename nlohmann::json;
-}
+namespace ml { ML_alias json = typename nlohmann::json; }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
