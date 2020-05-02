@@ -490,22 +490,22 @@ namespace ml::ds
 		template <class Fn
 		> void for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
 		{
-			std::for_each(first, last, [&](auto &) noexcept
+			for (; first != last; ++first)
 			{
 				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			});
+			}
 		}
 
 		template <class Fn
-		> void for_each(key_const_iterator first, Fn && fn) noexcept
+		> void for_each(key_iterator first, Fn && fn) noexcept
 		{
-			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
+			this->for_each(first, m_pair.first.end(), ML_forward(fn));
 		}
 
 		template <class Fn
 		> void for_each(Fn && fn) noexcept
 		{
-			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
+			this->for_each(m_pair.first.begin(), ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -513,10 +513,10 @@ namespace ml::ds
 		template <class Fn
 		> void for_each(key_const_iterator first, key_const_iterator last, Fn && fn) const
 		{
-			std::for_each(first, last, [&](auto const &) noexcept
+			for (; first != last; ++first)
 			{
 				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			});
+			}
 		}
 
 		template <class Fn
@@ -536,16 +536,20 @@ namespace ml::ds
 		template <class Fn
 		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
 		{
-			std::for_each_n(first, count, [&](auto &) noexcept
+			if (0 < count)
 			{
-				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			});
+				do {
+					std::invoke(ML_forward(fn), *first, *this->fetch(first));
+					--count;
+					++first;
+				} while (0 < count);
+			}
 		}
 
 		template <class Fn
 		> void for_each_n(ptrdiff_t count, Fn && fn) noexcept
 		{
-			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
+			this->for_each_n(m_pair.first.begin(), count, ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -553,10 +557,14 @@ namespace ml::ds
 		template <class Fn
 		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
 		{
-			std::for_each_n(first, count, [&](auto const &) noexcept
+			if (0 < count)
 			{
-				std::invoke(ML_forward(fn), *first, *this->fetch(first));
-			});
+				do {
+					std::invoke(ML_forward(fn), *first, *this->fetch(first));
+					--count;
+					++first;
+				} while (0 < count);
+			}
 		}
 
 		template <class Fn

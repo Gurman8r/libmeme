@@ -199,11 +199,11 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo()
+		demo() noexcept
 		{
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
-			event_system::add_listener<	draw_event	>(this);
+			event_system::add_listener<	draw_event		>(this);
 			event_system::add_listener<	gui_dock_event	>(this);
 			event_system::add_listener<	gui_draw_event	>(this);
 			event_system::add_listener<	unload_event	>(this);
@@ -600,25 +600,29 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			auto draw_item = [&](auto const & n, auto const & v)
+			auto draw_asset = [&](auto const & n, auto const & v)
 			{
 				ML_ImGui_ScopeID(ML_addressof(&v));
+
+				// type
 				using T = typename std::decay_t<decltype(v)>;
-				static constexpr auto tname{ nameof<>::filter_all(typeof_v<T>.name()) };
+				static constexpr auto ftype{ nameof<>::filter_all(typeof_v<T>.name()) };
+				char type[64] = "";
+				std::sprintf(type, "%.*s", (uint32_t)ftype.size(), ftype.data());
 
-				char name[64] = "";
-				std::sprintf(name, "%.*s", (uint32_t)tname.size(), tname.data());
+				// name
+				pmr::string const name = util::to_string(n);
 
+				// size
 				char size[20] = "";
 				std::sprintf(size, "%u", (uint32_t)sizeof(T));
 
+				// address
 				char addr[sizeof(size_t) * 2 + 1] = "";
 				std::sprintf(addr, "%p", &v);
 
-				pmr::string const s = util::to_string(n);
-
-				if (ImGui::Selectable(name))		highlight_memory(&v); ImGui::NextColumn();
-				if (ImGui::Selectable(s.c_str()))	highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(type))		highlight_memory(&v); ImGui::NextColumn();
+				if (ImGui::Selectable(name.c_str()))highlight_memory(&v); ImGui::NextColumn();
 				if (ImGui::Selectable(size))		highlight_memory(&v); ImGui::NextColumn();
 				if (ImGui::Selectable(addr))		highlight_memory(&v); ImGui::NextColumn();
 			};
@@ -636,13 +640,13 @@ namespace ml
 			ImGui::Separator();
 			ImGui::Columns(4);
 
-			m_pipeline.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_fonts.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_images.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_materials.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_models.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_shaders.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
-			m_textures.for_each([&](auto const & n, auto const & v) { draw_item(n, v); });
+			m_pipeline	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_materials	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_models	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_shaders	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_textures	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 
 			ImGui::Columns(1);
 
