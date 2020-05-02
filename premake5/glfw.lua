@@ -13,7 +13,7 @@ staticruntime	"Off"
 systemversion	"latest"
 
 defines{
-	"_CRT_SECURE_NO_WARNINGS",
+	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 }
 
 includedirs{
@@ -59,7 +59,6 @@ filter{ "configurations:Release" }
 
 filter{ "system:Windows" }
 	defines{
-		"NOMINMAX",
 		"_GLFW_WIN32=1",
 	}
 	files{

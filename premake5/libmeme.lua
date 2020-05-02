@@ -14,11 +14,11 @@ staticruntime	"Off"
 systemversion	"latest"
 
 dependson{
-	"assets", "glfw",
+	"common", "glfw",
 }
 
 defines{
-	"_CRT_SECURE_NO_WARNINGS",
+	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 	"ML_API=ML_API_EXPORT",
 	"ML_PLATFORM_GLFW",
 	"ML_RENDERER_OPENGL",
@@ -84,6 +84,10 @@ links{
 	"zlibstatic",
 }
 
+postbuildcommands{
+	"%{ml_copy} %{lib_in}%{prj.name}%{ml_dll} %{bin_out}",
+}
+
 filter{ "configurations:Debug" }
 	symbols "On"
 	links{
@@ -101,14 +105,8 @@ filter{ "configurations:Release" }
 -- WINDOWS
 
 filter{ "system:Windows" }
-	defines{
-		"NOMINMAX",
-	}
 	includedirs{
 		"%{ext_dir}cpython/PC",
-	}
-	postbuildcommands{
-		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
 	}
 
 filter{ "system:Windows", "configurations:Debug" }
@@ -120,5 +118,5 @@ filter{ "system:Windows", "configurations:Release" }
 	linkoptions{
 		"/NODEFAULTLIB:LIBCMT.lib"
 	}
-		
+
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

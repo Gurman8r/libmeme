@@ -6,12 +6,12 @@
 
 using namespace ml;
 
-#ifndef MEM_RESERVED
-#define MEM_RESERVED 128._MiB
+#ifndef MAIN_MEMORY
+#define MAIN_MEMORY 128.0_MiB
 #endif
 
-#ifndef CONFIG_FILE
-#define CONFIG_FILE L"../../../../assets/libmeme.json"
+#ifndef MAIN_CONFIG
+#define MAIN_CONFIG L"../../../../assets/libmeme.json"
 #endif
 
 ml::int32_t main()
@@ -21,7 +21,7 @@ ml::int32_t main()
 	// setup memory
 	static struct memcfg final : non_copyable
 	{
-		ds::array<byte_t, MEM_RESERVED>		data{};
+		ds::array<byte_t, MAIN_MEMORY>		data{};
 		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 		pmr::unsynchronized_pool_resource	pool{ &mono };
 		util::test_resource					test{ &pool, data.data(), data.size() };
@@ -37,10 +37,10 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// read config
-	auto config = ([&j = json{}, &file = std::ifstream{ CONFIG_FILE }]()
+	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
-		if (file) { file >> j; }
-		file.close();
+		ML_defer{ f.close(); };
+		if (f) { f >> j; }
 		return j;
 	})();
 

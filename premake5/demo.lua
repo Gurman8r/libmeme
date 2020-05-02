@@ -18,22 +18,20 @@ dependson{
 }
 
 defines{
-	"_CRT_SECURE_NO_WARNINGS",
+	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 }
 
 includedirs{
 	"%{sln_dir}include",
-	"%{sln_dir}plugins",
+	"%{sln_dir}src/plugins",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
-
-	-- imgui
 	"%{ext_dir}imgui",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include",
 }
 
 files{
-	"%{sln_dir}src/plugins/%{prj.name}.**",
+	"%{sln_dir}src/plugins/%{prj.name}/**.**",
 }
 
 libdirs{
@@ -45,6 +43,10 @@ links{
 	"libmeme",
 }
 
+postbuildcommands{
+	"%{ml_copy} %{lib_in}%{prj.name}%{ml_dll} %{bin_out}",
+}
+
 filter{ "configurations:Debug" }
 	symbols "On"
 
@@ -52,14 +54,6 @@ filter{ "configurations:Release" }
 	optimize "Speed"
 
 -- WINDOWS
-
-filter{ "system:Windows" }
-	defines{
-		"NOMINMAX",
-	}
-	postbuildcommands{
-		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.dll %{bin_out}",
-	}
 
 filter{ "system:Windows", "configurations:Debug" }
 	linkoptions{ 

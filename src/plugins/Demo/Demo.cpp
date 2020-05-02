@@ -983,8 +983,7 @@ namespace ml
 		{
 			static auto * const & testres{ memory_manager::get_test_resource() };
 
-			// setup memory editor
-			static ML_call
+			static ML_call // setup memory editor
 			{
 				m_memory.Open				= true;
 				m_memory.ReadOnly			= true;

@@ -18,7 +18,9 @@ dependson{
 }
 
 defines{
-	"_CRT_SECURE_NO_WARNINGS",
+	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
+	"MAIN_MEMORY=128.0_MiB",
+	"MAIN_CONFIG=L\"../../../../assets/libmeme.json\"",
 }
 
 includedirs{
@@ -40,6 +42,10 @@ links{
 	"libmeme",
 }
 
+postbuildcommands{
+	"%{ml_copy} %{lib_in}%{prj.name}%{ml_exe} %{bin_out}",
+}
+
 filter{ "configurations:Debug" }
 	symbols "On"
 	kind "ConsoleApp"
@@ -47,15 +53,5 @@ filter{ "configurations:Debug" }
 filter{ "configurations:Release" } 
 	optimize "Speed"
 	kind "WindowedApp"
-
--- WINDOWS
-
-filter{ "system:Windows" }
-	defines{
-		"NOMINMAX",
-	}
-	postbuildcommands{
-		"%{ml_copy} %{bin_lib}%{cfg.platform}\\%{cfg.buildcfg}\\%{prj.name}.exe %{bin_out}",
-	}
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

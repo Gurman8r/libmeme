@@ -92,25 +92,25 @@ namespace ml
 
 		bool has_value() const noexcept { return m_data; }
 
-		auto data() noexcept -> pointer const { return m_data; }
+		auto data() noexcept -> pointer const & { return m_data; }
 
-		auto data() const noexcept -> const_pointer const { return m_data; }
+		auto data() const noexcept -> const_pointer const & { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		operator bool() const noexcept { return m_data; }
 
-		operator pointer const() noexcept { return m_data; }
+		operator pointer const &() noexcept { return m_data; }
 
-		operator const_pointer const() const noexcept { return m_data; }
+		operator const_pointer const &() const noexcept { return m_data; }
 
-		auto operator->() noexcept -> pointer const { return m_data; }
+		auto operator->() noexcept -> pointer const & { return m_data; }
 
-		auto operator->() const noexcept -> const_pointer const { return m_data; }
+		auto operator->() const noexcept -> const_pointer const & { return m_data; }
 
-		auto operator *() & noexcept -> reference { return *m_data; }
+		auto operator *() & noexcept -> reference { return (*m_data); }
 
-		auto operator *() const & noexcept -> const_reference { return *m_data; }
+		auto operator *() const & noexcept -> const_reference { return (*m_data); }
 
 		auto operator *() && noexcept -> rvalue { return std::move(*m_data); }
 

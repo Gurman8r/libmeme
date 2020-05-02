@@ -23,7 +23,7 @@
 
 namespace ml::impl
 {
-    // invoke function in constructor
+    // invoke lambda body in constructor
     ML_flow_decl(Fn, immediate_call)
     {
         explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
@@ -37,7 +37,7 @@ namespace ml::impl
 
 namespace ml::impl
 {
-    // invoke function in destructor
+    // invoke lambda body in destructor
     ML_flow_decl(Fn, deferred_call)
     {
         explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}

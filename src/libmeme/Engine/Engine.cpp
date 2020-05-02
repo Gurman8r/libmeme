@@ -55,13 +55,9 @@ namespace ml
 
 	bool engine::create_context(json const & j, allocator_type const & alloc)
 	{
-		if (g_engine)
+		if (g_engine || !(g_engine = new engine_context{ j, alloc }))
 		{
-			return debug::log::error("engine is already initialized");
-		}
-		else if (!(g_engine = new engine_context{ j, alloc }))
-		{
-			return debug::log::error("failed initializing engine context");
+			return debug::log::error("failed creating engine context");
 		}
 		else
 		{
