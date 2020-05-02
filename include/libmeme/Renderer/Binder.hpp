@@ -1,7 +1,7 @@
 #ifndef _ML_BINDER_HPP_
 #define _ML_BINDER_HPP_
 
-#include <libmeme/Core/Flow.hpp>
+#include <libmeme/Common.hpp>
 
 #define ML_bind_ref(v, ...) \
 	auto ML_anon(ref_binder) = _ML ref_binder{ v, ##__VA_ARGS__ }
@@ -10,7 +10,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct ref_binder final : non_copyable
+	template <class T> struct ref_binder final
 	{
 		template <class ... Args
 		> ref_binder(T & value, Args && ... args) noexcept : m_ref{ value }

@@ -2,7 +2,6 @@
 #define _ML_FLOW_HPP_
 
 #include <libmeme/Common.hpp>
-#include <libmeme/Core/NonCopyable.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -14,7 +13,7 @@
     {                                                                                   \
         return Type<Fn>{ ML_forward(fn) };                                              \
     }                                                                                   \
-    template <class Fn> struct Type final : _ML non_copyable
+    template <class Fn> struct Type final
 
 // lambda variable helper
 #define ML_lambda_impl(Type) \

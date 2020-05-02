@@ -115,8 +115,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T
-	> struct nameof<T> final
+	template <class T> struct nameof<T> final
 	{
 		static constexpr auto value{ nameof<>::filter_type(pretty_function::type<T>()) };
 	};
