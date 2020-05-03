@@ -10,8 +10,8 @@ debugdir 		"%{bin_out}"
 kind			"Utility"
 
 files{
-	"%{sln_dir}premake5/**.lua",
 	"%{sln_dir}assets/**.**", 
+	"%{sln_dir}premake5/**.lua",
 	"%{sln_dir}tools/**.**",
 	"%{sln_dir}.gitattributes",
 	"%{sln_dir}.gitignore",
