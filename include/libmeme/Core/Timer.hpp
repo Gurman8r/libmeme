@@ -42,9 +42,9 @@ namespace ml
 		{
 			if (!m_running)
 			{
+				m_running = true;
 				m_current = m_previous = clock_type::now();
 				m_elapsed = 0.0;
-				m_running = true;
 			}
 			return (*this);
 		}
@@ -53,9 +53,9 @@ namespace ml
 		{
 			if (m_running)
 			{
+				m_running = false;
 				m_current = clock_type::now();
 				m_elapsed = (m_current - m_previous);
-				m_running = false;
 			}
 			return (*this);
 		}
