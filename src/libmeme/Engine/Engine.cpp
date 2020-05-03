@@ -3,7 +3,6 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Renderer/RenderStates.hpp>
 
 namespace ml
 {
@@ -68,12 +67,12 @@ namespace ml
 
 	bool engine::startup() noexcept
 	{
-		if (!g_engine) { return false; }
+		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
 
 		// startup scripting
 		if (!g_engine->m_scripts.startup())
 		{
-			return debug::log::error("engine failed starting scripting");
+			return debug::log::error("failed starting script manager");
 		}
 
 		return true;
@@ -81,13 +80,16 @@ namespace ml
 
 	bool engine::shutdown() noexcept
 	{
-		if (!g_engine) { return false; }
+		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
 
-		// shutdown gui
-		if (!g_engine->m_gui.shutdown()) {}
+		// need to clear main menu bar before anything else
+		g_engine->m_gui.main_menu_bar.menus.clear();
 
 		// shutdown plugins
 		g_engine->m_plugins.clear();
+
+		// shutdown gui
+		if (!g_engine->m_gui.shutdown()) {}
 
 		// shutdown window
 		if (!g_engine->m_window.close()) {}
@@ -96,48 +98,6 @@ namespace ml
 		if (!g_engine->m_scripts.shutdown()) {}
 
 		return true;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void engine::begin_loop() noexcept
-	{
-		ML_assert(is_initialized());
-
-		g_engine->m_time.begin_loop();
-
-		window::poll_events();
-	}
-
-	void engine::pre_draw() noexcept
-	{
-		ML_assert(is_initialized());
-
-		// clear color
-		g_engine->m_window.clear_color(colors::black);
-
-		// viewport
-		g_engine->m_window.viewport({ {}, g_engine->m_window.get_frame_size() });
-
-		// default states
-		constexpr render_states states{
-		}; states();
-	}
-
-	void engine::post_draw() noexcept
-	{
-		ML_assert(is_initialized());
-
-		g_engine->m_window.swap_buffers();
-
-		GL::flush();
-	}
-
-	void engine::end_loop() noexcept
-	{
-		ML_assert(is_initialized());
-
-		g_engine->m_time.end_loop();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

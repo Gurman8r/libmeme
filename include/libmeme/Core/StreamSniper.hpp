@@ -69,7 +69,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return m_cur && m_old; }
+		ML_NODISCARD operator bool() const noexcept { return (m_cur && m_old); }
 
 		ML_NODISCARD operator sstream_t & () & noexcept { return m_str; }
 		

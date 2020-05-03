@@ -11,10 +11,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { ID_Vert, ID_Geom, ID_Frag, ID_MAX };
+		enum id_ : size_t { id_vertex, id_geometry, id_fragment, id_max };
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using shader_source		= typename meta::array<pmr::string, ID_MAX>;
+		using shader_source		= typename meta::array<pmr::string, id_max>;
 		using attribute_cache	= typename ds::flat_map<hash_t, int32_t>;
 		using uniform_cache		= typename ds::flat_map<hash_t, int32_t>;
 		using texture_cache		= typename ds::flat_map<int32_t, texture const *>;

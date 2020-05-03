@@ -35,6 +35,15 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <size_t I>	using value_i			= typename meta::nth<I, value_types>;
+		template <size_t I>	using vector_i			= typename meta::nth<I, vector_types>;
+		template <size_t I>	using iterator_i		= typename vector_i<I>::iterator;
+		template <class U>	using iterator_t		= typename pmr::vector<U>::iterator;
+		template <size_t I>	using const_iterator_i	= typename vector_i<I>::const_iterator;
+		template <class U>	using const_iterator_t	= typename pmr::vector<U>::const_iterator;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		batch_vector(allocator_type const & alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
@@ -795,7 +804,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class U = meta::nth<I, value_types>
+		template <size_t I, class U = value_i<I>
 		> auto insert(size_t const i, U && value) noexcept
 		{
 			return this->get<I>().insert(this->begin<I>() + i, ML_forward(value));
@@ -831,7 +840,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class U = meta::nth<I, value_types>
+		template <size_t I, class U = value_i<I>
 		> void push_back(U && value) noexcept
 		{
 			this->get<I>().push_back(ML_forward(value));
@@ -863,7 +872,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class U = meta::nth<I, value_types>
+		template <size_t I, class U = value_i<I>
 		> decltype(auto) emplace(size_t const i, U && value) noexcept
 		{
 			return this->get<I>().emplace(this->begin<I>() + i, ML_forward(value));
@@ -899,7 +908,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class U = meta::nth<I, value_types>
+		template <size_t I, class U = value_i<I>
 		> decltype(auto) emplace_back(U && value) noexcept
 		{
 			return this->get<I>().emplace_back(ML_forward(value));
@@ -951,7 +960,7 @@ namespace ml::ds
 			}
 		}
 
-		template <size_t I, class U = meta::nth<I, vector_types>
+		template <size_t I, class U = vector_i<I>
 		> void swap(U & value) noexcept
 		{
 			this->get<I>().swap(value);

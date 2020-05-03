@@ -14,11 +14,11 @@ namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static std::ostream & out() noexcept { return std::cout; }
+	inline std::ostream & out() noexcept { return std::cout; }
 
-	static std::ostream & err() noexcept { return std::cerr; }
+	inline std::ostream & err() noexcept { return std::cerr; }
 
-	static std::istream & in() noexcept { return std::cin; }
+	inline std::istream & in() noexcept { return std::cin; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

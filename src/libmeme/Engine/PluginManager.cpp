@@ -35,7 +35,7 @@ namespace ml
 		{
 			auto const i{ (size_t)std::distance(m_data.begin<hash_t>(), it) };
 
-			memory_manager::deallocate(m_data.get<plugin *>(i));
+			delete m_data.get<plugin *>(i);
 
 			m_data.erase(i);
 
@@ -61,9 +61,9 @@ namespace ml
 			if (auto && lib{ make_shared_library(path) })
 			{
 				// load plugin
-				if (auto const ptr{ lib.call<plugin *>("ml_plugin_main") })
+				if (auto const p{ lib.call<plugin *>("ml_plugin_main") })
 				{
-					m_data.push_back(code, path, std::move(lib), ptr.value());
+					m_data.push_back(code, path, std::move(lib), p.value());
 
 					return code;
 				}

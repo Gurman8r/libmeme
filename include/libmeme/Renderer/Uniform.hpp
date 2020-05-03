@@ -30,7 +30,7 @@ namespace ml
 
 		using data_type = typename std::variant<variable_type, function_type>;
 
-		enum : size_t { ID_Variable, ID_Function };
+		enum id_ : size_t { id_variable, id_function };
 
 		template <class T> static constexpr bool is_sampler_ish
 		{
@@ -105,10 +105,10 @@ namespace ml
 		{
 			switch (m_data.index())
 			{
-			case ID_Variable:
+			case id_variable:
 				return std::get<variable_type>(m_data);
 
-			case ID_Function:
+			case id_function:
 				if (auto const & fn{ std::get<function_type>(m_data) })
 					return std::invoke(fn);
 			}

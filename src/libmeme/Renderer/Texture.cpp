@@ -241,7 +241,7 @@ namespace ml
 
 		ML_defer{ GL::flush(); };
 
-		ML_bind_ref(*this);
+		ML_bind_scope(*this);
 
 		GL::texImage2D(
 			m_sampler,
@@ -285,7 +285,7 @@ namespace ml
 
 		ML_defer{ GL::flush(); };
 
-		ML_bind_ref(*this);
+		ML_bind_scope(*this);
 
 		GL::texSubImage2D(
 			m_sampler,
@@ -318,7 +318,7 @@ namespace ml
 		auto temp{ make_image(size(), channels()) };
 		if (m_handle)
 		{
-			ML_bind_ref(*this);
+			ML_bind_scope(*this);
 
 			GL::getTexImage(
 				GL::Texture2D,
@@ -341,7 +341,7 @@ namespace ml
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_ref(*this);
+			ML_bind_scope(*this);
 
 			impl::set_mipmapped(value, m_sampler, is_smooth());
 			
@@ -358,7 +358,7 @@ namespace ml
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_ref(*this);
+			ML_bind_scope(*this);
 
 			impl::set_repeated(value, m_sampler);
 
@@ -375,7 +375,7 @@ namespace ml
 
 			ML_defer{ GL::flush(); };
 
-			ML_bind_ref(*this);
+			ML_bind_scope(*this);
 
 			impl::set_smooth(value, m_sampler, is_mipmapped());
 			

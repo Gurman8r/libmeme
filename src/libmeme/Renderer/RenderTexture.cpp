@@ -94,10 +94,10 @@ namespace ml
 		}
 
 		// bind framebuffer
-		ML_bind_ref(m_fbo);
+		ML_bind_scope(m_fbo);
 		{
 			// bind renderbuffer
-			ML_bind_ref(m_rbo);
+			ML_bind_scope(m_rbo);
 
 			// update renderbuffer
 			m_rbo.update(m_format);

@@ -4,12 +4,6 @@
 #include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 
-#ifdef ML_os_windows
-#	define ML_LIB_EXT L".dll"
-#else
-#	define ML_LIB_EXT L".so"
-#endif
-
 namespace ml
 {
 	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
@@ -20,6 +14,17 @@ namespace ml
 		using self_type			= typename shared_library;
 		using handle_type		= typename void *;
 		using symbols_type		= typename ds::flat_map<hash_t, handle_type>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr auto native_extension // native library file extension
+		{
+#if defined(ML_os_windows)
+			L".dll"
+#else
+			L".so"
+#endif
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -56,8 +61,6 @@ namespace ml
 			this->swap(std::move(value));
 			return (*this);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void swap(self_type & value) noexcept
 		{
@@ -103,15 +106,15 @@ namespace ml
 			}
 			else if constexpr (!std::is_same_v<Ret, void>)
 			{
-				return static_cast<std::optional<Ret>>(std::nullopt);
+				return (std::optional<Ret>)std::nullopt;
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return good(); }
+		ML_NODISCARD operator bool() const noexcept { return nonzero(); }
 
-		ML_NODISCARD bool good() const noexcept { return m_handle; }
+		ML_NODISCARD bool nonzero() const noexcept { return m_handle; }
 
 		ML_NODISCARD auto handle() const noexcept -> handle_type const & { return m_handle; }
 
@@ -130,12 +133,12 @@ namespace ml
 			}
 			else if constexpr (std::is_same_v<U, fs::path>)
 			{
-				return compare(util::hash(value.string()));
+				return compare(util::hash(value.filename().string()));
 			}
 			else
 			{
 				static_assert(std::is_same_v<U, hash_t>);
-				return util::compare(util::hash(m_path.string()), value);
+				return util::compare(util::hash(m_path.filename().string()), value);
 			}
 		}
 

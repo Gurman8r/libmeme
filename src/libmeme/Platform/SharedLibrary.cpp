@@ -18,14 +18,14 @@ namespace ml
 		// set path
 		if ((m_path = path).extension().empty())
 		{
-			m_path += ML_LIB_EXT;
+			m_path += shared_library::native_extension;
 		}
 
 		// clear symbols
 		m_symbols.clear();
 
 		// open library
-		return m_handle = ([&]()
+		return m_handle = ([&]() noexcept
 		{
 #ifdef ML_os_windows
 			return LoadLibraryExW(m_path.c_str(), nullptr, 0);
@@ -47,7 +47,7 @@ namespace ml
 		m_symbols.clear();
 
 		// free library
-		return ([&]()
+		return ([&]() noexcept
 		{
 #ifdef ML_os_windows
 			return FreeLibrary(static_cast<HINSTANCE>(m_handle));
@@ -65,7 +65,7 @@ namespace ml
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
-		return m_symbols.find_or_add_fn(util::hash(name), [&]()
+		return m_symbols.find_or_add_fn(util::hash(name), [&]() noexcept
 		{
 #ifdef ML_os_windows
 			return GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());

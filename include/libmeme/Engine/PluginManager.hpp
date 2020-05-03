@@ -31,10 +31,10 @@ namespace ml
 
 	private:
 		ds::batch_vector<
-			hash_t,			// file hash
-			fs::path,		// file name
+			hash_t,			// code
+			fs::path,		// name
 			shared_library,	// library
-			plugin *		// instance
+			plugin *		// plugin
 		> m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

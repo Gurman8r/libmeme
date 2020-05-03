@@ -1,5 +1,3 @@
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #
-
 import libmeme          as ml
 import libmeme_engine   as engine
 
@@ -7,8 +5,8 @@ import libmeme_engine   as engine
 assert(engine.window.open(ml.window_settings(
     "libmeme",                  # title
     ml.video_mode(
-        [ 1280, 720 ],          # size
-        32),                    # depth
+        [ 1280, 720 ],          # resolution
+        32),                    # color depth
     ml.context_settings(
         ml.platform_api.opengl, # api
         4,                      # major
@@ -30,10 +28,8 @@ engine.gui.load_style(engine.fs.path_to("assets/styles/obsidian.style"))
 # load plugins
 assert(engine.plugins.load("demo"))
 
-# messages
+# print messages
 print(f"# {ml.project.name} | {ml.build.arch!r}-bit | {ml.build.configuration}")
 print(f"# {ml.project.url}")
 print(f"# type \'help\' for a list of commands")
 print("")
-
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * #

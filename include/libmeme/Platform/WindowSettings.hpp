@@ -15,14 +15,14 @@ namespace ml
 		window_hints_visible			= (1 << 1), // visible
 		window_hints_decorated			= (1 << 2), // decorated
 		window_hints_focused			= (1 << 3), // focused
-		window_hints_auto_iconify		= (1 << 4), // auto_iconify
+		window_hints_auto_iconify		= (1 << 4), // auto iconify
 		window_hints_floating			= (1 << 5), // floating
 		window_hints_maximized			= (1 << 6), // maximized
 		window_hints_fullscreen			= (1 << 7), // fullscreen
 		window_hints_double_buffered	= (1 << 8), // double buffered
 		window_hints_install_callbacks	= (1 << 9), // install callbacks
 
-		// resizable / visible / decorated / focused / auto iconify
+		// resizable / visible / decorated / focused / auto iconify / callbacks
 		window_hints_default
 			= window_hints_resizable
 			| window_hints_visible
@@ -31,7 +31,7 @@ namespace ml
 			| window_hints_auto_iconify
 			| window_hints_install_callbacks,
 
-		// resizable / decorated / focused / auto iconify / maximized
+		// resizable / decorated / focused / auto iconify / maximized / callbacks
 		window_hints_default_max
 			= window_hints_resizable
 			| window_hints_decorated

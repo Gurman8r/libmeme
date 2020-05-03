@@ -33,15 +33,9 @@ namespace ml::util
 
 		const_pointer const buffer() const noexcept { return m_buffer; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool has_buffer() const noexcept { return m_buffer && (0 < m_total_bytes); }
-
-		bool has_upstream() const noexcept { return m_upstream; }
-
-		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
-
 		bool is_valid_size() const noexcept { return (0 < m_total_bytes); }
+
+		bool is_default_resource() const noexcept { return (this == pmr::get_default_resource()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -147,7 +141,7 @@ namespace ml
 			if (!value->upstream())			{ return debug::log::error("resource upstream cannot be null"); }
 			if (!value->buffer())			{ return debug::log::error("resource data cannot be null"); }
 			if (!value->is_valid_size())	{ return debug::log::error("resource size must be greater than zero"); }
-			if (!value->is_default())		{ return debug::log::error("resource is not the default resource"); }
+			if (!value->is_default_resource())		{ return debug::log::error("resource is not the default resource"); }
 
 			return (inst.m_testres = value);
 		}
@@ -162,7 +156,7 @@ namespace ml
 			// allocate the requested bytes
 			auto const temp{ inst.m_allocator.allocate(size) };
 
-			// insert a new record
+			// create a new record
 			return *inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first;
 		}
 

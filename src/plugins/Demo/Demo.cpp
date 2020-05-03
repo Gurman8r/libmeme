@@ -2,6 +2,7 @@
 
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/RAII_Pointer.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -20,7 +21,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// RENDERER CONFIG
+// ECS CONFIG
 namespace ml
 {
 	// (T) TAGS
@@ -65,7 +66,7 @@ namespace ml
 	{
 		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_ref(*shd, false);
+			ML_bind_scope(*shd, false);
 			for (uniform const & u : *mat)
 			{
 				shd->set_uniform(u);
@@ -77,7 +78,7 @@ namespace ml
 	{
 		void operator()(c_shader const & shd, c_model const & mdl, render_target & target)
 		{
-			ML_bind_ref(*shd, true);
+			ML_bind_scope(*shd, true);
 			target.draw(*mdl);
 		}
 	};
@@ -110,7 +111,7 @@ namespace ml
 	>;
 
 
-	// (M) MANAGER
+	// (M) MANAGERS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using renderer_manager = ecs::manager<renderer_traits>;
@@ -165,12 +166,16 @@ namespace ml
 
 		gui::console m_console{};
 
-		MemoryEditor m_memory{};
+		MemoryEditor m_mem_editor{};
 
-		ax::NodeEditor::EditorContext * m_node_editor{};
-
-		gui::plot_controller m_plots{
+		raii_ptr<ax::NodeEditor::EditorContext> m_node_editor
 		{
+			[]() { return ax::NodeEditor::CreateEditor(); },
+			&ax::NodeEditor::DestroyEditor
+		};
+
+		gui::plot_controller m_plots
+		{ {
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
 			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
 			[]() { return engine::time().delta().count<float_t>() * 1000.f; }
@@ -184,10 +189,10 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto * const & testres{ memory_manager::get_test_resource() };
+			static auto const & testres{ memory_manager::get_test_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
-			m_memory.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
+			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
 		}
 
 		template <class T> void highlight_memory(T const * ptr)
@@ -205,7 +210,7 @@ namespace ml
 			event_system::add_listener<	update_event	>(this);
 			event_system::add_listener<	draw_event		>(this);
 			event_system::add_listener<	gui_dock_event	>(this);
-			event_system::add_listener<	gui_draw_event	>(this);
+			event_system::add_listener<	draw_gui_event	>(this);
 			event_system::add_listener<	unload_event	>(this);
 		}
 
@@ -217,7 +222,7 @@ namespace ml
 			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
 			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
 			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.cast<gui_dock_event>());
-			case hashof_v<gui_draw_event>: return on_gui_draw	(*ev.cast<gui_draw_event>());
+			case hashof_v<draw_gui_event>: return on_gui_draw	(*ev.cast<draw_gui_event>());
 			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
 			}
 		}
@@ -456,7 +461,7 @@ namespace ml
 			{
 				//gbinder foo{ target };
 
-				ML_bind_ref(target);
+				ML_bind_scope(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
 				constexpr render_states states{
@@ -478,42 +483,42 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & g{ engine::gui() }; // gui manager
-			auto & d{ g.dockspace.nodes }; // dockspace nodes
-			if (d.empty()) { d.resize(MAX_DOCK_NODE); } else { return; } // resize or return
+			auto & d{ engine::gui().dockspace };
+			if (!d.empty()) { return; }
+			d.resize(MAX_DOCK_NODE);
 			
 			// begin builder
-			if (d[root] = g.begin_dockspace_builder(ImGuiDockNodeFlags_AutoHideTabBar))
+			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
 			{
 				constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
 
 				// split nodes
-				g.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				g.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				g.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-				g.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
-				g.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
-				g.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				g.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+				d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
+				d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+				d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+				d.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+				d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
+				d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+				d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
 				// dock windows
-				g.dock(m_gui_display.title		, d[left_up]);
-				g.dock(m_gui_ecs.title			, d[left_dn]);
-				g.dock(m_gui_assets.title		, d[left_dn]);
-				g.dock(m_gui_files.title		, d[left_dn]);
-				g.dock(m_gui_console.title		, d[left_dn]);
-				g.dock(m_gui_profiler.title		, d[left_dn2]);
-				g.dock(m_gui_memory.title		, d[right]);
-				g.dock(m_gui_docs.title			, d[right]);
-				g.dock(m_gui_scripting.title	, d[right]);
-				g.dock(m_gui_nodes.title		, d[right]);
+				d.dock(m_gui_display.title		, d[left_up]);
+				d.dock(m_gui_ecs.title			, d[left_dn]);
+				d.dock(m_gui_assets.title		, d[left_dn]);
+				d.dock(m_gui_files.title		, d[left_dn]);
+				d.dock(m_gui_console.title		, d[left_dn]);
+				d.dock(m_gui_profiler.title		, d[left_dn2]);
+				d.dock(m_gui_memory.title		, d[right]);
+				d.dock(m_gui_docs.title			, d[right]);
+				d.dock(m_gui_scripting.title	, d[right]);
+				d.dock(m_gui_nodes.title		, d[right]);
 
 				// end builder
-				g.end_dockspace_builder(root);
+				d.end_builder(root);
 			}
 		}
 
-		void on_gui_draw(gui_draw_event const &)
+		void on_gui_draw(draw_gui_event const &)
 		{
 			// gui stuff, etc...
 
@@ -538,7 +543,7 @@ namespace ml
 
 		void on_unload(unload_event const &)
 		{
-			// cleanup stuff, etc...
+			// unload stuff, etc...
 
 			m_renderer.clear();
 			m_images.clear();
@@ -549,15 +554,14 @@ namespace ml
 			m_fonts.clear();
 			m_pipeline.clear();
 
-			// destroy node editor
-			ax::NodeEditor::DestroyEditor(m_node_editor);
+			m_node_editor.destroy();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void setup_menus()
 		{
-			engine::gui().add_menu("file", [&]()
+			engine::gui().main_menu_bar.add("file", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				if (ImGui::MenuItem("quit", "Alt+F4"))
@@ -565,7 +569,7 @@ namespace ml
 					engine::window().close();
 				}
 			});
-			engine::gui().add_menu("tools", [&]()
+			engine::gui().main_menu_bar.add("tools", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_gui_assets.menu_item();
@@ -578,7 +582,7 @@ namespace ml
 				m_gui_profiler.menu_item();
 				m_gui_scripting.menu_item();
 			});
-			engine::gui().add_menu("settings", [&]()
+			engine::gui().main_menu_bar.add("settings", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				bool fullscreen{ engine::window().is_fullscreen() };
@@ -587,7 +591,7 @@ namespace ml
 					engine::window().set_fullscreen(fullscreen);
 				}
 			});
-			engine::gui().add_menu("help", [&]()
+			engine::gui().main_menu_bar.add("help", [&]()
 			{
 				ML_ImGui_ScopeID(ML_addressof(this));
 				m_imgui_demo.menu_item();
@@ -987,32 +991,32 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto * const & testres{ memory_manager::get_test_resource() };
+			static auto const & testres{ memory_manager::get_test_resource() };
 
 			static ML_scope // setup memory editor
 			{
-				m_memory.Open				= true;
-				m_memory.ReadOnly			= true;
-				m_memory.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
-				m_memory.OptShowOptions		= true;
-				m_memory.OptShowDataPreview	= true;
-				m_memory.OptShowHexII		= false;
-				m_memory.OptShowAscii		= true;
-				m_memory.OptGreyOutZeroes	= true;
-				m_memory.OptUpperCaseHex	= true;
-				m_memory.OptMidColsCount	= 8;
-				m_memory.OptAddrDigitsCount	= 0;
-				m_memory.HighlightColor		= IM_COL32(0, 255, 255, 50);
-				m_memory.ReadFn				= nullptr;
-				m_memory.WriteFn			= nullptr;
-				m_memory.HighlightFn		= nullptr;
+				m_mem_editor.Open				= true;
+				m_mem_editor.ReadOnly			= true;
+				m_mem_editor.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
+				m_mem_editor.OptShowOptions		= true;
+				m_mem_editor.OptShowDataPreview	= true;
+				m_mem_editor.OptShowHexII		= false;
+				m_mem_editor.OptShowAscii		= true;
+				m_mem_editor.OptGreyOutZeroes	= true;
+				m_mem_editor.OptUpperCaseHex	= true;
+				m_mem_editor.OptMidColsCount	= 8;
+				m_mem_editor.OptAddrDigitsCount	= 0;
+				m_mem_editor.HighlightColor		= IM_COL32(0, 255, 255, 50);
+				m_mem_editor.ReadFn				= nullptr;
+				m_mem_editor.WriteFn			= nullptr;
+				m_mem_editor.HighlightFn		= nullptr;
 			};
 
 			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
 				// read only
-				ImGui::Checkbox("read only", &m_memory.ReadOnly);
+				ImGui::Checkbox("read only", &m_mem_editor.ReadOnly);
 				ImGui::Separator();
 
 				// begin / end
@@ -1083,7 +1087,7 @@ namespace ml
 			}
 
 			// memory content
-			m_memory.DrawContents(testres->buffer(), testres->capacity(), testres->addr());
+			m_mem_editor.DrawContents(testres->buffer(), testres->capacity(), testres->addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1091,7 +1095,7 @@ namespace ml
 		void show_nodes_gui()
 		{
 			// create node editor
-			static ML_scope{ m_node_editor = ax::NodeEditor::CreateEditor(); };
+			//static ML_scope{ m_node_editor = ax::NodeEditor::CreateEditor(); };
 
 			namespace ed = ax::NodeEditor;
 
@@ -1155,10 +1159,10 @@ namespace ml
 
 			// benchmarks
 			ImGui::Columns(2);
-			if (static auto const & bench{ performance_tracker::prev() }; !bench.empty())
+			if (static auto const & frame{ performance_tracker::previous() }; !frame.empty())
 			{
 				ImGui::Separator();
-				for (auto const & elem : bench)
+				for (auto const & elem : frame)
 				{
 					char time[20] = "";
 					std::sprintf(time, "%.7fs", elem.second.count());
@@ -1192,8 +1196,8 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static auto temp{ new ml::demo{} };
-	return temp;
+	static auto p{ new ml::demo{} };
+	return p;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

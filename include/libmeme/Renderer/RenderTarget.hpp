@@ -46,6 +46,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void viewport(vec2i const & size);
+
 		void viewport(int_rect const & bounds);
 
 		void viewport(vec2i const & pos, vec2i const & size);

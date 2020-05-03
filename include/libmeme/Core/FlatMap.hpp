@@ -402,7 +402,7 @@ namespace ml::ds
 
 		iterator_pair insert(keyval_pair && pair) noexcept
 		{
-			return this->try_emplace(ML_forward(pair.first), ML_forward(pair.second)).first;
+			return this->try_emplace(std::move(pair.first), std::move(pair.second)).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -497,7 +497,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> void for_each(key_iterator first, Fn && fn) noexcept
+		> void for_each(key_const_iterator first, Fn && fn) noexcept
 		{
 			this->for_each(first, m_pair.first.end(), ML_forward(fn));
 		}
@@ -653,7 +653,7 @@ namespace ml::ds
 	template <
 		class	_Kt,					// key type
 		class	_Vt,					// value type
-		size_t	_Th = 42,				// search algorithm selector threshold
+		size_t	_Th = 42,				// search heuristic
 		class	_Pr = std::less<_Kt>	// key comparator predicate type
 	> ML_alias flat_map = typename basic_flat_map
 	<

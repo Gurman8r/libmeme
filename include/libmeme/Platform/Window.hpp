@@ -27,13 +27,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window() noexcept;
-
 		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & value) override;
+		ML_NODISCARD virtual bool open(window_settings const & ws) override;
 
 		virtual bool close() override;
 
@@ -42,8 +40,6 @@ namespace ml
 		void destroy();
 
 		void iconify();
-
-		void install_default_callbacks();
 		
 		void make_context_current();
 		
@@ -59,9 +55,9 @@ namespace ml
 		
 		void set_clipboard(cstring const & value);
 		
-		void set_cursor(void * value);
+		void set_cursor(cursor_handle value);
 		
-		void set_cursor_mode(cursor::mode value);
+		void set_cursor_mode(int32_t value);
 		
 		void set_cursor_pos(vec2d const & value);
 		
@@ -73,7 +69,7 @@ namespace ml
 		
 		void set_position(vec2i const & value);
 		
-		void set_monitor(void * value);
+		void set_monitor(window_handle value);
 
 		void set_should_close(bool value);
 		
@@ -97,7 +93,7 @@ namespace ml
 		
 		ML_NODISCARD vec2i get_frame_size() const;
 		
-		ML_NODISCARD void * get_handle() const;
+		ML_NODISCARD window_handle get_handle() const;
 
 		ML_NODISCARD int32_t get_key(int32_t key) const;
 		
@@ -105,15 +101,15 @@ namespace ml
 		
 		ML_NODISCARD int32_t get_mouse_button(int32_t button) const;
 
-		ML_NODISCARD void * get_native_handle() const;
+		ML_NODISCARD window_handle get_native_handle() const;
 		
 		ML_NODISCARD vec2i get_position() const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void	destroy_cursor(void * value);
+		static void	destroy_cursor(cursor_handle value);
 
-		static void make_context_current(void * value);
+		static void make_context_current(cursor_handle value);
 
 		static void poll_events();
 
@@ -123,9 +119,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static void * create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
+		ML_NODISCARD static cursor_handle create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
 		
-		ML_NODISCARD static void * create_standard_cursor(cursor::shape value);
+		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value);
 
 		ML_NODISCARD static int32_t extension_supported(cstring value);
 
@@ -137,7 +133,7 @@ namespace ml
 
 		ML_NODISCARD static proc_fn get_proc_address(cstring value);
 		
-		ML_NODISCARD static pmr::vector<void *> const & get_monitors();
+		ML_NODISCARD static pmr::vector<window_handle> const & get_monitors();
 
 		ML_NODISCARD static float64_t get_time();
 
@@ -158,6 +154,8 @@ namespace ml
 		position_fn		set_window_pos_callback		(position_fn		fn);
 		size_fn			set_window_size_callback	(size_fn			fn);
 
+		void install_default_callbacks();
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
@@ -171,14 +169,14 @@ namespace ml
 		ML_NODISCARD auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
 
 		ML_NODISCARD auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
-		
+
 		ML_NODISCARD auto get_hints() const -> int32_t const & { return m_settings.hints; }
 
-		ML_NODISCARD auto get_monitor() const noexcept -> void * { return m_monitor; }
+		ML_NODISCARD auto get_monitor() const noexcept -> window_handle { return m_monitor; }
 
 		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
 
-		ML_NODISCARD auto get_share() const noexcept -> void * { return m_share; }
+		ML_NODISCARD auto get_share() const noexcept -> window_handle { return m_share; }
 
 		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_video().size; }
 
@@ -189,14 +187,6 @@ namespace ml
 		ML_NODISCARD auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
 
 		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return ML_flag_read(get_hints(), i); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	protected:
-		void *			m_window	{}; // 
-		void * 			m_monitor	{}; // 
-		void * 			m_share		{}; // 
-		window_settings	m_settings	{}; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

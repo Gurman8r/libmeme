@@ -4,20 +4,20 @@
 
 workspace "libmeme_%{_ACTION}"
 	startproject "main"
-	configurations { "Debug", "Release" }
-	platforms { "x86", "x64" }
-	filter { "platforms:*64" }
+	configurations{ "Debug", "Release" }
+	platforms{ "x86", "x64" }
+	filter{ "platforms:*64" }
 		architecture "x64"
-	filter { "platforms:*32" }
+	filter{ "platforms:*32" }
 		architecture "x86"
-	filter { "platforms:*86" }
+	filter{ "platforms:*86" }
 		architecture "x86"
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 -- Globals
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-filter { "system:Unix", "system:Mac" }
+filter{ "system:Unix", "system:Mac" }
 	sln_dir	= "%{wks.location}/"
 	prj_dir	= "%{sln_dir}proj/%{_ACTION}/"
 	bin_out	= "%{sln_dir}bin/%{_ACTION}/%{cfg.platform}/%{cfg.buildcfg}/"
@@ -34,7 +34,7 @@ filter { "system:Unix", "system:Mac" }
 	ml_dll	= ".so"
 	ml_lib	= ".a"
 	
-filter { "system:Windows" }
+filter{ "system:Windows" }
 	sln_dir	= "%{wks.location}\\"
 	prj_dir	= "%{sln_dir}proj\\%{_ACTION}\\"
 	bin_out	= "%{sln_dir}bin\\%{_ACTION}\\%{cfg.platform}\\%{cfg.buildcfg}\\"
@@ -62,7 +62,7 @@ filter { "system:Windows" }
 dofile "./premake5/glfw.lua"
 
 -- SDK
-dofile "./premake5/common.lua"
+dofile "./premake5/assets.lua"
 dofile "./premake5/libmeme.lua"
 dofile "./premake5/main.lua"
 

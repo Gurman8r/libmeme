@@ -29,8 +29,8 @@ namespace ml
 	{
 		if (!vao || !vbo) { return; }
 		ML_defer{ GL::flush(); };
-		ML_bind_ref(vao);
-		ML_bind_ref(vbo);
+		ML_bind_scope(vao);
+		ML_bind_scope(vbo);
 		GL::drawArrays(vao.m_mode, 0, vbo.m_size);
 	}
 
@@ -38,9 +38,9 @@ namespace ml
 	{
 		if (!vao || !vbo || !ibo) { return; }
 		ML_defer{ GL::flush(); };
-		ML_bind_ref(vao);
-		ML_bind_ref(vbo);
-		ML_bind_ref(ibo);
+		ML_bind_scope(vao);
+		ML_bind_scope(vbo);
+		ML_bind_scope(ibo);
 		GL::drawElements(vao.m_mode, ibo.m_count, ibo.m_type, nullptr);
 	}
 
@@ -52,6 +52,11 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void ml::render_target::viewport(vec2i const & size)
+	{
+		this->viewport({ {}, size });
+	}
 
 	void render_target::viewport(int_rect const & bounds)
 	{

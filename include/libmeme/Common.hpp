@@ -39,12 +39,27 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// general
-#define _ML						::ml::
-#define ML_addressof(p)			((void *)(_ML intmax_t)p)
-#define ML_alias                using
-#define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
-#define ML_forward(v)			_ML std::forward<decltype(v)>(v)
+// macro concat impl
+#define ML_impl_concat(a, b)    a##b
+
+// macro concat
+#define ML_concat(a, b)         ML_impl_concat(a, b)
+
+// macro name to string
+#define ML_to_string(expr)      #expr
+
+// macro value to string
+#define ML_stringify(expr)      ML_to_string(expr)
+
+// anonymous variables
+#if defined(__COUNTER__)
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
+#elif defined(__LINE__)
+#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
+#else
+#   define ML_anon(expr)        expr
+#endif
+#define ML_anon_v(type)         auto ML_anon(anon) = type
 
 // assert
 #ifndef ML_assert
@@ -53,28 +68,35 @@
 
 // breakpoint
 #if (!ML_is_debug)
-#	define ML_breakpoint() ((void)0)
+#	define ML_breakpoint()		((void)0)
 #elif defined(ML_cc_msvc)
-#	define ML_breakpoint() _CSTD __debugbreak()
+#	define ML_breakpoint()		_CSTD __debugbreak()
 #else
-#	define ML_breakpoint() _CSTD raise(SIGTRAP)
+#	define ML_breakpoint()		_CSTD raise(SIGTRAP)
 #endif
 
 // environment
-#ifndef ML_DISABLE_LEGACY_ENV
+#ifndef ML_DISABLE_ENV
 #	define ML_argc				__argc
 #	ifndef ML_WIDE_ENV
 #		define ML_argv			__argv
-#		define ML_envp			__envp
+#		define ML_envp			_environ
 #	else
 #		define ML_argv			__wargv
-#		define ML_envp			__wenvp
+#		define ML_envp			_wenviron
 #	endif
 #else
 #	define ML_argc
 #	define ML_argv
 #	define ML_envp
 #endif
+
+// miscellaneous
+#define _ML						::ml::
+#define ML_addressof(p)			((void *)(_ML intmax_t)p)
+#define ML_alias				using
+#define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
+#define ML_forward(v)			_ML std::forward<decltype(v)>(v)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

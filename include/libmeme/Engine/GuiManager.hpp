@@ -21,50 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD dockspace_data final : non_copyable, trackable
-		{
-			using nodes_t = typename pmr::vector<uint32_t>;
-
-			static constexpr auto title{ "dockspace##libmeme##builtin" };
-
-			bool		visible	{ true };
-			float_t		border	{};
-			vec2		padding	{};
-			float_t		rounding{};
-			vec2		size	{};
-			float_t		alpha	{};
-			nodes_t		nodes	;
-
-		private:
-			friend gui_manager;
-			
-			dockspace_data(allocator_type const & alloc = {}) noexcept : nodes{ alloc } {}
-		
-		} dockspace;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct ML_NODISCARD main_menu_data final : non_copyable, trackable
-		{
-			using callback_t	= typename std::function<void()>;
-			using menu_t		= typename std::pair<cstring, pmr::vector<callback_t>>;
-			using menus_t		= typename pmr::vector<menu_t>;
-			
-			bool		visible	{ true };
-			menus_t		menus	;
-
-		private:
-			friend gui_manager;
-
-			main_menu_data(allocator_type const & alloc = {}) noexcept : menus{ alloc } {}
-
-			~main_menu_data() noexcept { this->menus.clear(); }
-		
-		} main_menu;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool is_initialized() const noexcept { return m_imgui; }
+		ML_NODISCARD bool is_initialized() const noexcept { return m_gui_context; }
 
 		ML_NODISCARD bool startup(struct window const & win, cstring ver);
 
@@ -72,9 +29,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void new_frame();
+		void begin_frame();
 
-		void draw();
+		void draw_builtin();
 
 		void end_frame();
 
@@ -92,26 +49,90 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void add_menu(cstring label, std::function<void()> && fn);
+		// DOCKSPACE
+		struct ML_ENGINE_API dockspace_data final : non_copyable
+		{
+			using nodes_t = typename pmr::vector<uint32_t>;
+
+			static constexpr auto title{ "dockspace##libmeme##builtin" };
+
+			bool		visible	{ true }	; // 
+			float_t		border	{}			; // 
+			vec2		padding	{}			; // 
+			float_t		rounding{}			; // 
+			vec2		size	{}			; // 
+			float_t		alpha	{}			; // 
+			nodes_t		nodes				; // 
+
+			uint32_t begin_builder(int32_t flags = {});
+
+			uint32_t end_builder(uint32_t root);
+
+			uint32_t dock(cstring name, uint32_t id);
+
+			uint32_t split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
+
+			uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
+
+			uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
+
+			bool empty() const noexcept { return nodes.empty(); }
+
+			void resize(size_t const i) { nodes.resize(i); }
+
+			auto & operator[](size_t const i) & noexcept { return nodes[i]; }
+
+			auto const & operator[](size_t const i) const & noexcept { return nodes[i]; }
+
+		private:
+			friend gui_manager;
+			
+			dockspace_data(allocator_type const & alloc = {}) noexcept : nodes{ alloc }
+			{
+			}
+
+			~dockspace_data() noexcept {}
+		
+		} dockspace;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uint32_t begin_dockspace_builder(int32_t flags = 0);
+		// MAIN MENU BAR
+		struct ML_ENGINE_API main_menu_bar_data final : non_copyable
+		{
+			using callback_t = std::function<void()>;
+			using menus_t = pmr::vector<std::pair<cstring, pmr::vector<callback_t>>>;
+			
+			bool		visible	{ true }	; // 
+			menus_t		menus				; // 
 
-		uint32_t end_dockspace_builder(uint32_t root);
+			template <class Fn> void add(cstring label, Fn && fn)
+			{
+				auto it{ std::find_if(menus.begin(), menus.end(), [&
+				](auto const & e) { return e.first == label; }) };
+				if (it == menus.end())
+				{
+					menus.push_back({ label, {} });
+					it = (menus.end() - 1);
+				}
+				it->second.emplace_back(ML_forward(fn));
+			}
 
-		uint32_t dock(cstring name, uint32_t id);
+		private:
+			friend gui_manager;
 
-		uint32_t split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
+			main_menu_bar_data(allocator_type const & alloc = {}) noexcept : menus{ alloc }
+			{
+			}
 
-		uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value);
-
-		uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
+			~main_menu_bar_data() noexcept { this->menus.clear(); }
+		
+		} main_menu_bar;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void * m_imgui;
+		void * m_gui_context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -14,7 +14,7 @@ staticruntime	"Off"
 systemversion	"latest"
 
 dependson{
-	"common", "glfw",
+	"assets",
 }
 
 defines{
@@ -51,6 +51,7 @@ includedirs{
 }
 
 files{
+	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}include/libmeme/**.hpp",
 	"%{sln_dir}src/libmeme/**.cpp",
 

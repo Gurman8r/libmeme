@@ -6,9 +6,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::open(window_settings const & value)
+	bool render_window::open(window_settings const & ws)
 	{
-		if (!window::open(value))
+		if (!window::open(ws))
 		{
 			return debug::log::error("render_window failed initializing platform");
 		}

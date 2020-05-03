@@ -37,10 +37,10 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// read config
-	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
+	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]() noexcept
 	{
-		ML_defer{ f.close(); };
 		if (f) { f >> j; }
+		f.close();
 		return j;
 	})();
 
@@ -50,24 +50,24 @@ ml::int32_t main()
 	// startup/shutdown engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
+	// window isn't open, nothing to do here
+	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// window isn't open, nothing to do here
-	if (!engine::window().is_open())
-	{
-		return EXIT_SUCCESS;
-	}
-
+	// load content
 	event_system::fire_event<load_event>();
 
+	// unload content
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	do // main loop
 	{
-		ML_defer{ performance_tracker::refresh(); };
+		ML_defer{ performance_tracker::swap_frames(); };
 		{
 			ML_benchmark("| begin loop");
-			engine::begin_loop();
+			engine::time().begin_loop();
+			engine::window().poll_events();
 			event_system::fire_event<begin_loop_event>();
 		}
 		{
@@ -75,33 +75,34 @@ ml::int32_t main()
 			event_system::fire_event<update_event>();
 		}
 		{
-			ML_benchmark("|  pre-draw");
-			engine::pre_draw();
-			event_system::fire_event<pre_draw_event>();
+			ML_benchmark("|  begin draw");
+			engine::window().clear_color(colors::black);
+			engine::window().viewport(engine::window().get_frame_size());
+			event_system::fire_event<begin_draw_event>();
 		}
 		{
 			ML_benchmark("|   draw");
 			event_system::fire_event<draw_event>();
 		}
 		{
-			ML_benchmark("|   pre-gui");
-			engine::gui().new_frame();
-			event_system::fire_event<pre_gui_event>();
+			ML_benchmark("|   begin gui");
+			engine::gui().begin_frame();
+			event_system::fire_event<begin_gui_event>();
 		}
 		{
-			ML_benchmark("|    draw-gui");
-			engine::gui().draw();
-			event_system::fire_event<gui_draw_event>();
+			ML_benchmark("|    draw gui");
+			engine::gui().draw_builtin();
+			event_system::fire_event<draw_gui_event>();
 		}
 		{
-			ML_benchmark("|   post-gui");
+			ML_benchmark("|   end gui");
 			engine::gui().end_frame();
-			event_system::fire_event<post_gui_event>();
+			event_system::fire_event<end_gui_event>();
 		}
 		{
-			ML_benchmark("|  post-draw");
-			engine::post_draw();
-			event_system::fire_event<post_draw_event>();
+			ML_benchmark("|  end draw");
+			engine::window().swap_buffers();
+			event_system::fire_event<end_draw_event>();
 		}
 		{
 			ML_benchmark("|  late update");
@@ -109,7 +110,7 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("| end loop");
-			engine::end_loop();
+			engine::time().end_loop();
 			event_system::fire_event<end_loop_event>();
 		}
 	} while (engine::window().is_open());

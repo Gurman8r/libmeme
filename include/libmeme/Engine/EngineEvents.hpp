@@ -37,7 +37,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(pre_draw_event)
+	ML_event(begin_draw_event)
 	{
 	};
 
@@ -45,13 +45,13 @@ namespace ml
 	{
 	};
 
-	ML_event(post_draw_event)
+	ML_event(end_draw_event)
 	{
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(pre_gui_event)
+	ML_event(begin_gui_event)
 	{
 	};
 
@@ -59,11 +59,11 @@ namespace ml
 	{
 	};
 
-	ML_event(gui_draw_event)
+	ML_event(draw_gui_event)
 	{
 	};
 
-	ML_event(post_gui_event)
+	ML_event(end_gui_event)
 	{
 	};
 

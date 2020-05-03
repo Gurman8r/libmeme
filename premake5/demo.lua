@@ -31,6 +31,7 @@ includedirs{
 }
 
 files{
+	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}src/plugins/%{prj.name}/**.**",
 }
 

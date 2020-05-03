@@ -39,16 +39,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void begin_loop() noexcept;
-
-		static void pre_draw() noexcept;
-
-		static void post_draw() noexcept;
-
-		static void end_loop() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static asset_manager	& assets() noexcept;
 
 		ML_NODISCARD static file_manager	& fs() noexcept;

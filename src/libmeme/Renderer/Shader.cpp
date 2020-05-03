@@ -104,22 +104,15 @@ namespace ml
 	bool shader::load_from_source(shader_source const & value)
 	{
 		auto const
-			& v{ std::get<ID_Vert>(value) },
-			& g{ std::get<ID_Geom>(value) },
-			& f{ std::get<ID_Frag>(value) };
+			& v{ std::get<id_vertex>(value) },
+			& g{ std::get<id_geometry>(value) },
+			& f{ std::get<id_fragment>(value) };
 
-		if (!v.empty() && !g.empty() && !f.empty())
-		{
-			return load_from_memory(v, g, f);
-		}
-		else if (!v.empty() && !f.empty())
-		{
-			return load_from_memory(v, f);
-		}
-		else
-		{
-			return false;
-		}
+		return ((!v.empty() && !g.empty() && !f.empty())
+			? load_from_memory(v, g, f)
+			: ((!v.empty() && !f.empty())
+				? load_from_memory(v, f)
+				: false));
 	}
 
 	bool shader::load_from_memory(pmr::string const & v_src, pmr::string const & f_src)

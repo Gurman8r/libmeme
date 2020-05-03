@@ -3,11 +3,11 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_impl_benchmark(var, name)								\
+#define ML_impl_benchmark(var, id)									\
 	auto var{ _ML timer{ true } };									\
-	ML_defer{ _ML performance_tracker::push(name, var.elapsed()); };
+	ML_defer{ _ML performance_tracker::add_trace(id, var.elapsed()); };
 
-#define ML_benchmark(name) ML_impl_benchmark(ML_anon(benchmark), name)
+#define ML_benchmark(id) ML_impl_benchmark(ML_anon(benchmark), id)
 
 namespace ml
 {
@@ -15,24 +15,24 @@ namespace ml
 
 	class ML_CORE_API performance_tracker final
 	{
-		using frame = pmr::vector<std::pair<cstring, duration>>;
+		using frame_data = pmr::vector<std::pair<cstring, duration>>;
 		
-		static frame m_curr;
-		static frame m_prev;
+		static frame_data m_curr; // current frame_data
+		static frame_data m_prev; // previous frame_data
 
 	public:
-		ML_NODISCARD static frame const & prev() noexcept
+		ML_NODISCARD static frame_data const & previous() noexcept
 		{
 			return m_prev;
 		}
 
 		template <class ... Args
-		> static void push(Args && ... args) noexcept
+		> static void add_trace(Args && ... args) noexcept
 		{
 			m_curr.emplace_back(ML_forward(args)...);
 		}
 
-		static void refresh() noexcept
+		static void swap_frames() noexcept
 		{
 			m_prev.swap(m_curr);
 

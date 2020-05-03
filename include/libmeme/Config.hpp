@@ -311,32 +311,6 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// PREPROCESSOR
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// concat implementation
-#define ML_impl_concat(a, b)    a##b
-
-// macro concatenate
-#define ML_concat(a, b)         ML_impl_concat(a, b)
-
-// macro name to string
-#define ML_to_string(expr)      #expr
-
-// macro value to string
-#define ML_stringify(expr)      ML_to_string(expr)
-
-// anonymous variable
-#if defined(__COUNTER__)
-#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
-#elif defined(__LINE__)
-#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
-#else
-#   define ML_anon(expr)        expr
-#endif
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 // ATTRIBUTES
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -394,7 +368,7 @@
 #   pragma warning(disable: 4067)   // unexpected tokens following preprocessor directive - expected a newline
 #   pragma warning(disable: 4251)   // type1 needs to have dll-interface to be used by type2
 #   pragma warning(disable: 4307)   // integral constant overflow
-#   pragma warning(disable: 4308)   // negative integral constant converted to unsigned type
+#   pragma warning(disable: 4308)   // negative integral constant converted to unsigned t
 #   pragma warning(disable: 4309)   // truncation of constant value
 #   pragma warning(disable: 4723)   // potential divide by zero
 #   pragma warning(disable: 6011)   // dereferencing NULL pointer

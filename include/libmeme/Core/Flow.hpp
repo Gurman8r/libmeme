@@ -6,18 +6,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // lambda struct helper
-#define ML_lambda_decl(Fn, Type)                                                        \
-    template <class Fn> struct Type;                                                    \
-    enum class ML_concat(Type, _tag) {};                                                \
-    template <class Fn> inline auto operator+(ML_concat(Type, _tag), Fn && fn) noexcept \
+#define ML_lambda_decl(Fn, type)                                                        \
+    template <class Fn> struct type;                                                    \
+    enum class ML_concat(type, _tag) {};                                                \
+    template <class Fn> inline auto operator+(ML_concat(type, _tag), Fn && fn) noexcept \
     {                                                                                   \
-        return Type<Fn>{ ML_forward(fn) };                                              \
+        return type<Fn>{ ML_forward(fn) };                                              \
     }                                                                                   \
-    template <class Fn> struct Type final
+    template <class Fn> struct type final
 
 // lambda variable helper
-#define ML_lambda_impl(Type) \
-    auto ML_anon(Type) = _ML impl:: ML_concat(Type, _tag){} + [&]() noexcept
+#define ML_lambda_impl(type) \
+    ML_anon_v(ML_concat(_ML impl::, ML_concat(type, _tag))) {} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -1,8 +1,6 @@
 #ifndef _ML_BASE_WINDOW_HPP_
 #define _ML_BASE_WINDOW_HPP_
 
-// WIP
-
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Platform/Cursor.hpp>
 #include <libmeme/Platform/Keyboard.hpp>
@@ -11,6 +9,12 @@
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_alias window_handle = typename void *;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	struct ML_PLATFORM_API base_window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,6 +26,14 @@ namespace ml
 		ML_NODISCARD virtual bool open(window_settings const &) = 0;
 
 		virtual bool close() = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	protected:
+		window_handle	m_window	{}; // 
+		window_handle	m_monitor	{}; // 
+		window_handle	m_share		{}; // 
+		window_settings	m_settings	{}; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

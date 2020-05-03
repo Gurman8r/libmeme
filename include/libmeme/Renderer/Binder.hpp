@@ -3,22 +3,21 @@
 
 #include <libmeme/Common.hpp>
 
-#define ML_bind_ref(v, ...) \
-	auto ML_anon(ref_binder) = _ML ref_binder{ v, ##__VA_ARGS__ }
+#define ML_bind_scope(v, ...) ML_anon_v(scope_binder) { v, ##__VA_ARGS__ }
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct ref_binder final
+	template <class T> struct scope_binder final
 	{
 		template <class ... Args
-		> ref_binder(T & value, Args && ... args) noexcept : m_ref{ value }
+		> scope_binder(T & value, Args && ... args) noexcept : m_ref{ value }
 		{
 			m_ref.get().bind(ML_forward(args)...);
 		}
 
-		~ref_binder() noexcept
+		~scope_binder() noexcept
 		{
 			m_ref.get().unbind();
 		}
