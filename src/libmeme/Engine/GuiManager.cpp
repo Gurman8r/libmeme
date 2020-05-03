@@ -109,7 +109,7 @@ namespace ml
 		// DOCKSPACE
 		if (auto & d{ this->dockspace }; d.visible)
 		{
-			ML_ImGui_ScopeID(d.title);
+			ML_ImGui_ScopeID(ML_addressof(&d));
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -157,6 +157,8 @@ namespace ml
 		// MAIN MENU
 		if (auto & m{ this->main_menu_bar }; m.visible)
 		{
+			ML_ImGui_ScopeID(ML_addressof(&m));
+
 			if (ImGui::BeginMainMenuBar())
 			{
 				for (auto const & pair : m.menus)

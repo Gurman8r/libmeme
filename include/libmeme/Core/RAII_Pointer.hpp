@@ -1,18 +1,16 @@
 #ifndef _ML_RAII_POINTER_HPP_
 #define _ML_RAII_POINTER_HPP_
 
-// testing
-
 #include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
+	// like wheat_ptr, but with less gluten
 	template <class T
 	> struct raii_ptr final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename raii_ptr<T>;
 		using value_type		= typename T;
 		using pointer			= typename value_type *;
