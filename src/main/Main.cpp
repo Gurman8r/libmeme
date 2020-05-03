@@ -19,7 +19,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static struct memcfg final : non_copyable
+	static struct memcfg final
 	{
 		ds::array<byte_t, MAIN_MEMORY>		data{};
 		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
@@ -50,7 +50,7 @@ ml::int32_t main()
 	// startup/shutdown engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
-	// window isn't open, nothing to do here
+	// nothing to do
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -61,7 +61,8 @@ ml::int32_t main()
 	// unload content
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
-	do // main loop
+	// main loop
+	while (engine::window().is_open())
 	{
 		ML_defer{ performance_tracker::swap_frames(); };
 		{
@@ -113,7 +114,7 @@ ml::int32_t main()
 			engine::time().end_loop();
 			event_system::fire_event<end_loop_event>();
 		}
-	} while (engine::window().is_open());
+	}
 	
 	// goodbye!
 	return EXIT_SUCCESS;

@@ -5,8 +5,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// lambda struct helper
-#define ML_lambda_decl(Fn, type)                                                        \
+// flow control declaration helper
+#define ML_decl_flow_control(Fn, type)                                                  \
     template <class Fn> struct type;                                                    \
     enum class ML_concat(type, _tag) {};                                                \
     template <class Fn> inline auto operator+(ML_concat(type, _tag), Fn && fn) noexcept \
@@ -15,8 +15,8 @@
     }                                                                                   \
     template <class Fn> struct type final
 
-// lambda variable helper
-#define ML_lambda_impl(type) \
+// flow control implementation helper
+#define ML_impl_flow_control(type) \
     ML_anon_v(ML_concat(_ML impl::, ML_concat(type, _tag))) {} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,13 +24,22 @@
 namespace ml::impl
 {
     // invoke body in constructor
-    ML_lambda_decl(Fn, immediate_call)
+    ML_decl_flow_control(Fn, immediate_call)
     {
         explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
+    // invoke body immediately
+#define ML_block \
+    ML_impl_flow_control(immediate_call)
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::impl
+{
     // invoke body in destructor
-    ML_lambda_decl(Fn, deferred_call)
+    ML_decl_flow_control(Fn, deferred_call)
     {
         explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
@@ -38,14 +47,10 @@ namespace ml::impl
 
     private: Fn const m_fn;
     };
-}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml::impl
-{
-#define ML_scope ML_lambda_impl(immediate_call) // invoke body immediately
-#define ML_defer ML_lambda_impl(deferred_call)  // invoke body on scope exit
+    // invoke body on scope exit
+#define ML_defer \
+    ML_impl_flow_control(deferred_call)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

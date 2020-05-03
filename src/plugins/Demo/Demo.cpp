@@ -700,7 +700,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						static ML_scope{ std::cout << "# type \'\\\' to exit\n"; };
+						static ML_block{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -754,7 +754,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			static ML_scope{
+			static ML_block{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
@@ -993,7 +993,7 @@ namespace ml
 		{
 			static auto const & testres{ memory_manager::get_test_resource() };
 
-			static ML_scope // setup memory editor
+			static ML_block // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
@@ -1037,13 +1037,13 @@ namespace ml
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
+					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
@@ -1095,7 +1095,7 @@ namespace ml
 		void show_nodes_gui()
 		{
 			// create node editor
-			//static ML_scope{ m_node_editor = ax::NodeEditor::CreateEditor(); };
+			//static ML_block{ m_node_editor = ax::NodeEditor::CreateEditor(); };
 
 			namespace ed = ax::NodeEditor;
 

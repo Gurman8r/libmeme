@@ -482,7 +482,7 @@ namespace ml
 	video_mode const & window::get_desktop_mode()
 	{
 		static video_mode temp{};
-		static ML_scope
+		static ML_block
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
@@ -502,7 +502,7 @@ namespace ml
 	pmr::vector<video_mode> const & window::get_fullscreen_modes()
 	{
 		static pmr::vector<video_mode> temp{};
-		static ML_scope
+		static ML_block
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);

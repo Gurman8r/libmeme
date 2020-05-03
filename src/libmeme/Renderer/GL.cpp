@@ -500,7 +500,7 @@ namespace ml
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
@@ -510,7 +510,7 @@ namespace ml
 		static int32_t temp{};
 		if (is_initialized())
 		{
-			static ML_scope{ temp = getInteger(GL::MaxCombTexImgUnits); };
+			static ML_block{ temp = getInteger(GL::MaxCombTexImgUnits); };
 		}
 		return temp;
 	}
@@ -520,7 +520,7 @@ namespace ml
 		static uint32_t temp{};
 		if (is_initialized())
 		{
-			static ML_scope{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
+			static ML_block{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
 		}
 		return temp;
 	}
@@ -535,7 +535,7 @@ namespace ml
 		static bool temp{};
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
@@ -544,7 +544,7 @@ namespace ml
 	{
 		static bool temp{};
 #ifdef GL_EXT_texture_sRGB
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
@@ -635,7 +635,7 @@ namespace ml
 		static bool temp{};
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
@@ -759,7 +759,7 @@ namespace ml
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
@@ -768,7 +768,7 @@ namespace ml
 	{
 		static bool temp{};
 #if defined(GL_ARB_geometry_shader4)
-		static ML_scope{ temp = true; };
+		static ML_block{ temp = true; };
 #endif
 		return temp;
 	}
