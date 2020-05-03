@@ -9,12 +9,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool event_system::add_listener(hash_t type, event_listener * value)
+	bool event_system::add_listener(hash_t type, event_listener * value) noexcept
 	{
 		return value && g_event_system.at(type).insert(value).second;
 	}
 
-	void event_system::fire_event(event const & value)
+	void event_system::fire_event(event const & value) noexcept
 	{
 		if (auto const listeners{ g_event_system.find(value.ID) })
 		{
@@ -25,7 +25,7 @@ namespace ml
 		}
 	}
 
-	void event_system::remove_listener(hash_t type, event_listener * value)
+	void event_system::remove_listener(hash_t type, event_listener * value) noexcept
 	{
 		if (!value) { return; }
 
@@ -39,7 +39,7 @@ namespace ml
 		}
 	}
 
-	void event_system::remove_listener(event_listener * value)
+	void event_system::remove_listener(event_listener * value) noexcept
 	{
 		if (!value) { return; }
 

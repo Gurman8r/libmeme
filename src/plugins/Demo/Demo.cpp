@@ -87,7 +87,7 @@ namespace ml
 	// (U) TRAITS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using renderer_traits = ecs::traits<
+	using entity_traits = ecs::traits<
 
 		// tags
 		ecs::cfg::tags<
@@ -111,10 +111,10 @@ namespace ml
 	>;
 
 
-	// (M) MANAGERS
+	// (M) MANAGER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using renderer_manager = ecs::manager<renderer_traits>;
+	using entity_manager = ecs::manager<entity_traits>;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -136,10 +136,10 @@ namespace ml
 		ds::flat_map<pmr::string,	texture			> m_textures	{};
 
 
-		// RENDERER
+		// ECS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		renderer_manager m_renderer{};
+		entity_manager m_ecs{};
 
 
 		// GUI
@@ -400,11 +400,11 @@ namespace ml
 
 			// ENTITIES
 			{
-				ML_defer{ m_renderer.refresh(); };
+				ML_defer{ m_ecs.refresh(); };
 
 				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
 				{
-					auto & h{ m_renderer.create_handle() };
+					auto & h{ m_ecs.create_handle() };
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
@@ -438,8 +438,8 @@ namespace ml
 			m_plots.update(engine::time().total().count<float_t>());
 			
 			// systems
-			m_renderer.update_system<x_apply_transforms>();
-			m_renderer.update_system<x_apply_materials>();
+			m_ecs.update_system<x_apply_transforms>();
+			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
 			if (m_display_size[0] > 0 && m_display_size[1] > 0)
@@ -467,7 +467,7 @@ namespace ml
 				constexpr render_states states{
 					{}, {}, cull_state{ false }, {}
 				}; states();
-				m_renderer.update_system<x_draw_renderers>(target);
+				m_ecs.update_system<x_draw_renderers>(target);
 			}
 		}
 
@@ -545,7 +545,7 @@ namespace ml
 		{
 			// unload stuff, etc...
 
-			m_renderer.clear();
+			m_ecs.clear();
 			m_images.clear();
 			m_shaders.clear();
 			m_materials.clear();
@@ -859,7 +859,7 @@ namespace ml
 					);
 				}
 				// SIGNATURE
-				else if constexpr (std::is_same_v<T, renderer_traits::signature>)
+				else if constexpr (std::is_same_v<T, entity_traits::signature>)
 				{
 					auto const & style			{ ImGui::GetStyle() };
 					auto const button_width		{ ImGui::GetFrameHeight() };
@@ -867,14 +867,14 @@ namespace ml
 					auto const window_visible	{ ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x };
 
 					int32_t i{};
-					meta::for_types<meta::concat<renderer_traits::component_list, renderer_traits::tag_list>
+					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
 					>([&](auto type)
 					{
 						ML_ImGui_ScopeID(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
-						using U = typename renderer_traits;
+						using U = typename entity_traits;
 						using T = typename decltype(type)::type;
 						using S = typename U::signature;
 						static constexpr bool
@@ -919,7 +919,7 @@ namespace ml
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 			ImGui::Columns(2);
 			ImGui::Separator();
-			m_renderer.for_entities([&](size_t const e)
+			m_ecs.for_entities([&](size_t const e)
 			{
 				ML_ImGui_ScopeID(static_cast<int32_t>(e));
 				ImGui::AlignTextToFramePadding();
@@ -934,7 +934,7 @@ namespace ml
 
 				if (e_open)
 				{
-					m_renderer.for_components(e, [&](auto & c)
+					m_ecs.for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
 						ML_ImGui_ScopeID(&c);
@@ -943,7 +943,7 @@ namespace ml
 
 						bool const c_open{ ImGui::TreeNode(
 							"component node", "[%u] %.*s",
-							renderer_traits::component_id<C>(),
+							entity_traits::component_id<C>(),
 							cname.size(), cname.data()
 						) }; ImGui::NextColumn();
 

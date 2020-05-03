@@ -36,13 +36,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t type, event_listener * value);
+		static bool add_listener(hash_t type, event_listener * value) noexcept;
 		
-		static void fire_event(event const & value);
+		static void fire_event(event const & value) noexcept;
 
-		static void remove_listener(hash_t type, event_listener * value);
+		static void remove_listener(hash_t type, event_listener * value) noexcept;
 		
-		static void remove_listener(event_listener * value);
+		static void remove_listener(event_listener * value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

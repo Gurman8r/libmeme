@@ -19,18 +19,18 @@
 #	define ML_PRETTY_VALUE_PREFIX	"class " ML_PRETTY_STR_NAME " __cdecl ml::pretty_function::value<"
 #	define ML_PRETTY_VALUE_DELIM	"; T Value = "
 #	define ML_PRETTY_VALUE_SUFFIX	">(void)"
-#elif defined(ML_cc_gcc)
-#	define ML_PRETTY_FUNCTION		__PRETTY_FUNCTION__
-#	define ML_PRETTY_TYPE_PREFIX	"constexpr " ML_PRETTY_STR_NAME " ml::pretty_function::type() [with T = "
-#	define ML_PRETTY_TYPE_SUFFIX	"]"
-#	define ML_PRETTY_VALUE_PREFIX	"constexpr " ML_PRETTY_STR_NAME " ml::pretty_function::value() [with T = "
-#	define ML_PRETTY_VALUE_DELIM	"; Value = "
-#	define ML_PRETTY_VALUE_SUFFIX	"]"
 #elif defined(ML_cc_clang)
 #	define ML_PRETTY_FUNCTION		__PRETTY_FUNCTION__
 #	define ML_PRETTY_TYPE_PREFIX	ML_PRETTY_STR_NAME " ml::pretty_function::type() [T = "
 #	define ML_PRETTY_TYPE_SUFFIX	"]"
 #	define ML_PRETTY_VALUE_PREFIX	ML_PRETTY_STR_NAME " ml::pretty_function::value() [T = "
+#	define ML_PRETTY_VALUE_DELIM	"; Value = "
+#	define ML_PRETTY_VALUE_SUFFIX	"]"
+#elif defined(ML_cc_gcc)
+#	define ML_PRETTY_FUNCTION		__PRETTY_FUNCTION__
+#	define ML_PRETTY_TYPE_PREFIX	"constexpr " ML_PRETTY_STR_NAME " ml::pretty_function::type() [with T = "
+#	define ML_PRETTY_TYPE_SUFFIX	"]"
+#	define ML_PRETTY_VALUE_PREFIX	"constexpr " ML_PRETTY_STR_NAME " ml::pretty_function::value() [with T = "
 #	define ML_PRETTY_VALUE_DELIM	"; Value = "
 #	define ML_PRETTY_VALUE_SUFFIX	"]"
 #else

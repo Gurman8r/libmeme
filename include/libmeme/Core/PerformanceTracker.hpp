@@ -3,22 +3,38 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_impl_benchmark(var, id)									\
-	auto var{ _ML timer{ true } };									\
-	ML_defer{ _ML performance_tracker::add_trace(id, var.elapsed()); };
-
-#define ML_benchmark(id) ML_impl_benchmark(ML_anon(benchmark), id)
+#define ML_benchmark(name) ML_anon_v(_ML performance_tracker) { name }
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API performance_tracker final
+	class ML_CORE_API performance_tracker final : non_copyable, trackable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		using frame_data = pmr::vector<std::pair<cstring, duration>>;
 		
-		static frame_data m_curr; // current frame_data
-		static frame_data m_prev; // previous frame_data
+		static frame_data m_curr; // current global data
+		static frame_data m_prev; // previous global data
+
+		cstring	m_name	; // local name
+		timer	m_timer	; // local timer
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	public:
+		explicit performance_tracker(cstring name) noexcept : m_name{ name }, m_timer{ true }
+		{
+		}
+
+		~performance_tracker() noexcept
+		{
+			add_trace(m_name, m_timer.elapsed());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	public:
 		ML_NODISCARD static frame_data const & previous() noexcept
@@ -38,6 +54,8 @@ namespace ml
 
 			m_curr.clear();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

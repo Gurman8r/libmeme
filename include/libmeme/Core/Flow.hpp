@@ -5,8 +5,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// flow control declaration helper
-#define ML_decl_flow_control(Fn, type)                                                  \
+// flow control declarator
+#define ML_flow_control_decl(Fn, type)                                                  \
     template <class Fn> struct type;                                                    \
     enum class ML_concat(type, _tag) {};                                                \
     template <class Fn> inline auto operator+(ML_concat(type, _tag), Fn && fn) noexcept \
@@ -15,8 +15,8 @@
     }                                                                                   \
     template <class Fn> struct type final
 
-// flow control implementation helper
-#define ML_impl_flow_control(type) \
+// flow control implementor
+#define ML_flow_control_impl(type) \
     ML_anon_v(ML_concat(_ML impl::, ML_concat(type, _tag))) {} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,14 +24,14 @@
 namespace ml::impl
 {
     // invoke body in constructor
-    ML_decl_flow_control(Fn, immediate_call)
+    ML_flow_control_decl(Fn, immediate_call)
     {
         explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
     // invoke body immediately
 #define ML_block \
-    ML_impl_flow_control(immediate_call)
+    ML_flow_control_impl(immediate_call)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,7 +39,7 @@ namespace ml::impl
 namespace ml::impl
 {
     // invoke body in destructor
-    ML_decl_flow_control(Fn, deferred_call)
+    ML_flow_control_decl(Fn, deferred_call)
     {
         explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
@@ -50,7 +50,7 @@ namespace ml::impl
 
     // invoke body on scope exit
 #define ML_defer \
-    ML_impl_flow_control(deferred_call)
+    ML_flow_control_impl(deferred_call)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

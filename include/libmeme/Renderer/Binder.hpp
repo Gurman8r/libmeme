@@ -3,13 +3,13 @@
 
 #include <libmeme/Common.hpp>
 
-#define ML_bind_scope(v, ...) ML_anon_v(scope_binder) { v, ##__VA_ARGS__ }
+#define ML_bind_scope(v, ...) ML_anon_v(_ML scope_binder) { v, ##__VA_ARGS__ }
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct scope_binder final
+	template <class T> struct ML_NODISCARD scope_binder final
 	{
 		template <class ... Args
 		> scope_binder(T & value, Args && ... args) noexcept : m_ref{ value }

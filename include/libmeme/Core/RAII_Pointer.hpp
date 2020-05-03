@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	// like wheat_ptr, but with less gluten
+	// similar to wheat_ptr, but with less gluten
 	template <class T
 	> struct raii_ptr final : non_copyable, trackable
 	{
@@ -84,9 +84,9 @@ namespace ml
 
 		ML_NODISCARD auto operator *() const & noexcept -> const_reference { return (*m_data); }
 
-		ML_NODISCARD auto operator *() && noexcept -> rvalue { return std::move((*m_data)); }
+		ML_NODISCARD auto operator *() && noexcept -> rvalue { return std::move(*m_data); }
 
-		ML_NODISCARD auto operator *() const && noexcept -> const_rvalue { return std::move((*m_data)); }
+		ML_NODISCARD auto operator *() const && noexcept -> const_rvalue { return std::move(*m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
