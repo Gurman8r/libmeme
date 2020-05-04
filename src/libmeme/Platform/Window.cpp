@@ -51,8 +51,8 @@ namespace ml
 			{
 			case window_api::opengl	: return GLFW_OPENGL_API;
 			case window_api::vulkan	:
-			case window_api::directx	:
-			default						: return GLFW_NO_API;
+			case window_api::directx:
+			default					: return GLFW_NO_API;
 			}
 		})());
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	m_settings.context.major);
@@ -63,11 +63,11 @@ namespace ml
 		{
 			switch (m_settings.context.profile)
 			{
-			case window_api::core		: return GLFW_OPENGL_CORE_PROFILE;
+			case window_api::core	: return GLFW_OPENGL_CORE_PROFILE;
 			case window_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
 			case window_api::debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case window_api::any		:
-			default						: return GLFW_OPENGL_ANY_PROFILE;
+			case window_api::any	:
+			default					: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());
 		glfwWindowHint(GLFW_DEPTH_BITS,		m_settings.context.depth_bits);

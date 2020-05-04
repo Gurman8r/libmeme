@@ -3,7 +3,9 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-#define ML_benchmark(name) ML_anon_v(_ML performance_tracker) { name }
+// benchmark
+#define ML_benchmark(name) \
+	auto ML_anon = _ML performance_tracker{ name }
 
 namespace ml
 {

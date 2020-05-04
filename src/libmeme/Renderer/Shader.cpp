@@ -9,21 +9,28 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		union { uint32_t current; uint32_t previous; int32_t location; };
+		enum { unknown = -1 };
 
-		operator bool() const noexcept { return (-1 < location); }
+		union { int32_t location; uint32_t current; uint32_t previous; };
+
+		operator bool() const noexcept { return (location > unknown); }
 
 		operator int32_t() const noexcept { return location; }
 
 		template <class Fn
-		> uniform_binder(shader & sh, pmr::string const & id, Fn && fn) noexcept
-			: current	{ !sh ?  0 : sh.handle() }
-			, previous	{ !sh ?  0 : GL::getProgramHandle(GL::ProgramObject) }
-			, location	{ !sh ? -1 : sh.get_uniform_location(id) }
+		> uniform_binder(shader & program, pmr::string const & name, Fn && fn) noexcept
+			: location{ unknown }, current{ NULL }, previous{ NULL }
 		{
-			if (current && (current != previous))
+			if (current = program.handle())
 			{
-				GL::useProgram(current);
+				previous = GL::getProgramHandle(GL::ProgramObject);
+
+				location = program.get_uniform_location(name);
+
+				if (current != previous)
+				{
+					GL::useProgram(current);
+				}
 			}
 			if (*this)
 			{
@@ -158,9 +165,9 @@ namespace ml
 			{
 				uint32_t index{};
 
-				value->m_textures.for_each([&index](int32_t location, texture const * tex)
+				value->m_textures.for_each([&index](int32_t loc, texture const * tex)
 				{
-					GL::uniform1i(location, index);
+					GL::uniform1i(loc, index);
 
 					GL::activeTexture(GL::Texture0 + (index++));
 
@@ -254,41 +261,41 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, int32_t value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniform1i(location, value);
+			GL::uniform1i(loc, value);
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
-		return uniform_binder{ *this, name, [&](int32_t location) noexcept
+		return uniform_binder{ *this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniform1f(location, value);
+			GL::uniform1f(loc, value);
 		} };
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniform2f(location, value[0], value[1]);
+			GL::uniform2f(loc, value[0], value[1]);
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec3 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniform3f(location, value[0], value[1], value[2]);
+			GL::uniform3f(loc, value[0], value[1], value[2]);
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec4 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniform4f(location, value[0], value[1], value[2], value[3]);
+			GL::uniform4f(loc, value[0], value[1], value[2], value[3]);
 		});
 	}
 
@@ -299,43 +306,43 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, mat2 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniformMatrix2fv(location, 1, false, value.data());
+			GL::uniformMatrix2fv(loc, 1, false, value.data());
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat3 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniformMatrix3fv(location, 1, false, value.data());
+			GL::uniformMatrix3fv(loc, 1, false, value.data());
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, mat4 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
-			GL::uniformMatrix4fv(location, 1, false, value.data());
+			GL::uniformMatrix4fv(loc, 1, false, value.data());
 		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, texture const * value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
 			static auto const max_texture_units
 			{
 				static_cast<size_t>(GL::getMaxTextureUnits())
 			};
-			if (auto const it{ m_textures.find(location) })
+			if (auto const it{ m_textures.find(loc) })
 			{
 				(*it->second) = value;
 			}
 			else if ((m_textures.size() + 1) < max_texture_units)
 			{
-				m_textures.insert(location, value);
+				m_textures.insert(loc, value);
 			}
 		});
 	}

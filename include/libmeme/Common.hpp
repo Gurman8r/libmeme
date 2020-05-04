@@ -39,7 +39,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// macro concat impl
+// concat implementation
 #define ML_impl_concat(a, b)	a##b
 
 // macro concat
@@ -51,52 +51,53 @@
 // macro value to string
 #define ML_stringify(expr)		ML_to_string(expr)
 
-// anonymous variables
+// anonymous
 #if defined(__COUNTER__)
-#	define ML_anon(expr)		ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
+#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon(expr)		ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
+#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
 #else
-#   define ML_anon(expr)		expr
+#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, _))
 #endif
-#define ML_anon_v(type)			auto ML_anon(anon) = type
+#define ML_anon					ML_make_anon(anonymous)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // assert
 #ifndef ML_assert
-#   define ML_assert(expr)		assert(expr)
+#   define ML_assert(expr)	assert(expr)
 #endif
 
 // breakpoint
 #if (!ML_is_debug)
-#	define ML_breakpoint()		((void)0)
+#	define ML_breakpoint()	((void)0)
 #elif defined(ML_cc_msvc)
-#	define ML_breakpoint()		_CSTD __debugbreak()
+#	define ML_breakpoint()	_CSTD __debugbreak()
 #else
-#	define ML_breakpoint()		_CSTD raise(SIGTRAP)
+#	define ML_breakpoint()	_CSTD raise(SIGTRAP)
 #endif
 
 // environment
-#ifndef ML_DISABLE_ENV
-#	define ML_argc				__argc
-#	ifndef ML_WIDE_ENV
-#		define ML_argv			__argv
-#		define ML_envp			_environ
-#	else
-#		define ML_argv			__wargv
-#		define ML_envp			_wenviron
-#	endif
+#ifndef ML_DISABLE_LEGACY
+#	define ML_argc			__argc
+#	define ML_argv			__argv
+#	define ML_wargv			__wargv
+#	define ML_environ		_environ
+#	define ML_wenviron		_wenviron
 #else
-#	define ML_argc
-#	define ML_argv
-#	define ML_envp
+#	define ML_argc			(0)
+#	define ML_argv			((char**)0)
+#	define ML_envp			((char***)0)
+#	define ML_wargv			((wchar_t**)0)
+#	define ML_wenvp			((wchar_t***)0)
 #endif
 
 // miscellaneous
-#define _ML						::ml::
-#define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
-#define ML_alias				using
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-#define ML_forward(var)			_ML std::forward<decltype(var)>(var)
+#define _ML					::ml::
+#define ML_addressof(ptr)	((void *)(_ML intmax_t)ptr)
+#define ML_alias			using
+#define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
+#define ML_forward(var)		_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

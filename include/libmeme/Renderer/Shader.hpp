@@ -11,7 +11,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum id_ : size_t { id_vertex, id_geometry, id_fragment, id_max };
+		enum : size_t { id_vertex, id_geometry, id_fragment, id_max };
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using shader_source		= typename meta::array<pmr::string, id_max>;
@@ -106,9 +106,7 @@ namespace ml
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool nonzero() const noexcept { return m_handle; }
-
-		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
+		ML_NODISCARD operator bool() const noexcept { return m_handle; }
 
 		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 

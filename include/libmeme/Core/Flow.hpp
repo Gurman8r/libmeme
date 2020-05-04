@@ -17,7 +17,7 @@
 
 // flow control implementor
 #define ML_flow_control_impl(type) \
-    ML_anon_v(_ML impl:: ML_concat(type, _tag)) {} + [&]() noexcept
+    auto ML_anon = _ML impl:: ML_concat(type, _tag){} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

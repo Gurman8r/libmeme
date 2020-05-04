@@ -482,8 +482,8 @@ namespace ml
 			};
 
 			auto & d{ engine::gui().dockspace };
-			if (!d.empty()) { return; }
-			d.resize(MAX_DOCK_NODE);
+			if (!d.nodes.empty()) { return; }
+			d.nodes.resize(MAX_DOCK_NODE);
 			
 			// begin builder
 			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))

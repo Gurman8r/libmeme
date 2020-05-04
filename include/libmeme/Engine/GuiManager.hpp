@@ -76,10 +76,6 @@ namespace ml
 
 			uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
 
-			bool empty() const noexcept { return nodes.empty(); }
-
-			void resize(size_t const i) { nodes.resize(i); }
-
 			auto & operator[](size_t const i) & noexcept { return nodes[i]; }
 
 			auto const & operator[](size_t const i) const & noexcept { return nodes[i]; }

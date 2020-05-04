@@ -669,12 +669,8 @@ namespace ml
 		if (value)
 		{
 			deleteFramebuffers(1, value);
-			return true;
 		}
-		else
-		{
-			return false;
-		}
+		return (bool)value;
 	}
 
 	void GL::deleteFramebuffers(uint32_t count, uint32_t const * framebuffers)

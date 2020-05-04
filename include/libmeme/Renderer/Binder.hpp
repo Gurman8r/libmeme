@@ -5,7 +5,7 @@
 
 // bind scope
 #define ML_bind_scope(v, ...) \
-	ML_anon_v(_ML impl::scope_binder) { v, ##__VA_ARGS__ }
+	auto ML_anon = _ML impl::scope_binder{ v, ##__VA_ARGS__ }
 
 namespace ml::impl
 {
@@ -14,18 +14,18 @@ namespace ml::impl
 	template <class T> struct ML_NODISCARD scope_binder final
 	{
 		template <class ... Args
-		> scope_binder(T & value, Args && ... args) noexcept : m_ref{ value }
+		> scope_binder(T & value, Args && ... args) noexcept : m_value{ &value }
 		{
-			m_ref.get().bind(ML_forward(args)...);
+			m_value->bind(ML_forward(args)...);
 		}
 
 		~scope_binder() noexcept
 		{
-			m_ref.get().unbind();
+			m_value->unbind();
 		}
 
 	private:
-		std::reference_wrapper<T> m_ref;
+		T * const m_value;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
