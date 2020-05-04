@@ -8,10 +8,10 @@ assert(engine.window.open(ml.window_settings(
         [ 1280, 720 ],          # resolution
         32),                    # color depth
     ml.context_settings(
-        ml.platform_api.opengl, # api
+        ml.window_api.opengl,   # api
         4,                      # major
         6,                      # minor
-        ml.platform_api.compat, # profile
+        ml.window_api.compat,   # profile
         24,                     # depth bits
         8,                      # stencil bits
         False,                  # multisample

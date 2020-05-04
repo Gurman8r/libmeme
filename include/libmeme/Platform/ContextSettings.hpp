@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class platform_api final
+	class window_api final
 	{
 	public:
 		enum { unknown, opengl, vulkan, directx };

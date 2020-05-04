@@ -106,16 +106,16 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// PLATFORM API
-		py::class_<platform_api>(m, "platform_api")
+		py::class_<window_api>(m, "window_api")
 			.def(py::init<>())
-			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)platform_api::unknown; })
-			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)platform_api::opengl; })
-			.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)platform_api::vulkan; })
-			.def_property_readonly_static("directx"	, [](py::object) { return (int32_t)platform_api::directx; })
-			.def_property_readonly_static("any"		, [](py::object) { return (int32_t)platform_api::any; })
-			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)platform_api::core; })
-			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)platform_api::compat; })
-			.def_property_readonly_static("debug"	, [](py::object) { return (int32_t)platform_api::debug; })
+			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)window_api::unknown; })
+			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)window_api::opengl; })
+			.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)window_api::vulkan; })
+			.def_property_readonly_static("directx"	, [](py::object) { return (int32_t)window_api::directx; })
+			.def_property_readonly_static("any"		, [](py::object) { return (int32_t)window_api::any; })
+			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)window_api::core; })
+			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)window_api::compat; })
+			.def_property_readonly_static("debug"	, [](py::object) { return (int32_t)window_api::debug; })
 			;
 
 		py::class_<window_hints_>(m, "window_hints")

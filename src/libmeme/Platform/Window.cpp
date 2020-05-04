@@ -49,9 +49,9 @@ namespace ml
 		{
 			switch (m_settings.context.api)
 			{
-			case platform_api::opengl	: return GLFW_OPENGL_API;
-			case platform_api::vulkan	:
-			case platform_api::directx	:
+			case window_api::opengl	: return GLFW_OPENGL_API;
+			case window_api::vulkan	:
+			case window_api::directx	:
 			default						: return GLFW_NO_API;
 			}
 		})());
@@ -63,10 +63,10 @@ namespace ml
 		{
 			switch (m_settings.context.profile)
 			{
-			case platform_api::core		: return GLFW_OPENGL_CORE_PROFILE;
-			case platform_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case platform_api::debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case platform_api::any		:
+			case window_api::core		: return GLFW_OPENGL_CORE_PROFILE;
+			case window_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case window_api::debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case window_api::any		:
 			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());
