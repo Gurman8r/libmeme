@@ -20,8 +20,7 @@ namespace ml
 
 		GL::validateVersion(m_settings.context.major, m_settings.context.minor);
 
-		constexpr render_states states{
-		}; states();
+		ML_anon_v(render_states) {}();
 
 		GL::enable(GL::Multisample, m_settings.context.multisample);
 

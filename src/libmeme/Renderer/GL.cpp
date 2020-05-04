@@ -56,7 +56,7 @@ namespace ml
 			return debug::log::error("GL is already initialized");
 		}
 
-		return s_gl_init = ([]()
+		return s_gl_init = ([]() noexcept
 		{
 #if defined(ML_OPENGL_LOADER_GLEW)
 		glewExperimental = true;

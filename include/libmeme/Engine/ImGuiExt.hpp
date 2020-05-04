@@ -192,9 +192,9 @@ namespace ml::gui
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, class ... Args
-		> inline void render(Fn && fn, Args && ... args) noexcept
+		> void render(Fn && fn, Args && ... args) noexcept
 		{
-			if (!open) return;
+			if (!open) { return; }
 			ML_ImGui_ScopeID(ML_addressof(this));
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))

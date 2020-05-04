@@ -18,9 +18,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear_color(color const & value);
+		void clear_color(color const & col);
 
-		void clear_color(color const & value, uint32_t flags);
+		void clear_color(color const & col, uint32_t flags);
 
 		void clear_flags(uint32_t flags);
 

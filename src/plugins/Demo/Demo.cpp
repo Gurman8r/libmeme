@@ -160,9 +160,9 @@ namespace ml
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_scripting	{ "scripting##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
 
-		stream_sniper m_cout{ &std::cout };
-
 		vec2 m_display_size{};
+
+		stream_sniper m_cout{ &std::cout };
 
 		gui::console m_console{};
 
@@ -444,9 +444,9 @@ namespace ml
 			// pipeline
 			if (m_display_size[0] > 0 && m_display_size[1] > 0)
 			{
-				m_pipeline.for_each([&](auto &, auto & value)
+				m_pipeline.for_each([&](auto &, auto & e)
 				{
-					value.resize(m_display_size);
+					e.resize(m_display_size);
 				});
 			}
 		}
@@ -535,8 +535,8 @@ namespace ml
 			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
 			m_gui_scripting	.render(&demo::show_scripting_gui	, this); // SCRIPTING
 			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
-			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
 			m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
+			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
 		}
 
 		void on_unload(unload_event const &)
@@ -1092,9 +1092,6 @@ namespace ml
 
 		void show_nodes_gui()
 		{
-			// create node editor
-			//static ML_block{ m_node_editor = ax::NodeEditor::CreateEditor(); };
-
 			namespace ed = ax::NodeEditor;
 
 			auto & io{ ImGui::GetIO() };

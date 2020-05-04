@@ -4,7 +4,8 @@
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/NameOf.hpp>
 
-#define ML_event(name) struct name final : _ML event_impl<name>
+#define ML_event(name) \
+	struct name final : _ML event_impl<name>
 
 namespace ml
 {
