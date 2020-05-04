@@ -66,8 +66,6 @@ namespace ml
 
 	bool gui_manager::shutdown()
 	{
-		this->main_menu_bar.menus.clear();
-
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
 #else

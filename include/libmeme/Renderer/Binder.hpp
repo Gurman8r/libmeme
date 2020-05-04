@@ -3,9 +3,11 @@
 
 #include <libmeme/Common.hpp>
 
-#define ML_bind_scope(v, ...) ML_anon_v(_ML scope_binder) { v, ##__VA_ARGS__ }
+// bind scope
+#define ML_bind_scope(v, ...) \
+	ML_anon_v(_ML impl::scope_binder) { v, ##__VA_ARGS__ }
 
-namespace ml
+namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

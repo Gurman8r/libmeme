@@ -177,12 +177,12 @@ namespace ml
 		gui::plot_controller m_plots
 		{ {
 			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
-			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
+			vec2{ 0.f, 64.f }, vec2::fill(FLT_MAX),
 			[]() { return engine::time().delta().count<float_t>() * 1000.f; }
 			),
 
 			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
-			vec2{ 0.f, 64.f }, vec2{ FLT_MAX, FLT_MAX },
+			vec2{ 0.f, 64.f }, vec2::fill(FLT_MAX),
 			[]() { return (float_t)engine::time().frame_rate(); }
 			),
 		} };
@@ -459,8 +459,6 @@ namespace ml
 
 			if (render_texture & target{ m_pipeline[0] })
 			{
-				//gbinder foo{ target };
-
 				ML_bind_scope(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());

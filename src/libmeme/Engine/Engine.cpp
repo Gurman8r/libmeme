@@ -70,10 +70,7 @@ namespace ml
 		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
 
 		// startup scripting
-		if (!g_engine->m_scripts.startup())
-		{
-			return debug::log::error("failed starting script manager");
-		}
+		if (!g_engine->m_scripts.startup()) { return debug::log::error("failed initializing scripting"); }
 
 		return true;
 	}
@@ -82,7 +79,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
 
-		// need to clear main menu bar before anything else
+		// FIXME: need to clear menus before clearing plugins
 		g_engine->m_gui.main_menu_bar.menus.clear();
 
 		// shutdown plugins

@@ -37,7 +37,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// read config
-	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]() noexcept
+	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
 		if (f) { f >> j; }
 		f.close();
@@ -50,10 +50,10 @@ ml::int32_t main()
 	// startup/shutdown engine
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// nothing to do
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// load content
 	event_system::fire_event<load_event>();

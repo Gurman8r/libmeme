@@ -40,26 +40,26 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // macro concat impl
-#define ML_impl_concat(a, b)    a##b
+#define ML_impl_concat(a, b)	a##b
 
 // macro concat
-#define ML_concat(a, b)         ML_impl_concat(a, b)
+#define ML_concat(a, b)			ML_impl_concat(a, b)
 
 // macro name to string
-#define ML_to_string(expr)      #expr
+#define ML_to_string(expr)		#expr
 
 // macro value to string
-#define ML_stringify(expr)      ML_to_string(expr)
+#define ML_stringify(expr)		ML_to_string(expr)
 
 // anonymous variables
 #if defined(__COUNTER__)
-#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
+#	define ML_anon(expr)		ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon(expr)        ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
+#	define ML_anon(expr)		ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
 #else
-#   define ML_anon(expr)        expr
+#   define ML_anon(expr)		expr
 #endif
-#define ML_anon_v(type)         auto ML_anon(anon) = type
+#define ML_anon_v(type)			auto ML_anon(anon) = type
 
 // assert
 #ifndef ML_assert
@@ -93,10 +93,10 @@
 
 // miscellaneous
 #define _ML						::ml::
-#define ML_addressof(p)			((void *)(_ML intmax_t)p)
+#define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
 #define ML_alias				using
-#define ML_arraysize(a)			(sizeof(a) / sizeof(*a))
-#define ML_forward(v)			_ML std::forward<decltype(v)>(v)
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_forward(var)			_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -157,7 +157,6 @@ namespace ml
 	namespace literals
 	{
 		using namespace _ML std::chrono_literals;
-		using namespace _ML std::string_literals;
 		using namespace _ML std::string_view_literals;
 	}
 	using namespace literals;

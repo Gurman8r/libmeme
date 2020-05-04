@@ -35,7 +35,7 @@ namespace ml
 		{
 			auto const i{ (size_t)std::distance(m_data.begin<hash_t>(), it) };
 
-			delete m_data.get<plugin *>(i);
+			memory_manager::deallocate(m_data.get<plugin *>(i));
 
 			m_data.erase(i);
 

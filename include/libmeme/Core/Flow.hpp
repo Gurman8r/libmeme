@@ -17,21 +17,21 @@
 
 // flow control implementor
 #define ML_flow_control_impl(type) \
-    ML_anon_v(ML_concat(_ML impl::, ML_concat(type, _tag))) {} + [&]() noexcept
+    ML_anon_v(_ML impl:: ML_concat(type, _tag)) {} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::impl
 {
     // invoke body in constructor
-    ML_flow_control_decl(Fn, immediate_call)
+    ML_flow_control_decl(Fn, immediate_block)
     {
-        explicit immediate_call(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
+        immediate_block(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
     // invoke body immediately
 #define ML_block \
-    ML_flow_control_impl(immediate_call)
+    ML_flow_control_impl(immediate_block)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,18 +39,18 @@ namespace ml::impl
 namespace ml::impl
 {
     // invoke body in destructor
-    ML_flow_control_decl(Fn, deferred_call)
+    ML_flow_control_decl(Fn, deferred_block)
     {
-        explicit deferred_call(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
+        deferred_block(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~deferred_call() noexcept { std::invoke(m_fn); }
+        ~deferred_block() noexcept { std::invoke(m_fn); }
 
     private: Fn const m_fn;
     };
 
     // invoke body on scope exit
 #define ML_defer \
-    ML_flow_control_impl(deferred_call)
+    ML_flow_control_impl(deferred_block)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

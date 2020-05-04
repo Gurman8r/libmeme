@@ -87,7 +87,7 @@ namespace ml
 		private:
 			friend gui_manager;
 			
-			dockspace_data(allocator_type const & alloc = {}) noexcept : nodes{ alloc }
+			dockspace_data(allocator_type const & alloc) noexcept : nodes{ alloc }
 			{
 			}
 
@@ -100,8 +100,9 @@ namespace ml
 		// MAIN MENU BAR
 		struct ML_ENGINE_API main_menu_bar_data final : non_copyable
 		{
-			using callback_t = std::function<void()>;
-			using menus_t = pmr::vector<std::pair<cstring, pmr::vector<callback_t>>>;
+			using menus_t = pmr::vector<std::pair<
+				cstring, pmr::vector<std::function<void()>>
+			>>;
 			
 			bool		visible	{ true }	; // 
 			menus_t		menus				; // 
@@ -109,7 +110,7 @@ namespace ml
 			template <class Fn> void add(cstring label, Fn && fn)
 			{
 				auto it{ std::find_if(menus.begin(), menus.end(), [&
-				](auto const & e) { return e.first == label; }) };
+				](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
 				if (it == menus.end())
 				{
 					menus.push_back({ label, {} });
@@ -121,7 +122,7 @@ namespace ml
 		private:
 			friend gui_manager;
 
-			main_menu_bar_data(allocator_type const & alloc = {}) noexcept : menus{ alloc }
+			main_menu_bar_data(allocator_type const & alloc) noexcept : menus{ alloc }
 			{
 			}
 
