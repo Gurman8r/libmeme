@@ -13,22 +13,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// EVENT SYSTEM
 	class ML_CORE_API event_system final
 	{
 		static ds::flat_map<hash_t, ds::flat_set<event_listener *>
 		> g_event_system;
 	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static bool add_listener(hash_t type, event_listener * value) noexcept;
-		
-		static void fire_event(event const & value) noexcept;
-
-		static void remove_listener(hash_t type, event_listener * value) noexcept;
-		
-		static void remove_listener(event_listener * value) noexcept;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ev
@@ -48,11 +37,20 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static bool add_listener(hash_t type, event_listener * value) noexcept;
+		
+		static void fire_event(event const & value) noexcept;
+
+		static void remove_listener(hash_t type, event_listener * value) noexcept;
+		
+		static void remove_listener(event_listener * value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// EVENT LISTENER
 	struct ML_CORE_API event_listener
 	{
 		virtual ~event_listener() noexcept
@@ -64,7 +62,6 @@ namespace ml
 	};
 
 
-	// EVENT SYSTEM FUNCTIONS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	inline bool event_system::add_listener(hash_t type, event_listener * value) noexcept
@@ -101,7 +98,7 @@ namespace ml
 	{
 		if (!value) { return; }
 
-		g_event_system.for_each([value](hash_t, auto & listeners)
+		g_event_system.for_each([&](hash_t, auto & listeners)
 		{
 			if (auto const it{ listeners.find(value) }
 			; it != listeners.end())
