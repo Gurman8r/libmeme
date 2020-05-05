@@ -15,7 +15,7 @@ namespace ml
 		asset_manager		m_assets	; // assets
 		file_manager		m_fs		; // files
 		gui_manager			m_gui		; // gui
-		object_manager		m_objects	; // objects
+		gameobj_manager		m_gameobj	; // game objects
 		plugin_manager		m_plugins	; // plugins
 		script_manager		m_scripts	; // scripts
 		time_manager		m_time		; // time
@@ -25,7 +25,7 @@ namespace ml
 			: m_assets	{ j, alloc }
 			, m_fs		{ j, alloc }
 			, m_gui		{ j, alloc }
-			, m_objects	{ j, alloc }
+			, m_gameobj	{ j, alloc }
 			, m_plugins	{ j, alloc }
 			, m_scripts	{ j, alloc }
 			, m_time	{ j, alloc }
@@ -70,7 +70,10 @@ namespace ml
 		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
 
 		// startup scripting
-		if (!g_engine->m_scripts.startup()) { return debug::log::error("failed initializing scripting"); }
+		if (!g_engine->m_scripts.startup())
+		{
+			return debug::log::error("failed initializing scripting");
+		}
 
 		return true;
 	}
@@ -111,10 +114,10 @@ namespace ml
 		return g_engine->m_fs;
 	}
 
-	object_manager & engine::objects() noexcept
+	gameobj_manager & engine::gameobj() noexcept
 	{
 		ML_assert(is_initialized());
-		return g_engine->m_objects;
+		return g_engine->m_gameobj;
 	}
 
 	gui_manager & engine::gui() noexcept

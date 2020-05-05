@@ -3,7 +3,8 @@
 
 // WIP
 
-#include <libmeme/Engine/Asset.hpp>
+#include <libmeme/Engine/Export.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
@@ -12,7 +13,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type		= typename ds::flat_map<hash_t, ds::flat_map<hash_t, asset>>;
+		using storage_type		= typename ds::flat_map<hash_t, ds::flat_map<hash_t, void *>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

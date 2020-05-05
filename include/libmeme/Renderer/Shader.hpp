@@ -23,7 +23,7 @@ namespace ml
 
 		shader() noexcept : shader{ allocator_type{} } {}
 		
-		explicit shader(allocator_type const & alloc);
+		explicit shader(allocator_type const & alloc) noexcept;
 		
 		shader(shader_source const & source, allocator_type const & alloc = {});
 		
@@ -52,6 +52,18 @@ namespace ml
 			return (*this);
 		}
 
+		void swap(shader & value) noexcept
+		{
+			if (this != std::addressof(value))
+			{
+				std::swap(m_handle, value.m_handle);
+				std::swap(m_source, value.m_source);
+				m_attributes.swap(value.m_attributes);
+				m_uniforms.swap(value.m_uniforms);
+				m_textures.swap(value.m_textures);
+			}
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool load_from_file(fs::path const & v_file, fs::path const & f_file);
@@ -75,8 +87,6 @@ namespace ml
 		bool destroy();
 		
 		bool generate();
-
-		void swap(shader & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

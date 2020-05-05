@@ -9,7 +9,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum { unknown = -1 };
+		enum : int32_t { unknown = -1 };
 
 		union { int32_t location; uint32_t current; uint32_t previous; };
 
@@ -25,12 +25,12 @@ namespace ml
 			{
 				previous = GL::getProgramHandle(GL::ProgramObject);
 
-				location = program.get_uniform_location(name);
-
 				if (current != previous)
 				{
 					GL::useProgram(current);
 				}
+
+				location = program.get_uniform_location(name);
 			}
 			if (*this)
 			{
@@ -54,7 +54,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader::shader(allocator_type const & alloc)
+	shader::shader(allocator_type const & alloc) noexcept
 		: m_handle		{ NULL }
 		, m_source		{ std::allocator_arg, alloc }
 		, m_attributes	{ alloc }
@@ -197,18 +197,6 @@ namespace ml
 	bool shader::generate()
 	{
 		return !m_handle && (m_handle = GL::createProgram());
-	}
-
-	void shader::swap(shader & value) noexcept
-	{
-		if (this != std::addressof(value))
-		{
-			std::swap(m_handle, value.m_handle);
-			std::swap(m_source, value.m_source);
-			m_attributes.swap(value.m_attributes);
-			m_uniforms.swap(value.m_uniforms);
-			m_textures.swap(value.m_textures);
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1,10 +1,10 @@
-#include <libmeme/Engine/ObjectManager.hpp>
+#include <libmeme/Engine/GameObjectManager.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	object_manager::object_manager(json const & j, allocator_type const & alloc) noexcept
+	gameobj_manager::gameobj_manager(json const & j, allocator_type const & alloc) noexcept
 	{
 	}
 
