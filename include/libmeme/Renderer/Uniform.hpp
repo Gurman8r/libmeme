@@ -101,6 +101,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD info_type const & type() const noexcept { return m_type; }
+
+		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
+
+		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD variable_type var() const noexcept
 		{
 			switch (m_data.index())
@@ -194,16 +202,6 @@ namespace ml
 		ML_NODISCARD bool operator<=(uniform const & value) const noexcept { return compare(value) <= 0; }
 
 		ML_NODISCARD bool operator>=(uniform const & value) const noexcept { return compare(value) >= 0; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD operator bool const() const noexcept { return !m_name.empty(); }
-
-		ML_NODISCARD info_type const & type() const noexcept { return m_type; }
-
-		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
-
-		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

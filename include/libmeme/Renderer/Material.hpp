@@ -212,12 +212,12 @@ namespace ml
 
 		bool insert(uniform const & value)
 		{
-			return value && m_storage.insert(value).second;
+			return !value.name().empty() && m_storage.insert(value).second;
 		}
 
 		bool insert(uniform && value)
 		{
-			return value && m_storage.insert(std::move(value)).second;
+			return !value.name().empty() && m_storage.insert(std::move(value)).second;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

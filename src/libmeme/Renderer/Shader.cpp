@@ -203,41 +203,20 @@ namespace ml
 
 	bool shader::set_uniform(uniform const & value)
 	{
-		if (!value) { return false; }
+		if (value.name().empty()) { return false; }
 		switch (value.type().guid())
 		{
-		case hashof_v<bool>: if (auto const v{ value.get<bool>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<int32_t>: if (auto const v{ value.get<int32_t>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<float_t>: if (auto const v{ value.get<float_t>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<vec2>: if (auto const v{ value.get<vec2>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<vec3>: if (auto const v{ value.get<vec3>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<vec4>: if (auto const v{ value.get<vec4>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<color>: if (auto const v{ value.get<color>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<mat2>: if (auto const v{ value.get<mat2>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<mat3>: if (auto const v{ value.get<mat3>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<mat4>: if (auto const v{ value.get<mat4>() })
-			return set_uniform(value.name(), *v);
-		
-		case hashof_v<texture>: if (auto const v{ value.get<texture>() })
-			return set_uniform(value.name(), *v);
+		case hashof_v<bool>		: return set_uniform(value.name(), *value.get<bool>());
+		case hashof_v<int32_t>	: return set_uniform(value.name(), *value.get<int32_t>());
+		case hashof_v<float_t>	: return set_uniform(value.name(), *value.get<float_t>());
+		case hashof_v<vec2>		: return set_uniform(value.name(), *value.get<vec2>());
+		case hashof_v<vec3>		: return set_uniform(value.name(), *value.get<vec3>());
+		case hashof_v<vec4>		: return set_uniform(value.name(), *value.get<vec4>());
+		case hashof_v<color>	: return set_uniform(value.name(), *value.get<color>());
+		case hashof_v<mat2>		: return set_uniform(value.name(), *value.get<mat2>());
+		case hashof_v<mat3>		: return set_uniform(value.name(), *value.get<mat3>());
+		case hashof_v<mat4>		: return set_uniform(value.name(), *value.get<mat4>());
+		case hashof_v<texture>	: return set_uniform(value.name(), *value.get<texture>());
 		}
 		return false;
 	}
@@ -257,10 +236,10 @@ namespace ml
 
 	bool shader::set_uniform(pmr::string const & name, float32_t value)
 	{
-		return uniform_binder{ *this, name, [&](int32_t loc) noexcept
+		return uniform_binder(*this, name, [&](int32_t loc) noexcept
 		{
 			GL::uniform1f(loc, value);
-		} };
+		});
 	}
 
 	bool shader::set_uniform(pmr::string const & name, vec2 const & value)
