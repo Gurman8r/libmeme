@@ -21,7 +21,7 @@ namespace ml
 		> uniform_binder(shader & program, pmr::string const & name, Fn && fn) noexcept
 			: location{ unknown }, current{ NULL }, previous{ NULL }
 		{
-			if (current = program.handle())
+			if (current = program.m_handle)
 			{
 				previous = GL::getProgramHandle(GL::ProgramObject);
 

@@ -166,8 +166,6 @@ namespace ml
 
 		gui::console m_console{};
 
-		MemoryEditor m_mem_editor{};
-
 		raii_ptr<ax::NodeEditor::EditorContext> m_node_editor
 		{
 			[]() { return ax::NodeEditor::CreateEditor(); },
@@ -186,6 +184,8 @@ namespace ml
 			[]() { return (float_t)engine::time().frame_rate(); }
 			),
 		} };
+
+		MemoryEditor m_mem_editor{};
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
