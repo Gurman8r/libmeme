@@ -101,8 +101,8 @@ namespace ml
 		// shutdown gui
 		if (g_engine->m_gui.is_initialized() && !g_engine->m_gui.shutdown()) {}
 
-		// close window
-		if (!g_engine->m_window.close()) {}
+		// destroy window
+		g_engine->m_window.destroy();
 
 		// shutdown window backend
 		g_engine->m_window.terminate();

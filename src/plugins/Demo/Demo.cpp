@@ -528,7 +528,7 @@ namespace ml
 					ML_ImGui_ScopeID(ML_addressof(this));
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
-						engine::window().close();
+						engine::window().set_should_close(true);
 					}
 				});
 				mmb.add("tools", [&]()
@@ -677,7 +677,7 @@ namespace ml
 
 				m_console.commands.push_back({ "exit", [&](auto args)
 				{
-					engine::window().close();
+					engine::window().set_should_close(true);
 				} });
 
 				m_console.commands.push_back({ "help", [&](auto args)

@@ -17,9 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool create(window_settings const & ws) override;
-
-		virtual bool close() override;
+		ML_NODISCARD virtual bool open(window_settings const & ws) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -45,11 +43,11 @@ namespace ml
 		
 		void set_cursor_mode(int32_t value) override;
 		
-		void set_cursor_pos(vec2d const & value) override;
+		void set_cursor_position(vec2d const & value) override;
 		
 		void set_fullscreen(bool value) override;
 		
-		void set_icon(size_t w, size_t h, byte_t const * pixels) override;
+		void set_icon(size_t w, size_t h, byte_t const * p) override;
 
 		void set_input_mode(int32_t mode, int32_t value) override;
 		
@@ -105,7 +103,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD cursor_handle create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels) const override;
+		ML_NODISCARD cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) const override;
 		
 		ML_NODISCARD cursor_handle create_standard_cursor(int32_t value) const override;
 
@@ -139,6 +137,11 @@ namespace ml
 		focus_fn		set_window_focus_callback	(focus_fn			fn) override;
 		position_fn		set_window_pos_callback		(position_fn		fn) override;
 		size_fn			set_window_size_callback	(size_fn			fn) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	protected:
+		base_window * m_impl{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -41,9 +41,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool create(window_settings const &) = 0;
-
-		virtual bool close() = 0;
+		ML_NODISCARD virtual bool open(window_settings const &) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -63,29 +61,29 @@ namespace ml
 
 		virtual void set_centered() = 0;
 
-		virtual void set_clipboard(cstring const & value) = 0;
+		virtual void set_clipboard(cstring const &) = 0;
 
-		virtual void set_cursor(cursor_handle value) = 0;
+		virtual void set_cursor(cursor_handle) = 0;
 
-		virtual void set_cursor_mode(int32_t value) = 0;
+		virtual void set_cursor_mode(int32_t) = 0;
 
-		virtual void set_cursor_pos(vec2d const & value) = 0;
+		virtual void set_cursor_position(vec2d const &) = 0;
 
-		virtual void set_fullscreen(bool value) = 0;
+		virtual void set_fullscreen(bool) = 0;
 
-		virtual void set_icon(size_t w, size_t h, byte_t const * pixels) = 0;
+		virtual void set_icon(size_t, size_t, byte_t const *) = 0;
 
-		virtual void set_input_mode(int32_t mode, int32_t value) = 0;
+		virtual void set_input_mode(int32_t, int32_t) = 0;
 
-		virtual void set_position(vec2i const & value) = 0;
+		virtual void set_position(vec2i const &) = 0;
 
-		virtual void set_monitor(window_handle value) = 0;
+		virtual void set_monitor(window_handle) = 0;
 
-		virtual void set_should_close(bool value) = 0;
+		virtual void set_should_close(bool) = 0;
 
-		virtual void set_size(vec2i const & value) = 0;
+		virtual void set_size(vec2i const &) = 0;
 
-		virtual void set_title(pmr::string const & value) = 0;
+		virtual void set_title(pmr::string const &) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -95,7 +93,7 @@ namespace ml
 
 		virtual bool is_open() const = 0;
 
-		virtual int32_t get_attribute(int32_t value) const = 0;
+		virtual int32_t get_attribute(int32_t) const = 0;
 
 		virtual cstring get_clipboard() const = 0;
 
@@ -105,11 +103,11 @@ namespace ml
 
 		virtual window_handle get_handle() const = 0;
 
-		virtual int32_t get_key(int32_t key) const = 0;
+		virtual int32_t get_key(int32_t) const = 0;
 
-		virtual int32_t get_input_mode(int32_t mode) const = 0;
+		virtual int32_t get_input_mode(int32_t) const = 0;
 
-		virtual int32_t get_mouse_button(int32_t button) const = 0;
+		virtual int32_t get_mouse_button(int32_t) const = 0;
 
 		virtual window_handle get_native_handle() const = 0;
 
@@ -117,23 +115,23 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void destroy_cursor(cursor_handle value) const = 0;
+		virtual void destroy_cursor(cursor_handle) const = 0;
 
-		virtual void make_context_current(window_handle value) const = 0;
+		virtual void make_context_current(window_handle) const = 0;
 
 		virtual void poll_events() const = 0;
 
-		virtual void swap_interval(int32_t value) const = 0;
+		virtual void swap_interval(int32_t) const = 0;
 
 		virtual void terminate() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual cursor_handle create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels) const = 0;
+		virtual cursor_handle create_custom_cursor(size_t, size_t, byte_t const *) const = 0;
 
-		virtual cursor_handle create_standard_cursor(int32_t value) const = 0;
+		virtual cursor_handle create_standard_cursor(int32_t) const = 0;
 
-		virtual int32_t extension_supported(cstring value) const = 0;
+		virtual int32_t extension_supported(cstring) const = 0;
 
 		virtual window_handle get_context_current() const = 0;
 
@@ -141,7 +139,7 @@ namespace ml
 
 		virtual pmr::vector<video_mode> const & get_fullscreen_modes() const = 0;
 
-		virtual proc_fn get_proc_address(cstring value) const = 0;
+		virtual proc_fn get_proc_address(cstring) const = 0;
 
 		virtual pmr::vector<window_handle> const & get_monitors() const = 0;
 

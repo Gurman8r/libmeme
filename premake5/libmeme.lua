@@ -22,8 +22,8 @@ defines{
 	"ML_API=ML_API_EXPORT",
 	"ML_PLATFORM_GLFW",
 	"ML_RENDERER_OPENGL",
-	--"ML_OPENGL_LOADER_GLAD",
 	"ML_OPENGL_LOADER_GLEW",
+	--"ML_OPENGL_LOADER_GLAD",
 
 	-- imgui
 	"IMGUI_USER_CONFIG=<libmeme/Config.hpp>",
@@ -52,7 +52,6 @@ includedirs{
 files{
 	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}include/libmeme/**.hpp",
-	"%{sln_dir}src/libmeme/**.cpp",
 
 	-- imgui
 	"%{ext_dir}imgui/*.h",

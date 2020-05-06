@@ -18,12 +18,13 @@
 
 namespace ml::impl
 {
-	static GLFWimage const * glfw_image(vec2s const & size, byte_t const * pixels) noexcept
+	static GLFWimage const * glfw_image(vec2s const & s, byte_t const * p) noexcept
 	{
-		if (!size[0] || !size[1] || !pixels) return nullptr;
+		if (!s[0] || !s[1] || !p) return nullptr;
 		static pmr::vector<GLFWimage> cache{};
-		return &cache.emplace_back(
-			GLFWimage{ (int32_t)size[0], (int32_t)size[1], (uint8_t *)pixels }
+		return &cache.emplace_back
+		(
+			GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p }
 		);
 	}
 }
@@ -34,7 +35,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::create(window_settings const & ws)
+	bool window::open(window_settings const & ws)
 	{
 		if (is_open()) { return false; }
 		
@@ -118,19 +119,6 @@ namespace ml
 		}
 
 		return is_open();
-	}
-
-	bool window::close()
-	{
-		if (!is_open()) { return false; }
-
-		set_should_close(true);
-
-		destroy();
-
-		m_window = m_monitor = m_share = nullptr;
-
-		return !is_open();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -219,7 +207,7 @@ namespace ml
 		})());
 	}
 
-	void window::set_cursor_pos(vec2d const & value)
+	void window::set_cursor_position(vec2d const & value)
 	{
 		if (!m_window) { return; }
 
@@ -231,13 +219,13 @@ namespace ml
 		set_monitor(value ? glfwGetPrimaryMonitor() : nullptr);
 	}
 
-	void window::set_icon(size_t w, size_t h, byte_t const * pixels)
+	void window::set_icon(size_t w, size_t h, byte_t const * p)
 	{
 		if (!m_window) { return; }
 
-		if (!w || !h || !pixels) { return; }
+		if (!w || !h || !p) { return; }
 
-		glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 1, impl::glfw_image({ w, h }, pixels));
+		glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 1, impl::glfw_image({ w, h }, p));
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value)
@@ -441,9 +429,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	cursor_handle window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels) const
+	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p) const
 	{
-		return glfwCreateCursor(impl::glfw_image({ w, h }, pixels), w, h);
+		return glfwCreateCursor(impl::glfw_image({ w, h }, p), w, h);
 	}
 
 	cursor_handle window::create_standard_cursor(int32_t value) const
@@ -551,175 +539,110 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::char_fn window::set_char_callback(char_fn value)
+	base_window::char_fn window::set_char_callback(char_fn value)
 	{
 		if (!m_window) { return nullptr; }
 		
-		return glfwSetCharCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWcharfun>(value)) ? value : nullptr;
+		return reinterpret_cast<char_fn>(
+			glfwSetCharCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWcharfun>(value)));
 	}
 	
-	window::cursor_enter_fn window::set_cursor_enter_callback(cursor_enter_fn value)
+	base_window::cursor_enter_fn window::set_cursor_enter_callback(cursor_enter_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetCursorEnterCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWcursorenterfun>(value)) ? value : nullptr;
+		return reinterpret_cast<cursor_enter_fn>(
+			glfwSetCursorEnterCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWcursorenterfun>(value)));
+	}
+
+	base_window::cursor_pos_fn window::set_cursor_pos_callback(cursor_pos_fn value)
+	{
+		if (!m_window) { return nullptr; }
+
+		return reinterpret_cast<cursor_pos_fn>(
+			glfwSetCursorPosCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWcursorposfun>(value)));
+	}
+
+	base_window::error_fn window::set_error_callback(error_fn value)
+	{
+		return reinterpret_cast<error_fn>(
+			glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(value)));
+	}
+
+	base_window::frame_size_fn window::set_frame_size_callback(frame_size_fn value)
+	{
+		if (!m_window) { return nullptr; }
+
+		return reinterpret_cast<frame_size_fn>(
+			glfwSetFramebufferSizeCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWframebuffersizefun>(value)));
 	}
 	
-	window::cursor_pos_fn window::set_cursor_pos_callback(cursor_pos_fn value)
+	base_window::key_fn window::set_key_callback(key_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetCursorPosCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWcursorposfun>(value)) ? value : nullptr;
-	}
-
-	window::error_fn window::set_error_callback(error_fn value)
-	{
-		return glfwSetErrorCallback(
-			reinterpret_cast<GLFWerrorfun>(value)) ? value : nullptr;
-	}
-
-	window::frame_size_fn window::set_frame_size_callback(frame_size_fn value)
-	{
-		if (!m_window) { return nullptr; }
-
-		return glfwSetFramebufferSizeCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWframebuffersizefun>(value)) ? value : nullptr;
+		return reinterpret_cast<key_fn>(
+			glfwSetKeyCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWkeyfun>(value)));
 	}
 	
-	window::key_fn window::set_key_callback(key_fn value)
+	base_window::mouse_fn window::set_mouse_callback(mouse_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetKeyCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWkeyfun>(value)) ? value : nullptr;
+		return reinterpret_cast<mouse_fn>(
+			glfwSetMouseButtonCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWmousebuttonfun>(value)));
 	}
 	
-	window::mouse_fn window::set_mouse_callback(mouse_fn value)
+	base_window::scroll_fn window::set_scroll_callback(scroll_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetMouseButtonCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWmousebuttonfun>(value)) ? value : nullptr;
+		return reinterpret_cast<scroll_fn>(
+			glfwSetScrollCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWscrollfun>(value)));
 	}
 	
-	window::scroll_fn window::set_scroll_callback(scroll_fn value)
+	base_window::close_fn window::set_window_close_callback(close_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetScrollCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWscrollfun>(value)) ? value : nullptr;
+		return reinterpret_cast<close_fn>(
+			glfwSetWindowCloseCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWwindowclosefun>(value)));
 	}
 	
-	window::close_fn window::set_window_close_callback(close_fn value)
+	base_window::focus_fn window::set_window_focus_callback(focus_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetWindowCloseCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWwindowclosefun>(value)) ? value : nullptr;
+		return reinterpret_cast<focus_fn>(
+			glfwSetWindowFocusCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWwindowfocusfun>(value)));
 	}
 	
-	window::focus_fn window::set_window_focus_callback(focus_fn value)
+	base_window::position_fn window::set_window_pos_callback(position_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetWindowFocusCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWwindowfocusfun>(value)) ? value : nullptr;
+		return reinterpret_cast<position_fn>(
+			glfwSetWindowPosCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWwindowposfun>(value)));
 	}
 	
-	window::position_fn window::set_window_pos_callback(position_fn value)
+	base_window::size_fn window::set_window_size_callback(size_fn value)
 	{
 		if (!m_window) { return nullptr; }
 
-		return glfwSetWindowPosCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
+		return reinterpret_cast<size_fn>(
+			glfwSetWindowSizeCallback(static_cast<GLFWwindow *>(m_window),
+				reinterpret_cast<GLFWwindowposfun>(value)));
 	}
-	
-	window::size_fn window::set_window_size_callback(size_fn value)
-	{
-		if (!m_window) { return nullptr; }
-
-		return glfwSetWindowSizeCallback(
-			static_cast<GLFWwindow *>(m_window),
-			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
-	}
-
-	//void window::install_default_callbacks()
-	//{
-	//	if (!is_open()) { return; }
-	//
-	//	set_char_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<char_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_cursor_enter_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_cursor_pos_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<cursor_position_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_error_callback([](auto ... args)
-	//	{
-	//		event_system::fire_event<window_error_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_frame_size_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<frame_size_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_key_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<key_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_mouse_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<mouse_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_scroll_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<scroll_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_window_close_callback([](auto)
-	//	{
-	//		event_system::fire_event<window_close_event>();
-	//	});
-	//
-	//	set_window_focus_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<window_focus_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_window_pos_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<window_position_event>(ML_forward(args)...);
-	//	});
-	//
-	//	set_window_size_callback([](auto, auto ... args)
-	//	{
-	//		event_system::fire_event<window_size_event>(ML_forward(args)...);
-	//	});
-	//}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
