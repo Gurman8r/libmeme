@@ -24,8 +24,8 @@ namespace ml
 		// Flags
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static bool isEnabled(uint32_t value);
-		static bool enable(uint32_t value, bool cond = true);
-		static bool disable(uint32_t value, bool cond = true);
+		static void enable(uint32_t value, bool cond = true);
+		static void disable(uint32_t value, bool cond = true);
 		
 		// Getters
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -36,11 +36,7 @@ namespace ml
 
 	bool window::open(window_settings const & ws)
 	{
-		if (is_open())			{ return debug::log::error("window is already open"); }
-		if (!initialize())		{ return debug::log::error("failed initializing backend"); }
-		if (ws.title.empty())	{ return debug::log::error("invalid window title"); }
-		if (!ws.video)			{ return debug::log::error("invalid video mode"); }
-		if (!ws.context)		{ return debug::log::error("invalid context settings"); }
+		if (is_open()) { return false; }
 		
 		m_settings = ws;
 
@@ -75,14 +71,14 @@ namespace ml
 		glfwWindowHint(GLFW_SRGB_CAPABLE,	m_settings.context.srgb_capable);
 
 		// style hints
-		glfwWindowHint(GLFW_RESIZABLE,		has_hint(window_hints_resizable));
-		glfwWindowHint(GLFW_VISIBLE,		has_hint(window_hints_visible));
-		glfwWindowHint(GLFW_DECORATED,		has_hint(window_hints_decorated));
-		glfwWindowHint(GLFW_FOCUSED,		has_hint(window_hints_focused));
-		glfwWindowHint(GLFW_AUTO_ICONIFY,	has_hint(window_hints_auto_iconify));
-		glfwWindowHint(GLFW_FLOATING,		has_hint(window_hints_floating));
-		glfwWindowHint(GLFW_MAXIMIZED,		has_hint(window_hints_maximized));
-		glfwWindowHint(GLFW_DOUBLEBUFFER,	has_hint(window_hints_double_buffered));
+		glfwWindowHint(GLFW_RESIZABLE,		get_hint(window_hints_resizable));
+		glfwWindowHint(GLFW_VISIBLE,		get_hint(window_hints_visible));
+		glfwWindowHint(GLFW_DECORATED,		get_hint(window_hints_decorated));
+		glfwWindowHint(GLFW_FOCUSED,		get_hint(window_hints_focused));
+		glfwWindowHint(GLFW_AUTO_ICONIFY,	get_hint(window_hints_auto_iconify));
+		glfwWindowHint(GLFW_FLOATING,		get_hint(window_hints_floating));
+		glfwWindowHint(GLFW_MAXIMIZED,		get_hint(window_hints_maximized));
+		glfwWindowHint(GLFW_DOUBLEBUFFER,	get_hint(window_hints_double_buffered));
 		
 		// create window
 		if (!([&]() noexcept
@@ -96,23 +92,23 @@ namespace ml
 			);
 		})())
 		{
-			return debug::log::error("failed creating glfw window");
+			return debug::error("failed creating glfw window");
 		}
 
 		make_context_current();
 
-		if (has_hint(window_hints_install_callbacks))
+		if (get_hint(window_hints_install_callbacks))
 		{
 			install_default_callbacks();
 		}
 
 		set_cursor_mode(cursor_mode_normal);
 
-		if (has_hint(window_hints_fullscreen))
+		if (get_hint(window_hints_fullscreen))
 		{
 			set_fullscreen(true); // fullscreen
 		}
-		else if (has_hint(window_hints_maximized))
+		else if (get_hint(window_hints_maximized))
 		{
 			maximize(); // maximized
 		}
@@ -131,8 +127,6 @@ namespace ml
 		set_should_close(true);
 
 		destroy();
-
-		window::terminate();
 
 		m_window = m_monitor = m_share = nullptr;
 
@@ -184,7 +178,7 @@ namespace ml
 	{
 		if (!m_window) { return; }
 
-		if (has_hint(window_hints_double_buffered))
+		if (get_hint(window_hints_double_buffered))
 		{
 			glfwSwapBuffers(static_cast<GLFWwindow *>(m_window));
 		}
@@ -194,7 +188,7 @@ namespace ml
 
 	void window::set_centered()
 	{
-		set_position((vec2i)(get_desktop_mode().size - get_size()) / 2);
+		set_position((vec2i)(get_desktop_mode().size - get_frame_size()) / 2);
 	}
 
 	void window::set_clipboard(cstring const & value)
@@ -271,7 +265,8 @@ namespace ml
 				glfwSetWindowMonitor(
 					static_cast<GLFWwindow *>(m_window),
 					static_cast<GLFWmonitor *>(m_monitor),
-					0, 0, vm->width, vm->height,
+					0, 0,
+					vm->width, vm->height,
 					GLFW_DONT_CARE
 				);
 			}
@@ -281,7 +276,8 @@ namespace ml
 			glfwSetWindowMonitor(
 				static_cast<GLFWwindow *>(m_window),
 				static_cast<GLFWmonitor *>(m_monitor),
-				0, 0, get_width(), get_height(),
+				0, 0,
+				m_settings.video.size[0], m_settings.video.size[1],
 				GLFW_DONT_CARE
 			);
 
@@ -302,7 +298,7 @@ namespace ml
 		
 		m_settings.video.size = value;
 		
-		glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), get_width(), get_height());
+		glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), value[0], value[1]);
 	}
 
 	void window::set_title(pmr::string const & value)
@@ -311,7 +307,7 @@ namespace ml
 
 		m_settings.title = value;
 
-		glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), get_title().c_str());
+		glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), value.c_str());
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -482,16 +478,13 @@ namespace ml
 	video_mode const & window::get_desktop_mode()
 	{
 		static video_mode temp{};
-		static ML_block
+		static ML_scope
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp = video_mode{ vec2i{
-				(int32_t)dm.dmPelsWidth,
-				(int32_t)dm.dmPelsHeight },
-				dm.dmBitsPerPel
-			};
+			temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
+			temp.depth = dm.dmBitsPerPel;
 #else
 			// do the thing
 #endif
@@ -502,17 +495,17 @@ namespace ml
 	pmr::vector<video_mode> const & window::get_fullscreen_modes()
 	{
 		static pmr::vector<video_mode> temp{};
-		static ML_block
+		static ML_scope
 		{
 #ifdef ML_os_windows
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				auto const vm{ video_mode{ vec2i{
-					(int32_t)dm.dmPelsWidth,
-					(int32_t)dm.dmPelsHeight },
+				video_mode const vm
+				{
+					vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
 					dm.dmBitsPerPel
-				} };
+				};
 
 				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
 				{
@@ -558,12 +551,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::error_fn window::set_error_callback(error_fn value)
-	{
-		return glfwSetErrorCallback(
-			reinterpret_cast<GLFWerrorfun>(value)) ? value : nullptr;
-	}
-
 	window::char_fn window::set_char_callback(char_fn value)
 	{
 		if (!m_window) { return nullptr; }
@@ -589,6 +576,12 @@ namespace ml
 		return glfwSetCursorPosCallback(
 			static_cast<GLFWwindow *>(m_window),
 			reinterpret_cast<GLFWcursorposfun>(value)) ? value : nullptr;
+	}
+
+	window::error_fn window::set_error_callback(error_fn value)
+	{
+		return glfwSetErrorCallback(
+			reinterpret_cast<GLFWerrorfun>(value)) ? value : nullptr;
 	}
 
 	window::frame_size_fn window::set_frame_size_callback(frame_size_fn value)

@@ -30,7 +30,7 @@ namespace ml::impl
     };
 
     // invoke body immediately
-#define ML_block \
+#define ML_scope \
     ML_flow_control_impl(immediate_block)
 }
 

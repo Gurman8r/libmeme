@@ -52,12 +52,12 @@ namespace ml
 		
 		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)win.get_handle(), true))
 		{
-			return debug::log::error("Failed initializing ImGui platform");
+			return debug::error("Failed initializing ImGui platform");
 		}
 
 		if (!ImGui_ImplOpenGL3_Init(ver))
 		{
-			return debug::log::error("Failed initializing ImGui renderer");
+			return debug::error("Failed initializing ImGui renderer");
 		}
 #else
 #endif
@@ -138,7 +138,11 @@ namespace ml
 				{
 					ImGui::PopStyleVar(3);
 
-					if (d.nodes.empty()) { event_system::fire_event<gui_dock_event>(); }
+					// fire docking event if nodes are empty
+					if (d.nodes.empty())
+					{
+						event_system::fire_event<gui_dock_event>();
+					}
 
 					ImGui::DockSpace(
 						ImGui::GetID(d.title),

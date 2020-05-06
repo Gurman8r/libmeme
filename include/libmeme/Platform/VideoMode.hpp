@@ -11,34 +11,24 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2i		size {};
-		uint32_t	depth{};
+		vec2i		size	{}; // 
+		uint32_t	depth	{}; // 
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr bool nonzero() const noexcept
+		constexpr bool operator==(video_mode const & other) const noexcept
 		{
-			return size[0] && size[1] && depth;
+			return (this == std::addressof(other))
+				|| ((size == other.size) && (depth == other.depth));
 		}
 
-		ML_NODISCARD constexpr operator bool() const noexcept
-		{
-			return this->nonzero();
-		}
-
-		ML_NODISCARD constexpr bool operator==(video_mode const & other) const
-		{
-			return (size == other.size) && (depth == other.depth);
-		}
-
-		ML_NODISCARD constexpr bool operator!=(video_mode const & other) const
+		constexpr bool operator!=(video_mode const & other) const noexcept
 		{
 			return !(*this == other);
 		}
 
-		ML_NODISCARD constexpr bool operator<(video_mode const & other) const
+		constexpr bool operator<(video_mode const & other) const noexcept
 		{
-			return (size < other.size) || (depth < other.depth);
+			return (this != std::addressof(other))
+				&& (size < other.size) || (depth < other.depth);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

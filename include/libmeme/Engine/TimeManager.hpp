@@ -14,15 +14,47 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		time_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		time_manager(json const & j, allocator_type const & alloc = {}) noexcept
+			: m_main_timer	{ true }
+			, m_loop_timer	{}
+			, m_fps_accum	{}
+			, m_fps_index	{}
+			, m_fps_value	{}
+			, m_fps_frames	{}
+			, m_delta_time	{}
+			, m_frame_rate	{}
+			, m_frame_count	{}
+		{
+		}
 
-		~time_manager() noexcept {}
+		~time_manager() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void begin_loop() noexcept;
+		void begin_loop() noexcept
+		{
+			m_delta_time = m_loop_timer.stop().elapsed();
 
-		void end_loop() noexcept;
+			m_loop_timer.start();
+		}
+
+		void end_loop() noexcept
+		{
+			++m_frame_count;
+
+			m_frame_rate = ([&, dt = m_delta_time.count()]() noexcept
+			{
+				m_fps_accum += dt - m_fps_frames[m_fps_index];
+
+				m_fps_frames[m_fps_index] = dt;
+
+				m_fps_index = (m_fps_index + 1) % ML_arraysize(m_fps_frames);
+
+				return m_fps_value = (m_fps_accum > 0.0)
+					? 1.0 / (m_fps_accum / (float64_t)ML_arraysize(m_fps_frames))
+					: FLT_MAX;
+			})();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -33,6 +65,8 @@ namespace ml
 		auto frame_rate() const & noexcept -> float64_t const & { return m_frame_rate; }
 
 		auto frame_count() const & noexcept -> uint64_t const & { return m_frame_count; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

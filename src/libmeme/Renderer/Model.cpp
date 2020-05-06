@@ -98,7 +98,7 @@ namespace ml
 		Assimp::Importer _ai;
 		aiScene const * s{ _ai.ReadFile(path.string().c_str(), flags) };
 		ML_defer{ _ai.FreeScene(); };
-		if (!s) { return debug::log::error("model failed reading assimp scene"); }
+		if (!s) { return debug::error("model failed reading assimp scene"); }
 
 		// clear existing
 		if (!m_meshes.empty()) { m_meshes.clear(); }

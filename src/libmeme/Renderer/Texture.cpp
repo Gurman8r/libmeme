@@ -214,13 +214,13 @@ namespace ml
 		// size cannot be zero
 		if (!w || !h)
 		{
-			return debug::log::error("texture size cannot be zero");
+			return debug::error("texture size cannot be zero");
 		}
 
 		// failed creating handle
 		if (!destroy() || !generate())
 		{
-			return debug::log::error("texture failed generating handle");
+			return debug::error("texture failed generating handle");
 		}
 
 		// set size
@@ -234,7 +234,7 @@ namespace ml
 		static auto const max_size{ GL::getMaxTextureSize() };
 		if ((m_real_size[0] > max_size) || (m_real_size[1] > max_size))
 		{
-			return debug::log::error("texture size is too large ({0}) max is: {1}",
+			return debug::error("texture size is too large ({0}) max is: {1}",
 				m_real_size, vec2u{ max_size , max_size }
 			);
 		}
@@ -275,12 +275,12 @@ namespace ml
 	{
 		if (!m_handle)
 		{
-			return debug::log::error("texture handle not set");
+			return debug::error("texture handle not set");
 		}
 
 		if (!w || !h)
 		{
-			return debug::log::error("texture size cannot be zero");
+			return debug::error("texture size cannot be zero");
 		}
 
 		ML_defer{ GL::flush(); };

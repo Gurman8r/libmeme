@@ -15,7 +15,6 @@
 #include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Renderer/Font.hpp>
 #include <libmeme/Renderer/Model.hpp>
-#include <libmeme/Renderer/RenderStates.hpp>
 #include <libmeme/Renderer/RenderTexture.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
@@ -172,16 +171,22 @@ namespace ml
 			&ax::NodeEditor::DestroyEditor
 		};
 
+
 		gui::plot_controller m_plots
 		{ {
-			gui::make_plot(120, 1, "##frame time", "%.3f ms/frame",
-			vec2{ 0.f, 64.f }, vec2::fill(FLT_MAX),
-			[]() { return engine::time().delta().count<float_t>() * 1000.f; }
+			gui::plot::create(120, gui::plot::histogram
+				, "##frame time"
+				, "%.3f ms/frame"
+				, vec2{ 0.f, 64.f }
+				, vec2{ FLT_MAX, FLT_MAX }
+				, []() { return engine::time().delta().count<float_t>() * 1000.f; }
 			),
-
-			gui::make_plot(120, 1, "##frame rate", "%.3f fps",
-			vec2{ 0.f, 64.f }, vec2::fill(FLT_MAX),
-			[]() { return (float_t)engine::time().frame_rate(); }
+			gui::plot::create(120, gui::plot::histogram
+				, "##frame rate"
+				, "%.3f fps"
+				, vec2{ 0.f, 64.f }
+				, vec2{ FLT_MAX, FLT_MAX }
+				, []() { return (float_t)engine::time().frame_rate(); }
 			),
 		} };
 
@@ -232,9 +237,6 @@ namespace ml
 		void on_load(load_event const &)
 		{
 			// load stuff, etc...
-
-			// GUI
-			setup_menus();
 
 			// ICON
 			if (auto icon{ make_image(engine::fs().path_to("assets/textures/icon.png")) })
@@ -462,9 +464,6 @@ namespace ml
 				ML_bind_scope(target);
 				target.clear_color(colors::magenta);
 				target.viewport(target.bounds());
-				constexpr render_states states{
-					{}, {}, cull_state{ false }, {}
-				}; states();
 				m_ecs.update_system<x_draw_renderers>(target);
 			}
 		}
@@ -520,23 +519,70 @@ namespace ml
 		{
 			// gui stuff, etc...
 
-			ML_ImGui_ScopeID(ML_addressof(this));
+			static ML_scope // main menu bar
+			{
+				auto & mmb{ engine::gui().main_menu_bar };
+				mmb.visible = true;
+				mmb.add("file", [&]()
+				{
+					ML_ImGui_ScopeID(ML_addressof(this));
+					if (ImGui::MenuItem("quit", "alt+f4"))
+					{
+						engine::window().close();
+					}
+				});
+				mmb.add("tools", [&]()
+				{
+					ML_ImGui_ScopeID(ML_addressof(this));
+					m_gui_assets.menu_item();
+					m_gui_console.menu_item();
+					m_gui_display.menu_item();
+					m_gui_docs.menu_item();
+					m_gui_ecs.menu_item();
+					m_gui_memory.menu_item();
+					m_gui_nodes.menu_item();
+					m_gui_profiler.menu_item();
+					m_gui_scripting.menu_item();
+				});
+				mmb.add("settings", [&]()
+				{
+					ML_ImGui_ScopeID(ML_addressof(this));
+					bool fullscreen{ engine::window().is_fullscreen() };
+					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
+					{
+						engine::window().set_fullscreen(fullscreen);
+					}
+				});
+				mmb.add("help", [&]()
+				{
+					ML_ImGui_ScopeID(ML_addressof(this));
+					m_imgui_demo.menu_item();
+					m_imgui_metrics.menu_item();
+					m_imgui_about.menu_item();
+				});
+			};
 
-			// IMGUI
-			if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
+			// draw
+			{
+				ML_ImGui_ScopeID(ML_addressof(this));
 
-			m_gui_display	.render(&demo::show_display_gui		, this); // DISPLAY
-			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
-			m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
-			m_gui_files		.render(&demo::show_files_gui		, this); // FILES
-			m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
-			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
-			m_gui_scripting	.render(&demo::show_scripting_gui	, this); // SCRIPTING
-			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
-			m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
-			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+				// IMGUI
+				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
+				if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }
+				if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
+
+				// WIDGETS
+				m_gui_display	.render(&demo::show_display_gui		, this); // DISPLAY
+				m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
+				m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
+				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
+				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
+				m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
+				m_gui_scripting	.render(&demo::show_scripting_gui	, this); // SCRIPTING
+				m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
+				m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
+				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+			}
 		}
 
 		void on_unload(unload_event const &)
@@ -553,49 +599,6 @@ namespace ml
 			m_pipeline.clear();
 
 			m_node_editor.destroy();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void setup_menus()
-		{
-			engine::gui().main_menu_bar.add("file", [&]()
-			{
-				ML_ImGui_ScopeID(ML_addressof(this));
-				if (ImGui::MenuItem("quit", "Alt+F4"))
-				{
-					engine::window().close();
-				}
-			});
-			engine::gui().main_menu_bar.add("tools", [&]()
-			{
-				ML_ImGui_ScopeID(ML_addressof(this));
-				m_gui_assets.menu_item();
-				m_gui_console.menu_item();
-				m_gui_display.menu_item();
-				m_gui_docs.menu_item();
-				m_gui_ecs.menu_item();
-				m_gui_memory.menu_item();
-				m_gui_nodes.menu_item();
-				m_gui_profiler.menu_item();
-				m_gui_scripting.menu_item();
-			});
-			engine::gui().main_menu_bar.add("settings", [&]()
-			{
-				ML_ImGui_ScopeID(ML_addressof(this));
-				bool fullscreen{ engine::window().is_fullscreen() };
-				if (ImGui::MenuItem("fullscreen", "", &fullscreen))
-				{
-					engine::window().set_fullscreen(fullscreen);
-				}
-			});
-			engine::gui().main_menu_bar.add("help", [&]()
-			{
-				ML_ImGui_ScopeID(ML_addressof(this));
-				m_imgui_demo.menu_item();
-				m_imgui_metrics.menu_item();
-				m_imgui_about.menu_item();
-			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -698,7 +701,7 @@ namespace ml
 					if (!m_console.overload && args.empty())
 					{
 						m_console.overload = "python";
-						static ML_block{ std::cout << "# type \'\\\' to exit\n"; };
+						static ML_scope{ std::cout << "# type \'\\\' to exit\n"; };
 					}
 					else if (m_console.overload && (args.front() == "\\"))
 					{
@@ -752,7 +755,7 @@ namespace ml
 			}
 
 			static ImGui::TextEditor test{};
-			static ML_block{
+			static ML_scope{
 				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				test.SetText("int main()\n{\n\treturn 0;\n}");
 			};
@@ -991,11 +994,11 @@ namespace ml
 		{
 			static auto const & testres{ memory_manager::get_test_resource() };
 
-			static ML_block // setup memory editor
+			static ML_scope // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= engine::window().has_hint(window_hints_maximized) ? 32 : 16;
+				m_mem_editor.Cols				= engine::window().get_hint(window_hints_maximized) ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1035,13 +1038,13 @@ namespace ml
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					static ML_block{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();

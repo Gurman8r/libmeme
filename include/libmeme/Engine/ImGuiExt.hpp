@@ -73,108 +73,133 @@ namespace ml::gui
 // PLOTS
 namespace ml::gui
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// plot
 	struct plot final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using getter_t	= typename float_t(*)(void);
-		using overlay_t	= typename ds::array<char, 32>;
-		using buffer_t	= typename pmr::vector<float_t>;
+		enum : int32_t { lines, histogram };
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using delta_t	= typename float_t;
+		using buffer_t	= typename pmr::vector<delta_t>;
+		using overtxt_t	= typename ds::array<char, 32>;
+		using get_fn_t	= typename std::function<delta_t(void)>;
 
-		buffer_t	buffer		{};
-		int32_t		mode		{};
-		cstring		label		{};
-		cstring		format		{ "%f" };
-		vec2		graph_size	{};
-		vec2		graph_scale	{ FLT_MAX, FLT_MAX };
-		getter_t	getter		{ []() { return 0.f; } };
-		int32_t		offset		{};
-		overlay_t	overlay		{};
-		bool		animate		{ true };
+		buffer_t	buffer	{};
+		int32_t		mode	{};
+		cstring		label	{};
+		cstring		fmt		{ "%f" };
+		vec2		size	{};
+		vec2		scale	{ FLT_MAX, FLT_MAX };
+		get_fn_t	get_fn	{ []() { return 0.f; } };
+		int32_t		offset	{};
+		overtxt_t	overtxt	{ "" };
+		bool		animate	{ true };
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plot & update() & noexcept
+		// make plot
+		template <class ... Args
+		> static auto create(size_t const cap, Args && ... args) noexcept
 		{
-			ML_assert(getter);
-			return update(std::invoke(getter));
+			return plot{ buffer_t{ cap, buffer_t::allocator_type{} }, ML_forward(args)... };
 		}
 
-		plot & update(float_t const v) & noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void update() noexcept
 		{
-			if (!animate || buffer.empty()) { return (*this); }
-			std::sprintf(overlay.data(), format, v);
-			buffer[offset] = v;
+			ML_assert(get_fn);
+			update(std::invoke(get_fn));
+		}
+
+		template <class Delta = delta_t
+		> void update(Delta const v) noexcept
+		{
+			static_assert(std::is_floating_point_v<Delta>);
+			if (!animate || buffer.empty()) { return; }
+			std::sprintf(overtxt.data(), fmt, v);
+			buffer[offset] = static_cast<delta_t>(v);
 			offset = (offset + 1) % buffer.size();
-			return (*this);
 		}
 
-		plot const & render() const & noexcept
+		void render() const noexcept
 		{
 			ML_ImGui_ScopeID(ML_addressof(this));
 
-			float_t width{ graph_size[0] };
+			// expand to available width
+			float_t width{ size[0] };
 			if ((width == 0.f) && (label && label[0] == '#' && label[1] == '#'))
 			{
 				width = ImGui::GetContentRegionAvailWidth();
 			}
+
+			// draw
 			switch (mode)
 			{
-			case 0: ImGui::PlotLines(label,
-				buffer.data(), (int32_t)buffer.size(), offset,
-				overlay.data(), graph_scale[0], graph_scale[1],
-				{ width, graph_size[1] }, sizeof(float_t)
-			); break;
-
-			case 1: ImGui::PlotHistogram(label,
-				buffer.data(), (int32_t)buffer.size(), offset,
-				overlay.data(), graph_scale[0], graph_scale[1],
-				{ width, graph_size[1] }, sizeof(float_t)
-			); break;
+			case lines:
+				return ImGui::PlotLines(label
+					, buffer.data(), (int32_t)buffer.size(), offset
+					, overtxt.data()
+					, scale[0], scale[1], { width, size[1] }
+					, sizeof(delta_t)
+				);
+			case histogram:
+				return ImGui::PlotHistogram(label
+					, buffer.data(), (int32_t)buffer.size(), offset
+					, overtxt.data()
+					, scale[0], scale[1], { width, size[1] }
+					, sizeof(delta_t)
+				);
 			}
-			return (*this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	template <class ... Args
-	> static inline auto make_plot(size_t const cap, Args && ... args) noexcept
-	{
-		using V = pmr::vector<float_t>;
-		using A = pmr::polymorphic_allocator<byte_t>;
-		return plot{ V{ cap, A{} }, ML_forward(args)... };
-	}
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// plot controller
 	struct plot_controller final
 	{
-		pmr::vector<plot> m_plots{};
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using delta_t = typename float_t;
+
+		template <class Delta = delta_t
+		> static constexpr auto sixty_fps{ Delta{ 1 } / Delta{ 60 } };
+
+		pmr::vector<plot> plots{};
 		
-		float_t m_ref_time{};
+		delta_t ref_time{};
 
 		template <class Fn> auto for_each(Fn && fn) noexcept
 		{
-			return std::for_each(m_plots.begin(), m_plots.end(), ML_forward(fn));
+			return std::for_each(plots.begin(), plots.end(), ML_forward(fn));
 		}
 
-		plot_controller & update(float_t const tt, float_t const dt = 1.f / 60.f) noexcept
+		template <class Delta = delta_t
+		> void update(Delta const tt, Delta const dt = sixty_fps<Delta>) noexcept
 		{
-			if (m_ref_time == 0.f)
+			if (ref_time == delta_t{ 0 })
 			{
-				m_ref_time = tt;
-				return (*this);
+				return (void)(ref_time = static_cast<delta_t>(tt));
 			}
-			while (m_ref_time < tt)
+			while (ref_time < static_cast<delta_t>(tt))
 			{
 				this->for_each([&](auto & p) { p.update(); });
 
-				m_ref_time += dt;
+				ref_time += static_cast<delta_t>(dt);
 			}
-			return (*this);
+			return;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 // WIDGET
@@ -242,9 +267,9 @@ namespace ml::gui
 		float_t			reg_size{ 32.f };
 
 		template <class Fn
-		> texture_preview & render(Fn && fn) noexcept
+		> void render(Fn && fn) noexcept
 		{
-			if (!value) { return (*this); }
+			if (!value) { return; }
 
 			auto const & io		{ ImGui::GetIO() };
 			auto const tex_addr	{ value->address() };
@@ -289,8 +314,6 @@ namespace ml::gui
 					{ 1.f, 1.f, 1.f, .5f }
 				);
 			});
-
-			return (*this);
 		}
 	};
 }
@@ -622,6 +645,7 @@ namespace ml::gui
 // FILE TREE
 namespace ml::gui
 {
+	// FIXME: VERY SLOW
 	struct file_tree final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

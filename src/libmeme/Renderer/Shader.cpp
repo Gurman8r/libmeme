@@ -360,11 +360,11 @@ namespace ml
 		uint32_t vert{};
 		switch (GL::compileShader(vert, GL::VertexShader, 1, &v_src))
 		{
-		case ML_SUCCESS:
+		case 1:
 			GL::attachShader(m_handle, vert);
 			GL::deleteShader(vert);
 			break;
-		case ML_FAILURE:
+		case 0:
 			destroy();
 			return EXIT_FAILURE * 5;
 		}
@@ -373,11 +373,11 @@ namespace ml
 		uint32_t geom{};
 		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g_src))
 		{
-		case ML_SUCCESS:
+		case 1:
 			GL::attachShader(m_handle, geom);
 			GL::deleteShader(geom);
 			break;
-		case ML_FAILURE:
+		case 0:
 			destroy();
 			return EXIT_FAILURE * 6;
 		}
@@ -386,11 +386,11 @@ namespace ml
 		uint32_t frag{};
 		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f_src))
 		{
-		case ML_SUCCESS:
+		case 1:
 			GL::attachShader(m_handle, frag);
 			GL::deleteShader(frag);
 			break;
-		case ML_FAILURE:
+		case 0:
 			destroy();
 			return EXIT_FAILURE * 7;
 		}
@@ -399,7 +399,7 @@ namespace ml
 		if (!GL::linkProgram(m_handle))
 		{
 			cstring const log{ GL::getProgramInfoLog(m_handle) };
-			debug::log::error(log);
+			debug::error(log);
 			destroy();
 			return EXIT_FAILURE * 8;
 		}

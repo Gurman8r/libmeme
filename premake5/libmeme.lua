@@ -43,7 +43,6 @@ includedirs{
 	"%{ext_dir}freetype2/include",
 	"%{ext_dir}freetype2/include/freetype",
 	"%{ext_dir}glfw/include",
-	"%{ext_dir}raknet/Source",
 
 	-- imgui
 	"%{ext_dir}imgui",

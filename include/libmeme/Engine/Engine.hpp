@@ -1,10 +1,8 @@
 #ifndef _ML_ENGINE_HPP_
 #define _ML_ENGINE_HPP_
 
-#include <libmeme/Engine/AssetManager.hpp>
 #include <libmeme/Engine/FileManager.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
-#include <libmeme/Engine/GameObjectManager.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
 #include <libmeme/Engine/TimeManager.hpp>
@@ -39,13 +37,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static asset_manager	& assets() noexcept;
-
 		ML_NODISCARD static file_manager	& fs() noexcept;
 
 		ML_NODISCARD static gui_manager		& gui() noexcept;
-
-		ML_NODISCARD static gameobj_manager	& gameobj() noexcept;
 
 		ML_NODISCARD static plugin_manager	& plugins() noexcept;
 

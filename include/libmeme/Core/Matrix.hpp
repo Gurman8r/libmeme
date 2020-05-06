@@ -10,7 +10,7 @@ namespace ml::ds
 
 	// fixed size matrix
 	template <class _T, size_t _W, size_t _H
-	> struct matrix
+	> struct ML_NODISCARD matrix
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -46,24 +46,24 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto data() noexcept -> pointer { return m_data.data(); }
+		constexpr auto data() noexcept -> pointer { return m_data.data(); }
 
-		ML_NODISCARD constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
+		constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
 
-		ML_NODISCARD constexpr bool empty() const noexcept { return false; }
+		constexpr bool empty() const noexcept { return false; }
 
-		ML_NODISCARD constexpr auto height() const noexcept -> size_t { return _H; }
+		constexpr auto height() const noexcept -> size_t { return _H; }
 
-		ML_NODISCARD constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
+		constexpr auto max_size() const noexcept -> size_t { return m_data.max_size(); }
 
-		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return m_data.size(); }
+		constexpr auto size() const noexcept -> size_t { return m_data.size(); }
 
-		ML_NODISCARD constexpr auto width() const noexcept -> size_t { return _W; }
+		constexpr auto width() const noexcept -> size_t { return _W; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U, size_t W, size_t H
-		> ML_NODISCARD constexpr operator matrix<U, W, H>() const noexcept
+		> constexpr operator matrix<U, W, H>() const noexcept
 		{
 			if constexpr (std::is_same_v<matrix<U, W, H>, self_type>)
 			{
@@ -97,116 +97,116 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator storage_type & () & noexcept { return m_data; }
+		constexpr operator storage_type & () & noexcept { return m_data; }
 
-		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_data; }
+		constexpr operator storage_type const & () const & noexcept { return m_data; }
 
-		ML_NODISCARD constexpr operator storage_type && () && noexcept { return std::move(m_data); }
+		constexpr operator storage_type && () && noexcept { return std::move(m_data); }
 
-		ML_NODISCARD constexpr operator storage_type const && () const && noexcept { return std::move(m_data); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr operator pointer() noexcept { return m_data; }
-
-		ML_NODISCARD constexpr operator const_pointer() const noexcept { return m_data; }
+		constexpr operator storage_type const && () const && noexcept { return std::move(m_data); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto operator*() & noexcept -> reference { return (*m_data); }
+		constexpr operator pointer() noexcept { return m_data; }
 
-		ML_NODISCARD constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
-
-		ML_NODISCARD constexpr auto operator*() && noexcept -> rvalue { return std::move(*m_data); }
-
-		ML_NODISCARD constexpr auto operator*() const && noexcept -> const_rvalue { return std::move(*m_data); }
+		constexpr operator const_pointer() const noexcept { return m_data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto at(size_t const i) & noexcept -> reference { return m_data.at(i); }
+		constexpr auto operator*() & noexcept -> reference { return (*m_data); }
+
+		constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
+
+		constexpr auto operator*() && noexcept -> rvalue { return std::move(*m_data); }
+
+		constexpr auto operator*() const && noexcept -> const_rvalue { return std::move(*m_data); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto at(size_t const i) & noexcept -> reference { return m_data.at(i); }
 		
-		ML_NODISCARD constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data.at(i); }
+		constexpr auto at(size_t const i) const & noexcept -> const_reference { return m_data.at(i); }
 
-		ML_NODISCARD constexpr auto at(size_t const i) && noexcept -> rvalue { return std::move(m_data.at(i)); }
+		constexpr auto at(size_t const i) && noexcept -> rvalue { return std::move(m_data.at(i)); }
 
-		ML_NODISCARD constexpr auto at(size_t const i) const && noexcept -> const_rvalue { return std::move(m_data.at(i)); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) & noexcept -> reference { return at(y * _W + x); }
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const & noexcept -> const_reference { return at(y * _W + x); }
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) && noexcept -> rvalue { return std::move(at(y * _W + x)); }
-
-		ML_NODISCARD constexpr auto at(size_t const x, size_t const y) const && noexcept -> const_rvalue { return std::move(at(y * _W + x)); }
+		constexpr auto at(size_t const i) const && noexcept -> const_rvalue { return std::move(m_data.at(i)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto back() & noexcept -> reference { return m_data.back(); }
+		constexpr auto at(size_t const x, size_t const y) & noexcept -> reference { return at(y * _W + x); }
 
-		ML_NODISCARD constexpr auto back() const & noexcept -> const_reference { return m_data.back(); }
+		constexpr auto at(size_t const x, size_t const y) const & noexcept -> const_reference { return at(y * _W + x); }
 
-		ML_NODISCARD constexpr auto back() && noexcept -> rvalue { return std::move(m_data.back()); }
+		constexpr auto at(size_t const x, size_t const y) && noexcept -> rvalue { return std::move(at(y * _W + x)); }
 
-		ML_NODISCARD constexpr auto back() const && noexcept -> const_rvalue { return std::move(m_data.back()); }
+		constexpr auto at(size_t const x, size_t const y) const && noexcept -> const_rvalue { return std::move(at(y * _W + x)); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr auto front() & noexcept -> reference { return m_data.front(); }
+		constexpr auto back() & noexcept -> reference { return m_data.back(); }
 
-		ML_NODISCARD constexpr auto front() const & noexcept -> const_reference { return m_data.front(); }
+		constexpr auto back() const & noexcept -> const_reference { return m_data.back(); }
 
-		ML_NODISCARD constexpr auto front() && noexcept -> rvalue { return std::move(m_data.front()); }
+		constexpr auto back() && noexcept -> rvalue { return std::move(m_data.back()); }
 
-		ML_NODISCARD constexpr auto front() const && noexcept -> const_rvalue { return std::move(m_data.front()); }
+		constexpr auto back() const && noexcept -> const_rvalue { return std::move(m_data.back()); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr auto front() & noexcept -> reference { return m_data.front(); }
+
+		constexpr auto front() const & noexcept -> const_reference { return m_data.front(); }
+
+		constexpr auto front() && noexcept -> rvalue { return std::move(m_data.front()); }
+
+		constexpr auto front() const && noexcept -> const_rvalue { return std::move(m_data.front()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
+		constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
 
-		ML_NODISCARD constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
+		constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
 
-		ML_NODISCARD constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
+		constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
 
-		ML_NODISCARD constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
+		constexpr auto cend() const noexcept -> const_iterator { return m_data.cend(); }
 
-		ML_NODISCARD constexpr auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin(); }
+		constexpr auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin(); }
 
-		ML_NODISCARD constexpr auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
+		constexpr auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
 		
-		ML_NODISCARD constexpr auto end() noexcept -> iterator { return m_data.end(); }
+		constexpr auto end() noexcept -> iterator { return m_data.end(); }
 
-		ML_NODISCARD constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
+		constexpr auto end() const noexcept -> const_iterator { return m_data.end(); }
 
-		ML_NODISCARD constexpr auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin(); }
+		constexpr auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin(); }
 
-		ML_NODISCARD constexpr auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin(); }
+		constexpr auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin(); }
 
-		ML_NODISCARD constexpr auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
+		constexpr auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
 
-		ML_NODISCARD constexpr auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
+		constexpr auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr self_type zero() noexcept
+		static constexpr self_type zero() noexcept
 		{
 			return self_type{};
 		}
 
-		ML_NODISCARD static constexpr self_type fill(value_type const value) noexcept
+		static constexpr self_type fill(value_type const value) noexcept
 		{
 			self_type temp{};
 			for (auto & elem : temp) { elem = value; }
 			return temp;
 		}
 
-		ML_NODISCARD static constexpr self_type one() noexcept
+		static constexpr self_type one() noexcept
 		{
 			return fill(value_type{ 1 });
 		}
 
-		ML_NODISCARD static constexpr self_type identity() noexcept
+		static constexpr self_type identity() noexcept
 		{
 			self_type temp{};
 			for (size_t i = 0; i < (_W * _H); ++i)

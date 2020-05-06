@@ -136,12 +136,12 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres)				{ return debug::log::error("resource already set"); }
-			if (!value)						{ return debug::log::error("resource cannot be null"); }
-			if (!value->upstream())			{ return debug::log::error("resource upstream cannot be null"); }
-			if (!value->buffer())			{ return debug::log::error("resource data cannot be null"); }
-			if (!value->is_valid_size())	{ return debug::log::error("resource size must be greater than zero"); }
-			if (!value->is_default())		{ return debug::log::error("resource is not the default resource"); }
+			if (inst.m_testres)				{ return debug::error("resource already set"); }
+			if (!value)						{ return debug::error("resource cannot be null"); }
+			if (!value->upstream())			{ return debug::error("resource upstream cannot be null"); }
+			if (!value->buffer())			{ return debug::error("resource data cannot be null"); }
+			if (!value->is_valid_size())	{ return debug::error("resource size must be greater than zero"); }
+			if (!value->is_default())		{ return debug::error("resource is not the default resource"); }
 
 			return (inst.m_testres = value);
 		}

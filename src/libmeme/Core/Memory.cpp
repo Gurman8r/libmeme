@@ -9,11 +9,11 @@ namespace ml
 #if ML_is_debug
 		if (!m_records.empty())
 		{
-			debug::log::error("final allocations follow");
+			debug::error("final allocations follow");
 
 			debug::pause();
 
-			debug::out() << std::left
+			std::cout << std::left
 				<< std::setw(20) << "Index"
 				<< std::setw(20) << "Size"
 				<< std::setw(20) << "Address"
@@ -21,7 +21,7 @@ namespace ml
 
 			m_records.for_each([&](auto, auto const & rec)
 			{
-				debug::out() << std::left
+				std::cout << std::left
 					<< std::setw(20) << rec.index
 					<< std::setw(20) << rec.size
 					<< std::setw(20) << rec.data

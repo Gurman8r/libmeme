@@ -14,18 +14,18 @@ namespace ml::impl
 	template <class T> struct ML_NODISCARD scope_binder final
 	{
 		template <class ... Args
-		> scope_binder(T & value, Args && ... args) noexcept : m_value{ &value }
+		> scope_binder(T & value, Args && ... args) noexcept : m_ptr{ &value }
 		{
-			m_value->bind(ML_forward(args)...);
+			m_ptr->bind(ML_forward(args)...);
 		}
 
 		~scope_binder() noexcept
 		{
-			m_value->unbind();
+			m_ptr->unbind();
 		}
 
 	private:
-		T * const m_value;
+		T * const m_ptr;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

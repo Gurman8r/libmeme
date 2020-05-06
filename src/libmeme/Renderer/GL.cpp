@@ -53,7 +53,7 @@ namespace ml
 	{
 		if (is_initialized())
 		{
-			return debug::log::error("GL is already initialized");
+			return debug::error("GL is already initialized");
 		}
 
 		return s_gl_init = ([]() noexcept
@@ -82,39 +82,39 @@ namespace ml
 			{
 				major = version[0] - '0';
 				minor = version[2] - '0';
-				debug::log::warning("Using OpenGL Version: {0}.{1}", major, minor);
+				debug::warning("using opengl version: {0}.{1}", major, minor);
 			}
 			else
 			{
 				major = 1;
 				minor = 1;
-				debug::log::warning("Can't get the version number, assuming 1.1");
+				debug::warning("can't get the version number, assuming 1.1");
 			}
 		}
 
 		if (!shadersAvailable())
 		{
-			debug::log::warning("Shaders are not available on your system.");
+			debug::warning("shaders unavailable");
 		}
 
 		if (!geometryShadersAvailable())
 		{
-			debug::log::warning("Geometry shaders are not available on your system.");
+			debug::warning("geometry shaders unavailable");
 		}
 
 		if (!framebuffersAvailable())
 		{
-			debug::log::warning("Framebuffers Unavailable");
+			debug::warning("framebuffers unavailable");
 		}
 
 		if (!edgeClampAvailable())
 		{
-			debug::log::warning("Texture Edge Clamp Unavailable");
+			debug::warning("texture edge clamp unavailable");
 		}
 
 		if (!textureSrgbAvailable())
 		{
-			debug::log::warning("Texture sRGB Unavailable");
+			debug::warning("texture srgb unavailable");
 		}
 	}
 
@@ -190,26 +190,20 @@ namespace ml
 		return temp;
 	}
 
-	bool GL::enable(uint32_t value, bool cond)
+	void GL::enable(uint32_t value, bool cond)
 	{
 		if (cond)
 		{
 			glCheck(glEnable(value));
-
-			return isEnabled(value);
 		}
-		return true;
 	}
 
-	bool GL::disable(uint32_t value, bool cond)
+	void GL::disable(uint32_t value, bool cond)
 	{
 		if (cond)
 		{
 			glCheck(glDisable(value));
-
-			return !isEnabled(value);
 		}
-		return true;
 	}
 
 
@@ -500,7 +494,7 @@ namespace ml
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}
@@ -510,7 +504,7 @@ namespace ml
 		static int32_t temp{};
 		if (is_initialized())
 		{
-			static ML_block{ temp = getInteger(GL::MaxCombTexImgUnits); };
+			static ML_scope{ temp = getInteger(GL::MaxCombTexImgUnits); };
 		}
 		return temp;
 	}
@@ -520,7 +514,7 @@ namespace ml
 		static uint32_t temp{};
 		if (is_initialized())
 		{
-			static ML_block{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
+			static ML_scope{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
 		}
 		return temp;
 	}
@@ -535,7 +529,7 @@ namespace ml
 		static bool temp{};
 #if defined(GLEW_ARB_texture_non_power_of_two) \
 || defined(GL_ARB_texture_non_power_of_two)
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}
@@ -544,7 +538,7 @@ namespace ml
 	{
 		static bool temp{};
 #ifdef GL_EXT_texture_sRGB
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}
@@ -635,7 +629,7 @@ namespace ml
 		static bool temp{};
 #if defined(GL_EXT_framebuffer_object) \
 || defined(GL_EXT_framebuffer_blit)
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}
@@ -755,7 +749,7 @@ namespace ml
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}
@@ -764,7 +758,7 @@ namespace ml
 	{
 		static bool temp{};
 #if defined(GL_ARB_geometry_shader4)
-		static ML_block{ temp = true; };
+		static ML_scope{ temp = true; };
 #endif
 		return temp;
 	}

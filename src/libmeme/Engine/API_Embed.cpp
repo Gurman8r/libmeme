@@ -139,8 +139,6 @@ namespace ml::embed
 		py::class_<context_settings>(m, "context_settings")
 			.def(py::init<>())
 			.def(py::init<int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, bool, bool>())
-			.def("__nonzero__"				, &context_settings::operator bool, py::is_operator())
-			.def("__bool__"					, &context_settings::operator bool, py::is_operator())
 			.def_readwrite("api"			, &context_settings::api)
 			.def_readwrite("major"			, &context_settings::major)
 			.def_readwrite("minor"			, &context_settings::minor)
@@ -155,8 +153,6 @@ namespace ml::embed
 		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
 			.def(py::init<vec2i, uint32_t>())
-			.def("__nonzero__"		, &video_mode::operator bool, py::is_operator())
-			.def("__bool__"			, &video_mode::operator bool, py::is_operator())
 			.def_readwrite("size"	, &video_mode::size)
 			.def_readwrite("depth"	, &video_mode::depth)
 			;
@@ -194,16 +190,6 @@ namespace ml::embed
 	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// ASSETS
-		struct ml_engine_assets {};
-		py::class_<ml_engine_assets>(m, "assets")
-			.def(py::init<>())
-			.def_static("load", [](py::args) { return false; })
-			.def_static("free", [](py::args) { return false; })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// FILES
 		struct ml_engine_files {};
@@ -220,14 +206,6 @@ namespace ml::embed
 			.def(py::init<>())
 			.def_static("startup", [](cstring s) { return engine::gui().startup(engine::window(), s); })
 			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// OBJECTS
-		struct ml_engine_objects {};
-		py::class_<ml_engine_objects>(m, "objects")
-			.def(py::init<>())
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -271,7 +249,7 @@ namespace ml::embed
 			.def(py::init<>())
 			.def_static("open", [](window_settings const & ws) { return engine::window().open(ws); })
 			.def_static("close", [](py::args) { return engine::window().close(); })
-			.def_static("get_size", []() { return engine::window().get_size(); })
+			.def_static("get_size", []() { return engine::window().get_frame_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })
 			;
 

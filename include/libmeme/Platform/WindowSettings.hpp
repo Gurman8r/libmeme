@@ -22,7 +22,7 @@ namespace ml
 		window_hints_double_buffered	= (1 << 8), // double buffered
 		window_hints_install_callbacks	= (1 << 9), // install callbacks
 
-		// resizable / visible / decorated / focused / auto iconify / callbacks
+		// resizable / visible / decorated / focused / auto iconify / install callbacks
 		window_hints_default
 			= window_hints_resizable
 			| window_hints_visible
@@ -31,7 +31,7 @@ namespace ml
 			| window_hints_auto_iconify
 			| window_hints_install_callbacks,
 
-		// resizable / decorated / focused / auto iconify / maximized / callbacks
+		// resizable / decorated / focused / auto iconify / maximized / install callbacks
 		window_hints_default_max
 			= window_hints_resizable
 			| window_hints_decorated

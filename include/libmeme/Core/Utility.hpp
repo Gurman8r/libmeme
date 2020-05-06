@@ -9,6 +9,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// min / max / clamp
+#define ML_min(a, b)			((a) < (b) ? (a) : (b))
+#define ML_max(a, b)			((a) > (b) ? (a) : (b))
+#define ML_clamp(v, lo, hi)		ML_min(ML_max(v, lo), hi)
+
 // flag manipulation
 #define ML_flag_read( v, f)		(v & f)
 #define ML_flag_set(  v, f)		(v |= f)
@@ -46,29 +51,9 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// Compare
+// Comparison
 namespace ml::util
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class LI, class RI
-	> ML_NODISCARD constexpr bool equal_to(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
-	{
-		return (lBegin != lEnd && rBegin != rEnd)
-			? ((*lBegin == *rBegin) && _ML util::equal_to(lBegin + 1, lEnd, rBegin + 1, rEnd))
-			: (lBegin == lEnd && rBegin == rEnd);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class LI, class RI
-	> ML_NODISCARD constexpr bool less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
-	{
-		return (lBegin != lEnd && rBegin != rEnd)
-			? ((*lBegin < *rBegin) && _ML util::less(lBegin + 1, lEnd, rBegin + 1, rEnd))
-			: (lBegin == lEnd && rBegin == rEnd);
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Lhs, class Rhs = Lhs
@@ -77,6 +62,26 @@ namespace ml::util
 		return (ML_forward(lhs) != ML_forward(rhs))
 			? ((ML_forward(lhs) < ML_forward(rhs)) ? -1 : 1)
 			: 0;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class LI, class RI
+	> ML_NODISCARD constexpr bool range_equal(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	{
+		return (lBegin != lEnd && rBegin != rEnd)
+			? ((*lBegin == *rBegin) && _ML util::range_equal(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			: (lBegin == lEnd && rBegin == rEnd);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class LI, class RI
+	> ML_NODISCARD constexpr bool range_less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
+	{
+		return (lBegin != lEnd && rBegin != rEnd)
+			? ((*lBegin < *rBegin) && _ML util::range_less(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			: (lBegin == lEnd && rBegin == rEnd);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -119,11 +124,10 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T, class Lhs, class Rhs
-	> constexpr decltype(auto) clamp(T && v, Lhs && lhs, Rhs && rhs)
+	template <class T, class Lo, class Hi
+	> constexpr decltype(auto) clamp(T && value, Lo && lo, Hi && hi)
 	{
-		// min(max(v, lhs), rhs)
-		return _ML util::min(_ML util::max(ML_forward(v), ML_forward(lhs)), ML_forward(rhs));
+		return ML_clamp(ML_forward(value), ML_forward(lo), ML_forward(hi));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

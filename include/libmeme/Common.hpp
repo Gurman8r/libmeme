@@ -51,53 +51,55 @@
 // macro value to string
 #define ML_stringify(expr)		ML_to_string(expr)
 
-// anonymous
+// anonymous expressions
 #if defined(__COUNTER__)
-#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
+#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
+#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
 #else
-#	define ML_make_anon(expr)	ML_concat(_ml_, ML_concat(expr, _))
+#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, _))
 #endif
-#define ML_anon					ML_make_anon(anonymous)
+#define ML_anon					ML_anon_expr(anonymous) // _ml_anonymous_#_
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// general
+#define _ML						::ml::
+#define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
+#define ML_alias				using
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_forward(var)			_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // assert
 #ifndef ML_assert
-#   define ML_assert(expr)	assert(expr)
+#   define ML_assert(expr)		assert(expr)
 #endif
 
 // breakpoint
 #if (!ML_is_debug)
-#	define ML_breakpoint()	((void)0)
+#	define ML_breakpoint()		((void)0)
 #elif defined(ML_cc_msvc)
-#	define ML_breakpoint()	_CSTD __debugbreak()
+#	define ML_breakpoint()		_CSTD __debugbreak()
 #else
-#	define ML_breakpoint()	_CSTD raise(SIGTRAP)
+#	define ML_breakpoint()		_CSTD raise(SIGTRAP)
 #endif
 
 // environment
 #ifndef ML_DISABLE_LEGACY
-#	define ML_argc			__argc
-#	define ML_argv			__argv
-#	define ML_wargv			__wargv
-#	define ML_environ		_environ
-#	define ML_wenviron		_wenviron
+#	define ML_argc				__argc
+#	define ML_argv				__argv
+#	define ML_wargv				__wargv
+#	define ML_environ			_environ
+#	define ML_wenviron			_wenviron
 #else
-#	define ML_argc			(0)
-#	define ML_argv			((char**)0)
-#	define ML_envp			((char***)0)
-#	define ML_wargv			((wchar_t**)0)
-#	define ML_wenvp			((wchar_t***)0)
+#	define ML_argc				(0)
+#	define ML_argv				((char**)0)
+#	define ML_envp				((char***)0)
+#	define ML_wargv				((wchar_t**)0)
+#	define ML_wenvp				((wchar_t***)0)
 #endif
-
-// miscellaneous
-#define _ML					::ml::
-#define ML_addressof(ptr)	((void *)(_ML intmax_t)ptr)
-#define ML_alias			using
-#define ML_arraysize(arr)	(sizeof(arr) / sizeof(*arr))
-#define ML_forward(var)		_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -154,6 +156,8 @@ namespace ml
 	namespace ranges	= _ML std::ranges;
 	namespace views		= _ML std::ranges::views;
 #endif
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace literals
 	{

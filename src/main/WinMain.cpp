@@ -2,8 +2,6 @@
 
 #include <libmeme/Config.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #ifdef ML_os_windows
 
 #include <Windows.h>

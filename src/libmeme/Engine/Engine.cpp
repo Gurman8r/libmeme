@@ -12,20 +12,16 @@ namespace ml
 	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine		;
-		asset_manager		m_assets	; // assets
 		file_manager		m_fs		; // files
 		gui_manager			m_gui		; // gui
-		gameobj_manager		m_gameobj	; // game objects
 		plugin_manager		m_plugins	; // plugins
 		script_manager		m_scripts	; // scripts
 		time_manager		m_time		; // time
 		render_window		m_window	; // window
 
 		engine_context(json const & j, allocator_type const & alloc) noexcept
-			: m_assets	{ j, alloc }
-			, m_fs		{ j, alloc }
+			: m_fs		{ j, alloc }
 			, m_gui		{ j, alloc }
-			, m_gameobj	{ j, alloc }
 			, m_plugins	{ j, alloc }
 			, m_scripts	{ j, alloc }
 			, m_time	{ j, alloc }
@@ -45,7 +41,7 @@ namespace ml
 
 	bool engine::create_context(json const & j, allocator_type const & alloc) noexcept
 	{
-		if (is_initialized()) { return debug::log::error("engine is already initialized"); }
+		if (is_initialized()) { return debug::error("engine is already initialized"); }
 
 		g_engine = new engine_context{ j, alloc };
 
@@ -54,7 +50,7 @@ namespace ml
 
 	bool engine::destroy_context() noexcept
 	{
-		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine is not initialized"); }
 		
 		delete g_engine;
 
@@ -67,12 +63,20 @@ namespace ml
 
 	bool engine::startup() noexcept
 	{
-		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine is not initialized"); }
+
+		// startup window backend
+		if (!window::initialize())
+		{
+			return debug::error("failed initializing window backend");
+		}
 
 		// startup scripting
 		if (!g_engine->m_scripts.startup())
 		{
-			return debug::log::error("failed initializing scripting");
+			//g_engine->m_scripts.do_file(g_engine->m_scripts.)
+
+			return debug::error("failed initializing scripting");
 		}
 
 		return true;
@@ -80,7 +84,7 @@ namespace ml
 
 	bool engine::shutdown() noexcept
 	{
-		if (!is_initialized()) { return debug::log::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine is not initialized"); }
 
 		// FIXME: need to clear menus before clearing plugins
 		g_engine->m_gui.main_menu_bar.menus.clear();
@@ -91,8 +95,11 @@ namespace ml
 		// shutdown gui
 		if (!g_engine->m_gui.shutdown()) {}
 
-		// shutdown window
+		// close window
 		if (!g_engine->m_window.close()) {}
+
+		// shutdown window backend
+		window::terminate();
 
 		// shutdown scripting
 		if (!g_engine->m_scripts.shutdown()) {}
@@ -102,22 +109,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	asset_manager & engine::assets() noexcept
-	{
-		ML_assert(is_initialized());
-		return g_engine->m_assets;
-	}
-
 	file_manager & engine::fs() noexcept
 	{
 		ML_assert(is_initialized());
 		return g_engine->m_fs;
-	}
-
-	gameobj_manager & engine::gameobj() noexcept
-	{
-		ML_assert(is_initialized());
-		return g_engine->m_gameobj;
 	}
 
 	gui_manager & engine::gui() noexcept

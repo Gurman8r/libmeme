@@ -1,6 +1,8 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
+// WIP
+
 #include <libmeme/Platform/BaseWindow.hpp>
 
 namespace ml
@@ -9,22 +11,6 @@ namespace ml
 
 	struct ML_PLATFORM_API window : base_window
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using char_fn			= typename void(*)(void *, uint32_t);
-		using close_fn			= typename void(*)(void *);
-		using cursor_enter_fn	= typename void(*)(void *, int32_t);
-		using cursor_pos_fn		= typename void(*)(void *, float64_t, float64_t);
-		using error_fn			= typename void(*)(int32_t, cstring);
-		using focus_fn			= typename void(*)(void *, int32_t);
-		using frame_size_fn		= typename void(*)(void *, int32_t, int32_t);
-		using key_fn			= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
-		using mouse_fn			= typename void(*)(void *, int32_t, int32_t, int32_t);
-		using position_fn		= typename void(*)(void *, int32_t, int32_t);
-		using proc_fn			= typename void *(*)(void);
-		using scroll_fn			= typename void(*)(void *, float64_t, float64_t);
-		using size_fn			= typename void(*)(void *, int32_t, int32_t);
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual ~window() noexcept = default;
@@ -141,10 +127,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static error_fn set_error_callback			(error_fn			fn);
 		char_fn			set_char_callback			(char_fn			fn);
 		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn	fn);
 		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn		fn);
+		error_fn		set_error_callback			(error_fn			fn);
 		frame_size_fn	set_frame_size_callback		(frame_size_fn		fn);
 		key_fn			set_key_callback			(key_fn				fn);
 		mouse_fn		set_mouse_callback			(mouse_fn			fn);
@@ -155,38 +141,6 @@ namespace ml
 		size_fn			set_window_size_callback	(size_fn			fn);
 
 		void install_default_callbacks();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD auto get_aspect() const noexcept -> float_t { return util::aspect(get_size()); };
-
-		ML_NODISCARD auto get_context() const noexcept -> context_settings const & { return m_settings.context; }
-
-		ML_NODISCARD auto get_frame_aspect() const noexcept -> float_t { return util::aspect(get_frame_size()); };
-
-		ML_NODISCARD auto get_frame_height() const noexcept -> int32_t { return get_frame_size()[1]; }
-
-		ML_NODISCARD auto get_frame_width() const noexcept -> int32_t { return get_frame_size()[0]; }
-
-		ML_NODISCARD auto get_height() const noexcept -> int32_t const & { return get_size()[1]; }
-
-		ML_NODISCARD auto get_hints() const -> int32_t const & { return m_settings.hints; }
-
-		ML_NODISCARD auto get_monitor() const noexcept -> window_handle { return m_monitor; }
-
-		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
-
-		ML_NODISCARD auto get_share() const noexcept -> window_handle { return m_share; }
-
-		ML_NODISCARD auto get_size() const noexcept -> vec2i const & { return get_video().size; }
-
-		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
-
-		ML_NODISCARD auto get_video() const noexcept -> video_mode const & { return m_settings.video; }
-
-		ML_NODISCARD auto get_width() const noexcept -> int32_t const & { return get_size()[0]; }
-
-		ML_NODISCARD bool has_hint(int32_t const i) const noexcept { return ML_flag_read(get_hints(), i); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

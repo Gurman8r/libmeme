@@ -99,10 +99,10 @@ namespace ml
 			return m_base;
 		}
 
-		template <class T = float64_t
+		template <class OutType = float64_t
 		> ML_NODISCARD constexpr auto count() const noexcept
 		{
-			return static_cast<T>(m_base.count());
+			return static_cast<OutType>(m_base.count());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -135,6 +135,11 @@ namespace ml
 		ML_NODISCARD constexpr hours_t hours() const noexcept
 		{
 			return chrono::duration_cast<hours_t>(m_base);
+		}
+
+		ML_NODISCARD constexpr days_t days() const noexcept
+		{
+			return chrono::duration_cast<days_t>(m_base);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
