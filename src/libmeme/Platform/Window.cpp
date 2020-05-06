@@ -469,47 +469,38 @@ namespace ml
 		static ML_scope
 		{
 #ifdef ML_os_windows
-			DEVMODE dm; dm.dmSize = sizeof(dm);
-			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
-			temp.depth = dm.dmBitsPerPel;
+		DEVMODE dm; dm.dmSize = sizeof(dm);
+		EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+		temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
+		temp.depth = dm.dmBitsPerPel;
 #else
-			// do the thing
+		// do the thing
 #endif
 		};
 		return temp;
 	}
 
-	pmr::vector<video_mode> const & window::get_fullscreen_modes() const
+	ds::flat_set<video_mode> const & window::get_fullscreen_modes() const
 	{
-		static pmr::vector<video_mode> temp{};
+		static ds::flat_set<video_mode> temp{};
 		static ML_scope
 		{
 #ifdef ML_os_windows
-			DEVMODE dm; dm.dmSize = sizeof(dm);
-			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
-			{
-				video_mode const vm
-				{
-					vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
-					dm.dmBitsPerPel
-				};
-
-				if (std::find(temp.begin(), temp.end(), vm) == temp.end())
-				{
-					temp.push_back(vm);
-				}
-			}
+		DEVMODE dm; dm.dmSize = sizeof(dm);
+		for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
+		{
+			temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
+		}
 #else
-			// do the thing
+		// do the thing
 #endif
 		};
 		return temp;
 	}
 
-	window::proc_fn window::get_proc_address(cstring value) const
+	void * window::get_proc_address(cstring value) const
 	{
-		return reinterpret_cast<window::proc_fn>(glfwGetProcAddress(value));
+		return glfwGetProcAddress(value);
 	}
 
 	pmr::vector<window_handle> const & window::get_monitors() const

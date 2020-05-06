@@ -113,9 +113,9 @@ namespace ml
 
 		ML_NODISCARD video_mode const & get_desktop_mode() const override;
 		
-		ML_NODISCARD pmr::vector<video_mode> const & get_fullscreen_modes() const override;
+		ML_NODISCARD ds::flat_set<video_mode> const & get_fullscreen_modes() const override;
 
-		ML_NODISCARD proc_fn get_proc_address(cstring value) const override;
+		ML_NODISCARD void * get_proc_address(cstring value) const override;
 		
 		ML_NODISCARD pmr::vector<window_handle> const & get_monitors() const override;
 

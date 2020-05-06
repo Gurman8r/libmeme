@@ -47,10 +47,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pmr::string			title	{}; // 
-		video_mode			video	{}; // 
-		context_settings	context	{}; // 
-		int32_t				hints	{}; // 
+		pmr::string			title	{};
+		video_mode			video	{};
+		context_settings	context	{};
+		int32_t				hints	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

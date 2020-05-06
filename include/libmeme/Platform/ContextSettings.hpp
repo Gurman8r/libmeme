@@ -21,14 +21,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t		api				{}; // 
-		int32_t		major			{}; // 
-		int32_t		minor			{}; // 
-		int32_t		profile			{}; // 
-		int32_t		depth_bits		{}; // 
-		int32_t		stencil_bits	{}; // 
-		bool		multisample		{}; // 
-		bool		srgb_capable	{}; // 
+		int32_t		api				{};
+		int32_t		major			{};
+		int32_t		minor			{};
+		int32_t		profile			{};
+		int32_t		depth_bits		{};
+		int32_t		stencil_bits	{};
+		bool		multisample		{};
+		bool		srgb_capable	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

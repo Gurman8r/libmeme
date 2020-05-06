@@ -31,7 +31,6 @@ namespace ml
 		using key_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
 		using mouse_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t);
 		using position_fn		= typename void(*)(window_handle, int32_t, int32_t);
-		using proc_fn			= typename void *(*)(void);
 		using scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
 		using size_fn			= typename void(*)(window_handle, int32_t, int32_t);
 
@@ -137,9 +136,9 @@ namespace ml
 
 		virtual video_mode const & get_desktop_mode() const = 0;
 
-		virtual pmr::vector<video_mode> const & get_fullscreen_modes() const = 0;
+		virtual ds::flat_set<video_mode> const & get_fullscreen_modes() const = 0;
 
-		virtual proc_fn get_proc_address(cstring) const = 0;
+		virtual void * get_proc_address(cstring) const = 0;
 
 		virtual pmr::vector<window_handle> const & get_monitors() const = 0;
 

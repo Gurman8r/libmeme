@@ -11,8 +11,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2i		size	{}; // 
-		uint32_t	depth	{}; // 
+		vec2i		size	{};
+		uint32_t	depth	{};
+
+		constexpr operator bool() const noexcept
+		{
+			return (0 < size[0]) && (0 < size[1]) && (0 < depth);
+		}
 
 		constexpr bool operator==(video_mode const & other) const noexcept
 		{

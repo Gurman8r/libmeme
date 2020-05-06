@@ -268,13 +268,13 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class U = value_type
-		> ML_NODISCARD auto insert(U const & value) noexcept
+		>  auto insert(U const & value) noexcept
 		{
 			return this->impl_insert(value);
 		}
 
 		template <class U = value_type
-		> ML_NODISCARD auto insert(U && value) noexcept
+		> auto insert(U && value) noexcept
 		{
 			return this->impl_insert(std::move(value));
 		}
