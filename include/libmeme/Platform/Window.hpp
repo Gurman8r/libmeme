@@ -17,130 +17,128 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws) override;
+		ML_NODISCARD virtual bool create(window_settings const & ws) override;
 
 		virtual bool close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		void destroy();
+		void destroy() override;
 
-		void iconify();
+		void iconify() override;
 		
-		void make_context_current();
+		void make_context_current() override;
 		
-		void maximize();
+		void maximize() override;
 		
-		void restore();
+		void restore() override;
 		
-		void swap_buffers();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void set_centered();
-		
-		void set_clipboard(cstring const & value);
-		
-		void set_cursor(cursor_handle value);
-		
-		void set_cursor_mode(int32_t value);
-		
-		void set_cursor_pos(vec2d const & value);
-		
-		void set_fullscreen(bool value);
-		
-		void set_icon(size_t w, size_t h, byte_t const * pixels);
-
-		void set_input_mode(int32_t mode, int32_t value);
-		
-		void set_position(vec2i const & value);
-		
-		void set_monitor(window_handle value);
-
-		void set_should_close(bool value);
-		
-		void set_size(vec2i const & value);
-		
-		void set_title(pmr::string const & value);
+		void swap_buffers() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_focused() const;
+		void set_centered() override;
 		
-		ML_NODISCARD bool is_fullscreen() const;
+		void set_clipboard(cstring const & value) override;
 		
-		ML_NODISCARD bool is_open() const;
+		void set_cursor(cursor_handle value) override;
 		
-		ML_NODISCARD int32_t get_attribute(int32_t value) const;
+		void set_cursor_mode(int32_t value) override;
 		
-		ML_NODISCARD cstring get_clipboard() const;
+		void set_cursor_pos(vec2d const & value) override;
 		
-		ML_NODISCARD vec2 get_cursor_pos() const;
+		void set_fullscreen(bool value) override;
 		
-		ML_NODISCARD vec2i get_frame_size() const;
-		
-		ML_NODISCARD window_handle get_handle() const;
+		void set_icon(size_t w, size_t h, byte_t const * pixels) override;
 
-		ML_NODISCARD int32_t get_key(int32_t key) const;
+		void set_input_mode(int32_t mode, int32_t value) override;
 		
-		ML_NODISCARD int32_t get_input_mode(int32_t mode) const;
+		void set_position(vec2i const & value) override;
 		
-		ML_NODISCARD int32_t get_mouse_button(int32_t button) const;
+		void set_monitor(window_handle value) override;
 
-		ML_NODISCARD window_handle get_native_handle() const;
+		void set_should_close(bool value) override;
 		
-		ML_NODISCARD vec2i get_position() const;
+		void set_size(vec2i const & value) override;
+		
+		void set_title(pmr::string const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void	destroy_cursor(cursor_handle value);
+		ML_NODISCARD bool is_focused() const override;
+		
+		ML_NODISCARD bool is_fullscreen() const override;
+		
+		ML_NODISCARD bool is_open() const override;
+		
+		ML_NODISCARD int32_t get_attribute(int32_t value) const override;
+		
+		ML_NODISCARD cstring get_clipboard() const override;
+		
+		ML_NODISCARD vec2 get_cursor_pos() const override;
+		
+		ML_NODISCARD vec2i get_frame_size() const override;
+		
+		ML_NODISCARD window_handle get_handle() const override;
 
-		static void make_context_current(cursor_handle value);
+		ML_NODISCARD int32_t get_key(int32_t key) const override;
+		
+		ML_NODISCARD int32_t get_input_mode(int32_t mode) const override;
+		
+		ML_NODISCARD int32_t get_mouse_button(int32_t button) const override;
 
-		static void poll_events();
-
-		static void swap_interval(int32_t value);
-
-		static void terminate();
+		ML_NODISCARD window_handle get_native_handle() const override;
+		
+		ML_NODISCARD vec2i get_position() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static cursor_handle create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels);
-		
-		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value);
+		void destroy_cursor(cursor_handle value) const override;
 
-		ML_NODISCARD static int32_t extension_supported(cstring value);
+		void make_context_current(window_handle value) const override;
 
-		ML_NODISCARD static void * get_context_current();
+		void poll_events() const override;
 
-		ML_NODISCARD static video_mode const & get_desktop_mode();
-		
-		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
+		void swap_interval(int32_t value) const override;
 
-		ML_NODISCARD static proc_fn get_proc_address(cstring value);
-		
-		ML_NODISCARD static pmr::vector<window_handle> const & get_monitors();
-
-		ML_NODISCARD static float64_t get_time();
-
-		ML_NODISCARD static bool initialize();
+		void terminate() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		char_fn			set_char_callback			(char_fn			fn);
-		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn	fn);
-		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn		fn);
-		error_fn		set_error_callback			(error_fn			fn);
-		frame_size_fn	set_frame_size_callback		(frame_size_fn		fn);
-		key_fn			set_key_callback			(key_fn				fn);
-		mouse_fn		set_mouse_callback			(mouse_fn			fn);
-		scroll_fn		set_scroll_callback			(scroll_fn			fn);
-		close_fn		set_window_close_callback	(close_fn			fn);
-		focus_fn		set_window_focus_callback	(focus_fn			fn);
-		position_fn		set_window_pos_callback		(position_fn		fn);
-		size_fn			set_window_size_callback	(size_fn			fn);
+		ML_NODISCARD cursor_handle create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels) const override;
+		
+		ML_NODISCARD cursor_handle create_standard_cursor(int32_t value) const override;
 
-		void install_default_callbacks();
+		ML_NODISCARD int32_t extension_supported(cstring value) const override;
+
+		ML_NODISCARD window_handle get_context_current() const override;
+
+		ML_NODISCARD video_mode const & get_desktop_mode() const override;
+		
+		ML_NODISCARD pmr::vector<video_mode> const & get_fullscreen_modes() const override;
+
+		ML_NODISCARD proc_fn get_proc_address(cstring value) const override;
+		
+		ML_NODISCARD pmr::vector<window_handle> const & get_monitors() const override;
+
+		ML_NODISCARD float64_t get_time() const override;
+
+		ML_NODISCARD bool initialize() const override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		char_fn			set_char_callback			(char_fn			fn) override;
+		cursor_enter_fn	set_cursor_enter_callback	(cursor_enter_fn	fn) override;
+		cursor_pos_fn	set_cursor_pos_callback		(cursor_pos_fn		fn) override;
+		error_fn		set_error_callback			(error_fn			fn) override;
+		frame_size_fn	set_frame_size_callback		(frame_size_fn		fn) override;
+		key_fn			set_key_callback			(key_fn				fn) override;
+		mouse_fn		set_mouse_callback			(mouse_fn			fn) override;
+		scroll_fn		set_scroll_callback			(scroll_fn			fn) override;
+		close_fn		set_window_close_callback	(close_fn			fn) override;
+		focus_fn		set_window_focus_callback	(focus_fn			fn) override;
+		position_fn		set_window_pos_callback		(position_fn		fn) override;
+		size_fn			set_window_size_callback	(size_fn			fn) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

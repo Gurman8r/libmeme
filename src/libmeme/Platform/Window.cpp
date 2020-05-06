@@ -34,7 +34,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::open(window_settings const & ws)
+	bool window::create(window_settings const & ws)
 	{
 		if (is_open()) { return false; }
 		
@@ -410,43 +410,43 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::destroy_cursor(cursor_handle value)
+	void window::destroy_cursor(cursor_handle value) const
 	{
 		if (!value) { return; }
 
 		glfwDestroyCursor(static_cast<GLFWcursor *>(value));
 	}
 
-	void window::make_context_current(cursor_handle value)
+	void window::make_context_current(window_handle value) const
 	{
 		if (!value) { return; }
 
 		glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
 	}
 
-	void window::poll_events()
+	void window::poll_events() const
 	{
 		glfwPollEvents();
 	}
 
-	void window::swap_interval(int32_t value)
+	void window::swap_interval(int32_t value) const
 	{
 		glfwSwapInterval(value);
 	}
 
-	void window::terminate()
+	void window::terminate() const
 	{
 		glfwTerminate();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	cursor_handle window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels)
+	cursor_handle window::create_custom_cursor(uint32_t w, uint32_t h, byte_t const * pixels) const
 	{
 		return glfwCreateCursor(impl::glfw_image({ w, h }, pixels), w, h);
 	}
 
-	cursor_handle window::create_standard_cursor(int32_t value)
+	cursor_handle window::create_standard_cursor(int32_t value) const
 	{
 		return glfwCreateStandardCursor(([value]() noexcept
 		{
@@ -465,17 +465,17 @@ namespace ml
 		})());
 	}
 
-	int32_t window::extension_supported(cstring value)
+	int32_t window::extension_supported(cstring value) const
 	{
 		return glfwExtensionSupported(value);
 	}
 
-	cursor_handle window::get_context_current()
+	window_handle window::get_context_current() const
 	{
 		return glfwGetCurrentContext();
 	}
 
-	video_mode const & window::get_desktop_mode()
+	video_mode const & window::get_desktop_mode() const
 	{
 		static video_mode temp{};
 		static ML_scope
@@ -492,7 +492,7 @@ namespace ml
 		return temp;
 	}
 
-	pmr::vector<video_mode> const & window::get_fullscreen_modes()
+	pmr::vector<video_mode> const & window::get_fullscreen_modes() const
 	{
 		static pmr::vector<video_mode> temp{};
 		static ML_scope
@@ -519,12 +519,12 @@ namespace ml
 		return temp;
 	}
 
-	window::proc_fn window::get_proc_address(cstring value)
+	window::proc_fn window::get_proc_address(cstring value) const
 	{
 		return reinterpret_cast<window::proc_fn>(glfwGetProcAddress(value));
 	}
 
-	pmr::vector<window_handle> const & window::get_monitors()
+	pmr::vector<window_handle> const & window::get_monitors() const
 	{
 		static pmr::vector<window_handle> temp{};
 		if (temp.empty())
@@ -539,12 +539,12 @@ namespace ml
 		return temp;
 	}
 
-	float64_t window::get_time()
+	float64_t window::get_time() const
 	{
 		return glfwGetTime();
 	}
 
-	bool window::initialize()
+	bool window::initialize() const
 	{
 		return glfwInit();
 	}
@@ -656,70 +656,70 @@ namespace ml
 			reinterpret_cast<GLFWwindowposfun>(value)) ? value : nullptr;
 	}
 
-	void window::install_default_callbacks()
-	{
-		if (!is_open()) { return; }
-
-		set_char_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<char_event>(ML_forward(args)...);
-		});
-
-		set_cursor_enter_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
-		});
-
-		set_cursor_pos_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
-		});
-
-		set_error_callback([](auto ... args)
-		{
-			event_system::fire_event<window_error_event>(ML_forward(args)...);
-		});
-
-		set_frame_size_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<frame_size_event>(ML_forward(args)...);
-		});
-
-		set_key_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<key_event>(ML_forward(args)...);
-		});
-
-		set_mouse_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<mouse_event>(ML_forward(args)...);
-		});
-
-		set_scroll_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<scroll_event>(ML_forward(args)...);
-		});
-
-		set_window_close_callback([](auto)
-		{
-			event_system::fire_event<window_close_event>();
-		});
-
-		set_window_focus_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_focus_event>(ML_forward(args)...);
-		});
-
-		set_window_pos_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_position_event>(ML_forward(args)...);
-		});
-
-		set_window_size_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_size_event>(ML_forward(args)...);
-		});
-	}
+	//void window::install_default_callbacks()
+	//{
+	//	if (!is_open()) { return; }
+	//
+	//	set_char_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<char_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_cursor_enter_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_cursor_pos_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<cursor_position_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_error_callback([](auto ... args)
+	//	{
+	//		event_system::fire_event<window_error_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_frame_size_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<frame_size_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_key_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<key_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_mouse_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<mouse_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_scroll_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<scroll_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_window_close_callback([](auto)
+	//	{
+	//		event_system::fire_event<window_close_event>();
+	//	});
+	//
+	//	set_window_focus_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<window_focus_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_window_pos_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<window_position_event>(ML_forward(args)...);
+	//	});
+	//
+	//	set_window_size_callback([](auto, auto ... args)
+	//	{
+	//		event_system::fire_event<window_size_event>(ML_forward(args)...);
+	//	});
+	//}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

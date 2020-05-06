@@ -12,7 +12,6 @@ namespace ml
 	script_manager::script_manager(json const & j, allocator_type const & alloc) noexcept
 	{
 		j["library_home"].get_to(m_library_home);
-		j["setup_script"].get_to(m_setup_script);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,8 +47,6 @@ namespace ml
 		Py_SetPythonHome(m_library_home.c_str());
 
 		Py_InitializeEx(1);
-
-		this->do_file(m_setup_script);
 
 		return is_initialized();
 	}

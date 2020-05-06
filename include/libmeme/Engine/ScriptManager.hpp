@@ -38,7 +38,6 @@ namespace ml
 
 	private:
 		fs::path m_library_home{};
-		fs::path m_setup_script{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

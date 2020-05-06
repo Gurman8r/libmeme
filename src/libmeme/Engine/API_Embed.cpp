@@ -247,7 +247,7 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-			.def_static("open", [](window_settings const & ws) { return engine::window().open(ws); })
+			.def_static("open", [](window_settings const & ws) { return engine::window().create(ws); })
 			.def_static("close", [](py::args) { return engine::window().close(); })
 			.def_static("get_size", []() { return engine::window().get_frame_size(); })
 			.def_static("get_settings", []() { return engine::window().get_settings(); })

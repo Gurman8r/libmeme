@@ -68,7 +68,7 @@ ml::int32_t main()
 		{
 			ML_benchmark("| begin loop");
 			engine::time().begin_loop();
-			window::poll_events();
+			engine::window().poll_events();
 			event_system::fire_event<begin_loop_event>();
 		}
 		{

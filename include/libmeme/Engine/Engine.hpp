@@ -12,7 +12,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_ENGINE_API engine final
+	class ML_ENGINE_API ML_NODISCARD engine final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,31 +23,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool is_initialized() noexcept;
+		static bool is_initialized() noexcept;
 
-		ML_NODISCARD static bool create_context(json const & j, allocator_type const & alloc = {}) noexcept;
+		static bool create_context(json const & j, allocator_type const & alloc = {}) noexcept;
 
-		ML_NODISCARD static bool destroy_context() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static bool startup() noexcept;
-
-		ML_NODISCARD static bool shutdown() noexcept;
+		static bool destroy_context() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static file_manager	& fs() noexcept;
+		static bool startup() noexcept;
 
-		ML_NODISCARD static gui_manager		& gui() noexcept;
+		static bool shutdown() noexcept;
 
-		ML_NODISCARD static plugin_manager	& plugins() noexcept;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static script_manager	& scripts() noexcept;
+		static json				& config() noexcept;
 
-		ML_NODISCARD static time_manager	& time() noexcept;
+		static file_manager		& fs() noexcept;
 
-		ML_NODISCARD static render_window	& window() noexcept;
+		static gui_manager		& gui() noexcept;
+
+		static plugin_manager	& plugins() noexcept;
+
+		static script_manager	& scripts() noexcept;
+
+		static time_manager		& time() noexcept;
+
+		static render_window	& window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -16,7 +16,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws) override;
+		ML_NODISCARD virtual bool create(window_settings const & ws) override;
 
 		using window::close;
 
