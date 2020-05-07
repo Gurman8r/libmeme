@@ -31,6 +31,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		auto total() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
+
+		auto delta() const & noexcept -> duration const & { return m_delta_time; }
+
+		auto frame_rate() const & noexcept -> float64_t const & { return m_frame_rate; }
+
+		auto frame_count() const & noexcept -> uint64_t const & { return m_frame_count; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void begin_loop() noexcept
 		{
 			m_delta_time = m_loop_timer.stop().elapsed();
@@ -55,18 +65,6 @@ namespace ml
 					: FLT_MAX;
 			})();
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		auto total() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
-
-		auto delta() const & noexcept -> duration const & { return m_delta_time; }
-
-		auto frame_rate() const & noexcept -> float64_t const & { return m_frame_rate; }
-
-		auto frame_count() const & noexcept -> uint64_t const & { return m_frame_count; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

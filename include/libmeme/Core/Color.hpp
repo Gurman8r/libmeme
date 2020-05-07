@@ -158,22 +158,22 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto clear		= make_color(0.0f, 0.0f, 0.0f, 0.0f);
-		static constexpr auto white		= make_color(1.0f, 1.0f, 1.0f, 1.0f);
-		static constexpr auto gray		= make_color(0.5f, 0.5f, 0.5f, 1.0f);
-		static constexpr auto black		= make_color(0.0f, 0.0f, 0.0f, 1.0f);
-		static constexpr auto red		= make_color(1.0f, 0.0f, 0.0f, 1.0f);
-		static constexpr auto green		= make_color(0.0f, 1.0f, 0.0f, 1.0f);
-		static constexpr auto blue		= make_color(0.0f, 0.0f, 1.0f, 1.0f);
-		static constexpr auto cyan		= make_color(0.0f, 1.0f, 1.0f, 1.0f);
-		static constexpr auto yellow	= make_color(1.0f, 1.0f, 0.0f, 1.0f);
-		static constexpr auto magenta	= make_color(1.0f, 0.0f, 1.0f, 1.0f);
-		static constexpr auto violet	= make_color(0.5f, 0.0f, 1.0f, 1.0f);
-		static constexpr auto lime		= make_color(0.5f, 1.0f, 0.0f, 1.0f);
-		static constexpr auto orange	= make_color(1.0f, 0.5f, 0.0f, 1.0f);
-		static constexpr auto fuchsia	= make_color(1.0f, 0.0f, 0.5f, 1.0f);
-		static constexpr auto aqua		= make_color(0.0f, 1.0f, 0.5f, 1.0f);
-		static constexpr auto azure		= make_color(0.0f, 0.5f, 1.0f, 1.0f);
+		static constexpr auto clear		= color{ 0.0f, 0.0f, 0.0f, 0.0f };
+		static constexpr auto white		= color{ 1.0f, 1.0f, 1.0f, 1.0f };
+		static constexpr auto gray		= color{ 0.5f, 0.5f, 0.5f, 1.0f };
+		static constexpr auto black		= color{ 0.0f, 0.0f, 0.0f, 1.0f };
+		static constexpr auto red		= color{ 1.0f, 0.0f, 0.0f, 1.0f };
+		static constexpr auto green		= color{ 0.0f, 1.0f, 0.0f, 1.0f };
+		static constexpr auto blue		= color{ 0.0f, 0.0f, 1.0f, 1.0f };
+		static constexpr auto cyan		= color{ 0.0f, 1.0f, 1.0f, 1.0f };
+		static constexpr auto yellow	= color{ 1.0f, 1.0f, 0.0f, 1.0f };
+		static constexpr auto magenta	= color{ 1.0f, 0.0f, 1.0f, 1.0f };
+		static constexpr auto violet	= color{ 0.5f, 0.0f, 1.0f, 1.0f };
+		static constexpr auto lime		= color{ 0.5f, 1.0f, 0.0f, 1.0f };
+		static constexpr auto orange	= color{ 1.0f, 0.5f, 0.0f, 1.0f };
+		static constexpr auto fuchsia	= color{ 1.0f, 0.0f, 0.5f, 1.0f };
+		static constexpr auto aqua		= color{ 0.0f, 1.0f, 0.5f, 1.0f };
+		static constexpr auto azure		= color{ 0.0f, 0.5f, 1.0f, 1.0f };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

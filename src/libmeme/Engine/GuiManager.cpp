@@ -12,7 +12,6 @@ namespace ml
 
 	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
 		: m_gui_context{}
-		, m_win_ptr{}
 		, main_menu_bar{ alloc }
 		, dockspace{ alloc }
 	{
@@ -51,9 +50,7 @@ namespace ml
 		// backend
 #if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
 		
-		m_win_ptr = &win;
-
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)m_win_ptr->get_handle(), true))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)win.get_handle(), true))
 		{
 			return debug::error("Failed initializing ImGui platform");
 		}
@@ -84,7 +81,6 @@ namespace ml
 		ImGui::DestroyContext();
 
 		m_gui_context = nullptr;
-		m_win_ptr = nullptr;
 
 		return true;
 	}
@@ -198,10 +194,10 @@ namespace ml
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ m_win_ptr->get_context_current() };
+			auto backup_context{ window::get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			m_win_ptr->make_context_current(backup_context);
+			window::make_context_current(backup_context);
 		}
 	}
 

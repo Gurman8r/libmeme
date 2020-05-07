@@ -130,7 +130,6 @@ namespace ml
 
 	private:
 		void * m_gui_context;
-		struct window const * m_win_ptr;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

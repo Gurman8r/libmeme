@@ -563,9 +563,8 @@ namespace ml
 			};
 
 			// draw
+			ML_ImGui_ScopeID(ML_addressof(this));
 			{
-				ML_ImGui_ScopeID(ML_addressof(this));
-
 				// IMGUI
 				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
 				if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }

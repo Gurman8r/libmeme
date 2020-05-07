@@ -30,6 +30,11 @@ namespace ml
 		bool		multisample		{};
 		bool		srgb_capable	{};
 
+		constexpr operator bool() const noexcept
+		{
+			return api && major && profile;
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 

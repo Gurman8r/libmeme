@@ -74,7 +74,7 @@ namespace ml
 		}
 
 		// start window backend
-		if (!g_engine->m_window.initialize())
+		if (!window::initialize())
 		{
 			return debug::error("failed initializing window backend");
 		}
@@ -105,7 +105,7 @@ namespace ml
 		g_engine->m_window.destroy();
 
 		// shutdown window backend
-		g_engine->m_window.terminate();
+		window::terminate();
 
 		// shutdown scripting backend
 		if (!g_engine->m_scripts.shutdown()) {}

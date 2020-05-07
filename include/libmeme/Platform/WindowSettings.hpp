@@ -8,6 +8,26 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_alias cursor_handle = typename void *;
+	ML_alias window_handle = typename void *;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	using window_char_fn			= typename void(*)(window_handle, uint32_t);
+	using window_close_fn			= typename void(*)(window_handle);
+	using window_cursor_enter_fn	= typename void(*)(window_handle, int32_t);
+	using window_cursor_pos_fn		= typename void(*)(window_handle, float64_t, float64_t);
+	using window_error_fn			= typename void(*)(int32_t, cstring);
+	using window_focus_fn			= typename void(*)(window_handle, int32_t);
+	using window_frame_size_fn		= typename void(*)(window_handle, int32_t, int32_t);
+	using window_key_fn				= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
+	using window_mouse_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t);
+	using window_position_fn		= typename void(*)(window_handle, int32_t, int32_t);
+	using window_scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
+	using window_size_fn			= typename void(*)(window_handle, int32_t, int32_t);
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum window_hints_ : int32_t
 	{
 		window_hints_none				= (0 << 0), // none
