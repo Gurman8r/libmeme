@@ -38,8 +38,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_centered();
-		
 		void set_clipboard(cstring value);
 		
 		void set_cursor(cursor_handle value);
@@ -152,6 +150,8 @@ namespace ml
 		ML_NODISCARD bool get_hint(int32_t const i) const noexcept { return ML_flag_read(m_settings.hints, i); }
 
 		ML_NODISCARD auto get_hints() const noexcept -> int32_t { return m_settings.hints; }
+
+		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
 
 		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
 

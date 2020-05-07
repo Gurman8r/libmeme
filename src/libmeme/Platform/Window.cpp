@@ -40,24 +40,27 @@ namespace ml
 
 		make_context_current();
 
+		set_cursor_mode(cursor_mode_normal);
+
 		if (ws.hints & window_hints_install_callbacks)
 		{
 			install_default_callbacks();
 		}
 
-		set_cursor_mode(cursor_mode_normal);
-
 		if (ws.hints & window_hints_fullscreen)
 		{
-			set_fullscreen(true); // fullscreen
+			// fullscreen
+			set_fullscreen(true);
 		}
 		else if (ws.hints & window_hints_maximized)
 		{
-			maximize(); // maximized
+			// maximized
+			maximize();
 		}
 		else
 		{
-			set_centered(); // centered
+			// centered
+			set_position((get_desktop_mode().size - get_frame_size()) / 2);
 		}
 
 		return is_open();
@@ -100,11 +103,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::set_centered()
-	{
-		m_impl->set_centered();
-	}
-
 	void window::set_clipboard(cstring value)
 	{
 		m_impl->set_clipboard(value);
@@ -128,6 +126,12 @@ namespace ml
 	void window::set_fullscreen(bool value)
 	{
 		m_impl->set_fullscreen(value);
+
+		if (!value)
+		{
+			set_size(m_settings.video.size);
+			set_position((get_desktop_mode().size - get_frame_size()) / 2);
+		}
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p)
@@ -301,6 +305,8 @@ namespace ml
 	{
 		return ml_window_impl::get_monitors();
 	}
+
+
 
 	float64_t window::get_time()
 	{

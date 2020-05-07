@@ -32,8 +32,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_centered() override;
-		
 		void set_clipboard(cstring value) override;
 		
 		void set_cursor(cursor_handle value) override;
@@ -115,6 +113,8 @@ namespace ml
 		ML_NODISCARD static void * get_proc_address(cstring value);
 		
 		ML_NODISCARD static pmr::vector<window_handle> const & get_monitors();
+
+		ML_NODISCARD static window_handle get_primary_monitor();
 
 		ML_NODISCARD static float64_t get_time();
 

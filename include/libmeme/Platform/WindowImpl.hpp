@@ -36,8 +36,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_centered() = 0;
-
 		virtual void set_clipboard(cstring) = 0;
 
 		virtual void set_cursor(cursor_handle) = 0;

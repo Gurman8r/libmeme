@@ -119,11 +119,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void impl_window_glfw::set_centered()
-	{
-		set_position((vec2i)(get_desktop_mode().size - get_frame_size()) / 2);
-	}
-
 	void impl_window_glfw::set_clipboard(cstring value)
 	{
 		glfwSetClipboardString(static_cast<GLFWwindow *>(m_window), value);
@@ -155,7 +150,7 @@ namespace ml
 
 	void impl_window_glfw::set_fullscreen(bool value)
 	{
-		set_monitor(value ? glfwGetPrimaryMonitor() : nullptr);
+		set_monitor(value ? get_primary_monitor() : nullptr);
 	}
 
 	void impl_window_glfw::set_icon(size_t w, size_t h, byte_t const * p)
@@ -177,14 +172,19 @@ namespace ml
 
 	void impl_window_glfw::set_monitor(window_handle value)
 	{
-		if (!m_window || (m_monitor == value)) { return; }
+		// FIXME: need default window size when no monitor
 
 		m_monitor = value;
-		auto const vm{ glfwGetVideoMode(static_cast<GLFWmonitor *>(m_monitor)) };
+		auto const vm
+		{
+			m_monitor ? glfwGetVideoMode(static_cast<GLFWmonitor *>(m_monitor)) : nullptr
+		};
 		glfwSetWindowMonitor(
 			static_cast<GLFWwindow *>(m_window),
 			static_cast<GLFWmonitor *>(m_monitor),
-			0, 0, vm->width, vm->height,
+			0, 0,
+			vm ? vm->width : 480,
+			vm ? vm->height : 320,
 			GLFW_DONT_CARE
 		);
 	}
@@ -213,7 +213,7 @@ namespace ml
 
 	bool impl_window_glfw::is_fullscreen() const
 	{
-		return m_window && m_monitor && (m_monitor == glfwGetPrimaryMonitor());
+		return m_monitor == get_primary_monitor();
 	}
 
 	bool impl_window_glfw::is_open() const
@@ -404,6 +404,11 @@ namespace ml
 			}
 		}
 		return temp;
+	}
+
+	window_handle ml::impl_window_glfw::get_primary_monitor()
+	{
+		return glfwGetPrimaryMonitor();
 	}
 
 	float64_t impl_window_glfw::get_time()
