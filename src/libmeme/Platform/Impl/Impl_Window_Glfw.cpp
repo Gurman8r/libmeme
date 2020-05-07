@@ -218,7 +218,7 @@ namespace ml
 
 	bool impl_window_glfw::is_open() const
 	{
-		return !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
+		return m_window && !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
 	}
 	
 	int32_t impl_window_glfw::get_attribute(int32_t value) const

@@ -147,11 +147,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
+
 		ML_NODISCARD bool get_hint(int32_t const i) const noexcept { return ML_flag_read(m_settings.hints, i); }
 
 		ML_NODISCARD auto get_hints() const noexcept -> int32_t { return m_settings.hints; }
 
-		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
+		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
+
+		ML_NODISCARD auto get_video_mode() const noexcept -> video_mode const & { return m_settings.video; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
