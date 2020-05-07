@@ -61,7 +61,6 @@ namespace ml
 		virtual void on_event(event const & ev) = 0;
 	};
 
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	inline bool event_system::add_listener(hash_t type, event_listener * value) noexcept
