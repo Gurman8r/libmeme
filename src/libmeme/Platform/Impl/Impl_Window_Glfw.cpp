@@ -1,10 +1,6 @@
 #ifdef ML_PLATFORM_GLFW
 
 #include "Impl_Window_Glfw.hpp"
-#include <libmeme/Core/StringUtility.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <glfw/glfw3.h>
 
 #ifdef ML_os_windows
@@ -14,23 +10,26 @@
 #	include <glfw/glfw3native.h>
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+bool operator<(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
+{
+	if (std::addressof(lhs) == std::addressof(rhs)) { return false; }
+	else return
+		_ML util::compare(lhs.width, rhs.width) < 0 &&
+		_ML util::compare(lhs.height, rhs.height) < 0 &&
+		_ML util::compare(lhs.pixels, rhs.pixels) < 0;
+}
 
 namespace ml::impl
 {
-	static GLFWimage const * make_glfw_image(vec2s const & s, byte_t const * p) noexcept
+	static GLFWimage const * make_icon(vec2s const & s, byte_t const * p) noexcept
 	{
 		if (!s[0] || !s[1] || !p) { return nullptr; }
 
-		static ds::map<void *, GLFWimage> cache{};
-		return &cache.find_or_add_fn((void *)p, [&]() noexcept
-		{
-			return GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p };
-		});
+		static ds::set<GLFWimage> cache{};
+
+		return &(*cache.insert(GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p }).first);
 	}
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -292,7 +291,7 @@ namespace ml
 
 	void impl_window_glfw::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		glfwSetWindowIcon(m_window, 1, impl::make_glfw_image({ w, h }, p));
+		glfwSetWindowIcon(m_window, 1, impl::make_icon({ w, h }, p));
 	}
 
 	void impl_window_glfw::set_input_mode(int32_t mode, int32_t value)
@@ -310,22 +309,29 @@ namespace ml
 		glfwSetWindowPos(m_window, value[0], value[1]);
 	}
 
-	void impl_window_glfw::set_monitor(monitor_handle value, vec4i const & bounds)
+	void impl_window_glfw::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
-		m_monitor = (GLFWmonitor *)value;
-		auto const vm
+		if (m_monitor = (GLFWmonitor *)value)
 		{
-			m_monitor ? glfwGetVideoMode(m_monitor) : nullptr
-		};
-		glfwSetWindowMonitor(
-			m_window,
-			m_monitor,
-			bounds[0],
-			bounds[1],
-			vm ? vm->width : bounds[2],
-			vm ? vm->height : bounds[3],
-			GLFW_DONT_CARE
-		);
+			if (auto const vm{ glfwGetVideoMode(m_monitor) })
+			{
+				glfwSetWindowMonitor(m_window, m_monitor,
+					bounds.left(),
+					bounds.top(),
+					vm->width,
+					vm->height,
+					vm->refreshRate);
+			}
+		}
+		else
+		{
+			glfwSetWindowMonitor(m_window, nullptr,
+				bounds.left(),
+				bounds.top(),
+				bounds.width(),
+				bounds.height(),
+				GLFW_DONT_CARE);
+		}
 	}
 
 	void impl_window_glfw::set_should_close(bool value)
@@ -347,18 +353,12 @@ namespace ml
 
 	bool impl_window_glfw::backend_initialize()
 	{
-#ifdef ML_os_windows
-		if (auto const cw{ GetConsoleWindow() })
-		{
-			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
-		}
-#endif
 		return glfwInit();
 	}
 
 	cursor_handle impl_window_glfw::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return glfwCreateCursor(impl::make_glfw_image({ w, h }, p), w, h);
+		return glfwCreateCursor(impl::make_icon({ w, h }, p), w, h);
 	}
 
 	cursor_handle impl_window_glfw::create_standard_cursor(int32_t value)
@@ -466,12 +466,6 @@ namespace ml
 
 	void impl_window_glfw::backend_finalize()
 	{
-#ifdef ML_os_windows
-		if (auto const cw{ GetConsoleWindow() })
-		{
-			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_ENABLED);
-		}
-#endif
 		glfwTerminate();
 	}
 

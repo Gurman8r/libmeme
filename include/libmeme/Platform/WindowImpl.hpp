@@ -85,7 +85,7 @@ namespace ml
 
 		virtual void set_position(vec2i const &) = 0;
 
-		virtual void set_monitor(monitor_handle, vec4i const &) = 0;
+		virtual void set_monitor(monitor_handle, int_rect const &) = 0;
 
 		virtual void set_should_close(bool) = 0;
 

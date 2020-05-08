@@ -548,7 +548,7 @@ namespace ml
 				{
 					ML_imgui_scope_id(ML_addressof(this));
 					bool fullscreen{ engine::window().is_fullscreen() };
-					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
+					if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
 					{
 						engine::window().set_fullscreen(fullscreen);
 					}
@@ -753,17 +753,18 @@ namespace ml
 				ImGui::EndMenuBar();
 			}
 
-			static ImGui::TextEditor test{};
-			static ML_scope{
-				test.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
-				test.SetText("int main()\n{\n\treturn 0;\n}");
+			static ImGui::TextEditor text{};
+			static ML_scope
+			{
+				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
+				text.SetText("int main()\n{\n\treturn 0;\n}");
 			};
 
 			if (ImGui::BeginTabBar("documents##tabs"))
 			{
-				if (ImGui::BeginTabItem("test document"))
+				if (ImGui::BeginTabItem("text document"))
 				{
-					test.Render("##document##text_editor", {}, true);
+					text.Render("##document##text_editor", {}, true);
 
 					ImGui::EndTabItem();
 				}

@@ -115,6 +115,8 @@ ml::int32_t main()
 			event_system::fire_event<end_loop_event>();
 		}
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// goodbye!
 	return EXIT_SUCCESS;

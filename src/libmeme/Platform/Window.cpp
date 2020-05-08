@@ -3,16 +3,19 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// platform specific
+#ifdef ML_os_windows
+#	include <Windows.h>
+#else
+#endif
 
+// window implementation
 #if defined(ML_PLATFORM_GLFW)
 //	GLFW
 #	include "Impl/Impl_Window_Glfw.hpp"
 	using ml_window_impl = _ML impl_window_glfw;
 #else
 #endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -268,7 +271,7 @@ namespace ml
 		m_impl->set_position(value);
 	}
 
-	void window::set_monitor(monitor_handle value, vec4i const & bounds)
+	void window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
 		m_impl->set_monitor(value, bounds);
 	}
@@ -293,6 +296,12 @@ namespace ml
 
 	bool window::backend_initialize()
 	{
+#ifdef ML_os_windows
+		if (auto const cw{ GetConsoleWindow() })
+		{
+			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
+		}
+#endif
 		return ml_window_impl::backend_initialize();
 	}
 
@@ -351,6 +360,13 @@ namespace ml
 	void window::backend_finalize()
 	{
 		ml_window_impl::backend_finalize();
+
+#ifdef ML_os_windows
+		if (auto const cw{ GetConsoleWindow() })
+		{
+			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_ENABLED);
+		}
+#endif
 	}
 
 	void window::destroy_cursor(cursor_handle value)

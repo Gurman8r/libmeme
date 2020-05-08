@@ -83,7 +83,7 @@ namespace ml
 		
 		void set_position(vec2i const & value) override;
 		
-		void set_monitor(monitor_handle value, vec4i const & bounds = {}) override;
+		void set_monitor(monitor_handle value, int_rect const & bounds = {}) override;
 
 		void set_should_close(bool value) override;
 		

@@ -89,7 +89,7 @@ namespace ml
 
 		void set_position(vec2i const & value);
 		
-		void set_monitor(monitor_handle value, vec4i const & bounds = {});
+		void set_monitor(monitor_handle value, int_rect const & bounds = {});
 
 		void set_should_close(bool value);
 		

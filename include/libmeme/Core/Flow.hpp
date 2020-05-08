@@ -5,7 +5,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// flow control declarator
+// flow control declarator helper
 #define ML_flow_control_decl(Fn, type)                                                  \
     template <class Fn> struct type;                                                    \
     enum class ML_concat(type, _tag) {};                                                \
@@ -15,7 +15,7 @@
     }                                                                                   \
     template <class Fn> struct ML_NODISCARD type final
 
-// flow control implementor
+// flow control implementor helper
 #define ML_flow_control_impl(type) \
     auto ML_anon = _ML impl:: ML_concat(type, _tag){} + [&]() noexcept
 
@@ -23,35 +23,32 @@
 
 namespace ml::impl
 {
-    // invoke body in constructor
-    ML_flow_control_decl(Fn, immediate_block)
+    // invoke in constructor
+    ML_flow_control_decl(Fn, immediate_scope)
     {
-        immediate_block(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
+        immediate_scope(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
-    // invoke body immediately
-#define ML_scope \
-    ML_flow_control_impl(immediate_block)
+    // invoke in destructor
+    ML_flow_control_decl(Fn, deferred_scope)
+    {
+        deferred_scope(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
+
+        ~deferred_scope() noexcept { std::invoke(m_fn); }
+
+    private: Fn const m_fn;
+    };
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml::impl
-{
-    // invoke body in destructor
-    ML_flow_control_decl(Fn, deferred_block)
-    {
-        deferred_block(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
+// invoke immediately
+#define ML_scope \
+    ML_flow_control_impl(immediate_scope)
 
-        ~deferred_block() noexcept { std::invoke(m_fn); }
-
-    private: Fn const m_fn;
-    };
-
-    // invoke body on scope exit
+// invoke on scope exit
 #define ML_defer \
-    ML_flow_control_impl(deferred_block)
-}
+    ML_flow_control_impl(deferred_scope)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

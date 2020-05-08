@@ -40,18 +40,18 @@ namespace ml
 		explicit shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			this->open(path);
+			(void)open(path);
 		}
 
 		explicit shared_library(self_type && value, allocator_type const & alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			this->swap(std::move(value));
+			swap(std::move(value));
 		}
 
 		~shared_library() noexcept
 		{
-			this->close();
+			close();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -76,14 +76,16 @@ namespace ml
 
 		bool open(fs::path const & path);
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		bool close();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD void * load_symbol(pmr::string const & name);
+		void * load_symbol(pmr::string const & name);
 
 		template <class T
-		> ML_NODISCARD auto load_symbol(pmr::string const & name)
+		> auto load_symbol(pmr::string const & name)
 		{
 			return reinterpret_cast<T>(this->load_symbol(name));
 		}

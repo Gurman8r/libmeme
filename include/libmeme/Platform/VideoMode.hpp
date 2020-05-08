@@ -1,7 +1,7 @@
 #ifndef _ML_VIDEO_MODE_HPP_
 #define _ML_VIDEO_MODE_HPP_
 
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/Rect.hpp>
 
 namespace ml
 {

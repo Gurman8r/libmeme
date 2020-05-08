@@ -143,18 +143,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// setup
-		ML_NODISCARD static bool configure(util::test_resource * value) noexcept
+		ML_NODISCARD static bool configure(util::test_resource * res) noexcept
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres)				{ return debug::error("resource already set"); }
-			if (!value)						{ return debug::error("resource cannot be null"); }
-			if (!value->upstream())			{ return debug::error("upstream cannot be null"); }
-			if (!value->buffer())			{ return debug::error("data cannot be null"); }
-			if (!value->is_valid_size())	{ return debug::error("size must be greater than zero"); }
-			if (!value->is_default())		{ return debug::error("resource is not the default resource"); }
+			if (inst.m_testres)			{ return debug::error("resource already set"); }
+			if (!res)					{ return debug::error("resource cannot be null"); }
+			if (!res->upstream())		{ return debug::error("upstream cannot be null"); }
+			if (!res->buffer())			{ return debug::error("data cannot be null"); }
+			if (!res->is_valid_size())	{ return debug::error("size must be greater than zero"); }
+			if (!res->is_default())		{ return debug::error("resource is not the default resource"); }
 
-			return (inst.m_testres = value);
+			return (inst.m_testres = res);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
