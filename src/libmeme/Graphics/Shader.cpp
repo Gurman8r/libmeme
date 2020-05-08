@@ -9,7 +9,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum { unknown = -1, none };
+		enum { unknown = -1 };
 
 		union { int32_t location; uint32_t current; uint32_t previous; };
 
@@ -19,7 +19,7 @@ namespace ml
 
 		template <class Fn
 		> uniform_binder(shader & program, pmr::string const & name, Fn && fn) noexcept
-			: location{ unknown }, current{ none }, previous{ none }
+			: location{ unknown }, current{}, previous{}
 		{
 			if (current = program.m_handle)
 			{

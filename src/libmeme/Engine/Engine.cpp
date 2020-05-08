@@ -50,10 +50,10 @@ namespace ml
 		}
 
 		// initialize windows
-		debug::info("initializing windows...");
-		if (!window::initialize())
+		debug::info("initializing window backend...");
+		if (!window().initialize())
 		{
-			return debug::error("failed initializing windows");
+			return debug::error("failed initializing window backend");
 		}
 
 		// initialize scripting
@@ -84,16 +84,16 @@ namespace ml
 		plugins().clear();
 
 		// finalize gui
-		if (!gui().finalize()) {}
+		(void)gui().finalize();
 
 		// finalize scripting
-		if (!scripts().finalize()) {}
+		(void)scripts().finalize();
 
 		// destroy window
 		window().destroy();
 
-		// finalize windows
-		window::finalize();
+		// finalize window backend
+		window().finalize();
 		
 		// destroy context
 		delete g_engine; g_engine = nullptr;

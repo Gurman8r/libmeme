@@ -19,6 +19,7 @@ namespace ml
 		template <class Ev> constexpr auto cast() const noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+
 			return (ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
 		}
 

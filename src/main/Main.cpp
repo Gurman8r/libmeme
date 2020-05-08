@@ -7,7 +7,7 @@
 using namespace ml;
 
 #ifndef MAIN_MEMORY
-#define MAIN_MEMORY 128._MiB
+#define MAIN_MEMORY 128_MiB
 #endif
 
 #ifndef MAIN_CONFIG

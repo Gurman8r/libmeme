@@ -131,7 +131,7 @@ namespace ml
 
 	inline event_listener::~event_listener() noexcept
 	{
-		event_system::remove_listener(this); // remove from all events
+		event_system::remove_listener(this); // remove listener from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

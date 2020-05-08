@@ -300,7 +300,8 @@ namespace ml::util
 		// https://stackoverflow.com/questions/466204/rounding-up-to-next-power-of-2
 		if constexpr (std::is_floating_point_v<T>)
 		{
-			return gcem::round(gcem::pow(2, gcem::ceil(gcem::log(v) / gcem::log(2))));
+			return gcem::round<T>(
+				gcem::pow<T>(2, gcem::ceil<T>(gcem::log<T>(v) / gcem::log<T>(2))));
 		}
 		else if constexpr (std::is_integral_v<T>)
 		{

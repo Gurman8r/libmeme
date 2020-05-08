@@ -1,7 +1,7 @@
 import libmeme          as ml
 import libmeme_engine   as engine
 
-# window
+# setup window
 print("[ info ] opening window...")
 assert(engine.window.open(ml.window_settings(
     "libmeme",
@@ -18,16 +18,16 @@ assert(engine.window.open(ml.window_settings(
 engine.window.install_default_callbacks()
 engine.window.set_cursor_mode(ml.cursor_mode.normal)
 
-# gui
+# setup gui
 print("[ info ] initializing gui...")
 assert(engine.gui.initialize("#version 130"))
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
-# plugins
+# setup plugins
 print("[ info ] loading plugins...")
 assert(engine.plugins.load("demo"))
 
-# messages
+# print messages
 print(f"# {ml.project.name} | {ml.build.arch!r}-bit | {ml.build.configuration}")
 print(f"# {ml.project.url}")
 print("# type \'help\' for a list of commands")
