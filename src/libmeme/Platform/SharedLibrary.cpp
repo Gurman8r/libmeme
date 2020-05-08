@@ -1,6 +1,5 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 
-// platform specific
 #ifdef ML_os_windows
 #	include <Windows.h>
 #else

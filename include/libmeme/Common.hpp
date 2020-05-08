@@ -111,10 +111,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// miscellaneous
+// misc
 #define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
 #define ML_alias				using
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
 #define ML_forward(var)			_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

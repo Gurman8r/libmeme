@@ -25,25 +25,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image(allocator_type const & alloc = {});
+		image(allocator_type alloc = {});
 		
-		image(vec2u const & size, allocator_type const & alloc = {});
+		image(vec2u const & size, allocator_type alloc = {});
 		
-		image(vec2u const & size, size_t channels, allocator_type const & alloc = {});
+		image(vec2u const & size, size_t channels, allocator_type alloc = {});
 		
-		image(vec2u const & size, storage_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, storage_type const & pixels, allocator_type alloc = {});
 		
-		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type const & alloc = {});
+		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type alloc = {});
 		
-		image(fs::path const & path, allocator_type const & alloc = {});
+		image(fs::path const & path, allocator_type alloc = {});
 		
-		image(fs::path const & path, bool flip_v, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip_v, allocator_type alloc = {});
 		
-		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type const & alloc = {});
+		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {});
 		
-		image(image const & value, allocator_type const & alloc = {});
+		image(image const & value, allocator_type alloc = {});
 		
-		image(image && value, allocator_type const & alloc = {}) noexcept;
+		image(image && value, allocator_type alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -16,7 +16,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	font::font(allocator_type const & alloc) noexcept
+	font::font(allocator_type alloc) noexcept
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
 		, m_library	{}
@@ -24,13 +24,13 @@ namespace ml
 	{
 	}
 
-	font::font(fs::path const & path, allocator_type const & alloc)
+	font::font(fs::path const & path, allocator_type alloc)
 		: font{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	font::font(font const & value, allocator_type const & alloc)
+	font::font(font const & value, allocator_type alloc)
 		: m_pages	{ value.m_pages, alloc }
 		, m_info	{ { value.m_info.family, alloc }, value.m_info.locale }
 		, m_library	{ value.m_library }
@@ -38,7 +38,7 @@ namespace ml
 	{
 	}
 
-	font::font(font && value, allocator_type const & alloc) noexcept
+	font::font(font && value, allocator_type alloc) noexcept
 		: font{ alloc }
 	{
 		swap(std::move(value));

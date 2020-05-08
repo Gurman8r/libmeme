@@ -542,7 +542,7 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		manager(allocator_type const & alloc = {}) noexcept
+		manager(allocator_type alloc = {}) noexcept
 			: m_capacity	{}
 			, m_size		{}
 			, m_size_next	{}
@@ -553,19 +553,19 @@ namespace ml::ecs
 		{
 		}
 
-		manager(self_type const & value, allocator_type const & alloc = {})
+		manager(self_type const & value, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
 			this->deep_copy(value);
 		}
 		
-		manager(self_type && value, allocator_type const & alloc = {}) noexcept
+		manager(self_type && value, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
 			this->swap(std::move(value));
 		}
 
-		manager(size_t const cap, allocator_type const & alloc = {})
+		manager(size_t const cap, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
 			this->grow_to(cap);

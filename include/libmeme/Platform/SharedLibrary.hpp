@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
+	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,18 +32,18 @@ namespace ml
 		{
 		}
 
-		explicit shared_library(allocator_type const & alloc) noexcept
+		explicit shared_library(allocator_type alloc) noexcept
 			: m_handle{}, m_path{}, m_symbols{ alloc }
 		{
 		}
 
-		explicit shared_library(fs::path const & path, allocator_type const & alloc = {}) noexcept
+		explicit shared_library(fs::path const & path, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
 			(void)open(path);
 		}
 
-		explicit shared_library(self_type && value, allocator_type const & alloc = {}) noexcept
+		explicit shared_library(self_type && value, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
 			swap(std::move(value));
@@ -140,7 +140,7 @@ namespace ml
 			else
 			{
 				static_assert(std::is_same_v<U, hash_t>);
-				return util::compare(util::hash(m_path.filename().string()), value);
+				return ML_compare(util::hash(m_path.filename().string()), value);
 			}
 		}
 

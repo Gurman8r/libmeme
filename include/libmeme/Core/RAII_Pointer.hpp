@@ -7,7 +7,7 @@ namespace ml
 {
 	// similar to wheat_ptr, but with less gluten
 	template <class T
-	> struct raii_ptr final : non_copyable, trackable
+	> struct raii_ptr final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

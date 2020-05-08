@@ -93,24 +93,24 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_flat_map(allocator_type const & alloc = {})
+		basic_flat_map(allocator_type alloc = {})
 			: m_pair{ key_storage{ alloc }, value_storage{ alloc } }
 		{
 		}
 
-		basic_flat_map(init_type value, allocator_type const & alloc = {})
+		basic_flat_map(init_type value, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
 			this->assign(value);
 		}
 
-		basic_flat_map(self_type const & value, allocator_type const & alloc = {})
+		basic_flat_map(self_type const & value, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
 			this->assign(value);
 		}
 
-		basic_flat_map(self_type && value, allocator_type const & alloc = {}) noexcept
+		basic_flat_map(self_type && value, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
 			this->swap(std::move(value));
@@ -585,7 +585,7 @@ namespace ml::ds
 			else
 			{
 				static_assert(std::is_same_v<U, storage_type>);
-				return util::compare(m_pair, value.m_pair);
+				return ML_compare(m_pair, value.m_pair);
 			}
 		}
 

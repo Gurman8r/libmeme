@@ -44,12 +44,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		batch_vector(allocator_type const & alloc = {}) noexcept
+		batch_vector(allocator_type alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
 		}
 
-		batch_vector(init_type value, allocator_type const & alloc = {}) noexcept
+		batch_vector(init_type value, allocator_type alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc }
 		{
 			this->reserve(value.size());
@@ -60,22 +60,22 @@ namespace ml::ds
 			}
 		}
 
-		explicit batch_vector(vector_tuple const & value, allocator_type const & alloc = {})
+		explicit batch_vector(vector_tuple const & value, allocator_type alloc = {})
 			: m_data{ std::allocator_arg, alloc, value }
 		{
 		}
 
-		explicit batch_vector(vector_tuple && value, allocator_type const & alloc = {}) noexcept
+		explicit batch_vector(vector_tuple && value, allocator_type alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc, std::move(value) }
 		{
 		}
 
-		batch_vector(self_type const & value, allocator_type const & alloc = {})
+		batch_vector(self_type const & value, allocator_type alloc = {})
 			: m_data{ std::allocator_arg, alloc, value.m_data }
 		{
 		}
 
-		batch_vector(self_type && value, allocator_type const & alloc = {}) noexcept
+		batch_vector(self_type && value, allocator_type alloc = {}) noexcept
 			: m_data{ std::allocator_arg, alloc, std::move(value.m_data) }
 		{
 		}
@@ -1057,7 +1057,7 @@ namespace ml::ds
 			else
 			{
 				static_assert(std::is_same_v<U, vector_tuple>);
-				return util::compare(m_data, value);
+				return ML_compare(m_data, value);
 			}
 		}
 

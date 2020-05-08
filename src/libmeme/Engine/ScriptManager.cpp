@@ -9,7 +9,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	script_manager::script_manager(json const & j, allocator_type const & alloc) noexcept
+	script_manager::script_manager(json const & j, allocator_type alloc) noexcept
 	{
 		j["library_home"].get_to(m_library_home);
 	}

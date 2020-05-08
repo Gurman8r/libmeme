@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API plugin_manager final : non_copyable, trackable
+	struct ML_ENGINE_API plugin_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -15,7 +15,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plugin_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		plugin_manager(json const & j, allocator_type alloc = {}) noexcept;
 
 		~plugin_manager() noexcept { clear(); }
 

@@ -21,38 +21,38 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		material(allocator_type const & alloc = {})
+		material(allocator_type alloc = {})
 			: m_storage{ alloc }
 		{
 		}
 
-		explicit material(storage_type const & data, allocator_type const & alloc = {})
+		explicit material(storage_type const & data, allocator_type alloc = {})
 			: m_storage{ data, alloc }
 		{
 		}
 
-		explicit material(storage_type && data, allocator_type const & alloc = {}) noexcept
+		explicit material(storage_type && data, allocator_type alloc = {}) noexcept
 			: m_storage{ std::move(data), alloc }
 		{
 		}
 
-		material(std::initializer_list<uniform> init, allocator_type const & alloc = {})
+		material(std::initializer_list<uniform> init, allocator_type alloc = {})
 			: m_storage{ init, alloc }
 		{
 		}
 
 		template <class It
-		> material(It first, It last, allocator_type const & alloc = {})
+		> material(It first, It last, allocator_type alloc = {})
 			: m_storage{ first, last, alloc }
 		{
 		}
 
-		material(material const & value, allocator_type const & alloc = {})
+		material(material const & value, allocator_type alloc = {})
 			: m_storage{ value.m_storage, alloc }
 		{
 		}
 
-		material(material && value, allocator_type const & alloc = {}) noexcept
+		material(material && value, allocator_type alloc = {}) noexcept
 			: m_storage{ alloc }
 		{
 			swap(std::move(value));

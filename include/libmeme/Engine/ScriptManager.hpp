@@ -8,7 +8,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API script_manager final : non_copyable, trackable
+	struct ML_ENGINE_API script_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -16,7 +16,7 @@ namespace ml
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		script_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		script_manager(json const & j, allocator_type alloc = {}) noexcept;
 
 		~script_manager() noexcept { (void)shutdown(); }
 

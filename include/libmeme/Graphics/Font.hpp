@@ -23,13 +23,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		font(allocator_type const & alloc = {}) noexcept;
+		font(allocator_type alloc = {}) noexcept;
 		
-		font(fs::path const & path, allocator_type const & alloc = {});
+		font(fs::path const & path, allocator_type alloc = {});
 		
-		font(font const & value, allocator_type const & alloc = {});
+		font(font const & value, allocator_type alloc = {});
 		
-		font(font && value, allocator_type const & alloc = {}) noexcept;
+		font(font && value, allocator_type alloc = {}) noexcept;
 		
 		~font() noexcept;
 

@@ -5,7 +5,7 @@
 #include <libmeme/Core/Flow.hpp>
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Meta.hpp>
-#include <libmeme/Core/TypeOf.hpp>
+#include <libmeme/Core/TypeInfo.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,16 +54,6 @@ namespace ml::util
 // Comparison
 namespace ml::util
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Lhs, class Rhs = Lhs
-	> ML_NODISCARD constexpr auto compare(Lhs && lhs, Rhs && rhs) noexcept
-	{
-		return (ML_forward(lhs) != ML_forward(rhs))
-			? ((ML_forward(lhs) < ML_forward(rhs)) ? -1 : 1)
-			: 0;
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class LI, class RI

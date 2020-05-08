@@ -11,7 +11,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API performance_tracker final : non_copyable, trackable
+	class ML_CORE_API performance_tracker final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

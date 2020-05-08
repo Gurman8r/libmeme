@@ -23,17 +23,17 @@ namespace ml
 
 		shader() noexcept : shader{ allocator_type{} } {}
 		
-		explicit shader(allocator_type const & alloc) noexcept;
+		explicit shader(allocator_type alloc) noexcept;
 		
-		shader(shader_source const & source, allocator_type const & alloc = {});
+		shader(shader_source const & source, allocator_type alloc = {});
 		
-		shader(fs::path const & v, fs::path const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {});
 		
-		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc = {});
+		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc = {});
 		
-		shader(shader const & value, allocator_type const & alloc = {});
+		shader(shader const & value, allocator_type alloc = {});
 		
-		shader(shader && value, allocator_type const & alloc = {}) noexcept;
+		shader(shader && value, allocator_type alloc = {}) noexcept;
 		
 		~shader() noexcept;
 

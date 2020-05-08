@@ -9,17 +9,17 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : int32_t { unknown = -1 };
+		enum { unknown = -1, none };
 
 		union { int32_t location; uint32_t current; uint32_t previous; };
 
-		operator bool() const noexcept { return (location > unknown); }
+		operator bool() const noexcept { return (unknown < location); }
 
 		operator int32_t() const noexcept { return location; }
 
 		template <class Fn
 		> uniform_binder(shader & program, pmr::string const & name, Fn && fn) noexcept
-			: location{ unknown }, current{ NULL }, previous{ NULL }
+			: location{ unknown }, current{ none }, previous{ none }
 		{
 			if (current = program.m_handle)
 			{
@@ -54,8 +54,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader::shader(allocator_type const & alloc) noexcept
-		: m_handle		{ NULL }
+	shader::shader(allocator_type alloc) noexcept
+		: m_handle		{}
 		, m_source		{ std::allocator_arg, alloc }
 		, m_attributes	{ alloc }
 		, m_textures	{ alloc }
@@ -63,31 +63,31 @@ namespace ml
 	{
 	}
 
-	shader::shader(shader_source const & source, allocator_type const & alloc)
+	shader::shader(shader_source const & source, allocator_type alloc)
 		: shader{ alloc }
 	{
 		load_from_source(source);
 	}
 
-	shader::shader(fs::path const & v, fs::path const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & f, allocator_type alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, f);
 	}
 
-	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type const & alloc)
+	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc)
 		: shader{ alloc }
 	{
 		load_from_file(v, g, f);
 	}
 
-	shader::shader(shader const & value, allocator_type const & alloc)
+	shader::shader(shader const & value, allocator_type alloc)
 		: shader{ alloc }
 	{
 		load_from_source(value.m_source);
 	}
 
-	shader::shader(shader && value, allocator_type const & alloc) noexcept
+	shader::shader(shader && value, allocator_type alloc) noexcept
 		: shader{ alloc }
 	{
 		swap(std::move(value));
@@ -352,9 +352,8 @@ namespace ml
 				if (!src || !*src) { return -1; } // no source provided
 				if (!(obj = GL::createShader(type))) { return 0; } // failed to create
 				GL::shaderSource(obj, 1, src, nullptr);
-				if (!GL::compileShader(obj))
+				if (!GL::compileShader(obj)) // failed to compile
 				{
-					// failed to compile
 					log = GL::getProgramInfoLog(obj);
 					GL::deleteShader(obj);
 					return 0;

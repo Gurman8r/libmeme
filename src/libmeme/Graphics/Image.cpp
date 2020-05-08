@@ -29,29 +29,29 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image::image(allocator_type const & alloc)
+	image::image(allocator_type alloc)
 		: m_size	{ 0 }
 		, m_channels{ 0 }
 		, m_pixels	{ alloc }
 	{
 	}
 
-	image::image(vec2u const & size, allocator_type const & alloc)
+	image::image(vec2u const & size, allocator_type alloc)
 		: image{ size, 4, alloc }
 	{
 	}
 
-	image::image(vec2u const & size, size_t channels, allocator_type const & alloc)
+	image::image(vec2u const & size, size_t channels, allocator_type alloc)
 		: image{ size, channels, storage_type{}, alloc }
 	{
 	}
 
-	image::image(vec2u const & size, storage_type const & pixels, allocator_type const & alloc)
+	image::image(vec2u const & size, storage_type const & pixels, allocator_type alloc)
 		: image{ size, 4, pixels, alloc }
 	{
 	}
 
-	image::image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type const & alloc)
+	image::image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type alloc)
 		: m_size	{ size }
 		, m_channels{ channels }
 		, m_pixels	{ pixels, alloc }
@@ -62,30 +62,30 @@ namespace ml
 		}
 	}
 
-	image::image(fs::path const & path, allocator_type const & alloc)
+	image::image(fs::path const & path, allocator_type alloc)
 		: image{ path, false, alloc }
 	{
 	}
 
-	image::image(fs::path const & path, bool flip_v, allocator_type const & alloc)
+	image::image(fs::path const & path, bool flip_v, allocator_type alloc)
 		: image{ path, flip_v, 0, alloc }
 	{
 	}
 
-	image::image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type const & alloc)
+	image::image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc)
 		: image{ alloc }
 	{
 		load_from_file(path, flip_v, req_channels);
 	}
 
-	image::image(image const & value, allocator_type const & alloc)
+	image::image(image const & value, allocator_type alloc)
 		: m_size	{ value.m_size }
 		, m_channels{ value.m_channels }
 		, m_pixels	{ value.m_pixels }
 	{
 	}
 
-	image::image(image && value, allocator_type const & alloc) noexcept
+	image::image(image && value, allocator_type alloc) noexcept
 		: image{ alloc }
 	{
 		swap(std::move(value));

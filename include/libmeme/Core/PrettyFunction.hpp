@@ -1,7 +1,7 @@
 #ifndef _ML_PRETTY_FUNCTION_HPP_
 #define _ML_PRETTY_FUNCTION_HPP_
 
-// Based on CTTI
+// Sources:
 // https://github.com/Manu343726/ctti
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/pretty_function.hpp
 

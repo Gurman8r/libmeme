@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	file_manager::file_manager(json const & j, allocator_type const & alloc) noexcept
+	file_manager::file_manager(json const & j, allocator_type alloc) noexcept
 	{
 		m_program_path = fs::current_path();
 

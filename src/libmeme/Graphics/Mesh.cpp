@@ -6,7 +6,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	mesh::mesh(allocator_type const & alloc) noexcept
+	mesh::mesh(allocator_type alloc) noexcept
 		: m_vao		{}
 		, m_vbo		{}
 		, m_ibo		{}
@@ -16,25 +16,25 @@ namespace ml
 	{
 	}
 
-	mesh::mesh(vertices_t const & vertices, allocator_type const & alloc)
+	mesh::mesh(vertices_t const & vertices, allocator_type alloc)
 		: mesh{ alloc }
 	{
 		load_from_memory(vertices);
 	}
 
-	mesh::mesh(vertices_t const & vertices, indices_t const & indices, allocator_type const & alloc)
+	mesh::mesh(vertices_t const & vertices, indices_t const & indices, allocator_type alloc)
 		: mesh{ alloc }
 	{
 		load_from_memory(vertices, indices);
 	}
 
-	mesh::mesh(mesh const & value, allocator_type const & alloc)
+	mesh::mesh(mesh const & value, allocator_type alloc)
 		: mesh{ alloc }
 	{
 		load_from_memory(value);
 	}
 
-	mesh::mesh(mesh && value, allocator_type const & alloc) noexcept
+	mesh::mesh(mesh && value, allocator_type alloc) noexcept
 		: mesh{ alloc }
 	{
 		swap(std::move(value));

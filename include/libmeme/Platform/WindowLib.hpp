@@ -15,18 +15,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias window_char_fn			= typename void(*)(window_handle, uint32_t);
-	ML_alias window_close_fn		= typename void(*)(window_handle);
-	ML_alias window_cursor_enter_fn	= typename void(*)(window_handle, int32_t);
-	ML_alias window_cursor_pos_fn	= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_error_fn		= typename void(*)(int32_t, cstring);
-	ML_alias window_focus_fn		= typename void(*)(window_handle, int32_t);
-	ML_alias window_frame_size_fn	= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_key_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
-	ML_alias window_mouse_fn		= typename void(*)(window_handle, int32_t, int32_t, int32_t);
-	ML_alias window_position_fn		= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_scroll_fn		= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_size_fn			= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_char_fn				= typename void(*)(window_handle, uint32_t);
+	ML_alias window_close_fn			= typename void(*)(window_handle);
+	ML_alias window_cursor_enter_fn		= typename void(*)(window_handle, int32_t);
+	ML_alias window_cursor_position_fn	= typename void(*)(window_handle, float64_t, float64_t);
+	ML_alias window_error_fn			= typename void(*)(int32_t, cstring);
+	ML_alias window_focus_fn			= typename void(*)(window_handle, int32_t);
+	ML_alias window_framebuffer_size_fn	= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_key_fn				= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
+	ML_alias window_mouse_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t);
+	ML_alias window_position_fn			= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
+	ML_alias window_size_fn				= typename void(*)(window_handle, int32_t, int32_t);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

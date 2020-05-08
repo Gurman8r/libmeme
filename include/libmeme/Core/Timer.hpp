@@ -9,32 +9,42 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class _Clock
-	> struct basic_timer final : non_copyable, trackable
+	> struct basic_timer final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using clock_type	= typename _Clock;
 		using time_point	= typename clock_type::time_point;
-		using self_type		= typename basic_timer<_Clock>;
+		using self_type		= typename basic_timer<clock_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer(bool start_me = true) noexcept
+		basic_timer() noexcept
+			: m_running		{}
+			, m_previous	{}
+			, m_current		{}
+			, m_elapsed		{}
+		{
+		}
+
+		explicit basic_timer(bool start_me) noexcept : self_type{}
 		{
 			if (start_me) { this->start(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD bool running() const noexcept
+		{
+			return m_running;
+		}
+
 		ML_NODISCARD duration const & elapsed() const & noexcept
 		{
 			return m_running ? (m_elapsed = (clock_type::now() - m_previous)) : m_elapsed;
 		}
 
-		ML_NODISCARD bool running() const noexcept
-		{
-			return m_running;
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		basic_timer & start() & noexcept
 		{
@@ -61,10 +71,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool				m_running	{};
-		time_point			m_previous	{};
-		time_point			m_current	{};
-		mutable duration	m_elapsed	{};
+		bool				m_running;
+		time_point			m_previous;
+		time_point			m_current;
+		mutable duration	m_elapsed;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

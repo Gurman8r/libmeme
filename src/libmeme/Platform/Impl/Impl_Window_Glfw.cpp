@@ -8,26 +8,35 @@
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
+#else
 #endif
 
 bool operator<(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
 {
-	if (std::addressof(lhs) == std::addressof(rhs)) { return false; }
-	else return
-		(lhs.width < rhs.width) &&
-		(lhs.height < rhs.height) &&
-		(lhs.pixels < rhs.pixels);
+	return (lhs.width < rhs.width) && (lhs.height < rhs.height) && (lhs.pixels < rhs.pixels);
 }
 
-namespace ml::impl
+bool operator==(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
 {
-	static GLFWimage const * make_icon(vec2s const & s, byte_t const * p) noexcept
+	return !(lhs < rhs) && !(rhs < lhs);
+}
+
+namespace ml
+{
+	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * p) noexcept
 	{
-		if (!s[0] || !s[1] || !p) { return nullptr; }
+		static_assert(nameof_v<ulong_t> == "unsigned long");
 
 		static ds::set<GLFWimage> cache{};
-
-		return &(*cache.insert(GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p }).first);
+		GLFWimage const temp{ (int32_t)w, (int32_t)h, (byte_t *)p };
+		if (auto const it{ cache.find(temp) }; it != cache.end())
+		{
+			return &(*it);
+		}
+		else
+		{
+			return &(*cache.insert(temp).first);
+		}
 	}
 }
 
@@ -291,7 +300,7 @@ namespace ml
 
 	void impl_window_glfw::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		glfwSetWindowIcon(m_window, 1, impl::make_icon({ w, h }, p));
+		glfwSetWindowIcon(m_window, 1, make_glfw_image(w, h, p));
 	}
 
 	void impl_window_glfw::set_input_mode(int32_t mode, int32_t value)
@@ -358,7 +367,7 @@ namespace ml
 
 	cursor_handle impl_window_glfw::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return glfwCreateCursor(impl::make_icon({ w, h }, p), w, h);
+		return glfwCreateCursor(make_glfw_image(w, h, p), w, h);
 	}
 
 	cursor_handle impl_window_glfw::create_standard_cursor(int32_t value)
@@ -505,9 +514,9 @@ namespace ml
 				reinterpret_cast<GLFWcursorenterfun>(fn)));
 	}
 
-	window_cursor_pos_fn impl_window_glfw::set_cursor_pos_callback(window_cursor_pos_fn fn)
+	window_cursor_position_fn impl_window_glfw::set_cursor_position_callback(window_cursor_position_fn fn)
 	{
-		return reinterpret_cast<window_cursor_pos_fn>(
+		return reinterpret_cast<window_cursor_position_fn>(
 			glfwSetCursorPosCallback(m_window,
 				reinterpret_cast<GLFWcursorposfun>(fn)));
 	}
@@ -518,9 +527,9 @@ namespace ml
 			glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(fn)));
 	}
 
-	window_frame_size_fn impl_window_glfw::set_frame_size_callback(window_frame_size_fn fn)
+	window_framebuffer_size_fn impl_window_glfw::set_framebuffer_size_callback(window_framebuffer_size_fn fn)
 	{
-		return reinterpret_cast<window_frame_size_fn>(
+		return reinterpret_cast<window_framebuffer_size_fn>(
 			glfwSetFramebufferSizeCallback(m_window,
 				reinterpret_cast<GLFWframebuffersizefun>(fn)));
 	}
@@ -560,7 +569,7 @@ namespace ml
 				reinterpret_cast<GLFWwindowfocusfun>(fn)));
 	}
 	
-	window_position_fn impl_window_glfw::set_window_pos_callback(window_position_fn fn)
+	window_position_fn impl_window_glfw::set_window_position_callback(window_position_fn fn)
 	{
 		return reinterpret_cast<window_position_fn>(
 			glfwSetWindowPosCallback(m_window,

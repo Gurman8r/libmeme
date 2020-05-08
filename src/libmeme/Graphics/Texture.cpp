@@ -62,7 +62,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	texture::texture(uint32_t sampler, int32_t level, uint32_t internal_format, uint32_t color_format, uint32_t pixel_type, int32_t flags)
-		: m_handle		{ NULL }
+		: m_handle		{}
 		, m_sampler		{ sampler }
 		, m_level		{ level }
 		, m_intl_format	{ internal_format }

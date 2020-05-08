@@ -16,38 +16,38 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	model::model(allocator_type const & alloc) noexcept
+	model::model(allocator_type alloc) noexcept
 		: m_meshes{ alloc }
 	{
 	}
 
-	model::model(std::initializer_list<mesh> init, allocator_type const & alloc)
+	model::model(std::initializer_list<mesh> init, allocator_type alloc)
 		: m_meshes{ init, alloc }
 	{
 	}
 
-	model::model(fs::path const & path, allocator_type const & alloc)
+	model::model(fs::path const & path, allocator_type alloc)
 		: m_meshes{ alloc }
 	{
 		load_from_file(path);
 	}
 
-	model::model(storage_type const & storage, allocator_type const & alloc)
+	model::model(storage_type const & storage, allocator_type alloc)
 		: m_meshes{ storage, alloc }
 	{
 	}
 
-	model::model(storage_type && storage, allocator_type const & alloc) noexcept
+	model::model(storage_type && storage, allocator_type alloc) noexcept
 		: m_meshes{ std::move(storage), alloc }
 	{
 	}
 
-	model::model(model const & value, allocator_type const & alloc)
+	model::model(model const & value, allocator_type alloc)
 		: m_meshes{ value.m_meshes, alloc }
 	{
 	}
 
-	model::model(model && value, allocator_type const & alloc) noexcept
+	model::model(model && value, allocator_type alloc) noexcept
 		: m_meshes{ alloc }
 	{
 		swap(std::move(value));

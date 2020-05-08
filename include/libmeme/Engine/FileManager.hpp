@@ -9,7 +9,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API file_manager final : non_copyable, trackable
+	struct ML_ENGINE_API file_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		file_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		file_manager(json const & j, allocator_type alloc = {}) noexcept;
 		
 		~file_manager() noexcept {}
 

@@ -10,7 +10,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
+	gui_manager::gui_manager(json const & j, allocator_type alloc) noexcept
 		: m_gui_context	{}
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }

@@ -19,15 +19,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh(allocator_type const & alloc = {}) noexcept;
+		mesh(allocator_type alloc = {}) noexcept;
 		
-		mesh(vertices_t const & vertices, allocator_type const & alloc = {});
+		mesh(vertices_t const & vertices, allocator_type alloc = {});
 		
-		mesh(vertices_t const & vertices, indices_t const & indices, allocator_type const & alloc = {});
+		mesh(vertices_t const & vertices, indices_t const & indices, allocator_type alloc = {});
 		
-		mesh(mesh const & value, allocator_type const & alloc = {});
+		mesh(mesh const & value, allocator_type alloc = {});
 		
-		mesh(mesh && value, allocator_type const & alloc = {}) noexcept;
+		mesh(mesh && value, allocator_type alloc = {}) noexcept;
 		
 		~mesh();
 

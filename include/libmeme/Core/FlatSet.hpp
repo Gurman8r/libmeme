@@ -63,42 +63,42 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_flat_set(allocator_type const & alloc = {}) noexcept
+		basic_flat_set(allocator_type alloc = {}) noexcept
 			: m_data{ alloc }
 		{
 		}
 
-		basic_flat_set(init_type value, allocator_type const & alloc = {})
+		basic_flat_set(init_type value, allocator_type alloc = {})
 			: m_data{ value, alloc }
 		{
 			this->impl_sort();
 		}
 
 		template <class It
-		> basic_flat_set(It first, It last, allocator_type const & alloc = {})
+		> basic_flat_set(It first, It last, allocator_type alloc = {})
 			: m_data{ first, last, alloc }
 		{
 			this->impl_sort();
 		}
 
-		basic_flat_set(storage_type const & value, allocator_type const & alloc = {})
+		basic_flat_set(storage_type const & value, allocator_type alloc = {})
 			: m_data{ value, alloc }
 		{
 			this->impl_sort();
 		}
 
-		basic_flat_set(storage_type && value, allocator_type const & alloc = {}) noexcept
+		basic_flat_set(storage_type && value, allocator_type alloc = {}) noexcept
 			: m_data{ std::move(value), alloc }
 		{
 			this->impl_sort();
 		}
 
-		basic_flat_set(self_type const & value, allocator_type const & alloc = {})
+		basic_flat_set(self_type const & value, allocator_type alloc = {})
 			: m_data{ value.m_data, alloc }
 		{
 		}
 
-		basic_flat_set(self_type && value, allocator_type const & alloc = {}) noexcept
+		basic_flat_set(self_type && value, allocator_type alloc = {}) noexcept
 			: m_data{ std::move(value.m_data), alloc }
 		{
 		}
@@ -345,7 +345,7 @@ namespace ml::ds
 			else
 			{
 				static_assert(std::is_same_v<U, storage_type>);
-				return util::compare(m_data, value.m_data);
+				return ML_compare(m_data, value.m_data);
 			}
 		}
 

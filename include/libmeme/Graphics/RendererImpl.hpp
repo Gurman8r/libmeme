@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct renderer_impl : non_copyable, trackable
+	struct renderer_impl : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

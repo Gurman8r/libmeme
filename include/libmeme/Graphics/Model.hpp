@@ -27,19 +27,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		model(allocator_type const & alloc = {}) noexcept;
+		model(allocator_type alloc = {}) noexcept;
 		
-		model(std::initializer_list<mesh> init, allocator_type const & alloc = {});
+		model(std::initializer_list<mesh> init, allocator_type alloc = {});
 		
-		model(fs::path const & path, allocator_type const & alloc = {});
+		model(fs::path const & path, allocator_type alloc = {});
 		
-		model(storage_type const & storage, allocator_type const & alloc = {});
+		model(storage_type const & storage, allocator_type alloc = {});
 		
-		model(storage_type && storage, allocator_type const & alloc = {}) noexcept;
+		model(storage_type && storage, allocator_type alloc = {}) noexcept;
 		
-		model(model const & value, allocator_type const & alloc = {});
+		model(model const & value, allocator_type alloc = {});
 		
-		model(model && value, allocator_type const & alloc = {}) noexcept;
+		model(model && value, allocator_type alloc = {}) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

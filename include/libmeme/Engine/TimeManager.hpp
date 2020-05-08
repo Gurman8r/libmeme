@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API time_manager final : non_copyable, trackable
+	struct ML_ENGINE_API time_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -14,7 +14,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		time_manager(json const & j, allocator_type const & alloc = {}) noexcept
+		time_manager(json const & j, allocator_type alloc = {}) noexcept
 			: m_main_timer	{}
 			, m_loop_timer	{ false }
 			, m_fps_accum	{}

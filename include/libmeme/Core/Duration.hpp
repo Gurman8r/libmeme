@@ -153,7 +153,7 @@ namespace ml
 			}
 			else
 			{
-				return util::compare(m_base, value);
+				return ML_compare(m_base, value);
 			}
 		}
 

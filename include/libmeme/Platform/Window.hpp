@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_PLATFORM_API window : non_copyable, trackable
+	struct ML_PLATFORM_API window : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -132,18 +132,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window_char_fn			set_char_callback			(window_char_fn			fn);
-		window_cursor_enter_fn	set_cursor_enter_callback	(window_cursor_enter_fn	fn);
-		window_cursor_pos_fn	set_cursor_pos_callback		(window_cursor_pos_fn	fn);
-		window_error_fn			set_error_callback			(window_error_fn		fn);
-		window_frame_size_fn	set_frame_size_callback		(window_frame_size_fn	fn);
-		window_key_fn			set_key_callback			(window_key_fn			fn);
-		window_mouse_fn			set_mouse_callback			(window_mouse_fn		fn);
-		window_scroll_fn		set_scroll_callback			(window_scroll_fn		fn);
-		window_close_fn			set_window_close_callback	(window_close_fn		fn);
-		window_focus_fn			set_window_focus_callback	(window_focus_fn		fn);
-		window_position_fn		set_window_pos_callback		(window_position_fn		fn);
-		window_size_fn			set_window_size_callback	(window_size_fn			fn);
+		window_error_fn				set_error_callback				(window_error_fn			fn);
+		window_char_fn				set_char_callback				(window_char_fn				fn);
+		window_cursor_enter_fn		set_cursor_enter_callback		(window_cursor_enter_fn		fn);
+		window_cursor_position_fn	set_cursor_position_callback	(window_cursor_position_fn	fn);
+		window_framebuffer_size_fn	set_framebuffer_size_callback	(window_framebuffer_size_fn	fn);
+		window_key_fn				set_key_callback				(window_key_fn				fn);
+		window_mouse_fn				set_mouse_callback				(window_mouse_fn			fn);
+		window_scroll_fn			set_scroll_callback				(window_scroll_fn			fn);
+		window_close_fn				set_window_close_callback		(window_close_fn			fn);
+		window_focus_fn				set_window_focus_callback		(window_focus_fn			fn);
+		window_position_fn			set_window_position_callback	(window_position_fn			fn);
+		window_size_fn				set_window_size_callback		(window_size_fn				fn);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

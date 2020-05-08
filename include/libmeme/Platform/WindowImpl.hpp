@@ -7,7 +7,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_impl : non_copyable, trackable
+	struct window_impl : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -91,18 +91,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual window_char_fn			set_char_callback(window_char_fn) = 0;
-		virtual window_cursor_enter_fn	set_cursor_enter_callback(window_cursor_enter_fn) = 0;
-		virtual window_cursor_pos_fn	set_cursor_pos_callback(window_cursor_pos_fn) = 0;
-		virtual window_error_fn			set_error_callback(window_error_fn) = 0;
-		virtual window_frame_size_fn	set_frame_size_callback(window_frame_size_fn) = 0;
-		virtual window_key_fn			set_key_callback(window_key_fn) = 0;
-		virtual window_mouse_fn			set_mouse_callback(window_mouse_fn) = 0;
-		virtual window_scroll_fn		set_scroll_callback(window_scroll_fn) = 0;
-		virtual window_close_fn			set_window_close_callback(window_close_fn) = 0;
-		virtual window_focus_fn			set_window_focus_callback(window_focus_fn) = 0;
-		virtual window_position_fn		set_window_pos_callback(window_position_fn) = 0;
-		virtual window_size_fn			set_window_size_callback(window_size_fn) = 0;
+		virtual window_char_fn				set_char_callback				(window_char_fn) = 0;
+		virtual window_cursor_enter_fn		set_cursor_enter_callback		(window_cursor_enter_fn) = 0;
+		virtual window_cursor_position_fn	set_cursor_position_callback	(window_cursor_position_fn) = 0;
+		virtual window_error_fn				set_error_callback				(window_error_fn) = 0;
+		virtual window_framebuffer_size_fn	set_framebuffer_size_callback	(window_framebuffer_size_fn) = 0;
+		virtual window_key_fn				set_key_callback				(window_key_fn) = 0;
+		virtual window_mouse_fn				set_mouse_callback				(window_mouse_fn) = 0;
+		virtual window_scroll_fn			set_scroll_callback				(window_scroll_fn) = 0;
+		virtual window_close_fn				set_window_close_callback		(window_close_fn) = 0;
+		virtual window_focus_fn				set_window_focus_callback		(window_focus_fn) = 0;
+		virtual window_position_fn			set_window_position_callback	(window_position_fn) = 0;
+		virtual window_size_fn				set_window_size_callback		(window_size_fn) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

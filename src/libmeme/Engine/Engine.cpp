@@ -9,7 +9,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// engine context
-	class engine::engine_context final : non_copyable, trackable
+	class engine::engine_context final : trackable, non_copyable
 	{
 		friend class		engine		;
 		json				m_config	; // config
@@ -20,7 +20,7 @@ namespace ml
 		time_manager		m_time		; // time
 		render_window		m_window	; // window
 
-		engine_context(json const & j, allocator_type const & alloc) noexcept
+		engine_context(json const & j, allocator_type alloc) noexcept
 			: m_config	{ json{ j } }
 			, m_fs		{ j, alloc }
 			, m_gui		{ j, alloc }
@@ -41,7 +41,7 @@ namespace ml
 		return (g_engine != nullptr);
 	}
 
-	bool engine::create_context(json const & j, allocator_type const & alloc) noexcept
+	bool engine::create_context(json const & j, allocator_type alloc) noexcept
 	{
 		if (is_initialized()) { return debug::error("engine context is already initialized"); }
 

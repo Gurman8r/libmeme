@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API gui_manager final : non_copyable, trackable
+	struct ML_ENGINE_API gui_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -15,7 +15,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		gui_manager(json const & j, allocator_type alloc = {}) noexcept;
 
 		~gui_manager() noexcept { (void)shutdown(); }
 
@@ -81,7 +81,7 @@ namespace ml
 		private:
 			friend gui_manager;
 			
-			dockspace_data(allocator_type const & alloc) noexcept : nodes{ alloc }
+			dockspace_data(allocator_type alloc) noexcept : nodes{ alloc }
 			{
 			}
 
@@ -119,7 +119,7 @@ namespace ml
 		private:
 			friend gui_manager;
 
-			main_menu_bar_data(allocator_type const & alloc) noexcept : menus{ alloc }
+			main_menu_bar_data(allocator_type alloc) noexcept : menus{ alloc }
 			{
 			}
 

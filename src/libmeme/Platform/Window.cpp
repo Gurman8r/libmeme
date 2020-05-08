@@ -3,13 +3,11 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 
-// platform specific
 #ifdef ML_os_windows
 #	include <Windows.h>
 #else
 #endif
 
-// window implementation
 #if defined(ML_PLATFORM_GLFW)
 //	GLFW
 #	include "Impl/Impl_Window_Glfw.hpp"
@@ -23,7 +21,7 @@ namespace ml
 
 	window::window() noexcept { ML_assert(m_impl = new ml_window_impl{}); }
 
-	window::~window() noexcept { memory_manager::deallocate(m_impl); }
+	window::~window() noexcept { delete m_impl; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,7 +34,7 @@ namespace ml
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
 		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
 
-		m_settings = ws; // store settings
+		m_settings = ws;
 		
 		set_current_context(get_handle());
 		
@@ -57,13 +55,13 @@ namespace ml
 		set_cursor_enter_callback([
 		](auto, auto ... args) noexcept { event_system::fire_event<cursor_enter_event>(ML_forward(args)...); });
 
-		set_cursor_pos_callback([
+		set_cursor_position_callback([
 		](auto, auto ... args) noexcept { event_system::fire_event<cursor_position_event>(ML_forward(args)...); });
 
 		set_error_callback([
 		](auto ... args) noexcept { event_system::fire_event<window_error_event>(ML_forward(args)...); });
 
-		set_frame_size_callback([
+		set_framebuffer_size_callback([
 		](auto, auto ... args) noexcept { event_system::fire_event<frame_size_event>(ML_forward(args)...); });
 
 		set_key_callback([
@@ -81,7 +79,7 @@ namespace ml
 		set_window_focus_callback([
 		](auto, auto ... args) noexcept { event_system::fire_event<window_focus_event>(ML_forward(args)...); });
 
-		set_window_pos_callback([
+		set_window_position_callback([
 		](auto, auto ... args) noexcept { event_system::fire_event<window_position_event>(ML_forward(args)...); });
 
 		set_window_size_callback([
@@ -377,9 +375,9 @@ namespace ml
 		return m_impl->set_cursor_enter_callback(fn);
 	}
 
-	window_cursor_pos_fn window::set_cursor_pos_callback(window_cursor_pos_fn fn)
+	window_cursor_position_fn window::set_cursor_position_callback(window_cursor_position_fn fn)
 	{
-		return m_impl->set_cursor_pos_callback(fn);
+		return m_impl->set_cursor_position_callback(fn);
 	}
 
 	window_error_fn window::set_error_callback(window_error_fn fn)
@@ -387,9 +385,9 @@ namespace ml
 		return m_impl->set_error_callback(fn);
 	}
 
-	window_frame_size_fn window::set_frame_size_callback(window_frame_size_fn fn)
+	window_framebuffer_size_fn window::set_framebuffer_size_callback(window_framebuffer_size_fn fn)
 	{
-		return m_impl->set_frame_size_callback(fn);
+		return m_impl->set_framebuffer_size_callback(fn);
 	}
 	
 	window_key_fn window::set_key_callback(window_key_fn fn)
@@ -417,9 +415,9 @@ namespace ml
 		return m_impl->set_window_focus_callback(fn);
 	}
 	
-	window_position_fn window::set_window_pos_callback(window_position_fn fn)
+	window_position_fn window::set_window_position_callback(window_position_fn fn)
 	{
-		return m_impl->set_window_pos_callback(fn);
+		return m_impl->set_window_position_callback(fn);
 	}
 	
 	window_size_fn window::set_window_size_callback(window_size_fn fn)
