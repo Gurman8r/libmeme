@@ -2,7 +2,7 @@
 #define _ML_IMGUI_EXT_HPP_
 
 #include <libmeme/Engine/ImGui.hpp>
-#include <libmeme/Renderer/Texture.hpp>
+#include <libmeme/Graphics/Texture.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
 // TOOLTIP

@@ -19,7 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer(bool start_me = {}) noexcept
+		basic_timer(bool start_me = true) noexcept
 		{
 			if (start_me) { this->start(); }
 		}

@@ -15,6 +15,7 @@
 #	include <functional>
 #	include <iostream>
 #	include <locale>
+#	include <memory>
 #	include <sstream>
 #	include <type_traits>
 #	include <utility>

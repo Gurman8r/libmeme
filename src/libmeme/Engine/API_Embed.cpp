@@ -85,7 +85,7 @@ namespace ml::embed
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
-		py::class_<ml_stdio::output>(m, "stdio_output_facade")
+		py::class_<ml_stdio::output>(m, "output_facade")
 			.def(py::init<>())
 			.def("closed"		, []() { return false; })
 			.def("isatty"		, []() { return false; })
@@ -104,24 +104,6 @@ namespace ml::embed
 			;
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// WINDOW API
-		py::class_<window_api_>(m, "window_api")
-			.def(py::init<>())
-			.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)window_api_unknown; })
-			.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)window_api_opengl; })
-			.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)window_api_vulkan; })
-			.def_property_readonly_static("directx"	, [](py::object) { return (int32_t)window_api_directx; })
-			;
-
-		// WINDOW PROFILE
-		py::class_<window_profile_>(m, "window_profile")
-			.def(py::init<>())
-			.def_property_readonly_static("any"		, [](py::object) { return (int32_t)window_profile_any; })
-			.def_property_readonly_static("core"	, [](py::object) { return (int32_t)window_profile_core; })
-			.def_property_readonly_static("compat"	, [](py::object) { return (int32_t)window_profile_compat; })
-			.def_property_readonly_static("debug"	, [](py::object) { return (int32_t)window_profile_debug; })
-			;
 
 		// CURSOR MODE
 		py::class_<cursor_mode_>(m, "cursor_mode")
@@ -289,10 +271,18 @@ namespace ml::embed
 			.def_property_readonly_static("menu", [](py::object) { return (int32_t)key_code_menu; })
 			;
 
+			// WINDOW API
+			py::class_<window_api_>(m, "window_api")
+				.def(py::init<>())
+				.def_property_readonly_static("unknown", [](py::object) { return (int32_t)window_api_unknown; })
+				.def_property_readonly_static("opengl", [](py::object) { return (int32_t)window_api_opengl; })
+				.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)window_api_vulkan; })
+				.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_api_directx; })
+				;
+
 		// WINDOW ATTRIBUTES
 		py::class_<window_attr_>(m, "window_attr")
 			.def(py::init<>())
-
 			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_attr_focused; })
 			.def_property_readonly_static("iconified", [](py::object) { return (int32_t)window_attr_iconified; })
 			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_attr_resizable; })
@@ -305,7 +295,6 @@ namespace ml::embed
 			.def_property_readonly_static("transparent_framebuffer", [](py::object) { return (int32_t)window_attr_transparent_framebuffer; })
 			.def_property_readonly_static("hovered", [](py::object) { return (int32_t)window_attr_hovered; })
 			.def_property_readonly_static("focus_on_show", [](py::object) { return (int32_t)window_attr_focus_on_show; })
-			
 			.def_property_readonly_static("red_bits", [](py::object) { return (int32_t)window_attr_red_bits; })
 			.def_property_readonly_static("green_bits", [](py::object) { return (int32_t)window_attr_green_bits; })
 			.def_property_readonly_static("blue_bits", [](py::object) { return (int32_t)window_attr_blue_bits; })
@@ -322,7 +311,6 @@ namespace ml::embed
 			.def_property_readonly_static("srgb_capable", [](py::object) { return (int32_t)window_attr_srgb_capable; })
 			.def_property_readonly_static("refresh_rate", [](py::object) { return (int32_t)window_attr_refresh_rate; })
 			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_attr_doublebuffer; })
-			
 			.def_property_readonly_static("client_api", [](py::object) { return (int32_t)window_attr_client_api; })
 			.def_property_readonly_static("context_version_major", [](py::object) { return (int32_t)window_attr_context_version_major; })
 			.def_property_readonly_static("context_version_minor", [](py::object) { return (int32_t)window_attr_context_version_minor; })
@@ -340,17 +328,26 @@ namespace ml::embed
 		// WINDOW HINTS
 		py::class_<window_hints_>(m, "window_hints")
 			.def(py::init<>())
-			.def_property_readonly_static("none"			, [](py::object) { return (int32_t)window_hints_none; })
-			.def_property_readonly_static("resizable"		, [](py::object) { return (int32_t)window_hints_resizable; })
-			.def_property_readonly_static("visible"			, [](py::object) { return (int32_t)window_hints_visible; })
-			.def_property_readonly_static("decorated"		, [](py::object) { return (int32_t)window_hints_decorated; })
-			.def_property_readonly_static("focused"			, [](py::object) { return (int32_t)window_hints_focused; })
-			.def_property_readonly_static("auto_iconify"	, [](py::object) { return (int32_t)window_hints_auto_iconify; })
-			.def_property_readonly_static("floating"		, [](py::object) { return (int32_t)window_hints_floating; })
-			.def_property_readonly_static("maximized"		, [](py::object) { return (int32_t)window_hints_maximized; })
-			.def_property_readonly_static("doublebuffer"	, [](py::object) { return (int32_t)window_hints_doublebuffer; })
-			.def_property_readonly_static("default"			, [](py::object) { return (int32_t)window_hints_default; })
-			.def_property_readonly_static("default_max"		, [](py::object) { return (int32_t)window_hints_default_max; })
+			.def_property_readonly_static("none", [](py::object) { return (int32_t)window_hints_none; })
+			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_hints_resizable; })
+			.def_property_readonly_static("visible", [](py::object) { return (int32_t)window_hints_visible; })
+			.def_property_readonly_static("decorated", [](py::object) { return (int32_t)window_hints_decorated; })
+			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_hints_focused; })
+			.def_property_readonly_static("auto_iconify", [](py::object) { return (int32_t)window_hints_auto_iconify; })
+			.def_property_readonly_static("floating", [](py::object) { return (int32_t)window_hints_floating; })
+			.def_property_readonly_static("maximized", [](py::object) { return (int32_t)window_hints_maximized; })
+			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_hints_doublebuffer; })
+			.def_property_readonly_static("default", [](py::object) { return (int32_t)window_hints_default; })
+			.def_property_readonly_static("default_max", [](py::object) { return (int32_t)window_hints_default_max; })
+			;
+
+		// WINDOW PROFILE
+		py::class_<window_profile_>(m, "window_profile")
+			.def(py::init<>())
+			.def_property_readonly_static("any", [](py::object) { return (int32_t)window_profile_any; })
+			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
+			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
+			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -415,6 +412,8 @@ namespace ml::embed
 		py::class_<ml_engine_files>(m, "fs")
 			.def(py::init<>())
 			.def_static("path2", [](cstring s) { return engine::fs().path2(s).string(); })
+			.def_property_readonly_static("program_path", [](py::object) { return engine::fs().program_path(); })
+			.def_property_readonly_static("content_home", [](py::object) { return engine::fs().content_home(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -466,7 +465,6 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-
 			.def_static("open", [](window_settings const & ws) { return engine::window().open(ws); })
 			.def_static("install_default_callbacks", []() { engine::window().install_default_callbacks(); })
 

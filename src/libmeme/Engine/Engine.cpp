@@ -22,11 +22,11 @@ namespace ml
 
 		engine_context(json const & j, allocator_type const & alloc) noexcept
 			: m_config	{ json{ j } }
-			, m_fs		{ m_config, alloc }
-			, m_gui		{ m_config, alloc }
-			, m_plugins	{ m_config, alloc }
-			, m_scripts	{ m_config, alloc }
-			, m_time	{ m_config, alloc }
+			, m_fs		{ j, alloc }
+			, m_gui		{ j, alloc }
+			, m_plugins	{ j, alloc }
+			, m_scripts	{ j, alloc }
+			, m_time	{ j, alloc }
 			, m_window	{}
 		{
 		}
@@ -68,17 +68,17 @@ namespace ml
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
 		// initialize window backend
-		debug::info("initializing window backend...");
+		debug::info("initializing windows...");
 		if (!window::backend_initialize())
 		{
 			return debug::error("failed initializing window backend");
 		}
 
 		// startup scripting
-		debug::info("starting scripting engine...");
+		debug::info("initializing scripting...");
 		if (!scripts().startup())
 		{
-			return debug::error("failed starting scripting engine");
+			return debug::error("failed initializing scripting");
 		}
 
 		// execute setup script

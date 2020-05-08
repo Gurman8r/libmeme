@@ -15,7 +15,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui_manager(json const & j = {}, allocator_type const & alloc = {}) noexcept;
+		gui_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 
 		~gui_manager() noexcept { (void)shutdown(); }
 

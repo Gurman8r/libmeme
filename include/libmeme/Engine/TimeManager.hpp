@@ -15,8 +15,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		time_manager(json const & j, allocator_type const & alloc = {}) noexcept
-			: m_main_timer	{ true }
-			, m_loop_timer	{}
+			: m_main_timer	{}
+			, m_loop_timer	{ false }
 			, m_fps_accum	{}
 			, m_fps_index	{}
 			, m_fps_value	{}
@@ -27,7 +27,7 @@ namespace ml
 		{
 		}
 
-		~time_manager() noexcept = default;
+		~time_manager() noexcept {}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

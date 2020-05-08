@@ -20,7 +20,7 @@ namespace ml
 
 	window::window() noexcept { ML_assert(m_impl = new ml_window_impl{}); }
 
-	window::~window() noexcept { delete m_impl; }
+	window::~window() noexcept { memory_manager::deallocate(m_impl); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -31,7 +31,7 @@ namespace ml
 		if (!ws.video)			{ return debug::error("invalid window video"); }
 		if (!ws.context)		{ return debug::error("invalid window context"); }
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
-		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
+		if (!m_impl->open(ws)){ return debug::error("failed opening window impl"); }
 
 		m_settings = ws;
 		
@@ -48,42 +48,42 @@ namespace ml
 	{
 		if (!is_open()) { return; }
 
-		set_char_callback([](auto, auto ... args)
+		set_char_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<char_event>(ML_forward(args)...);
 		});
 
-		set_cursor_enter_callback([](auto, auto ... args)
+		set_cursor_enter_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
 		});
 
-		set_cursor_pos_callback([](auto, auto ... args)
+		set_cursor_pos_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
 		});
 
-		set_error_callback([](auto ... args)
+		set_error_callback([](auto ... args) noexcept
 		{
 			event_system::fire_event<window_error_event>(ML_forward(args)...);
 		});
 
-		set_frame_size_callback([](auto, auto ... args)
+		set_frame_size_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<frame_size_event>(ML_forward(args)...);
 		});
 
-		set_key_callback([](auto, auto ... args)
+		set_key_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<key_event>(ML_forward(args)...);
 		});
 
-		set_mouse_callback([](auto, auto ... args)
+		set_mouse_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<mouse_event>(ML_forward(args)...);
 		});
 
-		set_scroll_callback([](auto, auto ... args)
+		set_scroll_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<scroll_event>(ML_forward(args)...);
 		});
@@ -93,17 +93,17 @@ namespace ml
 			event_system::fire_event<window_close_event>();
 		});
 
-		set_window_focus_callback([](auto, auto ... args)
+		set_window_focus_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<window_focus_event>(ML_forward(args)...);
 		});
 
-		set_window_pos_callback([](auto, auto ... args)
+		set_window_pos_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<window_position_event>(ML_forward(args)...);
 		});
 
-		set_window_size_callback([](auto, auto ... args)
+		set_window_size_callback([](auto, auto ... args) noexcept
 		{
 			event_system::fire_event<window_size_event>(ML_forward(args)...);
 		});

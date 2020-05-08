@@ -5,6 +5,9 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
+// memory_manager singleton
+#define ML_memory_manager _ML memory_manager::get_instance()
+
 // TEST RESOURCE
 namespace ml::util
 {

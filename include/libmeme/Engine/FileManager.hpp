@@ -17,22 +17,22 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		file_manager(json const & j = {}, allocator_type const & alloc = {}) noexcept;
+		file_manager(json const & j, allocator_type const & alloc = {}) noexcept;
 		
 		~file_manager() noexcept {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD fs::path path2(fs::path const & value = {}) const noexcept
+		{
+			return m_content_home.native() + value.native();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD fs::path const & program_path() const & noexcept { return m_program_path; }
 
 		ML_NODISCARD fs::path const & content_home() const & noexcept { return m_content_home; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD auto path2(fs::path const & value = {}) const noexcept
-		{
-			return fs::path{ m_content_home.native() + value.native() };
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -6,7 +6,7 @@
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
 #include <libmeme/Engine/TimeManager.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {
@@ -25,7 +25,7 @@ namespace ml
 
 		static bool is_initialized() noexcept;
 
-		static bool create_context(json const & j = {}, allocator_type const & alloc = {}) noexcept;
+		static bool create_context(json const & j, allocator_type const & alloc = {}) noexcept;
 
 		static bool destroy_context() noexcept;
 

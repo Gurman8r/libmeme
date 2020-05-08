@@ -12,11 +12,11 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
-#include <libmeme/Renderer/Binder.hpp>
-#include <libmeme/Renderer/Font.hpp>
-#include <libmeme/Renderer/Model.hpp>
-#include <libmeme/Renderer/RenderTexture.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Graphics/Binder.hpp>
+#include <libmeme/Graphics/Font.hpp>
+#include <libmeme/Graphics/Model.hpp>
+#include <libmeme/Graphics/RenderTexture.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

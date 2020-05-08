@@ -47,7 +47,7 @@ ml::int32_t main()
 	// create/destroy context
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 
-	// initialize/finalize systems
+	// startup/shutdown
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
