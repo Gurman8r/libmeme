@@ -146,7 +146,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using view_type = typename nameof<>::view_type;
-
 		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept = default;
@@ -163,7 +162,6 @@ namespace ml
 
 	private:
 		static constexpr view_type m_name{ nameof_v<T> };
-
 		static constexpr guid_type m_guid{ hashof_v<T> };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -176,7 +174,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using view_type = typename nameof<>::view_type;
-
 		using guid_type = typename nameof<>::guid_type;
 
 		constexpr typeof() noexcept
@@ -201,13 +198,15 @@ namespace ml
 		}
 
 	private:
-		view_type m_name; guid_type m_guid;
+		view_type m_name;
+		guid_type m_guid;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// type info
 	template <class ... T
 	> static constexpr auto typeof_v{ typeof<T...>{} };
 	

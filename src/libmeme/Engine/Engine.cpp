@@ -68,14 +68,14 @@ namespace ml
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
 		// initialize window backend
-		debug::info("initializing windows...");
+		debug::info("initialize window backend");
 		if (!window::backend_initialize())
 		{
-			return debug::error("failed initializing window backend");
+			return debug::error("failed starting window backend");
 		}
 
 		// startup scripting
-		debug::info("initializing scripting...");
+		debug::info("startup scripting");
 		if (!scripts().startup())
 		{
 			return debug::error("failed initializing scripting");
@@ -84,7 +84,7 @@ namespace ml
 		// execute setup script
 		if (config().contains("setup_script"))
 		{
-			debug::info("executing setup...");
+			debug::info("execute setup");
 			scripts().do_file(fs().path2(config()["setup_script"]));
 		}
 
@@ -95,7 +95,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
-		// FIXME: need to clear menus before plugins because menu code can live in plugins
+		// FIXME: need to clear menus before plugins because menu code can live inside plugins
 		gui().main_menu_bar().menus.clear();
 
 		// clear plugins
@@ -120,43 +120,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_window;
 	}
 

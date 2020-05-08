@@ -281,6 +281,56 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class Fn
+		> iterator find_if(Fn && fn) noexcept
+		{
+			return std::find_if(begin(), end(), ML_forward(fn));
+		}
+
+		template <class Fn
+		> const_iterator find_if(Fn && fn) const noexcept
+		{
+			return std::find_if(cbegin(), cend(), ML_forward(fn));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class U = value_type
+		> auto & find_or_add(U const & value) noexcept
+		{
+			if (auto const it{ this->find(value) }; it != this->end())
+			{
+				return (*it);
+			}
+			else if constexpr (traits_type::multi)
+			{
+				return *this->insert(value);
+			}
+			else
+			{
+				return *this->insert(value).first;
+			}
+		}
+
+		template <class U, class Fn, class ... Args
+		> auto & find_or_add_fn(U const & value, Fn && fn, Args && ... args) noexcept
+		{
+			if (auto const it{ this->find(value) }; it != this->end())
+			{
+				return (*it);
+			}
+			else if constexpr (traits_type::multi)
+			{
+				return *this->insert(std::invoke(ML_forward(fn), ML_forward(args)...));
+			}
+			else
+			{
+				return *this->insert(std::invoke(ML_forward(fn), ML_forward(args)...)).first;
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD auto operator[](size_type const i) noexcept -> reference { return m_data[i]; }
 
 		ML_NODISCARD auto operator[](size_type const i) const noexcept -> const_reference { return m_data[i]; }
@@ -396,32 +446,23 @@ namespace ml::ds
 		template <class It, class U
 		> static bool impl_contains(It first, It last, U const & value) noexcept
 		{
-			// linear
-			auto impl_contains_linear = [&]() noexcept
-			{
-				return std::find(first, last, value) != last;
-			};
+			auto linear = [&]() noexcept { return std::find(first, last, value) != last; };
 
-			// binary
-			auto impl_contains_binary = [&]() noexcept
-			{
-				return std::binary_search(first, last, value, compare_type{});
-			};
+			auto binary = [&]() noexcept { return std::binary_search(first, last, value, compare_type{}); };
 
-			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_contains_linear(); // always linear
+				return linear(); // always linear
 			}
 			else if (auto const size{ (size_t)std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
-					return impl_contains_linear(); // linear
+					return linear();
 				}
 				else
 				{
-					return impl_contains_binary(); // binary
+					return binary();
 				}
 			}
 			else
@@ -436,14 +477,9 @@ namespace ml::ds
 		template <class It, class U
 		> static iterator impl_find(It first, It last, U const & value) noexcept
 		{
-			// linear
-			auto impl_find_linear = [&]() noexcept
-			{
-				return std::find(first, last, value);
-			};
+			auto linear = [&]() noexcept { return std::find(first, last, value); };
 
-			// binary
-			auto impl_find_binary = [&]() noexcept
+			auto binary = [&]() noexcept
 			{
 				if (auto const it{ std::equal_range(first, last, value, compare_type{}) }
 				; it.first != it.second)
@@ -456,20 +492,19 @@ namespace ml::ds
 				}
 			};
 
-			// impl
 			if constexpr (traits_type::thresh == 0)
 			{
-				return impl_find_linear(); // always linear
+				return linear();
 			}
 			else if (auto const size{ (size_t)std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
-					return impl_find_linear(); // linear
+					return linear();
 				}
 				else
 				{
-					return impl_find_binary(); // binary
+					return binary();
 				}
 			}
 			else
@@ -511,8 +546,7 @@ namespace ml::ds
 				// insert multi
 				return m_data.emplace(
 					std::upper_bound(begin(), end(), value, compare_type{}),
-					ML_forward(value)
-				);
+					ML_forward(value));
 			}
 			else
 			{

@@ -25,10 +25,10 @@ namespace ml
 		// path empty
 		if (path.empty()) { return false; }
 
-		// code
+		// hash code
 		auto const code{ util::hash(path.filename().string()) };
 
-		// lookup
+		// lookup code
 		if (auto const it{
 			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
 		}; it == m_data.end<hash_t>())
@@ -49,10 +49,10 @@ namespace ml
 		// path empty
 		if (path.empty()) { return 0; }
 
-		// code
+		// hash code
 		auto const code{ util::hash(path.filename().string()) };
 
-		// lookup
+		// lookup code
 		if (auto const it{
 			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
 		}; it == m_data.end<hash_t>())

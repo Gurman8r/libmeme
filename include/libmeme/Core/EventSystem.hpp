@@ -4,28 +4,64 @@
 #include <libmeme/Core/Export.hpp>
 #include <libmeme/Core/Event.hpp>
 #include <libmeme/Core/FlatMap.hpp>
+#include <libmeme/Core/Singleton.hpp>
+
+// event_system singleton
+#define ML_event_system _ML event_system::get_instance()
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct event_listener;
+	// event listener
+	struct ML_CORE_API event_listener
+	{
+		virtual ~event_listener() noexcept; // EOF
+
+		virtual void on_event(event const & ev) = 0;
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API event_system final
+	// event system
+	struct ML_CORE_API event_system final : singleton<event_system>
 	{
-		static ds::map<hash_t, ds::set<event_listener *>
-		> g_event_system;
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static bool add_listener(hash_t type, event_listener * value) noexcept
+		{
+			static auto & inst{ get_instance().m_listeners };
+			
+			if (!value) { return false; }
+
+			// insert listener into category
+			return inst.at(type).insert(value).second;
+		}
+		
 		template <class Ev
 		> static bool add_listener(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
 			return add_listener(hashof_v<Ev>, value);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void fire_event(event const & value) noexcept
+		{
+			static auto & inst{ get_instance().m_listeners };
+
+			// find category
+			if (auto const cat{ inst.find(value.ID) })
+			{
+				// for each listener
+				for (auto const & listener : (*cat->second))
+				{
+					// handle event
+					listener->on_event(value);
+				}
+			}
 		}
 
 		template <class Ev, class ... Args
@@ -38,74 +74,62 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t type, event_listener * value) noexcept;
-		
-		static void fire_event(event const & value) noexcept;
+		static void remove_listener(hash_t type, event_listener * value) noexcept
+		{
+			static auto & inst{ get_instance().m_listeners };
 
-		static void remove_listener(hash_t type, event_listener * value) noexcept;
-		
-		static void remove_listener(event_listener * value) noexcept;
+			if (!value) { return; }
+
+			// find category
+			if (auto const cat{ inst.find(type) })
+			{
+				// find listener
+				if (auto const it{ cat->second->find(value) }; it != cat->second->end())
+				{
+					// remove listener
+					cat->second->erase(it);
+				}
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void remove_listener(event_listener * value) noexcept
+		{
+			static auto & inst{ get_instance().m_listeners };
+
+			if (!value) { return; }
+
+			// for each category
+			inst.for_each([&](hash_t, auto & cat) noexcept
+			{
+				// find listener
+				if (auto const it{ cat.find(value) }; it != cat.end())
+				{
+					// remove listener
+					cat.erase(it);
+				}
+			});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		friend singleton<event_system>;
+
+		event_system() noexcept = default;
+
+		~event_system() noexcept;
+
+		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API event_listener
-	{
-		virtual ~event_listener() noexcept
-		{
-			event_system::remove_listener(this);
-		}
-
-		virtual void on_event(event const & ev) = 0;
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	inline bool event_system::add_listener(hash_t type, event_listener * value) noexcept
-	{
-		return value && g_event_system.at(type).insert(value).second;
-	}
-
-	inline void event_system::fire_event(event const & value) noexcept
-	{
-		if (auto const listeners{ g_event_system.find(value.ID) })
-		{
-			for (event_listener * l : (*listeners->second))
-			{
-				l->on_event(value);
-			}
-		}
-	}
-
-	inline void event_system::remove_listener(hash_t type, event_listener * value) noexcept
-	{
-		if (!value) { return; }
-
-		if (auto const listeners{ g_event_system.find(type) })
-		{
-			if (auto const it{ listeners->second->find(value) }
-			; it != listeners->second->end())
-			{
-				(*listeners->second).erase(it);
-			}
-		}
-	}
-
-	inline void event_system::remove_listener(event_listener * value) noexcept
-	{
-		if (!value) { return; }
-
-		g_event_system.for_each([&](hash_t, auto & listeners)
-		{
-			if (auto const it{ listeners.find(value) }
-			; it != listeners.end())
-			{
-				listeners.erase(it);
-			}
-		});
-	}
+	// remove listener from all events
+	inline event_listener::~event_listener() noexcept { event_system::remove_listener(this); }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

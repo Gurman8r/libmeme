@@ -242,7 +242,7 @@ namespace ml
 
 		memory_manager() noexcept = default;
 
-		~memory_manager();
+		~memory_manager() noexcept;
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index

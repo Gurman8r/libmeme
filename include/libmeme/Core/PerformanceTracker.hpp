@@ -3,53 +3,66 @@
 
 #include <libmeme/Core/Timer.hpp>
 
+// performance_tracker singleton
+#define ML_performance_tracker _ML performance_tracker::get_instance()
+
 // benchmark
 #define ML_benchmark(name) \
-	auto ML_anon = _ML performance_tracker{ name }
+	auto ML_anon = _ML performance_tracker::benchmark{ name }
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_CORE_API performance_tracker final : trackable, non_copyable
+	struct ML_CORE_API performance_tracker final : singleton<performance_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		explicit performance_tracker(cstring name) noexcept : m_name{ name } {}
-
-		~performance_tracker() noexcept { push(m_name, m_timer.elapsed()); }
+		using frame_type = typename pmr::vector<std::pair<cstring, duration>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static frame_data const & previous() noexcept
+		struct ML_NODISCARD benchmark final
 		{
-			return m_prev;
+			explicit benchmark(cstring name) noexcept : m_name{ name } {}
+
+			~benchmark() noexcept { push(m_name, m_timer.elapsed()); }
+
+		private: cstring m_name{}; timer m_timer{};
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto const & previous() noexcept
+		{
+			return get_instance().m_prev;
 		}
 
 		template <class ... Args
 		> static void push(Args && ... args) noexcept
 		{
-			m_curr.emplace_back(ML_forward(args)...);
+			static auto & inst{ get_instance() };
+			inst.m_curr.emplace_back(ML_forward(args)...);
 		}
 
 		static void swap() noexcept
 		{
-			m_prev.swap(m_curr);
-			m_curr.clear();
+			static auto & inst{ get_instance() };
+			inst.m_prev.swap(inst.m_curr);
+			inst.m_curr.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static frame_data m_curr; // current frame
-		static frame_data m_prev; // previous frame
+		friend singleton<performance_tracker>;
 
-		cstring	m_name	{};
-		timer	m_timer	{};
+		performance_tracker() noexcept = default;
+
+		~performance_tracker() noexcept;
+
+		frame_type m_curr; // current frame data
+		frame_type m_prev; // previous frame data
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

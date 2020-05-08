@@ -7,9 +7,7 @@ namespace ml
 {
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-    ML_event(task_complete_event)
-    {
-    };
+    // nothing to do here
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
