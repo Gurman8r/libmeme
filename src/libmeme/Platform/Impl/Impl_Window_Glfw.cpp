@@ -347,6 +347,12 @@ namespace ml
 
 	bool impl_window_glfw::backend_initialize()
 	{
+#ifdef ML_os_windows
+		if (auto const cw{ GetConsoleWindow() })
+		{
+			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
+		}
+#endif
 		return glfwInit();
 	}
 
@@ -460,6 +466,12 @@ namespace ml
 
 	void impl_window_glfw::backend_finalize()
 	{
+#ifdef ML_os_windows
+		if (auto const cw{ GetConsoleWindow() })
+		{
+			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_ENABLED);
+		}
+#endif
 		glfwTerminate();
 	}
 
