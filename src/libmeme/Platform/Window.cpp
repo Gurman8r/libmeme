@@ -110,9 +110,10 @@ namespace ml
 
 	void window::swap_buffers()
 	{
-		if (!get_hint(window_hints_doublebuffer)) { return; }
-
-		m_impl->swap_buffers();
+		if (!get_hint(window_hints_doublebuffer))
+		{
+			m_impl->swap_buffers();
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

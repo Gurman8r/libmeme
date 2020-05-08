@@ -64,10 +64,11 @@ ml::int32_t main()
 	// main loop
 	while (engine::window().is_open())
 	{
+		engine::time().begin_loop();
+		ML_defer{ engine::time().end_loop(); };
 		ML_defer{ performance_tracker::swap(); };
 		{
 			ML_benchmark("| begin loop");
-			engine::time().begin_loop();
 			engine::window().poll_events();
 			event_system::fire_event<begin_loop_event>();
 		}
@@ -111,7 +112,6 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("| end loop");
-			engine::time().end_loop();
 			event_system::fire_event<end_loop_event>();
 		}
 	}
