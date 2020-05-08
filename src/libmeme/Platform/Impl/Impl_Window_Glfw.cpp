@@ -22,7 +22,7 @@ namespace ml::impl
 	{
 		if (!s[0] || !s[1] || !p) { return nullptr; }
 
-		static ds::flat_map<void *, GLFWimage> cache{};
+		static ds::map<void *, GLFWimage> cache{};
 		return &cache.find_or_add_fn((void *)p, [&]() noexcept
 		{
 			return GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p };
@@ -48,9 +48,9 @@ namespace ml
 			{
 			case window_api_opengl	: return GLFW_OPENGL_API;
 			case window_api_vulkan	:
-			case window_api_directx	:
-			case window_api_unknown	:
-			default					: return GLFW_NO_API;
+			case window_api_directx:
+			case window_api_unknown:
+			default						: return GLFW_NO_API;
 			}
 		})());
 		glfwWindowHint(GLFW_OPENGL_PROFILE, ([&]() noexcept

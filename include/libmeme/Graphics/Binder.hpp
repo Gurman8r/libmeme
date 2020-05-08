@@ -24,8 +24,7 @@ namespace ml::impl
 			m_ptr->unbind();
 		}
 
-	private:
-		T * const m_ptr;
+	private: T * const m_ptr;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

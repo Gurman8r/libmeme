@@ -126,13 +126,13 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::flat_map<int32_t	,	render_texture	> m_pipeline	{};
-		ds::flat_map<pmr::string,	font			> m_fonts		{};
-		ds::flat_map<pmr::string,	image			> m_images		{};
-		ds::flat_map<pmr::string,	material		> m_materials	{};
-		ds::flat_map<pmr::string,	model			> m_models		{};
-		ds::flat_map<pmr::string,	shader			> m_shaders		{};
-		ds::flat_map<pmr::string,	texture			> m_textures	{};
+		ds::map<int32_t,		render_texture	> m_pipeline	{};
+		ds::map<pmr::string,	font			> m_fonts		{};
+		ds::map<pmr::string,	image			> m_images		{};
+		ds::map<pmr::string,	material		> m_materials	{};
+		ds::map<pmr::string,	model			> m_models		{};
+		ds::map<pmr::string,	shader			> m_shaders		{};
+		ds::map<pmr::string,	texture			> m_textures	{};
 
 
 		// ECS
@@ -194,7 +194,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const & testres{ memory_manager::get_test_resource() };
+			static auto const & testres{ memory_manager::get_testres() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -377,9 +377,9 @@ namespace ml
 
 				m_models["triangle"] = make_model(make_mesh(
 					{
-						make_vertex({  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f }),
-						make_vertex({  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
-						make_vertex({ -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
+						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
+						vertex{ {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
+						vertex{ { -0.5f, -0.5f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
 					},
 					{
 						0, 1, 2,
@@ -388,10 +388,10 @@ namespace ml
 
 				m_models["quad"] = make_model(make_mesh(
 					{
-						make_vertex({ +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f }),
-						make_vertex({ +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f }),
-						make_vertex({ -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f }),
-						make_vertex({ -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f }),
+						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
+						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
+						vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
+						vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } },
 					},
 					{
 						0, 1, 3,
@@ -993,7 +993,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto const & testres{ memory_manager::get_test_resource() };
+			static auto const & testres{ memory_manager::get_testres() };
 
 			static ML_scope // setup memory editor
 			{

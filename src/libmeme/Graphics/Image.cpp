@@ -1,5 +1,4 @@
 #include <libmeme/Graphics/Image.hpp>
-#include <libmeme/Graphics/GL.hpp>
 
 #define STBI_MALLOC(s)				_ML memory_manager::allocate(s)
 #define STBI_FREE(p)				_ML memory_manager::deallocate(p)
@@ -268,28 +267,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t image::get_format() const
-	{
-		switch (channels())
-		{
-		case 1	: return GL::Red;
-		case 3	: return GL::RGB;
-		case 4	:
-		default	: return GL::RGBA;
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
 	std::optional<color32> image::get_pixel(size_t index) const
 	{
 		return (index < capacity())
-			? std::make_optional(make_color32(
+			? std::make_optional(color32{
 				(m_channels >= 1) ? *((cbegin() + index) + 0) : (byte_t)0,
 				(m_channels >= 2) ? *((cbegin() + index) + 1) : (byte_t)0,
 				(m_channels >= 3) ? *((cbegin() + index) + 2) : (byte_t)0,
 				(m_channels >= 4) ? *((cbegin() + index) + 3) : (byte_t)0
-				))
+				})
 			: std::nullopt;
 	}
 

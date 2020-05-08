@@ -13,7 +13,7 @@ namespace ml
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename shared_library;
 		using handle_type		= typename void *;
-		using symbols_type		= typename ds::flat_map<hash_t, handle_type>;
+		using symbols_type		= typename ds::map<hash_t, handle_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

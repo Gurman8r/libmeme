@@ -15,9 +15,9 @@ namespace ml
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using shader_source		= typename meta::array<pmr::string, id_max>;
-		using attribute_cache	= typename ds::flat_map<hash_t, int32_t>;
-		using uniform_cache		= typename ds::flat_map<hash_t, int32_t>;
-		using texture_cache		= typename ds::flat_map<int32_t, texture const *>;
+		using attribute_cache	= typename ds::map<hash_t, int32_t>;
+		using uniform_cache		= typename ds::map<hash_t, int32_t>;
+		using texture_cache		= typename ds::map<int32_t, texture const *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

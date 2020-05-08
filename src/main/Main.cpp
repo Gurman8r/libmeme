@@ -29,7 +29,7 @@ ml::int32_t main()
 		memcfg() noexcept
 		{
 			ML_assert(pmr::set_default_resource(&test));
-			ML_assert(memory_manager::set_test_resource(&test));
+			ML_assert(memory_manager::configure(&test));
 		}
 
 	} g_memcfg;

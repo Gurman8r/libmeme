@@ -89,10 +89,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD uint32_t get_format() const;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD std::optional<color32> get_pixel(size_t index) const;
 		
 		ML_NODISCARD std::optional<color32> get_pixel(size_t x, size_t y) const;

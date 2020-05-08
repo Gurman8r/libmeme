@@ -8,10 +8,9 @@
 // memory_manager singleton
 #define ML_memory_manager _ML memory_manager::get_instance()
 
-// TEST RESOURCE
 namespace ml::util
 {
-	// passthrough memory resource for collecting metrics
+	// passthrough memory_resource for collecting usage metrics
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -116,11 +115,12 @@ namespace ml::util
 	};
 }
 
-// MEMORY MANAGER
 namespace ml
 {
-	struct ML_CORE_API memory_manager final : singleton<memory_manager>
+	// memory manager
+	class ML_CORE_API memory_manager final : singleton<memory_manager>
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
@@ -130,20 +130,28 @@ namespace ml
 			size_t index; size_t size; byte_t * data;
 		};
 
-		using record_map = typename ds::flat_map<void *, record>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
+
+		ML_NODISCARD static auto const & get_index() noexcept { return get_instance().m_index; }
+
+		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
+
+		ML_NODISCARD static auto const & get_testres() noexcept { return get_instance().m_testres; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// setup
-		ML_NODISCARD static bool set_test_resource(util::test_resource * value) noexcept
+		ML_NODISCARD static bool configure(util::test_resource * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 
 			if (inst.m_testres)				{ return debug::error("resource already set"); }
 			if (!value)						{ return debug::error("resource cannot be null"); }
-			if (!value->upstream())			{ return debug::error("resource upstream cannot be null"); }
-			if (!value->buffer())			{ return debug::error("resource data cannot be null"); }
-			if (!value->is_valid_size())	{ return debug::error("resource size must be greater than zero"); }
+			if (!value->upstream())			{ return debug::error("upstream cannot be null"); }
+			if (!value->buffer())			{ return debug::error("data cannot be null"); }
+			if (!value->is_valid_size())	{ return debug::error("size must be greater than zero"); }
 			if (!value->is_default())		{ return debug::error("resource is not the default resource"); }
 
 			return (inst.m_testres = value);
@@ -157,24 +165,10 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate the requested bytes
-			auto const temp{ inst.m_allocator.allocate(size) };
+			auto const data{ inst.m_allocator.allocate(size) };
 
-			// create a new record
-			return *inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first;
-		}
-
-		// malloc (template size)
-		template <size_t Size
-		> ML_NODISCARD static void * allocate() noexcept
-		{
-			return allocate(Size);
-		}
-
-		// malloc (template type)
-		template <class Type
-		> ML_NODISCARD static void * allocate() noexcept
-		{
-			return allocate(sizeof(Type));
+			// create record
+			return *inst.m_records.insert(data, record{ inst.m_index++, size, data }).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -182,21 +176,8 @@ namespace ml
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
+			// allocate (count * size) bytes set to zero
 			return std::memset(allocate(count * size), 0, count * size);
-		}
-
-		// calloc (template size)
-		template <size_t Count, size_t Size
-		> ML_NODISCARD static void * allocate() noexcept
-		{
-			return allocate(Count, Size);
-		}
-
-		// calloc (template type)
-		template <size_t Count, class Type
-		> ML_NODISCARD static void * allocate() noexcept
-		{
-			return allocate(Count, sizeof(Type));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -224,6 +205,8 @@ namespace ml
 		{
 			return reallocate(addr, size, size);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc (sized)
 		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
@@ -255,33 +238,25 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
-
-		ML_NODISCARD static auto const & get_index() noexcept { return get_instance().m_index; }
-
-		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
-
-		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_instance().m_testres; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
 		friend singleton<memory_manager>;
+
+		memory_manager() noexcept = default;
 
 		~memory_manager();
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
-		record_map				m_records	{};	// record table
+		ds::map<void *, record>	m_records	{};	// record data
 		util::test_resource *	m_testres	{};	// test resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
-// TRACKABLE
 namespace ml
 {
+	// trackable base
 	struct ML_CORE_API trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -11,9 +11,9 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using page = typename ds::flat_map<uint32_t, glyph>;
+		using page = typename ds::map<uint32_t, glyph>;
 		
-		using page_table = typename ds::flat_map<uint32_t, page>;
+		using page_table = typename ds::map<uint32_t, page>;
 
 		struct ML_NODISCARD info final
 		{
@@ -53,7 +53,7 @@ namespace ml
 			if (this != std::addressof(value))
 			{
 				std::swap(m_pages, value.m_pages);
-				std::swap(m_lib, value.m_lib);
+				std::swap(m_library, value.m_library);
 				std::swap(m_face, value.m_face);
 				std::swap(m_info, value.m_info);
 			}
@@ -81,7 +81,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *		m_lib;
+		void *		m_library;
 		void *		m_face;
 		info		m_info;
 		page_table	m_pages;

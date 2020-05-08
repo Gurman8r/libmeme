@@ -42,14 +42,18 @@
 // concat implementation
 #define ML_impl_concat(a, b)	a##b
 
-// macro concat
+// token concat
 #define ML_concat(a, b)			ML_impl_concat(a, b)
 
-// macro name to string
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// token literal to string
 #define ML_to_string(expr)		#expr
 
-// macro contents to string
+// token contents to string
 #define ML_stringify(expr)		ML_to_string(expr)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // anonymous expressions
 #if defined(__COUNTER__)
@@ -68,12 +72,6 @@
 #define _ML_BEGIN				namespace ml {
 #define _ML_END					}
 
-// general
-#define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
-#define ML_alias				using
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-#define ML_forward(var)			_ML std::forward<decltype(var)>(var)
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // assert
@@ -81,14 +79,20 @@
 #   define ML_assert(expr)		assert(expr)
 #endif
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // breakpoint
-#if (!ML_is_debug)
-#	define ML_breakpoint		((void)0)
-#elif defined(ML_cc_msvc)
-#	define ML_breakpoint		_CSTD __debugbreak()
-#else
-#	define ML_breakpoint		_CSTD raise(SIGTRAP)
+#ifndef ML_breakpoint
+#	if (!ML_is_debug)
+#		define ML_breakpoint	((void)0)
+#	elif defined(ML_cc_msvc)
+#		define ML_breakpoint	_CSTD __debugbreak()
+#	else
+#		define ML_breakpoint	_CSTD raise(SIGTRAP)
+#	endif
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // environment
 #ifndef ML_DISABLE_LEGACY
@@ -104,6 +108,14 @@
 #	define ML_wargv				((wchar_t**)0)
 #	define ML_wenvp				((wchar_t***)0)
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// miscellaneous
+#define ML_addressof(ptr)		((void *)(_ML intmax_t)ptr)
+#define ML_alias				using
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_forward(var)			_ML std::forward<decltype(var)>(var)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

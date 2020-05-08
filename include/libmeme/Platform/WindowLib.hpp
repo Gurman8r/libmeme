@@ -38,6 +38,47 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum window_profile_ : int32_t
+	{
+		window_profile_any,
+		window_profile_core,
+		window_profile_compat,
+		window_profile_debug,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum window_hints_ : int32_t
+	{
+		window_hints_none				= 0,
+		window_hints_resizable			= (1 << 0),
+		window_hints_visible			= (1 << 1),
+		window_hints_decorated			= (1 << 2),
+		window_hints_focused			= (1 << 3),
+		window_hints_auto_iconify		= (1 << 4),
+		window_hints_floating			= (1 << 5),
+		window_hints_maximized			= (1 << 6),
+		window_hints_doublebuffer		= (1 << 7),
+
+		// resizable / visible / decorated / focused / auto iconify
+		window_hints_default
+			= window_hints_resizable
+			| window_hints_visible
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify,
+
+		// resizable / decorated / focused / auto iconify / maximized
+		window_hints_default_max
+			= window_hints_resizable
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify
+			| window_hints_maximized,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum window_attr_ : int32_t
 	{
 		window_attr_focused,
@@ -82,47 +123,6 @@ namespace ml
 		window_attr_context_no_error,
 		window_attr_context_creation_api,
 		window_attr_scale_to_monitor,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_hints_ : int32_t
-	{
-		window_hints_none				= 0,
-		window_hints_resizable			= (1 << 0),
-		window_hints_visible			= (1 << 1),
-		window_hints_decorated			= (1 << 2),
-		window_hints_focused			= (1 << 3),
-		window_hints_auto_iconify		= (1 << 4),
-		window_hints_floating			= (1 << 5),
-		window_hints_maximized			= (1 << 6),
-		window_hints_doublebuffer		= (1 << 7),
-
-		// resizable / visible / decorated / focused / auto iconify
-		window_hints_default
-			= window_hints_resizable
-			| window_hints_visible
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify,
-
-		// resizable / decorated / focused / auto iconify / maximized
-		window_hints_default_max
-			= window_hints_resizable
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify
-			| window_hints_maximized,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_profile_ : int32_t
-	{
-		window_profile_any,
-		window_profile_core,
-		window_profile_compat,
-		window_profile_debug,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

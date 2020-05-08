@@ -9,20 +9,30 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		using sampler_type = typename texture const *;
 
-		using sampler = typename texture const *;
+		template <class T> static constexpr bool is_sampler_ish
+		{
+			std::is_convertible_v<T, sampler_type> ||
+			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler_type>
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allowed_types = typename meta::list<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
-			sampler
+			sampler_type
 		>;
 
 		using variable_type = typename meta::rename<std::variant, allowed_types>;
 
 		using function_type = typename std::function<variable_type()>;
+
+		enum : size_t { id_variable, id_function };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using info_type = typename typeof<>;
 
@@ -30,94 +40,86 @@ namespace ml
 
 		using data_type = typename std::variant<variable_type, function_type>;
 
-		enum id_ : size_t { id_variable, id_function };
+		using storage_type = typename std::tuple<info_type, name_type, data_type>;
 
-		template <class T> static constexpr bool is_sampler_ish
-		{
-			std::is_convertible_v<T, sampler> ||
-			std::is_convertible_v<std::add_pointer_t<std::decay_t<T>>, sampler>
-		};
+		enum : size_t { id_type, id_name, id_data };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uniform(allocator_type const & alloc = {}) noexcept
-			: m_type{}
-			, m_name{ alloc }
-			, m_data{}
+		uniform() noexcept
+			: m_storage{}
 		{
 		}
 
-		uniform(info_type const & info, name_type const & name, data_type const & data, allocator_type const & alloc = {})
-			: m_type{ info }
-			, m_name{ name, alloc }
-			, m_data{ data }
+		explicit uniform(storage_type const & value)
+			: m_storage{ value }
 		{
 		}
 
-		uniform(info_type && info, name_type && name, data_type && data, allocator_type const & alloc = {}) noexcept
-			: m_type{ ML_forward(info) }
-			, m_name{ ML_forward(name), alloc }
-			, m_data{ ML_forward(data) }
+		explicit uniform(storage_type && value) noexcept
+			: m_storage{ std::move(value) }
 		{
 		}
 
-		uniform(uniform const & value, allocator_type const & alloc = {})
-			: m_type{ value.m_type }
-			, m_name{ value.m_name, alloc }
-			, m_data{ value.m_data }
+		uniform(uniform const & other)
+			: m_storage{ other.m_storage }
 		{
 		}
 
-		uniform(uniform && value, allocator_type const & alloc = {}) noexcept
-			: uniform{ alloc }
+		uniform(uniform && other) noexcept
+			: m_storage{ std::move(other.m_storage) }
 		{
-			swap(std::move(value));
+		}
+
+		template <class I, class N, class D
+		> uniform(I && info, N && name, D && data)
+			: m_storage{ ML_forward(info), ML_forward(name), ML_forward(data) }
+		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uniform & operator=(uniform const & value)
+		uniform & operator=(uniform const & other)
 		{
-			uniform temp{ value };
-			swap(temp);
+			uniform temp{ other };
+			this->swap(temp);
 			return (*this);
 		}
 
-		uniform & operator=(uniform && value) noexcept
+		uniform & operator=(uniform && other) noexcept
 		{
-			swap(std::move(value));
+			this->swap(std::move(other));
 			return (*this);
 		}
 
-		void swap(uniform & value) noexcept
+		void swap(uniform & other) noexcept
 		{
-			if (this != std::addressof(value))
+			if (this != std::addressof(other))
 			{
-				std::swap(m_type, value.m_type);
-				std::swap(m_name, value.m_name);
-				std::swap(m_data, value.m_data);
+				m_storage.swap(other.m_storage);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD info_type const & type() const noexcept { return m_type; }
+		ML_NODISCARD info_type const & type() const & noexcept { return std::get<id_type>(m_storage); }
 
-		ML_NODISCARD name_type const & name() const noexcept { return m_name; }
+		ML_NODISCARD name_type const & name() const & noexcept { return std::get<id_name>(m_storage); }
 
-		ML_NODISCARD data_type const & data() const noexcept { return m_data; }
+		ML_NODISCARD data_type const & data() const & noexcept { return std::get<id_data>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD variable_type var() const noexcept
 		{
-			switch (m_data.index())
+			auto const & d{ std::get<id_data>(m_storage) };
+			switch (d.index())
 			{
 			case id_variable:
-				return std::get<variable_type>(m_data);
+				return std::get<variable_type>(d);
 
 			case id_function:
-				if (auto const & fn{ std::get<function_type>(m_data) })
+				if (auto const & fn{ std::get<function_type>(d) })
 					return std::invoke(fn);
 			}
 			return variable_type{};
@@ -128,9 +130,9 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
-			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->holds<sampler>();
+				return this->holds<sampler_type>();
 			}
 			else
 			{
@@ -143,9 +145,9 @@ namespace ml
 		template <class T
 		> ML_NODISCARD auto get() const noexcept
 		{
-			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->get<sampler>();
+				return this->get<sampler_type>();
 			}
 			else if (auto const v{ this->var() }; std::holds_alternative<T>(v))
 			{
@@ -162,13 +164,13 @@ namespace ml
 		template <class T, class ... Args
 		> bool set(Args && ... args) noexcept
 		{
-			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler>)
+			if constexpr (is_sampler_ish<T> && !std::is_same_v<T, sampler_type>)
 			{
-				return this->set<sampler>(ML_forward(args)...);
+				return this->set<sampler_type>(ML_forward(args)...);
 			}
 			else if (this->holds<T>())
 			{
-				m_data = data_type{ ML_forward(args)... };
+				std::get<id_data>(m_storage) = data_type{ ML_forward(args)... };
 				return true;
 			}
 			else
@@ -181,13 +183,13 @@ namespace ml
 
 		ML_NODISCARD auto compare(uniform const & value) const noexcept
 		{
-			if (m_type != value.m_type)
+			if (type() != value.type())
 			{
-				return m_type.compare(value.m_type);
+				return type().compare(value.type());
 			}
 			else
 			{
-				return m_name.compare(value.m_name);
+				return name().compare(value.name());
 			}
 		}
 
@@ -206,9 +208,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		info_type m_type; // info
-		name_type m_name; // name
-		data_type m_data; // data
+		storage_type m_storage;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

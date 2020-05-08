@@ -15,7 +15,7 @@ namespace ml
 
 	class ML_CORE_API event_system final
 	{
-		static ds::flat_map<hash_t, ds::flat_set<event_listener *>
+		static ds::map<hash_t, ds::set<event_listener *>
 		> g_event_system;
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

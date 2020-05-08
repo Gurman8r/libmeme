@@ -19,7 +19,7 @@ namespace ml
 	font::font(allocator_type const & alloc) noexcept
 		: m_pages	{ alloc }
 		, m_info	{ pmr::string{ alloc }, {} }
-		, m_lib		{}
+		, m_library	{}
 		, m_face	{}
 	{
 	}
@@ -33,7 +33,7 @@ namespace ml
 	font::font(font const & value, allocator_type const & alloc)
 		: m_pages	{ value.m_pages, alloc }
 		, m_info	{ { value.m_info.family, alloc }, value.m_info.locale }
-		, m_lib		{ value.m_lib }
+		, m_library	{ value.m_library }
 		, m_face	{ value.m_face }
 	{
 	}
@@ -46,18 +46,15 @@ namespace ml
 
 	font::~font() noexcept
 	{
-		if (!m_pages.empty()) { m_pages.clear(); }
-
 		if (m_face) { FT_Done_Face(static_cast<FT_Face>(m_face)); }
-
-		if (m_lib) { FT_Done_FreeType(static_cast<FT_Library>(m_lib)); }
+		if (m_library) { FT_Done_FreeType(static_cast<FT_Library>(m_library)); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool font::load_from_file(fs::path const & path)
 	{
-		if (m_lib) { return false; }
+		if (m_library) { return false; }
 
 		// load freetype library instance
 		FT_Library library;
@@ -90,7 +87,7 @@ namespace ml
 		}
 
 		// store loaded font library
-		m_lib = library;
+		m_library = library;
 
 		// store the font faces
 		m_face = face;
@@ -130,7 +127,8 @@ namespace ml
 		g.graphic = make_texture(GL::Texture2D, GL::RGBA, GL::Red, texture_flags_default);
 
 		// set bounds
-		g.bounds = float_rect{
+		g.bounds = float_rect
+		{
 			face->glyph->bitmap_left,
 			face->glyph->bitmap_top,
 			face->glyph->bitmap.width,

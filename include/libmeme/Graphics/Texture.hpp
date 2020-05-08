@@ -36,9 +36,9 @@ namespace ml
 		
 		texture(uint32_t sampler);
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		texture();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		texture(fs::path const & path);
 		

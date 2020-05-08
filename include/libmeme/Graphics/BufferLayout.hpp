@@ -100,7 +100,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		buffer_layout const & apply() const noexcept;
+		buffer_layout const & apply() const noexcept
+		{
+			for (auto const & e : (*this))
+			{
+				e.apply();
+			}
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

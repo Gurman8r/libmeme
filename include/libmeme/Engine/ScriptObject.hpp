@@ -27,7 +27,7 @@ namespace ml::embed
 
 		using callback = std::function<void()>;
 
-		using funcs_type = ds::flat_map<hash_t, callback>;
+		using funcs_type = ds::map<hash_t, callback>;
 
 		using flags_type = ds::bitset<script_object_flags_MAX>;
 

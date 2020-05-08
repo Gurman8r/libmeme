@@ -41,15 +41,17 @@ namespace ml::impl
 
 	static bool refresh_flags(texture & t) noexcept
 	{
-		if (!t) return false;
+		if (!t) { return false; }
+		else
+		{
+			set_repeated(t.is_repeated(), t.sampler());
 
-		impl::set_repeated(t.is_repeated(), t.sampler());
+			set_smooth(t.is_smooth(), t.sampler(), t.is_mipmapped());
 
-		impl::set_smooth(t.is_smooth(), t.sampler(), t.is_mipmapped());
+			set_mipmapped(t.is_mipmapped(), t.sampler(), t.is_smooth());
 
-		impl::set_mipmapped(t.is_mipmapped(), t.sampler(), t.is_smooth());
-
-		return true;
+			return true;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,12 +94,12 @@ namespace ml
 	{
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	texture::texture()
 		: texture{ GL::Texture2D }
 	{
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	texture::texture(fs::path const & path)
 		: texture{}
@@ -145,7 +147,16 @@ namespace ml
 	{
 		if (!img.channels()) { return false; }
 
-		m_intl_format = m_color_format = img.get_format();
+		m_intl_format = m_color_format = ([&]() noexcept
+		{
+			switch (img.channels())
+			{
+			case 1	: return GL::Red;
+			case 3	: return GL::RGB;
+			case 4	:
+			default	: return GL::RGBA;
+			}
+		})();
 
 		return create(img.data(), img.size());
 	}
@@ -171,14 +182,19 @@ namespace ml
 			m_handle = NULL;
 			GL::flush();
 		}
-		return !(m_handle);
+		return !m_handle;
 	}
 
 	void texture::bind(texture const * value)
 	{
-		GL::bindTexture(
-			value ? value->m_sampler : GL::Texture2D,
-			value ? value->m_handle : NULL);
+		if (value)
+		{
+			GL::bindTexture(value->m_sampler, value->m_handle);
+		}
+		else
+		{
+			GL::bindTexture(GL::Texture2D, NULL);
+		}
 	}
 
 	void texture::swap(texture & value) noexcept

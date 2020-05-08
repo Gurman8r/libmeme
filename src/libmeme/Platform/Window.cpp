@@ -31,9 +31,9 @@ namespace ml
 		if (!ws.video)			{ return debug::error("invalid window video"); }
 		if (!ws.context)		{ return debug::error("invalid window context"); }
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
-		if (!m_impl->open(ws)){ return debug::error("failed opening window impl"); }
+		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
 
-		m_settings = ws;
+		m_settings = ws; // store settings
 		
 		set_current_context(get_handle());
 		
