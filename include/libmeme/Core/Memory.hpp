@@ -12,6 +12,7 @@
 namespace ml::util
 {
 	// passthrough resource for collecting upstream usage metrics
+	// intended for use with initial arena
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -149,7 +150,7 @@ namespace ml
 
 			if (inst.m_testres)			{ return debug::error("resource already set"); }
 			if (!res)					{ return debug::error("resource cannot be null"); }
-			if (!res->upstream())		{ return debug::error("upstream cannot be null"); }
+			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
 			if (!res->buffer())			{ return debug::error("data cannot be null"); }
 			if (!res->is_valid_size())	{ return debug::error("size must be greater than zero"); }
 			if (!res->is_default())		{ return debug::error("resource is not the default resource"); }

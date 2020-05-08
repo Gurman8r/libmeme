@@ -15,15 +15,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		time_manager(json const & j, allocator_type alloc = {}) noexcept
-			: m_main_timer	{}
-			, m_loop_timer	{ false }
-			, m_fps_accum	{}
-			, m_fps_index	{}
-			, m_fps_value	{}
-			, m_fps_frames	{}
-			, m_delta_time	{}
-			, m_frame_rate	{}
-			, m_frame_count	{}
 		{
 		}
 
@@ -69,17 +60,17 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		timer		m_main_timer;
-		timer		m_loop_timer;
+		timer		m_main_timer{};
+		timer		m_loop_timer{ false };
 
-		float64_t	m_fps_accum;
-		int32_t		m_fps_index;
-		float64_t	m_fps_value;
-		float64_t	m_fps_frames[128];
+		int32_t		m_fps_index{};
+		float64_t	m_fps_accum{};
+		float64_t	m_fps_value{};
+		float64_t	m_fps_frames[128]{};
 		
-		duration	m_delta_time;
-		float64_t	m_frame_rate;
-		uint64_t	m_frame_count;
+		duration	m_delta_time{};
+		float64_t	m_frame_rate{};
+		uint64_t	m_frame_count{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

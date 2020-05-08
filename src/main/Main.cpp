@@ -7,7 +7,7 @@
 using namespace ml;
 
 #ifndef MAIN_MEMORY
-#define MAIN_MEMORY 128.0_MiB
+#define MAIN_MEMORY 128._MiB
 #endif
 
 #ifndef MAIN_CONFIG
@@ -18,7 +18,7 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// memory settings
+	// setup memory
 	static struct memcfg final
 	{
 		ds::array<byte_t, MAIN_MEMORY>		data{};
@@ -36,18 +36,15 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// read config
-	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
+	// setup context
+	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
 		ML_defer{ f.close(); };
 		if (f) { f >> j; }
 		return j;
-	})();
-
-	// setup context
-	ML_assert(engine::initialize(config));
+	})()));
 	ML_defer{ ML_assert(engine::finalize()); };
-	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
+	if (!engine::window().is_open()) { return EXIT_FAILURE; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -106,8 +103,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// goodbye!
-	return EXIT_SUCCESS;
+	return EXIT_SUCCESS; // goodbye!
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
