@@ -11,51 +11,45 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class ML_CORE_API performance_tracker final : trackable, non_copyable
+	struct ML_CORE_API performance_tracker final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	private:
-		using frame_data = pmr::vector<std::pair<cstring, duration>>;
+		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static frame_data m_curr; // current global data
-		static frame_data m_prev; // previous global data
+		explicit performance_tracker(cstring name) noexcept : m_name{ name } {}
 
-		cstring	m_name	; // local name
-		timer	m_timer	; // local timer
+		~performance_tracker() noexcept { push(m_name, m_timer.elapsed()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	public:
-		explicit performance_tracker(cstring name) noexcept : m_name{ name }, m_timer{}
-		{
-		}
-
-		~performance_tracker() noexcept
-		{
-			add_trace(m_name, m_timer.elapsed());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	public:
 		ML_NODISCARD static frame_data const & previous() noexcept
 		{
 			return m_prev;
 		}
 
 		template <class ... Args
-		> static void add_trace(Args && ... args) noexcept
+		> static void push(Args && ... args) noexcept
 		{
 			m_curr.emplace_back(ML_forward(args)...);
 		}
 
-		static void swap_frames() noexcept
+		static void swap() noexcept
 		{
 			m_prev.swap(m_curr);
-
 			m_curr.clear();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		static frame_data m_curr; // current frame
+		static frame_data m_prev; // previous frame
+
+		cstring	m_name	{};
+		timer	m_timer	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
