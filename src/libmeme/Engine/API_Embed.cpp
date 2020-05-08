@@ -102,7 +102,15 @@ namespace ml::embed
 			.def_property_readonly_static("cerr", &ml_stdio::cerr)
 			.def_property_readonly_static("cout", &ml_stdio::cout)
 			;
-		
+		([&m, builtins = py::module::import("builtins")
+			, sys = py::module::import("sys")
+		]()
+		{
+			sys.attr("stdout") = m.attr("stdio").attr("cout");
+			sys.attr("stderr") = m.attr("stdio").attr("cout");
+			sys.attr("stdin") = py::none{};
+		})();
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// CURSOR MODE
@@ -310,6 +318,7 @@ namespace ml::embed
 		// WINDOW ATTRIBUTES
 		py::class_<window_attr_>(m, "window_attr")
 			.def(py::init<>())
+
 			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_attr_focused; })
 			.def_property_readonly_static("iconified", [](py::object) { return (int32_t)window_attr_iconified; })
 			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_attr_resizable; })
@@ -322,6 +331,7 @@ namespace ml::embed
 			.def_property_readonly_static("transparent_framebuffer", [](py::object) { return (int32_t)window_attr_transparent_framebuffer; })
 			.def_property_readonly_static("hovered", [](py::object) { return (int32_t)window_attr_hovered; })
 			.def_property_readonly_static("focus_on_show", [](py::object) { return (int32_t)window_attr_focus_on_show; })
+
 			.def_property_readonly_static("red_bits", [](py::object) { return (int32_t)window_attr_red_bits; })
 			.def_property_readonly_static("green_bits", [](py::object) { return (int32_t)window_attr_green_bits; })
 			.def_property_readonly_static("blue_bits", [](py::object) { return (int32_t)window_attr_blue_bits; })
@@ -338,6 +348,7 @@ namespace ml::embed
 			.def_property_readonly_static("srgb_capable", [](py::object) { return (int32_t)window_attr_srgb_capable; })
 			.def_property_readonly_static("refresh_rate", [](py::object) { return (int32_t)window_attr_refresh_rate; })
 			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_attr_doublebuffer; })
+
 			.def_property_readonly_static("client_api", [](py::object) { return (int32_t)window_attr_client_api; })
 			.def_property_readonly_static("context_version_major", [](py::object) { return (int32_t)window_attr_context_version_major; })
 			.def_property_readonly_static("context_version_minor", [](py::object) { return (int32_t)window_attr_context_version_minor; })
@@ -385,18 +396,6 @@ namespace ml::embed
 			.def_readwrite("context", &window_settings::context)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// SETUP
-		([&m, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
-		]()
-		{
-			sys.attr("stdout") = m.attr("stdio").attr("cout");
-			sys.attr("stderr") = m.attr("stdio").attr("cout");
-			sys.attr("stdin") = py::none{};
-		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
@@ -533,7 +532,6 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// SETUP
 		([&m, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")
 		]()

@@ -14,9 +14,9 @@ bool operator<(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
 {
 	if (std::addressof(lhs) == std::addressof(rhs)) { return false; }
 	else return
-		_ML util::compare(lhs.width, rhs.width) < 0 &&
-		_ML util::compare(lhs.height, rhs.height) < 0 &&
-		_ML util::compare(lhs.pixels, rhs.pixels) < 0;
+		(lhs.width < rhs.width) &&
+		(lhs.height < rhs.height) &&
+		(lhs.pixels < rhs.pixels);
 }
 
 namespace ml::impl
