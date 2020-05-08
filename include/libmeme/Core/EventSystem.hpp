@@ -16,7 +16,7 @@ namespace ml
 	// event listener
 	struct ML_CORE_API event_listener
 	{
-		virtual ~event_listener() noexcept; // EOF
+		virtual ~event_listener() noexcept;
 
 		virtual void on_event(event const & ev) = 0;
 	};
@@ -128,8 +128,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// remove listener from all events
-	inline event_listener::~event_listener() noexcept { event_system::remove_listener(this); }
+	inline event_listener::~event_listener() noexcept
+	{
+		event_system::remove_listener(this); // remove listener from all events
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

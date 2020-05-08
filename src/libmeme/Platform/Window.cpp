@@ -148,7 +148,7 @@ namespace ml
 		return m_impl->get_cursor_position();
 	}
 
-	vec4i window::get_frame_size() const
+	int_rect window::get_frame_size() const
 	{
 		return m_impl->get_frame_size();
 	}

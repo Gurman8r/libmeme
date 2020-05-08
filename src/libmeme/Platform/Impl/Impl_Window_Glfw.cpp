@@ -207,9 +207,9 @@ namespace ml
 		return (vec2)temp;
 	}
 
-	vec4i impl_window_glfw::get_frame_size() const
+	int_rect impl_window_glfw::get_frame_size() const
 	{
-		vec4i temp{};
+		int_rect temp{};
 		glfwGetWindowFrameSize(m_window, &temp[0], &temp[1], &temp[2], &temp[3]);
 		return temp;
 	}

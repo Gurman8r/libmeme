@@ -55,11 +55,11 @@ ml::int32_t main()
 	// nothing to do
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// load/unload content
 	event_system::fire_event<load_event>();
 	ML_defer{ event_system::fire_event<unload_event>(); };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// application loop
 	while (engine::window().is_open())

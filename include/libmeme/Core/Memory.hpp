@@ -164,10 +164,10 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate the requested bytes
-			auto const data{ inst.m_allocator.allocate(size) };
+			auto const temp{ inst.m_allocator.allocate(size) };
 
 			// create record
-			return *inst.m_records.insert(data, record{ inst.m_index++, size, data }).first;
+			return *inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -175,7 +175,7 @@ namespace ml
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
-			// allocate (count * size) bytes set to zero
+			// allocate (count * size) zeroed bytes
 			return std::memset(allocate(count * size), 0, count * size);
 		}
 

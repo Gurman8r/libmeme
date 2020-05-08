@@ -45,7 +45,7 @@ namespace ml
 
 		ML_NODISCARD vec2 get_cursor_position() const override;
 
-		ML_NODISCARD vec4i get_frame_size() const override;
+		ML_NODISCARD int_rect get_frame_size() const override;
 
 		ML_NODISCARD vec2i get_framebuffer_size() const override;
 

@@ -16,7 +16,7 @@ namespace ml
 
 		constexpr operator bool() const noexcept
 		{
-			return (0 < size[0]) && (0 < size[1]) && (0 < depth);
+			return size[0] && size[1] && depth;
 		}
 
 		constexpr bool operator==(video_mode const & other) const noexcept

@@ -75,10 +75,10 @@ namespace ml
 		}
 
 		// startup scripting
-		debug::info("startup scripting");
+		debug::info("starting scripting");
 		if (!scripts().startup())
 		{
-			return debug::error("failed initializing scripting");
+			return debug::error("failed starting scripting");
 		}
 
 		// execute setup script

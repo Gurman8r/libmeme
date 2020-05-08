@@ -43,7 +43,7 @@ namespace ml
 
 		virtual vec2 get_cursor_position() const = 0;
 
-		virtual vec4i get_frame_size() const = 0;
+		virtual int_rect get_frame_size() const = 0;
 
 		virtual vec2i get_framebuffer_size() const = 0;
 
