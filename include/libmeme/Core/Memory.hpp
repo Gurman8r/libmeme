@@ -210,12 +210,12 @@ namespace ml
 		// realloc (sized)
 		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
 		{
-			if (!newsz)
+			if (newsz == 0)
 			{
 				deallocate(addr);
 				return nullptr;
 			}
-			else if (!addr)
+			else if (addr == nullptr)
 			{
 				return allocate(newsz);
 			}

@@ -17,13 +17,15 @@ namespace ml
 
 		gui_manager(json const & j, allocator_type alloc = {}) noexcept;
 
-		~gui_manager() noexcept { (void)shutdown(); }
+		~gui_manager() noexcept { (void)finalize(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool startup(struct window const & win, cstring version);
+		ML_NODISCARD bool is_initialized() noexcept;
 
-		ML_NODISCARD bool shutdown();
+		ML_NODISCARD bool initialize(struct window const & win, cstring version);
+
+		ML_NODISCARD bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -19,8 +19,8 @@ engine.window.install_default_callbacks()
 engine.window.set_cursor_mode(ml.cursor_mode.normal)
 
 # gui
-print("[ info ] starting gui...")
-assert(engine.gui.startup("#version 130"))
+print("[ info ] initializing gui...")
+assert(engine.gui.initialize("#version 130"))
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
 # plugins

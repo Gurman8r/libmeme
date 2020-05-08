@@ -18,13 +18,15 @@ namespace ml
 
 		script_manager(json const & j, allocator_type alloc = {}) noexcept;
 
-		~script_manager() noexcept { (void)shutdown(); }
+		~script_manager() noexcept { (void)finalize(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool startup();
+		ML_NODISCARD bool is_initialized() noexcept;
 
-		ML_NODISCARD bool shutdown();
+		ML_NODISCARD bool initialize();
+
+		ML_NODISCARD bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

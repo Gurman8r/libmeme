@@ -36,62 +36,44 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::is_initialized() noexcept
-	{
-		return (g_engine != nullptr);
-	}
+	bool engine::is_initialized() noexcept { return (g_engine != nullptr); }
 
-	bool engine::create_context(json const & j, allocator_type alloc) noexcept
+	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
 		if (is_initialized()) { return debug::error("engine context is already initialized"); }
 
-		g_engine = new engine_context{ j, alloc };
+		// create context
+		debug::info("creating engine context...");
+		if (!(g_engine = new engine_context{ j, alloc }))
+		{
+			return debug::error("failed creating engine context");
+		}
+
+		// initialize windows
+		debug::info("initializing windows...");
+		if (!window::backend_initialize())
+		{
+			return debug::error("failed initializing windows");
+		}
+
+		// initialize scripts
+		debug::info("initializing scripts...");
+		if (!scripts().initialize())
+		{
+			return debug::error("failed initializing scripts");
+		}
+
+		// execute setup
+		if (config().contains("setup_script"))
+		{
+			debug::info("executing setup...");
+			scripts().do_file(fs().path2(config()["setup_script"]));
+		}
 
 		return is_initialized();
 	}
 
-	bool engine::destroy_context() noexcept
-	{
-		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
-		
-		delete g_engine;
-
-		g_engine = nullptr;
-		
-		return !is_initialized();
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool engine::startup() noexcept
-	{
-		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
-
-		// initialize window backend
-		debug::info("initialize window backend");
-		if (!window::backend_initialize())
-		{
-			return debug::error("failed starting window backend");
-		}
-
-		// startup scripting
-		debug::info("starting scripting");
-		if (!scripts().startup())
-		{
-			return debug::error("failed starting scripting");
-		}
-
-		// execute setup script
-		if (config().contains("setup_script"))
-		{
-			debug::info("execute setup");
-			scripts().do_file(fs().path2(config()["setup_script"]));
-		}
-
-		return true;
-	}
-
-	bool engine::shutdown() noexcept
+	bool engine::finalize() noexcept
 	{
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
@@ -101,19 +83,21 @@ namespace ml
 		// clear plugins
 		plugins().clear();
 
-		// shutdown gui
-		if (!gui().shutdown()) {}
+		// finalize gui
+		if (!gui().finalize()) {}
 
-		// shutdown scripting
-		if (!scripts().shutdown()) {}
+		// finalize scripting
+		if (!scripts().finalize()) {}
 
 		// destroy window
 		window().destroy();
 
 		// finalize window backend
 		window::backend_finalize();
-
-		return true;
+		
+		// destroy context
+		delete g_engine; g_engine = nullptr;
+		return !is_initialized();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

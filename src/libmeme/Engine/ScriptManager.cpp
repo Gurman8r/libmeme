@@ -16,9 +16,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script_manager::startup()
+	bool script_manager::is_initialized() noexcept { return Py_IsInitialized(); }
+
+	bool script_manager::initialize()
 	{
-		if (Py_IsInitialized()) { return false; }
+		if (is_initialized()) { return false; }
 
 		PyObject_SetArenaAllocator(([]() noexcept
 		{
@@ -43,12 +45,12 @@ namespace ml
 
 		Py_InitializeEx(1);
 
-		return Py_IsInitialized();
+		return is_initialized();
 	}
 
-	bool script_manager::shutdown()
+	bool script_manager::finalize()
 	{
-		if (!Py_IsInitialized()) { return false; }
+		if (!is_initialized()) { return false; }
 
 		return (0 < Py_FinalizeEx());
 	}
@@ -57,7 +59,7 @@ namespace ml
 
 	int32_t script_manager::do_file(fs::path const & value)
 	{
-		if (!Py_IsInitialized()) { return 0; }
+		if (!is_initialized()) { return 0; }
 
 		auto fp{ std::fopen(value.string().c_str(), "r") };
 
@@ -66,7 +68,7 @@ namespace ml
 
 	int32_t script_manager::do_string(pmr::string const & value)
 	{
-		if (!Py_IsInitialized()) { return 0; }
+		if (!is_initialized()) { return 0; }
 
 		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}

@@ -19,8 +19,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::startup(window const & win, cstring version)
+	bool gui_manager::is_initialized() noexcept { return (m_gui_context != nullptr); }
+
+	bool gui_manager::initialize(window const & win, cstring version)
 	{
+		if (is_initialized()) { return false; }
+
 		// check imgui version
 		IMGUI_CHECKVERSION();
 
@@ -61,12 +65,12 @@ namespace ml
 		}
 #else
 #endif
-		return true;
+		return is_initialized();
 	}
 
-	bool gui_manager::shutdown()
+	bool gui_manager::finalize()
 	{
-		if (!m_gui_context) { return false; }
+		if (!is_initialized()) { return false; }
 
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
@@ -82,7 +86,7 @@ namespace ml
 
 		m_gui_context = nullptr;
 
-		return true;
+		return !is_initialized();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

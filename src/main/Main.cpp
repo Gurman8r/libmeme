@@ -18,7 +18,7 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// memory settings
+	// setup memory
 	static struct memcfg final
 	{
 		ds::array<byte_t, MAIN_MEMORY>		data{};
@@ -39,25 +39,19 @@ ml::int32_t main()
 	// read config
 	auto config = ([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
+		ML_defer{ f.close(); };
 		if (f) { f >> j; }
-		f.close();
 		return j;
 	})();
 
-	// create/destroy context
-	ML_assert(engine::create_context(config));
-	ML_defer{ ML_assert(engine::destroy_context()); };
-
-	// startup/shutdown systems
-	ML_assert(engine::startup());
-	ML_defer{ ML_assert(engine::shutdown()); };
-
-	// nothing to do
+	// setup engine
+	ML_assert(engine::initialize(config));
+	ML_defer{ ML_assert(engine::finalize()); };
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// load/unload content
+	// content loading
 	event_system::fire_event<load_event>();
 	ML_defer{ event_system::fire_event<unload_event>(); };
 
