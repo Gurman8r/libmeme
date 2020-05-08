@@ -171,7 +171,6 @@ namespace ml
 			&ax::NodeEditor::DestroyEditor
 		};
 
-
 		gui::plot_controller m_plots
 		{ {
 			gui::plot::create(120, gui::plot::histogram
