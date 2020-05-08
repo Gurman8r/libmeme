@@ -45,23 +45,23 @@ ml::int32_t main()
 	})();
 
 	// create/destroy context
-	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
+	ML_assert(engine::create_context(config));
+	ML_defer{ ML_assert(engine::destroy_context()); };
 
-	// startup/shutdown
-	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
+	// startup/shutdown systems
+	ML_assert(engine::startup());
+	ML_defer{ ML_assert(engine::shutdown()); };
+
+	// nothing to do, exit
+	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
+
+	// load/unload content
+	event_system::fire_event<load_event>();
+	ML_defer{ event_system::fire_event<unload_event>(); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// nothing to do
-	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
-
-	// load content
-	event_system::fire_event<load_event>();
-
-	// unload content
-	ML_defer{ event_system::fire_event<unload_event>(); };
-
-	// main loop
+	// application loop
 	while (engine::window().is_open())
 	{
 		engine::time().begin_loop();

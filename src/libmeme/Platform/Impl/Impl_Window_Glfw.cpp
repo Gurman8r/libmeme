@@ -127,7 +127,7 @@ namespace ml
 
 	bool impl_window_glfw::is_fullscreen() const
 	{
-		return m_window && (m_monitor == get_primary_monitor());
+		return (m_monitor == get_primary_monitor());
 	}
 
 	bool impl_window_glfw::is_open() const

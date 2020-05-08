@@ -102,8 +102,7 @@ namespace ml::embed
 			.def_property_readonly_static("cerr", &ml_stdio::cerr)
 			.def_property_readonly_static("cout", &ml_stdio::cout)
 			;
-		([&m, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
+		([&m, sys = py::module::import("sys")
 		]()
 		{
 			sys.attr("stdout") = m.attr("stdio").attr("cout");
