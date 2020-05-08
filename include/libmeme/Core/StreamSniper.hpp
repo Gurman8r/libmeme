@@ -7,22 +7,24 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch = char, class Al = std::allocator<Ch>
+	template <class Ch = char, class Al = pmr::polymorphic_allocator<Ch>
 	> struct basic_stream_sniper final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type		= typename basic_stream_sniper		<Ch, Al>;
-		using traits_t		= typename std::char_traits			<Ch>;
-		using sstream_t		= typename std::basic_stringstream	<Ch, traits_t, Al>;
-		using ostream_t		= typename std::basic_ostream		<Ch, traits_t>;
-		using streambuf_t	= typename std::basic_streambuf		<Ch, traits_t>;
+		using char_type			= typename Ch;
+		using allocator_type	= typename Al;
+		using self_type			= typename _ML basic_stream_sniper	<char_type, allocator_type>;
+		using traits_type		= typename std::char_traits			<char_type>;
+		using sstream_type		= typename std::basic_stringstream	<char_type, traits_type, allocator_type>;
+		using ostream_type		= typename std::basic_ostream		<char_type, traits_type>;
+		using streambuf_type	= typename std::basic_streambuf		<char_type, traits_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_stream_sniper(ostream_t * value = {}) noexcept
+		explicit basic_stream_sniper(ostream_type * value = {}) noexcept
 		{
-			(*this)(value);
+			this->update(value);
 		}
 
 		basic_stream_sniper(self_type && value) noexcept
@@ -32,7 +34,7 @@ namespace ml
 
 		~basic_stream_sniper() noexcept
 		{
-			(*this)(nullptr);
+			this->update(nullptr);
 		}
 
 		basic_stream_sniper & operator=(self_type && value) noexcept
@@ -51,7 +53,7 @@ namespace ml
 			}
 		}
 
-		void operator()(ostream_t * value) noexcept
+		void update(ostream_type * value) noexcept
 		{
 			if (value && !m_cur && !m_old)
 			{
@@ -71,20 +73,20 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return (m_cur && m_old); }
 
-		ML_NODISCARD operator sstream_t & () & noexcept { return m_str; }
+		ML_NODISCARD operator sstream_type & () & noexcept { return m_str; }
 		
-		ML_NODISCARD operator sstream_t const & () const & noexcept { return m_str; }
+		ML_NODISCARD operator sstream_type const & () const & noexcept { return m_str; }
 
-		ML_NODISCARD operator sstream_t && () && noexcept { return std::move(m_str); }
+		ML_NODISCARD operator sstream_type && () && noexcept { return std::move(m_str); }
 
-		ML_NODISCARD operator sstream_t const && () const & noexcept { return std::move(m_str); }
+		ML_NODISCARD operator sstream_type const && () const & noexcept { return std::move(m_str); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		streambuf_t *	m_cur{}; // current stream
-		ostream_t *		m_old{}; // previous stream
-		sstream_t		m_str{}; // captured data
+		streambuf_type *	m_cur{}; // current stream
+		ostream_type *		m_old{}; // previous stream
+		sstream_type		m_str{}; // captured data
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

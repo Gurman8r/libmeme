@@ -41,7 +41,7 @@ namespace ml
 
 	enum input_mods_ : int32_t
 	{
-		input_mods_none,					// none
+		input_mods_none			= (0 << 0),	// none
 		input_mods_shift		= (0 << 1),	// shift
 		input_mods_ctrl			= (1 << 1),	// ctrl
 		input_mods_alt			= (1 << 2),	// alt

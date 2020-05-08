@@ -1,10 +1,10 @@
 #include <libmeme/Renderer/Image.hpp>
 #include <libmeme/Renderer/GL.hpp>
 
-#define STBI_MALLOC(s)				::ml::memory_manager::allocate(s)
-#define STBI_FREE(p)				::ml::memory_manager::deallocate(p)
-#define STBI_REALLOC(p, s)			::ml::memory_manager::reallocate(p, s)
-#define STBI_REALLOC_SIZED(p, o, n) ::ml::memory_manager::reallocate(p, o, n)
+#define STBI_MALLOC(s)				_ML memory_manager::allocate(s)
+#define STBI_FREE(p)				_ML memory_manager::deallocate(p)
+#define STBI_REALLOC(p, s)			_ML memory_manager::reallocate(p, s)
+#define STBI_REALLOC_SIZED(p, o, n) _ML memory_manager::reallocate(p, o, n)
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -13,7 +13,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image const image::default_rgba{ ([]()
+	image const image::default_rgba{ ([]() noexcept
 	{
 		image temp { vec2u{ 512, 512 }, 3 };
 		for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)

@@ -8,22 +8,20 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class _Clock = chrono::high_resolution_clock
+	template <class _Clock
 	> struct basic_timer final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using clock_type = typename _Clock;
-		using time_point = typename clock_type::time_point;
+		using clock_type	= typename _Clock;
+		using time_point	= typename clock_type::time_point;
+		using self_type		= typename basic_timer<_Clock>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		basic_timer(bool start_me = {}) noexcept
 		{
-			if (start_me)
-			{
-				this->start();
-			}
+			if (start_me) { this->start(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,7 +71,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias timer = typename basic_timer<>;
+	ML_alias timer = typename basic_timer<chrono::high_resolution_clock>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

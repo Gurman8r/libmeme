@@ -11,15 +11,15 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	gui_manager::gui_manager(json const & j, allocator_type const & alloc) noexcept
-		: m_gui_context{}
-		, main_menu_bar{ alloc }
-		, dockspace{ alloc }
+		: m_gui_context	{}
+		, m_main_menu	{ alloc }
+		, m_dockspace	{ alloc }
 	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::startup(window const & win, cstring ver)
+	bool gui_manager::startup(window const & win, cstring version)
 	{
 		// check imgui version
 		IMGUI_CHECKVERSION();
@@ -27,8 +27,8 @@ namespace ml
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
 		(
-			[](size_t s, auto) { return memory_manager::allocate(s); },
-			[](void * p, auto) { return memory_manager::deallocate(p); },
+			[](size_t s, auto) noexcept { return memory_manager::allocate(s); },
+			[](void * p, auto) noexcept { return memory_manager::deallocate(p); },
 			nullptr
 		);
 
@@ -55,7 +55,7 @@ namespace ml
 			return debug::error("Failed initializing ImGui platform");
 		}
 
-		if (!ImGui_ImplOpenGL3_Init(ver))
+		if (!ImGui_ImplOpenGL3_Init(version))
 		{
 			return debug::error("Failed initializing ImGui renderer");
 		}
@@ -66,7 +66,7 @@ namespace ml
 
 	bool gui_manager::shutdown()
 	{
-		if (!is_initialized()) { return false; }
+		if (!m_gui_context) { return false; }
 
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
@@ -104,12 +104,12 @@ namespace ml
 
 	void gui_manager::draw_builtin()
 	{
-		ML_ImGui_ScopeID(ML_addressof(this));
+		ML_imgui_scope_id(ML_addressof(this));
 
 		// DOCKSPACE
-		if (auto & d{ this->dockspace }; d.visible)
+		if (auto & d{ m_dockspace }; d.visible)
 		{
-			ML_ImGui_ScopeID(ML_addressof(&d));
+			ML_imgui_scope_id(ML_addressof(&d));
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -135,7 +135,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(this->main_menu_bar.visible ? ImGuiWindowFlags_MenuBar : 0)
+					(m_main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -159,9 +159,9 @@ namespace ml
 		}
 
 		// MAIN MENU
-		if (auto & m{ this->main_menu_bar }; m.visible)
+		if (auto & m{ m_main_menu }; m.visible)
 		{
-			ML_ImGui_ScopeID(ML_addressof(&m));
+			ML_imgui_scope_id(ML_addressof(&m));
 
 			if (ImGui::BeginMainMenuBar())
 			{
@@ -194,10 +194,10 @@ namespace ml
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ window::get_context_current() };
+			auto backup_context{ window::get_current_context() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			window::make_context_current(backup_context);
+			window::set_current_context(backup_context);
 		}
 	}
 
@@ -242,7 +242,7 @@ namespace ml
 			if (line.empty() || line.front() == '#') { continue; }
 
 			// scan line
-			std::stringstream ss{}; ss << line;
+			pmr::stringstream ss{}; ss << line;
 			switch (hash(input<pmr::string>(ss)))
 			{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

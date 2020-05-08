@@ -1,10 +1,12 @@
-#include <libmeme/Core/Registry.hpp>
+#if defined(ML_RENDERER_OPENGL)
+
+#include "Impl_Renderer_OpenGL.hpp"
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	decltype(registrar::m_storage) registrar::m_storage{};
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+#endif // ML_RENDERER_OPENGL

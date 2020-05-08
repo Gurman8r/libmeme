@@ -20,8 +20,8 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit test_resource(pmr::memory_resource * u, pointer const b, size_t s) noexcept
-			: m_upstream{ u }, m_buffer{ b }, m_total_bytes{ s }
+		explicit test_resource(pmr::memory_resource * u, pointer const b, size_t c) noexcept
+			: m_upstream{ u }, m_buffer{ b }, m_capacity{ c }
 		{
 		}
 
@@ -33,7 +33,7 @@ namespace ml::util
 
 		const_pointer const buffer() const noexcept { return m_buffer; }
 
-		bool is_valid_size() const noexcept { return (0 < m_total_bytes); }
+		bool is_valid_size() const noexcept { return (0 < m_capacity); }
 
 		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
 
@@ -43,13 +43,13 @@ namespace ml::util
 
 		size_t num_allocations() const noexcept { return m_num_alloc; }
 
-		size_t capacity() const noexcept { return m_total_bytes; }
+		size_t capacity() const noexcept { return m_capacity; }
 
 		size_t used_bytes() const noexcept { return m_bytes_used; }
 
-		size_t free_bytes() const noexcept { return m_total_bytes - m_bytes_used; }
+		size_t free_bytes() const noexcept { return m_capacity - m_bytes_used; }
 
-		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_total_bytes; }
+		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_capacity; }
 
 		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
 
@@ -59,9 +59,9 @@ namespace ml::util
 
 		const_reference front() const & noexcept { return m_buffer[0]; }
 
-		reference back() & noexcept { return m_buffer[m_total_bytes - 1]; }
+		reference back() & noexcept { return m_buffer[m_capacity - 1]; }
 
-		const_reference back() const & noexcept { return m_buffer[m_total_bytes - 1]; }
+		const_reference back() const & noexcept { return m_buffer[m_capacity - 1]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,9 +71,9 @@ namespace ml::util
 
 		const_pointer const cbegin() const noexcept { return begin(); }
 
-		pointer const end() noexcept { return m_buffer + m_total_bytes; }
+		pointer const end() noexcept { return m_buffer + m_capacity; }
 
-		const_pointer const end() const noexcept { return m_buffer + m_total_bytes; }
+		const_pointer const end() const noexcept { return m_buffer + m_capacity; }
 
 		const_pointer const cend() const noexcept { return end(); }
 
@@ -104,7 +104,7 @@ namespace ml::util
 	private:
 		pmr::memory_resource * m_upstream;
 		pointer const m_buffer;
-		size_t const m_total_bytes;
+		size_t const m_capacity;
 
 		size_t m_num_alloc {};
 		size_t m_bytes_used {};

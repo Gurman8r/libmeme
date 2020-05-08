@@ -235,7 +235,7 @@ namespace ml::impl
 
 		ML_NODISCARD auto operator()(cstring str) const noexcept
 		{
-			std::stringstream ss{ str };
+			pmr::stringstream ss{ str };
 			return (*this)(ss);
 		}
 

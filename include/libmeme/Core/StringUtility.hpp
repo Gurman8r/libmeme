@@ -189,7 +189,7 @@ namespace ml::util
 	{
 		if (value.empty()) { return {}; }
 		if (value.size() == 1) { return value.front(); }
-		std::stringstream ss{};
+		pmr::stringstream ss{};
 		for (auto const & str : value)
 		{
 			ss << str << delim;
@@ -575,13 +575,13 @@ namespace ml::util
 	template <class Arg0, class ... Args
 	> ML_NODISCARD inline pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
 	{
-		std::stringstream ss{};
+		pmr::stringstream ss{};
 		ss << ML_forward(arg0) << '\n';
 		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)sink;
 		return format(fmt, ss);
 	}
 
-	ML_NODISCARD inline pmr::string format(pmr::string fmt, std::stringstream & ss) noexcept
+	ML_NODISCARD inline pmr::string format(pmr::string fmt, pmr::stringstream & ss) noexcept
 	{
 		for (size_t i = 0; ss.good(); ++i)
 		{
@@ -601,17 +601,17 @@ namespace ml::util
 	}
 
 	template <class Str
-	> ML_NODISCARD inline pmr::string format(pmr::string fmt, pmr::vector<Str> const & args) noexcept
+	> ML_NODISCARD inline pmr::string format(pmr::string fmt, pmr::vector<Str> const & v) noexcept
 	{
-		for (size_t i = 0, imax = args.size(); i < imax; ++i)
+		for (size_t i = 0, imax = v.size(); i < imax; ++i)
 		{
 			pmr::string const token{ "{" + to_string(i) + "}" };
 
 			for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
 			{
-				fmt.replace(j, token.size(), args[i]);
+				fmt.replace(j, token.size(), v[i]);
 
-				j += args[i].size();
+				j += v[i].size();
 			}
 		}
 		return fmt;

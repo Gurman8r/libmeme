@@ -197,7 +197,7 @@ namespace ml::ds
 		static constexpr self_type fill(value_type const value) noexcept
 		{
 			self_type temp{};
-			for (auto & elem : temp) { elem = value; }
+			for (auto & e : temp) { e = value; }
 			return temp;
 		}
 
@@ -211,13 +211,17 @@ namespace ml::ds
 			self_type temp{};
 			for (size_t i = 0; i < (_W * _H); ++i)
 			{
-				if ((i / _W) == (i % _W))
-				{
-					temp[i] = value_type{ 1 };
-				}
+				if ((i / _W) == (i % _W)) { temp[i] = value_type{ 1 }; }
 			}
 			return temp;
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// define additional custom code
+#ifdef ML_MATRIX_STRUCT_EXTRA
+		ML_MATRIX_STRUCT_EXTRA
+#endif // ML_MATRIX_STRUCT_EXTRA
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -365,9 +369,9 @@ namespace ml::ds
 	template <class Tx, class Ty, size_t W, size_t H
 	> ML_NODISCARD constexpr auto & operator+=(matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 	{
-		for (auto & elem : lhs)
+		for (auto & e : lhs)
 		{
-			elem += static_cast<Tx>(rhs);
+			e += static_cast<Tx>(rhs);
 		}
 		return lhs;
 	}
@@ -375,9 +379,9 @@ namespace ml::ds
 	template <class Tx, class Ty, size_t W, size_t H
 	> ML_NODISCARD constexpr auto & operator-=(matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 	{
-		for (auto & elem : lhs)
+		for (auto & e : lhs)
 		{
-			elem -= static_cast<Tx>(rhs);
+			e -= static_cast<Tx>(rhs);
 		}
 		return lhs;
 	}
@@ -385,9 +389,9 @@ namespace ml::ds
 	template <class Tx, class Ty, size_t W, size_t H
 	> ML_NODISCARD constexpr auto & operator*=(matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 	{
-		for (auto & elem : lhs)
+		for (auto & e : lhs)
 		{
-			elem *= static_cast<Tx>(rhs);
+			e *= static_cast<Tx>(rhs);
 		}
 		return lhs;
 	}
@@ -395,9 +399,9 @@ namespace ml::ds
 	template <class Tx, class Ty, size_t W, size_t H
 	> ML_NODISCARD constexpr auto & operator/=(matrix<Tx, W, H> & lhs, Ty const rhs) noexcept
 	{
-		for (auto & elem : lhs)
+		for (auto & e : lhs)
 		{
-			elem /= static_cast<Tx>(rhs);
+			e /= static_cast<Tx>(rhs);
 		}
 		return lhs;
 	}

@@ -37,12 +37,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef ML_RENDERER_OPENGL
+#if defined(ML_PLATFORM_GLFW) && defined(ML_RENDERER_OPENGL)
 #	include <imgui/examples/imgui_impl_glfw.h>
-#else
-#endif
-
-#ifdef ML_PLATFORM_GLFW
 #	include <imgui/examples/imgui_impl_opengl3.h>
 #else
 #endif
@@ -55,9 +51,26 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_ImGui_ScopeID(id)	\
-	ImGui::PushID(id);			\
-	ML_defer{ ImGui::PopID(); };
+// ImGui::PushID followed by deferred ImGui::PopID
+#define ML_imgui_scope_id(...) \
+	auto ML_anon = _ML impl::imgui_scope_id{ ##__VA_ARGS__ }
+
+namespace ml::impl
+{
+	struct ML_NODISCARD imgui_scope_id final
+	{
+		template <class ... Args
+		> imgui_scope_id(Args && ... args) noexcept
+		{
+			ImGui::PushID(ML_forward(args)...);
+		}
+
+		~imgui_scope_id() noexcept
+		{
+			ImGui::PopID();
+		}
+	};
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

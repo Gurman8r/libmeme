@@ -12,7 +12,7 @@ namespace ml
 	class engine::engine_context final : non_copyable, trackable
 	{
 		friend class		engine		;
-		json				m_cfg		; // config
+		json				m_config	; // config
 		file_manager		m_fs		; // files
 		gui_manager			m_gui		; // gui
 		plugin_manager		m_plugins	; // plugins
@@ -21,12 +21,12 @@ namespace ml
 		render_window		m_window	; // window
 
 		engine_context(json const & j, allocator_type const & alloc) noexcept
-			: m_cfg		{ json{ j } }
-			, m_fs		{ m_cfg, alloc }
-			, m_gui		{ m_cfg, alloc }
-			, m_plugins	{ m_cfg, alloc }
-			, m_scripts	{ m_cfg, alloc }
-			, m_time	{ m_cfg, alloc }
+			: m_config	{ json{ j } }
+			, m_fs		{ m_config, alloc }
+			, m_gui		{ m_config, alloc }
+			, m_plugins	{ m_config, alloc }
+			, m_scripts	{ m_config, alloc }
+			, m_time	{ m_config, alloc }
 			, m_window	{}
 		{
 		}
@@ -43,7 +43,7 @@ namespace ml
 
 	bool engine::create_context(json const & j, allocator_type const & alloc) noexcept
 	{
-		if (is_initialized()) { return debug::error("engine is already initialized"); }
+		if (is_initialized()) { return debug::error("engine context is already initialized"); }
 
 		g_engine = new engine_context{ j, alloc };
 
@@ -52,7 +52,7 @@ namespace ml
 
 	bool engine::destroy_context() noexcept
 	{
-		if (!is_initialized()) { return debug::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 		
 		delete g_engine;
 
@@ -65,24 +65,27 @@ namespace ml
 
 	bool engine::startup() noexcept
 	{
-		if (!is_initialized()) { return debug::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
-		// start scripting backend
-		if (!g_engine->m_scripts.startup())
-		{
-			return debug::error("failed initializing scripting");
-		}
-
-		// start window backend
-		if (!window::initialize())
+		// initialize window backend
+		debug::info("initializing window backend...");
+		if (!window::backend_initialize())
 		{
 			return debug::error("failed initializing window backend");
 		}
 
-		// run setup script
+		// startup scripting
+		debug::info("starting scripting engine...");
+		if (!scripts().startup())
+		{
+			return debug::error("failed starting scripting engine");
+		}
+
+		// execute setup script
 		if (config().contains("setup_script"))
 		{
-			scripts().do_file(fs().path_to(config()["setup_script"].get<fs::path>()));
+			debug::info("executing setup...");
+			scripts().do_file(fs().path2(config()["setup_script"]));
 		}
 
 		return true;
@@ -90,25 +93,25 @@ namespace ml
 
 	bool engine::shutdown() noexcept
 	{
-		if (!is_initialized()) { return debug::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
-		// FIXME: need to clear menus before clearing plugins
-		g_engine->m_gui.main_menu_bar.menus.clear();
+		// FIXME: need to clear menus before plugins because menu code can live in plugins
+		gui().main_menu_bar().menus.clear();
 
 		// clear plugins
-		g_engine->m_plugins.clear();
+		plugins().clear();
 
 		// shutdown gui
-		if (g_engine->m_gui.is_initialized() && !g_engine->m_gui.shutdown()) {}
+		if (!gui().shutdown()) {}
+
+		// shutdown scripting
+		if (!scripts().shutdown()) {}
 
 		// destroy window
-		g_engine->m_window.destroy();
+		window().destroy();
 
-		// shutdown window backend
-		window::terminate();
-
-		// shutdown scripting backend
-		if (!g_engine->m_scripts.shutdown()) {}
+		// finalize window backend
+		window::backend_finalize();
 
 		return true;
 	}
@@ -118,7 +121,7 @@ namespace ml
 	json & engine::config() noexcept
 	{
 		ML_assert(is_initialized());
-		return g_engine->m_cfg;
+		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept

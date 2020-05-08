@@ -49,7 +49,7 @@ filter{ "configurations:Debug" }
 	symbols "On"
 	kind "ConsoleApp"
 
-filter{ "configurations:Release" } 
+filter{ "configurations:Release" }
 	optimize "Speed"
 	kind "WindowedApp"
 

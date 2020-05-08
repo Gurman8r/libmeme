@@ -18,14 +18,15 @@
 
 namespace ml::impl
 {
-	static GLFWimage const * glfw_image(vec2s const & s, byte_t const * p) noexcept
+	static GLFWimage const * make_glfw_image(vec2s const & s, byte_t const * p) noexcept
 	{
-		if (!s[0] || !s[1] || !p) return nullptr;
-		static pmr::vector<GLFWimage> cache{};
-		return &cache.emplace_back
-		(
-			GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p }
-		);
+		if (!s[0] || !s[1] || !p) { return nullptr; }
+
+		static ds::flat_map<void *, GLFWimage> cache{};
+		return &cache.find_or_add_fn((void *)p, [&]() noexcept
+		{
+			return GLFWimage{ (int32_t)s[0], (int32_t)s[1], (byte_t *)p };
+		});
 	}
 }
 
@@ -37,6 +38,7 @@ namespace ml
 
 	bool impl_window_glfw::open(window_settings const & ws)
 	{
+		// already open
 		if (m_window) { return false; }
 
 		// window hints
@@ -44,9 +46,10 @@ namespace ml
 		{
 			switch (ws.context.api)
 			{
-			case window_api::opengl	: return GLFW_OPENGL_API;
-			case window_api::vulkan	:
-			case window_api::directx:
+			case window_api_opengl	: return GLFW_OPENGL_API;
+			case window_api_vulkan	:
+			case window_api_directx	:
+			case window_api_unknown	:
 			default					: return GLFW_NO_API;
 			}
 		})());
@@ -54,11 +57,11 @@ namespace ml
 		{
 			switch (ws.context.profile)
 			{
-			case window_api::core	: return GLFW_OPENGL_CORE_PROFILE;
-			case window_api::compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case window_api::debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case window_api::any	:
-			default					: return GLFW_OPENGL_ANY_PROFILE;
+			case window_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
+			case window_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case window_profile_debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case window_profile_any		:
+			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		})());
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.context.major);
@@ -73,15 +76,15 @@ namespace ml
 		glfwWindowHint(GLFW_AUTO_ICONIFY,			ws.hints & window_hints_auto_iconify);
 		glfwWindowHint(GLFW_FLOATING,				ws.hints & window_hints_floating);
 		glfwWindowHint(GLFW_MAXIMIZED,				ws.hints & window_hints_maximized);
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_double_buffered);
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_doublebuffer);
 		
 		// create window
 		return m_window = glfwCreateWindow(
 			ws.video.size[0],
 			ws.video.size[1],
 			ws.title.c_str(),
-			static_cast<GLFWmonitor *>(m_monitor),
-			static_cast<GLFWwindow *>(m_share)
+			nullptr,
+			nullptr
 		);
 	}
 
@@ -89,49 +92,183 @@ namespace ml
 
 	void impl_window_glfw::destroy()
 	{
-		glfwDestroyWindow(static_cast<GLFWwindow *>(m_window));
+		glfwDestroyWindow(m_window);
 	}
 
 	void impl_window_glfw::iconify()
 	{
-		glfwIconifyWindow(static_cast<GLFWwindow *>(m_window));
-	}
-
-	void impl_window_glfw::make_context_current()
-	{
-		make_context_current(m_window);
+		glfwIconifyWindow(m_window);
 	}
 	
 	void impl_window_glfw::maximize()
 	{
-		glfwMaximizeWindow(static_cast<GLFWwindow *>(m_window));
+		glfwMaximizeWindow(m_window);
 	}
 
 	void impl_window_glfw::restore()
 	{
-		glfwRestoreWindow(static_cast<GLFWwindow *>(m_window));
+		glfwRestoreWindow(m_window);
 	}
 
 	void impl_window_glfw::swap_buffers()
 	{
-		glfwSwapBuffers(static_cast<GLFWwindow *>(m_window));
+		glfwSwapBuffers(m_window);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void impl_window_glfw::set_clipboard(cstring value)
+	bool impl_window_glfw::is_fullscreen() const
 	{
-		glfwSetClipboardString(static_cast<GLFWwindow *>(m_window), value);
+		return m_window && (m_monitor == get_primary_monitor());
+	}
+
+	bool impl_window_glfw::is_open() const
+	{
+		return m_window && !glfwWindowShouldClose(m_window);
+	}
+
+	int32_t impl_window_glfw::get_attribute(int32_t value) const
+	{
+		return glfwGetWindowAttrib(m_window, ([&]() noexcept
+		{
+			switch (value)
+			{
+			case window_attr_focused					: return GLFW_FOCUSED;
+			case window_attr_iconified					: return GLFW_ICONIFIED;
+			case window_attr_resizable					: return GLFW_RESIZABLE;
+			case window_attr_visible					: return GLFW_VISIBLE;
+			case window_attr_decorated					: return GLFW_DECORATED;
+			case window_attr_auto_iconify				: return GLFW_AUTO_ICONIFY;
+			case window_attr_floating					: return GLFW_FLOATING;
+			case window_attr_maximized					: return GLFW_MAXIMIZED;
+			case window_attr_center_cursor				: return GLFW_CENTER_CURSOR;
+			case window_attr_transparent_framebuffer	: return GLFW_TRANSPARENT_FRAMEBUFFER;
+			case window_attr_hovered					: return GLFW_HOVERED;
+			case window_attr_focus_on_show				: return GLFW_FOCUS_ON_SHOW;
+
+			case window_attr_red_bits					: return GLFW_RED_BITS;
+			case window_attr_green_bits					: return GLFW_GREEN_BITS;
+			case window_attr_blue_bits					: return GLFW_BLUE_BITS;
+			case window_attr_alpha_bits					: return GLFW_ALPHA_BITS;
+			case window_attr_depth_bits					: return GLFW_DEPTH_BITS;
+			case window_attr_stencil_bits				: return GLFW_STENCIL_BITS;
+			case window_attr_accum_red_bits				: return GLFW_ACCUM_RED_BITS;
+			case window_attr_accum_green_bits			: return GLFW_ACCUM_GREEN_BITS;
+			case window_attr_accum_blue_bits			: return GLFW_ACCUM_BLUE_BITS;
+			case window_attr_accum_alpha_bits			: return GLFW_ACCUM_ALPHA_BITS;
+			case window_attr_aux_buffers				: return GLFW_AUX_BUFFERS;
+			case window_attr_stereo						: return GLFW_STEREO;
+			case window_attr_samples					: return GLFW_SAMPLES;
+			case window_attr_srgb_capable				: return GLFW_SRGB_CAPABLE;
+			case window_attr_refresh_rate				: return GLFW_REFRESH_RATE;
+			case window_attr_doublebuffer				: return GLFW_DOUBLEBUFFER;
+			
+			case window_attr_client_api					: return GLFW_CLIENT_API;
+			case window_attr_context_version_major		: return GLFW_CONTEXT_VERSION_MAJOR;
+			case window_attr_context_version_minor		: return GLFW_CONTEXT_VERSION_MINOR;
+			case window_attr_context_revision			: return GLFW_CONTEXT_REVISION;
+			case window_attr_context_robustness			: return GLFW_CONTEXT_ROBUSTNESS;
+			case window_attr_backend_forward_compat		: return GLFW_OPENGL_FORWARD_COMPAT;
+			case window_attr_backend_debug_context		: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case window_attr_backend_profile			: return GLFW_OPENGL_PROFILE;
+			case window_attr_context_release_behavior	: return GLFW_CONTEXT_RELEASE_BEHAVIOR;
+			case window_attr_context_no_error			: return GLFW_CONTEXT_NO_ERROR;
+			case window_attr_context_creation_api		: return GLFW_CONTEXT_CREATION_API;
+			case window_attr_scale_to_monitor			: return GLFW_SCALE_TO_MONITOR;
+			}
+			return value;
+		})());
+	}
+
+	cstring impl_window_glfw::get_clipboard_string() const
+	{
+		return glfwGetClipboardString(m_window);
+	}
+
+	vec2 impl_window_glfw::get_content_scale() const
+	{
+		vec2 temp{};
+		glfwGetWindowContentScale(m_window, &temp[0], &temp[1]);
+		return temp;
+	}
+
+	vec2 impl_window_glfw::get_cursor_position() const
+	{
+		vec2d temp{};
+		glfwGetCursorPos(m_window, &temp[0], &temp[1]);
+		return (vec2)temp;
+	}
+
+	vec4i impl_window_glfw::get_frame_size() const
+	{
+		vec4i temp{};
+		glfwGetWindowFrameSize(m_window, &temp[0], &temp[1], &temp[2], &temp[3]);
+		return temp;
+	}
+
+	vec2i impl_window_glfw::get_framebuffer_size() const
+	{
+		vec2i temp{};
+		glfwGetFramebufferSize(m_window, &temp[0], &temp[1]);
+		return temp;
+	}
+
+	window_handle impl_window_glfw::get_handle() const
+	{
+		return m_window;
+	}
+
+	int32_t impl_window_glfw::get_input_mode(int32_t mode) const
+	{
+		return glfwGetInputMode(m_window, mode);
+	}
+
+	int32_t	impl_window_glfw::get_key(int32_t key) const
+	{
+		return glfwGetKey(m_window, key);
+	}
+
+	int32_t	impl_window_glfw::get_mouse_button(int32_t button) const
+	{
+		return glfwGetMouseButton(m_window, button);
+	}
+
+	window_handle impl_window_glfw::get_native_handle() const
+	{
+#ifdef ML_os_windows
+		return glfwGetWin32Window(m_window);
+#else
+		return m_window;
+#endif
+	}
+
+	float_t impl_window_glfw::get_opacity() const
+	{
+		return glfwGetWindowOpacity(m_window);
+	}
+
+	vec2i impl_window_glfw::get_position() const
+	{
+		vec2i temp{};
+		glfwGetWindowPos(m_window, &temp[0], &temp[1]);
+		return temp;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void impl_window_glfw::set_clipboard_string(cstring value)
+	{
+		glfwSetClipboardString(m_window, value);
 	}
 
 	void impl_window_glfw::set_cursor(cursor_handle value)
 	{
-		glfwSetCursor(static_cast<GLFWwindow *>(m_window), static_cast<GLFWcursor *>(value));
+		glfwSetCursor(m_window, static_cast<GLFWcursor *>(value));
 	}
 	
 	void impl_window_glfw::set_cursor_mode(int32_t value)
 	{
-		set_input_mode(GLFW_CURSOR, ([value]() noexcept
+		set_input_mode(GLFW_CURSOR, ([&]() noexcept
 		{
 			switch (value)
 			{
@@ -145,7 +282,7 @@ namespace ml
 
 	void impl_window_glfw::set_cursor_position(vec2d const & value)
 	{
-		glfwSetCursorPos(static_cast<GLFWwindow *>(m_window), value[0], value[1]);
+		glfwSetCursorPos(m_window, value[0], value[1]);
 	}
 
 	void impl_window_glfw::set_fullscreen(bool value)
@@ -155,171 +292,67 @@ namespace ml
 
 	void impl_window_glfw::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		if (!w || !h || !p) { return; }
-
-		glfwSetWindowIcon(static_cast<GLFWwindow *>(m_window), 1, impl::glfw_image({ w, h }, p));
+		glfwSetWindowIcon(m_window, 1, impl::make_glfw_image({ w, h }, p));
 	}
 
 	void impl_window_glfw::set_input_mode(int32_t mode, int32_t value)
 	{
-		glfwSetInputMode(static_cast<GLFWwindow *>(m_window), mode, value);
+		glfwSetInputMode(m_window, mode, value);
+	}
+
+	void impl_window_glfw::set_opacity(float_t value)
+	{
+		glfwSetWindowOpacity(m_window, value);
 	}
 
 	void impl_window_glfw::set_position(vec2i const & value)
 	{
-		glfwSetWindowPos(static_cast<GLFWwindow *>(m_window), value[0], value[1]);
+		glfwSetWindowPos(m_window, value[0], value[1]);
 	}
 
-	void impl_window_glfw::set_monitor(window_handle value)
+	void impl_window_glfw::set_monitor(monitor_handle value, vec4i const & bounds)
 	{
-		// FIXME: need default window size when no monitor
-
-		m_monitor = value;
+		m_monitor = (GLFWmonitor *)value;
 		auto const vm
 		{
-			m_monitor ? glfwGetVideoMode(static_cast<GLFWmonitor *>(m_monitor)) : nullptr
+			m_monitor ? glfwGetVideoMode(m_monitor) : nullptr
 		};
 		glfwSetWindowMonitor(
-			static_cast<GLFWwindow *>(m_window),
-			static_cast<GLFWmonitor *>(m_monitor),
-			0, 0,
-			vm ? vm->width : 480,
-			vm ? vm->height : 320,
+			m_window,
+			m_monitor,
+			bounds[0],
+			bounds[1],
+			vm ? vm->width : bounds[2],
+			vm ? vm->height : bounds[3],
 			GLFW_DONT_CARE
 		);
 	}
 
 	void impl_window_glfw::set_should_close(bool value)
 	{
-		glfwSetWindowShouldClose(static_cast<GLFWwindow *>(m_window), value);
+		glfwSetWindowShouldClose(m_window, value);
 	}
 
 	void impl_window_glfw::set_size(vec2i const & value)
 	{
-		glfwSetWindowSize(static_cast<GLFWwindow *>(m_window), value[0], value[1]);
+		glfwSetWindowSize(m_window, value[0], value[1]);
 	}
 
 	void impl_window_glfw::set_title(cstring value)
 	{
-		glfwSetWindowTitle(static_cast<GLFWwindow *>(m_window), value);
+		glfwSetWindowTitle(m_window, value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool impl_window_glfw::is_focused() const
+	bool impl_window_glfw::backend_initialize()
 	{
-		return get_attribute(GLFW_FOCUSED);
+		return glfwInit();
 	}
-
-	bool impl_window_glfw::is_fullscreen() const
-	{
-		return m_monitor == get_primary_monitor();
-	}
-
-	bool impl_window_glfw::is_open() const
-	{
-		return m_window && !glfwWindowShouldClose(static_cast<GLFWwindow *>(m_window));
-	}
-	
-	int32_t impl_window_glfw::get_attribute(int32_t value) const
-	{
-		return glfwGetWindowAttrib(static_cast<GLFWwindow *>(m_window), value);
-	}
-
-	cstring impl_window_glfw::get_clipboard() const
-	{
-		return glfwGetClipboardString(static_cast<GLFWwindow *>(m_window));
-	}
-
-	vec2 impl_window_glfw::get_cursor_pos() const
-	{
-		vec2d temp{};
-		glfwGetCursorPos(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
-		return (vec2)temp;
-	}
-
-	vec2i impl_window_glfw::get_frame_size() const
-	{
-		vec2i temp{};
-		glfwGetFramebufferSize(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
-		return temp;
-	}
-
-	window_handle impl_window_glfw::get_handle() const
-	{
-		return m_window;
-	}
-
-	int32_t impl_window_glfw::get_input_mode(int32_t mode) const
-	{
-		return glfwGetInputMode(static_cast<GLFWwindow *>(m_window), mode);
-	}
-
-	int32_t	impl_window_glfw::get_key(int32_t key) const
-	{
-		return glfwGetKey(static_cast<GLFWwindow *>(m_window), key);
-	}
-
-	int32_t	impl_window_glfw::get_mouse_button(int32_t button) const
-	{
-		return glfwGetMouseButton(static_cast<GLFWwindow *>(m_window), button);
-	}
-
-	window_handle impl_window_glfw::get_native_handle() const
-	{
-#ifdef ML_os_windows
-		return glfwGetWin32Window(static_cast<GLFWwindow *>(m_window));
-#else
-		return m_window;
-#endif
-	}
-
-	vec2i impl_window_glfw::get_position() const
-	{
-		vec2i temp{};
-		if (m_window)
-		{
-			glfwGetWindowPos(static_cast<GLFWwindow *>(m_window), &temp[0], &temp[1]);
-		}
-		return temp;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void impl_window_glfw::destroy_cursor(cursor_handle value)
-	{
-		if (!value) { return; }
-
-		glfwDestroyCursor(static_cast<GLFWcursor *>(value));
-	}
-
-	void impl_window_glfw::make_context_current(window_handle value)
-	{
-		if (!value) { return; }
-
-		glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
-	}
-
-	void impl_window_glfw::poll_events()
-	{
-		glfwPollEvents();
-	}
-
-	void impl_window_glfw::swap_interval(int32_t value)
-	{
-		glfwSwapInterval(value);
-	}
-
-	void impl_window_glfw::terminate()
-	{
-		glfwTerminate();
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	cursor_handle impl_window_glfw::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return glfwCreateCursor(impl::glfw_image({ w, h }, p), w, h);
+		return glfwCreateCursor(impl::make_glfw_image({ w, h }, p), w, h);
 	}
 
 	cursor_handle impl_window_glfw::create_standard_cursor(int32_t value)
@@ -346,7 +379,7 @@ namespace ml
 		return glfwExtensionSupported(value);
 	}
 
-	window_handle impl_window_glfw::get_context_current()
+	window_handle impl_window_glfw::get_current_context()
 	{
 		return glfwGetCurrentContext();
 	}
@@ -368,16 +401,23 @@ namespace ml
 		return temp;
 	}
 
-	ds::flat_set<video_mode> const & impl_window_glfw::get_fullscreen_modes()
+	pmr::vector<video_mode> const & impl_window_glfw::get_fullscreen_modes()
 	{
-		static ds::flat_set<video_mode> temp{};
+		static pmr::vector<video_mode> temp{};
+		auto add_vm = [&](video_mode && vm) noexcept
+		{
+			if (std::find(temp.begin(), temp.end(), ML_forward(vm)) == temp.end())
+			{
+				temp.emplace_back(ML_forward(vm));
+			}
+		};
 		static ML_scope
 		{
 #ifdef ML_os_windows
 		DEVMODE dm; dm.dmSize = sizeof(dm);
 		for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 		{
-			temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
+			add_vm({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
 		}
 #else
 		// do the thing
@@ -391,9 +431,9 @@ namespace ml
 		return glfwGetProcAddress(value);
 	}
 
-	pmr::vector<window_handle> const & impl_window_glfw::get_monitors()
+	pmr::vector<monitor_handle> const & impl_window_glfw::get_monitors()
 	{
-		static pmr::vector<window_handle> temp{};
+		static pmr::vector<monitor_handle> temp{};
 		if (temp.empty())
 		{
 			int32_t count { 0 };
@@ -406,7 +446,7 @@ namespace ml
 		return temp;
 	}
 
-	window_handle ml::impl_window_glfw::get_primary_monitor()
+	monitor_handle impl_window_glfw::get_primary_monitor()
 	{
 		return glfwGetPrimaryMonitor();
 	}
@@ -416,9 +456,31 @@ namespace ml
 		return glfwGetTime();
 	}
 
-	bool impl_window_glfw::initialize()
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void impl_window_glfw::backend_finalize()
 	{
-		return glfwInit();
+		glfwTerminate();
+	}
+
+	void impl_window_glfw::destroy_cursor(cursor_handle value)
+	{
+		glfwDestroyCursor(static_cast<GLFWcursor *>(value));
+	}
+
+	void impl_window_glfw::poll_events()
+	{
+		glfwPollEvents();
+	}
+
+	void impl_window_glfw::set_current_context(window_handle value)
+	{
+		glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
+	}
+
+	void impl_window_glfw::set_swap_interval(int32_t value)
+	{
+		glfwSwapInterval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -426,21 +488,21 @@ namespace ml
 	window_char_fn impl_window_glfw::set_char_callback(window_char_fn fn)
 	{
 		return reinterpret_cast<window_char_fn>(
-			glfwSetCharCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetCharCallback(m_window,
 				reinterpret_cast<GLFWcharfun>(fn)));
 	}
 	
 	window_cursor_enter_fn impl_window_glfw::set_cursor_enter_callback(window_cursor_enter_fn fn)
 	{
 		return reinterpret_cast<window_cursor_enter_fn>(
-			glfwSetCursorEnterCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetCursorEnterCallback(m_window,
 				reinterpret_cast<GLFWcursorenterfun>(fn)));
 	}
 
 	window_cursor_pos_fn impl_window_glfw::set_cursor_pos_callback(window_cursor_pos_fn fn)
 	{
 		return reinterpret_cast<window_cursor_pos_fn>(
-			glfwSetCursorPosCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetCursorPosCallback(m_window,
 				reinterpret_cast<GLFWcursorposfun>(fn)));
 	}
 
@@ -453,56 +515,56 @@ namespace ml
 	window_frame_size_fn impl_window_glfw::set_frame_size_callback(window_frame_size_fn fn)
 	{
 		return reinterpret_cast<window_frame_size_fn>(
-			glfwSetFramebufferSizeCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetFramebufferSizeCallback(m_window,
 				reinterpret_cast<GLFWframebuffersizefun>(fn)));
 	}
 	
 	window_key_fn impl_window_glfw::set_key_callback(window_key_fn fn)
 	{
 		return reinterpret_cast<window_key_fn>(
-			glfwSetKeyCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetKeyCallback(m_window,
 				reinterpret_cast<GLFWkeyfun>(fn)));
 	}
 	
 	window_mouse_fn impl_window_glfw::set_mouse_callback(window_mouse_fn fn)
 	{
 		return reinterpret_cast<window_mouse_fn>(
-			glfwSetMouseButtonCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetMouseButtonCallback(m_window,
 				reinterpret_cast<GLFWmousebuttonfun>(fn)));
 	}
 	
 	window_scroll_fn impl_window_glfw::set_scroll_callback(window_scroll_fn fn)
 	{
 		return reinterpret_cast<window_scroll_fn>(
-			glfwSetScrollCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetScrollCallback(m_window,
 				reinterpret_cast<GLFWscrollfun>(fn)));
 	}
 	
 	window_close_fn impl_window_glfw::set_window_close_callback(window_close_fn fn)
 	{
 		return reinterpret_cast<window_close_fn>(
-			glfwSetWindowCloseCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetWindowCloseCallback(m_window,
 				reinterpret_cast<GLFWwindowclosefun>(fn)));
 	}
 	
 	window_focus_fn impl_window_glfw::set_window_focus_callback(window_focus_fn fn)
 	{
 		return reinterpret_cast<window_focus_fn>(
-			glfwSetWindowFocusCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetWindowFocusCallback(m_window,
 				reinterpret_cast<GLFWwindowfocusfun>(fn)));
 	}
 	
 	window_position_fn impl_window_glfw::set_window_pos_callback(window_position_fn fn)
 	{
 		return reinterpret_cast<window_position_fn>(
-			glfwSetWindowPosCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetWindowPosCallback(m_window,
 				reinterpret_cast<GLFWwindowposfun>(fn)));
 	}
 	
 	window_size_fn impl_window_glfw::set_window_size_callback(window_size_fn fn)
 	{
 		return reinterpret_cast<window_size_fn>(
-			glfwSetWindowSizeCallback(static_cast<GLFWwindow *>(m_window),
+			glfwSetWindowSizeCallback(m_window,
 				reinterpret_cast<GLFWwindowposfun>(fn)));
 	}
 

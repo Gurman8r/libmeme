@@ -15,15 +15,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		gui_manager(json const & j = {}, allocator_type const & alloc = {}) noexcept;
 
-		~gui_manager() noexcept {}
+		~gui_manager() noexcept { (void)shutdown(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_initialized() const noexcept { return m_gui_context; }
-
-		ML_NODISCARD bool startup(struct window const & win, cstring ver);
+		ML_NODISCARD bool startup(struct window const & win, cstring version);
 
 		ML_NODISCARD bool shutdown();
 
@@ -88,17 +86,20 @@ namespace ml
 			}
 
 			~dockspace_data() noexcept {}
-		
-		} dockspace;
+		};
+
+		auto & dockspace() & noexcept { return m_dockspace; }
+
+		auto const & dockspace() const & noexcept { return m_dockspace; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// MAIN MENU BAR
 		struct ML_ENGINE_API main_menu_bar_data final : non_copyable
 		{
-			using menus_t = pmr::vector<std::pair<
-				cstring, pmr::vector<std::function<void()>>
-			>>;
+			using menus_t = pmr::vector<
+				std::pair<cstring, pmr::vector<std::function<void()>>>
+			>;
 			
 			bool		visible	{ true }	; // 
 			menus_t		menus				; // 
@@ -123,13 +124,18 @@ namespace ml
 			}
 
 			~main_menu_bar_data() noexcept { this->menus.clear(); }
-		
-		} main_menu_bar;
+		};
+
+		auto & main_menu_bar() & noexcept { return m_main_menu; }
+
+		auto const & main_menu_bar() const & noexcept { return m_main_menu; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		void * m_gui_context;
+		dockspace_data m_dockspace;
+		main_menu_bar_data m_main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

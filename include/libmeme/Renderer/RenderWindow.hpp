@@ -1,8 +1,6 @@
 #ifndef _ML_RENDER_WINDOW_HPP_
 #define _ML_RENDER_WINDOW_HPP_
 
-// WIP
-
 #include <libmeme/Platform/Window.hpp>
 #include <libmeme/Renderer/RenderTarget.hpp>
 

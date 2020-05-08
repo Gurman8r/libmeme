@@ -25,7 +25,7 @@ namespace ml
 
 		static bool is_initialized() noexcept;
 
-		static bool create_context(json const & j, allocator_type const & alloc = {}) noexcept;
+		static bool create_context(json const & j = {}, allocator_type const & alloc = {}) noexcept;
 
 		static bool destroy_context() noexcept;
 

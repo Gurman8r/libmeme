@@ -16,13 +16,11 @@ namespace ml
 	
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		script_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		script_manager(json const & j = {}, allocator_type const & alloc = {}) noexcept;
 
 		~script_manager() noexcept { (void)shutdown(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool is_initialized() const noexcept;
 
 		ML_NODISCARD bool startup();
 

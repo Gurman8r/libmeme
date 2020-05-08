@@ -6,64 +6,107 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_PLATFORM_GLFW)
-#include "Impl/Impl_Window_Glfw.hpp"
-using ml_window_impl = _ML impl_window_glfw;
+//	GLFW
+#	include "Impl/Impl_Window_Glfw.hpp"
+	using ml_window_impl = _ML impl_window_glfw;
 #else
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept
-	{
-		ML_assert(m_impl = new ml_window_impl{});
-	}
+	window::window() noexcept { ML_assert(m_impl = new ml_window_impl{}); }
 
-	window::~window() noexcept
-	{
-		delete m_impl;
-	}
+	window::~window() noexcept { delete m_impl; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool window::open(window_settings const & ws)
 	{
-		if (is_open())			{ return debug::error(""); }
-		if (ws.title.empty())	{ return debug::error(""); }
-		if (!ws.video)			{ return debug::error(""); }
-		if (!ws.context)		{ return debug::error(""); }
-		if (!ws.hints)			{ return debug::error(""); }
-		if (!m_impl->open(ws))	{ return debug::error(""); }
+		if (is_open())			{ return debug::error("window is already open"); }
+		if (ws.title.empty())	{ return debug::error("invalid window title"); }
+		if (!ws.video)			{ return debug::error("invalid window video"); }
+		if (!ws.context)		{ return debug::error("invalid window context"); }
+		if (!ws.hints)			{ return debug::error("invalid window hints"); }
+		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
 
 		m_settings = ws;
-
-		make_context_current();
-
-		set_cursor_mode(cursor_mode_normal);
-
-		if (ws.hints & window_hints_install_callbacks)
-		{
-			install_default_callbacks();
-		}
-
-		if (ws.hints & window_hints_fullscreen)
-		{
-			// fullscreen
-			set_fullscreen(true);
-		}
-		else if (ws.hints & window_hints_maximized)
-		{
-			// maximized
-			maximize();
-		}
-		else
-		{
-			// centered
-			set_position((get_desktop_mode().size - get_frame_size()) / 2);
-		}
-
+		
+		set_current_context(get_handle());
+		
+		if (get_hint(window_hints_maximized)) { maximize(); }
+		
 		return is_open();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void window::install_default_callbacks() noexcept
+	{
+		if (!is_open()) { return; }
+
+		set_char_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<char_event>(ML_forward(args)...);
+		});
+
+		set_cursor_enter_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
+		});
+
+		set_cursor_pos_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
+		});
+
+		set_error_callback([](auto ... args)
+		{
+			event_system::fire_event<window_error_event>(ML_forward(args)...);
+		});
+
+		set_frame_size_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<frame_size_event>(ML_forward(args)...);
+		});
+
+		set_key_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<key_event>(ML_forward(args)...);
+		});
+
+		set_mouse_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<mouse_event>(ML_forward(args)...);
+		});
+
+		set_scroll_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<scroll_event>(ML_forward(args)...);
+		});
+
+		set_window_close_callback([](auto)
+		{
+			event_system::fire_event<window_close_event>();
+		});
+
+		set_window_focus_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<window_focus_event>(ML_forward(args)...);
+		});
+
+		set_window_pos_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<window_position_event>(ML_forward(args)...);
+		});
+
+		set_window_size_callback([](auto, auto ... args)
+		{
+			event_system::fire_event<window_size_event>(ML_forward(args)...);
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -78,11 +121,6 @@ namespace ml
 		m_impl->iconify();
 	}
 
-	void window::make_context_current()
-	{
-		m_impl->make_context_current();
-	}
-	
 	void window::maximize()
 	{
 		m_impl->maximize();
@@ -95,87 +133,12 @@ namespace ml
 
 	void window::swap_buffers()
 	{
-		if (m_settings.hints & window_hints_double_buffered)
-		{
-			m_impl->swap_buffers();
-		}
+		if (!get_hint(window_hints_doublebuffer)) { return; }
+
+		m_impl->swap_buffers();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void window::set_clipboard(cstring value)
-	{
-		m_impl->set_clipboard(value);
-	}
-
-	void window::set_cursor(cursor_handle value)
-	{
-		m_impl->set_cursor(value);
-	}
-	
-	void window::set_cursor_mode(int32_t value)
-	{
-		m_impl->set_cursor_mode(value);
-	}
-
-	void window::set_cursor_position(vec2d const & value)
-	{
-		m_impl->set_cursor_position(value);
-	}
-
-	void window::set_fullscreen(bool value)
-	{
-		m_impl->set_fullscreen(value);
-
-		if (!value)
-		{
-			set_size(m_settings.video.size);
-			set_position((get_desktop_mode().size - get_frame_size()) / 2);
-		}
-	}
-
-	void window::set_icon(size_t w, size_t h, byte_t const * p)
-	{
-		m_impl->set_icon(w, h, p);
-	}
-
-	void window::set_input_mode(int32_t mode, int32_t value)
-	{
-		m_impl->set_input_mode(mode, value);
-	}
-
-	void window::set_position(vec2i const & value)
-	{
-		m_impl->set_position(value);
-	}
-
-	void window::set_monitor(window_handle value)
-	{
-		m_impl->set_monitor(value);
-	}
-
-	void window::set_should_close(bool value)
-	{
-		m_impl->set_should_close(value);
-	}
-
-	void window::set_size(vec2i const & value)
-	{
-		m_impl->set_size(value);
-	}
-
-	void window::set_title(cstring value)
-	{
-		m_settings.title = value;
-		m_impl->set_title(value);
-	}
-	
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool window::is_focused() const
-	{
-		return m_impl->is_focused();
-	}
 
 	bool window::is_fullscreen() const
 	{
@@ -192,19 +155,29 @@ namespace ml
 		return m_impl->get_attribute(value);
 	}
 
-	cstring window::get_clipboard() const
+	cstring window::get_clipboard_string() const
 	{
-		return m_impl->get_clipboard();
+		return m_impl->get_clipboard_string();
 	}
 
-	vec2 window::get_cursor_pos() const
+	vec2 window::get_content_scale() const
 	{
-		return m_impl->get_cursor_pos();
+		return m_impl->get_content_scale();
 	}
 
-	vec2i window::get_frame_size() const
+	vec2 window::get_cursor_position() const
+	{
+		return m_impl->get_cursor_position();
+	}
+
+	vec4i window::get_frame_size() const
 	{
 		return m_impl->get_frame_size();
+	}
+
+	vec2i window::get_framebuffer_size() const
+	{
+		return m_impl->get_framebuffer_size();
 	}
 
 	window_handle window::get_handle() const
@@ -232,6 +205,11 @@ namespace ml
 		return m_impl->get_native_handle();
 	}
 
+	float_t window::get_opacity() const
+	{
+		return m_impl->get_opacity();
+	}
+
 	vec2i window::get_position() const
 	{
 		return m_impl->get_position();
@@ -239,32 +217,84 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::destroy_cursor(cursor_handle value)
+	void window::set_clipboard_string(cstring value)
 	{
-		ml_window_impl::destroy_cursor(value);
+		m_impl->set_clipboard_string(value);
 	}
 
-	void window::make_context_current(window_handle value)
+	void window::set_cursor(cursor_handle value)
 	{
-		ml_window_impl::make_context_current(value);
+		m_impl->set_cursor(value);
+	}
+	
+	void window::set_cursor_mode(int32_t value)
+	{
+		m_impl->set_cursor_mode(value);
 	}
 
-	void window::poll_events()
+	void window::set_cursor_position(vec2d const & value)
 	{
-		ml_window_impl::poll_events();
+		m_impl->set_cursor_position(value);
 	}
 
-	void window::swap_interval(int32_t value)
+	void window::set_fullscreen(bool value)
 	{
-		ml_window_impl::swap_interval(value);
+		m_impl->set_fullscreen(value);
+
+		if (!value)
+		{
+			set_size(m_settings.video.size);
+			set_position((get_desktop_mode().size - get_framebuffer_size()) / 2);
+		}
 	}
 
-	void window::terminate()
+	void window::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		ml_window_impl::terminate();
+		m_impl->set_icon(w, h, p);
 	}
 
+	void window::set_input_mode(int32_t mode, int32_t value)
+	{
+		m_impl->set_input_mode(mode, value);
+	}
+
+	void window::set_opacity(float_t value)
+	{
+		m_impl->set_opacity(value);
+	}
+
+	void window::set_position(vec2i const & value)
+	{
+		m_impl->set_position(value);
+	}
+
+	void window::set_monitor(monitor_handle value, vec4i const & bounds)
+	{
+		m_impl->set_monitor(value, bounds);
+	}
+
+	void window::set_should_close(bool value)
+	{
+		m_impl->set_should_close(value);
+	}
+
+	void window::set_size(vec2i const & value)
+	{
+		m_impl->set_size(value);
+	}
+
+	void window::set_title(cstring value)
+	{
+		m_settings.title = value;
+		m_impl->set_title(value);
+	}
+	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool window::backend_initialize()
+	{
+		return ml_window_impl::backend_initialize();
+	}
 
 	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
@@ -281,9 +311,9 @@ namespace ml
 		return ml_window_impl::extension_supported(value);
 	}
 
-	window_handle window::get_context_current()
+	window_handle window::get_current_context()
 	{
-		return ml_window_impl::get_context_current();
+		return ml_window_impl::get_current_context();
 	}
 
 	video_mode const & window::get_desktop_mode()
@@ -291,7 +321,7 @@ namespace ml
 		return ml_window_impl::get_desktop_mode();
 	}
 
-	ds::flat_set<video_mode> const & window::get_fullscreen_modes()
+	pmr::vector<video_mode> const & window::get_fullscreen_modes()
 	{
 		return ml_window_impl::get_fullscreen_modes();
 	}
@@ -306,16 +336,41 @@ namespace ml
 		return ml_window_impl::get_monitors();
 	}
 
-
+	monitor_handle window::get_primary_monitor()
+	{
+		return ml_window_impl::get_primary_monitor();
+	}
 
 	float64_t window::get_time()
 	{
 		return ml_window_impl::get_time();
 	}
 
-	bool window::initialize()
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void window::backend_finalize()
 	{
-		return ml_window_impl::initialize();
+		ml_window_impl::backend_finalize();
+	}
+
+	void window::destroy_cursor(cursor_handle value)
+	{
+		ml_window_impl::destroy_cursor(value);
+	}
+
+	void window::poll_events()
+	{
+		ml_window_impl::poll_events();
+	}
+
+	void window::set_current_context(window_handle value)
+	{
+		ml_window_impl::set_current_context(value);
+	}
+
+	void window::set_swap_interval(int32_t value)
+	{
+		ml_window_impl::set_swap_interval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -378,73 +433,6 @@ namespace ml
 	window_size_fn window::set_window_size_callback(window_size_fn fn)
 	{
 		return m_impl->set_window_size_callback(fn);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void window::install_default_callbacks()
-	{
-		if (!is_open()) { return; }
-	
-		set_char_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<char_event>(ML_forward(args)...);
-		});
-	
-		set_cursor_enter_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<cursor_enter_event>(ML_forward(args)...);
-		});
-	
-		set_cursor_pos_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<cursor_position_event>(ML_forward(args)...);
-		});
-	
-		set_error_callback([](auto ... args)
-		{
-			event_system::fire_event<window_error_event>(ML_forward(args)...);
-		});
-	
-		set_frame_size_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<frame_size_event>(ML_forward(args)...);
-		});
-	
-		set_key_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<key_event>(ML_forward(args)...);
-		});
-	
-		set_mouse_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<mouse_event>(ML_forward(args)...);
-		});
-	
-		set_scroll_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<scroll_event>(ML_forward(args)...);
-		});
-	
-		set_window_close_callback([](auto)
-		{
-			event_system::fire_event<window_close_event>();
-		});
-	
-		set_window_focus_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_focus_event>(ML_forward(args)...);
-		});
-	
-		set_window_pos_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_position_event>(ML_forward(args)...);
-		});
-	
-		set_window_size_callback([](auto, auto ... args)
-		{
-			event_system::fire_event<window_size_event>(ML_forward(args)...);
-		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

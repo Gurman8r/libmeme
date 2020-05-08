@@ -13,7 +13,7 @@
     {                                                                                   \
         return type<Fn>{ ML_forward(fn) };                                              \
     }                                                                                   \
-    template <class Fn> struct type final
+    template <class Fn> struct ML_NODISCARD type final
 
 // flow control implementor
 #define ML_flow_control_impl(type) \

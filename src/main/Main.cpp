@@ -47,7 +47,7 @@ ml::int32_t main()
 	// create/destroy context
 	ML_assert(engine::create_context(config)); ML_defer{ ML_assert(engine::destroy_context()); };
 
-	// startup/shutdown
+	// initialize/finalize systems
 	ML_assert(engine::startup()); ML_defer{ ML_assert(engine::shutdown()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -78,7 +78,7 @@ ml::int32_t main()
 		{
 			ML_benchmark("|  begin draw");
 			engine::window().clear_color(colors::black);
-			engine::window().viewport(engine::window().get_frame_size());
+			engine::window().viewport(engine::window().get_framebuffer_size());
 			event_system::fire_event<begin_draw_event>();
 		}
 		{

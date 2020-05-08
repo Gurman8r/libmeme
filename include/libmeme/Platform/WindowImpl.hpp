@@ -3,6 +3,7 @@
 
 #include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
+#include <libmeme/Platform/WindowLib.hpp>
 #include <libmeme/Platform/Input.hpp>
 #include <libmeme/Platform/WindowSettings.hpp>
 
@@ -26,8 +27,6 @@ namespace ml
 
 		virtual void iconify() = 0;
 
-		virtual void make_context_current() = 0;
-
 		virtual void maximize() = 0;
 
 		virtual void restore() = 0;
@@ -36,7 +35,39 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_clipboard(cstring) = 0;
+		virtual bool is_fullscreen() const = 0;
+
+		virtual bool is_open() const = 0;
+
+		virtual int32_t get_attribute(int32_t) const = 0;
+
+		virtual cstring get_clipboard_string() const = 0;
+
+		virtual vec2 get_content_scale() const = 0;
+
+		virtual vec2 get_cursor_position() const = 0;
+
+		virtual vec4i get_frame_size() const = 0;
+
+		virtual vec2i get_framebuffer_size() const = 0;
+
+		virtual window_handle get_handle() const = 0;
+
+		virtual int32_t get_input_mode(int32_t) const = 0;
+
+		virtual int32_t get_key(int32_t) const = 0;
+
+		virtual int32_t get_mouse_button(int32_t) const = 0;
+
+		virtual window_handle get_native_handle() const = 0;
+
+		virtual float_t get_opacity() const = 0;
+
+		virtual vec2i get_position() const = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void set_clipboard_string(cstring) = 0;
 
 		virtual void set_cursor(cursor_handle) = 0;
 
@@ -50,43 +81,17 @@ namespace ml
 
 		virtual void set_input_mode(int32_t, int32_t) = 0;
 
+		virtual void set_opacity(float_t) = 0;
+
 		virtual void set_position(vec2i const &) = 0;
 
-		virtual void set_monitor(window_handle) = 0;
+		virtual void set_monitor(monitor_handle, vec4i const &) = 0;
 
 		virtual void set_should_close(bool) = 0;
 
 		virtual void set_size(vec2i const &) = 0;
 
 		virtual void set_title(cstring) = 0;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual bool is_focused() const = 0;
-
-		virtual bool is_fullscreen() const = 0;
-
-		virtual bool is_open() const = 0;
-
-		virtual int32_t get_attribute(int32_t) const = 0;
-
-		virtual cstring get_clipboard() const = 0;
-
-		virtual vec2 get_cursor_pos() const = 0;
-
-		virtual vec2i get_frame_size() const = 0;
-
-		virtual window_handle get_handle() const = 0;
-
-		virtual int32_t get_input_mode(int32_t) const = 0;
-
-		virtual int32_t get_key(int32_t) const = 0;
-
-		virtual int32_t get_mouse_button(int32_t) const = 0;
-
-		virtual window_handle get_native_handle() const = 0;
-
-		virtual vec2i get_position() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

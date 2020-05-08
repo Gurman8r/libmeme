@@ -333,73 +333,64 @@ namespace ml
 	int32_t shader::compile(cstring v_src, cstring g_src, cstring f_src)
 	{
 		// check shaders available
-		if (!GL::shadersAvailable())
-		{
-			return EXIT_FAILURE * 1;
-		}
+		if (!GL::shadersAvailable()) { return EXIT_FAILURE * 1; }
 
 		// check geometry shaders available
-		if (g_src && !GL::geometryShadersAvailable())
-		{
-			return EXIT_FAILURE * 2;
-		}
+		if (g_src && !GL::geometryShadersAvailable()) { return EXIT_FAILURE * 2; }
 
 		// destroy program
-		if (!destroy())
-		{
-			return EXIT_FAILURE * 3;
-		}
+		if (!destroy()) { return EXIT_FAILURE * 3; }
 
 		// generate program
-		if (!generate())
+		if (!generate()) { return EXIT_FAILURE * 4; }
+
+		auto compile_shader = [](uint32_t & obj, uint32_t type, cstring const * src)
 		{
-			return EXIT_FAILURE * 4;
-		}
+			cstring log{};
+			return ([&]()
+			{
+				if (!src || !*src) { return -1; } // no source provided
+				if (!(obj = GL::createShader(type))) { return 0; } // failed to create
+				GL::shaderSource(obj, 1, src, nullptr);
+				if (!GL::compileShader(obj))
+				{
+					// failed to compile
+					log = GL::getProgramInfoLog(obj);
+					GL::deleteShader(obj);
+					return 0;
+				}
+				return 1; // success
+			})();
+		};
 
 		// compile vertex
 		uint32_t vert{};
-		switch (GL::compileShader(vert, GL::VertexShader, 1, &v_src))
+		switch (compile_shader(vert, GL::VertexShader, &v_src))
 		{
-		case 1:
-			GL::attachShader(m_handle, vert);
-			GL::deleteShader(vert);
-			break;
-		case 0:
-			destroy();
-			return EXIT_FAILURE * 5;
+		case 1: { GL::attachShader(m_handle, vert); GL::deleteShader(vert); } break;
+		case 0: { destroy(); return EXIT_FAILURE * 5; }
 		}
 
 		// compile geometry
 		uint32_t geom{};
-		switch (GL::compileShader(geom, GL::GeometryShader, 1, &g_src))
+		switch (compile_shader(geom, GL::GeometryShader, &g_src))
 		{
-		case 1:
-			GL::attachShader(m_handle, geom);
-			GL::deleteShader(geom);
-			break;
-		case 0:
-			destroy();
-			return EXIT_FAILURE * 6;
+		case 1: { GL::attachShader(m_handle, geom); GL::deleteShader(geom); } break;
+		case 0: { destroy(); return EXIT_FAILURE * 6; }
 		}
 
 		// compile fragment
 		uint32_t frag{};
-		switch (GL::compileShader(frag, GL::FragmentShader, 1, &f_src))
+		switch (compile_shader(frag, GL::FragmentShader, &f_src))
 		{
-		case 1:
-			GL::attachShader(m_handle, frag);
-			GL::deleteShader(frag);
-			break;
-		case 0:
-			destroy();
-			return EXIT_FAILURE * 7;
+		case 1: { GL::attachShader(m_handle, frag); GL::deleteShader(frag); } break;
+		case 0: { destroy(); return EXIT_FAILURE * 7; }
 		}
 
 		// link
 		if (!GL::linkProgram(m_handle))
 		{
-			cstring const log{ GL::getProgramInfoLog(m_handle) };
-			debug::error(log);
+			debug::error(GL::getProgramInfoLog(m_handle));
 			destroy();
 			return EXIT_FAILURE * 8;
 		}

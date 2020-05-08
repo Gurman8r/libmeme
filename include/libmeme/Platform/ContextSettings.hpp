@@ -7,16 +7,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class window_api final
-	{
-	public:
-		enum { unknown, opengl, vulkan, directx };
-
-		enum { any, core, compat, debug };
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	struct ML_NODISCARD context_settings final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,10 +20,7 @@ namespace ml
 		bool		multisample		{};
 		bool		srgb_capable	{};
 
-		constexpr operator bool() const noexcept
-		{
-			return api && major && profile;
-		}
+		constexpr operator bool() const noexcept { return api && profile; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

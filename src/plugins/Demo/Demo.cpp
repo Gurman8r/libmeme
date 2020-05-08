@@ -239,7 +239,7 @@ namespace ml
 			// load stuff, etc...
 
 			// ICON
-			if (auto icon{ make_image(engine::fs().path_to("assets/textures/icon.png")) })
+			if (auto icon{ make_image(engine::fs().path2("assets/textures/icon.png")) })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
 			}
@@ -259,55 +259,55 @@ namespace ml
 				m_textures["default"] = make_texture(m_images["default"]);
 
 				m_textures["doot"] = make_texture(
-					engine::fs().path_to("assets/textures/doot.png")
+					engine::fs().path2("assets/textures/doot.png")
 				);
 
 				m_textures["navball"] = make_texture(
-					engine::fs().path_to("assets/textures/navball.png")
+					engine::fs().path2("assets/textures/navball.png")
 				);
 
 				m_textures["earth_dm_2k"] = make_texture(
-					engine::fs().path_to("assets/textures/earth/earth_dm_2k.png")
+					engine::fs().path2("assets/textures/earth/earth_dm_2k.png")
 				);
 
 				m_textures["earth_sm_2k"] = make_texture(
-					engine::fs().path_to("assets/textures/earth/earth_sm_2k.png")
+					engine::fs().path2("assets/textures/earth/earth_sm_2k.png")
 				);
 
 				m_textures["moon_dm_2k"] = make_texture(
-					engine::fs().path_to("assets/textures/moon/moon_dm_2k.png")
+					engine::fs().path2("assets/textures/moon/moon_dm_2k.png")
 				);
 			}
 
 			// FONTS
 			{
 				m_fonts["clacon"] = make_font(
-					engine::fs().path_to("assets/fonts/clacon.ttf")
+					engine::fs().path2("assets/fonts/clacon.ttf")
 				);
 
 				m_fonts["consolas"] = make_font(
-					engine::fs().path_to("assets/fonts/consolas.ttf")
+					engine::fs().path2("assets/fonts/consolas.ttf")
 				);
 
 				m_fonts["lucida_console"] = make_font(
-					engine::fs().path_to("assets/fonts/lucida_console.ttf")
+					engine::fs().path2("assets/fonts/lucida_console.ttf")
 				);
 
 				m_fonts["minecraft"] = make_font(
-					engine::fs().path_to("assets/fonts/minecraft.ttf")
+					engine::fs().path2("assets/fonts/minecraft.ttf")
 				);
 			}
 
 			// SHADERS
 			{
 				m_shaders["2d"] = make_shader(
-					engine::fs().path_to("assets/shaders/2D.vs.shader"),
-					engine::fs().path_to("assets/shaders/basic.fs.shader")
+					engine::fs().path2("assets/shaders/2D.vs.shader"),
+					engine::fs().path2("assets/shaders/basic.fs.shader")
 				);
 
 				m_shaders["3d"] = make_shader(
-					engine::fs().path_to("assets/shaders/3D.vs.shader"),
-					engine::fs().path_to("assets/shaders/basic.fs.shader")
+					engine::fs().path2("assets/shaders/3D.vs.shader"),
+					engine::fs().path2("assets/shaders/basic.fs.shader")
 				);
 			}
 
@@ -364,15 +364,15 @@ namespace ml
 			// MODELS
 			{
 				m_models["sphere8x6"] = make_model(
-					engine::fs().path_to("assets/models/sphere8x6.obj")
+					engine::fs().path2("assets/models/sphere8x6.obj")
 				);
 
 				m_models["sphere32x24"] = make_model(
-					engine::fs().path_to("assets/models/sphere32x24.obj")
+					engine::fs().path2("assets/models/sphere32x24.obj")
 				);
 
 				m_models["monkey"] = make_model(
-					engine::fs().path_to("assets/models/monkey.obj")
+					engine::fs().path2("assets/models/monkey.obj")
 				);
 
 				m_models["triangle"] = make_model(make_mesh(
@@ -480,7 +480,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ engine::gui().dockspace };
+			auto & d{ engine::gui().dockspace() };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -521,11 +521,11 @@ namespace ml
 
 			static ML_scope // main menu bar
 			{
-				auto & mmb{ engine::gui().main_menu_bar };
+				auto & mmb{ engine::gui().main_menu_bar() };
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
-					ML_ImGui_ScopeID(ML_addressof(this));
+					ML_imgui_scope_id(ML_addressof(this));
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
 						engine::window().set_should_close(true);
@@ -533,7 +533,7 @@ namespace ml
 				});
 				mmb.add("tools", [&]()
 				{
-					ML_ImGui_ScopeID(ML_addressof(this));
+					ML_imgui_scope_id(ML_addressof(this));
 					m_gui_assets.menu_item();
 					m_gui_console.menu_item();
 					m_gui_display.menu_item();
@@ -546,7 +546,7 @@ namespace ml
 				});
 				mmb.add("settings", [&]()
 				{
-					ML_ImGui_ScopeID(ML_addressof(this));
+					ML_imgui_scope_id(ML_addressof(this));
 					bool fullscreen{ engine::window().is_fullscreen() };
 					if (ImGui::MenuItem("fullscreen", "", &fullscreen))
 					{
@@ -555,7 +555,7 @@ namespace ml
 				});
 				mmb.add("help", [&]()
 				{
-					ML_ImGui_ScopeID(ML_addressof(this));
+					ML_imgui_scope_id(ML_addressof(this));
 					m_imgui_demo.menu_item();
 					m_imgui_metrics.menu_item();
 					m_imgui_about.menu_item();
@@ -563,7 +563,7 @@ namespace ml
 			};
 
 			// draw
-			ML_ImGui_ScopeID(ML_addressof(this));
+			ML_imgui_scope_id(ML_addressof(this));
 			{
 				// IMGUI
 				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
@@ -608,7 +608,7 @@ namespace ml
 
 			auto draw_asset = [&](auto const & n, auto const & v)
 			{
-				ML_ImGui_ScopeID(ML_addressof(&v));
+				ML_imgui_scope_id(ML_addressof(&v));
 
 				// type
 				using T = typename std::decay_t<decltype(v)>;
@@ -780,7 +780,7 @@ namespace ml
 			// SHOW VALUE
 			auto show_value = [&](auto const & value)
 			{
-				ML_ImGui_ScopeID(ML_addressof(&value));
+				ML_imgui_scope_id(ML_addressof(&value));
 
 				using T = typename std::decay_t<decltype(value)>;
 				static constexpr auto info{ typeof_v<T> };
@@ -838,7 +838,9 @@ namespace ml
 					if (ImGui::BeginPopupContextItem())
 					{
 						if (ImGui::MenuItem("copy"))
-							engine::window().set_clipboard(buf);
+						{
+							engine::window().set_clipboard_string(buf);
+						}
 						ImGui::EndPopup();
 					}
 				}
@@ -870,7 +872,7 @@ namespace ml
 					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
 					>([&](auto type)
 					{
-						ML_ImGui_ScopeID(i);
+						ML_imgui_scope_id(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
@@ -921,7 +923,7 @@ namespace ml
 			ImGui::Separator();
 			m_ecs.for_entities([&](size_t const e)
 			{
-				ML_ImGui_ScopeID(static_cast<int32_t>(e));
+				ML_imgui_scope_id(static_cast<int32_t>(e));
 				ImGui::AlignTextToFramePadding();
 				
 				bool const e_open{ ImGui::TreeNode(
@@ -937,7 +939,7 @@ namespace ml
 					m_ecs.for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
-						ML_ImGui_ScopeID(&c);
+						ML_imgui_scope_id(&c);
 						using C = typename std::decay_t<decltype(c)>;
 						static constexpr auto cname{ nameof_v<C> };
 
@@ -983,7 +985,7 @@ namespace ml
 			}
 
 			// file list
-			static gui::file_tree file_tree{ engine::fs().path_to() };
+			static gui::file_tree file_tree{ engine::fs().path2() };
 			file_tree.render();
 		}
 
@@ -1049,7 +1051,7 @@ namespace ml
 					ImGui::Separator();
 					for (auto const & rec : memory_manager::get_records().values())
 					{
-						ML_ImGui_ScopeID(ML_addressof(&rec));
+						ML_imgui_scope_id(ML_addressof(&rec));
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
 						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
@@ -1144,7 +1146,7 @@ namespace ml
 			// plots
 			m_plots.for_each([&](gui::plot & p)
 			{
-				ML_ImGui_ScopeID(ML_addressof(&p));
+				ML_imgui_scope_id(ML_addressof(&p));
 				p.render();
 				if (ImGui::BeginPopupContextItem("plot settings"))
 				{

@@ -16,18 +16,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script_manager::is_initialized() const noexcept
-	{
-		return Py_IsInitialized();
-	}
-
 	bool script_manager::startup()
 	{
-		if (is_initialized()) { return false; }
+		if (Py_IsInitialized()) { return false; }
 
-		PyObject_SetArenaAllocator(([&]() noexcept
+		PyObject_SetArenaAllocator(([]() noexcept
 		{
-			static PyObjectArenaAllocator alloc
+			static PyObjectArenaAllocator temp
 			{
 				nullptr,
 				[](auto, size_t s) noexcept
@@ -39,7 +34,7 @@ namespace ml
 					return pmr::get_default_resource()->deallocate(p, s);
 				}
 			};
-			return &alloc;
+			return &temp;
 		})());
 
 		Py_SetProgramName(fs::path{ ML_argv[0] }.filename().c_str());
@@ -48,23 +43,21 @@ namespace ml
 
 		Py_InitializeEx(1);
 
-		return is_initialized();
+		return Py_IsInitialized();
 	}
 
 	bool script_manager::shutdown()
 	{
-		if (!is_initialized()) { return false; }
+		if (!Py_IsInitialized()) { return false; }
 
-		Py_FinalizeEx();
-
-		return !is_initialized();
+		return (0 < Py_FinalizeEx());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int32_t script_manager::do_file(fs::path const & value)
 	{
-		if (!is_initialized() || value.empty() || !fs::exists(value)) { return 0; }
+		if (!Py_IsInitialized()) { return 0; }
 
 		auto fp{ std::fopen(value.string().c_str(), "r") };
 
@@ -73,7 +66,7 @@ namespace ml
 
 	int32_t script_manager::do_string(pmr::string const & value)
 	{
-		if (!is_initialized() || value.empty()) { return 0; }
+		if (!Py_IsInitialized()) { return 0; }
 
 		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}

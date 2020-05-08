@@ -316,10 +316,10 @@ namespace ml::util
 		{
 			v--;
 			if constexpr (sizeof(T) >= 1)
-				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8
-			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16
-			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32
-			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64
+				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8-bit
+			if constexpr (sizeof(T) >= 2) v |= v >> 8;	// 16-bit
+			if constexpr (sizeof(T) >= 4) v |= v >> 16; // 32-bit
+			if constexpr (sizeof(T) >= 8) v |= v >> 32; // 64-bit
 			v++;
 			return v;
 		}

@@ -5,6 +5,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/FileUtility.hpp>
 
 namespace ml
 {
@@ -16,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		file_manager(json const & j, allocator_type const & alloc = {}) noexcept;
+		file_manager(json const & j = {}, allocator_type const & alloc = {}) noexcept;
 		
 		~file_manager() noexcept {}
 
@@ -28,9 +29,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD fs::path path_to(fs::path const & value = {}) const noexcept
+		ML_NODISCARD auto path2(fs::path const & value = {}) const noexcept
 		{
-			return m_content_home.native() + value.native();
+			return fs::path{ m_content_home.native() + value.native() };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
