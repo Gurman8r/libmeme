@@ -49,11 +49,11 @@ namespace ml
 			return debug::error("failed creating engine context");
 		}
 
-		// initialize windows
-		debug::info("initializing window backend...");
-		if (!window().initialize())
+		// initialize window
+		debug::info("initializing window...");
+		if (!window::initialize())
 		{
-			return debug::error("failed initializing window backend");
+			return debug::error("failed initializing window");
 		}
 
 		// initialize scripting
@@ -70,7 +70,7 @@ namespace ml
 			scripts().do_file(fs().path2(config()["setup_script"]));
 		}
 
-		return g_engine;
+		return is_initialized();
 	}
 
 	bool engine::finalize() noexcept
@@ -92,8 +92,8 @@ namespace ml
 		// destroy window
 		window().destroy();
 
-		// finalize window backend
-		window().finalize();
+		// finalize window
+		window::finalize();
 		
 		// destroy context
 		delete g_engine; g_engine = nullptr;
