@@ -1,11 +1,7 @@
 #ifndef _ML_WINDOW_IMPL_HPP_
 #define _ML_WINDOW_IMPL_HPP_
 
-#include <libmeme/Platform/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Platform/WindowLib.hpp>
-#include <libmeme/Platform/Input.hpp>
-#include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
 {
