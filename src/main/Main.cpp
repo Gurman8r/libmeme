@@ -37,11 +37,11 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup context
-	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
+	ML_assert(engine::initialize(([&conf = json{}, &file = std::ifstream{ MAIN_CONFIG }]()
 	{
-		ML_defer{ f.close(); };
-		if (f) { f >> j; }
-		return j;
+		ML_defer{ file.close(); };
+		if (file) { file >> conf; }
+		return conf;
 	})()));
 	ML_defer{ ML_assert(engine::finalize()); };
 	if (!engine::window().is_open()) { return EXIT_FAILURE; }

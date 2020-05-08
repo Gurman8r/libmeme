@@ -108,12 +108,12 @@ namespace ml
 
 	void gui_manager::draw_default()
 	{
-		ML_imgui_scope_id(ML_addressof(this));
+		ML_scoped_imgui_id(ML_addressof(this));
 
 		// DOCKSPACE
 		if (auto & d{ m_dockspace }; d.visible)
 		{
-			ML_imgui_scope_id(ML_addressof(&d));
+			ML_scoped_imgui_id(ML_addressof(&d));
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -165,7 +165,7 @@ namespace ml
 		// MAIN MENU
 		if (auto & m{ m_main_menu }; m.visible)
 		{
-			ML_imgui_scope_id(ML_addressof(&m));
+			ML_scoped_imgui_id(ML_addressof(&m));
 
 			if (ImGui::BeginMainMenuBar())
 			{
