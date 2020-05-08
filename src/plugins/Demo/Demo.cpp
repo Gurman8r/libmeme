@@ -214,7 +214,7 @@ namespace ml
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
 			event_system::add_listener<	draw_event		>(this);
-			event_system::add_listener<	gui_dock_event	>(this);
+			event_system::add_listener<	dock_gui_event	>(this);
 			event_system::add_listener<	draw_gui_event	>(this);
 			event_system::add_listener<	unload_event	>(this);
 		}
@@ -226,7 +226,7 @@ namespace ml
 			case hashof_v<load_event	>: return on_load		(*ev.cast<load_event	>());
 			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
 			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
-			case hashof_v<gui_dock_event>: return on_gui_dock	(*ev.cast<gui_dock_event>());
+			case hashof_v<dock_gui_event>: return on_gui_dock	(*ev.cast<dock_gui_event>());
 			case hashof_v<draw_gui_event>: return on_gui_draw	(*ev.cast<draw_gui_event>());
 			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
 			}
@@ -468,7 +468,7 @@ namespace ml
 			}
 		}
 
-		void on_gui_dock(gui_dock_event const &)
+		void on_gui_dock(dock_gui_event const &)
 		{
 			// gui docking
 
@@ -1166,11 +1166,11 @@ namespace ml
 				{
 					char time[20] = "";
 					std::sprintf(time, "%.7fs", elem.second.count());
-					ImGui::Selectable(elem.first);
-					gui::tooltip(time); ImGui::NextColumn();
-					ImGui::Text(time); ImGui::NextColumn();
+					ImGui::Selectable(elem.first); gui::tooltip(time); ImGui::NextColumn();
+					ImGui::Text(time); gui::tooltip(elem.first); ImGui::NextColumn();
 				}
 			}
+			ImGui::Separator();
 			ImGui::Columns(1);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

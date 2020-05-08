@@ -91,7 +91,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::begin_frame()
+	void gui_manager::new_frame()
 	{
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_NewFrame();
@@ -106,7 +106,7 @@ namespace ml
 		ImGui::NewFrame();
 	}
 
-	void gui_manager::draw_builtin()
+	void gui_manager::draw_default()
 	{
 		ML_imgui_scope_id(ML_addressof(this));
 
@@ -147,7 +147,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						event_system::fire_event<gui_dock_event>();
+						event_system::fire_event<dock_gui_event>();
 					}
 
 					ImGui::DockSpace(
@@ -188,7 +188,7 @@ namespace ml
 		}
 	}
 
-	void gui_manager::end_frame()
+	void gui_manager::render_frame()
 	{
 		ImGui::Render();
 

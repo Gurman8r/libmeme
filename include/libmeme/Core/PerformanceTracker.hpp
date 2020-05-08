@@ -4,32 +4,20 @@
 #include <libmeme/Core/Timer.hpp>
 
 // performance_tracker singleton
-#define ML_performance_tracker _ML performance_tracker::get_instance()
+#define ML_performance_tracker \
+	_ML performance_tracker::get_instance()
 
 // benchmark
-#define ML_benchmark(name) \
-	auto ML_anon = _ML performance_tracker::benchmark{ name }
+#define ML_benchmark(id) \
+	auto ML_anon = _ML performance_tracker::benchmark{ id }
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	struct ML_CORE_API performance_tracker final : singleton<performance_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using frame_type = typename pmr::vector<std::pair<cstring, duration>>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct ML_NODISCARD benchmark final
-		{
-			explicit benchmark(cstring name) noexcept : m_name{ name } {}
-
-			~benchmark() noexcept { push(m_name, m_timer.elapsed()); }
-
-		private: cstring m_name{}; timer m_timer{};
-		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,6 +42,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct ML_NODISCARD benchmark final
+		{
+			explicit benchmark(cstring id) noexcept : m_id{ id } {}
+
+			~benchmark() noexcept { push(m_id, m_timer.elapsed()); }
+
+		private: cstring m_id{}; timer m_timer{};
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		friend singleton<performance_tracker>;
 
@@ -61,13 +60,11 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		frame_type m_curr; // current frame data
-		frame_type m_prev; // previous frame data
+		frame_type m_curr; // current frame
+		frame_type m_prev; // previous frame
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_PERFORMANCE_TRACKER_HPP_

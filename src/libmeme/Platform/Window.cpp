@@ -269,17 +269,6 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::backend_initialize()
-	{
-#ifdef ML_os_windows
-		if (auto const cw{ GetConsoleWindow() })
-		{
-			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
-		}
-#endif
-		return ml_window_impl::backend_initialize();
-	}
-
 	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
 		return ml_window_impl::create_custom_cursor(w, h, p);
@@ -330,11 +319,27 @@ namespace ml
 		return ml_window_impl::get_time();
 	}
 
+	bool window::initialize()
+	{
+#ifdef ML_os_windows
+		if (auto const cw{ GetConsoleWindow() })
+		{
+			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
+		}
+#endif
+		return ml_window_impl::initialize();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::backend_finalize()
+	void window::destroy_cursor(cursor_handle value)
 	{
-		ml_window_impl::backend_finalize();
+		ml_window_impl::destroy_cursor(value);
+	}
+
+	void window::finalize()
+	{
+		ml_window_impl::finalize();
 
 #ifdef ML_os_windows
 		if (auto const cw{ GetConsoleWindow() })
@@ -342,11 +347,6 @@ namespace ml
 			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_ENABLED);
 		}
 #endif
-	}
-
-	void window::destroy_cursor(cursor_handle value)
-	{
-		ml_window_impl::destroy_cursor(value);
 	}
 
 	void window::poll_events()

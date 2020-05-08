@@ -93,7 +93,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool backend_initialize();
+		ML_NODISCARD static bool initialize();
 
 		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 		
@@ -117,7 +117,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void backend_finalize();
+		static void finalize();
 
 		static void destroy_cursor(cursor_handle value);
 

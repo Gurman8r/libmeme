@@ -18,7 +18,7 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup memory
+	// memory settings
 	static struct memcfg final
 	{
 		ds::array<byte_t, MAIN_MEMORY>		data{};
@@ -26,13 +26,13 @@ ml::int32_t main()
 		pmr::unsynchronized_pool_resource	pool{ &mono };
 		util::test_resource					test{ &pool, data.data(), data.size() };
 
-		memcfg() noexcept
+		explicit memcfg() noexcept
 		{
 			ML_assert(pmr::set_default_resource(&test));
 			ML_assert(memory_manager::configure(&test));
 		}
 
-	} ML_anon;
+	} ML_anon{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,18 +44,16 @@ ml::int32_t main()
 		return j;
 	})();
 
-	// setup engine
+	// setup context
 	ML_assert(engine::initialize(config));
 	ML_defer{ ML_assert(engine::finalize()); };
 	if (!engine::window().is_open()) { return EXIT_SUCCESS; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// content loading
+	// application loop
 	event_system::fire_event<load_event>();
 	ML_defer{ event_system::fire_event<unload_event>(); };
-
-	// application loop
 	while (engine::window().is_open())
 	{
 		engine::time().begin_loop();
@@ -82,27 +80,23 @@ ml::int32_t main()
 		}
 		{
 			ML_benchmark("|   begin gui");
-			engine::gui().begin_frame();
+			engine::gui().new_frame();
 			event_system::fire_event<begin_gui_event>();
 		}
 		{
 			ML_benchmark("|    draw gui");
-			engine::gui().draw_builtin();
+			engine::gui().draw_default();
 			event_system::fire_event<draw_gui_event>();
 		}
 		{
 			ML_benchmark("|   end gui");
-			engine::gui().end_frame();
+			engine::gui().render_frame();
 			event_system::fire_event<end_gui_event>();
 		}
 		{
 			ML_benchmark("|  end draw");
 			engine::window().swap_buffers();
 			event_system::fire_event<end_draw_event>();
-		}
-		{
-			ML_benchmark("|  late update");
-			event_system::fire_event<late_update_event>();
 		}
 		{
 			ML_benchmark("| end loop");

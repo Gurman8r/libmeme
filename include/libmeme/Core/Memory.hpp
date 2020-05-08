@@ -6,11 +6,12 @@
 #include <libmeme/Core/Singleton.hpp>
 
 // memory_manager singleton
-#define ML_memory_manager _ML memory_manager::get_instance()
+#define ML_memory_manager \
+	_ML memory_manager::get_instance()
 
 namespace ml::util
 {
-	// passthrough memory_resource for collecting usage metrics
+	// passthrough resource for collecting upstream usage metrics
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -10,7 +10,7 @@ namespace ml::embed
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// LIBMEME
+	// LIBMEME (structures)
 	PYBIND11_EMBEDDED_MODULE(libmeme, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -402,14 +402,14 @@ namespace ml::embed
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// LIBMEME_ENGINE
+	// LIBMEME_ENGINE (systems)
 	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// FILES
-		struct ml_engine_files {};
-		py::class_<ml_engine_files>(m, "fs")
+		// FS
+		struct ml_engine_fs {};
+		py::class_<ml_engine_fs>(m, "fs")
 			.def(py::init<>())
 			.def_static("path2", [](cstring s) { return engine::fs().path2(s).string(); })
 			.def_property_readonly_static("program_path", [](py::object) { return engine::fs().program_path(); })
@@ -504,13 +504,12 @@ namespace ml::embed
 			.def_static("set_size"				, [](vec2i v) { engine::window().set_size(v); })
 			.def_static("set_title"				, [](cstring v) { engine::window().set_title(v); })
 
-			.def_static("backend_finalize"		, []() { window::backend_finalize(); })
 			.def_static("destroy_cursor"		, [](cursor_handle v) { window::destroy_cursor(v); })
+			.def_static("finalize"				, []() { window::finalize(); })
 			.def_static("poll_events"			, []() { window::poll_events(); })
 			.def_static("set_current_context"	, [](window_handle v) { window::set_current_context(v); })
 			.def_static("set_swap_interval"		, [](int32_t v) { window::set_swap_interval(v); })
 
-			.def_static("backend_initialize"	, []() { return window::backend_initialize(); })
 			.def_static("create_custom_cursor"	, [](size_t w, size_t h, byte_t const * p) { return window::create_custom_cursor(w, h, p); })
 			.def_static("create_standard_cursor", [](int32_t v) { return window::create_standard_cursor(v); })
 			.def_static("extension_supported"	, [](cstring v) { return window::extension_supported(v); })
@@ -520,6 +519,7 @@ namespace ml::embed
 			.def_static("get_proc_address"		, [](cstring v) { return window::get_proc_address(v); })
 			.def_static("get_monitors"			, []() { return window::get_monitors(); })
 			.def_static("get_time"				, []() { return window::get_time(); })
+			.def_static("initialize"			, []() { return window::initialize(); })
 
 			.def_static("get_context_settings"	, []() { return engine::window().get_context_settings(); })
 			.def_static("get_hint"				, [](int32_t v) { return engine::window().get_hint(v); })

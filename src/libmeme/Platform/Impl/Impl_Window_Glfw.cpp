@@ -25,8 +25,6 @@ namespace ml
 {
 	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * p) noexcept
 	{
-		static_assert(nameof_v<ulong_t> == "unsigned long");
-
 		static ds::set<GLFWimage> cache{};
 		GLFWimage const temp{ (int32_t)w, (int32_t)h, (byte_t *)p };
 		if (auto const it{ cache.find(temp) }; it != cache.end())
@@ -360,11 +358,6 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool impl_window_glfw::backend_initialize()
-	{
-		return glfwInit();
-	}
-
 	cursor_handle impl_window_glfw::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
 		return glfwCreateCursor(make_glfw_image(w, h, p), w, h);
@@ -471,16 +464,21 @@ namespace ml
 		return glfwGetTime();
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void impl_window_glfw::backend_finalize()
+	bool impl_window_glfw::initialize()
 	{
-		glfwTerminate();
+		return glfwInit();
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void impl_window_glfw::destroy_cursor(cursor_handle value)
 	{
 		glfwDestroyCursor(static_cast<GLFWcursor *>(value));
+	}
+
+	void impl_window_glfw::finalize()
+	{
+		glfwTerminate();
 	}
 
 	void impl_window_glfw::poll_events()

@@ -7,7 +7,8 @@
 #include <libmeme/Core/Singleton.hpp>
 
 // event_system singleton
-#define ML_event_system _ML event_system::get_instance()
+#define ML_event_system \
+	_ML event_system::get_instance()
 
 namespace ml
 {

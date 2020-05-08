@@ -40,7 +40,7 @@ namespace ml
 
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
-		if (is_initialized()) { return debug::error("engine context is already initialized"); }
+		if (g_engine) { return debug::error("engine context is already initialized"); }
 
 		// create context
 		debug::info("creating engine context...");
@@ -51,7 +51,7 @@ namespace ml
 
 		// initialize windows
 		debug::info("initializing windows...");
-		if (!window::backend_initialize())
+		if (!window::initialize())
 		{
 			return debug::error("failed initializing windows");
 		}
@@ -63,19 +63,19 @@ namespace ml
 			return debug::error("failed initializing scripts");
 		}
 
-		// execute setup
+		// execute setup script
 		if (config().contains("setup_script"))
 		{
 			debug::info("executing setup...");
 			scripts().do_file(fs().path2(config()["setup_script"]));
 		}
 
-		return is_initialized();
+		return g_engine;
 	}
 
 	bool engine::finalize() noexcept
 	{
-		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
+		if (!g_engine) { return debug::error("engine context is not initialized"); }
 
 		// FIXME: need to clear menus before plugins because menu code can live inside plugins
 		gui().main_menu_bar().menus.clear();
@@ -93,11 +93,11 @@ namespace ml
 		window().destroy();
 
 		// finalize window backend
-		window::backend_finalize();
+		window::finalize();
 		
 		// destroy context
-		delete g_engine; g_engine = nullptr;
-		return !is_initialized();
+		delete g_engine;
+		return !(g_engine = nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
