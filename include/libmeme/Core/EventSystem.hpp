@@ -29,14 +29,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t type, event_listener * value) noexcept
+		static bool add_listener(hash_t id, event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance().m_listeners };
+			static auto & inst{ get_instance() };
 			
 			if (!value) { return false; }
 
 			// insert listener into category
-			return inst.at(type).insert(value).second;
+			return inst.m_listeners.at(id).insert(value).second;
 		}
 		
 		template <class Ev
@@ -51,10 +51,10 @@ namespace ml
 
 		static void fire_event(event const & value) noexcept
 		{
-			static auto & inst{ get_instance().m_listeners };
+			static auto & inst{ get_instance() };
 
 			// find category
-			if (auto const cat{ inst.find(value.ID) })
+			if (auto const cat{ inst.m_listeners.find(value.ID) })
 			{
 				// for each listener
 				for (auto const & listener : (*cat->second))
@@ -75,14 +75,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(hash_t type, event_listener * value) noexcept
+		static void remove_listener(hash_t id, event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance().m_listeners };
+			static auto & inst{ get_instance() };
 
 			if (!value) { return; }
 
 			// find category
-			if (auto const cat{ inst.find(type) })
+			if (auto const cat{ inst.m_listeners.find(id) })
 			{
 				// find listener
 				if (auto const it{ cat->second->find(value) }; it != cat->second->end())
@@ -97,12 +97,12 @@ namespace ml
 
 		static void remove_listener(event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance().m_listeners };
+			static auto & inst{ get_instance() };
 
 			if (!value) { return; }
 
 			// for each category
-			inst.for_each([&](hash_t, auto & cat) noexcept
+			inst.m_listeners.for_each([&](hash_t, auto & cat) noexcept
 			{
 				// find listener
 				if (auto const it{ cat.find(value) }; it != cat.end())
@@ -131,7 +131,7 @@ namespace ml
 
 	inline event_listener::~event_listener() noexcept
 	{
-		event_system::remove_listener(this); // remove listener from all events
+		event_system::remove_listener(this); // remove from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -26,13 +26,13 @@ ml::int32_t main()
 		pmr::unsynchronized_pool_resource	pool{ &mono };
 		util::test_resource					test{ &pool, data.data(), data.size() };
 
-		explicit memcfg() noexcept
+		memcfg() noexcept
 		{
 			ML_assert(pmr::set_default_resource(&test));
 			ML_assert(memory_manager::configure(&test));
 		}
 
-	} ML_anon{};
+	} ML_anon;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -6,9 +6,7 @@ namespace ml
 
 	memory_manager::~memory_manager() noexcept
 	{
-#if (!ML_is_debug)
-		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
-#else
+#if (ML_is_debug)
 		if (!m_records.empty())
 		{
 			debug::error("final allocations follow");
@@ -35,6 +33,7 @@ namespace ml
 			debug::pause();
 		}
 #endif
+		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

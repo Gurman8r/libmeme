@@ -12,7 +12,7 @@ namespace ml::ds
 		class	_Ty,	// value type
 		class	_Pr,	// comparator predicate type
 		bool	_Mt,	// true if multiple equivalent values are permitted
-		size_t	_Th		// algorithm selector threshold
+		size_t	_Th		// search heuristic
 	> struct flat_set_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -458,16 +458,16 @@ namespace ml::ds
 			{
 				if (size < traits_type::thresh)
 				{
-					return linear();
+					return linear(); // linear
 				}
 				else
 				{
-					return binary();
+					return binary(); // binary
 				}
 			}
 			else
 			{
-				return false;
+				return false; // empty
 			}
 		}
 
@@ -494,22 +494,22 @@ namespace ml::ds
 
 			if constexpr (traits_type::thresh == 0)
 			{
-				return linear();
+				return linear(); // always linear
 			}
 			else if (auto const size{ (size_t)std::distance(first, last) })
 			{
 				if (size < traits_type::thresh)
 				{
-					return linear();
+					return linear(); // linear
 				}
 				else
 				{
-					return binary();
+					return binary(); // binary
 				}
 			}
 			else
 			{
-				return last;
+				return last; // empty
 			}
 		}
 		
@@ -571,7 +571,7 @@ namespace ml::ds
 	// FLAT SET | sorted vector of unique elements
 	template <
 		class	_Ty,					// value type
-		size_t	_Th = 42,				// algorithm selector threshold
+		size_t	_Th = 42,				// search heuristic
 		class	_Pr = std::less<_Ty>	// comparator predicate type
 	> ML_alias set = typename basic_flat_set
 	<
@@ -581,7 +581,7 @@ namespace ml::ds
 	// FLAT MULTISET | sorted vector of elements
 	template <
 		class	_Ty,					// value type
-		size_t	_Th = 42,				// algorithm selector threshold
+		size_t	_Th = 42,				// search heuristic
 		class	_Pr = std::less<_Ty>	// comparator predicate type
 	> ML_alias multiset = typename basic_flat_set
 	<
