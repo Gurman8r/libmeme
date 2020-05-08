@@ -19,15 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer() noexcept
-			: m_running		{}
-			, m_previous	{}
-			, m_current		{}
-			, m_elapsed		{}
-		{
-		}
-
-		explicit basic_timer(bool start_me) noexcept : self_type{}
+		basic_timer(bool start_me = true) noexcept
 		{
 			if (start_me) { this->start(); }
 		}
@@ -71,10 +63,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool				m_running;
-		time_point			m_previous;
-		time_point			m_current;
-		mutable duration	m_elapsed;
+		bool				m_running	{};
+		time_point			m_previous	{};
+		time_point			m_current	{};
+		mutable duration	m_elapsed	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

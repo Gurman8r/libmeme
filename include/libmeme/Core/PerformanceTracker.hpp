@@ -27,7 +27,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	public:
-		explicit performance_tracker(cstring name) noexcept : m_name{ name }, m_timer{ true }
+		explicit performance_tracker(cstring name) noexcept : m_name{ name }, m_timer{}
 		{
 		}
 
