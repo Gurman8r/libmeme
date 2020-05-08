@@ -32,7 +32,7 @@ ml::int32_t main()
 			ML_assert(memory_manager::configure(&test));
 		}
 
-	} g_memcfg;
+	} ML_anon;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
