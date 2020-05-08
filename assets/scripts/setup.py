@@ -6,7 +6,13 @@ print("[ info ] opening window...")
 assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ], 32),
-    ml.context_settings(ml.window_api.opengl, 4, 6, ml.window_profile.compat, 24, 8, False, False),
+    ml.context_settings(
+        ml.window_api.opengl, 4, 6,
+        ml.window_profile.compat,
+        24,     # depth bits
+        8,      # stencil bits
+        False,  # multisample
+        False), # sRGB capable
     ml.window_hints.default_max
     )))
 engine.window.install_default_callbacks()
