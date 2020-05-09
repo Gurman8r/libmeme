@@ -17,8 +17,8 @@ namespace ml
 
 		struct ML_NODISCARD info final
 		{
-			pmr::string family;
-			std::locale locale;
+			pmr::string family{};
+			std::locale locale{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,13 +38,13 @@ namespace ml
 		font & operator=(font const & value)
 		{
 			font temp{ value };
-			swap(temp);
+			this->swap(temp);
 			return (*this);
 		}
 
 		font & operator=(font && value) noexcept
 		{
-			swap(std::move(value));
+			this->swap(std::move(value));
 			return (*this);
 		}
 
@@ -52,10 +52,10 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				std::swap(m_pages, value.m_pages);
 				std::swap(m_library, value.m_library);
 				std::swap(m_face, value.m_face);
 				std::swap(m_info, value.m_info);
+				m_pages.swap(value.m_pages);
 			}
 		}
 
@@ -88,16 +88,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_font(Args && ... args)
-	{
-		return font{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_FONT_HPP_

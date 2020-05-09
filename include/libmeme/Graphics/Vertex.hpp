@@ -129,15 +129,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD static inline auto contiguous(pmr::vector<vertex> const & v)
+	ML_NODISCARD inline auto contiguous(pmr::vector<vertex> const & v) noexcept
 	{
 		pmr::vector<float_t> temp{};
 		if (size_t const imax{ v.size() * vertex::size })

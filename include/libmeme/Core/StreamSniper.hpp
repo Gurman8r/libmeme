@@ -73,13 +73,13 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return (m_cur && m_old); }
 
-		ML_NODISCARD operator sstream_type & () & noexcept { return m_str; }
-		
-		ML_NODISCARD operator sstream_type const & () const & noexcept { return m_str; }
+		ML_NODISCARD auto sstr() & noexcept -> sstream_type & { return m_str; }
 
-		ML_NODISCARD operator sstream_type && () && noexcept { return std::move(m_str); }
+		ML_NODISCARD auto sstr() const & noexcept -> sstream_type const & { return m_str; }
 
-		ML_NODISCARD operator sstream_type const && () const & noexcept { return std::move(m_str); }
+		ML_NODISCARD auto sstr() && noexcept -> sstream_type && { return std::move(m_str); }
+
+		ML_NODISCARD auto sstr() const && noexcept -> sstream_type const && { return std::move(m_str); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -5,8 +5,6 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	enum texture_flags_ : int32_t
 	{
 		texture_flags_none		= (0 << 0), // none
@@ -19,8 +17,6 @@ namespace ml
 			= texture_flags_smooth
 			| texture_flags_repeated,
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_GRAPHICS_API texture final : trackable
 	{
@@ -119,9 +115,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool nonzero() const noexcept { return m_handle; }
-
-		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
+		ML_NODISCARD operator bool() const noexcept { return m_handle; }
 
 		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
 
@@ -168,16 +162,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_texture(Args && ... args)
-	{
-		return texture{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_TEXTURE_HPP_

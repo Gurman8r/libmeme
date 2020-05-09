@@ -14,8 +14,12 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(0 < (_W * _H),
-			"matrix size negative or zero"
+		static_assert(0 < _W,
+			"matrix width negative or zero"
+		);
+
+		static_assert(0 < _H,
+			"matrix height negative or zero"
 		);
 
 		static_assert(std::is_integral_v<_T> || std::is_floating_point_v<_T>,
@@ -77,7 +81,7 @@ namespace ml::ds
 					// same dimensions
 					for (size_t i = 0; i < (W * H); ++i)
 					{
-						temp[i] = static_cast<U>(at(i));
+						temp[i] = static_cast<U>(this->at(i));
 					}
 				}
 				else
@@ -87,7 +91,7 @@ namespace ml::ds
 					{
 						if (size_t const x{ i % W }, y{ i / W }; (x < _W && y < _H))
 						{
-							temp[i] = static_cast<U>(at(x, y));
+							temp[i] = static_cast<U>(this->at(x, y));
 						}
 					}
 				}
@@ -189,6 +193,16 @@ namespace ml::ds
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr bool nonzero() const noexcept
+		{
+			for (auto const & e : (*this))
+				if (e != value_type{ 0 })
+					return true;
+			return false;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		static constexpr self_type zero() noexcept
 		{
 			return self_type{};
@@ -211,7 +225,10 @@ namespace ml::ds
 			self_type temp{};
 			for (size_t i = 0; i < (_W * _H); ++i)
 			{
-				if ((i / _W) == (i % _W)) { temp[i] = value_type{ 1 }; }
+				if ((i / _W) == (i % _W))
+				{
+					temp[i] = value_type{ 1 };
+				}
 			}
 			return temp;
 		}
@@ -219,9 +236,9 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// define additional custom code
-#ifdef ML_MATRIX_STRUCT_EXTRA
-		ML_MATRIX_STRUCT_EXTRA
-#endif // ML_MATRIX_STRUCT_EXTRA
+#ifdef ML_MATRIX_CLASS_EXTRA
+		ML_MATRIX_CLASS_EXTRA
+#endif // ML_MATRIX_CLASS_EXTRA
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -234,17 +251,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// MATRIX NxN
+	// matrix<T, N, N>
 	template <class T, size_t N
 	> ML_alias tmatnxn = ds::matrix<T, N, N>;
 
-	// MATRIX Nx1
+	// matrix<T, N, 1>
 	template <class T, size_t N
 	> ML_alias tvector = ds::matrix<T, N, 1>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// MATRIX 2x2
+	// matrix<T, 2, 2>
 	template <class T
 	> ML_alias	tmat2	= tmatnxn<T, 2>;
 	ML_alias	mat2b	= tmat2<byte_t>;
@@ -257,7 +274,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// MATRIX 3x3
+	// matrix<T, 3, 3>
 	template <class T
 	> ML_alias	tmat3	= tmatnxn<T, 3>;
 	ML_alias	mat3b	= tmat3<byte_t>;
@@ -270,7 +287,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// MATRIX 4x4
+	// matrix<T, 4 ,4>
 	template <class T
 	> ML_alias	tmat4	= tmatnxn<T, 4>;
 	ML_alias	mat4b	= tmat4<byte_t>;
@@ -283,7 +300,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// VECTOR 2
+	// matrix<T, 2, 1>
 	template <class T
 	> ML_alias	tvec2	= tvector<T, 2>;
 	ML_alias	vec2b	= tvec2<byte_t>;
@@ -296,7 +313,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// VECTOR 3
+	// matrix<T, 3, 1>
 	template <class T
 	> ML_alias	tvec3	= tvector<T, 3>;
 	ML_alias	vec3b	= tvec3<byte_t>;
@@ -309,7 +326,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// VECTOR 4
+	// matrix<T, 4, 1>
 	template <class T
 	> ML_alias	tvec4	= tvector<T, 4>;
 	ML_alias	vec4b	= tvec4<byte_t>;

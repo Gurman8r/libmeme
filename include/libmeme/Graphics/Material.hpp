@@ -7,7 +7,6 @@
 
 namespace ml
 {
-	// collection of uniforms
 	struct ML_GRAPHICS_API material final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -338,21 +337,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD static inline auto make_material(material::storage_type && s)
-	{
-		return material{ ML_forward(s) };
-	}
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_material(Args && ... args)
-	{
-		return material{ material::storage_type{ ML_forward(args)... } };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_MATERIAL_HPP_

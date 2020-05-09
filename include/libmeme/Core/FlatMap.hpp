@@ -499,13 +499,13 @@ namespace ml::ds
 		template <class Fn
 		> void for_each(key_const_iterator first, Fn && fn) noexcept
 		{
-			this->for_each(first, m_pair.first.end(), ML_forward(fn));
+			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
 		}
 
 		template <class Fn
 		> void for_each(Fn && fn) noexcept
 		{
-			this->for_each(m_pair.first.begin(), ML_forward(fn));
+			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -549,7 +549,7 @@ namespace ml::ds
 		template <class Fn
 		> void for_each_n(ptrdiff_t count, Fn && fn) noexcept
 		{
-			this->for_each_n(m_pair.first.begin(), count, ML_forward(fn));
+			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

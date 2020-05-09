@@ -118,13 +118,13 @@ namespace ml
 		// load character glyph
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
 		{
-			debug::warning("font failed loading  glyph \'{0}\'", (char)c);
+			debug::warning("font failed loading glyph: \'{0}\'", c);
 			
 			return g;
 		}
 
 		// set texture
-		g.graphic = make_texture(GL::Texture2D, GL::RGBA, GL::Red, texture_flags_default);
+		g.graphic = texture{ GL::Texture2D, GL::RGBA, GL::Red, texture_flags_default };
 
 		// set bounds
 		g.bounds = float_rect

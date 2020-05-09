@@ -5,8 +5,6 @@
 
 #include <libmeme/Config.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #ifdef ML_API
 #	define ML_CORE_API ML_API
 #else

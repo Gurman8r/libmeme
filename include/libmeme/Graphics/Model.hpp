@@ -7,7 +7,6 @@
 
 namespace ml
 {
-	// collection of meshes
 	struct ML_GRAPHICS_API model final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -120,21 +119,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD static inline auto make_model(mesh && m)
-	{
-		return model{ std::initializer_list<mesh>{ ML_forward(m) } };
-	}
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_model(Args && ... args)
-	{
-		return model{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_MODEL_HPP_

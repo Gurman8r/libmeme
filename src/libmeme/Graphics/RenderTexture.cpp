@@ -66,7 +66,7 @@ namespace ml
 
 	bool render_texture::generate()
 	{
-		if (nonzero())
+		if (*this)
 		{
 			return debug::error("render texture already created");
 		}
@@ -123,7 +123,7 @@ namespace ml
 		// attach texture to framebuffer
 		m_fbo.attach_texture(m_colorID, m_texture.handle(), m_texture.level());
 
-		return nonzero();
+		return (*this);
 	}
 
 	bool render_texture::resize(vec2i const & value)

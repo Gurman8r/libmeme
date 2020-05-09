@@ -25,85 +25,253 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image(allocator_type alloc = {});
-		
-		image(vec2u const & size, allocator_type alloc = {});
-		
-		image(vec2u const & size, size_t channels, allocator_type alloc = {});
-		
-		image(vec2u const & size, storage_type const & pixels, allocator_type alloc = {});
-		
-		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type alloc = {});
-		
-		image(fs::path const & path, allocator_type alloc = {});
-		
-		image(fs::path const & path, bool flip_v, allocator_type alloc = {});
-		
-		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {});
-		
-		image(image const & value, allocator_type alloc = {});
-		
-		image(image && value, allocator_type alloc = {}) noexcept;
+		image(allocator_type alloc = {})
+			: m_size{ 0 }
+			, m_channels{ 0 }
+			, m_pixels{ alloc }
+		{
+		}
+
+		image(vec2u const & size, allocator_type alloc = {})
+			: image{ size, 4, alloc }
+		{
+		}
+
+		image(vec2u const & size, size_t channels, allocator_type alloc = {})
+			: image{ size, channels, storage_type{}, alloc }
+		{
+		}
+
+		image(vec2u const & size, storage_type const & pixels, allocator_type alloc = {})
+			: image{ size, 4, pixels, alloc }
+		{
+		}
+
+		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type alloc = {})
+			: m_size{ size }
+			, m_channels{ channels }
+			, m_pixels{ pixels, alloc }
+		{
+			if (size_t const cap{ capacity() }; m_pixels.empty() || (m_pixels.size() != cap))
+			{
+				m_pixels.resize(cap);
+			}
+		}
+
+		image(fs::path const & path, allocator_type alloc = {})
+			: image{ path, false, alloc }
+		{
+		}
+
+		image(fs::path const & path, bool flip_v, allocator_type alloc = {})
+			: image{ path, flip_v, 0, alloc }
+		{
+		}
+
+		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {})
+			: image{ alloc }
+		{
+			load_from_file(path, flip_v, req_channels);
+		}
+
+		image(image const & value, allocator_type alloc = {})
+			: m_size{ value.m_size }
+			, m_channels{ value.m_channels }
+			, m_pixels{ value.m_pixels }
+		{
+		}
+
+		image(image && value, allocator_type alloc = {}) noexcept
+			: image{ alloc }
+		{
+			swap(std::move(value));
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & operator=(image const & value);
+		image & operator=(image const & value)
+		{
+			image temp{ value };
+			swap(temp);
+			return (*this);
+		}
 
-		image & operator=(image && value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		bool load_from_file(fs::path const & path);
-		
-		bool load_from_file(fs::path const & path, bool flip_v);
-		
-		bool load_from_file(fs::path const & path, bool flip_v, size_t req_channels);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		image & create_from_color(vec2u const & size, color32 const & color);
-		
-		image & create_from_color(color32 const & color);
-		
-		image & create_from_color(vec2u const & size, size_t channels, color32 const & color);
+		image & operator=(image && value) noexcept
+		{
+			swap(std::move(value));
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_pixels(vec2u const & size, storage_type const & pixels);
-		
-		image & create_from_pixels(storage_type const & pixels);
-		
-		image & create_from_pixels(vec2u const & size, size_t channels, storage_type const & pixels);
+		void clear() noexcept
+		{
+			m_size = {};
+			m_channels = 0;
+			m_pixels.clear();
+		}
+
+		void swap(image & value) noexcept
+		{
+			if (this != std::addressof(value))
+			{
+				std::swap(m_pixels, value.m_pixels);
+
+				std::swap(m_size, value.m_size);
+
+				std::swap(m_channels, value.m_channels);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+		bool load_from_file(fs::path const & path, bool flip_v = 0, size_t req_channels = 0);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear() noexcept;
+		image & create_from_color(vec2u const & size, color32 const & c) noexcept
+		{
+			return create_from_color(size, channels(), c);
+		}
 
-		void swap(image & value) noexcept;
+		image & create_from_color(color32 const & c) noexcept
+		{
+			return create_from_color(size(), channels(), c);
+		}
+
+		image & create_from_color(vec2u const & size, size_t channels, color32 const & c) noexcept
+		{
+			if (size[0] && size[1] && channels)
+			{
+				m_size = size;
+				m_channels = channels;
+				m_pixels.resize(capacity());
+
+				auto it{ begin() };
+				while (it != end())
+				{
+					if (m_channels >= 1) *it++ = c[0];
+					if (m_channels >= 2) *it++ = c[1];
+					if (m_channels >= 3) *it++ = c[2];
+					if (m_channels >= 4) *it++ = c[3];
+				}
+			}
+			else
+			{
+				clear();
+			}
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		image & flip_vertically();
 
-		image & flip_horizontally();
+		image & create_from_pixels(vec2u const & size, storage_type const & pixels) noexcept
+		{
+			return create_from_pixels(size, m_channels, pixels);
+		}
+
+		image & create_from_pixels(storage_type const & pixels) noexcept
+		{
+			return create_from_pixels(m_size, m_channels, pixels);
+		}
+
+		image & create_from_pixels(vec2u const & size, size_t channels, storage_type const & pixels) noexcept
+		{
+			if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
+			{
+				m_size = size;
+				m_channels = channels;
+				m_pixels = pixels;
+			}
+			else
+			{
+				clear();
+			}
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD std::optional<color32> get_pixel(size_t index) const;
-		
-		ML_NODISCARD std::optional<color32> get_pixel(size_t x, size_t y) const;
+		image & flip_vertically() noexcept
+		{
+			if (!empty())
+			{
+				size_t const cols{ width() * channels() };
+				for (size_t y = 0; y < height(); ++y)
+				{
+					auto lhs{ begin() + y * cols }, rhs{ begin() + (y + 1) * cols - channels() };
+					for (size_t x = 0; x < width() / 2; ++x)
+					{
+						std::swap_ranges(lhs, lhs + channels(), rhs);
+						lhs += channels();
+						rhs -= channels();
+					}
+				}
+			}
+			return (*this);
+		}
+
+		image & flip_horizontally() noexcept
+		{
+			if (!empty())
+			{
+				size_t const cols{ width() * channels() };
+				auto top{ begin() }, bot{ end() - cols };
+				for (size_t y = 0; y < height() / 2; ++y)
+				{
+					std::swap_ranges(top, top + cols, bot);
+					top += cols;
+					bot -= cols;
+				}
+			}
+			return (*this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool set_pixel(size_t index, color32 const & col);
-		
-		bool set_pixel(size_t x, size_t y, color32 const & col);
+		std::optional<color32> get_pixel(size_t index) const noexcept
+		{
+			return (index < capacity())
+				? std::make_optional(color32{
+					(m_channels >= 1) ? *((cbegin() + index) + 0) : (byte_t)0,
+					(m_channels >= 2) ? *((cbegin() + index) + 1) : (byte_t)0,
+					(m_channels >= 3) ? *((cbegin() + index) + 2) : (byte_t)0,
+					(m_channels >= 4) ? *((cbegin() + index) + 3) : (byte_t)0
+					})
+				: std::nullopt;
+		}
+
+		std::optional<color32> get_pixel(size_t x, size_t y) const noexcept
+		{
+			return get_pixel((x + y * m_size[0]) * m_channels);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool set_pixel(size_t index, color32 const & c) noexcept
+		{
+			if (index < capacity())
+			{
+				auto it{ begin() + index };
+				if (m_channels >= 1) *it++ = c[0];
+				if (m_channels >= 2) *it++ = c[1];
+				if (m_channels >= 3) *it++ = c[2];
+				if (m_channels >= 4) *it++ = c[3];
+				return true;
+			}
+			return false;
+		}
+
+		bool set_pixel(size_t x, size_t y, color32 const & c) noexcept
+		{
+			return set_pixel((x + y * m_size[0]) * m_channels, c);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD bool good() const noexcept { return !m_pixels.empty(); }
 
-		ML_NODISCARD operator bool() const noexcept { return good(); }
+		ML_NODISCARD operator bool() const noexcept { return !m_pixels.empty(); }
 
 		ML_NODISCARD auto operator[](size_t i) -> byte_t & { return m_pixels.at(i); }
 
@@ -166,16 +334,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_image(Args && ... args)
-	{
-		return image{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_IMAGE_HPP_

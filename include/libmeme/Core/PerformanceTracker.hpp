@@ -13,6 +13,7 @@
 
 namespace ml
 {
+	// global performance tracker
 	struct ML_CORE_API performance_tracker final : singleton<performance_tracker>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,9 +22,23 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto const & previous() noexcept
+		struct ML_NODISCARD benchmark final
 		{
-			return get_instance().m_prev;
+			explicit benchmark(cstring id) noexcept : m_id{ id } {}
+
+			~benchmark() noexcept { push(m_id, m_timer.elapsed()); }
+
+		private:
+			cstring m_id{};
+			timer m_timer{};
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static frame_type const & prev() noexcept
+		{
+			static auto & inst{ get_instance() };
+			return inst.m_prev;
 		}
 
 		template <class ... Args
@@ -42,17 +57,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD benchmark final
-		{
-			explicit benchmark(cstring id) noexcept : m_id{ id } {}
-
-			~benchmark() noexcept { push(m_id, m_timer.elapsed()); }
-
-		private: cstring m_id{}; timer m_timer{};
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
 		friend singleton<performance_tracker>;
 
@@ -60,8 +64,8 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		frame_type m_curr; // current frame
-		frame_type m_prev; // previous frame
+		frame_type m_curr{}; // current frame
+		frame_type m_prev{}; // previous frame
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

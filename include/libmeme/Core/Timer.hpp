@@ -21,7 +21,7 @@ namespace ml
 
 		basic_timer(bool start_me = true) noexcept
 		{
-			if (start_me) { this->start(); }
+			if (start_me) { this->restart(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,18 +38,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer & start() & noexcept
+		self_type & start() & noexcept
 		{
-			if (!m_running)
-			{
-				m_running = true;
-				m_current = m_previous = clock_type::now();
-				m_elapsed = 0.0;
-			}
-			return (*this);
+			return m_running ? (*this) : this->restart();
 		}
 
-		basic_timer & stop() & noexcept
+		self_type & stop() & noexcept
 		{
 			if (m_running)
 			{
@@ -57,6 +51,14 @@ namespace ml
 				m_current = clock_type::now();
 				m_elapsed = (m_current - m_previous);
 			}
+			return (*this);
+		}
+
+		self_type & restart() & noexcept
+		{
+			m_running = true;
+			m_current = m_previous = clock_type::now();
+			m_elapsed = {};
 			return (*this);
 		}
 

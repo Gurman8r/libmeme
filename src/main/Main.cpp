@@ -1,4 +1,3 @@
-#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Engine/Engine.hpp>
@@ -14,12 +13,20 @@ using namespace ml;
 #define MAIN_CONFIG L"../../../../assets/libmeme.json"
 #endif
 
+static auto const default_config{ R"(
+{
+	"content_home": "../../../../",
+	"library_home": "../../../../",
+	"setup_script": "assets/scripts/setup.py"
+}
+)"_json };
+
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup memory
-	static struct memcfg final
+	static struct memcfg final : non_copyable
 	{
 		ds::array<byte_t, MAIN_MEMORY>		data{};
 		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
@@ -37,11 +44,11 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup context
-	ML_assert(engine::initialize(([&conf = json{}, &file = std::ifstream{ MAIN_CONFIG }]()
+	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
-		ML_defer{ file.close(); };
-		if (file) { file >> conf; }
-		return conf;
+		ML_defer{ f.close(); };
+		if (f) { f >> j; } else { j = default_config; }
+		return j;
 	})()));
 	ML_defer{ ML_assert(engine::finalize()); };
 	if (!engine::window().is_open()) { return EXIT_FAILURE; }

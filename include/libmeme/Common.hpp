@@ -50,12 +50,12 @@
 // token literal to string
 #define ML_to_string(expr)		#expr
 
-// token contents to string
+// macro contents to string
 #define ML_stringify(expr)		ML_to_string(expr)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// anonymous expressions
+// anonymous expressions		_ml_expr_#_
 #if defined(__COUNTER__)
 #	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
 #elif defined(__LINE__)
@@ -105,18 +105,18 @@
 #	define ML_argc				(0)
 #	define ML_argv				((char**)0)
 #	define ML_envp				((char***)0)
-#	define ML_wargv				((wchar_t**)0)
-#	define ML_wenvp				((wchar_t***)0)
+#	define ML_environ			((wchar_t**)0)
+#	define ML_wenviron			((wchar_t***)0)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // misc
-#define ML_alias				using
+#define ML_alias				using // macro for global typedefs
 #define ML_addressof(ptr)		((void *)(intmax_t)(ptr))
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-#define ML_forward(value)		std::forward<decltype(value)>(value)
+#define ML_forward(expr)		std::forward<decltype(expr)>(expr)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -170,40 +170,26 @@ namespace ml
 	ML_alias	c16string	= typename char16_t const *;
 	ML_alias	c32string	= typename char32_t const *;
 
-	// standard namespaces
+	// namespaces
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace std		= ::std;
-	namespace chrono	= _ML std::chrono;
-	namespace fs		= _ML std::filesystem;
-	namespace pmr		= _ML std::pmr;
+	namespace chrono	= std::chrono;
+	namespace fs		= std::filesystem;
+	namespace pmr		= std::pmr;
 #if (ML_has_cxx20)
-	namespace ranges	= _ML std::ranges;
-	namespace views		= _ML std::ranges::views;
+	namespace ranges	= std::ranges;
+	namespace views		= std::ranges::views;
 #endif
 
 	namespace literals
 	{
-		using namespace _ML std::chrono_literals;
-		using namespace _ML std::string_view_literals;
+		using namespace std::chrono_literals;
+		using namespace std::string_view_literals;
 	}
 	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// standard extensions
-_STD_BEGIN
-
-namespace pmr
-{
-	using stringstream = _STD basic_stringstream<char, char_traits<char>, polymorphic_allocator<char>>;
-}
-
-_STD_END
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_COMMON_HPP_

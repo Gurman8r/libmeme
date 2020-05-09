@@ -102,13 +102,6 @@ namespace ml::embed
 			.def_property_readonly_static("cerr", &ml_stdio::cerr)
 			.def_property_readonly_static("cout", &ml_stdio::cout)
 			;
-		([&m, sys = py::module::import("sys")
-		]()
-		{
-			sys.attr("stdout") = m.attr("stdio").attr("cout");
-			sys.attr("stderr") = m.attr("stdio").attr("cout");
-			sys.attr("stdin") = py::none{};
-		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -381,7 +374,7 @@ namespace ml::embed
 		// VIDEO MODE
 		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
-			.def(py::init<vec2i, uint32_t>())
+			.def(py::init<vec2i const &, uint32_t>())
 			.def_readwrite("size"	, &video_mode::size)
 			.def_readwrite("depth"	, &video_mode::depth)
 			;
@@ -395,6 +388,17 @@ namespace ml::embed
 			.def_readwrite("context", &window_settings::context)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// SETUP
+		([&m, sys = py::module::import("sys")
+		]()
+		{
+			sys.attr("stdout") = m.attr("stdio").attr("cout");
+			sys.attr("stderr") = m.attr("stdio").attr("cout");
+			sys.attr("stdin") = py::none{};
+		})();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
@@ -531,6 +535,7 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// SETUP
 		([&m, builtins = py::module::import("builtins")
 			, sys = py::module::import("sys")
 		]()

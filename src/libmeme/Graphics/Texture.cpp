@@ -140,7 +140,7 @@ namespace ml
 
 	bool texture::load_from_file(fs::path const & path)
 	{
-		return load_from_image(make_image(path));
+		return load_from_image(image{ path });
 	}
 
 	bool texture::load_from_image(image const & img)
@@ -331,7 +331,7 @@ namespace ml
 
 	image texture::copy_to_image() const
 	{
-		auto temp{ make_image(size(), channels()) };
+		auto temp{ image{ size(), channels() } };
 		if (m_handle)
 		{
 			ML_bind_scope(*this);

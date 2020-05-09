@@ -238,143 +238,113 @@ namespace ml
 			// load stuff, etc...
 
 			// ICON
-			if (auto icon{ make_image(engine::fs().path2("assets/textures/icon.png")) })
+			if (image const icon{ engine::fs().path2("assets/textures/icon.png") })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// PIPELINE
 			{
-				(m_pipeline[0] = make_render_texture(vec2i{ 1280, 720 })).generate();
+				(m_pipeline[0] = render_texture{ { 1280, 720 } }).generate();
 			}
 
 			// IMAGES
 			{
-				m_images["default"] = make_image(image::default_rgba);
+				m_images["default"] = image::default_rgba;
 			}
 
 			// TEXTURES
 			{
-				m_textures["default"] = make_texture(m_images["default"]);
-
-				m_textures["doot"] = make_texture(
-					engine::fs().path2("assets/textures/doot.png")
-				);
-
-				m_textures["navball"] = make_texture(
-					engine::fs().path2("assets/textures/navball.png")
-				);
-
-				m_textures["earth_dm_2k"] = make_texture(
-					engine::fs().path2("assets/textures/earth/earth_dm_2k.png")
-				);
-
-				m_textures["earth_sm_2k"] = make_texture(
-					engine::fs().path2("assets/textures/earth/earth_sm_2k.png")
-				);
-
-				m_textures["moon_dm_2k"] = make_texture(
-					engine::fs().path2("assets/textures/moon/moon_dm_2k.png")
-				);
+				m_textures["default"] = texture{ m_images["default"] };
+				
+				m_textures["doot"] = texture{ engine::fs().path2("assets/textures/doot.png") };
+				
+				m_textures["navball"] = texture{ engine::fs().path2("assets/textures/navball.png") };
+				
+				m_textures["earth_dm_2k"] = texture{ engine::fs().path2("assets/textures/earth/earth_dm_2k.png") };
+				
+				m_textures["earth_sm_2k"] = texture{ engine::fs().path2("assets/textures/earth/earth_sm_2k.png") };
+				
+				m_textures["moon_dm_2k"] = texture{ engine::fs().path2("assets/textures/moon/moon_dm_2k.png") };
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"] = make_font(
-					engine::fs().path2("assets/fonts/clacon.ttf")
-				);
-
-				m_fonts["consolas"] = make_font(
-					engine::fs().path2("assets/fonts/consolas.ttf")
-				);
-
-				m_fonts["lucida_console"] = make_font(
-					engine::fs().path2("assets/fonts/lucida_console.ttf")
-				);
-
-				m_fonts["minecraft"] = make_font(
-					engine::fs().path2("assets/fonts/minecraft.ttf")
-				);
+				m_fonts["clacon"] = font{ engine::fs().path2("assets/fonts/clacon.ttf") };
+				
+				m_fonts["consolas"] = font{ engine::fs().path2("assets/fonts/consolas.ttf") };
+				
+				m_fonts["lucida_console"] = font{ engine::fs().path2("assets/fonts/lucida_console.ttf") };
+				
+				m_fonts["minecraft"] = font{ engine::fs().path2("assets/fonts/minecraft.ttf") };
 			}
 
 			// SHADERS
 			{
-				m_shaders["2d"] = make_shader(
+				m_shaders["2d"] = shader{
 					engine::fs().path2("assets/shaders/2D.vs.shader"),
 					engine::fs().path2("assets/shaders/basic.fs.shader")
-				);
+				};
 
-				m_shaders["3d"] = make_shader(
+				m_shaders["3d"] = shader{
 					engine::fs().path2("assets/shaders/3D.vs.shader"),
 					engine::fs().path2("assets/shaders/basic.fs.shader")
-				);
+				};
 			}
 
 			// MATERIALS
 			{
 				// timers
-				auto const _timers = make_material(
-					make_uniform<float_t>("u_time"	, []() { return engine::time().total().count<float_t>(); }),
-					make_uniform<float_t>("u_delta"	, []() { return engine::time().delta().count<float_t>(); })
-				);
+				auto const _timers = material{
+					make_uniform<float_t>("u_time"		, []() { return engine::time().total().count<float_t>(); }),
+					make_uniform<float_t>("u_delta"		, []() { return engine::time().delta().count<float_t>(); })
+				};
 
-				// MVP
-				auto const _mvp = make_material(
+				// mvp
+				auto const _mvp = material{
 					make_uniform<mat4	>("u_model"		, mat4::identity()),
 					make_uniform<mat4	>("u_view"		, mat4::identity()),
 					make_uniform<mat4	>("u_proj"		, mat4::identity())
-				);
+				};
 
 				// camera
-				auto const _camera = make_material(
+				auto const _camera = material{
 					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov"	, 45.0f),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
 					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
-				);
+				};
 
 				// transform
-				auto const _tf = make_material(
+				auto const _tf = material{
 					make_uniform<vec3	>("u_position"	, vec3{}),
 					make_uniform<vec4	>("u_rotation"	, vec4{}),
 					make_uniform<vec3	>("u_scale"		, vec3{})
-				);
+				};
 
-				// 2d
-				m_materials["2d"] = make_material(
+				// earth
+				m_materials["earth"] = material{
 					make_uniform<color	>("u_color"		, colors::white),
-					make_uniform<texture>("u_texture0"	, &m_textures["doot"])
-				) + _timers + _mvp;
-
-				// 3d
-				m_materials["3d"] = make_material(
-					make_uniform<color	>("u_color",	colors::white),
-					make_uniform<texture>("u_texture0", &m_textures["earth_dm_2k"])
+					make_uniform<texture>("u_texture0"	, &m_textures["earth_dm_2k"])
 					//, make_uniform<texture>("u_texture1", &m_textures["earth_sm_2k"])
-				) + _timers + _camera + _tf;
+				} + _timers + _camera + _tf;
 
-				// test
-				m_materials["moon"] = (make_material() + m_materials["3d"])
+				// moon
+				m_materials["moon"] = (material{} + m_materials["3d"])
 					.set<texture>("u_texture0", &m_textures["moon_dm_2k"]);
 			}
 
 			// MODELS
 			{
-				m_models["sphere8x6"] = make_model(
-					engine::fs().path2("assets/models/sphere8x6.obj")
-				);
+				m_models["sphere8x6"] = model{ engine::fs().path2("assets/models/sphere8x6.obj") };
 
-				m_models["sphere32x24"] = make_model(
-					engine::fs().path2("assets/models/sphere32x24.obj")
-				);
+				m_models["sphere32x24"] = model{ engine::fs().path2("assets/models/sphere32x24.obj") };
 
-				m_models["monkey"] = make_model(
-					engine::fs().path2("assets/models/monkey.obj")
-				);
+				m_models["monkey"] = model{ engine::fs().path2("assets/models/monkey.obj") };
 
-				m_models["triangle"] = make_model(make_mesh(
+				m_models["triangle"] = model{ mesh{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
 						vertex{ {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -383,9 +353,9 @@ namespace ml
 					{
 						0, 1, 2,
 					}
-				));
+				} };
 
-				m_models["quad"] = make_model(make_mesh(
+				m_models["quad"] = model{ mesh{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
 						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -396,7 +366,7 @@ namespace ml
 						0, 1, 3,
 						1, 2, 3,
 					}
-				));
+				} };
 			}
 
 			// ENTITIES
@@ -414,7 +384,7 @@ namespace ml
 					return h;
 				};
 				
-				auto & earth = make_renderer("3d", "3d", "sphere32x24", c_transform{
+				auto & earth = make_renderer("3d", "earth", "sphere32x24", c_transform{
 					vec3{ -.5f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .15f },
 					vec3::fill(1.f)
@@ -433,7 +403,7 @@ namespace ml
 			// update stuff, etc...
 
 			// console
-			if (m_cout) { m_console.printss(m_cout); }
+			m_console.printss(m_cout.sstr());
 
 			// plots
 			m_plots.update(engine::time().total().count<float_t>());
@@ -443,13 +413,10 @@ namespace ml
 			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
-			if (m_display_size[0] > 0 && m_display_size[1] > 0)
+			m_pipeline.for_each([&](auto &, render_texture & e)
 			{
-				m_pipeline.for_each([&](auto &, auto & e)
-				{
-					e.resize(m_display_size);
-				});
-			}
+				e.resize(m_display_size);
+			});
 		}
 
 		void on_draw(draw_event const &)
@@ -1157,7 +1124,7 @@ namespace ml
 
 			// benchmarks
 			ImGui::Columns(2);
-			if (static auto const & frame{ performance_tracker::previous() }; !frame.empty())
+			if (static auto const & frame{ performance_tracker::prev() }; !frame.empty())
 			{
 				ImGui::Separator();
 				for (auto const & elem : frame)

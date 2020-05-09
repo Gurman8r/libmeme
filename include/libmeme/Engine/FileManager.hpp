@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		file_manager(json const & j, allocator_type alloc = {}) noexcept;
+		explicit file_manager(json const & j, allocator_type alloc) noexcept;
 		
 		~file_manager() noexcept {}
 
@@ -30,15 +30,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD fs::path const & program_path() const & noexcept { return m_program_path; }
-
 		ML_NODISCARD fs::path const & content_home() const & noexcept { return m_content_home; }
+
+		ML_NODISCARD fs::path const & program_path() const & noexcept { return m_program_path; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		fs::path m_program_path{};
 		fs::path m_content_home{};
+		fs::path m_program_path{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

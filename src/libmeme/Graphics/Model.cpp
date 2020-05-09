@@ -144,7 +144,7 @@ namespace ml
 			});
 
 			// create the mesh
-			m_meshes.emplace_back(make_mesh(verts));
+			m_meshes.emplace_back(mesh{ verts });
 
 		});
 

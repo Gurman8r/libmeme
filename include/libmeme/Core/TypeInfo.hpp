@@ -13,7 +13,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <> struct nameof<> final
+	template <> struct ML_NODISCARD nameof<> final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -21,13 +21,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using name_type = typename pretty_function::name_type;
+		using name_type = typename pretty_function::string_type;
 
 		using guid_type = typename decltype(util::hash(name_type{}));
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_prefix(name_type s, name_type v)
+		static constexpr auto filter_prefix(name_type s, name_type v)
 		{
 			bool const match
 			{
@@ -36,7 +36,7 @@ namespace ml
 			return match ? s.substr(v.size()) : s;
 		}
 
-		ML_NODISCARD static constexpr auto filter_suffix(name_type s, name_type v)
+		static constexpr auto filter_suffix(name_type s, name_type v)
 		{
 			bool const match
 			{
@@ -47,7 +47,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_type(name_type s) noexcept
+		static constexpr auto filter_type(name_type s) noexcept
 		{
 			constexpr auto const
 				pre{ ML_PRETTY_TYPE_PREFIX },
@@ -55,7 +55,7 @@ namespace ml
 			return filter_suffix(filter_prefix(s, pre), suf);
 		}
 
-		ML_NODISCARD static constexpr auto filter_value(name_type s) noexcept
+		static constexpr auto filter_value(name_type s) noexcept
 		{
 			constexpr auto const
 				pre{ ML_PRETTY_VALUE_PREFIX },
@@ -66,13 +66,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_template(name_type s) noexcept
+		static constexpr auto filter_template(name_type s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') };
 			return (t != s.npos) ? s.substr(0, t) : s;
 		}
 
-		ML_NODISCARD static constexpr auto filter_namespace(name_type s) noexcept
+		static constexpr auto filter_namespace(name_type s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') }; // check for template
 			return (t != s.npos)
@@ -80,24 +80,24 @@ namespace ml
 				: s.substr(s.find_last_of(':') + 1);
 		}
 
-		ML_NODISCARD static constexpr auto filter_struct(name_type s) noexcept
+		static constexpr auto filter_struct(name_type s) noexcept
 		{
 			return filter_prefix(s, "struct ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_class(name_type s) noexcept
+		static constexpr auto filter_class(name_type s) noexcept
 		{
 			return filter_prefix(s, "class ");
 		}
 
-		ML_NODISCARD static constexpr auto filter_union(name_type s) noexcept
+		static constexpr auto filter_union(name_type s) noexcept
 		{
 			return filter_prefix(s, "union ");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static constexpr auto filter_all(name_type s) noexcept
+		static constexpr auto filter_all(name_type s) noexcept
 		{
 			return
 				filter_class(

@@ -34,9 +34,9 @@ namespace ml
 
 		void begin_loop() noexcept
 		{
-			m_delta_time = m_loop_timer.stop().elapsed();
+			m_delta_time = m_loop_timer.elapsed();
 
-			m_loop_timer.start();
+			m_loop_timer.restart();
 		}
 
 		void end_loop() noexcept

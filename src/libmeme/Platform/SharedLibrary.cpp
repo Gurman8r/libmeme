@@ -1,6 +1,6 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 
-#ifdef ML_os_windows
+#if defined(ML_os_windows)
 #	include <Windows.h>
 #else
 //	https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html

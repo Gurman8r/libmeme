@@ -3,7 +3,7 @@
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/PlatformEvents.hpp>
 
-#ifdef ML_os_windows
+#if defined(ML_os_windows)
 #	include <Windows.h>
 #else
 #endif

@@ -12,7 +12,6 @@
 namespace ml::util
 {
 	// passthrough resource for collecting upstream usage metrics
-	// intended for use with initial arena
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -119,12 +118,14 @@ namespace ml::util
 
 namespace ml
 {
-	// memory manager
+	// global memory manager
 	struct ML_CORE_API memory_manager final : singleton<memory_manager>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		struct ML_NODISCARD record final
 		{
@@ -143,16 +144,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// setup
+		// set test resource
 		ML_NODISCARD static bool configure(util::test_resource * res) noexcept
 		{
 			static auto & inst{ get_instance() };
 
-			if (inst.m_testres)			{ return debug::error("resource already set"); }
 			if (!res)					{ return debug::error("resource cannot be null"); }
 			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
-			if (!res->buffer())			{ return debug::error("data cannot be null"); }
-			if (!res->is_valid_size())	{ return debug::error("size must be greater than zero"); }
+			if (!res->buffer())			{ return debug::error("resource data cannot be null"); }
+			if (!res->is_valid_size())	{ return debug::error("resource size must be greater than zero"); }
 			if (!res->is_default())		{ return debug::error("resource is not the default resource"); }
 
 			return (inst.m_testres = res);
@@ -166,10 +166,10 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate the requested bytes
-			auto const temp{ inst.m_allocator.allocate(size) };
+			auto const addr{ inst.m_allocator.allocate(size) };
 
 			// create record
-			return *inst.m_records.insert(temp, record{ inst.m_index++, size, temp }).first;
+			return *inst.m_records.insert(addr, record{ inst.m_index++, size, addr }).first;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -177,7 +177,7 @@ namespace ml
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
-			// allocate (count * size) zeroed bytes
+			// allocate (count*size) zeroed bytes
 			return std::memset(allocate(count * size), 0, count * size);
 		}
 
@@ -248,7 +248,7 @@ namespace ml
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
-		ds::map<void *, record>	m_records	{};	// record data
+		ds::map<void *, record>	m_records	{};	// memory records
 		util::test_resource *	m_testres	{};	// test resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

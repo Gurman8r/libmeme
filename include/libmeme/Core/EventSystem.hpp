@@ -14,7 +14,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event listener
+	// global event listener
 	struct ML_CORE_API event_listener
 	{
 		virtual ~event_listener() noexcept;
@@ -24,7 +24,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event system
+	// global event system
 	struct ML_CORE_API event_system final : singleton<event_system>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,10 +33,8 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 			
-			if (!value) { return false; }
-
-			// insert listener into category
-			return inst.m_listeners.at(id).insert(value).second;
+			// add listener to category
+			return value && inst.m_listeners[id].insert(value).second;
 		}
 		
 		template <class Ev
@@ -44,6 +42,7 @@ namespace ml
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
+			// add listener by type
 			return add_listener(hashof_v<Ev>, value);
 		}
 
@@ -53,7 +52,7 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 
-			// find category
+			// get category
 			if (auto const cat{ inst.m_listeners.find(value.ID) })
 			{
 				// for each listener
@@ -70,6 +69,7 @@ namespace ml
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
+			// fire event by type
 			return fire_event(Ev{ ML_forward(args)... });
 		}
 
@@ -81,10 +81,10 @@ namespace ml
 
 			if (!value) { return; }
 
-			// find category
+			// get category
 			if (auto const cat{ inst.m_listeners.find(id) })
 			{
-				// find listener
+				// get listener
 				if (auto const it{ cat->second->find(value) }; it != cat->second->end())
 				{
 					// remove listener
@@ -102,9 +102,9 @@ namespace ml
 			if (!value) { return; }
 
 			// for each category
-			inst.m_listeners.for_each([&](hash_t, auto & cat) noexcept
+			inst.m_listeners.for_each([&](auto, auto & cat) noexcept
 			{
-				// find listener
+				// get listener
 				if (auto const it{ cat.find(value) }; it != cat.end())
 				{
 					// remove listener

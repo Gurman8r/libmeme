@@ -19,14 +19,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allowed_types = typename meta::list<
+		using variable_type = typename std::variant<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			sampler_type
 		>;
-
-		using variable_type = typename meta::rename<std::variant, allowed_types>;
 
 		using function_type = typename std::function<variable_type()>;
 
@@ -115,14 +113,10 @@ namespace ml
 			auto const & d{ std::get<id_data>(m_storage) };
 			switch (d.index())
 			{
-			case id_variable:
-				return std::get<variable_type>(d);
-
-			case id_function:
-				if (auto const & fn{ std::get<function_type>(d) })
-					return std::invoke(fn);
+			default			: return variable_type{};
+			case id_variable: return std::get<variable_type>(d);
+			case id_function: return std::invoke(std::get<function_type>(d));
 			}
-			return variable_type{};
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

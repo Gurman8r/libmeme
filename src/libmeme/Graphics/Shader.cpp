@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	struct shader::uniform_binder final
+	struct shader::uniform_binder final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -206,6 +206,7 @@ namespace ml
 		if (value.name().empty()) { return false; }
 		switch (value.type().guid())
 		{
+		default					: return false;
 		case hashof_v<bool>		: return set_uniform(value.name(), *value.get<bool>());
 		case hashof_v<int32_t>	: return set_uniform(value.name(), *value.get<int32_t>());
 		case hashof_v<float_t>	: return set_uniform(value.name(), *value.get<float_t>());
@@ -218,7 +219,6 @@ namespace ml
 		case hashof_v<mat4>		: return set_uniform(value.name(), *value.get<mat4>());
 		case hashof_v<texture>	: return set_uniform(value.name(), *value.get<texture>());
 		}
-		return false;
 	}
 
 	bool shader::set_uniform(pmr::string const & name, bool value)

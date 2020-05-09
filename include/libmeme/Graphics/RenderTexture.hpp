@@ -68,9 +68,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool nonzero() const noexcept { return m_fbo && m_rbo && m_texture; }
-
-		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
+		ML_NODISCARD operator bool() const noexcept { return (m_fbo && m_rbo && m_texture); }
 
 		ML_NODISCARD auto fbo() const noexcept -> FBO const & { return m_fbo; }
 
@@ -109,7 +107,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ... Args
-	> ML_NODISCARD inline auto make_render_texture(Args && ... args)
+	> ML_NODISCARD inline auto make_render_texture(Args && ... args) noexcept
 	{
 		return render_texture{ ML_forward(args)... };
 	}

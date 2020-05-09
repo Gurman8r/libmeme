@@ -49,11 +49,11 @@ namespace ml
 			return debug::error("failed creating engine context");
 		}
 
-		// initialize window
-		debug::info("initializing window...");
+		// initialize windows
+		debug::info("initializing window backend...");
 		if (!window::initialize())
 		{
-			return debug::error("failed initializing window");
+			return debug::error("failed initializing windo backend");
 		}
 
 		// initialize scripting
@@ -77,7 +77,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
-		// FIXME?: need to clear menus before plugins because menu code can live inside plugins
+		// FIXME: need to clear menus before plugins because menu code can live inside plugins?
 		gui().main_menu_bar().menus.clear();
 
 		// clear plugins
@@ -92,7 +92,7 @@ namespace ml
 		// destroy window
 		window().destroy();
 
-		// finalize window
+		// finalize window backend
 		window::finalize();
 		
 		// destroy context
@@ -104,43 +104,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_window;
 	}
 
