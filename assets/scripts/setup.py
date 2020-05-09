@@ -3,7 +3,7 @@ import libmeme_engine   as engine
 
 # setup window
 print("[ info ] opening window...")
-engine.window.open(ml.window_settings(
+assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ], 32),
     ml.context_settings(
@@ -14,7 +14,7 @@ engine.window.open(ml.window_settings(
         False,  # multisample
         False), # sRGB capable
     ml.window_hints.default_max
-    ))
+    )))
 engine.window.install_default_callbacks()
 engine.window.set_cursor_mode(ml.cursor_mode.normal)
 
