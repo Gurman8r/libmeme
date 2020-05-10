@@ -895,38 +895,6 @@ namespace ml
 		return getProgramParameter(obj, GL::ObjectCompileStatus);
 	}
 
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source) -> int32_t
-	{
-		cstring log{};
-		return compileShader(obj, type, count, source, log);
-	}
-
-	auto GL::compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source, cstring & log) -> int32_t
-	{
-		if ((count < 1) || !source || !*source)
-		{
-			return -1; // true
-		}
-		
-		if (!(obj = createShader(type)))
-		{
-			return 0; // false
-		}
-
-		shaderSource(obj, count, source, nullptr);
-
-		if (!compileShader(obj))
-		{
-			log = getProgramInfoLog(obj);
-
-			deleteShader(obj);
-
-			return 0; // false
-		}
-
-		return 1; // true
-	}
-
 	auto GL::linkProgram(uint32_t obj) -> int32_t
 	{
 #ifdef GL_ARB_shader_objects

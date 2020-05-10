@@ -141,8 +141,6 @@ namespace ml
 		static void attachShader(uint32_t containerObj, uint32_t obj);
 		static void shaderSource(uint32_t obj, int32_t count, cstring const * src, int32_t const * length);
 		static auto compileShader(uint32_t obj) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source) -> int32_t;
-		static auto compileShader(uint32_t & obj, uint32_t type, int32_t count, cstring const * source, cstring & log) -> int32_t;
 		static auto linkProgram(uint32_t obj) -> int32_t;
 
 		static void uniform1i(int32_t location, int32_t value);

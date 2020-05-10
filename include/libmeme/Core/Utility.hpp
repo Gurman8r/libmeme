@@ -15,10 +15,10 @@
 #define ML_clamp(v, lo, hi)		ML_min(ML_max(v, lo), hi)
 
 // flag manipulation
-#define ML_flag_read( v, f)		(v & f)
-#define ML_flag_set(  v, f)		(v |= f)
-#define ML_flag_clear(v, f)		(v &= ~f)
-#define ML_flag_write(v, f, b)	(b ? ML_flag_set(v, f) : ML_flag_clear(v, f))
+#define ML_flag_read( v, i)		(v & i)
+#define ML_flag_set(  v, i)		(v |= i)
+#define ML_flag_clear(v, i)		(v &= ~i)
+#define ML_flag_write(v, i, b)	(b ? ML_flag_set(v, i) : ML_flag_clear(v, i))
 
 // bit manipulation
 #define ML_bit_read( v, i)		ML_flag_read(v >> i, 1)
