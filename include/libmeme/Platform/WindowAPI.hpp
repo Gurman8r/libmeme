@@ -16,15 +16,21 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_alias window_char_fn				= typename void(*)(window_handle, uint32_t);
+	ML_alias window_char_mods_fn		= typename void(*)(window_handle, uint32_t, int32_t, int32_t); // NO EVENT
 	ML_alias window_close_fn			= typename void(*)(window_handle);
+	ML_alias window_content_scale_fn	= typename void(*)(window_handle, float_t, float_t); // NO EVENT
 	ML_alias window_cursor_enter_fn		= typename void(*)(window_handle, int32_t);
 	ML_alias window_cursor_position_fn	= typename void(*)(window_handle, float64_t, float64_t);
+	ML_alias window_drop_fn				= typename void(*)(window_handle, int32_t, cstring[]); // NO EVENT
 	ML_alias window_error_fn			= typename void(*)(int32_t, cstring);
 	ML_alias window_focus_fn			= typename void(*)(window_handle, int32_t);
 	ML_alias window_framebuffer_size_fn	= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_iconify_fn			= typename void(*)(window_handle, int32_t); // NO EVENT
 	ML_alias window_key_fn				= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
+	ML_alias window_maximize_fn			= typename void(*)(window_handle, int32_t); // NO EVENT
 	ML_alias window_mouse_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t);
 	ML_alias window_position_fn			= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_refresh_fn			= typename void(*)(window_handle); // NO EVENT
 	ML_alias window_scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
 	ML_alias window_size_fn				= typename void(*)(window_handle, int32_t, int32_t);
 
@@ -78,6 +84,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum window_client_ : int32_t
+	{
+		window_client_unknown,
+		window_client_opengl,
+		window_client_vulkan,
+		window_client_directx,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum window_hints_ : int32_t
 	{
 		window_hints_none				= 0,
@@ -115,16 +131,6 @@ namespace ml
 		window_profile_core,
 		window_profile_compat,
 		window_profile_debug,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_renderer_ : int32_t
-	{
-		window_renderer_unknown,
-		window_renderer_opengl,
-		window_renderer_vulkan,
-		window_renderer_directx,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

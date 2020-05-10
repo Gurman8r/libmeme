@@ -321,6 +321,15 @@ namespace ml::embed
 			.def_property_readonly_static("scale_to_monitor", [](py::object) { return (int32_t)window_attr_scale_to_monitor; })
 			;
 
+		// WINDOW CLIENT
+		py::class_<window_client_>(m, "window_client")
+			.def(py::init<>())
+			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)window_client_unknown; })
+			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)window_client_opengl; })
+			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)window_client_vulkan; })
+			.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_client_directx; })
+			;
+
 		// WINDOW HINTS
 		py::class_<window_hints_>(m, "window_hints")
 			.def(py::init<>())
@@ -344,15 +353,6 @@ namespace ml::embed
 			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
 			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
 			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
-			;
-
-		// WINDOW RENDERER
-		py::class_<window_renderer_>(m, "window_renderer")
-			.def(py::init<>())
-			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)window_renderer_unknown; })
-			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)window_renderer_opengl; })
-			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)window_renderer_vulkan; })
-			.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_renderer_directx; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

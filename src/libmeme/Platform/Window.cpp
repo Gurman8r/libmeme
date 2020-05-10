@@ -90,16 +90,16 @@ namespace ml
 			set_scroll_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<scroll_event>(ML_forward(x)...); });
 
-			set_window_close_callback([
+			set_close_callback([
 			](auto) noexcept { event_system::fire_event<window_close_event>(); });
 
-			set_window_focus_callback([
+			set_focus_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_focus_event>(ML_forward(x)...); });
 
-			set_window_position_callback([
+			set_position_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_position_event>(ML_forward(x)...); });
 
-			set_window_size_callback([
+			set_size_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_size_event>(ML_forward(x)...); });
 		}
 
@@ -218,27 +218,27 @@ namespace ml
 
 	void window::set_clipboard_string(cstring value)
 	{
-		return m_impl->set_clipboard_string(value);
+		m_impl->set_clipboard_string(value);
 	}
 
 	void window::set_cursor(cursor_handle value)
 	{
-		return m_impl->set_cursor(value);
+		m_impl->set_cursor(value);
 	}
 	
 	void window::set_cursor_mode(int32_t value)
 	{
-		return m_impl->set_cursor_mode(value);
+		m_impl->set_cursor_mode(value);
 	}
 
 	void window::set_cursor_position(vec2d const & value)
 	{
-		return m_impl->set_cursor_position(value);
+		m_impl->set_cursor_position(value);
 	}
 
 	void window::set_fullscreen(bool value)
 	{
-		return m_impl->set_fullscreen(value);
+		m_impl->set_fullscreen(value);
 
 		if (!value)
 		{
@@ -249,43 +249,43 @@ namespace ml
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		return m_impl->set_icon(w, h, p);
+		m_impl->set_icon(w, h, p);
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value)
 	{
-		return m_impl->set_input_mode(mode, value);
+		m_impl->set_input_mode(mode, value);
 	}
 
 	void window::set_opacity(float_t value)
 	{
-		return m_impl->set_opacity(value);
+		m_impl->set_opacity(value);
 	}
 
 	void window::set_position(vec2i const & value)
 	{
-		return m_impl->set_position(value);
+		m_impl->set_position(value);
 	}
 
 	void window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
-		return m_impl->set_monitor(value, bounds);
+		m_impl->set_monitor(value, bounds);
 	}
 
 	void window::set_should_close(bool value)
 	{
-		return m_impl->set_should_close(value);
+		m_impl->set_should_close(value);
 	}
 
 	void window::set_size(vec2i const & value)
 	{
-		return m_impl->set_size(value);
+		m_impl->set_size(value);
 	}
 
 	void window::set_title(cstring value)
 	{
 		m_settings.title = value;
-		return m_impl->set_title(value);
+		m_impl->set_title(value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -345,12 +345,12 @@ namespace ml
 
 	void window::destroy_cursor(cursor_handle value)
 	{
-		return ml_window_impl::destroy_cursor(value);
+		ml_window_impl::destroy_cursor(value);
 	}
 
 	void window::finalize()
 	{
-		return ml_window_impl::finalize();
+		ml_window_impl::finalize();
 
 #ifdef ML_os_windows
 		if (auto const cw{ GetConsoleWindow() })
@@ -362,17 +362,17 @@ namespace ml
 
 	void window::poll_events()
 	{
-		return ml_window_impl::poll_events();
+		ml_window_impl::poll_events();
 	}
 
 	void window::set_current_context(window_handle value)
 	{
-		return ml_window_impl::set_current_context(value);
+		ml_window_impl::set_current_context(value);
 	}
 
 	void window::set_swap_interval(int32_t value)
 	{
-		return ml_window_impl::set_swap_interval(value);
+		ml_window_impl::set_swap_interval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -380,6 +380,21 @@ namespace ml
 	window_char_fn window::set_char_callback(window_char_fn fn)
 	{
 		return m_impl->set_char_callback(fn);
+	}
+
+	window_char_mods_fn window::set_char_mods_callback(window_char_mods_fn fn)
+	{
+		return m_impl->set_char_mods_callback(fn);
+	}
+
+	window_close_fn window::set_close_callback(window_close_fn fn)
+	{
+		return m_impl->set_close_callback(fn);
+	}
+
+	window_content_scale_fn window::set_content_scale_callback(window_content_scale_fn fn)
+	{
+		return m_impl->set_content_scale_callback(fn);
 	}
 	
 	window_cursor_enter_fn window::set_cursor_enter_callback(window_cursor_enter_fn fn)
@@ -392,19 +407,39 @@ namespace ml
 		return m_impl->set_cursor_position_callback(fn);
 	}
 
+	window_drop_fn window::set_drop_callback(window_drop_fn fn)
+	{
+		return m_impl->set_drop_callback(fn);
+	}
+
 	window_error_fn window::set_error_callback(window_error_fn fn)
 	{
 		return m_impl->set_error_callback(fn);
+	}
+
+	window_focus_fn window::set_focus_callback(window_focus_fn fn)
+	{
+		return m_impl->set_focus_callback(fn);
 	}
 
 	window_framebuffer_size_fn window::set_framebuffer_size_callback(window_framebuffer_size_fn fn)
 	{
 		return m_impl->set_framebuffer_size_callback(fn);
 	}
+
+	window_iconify_fn window::set_iconify_callback(window_iconify_fn fn)
+	{
+		return m_impl->set_iconify_callback(fn);
+	}
 	
 	window_key_fn window::set_key_callback(window_key_fn fn)
 	{
 		return m_impl->set_key_callback(fn);
+	}
+
+	window_maximize_fn window::set_maximize_callback(window_maximize_fn fn)
+	{
+		return m_impl->set_maximize_callback(fn);
 	}
 	
 	window_mouse_fn window::set_mouse_callback(window_mouse_fn fn)
@@ -412,29 +447,24 @@ namespace ml
 		return m_impl->set_mouse_callback(fn);
 	}
 	
+	window_position_fn window::set_position_callback(window_position_fn fn)
+	{
+		return m_impl->set_position_callback(fn);
+	}
+
+	window_refresh_fn window::set_refresh_callback(window_refresh_fn fn)
+	{
+		return m_impl->set_refresh_callback(fn);
+	}
+
 	window_scroll_fn window::set_scroll_callback(window_scroll_fn fn)
 	{
 		return m_impl->set_scroll_callback(fn);
 	}
 	
-	window_close_fn window::set_window_close_callback(window_close_fn fn)
+	window_size_fn window::set_size_callback(window_size_fn fn)
 	{
-		return m_impl->set_window_close_callback(fn);
-	}
-	
-	window_focus_fn window::set_window_focus_callback(window_focus_fn fn)
-	{
-		return m_impl->set_window_focus_callback(fn);
-	}
-	
-	window_position_fn window::set_window_position_callback(window_position_fn fn)
-	{
-		return m_impl->set_window_position_callback(fn);
-	}
-	
-	window_size_fn window::set_window_size_callback(window_size_fn fn)
-	{
-		return m_impl->set_window_size_callback(fn);
+		return m_impl->set_size_callback(fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

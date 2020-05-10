@@ -53,10 +53,10 @@ namespace ml
 		{
 			switch (ws.context.api)
 			{
-			case window_renderer_opengl	: return GLFW_OPENGL_API;
-			case window_renderer_vulkan	:
-			case window_renderer_directx:
-			case window_renderer_unknown:
+			case window_client_opengl	: return GLFW_OPENGL_API;
+			case window_client_vulkan	:
+			case window_client_directx:
+			case window_client_unknown:
 			default						: return GLFW_NO_API;
 			}
 		})());
@@ -469,6 +469,27 @@ namespace ml
 			glfwSetCharCallback(m_window,
 				reinterpret_cast<GLFWcharfun>(fn)));
 	}
+
+	window_char_mods_fn impl_window_glfw::set_char_mods_callback(window_char_mods_fn fn)
+	{
+		return reinterpret_cast<window_char_mods_fn>(
+			glfwSetCharModsCallback(m_window,
+				reinterpret_cast<GLFWcharmodsfun>(fn)));
+	}
+
+	window_close_fn impl_window_glfw::set_close_callback(window_close_fn fn)
+	{
+		return reinterpret_cast<window_close_fn>(
+			glfwSetWindowCloseCallback(m_window,
+				reinterpret_cast<GLFWwindowclosefun>(fn)));
+	}
+
+	window_content_scale_fn impl_window_glfw::set_content_scale_callback(window_content_scale_fn fn)
+	{
+		return reinterpret_cast<window_content_scale_fn>(
+			glfwSetWindowContentScaleCallback(m_window,
+				reinterpret_cast<GLFWwindowcontentscalefun>(fn)));
+	}
 	
 	window_cursor_enter_fn impl_window_glfw::set_cursor_enter_callback(window_cursor_enter_fn fn)
 	{
@@ -484,10 +505,24 @@ namespace ml
 				reinterpret_cast<GLFWcursorposfun>(fn)));
 	}
 
+	window_drop_fn impl_window_glfw::set_drop_callback(window_drop_fn fn)
+	{
+		return reinterpret_cast<window_drop_fn>(
+			glfwSetDropCallback(m_window,
+				reinterpret_cast<GLFWdropfun>(fn)));
+	}
+
 	window_error_fn impl_window_glfw::set_error_callback(window_error_fn fn)
 	{
 		return reinterpret_cast<window_error_fn>(
 			glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(fn)));
+	}
+
+	window_focus_fn impl_window_glfw::set_focus_callback(window_focus_fn fn)
+	{
+		return reinterpret_cast<window_focus_fn>(
+			glfwSetWindowFocusCallback(m_window,
+				reinterpret_cast<GLFWwindowfocusfun>(fn)));
 	}
 
 	window_framebuffer_size_fn impl_window_glfw::set_framebuffer_size_callback(window_framebuffer_size_fn fn)
@@ -496,12 +531,26 @@ namespace ml
 			glfwSetFramebufferSizeCallback(m_window,
 				reinterpret_cast<GLFWframebuffersizefun>(fn)));
 	}
+
+	window_iconify_fn impl_window_glfw::set_iconify_callback(window_iconify_fn fn)
+	{
+		return reinterpret_cast<window_iconify_fn>(
+			glfwSetWindowIconifyCallback(m_window,
+				reinterpret_cast<GLFWwindowiconifyfun>(fn)));
+	}
 	
 	window_key_fn impl_window_glfw::set_key_callback(window_key_fn fn)
 	{
 		return reinterpret_cast<window_key_fn>(
 			glfwSetKeyCallback(m_window,
 				reinterpret_cast<GLFWkeyfun>(fn)));
+	}
+
+	window_maximize_fn impl_window_glfw::set_maximize_callback(window_maximize_fn fn)
+	{
+		return reinterpret_cast<window_maximize_fn>(
+			glfwSetWindowMaximizeCallback(m_window,
+				reinterpret_cast<GLFWwindowmaximizefun>(fn)));
 	}
 	
 	window_mouse_fn impl_window_glfw::set_mouse_callback(window_mouse_fn fn)
@@ -511,6 +560,20 @@ namespace ml
 				reinterpret_cast<GLFWmousebuttonfun>(fn)));
 	}
 	
+	window_position_fn impl_window_glfw::set_position_callback(window_position_fn fn)
+	{
+		return reinterpret_cast<window_position_fn>(
+			glfwSetWindowPosCallback(m_window,
+				reinterpret_cast<GLFWwindowposfun>(fn)));
+	}
+
+	window_refresh_fn impl_window_glfw::set_refresh_callback(window_refresh_fn fn)
+	{
+		return reinterpret_cast<window_refresh_fn>(
+			glfwSetWindowRefreshCallback(m_window,
+				reinterpret_cast<GLFWwindowrefreshfun>(fn)));
+	}
+
 	window_scroll_fn impl_window_glfw::set_scroll_callback(window_scroll_fn fn)
 	{
 		return reinterpret_cast<window_scroll_fn>(
@@ -518,28 +581,7 @@ namespace ml
 				reinterpret_cast<GLFWscrollfun>(fn)));
 	}
 	
-	window_close_fn impl_window_glfw::set_window_close_callback(window_close_fn fn)
-	{
-		return reinterpret_cast<window_close_fn>(
-			glfwSetWindowCloseCallback(m_window,
-				reinterpret_cast<GLFWwindowclosefun>(fn)));
-	}
-	
-	window_focus_fn impl_window_glfw::set_window_focus_callback(window_focus_fn fn)
-	{
-		return reinterpret_cast<window_focus_fn>(
-			glfwSetWindowFocusCallback(m_window,
-				reinterpret_cast<GLFWwindowfocusfun>(fn)));
-	}
-	
-	window_position_fn impl_window_glfw::set_window_position_callback(window_position_fn fn)
-	{
-		return reinterpret_cast<window_position_fn>(
-			glfwSetWindowPosCallback(m_window,
-				reinterpret_cast<GLFWwindowposfun>(fn)));
-	}
-	
-	window_size_fn impl_window_glfw::set_window_size_callback(window_size_fn fn)
+	window_size_fn impl_window_glfw::set_size_callback(window_size_fn fn)
 	{
 		return reinterpret_cast<window_size_fn>(
 			glfwSetWindowSizeCallback(m_window,

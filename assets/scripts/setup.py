@@ -7,7 +7,7 @@ assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ]),
     ml.context_settings(
-        ml.window_renderer.opengl, 4, 6,
+        ml.window_client.opengl, 4, 6,
         ml.window_profile.compat,
         24,     # depth bits
         8,      # stencil bits
