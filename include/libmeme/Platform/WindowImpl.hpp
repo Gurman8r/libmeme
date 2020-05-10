@@ -1,12 +1,13 @@
 #ifndef _ML_WINDOW_IMPL_HPP_
 #define _ML_WINDOW_IMPL_HPP_
 
-#include <libmeme/Platform/WindowLib.hpp>
+#include <libmeme/Platform/WindowAPI.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// window implementation base
 	struct window_impl : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

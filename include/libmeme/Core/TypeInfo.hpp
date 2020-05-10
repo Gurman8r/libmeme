@@ -120,12 +120,12 @@ namespace ml
 #ifdef ML_cc_msvc
 	template <> struct nameof<int64_t> final
 	{
-		static constexpr auto value{ "long long"sv }; // __int64
+		static constexpr auto value{ "long long" }; // __int64
 	};
 
 	template <> struct nameof<uint64_t> final
 	{
-		static constexpr auto value{ "unsigned long long"sv }; // unsigned __int64
+		static constexpr auto value{ "unsigned long long" }; // unsigned __int64
 	};
 #endif
 
@@ -137,7 +137,7 @@ namespace ml
 
 	// hash of type
 	template <class T
-	> static constexpr auto hashof_v{ util::hash(nameof_v<T>) };
+	> static constexpr auto hashof_v{ util::hash((nameof<>::name_type)nameof_v<T>) };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -157,7 +157,7 @@ namespace ml
 		template <class ... U
 		> constexpr auto compare(typeof<U...> const & value) noexcept
 		{
-			return ML_compare(m_guid, value.guid());
+			return util::compare(m_guid, value.guid());
 		}
 
 	private:
@@ -194,7 +194,7 @@ namespace ml
 		template <class ... U
 		> constexpr auto compare(typeof<U...> const & value) const noexcept
 		{
-			return ML_compare(m_guid, value.guid());
+			return util::compare(m_guid, value.guid());
 		}
 
 	private:

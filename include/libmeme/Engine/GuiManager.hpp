@@ -23,7 +23,7 @@ namespace ml
 
 		ML_NODISCARD bool is_initialized() noexcept;
 
-		ML_NODISCARD bool initialize(struct window const & win, cstring version);
+		ML_NODISCARD bool initialize(struct window const & w, cstring shading_language_version);
 
 		ML_NODISCARD bool finalize();
 

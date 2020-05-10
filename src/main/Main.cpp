@@ -4,6 +4,7 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 
 using namespace ml;
+using namespace ml::literals;
 
 #ifndef MAIN_MEMORY
 #define MAIN_MEMORY 128_MiB
@@ -43,7 +44,7 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup context
+	// setup engine
 	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
 	{
 		ML_defer{ f.close(); };

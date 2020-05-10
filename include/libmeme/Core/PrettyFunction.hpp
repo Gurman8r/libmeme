@@ -2,7 +2,6 @@
 #define _ML_PRETTY_FUNCTION_HPP_
 
 // Sources:
-// https://github.com/Manu343726/ctti
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/pretty_function.hpp
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -11,6 +10,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// compile time type info string class type
 #ifndef ML_CTTI_STR_TYPE
 #define ML_CTTI_STR_TYPE std::basic_string_view<char,struct std::char_traits<char> >
 #endif

@@ -273,40 +273,6 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// WINDOW API
-		py::class_<window_api_>(m, "window_api")
-			.def(py::init<>())
-			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)window_api_unknown; })
-			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)window_api_opengl; })
-			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)window_api_vulkan; })
-			.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_api_directx; })
-			;
-
-		// WINDOW PROFILE
-		py::class_<window_profile_>(m, "window_profile")
-			.def(py::init<>())
-			.def_property_readonly_static("any", [](py::object) { return (int32_t)window_profile_any; })
-			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
-			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
-			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
-			;
-
-		// WINDOW HINTS
-		py::class_<window_hints_>(m, "window_hints")
-			.def(py::init<>())
-			.def_property_readonly_static("none", [](py::object) { return (int32_t)window_hints_none; })
-			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_hints_resizable; })
-			.def_property_readonly_static("visible", [](py::object) { return (int32_t)window_hints_visible; })
-			.def_property_readonly_static("decorated", [](py::object) { return (int32_t)window_hints_decorated; })
-			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_hints_focused; })
-			.def_property_readonly_static("auto_iconify", [](py::object) { return (int32_t)window_hints_auto_iconify; })
-			.def_property_readonly_static("floating", [](py::object) { return (int32_t)window_hints_floating; })
-			.def_property_readonly_static("maximized", [](py::object) { return (int32_t)window_hints_maximized; })
-			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_hints_doublebuffer; })
-			.def_property_readonly_static("default", [](py::object) { return (int32_t)window_hints_default; })
-			.def_property_readonly_static("default_max", [](py::object) { return (int32_t)window_hints_default_max; })
-			;
-
 		// WINDOW ATTRIBUTES
 		py::class_<window_attr_>(m, "window_attr")
 			.def(py::init<>())
@@ -353,6 +319,40 @@ namespace ml::embed
 			.def_property_readonly_static("context_no_error", [](py::object) { return (int32_t)window_attr_context_no_error; })
 			.def_property_readonly_static("context_creation_api", [](py::object) { return (int32_t)window_attr_context_creation_api; })
 			.def_property_readonly_static("scale_to_monitor", [](py::object) { return (int32_t)window_attr_scale_to_monitor; })
+			;
+
+		// WINDOW HINTS
+		py::class_<window_hints_>(m, "window_hints")
+			.def(py::init<>())
+			.def_property_readonly_static("none", [](py::object) { return (int32_t)window_hints_none; })
+			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_hints_resizable; })
+			.def_property_readonly_static("visible", [](py::object) { return (int32_t)window_hints_visible; })
+			.def_property_readonly_static("decorated", [](py::object) { return (int32_t)window_hints_decorated; })
+			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_hints_focused; })
+			.def_property_readonly_static("auto_iconify", [](py::object) { return (int32_t)window_hints_auto_iconify; })
+			.def_property_readonly_static("floating", [](py::object) { return (int32_t)window_hints_floating; })
+			.def_property_readonly_static("maximized", [](py::object) { return (int32_t)window_hints_maximized; })
+			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_hints_doublebuffer; })
+			.def_property_readonly_static("default", [](py::object) { return (int32_t)window_hints_default; })
+			.def_property_readonly_static("default_maximized", [](py::object) { return (int32_t)window_hints_default_maximized; })
+			;
+
+		// WINDOW PROFILE
+		py::class_<window_profile_>(m, "window_profile")
+			.def(py::init<>())
+			.def_property_readonly_static("any", [](py::object) { return (int32_t)window_profile_any; })
+			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
+			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
+			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
+			;
+
+		// WINDOW RENDERER
+		py::class_<window_renderer_>(m, "window_renderer")
+			.def(py::init<>())
+			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)window_renderer_unknown; })
+			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)window_renderer_opengl; })
+			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)window_renderer_vulkan; })
+			.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_renderer_directx; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -21,9 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader() noexcept : shader{ allocator_type{} } {}
-		
-		explicit shader(allocator_type alloc) noexcept;
+		shader(allocator_type alloc = {});
 		
 		shader(shader_source const & source, allocator_type alloc = {});
 		
@@ -66,15 +64,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & v_file, fs::path const & f_file);
+		ML_NODISCARD bool load_from_file(fs::path const & v_file, fs::path const & f_file);
 
-		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
+		ML_NODISCARD bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
 
-		bool load_from_source(shader_source const & value);
+		ML_NODISCARD bool load_from_source(shader_source const & value);
 
-		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src);
+		ML_NODISCARD bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src);
 
-		bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src);
+		ML_NODISCARD bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

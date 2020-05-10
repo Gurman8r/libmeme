@@ -7,13 +7,13 @@ assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ], 32),
     ml.context_settings(
-        ml.window_api.opengl, 4, 6,
+        ml.window_renderer.opengl, 4, 6,
         ml.window_profile.compat,
         24,     # depth bits
         8,      # stencil bits
         False,  # multisample
         False), # sRGB capable
-    ml.window_hints.default_max
+    ml.window_hints.default_maximized
     )))
 engine.window.install_default_callbacks()
 engine.window.set_cursor_mode(ml.cursor_mode.normal)

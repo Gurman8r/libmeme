@@ -329,14 +329,14 @@ namespace std
 namespace ml::ds
 {
 	template <class T, size_t N
-	> static void to_json(json & j, array<T, N> const & value)
+	> void to_json(json & j, array<T, N> const & value)
 	{
 		// sue me
 		j = *reinterpret_cast<std::array<T, N> const *>(&value);
 	}
 
 	template <class T, size_t N
-	> static void from_json(json const & j, array<T, N> & value)
+	> void from_json(json const & j, array<T, N> & value)
 	{
 		// sue me
 		j.get_to(*reinterpret_cast<std::array<T, N> *>(&value));

@@ -9,15 +9,16 @@ struct GLFWmonitor;
 
 namespace ml
 {
+	// glfw window implementation
 	struct impl_window_glfw final : window_impl
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~impl_window_glfw() noexcept = default;
+		~impl_window_glfw() noexcept { this->destroy(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws) override;
+		ML_NODISCARD bool open(window_settings const & ws) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

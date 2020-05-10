@@ -19,7 +19,7 @@ namespace ml
 	{
 		virtual ~event_listener() noexcept;
 
-		virtual void on_event(event const & ev) = 0;
+		virtual void on_event(event const &) = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

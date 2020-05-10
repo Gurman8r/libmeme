@@ -14,6 +14,13 @@ namespace std::pmr
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// std string template
+#define ML_STD_STRING_TEMPLATE(C, T, A, S)		\
+	class C = char,								\
+	class T = std::char_traits<C>,				\
+	class A = std::allocator<C>,				\
+	class S = std::basic_string<C, T, A>
+
 // pmr string template
 #define ML_PMR_STRING_TEMPLATE(C, T, A, S)		\
 	class C = char,								\

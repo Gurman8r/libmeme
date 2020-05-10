@@ -13,11 +13,11 @@ namespace ml
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename shared_library;
 		using handle_type		= typename void *;
-		using symbols_type		= typename ds::map<hash_t, handle_type>;
+		using symbol_table		= typename ds::map<hash_t, handle_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto native_extension // native library file extension
+		static constexpr auto default_extension // native library file extension
 		{
 #if defined(ML_os_windows)
 			L".dll"
@@ -28,11 +28,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared_library() noexcept : self_type{ allocator_type{} }
-		{
-		}
-
-		explicit shared_library(allocator_type alloc) noexcept
+		shared_library(allocator_type alloc = {}) noexcept
 			: m_handle{}, m_path{}, m_symbols{ alloc }
 		{
 		}
@@ -40,18 +36,18 @@ namespace ml
 		explicit shared_library(fs::path const & path, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			(void)open(path);
+			(void)this->open(path);
 		}
 
 		explicit shared_library(self_type && value, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			swap(std::move(value));
+			this->swap(std::move(value));
 		}
 
 		~shared_library() noexcept
 		{
-			close();
+			this->close();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -103,7 +99,7 @@ namespace ml
 				}
 				else
 				{
-					return (void)std::invoke(fn, ML_forward(args)...);
+					std::invoke(fn, ML_forward(args)...);
 				}
 			}
 			else if constexpr (!std::is_same_v<Ret, void>)
@@ -114,15 +110,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return nonzero(); }
+		ML_NODISCARD bool good() const noexcept { return m_handle; }
 
-		ML_NODISCARD bool nonzero() const noexcept { return m_handle; }
+		ML_NODISCARD operator bool() const noexcept { return this->good(); }
 
 		ML_NODISCARD auto handle() const noexcept -> handle_type const & { return m_handle; }
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
-		ML_NODISCARD auto symbols() const noexcept -> symbols_type const & { return m_symbols; }
+		ML_NODISCARD auto symbols() const noexcept -> symbol_table const & { return m_symbols; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -140,7 +136,7 @@ namespace ml
 			else
 			{
 				static_assert(std::is_same_v<U, hash_t>);
-				return ML_compare(util::hash(m_path.filename().string()), value);
+				return util::compare(util::hash(m_path.filename().string()), value);
 			}
 		}
 
@@ -185,7 +181,7 @@ namespace ml
 	private:
 		handle_type		m_handle;
 		fs::path		m_path;
-		symbols_type	m_symbols;
+		symbol_table	m_symbols;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

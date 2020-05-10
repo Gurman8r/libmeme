@@ -13,11 +13,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type				= typename pmr::vector<byte_t>;
-		using iterator					= typename storage_type::iterator;
-		using const_iterator			= typename storage_type::const_iterator;
-		using reverse_iterator			= typename storage_type::reverse_iterator;
-		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+		using pixels_type				= typename pmr::vector<byte_t>;
+		using iterator					= typename pixels_type::iterator;
+		using const_iterator			= typename pixels_type::const_iterator;
+		using reverse_iterator			= typename pixels_type::reverse_iterator;
+		using const_reverse_iterator	= typename pixels_type::const_reverse_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,16 +38,16 @@ namespace ml
 		}
 
 		image(vec2u const & size, size_t channels, allocator_type alloc = {})
-			: image{ size, channels, storage_type{}, alloc }
+			: image{ size, channels, pixels_type{}, alloc }
 		{
 		}
 
-		image(vec2u const & size, storage_type const & pixels, allocator_type alloc = {})
+		image(vec2u const & size, pixels_type const & pixels, allocator_type alloc = {})
 			: image{ size, 4, pixels, alloc }
 		{
 		}
 
-		image(vec2u const & size, size_t channels, storage_type const & pixels, allocator_type alloc = {})
+		image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type alloc = {})
 			: m_size{ size }
 			, m_channels{ channels }
 			, m_pixels{ pixels, alloc }
@@ -71,7 +71,7 @@ namespace ml
 		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {})
 			: image{ alloc }
 		{
-			load_from_file(path, flip_v, req_channels);
+			(void)load_from_file(path, flip_v, req_channels);
 		}
 
 		image(image const & value, allocator_type alloc = {})
@@ -125,7 +125,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-		bool load_from_file(fs::path const & path, bool flip_v = 0, size_t req_channels = 0);
+		ML_NODISCARD bool load_from_file(fs::path const & path, bool flip_v = 0, size_t req_channels = 0);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -165,17 +165,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_pixels(vec2u const & size, storage_type const & pixels) noexcept
+		image & create_from_pixels(vec2u const & size, pixels_type const & pixels) noexcept
 		{
 			return create_from_pixels(size, m_channels, pixels);
 		}
 
-		image & create_from_pixels(storage_type const & pixels) noexcept
+		image & create_from_pixels(pixels_type const & pixels) noexcept
 		{
 			return create_from_pixels(m_size, m_channels, pixels);
 		}
 
-		image & create_from_pixels(vec2u const & size, size_t channels, storage_type const & pixels) noexcept
+		image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels) noexcept
 		{
 			if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 			{
@@ -229,7 +229,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		std::optional<color32> get_pixel(size_t index) const noexcept
+		ML_NODISCARD std::optional<color32> get_pixel(size_t index) const noexcept
 		{
 			return (index < capacity())
 				? std::make_optional(color32{
@@ -241,7 +241,7 @@ namespace ml
 				: std::nullopt;
 		}
 
-		std::optional<color32> get_pixel(size_t x, size_t y) const noexcept
+		ML_NODISCARD std::optional<color32> get_pixel(size_t x, size_t y) const noexcept
 		{
 			return get_pixel((x + y * m_size[0]) * m_channels);
 		}
@@ -269,9 +269,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool good() const noexcept { return !m_pixels.empty(); }
-
-		ML_NODISCARD operator bool() const noexcept { return !m_pixels.empty(); }
+		ML_NODISCARD operator bool() const noexcept { return !this->empty(); }
 
 		ML_NODISCARD auto operator[](size_t i) -> byte_t & { return m_pixels.at(i); }
 
@@ -291,9 +289,9 @@ namespace ml
 		
 		ML_NODISCARD auto height() const noexcept -> size_t { return m_size[1]; }
 
-		ML_NODISCARD auto pixels() noexcept -> storage_type & { return m_pixels; }
+		ML_NODISCARD auto pixels() noexcept -> pixels_type & { return m_pixels; }
 		
-		ML_NODISCARD auto pixels() const noexcept -> storage_type const & { return m_pixels; }
+		ML_NODISCARD auto pixels() const noexcept -> pixels_type const & { return m_pixels; }
 		
 		ML_NODISCARD auto size() const noexcept -> vec2u const & { return m_size; }
 		
@@ -328,9 +326,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		vec2u			m_size;
-		size_t			m_channels;
-		storage_type	m_pixels;
+		vec2u		m_size;
+		size_t		m_channels;
+		pixels_type	m_pixels;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

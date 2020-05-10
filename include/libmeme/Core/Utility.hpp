@@ -56,6 +56,14 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class Lhs, class Rhs
+	> ML_NODISCARD constexpr auto compare(Lhs && lhs, Rhs && rhs) noexcept
+	{
+		return ML_compare(ML_forward(lhs), ML_forward(rhs));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class LI, class RI
 	> ML_NODISCARD constexpr bool range_equal(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{

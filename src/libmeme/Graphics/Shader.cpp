@@ -54,7 +54,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader::shader(allocator_type alloc) noexcept
+	shader::shader(allocator_type alloc)
 		: m_handle		{}
 		, m_source		{ std::allocator_arg, alloc }
 		, m_attributes	{ alloc }
@@ -66,25 +66,25 @@ namespace ml
 	shader::shader(shader_source const & source, allocator_type alloc)
 		: shader{ alloc }
 	{
-		load_from_source(source);
+		(void)load_from_source(source);
 	}
 
 	shader::shader(fs::path const & v, fs::path const & f, allocator_type alloc)
 		: shader{ alloc }
 	{
-		load_from_file(v, f);
+		(void)load_from_file(v, f);
 	}
 
 	shader::shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc)
 		: shader{ alloc }
 	{
-		load_from_file(v, g, f);
+		(void)load_from_file(v, g, f);
 	}
 
 	shader::shader(shader const & value, allocator_type alloc)
 		: shader{ alloc }
 	{
-		load_from_source(value.m_source);
+		(void)load_from_source(value.m_source);
 	}
 
 	shader::shader(shader && value, allocator_type alloc) noexcept
@@ -103,17 +103,17 @@ namespace ml
 	bool shader::load_from_file(fs::path const & v_file, fs::path const & f_file)
 	{
 		return load_from_memory(
-			util::get_file_string(v_file).c_str(),
-			util::get_file_string(f_file).c_str()
+			util::get_file_string(v_file),
+			util::get_file_string(f_file)
 		);
 	}
 
 	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
 	{
 		return load_from_memory(
-			util::get_file_string(v_file).c_str(),
-			util::get_file_string(g_file).c_str(),
-			util::get_file_string(f_file).c_str()
+			util::get_file_string(v_file),
+			util::get_file_string(g_file),
+			util::get_file_string(f_file)
 		);
 	}
 

@@ -104,13 +104,13 @@ namespace ml
 	texture::texture(fs::path const & path)
 		: texture{}
 	{
-		load_from_file(path);
+		(void)load_from_file(path);
 	}
 
 	texture::texture(image const & image)
 		: texture{}
 	{
-		load_from_image(image);
+		(void)load_from_image(image);
 	}
 
 	texture::texture(texture const & value) : texture{
@@ -122,7 +122,7 @@ namespace ml
 		value.m_flags
 	}
 	{
-		load_from_texture(value);
+		(void)load_from_texture(value);
 	}
 
 	texture::texture(texture && value) noexcept

@@ -1,5 +1,5 @@
-#ifndef _ML_INPUT_HPP_
-#define _ML_INPUT_HPP_
+#ifndef _ML_WINDOW_INPUT_HPP_
+#define _ML_WINDOW_INPUT_HPP_
 
 #include <libmeme/Common.hpp>
 
@@ -193,4 +193,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_INPUT_HPP_
+#endif // !_ML_WINDOW_INPUT_HPP_

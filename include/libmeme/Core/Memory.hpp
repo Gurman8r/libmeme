@@ -249,7 +249,7 @@ namespace ml
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
 		ds::map<void *, record>	m_records	{};	// memory records
-		util::test_resource *	m_testres	{};	// test resource
+		util::test_resource *	m_testres	{};	// pointer to test resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -15,18 +15,16 @@ namespace ml
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }
 	{
+		static ML_scope{ ML_assert(IMGUI_CHECKVERSION()); }; // check imgui version
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	bool gui_manager::is_initialized() noexcept { return (m_gui_context != nullptr); }
 
-	bool gui_manager::initialize(window const & win, cstring version)
+	bool gui_manager::initialize(window const & w, cstring shading_language_version)
 	{
 		if (is_initialized()) { return false; }
-
-		// check imgui version
-		IMGUI_CHECKVERSION();
 
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
@@ -37,7 +35,10 @@ namespace ml
 		);
 
 		// create editor_context
-		m_gui_context = ImGui::CreateContext();
+		if (!(m_gui_context = ImGui::CreateContext()))
+		{
+			return debug::error("failed creating imgui context");
+		}
 
 		auto & im_io{ ImGui::GetIO() };
 		auto & im_style{ ImGui::GetStyle() };
@@ -51,19 +52,16 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		// backend
+		// setup backend
 #if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
-		
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)win.get_handle(), true))
+		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)w.get_handle(), true))
 		{
 			return debug::error("Failed initializing ImGui platform");
 		}
-
-		if (!ImGui_ImplOpenGL3_Init(version))
+		if (!ImGui_ImplOpenGL3_Init(shading_language_version))
 		{
 			return debug::error("Failed initializing ImGui renderer");
 		}
-#else
 #endif
 		return is_initialized();
 	}
@@ -72,14 +70,9 @@ namespace ml
 	{
 		if (!is_initialized()) { return false; }
 
-#if defined(ML_RENDERER_OPENGL)
+#if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
 		ImGui_ImplOpenGL3_Shutdown();
-#else
-#endif
-
-#if defined(ML_PLATFORM_GLFW)
 		ImGui_ImplGlfw_Shutdown();
-#else
 #endif
 
 		ImGui::DestroyContext();
@@ -93,14 +86,9 @@ namespace ml
 
 	void gui_manager::new_frame()
 	{
-#if defined(ML_RENDERER_OPENGL)
+#if defined(ML_RENDERER_OPENGL) && defined(ML_PLATFORM_GLFW)
 		ImGui_ImplOpenGL3_NewFrame();
-#else
-#endif
-
-#if defined(ML_PLATFORM_GLFW)
 		ImGui_ImplGlfw_NewFrame();
-#else
 #endif
 
 		ImGui::NewFrame();
@@ -194,7 +182,6 @@ namespace ml
 
 #if defined(ML_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#else
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{

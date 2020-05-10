@@ -2,7 +2,7 @@
 #define _ML_PLATFORM_EVENTS_HPP_
 
 #include <libmeme/Core/Event.hpp>
-#include <libmeme/Platform/Input.hpp>
+#include <libmeme/Platform/WindowInput.hpp>
 
 namespace ml
 {

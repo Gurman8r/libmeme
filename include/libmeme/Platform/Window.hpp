@@ -2,7 +2,7 @@
 #define _ML_WINDOW_HPP_
 
 #include <libmeme/Platform/Export.hpp>
-#include <libmeme/Platform/WindowLib.hpp>
+#include <libmeme/Platform/WindowAPI.hpp>
 
 namespace ml
 {

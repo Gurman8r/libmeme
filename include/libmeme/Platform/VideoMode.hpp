@@ -16,7 +16,7 @@ namespace ml
 
 		constexpr operator bool() const noexcept
 		{
-			return size[0] && size[1] && depth;
+			return size.nonzero() && depth;
 		}
 
 		constexpr bool operator==(video_mode const & other) const noexcept
@@ -41,7 +41,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void from_json(json const & j, video_mode & value)
+	inline void from_json(json const & j, video_mode & value)
 	{
 		j.at("size").get_to(value.size);
 		j.at("depth").get_to(value.depth);

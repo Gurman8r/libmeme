@@ -27,7 +27,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void from_json(json const & j, context_settings & value)
+	inline void from_json(json const & j, context_settings & value)
 	{
 		j.at("api").get_to(value.api);
 		j.at("major").get_to(value.major);

@@ -620,7 +620,7 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t W, size_t H
-	> static void to_json(json & j, matrix<T, W, H> const & value)
+	> void to_json(json & j, matrix<T, W, H> const & value)
 	{
 		j = value.m_data;
 	}
@@ -628,7 +628,7 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t W, size_t H
-	> static void from_json(json const & j, matrix<T, W, H> & value)
+	> void from_json(json const & j, matrix<T, W, H> & value)
 	{
 		j.get_to(value.m_data);
 	}

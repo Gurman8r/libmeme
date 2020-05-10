@@ -18,11 +18,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(_DEBUG)
-/* * * * * * * * * * * * * * * * Debug */
+//                              Debug
 #   define ML_is_debug          true
 #   define ML_configuration     "debug"
 #else
-/* * * * * * * * * * * * * * * * Release */
+//                              Release
 #   define ML_is_debug          false
 #   define ML_configuration     "release"
 #endif
@@ -33,7 +33,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(__cplusplus)
-/* * * * * * * * * * * * * * * * Lang */
+//                              Lang
 #   if defined(_MSVC_LANG)
 #       define ML_lang           _MSVC_LANG
 #   else
@@ -41,40 +41,38 @@
 #   endif
 
 #   if (ML_lang >= 201907L)
-/* * * * * * * * * * * * * * * * C++20 */
+//                              C++20
 #       define ML_has_cxx20     1
 #       define ML_has_cxx17     1
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 #   elif (ML_lang >= 201703L)
-/* * * * * * * * * * * * * * * * C++17 */
+//                              C++17
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     1
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 #   elif (ML_lang >= 201402L)
-/* * * * * * * * * * * * * * * * C++14 */
+//                              C++14
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     0
 #       define ML_has_cxx14     1
 #       define ML_has_cxx11     1
 
 #   elif (ML_lang >= 201103L)
-/* * * * * * * * * * * * * * * * C++11 */
+//                              C++11
 #       define ML_has_cxx20     0
 #       define ML_has_cxx17     0
 #       define ML_has_cxx14     0
 #       define ML_has_cxx11     1
 
 #   else
-/* * * * * * * * * * * * * * * * Unknown C++ */
 #       error This version of C++ is not supported.
 #   endif
 
 #else
-/* * * * * * * * * * * * * * * * C++ Unsupported */
 #   error This system does not support C++.
 #endif
 
@@ -84,40 +82,38 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(WIN64) || defined(__MINGW32__) || defined(__MINGW64__)
-/* * * * * * * * * * * * * * * * Windows */
+//                              Windows
 #   define ML_os_windows        1
 #   define ML_os_name           "Windows"
 
 #elif defined(__APPLE__) && defined(__MACH__)
-/* * * * * * * * * * * * * * * * Apple */
+//                              Apple
 #   define ML_os_apple          1
 #   define ML_os_name           "Apple"
 
 #elif defined(__unix__)
-/* * * * * * * * * * * * * * * * Unix */
+//                              Unix
 
 #   if defined(__ANDROID__)
-/* * * * * * * * * * * * * * * * Android */
+//                              Android
 #       define ML_os_android    1
 #       define ML_os_name       "Android"
 
 #   elif defined(__linux__)
-/* * * * * * * * * * * * * * * * Linux */
+//                              Linux
 #       define ML_os_linux      1
 #       define ML_os_name       "Linux"
 
 #   elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-/* * * * * * * * * * * * * * * * FreeBSD */
+//                              FreeBSD
 #       define ML_os_freebsd    1
 #       define ML_os_name       "FreeBSD"
 
 #   else
-/* * * * * * * * * * * * * * * * Unknown Unix */
-#       error This Unix system is not supported.
+#       error This unix operating system is not supported.
 #   endif
 
 #else
-/* * * * * * * * * * * * * * * * Unknown Operating System */
 #   error This operating system is not supported.
 #endif
 
@@ -127,19 +123,19 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(_x64)
-/* * * * * * * * * * * * * * * * x64 */
+//                              x64
 #   define ML_x64               1
 #   define ML_arch              64
 #   define ML_platform          "x64"
 
 #elif defined(__i386__) || defined(_M_IX86)
-/* * * * * * * * * * * * * * * * x86 */
+//                              x86
 #   define ML_x86               1
 #   define ML_arch              32
 #   define ML_platform          "x86"
 
 #elif defined(__arm__) || defined(_M_ARM) || defined(__aarch64__)
-/* * * * * * * * * * * * * * * * ARM */
+//                              ARM
 #   if defined(__aarch64__)
 #       define ML_arm64         1
 #       define ML_arch          64
@@ -151,7 +147,7 @@
 #   endif
 
 #elif defined(ppc) || defined(_M_PPC) || defined(__ppc64__)
-/* * * * * * * * * * * * * * * * PowerPC */
+//                              PowerPC
 #   if defined(__ppc64__)
 #       define ML_ppc64         1
 #       define ML_arch          64
@@ -163,7 +159,6 @@
 #   endif
 
 #else
-/* * * * * * * * * * * * * * * * Unknown Architecture */
 #   error Unable to detect platform architecture.
 #endif
 
@@ -173,7 +168,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(_MSC_VER)
-/* * * * * * * * * * * * * * * * Visual Studio */
+//                              Visual Studio
 #   define ML_cc_msvc           _MSC_VER
 #   define ML_cc_version        ML_cc_msvc
 #   if (ML_cc_version >= 1920)
@@ -189,13 +184,13 @@
 #   endif
 
 #elif defined(__clang__)
-/* * * * * * * * * * * * * * * * Clang / LLVM */
+//                              Clang / LLVM
 #   define ML_cc_clang          __clang__
 #   define ML_cc_version        ML_cc_clang
 #   define ML_cc_name           "Clang/LLVM"
 
 #elif (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
-/* * * * * * * * * * * * * * * * GCC */
+//                              GCC
 #   if defined(__GNUC__)
 #       define ML_cc_gcc        __GNUC__
 #   else
@@ -205,7 +200,7 @@
 #   define ML_cc_name           "GCC"
 
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
-/* * * * * * * * * * * * * * * * Intel */
+//                              Intel
 #   if defined(__ICC)
 #       define ML_cc_intel      __ICC
 #   else
@@ -215,7 +210,7 @@
 #   define ML_cc_name           "Intel"
 
 #elif defined(__MINGW32__) || defined(__MINGW64__)
-/* * * * * * * * * * * * * * * * MinGW */
+//                              MinGW
 #   if defined(__MINGW64__)
 #       define ML_cc_mingw      __MINGW64__
 #   else
@@ -225,25 +220,24 @@
 #   define ML_cc_name           "MinGW"
 
 #elif defined(__EMSCRIPTEN__)
-/* * * * * * * * * * * * * * * * Emscripten */
+//                              Emscripten
 #   define ML_cc_emscripten     __EMSCRIPTEN__
 #   define ML_cc_version        ML_cc_emscripten
 #   define ML_cc_name           "Emscripten"
 
 #elif defined(__asmjs__)
-/* * * * * * * * * * * * * * * * asm.js */
+//                              asm.js
 #   define ML_cc_asmjs          __asmjs__
 #   define ML_cc_version        ML_cc_asmjs
 #   define ML_cc_name           "asm.js"
 
 #elif defined(__wasm__)
-/* * * * * * * * * * * * * * * * WebAssembly */
+//                              WebAssembly
 #   define ML_cc_wasm           __wasm__
 #   define ML_cc_version        ML_cc_wasm
 #   define ML_cc_name           "WebAssembly"
 
 #else
-/* * * * * * * * * * * * * * * * Unknown Compiler */
 #   error This compiler is not supported.
 #endif
 

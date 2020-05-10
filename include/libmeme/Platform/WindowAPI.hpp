@@ -1,8 +1,8 @@
-#ifndef _ML_WINDOW_LIB_HPP_
-#define _ML_WINDOW_LIB_HPP_
+#ifndef _ML_WINDOW_API_HPP_
+#define _ML_WINDOW_API_HPP_
 
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Platform/Input.hpp>
+#include <libmeme/Platform/WindowInput.hpp>
 #include <libmeme/Platform/WindowSettings.hpp>
 
 namespace ml
@@ -27,57 +27,6 @@ namespace ml
 	ML_alias window_position_fn			= typename void(*)(window_handle, int32_t, int32_t);
 	ML_alias window_scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
 	ML_alias window_size_fn				= typename void(*)(window_handle, int32_t, int32_t);
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_api_ : int32_t
-	{
-		window_api_unknown,
-		window_api_opengl,
-		window_api_vulkan,
-		window_api_directx,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_profile_ : int32_t
-	{
-		window_profile_any,
-		window_profile_core,
-		window_profile_compat,
-		window_profile_debug,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_hints_ : int32_t
-	{
-		window_hints_none				= 0,
-		window_hints_resizable			= (1 << 0),
-		window_hints_visible			= (1 << 1),
-		window_hints_decorated			= (1 << 2),
-		window_hints_focused			= (1 << 3),
-		window_hints_auto_iconify		= (1 << 4),
-		window_hints_floating			= (1 << 5),
-		window_hints_maximized			= (1 << 6),
-		window_hints_doublebuffer		= (1 << 7),
-
-		// resizable / visible / decorated / focused / auto iconify
-		window_hints_default
-			= window_hints_resizable
-			| window_hints_visible
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify,
-
-		// resizable / decorated / focused / auto iconify / maximized
-		window_hints_default_max
-			= window_hints_resizable
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify
-			| window_hints_maximized,
-	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -128,6 +77,57 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum window_hints_ : int32_t
+	{
+		window_hints_none				= 0,
+		window_hints_resizable			= (1 << 0),
+		window_hints_visible			= (1 << 1),
+		window_hints_decorated			= (1 << 2),
+		window_hints_focused			= (1 << 3),
+		window_hints_auto_iconify		= (1 << 4),
+		window_hints_floating			= (1 << 5),
+		window_hints_maximized			= (1 << 6),
+		window_hints_doublebuffer		= (1 << 7),
+
+		// resizable / visible / decorated / focused / auto iconify
+		window_hints_default
+			= window_hints_resizable
+			| window_hints_visible
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify,
+
+		// resizable / decorated / focused / auto iconify / maximized
+		window_hints_default_maximized
+			= window_hints_resizable
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify
+			| window_hints_maximized,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum window_profile_ : int32_t
+	{
+		window_profile_any,
+		window_profile_core,
+		window_profile_compat,
+		window_profile_debug,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum window_renderer_ : int32_t
+	{
+		window_renderer_unknown,
+		window_renderer_opengl,
+		window_renderer_vulkan,
+		window_renderer_directx,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_WINDOW_LIB_HPP_
+#endif // !_ML_WINDOW_API_HPP_

@@ -14,12 +14,12 @@ namespace ml { ML_alias json = typename nlohmann::json; }
 
 namespace std::filesystem
 {
-	static void to_json(_ML json & j, path const & value)
+	inline void to_json(_ML json & j, path const & value)
 	{
 		j = value.native();
 	}
 
-	static void from_json(_ML json const & j, path & value)
+	inline void from_json(_ML json const & j, path & value)
 	{
 		if (j.is_string()) { value = j.get<pmr::string>(); }
 	}

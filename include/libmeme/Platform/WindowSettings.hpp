@@ -18,7 +18,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static void from_json(json const & j, window_settings & value)
+	inline void from_json(json const & j, window_settings & value)
 	{
 		j.at("title").get_to(value.title);
 		j.at("video").get_to(value.video);

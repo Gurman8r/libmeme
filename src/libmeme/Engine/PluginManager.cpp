@@ -58,7 +58,7 @@ namespace ml
 		}; it == m_data.end<hash_t>())
 		{
 			// load library
-			if (auto && lib{ make_shared_library(path) })
+			if (shared_library lib{ path })
 			{
 				// load plugin
 				if (auto const p{ lib.call<plugin *>("ml_plugin_main") })

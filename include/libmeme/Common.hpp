@@ -84,11 +84,11 @@
 // breakpoint
 #ifndef ML_breakpoint
 #	if (!ML_is_debug)
-#		define ML_breakpoint	((void)0)
+#		define ML_breakpoint()	((void)0)
 #	elif defined(ML_cc_msvc)
-#		define ML_breakpoint	_CSTD __debugbreak()
+#		define ML_breakpoint()	::__debugbreak()
 #	else
-#		define ML_breakpoint	_CSTD raise(SIGTRAP)
+#		define ML_breakpoint()	::raise(SIGTRAP)
 #	endif
 #endif
 
@@ -116,7 +116,7 @@
 #define ML_addressof(ptr)		((void *)(intmax_t)(ptr))
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-#define ML_forward(expr)		std::forward<decltype(expr)>(expr)
+#define ML_forward(x)			std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -170,7 +170,7 @@ namespace ml
 	ML_alias	c16string	= typename char16_t const *;
 	ML_alias	c32string	= typename char32_t const *;
 
-	// namespaces
+	// standard namespaces
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	namespace std		= ::std;
@@ -181,13 +181,6 @@ namespace ml
 	namespace ranges	= std::ranges;
 	namespace views		= std::ranges::views;
 #endif
-
-	namespace literals
-	{
-		using namespace std::chrono_literals;
-		using namespace std::string_view_literals;
-	}
-	using namespace literals;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

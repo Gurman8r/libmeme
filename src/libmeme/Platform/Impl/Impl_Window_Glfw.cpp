@@ -3,7 +3,7 @@
 #include "Impl_Window_Glfw.hpp"
 #include <glfw/glfw3.h>
 
-#ifdef ML_os_windows
+#if defined(ML_os_windows)
 #	undef APIENTRY
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
@@ -26,15 +26,7 @@ namespace ml
 	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * p) noexcept
 	{
 		static ds::set<GLFWimage> cache{};
-		GLFWimage const temp{ (int32_t)w, (int32_t)h, (byte_t *)p };
-		if (auto const it{ cache.find(temp) }; it != cache.end())
-		{
-			return &(*it);
-		}
-		else
-		{
-			return &(*cache.insert(temp).first);
-		}
+		return &cache.find_or_add(GLFWimage{ (int32_t)w, (int32_t)h, (byte_t *)p });
 	}
 }
 
@@ -52,10 +44,10 @@ namespace ml
 		{
 			switch (ws.context.api)
 			{
-			case window_api_opengl	: return GLFW_OPENGL_API;
-			case window_api_vulkan	:
-			case window_api_directx:
-			case window_api_unknown:
+			case window_renderer_opengl	: return GLFW_OPENGL_API;
+			case window_renderer_vulkan	:
+			case window_renderer_directx:
+			case window_renderer_unknown:
 			default						: return GLFW_NO_API;
 			}
 		})());
@@ -99,6 +91,8 @@ namespace ml
 	void impl_window_glfw::destroy()
 	{
 		glfwDestroyWindow(m_window);
+		m_window = nullptr;
+		m_monitor = nullptr;
 	}
 
 	void impl_window_glfw::iconify()
@@ -125,7 +119,7 @@ namespace ml
 
 	bool impl_window_glfw::is_fullscreen() const
 	{
-		return (m_monitor == get_primary_monitor());
+		return m_monitor && (m_monitor == get_primary_monitor());
 	}
 
 	bool impl_window_glfw::is_open() const
@@ -360,7 +354,7 @@ namespace ml
 
 	cursor_handle impl_window_glfw::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return glfwCreateCursor(make_glfw_image(w, h, p), w, h);
+		return glfwCreateCursor(make_glfw_image(w, h, p), (int32_t)w, (int32_t)h);
 	}
 
 	cursor_handle impl_window_glfw::create_standard_cursor(int32_t value)

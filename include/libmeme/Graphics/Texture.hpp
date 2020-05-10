@@ -63,11 +63,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_from_file(fs::path const & path);
+		ML_NODISCARD bool load_from_file(fs::path const & path);
 
-		bool load_from_image(image const & img);
+		ML_NODISCARD bool load_from_image(image const & img);
 
-		bool load_from_texture(texture const & value);
+		ML_NODISCARD bool load_from_texture(texture const & value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
