@@ -374,6 +374,7 @@ namespace ml::embed
 		// VIDEO MODE
 		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
+			.def(py::init<vec2i const &>())
 			.def(py::init<vec2i const &, uint32_t>())
 			.def_readwrite("size"	, &video_mode::size)
 			.def_readwrite("depth"	, &video_mode::depth)

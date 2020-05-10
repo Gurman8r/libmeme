@@ -324,16 +324,21 @@ namespace ml
 					make_uniform<vec3	>("u_scale"		, vec3{})
 				};
 
-				// earth
-				m_materials["earth"] = material{
+				// basic 3d
+				auto const _basic_3d = material{
 					make_uniform<color	>("u_color"		, colors::white),
-					make_uniform<texture>("u_texture0"	, &m_textures["earth_dm_2k"])
-					//, make_uniform<texture>("u_texture1", &m_textures["earth_sm_2k"])
-				} + _timers + _camera + _tf;
+					make_uniform<texture>("u_texture0"	, (texture *)nullptr)
+				} + _timers + _mvp + _camera + _tf;
+
+				// earth
+				m_materials["earth"] = material{ _basic_3d }
+					.set<texture>("u_texture0", &m_textures["earth_dm_2k"])
+					;
 
 				// moon
-				m_materials["moon"] = (material{} + m_materials["3d"])
-					.set<texture>("u_texture0", &m_textures["moon_dm_2k"]);
+				m_materials["moon"] = material{ _basic_3d }
+					.set<texture>("u_texture0", &m_textures["moon_dm_2k"])
+					;
 			}
 
 			// MODELS
@@ -390,7 +395,7 @@ namespace ml
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3d", "moon", "monkey", c_transform{
+				auto & moon = make_renderer("3d", "moon", "sphere8x6", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)

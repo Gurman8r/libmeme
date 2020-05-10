@@ -11,8 +11,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		vec2i		size	{};
-		uint32_t	depth	{};
+		vec2i		size	{ 640, 480 };
+		uint32_t	depth	{ 32 };
 
 		constexpr operator bool() const noexcept
 		{

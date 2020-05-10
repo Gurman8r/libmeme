@@ -77,7 +77,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
-		// FIXME: need to clear menus before plugins because menu code can live inside plugins?
+		// FIXME: need to clear menus before plugins because menu code can live inside plugins
 		gui().main_menu_bar().menus.clear();
 
 		// clear plugins

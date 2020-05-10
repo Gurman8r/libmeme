@@ -10,15 +10,10 @@
 #if (ML_has_cxx11 && ML_has_cxx14)
 #	include <cassert>
 #	include <chrono>
-#	include <cstdarg>
 #	include <fstream>
 #	include <functional>
 #	include <iostream>
-#	include <locale>
-#	include <memory>
 #	include <sstream>
-#	include <type_traits>
-#	include <utility>
 #	include <vector>
 #endif
 
@@ -112,7 +107,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // misc
-#define ML_alias				using // macro for global typedefs
+#define ML_alias				using // global typedef
 #define ML_addressof(ptr)		((void *)(intmax_t)(ptr))
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)

@@ -5,13 +5,13 @@ import libmeme_engine   as engine
 print("[ info ] opening window...")
 assert(engine.window.open(ml.window_settings(
     "libmeme",
-    ml.video_mode([ 1280, 720 ], 32),
+    ml.video_mode([ 1280, 720 ]),
     ml.context_settings(
         ml.window_renderer.opengl, 4, 6,
         ml.window_profile.compat,
         24,     # depth bits
         8,      # stencil bits
-        False,  # multisample
+        True,   # multisample
         False), # sRGB capable
     ml.window_hints.default_maximized
     )))
