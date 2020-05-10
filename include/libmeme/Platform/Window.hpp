@@ -38,13 +38,13 @@ namespace ml
 
 		ML_NODISCARD int32_t get_attribute(int32_t value) const;
 
+		ML_NODISCARD int_rect get_bounds() const;
+
 		ML_NODISCARD cstring get_clipboard_string() const;
 
 		ML_NODISCARD vec2 get_content_scale() const;
 
 		ML_NODISCARD vec2 get_cursor_position() const;
-
-		ML_NODISCARD int_rect get_bounds() const;
 
 		ML_NODISCARD vec2i get_framebuffer_size() const;
 
@@ -99,10 +99,6 @@ namespace ml
 		ML_NODISCARD static int32_t extension_supported(cstring value);
 
 		ML_NODISCARD static window_handle get_current_context();
-
-		ML_NODISCARD static video_mode const & get_desktop_mode();
-		
-		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
 
 		ML_NODISCARD static void * get_proc_address(cstring value);
 		

@@ -7,25 +7,17 @@
 #include <libmeme/Graphics/RendererAPI.hpp>
 
 // renderer singleton
-#define ML_renderer_api \
+#define ML_renderer \
 	_ML renderer::get_instance()
 
 namespace ml
 {
-	// global renderer implementation
+	// global renderer
 	struct ML_GRAPHICS_API renderer final : singleton<renderer>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool is_initialized() const;
-
-		bool initialize();
-
-		bool finalize();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-
+		ML_NODISCARD bool initialize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

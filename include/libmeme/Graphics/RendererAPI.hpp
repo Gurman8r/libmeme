@@ -4,12 +4,34 @@
 // WIP
 
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/Color.hpp>
+#include <libmeme/Core/Rect.hpp>
 
 namespace ml
 {
-	enum gl_ : int32_t
+	enum gl_ : uint32_t
 	{
+		gl_vendor,
+		gl_renderer,
+		gl_version,
+		gl_major_version,
+		gl_minor_version,
+		gl_extensions,
+		gl_num_extensions,
+
+		gl_no_error,
+		gl_invalid_enum,
+		gl_invalid_value,
+		gl_invalid_operation,
+		gl_stack_overflow,
+		gl_stack_underflow,
+		gl_out_of_memory,
+		gl_invalid_framebuffer_operation,
+
+		gl_stream_draw,
+		gl_static_draw,
+		gl_dynamic_draw,
+
 		gl_cull_face,
 		gl_depth_test,
 		gl_alpha_test,
@@ -21,6 +43,8 @@ namespace ml
 		gl_texture_2d,
 		gl_texture_3d,
 		gl_texture_cube_map,
+		gl_max_texture_size,
+		gl_max_combined_texture_image_units,
 
 		gl_array_buffer,
 		gl_element_array_buffer,
@@ -37,37 +61,10 @@ namespace ml
 		gl_texture_binding_2d,
 		gl_sampler_binding,
 		gl_active_texture,
-
-		gl_stream_draw,
-		gl_static_draw,
-		gl_dynamic_draw,
-
-		gl_no_error,
-		gl_invalid_enum,
-		gl_invalid_value,
-		gl_invalid_operation,
-		gl_stack_overflow,
-		gl_stack_underflow,
-		gl_out_of_memory,
-		gl_invalid_framebuffer_operation,
-
-		gl_vendor,
-		gl_renderer,
-		gl_version,
-		gl_extensions,
-		gl_shading_language_version,
-
-		gl_major_version,
-		gl_minor_version,
-		gl_num_extensions,
-		gl_context_flags,
-		gl_context_profile_mask,
-		gl_max_texture_size,
-		gl_max_combined_texture_image_units,
-		gl_info_log_length,
 		gl_polygon_mode,
 		gl_viewport,
 		gl_scissor_box,
+
 		gl_blend_equation_rgb,
 		gl_blend_equation_alpha,
 		gl_blend_dst_rgb,
@@ -82,11 +79,13 @@ namespace ml
 		gl_object_delete_status,
 		gl_object_compile_status,
 		gl_object_link_status,
+		gl_info_log_length,
 		gl_framebuffer_complete,
 
 		gl_fragment_shader,
 		gl_vertex_shader,
 		gl_geometry_shader,
+		gl_shading_language_version,
 
 		gl_points,
 		gl_lines,
@@ -279,6 +278,8 @@ namespace ml
 		gl_draw_buffer14,
 		gl_draw_buffer15,
 
+		gl_context_flags,
+		gl_context_profile_mask,
 		gl_context_core_profile_bit,
 		gl_context_compatability_profile_bit,
 		gl_context_flag_debug_bit,
@@ -286,6 +287,8 @@ namespace ml
 		gl_depth_buffer_bit,
 		gl_stencil_buffer_bit,
 		gl_color_buffer_bit,
+
+		gl_MAX_ENUM
 	};
 }
 

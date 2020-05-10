@@ -11,9 +11,13 @@ namespace ml
 {
 	struct plugin : trackable, non_copyable, event_listener
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~plugin() noexcept = default;
 
-		virtual void on_event(event const & ev) override = 0;
+		virtual void on_event(event const &) override = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 

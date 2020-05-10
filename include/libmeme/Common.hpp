@@ -35,10 +35,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // concat implementation
-#define ML_IMPL_CONCAT(a, b)	a##b
+#define __ML_CONCATENATE(a, b)	a##b
 
 // macro literal concat
-#define ML_concat(a, b)			ML_IMPL_CONCAT(a, b)
+#define ML_concat(a, b)			__ML_CONCATENATE(a, b)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

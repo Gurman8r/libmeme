@@ -26,6 +26,8 @@ includedirs{
 	"%{sln_dir}src/plugins",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
+
+	-- imgui
 	"%{ext_dir}imgui",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include",
 }

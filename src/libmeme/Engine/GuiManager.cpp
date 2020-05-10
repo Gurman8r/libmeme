@@ -53,7 +53,7 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// setup backend
-#if defined(ML_WINDOW_GLFW) && defined(ML_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)w.get_handle(), true))
 		{
 			return debug::error("Failed initializing ImGui platform");
@@ -70,7 +70,7 @@ namespace ml
 	{
 		if (!is_initialized()) { return false; }
 
-#if defined(ML_WINDOW_GLFW) && defined(ML_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 #endif
@@ -86,7 +86,7 @@ namespace ml
 
 	void gui_manager::new_frame()
 	{
-#if defined(ML_WINDOW_GLFW) && defined(ML_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 #endif
@@ -180,7 +180,7 @@ namespace ml
 	{
 		ImGui::Render();
 
-#if defined(ML_RENDERER_OPENGL)
+#if defined(ML_IMPL_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)

@@ -136,11 +136,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(frame_size_event)
+	ML_event(framebuffer_size_event)
 	{
 		int32_t const width, height;
 
-		constexpr frame_size_event(int32_t width, int32_t height) noexcept
+		constexpr framebuffer_size_event(int32_t width, int32_t height) noexcept
 			: width{ width }
 			, height{ height }
 		{

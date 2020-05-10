@@ -361,14 +361,14 @@ namespace ml::embed
 		py::class_<context_settings>(m, "context_settings")
 			.def(py::init<>())
 			.def(py::init<int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, bool, bool>())
-			.def_readwrite("api"			, &context_settings::api)
-			.def_readwrite("major"			, &context_settings::major)
-			.def_readwrite("minor"			, &context_settings::minor)
-			.def_readwrite("profile"		, &context_settings::profile)
-			.def_readwrite("depth_bits"		, &context_settings::depth_bits)
-			.def_readwrite("stencil_bits"	, &context_settings::stencil_bits)
-			.def_readwrite("multisample"	, &context_settings::multisample)
-			.def_readwrite("srgb_capable"	, &context_settings::srgb_capable)
+			.def_readwrite("api", &context_settings::api)
+			.def_readwrite("major", &context_settings::major)
+			.def_readwrite("minor", &context_settings::minor)
+			.def_readwrite("profile", &context_settings::profile)
+			.def_readwrite("depth_bits", &context_settings::depth_bits)
+			.def_readwrite("stencil_bits", &context_settings::stencil_bits)
+			.def_readwrite("multisample", &context_settings::multisample)
+			.def_readwrite("srgb_capable", &context_settings::srgb_capable)
 			;
 
 		// VIDEO MODE
@@ -376,18 +376,20 @@ namespace ml::embed
 			.def(py::init<>())
 			.def(py::init<vec2i const &>())
 			.def(py::init<vec2i const &, uint32_t>())
-			.def_readwrite("size"	, &video_mode::size)
-			.def_readwrite("depth"	, &video_mode::depth)
+			.def_readwrite("size", &video_mode::size)
+			.def_readwrite("depth", &video_mode::depth)
+			.def_static("get_desktop_mode", &video_mode::get_desktop_mode)
+			.def_static("get_fullscreen_modes", &video_mode::get_fullscreen_modes)
 			;
 
 		// WINDOW SETTINGS
 		py::class_<window_settings>(m, "window_settings")
 			.def(py::init<>())
 			.def(py::init<pmr::string const &, video_mode const &, context_settings const &, int32_t>())
-			.def_readwrite("title"	, &window_settings::title)
-			.def_readwrite("video"	, &window_settings::video)
+			.def_readwrite("title", &window_settings::title)
+			.def_readwrite("video", &window_settings::video)
 			.def_readwrite("context", &window_settings::context)
-			.def_readwrite("hints"	, &window_settings::hints)
+			.def_readwrite("hints", &window_settings::hints)
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -517,8 +519,6 @@ namespace ml::embed
 			.def_static("create_standard_cursor", [](int32_t v) { return window::create_standard_cursor(v); })
 			.def_static("extension_supported"	, [](cstring v) { return window::extension_supported(v); })
 			.def_static("get_current_context"	, []() { return window::get_current_context(); })
-			.def_static("get_desktop_mode"		, []() { return window::get_desktop_mode(); })
-			.def_static("get_fullscreen_modes"	, []() { return window::get_fullscreen_modes(); })
 			.def_static("get_proc_address"		, [](cstring v) { return window::get_proc_address(v); })
 			.def_static("get_monitors"			, []() { return window::get_monitors(); })
 			.def_static("get_time"				, []() { return window::get_time(); })

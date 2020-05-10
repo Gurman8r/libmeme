@@ -13,9 +13,9 @@ namespace ml
 
 		union { int32_t location; uint32_t current; uint32_t previous; };
 
-		inline operator bool() const noexcept { return (unknown < location); }
+		operator bool() const noexcept { return (unknown < location); }
 
-		inline operator int32_t() const noexcept { return location; }
+		operator int32_t() const noexcept { return location; }
 
 		template <class Fn
 		> uniform_binder(shader & s, pmr::string const & name, Fn && fn) noexcept

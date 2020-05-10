@@ -14,6 +14,8 @@ namespace ml
 		vec2i		size	{ 640, 480 };
 		uint32_t	depth	{ 32 };
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr operator bool() const noexcept
 		{
 			return size.nonzero() && depth;
@@ -35,6 +37,12 @@ namespace ml
 			return (this != std::addressof(other))
 				&& (size < other.size) || (depth < other.depth);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static video_mode const & get_desktop_mode();
+
+		static pmr::vector<video_mode> const & get_fullscreen_modes();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -14,22 +14,20 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_WINDOW_GLFW)
+#if defined(ML_IMPL_WINDOW_GLFW)
 #include "Impl/Impl_Window_GLFW.hpp"
 using ml_window_impl = _ML impl_window_glfw;
 
-#elif defined(ML_WINDOW_SDL)
+#elif defined(ML_IMPL_WINDOW_SDL)
 #include "Impl/Impl_Window_SDL.hpp"
 using ml_window_impl = _ML impl_window_sdl;
 
-#elif defined(ML_WINDOW_SFML)
+#elif defined(ML_IMPL_WINDOW_SFML)
 #include "Impl/Impl_Window_SFML.hpp"
 using ml_window_impl = _ML impl_window_sfml;
 
-// etc...
-
 #else
-#error Unknown window implementation.
+#error Unknown or invalid window implementation specified.
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -59,7 +57,13 @@ namespace ml
 		// make context current
 		set_current_context(get_handle());
 
-		// install event callbacks
+		// centered
+		set_position((video_mode::get_desktop_mode().size - ws.video.size) / 2);
+
+		// maximized
+		if (get_hint(window_hints_maximized)) { maximize(); }
+
+		// install callbacks
 		if (install_callbacks)
 		{
 			set_char_callback([
@@ -75,7 +79,7 @@ namespace ml
 			](auto ... x) noexcept { event_system::fire_event<window_error_event>(ML_forward(x)...); });
 
 			set_framebuffer_size_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<frame_size_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_system::fire_event<framebuffer_size_event>(ML_forward(x)...); });
 
 			set_key_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<key_event>(ML_forward(x)...); });
@@ -99,10 +103,7 @@ namespace ml
 			](auto, auto ... x) noexcept { event_system::fire_event<window_size_event>(ML_forward(x)...); });
 		}
 
-		// additional setup
-		if (get_hint(window_hints_maximized)) { maximize(); } // maximized
-		else { set_position((get_desktop_mode().size - ws.video.size) / 2); } // centered
-		
+		// success
 		return is_open();
 	}
 
@@ -110,10 +111,7 @@ namespace ml
 
 	void window::destroy()
 	{
-		if (is_open())
-		{
-			m_impl->destroy();
-		}
+		m_impl->destroy();
 	}
 
 	void window::iconify()
@@ -220,74 +218,74 @@ namespace ml
 
 	void window::set_clipboard_string(cstring value)
 	{
-		m_impl->set_clipboard_string(value);
+		return m_impl->set_clipboard_string(value);
 	}
 
 	void window::set_cursor(cursor_handle value)
 	{
-		m_impl->set_cursor(value);
+		return m_impl->set_cursor(value);
 	}
 	
 	void window::set_cursor_mode(int32_t value)
 	{
-		m_impl->set_cursor_mode(value);
+		return m_impl->set_cursor_mode(value);
 	}
 
 	void window::set_cursor_position(vec2d const & value)
 	{
-		m_impl->set_cursor_position(value);
+		return m_impl->set_cursor_position(value);
 	}
 
 	void window::set_fullscreen(bool value)
 	{
-		m_impl->set_fullscreen(value);
+		return m_impl->set_fullscreen(value);
 
 		if (!value)
 		{
 			set_size(m_settings.video.size);
-			set_position((get_desktop_mode().size - get_framebuffer_size()) / 2);
+			set_position((video_mode::get_desktop_mode().size - get_framebuffer_size()) / 2);
 		}
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		m_impl->set_icon(w, h, p);
+		return m_impl->set_icon(w, h, p);
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value)
 	{
-		m_impl->set_input_mode(mode, value);
+		return m_impl->set_input_mode(mode, value);
 	}
 
 	void window::set_opacity(float_t value)
 	{
-		m_impl->set_opacity(value);
+		return m_impl->set_opacity(value);
 	}
 
 	void window::set_position(vec2i const & value)
 	{
-		m_impl->set_position(value);
+		return m_impl->set_position(value);
 	}
 
 	void window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
-		m_impl->set_monitor(value, bounds);
+		return m_impl->set_monitor(value, bounds);
 	}
 
 	void window::set_should_close(bool value)
 	{
-		m_impl->set_should_close(value);
+		return m_impl->set_should_close(value);
 	}
 
 	void window::set_size(vec2i const & value)
 	{
-		m_impl->set_size(value);
+		return m_impl->set_size(value);
 	}
 
 	void window::set_title(cstring value)
 	{
 		m_settings.title = value;
-		m_impl->set_title(value);
+		return m_impl->set_title(value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -310,16 +308,6 @@ namespace ml
 	window_handle window::get_current_context()
 	{
 		return ml_window_impl::get_current_context();
-	}
-
-	video_mode const & window::get_desktop_mode()
-	{
-		return ml_window_impl::get_desktop_mode();
-	}
-
-	pmr::vector<video_mode> const & window::get_fullscreen_modes()
-	{
-		return ml_window_impl::get_fullscreen_modes();
 	}
 
 	void * window::get_proc_address(cstring value)
@@ -357,12 +345,12 @@ namespace ml
 
 	void window::destroy_cursor(cursor_handle value)
 	{
-		ml_window_impl::destroy_cursor(value);
+		return ml_window_impl::destroy_cursor(value);
 	}
 
 	void window::finalize()
 	{
-		ml_window_impl::finalize();
+		return ml_window_impl::finalize();
 
 #ifdef ML_os_windows
 		if (auto const cw{ GetConsoleWindow() })
@@ -374,17 +362,17 @@ namespace ml
 
 	void window::poll_events()
 	{
-		ml_window_impl::poll_events();
+		return ml_window_impl::poll_events();
 	}
 
 	void window::set_current_context(window_handle value)
 	{
-		ml_window_impl::set_current_context(value);
+		return ml_window_impl::set_current_context(value);
 	}
 
 	void window::set_swap_interval(int32_t value)
 	{
-		ml_window_impl::set_swap_interval(value);
+		return ml_window_impl::set_swap_interval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

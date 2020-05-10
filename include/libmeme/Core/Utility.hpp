@@ -264,7 +264,7 @@ namespace ml::util
 	template <class V2, class T = float_t
 	> ML_NODISCARD constexpr auto aspect(V2 const & v) noexcept
 	{
-		return (T{} < v[1]) ? (static_cast<T>(v[0]) / static_cast<T>(v[1])) : T{};
+		return (T{ 0 } < v[1]) ? (static_cast<T>(v[0]) / static_cast<T>(v[1])) : T{ 0 };
 	}
 
 	template <class V2

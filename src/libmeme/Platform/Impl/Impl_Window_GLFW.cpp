@@ -1,4 +1,6 @@
-#ifdef ML_WINDOW_GLFW
+#if defined(ML_IMPL_WINDOW_GLFW)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "Impl_Window_Glfw.hpp"
 #include <glfw/glfw3.h>
@@ -71,10 +73,6 @@ namespace ml
 		})());
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.context.major);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	ws.context.minor);
-		//glfwWindowHint(GLFW_RED_BITS,				8);
-		//glfwWindowHint(GLFW_GREEN_BITS,				8);
-		//glfwWindowHint(GLFW_BLUE_BITS,				8);
-		//glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
 		glfwWindowHint(GLFW_DEPTH_BITS,				ws.context.depth_bits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			ws.context.stencil_bits);
 		glfwWindowHint(GLFW_SRGB_CAPABLE,			ws.context.srgb_capable);
@@ -86,6 +84,10 @@ namespace ml
 		glfwWindowHint(GLFW_FLOATING,				ws.hints & window_hints_floating);
 		glfwWindowHint(GLFW_MAXIMIZED,				ws.hints & window_hints_maximized);
 		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_doublebuffer);
+		//glfwWindowHint(GLFW_RED_BITS,				0);
+		//glfwWindowHint(GLFW_GREEN_BITS,			0);
+		//glfwWindowHint(GLFW_BLUE_BITS,			0);
+		//glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
 		
 		// create window
 		return m_window = glfwCreateWindow(
@@ -397,48 +399,6 @@ namespace ml
 		return glfwGetCurrentContext();
 	}
 
-	video_mode const & impl_window_glfw::get_desktop_mode()
-	{
-		static video_mode temp{};
-		static ML_scope
-		{
-#ifdef ML_os_windows
-		DEVMODE dm; dm.dmSize = sizeof(dm);
-		EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-		temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
-		temp.depth = dm.dmBitsPerPel;
-#else
-		// do the thing
-#endif
-		};
-		return temp;
-	}
-
-	pmr::vector<video_mode> const & impl_window_glfw::get_fullscreen_modes()
-	{
-		static pmr::vector<video_mode> temp{};
-		auto add_vm = [&](video_mode && vm) noexcept
-		{
-			if (std::find(temp.begin(), temp.end(), ML_forward(vm)) == temp.end())
-			{
-				temp.emplace_back(ML_forward(vm));
-			}
-		};
-		static ML_scope
-		{
-#ifdef ML_os_windows
-		DEVMODE dm; dm.dmSize = sizeof(dm);
-		for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
-		{
-			add_vm({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
-		}
-#else
-		// do the thing
-#endif
-		};
-		return temp;
-	}
-
 	void * impl_window_glfw::get_proc_address(cstring value)
 	{
 		return glfwGetProcAddress(value);
@@ -589,4 +549,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // ML_WINDOW_GLFW
+#endif // ML_IMPL_WINDOW_GLFW

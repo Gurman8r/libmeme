@@ -14,9 +14,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		time_manager(json const & j, allocator_type alloc = {}) noexcept
-		{
-		}
+		explicit time_manager(json const & j, allocator_type alloc = {}) noexcept;
 
 		~time_manager() noexcept {}
 
@@ -51,7 +49,7 @@ namespace ml
 
 				m_fps_index = (m_fps_index + 1) % ML_arraysize(m_fps_frames);
 
-				return m_fps_value = (m_fps_accum > 0.0)
+				return (m_fps_accum > 0.0)
 					? 1.0 / (m_fps_accum / (float64_t)ML_arraysize(m_fps_frames))
 					: FLT_MAX;
 			})();
@@ -62,15 +60,14 @@ namespace ml
 	private:
 		timer		m_main_timer{};
 		timer		m_loop_timer{ false };
-
-		int32_t		m_fps_index{};
-		float64_t	m_fps_accum{};
-		float64_t	m_fps_value{};
-		float64_t	m_fps_frames[128]{};
 		
 		duration	m_delta_time{};
 		float64_t	m_frame_rate{};
 		uint64_t	m_frame_count{};
+
+		int32_t		m_fps_index{};
+		float64_t	m_fps_accum{};
+		float64_t	m_fps_frames[128]{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -17,8 +17,8 @@
 
 #include <libmeme/Common.hpp>
 
-// invoke
-#if ML_has_cxx20
+// constexpr invoke
+#if (ML_has_cxx20)
 #	define ML_meta_invoke(fn, ...) std::invoke(fn, ##__VA_ARGS__)
 #else
 #	define ML_meta_invoke(fn, ...) (fn)(##__VA_ARGS__)

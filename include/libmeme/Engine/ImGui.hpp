@@ -31,13 +31,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_WINDOW_GLFW) && defined(ML_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 #	include <imgui/examples/imgui_impl_glfw.h>
 #	include <imgui/examples/imgui_impl_opengl3.h>
 #else

@@ -7,7 +7,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// engine context
 	class engine::engine_context final : trackable, non_copyable
 	{
 		friend class		engine		;
@@ -16,7 +15,7 @@ namespace ml
 		gui_manager			m_gui		; // gui
 		plugin_manager		m_plugins	; // plugins
 		script_manager		m_scripts	; // scripts
-		time_manager		m_time		; // time
+		time_manager		m_time		; // timers
 		render_window		m_window	; // window
 
 		engine_context(json const & j, allocator_type alloc) noexcept
@@ -31,7 +30,7 @@ namespace ml
 		}
 	};
 
-	static engine::engine_context * g_engine{};
+	static engine::engine_context * g_engine{}; // global engine context
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -39,6 +38,7 @@ namespace ml
 
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
+		// already initialized
 		if (is_initialized()) { return debug::error("engine context is already initialized"); }
 
 		// create context
@@ -57,16 +57,18 @@ namespace ml
 
 		// initialize scripting
 		debug::info("initializing scripting...");
-		if (!scripts().initialize())
+		if (!g_engine->m_scripts.initialize())
 		{
 			return debug::error("failed initializing scripting");
 		}
 
 		// execute setup script
-		if (config().contains("setup_script"))
+		if (g_engine->m_config.contains("setup_script"))
 		{
-			debug::info("executing setup...");
-			scripts().do_file(fs().path2(config()["setup_script"]));
+			debug::info("executing setup script...");
+			g_engine->m_scripts.do_file(
+				g_engine->m_fs.path2(
+					g_engine->m_config["setup_script"]));
 		}
 
 		return is_initialized();
@@ -74,22 +76,23 @@ namespace ml
 
 	bool engine::finalize() noexcept
 	{
+		// not initialized
 		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
 
 		// FIXME: need to clear menus before plugins because menu code can live inside plugins
-		gui().main_menu_bar().menus.clear();
+		g_engine->m_gui.main_menu_bar().menus.clear();
 
 		// clear plugins
-		plugins().clear();
+		g_engine->m_plugins.clear();
 
 		// finalize gui
-		(void)gui().finalize();
+		(void)g_engine->m_gui.finalize();
 
 		// finalize scripting
-		(void)scripts().finalize();
+		(void)g_engine->m_scripts.finalize();
 
 		// destroy window
-		window().destroy();
+		g_engine->m_window.destroy();
 
 		// finalize window backend
 		window::finalize();

@@ -16,11 +16,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool is_initialized() const = 0;
+	protected:
+		static ds::array<uint32_t, gl_MAX_ENUM> const g_enum_table; // global enum table
 
-		virtual bool initialize() = 0;
-
-		virtual bool finalize() = 0;
+		ML_NODISCARD static uint32_t get_enum(uint32_t const i) noexcept
+		{
+			return g_enum_table[static_cast<size_t>(i)];
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

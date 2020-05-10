@@ -690,11 +690,11 @@ namespace ml
 		{
 			if (m_pipeline.empty()) return;
 
-			static gui::texture_preview pview{ nullptr, {}, 4.f, 32.f };
+			static gui::texture_preview preview{ nullptr, {}, 4.f, 32.f };
 			
-			pview.value = &m_pipeline.back().second.get_texture();
+			preview.value = &m_pipeline.back().second.tex();
 
-			pview.render([&]()
+			preview.render([&]()
 			{
 				m_display_size = util::maintain(m_display_size, ImGui::GetContentRegionAvail());
 			});

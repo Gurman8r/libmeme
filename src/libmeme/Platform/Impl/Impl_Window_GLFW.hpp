@@ -1,4 +1,4 @@
-#if defined(ML_WINDOW_GLFW)
+#if defined(ML_IMPL_WINDOW_GLFW)
 #ifndef _ML_IMPL_WINDOW_GLFW_HPP_
 #define _ML_IMPL_WINDOW_GLFW_HPP_
 
@@ -10,7 +10,7 @@ struct GLFWmonitor;
 namespace ml
 {
 	// glfw window implementation
-	struct impl_window_glfw final : window_impl
+	struct ML_NODISCARD impl_window_glfw final : window_impl
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,7 +20,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool open(window_settings const & ws) override;
+		bool open(window_settings const & ws) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -36,35 +36,35 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_fullscreen() const override;
+		bool is_fullscreen() const override;
 
-		ML_NODISCARD bool is_open() const override;
+		bool is_open() const override;
 
-		ML_NODISCARD int32_t get_attribute(int32_t value) const override;
+		int32_t get_attribute(int32_t value) const override;
 
-		ML_NODISCARD int_rect get_bounds() const override;
+		int_rect get_bounds() const override;
 
-		ML_NODISCARD cstring get_clipboard_string() const override;
+		cstring get_clipboard_string() const override;
 
-		ML_NODISCARD vec2 get_content_scale() const override;
+		vec2 get_content_scale() const override;
 
-		ML_NODISCARD vec2 get_cursor_position() const override;
+		vec2 get_cursor_position() const override;
 
-		ML_NODISCARD vec2i get_framebuffer_size() const override;
+		vec2i get_framebuffer_size() const override;
 
-		ML_NODISCARD window_handle get_handle() const override;
+		window_handle get_handle() const override;
 
-		ML_NODISCARD int32_t get_input_mode(int32_t mode) const override;
+		int32_t get_input_mode(int32_t mode) const override;
 
-		ML_NODISCARD int32_t get_key(int32_t key) const override;
+		int32_t get_key(int32_t key) const override;
 
-		ML_NODISCARD int32_t get_mouse_button(int32_t button) const override;
+		int32_t get_mouse_button(int32_t button) const override;
 
-		ML_NODISCARD window_handle get_native_handle() const override;
+		window_handle get_native_handle() const override;
 
-		ML_NODISCARD float_t get_opacity() const override;
+		float_t get_opacity() const override;
 
-		ML_NODISCARD vec2i get_position() const override;
+		vec2i get_position() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,27 +96,23 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
+		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 		
-		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value);
+		static cursor_handle create_standard_cursor(int32_t value);
 
-		ML_NODISCARD static int32_t extension_supported(cstring value);
+		static int32_t extension_supported(cstring value);
 
-		ML_NODISCARD static window_handle get_current_context();
+		static window_handle get_current_context();
 
-		ML_NODISCARD static video_mode const & get_desktop_mode();
+		static void * get_proc_address(cstring value);
 		
-		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
+		static pmr::vector<monitor_handle> const & get_monitors();
 
-		ML_NODISCARD static void * get_proc_address(cstring value);
-		
-		ML_NODISCARD static pmr::vector<monitor_handle> const & get_monitors();
+		static monitor_handle get_primary_monitor();
 
-		ML_NODISCARD static monitor_handle get_primary_monitor();
+		static float64_t get_time();
 
-		ML_NODISCARD static float64_t get_time();
-
-		ML_NODISCARD static bool initialize();
+		static bool initialize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -156,4 +152,4 @@ namespace ml
 }
 
 #endif // !_ML_IMPL_WINDOW_GLFW_HPP_
-#endif // ML_WINDOW_GLFW
+#endif // ML_IMPL_WINDOW_GLFW

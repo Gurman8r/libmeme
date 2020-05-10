@@ -1,4 +1,4 @@
-#ifdef ML_RENDERER_OPENGL
+#ifdef ML_IMPL_RENDERER_OPENGL
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -7,30 +7,31 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_OPENGL_ES2)
+#if defined(ML_IMPL_OPENGL_ES2)
 #	include <GLES2/gl2.h>
-#elif defined(ML_OPENGL_ES3)
+#elif defined(ML_IMPL_OPENGL_ES3)
 #	if defined(ML_os_apple && (TARGET_OS_IOS || TARGET_OS_TV))
 #		include <OpenGLES/ES3/gl.h>
 #	else
 #		include <GLES3/gl3.h>
 #	endif
-#elif defined(ML_OPENGL_LOADER_GLEW)
+#elif defined(ML_IMPL_OPENGL_LOADER_GLEW)
 #	include <GL/glew.h>
-#elif defined(ML_OPENGL_LOADER_GL3W)
+#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
 #	include <GL/gl3w.h>
-#elif defined(ML_OPENGL_LOADER_GLAD)
+#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
 #	include <glad/glad.h>
-#elif defined(ML_OPENGL_LOADER_CUSTOM)
+#elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 #	include ML_OPENGL_LOADER_CUSTOM
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if ML_is_debug
-# 	define glCheck(expr) do { expr; _ML GL::checkError(__FILE__, __LINE__, #expr); } while (0)
-#else
+#if (!ML_is_debug)
 # 	define glCheck(expr) (expr)
+#else
+#	define glCheck(expr) \
+	do { expr; _ML GL::checkError(__FILE__, __LINE__, ML_to_string(expr)); } while (0)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -58,14 +59,14 @@ namespace ml
 
 		return s_gl_init = ([]() noexcept
 		{
-#if defined(ML_OPENGL_LOADER_GLEW)
+#if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
 		return GLEW_OK == glewInit();
-#elif defined(ML_OPENGL_LOADER_GL3W)
+#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
 		return gl3wInit();
-#elif defined(ML_OPENGL_LOADER_GLAD)
+#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
 		return gladLoadGL();
-#elif defined(ML_OPENGL_LOADER_CUSTOM)
+#elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 		return false;
 #endif
 		})();

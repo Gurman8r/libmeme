@@ -88,7 +88,7 @@ namespace ml
 
 		ML_NODISCARD auto format() const noexcept -> uint32_t { return m_format; }
 
-		ML_NODISCARD auto get_texture() const noexcept -> texture const & { return m_texture; }
+		ML_NODISCARD auto tex() const noexcept -> texture const & { return m_texture; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
