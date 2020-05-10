@@ -1,8 +1,11 @@
-#ifdef ML_PLATFORM_GLFW
+#ifdef ML_WINDOW_GLFW
 
 #include "Impl_Window_Glfw.hpp"
 #include <glfw/glfw3.h>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// platform specific
 #if defined(ML_os_windows)
 #	undef APIENTRY
 #	include <Windows.h>
@@ -11,12 +14,14 @@
 #else
 #endif
 
-bool operator<(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+bool operator<(GLFWimage const & lhs, GLFWimage const & rhs)
 {
 	return (lhs.width < rhs.width) && (lhs.height < rhs.height) && (lhs.pixels < rhs.pixels);
 }
 
-bool operator==(GLFWimage const & lhs, GLFWimage const & rhs) noexcept
+bool operator==(GLFWimage const & lhs, GLFWimage const & rhs)
 {
 	return !(lhs < rhs) && !(rhs < lhs);
 }
@@ -29,6 +34,8 @@ namespace ml
 		return &cache.find_or_add(GLFWimage{ (int32_t)w, (int32_t)h, (byte_t *)p });
 	}
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -64,6 +71,10 @@ namespace ml
 		})());
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.context.major);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	ws.context.minor);
+		//glfwWindowHint(GLFW_RED_BITS,				8);
+		//glfwWindowHint(GLFW_GREEN_BITS,				8);
+		//glfwWindowHint(GLFW_BLUE_BITS,				8);
+		//glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
 		glfwWindowHint(GLFW_DEPTH_BITS,				ws.context.depth_bits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			ws.context.stencil_bits);
 		glfwWindowHint(GLFW_SRGB_CAPABLE,			ws.context.srgb_capable);
@@ -180,6 +191,13 @@ namespace ml
 		})());
 	}
 
+	int_rect impl_window_glfw::get_bounds() const
+	{
+		int_rect temp{};
+		glfwGetWindowFrameSize(m_window, &temp[0], &temp[1], &temp[2], &temp[3]);
+		return temp;
+	}
+
 	cstring impl_window_glfw::get_clipboard_string() const
 	{
 		return glfwGetClipboardString(m_window);
@@ -197,13 +215,6 @@ namespace ml
 		vec2d temp{};
 		glfwGetCursorPos(m_window, &temp[0], &temp[1]);
 		return (vec2)temp;
-	}
-
-	int_rect impl_window_glfw::get_frame_size() const
-	{
-		int_rect temp{};
-		glfwGetWindowFrameSize(m_window, &temp[0], &temp[1], &temp[2], &temp[3]);
-		return temp;
 	}
 
 	vec2i impl_window_glfw::get_framebuffer_size() const
@@ -578,4 +589,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // ML_PLATFORM_GLFW
+#endif // ML_WINDOW_GLFW

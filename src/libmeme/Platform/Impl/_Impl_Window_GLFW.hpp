@@ -1,4 +1,4 @@
-#if defined(ML_PLATFORM_GLFW)
+#if defined(ML_WINDOW_GLFW)
 #ifndef _ML_IMPL_WINDOW_GLFW_HPP_
 #define _ML_IMPL_WINDOW_GLFW_HPP_
 
@@ -40,13 +40,13 @@ namespace ml
 
 		ML_NODISCARD int32_t get_attribute(int32_t value) const override;
 
+		ML_NODISCARD int_rect get_bounds() const override;
+
 		ML_NODISCARD cstring get_clipboard_string() const override;
 
 		ML_NODISCARD vec2 get_content_scale() const override;
 
 		ML_NODISCARD vec2 get_cursor_position() const override;
-
-		ML_NODISCARD int_rect get_frame_size() const override;
 
 		ML_NODISCARD vec2i get_framebuffer_size() const override;
 
@@ -94,8 +94,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool initialize();
-
 		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 		
 		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value);
@@ -116,11 +114,13 @@ namespace ml
 
 		ML_NODISCARD static float64_t get_time();
 
+		ML_NODISCARD static bool initialize();
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void finalize();
-
 		static void destroy_cursor(cursor_handle value);
+
+		static void finalize();
 
 		static void poll_events();
 
@@ -154,4 +154,4 @@ namespace ml
 }
 
 #endif // !_ML_IMPL_WINDOW_GLFW_HPP_
-#endif // ML_PLATFORM_GLFW
+#endif // ML_WINDOW_GLFW
