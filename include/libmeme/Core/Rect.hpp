@@ -7,13 +7,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T
-	> struct rectangle final
+	template <class T> struct basic_rect final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using value_type		= typename T;
-		using self_type			= typename rectangle<value_type>;
+		using self_type			= typename basic_rect<value_type>;
 		using storage_type		= typename tvec4<value_type>;
 		using coord_type		= typename tvec2<value_type>;
 		using pointer			= typename storage_type::pointer;
@@ -25,28 +24,28 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr rectangle() noexcept
+		constexpr basic_rect() noexcept
 			: m_data{}
 		{
 		}
 
-		constexpr rectangle(T value) noexcept
+		constexpr basic_rect(T value) noexcept
 			: m_data{ value }
 		{
 		}
 		
-		constexpr rectangle(T w, T h) noexcept
+		constexpr basic_rect(T w, T h) noexcept
 			: m_data{ 0, 0, w, h }
 		{
 		}
 		
-		constexpr rectangle(T x, T y, T w, T h) noexcept
+		constexpr basic_rect(T x, T y, T w, T h) noexcept
 			: m_data{ x, y, w, h }
 		{
 		}
 
 		template <class X, class Y, class W, class H
-		> constexpr rectangle(X x, Y y, W w, H h) noexcept : m_data{
+		> constexpr basic_rect(X x, Y y, W w, H h) noexcept : m_data{
 			static_cast<T>(x),
 			static_cast<T>(y),
 			static_cast<T>(w),
@@ -55,23 +54,23 @@ namespace ml
 		{
 		}
 
-		constexpr rectangle(self_type const & value) noexcept
+		constexpr basic_rect(self_type const & value) noexcept
 			: m_data{ value.m_data }
 		{
 		}
 
 		template <class U
-		> constexpr rectangle(tvec4<U> const & value) noexcept
+		> constexpr basic_rect(tvec4<U> const & value) noexcept
 			: m_data{ value }
 		{
 		}
 		
-		constexpr rectangle(coord_type const & pos, coord_type const & size) noexcept
+		constexpr basic_rect(coord_type const & pos, coord_type const & size) noexcept
 			: m_data{ pos[0], pos[1], size[0], size[1] }
 		{
 		}
 		
-		constexpr rectangle(coord_type const & size) noexcept
+		constexpr basic_rect(coord_type const & size) noexcept
 			: m_data{ 0, 0, size[0], size[1] }
 		{
 		}
@@ -142,9 +141,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias float_rect = rectangle<float_t>;
-	ML_alias int_rect	= rectangle<int32_t>;
-	ML_alias uint_rect	= rectangle<uint32_t>;
+	ML_alias float_rect = basic_rect<float_t>;
+	ML_alias int_rect	= basic_rect<int32_t>;
+	ML_alias uint_rect	= basic_rect<uint32_t>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

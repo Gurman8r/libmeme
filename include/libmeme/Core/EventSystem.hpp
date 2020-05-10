@@ -33,7 +33,7 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 			
-			// add listener to category
+			// insert listener into category
 			return value && inst.m_listeners[id].insert(value).second;
 		}
 		

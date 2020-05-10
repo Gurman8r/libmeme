@@ -12,9 +12,17 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~impl_renderer_opengl() noexcept = default;
+		impl_renderer_opengl() noexcept = default;
+
+		~impl_renderer_opengl() noexcept { (void)finalize(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool is_initialized() const override;
+
+		bool initialize() override;
+
+		bool finalize() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

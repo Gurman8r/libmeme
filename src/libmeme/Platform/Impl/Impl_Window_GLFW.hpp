@@ -14,6 +14,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		impl_window_glfw() noexcept = default;
+
 		~impl_window_glfw() noexcept { this->destroy(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

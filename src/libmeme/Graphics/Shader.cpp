@@ -204,7 +204,7 @@ namespace ml
 	bool shader::set_uniform(uniform const & value)
 	{
 		if (value.name().empty()) { return false; }
-		switch (value.type().guid())
+		switch (value.type().hash())
 		{
 		default					: return false;
 		case hashof_v<bool>		: return set_uniform(value.name(), *value.get<bool>());
@@ -349,7 +349,7 @@ namespace ml
 			GL::shaderSource(obj, 1, src, nullptr);
 			if (!GL::compileShader(obj)) // failed to compile
 			{
-				print_errors(obj); // compiler errors
+				print_errors(obj); // print compiler errors
 				GL::deleteShader(obj);
 				return 0;
 			}
@@ -395,7 +395,7 @@ namespace ml
 		// link program
 		if (!GL::linkProgram(m_handle))
 		{
-			print_errors(m_handle); // linker errors
+			print_errors(m_handle); // print linker errors
 			destroy();
 			return EXIT_FAILURE * 8;
 		}

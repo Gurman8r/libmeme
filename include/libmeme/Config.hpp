@@ -93,6 +93,7 @@
 
 #elif defined(__unix__)
 //                              Unix
+#	define ML_os_unix           1
 
 #   if defined(__ANDROID__)
 //                              Android

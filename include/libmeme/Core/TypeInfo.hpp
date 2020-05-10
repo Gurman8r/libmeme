@@ -1,5 +1,5 @@
-#ifndef _ML_TYPE_OF_HPP_
-#define _ML_TYPE_OF_HPP_
+#ifndef _ML_TYPE_INFO_HPP_
+#define _ML_TYPE_INFO_HPP_
 
 #include <libmeme/Core/PrettyFunction.hpp>
 #include <libmeme/Core/Hash.hpp>
@@ -13,6 +13,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// name filters
 	template <> struct ML_NODISCARD nameof<> final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,13 +22,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using name_type = typename pretty_function::string_type;
-
-		using guid_type = typename decltype(util::hash(name_type{}));
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static constexpr auto filter_prefix(name_type s, name_type v)
+		static constexpr auto filter_prefix(pretty_function::string s, pretty_function::string v)
 		{
 			bool const match
 			{
@@ -36,7 +31,7 @@ namespace ml
 			return match ? s.substr(v.size()) : s;
 		}
 
-		static constexpr auto filter_suffix(name_type s, name_type v)
+		static constexpr auto filter_suffix(pretty_function::string s, pretty_function::string v)
 		{
 			bool const match
 			{
@@ -47,7 +42,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto filter_type(name_type s) noexcept
+		static constexpr auto filter_type(pretty_function::string s) noexcept
 		{
 			constexpr auto const
 				pre{ ML_PRETTY_TYPE_PREFIX },
@@ -55,7 +50,7 @@ namespace ml
 			return filter_suffix(filter_prefix(s, pre), suf);
 		}
 
-		static constexpr auto filter_value(name_type s) noexcept
+		static constexpr auto filter_value(pretty_function::string s) noexcept
 		{
 			constexpr auto const
 				pre{ ML_PRETTY_VALUE_PREFIX },
@@ -66,13 +61,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto filter_template(name_type s) noexcept
+		static constexpr auto filter_template(pretty_function::string s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') };
 			return (t != s.npos) ? s.substr(0, t) : s;
 		}
 
-		static constexpr auto filter_namespace(name_type s) noexcept
+		static constexpr auto filter_namespace(pretty_function::string s) noexcept
 		{
 			size_t const t{ s.find_first_of('<') }; // check for template
 			return (t != s.npos)
@@ -80,31 +75,24 @@ namespace ml
 				: s.substr(s.find_last_of(':') + 1);
 		}
 
-		static constexpr auto filter_struct(name_type s) noexcept
+		static constexpr auto filter_struct(pretty_function::string s) noexcept
 		{
 			return filter_prefix(s, "struct ");
 		}
 
-		static constexpr auto filter_class(name_type s) noexcept
+		static constexpr auto filter_class(pretty_function::string s) noexcept
 		{
 			return filter_prefix(s, "class ");
 		}
 
-		static constexpr auto filter_union(name_type s) noexcept
+		static constexpr auto filter_union(pretty_function::string s) noexcept
 		{
 			return filter_prefix(s, "union ");
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static constexpr auto filter_all(name_type s) noexcept
+		static constexpr auto filter_all(pretty_function::string s) noexcept
 		{
-			return
-				filter_class(
-				filter_struct(
-				filter_union(
-				filter_namespace(
-				filter_template(s)))));
+			return filter_class(filter_struct(filter_union(filter_namespace(filter_template(s)))));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -131,13 +119,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// name of type
+	// get type name
 	template <class T
-	> static constexpr auto nameof_v{ nameof<T>::value };
+	> static constexpr auto nameof_v
+	{
+		pretty_function::string{ nameof<T>::value }
+	};
 
-	// hash of type
+	// get type hash
 	template <class T
-	> static constexpr auto hashof_v{ util::hash((nameof<>::name_type)nameof_v<T>) };
+	> static constexpr auto hashof_v
+	{
+		util::hash(pretty_function::string{ nameof_v<T> })
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -145,24 +139,21 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using name_type = typename nameof<>::name_type;
-		using guid_type = typename nameof<>::guid_type;
-
 		constexpr typeof() noexcept = default;
 
-		static constexpr name_type const & name() noexcept { return m_name; }
+		static constexpr auto const & name() noexcept { return m_name; }
 
-		static constexpr guid_type const & guid() noexcept { return m_guid; }
+		static constexpr auto const & hash() noexcept { return m_hash; }
 
 		template <class ... U
-		> constexpr auto compare(typeof<U...> const & value) noexcept
+		> constexpr auto compare(typeof<U...> const & other) noexcept
 		{
-			return util::compare(m_guid, value.guid());
+			return util::compare(m_hash, other.hash());
 		}
 
 	private:
-		static constexpr name_type m_name{ nameof_v<T> };
-		static constexpr guid_type m_guid{ hashof_v<T> };
+		static constexpr pretty_function::string m_name{ nameof_v<T> };
+		static constexpr hash_t m_hash{ hashof_v<T> };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -173,42 +164,42 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using name_type = typename nameof<>::name_type;
-		using guid_type = typename nameof<>::guid_type;
-
 		constexpr typeof() noexcept
-			: m_name{}, m_guid{}
+			: m_name{}, m_hash{}
 		{
 		}
 
 		template <class T
-		> constexpr typeof(typeof<T> const & value) noexcept
-			: m_name{ value.name() }, m_guid{ value.guid() }
+		> constexpr typeof(typeof<T> const & other) noexcept
+			: m_name{ other.name() }, m_hash{ other.hash() }
 		{
 		}
 
-		constexpr name_type const & name() const noexcept { return m_name; }
+		constexpr auto const & name() const noexcept { return m_name; }
 
-		constexpr guid_type const & guid() const noexcept { return m_guid; }
+		constexpr auto const & hash() const noexcept { return m_hash; }
 
 		template <class ... U
-		> constexpr auto compare(typeof<U...> const & value) const noexcept
+		> constexpr auto compare(typeof<U...> const & other) const noexcept
 		{
-			return util::compare(m_guid, value.guid());
+			return util::compare(m_hash, other.hash());
 		}
 
 	private:
-		name_type m_name;
-		guid_type m_guid;
+		pretty_function::string m_name;
+		hash_t m_hash;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// type info
-	template <class ... T
-	> static constexpr auto typeof_v{ typeof<T...>{} };
+	// get type info
+	template <class T
+	> static constexpr auto typeof_v
+	{
+		typeof<T>{}
+	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -319,4 +310,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_TYPE_OF_HPP_
+#endif // !_ML_TYPE_INFO_HPP_

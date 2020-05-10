@@ -16,18 +16,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws);
+		ML_NODISCARD virtual bool open(window_settings const & ws, bool install_callbacks = true);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void install_default_callbacks() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
 		void destroy();
 
 		void iconify();
-		
+
 		void maximize();
 		
 		void restore();
@@ -48,7 +44,7 @@ namespace ml
 
 		ML_NODISCARD vec2 get_cursor_position() const;
 
-		ML_NODISCARD int_rect get_frame_size() const;
+		ML_NODISCARD int_rect get_bounds() const;
 
 		ML_NODISCARD vec2i get_framebuffer_size() const;
 
@@ -96,18 +92,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void destroy_cursor(cursor_handle value);
-
-		static void finalize();
-
-		static void poll_events();
-
-		static void set_current_context(window_handle value);
-
-		static void set_swap_interval(int32_t value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 		
 		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value);
@@ -129,6 +113,18 @@ namespace ml
 		ML_NODISCARD static float64_t get_time();
 
 		ML_NODISCARD static bool initialize();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void destroy_cursor(cursor_handle value);
+
+		static void finalize();
+
+		static void poll_events();
+
+		static void set_current_context(window_handle value);
+
+		static void set_swap_interval(int32_t value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

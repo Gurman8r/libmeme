@@ -1,5 +1,5 @@
-#ifndef _ML_PLATFORM_EVENTS_HPP_
-#define _ML_PLATFORM_EVENTS_HPP_
+#ifndef _ML_WINDOW_EVENTS_HPP_
+#define _ML_WINDOW_EVENTS_HPP_
 
 #include <libmeme/Core/Event.hpp>
 #include <libmeme/Platform/WindowInput.hpp>
@@ -208,4 +208,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_PLATFORM_EVENTS_HPP_
+#endif // !_ML_WINDOW_EVENTS_HPP_

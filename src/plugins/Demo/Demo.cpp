@@ -11,7 +11,7 @@
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Platform/PlatformEvents.hpp>
+#include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Graphics/Binder.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Model.hpp>

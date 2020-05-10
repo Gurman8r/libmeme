@@ -1,19 +1,38 @@
 #include <libmeme/Platform/Window.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Platform/PlatformEvents.hpp>
+#include <libmeme/Platform/WindowEvents.hpp>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// platform specific
 #if defined(ML_os_windows)
 #	include <Windows.h>
-#else
+#elif defined(ML_os_apple)
+#elif defined(ML_os_unix)
 #endif
 
-#if defined(ML_PLATFORM_GLFW)
-//	GLFW
-#	include "Impl/Impl_Window_Glfw.hpp"
-	using ml_window_impl = _ML impl_window_glfw;
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#if defined(ML_WINDOW_GLFW)
+#include "Impl/Impl_Window_GLFW.hpp"
+using ml_window_impl = _ML impl_window_glfw;
+
+#elif defined(ML_WINDOW_SDL)
+#include "Impl/Impl_Window_SDL.hpp"
+using ml_window_impl = _ML impl_window_sdl;
+
+#elif defined(ML_WINDOW_SFML)
+#include "Impl/Impl_Window_SFML.hpp"
+using ml_window_impl = _ML impl_window_sfml;
+
+// etc...
+
 #else
+#error Unknown window implementation.
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -25,7 +44,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::open(window_settings const & ws)
+	bool window::open(window_settings const & ws, bool install_callbacks)
 	{
 		if (is_open())			{ return debug::error("window is already open"); }
 		if (ws.title.empty())	{ return debug::error("invalid window title"); }
@@ -34,63 +53,67 @@ namespace ml
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
 		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
 
+		// store settings
 		m_settings = ws;
 		
+		// make context current
 		set_current_context(get_handle());
-		
-		if (get_hint(window_hints_maximized)) { maximize(); }
+
+		// install event callbacks
+		if (install_callbacks)
+		{
+			set_char_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<char_event>(ML_forward(x)...); });
+
+			set_cursor_enter_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<cursor_enter_event>(ML_forward(x)...); });
+
+			set_cursor_position_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<cursor_position_event>(ML_forward(x)...); });
+
+			set_error_callback([
+			](auto ... x) noexcept { event_system::fire_event<window_error_event>(ML_forward(x)...); });
+
+			set_framebuffer_size_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<frame_size_event>(ML_forward(x)...); });
+
+			set_key_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<key_event>(ML_forward(x)...); });
+
+			set_mouse_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<mouse_event>(ML_forward(x)...); });
+
+			set_scroll_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<scroll_event>(ML_forward(x)...); });
+
+			set_window_close_callback([
+			](auto) noexcept { event_system::fire_event<window_close_event>(); });
+
+			set_window_focus_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<window_focus_event>(ML_forward(x)...); });
+
+			set_window_position_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<window_position_event>(ML_forward(x)...); });
+
+			set_window_size_callback([
+			](auto, auto ... x) noexcept { event_system::fire_event<window_size_event>(ML_forward(x)...); });
+		}
+
+		// additional setup
+		if (get_hint(window_hints_maximized)) { maximize(); } // maximized
+		else { set_position((get_desktop_mode().size - ws.video.size) / 2); } // centered
 		
 		return is_open();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::install_default_callbacks() noexcept
-	{
-		if (!is_open()) { return; }
-
-		set_char_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<char_event>(ML_forward(args)...); });
-
-		set_cursor_enter_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<cursor_enter_event>(ML_forward(args)...); });
-
-		set_cursor_position_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<cursor_position_event>(ML_forward(args)...); });
-
-		set_error_callback([
-		](auto ... args) noexcept { event_system::fire_event<window_error_event>(ML_forward(args)...); });
-
-		set_framebuffer_size_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<frame_size_event>(ML_forward(args)...); });
-
-		set_key_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<key_event>(ML_forward(args)...); });
-
-		set_mouse_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<mouse_event>(ML_forward(args)...); });
-
-		set_scroll_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<scroll_event>(ML_forward(args)...); });
-
-		set_window_close_callback([
-		](auto) noexcept { event_system::fire_event<window_close_event>(); });
-
-		set_window_focus_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<window_focus_event>(ML_forward(args)...); });
-
-		set_window_position_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<window_position_event>(ML_forward(args)...); });
-
-		set_window_size_callback([
-		](auto, auto ... args) noexcept { event_system::fire_event<window_size_event>(ML_forward(args)...); });
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void window::destroy()
 	{
-		m_impl->destroy();
+		if (is_open())
+		{
+			m_impl->destroy();
+		}
 	}
 
 	void window::iconify()
@@ -133,6 +156,11 @@ namespace ml
 		return m_impl->get_attribute(value);
 	}
 
+	int_rect window::get_bounds() const
+	{
+		return m_impl->get_bounds();
+	}
+
 	cstring window::get_clipboard_string() const
 	{
 		return m_impl->get_clipboard_string();
@@ -146,11 +174,6 @@ namespace ml
 	vec2 window::get_cursor_position() const
 	{
 		return m_impl->get_cursor_position();
-	}
-
-	int_rect window::get_frame_size() const
-	{
-		return m_impl->get_frame_size();
 	}
 
 	vec2i window::get_framebuffer_size() const

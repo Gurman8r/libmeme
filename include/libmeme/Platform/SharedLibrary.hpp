@@ -13,7 +13,7 @@ namespace ml
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename shared_library;
 		using handle_type		= typename void *;
-		using symbol_table		= typename ds::map<hash_t, handle_type>;
+		using symbol_table		= typename ds::map<hash_t, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,7 +47,7 @@ namespace ml
 
 		~shared_library() noexcept
 		{
-			this->close();
+			(void)this->close();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,28 +70,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool open(fs::path const & path);
+		ML_NODISCARD bool open(fs::path const & path);
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD bool close();
 
-		bool close();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void * load_symbol(pmr::string const & name);
+		ML_NODISCARD void * load_symbol(pmr::string const & name);
 
 		template <class T
-		> auto load_symbol(pmr::string const & name)
+		> ML_NODISCARD auto load_symbol(pmr::string const & name)
 		{
 			return reinterpret_cast<T>(this->load_symbol(name));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Ret, class ... Args
-		> auto call(pmr::string const & name, Args && ... args)
+		template <class Ret, class Name, class ... Args
+		> auto call(Name && name, Args && ... args)
 		{
-			if (auto const fn{ this->load_symbol<Ret(*)(Args...)>(name) })
+			if (auto const fn{ this->load_symbol<Ret(*)(Args...)>(ML_forward(name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{

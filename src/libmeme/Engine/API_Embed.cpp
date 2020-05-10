@@ -470,9 +470,7 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-			.def_static("open", [](window_settings const & ws) { return engine::window().open(ws); })
-			.def_static("install_default_callbacks", []() { engine::window().install_default_callbacks(); })
-
+			.def_static("open"					, [](window_settings const & ws) { return engine::window().open(ws); })
 			.def_static("destroy"				, []() { engine::window().destroy(); })
 			.def_static("iconify"				, []() { engine::window().iconify(); })
 			.def_static("maximize"				, []() { engine::window().maximize(); })
@@ -485,7 +483,7 @@ namespace ml::embed
 			.def_static("get_clipboard_string"	, []() { return engine::window().get_clipboard_string(); })
 			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
 			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
-			.def_static("get_frame_size"		, []() { return engine::window().get_frame_size(); })
+			.def_static("get_bounds"		, []() { return engine::window().get_bounds(); })
 			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
 			.def_static("get_handle"			, []() { return engine::window().get_handle(); })
 			.def_static("get_input_mode"		, [](int32_t v) { return engine::window().get_input_mode(v); })

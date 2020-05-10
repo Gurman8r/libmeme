@@ -1,5 +1,5 @@
-import libmeme          as ml
-import libmeme_engine   as engine
+import libmeme          as ml       # structures
+import libmeme_engine   as engine   # systems
 
 # setup window
 print("[ info ] opening window...")
@@ -15,7 +15,6 @@ assert(engine.window.open(ml.window_settings(
         False), # sRGB capable
     ml.window_hints.default_maximized
     )))
-engine.window.install_default_callbacks()
 engine.window.set_cursor_mode(ml.cursor_mode.normal)
 
 # setup gui

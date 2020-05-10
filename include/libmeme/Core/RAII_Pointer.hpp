@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	// similar to wheat_ptr, but with less gluten
+	// similar to unique_ptr, uses function pointers for allocation and deallocation
 	template <class T
 	> struct raii_ptr final : trackable, non_copyable
 	{

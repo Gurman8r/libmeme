@@ -349,7 +349,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		console & write(char value)
+		console & write(char const value)
 		{
 			switch (value)
 			{
@@ -364,35 +364,21 @@ namespace ml::gui
 			return (*this);
 		}
 
-		console & printl(pmr::string const & value = {})
-		{
-			return this->print(value).write('\n');
-		}
-
 		console & print(pmr::string const & value)
 		{
-			// FIXME: inefficient
-			if (value.empty())
+			if (!value.empty())
 			{
-				return (*this);
-			}
-			else if (value.find('\n') == value.npos)
-			{
-				for (char const c : value)
+				for (char const & c : value)
 				{
 					this->write(c);
 				}
 			}
-			else if (auto const toks{ util::tokenize(value, "\n") }; !toks.empty())
-			{
-				auto it{ toks.begin() };
-				this->print(*it);
-				while (++it != toks.end())
-				{
-					this->printl(*it);
-				}
-			}
 			return (*this);
+		}
+
+		console & printl(pmr::string const & value = {})
+		{
+			return this->print(value).write('\n');
 		}
 
 		console & printss(pmr::stringstream & value)

@@ -1,8 +1,10 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 
+// platform specific
 #if defined(ML_os_windows)
 #	include <Windows.h>
-#else
+#elif defined(ML_os_apple)
+#elif defined(ML_os_unix)
 //	https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
 #endif
 
@@ -12,7 +14,7 @@ namespace ml
 
 	bool shared_library::open(fs::path const & path)
 	{
-		// already opened
+		// already open
 		if (m_handle) { return false; }
 
 		// set path
@@ -24,12 +26,16 @@ namespace ml
 		// clear symbols
 		m_symbols.clear();
 
-		// open library
+		// load library
 		return m_handle = ([&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return LoadLibraryExW(m_path.c_str(), nullptr, 0);
-#else
+
+#elif defined(ML_os_apple)
+			return nullptr;
+
+#elif defined(ML_os_unix)
 			return nullptr;
 #endif
 		})();
@@ -39,7 +45,7 @@ namespace ml
 
 	bool shared_library::close()
 	{
-		// not opened
+		// not open
 		if (!m_handle) { return false; }
 
 		// clear path
@@ -53,7 +59,11 @@ namespace ml
 		{
 #if defined(ML_os_windows)
 			return FreeLibrary(static_cast<HINSTANCE>(m_handle));
-#else
+
+#elif defined(ML_os_apple)
+			return false;
+
+#elif defined(ML_os_unix)
 			return false;
 #endif
 		})();
@@ -63,7 +73,7 @@ namespace ml
 
 	void * shared_library::load_symbol(pmr::string const & name)
 	{
-		// not opened
+		// not open
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
@@ -71,7 +81,11 @@ namespace ml
 		{
 #if defined(ML_os_windows)
 			return GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());
-#else
+
+#elif defined(ML_os_apple)
+			return nullptr;
+
+#elif defined(ML_os_unix)
 			return nullptr;
 #endif
 		});

@@ -12,6 +12,7 @@
 namespace ml::util
 {
 	// passthrough resource for collecting upstream usage metrics
+	// intended for use with initial buffer
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,6 +56,8 @@ namespace ml::util
 		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_capacity; }
 
 		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
+
+		bool in_range(void * addr) const noexcept { return ((pointer)addr >= begin()) && ((pointer)addr < end()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -109,8 +112,8 @@ namespace ml::util
 		pointer const m_buffer;
 		size_t const m_capacity;
 
-		size_t m_num_alloc {};
-		size_t m_bytes_used {};
+		size_t m_num_alloc{};
+		size_t m_bytes_used{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

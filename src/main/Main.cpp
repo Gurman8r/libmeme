@@ -4,7 +4,7 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 
 using namespace ml;
-using namespace ml::literals;
+using namespace ml::size_literals;
 
 #ifndef MAIN_MEMORY
 #define MAIN_MEMORY 128_MiB

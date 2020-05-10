@@ -3,7 +3,7 @@
 
 // WIP
 
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Graphics/RendererAPI.hpp>
 
 namespace ml
 {
@@ -15,6 +15,12 @@ namespace ml
 		virtual ~renderer_impl() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual bool is_initialized() const = 0;
+
+		virtual bool initialize() = 0;
+
+		virtual bool finalize() = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

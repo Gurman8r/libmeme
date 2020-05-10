@@ -6,6 +6,21 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	bool impl_renderer_opengl::is_initialized() const
+	{
+		return false;
+	}
+
+	bool impl_renderer_opengl::initialize()
+	{
+		return false;
+	}
+
+	bool impl_renderer_opengl::finalize()
+	{
+		return false;
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

@@ -16,7 +16,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool open(window_settings const & ws) = 0;
+		virtual bool open(window_settings const &) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -38,13 +38,13 @@ namespace ml
 
 		virtual int32_t get_attribute(int32_t) const = 0;
 
+		virtual int_rect get_bounds() const = 0;
+
 		virtual cstring get_clipboard_string() const = 0;
 
 		virtual vec2 get_content_scale() const = 0;
 
 		virtual vec2 get_cursor_position() const = 0;
-
-		virtual int_rect get_frame_size() const = 0;
 
 		virtual vec2i get_framebuffer_size() const = 0;
 

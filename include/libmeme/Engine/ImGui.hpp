@@ -37,7 +37,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_PLATFORM_GLFW) && defined(ML_RENDERER_OPENGL)
+#if defined(ML_WINDOW_GLFW) && defined(ML_RENDERER_OPENGL)
 #	include <imgui/examples/imgui_impl_glfw.h>
 #	include <imgui/examples/imgui_impl_opengl3.h>
 #else

@@ -1,7 +1,6 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Platform/PlatformEvents.hpp>
 #include <libmeme/Platform/SharedLibrary.hpp>
 
 namespace ml
@@ -53,7 +52,7 @@ namespace ml
 		debug::info("initializing window backend...");
 		if (!window::initialize())
 		{
-			return debug::error("failed initializing windo backend");
+			return debug::error("failed initializing window backend");
 		}
 
 		// initialize scripting
