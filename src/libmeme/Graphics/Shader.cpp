@@ -332,6 +332,30 @@ namespace ml
 
 	int32_t shader::compile(cstring v_src, cstring g_src, cstring f_src)
 	{
+		auto print_errors = [](uint32_t obj) noexcept
+		{
+			pmr::stringstream ss{ GL::getProgramInfoLog(obj) };
+			pmr::string line;
+			while (std::getline(ss, line))
+			{
+				std::cout << line << '\n';
+			}
+		};
+
+		auto compile_shader = [&](uint32_t & obj, uint32_t type, cstring const * src) noexcept
+		{
+			if (!src || !*src) { return -1; } // no source provided
+			if (!(obj = GL::createShader(type))) { return 0; } // failed to create
+			GL::shaderSource(obj, 1, src, nullptr);
+			if (!GL::compileShader(obj)) // failed to compile
+			{
+				print_errors(obj); // compiler errors
+				GL::deleteShader(obj);
+				return 0;
+			}
+			return 1; // success
+		};
+
 		// check shaders available
 		if (!GL::shadersAvailable()) { return EXIT_FAILURE * 1; }
 
@@ -344,21 +368,6 @@ namespace ml
 		// generate program
 		if (!generate()) { return EXIT_FAILURE * 4; }
 		
-		// compile helper
-		auto compile_shader = [](uint32_t & obj, uint32_t type, cstring const * src) noexcept
-		{
-			if (!src || !*src) { return -1; } // no source provided
-			if (!(obj = GL::createShader(type))) { return 0; } // failed to create
-			GL::shaderSource(obj, 1, src, nullptr);
-			if (!GL::compileShader(obj)) // failed to compile
-			{
-				cstring log = GL::getProgramInfoLog(obj); // compile errors
-				GL::deleteShader(obj);
-				return 0;
-			}
-			return 1; // success
-		};
-
 		// vertex
 		uint32_t v_obj{};
 		switch (compile_shader(v_obj, GL::VertexShader, &v_src))
@@ -386,7 +395,7 @@ namespace ml
 		// link program
 		if (!GL::linkProgram(m_handle))
 		{
-			debug::error(GL::getProgramInfoLog(m_handle));
+			print_errors(m_handle); // linker errors
 			destroy();
 			return EXIT_FAILURE * 8;
 		}
