@@ -62,10 +62,13 @@ namespace ml
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
 		return GLEW_OK == glewInit();
+
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
 		return gl3wInit();
+
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
 		return gladLoadGL();
+
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 		return false;
 #endif

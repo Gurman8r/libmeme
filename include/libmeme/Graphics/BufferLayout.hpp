@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_GRAPHICS_API buffer_layout final
+	struct buffer_layout final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

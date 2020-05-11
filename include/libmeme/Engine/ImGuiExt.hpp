@@ -127,7 +127,7 @@ namespace ml::gui
 
 		void render() const noexcept
 		{
-			ML_scope_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(ML_addressof(this));
 
 			// expand to available width
 			float_t width{ size[0] };
@@ -220,7 +220,7 @@ namespace ml::gui
 		> void render(Fn && fn, Args && ... args) noexcept
 		{
 			if (!open) { return; }
-			ML_scope_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(ML_addressof(this));
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
@@ -448,7 +448,7 @@ namespace ml::gui
 
 		console & render()
 		{
-			ML_scope_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(ML_addressof(this));
 
 			// HEADER
 			filter.Draw("filter", 180); ImGui::SameLine();
@@ -644,7 +644,7 @@ namespace ml::gui
 		{
 			if (m_path.empty() || !fs::is_directory(m_path)) { return; }
 
-			ML_scope_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(ML_addressof(this));
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 			ImGui::Separator();
@@ -670,7 +670,7 @@ namespace ml::gui
 			// check
 			if (value.path().empty() || !fs::is_directory(value)) { return; }
 
-			ML_scope_imgui_id((int32_t)util::hash(value.path().native()));
+			ML_scoped_imgui_id((int32_t)util::hash(value.path().native()));
 
 			// tree node
 			ImGui::AlignTextToFramePadding();
@@ -712,7 +712,7 @@ namespace ml::gui
 			// check
 			if (value.path().empty() || !fs::is_regular_file(value)) { return; }
 
-			ML_scope_imgui_id((int32_t)util::hash(value.path().native()));
+			ML_scoped_imgui_id((int32_t)util::hash(value.path().native()));
 
 			// tree node
 			ImGui::AlignTextToFramePadding();

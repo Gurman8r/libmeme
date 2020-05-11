@@ -479,17 +479,9 @@ namespace ml::ds
 		{
 			auto linear = [&]() noexcept { return std::find(first, last, value); };
 
-			auto binary = [&]() noexcept
+			auto binary = [&, it = std::equal_range(first, last, value, compare_type{})]() noexcept
 			{
-				if (auto const it{ std::equal_range(first, last, value, compare_type{}) }
-				; it.first != it.second)
-				{
-					return it.first;
-				}
-				else
-				{
-					return last;
-				}
+				return (it.first != it.second) ? it.first : last;
 			};
 
 			if constexpr (traits_type::thresh == 0)

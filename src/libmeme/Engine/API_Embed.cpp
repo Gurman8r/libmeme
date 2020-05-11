@@ -472,7 +472,7 @@ namespace ml::embed
 		struct ml_engine_window {};
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
-			.def_static("open"					, [](window_settings const & ws) { return engine::window().open(ws); })
+			.def_static("open"					, [](window_settings const & ws, bool ic) { return engine::window().open(ws, ic); })
 			.def_static("destroy"				, []() { engine::window().destroy(); })
 			.def_static("iconify"				, []() { engine::window().iconify(); })
 			.def_static("maximize"				, []() { engine::window().maximize(); })

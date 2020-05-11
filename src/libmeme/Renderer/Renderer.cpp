@@ -1,4 +1,4 @@
-#include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

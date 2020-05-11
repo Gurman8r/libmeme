@@ -39,7 +39,7 @@ namespace ml
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
 		// already initialized
-		if (is_initialized()) { return debug::error("engine context is already initialized"); }
+		if (is_initialized()) { return debug::error("engine is already initialized"); }
 
 		// create context
 		debug::info("creating engine context...");
@@ -49,23 +49,23 @@ namespace ml
 		}
 
 		// initialize windows
-		debug::info("initializing window backend...");
+		debug::info("initializing windows...");
 		if (!window::initialize())
 		{
-			return debug::error("failed initializing window backend");
+			return debug::error("failed initializing windows");
 		}
 
 		// initialize scripting
-		debug::info("initializing scripting...");
+		debug::info("initializing scripts...");
 		if (!g_engine->m_scripts.initialize())
 		{
-			return debug::error("failed initializing scripting");
+			return debug::error("failed initializing scripts");
 		}
 
 		// execute setup script
 		if (g_engine->m_config.contains("setup_script"))
 		{
-			debug::info("executing setup script...");
+			debug::info("executing setup...");
 			g_engine->m_scripts.do_file(
 				g_engine->m_fs.path2(
 					g_engine->m_config["setup_script"]));
@@ -77,7 +77,7 @@ namespace ml
 	bool engine::finalize() noexcept
 	{
 		// not initialized
-		if (!is_initialized()) { return debug::error("engine context is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine is not initialized"); }
 
 		// FIXME: need to clear menus before plugins because menu code can live inside plugins
 		g_engine->m_gui.main_menu_bar().menus.clear();
@@ -106,43 +106,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert(g_engine && "engine is not initialized");
 		return g_engine->m_window;
 	}
 

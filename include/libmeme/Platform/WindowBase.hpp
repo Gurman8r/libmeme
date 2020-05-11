@@ -1,5 +1,5 @@
-#ifndef _ML_WINDOW_IMPL_HPP_
-#define _ML_WINDOW_IMPL_HPP_
+#ifndef _ML_WINDOW_BASE_HPP_
+#define _ML_WINDOW_BASE_HPP_
 
 #include <libmeme/Platform/WindowAPI.hpp>
 
@@ -8,11 +8,11 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// window implementation base
-	struct window_impl : trackable, non_copyable
+	struct window_base : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~window_impl() noexcept = default;
+		virtual ~window_base() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -115,4 +115,4 @@ namespace ml
 	};
 }
 
-#endif // !_ML_WINDOW_IMPL_HPP_
+#endif // !_ML_WINDOW_BASE_HPP_

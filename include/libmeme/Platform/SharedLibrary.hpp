@@ -17,7 +17,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr auto default_extension // native library file extension
+		static constexpr auto default_extension // native library extension
 		{
 #if defined(ML_os_windows)
 			L".dll"

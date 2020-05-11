@@ -14,16 +14,12 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static_assert(0 < _W,
-			"matrix width negative or zero"
-		);
+		static_assert(0 < _W, "matrix width negative or zero");
 
-		static_assert(0 < _H,
-			"matrix height negative or zero"
-		);
+		static_assert(0 < _H, "matrix height negative or zero");
 
 		static_assert(std::is_integral_v<_T> || std::is_floating_point_v<_T>,
-			"matrix only supports integral and floating point types"
+			"matrices only support integral and floating point types"
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

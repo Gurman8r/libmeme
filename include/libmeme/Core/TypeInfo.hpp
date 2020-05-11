@@ -119,14 +119,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// get type name
+	// get name of type
 	template <class T
 	> static constexpr auto nameof_v
 	{
 		pretty_function::string{ nameof<T>::value }
 	};
 
-	// get type hash
+	// get hash of type
 	template <class T
 	> static constexpr auto hashof_v
 	{

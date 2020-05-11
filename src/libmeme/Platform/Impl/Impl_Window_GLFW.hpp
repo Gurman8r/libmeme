@@ -2,7 +2,7 @@
 #ifndef _ML_IMPL_WINDOW_GLFW_HPP_
 #define _ML_IMPL_WINDOW_GLFW_HPP_
 
-#include <libmeme/Platform/WindowImpl.hpp>
+#include <libmeme/Platform/WindowBase.hpp>
 
 struct GLFWwindow;
 struct GLFWmonitor;
@@ -10,7 +10,7 @@ struct GLFWmonitor;
 namespace ml
 {
 	// glfw window implementation
-	struct impl_window_glfw final : window_impl
+	struct impl_window_glfw final : window_base
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

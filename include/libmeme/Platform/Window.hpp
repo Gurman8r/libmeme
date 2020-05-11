@@ -161,8 +161,10 @@ namespace ml
 	protected:
 		window_settings m_settings{};
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
-		struct window_impl * m_window;
+		struct window_base * m_impl;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

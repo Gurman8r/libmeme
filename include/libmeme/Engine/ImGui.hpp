@@ -52,17 +52,17 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // ImGui::PushID followed by deferred ImGui::PopID
-#define ML_scope_imgui_id(...) \
-	auto ML_anon = _ML impl::scope_imgui_id{ ##__VA_ARGS__ }
+#define ML_scoped_imgui_id(...) \
+	auto ML_anon = _ML impl::scoped_imgui_id{ ##__VA_ARGS__ }
 
 namespace ml::impl
 {
-	struct ML_NODISCARD scope_imgui_id final
+	struct ML_NODISCARD scoped_imgui_id final
 	{
 		template <class ... Args
-		> scope_imgui_id(Args && ... args) noexcept { ImGui::PushID(ML_forward(args)...); }
+		> scoped_imgui_id(Args && ... args) noexcept { ImGui::PushID(ML_forward(args)...); }
 
-		~scope_imgui_id() noexcept { ImGui::PopID(); }
+		~scoped_imgui_id() noexcept { ImGui::PopID(); }
 	};
 }
 

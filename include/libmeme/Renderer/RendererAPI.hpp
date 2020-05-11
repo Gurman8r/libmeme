@@ -9,7 +9,7 @@
 
 namespace ml
 {
-	enum gl_ : uint32_t
+	enum gl_enum : uint32_t
 	{
 		gl_vendor,
 		gl_renderer,
@@ -27,24 +27,6 @@ namespace ml
 		gl_stack_underflow,
 		gl_out_of_memory,
 		gl_invalid_framebuffer_operation,
-
-		gl_stream_draw,
-		gl_static_draw,
-		gl_dynamic_draw,
-
-		gl_cull_face,
-		gl_depth_test,
-		gl_alpha_test,
-		gl_blend,
-		gl_multisample,
-		gl_framebuffer_srgb,
-		gl_scissor_test,
-
-		gl_texture_2d,
-		gl_texture_3d,
-		gl_texture_cube_map,
-		gl_max_texture_size,
-		gl_max_combined_texture_image_units,
 
 		gl_array_buffer,
 		gl_element_array_buffer,
@@ -65,6 +47,18 @@ namespace ml
 		gl_viewport,
 		gl_scissor_box,
 
+		gl_stream_draw,
+		gl_static_draw,
+		gl_dynamic_draw,
+
+		gl_cull_face,
+		gl_depth_test,
+		gl_alpha_test,
+		gl_blend,
+		gl_multisample,
+		gl_framebuffer_srgb,
+		gl_scissor_test,
+
 		gl_blend_equation_rgb,
 		gl_blend_equation_alpha,
 		gl_blend_dst_rgb,
@@ -75,17 +69,6 @@ namespace ml
 		gl_lower_left,
 		gl_upper_left,
 		gl_clip_origin,
-
-		gl_object_delete_status,
-		gl_object_compile_status,
-		gl_object_link_status,
-		gl_info_log_length,
-		gl_framebuffer_complete,
-
-		gl_fragment_shader,
-		gl_vertex_shader,
-		gl_geometry_shader,
-		gl_shading_language_version,
 
 		gl_points,
 		gl_lines,
@@ -159,17 +142,11 @@ namespace ml
 		gl_sluminance8,
 		gl_depth24_stencil8,
 
-		gl_framebuffer_attachment_color_encoding,
-		gl_framebuffer_attachment_component_type,
-		gl_framebuffer_attachment_red_size,
-		gl_framebuffer_attachment_green_size,
-		gl_framebuffer_attachment_blue_size,
-		gl_framebuffer_attachment_alpha_size,
-		gl_framebuffer_attachment_depth_size,
-		gl_framebuffer_attachment_stencil_size,
-		gl_framebuffer_default,
-		gl_framebuffer_undefined,
-		gl_depth_stencil_attachment,
+		gl_texture_2d,
+		gl_texture_3d,
+		gl_texture_cube_map,
+		gl_max_texture_size,
+		gl_max_combined_texture_image_units,
 
 		gl_nearest,
 		gl_linear,
@@ -211,6 +188,29 @@ namespace ml
 		gl_pack_skip_pixels,
 		gl_pack_alignment,
 
+		gl_fragment_shader,
+		gl_vertex_shader,
+		gl_geometry_shader,
+		gl_shading_language_version,
+
+		gl_object_delete_status,
+		gl_object_compile_status,
+		gl_object_link_status,
+		gl_info_log_length,
+		gl_framebuffer_complete,
+
+		gl_framebuffer_attachment_color_encoding,
+		gl_framebuffer_attachment_component_type,
+		gl_framebuffer_attachment_red_size,
+		gl_framebuffer_attachment_green_size,
+		gl_framebuffer_attachment_blue_size,
+		gl_framebuffer_attachment_alpha_size,
+		gl_framebuffer_attachment_depth_size,
+		gl_framebuffer_attachment_stencil_size,
+		gl_framebuffer_default,
+		gl_framebuffer_undefined,
+		gl_depth_stencil_attachment,
+
 		gl_color_attachment0,
 		gl_color_attachment1,
 		gl_color_attachment2,
@@ -227,6 +227,23 @@ namespace ml
 		gl_color_attachment13,
 		gl_color_attachment14,
 		gl_color_attachment15,
+
+		gl_draw_buffer0,
+		gl_draw_buffer1,
+		gl_draw_buffer2,
+		gl_draw_buffer3,
+		gl_draw_buffer4,
+		gl_draw_buffer5,
+		gl_draw_buffer6,
+		gl_draw_buffer7,
+		gl_draw_buffer8,
+		gl_draw_buffer9,
+		gl_draw_buffer10,
+		gl_draw_buffer11,
+		gl_draw_buffer12,
+		gl_draw_buffer13,
+		gl_draw_buffer14,
+		gl_draw_buffer15,
 
 		gl_texture0,
 		gl_texture1,
@@ -260,23 +277,6 @@ namespace ml
 		gl_texture29,
 		gl_texture30,
 		gl_texture31,
-
-		gl_draw_buffer0,
-		gl_draw_buffer1,
-		gl_draw_buffer2,
-		gl_draw_buffer3,
-		gl_draw_buffer4,
-		gl_draw_buffer5,
-		gl_draw_buffer6,
-		gl_draw_buffer7,
-		gl_draw_buffer8,
-		gl_draw_buffer9,
-		gl_draw_buffer10,
-		gl_draw_buffer11,
-		gl_draw_buffer12,
-		gl_draw_buffer13,
-		gl_draw_buffer14,
-		gl_draw_buffer15,
 
 		gl_context_flags,
 		gl_context_profile_mask,

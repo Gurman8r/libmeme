@@ -35,7 +35,10 @@ namespace ml::util
 
 	// is any of
 	template <class T, class ... Ts
-	> constexpr bool is_any_of_v{ std::disjunction_v<std::is_same<T, Ts>...> };
+	> constexpr bool is_any_of_v
+	{
+		std::disjunction_v<std::is_same<T, Ts>...>
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

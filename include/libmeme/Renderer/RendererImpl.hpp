@@ -3,7 +3,7 @@
 
 // WIP
 
-#include <libmeme/Graphics/RendererAPI.hpp>
+#include <libmeme/Renderer/RendererAPI.hpp>
 
 namespace ml
 {
@@ -19,9 +19,9 @@ namespace ml
 	protected:
 		static ds::array<uint32_t, gl_MAX_ENUM> const g_enum_table; // global enum table
 
-		ML_NODISCARD static uint32_t get_enum(uint32_t const i) noexcept
+		template <class I = size_t> ML_NODISCARD static auto get_enum(I && i) noexcept
 		{
-			return g_enum_table[static_cast<size_t>(i)];
+			return g_enum_table[static_cast<size_t>(ML_forward(i))];
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

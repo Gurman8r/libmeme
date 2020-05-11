@@ -3,8 +3,8 @@
 
 // WIP
 
-#include <libmeme/Graphics/Export.hpp>
-#include <libmeme/Graphics/RendererAPI.hpp>
+#include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Renderer/RendererAPI.hpp>
 
 // renderer singleton
 #define ML_renderer \
@@ -13,7 +13,7 @@
 namespace ml
 {
 	// global renderer
-	struct ML_GRAPHICS_API renderer final : singleton<renderer>
+	struct ML_RENDERER_API renderer final : singleton<renderer>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

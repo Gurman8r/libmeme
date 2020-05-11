@@ -76,9 +76,9 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return m_data; }
 
-		ML_NODISCARD operator pointer &() & noexcept { return m_data; }
+		ML_NODISCARD operator pointer() noexcept { return m_data; }
 
-		ML_NODISCARD operator const_pointer const &() const & noexcept { return m_data; }
+		ML_NODISCARD operator const_pointer() const noexcept { return m_data; }
 
 		ML_NODISCARD auto operator *() & noexcept -> reference { return (*m_data); }
 

@@ -4,7 +4,7 @@
 
 // WIP
 
-#include <libmeme/Graphics/RendererImpl.hpp>
+#include <libmeme/Renderer/RendererImpl.hpp>
 
 namespace ml
 {
