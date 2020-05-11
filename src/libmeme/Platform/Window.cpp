@@ -65,7 +65,7 @@ namespace ml
 
 		// install callbacks
 		if (install_callbacks)
-		{+
+		{
 			set_char_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_char_event>(ML_forward(x)...); });
 
