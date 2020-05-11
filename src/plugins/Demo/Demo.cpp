@@ -165,7 +165,6 @@ namespace ml
 
 		gui::console m_console{};
 
-
 		raii_ptr<ax::NodeEditor::EditorContext> m_node_editor
 		{
 			[]() { return ax::NodeEditor::CreateEditor(); },
@@ -256,28 +255,28 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"] = texture{ m_images["default"] };
+				m_textures["default"] = m_images["default"];
 				
-				m_textures["doot"] = texture{ engine::fs().path2("assets/textures/doot.png") };
+				m_textures["doot"] = engine::fs().path2("assets/textures/doot.png");
 				
-				m_textures["navball"] = texture{ engine::fs().path2("assets/textures/navball.png") };
+				m_textures["navball"] = engine::fs().path2("assets/textures/navball.png");
 				
-				m_textures["earth_dm_2k"] = texture{ engine::fs().path2("assets/textures/earth/earth_dm_2k.png") };
+				m_textures["earth_dm_2k"] = engine::fs().path2("assets/textures/earth/earth_dm_2k.png");
 				
-				m_textures["earth_sm_2k"] = texture{ engine::fs().path2("assets/textures/earth/earth_sm_2k.png") };
+				m_textures["earth_sm_2k"] = engine::fs().path2("assets/textures/earth/earth_sm_2k.png");
 				
-				m_textures["moon_dm_2k"] = texture{ engine::fs().path2("assets/textures/moon/moon_dm_2k.png") };
+				m_textures["moon_dm_2k"] = engine::fs().path2("assets/textures/moon/moon_dm_2k.png");
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"] = font{ engine::fs().path2("assets/fonts/clacon.ttf") };
+				m_fonts["clacon"] = engine::fs().path2("assets/fonts/clacon.ttf");
 				
-				m_fonts["consolas"] = font{ engine::fs().path2("assets/fonts/consolas.ttf") };
+				m_fonts["consolas"] = engine::fs().path2("assets/fonts/consolas.ttf");
 				
-				m_fonts["lucida_console"] = font{ engine::fs().path2("assets/fonts/lucida_console.ttf") };
+				m_fonts["lucida_console"] = engine::fs().path2("assets/fonts/lucida_console.ttf");
 				
-				m_fonts["minecraft"] = font{ engine::fs().path2("assets/fonts/minecraft.ttf") };
+				m_fonts["minecraft"] = engine::fs().path2("assets/fonts/minecraft.ttf");
 			}
 
 			// SHADERS

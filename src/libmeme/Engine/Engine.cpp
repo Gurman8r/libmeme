@@ -65,7 +65,7 @@ namespace ml
 		// execute setup script
 		if (g_engine->m_config.contains("setup_script"))
 		{
-			debug::info("executing setup...");
+			debug::info("executing setup script...");
 			g_engine->m_scripts.do_file(
 				g_engine->m_fs.path2(
 					g_engine->m_config["setup_script"]));
