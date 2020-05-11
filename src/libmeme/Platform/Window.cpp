@@ -73,7 +73,7 @@ namespace ml
 			](auto, auto ... x) noexcept { event_system::fire_event<window_char_mods_event>(ML_forward(x)...); });
 
 			set_close_callback([
-			](auto) noexcept { event_system::fire_event<window_close_event>(); });
+			](auto, auto ... x) noexcept { event_system::fire_event<window_close_event>(ML_forward(x)...); });
 
 			set_cursor_enter_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
@@ -112,7 +112,7 @@ namespace ml
 			](auto, auto ... x) noexcept { event_system::fire_event<window_position_event>(ML_forward(x)...); });
 
 			set_refresh_callback([
-			](auto) noexcept { event_system::fire_event<window_refresh_event>(); });
+			](auto, auto ... x) noexcept { event_system::fire_event<window_refresh_event>(ML_forward(x)...); });
 
 			set_scroll_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_scroll_event>(ML_forward(x)...); });
