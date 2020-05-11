@@ -1,7 +1,6 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Platform/Export.hpp>
 #include <libmeme/Platform/WindowAPI.hpp>
 
 namespace ml
@@ -160,8 +159,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		struct window_impl * m_impl;
 		window_settings m_settings{};
+
+	private:
+		struct window_impl * m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

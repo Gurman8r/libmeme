@@ -35,14 +35,14 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // concat implementation
-#define __ML_CONCATENATE(a, b)	a##b
+#define _ML_CONCAT_(a, b)		a##b
 
-// macro literal concat
-#define ML_concat(a, b)			__ML_CONCATENATE(a, b)
+// concatenate expressions 
+#define ML_concat(a, b)			_ML_CONCAT_(a, b)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// macro literal to string
+// expression to string
 #define ML_to_string(expr)		#expr
 
 // macro contents to string
