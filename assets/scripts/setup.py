@@ -3,20 +3,18 @@ import libmeme_engine   as engine   # systems
 
 # setup window
 print("[ info ] loading window...")
-assert(engine.window.open(
-    ml.window_settings(
-        "libmeme",                          # title
-        ml.video_mode(
-            [ 1280, 720 ]),                 # resolution
-        ml.context_settings(
-            ml.window_client.opengl, 4, 6,  # window renderer
-            ml.window_profile.compat,       # renderer profile
-            24,                             # depth bits
-            8,                              # stencil bits
-            True,                           # multisample
-            False),                         # sRGB capable
-        ml.window_hints.default_maximized), # window hints
-    True))                                  # install callbacks
+assert(engine.window.open(ml.window_settings(
+    "libmeme",
+    ml.video_mode([ 1280, 720 ]),
+    ml.context_settings(
+        ml.window_client.opengl, 4, 6,  # backend client
+        ml.window_profile.compat,       # backend profile
+        24,                             # depth bits
+        8,                              # stencil bits
+        True,                           # multisample
+        False),                         # sRGB capable
+    ml.window_hints.default_maximized), # window hints
+    True))                              # install callbacks
 
 # setup gui
 print("[ info ] loading gui...")

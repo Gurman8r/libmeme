@@ -248,7 +248,7 @@ namespace ml
 
 			// IMAGES
 			{
-				m_images["default"] = image::default_rgba;
+				m_images["default"] = image::gen_default_rgba();
 			}
 
 			// TEXTURES

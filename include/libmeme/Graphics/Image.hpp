@@ -21,10 +21,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static image const default_rgba;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		image(allocator_type alloc = {})
 			: m_size{ 0 }
 			, m_channels{ 0 }
@@ -322,6 +318,23 @@ namespace ml
 		ML_NODISCARD auto rend() noexcept -> reverse_iterator { return m_pixels.rend(); }
 		
 		ML_NODISCARD auto rend() const noexcept -> const_reverse_iterator { return m_pixels.rend(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static image const & gen_default_rgba() noexcept
+		{
+			static image temp{ vec2u{ 512, 512 }, 3 };
+			for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)
+			{
+				size_t const y{ i % w }, x{ i / w };
+
+				temp.set_pixel(x, y, ((y < h / 2) && (x < w / 2)) || ((y >= h / 2) && (x >= w / 2))
+					? color{ color{ 0.1f }.rgb(), 1.0 }
+					: (y >= h / 2) || (x >= w / 2) ? colors::magenta : colors::green
+				);
+			}
+			return temp;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

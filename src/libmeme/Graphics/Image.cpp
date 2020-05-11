@@ -12,23 +12,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	image const image::default_rgba{ ([]() noexcept
-	{
-		image temp{ vec2u{ 512, 512 }, 3 };
-		for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)
-		{
-			size_t const y{ i % w }, x{ i / w };
-
-			temp.set_pixel(x, y, ((y < h / 2) && (x < w / 2)) || ((y >= h / 2) && (x >= w / 2))
-				? color{ color{ 0.1f }.rgb(), 1.0 }
-				: (y >= h / 2) || (x >= w / 2) ? colors::magenta : colors::green
-			);
-		}
-		return temp;
-	})() };
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool image::load_from_file(fs::path const & path, bool flip_v, size_t req_channels)
 	{
 		::stbi_set_flip_vertically_on_load(flip_v);

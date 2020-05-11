@@ -20,12 +20,13 @@
 
 bool operator<(GLFWimage const & lhs, GLFWimage const & rhs)
 {
-	return (lhs.width < rhs.width) && (lhs.height < rhs.height) && (lhs.pixels < rhs.pixels);
+	return !(std::addressof(lhs) == std::addressof(rhs))
+		&& (lhs.width < rhs.width && lhs.height < rhs.height && lhs.pixels < rhs.pixels);
 }
 
 bool operator==(GLFWimage const & lhs, GLFWimage const & rhs)
 {
-	return (lhs.width == rhs.width) && (lhs.height == rhs.height) && (lhs.pixels == rhs.pixels);
+	return !(lhs < rhs) && !(rhs < lhs);
 }
 
 namespace ml

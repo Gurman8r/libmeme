@@ -18,20 +18,22 @@ using namespace ml::size_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-static class memcfg final : non_copyable
+class memcfg final : public singleton<memcfg>
 {
+	friend singleton<memcfg>;
+
 	ds::array<byte_t, MEM_RESERVED>		data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 	pmr::unsynchronized_pool_resource	pool{ &mono };
 	util::test_resource					test{ &pool, data.data(), data.size() };
 
-public:
 	memcfg() noexcept
 	{
 		ML_assert(pmr::set_default_resource(&test));
 		ML_assert(memory_manager::configure(&test));
 	}
-} ML_anon{};
+
+} &ML_anon{ memcfg::get_instance() };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
