@@ -8,11 +8,11 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(char_event)
+	ML_event(window_char_event)
 	{
 		uint32_t const value;
 
-		constexpr char_event(uint32_t value) noexcept
+		constexpr window_char_event(uint32_t value) noexcept
 			: value{ value }
 		{
 		}
@@ -20,11 +20,55 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(cursor_enter_event)
+	ML_event(window_char_mods_event)
+	{
+		uint32_t const value;
+		int32_t const mods;
+
+		constexpr window_char_mods_event(uint32_t value, int32_t mods) noexcept
+			: value{ value }, mods{ mods }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_close_event)
+	{
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_content_scale_event)
+	{
+		float_t const x, y;
+
+		constexpr window_content_scale_event(float_t x, float_t y) noexcept
+			: x{ x }, y{ y }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_drop_event)
+	{
+		int32_t const count;
+		cstring const * const paths;
+
+		constexpr window_drop_event(int32_t count, cstring const * paths) noexcept
+			: count{ count }, paths{ paths }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_cursor_enter_event)
 	{
 		int32_t const entered;
 
-		constexpr cursor_enter_event(int32_t entered) noexcept
+		constexpr window_cursor_enter_event(int32_t entered) noexcept
 			: entered{ entered }
 		{
 		}
@@ -32,28 +76,73 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(cursor_position_event)
+	ML_event(window_cursor_position_event)
 	{
 		float64_t const x, y;
 
-		constexpr cursor_position_event(float64_t x, float64_t y) noexcept
-			: x{ x }
-			, y{ y }
+		constexpr window_cursor_position_event(float64_t x, float64_t y) noexcept
+			: x{ x }, y{ y }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(key_event)
+	ML_event(window_error_event)
+	{
+		int32_t const code;
+		cstring const desc;
+
+		constexpr window_error_event(int32_t code, cstring desc) noexcept
+			: code{ code }, desc{ desc }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_focus_event)
+	{
+		int32_t const focused;
+
+		constexpr window_focus_event(int32_t focused) noexcept
+			: focused{ focused }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_framebuffer_size_event)
+	{
+		int32_t const width, height;
+
+		constexpr window_framebuffer_size_event(int32_t width, int32_t height) noexcept
+			: width{ width }, height{ height }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_iconify_event)
+	{
+		int32_t const iconified;
+
+		constexpr window_iconify_event(int32_t iconified) noexcept
+			: iconified{ iconified }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_key_event)
 	{
 		int32_t const key, scan, action, mods;
 
-		constexpr key_event(int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
-			: key	{ key }
-			, scan	{ scan }
-			, action{ action }
-			, mods	{ mods }
+		constexpr window_key_event(int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
+			: key{ key }, scan{ scan }, action{ action }, mods{ mods }
 		{
 		}
 
@@ -96,14 +185,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(mouse_event)
+	ML_event(window_maximize_event)
+	{
+		int32_t const maximized;
+
+		constexpr window_maximize_event(int32_t maximized) noexcept
+			: maximized{ maximized }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_mouse_event)
 	{
 		int32_t const button, action, mods;
 
-		constexpr mouse_event(int32_t button, int32_t action, int32_t mods) noexcept
-			: button{ button }
-			, action{ action }
-			, mods{ mods }
+		constexpr window_mouse_event(int32_t button, int32_t action, int32_t mods) noexcept
+			: button{ button }, action{ action }, mods{ mods }
 		{
 		}
 
@@ -123,71 +222,30 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(scroll_event)
-	{
-		float64_t const x, y;
-
-		constexpr scroll_event(float64_t x, float64_t y) noexcept
-			: x{ x }
-			, y{ y }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(framebuffer_size_event)
-	{
-		int32_t const width, height;
-
-		constexpr framebuffer_size_event(int32_t width, int32_t height) noexcept
-			: width{ width }
-			, height{ height }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(window_close_event)
-	{
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(window_error_event)
-	{
-		int32_t const code;
-		cstring const desc;
-
-		constexpr window_error_event(int32_t code, cstring desc) noexcept
-			: code{ code }
-			, desc{ desc }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(window_focus_event)
-	{
-		int32_t const focused;
-		
-		constexpr window_focus_event(int32_t focused) noexcept
-			: focused{ focused }
-		{
-		}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	ML_event(window_position_event)
 	{
 		int32_t const x, y;
 
 		constexpr window_position_event(int32_t x, int32_t y) noexcept
-			: x{ x }
-			, y{ y }
+			: x{ x }, y{ y }
+		{
+		}
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_refresh_event)
+	{
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_event(window_scroll_event)
+	{
+		float64_t const x, y;
+
+		constexpr window_scroll_event(float64_t x, float64_t y) noexcept
+			: x{ x }, y{ y }
 		{
 		}
 	};
@@ -199,8 +257,7 @@ namespace ml
 		int32_t const width, height;
 
 		constexpr window_size_event(int32_t width, int32_t height) noexcept
-			: width{ width }
-			, height{ height }
+			: width{ width }, height{ height }
 		{
 		}
 	};
