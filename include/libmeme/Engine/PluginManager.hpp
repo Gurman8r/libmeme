@@ -21,7 +21,7 @@ namespace ml
 
 		explicit plugin_manager(json const & j, allocator_type alloc) noexcept;
 
-		~plugin_manager() noexcept { clear(); }
+		~plugin_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

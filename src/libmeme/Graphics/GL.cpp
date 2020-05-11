@@ -38,27 +38,11 @@
 
 namespace ml
 {
-	// global init flag
-	static bool s_gl_init{ false };
-
-
 	// Initialization
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool GL::is_initialized()
-	{
-		return s_gl_init;
-	}
-
 	bool GL::initialize()
 	{
-		if (is_initialized())
-		{
-			return debug::error("GL is already initialized");
-		}
-
-		return s_gl_init = ([]() noexcept
-		{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
 		return GLEW_OK == glewInit();
@@ -72,7 +56,6 @@ namespace ml
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 		return false;
 #endif
-		})();
 	}
 
 	void GL::validateVersion(int32_t & major, int32_t & minor)
@@ -505,21 +488,13 @@ namespace ml
 
 	auto GL::getMaxTextureUnits() -> int32_t
 	{
-		static int32_t temp{};
-		if (is_initialized())
-		{
-			static ML_scope{ temp = getInteger(GL::MaxCombTexImgUnits); };
-		}
+		static int32_t temp{ getInteger(GL::MaxCombTexImgUnits) };
 		return temp;
 	}
 
 	auto GL::getMaxTextureSize() -> uint32_t
 	{
-		static uint32_t temp{};
-		if (is_initialized())
-		{
-			static ML_scope{ temp = (uint32_t)getInteger(GL::MaxTextureSize); };
-		}
+		static uint32_t temp{ (uint32_t)getInteger(GL::MaxTextureSize) };
 		return temp;
 	}
 

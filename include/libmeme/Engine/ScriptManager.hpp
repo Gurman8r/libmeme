@@ -18,7 +18,7 @@ namespace ml
 
 		explicit script_manager(json const & j, allocator_type alloc) noexcept;
 
-		~script_manager() noexcept { (void)finalize(); }
+		~script_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

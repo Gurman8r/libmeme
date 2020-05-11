@@ -33,30 +33,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Bounds, class Advance
-	> ML_NODISCARD inline auto make_glyph(texture const & t, Bounds && b, Advance && a)
-	{
-		glyph g{};
-		g.graphic	= t;
-		g.bounds	= ML_forward(b);
-		g.advance	= ML_forward(a);
-		return g;
-	}
-
-	template <class Bounds, class Advance
-	> ML_NODISCARD inline auto make_glyph(texture && t, Bounds && b, Advance && a)
-	{
-		glyph g{};
-		g.graphic	= std::move(t);
-		g.bounds	= ML_forward(b);
-		g.advance	= ML_forward(a);
-		return g;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_GLYPH_HPP_

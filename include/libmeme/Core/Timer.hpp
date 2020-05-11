@@ -48,6 +48,14 @@ namespace ml
 			return m_running ? (*this) : this->restart();
 		}
 
+		self_type & restart() & noexcept
+		{
+			m_running = true;
+			m_current = m_previous = clock_type::now();
+			m_elapsed = {};
+			return (*this);
+		}
+
 		self_type & stop() & noexcept
 		{
 			if (m_running)
@@ -56,14 +64,6 @@ namespace ml
 				m_current = clock_type::now();
 				m_elapsed = (m_current - m_previous);
 			}
-			return (*this);
-		}
-
-		self_type & restart() & noexcept
-		{
-			m_running = true;
-			m_current = m_previous = clock_type::now();
-			m_elapsed = {};
 			return (*this);
 		}
 

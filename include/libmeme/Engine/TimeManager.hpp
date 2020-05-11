@@ -3,6 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Timer.hpp>
+#include <libmeme/Core/Array.hpp>
 
 namespace ml
 {
@@ -16,7 +17,23 @@ namespace ml
 
 		explicit time_manager(json const & j, allocator_type alloc = {}) noexcept;
 
-		~time_manager() noexcept {}
+		~time_manager() noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void begin_loop() noexcept
+		{
+			m_loop_timer.restart();
+
+			m_frame_rate = m_fps.update(m_delta_time.count<float_t>());
+		}
+
+		void end_loop() noexcept
+		{
+			++m_frame_count;
+
+			m_delta_time = m_loop_timer.elapsed();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,36 +41,9 @@ namespace ml
 
 		auto delta() const & noexcept -> duration const & { return m_delta_time; }
 
-		auto frame_rate() const & noexcept -> float64_t const & { return m_frame_rate; }
+		auto frame_rate() const & noexcept -> float_t const & { return m_frame_rate; }
 
 		auto frame_count() const & noexcept -> uint64_t const & { return m_frame_count; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void begin_loop() noexcept
-		{
-			m_delta_time = m_loop_timer.elapsed();
-
-			m_loop_timer.restart();
-		}
-
-		void end_loop() noexcept
-		{
-			++m_frame_count;
-
-			m_frame_rate = ([&, dt = m_delta_time.count()]() noexcept
-			{
-				m_fps_accum += dt - m_fps_frames[m_fps_index];
-
-				m_fps_frames[m_fps_index] = dt;
-
-				m_fps_index = (m_fps_index + 1) % ML_arraysize(m_fps_frames);
-
-				return (m_fps_accum > 0.0)
-					? 1.0 / (m_fps_accum / (float64_t)ML_arraysize(m_fps_frames))
-					: FLT_MAX;
-			})();
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -62,12 +52,26 @@ namespace ml
 		timer		m_loop_timer{ false };
 		
 		duration	m_delta_time{};
-		float64_t	m_frame_rate{};
+		float_t		m_frame_rate{};
 		uint64_t	m_frame_count{};
 
-		int32_t		m_fps_index{};
-		float64_t	m_fps_accum{};
-		float64_t	m_fps_frames[128]{};
+		struct fps_tracker final : non_copyable
+		{
+			using frame_times = ds::array<float_t, 120>;
+
+			float_t		accum{}; // accumulator
+			size_t		index{}; // frame index
+			frame_times times{}; // frame times
+
+			float_t update(float_t const dt) noexcept
+			{
+				accum += dt - times[index];
+				times[index] = dt;
+				index = (index + 1) % times.size();
+				return (0.f < accum) ? 1.f / (accum / (float_t)times.size()) : FLT_MAX;
+			}
+
+		} m_fps{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

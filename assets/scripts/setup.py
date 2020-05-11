@@ -2,7 +2,7 @@ import libmeme          as ml       # structures
 import libmeme_engine   as engine   # systems
 
 # setup window
-print("[ info ] opening window...")
+print("[ info ] loading window...")
 assert(engine.window.open(
     ml.window_settings(
         "libmeme",                          # title
@@ -19,7 +19,7 @@ assert(engine.window.open(
     True))                                  # install callbacks
 
 # setup gui
-print("[ info ] initializing imgui...")
+print("[ info ] loading gui...")
 assert(engine.gui.initialize("#version 130"))
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 

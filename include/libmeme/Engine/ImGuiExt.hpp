@@ -381,22 +381,6 @@ namespace ml::gui
 			return this->print(value).write('\n');
 		}
 
-		console & printss(pmr::stringstream & value)
-		{
-			// FIXME: inefficient
-			if (auto const str{ value.str() }; !str.empty())
-			{
-				pmr::stringstream ss{ str };
-				pmr::string line{};
-				while (std::getline(ss, line))
-				{
-					this->printl(line);
-				}
-				value.str({});
-			}
-			return (*this);
-		}
-
 		console & printf(cstring fmt, ...)
 		{
 			ds::array<char, 1024> buf{};
@@ -406,6 +390,22 @@ namespace ml::gui
 			buf.back() = 0;
 			va_end(args);
 			return this->print(buf.data());
+		}
+
+		console & printss(pmr::stringstream & value)
+		{
+			// FIXME: inefficient
+			if (auto const str{ value.str() }; !str.empty())
+			{
+				pmr::stringstream ss{ str };
+				pmr::string line{};
+				while (std::getline(value, line))
+				{
+					this->printl(line);
+				}
+				value.str({});
+			}
+			return (*this);
 		}
 
 		console & execute(cstring value)

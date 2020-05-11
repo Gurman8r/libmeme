@@ -178,15 +178,13 @@ namespace ml
 				, "%.3f ms/frame"
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }
-				, []() { return engine::time().delta().count<float_t>() * 1000.f; }
-			),
+				, []() { return 1000.f / engine::time().frame_rate(); }),
 			gui::plot::create(120, gui::plot::histogram
 				, "##frame rate"
-				, "%.3f fps"
+				, "%.1f fps"
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }
-				, []() { return (float_t)engine::time().frame_rate(); }
-			),
+				, []() { return engine::time().frame_rate(); }),
 		} };
 
 		MemoryEditor m_mem_editor{};
@@ -255,38 +253,30 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"] = m_images["default"];
-				
-				m_textures["doot"] = engine::fs().path2("assets/textures/doot.png");
-				
-				m_textures["navball"] = engine::fs().path2("assets/textures/navball.png");
-				
-				m_textures["earth_dm_2k"] = engine::fs().path2("assets/textures/earth/earth_dm_2k.png");
-				
-				m_textures["earth_sm_2k"] = engine::fs().path2("assets/textures/earth/earth_sm_2k.png");
-				
-				m_textures["moon_dm_2k"] = engine::fs().path2("assets/textures/moon/moon_dm_2k.png");
+				m_textures["default"]		= m_images["default"];
+				m_textures["doot"]			= engine::fs().path2("assets/textures/doot.png");
+				m_textures["navball"]		= engine::fs().path2("assets/textures/navball.png");
+				m_textures["earth_dm_2k"]	= engine::fs().path2("assets/textures/earth/earth_dm_2k.png");
+				m_textures["earth_sm_2k"]	= engine::fs().path2("assets/textures/earth/earth_sm_2k.png");
+				m_textures["moon_dm_2k"]	= engine::fs().path2("assets/textures/moon/moon_dm_2k.png");
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"] = engine::fs().path2("assets/fonts/clacon.ttf");
-				
-				m_fonts["consolas"] = engine::fs().path2("assets/fonts/consolas.ttf");
-				
-				m_fonts["lucida_console"] = engine::fs().path2("assets/fonts/lucida_console.ttf");
-				
-				m_fonts["minecraft"] = engine::fs().path2("assets/fonts/minecraft.ttf");
+				m_fonts["clacon"]			= engine::fs().path2("assets/fonts/clacon.ttf");
+				m_fonts["consolas"]			= engine::fs().path2("assets/fonts/consolas.ttf");
+				m_fonts["lucida_console"]	= engine::fs().path2("assets/fonts/lucida_console.ttf");
+				m_fonts["minecraft"]		= engine::fs().path2("assets/fonts/minecraft.ttf");
 			}
 
 			// SHADERS
 			{
-				m_shaders["2d"] = shader{
+				m_shaders["2d"] = {
 					engine::fs().path2("assets/shaders/2D.vs.shader"),
 					engine::fs().path2("assets/shaders/basic.fs.shader")
 				};
 
-				m_shaders["3d"] = shader{
+				m_shaders["3d"] = {
 					engine::fs().path2("assets/shaders/3D.vs.shader"),
 					engine::fs().path2("assets/shaders/basic.fs.shader")
 				};
@@ -324,32 +314,30 @@ namespace ml
 					make_uniform<vec3	>("u_scale"		, vec3{})
 				};
 
-				// basic 3d
-				auto const _basic_3d = material{
+				// 3d
+				auto const _3d = material{
 					make_uniform<color	>("u_color"		, colors::white),
 					make_uniform<texture>("u_texture0"	, (texture *)nullptr)
 				} + _timers + _mvp + _camera + _tf;
 
 				// earth
-				m_materials["earth"] = material{ _basic_3d }
+				m_materials["earth"] = material{ _3d }
 					.set<texture>("u_texture0", &m_textures["earth_dm_2k"])
 					;
 
 				// moon
-				m_materials["moon"] = material{ _basic_3d }
+				m_materials["moon"] = material{ _3d }
 					.set<texture>("u_texture0", &m_textures["moon_dm_2k"])
 					;
 			}
 
 			// MODELS
 			{
-				m_models["sphere8x6"] = model{ engine::fs().path2("assets/models/sphere8x6.obj") };
+				m_models["sphere8x6"]	= engine::fs().path2("assets/models/sphere8x6.obj");
+				m_models["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
+				m_models["monkey"]		= engine::fs().path2("assets/models/monkey.obj");
 
-				m_models["sphere32x24"] = model{ engine::fs().path2("assets/models/sphere32x24.obj") };
-
-				m_models["monkey"] = model{ engine::fs().path2("assets/models/monkey.obj") };
-
-				m_models["triangle"] = model{ mesh{
+				m_models["triangle"] = { mesh{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
 						vertex{ {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -360,7 +348,7 @@ namespace ml
 					}
 				} };
 
-				m_models["quad"] = model{ mesh{
+				m_models["quad"] = { mesh{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
 						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -490,7 +478,7 @@ namespace ml
 		{
 			// gui stuff, etc...
 
-			static ML_scope // main menu bar
+			static ML_scope // setup main menu bar
 			{
 				auto & mmb{ engine::gui().main_menu_bar() };
 				mmb.visible = true;
@@ -583,19 +571,16 @@ namespace ml
 				// type
 				using T = typename std::decay_t<decltype(v)>;
 				static constexpr auto ftype{ nameof<>::filter_all(typeof_v<T>.name()) };
-				char type[64] = "";
-				std::sprintf(type, "%.*s", (uint32_t)ftype.size(), ftype.data());
+				char type[64] = ""; std::sprintf(type, "%.*s", (uint32_t)ftype.size(), ftype.data());
 
 				// name
 				pmr::string const name = util::to_string(n);
 
 				// size
-				char size[20] = "";
-				std::sprintf(size, "%u", (uint32_t)sizeof(T));
+				char size[20] = ""; std::sprintf(size, "%u", (uint32_t)sizeof(T));
 
 				// address
-				char addr[sizeof(size_t) * 2 + 1] = "";
-				std::sprintf(addr, "%p", &v);
+				char addr[sizeof(size_t) * 2 + 1] = ""; std::sprintf(addr, "%p", &v);
 
 				if (ImGui::Selectable(type))		highlight_memory(&v); ImGui::NextColumn();
 				if (ImGui::Selectable(name.c_str()))highlight_memory(&v); ImGui::NextColumn();
@@ -800,8 +785,7 @@ namespace ml
 				// POINTER
 				else if constexpr (std::is_pointer_v<T>)
 				{
-					char buf[sizeof(size_t) * 2 + 1] = "";
-					std::sprintf(buf, "%p", value);
+					char buf[sizeof(size_t) * 2 + 1] = ""; std::sprintf(buf, "%p", value);
 					if (ImGui::Selectable(buf))
 					{
 						highlight_memory(value);
@@ -1040,8 +1024,8 @@ namespace ml
 				ImGui::Separator();
 
 				// progress
-				char progress[32] = "";
-				std::sprintf(progress, "%u / %u (%.2f%%)",
+				char progress[32] = ""; std::sprintf(progress,
+					"%u / %u (%.2f%%)",
 					(uint32_t)testres->used_bytes(),
 					(uint32_t)testres->capacity(),
 					testres->percent_used()
@@ -1134,8 +1118,7 @@ namespace ml
 				ImGui::Separator();
 				for (auto const & elem : frame)
 				{
-					char time[20] = "";
-					std::sprintf(time, "%.7fs", elem.second.count());
+					char time[20] = ""; std::sprintf(time, "%.7fs", elem.second.count());
 					ImGui::Selectable(elem.first); gui::tooltip(time); ImGui::NextColumn();
 					ImGui::Text(time); gui::tooltip(elem.first); ImGui::NextColumn();
 				}
@@ -1164,7 +1147,7 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void *)
 {
 	static ml::plugin * temp{};
 	return temp ? nullptr : temp = new ml::demo{};

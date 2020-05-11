@@ -9,6 +9,11 @@ namespace ml
 	{
 	}
 
+	plugin_manager::~plugin_manager() noexcept
+	{
+		clear();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void plugin_manager::clear()
@@ -61,7 +66,7 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN) })
+				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, nullptr) })
 				{
 					m_data.push_back(code, path, std::move(lib), p.value());
 

@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum { unknown = -1 };
+		enum : int32_t { unknown = -1 };
 
-		union { int32_t location; uint32_t current; uint32_t previous; };
+		uint32_t current{}; uint32_t previous{}; int32_t location{ unknown };
 
 		operator bool() const noexcept { return (unknown < location); }
 
@@ -19,7 +19,6 @@ namespace ml
 
 		template <class Fn
 		> uniform_binder(shader & s, pmr::string const & name, Fn && fn) noexcept
-			: location{ unknown }, current{}, previous{}
 		{
 			if (current = s.m_handle)
 			{

@@ -6,15 +6,36 @@
 using namespace ml;
 using namespace ml::size_literals;
 
-#ifndef MAIN_MEMORY
-#define MAIN_MEMORY 128_MiB
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef MEM_RESERVED
+#define MEM_RESERVED 128_MiB
 #endif
 
-#ifndef MAIN_CONFIG
-#define MAIN_CONFIG L"../../../../assets/libmeme.json"
+#ifndef CONFIG_PATH
+#define CONFIG_PATH "../../../../assets/libmeme.json"
 #endif
 
-static auto const default_config{ R"(
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+static class memcfg final : non_copyable
+{
+	ds::array<byte_t, MEM_RESERVED>		data{};
+	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
+	pmr::unsynchronized_pool_resource	pool{ &mono };
+	util::test_resource					test{ &pool, data.data(), data.size() };
+
+public:
+	memcfg() noexcept
+	{
+		ML_assert(pmr::set_default_resource(&test));
+		ML_assert(memory_manager::configure(&test));
+	}
+} ML_anon{};
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+static auto const default_settings{ R"(
 {
 	"content_home": "../../../../",
 	"library_home": "../../../../",
@@ -22,33 +43,17 @@ static auto const default_config{ R"(
 }
 )"_json };
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup memory
-	static struct memcfg final : non_copyable
-	{
-		ds::array<byte_t, MAIN_MEMORY>		data{};
-		pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
-		pmr::unsynchronized_pool_resource	pool{ &mono };
-		util::test_resource					test{ &pool, data.data(), data.size() };
-
-		memcfg() noexcept
-		{
-			ML_assert(pmr::set_default_resource(&test));
-			ML_assert(memory_manager::configure(&test));
-		}
-
-	} ML_anon{};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// setup engine
-	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ MAIN_CONFIG }]()
+	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ CONFIG_PATH }]()
 	{
 		ML_defer{ f.close(); };
-		if (f) { f >> j; } else { j = default_config; }
+		if (f) { f >> j; } else { j = default_settings; }
 		return j;
 	})()));
 	ML_defer{ ML_assert(engine::finalize()); };

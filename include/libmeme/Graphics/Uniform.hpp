@@ -19,12 +19,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using variable_type = typename std::variant<
+		using allowed_types = meta::list<
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
 			sampler_type
 		>;
+
+		using variable_type = typename meta::rename<std::variant, allowed_types>;
 
 		using function_type = typename std::function<variable_type()>;
 
@@ -32,15 +34,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using info_type = typename typeof<>;
-
-		using name_type = typename pmr::string;
-
-		using data_type = typename std::variant<variable_type, function_type>;
-
-		using storage_type = typename std::tuple<info_type, name_type, data_type>;
-
-		enum : size_t { id_type, id_name, id_data };
+		using info_type		= typename typeof<>;
+		using name_type		= typename pmr::string;
+		using data_type		= typename std::variant<variable_type, function_type>;
+		using storage_type	= typename std::tuple<info_type, name_type, data_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -70,8 +67,8 @@ namespace ml
 		}
 
 		template <class I, class N, class D
-		> uniform(I && info, N && name, D && data)
-			: m_storage{ ML_forward(info), ML_forward(name), ML_forward(data) }
+		> uniform(I && type, N && name, D && data)
+			: m_storage{ ML_forward(type), ML_forward(name), ML_forward(data) }
 		{
 		}
 
@@ -100,18 +97,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD info_type const & type() const & noexcept { return std::get<id_type>(m_storage); }
+		ML_NODISCARD auto const & type() const & noexcept { return std::get<info_type>(m_storage); }
 
-		ML_NODISCARD name_type const & name() const & noexcept { return std::get<id_name>(m_storage); }
+		ML_NODISCARD auto const & name() const & noexcept { return std::get<name_type>(m_storage); }
 
-		ML_NODISCARD data_type const & data() const & noexcept { return std::get<id_data>(m_storage); }
+		ML_NODISCARD auto const & data() const & noexcept { return std::get<data_type>(m_storage); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD variable_type var() const noexcept
 		{
-			auto const & d{ std::get<id_data>(m_storage) };
-			switch (d.index())
+			switch (auto const & d{ std::get<data_type>(m_storage) }; d.index())
 			{
 			default			: return variable_type{};
 			case id_variable: return std::get<variable_type>(d);
@@ -164,7 +160,7 @@ namespace ml
 			}
 			else if (this->holds<T>())
 			{
-				std::get<id_data>(m_storage) = data_type{ ML_forward(args)... };
+				std::get<data_type>(m_storage) = data_type{ ML_forward(args)... };
 				return true;
 			}
 			else

@@ -19,7 +19,7 @@ namespace ml
 		
 		explicit file_manager(json const & j, allocator_type alloc) noexcept;
 		
-		~file_manager() noexcept {}
+		~file_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

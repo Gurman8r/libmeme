@@ -142,12 +142,6 @@ namespace ml
 		gl_sluminance8,
 		gl_depth24_stencil8,
 
-		gl_texture_2d,
-		gl_texture_3d,
-		gl_texture_cube_map,
-		gl_max_texture_size,
-		gl_max_combined_texture_image_units,
-
 		gl_nearest,
 		gl_linear,
 		gl_nearest_mipmap_nearest,
@@ -166,6 +160,12 @@ namespace ml
 		gl_texture_max_lod,
 		gl_texture_base_level,
 		gl_texture_max_level,
+
+		gl_texture_2d,
+		gl_texture_3d,
+		gl_texture_cube_map,
+		gl_max_texture_size,
+		gl_max_combined_texture_image_units,
 
 		gl_texture_cube_map_positive_x,
 		gl_texture_cube_map_negative_x,

@@ -19,10 +19,7 @@ namespace ml
 	protected:
 		static ds::array<uint32_t, gl_MAX_ENUM> const g_enum_table; // global enum table
 
-		template <class I = size_t> ML_NODISCARD static auto get_enum(I && i) noexcept
-		{
-			return g_enum_table[static_cast<size_t>(ML_forward(i))];
-		}
+		ML_NODISCARD static auto get_enum(size_t const i) noexcept { return g_enum_table[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

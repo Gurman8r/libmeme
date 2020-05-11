@@ -18,6 +18,11 @@ namespace ml
 		static ML_scope{ ML_assert(IMGUI_CHECKVERSION()); }; // check imgui version
 	}
 
+	gui_manager::~gui_manager() noexcept
+	{
+		(void)finalize();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	bool gui_manager::is_initialized() noexcept { return (m_gui_context != nullptr); }

@@ -14,6 +14,11 @@ namespace ml
 		j["library_home"].get_to(m_library_home);
 	}
 
+	script_manager::~script_manager() noexcept
+	{
+		(void)finalize();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool script_manager::is_initialized() noexcept { return Py_IsInitialized(); }

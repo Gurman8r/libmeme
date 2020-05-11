@@ -105,7 +105,8 @@ namespace ml
 
 		// reserve space
 		m_meshes.reserve(
-			std::distance(&s->mMeshes[0], &s->mMeshes[s->mNumMeshes]));
+			std::distance(&s->mMeshes[0], &s->mMeshes[s->mNumMeshes])
+		);
 
 		// for each mesh
 		std::for_each(&s->mMeshes[0], &s->mMeshes[s->mNumMeshes], [&](aiMesh * const m)
@@ -118,7 +119,8 @@ namespace ml
 			{
 				// reserve space
 				verts.reserve(
-					verts.capacity() + std::distance(&f.mIndices[0], &f.mIndices[f.mNumIndices]));
+					verts.capacity() + std::distance(&f.mIndices[0], &f.mIndices[f.mNumIndices])
+				);
 
 				// for each index
 				std::for_each(&f.mIndices[0], &f.mIndices[f.mNumIndices], [&](uint32_t i)
@@ -140,12 +142,10 @@ namespace ml
 						uv ? vec2{ uv->x, uv->y } : vec2::one()
 					});
 				});
-
 			});
 
 			// create the mesh
 			m_meshes.emplace_back(mesh{ verts });
-
 		});
 
 		return (!m_meshes.empty());

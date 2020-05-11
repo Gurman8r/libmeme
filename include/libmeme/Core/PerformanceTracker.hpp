@@ -28,9 +28,7 @@ namespace ml
 
 			~benchmark() noexcept { push(m_id, m_timer.elapsed()); }
 
-		private:
-			cstring m_id{};
-			timer m_timer{};
+		private: cstring const m_id; timer m_timer{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

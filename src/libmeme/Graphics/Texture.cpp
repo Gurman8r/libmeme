@@ -331,7 +331,7 @@ namespace ml
 
 	image texture::copy_to_image() const
 	{
-		auto temp{ image{ size(), channels() } };
+		image temp{ size(), channels() };
 		if (m_handle)
 		{
 			ML_bind_scope(*this);

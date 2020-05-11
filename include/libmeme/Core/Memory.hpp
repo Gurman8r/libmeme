@@ -281,12 +281,12 @@ namespace ml
 
 		void operator delete(void * addr) noexcept
 		{
-			return memory_manager::deallocate(addr);
+			memory_manager::deallocate(addr);
 		}
 
 		void operator delete[](void * addr) noexcept
 		{
-			return memory_manager::deallocate(addr);
+			memory_manager::deallocate(addr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -8,5 +8,9 @@ namespace ml
 	{
 	}
 
+	time_manager::~time_manager() noexcept
+	{
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
