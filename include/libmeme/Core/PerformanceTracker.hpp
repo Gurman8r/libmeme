@@ -38,7 +38,7 @@ namespace ml
 		{
 			cstring const id;
 
-			template <class Fn> inline auto operator+(Fn && fn) const noexcept
+			template <class Fn> auto operator+(Fn && fn) const noexcept
 			{
 				return benchmark<Fn>{ id, ML_forward(fn) };
 			}
