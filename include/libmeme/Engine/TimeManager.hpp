@@ -15,7 +15,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit time_manager(json const & j, allocator_type alloc = {}) noexcept;
+		explicit time_manager(json const & j, allocator_type alloc) noexcept;
 
 		~time_manager() noexcept;
 
