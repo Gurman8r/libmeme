@@ -34,6 +34,8 @@ namespace ml
 		private: timer t{};
 		};
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		struct ML_NODISCARD benchmark_helper final
 		{
 			cstring const id;
