@@ -3,13 +3,21 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-// performance_tracker singleton
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// performance tracker singleton
 #define ML_performance_tracker \
 	_ML performance_tracker::get_instance()
 
-// benchmark
-#define ML_benchmark(id) \
-	auto ML_anon = _ML performance_tracker::benchmark_helper{ id } + [&]() noexcept
+// benchmark scope
+#define ML_bench_scope(id) \
+	auto ML_anon = _ML performance_tracker::scope_benchmark{ id }
+
+// benchmark lambda
+#define ML_bench_lambda(id) \
+	auto ML_anon = _ML performance_tracker::lambda_benchmark{ id } + [&]() noexcept
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -21,39 +29,15 @@ namespace ml
 		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Fn> struct ML_NODISCARD benchmark final
-		{
-			explicit benchmark(cstring id, Fn && fn) noexcept
-			{
-				std::invoke(ML_forward(fn));
-
-				push(id, t.elapsed());
-			}
-			
-		private: timer t{};
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct ML_NODISCARD benchmark_helper final
-		{
-			cstring id;
-
-			template <class Fn> inline auto operator+(Fn && fn) const noexcept
-			{
-				return benchmark<Fn>{ id, ML_forward(fn) };
-			}
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+		
+		// get previous frame
 		ML_NODISCARD static frame_data const & prev() noexcept
 		{
 			static auto & inst{ get_instance() };
 			return inst.m_previous;
 		}
 
+		// add to current frame
 		template <class ... Args
 		> static void push(Args && ... args) noexcept
 		{
@@ -61,12 +45,41 @@ namespace ml
 			inst.m_current.emplace_back(ML_forward(args)...);
 		}
 
+		// swap frames and clear current
 		static void refresh() noexcept
 		{
 			static auto & inst{ get_instance() };
 			inst.m_previous.swap(inst.m_current);
 			inst.m_current.clear();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct ML_NODISCARD scope_benchmark final
+		{
+			explicit scope_benchmark(cstring id) noexcept : id{ id } {}
+
+			~scope_benchmark() noexcept { push(id, t.elapsed()); }
+
+		private: cstring const id; timer t{};
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct ML_NODISCARD lambda_benchmark final
+		{
+			explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
+
+			template <class Fn> inline auto const & operator+(Fn && fn) const & noexcept
+			{
+				timer t{};
+				std::invoke(ML_forward(fn));
+				push(id, t.elapsed());
+				return (*this);
+			}
+
+		private: cstring const id;
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

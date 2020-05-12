@@ -287,8 +287,8 @@ namespace ml
 				// timers
 				auto const _timers = material
 				{
-					make_uniform<float_t>("u_time"	, [&t = engine::time().total_time()]() { return t.count<float_t>(); }),
-					make_uniform<float_t>("u_delta"	, [&t = engine::time().delta_time()]() { return t.count<float_t>(); })
+					make_uniform<float_t>("u_time"	, [tt = engine::time().total_time()]() { return tt.count<float_t>(); }),
+					make_uniform<float_t>("u_delta"	, [dt = engine::time().delta_time()]() { return dt.count<float_t>(); })
 				};
 
 				// camera

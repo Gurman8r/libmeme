@@ -6,7 +6,7 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
-// event_system singleton
+// event system singleton
 #define ML_event_system \
 	_ML event_system::get_instance()
 

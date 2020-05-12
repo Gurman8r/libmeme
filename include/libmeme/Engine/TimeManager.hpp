@@ -39,24 +39,24 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto total_time() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
+		auto total_time() const & noexcept -> duration { return m_main_timer.elapsed(); }
 
-		auto delta_time() const & noexcept -> duration const & { return m_delta_time; }
+		auto delta_time() const & noexcept -> duration { return m_delta_time; }
 
-		auto frame_rate() const & noexcept -> float_t const & { return m_frame_rate; }
+		auto frame_rate() const & noexcept -> float_t { return m_frame_rate; }
 
-		auto frame_count() const & noexcept -> uint64_t const & { return m_frame_count; }
+		auto frame_count() const & noexcept -> uint64_t { return m_frame_count; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		timer		m_main_timer{};
-		timer		m_loop_timer{ false };
-		
-		duration	m_delta_time{};
-		float_t		m_frame_rate{};
-		uint64_t	m_frame_count{};
+		timer		m_main_timer	{}			; // main timer
+		timer		m_loop_timer	{ false }	; // loop timer
+		duration	m_delta_time	{}			; // delta time
+		float_t		m_frame_rate	{}			; // frame rate
+		uint64_t	m_frame_count	{}			; // frame count
 
+		// fps tracker
 		struct fps_tracker final : non_copyable
 		{
 			using frame_times = ds::array<float_t, 120>;
