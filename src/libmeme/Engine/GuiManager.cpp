@@ -25,7 +25,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::is_initialized() noexcept { return (m_gui_context != nullptr); }
+	bool gui_manager::is_initialized() noexcept
+	{
+		return (m_gui_context != nullptr);
+	}
 
 	bool gui_manager::initialize(window const & w, cstring shading_language_version)
 	{

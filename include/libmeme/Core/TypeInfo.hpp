@@ -137,33 +137,23 @@ namespace ml
 
 	template <class T> struct ML_NODISCARD typeof<T> final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		constexpr typeof() noexcept = default;
 
-		static constexpr auto const & name() noexcept { return m_name; }
+		static constexpr auto const & name() noexcept { return nameof_v<T>; }
 
-		static constexpr auto const & hash() noexcept { return m_hash; }
+		static constexpr auto const & hash() noexcept { return hashof_v<T>; }
 
 		template <class ... U
-		> constexpr auto compare(typeof<U...> const & other) noexcept
+		> constexpr auto compare(typeof<U...> const & other) const noexcept
 		{
 			return util::compare(m_hash, other.hash());
 		}
-
-	private:
-		static constexpr pretty_function::string m_name{ nameof_v<T> };
-		static constexpr hash_t m_hash{ hashof_v<T> };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <> struct ML_NODISCARD typeof<> final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		constexpr typeof() noexcept
 			: m_name{}, m_hash{}
 		{
@@ -175,9 +165,9 @@ namespace ml
 		{
 		}
 
-		constexpr auto const & name() const noexcept { return m_name; }
+		constexpr auto const & name() const & noexcept { return m_name; }
 
-		constexpr auto const & hash() const noexcept { return m_hash; }
+		constexpr auto const & hash() const & noexcept { return m_hash; }
 
 		template <class ... U
 		> constexpr auto compare(typeof<U...> const & other) const noexcept
@@ -186,10 +176,7 @@ namespace ml
 		}
 
 	private:
-		pretty_function::string m_name;
-		hash_t m_hash;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		pretty_function::string m_name; hash_t m_hash;
 	};
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

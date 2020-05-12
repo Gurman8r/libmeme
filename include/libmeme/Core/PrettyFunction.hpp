@@ -1,16 +1,26 @@
 #ifndef _ML_PRETTY_FUNCTION_HPP_
 #define _ML_PRETTY_FUNCTION_HPP_
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // Sources:
 // https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/pretty_function.hpp
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Common.hpp>
 
-// ctti string class
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// ctti class
 #ifndef ML_CTTI_STRING
 #define ML_CTTI_STRING std::basic_string_view<char,struct std::char_traits<char> >
 #endif
+
+// ctti class string
 #define ML_CTTI_STRING_RAW ML_stringify(ML_CTTI_STRING)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // pretty function
 #if defined(ML_cc_msvc)
@@ -37,6 +47,8 @@
 #else
 #	error Type information is not available.
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::pretty_function
 {

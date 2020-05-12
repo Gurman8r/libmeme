@@ -33,6 +33,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T, class B, class A
+	> ML_NODISCARD inline auto make_glyph(T && t, B && b, A && a) noexcept
+	{
+		glyph g{};
+		g.graphic	= ML_forward(t);
+		g.bounds	= ML_forward(b);
+		g.advance	= ML_forward(a);
+		return g;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_GLYPH_HPP_

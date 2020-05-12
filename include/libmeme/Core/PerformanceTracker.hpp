@@ -38,7 +38,7 @@ namespace ml
 
 		struct ML_NODISCARD benchmark_helper final
 		{
-			cstring const id;
+			cstring id;
 
 			template <class Fn> inline auto operator+(Fn && fn) const noexcept
 			{

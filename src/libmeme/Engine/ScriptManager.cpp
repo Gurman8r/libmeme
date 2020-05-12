@@ -21,7 +21,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script_manager::is_initialized() noexcept { return Py_IsInitialized(); }
+	bool script_manager::is_initialized() noexcept
+	{
+		return Py_IsInitialized();
+	}
 
 	bool script_manager::initialize()
 	{

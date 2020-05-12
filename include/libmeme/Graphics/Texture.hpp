@@ -48,24 +48,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		texture & operator=(texture const & value)
-		{
-			texture temp{ value };
-			swap(temp);
-			return (*this);
-		}
+		texture & operator=(texture const & value);
 
-		texture & operator=(texture && value) noexcept
-		{
-			swap(std::move(value));
-			return (*this);
-		}
+		texture & operator=(texture && value) noexcept;
+
+		void swap(texture & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD bool load_from_file(fs::path const & path);
 
-		ML_NODISCARD bool load_from_image(image const & img);
+		ML_NODISCARD bool load_from_image(image const & value);
 
 		ML_NODISCARD bool load_from_texture(texture const & value);
 
@@ -80,8 +73,6 @@ namespace ml
 		bool destroy();
 
 		bool generate();
-
-		void swap(texture & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -74,7 +74,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::is_initialized() noexcept { return (g_engine != nullptr); }
+	bool engine::is_initialized() noexcept
+	{
+		return (g_engine != nullptr);
+	}
 
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{

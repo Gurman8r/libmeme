@@ -9,18 +9,20 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : int32_t { unknown = -1 };
+		enum { unknown = -1 };
 
-		uint32_t current{}; uint32_t previous{}; int32_t location{ unknown };
+		int32_t location{ unknown };
+		
+		uint32_t current{}, previous{};
 
 		operator bool() const noexcept { return (unknown < location); }
 
 		operator int32_t() const noexcept { return location; }
 
 		template <class Fn
-		> uniform_binder(shader & s, pmr::string const & name, Fn && fn) noexcept
+		> uniform_binder(shader & self, pmr::string const & name, Fn && fn) noexcept
 		{
-			if (current = s.m_handle)
+			if (current = self.m_handle)
 			{
 				previous = GL::getProgramHandle(GL::ProgramObject);
 
@@ -29,7 +31,7 @@ namespace ml
 					GL::useProgram(current);
 				}
 
-				location = s.get_uniform_location(name);
+				location = self.get_uniform_location(name);
 			}
 			if (*this)
 			{
@@ -95,6 +97,33 @@ namespace ml
 	shader::~shader() noexcept
 	{
 		destroy();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	shader & shader::operator=(shader const & value)
+	{
+		shader temp{ value };
+		swap(temp);
+		return (*this);
+	}
+
+	shader & shader::operator=(shader && value) noexcept
+	{
+		swap(std::move(value));
+		return (*this);
+	}
+
+	void shader::swap(shader & value) noexcept
+	{
+		if (this != std::addressof(value))
+		{
+			std::swap(m_handle, value.m_handle);
+			std::swap(m_source, value.m_source);
+			m_attributes.swap(value.m_attributes);
+			m_uniforms.swap(value.m_uniforms);
+			m_textures.swap(value.m_textures);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -331,6 +360,9 @@ namespace ml
 
 	int32_t shader::compile(cstring v_src, cstring g_src, cstring f_src)
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// error helper
 		auto print_errors = [](uint32_t obj) noexcept
 		{
 			pmr::stringstream ss{ GL::getProgramInfoLog(obj) };
@@ -341,6 +373,7 @@ namespace ml
 			}
 		};
 
+		// compiler helper
 		auto compile_shader = [&](uint32_t & obj, uint32_t type, cstring const * src) noexcept
 		{
 			if (!src || !*src) { return -1; } // no source provided
@@ -354,6 +387,8 @@ namespace ml
 			}
 			return 1; // success
 		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// check shaders available
 		if (!GL::shadersAvailable()) { return EXIT_FAILURE * 1; }
@@ -401,6 +436,8 @@ namespace ml
 
 		GL::flush();
 		return EXIT_SUCCESS;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

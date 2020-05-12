@@ -29,20 +29,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t id, event_listener * value) noexcept
+		static bool add_listener(hash_t type, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 			
 			// insert listener into category
-			return value && inst.m_listeners[id].insert(value).second;
+			return value && inst.m_listeners[type].insert(value).second;
 		}
 		
 		template <class Ev
 		> static bool add_listener(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-
 			// add listener by type
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 			return add_listener(hashof_v<Ev>, value);
 		}
 
@@ -53,13 +52,13 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// get category
-			if (auto const cat{ inst.m_listeners.find(value.ID) })
+			if (auto const v{ inst.m_listeners.find(value.ID) })
 			{
 				// for each listener
-				for (auto const & listener : (*cat->second))
+				for (auto const & l : (*v->second))
 				{
 					// handle event
-					listener->on_event(value);
+					l->on_event(value);
 				}
 			}
 		}
@@ -67,28 +66,27 @@ namespace ml
 		template <class Ev, class ... Args
 		> static void fire_event(Args && ... args) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-
 			// fire event by type
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 			return fire_event(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(hash_t id, event_listener * value) noexcept
+		static void remove_listener(hash_t type, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 
 			if (!value) { return; }
 
 			// get category
-			if (auto const cat{ inst.m_listeners.find(id) })
+			if (auto const v{ inst.m_listeners.find(type) })
 			{
 				// get listener
-				if (auto const it{ cat->second->find(value) }; it != cat->second->end())
+				if (auto const l{ v->second->find(value) }; l != v->second->end())
 				{
 					// remove listener
-					cat->second->erase(it);
+					v->second->erase(l);
 				}
 			}
 		}
@@ -102,13 +100,13 @@ namespace ml
 			if (!value) { return; }
 
 			// for each category
-			inst.m_listeners.for_each([&](auto, auto & cat) noexcept
+			inst.m_listeners.for_each([&](auto, auto & v) noexcept
 			{
 				// get listener
-				if (auto const it{ cat.find(value) }; it != cat.end())
+				if (auto const l{ v.find(value) }; l != v.end())
 				{
 					// remove listener
-					cat.erase(it);
+					v.erase(l);
 				}
 			});
 		}

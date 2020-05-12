@@ -31,10 +31,7 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	constexpr int32_t info() noexcept
-	{
-		return 1; // true
-	}
+	constexpr int32_t info() noexcept { return 1; } // true
 
 	template <class T
 	> int32_t info(T && value) noexcept
@@ -51,10 +48,7 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	constexpr int32_t error() noexcept
-	{
-		return 0; // false
-	}
+	constexpr int32_t error() noexcept { return 0; } // false
 
 	template <class T
 	> int32_t error(T && value) noexcept
@@ -71,10 +65,7 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	constexpr int32_t warning() noexcept
-	{
-		return -1; // true
-	}
+	constexpr int32_t warning() noexcept { return -1; } // true
 
 	template <class T
 	> int32_t warning(T && value) noexcept

@@ -35,30 +35,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader & shader::operator=(shader const & value)
-		{
-			shader temp{ value };
-			swap(temp);
-			return (*this);
-		}
+		shader & operator=(shader const & value);
 
-		shader & shader::operator=(shader && value) noexcept
-		{
-			swap(std::move(value));
-			return (*this);
-		}
+		shader & operator=(shader && value) noexcept;
 
-		void swap(shader & value) noexcept
-		{
-			if (this != std::addressof(value))
-			{
-				std::swap(m_handle, value.m_handle);
-				std::swap(m_source, value.m_source);
-				m_attributes.swap(value.m_attributes);
-				m_uniforms.swap(value.m_uniforms);
-				m_textures.swap(value.m_textures);
-			}
-		}
+		void swap(shader & value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

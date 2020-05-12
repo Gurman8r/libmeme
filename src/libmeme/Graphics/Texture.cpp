@@ -138,18 +138,49 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	texture & texture::operator=(texture const & value)
+	{
+		texture temp{ value };
+		swap(temp);
+		return (*this);
+	}
+
+	texture & texture::operator=(texture && value) noexcept
+	{
+		swap(std::move(value));
+		return (*this);
+	}
+
+	void texture::swap(texture & value) noexcept
+	{
+		if (this != std::addressof(value))
+		{
+			std::swap(m_handle, value.m_handle);
+			std::swap(m_sampler, value.m_sampler);
+			std::swap(m_level, value.m_level);
+			std::swap(m_intl_format, value.m_intl_format);
+			std::swap(m_color_format, value.m_color_format);
+			std::swap(m_pixel_type, value.m_pixel_type);
+			std::swap(m_size, value.m_size);
+			std::swap(m_real_size, value.m_real_size);
+			std::swap(m_flags, value.m_flags);
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool texture::load_from_file(fs::path const & path)
 	{
 		return load_from_image(image{ path });
 	}
 
-	bool texture::load_from_image(image const & img)
+	bool texture::load_from_image(image const & value)
 	{
-		if (!img.channels()) { return false; }
+		if (!value.channels()) { return false; }
 
 		m_intl_format = m_color_format = ([&]() noexcept
 		{
-			switch (img.channels())
+			switch (value.channels())
 			{
 			case 1	: return GL::Red;
 			case 3	: return GL::RGB;
@@ -158,7 +189,7 @@ namespace ml
 			}
 		})();
 
-		return create(img.data(), img.size());
+		return create(value.data(), value.size());
 	}
 
 	bool texture::load_from_texture(texture const & value)
@@ -167,6 +198,18 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void texture::bind(texture const * value)
+	{
+		if (value)
+		{
+			GL::bindTexture(value->m_sampler, value->m_handle);
+		}
+		else
+		{
+			GL::bindTexture(GL::Texture2D, NULL);
+		}
+	}
 	
 	bool texture::generate()
 	{
@@ -183,34 +226,6 @@ namespace ml
 			GL::flush();
 		}
 		return !m_handle;
-	}
-
-	void texture::bind(texture const * value)
-	{
-		if (value)
-		{
-			GL::bindTexture(value->m_sampler, value->m_handle);
-		}
-		else
-		{
-			GL::bindTexture(GL::Texture2D, NULL);
-		}
-	}
-
-	void texture::swap(texture & value) noexcept
-	{
-		if (this != std::addressof(value))
-		{
-			std::swap(m_handle,			value.m_handle);
-			std::swap(m_sampler,		value.m_sampler);
-			std::swap(m_level,			value.m_level);
-			std::swap(m_intl_format,	value.m_intl_format);
-			std::swap(m_color_format,	value.m_color_format);
-			std::swap(m_pixel_type,		value.m_pixel_type);
-			std::swap(m_size,			value.m_size);
-			std::swap(m_real_size,		value.m_real_size);
-			std::swap(m_flags,			value.m_flags);
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -241,10 +256,7 @@ namespace ml
 
 		// set size
 		m_size = { w, h };
-		m_real_size = {
-			GL::getValidTextureSize(m_size[0]),
-			GL::getValidTextureSize(m_size[1])
-		};
+		m_real_size = { GL::getValidTextureSize(m_size[0]), GL::getValidTextureSize(m_size[1]) };
 
 		// validate size
 		static auto const max_size{ GL::getMaxTextureSize() };
@@ -322,11 +334,11 @@ namespace ml
 	{
 		switch (m_intl_format)
 		{
-		case GL::Red: return 1;
-		case GL::RGB: return 3;
-		case GL::RGBA: return 4;
+		default			: return 0;
+		case GL::Red	: return 1;
+		case GL::RGB	: return 3;
+		case GL::RGBA	: return 4;
 		}
-		return 0;
 	}
 
 	image texture::copy_to_image() const

@@ -245,87 +245,64 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = value_type
-		> ML_NODISCARD bool contains(U const & value) const noexcept
+		template <class Value
+		> ML_NODISCARD bool contains(Value && value) const noexcept
 		{
-			return self_type::impl_contains(begin(), end(), value);
+			return self_type::impl_contains(begin(), end(), ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = value_type
-		> ML_NODISCARD iterator find(U const & value) noexcept
+		template <class Value
+		> ML_NODISCARD iterator find(Value && value) noexcept
 		{
-			return self_type::impl_find(begin(), end(), value);
+			return self_type::impl_find(begin(), end(), ML_forward(value));
 		}
 
-		template <class U = value_type
-		> ML_NODISCARD const_iterator find(U const & value) const noexcept
+		template <class Value
+		> ML_NODISCARD const_iterator find(Value && value) const noexcept
 		{
-			return self_type::impl_find(cbegin(), cend(), value);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class U = value_type
-		>  auto insert(U const & value) noexcept
-		{
-			return this->impl_insert(value);
-		}
-
-		template <class U = value_type
-		> auto insert(U && value) noexcept
-		{
-			return this->impl_insert(std::move(value));
+			return self_type::impl_find(cbegin(), cend(), ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> iterator find_if(Fn && fn) noexcept
+		> ML_NODISCARD iterator find_if(Fn && fn) noexcept
 		{
 			return std::find_if(begin(), end(), ML_forward(fn));
 		}
 
 		template <class Fn
-		> const_iterator find_if(Fn && fn) const noexcept
+		> ML_NODISCARD const_iterator find_if(Fn && fn) const noexcept
 		{
 			return std::find_if(cbegin(), cend(), ML_forward(fn));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = value_type
-		> auto & find_or_add(U const & value) noexcept
+		template <class Value
+		> auto insert(Value && value) noexcept
 		{
-			if (auto const it{ this->find(value) }; it != this->end())
-			{
-				return (*it);
-			}
-			else if constexpr (traits_type::multi)
-			{
-				return *this->insert(value);
-			}
-			else
-			{
-				return *this->insert(value).first;
-			}
+			return this->impl_insert(ML_forward(value));
 		}
 
-		template <class U, class Fn, class ... Args
-		> auto & find_or_add_fn(U const & value, Fn && fn, Args && ... args) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Value
+		> ML_NODISCARD auto & find_or_add(Value && value) noexcept
 		{
-			if (auto const it{ this->find(value) }; it != this->end())
+			if (auto const it{ this->find(ML_forward(value)) }; it != this->end())
 			{
 				return (*it);
 			}
 			else if constexpr (traits_type::multi)
 			{
-				return *this->insert(std::invoke(ML_forward(fn), ML_forward(args)...));
+				return *this->insert(ML_forward(value));
 			}
 			else
 			{
-				return *this->insert(std::invoke(ML_forward(fn), ML_forward(args)...)).first;
+				return *this->insert(ML_forward(value)).first;
 			}
 		}
 
@@ -443,65 +420,52 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// contains implementation
-		template <class It, class U
-		> static bool impl_contains(It first, It last, U const & value) noexcept
+		template <class It, class Value
+		> static bool impl_contains(It first, It last, Value && value) noexcept
 		{
-			auto linear = [&]() noexcept { return std::find(first, last, value) != last; };
+			auto linear = [&
+			]() noexcept { return std::find(first, last, ML_forward(value)) != last; };
 
-			auto binary = [&]() noexcept { return std::binary_search(first, last, value, compare_type{}); };
+			auto binary = [&
+			]() noexcept { return std::binary_search(first, last, ML_forward(value), compare_type{}); };
 
 			if constexpr (traits_type::thresh == 0)
 			{
 				return linear(); // always linear
 			}
-			else if (auto const size{ (size_t)std::distance(first, last) })
+			else if ((size_t)std::distance(first, last) < traits_type::thresh)
 			{
-				if (size < traits_type::thresh)
-				{
-					return linear(); // linear
-				}
-				else
-				{
-					return binary(); // binary
-				}
+				return linear(); // linear
 			}
 			else
 			{
-				return false; // empty
+				return binary(); // binary
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// find implementation
-		template <class It, class U
-		> static iterator impl_find(It first, It last, U const & value) noexcept
+		template <class It, class Value
+		> static iterator impl_find(It first, It last, Value && value) noexcept
 		{
-			auto linear = [&]() noexcept { return std::find(first, last, value); };
+			auto linear = [&
+			]() noexcept { return std::find(first, last, ML_forward(value)); };
 
-			auto binary = [&, it = std::equal_range(first, last, value, compare_type{})]() noexcept
-			{
-				return (it.first != it.second) ? it.first : last;
-			};
+			auto binary = [&, it = std::equal_range(first, last, ML_forward(value), compare_type{})
+			]() noexcept { return (it.first != it.second) ? it.first : last; };
 
 			if constexpr (traits_type::thresh == 0)
 			{
 				return linear(); // always linear
 			}
-			else if (auto const size{ (size_t)std::distance(first, last) })
+			else if ((size_t)std::distance(first, last) < traits_type::thresh)
 			{
-				if (size < traits_type::thresh)
-				{
-					return linear(); // linear
-				}
-				else
-				{
-					return binary(); // binary
-				}
+				return linear(); // linear
 			}
 			else
 			{
-				return last; // empty
+				return binary(); // binary
 			}
 		}
 		
@@ -522,28 +486,28 @@ namespace ml::ds
 			// remove duplicates
 			if constexpr (!traits_type::multi)
 			{
-				erase(std::unique(begin(), end()), end());
+				this->erase(std::unique(begin(), end()), end());
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// insert implementation
-		template <class U
-		> auto impl_insert(U && value) noexcept
+		template <class Value
+		> auto impl_insert(Value && value) noexcept
 			-> std::conditional_t<traits_type::multi, iterator, std::pair<iterator, bool>>
 		{
 			if constexpr (traits_type::multi)
 			{
 				// insert multi
 				return m_data.emplace(
-					std::upper_bound(begin(), end(), value, compare_type{}),
+					std::upper_bound(begin(), end(), ML_forward(value), compare_type{}),
 					ML_forward(value));
 			}
 			else
 			{
 				// insert unique
-				if (auto const it{ std::equal_range(begin(), end(), value, compare_type{}) }
+				if (auto const it{ std::equal_range(begin(), end(), ML_forward(value), compare_type{}) }
 				; it.first == it.second)
 				{
 					return { m_data.emplace(it.second, ML_forward(value)), true };

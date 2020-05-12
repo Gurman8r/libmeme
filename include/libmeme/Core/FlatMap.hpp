@@ -12,7 +12,7 @@ namespace ml::ds
 		class	_Kt,	// key type
 		class	_Vt,	// value type
 		class	_Pr,	// key comparator predicate type
-		size_t	_Th		// search algorithm selector threshold
+		size_t	_Th		// search heuristic
 	> struct flat_map_traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -328,16 +328,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool contains(key_type const & key) const noexcept
+		template <class Key
+		> ML_NODISCARD bool contains(Key && key) const noexcept
 		{
-			return m_pair.first.contains(key);
+			return m_pair.first.contains(ML_forward(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD optl_iterator_pair find(key_type const & key) noexcept
+		template <class Key
+		> ML_NODISCARD optl_iterator_pair find(Key && key) noexcept
 		{
-			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.end())
+			if (auto const k{ m_pair.first.find(ML_forward(key)) }; k != m_pair.first.end())
 			{
 				return std::make_optional(iterator_pair{ k, this->fetch(k) });
 			}
@@ -347,9 +349,10 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD optl_const_iterator_pair find(key_type const & key) const noexcept
+		template <class Key
+		> ML_NODISCARD optl_const_iterator_pair find(Key && key) const noexcept
 		{
-			if (auto const k{ m_pair.first.find(key) }; k != m_pair.first.cend())
+			if (auto const k{ m_pair.first.find(ML_forward(key)) }; k != m_pair.first.cend())
 			{
 				return std::make_optional(const_iterator_pair{ k, this->fetch(k) });
 			}
@@ -361,128 +364,81 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> std::pair<iterator_pair, bool> try_emplace(key_type const & key, Args && ... args) noexcept
-		{
-			if (auto const k{ m_pair.first.insert(key) }; k.second)
-			{
-				return { this->impl_emplace_hint(k.first, ML_forward(args)...), true };
-			}
-			else
-			{
-				return { { k.first, this->fetch(k.first) }, false };
-			}
-		}
-
-		template <class ... Args
-		> std::pair<iterator_pair, bool> try_emplace(key_type && key, Args && ... args) noexcept
-		{
-			if (auto const k{ m_pair.first.insert(std::move(key)) }; k.second)
-			{
-				return { this->impl_emplace_hint(k.first, ML_forward(args)...), true };
-			}
-			else
-			{
-				return { { k.first, this->fetch(k.first) }, false };
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <class Key, class ... Args
-		> iterator_pair insert(Key && key, Args && ... args) noexcept
+		> std::pair<iterator_pair, bool> try_emplace(Key && key, Args && ... args) noexcept
 		{
-			return this->try_emplace(ML_forward(key), ML_forward(args)...).first;
-		}
-
-		iterator_pair insert(keyval_pair const & pair) noexcept
-		{
-			return this->try_emplace(pair.first, pair.second).first;
-		}
-
-		iterator_pair insert(keyval_pair && pair) noexcept
-		{
-			return this->try_emplace(std::move(pair.first), std::move(pair.second)).first;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class Value = value_type
-		> value_type & find_or_add(key_type const & key, Value && value) noexcept
-		{
-			if (auto const it{ this->find(key) })
+			if (auto const k{ m_pair.first.insert(ML_forward(key)) }; k.second)
 			{
-				return (*it->second);
+				return { this->impl_emplace_hint(k.first, ML_forward(args)...), true };
 			}
 			else
 			{
-				return *this->insert(key, ML_forward(value)).second;
-			}
-		}
-
-		template <class Value = value_type
-		> value_type & find_or_add(key_type && key, Value && value) noexcept
-		{
-			if (auto const it{ this->find(key) })
-			{
-				return (*it->second);
-			}
-			else
-			{
-				return *this->insert(std::move(key), ML_forward(value)).second;
+				return { { k.first, this->fetch(k.first) }, false };
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class ... Args
-		> value_type & find_or_add_fn(key_type const & key, Fn && fn, Args && ... args) noexcept
+		template <class Key, class Value
+		> iterator_pair insert(Key && key, Value && value) noexcept
 		{
-			if (auto const it{ this->find(key) })
+			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
+		}
+
+		iterator_pair insert(keyval_pair const & kvp) noexcept
+		{
+			return this->try_emplace(kvp.first, kvp.second).first;
+		}
+
+		iterator_pair insert(keyval_pair && kvp) noexcept
+		{
+			return this->try_emplace(std::move(kvp.first), std::move(kvp.second)).first;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Key
+		> ML_NODISCARD value_type & operator[](Key && key) & noexcept
+		{
+			return this->at(ML_forward(key));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Key
+		> ML_NODISCARD value_type & at(Key && key) noexcept
+		{
+			return this->find_or_add(ML_forward(key), value_type{});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Key, class Value
+		> ML_NODISCARD value_type & find_or_add(Key && key, Value && value) noexcept
+		{
+			if (auto const it{ this->find(ML_forward(key)) })
 			{
 				return (*it->second);
 			}
 			else
 			{
-				return *this->insert(key, std::invoke(ML_forward(fn), ML_forward(args)...)).second;
+				return *this->insert(ML_forward(key), ML_forward(value)).second;
 			}
 		}
 
-		template <class Fn, class ... Args
-		> value_type & find_or_add_fn(key_type && key, Fn && fn, Args && ... args) noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Key, class Fn, class ... Args
+		> ML_NODISCARD value_type & find_or_add_fn(Key && key, Fn && fn, Args && ... args) noexcept
 		{
-			if (auto const it{ this->find(key) })
+			if (auto const it{ this->find(ML_forward(key)) })
 			{
 				return (*it->second);
 			}
 			else
 			{
-				return *this->insert(std::move(key), std::invoke(ML_forward(fn), ML_forward(args)...)).second;
+				return *this->insert(ML_forward(key), std::invoke(ML_forward(fn), ML_forward(args)...)).second;
 			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD value_type & at(key_type const & key) noexcept
-		{
-			return this->find_or_add(key, value_type{});
-		}
-
-		ML_NODISCARD value_type & at(key_type && key) noexcept
-		{
-			return this->find_or_add(std::move(key), value_type{});
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD value_type & operator[](key_type const & key) & noexcept
-		{
-			return this->at(key);
-		}
-
-		ML_NODISCARD value_type & operator[](key_type && key) & noexcept
-		{
-			return this->at(std::move(key));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -515,7 +471,7 @@ namespace ml::ds
 		{
 			for (; first != last; ++first)
 			{
-				std::invoke(ML_forward(fn), *first, *this->fetch(first));
+				std::invoke(ML_forward(fn), *first, *this->cfetch(first));
 			}
 		}
 
@@ -534,20 +490,22 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn)
+		> void for_each_n(key_const_iterator first, difference_type count, Fn && fn)
 		{
 			if (0 < count)
 			{
-				do {
+				do
+				{
 					std::invoke(ML_forward(fn), *first, *this->fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
+					
+					--count; ++first;
+				}
+				while (0 < count);
 			}
 		}
 
 		template <class Fn
-		> void for_each_n(ptrdiff_t count, Fn && fn) noexcept
+		> void for_each_n(difference_type count, Fn && fn) noexcept
 		{
 			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
@@ -555,20 +513,22 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn
-		> void for_each_n(key_const_iterator first, ptrdiff_t count, Fn && fn) const
+		> void for_each_n(key_const_iterator first, difference_type count, Fn && fn) const
 		{
 			if (0 < count)
 			{
-				do {
-					std::invoke(ML_forward(fn), *first, *this->fetch(first));
-					--count;
-					++first;
-				} while (0 < count);
+				do
+				{
+					std::invoke(ML_forward(fn), *first, *this->cfetch(first));
+
+					--count; ++first;
+				}
+				while (0 < count);
 			}
 		}
 
 		template <class Fn
-		> void for_each_n(ptrdiff_t count, Fn && fn) const noexcept
+		> void for_each_n(difference_type count, Fn && fn) const noexcept
 		{
 			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
@@ -636,8 +596,7 @@ namespace ml::ds
 		template <class ... Args
 		> iterator_pair impl_emplace_hint(key_const_iterator it, Args && ... args)
 		{
-			// must be private or the map could become unsorted
-			return
+			return // must be private or the map could become unsorted
 			{
 				std::next(m_pair.first.begin(), this->index_of(it)),
 				m_pair.second.emplace(this->fetch(it), ML_forward(args)...)
