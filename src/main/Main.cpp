@@ -1,5 +1,4 @@
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Core/PerformanceTracker.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 
