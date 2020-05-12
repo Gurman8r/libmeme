@@ -4,8 +4,9 @@
 #include <libmeme/Core/NonCopyable.hpp>
 #include <libmeme/Core/TypeInfo.hpp>
 
-#define ML_event(name) \
-	struct name final : _ML event_impl<name>
+// event declarator helper
+#define ML_event(type) \
+	struct type final : _ML event_impl<type>
 
 namespace ml
 {
@@ -20,7 +21,7 @@ namespace ml
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			return (ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
+			return (this->ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
 		}
 
 	protected:

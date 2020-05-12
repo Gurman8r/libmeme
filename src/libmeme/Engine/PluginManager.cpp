@@ -53,7 +53,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	hash_t plugin_manager::load(fs::path const & path)
+	hash_t plugin_manager::load(fs::path const & path, void * user_data)
 	{
 		// path empty
 		if (path.empty()) { return 0; }
@@ -70,7 +70,7 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, nullptr) })
+				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, user_data) })
 				{
 					m_data.push_back(code, path, std::move(lib), p.value());
 

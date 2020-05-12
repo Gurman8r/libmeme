@@ -117,6 +117,8 @@ namespace ml
 		constexpr auto a() const  noexcept-> value_type const & { return m_data[3]; }
 		
 		constexpr auto rgb() const  noexcept-> rgb_type { return (rgb_type)m_data; }
+
+		constexpr auto rgba() & noexcept-> rgba_type & { return m_data; }
 		
 		constexpr auto rgba() const & noexcept-> rgba_type const & { return m_data; }
 

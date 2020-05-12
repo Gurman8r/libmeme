@@ -172,20 +172,23 @@ namespace ml
 		};
 
 		gui::plot_controller m_plots
-		{ {
-			gui::plot::create(120, gui::plot::histogram
+		{
+			gui::plot::create(120
+				, gui::plot::histogram
 				, "##frame time"
 				, "%.3f ms/frame"
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }
 				, []() { return 1000.f / engine::time().frame_rate(); }),
-			gui::plot::create(120, gui::plot::histogram
+
+			gui::plot::create(120
+				, gui::plot::histogram
 				, "##frame rate"
 				, "%.1f fps"
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }
 				, []() { return engine::time().frame_rate(); }),
-		} };
+		};
 
 		MemoryEditor m_mem_editor{};
 
@@ -287,8 +290,8 @@ namespace ml
 				// timers
 				auto const _timers = material
 				{
-					make_uniform<float_t>("u_time"	, [tt = engine::time().total_time()]() { return tt.count<float_t>(); }),
-					make_uniform<float_t>("u_delta"	, [dt = engine::time().delta_time()]() { return dt.count<float_t>(); })
+					make_uniform<float_t>("u_time"	, [&tt = engine::time().total_time()]() { return tt.count<float_t>(); }),
+					make_uniform<float_t>("u_delta"	, [&dt = engine::time().delta_time()]() { return dt.count<float_t>(); })
 				};
 
 				// camera

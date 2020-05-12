@@ -328,7 +328,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key
+		template <class Key = key_type
 		> ML_NODISCARD bool contains(Key && key) const noexcept
 		{
 			return m_pair.first.contains(ML_forward(key));
@@ -336,7 +336,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key
+		template <class Key = key_type
 		> ML_NODISCARD optl_iterator_pair find(Key && key) noexcept
 		{
 			if (auto const k{ m_pair.first.find(ML_forward(key)) }; k != m_pair.first.end())
@@ -349,7 +349,7 @@ namespace ml::ds
 			}
 		}
 
-		template <class Key
+		template <class Key = key_type
 		> ML_NODISCARD optl_const_iterator_pair find(Key && key) const noexcept
 		{
 			if (auto const k{ m_pair.first.find(ML_forward(key)) }; k != m_pair.first.cend())
@@ -379,7 +379,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key, class Value
+		template <class Key = key_type, class Value = value_type
 		> iterator_pair insert(Key && key, Value && value) noexcept
 		{
 			return this->try_emplace(ML_forward(key), ML_forward(value)).first;
@@ -397,7 +397,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key
+		template <class Key = key_type
 		> ML_NODISCARD value_type & operator[](Key && key) & noexcept
 		{
 			return this->at(ML_forward(key));
@@ -405,7 +405,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key
+		template <class Key = key_type
 		> ML_NODISCARD value_type & at(Key && key) noexcept
 		{
 			return this->find_or_add(ML_forward(key), value_type{});
@@ -413,7 +413,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Key, class Value
+		template <class Key = key_type, class Value = value_type
 		> ML_NODISCARD value_type & find_or_add(Key && key, Value && value) noexcept
 		{
 			if (auto const it{ this->find(ML_forward(key)) })
@@ -453,13 +453,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> void for_each(key_const_iterator first, Fn && fn) noexcept
+		> void for_each(key_const_iterator first, Fn && fn)
 		{
 			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
 		}
 
 		template <class Fn
-		> void for_each(Fn && fn) noexcept
+		> void for_each(Fn && fn)
 		{
 			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
 		}
@@ -476,13 +476,13 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> void for_each(key_const_iterator first, Fn && fn) const noexcept
+		> void for_each(key_const_iterator first, Fn && fn) const
 		{
 			this->for_each(first, m_pair.first.cend(), ML_forward(fn));
 		}
 
 		template <class Fn
-		> void for_each(Fn && fn) const noexcept
+		> void for_each(Fn && fn) const
 		{
 			this->for_each(m_pair.first.cbegin(), ML_forward(fn));
 		}
@@ -505,7 +505,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> void for_each_n(difference_type count, Fn && fn) noexcept
+		> void for_each_n(difference_type count, Fn && fn)
 		{
 			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
@@ -528,7 +528,7 @@ namespace ml::ds
 		}
 
 		template <class Fn
-		> void for_each_n(difference_type count, Fn && fn) const noexcept
+		> void for_each_n(difference_type count, Fn && fn) const
 		{
 			this->for_each_n(m_pair.first.cbegin(), count, ML_forward(fn));
 		}
@@ -588,9 +588,6 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type m_pair;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// emplace_hint implementation
 		template <class ... Args
@@ -602,6 +599,11 @@ namespace ml::ds
 				m_pair.second.emplace(this->fetch(it), ML_forward(args)...)
 			};
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_pair;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

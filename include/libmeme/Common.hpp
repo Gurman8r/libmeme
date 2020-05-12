@@ -58,7 +58,7 @@
 #else
 #	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, _))
 #endif
-#define ML_anon					ML_anon_expr(anonymous) // _ml_anonymous_#_
+#define ML_anon					ML_anon_expr(anon) // _ml_anon_#_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -89,20 +89,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// environment
-#ifndef ML_DISABLE_LEGACY
-#	define ML_argc				__argc
-#	define ML_argv				__argv
-#	define ML_wargv				__wargv
-#	define ML_environ			_environ
-#	define ML_wenviron			_wenviron
-#else
-#	define ML_argc				(0)
-#	define ML_argv				((char**)0)
-#	define ML_envp				((char***)0)
-#	define ML_environ			((wchar_t**)0)
-#	define ML_wenviron			((wchar_t***)0)
-#endif
+// command line
+#define ML_argc					__argc
+#define ML_argv					__argv
+#define ML_wargv				__wargv
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

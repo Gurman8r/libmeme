@@ -364,10 +364,17 @@
 #   pragma warning(disable: 4031)   // second formal parameter list longer than the first list
 #   pragma warning(disable: 4067)   // unexpected tokens following preprocessor directive - expected a newline
 #   pragma warning(disable: 4251)   // type1 needs to have dll-interface to be used by type2
+#   pragma warning(disable: 4307)   // integral constant overflow
 #   pragma warning(disable: 4308)   // negative integral constant converted to unsigned t
+#   pragma warning(disable: 4309)   // truncation of constant value
 #   pragma warning(disable: 4723)   // potential divide by zero
 #   pragma warning(disable: 6011)   // dereferencing NULL pointer
 #   pragma warning(disable: 6282)   // incorrect operator
+#   pragma warning(disable: 26437)  // do not slice
+#   pragma warning(disable: 26444)  // avoid unnamed objecs with custom construction and destruction
+#   pragma warning(disable: 26451)  // arithmetic overflow
+#   pragma warning(disable: 26495)  // value may be uninitialized
+#   pragma warning(disable: 26812)  // unscoped enum
 #endif
 
 #endif // !_ML_CONFIG_HPP_

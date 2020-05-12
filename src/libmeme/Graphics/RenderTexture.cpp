@@ -128,15 +128,15 @@ namespace ml
 
 	bool render_texture::resize(vec2i const & value)
 	{
-		if ((0 < value[0]) && (0 < value[1]) && (m_size != value))
+		if (value[0] <= 0 || value[1] <= 0 || m_size == value)
+		{
+			return false;
+		}
+		else
 		{
 			m_size = value;
 
 			return destroy() && generate();
-		}
-		else
-		{
-			return false;
 		}
 	}
 

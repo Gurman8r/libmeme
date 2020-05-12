@@ -166,32 +166,30 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using delta_t = typename float_t;
+		pmr::vector<plot> plots{}; float_t ref_time{};
 
-		template <class Delta = delta_t
-		> static constexpr auto sixty_fps{ Delta{ 1 } / Delta{ 60 } };
-
-		pmr::vector<plot> plots{};
-		
-		delta_t ref_time{};
+		plot_controller(std::initializer_list<plot> init) noexcept
+			: plots{ init.begin(), init.end() }, ref_time{}
+		{
+		}
 
 		template <class Fn> auto for_each(Fn && fn) noexcept
 		{
 			return std::for_each(plots.begin(), plots.end(), ML_forward(fn));
 		}
 
-		template <class Delta = delta_t
-		> void update(Delta const tt, Delta const dt = sixty_fps<Delta>) noexcept
+		template <class Delta = float_t
+		> void update(Delta const tt, Delta const dt = (Delta)(1.f / 60.f)) noexcept
 		{
-			if (ref_time == delta_t{ 0 })
+			if (ref_time == 0.f)
 			{
-				return (void)(ref_time = static_cast<delta_t>(tt));
+				return (void)(ref_time = static_cast<float_t>(tt));
 			}
-			while (ref_time < static_cast<delta_t>(tt))
+			while (ref_time < static_cast<float_t>(tt))
 			{
 				this->for_each([&](auto & p) { p.update(); });
 
-				ref_time += static_cast<delta_t>(dt);
+				ref_time += static_cast<float_t>(dt);
 			}
 			return;
 		}

@@ -29,36 +29,36 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t type, event_listener * value) noexcept
+		static bool add_listener(hash_t id, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 			
 			// insert listener into category
-			return value && inst.m_listeners[type].insert(value).second;
+			return value && inst.m_listeners[id].insert(value).second;
 		}
 		
 		template <class Ev
 		> static bool add_listener(event_listener * value) noexcept
 		{
-			// add listener by type
+			// add listener by id
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 			return add_listener(hashof_v<Ev>, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void fire_event(event const & value) noexcept
+		static void fire_event(event const & ev) noexcept
 		{
 			static auto & inst{ get_instance() };
 
 			// get category
-			if (auto const v{ inst.m_listeners.find(value.ID) })
+			if (auto const v{ inst.m_listeners.find(ev.ID) })
 			{
 				// for each listener
 				for (auto const & l : (*v->second))
 				{
 					// handle event
-					l->on_event(value);
+					l->on_event(ev);
 				}
 			}
 		}
@@ -66,21 +66,21 @@ namespace ml
 		template <class Ev, class ... Args
 		> static void fire_event(Args && ... args) noexcept
 		{
-			// fire event by type
+			// fire event by id
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 			return fire_event(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(hash_t type, event_listener * value) noexcept
+		static void remove_listener(hash_t id, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 
 			if (!value) { return; }
 
 			// get category
-			if (auto const v{ inst.m_listeners.find(type) })
+			if (auto const v{ inst.m_listeners.find(id) })
 			{
 				// get listener
 				if (auto const l{ v->second->find(value) }; l != v->second->end())

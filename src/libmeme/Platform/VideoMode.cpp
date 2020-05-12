@@ -35,23 +35,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	pmr::vector<video_mode> const & video_mode::get_fullscreen_modes()
+	ds::set<video_mode> const & video_mode::get_fullscreen_modes()
 	{
-		static pmr::vector<video_mode> temp{};
-		auto add_mode = [&](video_mode && vm) noexcept
-		{
-			if (std::find(temp.begin(), temp.end(), ML_forward(vm)) == temp.end())
-			{
-				temp.emplace_back(ML_forward(vm));
-			}
-		};
+		static ds::set<video_mode> temp{};
 		static ML_scope // once
 		{
 #if defined(ML_os_windows)
-			DEVMODE dm; dm.dmSize = sizeof(dm);
+			DEVMODE dm{}; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
-				add_mode({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
+				temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
 			}
 #elif defined(ML_os_apple)
 #elif defined(ML_os_unix)

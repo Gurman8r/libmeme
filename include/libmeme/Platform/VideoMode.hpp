@@ -3,6 +3,7 @@
 
 #include <libmeme/Platform/Export.hpp>
 #include <libmeme/Core/Rect.hpp>
+#include <libmeme/Core/FlatSet.hpp>
 
 namespace ml
 {
@@ -43,7 +44,7 @@ namespace ml
 
 		ML_NODISCARD static video_mode const & get_desktop_mode();
 
-		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
+		ML_NODISCARD static ds::set<video_mode> const & get_fullscreen_modes();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

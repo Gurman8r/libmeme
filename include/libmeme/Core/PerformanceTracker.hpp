@@ -90,7 +90,7 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		frame_data m_current, m_previous;
+		frame_data m_current{}, m_previous{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -93,7 +93,7 @@ namespace ml
 
 		// initialize windows
 		debug::info("initializing windows...");
-		if (!window::initialize())
+		if (!g_engine->m_window.initialize())
 		{
 			return debug::error("failed initializing windows");
 		}
@@ -138,8 +138,8 @@ namespace ml
 		// destroy window
 		g_engine->m_window.destroy();
 
-		// finalize window backend
-		window::finalize();
+		// finalize windows
+		g_engine->m_window.finalize();
 		
 		// destroy context
 		delete g_engine; g_engine = nullptr;

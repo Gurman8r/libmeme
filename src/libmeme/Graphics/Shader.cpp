@@ -17,25 +17,20 @@ namespace ml
 
 		operator bool() const noexcept { return (unknown < location); }
 
-		operator int32_t() const noexcept { return location; }
-
 		template <class Fn
 		> uniform_binder(shader & self, pmr::string const & name, Fn && fn) noexcept
 		{
 			if (current = self.m_handle)
 			{
-				previous = GL::getProgramHandle(GL::ProgramObject);
-
-				if (current != previous)
+				if (current != (previous = GL::getProgramHandle(GL::ProgramObject)))
 				{
 					GL::useProgram(current);
 				}
 
-				location = self.get_uniform_location(name);
-			}
-			if (*this)
-			{
-				std::invoke(ML_forward(fn), *this);
+				if (unknown < (location = self.get_uniform_location(name)))
+				{
+					std::invoke(ML_forward(fn), location);
+				}
 			}
 		}
 

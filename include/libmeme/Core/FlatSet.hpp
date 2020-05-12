@@ -245,7 +245,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Value
+		template <class Value = value_type
 		> ML_NODISCARD bool contains(Value && value) const noexcept
 		{
 			return self_type::impl_contains(begin(), end(), ML_forward(value));
@@ -253,13 +253,13 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Value
+		template <class Value = value_type
 		> ML_NODISCARD iterator find(Value && value) noexcept
 		{
 			return self_type::impl_find(begin(), end(), ML_forward(value));
 		}
 
-		template <class Value
+		template <class Value = value_type
 		> ML_NODISCARD const_iterator find(Value && value) const noexcept
 		{
 			return self_type::impl_find(cbegin(), cend(), ML_forward(value));
@@ -281,7 +281,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Value
+		template <class Value = value_type
 		> auto insert(Value && value) noexcept
 		{
 			return this->impl_insert(ML_forward(value));
@@ -289,7 +289,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Value
+		template <class Value = value_type
 		> ML_NODISCARD auto & find_or_add(Value && value) noexcept
 		{
 			if (auto const it{ this->find(ML_forward(value)) }; it != this->end())
@@ -415,9 +415,6 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		storage_type m_data;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// contains implementation
 		template <class It, class Value
@@ -447,7 +444,7 @@ namespace ml::ds
 
 		// find implementation
 		template <class It, class Value
-		> static iterator impl_find(It first, It last, Value && value) noexcept
+		> static auto impl_find(It first, It last, Value && value) noexcept
 		{
 			auto linear = [&
 			]() noexcept { return std::find(first, last, ML_forward(value)); };
@@ -518,6 +515,11 @@ namespace ml::ds
 				}
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -94,6 +94,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum window_profile_ : int32_t
+	{
+		window_profile_any,
+		window_profile_core,
+		window_profile_compat,
+		window_profile_debug,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum window_hints_ : int32_t
 	{
 		window_hints_none				= 0,
@@ -121,16 +131,6 @@ namespace ml
 			| window_hints_focused
 			| window_hints_auto_iconify
 			| window_hints_maximized,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_profile_ : int32_t
-	{
-		window_profile_any,
-		window_profile_core,
-		window_profile_compat,
-		window_profile_debug,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

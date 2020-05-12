@@ -330,6 +330,15 @@ namespace ml::embed
 			.def_property_readonly_static("directx", [](py::object) { return (int32_t)window_client_directx; })
 			;
 
+		// WINDOW PROFILE
+		py::class_<window_profile_>(m, "window_profile")
+			.def(py::init<>())
+			.def_property_readonly_static("any", [](py::object) { return (int32_t)window_profile_any; })
+			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
+			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
+			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
+			;
+
 		// WINDOW HINTS
 		py::class_<window_hints_>(m, "window_hints")
 			.def(py::init<>())
@@ -344,15 +353,6 @@ namespace ml::embed
 			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_hints_doublebuffer; })
 			.def_property_readonly_static("default", [](py::object) { return (int32_t)window_hints_default; })
 			.def_property_readonly_static("default_maximized", [](py::object) { return (int32_t)window_hints_default_maximized; })
-			;
-
-		// WINDOW PROFILE
-		py::class_<window_profile_>(m, "window_profile")
-			.def(py::init<>())
-			.def_property_readonly_static("any", [](py::object) { return (int32_t)window_profile_any; })
-			.def_property_readonly_static("core", [](py::object) { return (int32_t)window_profile_core; })
-			.def_property_readonly_static("compat", [](py::object) { return (int32_t)window_profile_compat; })
-			.def_property_readonly_static("debug", [](py::object) { return (int32_t)window_profile_debug; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -482,10 +482,10 @@ namespace ml::embed
 			.def_static("is_fullscreen"			, []() { return engine::window().is_fullscreen(); })
 			.def_static("is_open"				, []() { return engine::window().is_open(); })
 			.def_static("get_attribute"			, [](int32_t v) { return engine::window().get_attribute(v); })
+			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
 			.def_static("get_clipboard_string"	, []() { return engine::window().get_clipboard_string(); })
 			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
 			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
-			.def_static("get_bounds"		, []() { return engine::window().get_bounds(); })
 			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
 			.def_static("get_handle"			, []() { return engine::window().get_handle(); })
 			.def_static("get_input_mode"		, [](int32_t v) { return engine::window().get_input_mode(v); })
