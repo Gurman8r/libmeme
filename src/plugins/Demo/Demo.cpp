@@ -407,9 +407,9 @@ namespace ml
 			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
-			m_pipeline.for_each([&](auto &, render_texture & e)
+			m_pipeline.for_each([&](auto, render_texture & rt)
 			{
-				e.resize(m_display_size);
+				rt.resize(m_display_size);
 			});
 		}
 
@@ -419,12 +419,12 @@ namespace ml
 
 			if (m_pipeline.empty()) { return; }
 
-			if (render_texture & target{ m_pipeline[0] })
+			if (render_texture & rt{ m_pipeline[0] })
 			{
-				ML_bind_scope(target);
-				target.clear_color(colors::magenta);
-				target.viewport(target.bounds());
-				m_ecs.update_system<x_draw_renderers>(target);
+				ML_bind_scope(rt);
+				rt.clear_color(colors::magenta);
+				rt.viewport(rt.bounds());
+				m_ecs.update_system<x_draw_renderers>(rt);
 			}
 		}
 
