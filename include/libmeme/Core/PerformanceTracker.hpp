@@ -9,7 +9,7 @@
 
 // benchmark
 #define ML_benchmark(id) \
-	auto ML_anon = _ML performance_tracker::benchmark{ id }
+	auto ML_anon = _ML performance_tracker::benchmark_helper{ id } + [&]() noexcept
 
 namespace ml
 {
@@ -22,13 +22,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD benchmark final
+		template <class Fn> struct ML_NODISCARD benchmark final
 		{
-			explicit benchmark(cstring id) noexcept : m_id{ id } {}
+			explicit benchmark(cstring id, Fn && fn) noexcept
+			{
+				std::invoke(ML_forward(fn));
 
-			~benchmark() noexcept { push(m_id, m_timer.elapsed()); }
+				push(id, t.elapsed());
+			}
+			
+		private: timer t{};
+		};
 
-		private: cstring const m_id; timer m_timer{};
+		struct ML_NODISCARD benchmark_helper final
+		{
+			cstring const id;
+
+			template <class Fn> auto operator+(Fn && fn) const noexcept
+			{
+				return benchmark<Fn>{ id, ML_forward(fn) };
+			}
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -5,14 +5,12 @@
 
 #include <libmeme/Config.hpp>
 
-#ifdef ML_API
+#if defined(ML_API)
 #	define ML_GRAPHICS_API ML_API
+#elif defined(ML_GRAPHICS_EXPORTS)
+#	define ML_GRAPHICS_API ML_API_EXPORT
 #else
-#	ifdef ML_GRAPHICS_EXPORTS
-#		define ML_GRAPHICS_API ML_API_EXPORT
-#	else
-#		define ML_GRAPHICS_API ML_API_IMPORT
-#	endif
+#	define ML_GRAPHICS_API ML_API_IMPORT
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

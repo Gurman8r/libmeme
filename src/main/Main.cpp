@@ -69,51 +69,18 @@ ml::int32_t main()
 	while (engine::window().is_open())
 	{
 		engine::time().begin_loop();
-		ML_defer{ engine::time().end_loop(); };
-		ML_defer{ performance_tracker::swap(); };
-		{
-			ML_benchmark("| begin loop");
-			engine::window().poll_events();
-			event_system::fire_event<begin_loop_event>();
-		}
-		{
-			ML_benchmark("|  update");
-			event_system::fire_event<update_event>();
-		}
-		{
-			ML_benchmark("|  begin draw");
-			engine::window().clear_color(colors::black);
-			engine::window().viewport(engine::window().get_framebuffer_size());
-			event_system::fire_event<begin_draw_event>();
-		}
-		{
-			ML_benchmark("|   draw");
-			event_system::fire_event<draw_event>();
-		}
-		{
-			ML_benchmark("|   begin gui");
-			engine::gui().new_frame();
-			event_system::fire_event<begin_gui_event>();
-		}
-		{
-			ML_benchmark("|    draw gui");
-			engine::gui().draw_default();
-			event_system::fire_event<draw_gui_event>();
-		}
-		{
-			ML_benchmark("|   end gui");
-			engine::gui().render_frame();
-			event_system::fire_event<end_gui_event>();
-		}
-		{
-			ML_benchmark("|  end draw");
-			engine::window().swap_buffers();
-			event_system::fire_event<end_draw_event>();
-		}
-		{
-			ML_benchmark("| end loop");
-			event_system::fire_event<end_loop_event>();
-		}
+
+		ML_defer{ performance_tracker::swap(); engine::time().end_loop(); };
+
+		ML_benchmark("| begin loop")	{ event_system::fire_event<begin_loop_event>(); };
+		ML_benchmark("|  update")		{ event_system::fire_event<update_event>(); };
+		ML_benchmark("|  begin draw")	{ event_system::fire_event<begin_draw_event>(); };
+		ML_benchmark("|   draw")		{ event_system::fire_event<draw_event>(); };
+		ML_benchmark("|   begin gui")	{ event_system::fire_event<begin_gui_event>(); };
+		ML_benchmark("|    draw gui")	{ event_system::fire_event<draw_gui_event>(); };
+		ML_benchmark("|   end gui")		{ event_system::fire_event<end_gui_event>(); };
+		ML_benchmark("|  end draw")		{ event_system::fire_event<end_draw_event>(); };
+		ML_benchmark("| end loop")		{ event_system::fire_event<end_loop_event>(); };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

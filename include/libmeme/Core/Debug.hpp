@@ -36,10 +36,10 @@ namespace ml::debug
 		return 1; // true
 	}
 
-	template <class Fmt
-	> int32_t info(Fmt && fmt) noexcept
+	template <class T
+	> int32_t info(T && value) noexcept
 	{
-		std::cout << "[ info ] " << ML_forward(fmt) << '\n';
+		std::cout << "[ info ] " << ML_forward(value) << '\n';
 		return info();
 	}
 
@@ -56,10 +56,10 @@ namespace ml::debug
 		return 0; // false
 	}
 
-	template <class Fmt
-	> int32_t error(Fmt && fmt) noexcept
+	template <class T
+	> int32_t error(T && value) noexcept
 	{
-		std::cout << "[ error ] " << ML_forward(fmt) << '\n';
+		std::cout << "[ error ] " << ML_forward(value) << '\n';
 		return error();
 	}
 
@@ -76,10 +76,10 @@ namespace ml::debug
 		return -1; // true
 	}
 
-	template <class Fmt
-	> int32_t warning(Fmt && fmt) noexcept
+	template <class T
+	> int32_t warning(T && value) noexcept
 	{
-		std::cout << "[ warn ] " << ML_forward(fmt) << '\n';
+		std::cout << "[ warn ] " << ML_forward(value) << '\n';
 		return warning();
 	}
 

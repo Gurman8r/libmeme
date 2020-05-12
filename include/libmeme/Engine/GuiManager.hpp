@@ -56,13 +56,13 @@ namespace ml
 
 			static constexpr auto title{ "dockspace##libmeme" };
 
-			bool		visible	{ true }	; // 
-			float_t		border	{}			; // 
-			vec2		padding	{}			; // 
-			float_t		rounding{}			; // 
-			vec2		size	{}			; // 
-			float_t		alpha	{}			; // 
-			nodes_t		nodes				; // 
+			bool		visible	{ true };
+			float_t		border	{};
+			vec2		padding	{};
+			float_t		rounding{};
+			vec2		size	{};
+			float_t		alpha	{};
+			nodes_t		nodes;
 
 			uint32_t begin_builder(int32_t flags = {});
 
@@ -103,8 +103,8 @@ namespace ml
 				std::pair<cstring, pmr::vector<std::function<void()>>>
 			>;
 			
-			bool		visible	{ true }	; // 
-			menus_t		menus				; // 
+			bool		visible;
+			menus_t		menus;
 
 			template <class Fn> void add(cstring label, Fn && fn)
 			{

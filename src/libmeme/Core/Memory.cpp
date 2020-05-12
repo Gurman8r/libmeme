@@ -9,7 +9,7 @@ namespace ml
 #if (ML_is_debug)
 		if (!m_records.empty())
 		{
-			debug::error("final allocations follow");
+			debug::error("final allocations follow:");
 
 			debug::pause();
 

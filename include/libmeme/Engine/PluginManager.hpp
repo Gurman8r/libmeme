@@ -5,10 +5,6 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Core/BatchVector.hpp>
 
-#ifndef ML_PLUGIN_MAIN
-#define ML_PLUGIN_MAIN "ml_plugin_main"
-#endif
-
 namespace ml
 {
 	struct ML_ENGINE_API plugin_manager final : trackable, non_copyable

@@ -25,6 +25,8 @@ namespace ml
 		m_data.clear();
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool plugin_manager::free(fs::path const & path)
 	{
 		// path empty
@@ -48,6 +50,8 @@ namespace ml
 		}
 		return false;
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	hash_t plugin_manager::load(fs::path const & path)
 	{
