@@ -460,8 +460,8 @@ namespace ml::embed
 		struct ml_engine_time {};
 		py::class_<ml_engine_time>(m, "time")
 			.def(py::init<>())
-			.def_property_readonly_static("total", [](py::object) { return engine::time().total().count(); })
-			.def_property_readonly_static("delta", [](py::object) { return engine::time().delta().count(); })
+			.def_property_readonly_static("total_time", [](py::object) { return engine::time().total_time().count(); })
+			.def_property_readonly_static("delta_time", [](py::object) { return engine::time().delta_time().count(); })
 			.def_property_readonly_static("frame_count", [](py::object) { return engine::time().frame_count(); })
 			.def_property_readonly_static("frame_rate", [](py::object) { return engine::time().frame_rate(); })
 			;

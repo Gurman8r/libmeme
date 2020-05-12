@@ -38,7 +38,7 @@ namespace ml
 		{
 			cstring const id;
 
-			template <class Fn> auto operator+(Fn && fn) const noexcept
+			template <class Fn> inline auto operator+(Fn && fn) const noexcept
 			{
 				return benchmark<Fn>{ id, ML_forward(fn) };
 			}
@@ -59,7 +59,7 @@ namespace ml
 			inst.m_curr.emplace_back(ML_forward(args)...);
 		}
 
-		static void swap() noexcept
+		static void refresh() noexcept
 		{
 			static auto & inst{ get_instance() };
 			inst.m_prev.swap(inst.m_curr);

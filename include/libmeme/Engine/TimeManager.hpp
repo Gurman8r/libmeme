@@ -2,8 +2,8 @@
 #define _ML_TIME_MANAGER_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Timer.hpp>
 #include <libmeme/Core/Array.hpp>
+#include <libmeme/Core/PerformanceTracker.hpp>
 
 namespace ml
 {
@@ -32,14 +32,16 @@ namespace ml
 		{
 			++m_frame_count;
 
+			performance_tracker::refresh();
+
 			m_delta_time = m_loop_timer.elapsed();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto total() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
+		auto total_time() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
 
-		auto delta() const & noexcept -> duration const & { return m_delta_time; }
+		auto delta_time() const & noexcept -> duration const & { return m_delta_time; }
 
 		auto frame_rate() const & noexcept -> float_t const & { return m_frame_rate; }
 

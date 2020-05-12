@@ -285,20 +285,15 @@ namespace ml
 			// MATERIALS
 			{
 				// timers
-				auto const _timers = material{
-					make_uniform<float_t>("u_time"		, []() { return engine::time().total().count<float_t>(); }),
-					make_uniform<float_t>("u_delta"		, []() { return engine::time().delta().count<float_t>(); })
-				};
-
-				// mvp
-				auto const _mvp = material{
-					make_uniform<mat4	>("u_model"		, mat4::identity()),
-					make_uniform<mat4	>("u_view"		, mat4::identity()),
-					make_uniform<mat4	>("u_proj"		, mat4::identity())
+				auto const _timers = material
+				{
+					make_uniform<float_t>("u_time"	, [&t = engine::time().total_time()]() { return t.count<float_t>(); }),
+					make_uniform<float_t>("u_delta"	, [&t = engine::time().delta_time()]() { return t.count<float_t>(); })
 				};
 
 				// camera
-				auto const _camera = material{
+				auto const _camera = material
+				{
 					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov"	, 45.0f),
@@ -308,17 +303,20 @@ namespace ml
 				};
 
 				// transform
-				auto const _tf = material{
+				auto const _tf = material
+				{
 					make_uniform<vec3	>("u_position"	, vec3{}),
 					make_uniform<vec4	>("u_rotation"	, vec4{}),
 					make_uniform<vec3	>("u_scale"		, vec3{})
 				};
 
 				// 3d
-				auto const _3d = material{
+				auto const _3d = material
+				{
 					make_uniform<color	>("u_color"		, colors::white),
 					make_uniform<texture>("u_texture0"	, (texture *)nullptr)
-				} + _timers + _mvp + _camera + _tf;
+				}
+				+ _timers + _camera + _tf;
 
 				// earth
 				m_materials["earth"] = material{ _3d }
@@ -399,7 +397,7 @@ namespace ml
 			m_console.printss(m_cout.sstr());
 
 			// plots
-			m_plots.update(engine::time().total().count<float_t>());
+			m_plots.update(engine::time().total_time().count<float_t>());
 			
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
@@ -1089,7 +1087,7 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			static auto const & tt{ engine::time().total() };
+			static auto const & tt{ engine::time().total_time() };
 
 			// total time
 			ImGui::Columns(2);

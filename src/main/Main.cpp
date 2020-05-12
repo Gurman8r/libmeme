@@ -59,18 +59,19 @@ ml::int32_t main()
 		return j;
 	})()));
 	ML_defer{ ML_assert(engine::finalize()); };
-	if (!engine::window().is_open()) { return EXIT_FAILURE; }
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// application loop
+	if (!engine::window().is_open()) { return EXIT_FAILURE; }
+	
 	event_system::fire_event<load_event>();
+	
 	ML_defer{ event_system::fire_event<unload_event>(); };
+	
 	while (engine::window().is_open())
 	{
 		engine::time().begin_loop();
-
-		ML_defer{ performance_tracker::swap(); engine::time().end_loop(); };
 
 		ML_benchmark("| begin loop")	{ event_system::fire_event<begin_loop_event>(); };
 		ML_benchmark("|  update")		{ event_system::fire_event<update_event>(); };
@@ -81,6 +82,8 @@ ml::int32_t main()
 		ML_benchmark("|   end gui")		{ event_system::fire_event<end_gui_event>(); };
 		ML_benchmark("|  end draw")		{ event_system::fire_event<end_draw_event>(); };
 		ML_benchmark("| end loop")		{ event_system::fire_event<end_loop_event>(); };
+
+		engine::time().end_loop();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
