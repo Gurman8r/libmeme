@@ -28,10 +28,10 @@ namespace ml
 			{
 				std::invoke(ML_forward(fn));
 
-				push(id, tm.elapsed());
+				push(id, t.elapsed());
 			}
 			
-		private: timer tm{};
+		private: timer t{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,21 +51,21 @@ namespace ml
 		ML_NODISCARD static frame_data const & prev() noexcept
 		{
 			static auto & inst{ get_instance() };
-			return inst.m_data.second;
+			return inst.m_previous;
 		}
 
 		template <class ... Args
 		> static void push(Args && ... args) noexcept
 		{
 			static auto & inst{ get_instance() };
-			inst.m_data.first.emplace_back(ML_forward(args)...);
+			inst.m_current.emplace_back(ML_forward(args)...);
 		}
 
 		static void refresh() noexcept
 		{
 			static auto & inst{ get_instance() };
-			inst.m_data.second.swap(inst.m_data.first);
-			inst.m_data.first.clear();
+			inst.m_previous.swap(inst.m_current);
+			inst.m_current.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -77,7 +77,7 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		std::pair<frame_data, frame_data> m_data{};
+		frame_data m_current, m_previous;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
