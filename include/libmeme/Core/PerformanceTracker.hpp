@@ -28,10 +28,10 @@ namespace ml
 			{
 				std::invoke(ML_forward(fn));
 
-				push(id, t.elapsed());
+				push(id, tm.elapsed());
 			}
 			
-		private: timer t{};
+		private: timer tm{};
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

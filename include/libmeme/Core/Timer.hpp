@@ -13,20 +13,14 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using clock_type	= typename _Clock;
-		using time_point	= typename clock_type::time_point;
-		using self_type		= typename basic_timer<clock_type>;
+		using clock			= typename _Clock;
+		using time_point	= typename clock::time_point;
+		using self_type		= typename basic_timer<clock>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer() noexcept
+		basic_timer(bool start_me = true) noexcept : m_running{ start_me }
 		{
-			this->restart();
-		}
-
-		basic_timer(bool start_me) noexcept
-		{
-			if (start_me) { this->restart(); }
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,7 +32,7 @@ namespace ml
 
 		ML_NODISCARD duration const & elapsed() const & noexcept
 		{
-			return m_running ? (m_elapsed = (clock_type::now() - m_previous)) : m_elapsed;
+			return m_running ? (m_elapsed = (clock::now() - m_previous)) : m_elapsed;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,7 +45,7 @@ namespace ml
 		self_type & restart() & noexcept
 		{
 			m_running = true;
-			m_current = m_previous = clock_type::now();
+			m_current = m_previous = clock::now();
 			m_elapsed = {};
 			return (*this);
 		}
@@ -61,7 +55,7 @@ namespace ml
 			if (m_running)
 			{
 				m_running = false;
-				m_current = clock_type::now();
+				m_current = clock::now();
 				m_elapsed = (m_current - m_previous);
 			}
 			return (*this);
@@ -71,8 +65,8 @@ namespace ml
 
 	private:
 		bool				m_running	{};
-		time_point			m_previous	{};
-		time_point			m_current	{};
+		time_point			m_previous	{ clock::now() };
+		time_point			m_current	{ m_previous };
 		mutable duration	m_elapsed	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
