@@ -49,21 +49,21 @@ namespace ml
 		ML_NODISCARD static frame_data const & prev() noexcept
 		{
 			static auto & inst{ get_instance() };
-			return inst.m_prev;
+			return inst.m_data.second;
 		}
 
 		template <class ... Args
 		> static void push(Args && ... args) noexcept
 		{
 			static auto & inst{ get_instance() };
-			inst.m_curr.emplace_back(ML_forward(args)...);
+			inst.m_data.first.emplace_back(ML_forward(args)...);
 		}
 
 		static void refresh() noexcept
 		{
 			static auto & inst{ get_instance() };
-			inst.m_prev.swap(inst.m_curr);
-			inst.m_curr.clear();
+			inst.m_data.second.swap(inst.m_data.first);
+			inst.m_data.first.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -75,8 +75,7 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		frame_data m_curr{}; // current frame
-		frame_data m_prev{}; // previous frame
+		std::pair<frame_data, frame_data> m_data{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
