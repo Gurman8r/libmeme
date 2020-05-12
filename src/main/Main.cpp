@@ -73,7 +73,6 @@ ml::int32_t main()
 	{
 		engine::time().begin_loop();
 
-		ML_benchmark("test") {};
 		ML_benchmark("| begin loop")	{ event_system::fire_event<begin_loop_event>(); };
 		ML_benchmark("|  update")		{ event_system::fire_event<update_event>();		};
 		ML_benchmark("|  begin draw")	{ event_system::fire_event<begin_draw_event>(); };
