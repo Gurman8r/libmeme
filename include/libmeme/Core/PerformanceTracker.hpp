@@ -18,7 +18,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using frame_type = typename pmr::vector<std::pair<cstring, duration>>;
+		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -46,7 +46,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static frame_type const & prev() noexcept
+		ML_NODISCARD static frame_data const & prev() noexcept
 		{
 			static auto & inst{ get_instance() };
 			return inst.m_prev;
@@ -75,8 +75,8 @@ namespace ml
 
 		~performance_tracker() noexcept;
 
-		frame_type m_curr{}; // current frame
-		frame_type m_prev{}; // previous frame
+		frame_data m_curr{}; // current frame
+		frame_data m_prev{}; // previous frame
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
