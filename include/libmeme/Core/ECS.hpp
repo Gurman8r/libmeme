@@ -1032,13 +1032,13 @@ namespace ml::ecs
 			});
 		}
 
-		// invoke all systems matching a signature
-		template <template <class> class X, class ... Args
-		> self_type & update_system(Args && ... args) noexcept
+		// update all systems matching a signature
+		template <template <class> class X, class ... Extra
+		> self_type & update_system(Extra && ... extra) noexcept
 		{
 			return this->for_system<X>([&](auto & x, auto && ... req_comp) noexcept
 			{
-				std::invoke(x, ML_forward(req_comp)..., ML_forward(args)...);
+				std::invoke(x, ML_forward(req_comp)..., ML_forward(extra)...);
 			});
 		}
 

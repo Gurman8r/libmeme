@@ -9,7 +9,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_PLATFORM_API video_mode final
+	struct ML_PLATFORM_API ML_NODISCARD video_mode final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -18,33 +18,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr operator bool() const noexcept
+		constexpr operator bool() const noexcept
 		{
 			return size.nonzero() && depth;
 		}
 
-		ML_NODISCARD constexpr bool operator==(video_mode const & other) const noexcept
+		constexpr bool operator==(video_mode const & other) const noexcept
 		{
 			return (this == std::addressof(other))
-				|| ((size == other.size) && (depth == other.depth));
+				|| (size == other.size && depth == other.depth);
 		}
 
-		ML_NODISCARD constexpr bool operator!=(video_mode const & other) const noexcept
+		constexpr bool operator!=(video_mode const & other) const noexcept
 		{
 			return !(*this == other);
 		}
 
-		ML_NODISCARD constexpr bool operator<(video_mode const & other) const noexcept
+		constexpr bool operator<(video_mode const & other) const noexcept
 		{
 			return (this != std::addressof(other))
-				&& (size < other.size) || (depth < other.depth);
+				&& (size < other.size || depth < other.depth);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static video_mode const & get_desktop_mode();
+		static video_mode const & get_desktop_mode();
 
-		ML_NODISCARD static ds::set<video_mode> const & get_fullscreen_modes();
+		static ds::set<video_mode> const & get_fullscreen_modes();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

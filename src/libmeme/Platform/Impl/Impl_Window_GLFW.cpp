@@ -13,6 +13,8 @@
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
+#elif defined(ML_os_apple)
+#elif defined(ML_os_unix)
 #else
 #endif
 
@@ -34,7 +36,7 @@ namespace ml
 	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * p) noexcept
 	{
 		static ds::set<GLFWimage> cache{};
-		return &cache.find_or_add(GLFWimage{ (int32_t)w, (int32_t)h, (byte_t *)p });
+		return &cache.find_or_add({ (int32_t)w, (int32_t)h, (byte_t *)p });
 	}
 }
 
@@ -50,7 +52,7 @@ namespace ml
 		if (m_window) { return false; }
 
 		// window hints
-		glfwWindowHint(GLFW_CLIENT_API, ([&]() noexcept
+		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
 		{
 			switch (ws.context.api)
 			{
@@ -60,8 +62,8 @@ namespace ml
 			case window_client_unknown	:
 			default						: return GLFW_NO_API;
 			}
-		})());
-		glfwWindowHint(GLFW_OPENGL_PROFILE, ([&]() noexcept
+		}));
+		glfwWindowHint(GLFW_OPENGL_PROFILE, std::invoke([&]() noexcept
 		{
 			switch (ws.context.profile)
 			{
@@ -71,7 +73,7 @@ namespace ml
 			case window_profile_any		:
 			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
-		})());
+		}));
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.context.major);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	ws.context.minor);
 		glfwWindowHint(GLFW_DEPTH_BITS,				ws.context.depth_bits);
@@ -280,7 +282,7 @@ namespace ml
 	
 	void impl_window_glfw::set_cursor_mode(int32_t value)
 	{
-		set_input_mode(GLFW_CURSOR, ([&]() noexcept
+		set_input_mode(GLFW_CURSOR, std::invoke([&]() noexcept
 		{
 			switch (value)
 			{
@@ -289,7 +291,7 @@ namespace ml
 			case cursor_mode_normal		:
 			default						: return GLFW_CURSOR_NORMAL;
 			}
-		})());
+		}));
 	}
 
 	void impl_window_glfw::set_cursor_position(vec2d const & value)
@@ -404,15 +406,16 @@ namespace ml
 	pmr::vector<monitor_handle> const & impl_window_glfw::get_monitors()
 	{
 		static pmr::vector<monitor_handle> temp{};
-		if (temp.empty())
+		static ML_scope // once
 		{
-			int32_t count { 0 };
-			GLFWmonitor ** m { glfwGetMonitors(&count) };
+			int32_t count{};
+			GLFWmonitor ** monitors{ glfwGetMonitors(&count) };
+			temp.reserve((size_t)count);
 			for (size_t i = 0, imax = (size_t)count; i < imax; ++i)
 			{
-				temp.push_back(m[i]);
+				temp.push_back(monitors[i]);
 			}
-		}
+		};
 		return temp;
 	}
 

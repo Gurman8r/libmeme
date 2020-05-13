@@ -1,12 +1,17 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // platform specific
 #if defined(ML_os_windows)
 #	include <Windows.h>
 #elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
 //	https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
+#else
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -23,11 +28,8 @@ namespace ml
 			m_path += default_extension; // no extension provided
 		}
 
-		// clear symbols
-		m_symbols.clear();
-
-		// load library
-		return m_handle = ([&]() noexcept
+		// open library
+		return m_handle = std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return LoadLibraryExW(m_path.c_str(), nullptr, 0);
@@ -37,8 +39,11 @@ namespace ml
 
 #elif defined(ML_os_unix)
 			return nullptr;
+
+#else
+			return nullptr;
 #endif
-		})();
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -54,8 +59,8 @@ namespace ml
 		// clear symbols
 		m_symbols.clear();
 
-		// free library
-		return ([&]() noexcept
+		// close library
+		return std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return FreeLibrary(static_cast<HINSTANCE>(m_handle));
@@ -65,8 +70,11 @@ namespace ml
 
 #elif defined(ML_os_unix)
 			return false;
+
+#else
+			return false;
 #endif
-		})();
+		});
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -86,6 +94,9 @@ namespace ml
 			return nullptr;
 
 #elif defined(ML_os_unix)
+			return nullptr;
+
+#else
 			return nullptr;
 #endif
 		});

@@ -70,7 +70,7 @@ namespace ml
 		{
 			explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
 
-			template <class Fn> inline auto const & operator+(Fn && fn) const & noexcept
+			template <class Fn> auto const & operator+(Fn && fn) const & noexcept
 			{
 				timer t{};
 				std::invoke(ML_forward(fn));

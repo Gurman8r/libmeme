@@ -16,7 +16,7 @@ namespace ml::impl
     enum class ML_NODISCARD immediate_scope_tag {};
 
     template <class Fn
-    > ML_NODISCARD inline auto operator+(immediate_scope_tag, Fn && fn) noexcept
+    > ML_NODISCARD auto operator+(immediate_scope_tag, Fn && fn) noexcept
     {
         return immediate_scope<Fn>{ ML_forward(fn) };
     }
@@ -43,7 +43,7 @@ namespace ml::impl
     enum class ML_NODISCARD deferred_scope_tag {};
 
     template <class Fn
-    > ML_NODISCARD inline auto operator+(deferred_scope_tag, Fn && fn) noexcept
+    > ML_NODISCARD auto operator+(deferred_scope_tag, Fn && fn) noexcept
     {
         return deferred_scope<Fn>{ ML_forward(fn) };
     }

@@ -75,10 +75,10 @@ namespace ml
 
 	template <class> struct x_draw_renderers final : ecs::detail::x_base<s_draw_renderers>
 	{
-		void operator()(c_shader const & shd, c_model const & mdl, render_target & target)
+		void operator()(c_shader const & shd, c_model const & mdl, render_target & rt)
 		{
 			ML_bind_scope(*shd, true);
-			target.draw(*mdl);
+			rt.draw(*mdl);
 		}
 	};
 
@@ -290,8 +290,8 @@ namespace ml
 				// timers
 				auto const _timers = material
 				{
-					make_uniform<float_t>("u_time"	, [&tt = engine::time().total_time()]() { return tt.count<float_t>(); }),
-					make_uniform<float_t>("u_delta"	, [&dt = engine::time().delta_time()]() { return dt.count<float_t>(); })
+					make_uniform<float_t>("u_time"	, []() { return engine::time().total_time().count<float_t>(); }),
+					make_uniform<float_t>("u_delta"	, []() { return engine::time().delta_time().count<float_t>(); })
 				};
 
 				// camera
@@ -400,7 +400,7 @@ namespace ml
 			m_console.printss(m_cout.sstr());
 
 			// plots
-			m_plots.update(engine::time().total_time().count<float_t>());
+			m_plots.update(engine::time().total_time().count());
 			
 			// systems
 			m_ecs.update_system<x_apply_transforms>();
@@ -1090,12 +1090,10 @@ namespace ml
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			static auto const & tt{ engine::time().total_time() };
-
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", tt.count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", engine::time().total_time().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1121,7 +1119,7 @@ namespace ml
 				{
 					char time[20] = ""; std::sprintf(time, "%.7fs", elem.second.count());
 					ImGui::Selectable(elem.first); gui::tooltip(time); ImGui::NextColumn();
-					ImGui::Text(time); gui::tooltip(elem.first); ImGui::NextColumn();
+					ImGui::Selectable(time); gui::tooltip(elem.first); ImGui::NextColumn();
 				}
 			}
 			ImGui::Separator();

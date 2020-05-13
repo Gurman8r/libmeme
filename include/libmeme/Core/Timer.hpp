@@ -30,9 +30,9 @@ namespace ml
 			return m_running;
 		}
 
-		ML_NODISCARD duration const & elapsed() const & noexcept
+		ML_NODISCARD duration elapsed() const noexcept
 		{
-			return m_running ? (m_elapsed = (clock::now() - m_start_time)) : m_elapsed;
+			return m_running ? (clock::now() - m_start_time) : m_elapsed;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -63,10 +63,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool				m_running		{}					; // 
-		time_point			m_start_time	{ clock::now() }	; // 
-		time_point			m_stop_time		{ m_start_time }	; // 
-		mutable duration	m_elapsed		{}					; // 
+		bool		m_running		{}					; // 
+		time_point	m_start_time	{ clock::now() }	; // 
+		time_point	m_stop_time		{ m_start_time }	; // 
+		duration	m_elapsed		{}					; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

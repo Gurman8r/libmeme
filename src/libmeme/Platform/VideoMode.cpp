@@ -41,7 +41,7 @@ namespace ml
 		static ML_scope // once
 		{
 #if defined(ML_os_windows)
-			DEVMODE dm{}; dm.dmSize = sizeof(dm);
+			DEVMODE dm; dm.dmSize = sizeof(dm);
 			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
 			{
 				temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });

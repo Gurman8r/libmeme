@@ -62,13 +62,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// namespace
-#define _ML						::ml::
-#define _ML_BEGIN				namespace ml {
-#define _ML_END					}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // assert
 #ifndef ML_assert
 #   define ML_assert(expr)		assert(expr)
@@ -97,6 +90,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // misc
+#define _ML						::ml::
 #define ML_alias				using // global typedef
 #define ML_addressof(ptr)		((void *)(intmax_t)(ptr))
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))

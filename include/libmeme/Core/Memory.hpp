@@ -154,9 +154,9 @@ namespace ml
 
 			if (!res)					{ return debug::error("resource cannot be null"); }
 			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
-			if (!res->buffer())			{ return debug::error("resource data cannot be null"); }
-			if (!res->is_valid_size())	{ return debug::error("resource size must be greater than zero"); }
-			if (!res->is_default())		{ return debug::error("resource is not the default resource"); }
+			if (!res->buffer())			{ return debug::error("resource buffer cannot be null"); }
+			if (!res->is_valid_size())	{ return debug::error("resource capacity must be greater than zero"); }
+			if (!res->is_default())		{ return debug::error("resource is not the default memory resource"); }
 
 			return (inst.m_testres = res);
 		}

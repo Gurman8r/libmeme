@@ -8,16 +8,16 @@ using namespace ml::size_literals;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef MEM_RESERVED
-#define MEM_RESERVED 128_MiB
+#define MEM_RESERVED	128.0_MiB
 #endif
 
-#ifndef CONFIG_PATH
-#define CONFIG_PATH "../../../../assets/libmeme.json"
+#ifndef CONFIG_FILE
+#define CONFIG_FILE		"../../../../assets/libmeme.json"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-class memcfg final : public singleton<memcfg>
+static class memcfg final : public singleton<memcfg>
 {
 	friend singleton<memcfg>;
 
@@ -49,14 +49,14 @@ static auto const default_settings{ R"(
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	
 	// setup engine
-	ML_assert(engine::initialize(([&j = json{}, &f = std::ifstream{ CONFIG_PATH }]()
+	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{
 		ML_defer{ f.close(); };
 		if (f) { f >> j; } else { j = default_settings; }
 		return j;
-	})()));
+	})));
 	ML_defer{ ML_assert(engine::finalize()); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,7 +70,8 @@ ml::int32_t main()
 	
 	while (engine::window().is_open())
 	{
-		engine::time().begin_loop();
+		engine::time().begin_loop(); ML_defer{ engine::time().end_loop(); };
+
 		ML_bench_lambda("| begin loop")		{ event_system::fire_event<begin_loop_event>(); };
 		ML_bench_lambda("|  update")		{ event_system::fire_event<update_event>();		};
 		ML_bench_lambda("|  begin draw")	{ event_system::fire_event<begin_draw_event>(); };
@@ -80,7 +81,6 @@ ml::int32_t main()
 		ML_bench_lambda("|   end gui")		{ event_system::fire_event<end_gui_event>();	};
 		ML_bench_lambda("|  end draw")		{ event_system::fire_event<end_draw_event>();	};
 		ML_bench_lambda("| end loop")		{ event_system::fire_event<end_loop_event>();	};
-		engine::time().end_loop();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -39,13 +39,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto total_time() const & noexcept -> duration const & { return m_main_timer.elapsed(); }
+		auto total_time() const noexcept -> duration { return m_main_timer.elapsed(); }
 
-		auto delta_time() const & noexcept -> duration const & { return m_delta_time; }
+		auto delta_time() const noexcept -> duration { return m_delta_time; }
 
-		auto frame_rate() const & noexcept -> float_t { return m_frame_rate; }
+		auto frame_rate() const noexcept -> float_t { return m_frame_rate; }
 
-		auto frame_count() const & noexcept -> uint64_t { return m_frame_count; }
+		auto frame_count() const noexcept -> uint64_t { return m_frame_count; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

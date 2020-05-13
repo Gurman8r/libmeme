@@ -7,8 +7,9 @@ assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ]),
     ml.context_settings(
-        ml.window_client.opengl, 4, 6,  # backend client
-        ml.window_profile.compat,       # backend profile
+        ml.window_client.opengl,        # renderer client
+        4, 6,                           # client version
+        ml.window_profile.compat,       # client profile
         24,                             # depth bits
         8,                              # stencil bits
         True,                           # multisample

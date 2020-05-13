@@ -83,7 +83,7 @@ namespace ml
 		private:
 			friend gui_manager;
 			
-			dockspace_data(allocator_type alloc) noexcept : nodes{ alloc }
+			explicit dockspace_data(allocator_type alloc) noexcept : nodes{ alloc }
 			{
 			}
 
@@ -121,7 +121,7 @@ namespace ml
 		private:
 			friend gui_manager;
 
-			main_menu_bar_data(allocator_type alloc) noexcept : menus{ alloc }
+			explicit main_menu_bar_data(allocator_type alloc) noexcept : menus{ alloc }
 			{
 			}
 

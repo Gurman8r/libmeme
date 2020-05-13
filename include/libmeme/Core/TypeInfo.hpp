@@ -130,7 +130,7 @@ namespace ml
 	template <class T
 	> static constexpr auto hashof_v
 	{
-		util::hash(pretty_function::string{ nameof_v<T> })
+		util::hash(pretty_function::string{ nameof<T>::value })
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

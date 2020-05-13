@@ -10,6 +10,7 @@
 #	include <Windows.h>
 #elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
+#else
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,6 +26,8 @@ using window_impl = _ML impl_window_sdl;
 #elif defined(ML_IMPL_WINDOW_SFML)
 #include "Impl/Impl_Window_SFML.hpp"
 using window_impl = _ML impl_window_sfml;
+
+// etc...
 
 #else
 #error Unknown or invalid window implementation specified.
@@ -51,15 +54,17 @@ namespace ml
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
 		if (!m_impl->open(ws))	{ return debug::error("failed opening window impl"); }
 
-		m_settings = ws; // store settings
+		// store settings
+		m_settings = ws;
 		
-		set_current_context(get_handle()); // make context current
+		// make context current
+		set_current_context(get_handle());
 
-		set_cursor_mode(cursor_mode_normal); // cursor mode
+		// centered
+		set_position((video_mode::get_desktop_mode().size - ws.video.size) / 2);
 
-		set_position((video_mode::get_desktop_mode().size - ws.video.size) / 2); // centered
-
-		if (get_hint(window_hints_maximized)) { maximize(); } // maximized
+		// maximized
+		if (get_hint(window_hints_maximized)) { maximize(); }
 
 		// install callbacks
 		if (install_callbacks)
