@@ -28,13 +28,13 @@ namespace ml
 			, m_time	{ j, alloc }
 			, m_window	{}
 		{
-			event_system::add_listener<begin_loop_event>(this);
-			event_system::add_listener<begin_draw_event>(this);
-			event_system::add_listener<begin_gui_event>(this);
-			event_system::add_listener<draw_gui_event>(this);
-			event_system::add_listener<end_gui_event>(this);
-			event_system::add_listener<end_draw_event>(this);
-			event_system::add_listener<end_loop_event>(this);
+			event_system::add_listener<	begin_loop_event>(this);
+			event_system::add_listener<	begin_draw_event>(this);
+			event_system::add_listener<	begin_gui_event	>(this);
+			event_system::add_listener<	draw_gui_event	>(this);
+			event_system::add_listener<	end_gui_event	>(this);
+			event_system::add_listener<	end_draw_event	>(this);
+			event_system::add_listener<	end_loop_event	>(this);
 		}
 
 		void on_event(event const & ev) override

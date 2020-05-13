@@ -31,7 +31,7 @@
 # 	define glCheck(expr) (expr)
 #else
 #	define glCheck(expr) \
-	do { expr; _ML GL::checkError(__FILE__, __LINE__, ML_to_string(expr)); } while (0)
+	do { expr; _ML GL::checkError(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

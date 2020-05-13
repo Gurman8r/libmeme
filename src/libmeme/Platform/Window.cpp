@@ -17,15 +17,15 @@
 
 #if defined(ML_IMPL_WINDOW_GLFW)
 #include "Impl/Impl_Window_GLFW.hpp"
-using window_impl = _ML impl_window_glfw;
+using impl_window = _ML glfw_window;
 
 #elif defined(ML_IMPL_WINDOW_SDL)
 #include "Impl/Impl_Window_SDL.hpp"
-using window_impl = _ML impl_window_sdl;
+using impl_window = _ML sdl_window;
 
 #elif defined(ML_IMPL_WINDOW_SFML)
 #include "Impl/Impl_Window_SFML.hpp"
-using window_impl = _ML impl_window_sfml;
+using impl_window = _ML impl_window_sfml;
 
 // etc...
 
@@ -39,7 +39,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept { ML_assert(m_impl = new window_impl{}); }
+	window::window() noexcept { ML_assert(m_impl = new impl_window{}); }
 
 	window::~window() noexcept { delete m_impl; }
 
@@ -313,42 +313,42 @@ namespace ml
 
 	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return window_impl::create_custom_cursor(w, h, p);
+		return impl_window::create_custom_cursor(w, h, p);
 	}
 
 	cursor_handle window::create_standard_cursor(int32_t value)
 	{
-		return window_impl::create_standard_cursor(value);
+		return impl_window::create_standard_cursor(value);
 	}
 
 	int32_t window::extension_supported(cstring value)
 	{
-		return window_impl::extension_supported(value);
+		return impl_window::extension_supported(value);
 	}
 
 	window_handle window::get_current_context()
 	{
-		return window_impl::get_current_context();
+		return impl_window::get_current_context();
 	}
 
 	void * window::get_proc_address(cstring value)
 	{
-		return window_impl::get_proc_address(value);
+		return impl_window::get_proc_address(value);
 	}
 
 	pmr::vector<window_handle> const & window::get_monitors()
 	{
-		return window_impl::get_monitors();
+		return impl_window::get_monitors();
 	}
 
 	monitor_handle window::get_primary_monitor()
 	{
-		return window_impl::get_primary_monitor();
+		return impl_window::get_primary_monitor();
 	}
 
 	float64_t window::get_time()
 	{
-		return window_impl::get_time();
+		return impl_window::get_time();
 	}
 
 	bool window::initialize()
@@ -359,19 +359,19 @@ namespace ml
 			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
 		}
 #endif
-		return window_impl::initialize();
+		return impl_window::initialize();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::destroy_cursor(cursor_handle value)
 	{
-		window_impl::destroy_cursor(value);
+		impl_window::destroy_cursor(value);
 	}
 
 	void window::finalize()
 	{
-		window_impl::finalize();
+		impl_window::finalize();
 
 #ifdef ML_os_windows
 		if (auto const cw{ GetConsoleWindow() })
@@ -383,17 +383,17 @@ namespace ml
 
 	void window::poll_events()
 	{
-		window_impl::poll_events();
+		impl_window::poll_events();
 	}
 
 	void window::set_current_context(window_handle value)
 	{
-		window_impl::set_current_context(value);
+		impl_window::set_current_context(value);
 	}
 
 	void window::set_swap_interval(int32_t value)
 	{
-		window_impl::set_swap_interval(value);
+		impl_window::set_swap_interval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

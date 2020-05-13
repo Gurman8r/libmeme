@@ -3,7 +3,6 @@
 
 // WIP
 
-#include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Renderer/RendererAPI.hpp>
 
 // renderer singleton
@@ -17,18 +16,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool initialize();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
 		friend singleton<renderer>;
 
 		renderer() noexcept;
 
 		~renderer() noexcept;
-
-		struct renderer_impl * m_impl;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

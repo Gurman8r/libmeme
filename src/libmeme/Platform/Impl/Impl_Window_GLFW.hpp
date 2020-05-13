@@ -10,13 +10,13 @@ struct GLFWmonitor;
 namespace ml
 {
 	// glfw window implementation
-	struct impl_window_glfw final : window_base
+	struct glfw_window final : window_base
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		impl_window_glfw() noexcept = default;
+		glfw_window() noexcept = default;
 
-		~impl_window_glfw() noexcept { this->destroy(); }
+		~glfw_window() noexcept { this->destroy(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -8,18 +8,20 @@
 namespace ml
 {
 	// renderer implementation base
-	struct renderer_impl : trackable, non_copyable
+	struct renderer_base : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~renderer_impl() noexcept = default;
+		virtual ~renderer_base() noexcept = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		uint32_t get_enum(size_t const i) const noexcept { return get_enum_table()[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		static ds::array<uint32_t, gl_MAX_ENUM> const g_enum_table; // global enum table
-
-		ML_NODISCARD static auto get_enum(size_t const i) noexcept { return g_enum_table[i]; }
+		virtual gl_enum_table const & get_enum_table() const noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
