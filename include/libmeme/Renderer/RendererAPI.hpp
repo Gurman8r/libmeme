@@ -307,136 +307,114 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct vertex_array;
-	struct vertex_buffer;
-	struct index_buffer;
-	struct frame_buffer;
-	struct render_buffer;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base buffer
-	struct ML_RENDERER_API graphics_buffer : trackable, non_copyable
-	{
-		virtual ~graphics_buffer() = default;
-
-		ML_NODISCARD virtual void * handle() noexcept = 0;
-
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
-
-		ML_NODISCARD operator bool() const noexcept { return this->nonzero(); }
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// base vertex array
-	struct ML_RENDERER_API vertex_array : graphics_buffer
+	struct ML_RENDERER_API vertex_array : trackable, non_copyable
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		virtual ~vertex_array() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual void * handle() noexcept = 0;
+		ML_NODISCARD virtual void const * handle() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t type() const noexcept = 0;
-
-		ML_NODISCARD static vertex_array * create(uint32_t type) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD static vertex_array * create(uint32_t mode) noexcept;
 	};
 
-	// base vertex buffer
-	struct ML_RENDERER_API vertex_buffer : graphics_buffer
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// base vertex buffer
+	struct ML_RENDERER_API vertex_buffer : trackable, non_copyable
+	{
 		virtual ~vertex_buffer() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual void * handle() noexcept = 0;
+		virtual void set_data(float_t const * vertices, uint32_t size) = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		virtual void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) = 0;
 
-		ML_NODISCARD static vertex_buffer * create(float_t * vertices, uint32_t size) noexcept;
+		ML_NODISCARD virtual void const * handle() const noexcept = 0;
 
-		ML_NODISCARD static vertex_buffer * create(float_t * vertices, uint32_t size, uint32_t offset) noexcept;
+		ML_NODISCARD virtual uint32_t get_offset() const noexcept = 0;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD virtual uint32_t get_size() const noexcept = 0;
+
+		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
+
+		ML_NODISCARD static vertex_buffer * create(uint32_t usage) noexcept;
+
+		ML_NODISCARD static vertex_buffer * create(float_t const * vertices, uint32_t size) noexcept;
+
+		ML_NODISCARD static vertex_buffer * create(float_t const * vertices, uint32_t size, uint32_t offset) noexcept;
 	};
 
-	// base index buffer
-	struct ML_RENDERER_API index_buffer : graphics_buffer
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// base index buffer
+	struct ML_RENDERER_API index_buffer : trackable, non_copyable
+	{
 		virtual ~index_buffer() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual void * handle() noexcept = 0;
+		virtual void set_data(uint32_t const * indices, uint32_t count) = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		ML_NODISCARD virtual void const * handle() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t count() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_count() const noexcept = 0;
 
-		ML_NODISCARD static index_buffer * create(uint32_t * indices, uint32_t count) noexcept;
+		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
+
+		ML_NODISCARD static index_buffer * create(uint32_t usage, uint32_t type) noexcept;
+
+		ML_NODISCARD static index_buffer * create(uint32_t const * indices, uint32_t count) noexcept;
 	};
 
-	// base frame buffer
-	struct ML_RENDERER_API frame_buffer : graphics_buffer
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// base frame buffer
+	struct ML_RENDERER_API frame_buffer : trackable, non_copyable
+	{
 		virtual ~frame_buffer() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		virtual void set_renderbuffer(void * value, uint32_t attachment) = 0;
+		virtual void set_render_buffer(void * value, uint32_t attachment) = 0;
 
 		virtual void set_texture2d(void * value, uint32_t attachment, uint32_t level) = 0;
 
-		ML_NODISCARD virtual void * handle() noexcept = 0;
-
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		ML_NODISCARD virtual void const * handle() const noexcept = 0;
 
 		ML_NODISCARD static frame_buffer * create() noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	// base render buffer
-	struct ML_RENDERER_API render_buffer : graphics_buffer
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// base render buffer
+	struct ML_RENDERER_API render_buffer : trackable, non_copyable
+	{
 		virtual ~render_buffer() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual void * handle() noexcept = 0;
+		virtual void set_storage(uint32_t format, int32_t width, int32_t height) = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		ML_NODISCARD virtual void const * handle() const noexcept = 0;
 
-		ML_NODISCARD static render_buffer * create(int32_t width, int32_t height, uint32_t format) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD static render_buffer * create(uint32_t format, int32_t width, int32_t height) noexcept;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

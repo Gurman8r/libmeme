@@ -35,13 +35,15 @@
 	do { expr; check_error(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr uint32_t get_enum(uint32_t index)
 	{
-		constexpr gl_enum_table const temp
+		constexpr gl_enum_table const opengl_enums
 		{
 			GL_VENDOR,
 			GL_RENDERER,
@@ -320,7 +322,7 @@ namespace ml
 			GL_STENCIL_BUFFER_BIT,
 			GL_COLOR_BUFFER_BIT,
 		};
-		return temp[static_cast<size_t>(index)];
+		return opengl_enums[static_cast<size_t>(index)];
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -383,106 +385,156 @@ namespace ml
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// opengl vertex array
 	struct opengl_vertex_array final : vertex_array
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using self_type = opengl_vertex_array;
 
-		opengl_vertex_array(uint32_t type) : m_type{ type }
-		{
-			glCheck(glGenVertexArrays(1, &m_handle));
-		}
+		opengl_vertex_array() { glCheck(glGenVertexArrays(1, &m_handle)); }
 
 		~opengl_vertex_array() { glCheck(glDeleteVertexArrays(1, &m_handle)); }
+
+		opengl_vertex_array(uint32_t mode) : self_type{}
+		{
+			m_mode = get_enum(mode);
+		}
 
 		void bind() const override { glCheck(glBindVertexArray(m_handle)); }
 
 		void unbind() const override { glCheck(glBindVertexArray(NULL)); }
 
-		ML_NODISCARD void * handle() noexcept override { return std::addressof(m_handle); }
+		void const * handle() const noexcept override { return std::addressof(m_handle); }
 
-		ML_NODISCARD bool nonzero() const noexcept override { return m_handle; }
-
-		ML_NODISCARD uint32_t type() const noexcept override { return m_type; }
+		uint32_t get_mode() const noexcept override { return m_mode; }
 
 	private:
-		uint32_t m_handle{}; // handle
-		uint32_t m_type{}; // primitive type
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		uint32_t m_handle	{}						; // handle
+		uint32_t m_mode		{ GL_TRIANGLES }		; // primitive type
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex buffer
 	struct opengl_vertex_buffer final : vertex_buffer
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using self_type = opengl_vertex_buffer;
 
-		opengl_vertex_buffer(float_t * vertices, uint32_t size)
-		{
-			glCheck(glGenBuffers(1, &m_handle));
-			glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
-		}
-
-		opengl_vertex_buffer(float_t * vertices, uint32_t size, uint32_t offset)
-		{
-			glCheck(glGenBuffers(1, &m_handle));
-			glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
-		}
+		opengl_vertex_buffer() { glCheck(glGenBuffers(1, &m_handle)); }
 
 		~opengl_vertex_buffer() { glCheck(glDeleteBuffers(1, &m_handle)); }
+
+		opengl_vertex_buffer(uint32_t usage) : self_type{}
+		{
+			m_usage = get_enum(usage);
+		}
+
+		opengl_vertex_buffer(float_t const * vertices, uint32_t size) : self_type{ gl_static_draw }
+		{
+			this->set_data(vertices, size);
+		}
+
+		opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset) : self_type{ gl_dynamic_draw }
+		{
+			this->set_sub_data(vertices, size, offset);
+		}
 
 		void bind() const override { glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle)); }
 
 		void unbind() const override { glCheck(glBindBuffer(GL_ARRAY_BUFFER, NULL)); }
 
-		ML_NODISCARD void * handle() noexcept override { return std::addressof(m_handle); }
+		void set_data(float_t const * vertices, uint32_t size) override
+		{
+			glCheck(glBufferData(
+				GL_ARRAY_BUFFER,
+				m_size = size,
+				vertices,
+				m_usage));
+		}
 
-		ML_NODISCARD bool nonzero() const noexcept override { return m_handle; }
+		void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) override
+		{
+			glCheck(glBufferSubData(
+				GL_ARRAY_BUFFER,
+				m_offset = offset,
+				m_size = size,
+				vertices));
+		}
+
+		void const * handle() const noexcept override { return std::addressof(m_handle); }
+
+		uint32_t get_offset() const noexcept override { return m_offset; }
+
+		uint32_t get_size() const noexcept override { return m_size; }
+
+		uint32_t get_usage() const noexcept override { return m_usage; }
 
 	private:
-		uint32_t m_handle{}; // handle
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		uint32_t m_handle	{}; // handle
+		uint32_t m_offset	{}; // offset
+		uint32_t m_size		{}; // size
+		uint32_t m_usage	{}; // usage
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl index buffer
 	struct opengl_index_buffer final : index_buffer
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using self_type = opengl_index_buffer;
 
-		opengl_index_buffer(uint32_t * indices, uint32_t count)
-		{
-			glCheck(glGenBuffers(1, &m_handle));
-			glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW));
-		}
+		opengl_index_buffer() { glCheck(glGenBuffers(1, &m_handle)); }
 
 		~opengl_index_buffer() { glCheck(glDeleteBuffers(1, &m_handle)); }
+
+		opengl_index_buffer(uint32_t usage, uint32_t type) : self_type{}
+		{
+			m_usage = get_enum(usage);
+			m_type = get_enum(type);
+		}
+
+		opengl_index_buffer(uint32_t const * indices, uint32_t count) : self_type{ gl_static_draw, gl_unsigned_int }
+		{
+			this->set_data(indices, count);
+		}
 
 		void bind() const override { glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle)); }
 
 		void unbind() const override { glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL)); }
 
-		ML_NODISCARD void * handle() noexcept override { return std::addressof(m_handle); }
+		void set_data(uint32_t const * indices, uint32_t count) override
+		{
+			glCheck(glBufferData(
+				GL_ELEMENT_ARRAY_BUFFER,
+				(m_count = count) * sizeof(uint32_t),
+				indices,
+				m_usage));
+		}
 
-		ML_NODISCARD bool nonzero() const noexcept override { return m_handle; }
+		void const * handle() const noexcept override { return std::addressof(m_handle); }
 
-		ML_NODISCARD uint32_t count() const noexcept override { return 0; }
+		uint32_t get_count() const noexcept override { return m_count; }
+
+		uint32_t get_type() const noexcept override { return m_type; }
+
+		uint32_t get_usage() const noexcept override { return m_usage; }
 
 	private:
-		uint32_t m_handle{}; // handle
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		uint32_t m_handle	{}; // handle
+		uint32_t m_count	{}; // count
+		uint32_t m_type		{}; // type
+		uint32_t m_usage	{}; // usage
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl frame buffer
 	struct opengl_frame_buffer final : frame_buffer
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using self_type = opengl_frame_buffer;
 
-		opengl_frame_buffer()
-		{
-			glCheck(glGenFramebuffers(1, &m_handle));
-		}
+		opengl_frame_buffer() { glCheck(glGenFramebuffers(1, &m_handle)); }
 
 		~opengl_frame_buffer() { glCheck(glDeleteFramebuffers(1, &m_handle)); }
 
@@ -490,52 +542,67 @@ namespace ml
 
 		void unbind() const override { glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL)); }
 
-		void set_renderbuffer(void * value, uint32_t attachment) override
+		void set_render_buffer(void * value, uint32_t attachment) override
 		{
-			glCheck(glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, *(uint32_t *)value));
+			glCheck(glFramebufferRenderbuffer(
+				GL_FRAMEBUFFER,
+				get_enum(attachment),
+				GL_RENDERBUFFER,
+				*(uint32_t *)value));
 		}
 
 		void set_texture2d(void * value, uint32_t attachment, uint32_t level) override
 		{
-			glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, *(uint32_t *)value, level));
+			glCheck(glFramebufferTexture2D(
+				GL_FRAMEBUFFER,
+				get_enum(attachment),
+				GL_TEXTURE_2D,
+				*(uint32_t *)value,
+				level));
 		}
 
-		ML_NODISCARD void * handle() noexcept override { return std::addressof(m_handle); }
-
-		ML_NODISCARD bool nonzero() const noexcept override { return m_handle; }
+		void const * handle() const noexcept override { return std::addressof(m_handle); }
 
 	private:
 		uint32_t m_handle{}; // handle
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl render buffer
 	struct opengl_render_buffer final : render_buffer
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using self_type = opengl_render_buffer;
 
-		opengl_render_buffer(int32_t width, int32_t height, uint32_t format)
-		{
-			glCheck(glGenRenderbuffers(1, &m_handle));
-			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, format, width, height));
-		}
+		opengl_render_buffer() { glCheck(glGenRenderbuffers(1, &m_handle)); }
 
 		~opengl_render_buffer() { glCheck(glDeleteRenderbuffers(1, &m_handle)); }
+
+		opengl_render_buffer(uint32_t format, int32_t width, int32_t height) : self_type{}
+		{
+			this->set_storage(format, width, height);
+		}
 
 		void bind() const override { glCheck(glBindRenderbuffer(GL_RENDERBUFFER, m_handle)); }
 
 		void unbind() const override { glCheck(glBindRenderbuffer(GL_RENDERBUFFER, NULL)); }
 
-		ML_NODISCARD void * handle() noexcept override { return std::addressof(m_handle); }
+		void set_storage(uint32_t format, int32_t width, int32_t height) override
+		{
+			glCheck(glRenderbufferStorage(
+				GL_RENDERBUFFER,
+				get_enum(format),
+				width,
+				height));
+		}
 
-		ML_NODISCARD bool nonzero() const noexcept override { return m_handle; }
+		void const * handle() const noexcept override { return std::addressof(m_handle); }
 
 	private:
 		uint32_t m_handle{}; // handle
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

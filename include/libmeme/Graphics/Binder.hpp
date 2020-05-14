@@ -13,10 +13,17 @@ namespace ml::impl
 
 	template <class T> struct ML_NODISCARD scope_binder final
 	{
+		using self_type = scope_binder<T>;
+
 		template <class ... Args
-		> scope_binder(T & value, Args && ... args) noexcept : m_ptr{ &value }
+		> scope_binder(T * value, Args && ... args) noexcept : m_ptr{ value }
 		{
 			m_ptr->bind(ML_forward(args)...);
+		}
+
+		template <class ... Args
+		> scope_binder(T & value, Args && ... args) noexcept : self_type{ &value }
+		{
 		}
 
 		~scope_binder() noexcept

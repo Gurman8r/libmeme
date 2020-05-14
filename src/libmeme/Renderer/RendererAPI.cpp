@@ -20,26 +20,36 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vertex_array * vertex_array::create(uint32_t type) noexcept
+	vertex_array * vertex_array::create(uint32_t mode) noexcept
 	{
-		return new impl_vertex_array{ type };
+		return new impl_vertex_array{ mode };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vertex_buffer * vertex_buffer::create(float_t * vertices, uint32_t size) noexcept
+	vertex_buffer * vertex_buffer::create(uint32_t usage) noexcept
+	{
+		return new impl_vertex_buffer{ usage };
+	}
+
+	vertex_buffer * vertex_buffer::create(float_t const * vertices, uint32_t size) noexcept
 	{
 		return new impl_vertex_buffer{ vertices, size };
 	}
 
-	vertex_buffer * vertex_buffer::create(float_t * vertices, uint32_t size, uint32_t offset) noexcept
+	vertex_buffer * vertex_buffer::create(float_t const * vertices, uint32_t size, uint32_t offset) noexcept
 	{
 		return new impl_vertex_buffer{ vertices, size, offset };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	index_buffer * index_buffer::create(uint32_t * indices, uint32_t count) noexcept
+	index_buffer * index_buffer::create(uint32_t usage, uint32_t type) noexcept
+	{
+		return new impl_index_buffer{ usage, type };
+	}
+
+	index_buffer * index_buffer::create(uint32_t const * indices, uint32_t count) noexcept
 	{
 		return new impl_index_buffer{ indices, count };
 	}
@@ -53,9 +63,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_buffer * render_buffer::create(int32_t width, int32_t height, uint32_t format) noexcept
+	render_buffer * render_buffer::create(uint32_t format, int32_t width, int32_t height) noexcept
 	{
-		return new impl_render_buffer{ width, height, format };
+		return new impl_render_buffer{ format, width, height };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

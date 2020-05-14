@@ -9,6 +9,20 @@
 #define ML_renderer \
 	_ML renderer::get_instance()
 
+
+// commands
+namespace ml
+{
+	struct render_commands
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
 namespace ml
 {
 	// global renderer
