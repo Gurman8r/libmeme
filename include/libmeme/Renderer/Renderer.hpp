@@ -9,25 +9,24 @@
 #define ML_renderer \
 	_ML renderer::get_instance()
 
-
-// commands
-namespace ml
-{
-	struct render_commands
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
 namespace ml
 {
 	// global renderer
-	struct ML_RENDERER_API renderer final : singleton<renderer>
+	class ML_RENDERER_API renderer final : public singleton<renderer>
 	{
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void begin_scene() {}
+
+		static void end_scene() {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void submit() {}
+
+		static void upload() {}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:

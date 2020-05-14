@@ -1,6 +1,7 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 
 namespace ml
 {
@@ -46,8 +47,8 @@ namespace ml
 				break;
 
 			case hashof_v<begin_draw_event>:
-				m_window.clear_color(colors::black);
-				m_window.viewport(m_window.get_framebuffer_size());
+				render_command::set_clear_color(colors::black)();
+				render_command::set_viewport(m_window.get_framebuffer_size())();
 				break;
 
 			case hashof_v<begin_gui_event>:

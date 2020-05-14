@@ -16,14 +16,6 @@ namespace ml
 		virtual ~render_target() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void clear_color(color const & col);
-
-		void clear_color(color const & col, uint32_t flags);
-
-		void clear_flags(uint32_t flags);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		void draw(VAO const & vao, VBO const & vbo);
 
@@ -38,20 +30,6 @@ namespace ml
 		{
 			this->draw(&value);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void flush();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void viewport(vec2i const & size);
-
-		void viewport(int_rect const & bounds);
-
-		void viewport(vec2i const & pos, vec2i const & size);
-
-		void viewport(int32_t x, int32_t y, int32_t w, int32_t h);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -20,6 +20,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// WIP
+#include <libmeme/Renderer/Renderer.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // ECS CONFIG
 namespace ml
 {
@@ -422,8 +427,9 @@ namespace ml
 			if (render_texture & rt{ m_pipeline[0] })
 			{
 				ML_bind_scope(rt);
-				rt.clear_color(colors::magenta);
-				rt.viewport(rt.bounds());
+				render_command::set_clear_color(colors::magenta)();
+				render_command::clear(GL::ColorBufferBit | GL::DepthBufferBit)();
+				render_command::set_viewport(rt.bounds())();
 				m_ecs.update_system<x_draw_renderers>(rt);
 			}
 		}

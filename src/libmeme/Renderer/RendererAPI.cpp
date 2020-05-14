@@ -4,6 +4,7 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
+using impl_render_api		= _ML opengl_render_api;
 using impl_vertex_array		= _ML opengl_vertex_array;
 using impl_vertex_buffer	= _ML opengl_vertex_buffer;
 using impl_index_buffer		= _ML opengl_index_buffer;
@@ -14,11 +15,15 @@ using impl_render_buffer	= _ML opengl_render_buffer;
 #error Unknown or invalid renderer implementation specified.
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// buffers
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void vertex_array::bind(vertex_array const * value) noexcept
+	{
+		impl_vertex_array::bind(static_cast<impl_vertex_array const *>(value));
+	}
 
 	vertex_array * vertex_array::create(uint32_t mode) noexcept
 	{
@@ -27,9 +32,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vertex_buffer * vertex_buffer::create(uint32_t usage) noexcept
+	void vertex_buffer::bind(vertex_buffer const * value) noexcept
 	{
-		return new impl_vertex_buffer{ usage };
+		impl_vertex_buffer::bind(static_cast<impl_vertex_buffer const *>(value));
 	}
 
 	vertex_buffer * vertex_buffer::create(float_t const * vertices, uint32_t size) noexcept
@@ -44,9 +49,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	index_buffer * index_buffer::create(uint32_t usage, uint32_t type) noexcept
+	void index_buffer::bind(index_buffer const * value) noexcept
 	{
-		return new impl_index_buffer{ usage, type };
+		impl_index_buffer::bind(static_cast<impl_index_buffer const *>(value));
 	}
 
 	index_buffer * index_buffer::create(uint32_t const * indices, uint32_t count) noexcept
@@ -56,6 +61,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	void frame_buffer::bind(frame_buffer const * value) noexcept
+	{
+		impl_frame_buffer::bind(static_cast<impl_frame_buffer const *>(value));
+	}
+
 	frame_buffer * frame_buffer::create() noexcept
 	{
 		return new impl_frame_buffer{};
@@ -63,10 +73,27 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	void render_buffer::bind(render_buffer const * value) noexcept
+	{
+		impl_render_buffer::bind(static_cast<impl_render_buffer const *>(value));
+	}
+
 	render_buffer * render_buffer::create(uint32_t format, int32_t width, int32_t height) noexcept
 	{
 		return new impl_render_buffer{ format, width, height };
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// render commands
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	render_command::render_command() noexcept : m_api{ std::make_unique<impl_render_api>() } {}
+
+	render_command::~render_command() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

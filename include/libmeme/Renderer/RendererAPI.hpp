@@ -1,12 +1,14 @@
 #ifndef _ML_RENDERER_API_HPP_
 #define _ML_RENDERER_API_HPP_
 
-// WIP
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Renderer/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // enums
 namespace ml
@@ -302,32 +304,40 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // buffers
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base vertex array
+	// vertex array base
 	struct ML_RENDERER_API vertex_array : trackable, non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~vertex_array() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual void const * handle() const noexcept = 0;
+		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void bind(vertex_array const * value) noexcept;
+
 		ML_NODISCARD static vertex_array * create(uint32_t mode) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base vertex buffer
+	// vertex buffer base
 	struct ML_RENDERER_API vertex_buffer : trackable, non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~vertex_buffer() = default;
 
 		virtual void bind() const = 0;
@@ -338,26 +348,26 @@ namespace ml
 
 		virtual void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) = 0;
 
-		ML_NODISCARD virtual void const * handle() const noexcept = 0;
-
-		ML_NODISCARD virtual uint32_t get_offset() const noexcept = 0;
+		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_size() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static vertex_buffer * create(uint32_t usage) noexcept;
+		static void bind(vertex_buffer const * value) noexcept;
 
 		ML_NODISCARD static vertex_buffer * create(float_t const * vertices, uint32_t size) noexcept;
 
 		ML_NODISCARD static vertex_buffer * create(float_t const * vertices, uint32_t size, uint32_t offset) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base index buffer
+	// index buffer base
 	struct ML_RENDERER_API index_buffer : trackable, non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~index_buffer() = default;
 
 		virtual void bind() const = 0;
@@ -366,44 +376,50 @@ namespace ml
 
 		virtual void set_data(uint32_t const * indices, uint32_t count) = 0;
 
-		ML_NODISCARD virtual void const * handle() const noexcept = 0;
+		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
-
-		ML_NODISCARD static index_buffer * create(uint32_t usage, uint32_t type) noexcept;
+		static void bind(index_buffer const * value) noexcept;
 
 		ML_NODISCARD static index_buffer * create(uint32_t const * indices, uint32_t count) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base frame buffer
+	// frame buffer base
 	struct ML_RENDERER_API frame_buffer : trackable, non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~frame_buffer() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		virtual void set_render_buffer(void * value, uint32_t attachment) = 0;
+		virtual void set_render_buffer(void const * value, uint32_t attachment) = 0;
 
-		virtual void set_texture2d(void * value, uint32_t attachment, uint32_t level) = 0;
+		virtual void set_texture2d(void const * value, uint32_t attachment, uint32_t level) = 0;
 
-		ML_NODISCARD virtual void const * handle() const noexcept = 0;
+		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void bind(frame_buffer const * value) noexcept;
 
 		ML_NODISCARD static frame_buffer * create() noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// base render buffer
+	// render buffer base
 	struct ML_RENDERER_API render_buffer : trackable, non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~render_buffer() = default;
 
 		virtual void bind() const = 0;
@@ -412,12 +428,109 @@ namespace ml
 
 		virtual void set_storage(uint32_t format, int32_t width, int32_t height) = 0;
 
-		ML_NODISCARD virtual void const * handle() const noexcept = 0;
+		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void bind(render_buffer const * value) noexcept;
 
 		ML_NODISCARD static render_buffer * create(uint32_t format, int32_t width, int32_t height) noexcept;
-	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// render api
+namespace ml
+{
+	struct ML_RENDERER_API render_api : trackable, non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual ~render_api() noexcept = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void clear(uint32_t flags) = 0;
+		virtual void flush() = 0;
+
+		virtual void set_clear_color(color const & value) = 0;
+		virtual void set_viewport(int_rect const & value) = 0;
+
+		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
+		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void * indices) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// render commands
+namespace ml
+{
+	class ML_RENDERER_API render_command final : public singleton<render_command>
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend singleton<render_command>;
+
+		render_command() noexcept;
+
+		~render_command() noexcept;
+
+		std::unique_ptr<render_api> m_api;
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static std::unique_ptr<render_api> const & api() noexcept
+		{
+			return get_instance().m_api;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static auto clear(uint32_t flags) noexcept
+		{
+			return std::bind(&render_api::clear, api().get(), flags);
+		}
+
+		static auto flush() noexcept
+		{
+			return std::bind(&render_api::flush, api().get());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static auto set_clear_color(color const & value) noexcept
+		{
+			return std::bind(&render_api::set_clear_color, api().get(), value);
+		}
+
+		static auto set_viewport(int_rect const & value) noexcept
+		{
+			return std::bind(&render_api::set_viewport, api().get(), value);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static auto draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
+		{
+			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
+		}
+
+		static auto draw_indexed(uint32_t mode, int32_t first, uint32_t type, void * indices) noexcept
+		{
+			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_RENDERER_API_HPP_

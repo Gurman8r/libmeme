@@ -32,6 +32,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using self_type					= typename basic_color<_T>;
 		using value_type				= typename _T;
 		using rgb_type					= typename tvec3<value_type>;
 		using rgba_type					= typename tvec4<value_type>;
@@ -56,7 +57,7 @@ namespace ml
 		}
 
 		constexpr basic_color(rgb_type const & rgb, value_type a)
-			: m_data{ rgb[0], rgb[1], rgb[2], a }
+			: self_type{ rgb[0], rgb[1], rgb[2], a }
 		{
 		}
 
@@ -65,13 +66,18 @@ namespace ml
 		{
 		}
 
-		constexpr basic_color(value_type r, value_type g, value_type b)
-			: m_data{ r, g, b, 1 }
+		template <class R, class G, class B, class A
+		> constexpr basic_color(R r, G g, B b, A a) : m_data{
+			static_cast<value_type>(r),
+			static_cast<value_type>(g),
+			static_cast<value_type>(b),
+			static_cast<value_type>(a)
+		}
 		{
 		}
 
-		constexpr basic_color(value_type r, value_type g, value_type b, value_type a)
-			: m_data{ r, g, b, a }
+		template <class R, class G, class B
+		> constexpr basic_color(R r, G g, B b) : self_type{ r, g, b, 1 }
 		{
 		}
 
