@@ -12,9 +12,15 @@
 namespace ml
 {
 	// global renderer
-	class ML_RENDERER_API renderer final : public singleton<renderer>
+	struct ML_RENDERER_API renderer final : singleton<renderer>
 	{
-	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static std::unique_ptr<renderer_api> const & api() noexcept
+		{
+			return render_command::api();
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void begin_scene() {}
