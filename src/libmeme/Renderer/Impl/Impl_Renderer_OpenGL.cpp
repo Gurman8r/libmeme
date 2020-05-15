@@ -44,10 +44,10 @@ namespace ml
 	void opengl_render_api::clear(uint32_t flags)
 	{
 		uint32_t temp{};
-		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, flags, gl::clear_flags_depth);
-		ML_flag_map(temp, GL_ACCUM_BUFFER_BIT	, flags, gl::clear_flags_accum);
-		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, flags, gl::clear_flags_stencil);
-		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, flags, gl::clear_flags_color);
+		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT,		flags, gl::clear_flags_depth);
+		ML_flag_map(temp, GL_ACCUM_BUFFER_BIT,		flags, gl::clear_flags_accum);
+		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT,	flags, gl::clear_flags_stencil);
+		ML_flag_map(temp, GL_COLOR_BUFFER_BIT,		flags, gl::clear_flags_color);
 		glCheck(glClear(temp));
 	}
 
@@ -75,29 +75,53 @@ namespace ml
 		glCheck(glActiveTexture(value ? *reinterpret_cast<uint32_t const *>(value) : NULL));
 	}
 
-	void opengl_render_api::set_alpha_function(uint32_t func, float32_t ref)
+	void opengl_render_api::set_alpha_function(uint32_t value, float32_t ref)
 	{
-		glCheck(glAlphaFunc(func, ref));
+		glCheck(glAlphaFunc(std::invoke([&]() noexcept -> uint32_t
+		{
+			switch (value)
+			{
+			default						: return value;
+			case gl::predicate_never	: return GL_NEVER;
+			case gl::predicate_less		: return GL_LESS;
+			case gl::predicate_equal	: return GL_EQUAL;
+			case gl::predicate_lequal	: return GL_LEQUAL;
+			case gl::predicate_greater	: return GL_GREATER;
+			case gl::predicate_notequal	: return GL_NOTEQUAL;
+			case gl::predicate_gequal	: return GL_GEQUAL;
+			case gl::predicate_always	: return GL_ALWAYS;
+			}
+		}), ref));
 	}
 
-	void opengl_render_api::set_blend_equation(uint32_t value)
-	{
-		glCheck(glBlendEquation(value));
-	}
-
-	void opengl_render_api::set_blend_equation_separate(uint32_t modeRGB, uint32_t modeAlpha)
+	void opengl_render_api::set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha)
 	{
 		glCheck(glBlendEquationSeparate(modeRGB, modeAlpha));
 	}
 
-	void opengl_render_api::set_blend_function(uint32_t sFactor, uint32_t dFactor)
+	void opengl_render_api::set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
 	{
-		glCheck(glBlendFunc(sFactor, dFactor));
-	}
-
-	void opengl_render_api::set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
-	{
-		glCheck(glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha));
+		auto _factor = [](auto value) noexcept -> uint32_t
+		{
+			switch (value)
+			{
+			default								: return value;
+			case gl::factor_zero				: return GL_ZERO;
+			case gl::factor_one					: return GL_ONE;
+			case gl::factor_src_color			: return GL_SRC_COLOR;
+			case gl::factor_one_minus_src_color	: return GL_ONE_MINUS_SRC_COLOR;
+			case gl::factor_src_alpha			: return GL_SRC_ALPHA;
+			case gl::factor_one_minus_src_alpha	: return GL_ONE_MINUS_SRC_ALPHA;
+			case gl::factor_dst_alpha			: return GL_DST_ALPHA;
+			case gl::factor_one_minus_dst_alpha	: return GL_ONE_MINUS_DST_ALPHA;
+			case gl::factor_dst_color			: return GL_DST_COLOR;
+			case gl::factor_one_minus_dst_color	: return GL_ONE_MINUS_DST_COLOR;
+			case gl::factor_src_alpha_saturate	: return GL_SRC_ALPHA_SATURATE;
+			}
+		};
+		glCheck(glBlendFuncSeparate(
+			_factor(sfactorRGB), _factor(dfactorRGB),
+			_factor(sfactorAlpha), _factor(dfactorAlpha)));
 	}
 
 	void opengl_render_api::set_clear_color(color const & value)
@@ -107,12 +131,41 @@ namespace ml
 
 	void opengl_render_api::set_cull_mode(uint32_t value)
 	{
-		glCheck(glCullFace(value));
+		glCheck(glCullFace(std::invoke([value]() noexcept -> uint32_t
+		{
+			switch (value)
+			{
+			case gl::facet_front_left		: return GL_FRONT_LEFT;
+			case gl::facet_front_right		: return GL_FRONT_RIGHT;
+			case gl::facet_back_left		: return GL_BACK_LEFT;
+			case gl::facet_back_right		: return GL_BACK_RIGHT;
+			case gl::facet_front			: return GL_FRONT;
+			case gl::facet_back				: return GL_BACK;
+			case gl::facet_left				: return GL_LEFT;
+			case gl::facet_right			: return GL_RIGHT;
+			case gl::facet_front_and_back	: return GL_FRONT_AND_BACK;
+			default: return value;
+			}
+		})));
 	}
 
 	void opengl_render_api::set_depth_function(uint32_t value)
 	{
-		glCheck(glDepthFunc(value));
+		glCheck(glDepthFunc(std::invoke([&]() noexcept -> uint32_t
+		{
+			switch (value)
+			{
+			default						: return value;
+			case gl::predicate_never	: return GL_NEVER;
+			case gl::predicate_less		: return GL_LESS;
+			case gl::predicate_equal	: return GL_EQUAL;
+			case gl::predicate_lequal	: return GL_LEQUAL;
+			case gl::predicate_greater	: return GL_GREATER;
+			case gl::predicate_notequal	: return GL_NOTEQUAL;
+			case gl::predicate_gequal	: return GL_GEQUAL;
+			case gl::predicate_always	: return GL_ALWAYS;
+			}
+		})));
 	}
 
 	void opengl_render_api::set_depth_mask(bool value)
@@ -120,9 +173,29 @@ namespace ml
 		glCheck(glDepthMask(value));
 	}
 
-	void opengl_render_api::set_enabled(uint32_t capability, bool enabled)
+	void opengl_render_api::set_enabled(uint32_t value, bool enabled)
 	{
-		glCheck(enabled ? glEnable(capability) : glDisable(capability));
+		glCheck((enabled ? &glEnable : &glDisable)(std::invoke([&]() noexcept -> uint32_t
+		{
+			switch (value)
+			{
+			default											: return value;
+			case gl::capability_alpha_test					: return GL_ALPHA_TEST;
+			case gl::capability_blend						: return GL_BLEND;
+			case gl::capability_cull_face					: return GL_CULL_FACE;
+			case gl::capability_depth_clamp					: return GL_DEPTH_CLAMP;
+			case gl::capability_depth_test					: return GL_DEPTH_TEST;
+			case gl::capability_dither						: return GL_DITHER;
+			case gl::capability_framebuffer_srgb			: return GL_FRAMEBUFFER_SRGB;
+			case gl::capability_line_smooth					: return GL_LINE_SMOOTH;
+			case gl::capability_multisample					: return GL_MULTISAMPLE;
+			case gl::capability_polygon_smooth				: return GL_POLYGON_SMOOTH;
+			case gl::capability_sample_mask					: return GL_SAMPLE_MASK;
+			case gl::capability_scissor_test				: return GL_SCISSOR_TEST;
+			case gl::capability_stencil_test				: return GL_STENCIL_TEST;
+			case gl::capability_texture_cube_map_seamless	: return GL_TEXTURE_CUBE_MAP_SEAMLESS;
+			}
+		})));
 	}
 
 	void opengl_render_api::set_polygon_mode(uint32_t face, uint32_t mode)

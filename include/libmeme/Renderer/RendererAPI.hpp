@@ -13,7 +13,7 @@
 // enums
 namespace ml::gl
 {
-	enum gl_ : uint32_t // <- extra
+	enum gl_ : uint32_t // <- uncategorized
 	{
 		gl_element_array_buffer,
 		gl_array_buffer_binding,
@@ -61,10 +61,17 @@ namespace ml::gl
 		capability_alpha_test,
 		capability_blend,
 		capability_cull_face,
+		capability_depth_clamp,
 		capability_depth_test,
+		capability_dither,
 		capability_framebuffer_srgb,
+		capability_line_smooth,
 		capability_multisample,
+		capability_polygon_smooth,
+		capability_sample_mask,
 		capability_scissor_test,
+		capability_stencil_test,
+		capability_texture_cube_map_seamless,
 	};
 
 	enum clear_flags_ : uint32_t
@@ -99,7 +106,7 @@ namespace ml::gl
 	{
 		predicate_never,
 		predicate_less,
-		predicate_equationual,
+		predicate_equal,
 		predicate_lequal,
 		predicate_greater,
 		predicate_notequal,
@@ -537,16 +544,14 @@ namespace ml
 		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
 
 		virtual void set_active_texture(void const * value) = 0;
-		virtual void set_alpha_function(uint32_t func, float32_t ref) = 0;
-		virtual void set_blend_equation(uint32_t value) = 0;
-		virtual void set_blend_equation_separate(uint32_t rgb, uint32_t alpha) = 0;
-		virtual void set_blend_function(uint32_t sFactor, uint32_t dFactor) = 0;
-		virtual void set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) = 0;
+		virtual void set_alpha_function(uint32_t value, float32_t ref) = 0;
+		virtual void set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) = 0;
+		virtual void set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) = 0;
 		virtual void set_clear_color(color const & value) = 0;
 		virtual void set_cull_mode(uint32_t value) = 0;
 		virtual void set_depth_function(uint32_t value) = 0;
 		virtual void set_depth_mask(bool value) = 0;
-		virtual void set_enabled(uint32_t capability, bool enabled) = 0;
+		virtual void set_enabled(uint32_t value, bool enabled) = 0;
 		virtual void set_polygon_mode(uint32_t face, uint32_t mode) = 0;
 		virtual void set_viewport(int_rect const & value) = 0;
 
@@ -559,10 +564,11 @@ namespace ml
 // render commands
 namespace ml
 {
-	class ML_RENDERER_API render_command final : public singleton<render_command>
+	class ML_RENDERER_API ML_NODISCARD render_command final : public singleton<render_command>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	private:
 		friend singleton<render_command>;
 
 		render_command() noexcept;
@@ -610,29 +616,19 @@ namespace ml
 			return std::bind(&render_api::set_active_texture, api().get(), value);
 		}
 		
-		static auto set_alpha_function(uint32_t func, float32_t ref) noexcept
+		static auto set_alpha_function(uint32_t value, float32_t ref) noexcept
 		{
-			return std::bind(&render_api::set_alpha_function, api().get(), func, ref);
+			return std::bind(&render_api::set_alpha_function, api().get(), value, ref);
 		}
 		
-		static auto set_blend_equation(uint32_t value) noexcept
+		static auto set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) noexcept
 		{
-			return std::bind(&render_api::set_blend_equation, api().get(), value);
-		}
-		
-		static auto set_blend_equation_separate(uint32_t modeRGB, uint32_t modeAlpha) noexcept
-		{
-			return std::bind(&render_api::set_blend_equation_separate, api().get(), modeRGB, modeAlpha);
+			return std::bind(&render_api::set_blend_equation, api().get(), modeRGB, modeAlpha);
 		}
 
-		static auto set_blend_function(uint32_t sFactor, uint32_t dFactor) noexcept
+		static auto set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) noexcept
 		{
-			return std::bind(&render_api::set_blend_function, api().get(), sFactor, dFactor);
-		}
-
-		static auto set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) noexcept
-		{
-			return std::bind(&render_api::set_blend_function_separate, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+			return std::bind(&render_api::set_blend_function, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 		}
 		
 		static auto set_clear_color(color const & value) noexcept
@@ -655,9 +651,9 @@ namespace ml
 			return std::bind(&render_api::set_depth_mask, api().get(), value);
 		}
 
-		static auto set_enabled(uint32_t capability, bool enabled) noexcept
+		static auto set_enabled(uint32_t value, bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_enabled, api().get(), capability, enabled);
+			return std::bind(&render_api::set_enabled, api().get(), value, enabled);
 		}
 		
 		static auto set_polygon_mode(uint32_t face, uint32_t mode) noexcept

@@ -173,8 +173,7 @@ namespace ml
 
 		void set_data(uint32_t const * indices, uint32_t count) override
 		{
-			glCheck(glBufferData(
-				GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
+			glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
 		}
 
 		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
@@ -245,8 +244,7 @@ namespace ml
 
 		void set_storage(uint32_t format, int32_t width, int32_t height) override
 		{
-			glCheck(glRenderbufferStorage(
-				GL_RENDERBUFFER, format, width, height));
+			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, format, width, height));
 		}
 
 		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
@@ -291,15 +289,11 @@ namespace ml
 
 		void set_active_texture(void const * value) override;
 		
-		void set_alpha_function(uint32_t func, float32_t ref) override;
+		void set_alpha_function(uint32_t value, float32_t ref) override;
 		
-		void set_blend_equation(uint32_t value) override;
+		void set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) override;
 		
-		void set_blend_equation_separate(uint32_t modeRGB, uint32_t modeAlpha) override;
-		
-		void set_blend_function(uint32_t sFactor, uint32_t dFactor) override;
-		
-		void set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) override;
+		void set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) override;
 		
 		void set_clear_color(color const & value) override;
 
@@ -309,7 +303,7 @@ namespace ml
 		
 		void set_depth_mask(bool value) override;
 		
-		void set_enabled(uint32_t capability, bool enabled) override;
+		void set_enabled(uint32_t value, bool enabled) override;
 		
 		void set_polygon_mode(uint32_t face, uint32_t mode) override;
 		
