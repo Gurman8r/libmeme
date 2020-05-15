@@ -30,6 +30,15 @@ namespace ml::gl
 		gl_scissor_box,
 	};
 
+	enum clear_flags_ : uint32_t
+	{
+		clear_flags_none,
+		clear_flags_accum	= 1 << 0,
+		clear_flags_color	= 1 << 1,
+		clear_flags_depth	= 1 << 2,
+		clear_flags_stencil = 1 << 3,
+	};
+
 	enum backend_ : uint32_t
 	{
 		backend_vendor,
@@ -39,7 +48,6 @@ namespace ml::gl
 		backend_minor_version,
 		backend_extensions,
 		backend_num_extensions,
-		backend_shading_language_version,
 		backend_info_log_length,
 	};
 
@@ -71,15 +79,6 @@ namespace ml::gl
 		capability_scissor_test,
 		capability_stencil_test,
 		capability_texture_cube_map_seamless,
-	};
-
-	enum clear_flags_ : uint32_t
-	{
-		clear_flags_none,
-		clear_flags_depth	= 1 << 0,
-		clear_flags_accum	= 1 << 1,
-		clear_flags_stencil = 1 << 2,
-		clear_flags_color	= 1 << 3,
 	};
 
 	enum usage_ : uint32_t
@@ -125,22 +124,13 @@ namespace ml::gl
 		type_half_float,
 	};
 
-	enum equation_ : uint32_t
+	enum function_ : uint32_t
 	{
-		equation_mult,
-		equation_add,
-		equation_subtract,
-		equation_func_add,
-	};
-
-	enum blend_
-	{
-		blend_equation_rgb,
-		blend_equation_alpha,
-		blend_dst_rgb,
-		blend_src_rgb,
-		blend_dst_alpha,
-		blend_src_alpha,
+		function_add,
+		function_subtract,
+		function_reverse_subtract,
+		function_min,
+		function_max,
 	};
 
 	enum facet_ : uint32_t
@@ -209,28 +199,12 @@ namespace ml::gl
 		store_pack_alignment,
 	};
 
-	enum origin_ : uint32_t
-	{
-		origin_lower_left,
-		origin_upper_left,
-		origin_clip_origin,
-	};
-
-	enum texture_type_ : uint32_t
+	enum texture_ : uint32_t
 	{
 		texture_type_2d,
 		texture_type_3d,
 		texture_type_cube_map,
-	};
 
-	enum texture_attr_ : uint32_t
-	{
-		texture_attr_max_size,
-		texture_attr_max_combined_image_units,
-	};
-
-	enum texture_param_ : uint32_t
-	{
 		texture_param_nearest,
 		texture_param_linear,
 		texture_param_nearest_mipmap_nearest,
@@ -249,10 +223,7 @@ namespace ml::gl
 		texture_param_texture_max_lod,
 		texture_param_texture_base_level,
 		texture_param_texture_max_level,
-	};
 
-	enum texture_cube_map_ : uint32_t
-	{
 		texture_cube_map_positive_x,
 		texture_cube_map_negative_x,
 		texture_cube_map_positive_y,
@@ -261,31 +232,18 @@ namespace ml::gl
 		texture_cube_map_negative_z,
 	};
 
-	enum shader_type_ : uint32_t
+	enum shader_ : uint32_t
 	{
 		shader_type_vertex,
 		shader_type_fragment,
 		shader_type_geometry,
 	};
 
-	enum shader_attr_ : uint32_t
+	enum framebuffer_ : uint32_t
 	{
-		shader_attr_compile_status,
-		shader_attr_delete_status,
-		shader_attr_link_status,
-		shader_attr_program_object,
-	};
-
-	enum framebuffer_attr_
-	{
-		framebuffer_attr_complete,
-	};
-
-	enum framebuffer_attachment_ : uint32_t
-	{
-		framebuffer_attachment_default,
-		framebuffer_attachment_undefined,
-		framebuffer_attachment_depth_stencil,
+		framebuffer_default,
+		framebuffer_undefined,
+		framebuffer_depth_stencil_attachment,
 	};
 
 	enum color_attachment_ : uint32_t
@@ -527,25 +485,34 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool initialize() = 0;
+		virtual void validate_version(int32_t & major, int32_t & minor) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool get_enabled(uint32_t capability) const = 0;
+		virtual uint32_t get_enum(hash_t code, uint32_t index) const = 0;
 		virtual uint32_t get_error() const = 0;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual void clear(uint32_t flags) = 0;
-		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
-		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
+		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
+		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) = 0;
 		virtual void flush() = 0;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual void set_active_texture(void const * value) = 0;
-		virtual void set_alpha_function(uint32_t value, float32_t ref) = 0;
-		virtual void set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) = 0;
-		virtual void set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) = 0;
+		virtual void set_alpha_function(uint32_t predicate, float_t ref) = 0;
+		virtual void set_blend_color(color const & value) = 0;
+		virtual void set_blend_equation(uint32_t rgb, uint32_t alpha) = 0;
+		virtual void set_blend_function(uint32_t srgb, uint32_t drgb, uint32_t salpha, uint32_t dalpha) = 0;
 		virtual void set_clear_color(color const & value) = 0;
-		virtual void set_cull_mode(uint32_t value) = 0;
-		virtual void set_depth_function(uint32_t value) = 0;
+		virtual void set_cull_mode(uint32_t facet) = 0;
+		virtual void set_depth_function(uint32_t predicate) = 0;
 		virtual void set_depth_mask(bool enabled) = 0;
 		virtual void set_enabled(uint32_t capability, bool enabled) = 0;
-		virtual void set_viewport(int_rect const & value) = 0;
+		virtual void set_viewport(int_rect const & bounds) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -556,10 +523,15 @@ namespace ml
 // context
 namespace ml
 {
-	class ML_RENDERER_API render_context final : public singleton<render_context>
+	struct ML_RENDERER_API render_context final : singleton<render_context>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static auto const & api() noexcept { return get_instance().m_api; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
 		friend singleton<render_context>;
 
 		render_context() noexcept;
@@ -567,12 +539,6 @@ namespace ml
 		~render_context() noexcept;
 
 		std::unique_ptr<render_api> m_api;
-
-	public:
-		static std::unique_ptr<render_api> const & api() noexcept
-		{
-			return get_instance().m_api;
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -588,80 +554,97 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using command = typename std::function<void()>; // render command type
+
 		static auto const & api() noexcept { return render_context::api(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto clear(uint32_t flags) noexcept
+		static command clear(uint32_t flags) noexcept
 		{
 			return std::bind(&render_api::clear, api().get(), flags);
 		}
 
-		static auto draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
+		static command draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
 		{
 			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
 		}
 
-		static auto draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
+		static command draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
 		{
 			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
 		}
 
-		static auto flush() noexcept
+		static command flush() noexcept
 		{
 			return std::bind(&render_api::flush, api().get());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto set_active_texture(void const * value) noexcept
+		static command set_active_texture(void const * value) noexcept
 		{
 			return std::bind(&render_api::set_active_texture, api().get(), value);
 		}
 		
-		static auto set_alpha_function(uint32_t value, float32_t ref) noexcept
+		static command set_alpha_function(uint32_t predicate, float32_t ref) noexcept
 		{
-			return std::bind(&render_api::set_alpha_function, api().get(), value, ref);
+			return std::bind(&render_api::set_alpha_function, api().get(), predicate, ref);
 		}
 		
-		static auto set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) noexcept
+		static command set_blend_color(color const & value) noexcept
+		{
+			return std::bind(&render_api::set_blend_color, api().get(), value);
+		}
+
+		static command set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) noexcept
 		{
 			return std::bind(&render_api::set_blend_equation, api().get(), modeRGB, modeAlpha);
 		}
 
-		static auto set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) noexcept
+		static command set_blend_equation(uint32_t mode) noexcept
 		{
-			return std::bind(&render_api::set_blend_function, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+			return set_blend_equation(mode, mode);
 		}
-		
-		static auto set_clear_color(color const & value) noexcept
+
+		static command set_blend_function(uint32_t srgb, uint32_t drgb, uint32_t salpha, uint32_t dalpha) noexcept
+		{
+			return std::bind(&render_api::set_blend_function, api().get(), srgb, drgb, salpha, dalpha);
+		}
+
+		static command set_blend_function(uint32_t sfactor, uint32_t dfactor) noexcept
+		{
+			return set_blend_function(sfactor, dfactor, sfactor, dfactor);
+		}
+
+		static command set_clear_color(color const & value) noexcept
 		{
 			return std::bind(&render_api::set_clear_color, api().get(), value);
 		}
 
-		static auto set_cull_mode(uint32_t value) noexcept
+		static command set_cull_mode(uint32_t facet) noexcept
 		{
-			return std::bind(&render_api::set_cull_mode, api().get(), value);
+			return std::bind(&render_api::set_cull_mode, api().get(), facet);
 		}
 
-		static auto set_depth_function(uint32_t value) noexcept
+		static command set_depth_function(uint32_t predicate) noexcept
 		{
-			return std::bind(&render_api::set_depth_function, api().get(), value);
+			return std::bind(&render_api::set_depth_function, api().get(), predicate);
 		}
 		
-		static auto set_depth_mask(bool enabled) noexcept
+		static command set_depth_mask(bool enabled) noexcept
 		{
 			return std::bind(&render_api::set_depth_mask, api().get(), enabled);
 		}
 
-		static auto set_enabled(uint32_t capability, bool enabled) noexcept
+		static command set_enabled(uint32_t capability, bool enabled) noexcept
 		{
 			return std::bind(&render_api::set_enabled, api().get(), capability, enabled);
 		}
 		
-		static auto set_viewport(int_rect const & value) noexcept
+		static command set_viewport(int_rect const & bounds) noexcept
 		{
-			return std::bind(&render_api::set_viewport, api().get(), value);
+			return std::bind(&render_api::set_viewport, api().get(), bounds);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

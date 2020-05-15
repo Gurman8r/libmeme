@@ -33,7 +33,7 @@
 #	elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
 #		include ML_OPENGL_LOADER_CUSTOM
 #	else
-#		error Unknown or invalid OpenGL loader specified.
+#		error Unknown or invalid opengl loader specified.
 #	endif
 #endif // ML_IMPL_RENDERER_OPENGL
 

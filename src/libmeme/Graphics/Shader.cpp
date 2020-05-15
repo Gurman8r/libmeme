@@ -127,8 +127,7 @@ namespace ml
 	{
 		return load_from_memory(
 			util::get_file_string(v_file),
-			util::get_file_string(f_file)
-		);
+			util::get_file_string(f_file));
 	}
 
 	bool shader::load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
@@ -136,8 +135,7 @@ namespace ml
 		return load_from_memory(
 			util::get_file_string(v_file),
 			util::get_file_string(g_file),
-			util::get_file_string(f_file)
-		);
+			util::get_file_string(f_file));
 	}
 
 	bool shader::load_from_source(shader_source const & value)

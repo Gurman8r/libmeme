@@ -15,6 +15,10 @@ using impl_render_buffer	= _ML opengl_render_buffer;
 #error Unknown or invalid renderer implementation specified.
 #endif
 
+// context
+ml::render_context::render_context() noexcept { m_api = std::make_unique<impl_renderer_api>(); }
+ml::render_context::~render_context() noexcept {}
+
 // buffers
 namespace ml
 {
@@ -82,18 +86,6 @@ namespace ml
 	{
 		return new impl_render_buffer{ format, width, height };
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// context
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	render_context::render_context() noexcept : m_api{ std::make_unique<impl_renderer_api>() } {}
-
-	render_context::~render_context() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
