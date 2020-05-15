@@ -12,7 +12,7 @@
 #	define glCheck(expr) (expr)
 #else
 #	define glCheck(expr) \
-	do { expr; _ML gl_check_error(__FILE__, __LINE__, expr); } while (0)
+	do { expr; _ML gl_check_error(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
 // errors
