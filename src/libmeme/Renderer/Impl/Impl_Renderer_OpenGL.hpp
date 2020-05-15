@@ -12,7 +12,7 @@
 #	define glCheck(expr) (expr)
 #else
 #	define glCheck(expr) \
-	do { expr; _ML gl_check_error(__FILE__, __LINE__, #expr); } while (0)
+	do { expr; _ML gl_check_error(__FILE__, __LINE__, expr); } while (0)
 #endif
 
 // errors
@@ -244,7 +244,30 @@ namespace ml
 
 		void set_storage(uint32_t format, int32_t width, int32_t height) override
 		{
-			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, format, width, height));
+			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, std::invoke([&]() noexcept -> uint32_t
+			{
+				switch (format)
+				{
+				default								: return format;
+				case gl::format_red					: return GL_RED;
+				case gl::format_green				: return GL_GREEN;
+				case gl::format_blue				: return GL_BLUE;
+				case gl::format_alpha				: return GL_ALPHA;
+				case gl::format_rgb					: return GL_RGB;
+				case gl::format_rgba				: return GL_RGBA;
+				case gl::format_luminance			: return GL_LUMINANCE;
+				case gl::format_luminance_alpha		: return GL_LUMINANCE_ALPHA;
+				case gl::format_srgb				: return GL_SRGB;
+				case gl::format_srgb8				: return GL_SRGB8;
+				case gl::format_srgb_alpha			: return GL_SRGB_ALPHA;
+				case gl::format_srgb8_alpha8		: return GL_SRGB8_ALPHA8;
+				case gl::format_sluminance_alpha	: return GL_SLUMINANCE_ALPHA;
+				case gl::format_sluminance8_alpha8	: return GL_SLUMINANCE8_ALPHA8;
+				case gl::format_sluminance			: return GL_SLUMINANCE;
+				case gl::format_sluminance8			: return GL_SLUMINANCE8;
+				case gl::format_depth24_stencil8	: return GL_DEPTH24_STENCIL8;
+				}
+			}), width, height));
 		}
 
 		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
@@ -261,11 +284,11 @@ namespace ml
 // opengl render api
 namespace ml
 {
-	struct ML_RENDERER_API opengl_render_api final : render_api
+	struct ML_RENDERER_API opengl_renderer_api final : renderer_api
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		~opengl_render_api() noexcept = default;
+		~opengl_renderer_api() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -301,11 +324,9 @@ namespace ml
 		
 		void set_depth_function(uint32_t value) override;
 		
-		void set_depth_mask(bool value) override;
+		void set_depth_mask(bool enabled) override;
 		
-		void set_enabled(uint32_t value, bool enabled) override;
-		
-		void set_polygon_mode(uint32_t face, uint32_t mode) override;
+		void set_enabled(uint32_t capability, bool enabled) override;
 		
 		void set_viewport(int_rect const & value) override;
 

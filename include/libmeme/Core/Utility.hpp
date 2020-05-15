@@ -32,8 +32,8 @@
 // conditional set or clear flag
 #define ML_flag_write(v, i, b)		(b ? ML_flag_set(v, i) : ML_flag_clear(v, i))
 
-// map between two flag indices
-#define ML_flag_map(dst, i, src, j)	ML_flag_write(dst, i, ML_flag_read(src, j))
+// map between flag bits
+#define ML_flag_map(dst, src, i, j)	ML_flag_write(dst, i, ML_flag_read(src, j))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

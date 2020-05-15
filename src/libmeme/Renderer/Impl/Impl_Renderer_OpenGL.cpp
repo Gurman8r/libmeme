@@ -6,7 +6,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool opengl_render_api::initialize()
+	bool opengl_renderer_api::initialize()
 	{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 		glewExperimental = true;
@@ -23,7 +23,7 @@ namespace ml
 #endif
 	}
 
-	uint32_t opengl_render_api::get_error()
+	uint32_t opengl_renderer_api::get_error()
 	{
 		switch (glGetError())
 		{
@@ -41,41 +41,41 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_render_api::clear(uint32_t flags)
+	void opengl_renderer_api::clear(uint32_t flags)
 	{
 		uint32_t temp{};
-		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT,		flags, gl::clear_flags_depth);
-		ML_flag_map(temp, GL_ACCUM_BUFFER_BIT,		flags, gl::clear_flags_accum);
-		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT,	flags, gl::clear_flags_stencil);
-		ML_flag_map(temp, GL_COLOR_BUFFER_BIT,		flags, gl::clear_flags_color);
+		ML_flag_map(temp, flags, GL_ACCUM_BUFFER_BIT	, gl::clear_flags_accum);
+		ML_flag_map(temp, flags, GL_COLOR_BUFFER_BIT	, gl::clear_flags_color);
+		ML_flag_map(temp, flags, GL_DEPTH_BUFFER_BIT	, gl::clear_flags_depth);
+		ML_flag_map(temp, flags, GL_STENCIL_BUFFER_BIT	, gl::clear_flags_stencil);
 		glCheck(glClear(temp));
 	}
 
-	void opengl_render_api::flush()
+	void opengl_renderer_api::flush()
 	{
 		glCheck(glFlush());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_render_api::draw_arrays(uint32_t mode, uint32_t first, uint32_t count)
+	void opengl_renderer_api::draw_arrays(uint32_t mode, uint32_t first, uint32_t count)
 	{
 		glCheck(glDrawArrays(mode, first, count));
 	}
 
-	void opengl_render_api::draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices)
+	void opengl_renderer_api::draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices)
 	{
 		glCheck(glDrawElements(mode, first, type, indices));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_render_api::set_active_texture(void const * value)
+	void opengl_renderer_api::set_active_texture(void const * value)
 	{
 		glCheck(glActiveTexture(value ? *reinterpret_cast<uint32_t const *>(value) : NULL));
 	}
 
-	void opengl_render_api::set_alpha_function(uint32_t value, float32_t ref)
+	void opengl_renderer_api::set_alpha_function(uint32_t value, float32_t ref)
 	{
 		glCheck(glAlphaFunc(std::invoke([&]() noexcept -> uint32_t
 		{
@@ -94,12 +94,12 @@ namespace ml
 		}), ref));
 	}
 
-	void opengl_render_api::set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha)
+	void opengl_renderer_api::set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha)
 	{
 		glCheck(glBlendEquationSeparate(modeRGB, modeAlpha));
 	}
 
-	void opengl_render_api::set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
+	void opengl_renderer_api::set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha)
 	{
 		auto _factor = [](auto value) noexcept -> uint32_t
 		{
@@ -124,12 +124,12 @@ namespace ml
 			_factor(sfactorAlpha), _factor(dfactorAlpha)));
 	}
 
-	void opengl_render_api::set_clear_color(color const & value)
+	void opengl_renderer_api::set_clear_color(color const & value)
 	{
 		glCheck(glClearColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_render_api::set_cull_mode(uint32_t value)
+	void opengl_renderer_api::set_cull_mode(uint32_t value)
 	{
 		glCheck(glCullFace(std::invoke([value]() noexcept -> uint32_t
 		{
@@ -149,7 +149,7 @@ namespace ml
 		})));
 	}
 
-	void opengl_render_api::set_depth_function(uint32_t value)
+	void opengl_renderer_api::set_depth_function(uint32_t value)
 	{
 		glCheck(glDepthFunc(std::invoke([&]() noexcept -> uint32_t
 		{
@@ -168,18 +168,18 @@ namespace ml
 		})));
 	}
 
-	void opengl_render_api::set_depth_mask(bool value)
+	void opengl_renderer_api::set_depth_mask(bool enabled)
 	{
-		glCheck(glDepthMask(value));
+		glCheck(glDepthMask(enabled));
 	}
 
-	void opengl_render_api::set_enabled(uint32_t value, bool enabled)
+	void opengl_renderer_api::set_enabled(uint32_t capability, bool enabled)
 	{
 		glCheck((enabled ? &glEnable : &glDisable)(std::invoke([&]() noexcept -> uint32_t
 		{
-			switch (value)
+			switch (capability)
 			{
-			default											: return value;
+			default											: return capability;
 			case gl::capability_alpha_test					: return GL_ALPHA_TEST;
 			case gl::capability_blend						: return GL_BLEND;
 			case gl::capability_cull_face					: return GL_CULL_FACE;
@@ -198,12 +198,7 @@ namespace ml
 		})));
 	}
 
-	void opengl_render_api::set_polygon_mode(uint32_t face, uint32_t mode)
-	{
-		glCheck(glPolygonMode(face, mode));
-	}
-
-	void opengl_render_api::set_viewport(int_rect const & value)
+	void opengl_renderer_api::set_viewport(int_rect const & value)
 	{
 		glCheck(glViewport(value[0], value[1], value[2], value[3]));
 	}

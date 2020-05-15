@@ -29,28 +29,20 @@ namespace ml
 		{
 		}
 
-		constexpr basic_rect(T value) noexcept
+		constexpr basic_rect(value_type value) noexcept
 			: m_data{ value }
 		{
 		}
 		
-		constexpr basic_rect(T w, T h) noexcept
-			: m_data{ 0, 0, w, h }
+		template <class W, class H
+		> constexpr basic_rect(W w, H h) noexcept
+			: m_data{ 0, 0, static_cast<T>(w), static_cast<T>(h) }
 		{
 		}
 		
-		constexpr basic_rect(T x, T y, T w, T h) noexcept
-			: m_data{ x, y, w, h }
-		{
-		}
-
 		template <class X, class Y, class W, class H
-		> constexpr basic_rect(X x, Y y, W w, H h) noexcept : m_data{
-			static_cast<T>(x),
-			static_cast<T>(y),
-			static_cast<T>(w),
-			static_cast<T>(h)
-		}
+		> constexpr basic_rect(X x, Y y, W w, H h) noexcept
+			: m_data{ static_cast<T>(x), static_cast<T>(y), static_cast<T>(w), static_cast<T>(h) }
 		{
 		}
 
@@ -59,8 +51,7 @@ namespace ml
 		{
 		}
 
-		template <class U
-		> constexpr basic_rect(tvec4<U> const & value) noexcept
+		constexpr basic_rect(storage_type const & value) noexcept
 			: m_data{ value }
 		{
 		}
