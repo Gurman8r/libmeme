@@ -13,14 +13,15 @@ namespace ml
 			return debug::error("render_window failed opening window");
 		}
 
-		// initialize renderer
-		if (!renderer::api()->initialize())
+		// initialize api
+		if (!render_context::api()->initialize())
 		{
 			return debug::error("render_window failed initializing renderer");
 		}
 
 		// validate version
-		render_context::api()->validate_version(m_settings.context.major, m_settings.context.minor);
+		m_settings.context.major = render_context::api()->get_major_version();
+		m_settings.context.minor = render_context::api()->get_minor_version();
 
 		for (auto const & fn : // commands
 		{

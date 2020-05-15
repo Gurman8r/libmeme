@@ -87,22 +87,6 @@ namespace ml::gl
 		}
 	}
 
-	constexpr uint32_t _backend(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default							: return value;
-		case backend_vendor				: return GL_VENDOR;
-		case backend_renderer			: return GL_RENDERER;
-		case backend_version			: return GL_VERSION;
-		case backend_major_version		: return GL_MAJOR_VERSION;
-		case backend_minor_version		: return GL_MINOR_VERSION;
-		case backend_extensions			: return GL_EXTENSIONS;
-		case backend_num_extensions		: return GL_NUM_EXTENSIONS;
-		case backend_info_log_length	: return GL_INFO_LOG_LENGTH;
-		}
-	}
-
 	constexpr uint32_t _error_type(uint32_t value) noexcept
 	{
 		switch (value)
@@ -643,25 +627,27 @@ namespace ml
 
 		bool initialize() override;
 
-		void validate_version(int32_t & major, int32_t & minor) override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool get_enabled(uint32_t capability) const override;
-
-		uint32_t get_enum(hash_t code, uint32_t index) const override;
-
-		uint32_t get_error() const override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		void clear(uint32_t flags) override;
-
-		void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) override;
-
-		void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) override;
-
-		void flush() override;
+		uint32_t get_error() const override;
+		
+		cstring get_extensions() const override;
+		
+		int32_t get_major_version() const override;
+		
+		int32_t get_minor_version() const override;
+		
+		int32_t get_num_extensions() const override;
+		
+		cstring get_renderer() const override;
+		
+		cstring get_shading_language_version() const override;
+		
+		cstring get_vendor() const override;
+		
+		cstring get_version() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -686,6 +672,16 @@ namespace ml
 		void set_enabled(uint32_t capability, bool enabled) override;
 		
 		void set_viewport(int_rect const & bounds) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		void clear(uint32_t flags) override;
+
+		void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) override;
+
+		void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) override;
+
+		void flush() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -8,41 +8,23 @@ namespace ml
 
 	bool opengl_render_api::initialize()
 	{
+		static bool temp{ std::invoke([]() noexcept -> bool
+		{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
-		glewExperimental = true;
-		return (GLEW_OK == glewInit());
+			glewExperimental = true;
+			return (GLEW_OK == glewInit());
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-		return gl3wInit();
+			return gl3wInit();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-		return gladLoadGL();
+			return gladLoadGL();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-		return false;
+			return false;
 #endif
-	}
-
-	void opengl_render_api::validate_version(int32_t & major, int32_t & minor)
-	{
-		glCheck(glGetIntegerv(GL_MAJOR_VERSION, &major));
-		glCheck(glGetIntegerv(GL_MINOR_VERSION, &minor));
-
-		if (glGetError() == GL_INVALID_ENUM)
-		{
-			if (auto const version{ glGetString(GL_VERSION) })
-			{
-				major = version[0] - '0';
-				minor = version[2] - '0';
-				debug::warning("using opengl version: {0}.{1}", major, minor);
-			}
-			else
-			{
-				major = 1;
-				minor = 1;
-				debug::warning("can't get the opengl version number, assuming 1.1");
-			}
-		}
+		}) };
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -50,33 +32,6 @@ namespace ml
 	bool opengl_render_api::get_enabled(uint32_t capability) const
 	{
 		return glIsEnabled(gl::_capability(capability));
-	}
-
-	uint32_t opengl_render_api::get_enum(hash_t code, uint32_t value) const
-	{
-		switch (code)
-		{
-		default									: return value;
-		case hashof_v<gl::clear_flags_>			: return gl::_clear_flags(value);
-		case hashof_v<gl::backend_>				: return gl::_backend(value);
-		case hashof_v<gl::error_type_>			: return gl::_error_type(value);
-		case hashof_v<gl::capability_>			: return gl::_capability(value);
-		case hashof_v<gl::usage_>				: return gl::_usage(value);
-		case hashof_v<gl::primitive_>			: return gl::_primitive(value);
-		case hashof_v<gl::predicate_>			: return gl::_predicate(value);
-		case hashof_v<gl::type_>				: return gl::_type(value);
-		case hashof_v<gl::function_>			: return gl::_function(value);
-		case hashof_v<gl::facet_>				: return gl::_facet(value);
-		case hashof_v<gl::factor_>				: return gl::_factor(value);
-		case hashof_v<gl::format_>				: return gl::_format(value);
-		case hashof_v<gl::store_>				: return gl::_store(value);
-		case hashof_v<gl::texture_>				: return gl::_texture(value);
-		case hashof_v<gl::shader_>				: return gl::_shader(value);
-		case hashof_v<gl::framebuffer_>			: return gl::_framebuffer(value);
-		case hashof_v<gl::color_attachment_>	: return gl::_color_attachment(value);
-		case hashof_v<gl::draw_buffer_>			: return gl::_draw_buffer(value);
-		case hashof_v<gl::texture_attachment_>	: return gl::_texture_attachment(value);
-		}
 	}
 
 	uint32_t opengl_render_api::get_error() const
@@ -95,31 +50,104 @@ namespace ml
 		}
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void opengl_render_api::clear(uint32_t flags)
+	cstring opengl_render_api::get_extensions() const
 	{
-		uint32_t temp{};
-		ML_flag_map(temp, flags, GL_ACCUM_BUFFER_BIT	, gl::clear_flags_accum);
-		ML_flag_map(temp, flags, GL_COLOR_BUFFER_BIT	, gl::clear_flags_color);
-		ML_flag_map(temp, flags, GL_DEPTH_BUFFER_BIT	, gl::clear_flags_depth);
-		ML_flag_map(temp, flags, GL_STENCIL_BUFFER_BIT	, gl::clear_flags_stencil);
-		glCheck(glClear(temp));
+		static cstring temp{};
+		static ML_scope // once
+		{
+			glCheck(temp = reinterpret_cast<cstring>(glGetString(GL_EXTENSIONS)));
+		};
+		return temp;
 	}
-
-	void opengl_render_api::draw_arrays(uint32_t primitive, uint32_t first, uint32_t count)
+	
+	int32_t opengl_render_api::get_major_version() const
 	{
-		glCheck(glDrawArrays(gl::_primitive(primitive), first, count));
+		static int32_t temp{};
+		static ML_scope // once
+		{
+			if (glGetIntegerv(GL_MAJOR_VERSION, &temp); glGetError() == GL_INVALID_ENUM)
+			{
+				if (auto const version{ glGetString(GL_VERSION) })
+				{
+					temp = version[0] - '0';
+				}
+				else
+				{
+					temp = 1;
+				}
+			}
+		};
+		return temp;
 	}
-
-	void opengl_render_api::draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices)
+	
+	int32_t opengl_render_api::get_minor_version() const
 	{
-		glCheck(glDrawElements(gl::_primitive(primitive), first, gl::_type(type), indices));
+		static int32_t temp{};
+		static ML_scope // once
+		{
+			if (glGetIntegerv(GL_MINOR_VERSION, &temp); glGetError() == GL_INVALID_ENUM)
+			{
+				if (auto const version{ glGetString(GL_VERSION) })
+				{
+					temp = version[2] - '0';
+				}
+				else
+				{
+					temp = 1;
+				}
+			}
+		};
+		return temp;
 	}
-
-	void opengl_render_api::flush()
+	
+	int32_t opengl_render_api::get_num_extensions() const
 	{
-		glCheck(glFlush());
+		static int32_t temp{};
+		static ML_scope // once
+		{
+			glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &temp));
+		};
+		return temp;
+	}
+	
+	cstring opengl_render_api::get_renderer() const
+	{
+		static cstring temp{};
+		static ML_scope // once
+		{
+			glCheck(temp = reinterpret_cast<cstring>(glGetString(GL_RENDER)));
+		};
+		return temp;
+	}
+	
+	cstring ml::opengl_render_api::get_shading_language_version() const
+	{
+		static cstring temp{};
+		static ML_scope // once
+		{
+			glCheck(temp = reinterpret_cast<cstring>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
+		};
+		return temp;
+	}
+	
+	cstring opengl_render_api::get_vendor() const
+	{
+		static cstring temp{};
+		static ML_scope // once
+		{
+			glCheck(temp = reinterpret_cast<cstring>(glGetString(GL_VENDOR)));
+		};
+		return temp;
+	}
+	
+	cstring opengl_render_api::get_version() const
+	{
+		static cstring temp{};
+		static ML_scope // once
+		{
+			glCheck(temp = reinterpret_cast<cstring>(glGetString(GL_VERSION)));
+		};
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -177,6 +205,33 @@ namespace ml
 	void opengl_render_api::set_viewport(int_rect const & bounds)
 	{
 		glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_render_api::clear(uint32_t flags)
+	{
+		uint32_t temp{};
+		ML_flag_map(temp, flags, GL_ACCUM_BUFFER_BIT	, gl::clear_flags_accum);
+		ML_flag_map(temp, flags, GL_COLOR_BUFFER_BIT	, gl::clear_flags_color);
+		ML_flag_map(temp, flags, GL_DEPTH_BUFFER_BIT	, gl::clear_flags_depth);
+		ML_flag_map(temp, flags, GL_STENCIL_BUFFER_BIT	, gl::clear_flags_stencil);
+		glCheck(glClear(temp));
+	}
+
+	void opengl_render_api::draw_arrays(uint32_t mode, uint32_t first, uint32_t count)
+	{
+		glCheck(glDrawArrays(gl::_primitive(mode), first, count));
+	}
+
+	void opengl_render_api::draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices)
+	{
+		glCheck(glDrawElements(gl::_primitive(mode), first, gl::_type(type), indices));
+	}
+
+	void opengl_render_api::flush()
+	{
+		glCheck(glFlush());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

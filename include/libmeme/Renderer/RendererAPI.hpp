@@ -13,23 +13,6 @@
 // enums
 namespace ml::gl
 {
-	enum gl_ : uint32_t // <- uncategorized
-	{
-		gl_array_buffer_binding,
-		gl_read_framebuffer,
-		gl_draw_framebuffer,
-		gl_read_framebuffer_binding,
-		gl_draw_framebuffer_binding,
-		gl_current_program,
-		gl_vertex_array_binding,
-		gl_texture_binding_2d,
-		gl_sampler_binding,
-		gl_active_texture,
-		gl_polygon_mode,
-		gl_viewport,
-		gl_scissor_box,
-	};
-
 	enum clear_flags_ : uint32_t
 	{
 		clear_flags_none,
@@ -37,18 +20,6 @@ namespace ml::gl
 		clear_flags_color	= 1 << 1,
 		clear_flags_depth	= 1 << 2,
 		clear_flags_stencil = 1 << 3,
-	};
-
-	enum backend_ : uint32_t
-	{
-		backend_vendor,
-		backend_renderer,
-		backend_version,
-		backend_major_version,
-		backend_minor_version,
-		backend_extensions,
-		backend_num_extensions,
-		backend_info_log_length,
 	};
 
 	enum error_type_ : uint32_t
@@ -485,20 +456,19 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool initialize() = 0;
-		virtual void validate_version(int32_t & major, int32_t & minor) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool get_enabled(uint32_t capability) const = 0;
-		virtual uint32_t get_enum(hash_t code, uint32_t index) const = 0;
 		virtual uint32_t get_error() const = 0;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual void clear(uint32_t flags) = 0;
-		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
-		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) = 0;
-		virtual void flush() = 0;
+		virtual cstring get_extensions() const = 0;
+		virtual int32_t get_major_version() const = 0;
+		virtual int32_t get_minor_version() const = 0;
+		virtual int32_t get_num_extensions() const = 0;
+		virtual cstring get_renderer() const = 0;
+		virtual cstring get_shading_language_version() const = 0;
+		virtual cstring get_vendor() const = 0;
+		virtual cstring get_version() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -513,6 +483,13 @@ namespace ml
 		virtual void set_depth_mask(bool enabled) = 0;
 		virtual void set_enabled(uint32_t capability, bool enabled) = 0;
 		virtual void set_viewport(int_rect const & bounds) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void clear(uint32_t flags) = 0;
+		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
+		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
+		virtual void flush() = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -557,28 +534,6 @@ namespace ml
 		using command = typename std::function<void()>; // render command type
 
 		static auto const & api() noexcept { return render_context::api(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static command clear(uint32_t flags) noexcept
-		{
-			return std::bind(&render_api::clear, api().get(), flags);
-		}
-
-		static command draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
-		{
-			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
-		}
-
-		static command draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
-		{
-			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
-		}
-
-		static command flush() noexcept
-		{
-			return std::bind(&render_api::flush, api().get());
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -645,6 +600,28 @@ namespace ml
 		static command set_viewport(int_rect const & bounds) noexcept
 		{
 			return std::bind(&render_api::set_viewport, api().get(), bounds);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static command clear(uint32_t flags) noexcept
+		{
+			return std::bind(&render_api::clear, api().get(), flags);
+		}
+
+		static command draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
+		{
+			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
+		}
+
+		static command draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
+		{
+			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
+		}
+
+		static command flush() noexcept
+		{
+			return std::bind(&render_api::flush, api().get());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
