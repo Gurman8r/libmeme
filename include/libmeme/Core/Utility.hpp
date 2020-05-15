@@ -9,22 +9,45 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// min / max / clamp
-#define ML_min(a, b)			((a) < (b) ? (a) : (b))
-#define ML_max(a, b)			((a) > (b) ? (a) : (b))
-#define ML_clamp(v, lo, hi)		ML_min(ML_max(v, lo), hi)
+// macro min
+#define ML_min(a, b)				((a) < (b) ? (a) : (b))
 
-// flag manipulation
-#define ML_flag_read( v, i)		(v & i)
-#define ML_flag_set(  v, i)		(v |= i)
-#define ML_flag_clear(v, i)		(v &= ~i)
-#define ML_flag_write(v, i, b)	(b ? ML_flag_set(v, i) : ML_flag_clear(v, i))
+// macro max
+#define ML_max(a, b)				((a) > (b) ? (a) : (b))
 
-// bit manipulation
-#define ML_bit_read( v, i)		ML_flag_read(v >> i, 1)
-#define ML_bit_set(  v, i)		ML_flag_set(v, 1 << i)
-#define ML_bit_clear(v, i)		ML_flag_clear(v, 1 << i)
-#define ML_bit_write(v, i, b)	(b ? ML_bit_set(v, i) : ML_bit_clear(v, i))
+// macro clamp
+#define ML_clamp(v, lo, hi)			ML_min(ML_max(v, lo), hi)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// read flag at index
+#define ML_flag_read(v, i)			(v & i)
+
+// set flag at index
+#define ML_flag_set(v, i)			(v |= i)
+
+// clear flag at index
+#define ML_flag_clear(v, i)			(v &= ~i)
+
+// conditional set or clear flag
+#define ML_flag_write(v, i, b)		(b ? ML_flag_set(v, i) : ML_flag_clear(v, i))
+
+// map between flags
+#define ML_flag_map(dst, i, src, j) ML_flag_write(dst, i, ML_flag_read(src, j))
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// read bit at index
+#define ML_bit_read(v, i)			ML_flag_read(v >> i, 1)
+
+// set bit at index
+#define ML_bit_set( v, i)			ML_flag_set(v, 1 << i)
+
+// clear bit at index
+#define ML_bit_clear(v, i)			ML_flag_clear(v, 1 << i)
+
+// conditional set or clear bit
+#define ML_bit_write(v, i, b)		(b ? ML_bit_set(v, i) : ML_bit_clear(v, i))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

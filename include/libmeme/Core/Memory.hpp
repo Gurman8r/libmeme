@@ -5,10 +5,6 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
-// memory manager singleton
-#define ML_memory_manager \
-	_ML memory_manager::get_instance()
-
 namespace ml::util
 {
 	// passthrough resource for collecting upstream usage metrics

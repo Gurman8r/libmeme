@@ -15,6 +15,7 @@
 	do { expr; _ML gl_check_error(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
+// errors
 namespace ml
 {
 	static void gl_check_error(cstring file, uint32_t line, cstring expr)
@@ -95,10 +96,6 @@ namespace ml
 			glCheck(glBindVertexArray(value ? value->m_handle : NULL));
 		}
 
-		void bind() const override { bind(this); }
-
-		void unbind() const override { bind(nullptr); }
-
 		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
 
 		uint32_t get_mode() const noexcept override { return m_mode; }
@@ -133,10 +130,6 @@ namespace ml
 		{
 			glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
 		}
-
-		void bind() const override { bind(this); }
-
-		void unbind() const override { bind(nullptr); }
 
 		void set_data(float_t const * vertices, uint32_t size) override
 		{
@@ -178,10 +171,6 @@ namespace ml
 			glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
 		}
 
-		void bind() const override { bind(this); }
-
-		void unbind() const override { bind(nullptr); }
-
 		void set_data(uint32_t const * indices, uint32_t count) override
 		{
 			glCheck(glBufferData(
@@ -212,10 +201,6 @@ namespace ml
 		{
 			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, value ? value->m_handle : NULL));
 		}
-
-		void bind() const override { bind(this); }
-
-		void unbind() const override { bind(nullptr); }
 
 		void set_render_buffer(void const * value, uint32_t attachment) override
 		{
@@ -258,10 +243,6 @@ namespace ml
 			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, value ? value->m_handle : NULL));
 		}
 
-		void bind() const override { bind(this); }
-
-		void unbind() const override { bind(nullptr); }
-
 		void set_storage(uint32_t format, int32_t width, int32_t height) override
 		{
 			glCheck(glRenderbufferStorage(
@@ -286,19 +267,53 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		opengl_render_api() noexcept = default;
 		~opengl_render_api() noexcept = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool initialize() override;
+
+		uint32_t get_error() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		void clear(uint32_t flags) override;
+
 		void flush() override;
 
-		void set_clear_color(color const & value) override;
-		void set_viewport(int_rect const & value) override;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) override;
-		void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void * indices) override;
+
+		void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_active_texture(void const * value) override;
+		
+		void set_alpha_function(uint32_t func, float32_t ref) override;
+		
+		void set_blend_equation(uint32_t value) override;
+		
+		void set_blend_equation_separate(uint32_t modeRGB, uint32_t modeAlpha) override;
+		
+		void set_blend_function(uint32_t sFactor, uint32_t dFactor) override;
+		
+		void set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) override;
+		
+		void set_clear_color(color const & value) override;
+
+		void set_cull_mode(uint32_t value) override;
+		
+		void set_depth_function(uint32_t value) override;
+		
+		void set_depth_mask(bool value) override;
+		
+		void set_enabled(uint32_t capability, bool enabled) override;
+		
+		void set_polygon_mode(uint32_t face, uint32_t mode) override;
+		
+		void set_viewport(int_rect const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

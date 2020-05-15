@@ -48,6 +48,7 @@ namespace ml
 
 			case hashof_v<begin_draw_event>:
 				render_command::set_clear_color(colors::black)();
+				render_command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
 				render_command::set_viewport(m_window.get_framebuffer_size())();
 				break;
 

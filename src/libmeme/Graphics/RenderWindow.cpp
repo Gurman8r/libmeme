@@ -1,5 +1,6 @@
 #include <libmeme/Graphics/RenderWindow.hpp>
 #include <libmeme/Graphics/GL.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 
 namespace ml
 {
@@ -18,24 +19,24 @@ namespace ml
 		}
 
 		GL::validateVersion(m_settings.context.major, m_settings.context.minor);
-
-		GL::enable(GL::AlphaTest);
-		GL::alphaFunc(GL::Greater, 0.001f);
-
-		GL::enable(GL::Blend);
-		GL::blendFuncSeparate(
+		
+		render_command::set_enabled(GL::AlphaTest, true)();
+		render_command::set_alpha_function(GL::Greater, 0.001f)();
+		
+		render_command::set_enabled(GL::Blend, true)();
+		render_command::set_blend_function_separate(
 			GL::SrcAlpha, GL::OneMinusSrcAlpha,
-			GL::SrcAlpha, GL::OneMinusSrcAlpha);
+			GL::SrcAlpha, GL::OneMinusSrcAlpha)();
+		
+		render_command::set_enabled(GL::CullFace, true)();
+		render_command::set_cull_mode(GL::Back)();
+		
+		render_command::set_enabled(GL::DepthTest, true)();
+		render_command::set_depth_function(GL::Less)();
+		render_command::set_depth_mask(true)();
 
-		GL::enable(GL::CullFace);
-		GL::cullFace(GL::Back);
-
-		GL::enable(GL::DepthTest);
-		GL::depthFunc(GL::Less);
-		GL::depthMask(true);
-
-		GL::enable(GL::Multisample, m_settings.context.multisample);
-		GL::enable(GL::FramebufferSRGB, m_settings.context.srgb_capable);
+		render_command::set_enabled(GL::Multisample, m_settings.context.multisample)();
+		render_command::set_enabled(GL::FramebufferSRGB, m_settings.context.srgb_capable)();
 
 		return true;
 	}

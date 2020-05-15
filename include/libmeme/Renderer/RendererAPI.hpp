@@ -11,39 +11,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // enums
-namespace ml
+namespace ml::gl
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum gl_ : uint32_t
+	enum gl_ : uint32_t // <- extra
 	{
-		gl_vendor,
-		gl_renderer,
-		gl_version,
-		gl_major_version,
-		gl_minor_version,
-		gl_extensions,
-		gl_num_extensions,
-
-		gl_no_error,
-		gl_invalid_enum,
-		gl_invalid_value,
-		gl_invalid_operation,
-		gl_stack_overflow,
-		gl_stack_underflow,
-		gl_out_of_memory,
-		gl_invalid_framebuffer_operation,
-
-		gl_stream_draw,
-		gl_static_draw,
-		gl_dynamic_draw,
-
-		gl_array_buffer,
 		gl_element_array_buffer,
 		gl_array_buffer_binding,
-		gl_framebuffer,
-		gl_renderbuffer,
-		gl_program_object,
 		gl_read_framebuffer,
 		gl_draw_framebuffer,
 		gl_read_framebuffer_binding,
@@ -56,252 +29,343 @@ namespace ml
 		gl_polygon_mode,
 		gl_viewport,
 		gl_scissor_box,
+	};
 
-		gl_cull_face,
-		gl_depth_test,
-		gl_alpha_test,
-		gl_blend,
-		gl_multisample,
-		gl_framebuffer_srgb,
-		gl_scissor_test,
+	enum backend_ : uint32_t
+	{
+		backend_vendor,
+		backend_renderer,
+		backend_version,
+		backend_major_version,
+		backend_minor_version,
+		backend_extensions,
+		backend_num_extensions,
+		backend_shading_language_version,
+		backend_info_log_length,
+	};
 
-		gl_blend_equation_rgb,
-		gl_blend_equation_alpha,
-		gl_blend_dst_rgb,
-		gl_blend_src_rgb,
-		gl_blend_dst_alpha,
-		gl_blend_src_alpha,
+	enum error_type_ : uint32_t
+	{
+		error_type_none,
+		error_type_invalid_enum,
+		error_type_invalid_value,
+		error_type_invalid_operation,
+		error_type_stack_overflow,
+		error_type_stack_underflow,
+		error_type_out_of_memory,
+		error_type_invalid_framebuffer_operation,
+	};
 
+	enum capability_ : uint32_t
+	{
+		capability_alpha_test,
+		capability_blend,
+		capability_cull_face,
+		capability_depth_test,
+		capability_framebuffer_srgb,
+		capability_multisample,
+		capability_scissor_test,
+	};
+
+	enum clear_flags_ : uint32_t
+	{
+		clear_flags_none,
+		clear_flags_depth	= 1 << 0,
+		clear_flags_accum	= 1 << 1,
+		clear_flags_stencil = 1 << 2,
+		clear_flags_color	= 1 << 3,
+	};
+
+	enum usage_ : uint32_t
+	{
+		usage_stream_draw,
+		usage_static_draw,
+		usage_dynamic_draw,
+	};
+
+	enum primitive_ : uint32_t
+	{
+		primitive_points,
+		primitive_lines,
+		primitive_line_loop,
+		primitive_line_strip,
+		primitive_triangles,
+		primitive_triangle_strip,
+		primitive_triangle_fan,
+		primitive_fill,
+	};
+
+	enum predicate_ : uint32_t
+	{
+		predicate_never,
+		predicate_less,
+		predicate_equationual,
+		predicate_lequal,
+		predicate_greater,
+		predicate_notequal,
+		predicate_gequal,
+		predicate_always,
+	};
+
+	enum index_type_ : uint32_t
+	{
+		index_type_byte,
+		index_type_unsigned_byte,
+		index_type_short,
+		index_type_unsigned_short,
+		index_type_int,
+		index_type_unsigned_int,
+		index_type_float,
+		index_type_half_float,
+	};
+
+	enum equation_ : uint32_t
+	{
+		equation_mult,
+		equation_add,
+		equation_subtract,
+		equation_func_add,
+	};
+
+	enum blend_mode_
+	{
+		blend_mode_equation_rgb,
+		blend_mode_equation_alpha,
+		blend_mode_dst_rgb,
+		blend_mode_src_rgb,
+		blend_mode_dst_alpha,
+		blend_mode_src_alpha,
+	};
+
+	enum facet_ : uint32_t
+	{
+		facet_front_left,
+		facet_front_right,
+		facet_back_left,
+		facet_back_right,
+		facet_front,
+		facet_back,
+		facet_left,
+		facet_right,
+		facet_front_and_back,
+	};
+
+	enum factor_ : uint32_t
+	{
+		factor_zero,
+		factor_one,
+		factor_src_color,
+		factor_one_minus_src_color,
+		factor_src_alpha,
+		factor_one_minus_src_alpha,
+		factor_dst_alpha,
+		factor_one_minus_dst_alpha,
+		factor_dst_color,
+		factor_one_minus_dst_color,
+		factor_src_alpha_saturate,
+	};
+
+	enum format_ : uint32_t
+	{
+		format_red,
+		format_green,
+		format_blue,
+		format_alpha,
+		format_rgb,
+		format_rgba,
+		format_luminance,
+		format_luminance_alpha,
+		format_srgb,
+		format_srgb8,
+		format_srgb_alpha,
+		format_srgb8_alpha8,
+		format_sluminance_alpha,
+		format_sluminance8_alpha8,
+		format_sluminance,
+		format_sluminance8,
+		format_depth24_stencil8,
+	};
+
+	enum storage_ : uint32_t
+	{
+		storage_unpack_swap_bytes,
+		storage_unpack_lsb_first,
+		storage_unpack_row_length,
+		storage_unpack_skip_rows,
+		storage_unpack_skip_pixels,
+		storage_unpack_alignment,
+
+		storage_pack_swap_bytes,
+		storage_pack_lsb_first,
+		storage_pack_row_length,
+		storage_pack_skip_rows,
+		storage_pack_skip_pixels,
+		storage_pack_alignment,
+	};
+
+	enum origin_ : uint32_t
+	{
 		gl_lower_left,
 		gl_upper_left,
 		gl_clip_origin,
-
-		gl_points,
-		gl_lines,
-		gl_line_loop,
-		gl_line_strip,
-		gl_triangles,
-		gl_triangle_strip,
-		gl_triangle_fan,
-		gl_fill,
-
-		gl_mult,
-		gl_add,
-		gl_subtract,
-		gl_func_add,
-
-		gl_never,
-		gl_less,
-		gl_equal,
-		gl_lequal,
-		gl_greater,
-		gl_notequal,
-		gl_gequal,
-		gl_always,
-
-		gl_zero,
-		gl_one,
-		gl_src_color,
-		gl_one_minus_src_color,
-		gl_src_alpha,
-		gl_one_minus_src_alpha,
-		gl_dst_alpha,
-		gl_one_minus_dst_alpha,
-		gl_dst_color,
-		gl_one_minus_dst_color,
-		gl_src_alpha_saturate,
-
-		gl_front_left,
-		gl_front_right,
-		gl_back_left,
-		gl_back_right,
-		gl_front,
-		gl_back,
-		gl_left,
-		gl_right,
-		gl_front_and_back,
-
-		gl_byte,
-		gl_unsigned_byte,
-		gl_short,
-		gl_unsigned_short,
-		gl_int,
-		gl_unsigned_int,
-		gl_float,
-		gl_half_float,
-
-		gl_red,
-		gl_green,
-		gl_blue,
-		gl_alpha,
-		gl_rgb,
-		gl_rgba,
-		gl_luminance,
-		gl_luminance_alpha,
-		gl_srgb,
-		gl_srgb8,
-		gl_srgb_alpha,
-		gl_srgb8_alpha8,
-		gl_sluminance_alpha,
-		gl_sluminance8_alpha8,
-		gl_sluminance,
-		gl_sluminance8,
-		gl_depth24_stencil8,
-
-		gl_nearest,
-		gl_linear,
-		gl_nearest_mipmap_nearest,
-		gl_linear_mipmap_nearest,
-		gl_nearest_mipmap_linear,
-		gl_linear_mipmap_linear,
-		gl_texture_mag_filter,
-		gl_texture_min_filter,
-		gl_texture_wrap_s,
-		gl_texture_wrap_t,
-		gl_texture_wrap_r,
-		gl_clamp,
-		gl_repeat,
-		gl_clamp_to_edge,
-		gl_texture_min_lod,
-		gl_texture_max_lod,
-		gl_texture_base_level,
-		gl_texture_max_level,
-
-		gl_texture_2d,
-		gl_texture_3d,
-		gl_texture_cube_map,
-		gl_max_texture_size,
-		gl_max_combined_texture_image_units,
-
-		gl_texture_cube_map_positive_x,
-		gl_texture_cube_map_negative_x,
-		gl_texture_cube_map_positive_y,
-		gl_texture_cube_map_negative_y,
-		gl_texture_cube_map_positive_z,
-		gl_texture_cube_map_negative_z,
-
-		gl_unpack_swap_bytes,
-		gl_unpack_lsb_first,
-		gl_unpack_row_length,
-		gl_unpack_skip_rows,
-		gl_unpack_skip_pixels,
-		gl_unpack_alignment,
-
-		gl_pack_swap_bytes,
-		gl_pack_lsb_first,
-		gl_pack_row_length,
-		gl_pack_skip_rows,
-		gl_pack_skip_pixels,
-		gl_pack_alignment,
-
-		gl_fragment_shader,
-		gl_vertex_shader,
-		gl_geometry_shader,
-		gl_shading_language_version,
-
-		gl_object_delete_status,
-		gl_object_compile_status,
-		gl_object_link_status,
-		gl_info_log_length,
-		gl_framebuffer_complete,
-
-		gl_framebuffer_attachment_color_encoding,
-		gl_framebuffer_attachment_component_type,
-		gl_framebuffer_attachment_red_size,
-		gl_framebuffer_attachment_green_size,
-		gl_framebuffer_attachment_blue_size,
-		gl_framebuffer_attachment_alpha_size,
-		gl_framebuffer_attachment_depth_size,
-		gl_framebuffer_attachment_stencil_size,
-		gl_framebuffer_default,
-		gl_framebuffer_undefined,
-		gl_depth_stencil_attachment,
-
-		gl_color_attachment0,
-		gl_color_attachment1,
-		gl_color_attachment2,
-		gl_color_attachment3,
-		gl_color_attachment4,
-		gl_color_attachment5,
-		gl_color_attachment6,
-		gl_color_attachment7,
-		gl_color_attachment8,
-		gl_color_attachment9,
-		gl_color_attachment10,
-		gl_color_attachment11,
-		gl_color_attachment12,
-		gl_color_attachment13,
-		gl_color_attachment14,
-		gl_color_attachment15,
-
-		gl_draw_buffer0,
-		gl_draw_buffer1,
-		gl_draw_buffer2,
-		gl_draw_buffer3,
-		gl_draw_buffer4,
-		gl_draw_buffer5,
-		gl_draw_buffer6,
-		gl_draw_buffer7,
-		gl_draw_buffer8,
-		gl_draw_buffer9,
-		gl_draw_buffer10,
-		gl_draw_buffer11,
-		gl_draw_buffer12,
-		gl_draw_buffer13,
-		gl_draw_buffer14,
-		gl_draw_buffer15,
-
-		gl_texture0,
-		gl_texture1,
-		gl_texture2,
-		gl_texture3,
-		gl_texture4,
-		gl_texture5,
-		gl_texture6,
-		gl_texture7,
-		gl_texture8,
-		gl_texture9,
-		gl_texture10,
-		gl_texture11,
-		gl_texture12,
-		gl_texture13,
-		gl_texture14,
-		gl_texture15,
-		gl_texture16,
-		gl_texture17,
-		gl_texture18,
-		gl_texture19,
-		gl_texture20,
-		gl_texture21,
-		gl_texture22,
-		gl_texture23,
-		gl_texture24,
-		gl_texture25,
-		gl_texture26,
-		gl_texture27,
-		gl_texture28,
-		gl_texture29,
-		gl_texture30,
-		gl_texture31,
-
-		gl_context_flags,
-		gl_context_profile_mask,
-		gl_context_core_profile_bit,
-		gl_context_compatability_profile_bit,
-		gl_context_flag_debug_bit,
-
-		gl_depth_buffer_bit,
-		gl_stencil_buffer_bit,
-		gl_color_buffer_bit,
-
-		gl_MAX_ENUM
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	enum texture_type_ : uint32_t
+	{
+		texture_type_2d,
+		texture_type_3d,
+		texture_type_cube_map,
+	};
 
-	ML_alias gl_enum_table = typename ds::array<uint32_t, gl_MAX_ENUM>;
+	enum texture_attr_ : uint32_t
+	{
+		texture_attr_max_size,
+		texture_attr_max_combined_image_units,
+	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	enum texture_param_ : uint32_t
+	{
+		texture_param_nearest,
+		texture_param_linear,
+		texture_param_nearest_mipmap_nearest,
+		texture_param_linear_mipmap_nearest,
+		texture_param_nearest_mipmap_linear,
+		texture_param_linear_mipmap_linear,
+		texture_param_texture_mag_filter,
+		texture_param_texture_min_filter,
+		texture_param_texture_wrap_s,
+		texture_param_texture_wrap_t,
+		texture_param_texture_wrap_r,
+		texture_param_clamp,
+		texture_param_repeat,
+		texture_param_clamp_to_edge,
+		texture_param_texture_min_lod,
+		texture_param_texture_max_lod,
+		texture_param_texture_base_level,
+		texture_param_texture_max_level,
+	};
+
+	enum texture_cube_map_ : uint32_t
+	{
+		texture_cube_map_positive_x,
+		texture_cube_map_negative_x,
+		texture_cube_map_positive_y,
+		texture_cube_map_negative_y,
+		texture_cube_map_positive_z,
+		texture_cube_map_negative_z,
+	};
+
+	enum shader_attr_ : uint32_t
+	{
+		shader_attr_compile_status,
+		shader_attr_delete_status,
+		shader_attr_link_status,
+		shader_attr_program_object,
+	};
+
+	enum shader_type_ : uint32_t
+	{
+		shader_type_vertex,
+		shader_type_fragment,
+		shader_type_geometry,
+	};
+
+	enum framebuffer_attr_
+	{
+		framebuffer_attr_complete,
+	};
+
+	enum framebuffer_attachment_ : uint32_t
+	{
+		framebuffer_attachment_default,
+		framebuffer_attachment_undefined,
+		framebuffer_attachment_depth_stencil,
+
+		framebuffer_attachment_color_encoding,
+		framebuffer_attachment_component_type,
+		framebuffer_attachment_red_size,
+		framebuffer_attachment_green_size,
+		framebuffer_attachment_blue_size,
+		framebuffer_attachment_alpha_size,
+		framebuffer_attachment_depth_size,
+		framebuffer_attachment_stencil_size,
+	};
+
+	enum color_attachment_ : uint32_t
+	{
+		color_attachment_0,
+		color_attachment_1,
+		color_attachment_2,
+		color_attachment_3,
+		color_attachment_4,
+		color_attachment_5,
+		color_attachment_6,
+		color_attachment_7,
+		color_attachment_8,
+		color_attachment_9,
+		color_attachment_10,
+		color_attachment_11,
+		color_attachment_12,
+		color_attachment_13,
+		color_attachment_14,
+		color_attachment_15,
+	};
+
+	enum draw_buffer_ : uint32_t
+	{
+		draw_buffer_0,
+		draw_buffer_1,
+		draw_buffer_2,
+		draw_buffer_3,
+		draw_buffer_4,
+		draw_buffer_5,
+		draw_buffer_6,
+		draw_buffer_7,
+		draw_buffer_8,
+		draw_buffer_9,
+		draw_buffer_10,
+		draw_buffer_11,
+		draw_buffer_12,
+		draw_buffer_13,
+		draw_buffer_14,
+		draw_buffer_15,
+	};
+
+	enum texture_attachment_ : uint32_t
+	{
+		texture_attachment_0,
+		texture_attachment_1,
+		texture_attachment_2,
+		texture_attachment_3,
+		texture_attachment_4,
+		texture_attachment_5,
+		texture_attachment_6,
+		texture_attachment_7,
+		texture_attachment_8,
+		texture_attachment_9,
+		texture_attachment_10,
+		texture_attachment_11,
+		texture_attachment_12,
+		texture_attachment_13,
+		texture_attachment_14,
+		texture_attachment_15,
+		texture_attachment_16,
+		texture_attachment_17,
+		texture_attachment_18,
+		texture_attachment_19,
+		texture_attachment_20,
+		texture_attachment_21,
+		texture_attachment_22,
+		texture_attachment_23,
+		texture_attachment_24,
+		texture_attachment_25,
+		texture_attachment_26,
+		texture_attachment_27,
+		texture_attachment_28,
+		texture_attachment_29,
+		texture_attachment_30,
+		texture_attachment_31,
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -316,10 +380,6 @@ namespace ml
 
 		virtual ~vertex_array() = default;
 
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
 		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
@@ -327,6 +387,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(vertex_array const * value) noexcept;
+
+		void bind() const noexcept { bind(this); }
+
+		void unbind() const noexcept { bind(nullptr); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static vertex_array * create(uint32_t mode) noexcept;
 
@@ -340,10 +406,6 @@ namespace ml
 
 		virtual ~vertex_buffer() = default;
 
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
 		virtual void set_data(float_t const * vertices, uint32_t size) = 0;
 
 		virtual void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) = 0;
@@ -355,6 +417,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(vertex_buffer const * value) noexcept;
+
+		void bind() const noexcept { bind(this); }
+
+		void unbind() const noexcept { bind(nullptr); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static vertex_buffer * create(float_t const * vertices, uint32_t size) noexcept;
 
@@ -370,10 +438,6 @@ namespace ml
 
 		virtual ~index_buffer() = default;
 
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
 		virtual void set_data(uint32_t const * indices, uint32_t count) = 0;
 
 		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
@@ -383,6 +447,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(index_buffer const * value) noexcept;
+
+		void bind() const noexcept { bind(this); }
+
+		void unbind() const noexcept { bind(nullptr); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static index_buffer * create(uint32_t const * indices, uint32_t count) noexcept;
 
@@ -396,10 +466,6 @@ namespace ml
 
 		virtual ~frame_buffer() = default;
 
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
 		virtual void set_render_buffer(void const * value, uint32_t attachment) = 0;
 
 		virtual void set_texture2d(void const * value, uint32_t attachment, uint32_t level) = 0;
@@ -409,6 +475,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(frame_buffer const * value) noexcept;
+
+		void bind() const noexcept { bind(this); }
+
+		void unbind() const noexcept { bind(nullptr); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static frame_buffer * create() noexcept;
 
@@ -422,10 +494,6 @@ namespace ml
 
 		virtual ~render_buffer() = default;
 
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
 		virtual void set_storage(uint32_t format, int32_t width, int32_t height) = 0;
 
 		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
@@ -433,6 +501,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(render_buffer const * value) noexcept;
+
+		void bind() const noexcept { bind(this); }
+
+		void unbind() const noexcept { bind(nullptr); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static render_buffer * create(uint32_t format, int32_t width, int32_t height) noexcept;
 
@@ -453,14 +527,28 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		virtual bool initialize() = 0;
+		virtual uint32_t get_error() = 0;
+
 		virtual void clear(uint32_t flags) = 0;
 		virtual void flush() = 0;
 
-		virtual void set_clear_color(color const & value) = 0;
-		virtual void set_viewport(int_rect const & value) = 0;
-
 		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
-		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void * indices) = 0;
+		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
+
+		virtual void set_active_texture(void const * value) = 0;
+		virtual void set_alpha_function(uint32_t func, float32_t ref) = 0;
+		virtual void set_blend_equation(uint32_t value) = 0;
+		virtual void set_blend_equation_separate(uint32_t rgb, uint32_t alpha) = 0;
+		virtual void set_blend_function(uint32_t sFactor, uint32_t dFactor) = 0;
+		virtual void set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) = 0;
+		virtual void set_clear_color(color const & value) = 0;
+		virtual void set_cull_mode(uint32_t value) = 0;
+		virtual void set_depth_function(uint32_t value) = 0;
+		virtual void set_depth_mask(bool value) = 0;
+		virtual void set_enabled(uint32_t capability, bool enabled) = 0;
+		virtual void set_polygon_mode(uint32_t face, uint32_t mode) = 0;
+		virtual void set_viewport(int_rect const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -483,9 +571,9 @@ namespace ml
 
 		std::unique_ptr<render_api> m_api;
 
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	public:
 		static std::unique_ptr<render_api> const & api() noexcept
 		{
 			return get_instance().m_api;
@@ -505,26 +593,81 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto set_clear_color(color const & value) noexcept
-		{
-			return std::bind(&render_api::set_clear_color, api().get(), value);
-		}
-
-		static auto set_viewport(int_rect const & value) noexcept
-		{
-			return std::bind(&render_api::set_viewport, api().get(), value);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static auto draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
 		{
 			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
 		}
 
-		static auto draw_indexed(uint32_t mode, int32_t first, uint32_t type, void * indices) noexcept
+		static auto draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
 		{
 			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static auto set_active_texture(void const * value) noexcept
+		{
+			return std::bind(&render_api::set_active_texture, api().get(), value);
+		}
+		
+		static auto set_alpha_function(uint32_t func, float32_t ref) noexcept
+		{
+			return std::bind(&render_api::set_alpha_function, api().get(), func, ref);
+		}
+		
+		static auto set_blend_equation(uint32_t value) noexcept
+		{
+			return std::bind(&render_api::set_blend_equation, api().get(), value);
+		}
+		
+		static auto set_blend_equation_separate(uint32_t modeRGB, uint32_t modeAlpha) noexcept
+		{
+			return std::bind(&render_api::set_blend_equation_separate, api().get(), modeRGB, modeAlpha);
+		}
+
+		static auto set_blend_function(uint32_t sFactor, uint32_t dFactor) noexcept
+		{
+			return std::bind(&render_api::set_blend_function, api().get(), sFactor, dFactor);
+		}
+
+		static auto set_blend_function_separate(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) noexcept
+		{
+			return std::bind(&render_api::set_blend_function_separate, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+		}
+		
+		static auto set_clear_color(color const & value) noexcept
+		{
+			return std::bind(&render_api::set_clear_color, api().get(), value);
+		}
+
+		static auto set_cull_mode(uint32_t value) noexcept
+		{
+			return std::bind(&render_api::set_cull_mode, api().get(), value);
+		}
+
+		static auto set_depth_function(uint32_t value) noexcept
+		{
+			return std::bind(&render_api::set_depth_function, api().get(), value);
+		}
+		
+		static auto set_depth_mask(bool value) noexcept
+		{
+			return std::bind(&render_api::set_depth_mask, api().get(), value);
+		}
+
+		static auto set_enabled(uint32_t capability, bool enabled) noexcept
+		{
+			return std::bind(&render_api::set_enabled, api().get(), capability, enabled);
+		}
+		
+		static auto set_polygon_mode(uint32_t face, uint32_t mode) noexcept
+		{
+			return std::bind(&render_api::set_polygon_mode, api().get(), face, mode);
+		}
+
+		static auto set_viewport(int_rect const & value) noexcept
+		{
+			return std::bind(&render_api::set_viewport, api().get(), value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

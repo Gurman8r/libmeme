@@ -428,7 +428,7 @@ namespace ml
 			{
 				ML_bind_scope(rt);
 				render_command::set_clear_color(colors::magenta)();
-				render_command::clear(GL::ColorBufferBit | GL::DepthBufferBit)();
+				render_command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
 				render_command::set_viewport(rt.bounds())();
 				m_ecs.update_system<x_draw_renderers>(rt);
 			}

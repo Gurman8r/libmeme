@@ -5,10 +5,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// performance tracker singleton
-#define ML_performance_tracker \
-	_ML performance_tracker::get_instance()
-
 // benchmark scope
 #define ML_bench_scope(id) \
 	auto ML_anon = _ML performance_tracker::scope_benchmark{ id }
