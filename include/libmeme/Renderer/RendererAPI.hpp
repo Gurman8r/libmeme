@@ -513,25 +513,28 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render api
+// api
 namespace ml
 {
-	struct ML_RENDERER_API renderer_api : trackable, non_copyable
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct ML_RENDERER_API render_api : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~renderer_api() noexcept = default;
+		virtual ~render_api() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool initialize() = 0;
-		virtual uint32_t get_error() = 0;
+
+		virtual bool get_enabled(uint32_t capability) const = 0;
+		virtual uint32_t get_error() const = 0;
 
 		virtual void clear(uint32_t flags) = 0;
-		virtual void flush() = 0;
-
 		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
 		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
+		virtual void flush() = 0;
 
 		virtual void set_active_texture(void const * value) = 0;
 		virtual void set_alpha_function(uint32_t value, float32_t ref) = 0;
@@ -550,109 +553,116 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render commands
+// context
 namespace ml
 {
-	struct ML_RENDERER_API ML_NODISCARD render_command final : singleton<render_command>
+	class ML_RENDERER_API render_context final : public singleton<render_context>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using function		= typename std::function<void(void)>;
-		using initializer	= typename std::initializer_list<function>;
+		friend singleton<render_context>;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		render_context() noexcept;
 
-		static std::unique_ptr<renderer_api> const & api() noexcept
+		~render_context() noexcept;
+
+		std::unique_ptr<render_api> m_api;
+
+	public:
+		static std::unique_ptr<render_api> const & api() noexcept
 		{
 			return get_instance().m_api;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
 
-		static auto clear(uint32_t flags) noexcept
-		{
-			return std::bind(&renderer_api::clear, api().get(), flags);
-		}
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto flush() noexcept
-		{
-			return std::bind(&renderer_api::flush, api().get());
-		}
+// commands
+namespace ml
+{
+	class ML_NODISCARD render_command final
+	{
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static auto const & api() noexcept { return render_context::api(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static auto clear(uint32_t flags) noexcept
+		{
+			return std::bind(&render_api::clear, api().get(), flags);
+		}
+
 		static auto draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
 		{
-			return std::bind(&renderer_api::draw_arrays, api().get(), mode, first, count);
+			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
 		}
 
 		static auto draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
 		{
-			return std::bind(&renderer_api::draw_indexed, api().get(), mode, first, type, indices);
+			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
+		}
+
+		static auto flush() noexcept
+		{
+			return std::bind(&render_api::flush, api().get());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static auto set_active_texture(void const * value) noexcept
 		{
-			return std::bind(&renderer_api::set_active_texture, api().get(), value);
+			return std::bind(&render_api::set_active_texture, api().get(), value);
 		}
 		
 		static auto set_alpha_function(uint32_t value, float32_t ref) noexcept
 		{
-			return std::bind(&renderer_api::set_alpha_function, api().get(), value, ref);
+			return std::bind(&render_api::set_alpha_function, api().get(), value, ref);
 		}
 		
 		static auto set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) noexcept
 		{
-			return std::bind(&renderer_api::set_blend_equation, api().get(), modeRGB, modeAlpha);
+			return std::bind(&render_api::set_blend_equation, api().get(), modeRGB, modeAlpha);
 		}
 
 		static auto set_blend_function(uint32_t sfactorRGB, uint32_t dfactorRGB, uint32_t sfactorAlpha, uint32_t dfactorAlpha) noexcept
 		{
-			return std::bind(&renderer_api::set_blend_function, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+			return std::bind(&render_api::set_blend_function, api().get(), sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
 		}
 		
 		static auto set_clear_color(color const & value) noexcept
 		{
-			return std::bind(&renderer_api::set_clear_color, api().get(), value);
+			return std::bind(&render_api::set_clear_color, api().get(), value);
 		}
 
 		static auto set_cull_mode(uint32_t value) noexcept
 		{
-			return std::bind(&renderer_api::set_cull_mode, api().get(), value);
+			return std::bind(&render_api::set_cull_mode, api().get(), value);
 		}
 
 		static auto set_depth_function(uint32_t value) noexcept
 		{
-			return std::bind(&renderer_api::set_depth_function, api().get(), value);
+			return std::bind(&render_api::set_depth_function, api().get(), value);
 		}
 		
 		static auto set_depth_mask(bool enabled) noexcept
 		{
-			return std::bind(&renderer_api::set_depth_mask, api().get(), enabled);
+			return std::bind(&render_api::set_depth_mask, api().get(), enabled);
 		}
 
 		static auto set_enabled(uint32_t capability, bool enabled) noexcept
 		{
-			return std::bind(&renderer_api::set_enabled, api().get(), capability, enabled);
+			return std::bind(&render_api::set_enabled, api().get(), capability, enabled);
 		}
 		
 		static auto set_viewport(int_rect const & value) noexcept
 		{
-			return std::bind(&renderer_api::set_viewport, api().get(), value);
+			return std::bind(&render_api::set_viewport, api().get(), value);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend singleton<render_command>;
-
-		render_command() noexcept;
-
-		~render_command() noexcept;
-
-		std::unique_ptr<renderer_api> m_api;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

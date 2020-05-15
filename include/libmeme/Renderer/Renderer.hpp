@@ -12,14 +12,12 @@
 namespace ml
 {
 	// global renderer
-	struct ML_RENDERER_API renderer final : singleton<renderer>
+	class renderer final
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static std::unique_ptr<renderer_api> const & api() noexcept
-		{
-			return render_command::api();
-		}
+		static auto const & api() noexcept { return render_context::api(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,15 +30,6 @@ namespace ml
 		static void submit() {}
 
 		static void upload() {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend singleton<renderer>;
-
-		renderer() noexcept;
-
-		~renderer() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -13,14 +13,14 @@ namespace ml
 			return debug::error("render_window failed initializing platform");
 		}
 
-		if (!render_command::api()->initialize())
+		if (!render_context::api()->initialize())
 		{
 			return debug::error("render_window failed initializing renderer");
 		}
 
 		GL::validateVersion(m_settings.context.major, m_settings.context.minor);
 
-		for (auto const & cmd : render_command::initializer
+		for (auto const & fn : std::initializer_list<std::function<void()>>
 		{
 			render_command::set_active_texture(nullptr),
 
@@ -45,7 +45,7 @@ namespace ml
 			render_command::flush()
 		})
 		{
-			std::invoke(cmd);
+			std::invoke(fn);
 		}
 
 		return true;

@@ -4,7 +4,7 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
-using impl_renderer_api		= _ML opengl_renderer_api;
+using impl_renderer_api		= _ML opengl_render_api;
 using impl_vertex_array		= _ML opengl_vertex_array;
 using impl_vertex_buffer	= _ML opengl_vertex_buffer;
 using impl_index_buffer		= _ML opengl_index_buffer;
@@ -86,14 +86,14 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// render commands
+// context
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_command::render_command() noexcept : m_api{ std::make_unique<impl_renderer_api>() } {}
+	render_context::render_context() noexcept : m_api{ std::make_unique<impl_renderer_api>() } {}
 
-	render_command::~render_command() noexcept {}
+	render_context::~render_context() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

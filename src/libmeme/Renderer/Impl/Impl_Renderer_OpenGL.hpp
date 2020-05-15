@@ -284,29 +284,31 @@ namespace ml
 // opengl render api
 namespace ml
 {
-	struct ML_RENDERER_API opengl_renderer_api final : renderer_api
+	struct ML_RENDERER_API opengl_render_api final : render_api
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		~opengl_renderer_api() noexcept = default;
+		~opengl_render_api() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool initialize() override;
 
-		uint32_t get_error() override;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool get_enabled(uint32_t capability) const override;
+
+		uint32_t get_error() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		void clear(uint32_t flags) override;
 
-		void flush() override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) override;
 
 		void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) override;
+
+		void flush() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
