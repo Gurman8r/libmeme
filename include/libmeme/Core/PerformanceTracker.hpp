@@ -5,11 +5,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// benchmark scope
+// scope benchmark
 #define ML_benchmark_S(id) \
 	auto ML_anon = _ML performance_tracker::scope_benchmark{ id }
 
-// benchmark lambda
+// lambda benchmark
 #define ML_benchmark_L(id) \
 	auto ML_anon = _ML performance_tracker::lambda_benchmark{ id } + [&]() noexcept
 
@@ -18,8 +18,9 @@
 namespace ml
 {
 	// global performance tracker
-	struct ML_CORE_API performance_tracker final : singleton<performance_tracker>
+	class ML_CORE_API performance_tracker final : public singleton<performance_tracker>
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;

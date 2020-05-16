@@ -11,17 +11,15 @@
 
 namespace ml
 {
-	// global renderer
-	class renderer final
+	struct perspective_camera final {};
+	struct orthographic_camera final {};
+	
+	class renderer3d final : public singleton<renderer3d>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto const & api() noexcept { return render_context::api(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void begin_scene() {}
+		static void begin_scene(perspective_camera const & camera) {}
 
 		static void end_scene() {}
 
@@ -30,6 +28,11 @@ namespace ml
 		static void submit() {}
 
 		static void upload() {}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		friend singleton<renderer3d>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

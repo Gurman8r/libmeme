@@ -41,13 +41,13 @@
 #	define glCheck(expr) (expr)
 #else
 #	define glCheck(expr) \
-	do { expr; _ML gl_check_error(__FILE__, __LINE__, #expr); } while (0)
+	do { expr; _ML gl::check_error(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
 // errors
-namespace ml
+namespace ml::gl
 {
-	static void gl_check_error(cstring file, uint32_t line, cstring expr)
+	static void check_error(cstring file, uint32_t line, cstring expr)
 	{
 		if (auto const code{ glGetError() }; code != GL_NO_ERROR)
 		{
@@ -101,499 +101,645 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// enum mappings
+// opengl enums
 namespace ml::gl
 {
-	constexpr uint32_t _capability(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _clear_flags(uint32_t value) noexcept
 	{
-		switch (value)
+		uint32_t temp{};
+		if constexpr (ToImpl())
 		{
-		default										: return value;
-		case capability_alpha_test					: return GL_ALPHA_TEST;
-		case capability_blend						: return GL_BLEND;
-		case capability_cull_face					: return GL_CULL_FACE;
-		case capability_depth_clamp					: return GL_DEPTH_CLAMP;
-		case capability_depth_test					: return GL_DEPTH_TEST;
-		case capability_dither						: return GL_DITHER;
-		case capability_framebuffer_srgb			: return GL_FRAMEBUFFER_SRGB;
-		case capability_line_smooth					: return GL_LINE_SMOOTH;
-		case capability_multisample					: return GL_MULTISAMPLE;
-		case capability_polygon_smooth				: return GL_POLYGON_SMOOTH;
-		case capability_sample_mask					: return GL_SAMPLE_MASK;
-		case capability_scissor_test				: return GL_SCISSOR_TEST;
-		case capability_stencil_test				: return GL_STENCIL_TEST;
-		case capability_texture_1d					: return GL_TEXTURE_1D;
-		case capability_texture_2d					: return GL_TEXTURE_2D;
-		case capability_texture_3d					: return GL_TEXTURE_2D;
-		case capability_texture_cube_map			: return GL_TEXTURE_CUBE_MAP;
-		case capability_texture_cube_map_seamless	: return GL_TEXTURE_CUBE_MAP_SEAMLESS;
+			ML_flag_map(temp, value, clear_flags_accum	, GL_ACCUM_BUFFER_BIT);
+			ML_flag_map(temp, value, clear_flags_color	, GL_COLOR_BUFFER_BIT);
+			ML_flag_map(temp, value, clear_flags_depth	, GL_DEPTH_BUFFER_BIT);
+			ML_flag_map(temp, value, clear_flags_stencil, GL_STENCIL_BUFFER_BIT);
+		}
+		else
+		{
+			ML_flag_map(temp, value, GL_ACCUM_BUFFER_BIT	, clear_flags_accum);
+			ML_flag_map(temp, value, GL_COLOR_BUFFER_BIT	, clear_flags_color);
+			ML_flag_map(temp, value, GL_DEPTH_BUFFER_BIT	, clear_flags_depth);
+			ML_flag_map(temp, value, GL_STENCIL_BUFFER_BIT	, clear_flags_stencil);
+		}
+		return temp;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _error(uint32_t value) noexcept
+	{
+		if constexpr (ToImpl())
+		{
+			switch (value)
+			{
+			default									: return value;
+			case error_none							: return GL_NO_ERROR;
+			case error_invalid_enum					: return GL_INVALID_ENUM;
+			case error_invalid_value				: return GL_INVALID_VALUE;
+			case error_invalid_operation			: return GL_INVALID_OPERATION;
+			case error_stack_overflow				: return GL_STACK_OVERFLOW;
+			case error_stack_underflow				: return GL_STACK_UNDERFLOW;
+			case error_out_of_memory				: return GL_OUT_OF_MEMORY;
+			case error_invalid_framebuffer_operation: return GL_INVALID_FRAMEBUFFER_OPERATION;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default									: return value;
+			case GL_NO_ERROR						: return error_none;
+			case GL_INVALID_ENUM					: return error_invalid_enum;
+			case GL_INVALID_VALUE					: return error_invalid_value;
+			case GL_INVALID_OPERATION				: return error_invalid_operation;
+			case GL_STACK_OVERFLOW					: return error_stack_overflow;
+			case GL_STACK_UNDERFLOW					: return error_stack_underflow;
+			case GL_OUT_OF_MEMORY					: return error_out_of_memory;
+			case GL_INVALID_FRAMEBUFFER_OPERATION	: return error_invalid_framebuffer_operation;
+			}
 		}
 	}
 
-	constexpr uint32_t _error_type(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _usage(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default											: value;
-		case error_type_none							: return GL_NO_ERROR;
-		case error_type_invalid_enum					: return GL_INVALID_ENUM;
-		case error_type_invalid_value					: return GL_INVALID_VALUE;
-		case error_type_invalid_operation				: return GL_INVALID_OPERATION;
-		case error_type_stack_overflow					: return GL_STACK_OVERFLOW;
-		case error_type_stack_underflow					: return GL_STACK_UNDERFLOW;
-		case error_type_out_of_memory					: return GL_OUT_OF_MEMORY;
-		case error_type_invalid_framebuffer_operation	: return GL_INVALID_FRAMEBUFFER_OPERATION;
+			switch (value)
+			{
+			default					: return value;
+			case usage_stream_draw	: return GL_STREAM_DRAW;
+			case usage_static_draw	: return GL_STATIC_DRAW;
+			case usage_dynamic_draw	: return GL_DYNAMIC_DRAW;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_STREAM_DRAW		: return usage_stream_draw;
+			case GL_STATIC_DRAW		: return usage_static_draw;
+			case GL_DYNAMIC_DRAW	: return usage_dynamic_draw;
+			}
 		}
 	}
 
-	constexpr uint32_t _clear_flags(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default					: return value;
-		case clear_flags_accum	: return GL_ACCUM_BUFFER_BIT;
-		case clear_flags_color	: return GL_COLOR_BUFFER_BIT;
-		case clear_flags_depth	: return GL_DEPTH_BUFFER_BIT;
-		case clear_flags_stencil: return GL_STENCIL_BUFFER_BIT;
+			switch (value)
+			{
+			default							: return value;
+			case primitive_points			: return GL_POINTS;
+			case primitive_lines			: return GL_LINES;
+			case primitive_line_loop		: return GL_LINE_LOOP;
+			case primitive_line_strip		: return GL_LINE_STRIP;
+			case primitive_triangles		: return GL_TRIANGLES;
+			case primitive_triangle_strip	: return GL_TRIANGLE_STRIP;
+			case primitive_triangle_fan		: return GL_TRIANGLE_FAN;
+			case primitive_fill				: return GL_FILL;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_POINTS			: return primitive_points;
+			case GL_LINES			: return primitive_lines;
+			case GL_LINE_LOOP		: return primitive_line_loop;
+			case GL_LINE_STRIP		: return primitive_line_strip;
+			case GL_TRIANGLES		: return primitive_triangles;
+			case GL_TRIANGLE_STRIP	: return primitive_triangle_strip;
+			case GL_TRIANGLE_FAN	: return primitive_triangle_fan;
+			case GL_FILL			: return primitive_fill;
+			}
 		}
 	}
 
-	constexpr uint32_t _usage(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default					: return value;
-		case usage_stream_draw	: return GL_STREAM_DRAW;
-		case usage_static_draw	: return GL_STATIC_DRAW;
-		case usage_dynamic_draw	: return GL_DYNAMIC_DRAW;
+			switch (value)
+			{
+			default					: return value;
+			case predicate_never	: return GL_NEVER;
+			case predicate_less		: return GL_LESS;
+			case predicate_equal	: return GL_EQUAL;
+			case predicate_lequal	: return GL_LEQUAL;
+			case predicate_greater	: return GL_GREATER;
+			case predicate_notequal	: return GL_NOTEQUAL;
+			case predicate_gequal	: return GL_GEQUAL;
+			case predicate_always	: return GL_ALWAYS;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default			: return value;
+			case GL_NEVER	: return predicate_never;
+			case GL_LESS	: return predicate_less;
+			case GL_EQUAL	: return predicate_equal;
+			case GL_LEQUAL	: return predicate_lequal;
+			case GL_GREATER	: return predicate_greater;
+			case GL_NOTEQUAL: return predicate_notequal;
+			case GL_GEQUAL	: return predicate_gequal;
+			case GL_ALWAYS	: return predicate_always;
+			}
 		}
 	}
 
-	constexpr uint32_t _primitive(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _type(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default							: return value;
-		case primitive_points			: return GL_POINTS;
-		case primitive_lines			: return GL_LINES;
-		case primitive_line_loop		: return GL_LINE_LOOP;
-		case primitive_line_strip		: return GL_LINE_STRIP;
-		case primitive_triangles		: return GL_TRIANGLES;
-		case primitive_triangle_strip	: return GL_TRIANGLE_STRIP;
-		case primitive_triangle_fan		: return GL_TRIANGLE_FAN;
-		case primitive_fill				: return GL_FILL;
+			switch (value)
+			{
+			default					: return value;
+			case type_byte			: return GL_BYTE;
+			case type_unsigned_byte	: return GL_UNSIGNED_BYTE;
+			case type_short			: return GL_SHORT;
+			case type_unsigned_short: return GL_UNSIGNED_SHORT;
+			case type_int			: return GL_INT;
+			case type_unsigned_int	: return GL_UNSIGNED_INT;
+			case type_float			: return GL_FLOAT;
+			case type_half_float	: return GL_HALF_FLOAT;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_BYTE			: return type_byte;
+			case GL_UNSIGNED_BYTE	: return type_unsigned_byte;
+			case GL_SHORT			: return type_short;
+			case GL_UNSIGNED_SHORT	: return type_unsigned_short;
+			case GL_INT				: return type_int;
+			case GL_UNSIGNED_INT	: return type_unsigned_int;
+			case GL_FLOAT			: return type_float;
+			case GL_HALF_FLOAT		: return type_half_float;
+			}
 		}
 	}
 
-	constexpr uint32_t _predicate(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _function(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default					: return value;
-		case predicate_never	: return GL_NEVER;
-		case predicate_less		: return GL_LESS;
-		case predicate_equal	: return GL_EQUAL;
-		case predicate_lequal	: return GL_LEQUAL;
-		case predicate_greater	: return GL_GREATER;
-		case predicate_notequal	: return GL_NOTEQUAL;
-		case predicate_gequal	: return GL_GEQUAL;
-		case predicate_always	: return GL_ALWAYS;
+			switch (value)
+			{
+			default							: return value;
+			case function_add				: return GL_FUNC_ADD;
+			case function_subtract			: return GL_FUNC_SUBTRACT;
+			case function_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
+			case function_min				: return GL_MIN;
+			case function_max				: return GL_MAX;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default							: return value;
+			case GL_FUNC_ADD				: return function_add;
+			case GL_FUNC_SUBTRACT			: return function_subtract;
+			case GL_FUNC_REVERSE_SUBTRACT	: return function_reverse_subtract;
+			case GL_MIN						: return function_min;
+			case GL_MAX						: return function_max;
+			}
 		}
 	}
 
-	constexpr uint32_t _type(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _cull_order(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default					: return value;
-		case type_byte			: return GL_BYTE;
-		case type_unsigned_byte	: return GL_UNSIGNED_BYTE;
-		case type_short			: return GL_SHORT;
-		case type_unsigned_short: return GL_UNSIGNED_SHORT;
-		case type_int			: return GL_INT;
-		case type_unsigned_int	: return GL_UNSIGNED_INT;
-		case type_float			: return GL_FLOAT;
-		case type_half_float	: return GL_HALF_FLOAT;
+			switch (value)
+			{
+			default				: return value;
+			case cull_order_cw	: return GL_CW;
+			case cull_order_ccw	: return GL_CCW;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default		: return value;
+			case GL_CW	: return cull_order_cw;
+			case GL_CCW	: return cull_order_ccw;
+			}
 		}
 	}
 
-	constexpr uint32_t _function(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _facet(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default							: return value;
-		case function_add				: return GL_FUNC_ADD;
-		case function_subtract			: return GL_FUNC_SUBTRACT;
-		case function_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
-		case function_min				: return GL_MIN;
-		case function_max				: return GL_MAX;
+			switch (value)
+			{
+			default						: return value;
+			case facet_front_left		: return GL_FRONT_LEFT;
+			case facet_front_right		: return GL_FRONT_RIGHT;
+			case facet_back_left		: return GL_BACK_LEFT;
+			case facet_back_right		: return GL_BACK_RIGHT;
+			case facet_front			: return GL_FRONT;
+			case facet_back				: return GL_BACK;
+			case facet_left				: return GL_LEFT;
+			case facet_right			: return GL_RIGHT;
+			case facet_front_and_back	: return GL_FRONT_AND_BACK;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_FRONT_LEFT		: return facet_front_left;
+			case GL_FRONT_RIGHT		: return facet_front_right;
+			case GL_BACK_LEFT		: return facet_back_left;
+			case GL_BACK_RIGHT		: return facet_back_right;
+			case GL_FRONT			: return facet_front;
+			case GL_BACK			: return facet_back;
+			case GL_LEFT			: return facet_left;
+			case GL_RIGHT			: return facet_right;
+			case GL_FRONT_AND_BACK	: return facet_front_and_back;
+			}
 		}
 	}
 
-	constexpr uint32_t _front_face(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _factor(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default				: return value;
-		case front_face_cw	: return GL_CW;
-		case front_face_ccw	: return GL_CCW;
+			switch (value)
+			{
+			default							: return value;
+			case factor_zero				: return GL_ZERO;
+			case factor_one					: return GL_ONE;
+			case factor_src_color			: return GL_SRC_COLOR;
+			case factor_one_minus_src_color	: return GL_ONE_MINUS_SRC_COLOR;
+			case factor_src_alpha			: return GL_SRC_ALPHA;
+			case factor_one_minus_src_alpha	: return GL_ONE_MINUS_SRC_ALPHA;
+			case factor_dst_alpha			: return GL_DST_ALPHA;
+			case factor_one_minus_dst_alpha	: return GL_ONE_MINUS_DST_ALPHA;
+			case factor_dst_color			: return GL_DST_COLOR;
+			case factor_one_minus_dst_color	: return GL_ONE_MINUS_DST_COLOR;
+			case factor_src_alpha_saturate	: return GL_SRC_ALPHA_SATURATE;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default						: return value;
+			case GL_ZERO				: return factor_zero;
+			case GL_ONE					: return factor_one;
+			case GL_SRC_COLOR			: return factor_src_color;
+			case GL_ONE_MINUS_SRC_COLOR	: return factor_one_minus_src_color;
+			case GL_SRC_ALPHA			: return factor_src_alpha;
+			case GL_ONE_MINUS_SRC_ALPHA	: return factor_one_minus_src_alpha;
+			case GL_DST_ALPHA			: return factor_dst_alpha;
+			case GL_ONE_MINUS_DST_ALPHA	: return factor_one_minus_dst_alpha;
+			case GL_DST_COLOR			: return factor_dst_color;
+			case GL_ONE_MINUS_DST_COLOR	: return factor_one_minus_dst_color;
+			case GL_SRC_ALPHA_SATURATE	: return factor_src_alpha_saturate;
+			}
 		}
 	}
 
-	constexpr uint32_t _facet(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _format(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default						: return value;
-		case facet_front_left		: return GL_FRONT_LEFT;
-		case facet_front_right		: return GL_FRONT_RIGHT;
-		case facet_back_left		: return GL_BACK_LEFT;
-		case facet_back_right		: return GL_BACK_RIGHT;
-		case facet_front			: return GL_FRONT;
-		case facet_back				: return GL_BACK;
-		case facet_left				: return GL_LEFT;
-		case facet_right			: return GL_RIGHT;
-		case facet_front_and_back	: return GL_FRONT_AND_BACK;
+			switch (value)
+			{
+			default							: return value;
+			case format_red					: return GL_RED;
+			case format_green				: return GL_GREEN;
+			case format_blue				: return GL_BLUE;
+			case format_alpha				: return GL_ALPHA;
+			case format_rgb					: return GL_RGB;
+			case format_rgba				: return GL_RGBA;
+			case format_luminance			: return GL_LUMINANCE;
+			case format_luminance_alpha		: return GL_LUMINANCE_ALPHA;
+			case format_srgb				: return GL_SRGB;
+			case format_srgb8				: return GL_SRGB8;
+			case format_srgb_alpha			: return GL_SRGB_ALPHA;
+			case format_srgb8_alpha8		: return GL_SRGB8_ALPHA8;
+			case format_sluminance_alpha	: return GL_SLUMINANCE_ALPHA;
+			case format_sluminance8_alpha8	: return GL_SLUMINANCE8_ALPHA8;
+			case format_sluminance			: return GL_SLUMINANCE;
+			case format_sluminance8			: return GL_SLUMINANCE8;
+			case format_depth24_stencil8	: return GL_DEPTH24_STENCIL8;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default							: return value;
+			case GL_RED						: return format_red;
+			case GL_GREEN					: return format_green;
+			case GL_BLUE					: return format_blue;
+			case GL_ALPHA					: return format_alpha;
+			case GL_RGB						: return format_rgb;
+			case GL_RGBA					: return format_rgba;
+			case GL_LUMINANCE				: return format_luminance;
+			case GL_LUMINANCE_ALPHA			: return format_luminance_alpha;
+			case GL_SRGB					: return format_srgb;
+			case GL_SRGB8					: return format_srgb8;
+			case GL_SRGB_ALPHA				: return format_srgb_alpha;
+			case GL_SRGB8_ALPHA8			: return format_srgb8_alpha8;
+			case GL_SLUMINANCE_ALPHA		: return format_sluminance_alpha;
+			case GL_SLUMINANCE8_ALPHA8		: return format_sluminance8_alpha8;
+			case GL_SLUMINANCE				: return format_sluminance;
+			case GL_SLUMINANCE8				: return format_sluminance8;
+			case GL_DEPTH24_STENCIL8		: return format_depth24_stencil8;
+			}
 		}
 	}
 
-	constexpr uint32_t _factor(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default							: return value;
-		case factor_zero				: return GL_ZERO;
-		case factor_one					: return GL_ONE;
-		case factor_src_color			: return GL_SRC_COLOR;
-		case factor_one_minus_src_color	: return GL_ONE_MINUS_SRC_COLOR;
-		case factor_src_alpha			: return GL_SRC_ALPHA;
-		case factor_one_minus_src_alpha	: return GL_ONE_MINUS_SRC_ALPHA;
-		case factor_dst_alpha			: return GL_DST_ALPHA;
-		case factor_one_minus_dst_alpha	: return GL_ONE_MINUS_DST_ALPHA;
-		case factor_dst_color			: return GL_DST_COLOR;
-		case factor_one_minus_dst_color	: return GL_ONE_MINUS_DST_COLOR;
-		case factor_src_alpha_saturate	: return GL_SRC_ALPHA_SATURATE;
+			switch (value)
+			{
+			default						: return value;
+			case texture_type_1d		: return GL_TEXTURE_1D;
+			case texture_type_2d		: return GL_TEXTURE_2D;
+			case texture_type_3d		: return GL_TEXTURE_3D;
+			case texture_type_cube_map	: return GL_TEXTURE_CUBE_MAP;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default						: return value;
+			case GL_TEXTURE_1D			: return texture_type_1d;
+			case GL_TEXTURE_2D			: return texture_type_2d;
+			case GL_TEXTURE_3D			: return texture_type_3d;
+			case GL_TEXTURE_CUBE_MAP	: return texture_type_cube_map;
+			}
 		}
 	}
 
-	constexpr uint32_t _format(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default							: return value;
-		case format_red					: return GL_RED;
-		case format_green				: return GL_GREEN;
-		case format_blue				: return GL_BLUE;
-		case format_alpha				: return GL_ALPHA;
-		case format_rgb					: return GL_RGB;
-		case format_rgba				: return GL_RGBA;
-		case format_luminance			: return GL_LUMINANCE;
-		case format_luminance_alpha		: return GL_LUMINANCE_ALPHA;
-		case format_srgb				: return GL_SRGB;
-		case format_srgb8				: return GL_SRGB8;
-		case format_srgb_alpha			: return GL_SRGB_ALPHA;
-		case format_srgb8_alpha8		: return GL_SRGB8_ALPHA8;
-		case format_sluminance_alpha	: return GL_SLUMINANCE_ALPHA;
-		case format_sluminance8_alpha8	: return GL_SLUMINANCE8_ALPHA8;
-		case format_sluminance			: return GL_SLUMINANCE;
-		case format_sluminance8			: return GL_SLUMINANCE8;
-		case format_depth24_stencil8	: return GL_DEPTH24_STENCIL8;
+			switch (value)
+			{
+			default						: return value;
+			case shader_type_vertex		: return GL_VERTEX_SHADER;
+			case shader_type_fragment	: return GL_FRAGMENT_SHADER;
+			case shader_type_geometry	: return GL_GEOMETRY_SHADER;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_VERTEX_SHADER	: return shader_type_vertex;
+			case GL_FRAGMENT_SHADER	: return shader_type_fragment;
+			case GL_GEOMETRY_SHADER	: return shader_type_geometry;
+			}
 		}
 	}
 
-	constexpr uint32_t _texture_type(uint32_t value) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ToImpl> constexpr uint32_t _attachment(uint32_t value) noexcept
 	{
-		switch (value)
+		if constexpr (ToImpl())
 		{
-		default						: return value;
-		case texture_type_1d		: return GL_TEXTURE_1D;
-		case texture_type_2d		: return GL_TEXTURE_2D;
-		case texture_type_3d		: return GL_TEXTURE_3D;
-		case texture_type_cube_map	: return GL_TEXTURE_CUBE_MAP;
+			switch (value)
+			{
+			default							: return GL_COLOR_ATTACHMENT0 + value;
+			case depth_attchment			: return GL_DEPTH_ATTACHMENT;
+			case stencil_attachment			: return GL_STENCIL_ATTACHMENT;
+			case depth_stencil_attachment	: return GL_DEPTH_STENCIL_ATTACHMENT;
+			}
+		}
+		else
+		{
+			switch (value)
+			{
+			default							: return color_attachment_0 + std::distance(GL_COLOR_ATTACHMENT0, value);
+			case GL_DEPTH_ATTACHMENT		: return depth_attchment;
+			case GL_STENCIL_ATTACHMENT		: return stencil_attachment;
+			case GL_DEPTH_STENCIL_ATTACHMENT: return depth_stencil_attachment;
+			}
 		}
 	}
 
-	constexpr uint32_t _shader_type(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default						: return value;
-		case shader_type_vertex		: return GL_VERTEX_SHADER;
-		case shader_type_fragment	: return GL_FRAGMENT_SHADER;
-		case shader_type_geometry	: return GL_GEOMETRY_SHADER;
-		}
-	}
-
-	constexpr uint32_t _color_attachment(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default					: return value;
-		case color_attachment_0	: return GL_COLOR_ATTACHMENT0;
-		case color_attachment_1	: return GL_COLOR_ATTACHMENT1;
-		case color_attachment_2	: return GL_COLOR_ATTACHMENT2;
-		case color_attachment_3	: return GL_COLOR_ATTACHMENT3;
-		case color_attachment_4	: return GL_COLOR_ATTACHMENT4;
-		case color_attachment_5	: return GL_COLOR_ATTACHMENT5;
-		case color_attachment_6	: return GL_COLOR_ATTACHMENT6;
-		case color_attachment_7	: return GL_COLOR_ATTACHMENT7;
-		case color_attachment_8	: return GL_COLOR_ATTACHMENT8;
-		case color_attachment_9	: return GL_COLOR_ATTACHMENT9;
-		case color_attachment_10: return GL_COLOR_ATTACHMENT10;
-		case color_attachment_11: return GL_COLOR_ATTACHMENT11;
-		case color_attachment_12: return GL_COLOR_ATTACHMENT12;
-		case color_attachment_13: return GL_COLOR_ATTACHMENT13;
-		case color_attachment_14: return GL_COLOR_ATTACHMENT14;
-		case color_attachment_15: return GL_COLOR_ATTACHMENT15;
-		}
-	}
-
-	constexpr uint32_t _draw_buffer(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default				: return value;
-		case draw_buffer_0	: return GL_DRAW_BUFFER0;
-		case draw_buffer_1	: return GL_DRAW_BUFFER1;
-		case draw_buffer_2	: return GL_DRAW_BUFFER2;
-		case draw_buffer_3	: return GL_DRAW_BUFFER3;
-		case draw_buffer_4	: return GL_DRAW_BUFFER4;
-		case draw_buffer_5	: return GL_DRAW_BUFFER5;
-		case draw_buffer_6	: return GL_DRAW_BUFFER6;
-		case draw_buffer_7	: return GL_DRAW_BUFFER7;
-		case draw_buffer_8	: return GL_DRAW_BUFFER8;
-		case draw_buffer_9	: return GL_DRAW_BUFFER9;
-		case draw_buffer_10	: return GL_DRAW_BUFFER10;
-		case draw_buffer_11	: return GL_DRAW_BUFFER11;
-		case draw_buffer_12	: return GL_DRAW_BUFFER12;
-		case draw_buffer_13	: return GL_DRAW_BUFFER13;
-		case draw_buffer_14	: return GL_DRAW_BUFFER14;
-		case draw_buffer_15	: return GL_DRAW_BUFFER15;
-		}
-	}
-
-	constexpr uint32_t _texture_attachment(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default						: return value;
-		case texture_attachment_0	: return GL_TEXTURE0;
-		case texture_attachment_1	: return GL_TEXTURE1;
-		case texture_attachment_2	: return GL_TEXTURE2;
-		case texture_attachment_3	: return GL_TEXTURE3;
-		case texture_attachment_4	: return GL_TEXTURE4;
-		case texture_attachment_5	: return GL_TEXTURE5;
-		case texture_attachment_6	: return GL_TEXTURE6;
-		case texture_attachment_7	: return GL_TEXTURE7;
-		case texture_attachment_8	: return GL_TEXTURE8;
-		case texture_attachment_9	: return GL_TEXTURE9;
-		case texture_attachment_10	: return GL_TEXTURE10;
-		case texture_attachment_11	: return GL_TEXTURE11;
-		case texture_attachment_12	: return GL_TEXTURE12;
-		case texture_attachment_13	: return GL_TEXTURE13;
-		case texture_attachment_14	: return GL_TEXTURE14;
-		case texture_attachment_15	: return GL_TEXTURE15;
-		case texture_attachment_16	: return GL_TEXTURE16;
-		case texture_attachment_17	: return GL_TEXTURE17;
-		case texture_attachment_18	: return GL_TEXTURE18;
-		case texture_attachment_19	: return GL_TEXTURE19;
-		case texture_attachment_20	: return GL_TEXTURE20;
-		case texture_attachment_21	: return GL_TEXTURE21;
-		case texture_attachment_22	: return GL_TEXTURE22;
-		case texture_attachment_23	: return GL_TEXTURE23;
-		case texture_attachment_24	: return GL_TEXTURE24;
-		case texture_attachment_25	: return GL_TEXTURE25;
-		case texture_attachment_26	: return GL_TEXTURE26;
-		case texture_attachment_27	: return GL_TEXTURE27;
-		case texture_attachment_28	: return GL_TEXTURE28;
-		case texture_attachment_29	: return GL_TEXTURE29;
-		case texture_attachment_30	: return GL_TEXTURE30;
-		case texture_attachment_31	: return GL_TEXTURE31;
-		}
-	}
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// opengl buffers
-namespace ml
+// opengl primitives
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex array
-	struct ML_RENDERER_API opengl_vertex_array final : vertex_array
+	class ML_RENDERER_API opengl_vertex_array final : public vertex_array
 	{
+	public:
 		using self_type = opengl_vertex_array;
 
-		opengl_vertex_array() { glCheck(glGenVertexArrays(1, &m_handle)); }
+		opengl_vertex_array();
 
-		~opengl_vertex_array() { glCheck(glDeleteVertexArrays(1, &m_handle)); }
+		~opengl_vertex_array();
 
-		opengl_vertex_array(uint32_t mode) : self_type{}
-		{
-			m_mode = mode;
-		}
+		opengl_vertex_array(uint32_t mode);
 
-		static void bind(opengl_vertex_array const * value)
-		{
-			glCheck(glBindVertexArray(value ? value->m_handle : NULL));
-		}
+		static void bind(opengl_vertex_array const * value);
 
-		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
 
-		uint32_t get_mode() const noexcept override { return m_mode; }
+		inline uint32_t get_mode() const override { return m_mode; }
 
 	private:
-		uint32_t m_handle	{}						; // handle
-		uint32_t m_mode		{ GL_TRIANGLES }		; // primitive type
+		uint32_t m_handle;
+		uint32_t m_mode;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex buffer
-	struct ML_RENDERER_API opengl_vertex_buffer final : vertex_buffer
+	class ML_RENDERER_API opengl_vertex_buffer final : public vertex_buffer
 	{
+	public:
 		using self_type = opengl_vertex_buffer;
 
-		opengl_vertex_buffer() { glCheck(glGenBuffers(1, &m_handle)); }
+		opengl_vertex_buffer();
 
-		~opengl_vertex_buffer() { glCheck(glDeleteBuffers(1, &m_handle)); }
+		~opengl_vertex_buffer();
 
-		opengl_vertex_buffer(float_t const * vertices, uint32_t size) : self_type{}
-		{
-			this->set_data(vertices, size);
-		}
+		opengl_vertex_buffer(float_t const * vertices, uint32_t size);
 
-		opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset) : self_type{}
-		{
-			this->set_sub_data(vertices, size, offset);
-		}
+		opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset);
 
-		static void bind(opengl_vertex_buffer const * value)
-		{
-			glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
-		}
+		static void bind(opengl_vertex_buffer const * value);
 
-		void set_data(float_t const * vertices, uint32_t size) override
-		{
-			glCheck(glBufferData(GL_ARRAY_BUFFER, (m_size = size), vertices, GL_STATIC_DRAW));
-		}
+		void set_data(float_t const * vertices, uint32_t size) override;
 
-		void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) override
-		{
-			glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, (m_size = size), vertices));
-		}
+		void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) override;
 
-		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
 
-		uint32_t get_size() const noexcept override { return m_size; }
+		inline uint32_t get_size() const override { return m_size; }
 
 	private:
-		uint32_t m_handle	{}; // handle
-		uint32_t m_size		{}; // size
+		uint32_t m_handle;
+		uint32_t m_size;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl index buffer
-	struct ML_RENDERER_API opengl_index_buffer final : index_buffer
+	class ML_RENDERER_API opengl_index_buffer final : public index_buffer
 	{
+	public:
 		using self_type = opengl_index_buffer;
 
-		opengl_index_buffer() { glCheck(glGenBuffers(1, &m_handle)); }
+		opengl_index_buffer();
 
-		~opengl_index_buffer() { glCheck(glDeleteBuffers(1, &m_handle)); }
+		~opengl_index_buffer();
 
-		opengl_index_buffer(uint32_t const * indices, uint32_t count) : self_type{}
-		{
-			this->set_data(indices, count);
-		}
+		opengl_index_buffer(uint32_t const * indices, uint32_t count);
 
-		static void bind(opengl_index_buffer const * value)
-		{
-			glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
-		}
+		static void bind(opengl_index_buffer const * value);
 
-		void set_data(uint32_t const * indices, uint32_t count) override
-		{
-			glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
-		}
+		void set_data(uint32_t const * indices, uint32_t count) override;
 
-		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
 
-		uint32_t get_count() const noexcept override { return m_count; }
+		inline uint32_t get_count() const override;
 
 	private:
-		uint32_t m_handle	{}; // handle
-		uint32_t m_count	{}; // count
+		uint32_t m_handle;
+		uint32_t m_count;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl frame buffer
-	struct ML_RENDERER_API opengl_frame_buffer final : frame_buffer
+	class ML_RENDERER_API opengl_frame_buffer final : public frame_buffer
 	{
+	public:
 		using self_type = opengl_frame_buffer;
 
-		opengl_frame_buffer() { glCheck(glGenFramebuffers(1, &m_handle)); }
+		opengl_frame_buffer();
 
-		~opengl_frame_buffer() { glCheck(glDeleteFramebuffers(1, &m_handle)); }
+		~opengl_frame_buffer();
 
-		static void bind(opengl_frame_buffer const * value)
-		{
-			glCheck(glBindFramebuffer(GL_FRAMEBUFFER, value ? value->m_handle : NULL));
-		}
+		static void bind(opengl_frame_buffer const * value);
 
-		void set_render_buffer(void const * value, uint32_t attachment) override
-		{
-			glCheck(glFramebufferRenderbuffer(
-				GL_FRAMEBUFFER, attachment,
-				GL_RENDERBUFFER, *reinterpret_cast<uint32_t const *>(value)));
-		}
+		void set_render_buffer(void const * value, uint32_t attachment) override;
 
-		void set_texture2d(void const * value, uint32_t attachment, uint32_t level) override
-		{
-			glCheck(glFramebufferTexture2D(
-				GL_FRAMEBUFFER, attachment,
-				GL_TEXTURE_2D, *reinterpret_cast<uint32_t const *>(value), level));
-		}
+		void set_texture2d(void const * value, uint32_t attachment, uint32_t level) override;
 
-		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
-		uint32_t m_handle{}; // handle
+		uint32_t m_handle;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl render buffer
-	struct ML_RENDERER_API opengl_render_buffer final : render_buffer
+	class ML_RENDERER_API opengl_render_buffer final : public render_buffer
 	{
+	public:
 		using self_type = opengl_render_buffer;
 
-		opengl_render_buffer() { glCheck(glGenRenderbuffers(1, &m_handle)); }
+		opengl_render_buffer();
 
-		~opengl_render_buffer() { glCheck(glDeleteRenderbuffers(1, &m_handle)); }
+		~opengl_render_buffer();
 
-		opengl_render_buffer(uint32_t format, int32_t width, int32_t height) : self_type{}
-		{
-			this->set_storage(format, width, height);
-		}
+		opengl_render_buffer(uint32_t format, vec2i const & size);
 
-		static void bind(opengl_render_buffer const * value)
-		{
-			glCheck(glBindRenderbuffer(GL_RENDERBUFFER, value ? value->m_handle : NULL));
-		}
+		static void bind(opengl_render_buffer const * value);
 
-		void set_storage(uint32_t format, int32_t width, int32_t height) override
-		{
-			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, gl::_format(format), width, height));
-		}
+		void set_storage(uint32_t format, vec2i const & size) override;
 
-		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
-		uint32_t m_handle{}; // handle
+		uint32_t m_handle;
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// opengl shader
+	class ML_RENDERER_API opengl_shader final : public shader_object
+	{
+	public:
+		opengl_shader();
+
+		~opengl_shader();
+
+		static void bind(opengl_shader const * value);
+
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
+
+	private:
+		uint32_t m_handle;
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// opengl texture
+	class ML_RENDERER_API opengl_texture final : public texture_object
+	{
+	public:
+		opengl_texture();
+
+		~opengl_texture();
+
+		static void bind(opengl_texture const * value);
+
+		inline void * get_handle() const override { return ML_addressof(m_handle); }
+
+		inline uint32_t get_type() const override { return 0; }
+
+	private:
+		uint32_t m_handle;
+		uint32_t m_type;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -601,17 +747,18 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// opengl render api
-namespace ml
+// opengl api
+namespace ml::gl
 {
-	struct ML_RENDERER_API opengl_render_api final : render_api
+	class ML_RENDERER_API opengl_render_api final : public render_api
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		~opengl_render_api() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+		
 		bool initialize() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -636,52 +783,70 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gl::alpha_function get_alpha_function() const override;
+		bool get_alpha_enabled() const override;
+
+		alpha_function get_alpha_function() const override;
 		
+		bool get_blend_enabled() const override;
+
 		color get_blend_color() const override;
 		
-		gl::blend_equation	get_blend_equation() const override;
+		blend_equation get_blend_equation() const override;
 		
-		gl::blend_function get_blend_function() const override;
+		blend_function get_blend_function() const override;
 		
 		color get_clear_color() const override;
+
+		bool get_cull_enabled() const override;
+
+		uint32_t get_cull_face() const override;
+
+		uint32_t get_cull_order() const override;
+
+		bool get_depth_enabled() const override;
 		
 		uint32_t get_depth_function() const override;
 		
 		bool get_depth_mask() const override;
 
-		gl::depth_range get_depth_range() const override;
-		
-		bool get_enabled(uint32_t capability) const override;
-		
-		uint32_t get_front_face() const override;
+		depth_range get_depth_range() const override;
+
+		bool get_multisample_enabled() const override;
 		
 		int_rect get_viewport() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_alpha_function(gl::alpha_function const & value) override;
+		void set_alpha_enabled(bool enabled) override;
+
+		void set_alpha_function(alpha_function const & value) override;
 		
 		void set_blend_color(color const & value) override;
+
+		void set_blend_enabled(bool enabled) override;
 		
-		void set_blend_equation(gl::blend_equation const & value) override;
+		void set_blend_equation(blend_equation const & value) override;
 		
-		void set_blend_function(gl::blend_function const & value) override;
+		void set_blend_function(blend_function const & value) override;
 		
 		void set_clear_color(color const & value) override;
 		
-		void set_cull_mode(uint32_t facet) override;
+		void set_cull_enabled(bool enabled) override;
+
+		void set_cull_facet(uint32_t facet) override;
+
+		void set_cull_order(uint32_t order) override;
+
+		void set_depth_enabled(bool enabled) override;
 		
 		void set_depth_function(uint32_t predicate) override;
 		
 		void set_depth_mask(bool enabled) override;
 
-		void set_depth_range(gl::depth_range const & value) override;
-		
-		void set_enabled(uint32_t capability, bool enabled) override;
-		
-		void set_front_face(uint32_t front_face) override;
-		
+		void set_depth_range(depth_range const & value) override;
+
+		void set_multisample_enabled(bool enabled) override;
+
 		void set_viewport(int_rect const & bounds) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -690,7 +855,7 @@ namespace ml
 		
 		void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) override;
 		
-		void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) override;
+		void draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, void const * indices) override;
 		
 		void flush() override;
 

@@ -162,7 +162,7 @@ namespace ml
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_scripting	{ "scripting##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
+			m_gui_renderer	{ "renderer##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
 
 		vec2 m_display_size{};
 
@@ -427,9 +427,9 @@ namespace ml
 			if (render_texture & rt{ m_pipeline[0] })
 			{
 				ML_bind_scope(rt);
-				render_command::set_clear_color(colors::magenta)();
-				render_command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
-				render_command::set_viewport(rt.bounds())();
+				gl::command::set_clear_color(colors::magenta)();
+				gl::command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
+				gl::command::set_viewport(rt.bounds())();
 				m_ecs.update_system<x_draw_renderers>(rt);
 			}
 		}
@@ -473,8 +473,8 @@ namespace ml
 				d.dock(m_gui_profiler.title		, d[left_dn2]);
 				d.dock(m_gui_memory.title		, d[right]);
 				d.dock(m_gui_docs.title			, d[right]);
-				d.dock(m_gui_scripting.title	, d[right]);
 				d.dock(m_gui_nodes.title		, d[right]);
+				d.dock(m_gui_renderer.title		, d[right]);
 
 				// end builder
 				d.end_builder(root);
@@ -542,10 +542,11 @@ namespace ml
 				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
 				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
 				m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
-				m_gui_scripting	.render(&demo::show_scripting_gui	, this); // SCRIPTING
+				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // SCRIPTING
 				m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
 				m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
 				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
 			}
 		}
 
@@ -1135,14 +1136,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_scripting_gui()
+		void show_renderer_gui()
 		{
+			auto const & api{ gl::render_context::api() };
+
 			if (ImGui::BeginMenuBar())
 			{
 				ImGui::EndMenuBar();
 			}
 
-			// WIP
+
+
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

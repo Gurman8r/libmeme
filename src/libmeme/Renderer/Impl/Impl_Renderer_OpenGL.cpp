@@ -2,28 +2,240 @@
 
 #include "Impl_Renderer_OpenGL.hpp"
 
-namespace ml
+// opengl resources
+namespace ml::gl
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_vertex_array::opengl_vertex_array()
+		: m_handle{}, m_mode{ primitive_triangles }
+	{
+		glCheck(glGenVertexArrays(1, &m_handle));
+	}
+
+	opengl_vertex_array::~opengl_vertex_array()
+	{
+		glCheck(glDeleteVertexArrays(1, &m_handle));
+	}
+
+	opengl_vertex_array::opengl_vertex_array(uint32_t mode)
+		: self_type{}
+	{
+		m_mode = mode;
+	}
+
+	void opengl_vertex_array::bind(opengl_vertex_array const * value)
+	{
+		glCheck(glBindVertexArray(value ? value->m_handle : NULL));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_vertex_buffer::opengl_vertex_buffer()
+		: m_handle{}, m_size{}
+	{
+		glCheck(glGenBuffers(1, &m_handle));
+	}
+
+	opengl_vertex_buffer::~opengl_vertex_buffer()
+	{
+		glCheck(glDeleteBuffers(1, &m_handle));
+	}
+
+	opengl_vertex_buffer::opengl_vertex_buffer(float_t const * vertices, uint32_t size)
+		: self_type{}
+	{
+		this->set_data(vertices, size);
+	}
+
+	opengl_vertex_buffer::opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset)
+		: self_type{}
+	{
+		this->set_sub_data(vertices, size, offset);
+	}
+
+	void opengl_vertex_buffer::bind(opengl_vertex_buffer const * value)
+	{
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
+	}
+
+	void opengl_vertex_buffer::set_data(float_t const * vertices, uint32_t size)
+	{
+		glCheck(glBufferData(GL_ARRAY_BUFFER, (m_size = size), vertices, GL_STATIC_DRAW));
+	}
+
+	void opengl_vertex_buffer::set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset)
+	{
+		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, (m_size = size), vertices));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_index_buffer::opengl_index_buffer()
+		: m_handle{}, m_count{}
+	{
+		glCheck(glGenBuffers(1, &m_handle));
+	}
+
+	opengl_index_buffer::~opengl_index_buffer()
+	{
+		glCheck(glDeleteBuffers(1, &m_handle));
+	}
+
+	opengl_index_buffer::opengl_index_buffer(uint32_t const * indices, uint32_t count)
+		: self_type{}
+	{
+		this->set_data(indices, count);
+	}
+
+	void opengl_index_buffer::bind(opengl_index_buffer const * value)
+	{
+		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
+	}
+
+	uint32_t opengl_index_buffer::get_count() const
+	{
+		return m_count;
+	}
+
+	void opengl_index_buffer::set_data(uint32_t const * indices, uint32_t count)
+	{
+		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_frame_buffer::opengl_frame_buffer::opengl_frame_buffer()
+		: m_handle{}
+	{
+		glCheck(glGenFramebuffers(1, &m_handle));
+	}
+
+	opengl_frame_buffer::~opengl_frame_buffer()
+	{
+		glCheck(glDeleteFramebuffers(1, &m_handle));
+	}
+
+	void opengl_frame_buffer::bind(opengl_frame_buffer const * value)
+	{
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, value ? value->m_handle : NULL));
+	}
+
+	void opengl_frame_buffer::set_render_buffer(void const * value, uint32_t attachment)
+	{
+		glCheck(glFramebufferRenderbuffer(
+			GL_FRAMEBUFFER, (GL_COLOR_ATTACHMENT0 + attachment),
+			GL_RENDERBUFFER, (uint32_t)(intptr_t)value));
+	}
+
+	void opengl_frame_buffer::set_texture2d(void const * value, uint32_t attachment, uint32_t level)
+	{
+		glCheck(glFramebufferTexture2D(
+			GL_FRAMEBUFFER, (GL_COLOR_ATTACHMENT0 + attachment),
+			GL_TEXTURE_2D, (uint32_t)(intptr_t)value, level));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_render_buffer::opengl_render_buffer()
+		: m_handle{}
+	{
+		glCheck(glGenRenderbuffers(1, &m_handle));
+	}
+
+	opengl_render_buffer::~opengl_render_buffer()
+	{
+		glCheck(glDeleteRenderbuffers(1, &m_handle));
+	}
+
+	opengl_render_buffer::opengl_render_buffer(uint32_t format, vec2i const & size)
+		: self_type{}
+	{
+		this->set_storage(format, size);
+	}
+
+	void opengl_render_buffer::bind(opengl_render_buffer const * value)
+	{
+		glCheck(glBindRenderbuffer(GL_RENDERBUFFER, value ? value->m_handle : NULL));
+	}
+
+	void opengl_render_buffer::set_storage(uint32_t format, vec2i const & size)
+	{
+		glCheck(glRenderbufferStorage(GL_RENDERBUFFER, _format<to_impl>(format), size[0], size[1]));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_shader::opengl_shader()
+		: m_handle{}
+	{
+#ifdef GL_ARB_shader_objects
+		glCheck(m_handle = glCreateProgramObjectARB());
+#else
+		glCheck(m_handle = glCreateProgram());
+#endif
+	}
+
+	opengl_shader::~opengl_shader()
+	{
+#ifdef GL_ARB_shader_objects
+		glCheck(glDeleteObjectARB(m_handle));
+#else
+		glCheck(glDeleteShader(m_handle));
+#endif
+	}
+
+	void opengl_shader::bind(opengl_shader const * value)
+	{
+#ifdef GL_ARB_shader_objects
+		glCheck(glUseProgramObjectARB(value ? (uint32_t)(intptr_t)value->get_handle() : NULL));
+#else
+		glCheck(glUseProgram(value ? (uint32_t)(intptr_t)value->get_handle() : NULL));
+#endif
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_texture::opengl_texture()
+		: m_handle{}, m_type{}
+	{
+	}
+
+	opengl_texture::~opengl_texture()
+	{
+	}
+
+	void opengl_texture::bind(opengl_texture const * value)
+	{
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// opengl api
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool opengl_render_api::initialize()
 	{
-		static bool temp{ std::invoke([]() -> bool
+		static bool temp{};
+		static ML_scope // once
 		{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
 			glewExperimental = true;
-			return (GLEW_OK == glewInit());
+			temp = (GLEW_OK == glewInit());
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-			return gl3wInit();
+			temp = gl3wInit();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-			return gladLoadGL();
+			temp = gladLoadGL();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-			return false;
+			temp = false;
 #endif
-		}) };
+		};
 		return temp;
 	}
 
@@ -31,18 +243,7 @@ namespace ml
 
 	uint32_t opengl_render_api::get_error() const
 	{
-		switch (glGetError())
-		{
-		case GL_INVALID_ENUM					: return gl::error_type_invalid_enum;
-		case GL_INVALID_VALUE					: return gl::error_type_invalid_value;
-		case GL_INVALID_OPERATION				: return gl::error_type_invalid_operation;
-		case GL_STACK_OVERFLOW					: return gl::error_type_stack_overflow;
-		case GL_STACK_UNDERFLOW					: return gl::error_type_stack_underflow;
-		case GL_OUT_OF_MEMORY					: return gl::error_type_out_of_memory;
-		case GL_INVALID_FRAMEBUFFER_OPERATION	: return gl::error_type_invalid_framebuffer_operation;
-		case GL_NO_ERROR						:
-		default									: return gl::error_type_none;
-		}
+		return _error<to_user>(glGetError());
 	}
 
 	cstring opengl_render_api::get_extensions() const
@@ -139,7 +340,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gl::alpha_function opengl_render_api::get_alpha_function() const
+	bool opengl_render_api::get_alpha_enabled() const
+	{
+		return glIsEnabled(GL_ALPHA_TEST);
+	}
+
+	alpha_function opengl_render_api::get_alpha_function() const
 	{
 		return
 		{
@@ -147,18 +353,7 @@ namespace ml
 			{
 				uint32_t func{};
 				glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&func));
-				switch (func)
-				{
-				default			: return func;
-				case GL_NEVER	: return gl::predicate_never;
-				case GL_LESS	: return gl::predicate_less;
-				case GL_EQUAL	: return gl::predicate_equal;
-				case GL_LEQUAL	: return gl::predicate_lequal;
-				case GL_GREATER	: return gl::predicate_greater;
-				case GL_NOTEQUAL: return gl::predicate_notequal;
-				case GL_GEQUAL	: return gl::predicate_gequal;
-				case GL_ALWAYS	: return gl::predicate_always;
-				}
+				return _predicate<to_user>(func);
 			}),
 			std::invoke([]() -> float_t
 			{
@@ -169,6 +364,11 @@ namespace ml
 		};
 	}
 
+	bool opengl_render_api::get_blend_enabled() const
+	{
+		return glIsEnabled(GL_BLEND);
+	}
+
 	color opengl_render_api::get_blend_color() const
 	{
 		color temp{};
@@ -176,50 +376,31 @@ namespace ml
 		return temp;
 	}
 
-	gl::blend_equation opengl_render_api::get_blend_equation() const
+	blend_equation opengl_render_api::get_blend_equation() const
 	{
-		auto helper = [](auto value) -> uint32_t
+		auto helper = [](auto value) noexcept -> uint32_t
 		{
 			uint32_t temp{};
-			switch (glGetIntegerv(value, (int32_t *)&temp); temp)
-			{
-			default							: return temp;
-			case GL_FUNC_ADD				: return gl::function_add;
-			case GL_FUNC_SUBTRACT			: return gl::function_subtract;
-			case GL_FUNC_REVERSE_SUBTRACT	: return gl::function_reverse_subtract;
-			case GL_MIN						: return gl::function_min;
-			case GL_MAX						: return gl::function_max;
-			}
+			glCheck(glGetIntegerv(value, (int32_t *)&temp));
+			return _function<to_user>(temp);
 		};
 		return {
-			helper(GL_BLEND_EQUATION_RGB), helper(GL_BLEND_EQUATION_ALPHA)
+			helper(GL_BLEND_EQUATION_RGB),
+			helper(GL_BLEND_EQUATION_ALPHA)
 		};
 	}
 
-	gl::blend_function opengl_render_api::get_blend_function() const
+	blend_function opengl_render_api::get_blend_function() const
 	{
-		auto helper = [](auto value) -> uint32_t
+		auto helper = [](auto value) noexcept -> uint32_t
 		{
 			uint32_t temp{};
-			switch (glGetIntegerv(value, (int32_t *)&temp); temp)
-			{
-			default						: return temp;
-			case GL_ZERO				: return gl::factor_zero;
-			case GL_ONE					: return gl::factor_one;
-			case GL_SRC_COLOR			: return gl::factor_src_color;
-			case GL_ONE_MINUS_SRC_COLOR	: return gl::factor_one_minus_src_color;
-			case GL_SRC_ALPHA			: return gl::factor_src_alpha;
-			case GL_ONE_MINUS_SRC_ALPHA	: return gl::factor_one_minus_src_alpha;
-			case GL_DST_ALPHA			: return gl::factor_dst_alpha;
-			case GL_ONE_MINUS_DST_ALPHA	: return gl::factor_one_minus_dst_alpha;
-			case GL_DST_COLOR			: return gl::factor_dst_color;
-			case GL_ONE_MINUS_DST_COLOR	: return gl::factor_one_minus_dst_color;
-			case GL_SRC_ALPHA_SATURATE	: return gl::factor_src_alpha_saturate;
-			}
+			glCheck(glGetIntegerv(value, (int32_t *)&temp));
+			return _factor<to_user>(temp);
 		};
 		return {
 			helper(GL_BLEND_SRC_RGB), helper(GL_BLEND_SRC_ALPHA),
-			helper(GL_BLEND_DST_RGB), helper(GL_BLEND_DST_ALPHA),
+			helper(GL_BLEND_DST_RGB), helper(GL_BLEND_DST_ALPHA)
 		};
 	}
 
@@ -230,51 +411,52 @@ namespace ml
 		return temp;
 	}
 
+	bool opengl_render_api::get_cull_enabled() const
+	{
+		return glIsEnabled(GL_CULL_FACE);
+	}
+
+	uint32_t opengl_render_api::get_cull_face() const
+	{
+		uint32_t temp{};
+		glCheck(glGetIntegerv(GL_CULL_FACE_MODE, (int32_t *)&temp));
+		return _facet<to_user>(temp);
+	}
+
+	uint32_t opengl_render_api::get_cull_order() const
+	{
+		uint32_t temp{};
+		glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp));
+		return _cull_order<to_user>(temp);
+	}
+
+	bool opengl_render_api::get_depth_enabled() const
+	{
+		return glIsEnabled(GL_DEPTH_TEST);
+	}
+
 	uint32_t opengl_render_api::get_depth_function() const
 	{
 		uint32_t temp{};
-		switch (glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp); temp)
-		{
-		default			: return temp;
-		case GL_NEVER	: return gl::predicate_never;
-		case GL_LESS	: return gl::predicate_less;
-		case GL_EQUAL	: return gl::predicate_equal;
-		case GL_LEQUAL	: return gl::predicate_lequal;
-		case GL_GREATER	: return gl::predicate_greater;
-		case GL_NOTEQUAL: return gl::predicate_notequal;
-		case GL_GEQUAL	: return gl::predicate_gequal;
-		case GL_ALWAYS	: return gl::predicate_always;
-		}
+		glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp));
+		return _predicate<to_user>(temp);
 	}
 
 	bool opengl_render_api::get_depth_mask() const
 	{
-		uint8_t temp;
-		glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, &temp));
-		return temp;
+		return glIsEnabled(GL_DEPTH_WRITEMASK);
 	}
 
-	gl::depth_range opengl_render_api::get_depth_range() const
+	depth_range opengl_render_api::get_depth_range() const
 	{
-		gl::depth_range temp{};
+		depth_range temp{};
 		glCheck(glGetFloatv(GL_DEPTH_RANGE, &temp.nearVal));
 		return temp;
 	}
 
-	bool opengl_render_api::get_enabled(uint32_t capability) const
+	bool opengl_render_api::get_multisample_enabled() const
 	{
-		return glIsEnabled(gl::_capability(capability));
-	}
-
-	uint32_t opengl_render_api::get_front_face() const
-	{
-		uint32_t temp{};
-		switch (glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp); temp)
-		{
-		default		: return temp;
-		case GL_CW	: return gl::front_face_cw;
-		case GL_CCW	: return gl::front_face_ccw;
-		}
+		return glIsEnabled(GL_MULTISAMPLE);
 	}
 
 	int_rect opengl_render_api::get_viewport() const
@@ -286,9 +468,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_render_api::set_alpha_function(gl::alpha_function const & value)
+	void opengl_render_api::set_alpha_enabled(bool enabled)
 	{
-		glCheck(glAlphaFunc(gl::_predicate(value.func), value.ref));
+		glCheck((enabled ? &glEnable : &glDisable)(GL_ALPHA_TEST));
+	}
+
+	void opengl_render_api::set_alpha_function(alpha_function const & value)
+	{
+		glCheck(glAlphaFunc(_predicate<to_impl>(value.func), value.ref));
 	}
 
 	void opengl_render_api::set_blend_color(color const & value)
@@ -296,18 +483,25 @@ namespace ml
 		glCheck(glBlendColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_render_api::set_blend_equation(gl::blend_equation const & value)
+	void opengl_render_api::set_blend_enabled(bool enabled)
 	{
-		glCheck(glBlendEquationSeparate(
-			gl::_function(value.modeRGB),
-			gl::_function(value.modeAlpha)));
+		glCheck((enabled ? &glEnable : &glDisable)(GL_BLEND));
 	}
 
-	void opengl_render_api::set_blend_function(gl::blend_function const & value)
+	void opengl_render_api::set_blend_equation(blend_equation const & value)
+	{
+		glCheck(glBlendEquationSeparate(
+			_function<to_impl>(value.modeRGB),
+			_function<to_impl>(value.modeAlpha)));
+	}
+
+	void opengl_render_api::set_blend_function(blend_function const & value)
 	{
 		glCheck(glBlendFuncSeparate(
-			gl::_factor(value.sfactorRGB), gl::_factor(value.dfactorRGB),
-			gl::_factor(value.sfactorAlpha), gl::_factor(value.dfactorAlpha)));
+			_factor<to_impl>(value.sfactorRGB),
+			_factor<to_impl>(value.dfactorRGB),
+			_factor<to_impl>(value.sfactorAlpha),
+			_factor<to_impl>(value.dfactorAlpha)));
 	}
 
 	void opengl_render_api::set_clear_color(color const & value)
@@ -315,14 +509,29 @@ namespace ml
 		glCheck(glClearColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_render_api::set_cull_mode(uint32_t facet)
+	void opengl_render_api::set_cull_enabled(bool enabled)
 	{
-		glCheck(glCullFace(gl::_facet(facet)));
+		glCheck((enabled ? &glEnable : &glDisable)(GL_CULL_FACE));
+	}
+
+	void opengl_render_api::set_cull_facet(uint32_t facet)
+	{
+		glCheck(glCullFace(_facet<to_impl>(facet)));
+	}
+
+	void opengl_render_api::set_cull_order(uint32_t order)
+	{
+		glCheck(glFrontFace(_cull_order<to_impl>(order)));
+	}
+
+	void opengl_render_api::set_depth_enabled(bool enabled)
+	{
+		glCheck((enabled ? &glEnable : &glDisable)(GL_DEPTH_TEST));
 	}
 
 	void opengl_render_api::set_depth_function(uint32_t predicate)
 	{
-		glCheck(glDepthFunc(gl::_predicate(predicate)));
+		glCheck(glDepthFunc(_predicate<to_impl>(predicate)));
 	}
 
 	void opengl_render_api::set_depth_mask(bool enabled)
@@ -330,19 +539,14 @@ namespace ml
 		glCheck(glDepthMask(enabled));
 	}
 
-	void opengl_render_api::set_depth_range(gl::depth_range const & value)
+	void opengl_render_api::set_depth_range(depth_range const & value)
 	{
 		glCheck(glDepthRangef(value.nearVal, value.farVal));
 	}
 
-	void opengl_render_api::set_enabled(uint32_t capability, bool enabled)
+	void opengl_render_api::set_multisample_enabled(bool enabled)
 	{
-		glCheck((enabled ? &glEnable : &glDisable)(gl::_capability(capability)));
-	}
-
-	void opengl_render_api::set_front_face(uint32_t front_face)
-	{
-		glCheck(glFrontFace(gl::_front_face(front_face)));
+		glCheck((enabled ? &glEnable : &glDisable)(GL_MULTISAMPLE));
 	}
 
 	void opengl_render_api::set_viewport(int_rect const & bounds)
@@ -354,22 +558,17 @@ namespace ml
 
 	void opengl_render_api::clear(uint32_t flags)
 	{
-		uint32_t temp{};
-		ML_flag_map(temp, flags, GL_ACCUM_BUFFER_BIT	, gl::clear_flags_accum);
-		ML_flag_map(temp, flags, GL_COLOR_BUFFER_BIT	, gl::clear_flags_color);
-		ML_flag_map(temp, flags, GL_DEPTH_BUFFER_BIT	, gl::clear_flags_depth);
-		ML_flag_map(temp, flags, GL_STENCIL_BUFFER_BIT	, gl::clear_flags_stencil);
-		glCheck(glClear(temp));
+		glCheck(glClear(_clear_flags<to_impl>(flags)));
 	}
 
 	void opengl_render_api::draw_arrays(uint32_t primitive, uint32_t first, uint32_t count)
 	{
-		glCheck(glDrawArrays(gl::_primitive(primitive), first, count));
+		glCheck(glDrawArrays(_primitive<to_impl>(primitive), first, count));
 	}
 
-	void opengl_render_api::draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices)
+	void opengl_render_api::draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, void const * indices)
 	{
-		glCheck(glDrawElements(gl::_primitive(primitive), first, gl::_type(type), indices));
+		glCheck(glDrawElements(_primitive<to_impl>(primitive), first, _type<to_impl>(index_type), indices));
 	}
 
 	void opengl_render_api::flush()

@@ -21,8 +21,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// global event system
-	struct ML_CORE_API event_system final : singleton<event_system>
+	class ML_CORE_API event_system final : public singleton<event_system>
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static bool add_listener(hash_t id, event_listener * value) noexcept

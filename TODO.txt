@@ -2,7 +2,4 @@ rework graphics buffers
 models are upside-down
 make models/meshes DO
 make materials/uniforms DO
-loop system?
-sequences?
-
-need to make function that converts renderer enums to their backend counterparts.
+loop system? sequences?

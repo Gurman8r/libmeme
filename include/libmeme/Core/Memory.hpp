@@ -118,8 +118,9 @@ namespace ml::util
 namespace ml
 {
 	// global memory manager
-	struct ML_CORE_API memory_manager final : singleton<memory_manager>
+	class ML_CORE_API memory_manager final : public singleton<memory_manager>
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
