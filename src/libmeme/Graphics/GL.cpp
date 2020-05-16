@@ -606,7 +606,7 @@ namespace ml
 	bool GL::framebuffersAvailable()
 	{
 		static bool temp{};
-#if defined(GL_EXT_framebuffer_object) \
+#if defined(GL_EXT_frame_buffer_object) \
 || defined(GL_EXT_framebuffer_blit)
 		static ML_scope{ temp = true; };
 #endif

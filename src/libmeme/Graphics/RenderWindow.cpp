@@ -27,29 +27,29 @@ namespace ml
 		m_settings.context.minor = api->get_minor_version();
 
 		// run setup commands
-		for (auto const & cmd : std::initializer_list<gl::render_command>
+		for (auto const & cmd : std::initializer_list<gl::command>
 		{
-			gl::command::set_alpha_enabled(true),
-			gl::command::set_alpha_function({ gl::predicate_greater, 0.001f }),
+			gl::render_command::set_alpha_enabled(true),
+			gl::render_command::set_alpha_function({ gl::predicate_greater, 0.001f }),
 			
-			gl::command::set_blend_enabled(true),
-			gl::command::set_blend_color(colors::white),
-			gl::command::set_blend_equation({ gl::function_add }),
-			gl::command::set_blend_function({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
+			gl::render_command::set_blend_enabled(true),
+			gl::render_command::set_blend_color(colors::white),
+			gl::render_command::set_blend_equation({ gl::function_add }),
+			gl::render_command::set_blend_function({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
 			
-			gl::command::set_cull_enabled(true),
-			gl::command::set_cull_facet(gl::facet_back),
-			gl::command::set_cull_order(gl::cull_order_ccw),
+			gl::render_command::set_cull_enabled(true),
+			gl::render_command::set_cull_face(gl::facet_back),
+			gl::render_command::set_cull_order(gl::cull_order_ccw),
 
-			gl::command::set_depth_enabled(true),
-			gl::command::set_depth_function(gl::predicate_less),
-			gl::command::set_depth_mask(true),
-			gl::command::set_depth_range({ 0.f, 1.f }),
+			gl::render_command::set_depth_enabled(true),
+			gl::render_command::set_depth_function(gl::predicate_less),
+			gl::render_command::set_depth_mask(true),
+			gl::render_command::set_depth_range({ 0.f, 1.f }),
 
-			gl::command::set_multisample_enabled(ws.context.multisample),
+			gl::render_command::set_multisample_enabled(ws.context.multisample),
 			//gl::command::set_enabled(gl::capability_framebuffer_srgb, ws.context.srgb_capable),
 
-			gl::command::flush(),
+			gl::render_command::flush(),
 		})
 		{
 			std::invoke(cmd);

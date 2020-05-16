@@ -47,11 +47,11 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
-				for (auto const & cmd : std::initializer_list<gl::render_command>
+				for (auto const & cmd : std::initializer_list<gl::command>
 				{
-					gl::command::set_clear_color(colors::black),
-					gl::command::clear(gl::clear_flags_color | gl::clear_flags_depth),
-					gl::command::set_viewport(m_window.get_framebuffer_size()),
+					gl::render_command::set_clear_color(colors::black),
+					gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
+					gl::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
 					std::invoke(cmd);

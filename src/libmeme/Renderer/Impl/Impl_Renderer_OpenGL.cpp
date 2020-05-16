@@ -2,13 +2,13 @@
 
 #include "Impl_Renderer_OpenGL.hpp"
 
-// opengl resources
+// opengl objects
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertex_array::opengl_vertex_array()
-		: m_handle{}, m_mode{ primitive_triangles }
+	opengl_vertex_array::opengl_vertex_array(uint32_t mode)
+		: m_mode{ mode }
 	{
 		glCheck(glGenVertexArrays(1, &m_handle));
 	}
@@ -18,23 +18,40 @@ namespace ml::gl
 		glCheck(glDeleteVertexArrays(1, &m_handle));
 	}
 
-	opengl_vertex_array::opengl_vertex_array(uint32_t mode)
-		: self_type{}
+	void opengl_vertex_array::bind() const
 	{
-		m_mode = mode;
+		glCheck(glBindVertexArray(m_handle));
 	}
 
-	void opengl_vertex_array::bind(opengl_vertex_array const * value)
+	void opengl_vertex_array::unbind() const
 	{
-		glCheck(glBindVertexArray(value ? value->m_handle : NULL));
+		glCheck(glBindVertexArray(NULL));
+	}
+
+	void opengl_vertex_array::add_vertices(shared<vertex_buffer> const & value)
+	{
+	}
+
+	void opengl_vertex_array::set_indices(shared<index_buffer> const & value)
+	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertex_buffer::opengl_vertex_buffer()
-		: m_handle{}, m_size{}
+	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size)
+		: m_size{ size }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
+		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
+	}
+
+	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t offset)
+		: m_size{ size }
+	{
+		glCheck(glGenBuffers(1, &m_handle));
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
+		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
 	}
 
 	opengl_vertex_buffer::~opengl_vertex_buffer()
@@ -42,39 +59,24 @@ namespace ml::gl
 		glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	opengl_vertex_buffer::opengl_vertex_buffer(float_t const * vertices, uint32_t size)
-		: self_type{}
+	void opengl_vertex_buffer::bind() const
 	{
-		this->set_data(vertices, size);
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
 	}
 
-	opengl_vertex_buffer::opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset)
-		: self_type{}
+	void opengl_vertex_buffer::unbind() const
 	{
-		this->set_sub_data(vertices, size, offset);
-	}
-
-	void opengl_vertex_buffer::bind(opengl_vertex_buffer const * value)
-	{
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
-	}
-
-	void opengl_vertex_buffer::set_data(float_t const * vertices, uint32_t size)
-	{
-		glCheck(glBufferData(GL_ARRAY_BUFFER, (m_size = size), vertices, GL_STATIC_DRAW));
-	}
-
-	void opengl_vertex_buffer::set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset)
-	{
-		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, (m_size = size), vertices));
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_index_buffer::opengl_index_buffer()
-		: m_handle{}, m_count{}
+	opengl_index_buffer::opengl_index_buffer(buffer indices, uint32_t count)
+		: m_count{ count }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
+		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
+		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
 	}
 
 	opengl_index_buffer::~opengl_index_buffer()
@@ -82,31 +84,19 @@ namespace ml::gl
 		glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	opengl_index_buffer::opengl_index_buffer(uint32_t const * indices, uint32_t count)
-		: self_type{}
+	void opengl_index_buffer::bind() const
 	{
-		this->set_data(indices, count);
+		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
 	}
 
-	void opengl_index_buffer::bind(opengl_index_buffer const * value)
+	void opengl_index_buffer::unbind() const
 	{
-		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
-	}
-
-	uint32_t opengl_index_buffer::get_count() const
-	{
-		return m_count;
-	}
-
-	void opengl_index_buffer::set_data(uint32_t const * indices, uint32_t count)
-	{
-		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
+		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_frame_buffer::opengl_frame_buffer::opengl_frame_buffer()
-		: m_handle{}
 	{
 		glCheck(glGenFramebuffers(1, &m_handle));
 	}
@@ -116,97 +106,59 @@ namespace ml::gl
 		glCheck(glDeleteFramebuffers(1, &m_handle));
 	}
 
-	void opengl_frame_buffer::bind(opengl_frame_buffer const * value)
+	void opengl_frame_buffer::bind() const
 	{
-		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, value ? value->m_handle : NULL));
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, m_handle));
+		glCheck(glViewport(0, 0, m_size[0], m_size[1]));
 	}
 
-	void opengl_frame_buffer::set_render_buffer(void const * value, uint32_t attachment)
+	void opengl_frame_buffer::unbind() const
 	{
-		glCheck(glFramebufferRenderbuffer(
-			GL_FRAMEBUFFER, (GL_COLOR_ATTACHMENT0 + attachment),
-			GL_RENDERBUFFER, (uint32_t)(intptr_t)value));
-	}
-
-	void opengl_frame_buffer::set_texture2d(void const * value, uint32_t attachment, uint32_t level)
-	{
-		glCheck(glFramebufferTexture2D(
-			GL_FRAMEBUFFER, (GL_COLOR_ATTACHMENT0 + attachment),
-			GL_TEXTURE_2D, (uint32_t)(intptr_t)value, level));
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_render_buffer::opengl_render_buffer()
-		: m_handle{}
+	opengl_shader_object::opengl_shader_object()
 	{
-		glCheck(glGenRenderbuffers(1, &m_handle));
-	}
-
-	opengl_render_buffer::~opengl_render_buffer()
-	{
-		glCheck(glDeleteRenderbuffers(1, &m_handle));
-	}
-
-	opengl_render_buffer::opengl_render_buffer(uint32_t format, vec2i const & size)
-		: self_type{}
-	{
-		this->set_storage(format, size);
-	}
-
-	void opengl_render_buffer::bind(opengl_render_buffer const * value)
-	{
-		glCheck(glBindRenderbuffer(GL_RENDERBUFFER, value ? value->m_handle : NULL));
-	}
-
-	void opengl_render_buffer::set_storage(uint32_t format, vec2i const & size)
-	{
-		glCheck(glRenderbufferStorage(GL_RENDERBUFFER, _format<to_impl>(format), size[0], size[1]));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_shader::opengl_shader()
-		: m_handle{}
-	{
-#ifdef GL_ARB_shader_objects
 		glCheck(m_handle = glCreateProgramObjectARB());
-#else
-		glCheck(m_handle = glCreateProgram());
-#endif
 	}
 
-	opengl_shader::~opengl_shader()
+	opengl_shader_object::~opengl_shader_object()
 	{
-#ifdef GL_ARB_shader_objects
 		glCheck(glDeleteObjectARB(m_handle));
-#else
-		glCheck(glDeleteShader(m_handle));
-#endif
 	}
 
-	void opengl_shader::bind(opengl_shader const * value)
+	void opengl_shader_object::bind() const
 	{
-#ifdef GL_ARB_shader_objects
-		glCheck(glUseProgramObjectARB(value ? (uint32_t)(intptr_t)value->get_handle() : NULL));
-#else
-		glCheck(glUseProgram(value ? (uint32_t)(intptr_t)value->get_handle() : NULL));
-#endif
+		glCheck(glUseProgramObjectARB(m_handle));
+	}
+
+	void opengl_shader_object::unbind() const
+	{
+		glCheck(glUseProgramObjectARB(NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture::opengl_texture()
-		: m_handle{}, m_type{}
+	opengl_texture_object::opengl_texture_object()
 	{
+		glCheck(glGenTextures(1, &m_handle));
 	}
 
-	opengl_texture::~opengl_texture()
+	opengl_texture_object::~opengl_texture_object()
 	{
+		glCheck(glDeleteTextures(1, &m_handle));
 	}
 
-	void opengl_texture::bind(opengl_texture const * value)
+	void opengl_texture_object::bind() const
 	{
+		glCheck(glBindTexture(_texture_type<to_impl>(m_type), m_handle));
+	}
+
+	void opengl_texture_object::unbind() const
+	{
+		glCheck(glBindTexture(_texture_type<to_impl>(m_type), NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -514,7 +466,7 @@ namespace ml::gl
 		glCheck((enabled ? &glEnable : &glDisable)(GL_CULL_FACE));
 	}
 
-	void opengl_render_api::set_cull_facet(uint32_t facet)
+	void opengl_render_api::set_cull_face(uint32_t facet)
 	{
 		glCheck(glCullFace(_facet<to_impl>(facet)));
 	}

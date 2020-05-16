@@ -427,9 +427,9 @@ namespace ml
 			if (render_texture & rt{ m_pipeline[0] })
 			{
 				ML_bind_scope(rt);
-				gl::command::set_clear_color(colors::magenta)();
-				gl::command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
-				gl::command::set_viewport(rt.bounds())();
+				gl::render_command::set_clear_color(colors::magenta)();
+				gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
+				gl::render_command::set_viewport(rt.bounds())();
 				m_ecs.update_system<x_draw_renderers>(rt);
 			}
 		}

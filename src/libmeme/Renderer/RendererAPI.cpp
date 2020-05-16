@@ -9,15 +9,8 @@ using impl_vertex_array		= _ML gl::opengl_vertex_array;
 using impl_vertex_buffer	= _ML gl::opengl_vertex_buffer;
 using impl_index_buffer		= _ML gl::opengl_index_buffer;
 using impl_frame_buffer		= _ML gl::opengl_frame_buffer;
-using impl_render_buffer	= _ML gl::opengl_render_buffer;
-using impl_shader			= _ML gl::opengl_shader;
-using impl_texture			= _ML gl::opengl_texture;
-
-#elif defined(ML_RENDERER_DIRECTX)
-#include "Impl/Impl_Renderer_DirectX.hpp"
-
-#elif defined(ML_RENDERER_VULKAN)
-#include "Impl/Impl_Renderer_Vulkan.hpp"
+using impl_shader_object	= _ML gl::opengl_shader_object;
+using impl_texture_object	= _ML gl::opengl_texture_object;
 
 #else
 #error "Unknown or invalid renderer implementation specified."
@@ -28,103 +21,61 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_context::render_context() noexcept { m_api = std::make_unique<impl_render_api>(); }
+	render_context::render_context() noexcept : m_api{ std::make_unique<impl_render_api>() } {}
 
 	render_context::~render_context() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// resources
+// objects
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void vertex_array::bind(vertex_array const * value)
+	shared<vertex_array> vertex_array::create(uint32_t mode, allocator alloc)
 	{
-		impl_vertex_array::bind(static_cast<impl_vertex_array const *>(value));
-	}
-
-	vertex_array * vertex_array::create(uint32_t mode)
-	{
-		return new impl_vertex_array{ mode };
+		return std::allocate_shared<impl_vertex_array>(alloc, mode);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void vertex_buffer::bind(vertex_buffer const * value)
+	shared<vertex_buffer> vertex_buffer::create(buffer vertices, uint32_t size, allocator alloc)
 	{
-		impl_vertex_buffer::bind(static_cast<impl_vertex_buffer const *>(value));
+		return std::allocate_shared<impl_vertex_buffer>(alloc, vertices, size);
 	}
 
-	vertex_buffer * vertex_buffer::create(float_t const * vertices, uint32_t size)
+	shared<vertex_buffer> vertex_buffer::create(buffer vertices, uint32_t size, uint32_t offset, allocator alloc)
 	{
-		return new impl_vertex_buffer{ vertices, size };
-	}
-
-	vertex_buffer * vertex_buffer::create(float_t const * vertices, uint32_t size, uint32_t offset)
-	{
-		return new impl_vertex_buffer{ vertices, size, offset };
+		return std::allocate_shared<impl_vertex_buffer>(alloc, vertices, size, offset);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void index_buffer::bind(index_buffer const * value)
+	shared<index_buffer> index_buffer::create(buffer indices, uint32_t count, allocator alloc)
 	{
-		impl_index_buffer::bind(static_cast<impl_index_buffer const *>(value));
-	}
-
-	index_buffer * index_buffer::create(uint32_t const * indices, uint32_t count)
-	{
-		return new impl_index_buffer{ indices, count };
+		return std::allocate_shared<impl_index_buffer>(alloc, indices, count);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void frame_buffer::bind(frame_buffer const * value)
+	shared<frame_buffer> frame_buffer::create(allocator alloc)
 	{
-		impl_frame_buffer::bind(static_cast<impl_frame_buffer const *>(value));
-	}
-
-	frame_buffer * frame_buffer::create()
-	{
-		return new impl_frame_buffer{};
+		return std::allocate_shared<impl_frame_buffer>(alloc);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void render_buffer::bind(render_buffer const * value)
+	shared<shader_object> shader_object::create(allocator alloc)
 	{
-		impl_render_buffer::bind(static_cast<impl_render_buffer const *>(value));
-	}
-
-	render_buffer * render_buffer::create(uint32_t format, vec2i const & size)
-	{
-		return new impl_render_buffer{ format, size };
+		return std::allocate_shared<impl_shader_object>(alloc);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void shader_object::bind(shader_object const * value)
+	shared<texture_object> texture_object::create(allocator alloc)
 	{
-		impl_shader::bind(static_cast<impl_shader const *>(value));
-	}
-
-	shader_object * shader_object::create()
-	{
-		return new impl_shader{};
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-	void texture_object::bind(texture_object const * value)
-	{
-		impl_texture::bind(static_cast<impl_texture const *>(value));
-	}
-
-	texture_object * texture_object::create()
-	{
-		return new impl_texture{};
+		return std::allocate_shared<impl_texture_object>(alloc);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

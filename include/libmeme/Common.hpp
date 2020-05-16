@@ -89,9 +89,14 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// global typedef macro
+#define ML_alias				using 
+#define ML_alias_T(...)			template <##__VA_ARGS__> using
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // misc
 #define _ML						::ml::
-#define ML_alias				using // global typedef
 #define ML_addressof(ptr)		((void *)(intptr_t)(ptr))
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
@@ -131,6 +136,7 @@ namespace ml
 	// helper types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_alias	double_t	= typename float64_t;
 	ML_alias	float_t		= typename float32_t;
 	ML_alias	hash_t		= typename uint64_t;
 	ML_alias	intptr_t	= typename intmax_t;

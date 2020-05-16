@@ -37,6 +37,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// check error macro
 #if (!ML_is_debug)
 #	define glCheck(expr) (expr)
 #else
@@ -83,7 +84,7 @@ namespace ml::gl
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
 				err_name = "Invalid Framebuffer Operation";
-				err_desc = "The object bound to framebuffer binding is not \'framebuffer complete\'";
+				err_desc = "The object bound to frame buffer binding is not \'frame buffer complete\'";
 				break;
 			}
 			std::cout
@@ -106,10 +107,10 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _clear_flags(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _clear_flags(uint32_t value) noexcept
 	{
 		uint32_t temp{};
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			ML_flag_map(temp, value, clear_flags_accum	, GL_ACCUM_BUFFER_BIT);
 			ML_flag_map(temp, value, clear_flags_color	, GL_COLOR_BUFFER_BIT);
@@ -128,9 +129,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _error(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -164,9 +165,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _usage(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -190,9 +191,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _primitive(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -226,9 +227,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _predicate(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -262,9 +263,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _type(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -298,9 +299,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _function(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -328,9 +329,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _cull_order(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _cull_order(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -352,9 +353,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _facet(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _facet(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -390,9 +391,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _factor(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _factor(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -432,9 +433,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _format(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _format(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -486,9 +487,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _texture_type(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -514,9 +515,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _shader_type(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -540,9 +541,9 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ToImpl> constexpr uint32_t _attachment(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _attachment(uint32_t value) noexcept
 	{
-		if constexpr (ToImpl())
+		if constexpr (Convt{})
 		{
 			switch (value)
 			{
@@ -569,96 +570,103 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// opengl primitives
+// opengl objects
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex array
-	class ML_RENDERER_API opengl_vertex_array final : public vertex_array
+	class opengl_vertex_array final : public vertex_array
 	{
 	public:
 		using self_type = opengl_vertex_array;
 
-		opengl_vertex_array();
+		opengl_vertex_array(uint32_t mode);
 
 		~opengl_vertex_array();
 
-		opengl_vertex_array(uint32_t mode);
+		void bind() const override;
 
-		static void bind(opengl_vertex_array const * value);
+		void unbind() const override;
 
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline uint32_t get_mode() const override { return m_mode; }
 
+		void add_vertices(shared<vertex_buffer> const & value) override;
+
+		void set_indices(shared<index_buffer> const & value) override;
+
+		inline vector<shared<vertex_buffer>> const & get_vertices() const override { return m_vbos; }
+
+		inline shared<index_buffer> const & get_indices() const override { return m_ibo; }
+
 	private:
-		uint32_t m_handle;
-		uint32_t m_mode;
+		uint32_t m_handle	{}						; // handle
+		uint32_t m_mode		{ primitive_triangles }	; // draw mode
+		
+		vector<shared<vertex_buffer>>	m_vbos	{}	; // vertex buffers
+		shared<index_buffer>			m_ibo	{}	; // index buffer
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex buffer
-	class ML_RENDERER_API opengl_vertex_buffer final : public vertex_buffer
+	class opengl_vertex_buffer final : public vertex_buffer
 	{
 	public:
 		using self_type = opengl_vertex_buffer;
 
-		opengl_vertex_buffer();
+		opengl_vertex_buffer(buffer vertices, uint32_t size);
+
+		opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t offset);
 
 		~opengl_vertex_buffer();
 
-		opengl_vertex_buffer(float_t const * vertices, uint32_t size);
+		void bind() const override;
 
-		opengl_vertex_buffer(float_t const * vertices, uint32_t size, uint32_t offset);
+		void unbind() const override;
 
-		static void bind(opengl_vertex_buffer const * value);
-
-		void set_data(float_t const * vertices, uint32_t size) override;
-
-		void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) override;
-
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline uint32_t get_size() const override { return m_size; }
 
 	private:
-		uint32_t m_handle;
-		uint32_t m_size;
+		uint32_t m_handle	{};
+		uint32_t m_size		{};
+		uint32_t m_usage	{};
+
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl index buffer
-	class ML_RENDERER_API opengl_index_buffer final : public index_buffer
+	class opengl_index_buffer final : public index_buffer
 	{
 	public:
 		using self_type = opengl_index_buffer;
 
-		opengl_index_buffer();
+		opengl_index_buffer(buffer indices, uint32_t count);
 
 		~opengl_index_buffer();
 
-		opengl_index_buffer(uint32_t const * indices, uint32_t count);
+		void bind() const override;
 
-		static void bind(opengl_index_buffer const * value);
+		void unbind() const override;
 
-		void set_data(uint32_t const * indices, uint32_t count) override;
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
-
-		inline uint32_t get_count() const override;
+		inline uint32_t get_count() const override { return m_count; }
 
 	private:
-		uint32_t m_handle;
-		uint32_t m_count;
+		uint32_t m_handle	{};
+		uint32_t m_count	{};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl frame buffer
-	class ML_RENDERER_API opengl_frame_buffer final : public frame_buffer
+	class opengl_frame_buffer final : public frame_buffer
 	{
 	public:
 		using self_type = opengl_frame_buffer;
@@ -667,79 +675,76 @@ namespace ml::gl
 
 		~opengl_frame_buffer();
 
-		static void bind(opengl_frame_buffer const * value);
+		void bind() const override;
 
-		void set_render_buffer(void const * value, uint32_t attachment) override;
+		void unbind() const override;
 
-		void set_texture2d(void const * value, uint32_t attachment, uint32_t level) override;
+		inline uint32_t get_color_attachment() const override { return m_color_attachment; }
 
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		inline uint32_t get_depth_attachment() const override { return m_depth_attachment; }
 
-	private:
-		uint32_t m_handle;
-	};
+		inline vec2i get_size() const override { return m_size; }
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		inline uint32_t get_format() const override { return m_format; }
 
-	// opengl render buffer
-	class ML_RENDERER_API opengl_render_buffer final : public render_buffer
-	{
-	public:
-		using self_type = opengl_render_buffer;
-
-		opengl_render_buffer();
-
-		~opengl_render_buffer();
-
-		opengl_render_buffer(uint32_t format, vec2i const & size);
-
-		static void bind(opengl_render_buffer const * value);
-
-		void set_storage(uint32_t format, vec2i const & size) override;
-
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
-		uint32_t m_handle;
+		uint32_t	m_handle			{};
+		uint32_t	m_format			{};
+		vec2i		m_size				{};
+		uint32_t	m_color_attachment	{};
+		uint32_t	m_depth_attachment	{};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl shader
-	class ML_RENDERER_API opengl_shader final : public shader_object
+	class opengl_shader_object final : public shader_object
 	{
 	public:
-		opengl_shader();
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		~opengl_shader();
+		opengl_shader_object();
 
-		static void bind(opengl_shader const * value);
+		~opengl_shader_object();
 
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		void bind() const override;
+
+		void unbind() const override;
+
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
-		uint32_t m_handle;
+		uint32_t					m_handle	{};
+		ds::map<hash_t, int32_t>	m_attribs	{};
+		ds::map<hash_t, int32_t>	m_uniforms	{};
+		ds::map<hash_t, handle>		m_textures	{};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl texture
-	class ML_RENDERER_API opengl_texture final : public texture_object
+	class opengl_texture_object final : public texture_object
 	{
 	public:
-		opengl_texture();
+		opengl_texture_object();
 
-		~opengl_texture();
+		~opengl_texture_object();
 
-		static void bind(opengl_texture const * value);
+		void bind() const override;
 
-		inline void * get_handle() const override { return ML_addressof(m_handle); }
+		void unbind() const override;
 
-		inline uint32_t get_type() const override { return 0; }
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
+
+		inline uint32_t get_type() const override { return m_type; }
 
 	private:
-		uint32_t m_handle;
-		uint32_t m_type;
+		uint32_t m_handle	{};
+		uint32_t m_type		{};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -750,13 +755,13 @@ namespace ml::gl
 // opengl api
 namespace ml::gl
 {
-	class ML_RENDERER_API opengl_render_api final : public render_api
+	class opengl_render_api final : public render_api
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		~opengl_render_api() noexcept = default;
-
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		bool initialize() override;
@@ -833,7 +838,7 @@ namespace ml::gl
 		
 		void set_cull_enabled(bool enabled) override;
 
-		void set_cull_facet(uint32_t facet) override;
+		void set_cull_face(uint32_t facet) override;
 
 		void set_cull_order(uint32_t order) override;
 
