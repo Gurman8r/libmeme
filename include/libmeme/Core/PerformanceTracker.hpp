@@ -6,11 +6,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // benchmark scope
-#define ML_bench_scope(id) \
+#define ML_benchmark_S(id) \
 	auto ML_anon = _ML performance_tracker::scope_benchmark{ id }
 
 // benchmark lambda
-#define ML_bench_lambda(id) \
+#define ML_benchmark_L(id) \
 	auto ML_anon = _ML performance_tracker::lambda_benchmark{ id } + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,6 +51,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// scope benchmark
 		struct ML_NODISCARD scope_benchmark final
 		{
 			explicit scope_benchmark(cstring id) noexcept : id{ id } {}
@@ -62,6 +63,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// lambda benchmark
 		struct ML_NODISCARD lambda_benchmark final
 		{
 			explicit lambda_benchmark(cstring id) noexcept : id{ id } {}

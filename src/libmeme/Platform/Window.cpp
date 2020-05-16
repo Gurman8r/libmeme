@@ -30,7 +30,7 @@ using impl_window = _ML impl_window_sfml;
 // etc...
 
 #else
-#error Unknown or invalid window implementation specified.
+#error "Unknown or invalid window implementation specified."
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

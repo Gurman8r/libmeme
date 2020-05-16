@@ -4,20 +4,26 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
-using impl_renderer_api		= _ML opengl_render_api;
+using impl_render_api		= _ML opengl_render_api;
 using impl_vertex_array		= _ML opengl_vertex_array;
 using impl_vertex_buffer	= _ML opengl_vertex_buffer;
 using impl_index_buffer		= _ML opengl_index_buffer;
 using impl_frame_buffer		= _ML opengl_frame_buffer;
 using impl_render_buffer	= _ML opengl_render_buffer;
 
+#elif defined(ML_RENDERER_DIRECTX)
+#include "Impl/Impl_Renderer_DirectX.hpp"
+
+#elif defined(ML_RENDERER_VULKAN)
+#include "Impl/Impl_Renderer_Vulkan.hpp"
+
 #else
-#error Unknown or invalid renderer implementation specified.
+#error "Unknown or invalid renderer implementation specified."
 #endif
 
 // context
-ml::render_context::render_context() noexcept { m_api = std::make_unique<impl_renderer_api>(); }
-ml::render_context::~render_context() noexcept {}
+ml::render_context::render_context() noexcept { m_api = std::make_unique<impl_render_api>(); }
+
 
 // buffers
 namespace ml

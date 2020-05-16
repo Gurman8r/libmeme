@@ -42,34 +42,40 @@ namespace ml
 		{
 			switch (ev.ID)
 			{
-			case hashof_v<begin_loop_event>:
+			case hashof_v<begin_loop_event>: {
 				m_window.poll_events();
-				break;
+			} break;
 
-			case hashof_v<begin_draw_event>:
-				render_command::set_clear_color(colors::black)();
-				render_command::clear(gl::clear_flags_color | gl::clear_flags_depth)();
-				render_command::set_viewport(m_window.get_framebuffer_size())();
-				break;
+			case hashof_v<begin_draw_event>: {
+				for (auto const & cmd : std::initializer_list<gl::command>
+				{
+					render_command::set_clear_color(colors::black),
+					render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
+					render_command::set_viewport(m_window.get_framebuffer_size()),
+				})
+				{
+					std::invoke(cmd);
+				}
+			} break;
 
-			case hashof_v<begin_gui_event>:
+			case hashof_v<begin_gui_event>: {
 				m_gui.new_frame();
-				break;
+			} break;
 
-			case hashof_v<draw_gui_event>:
+			case hashof_v<draw_gui_event>: {
 				m_gui.draw_default();
-				break;
+			} break;
 
-			case hashof_v<end_gui_event>:
+			case hashof_v<end_gui_event>: {
 				m_gui.render_frame();
-				break;
+			} break;
 
-			case hashof_v<end_draw_event>:
+			case hashof_v<end_draw_event>: {
 				m_window.swap_buffers();
-				break;
+			} break;
 
-			case hashof_v<end_loop_event>:
-				break;
+			case hashof_v<end_loop_event>: {
+			} break;
 			}
 		}
 	};

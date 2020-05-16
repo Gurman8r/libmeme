@@ -561,7 +561,6 @@ namespace ml
 			m_textures.clear();
 			m_fonts.clear();
 			m_pipeline.clear();
-
 			m_node_editor.destroy();
 		}
 

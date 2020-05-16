@@ -13,27 +13,6 @@
 // enums
 namespace ml::gl
 {
-	enum clear_flags_ : uint32_t
-	{
-		clear_flags_none,
-		clear_flags_accum	= 1 << 0,
-		clear_flags_color	= 1 << 1,
-		clear_flags_depth	= 1 << 2,
-		clear_flags_stencil = 1 << 3,
-	};
-
-	enum error_type_ : uint32_t
-	{
-		error_type_none,
-		error_type_invalid_enum,
-		error_type_invalid_value,
-		error_type_invalid_operation,
-		error_type_stack_overflow,
-		error_type_stack_underflow,
-		error_type_out_of_memory,
-		error_type_invalid_framebuffer_operation,
-	};
-
 	enum capability_ : uint32_t
 	{
 		capability_alpha_test,
@@ -49,7 +28,32 @@ namespace ml::gl
 		capability_sample_mask,
 		capability_scissor_test,
 		capability_stencil_test,
+		capability_texture_1d,
+		capability_texture_2d,
+		capability_texture_3d,
+		capability_texture_cube_map,
 		capability_texture_cube_map_seamless,
+	};
+
+	enum error_type_ : uint32_t
+	{
+		error_type_none,
+		error_type_invalid_enum,
+		error_type_invalid_value,
+		error_type_invalid_operation,
+		error_type_stack_overflow,
+		error_type_stack_underflow,
+		error_type_out_of_memory,
+		error_type_invalid_framebuffer_operation,
+	};
+
+	enum clear_flags_ : uint32_t
+	{
+		clear_flags_none,
+		clear_flags_accum	= 1 << 0,
+		clear_flags_color	= 1 << 1,
+		clear_flags_depth	= 1 << 2,
+		clear_flags_stencil = 1 << 3,
 	};
 
 	enum usage_ : uint32_t
@@ -104,6 +108,12 @@ namespace ml::gl
 		function_max,
 	};
 
+	enum front_face_
+	{
+		front_face_cw,
+		front_face_ccw,
+	};
+
 	enum facet_ : uint32_t
 	{
 		facet_front_left,
@@ -153,68 +163,19 @@ namespace ml::gl
 		format_depth24_stencil8,
 	};
 
-	enum store_ : uint32_t
+	enum texture_type_ : uint32_t
 	{
-		store_unpack_swap_bytes,
-		store_unpack_lsb_first,
-		store_unpack_row_length,
-		store_unpack_skip_rows,
-		store_unpack_skip_pixels,
-		store_unpack_alignment,
-
-		store_pack_swap_bytes,
-		store_pack_lsb_first,
-		store_pack_row_length,
-		store_pack_skip_rows,
-		store_pack_skip_pixels,
-		store_pack_alignment,
-	};
-
-	enum texture_ : uint32_t
-	{
+		texture_type_1d,
 		texture_type_2d,
 		texture_type_3d,
 		texture_type_cube_map,
-
-		texture_param_nearest,
-		texture_param_linear,
-		texture_param_nearest_mipmap_nearest,
-		texture_param_linear_mipmap_nearest,
-		texture_param_nearest_mipmap_linear,
-		texture_param_linear_mipmap_linear,
-		texture_param_texture_mag_filter,
-		texture_param_texture_min_filter,
-		texture_param_texture_wrap_s,
-		texture_param_texture_wrap_t,
-		texture_param_texture_wrap_r,
-		texture_param_clamp,
-		texture_param_repeat,
-		texture_param_clamp_to_edge,
-		texture_param_texture_min_lod,
-		texture_param_texture_max_lod,
-		texture_param_texture_base_level,
-		texture_param_texture_max_level,
-
-		texture_cube_map_positive_x,
-		texture_cube_map_negative_x,
-		texture_cube_map_positive_y,
-		texture_cube_map_negative_y,
-		texture_cube_map_positive_z,
-		texture_cube_map_negative_z,
 	};
 
-	enum shader_ : uint32_t
+	enum shader_type_ : uint32_t
 	{
 		shader_type_vertex,
 		shader_type_fragment,
 		shader_type_geometry,
-	};
-
-	enum framebuffer_ : uint32_t
-	{
-		framebuffer_default,
-		framebuffer_undefined,
-		framebuffer_depth_stencil_attachment,
 	};
 
 	enum color_attachment_ : uint32_t
@@ -306,7 +267,7 @@ namespace ml
 
 		virtual ~vertex_array() = default;
 
-		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+		ML_NODISCARD virtual void * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
 
@@ -336,7 +297,7 @@ namespace ml
 
 		virtual void set_sub_data(float_t const * vertices, uint32_t size, uint32_t offset) = 0;
 
-		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+		ML_NODISCARD virtual void * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_size() const noexcept = 0;
 
@@ -366,7 +327,7 @@ namespace ml
 
 		virtual void set_data(uint32_t const * indices, uint32_t count) = 0;
 
-		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+		ML_NODISCARD virtual void * get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const noexcept = 0;
 
@@ -396,7 +357,7 @@ namespace ml
 
 		virtual void set_texture2d(void const * value, uint32_t attachment, uint32_t level) = 0;
 
-		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+		ML_NODISCARD virtual void * get_handle() const noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -422,7 +383,7 @@ namespace ml
 
 		virtual void set_storage(uint32_t format, int32_t width, int32_t height) = 0;
 
-		ML_NODISCARD virtual void const * get_handle() const noexcept = 0;
+		ML_NODISCARD virtual void * get_handle() const noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -442,11 +403,44 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// states
+namespace ml::gl
+{
+	struct ML_NODISCARD alpha_function final
+	{
+		uint32_t func;
+		float_t ref;
+	};
+
+	struct ML_NODISCARD blend_equation final
+	{
+		uint32_t
+			modeRGB,
+			modeAlpha = modeRGB;
+	};
+
+	struct ML_NODISCARD blend_function final
+	{
+		uint32_t
+			sfactorRGB,
+			dfactorRGB,
+			sfactorAlpha = sfactorRGB,
+			dfactorAlpha = dfactorRGB;
+	};
+
+	struct ML_NODISCARD depth_range final
+	{
+		float_t
+			nearVal,
+			farVal;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // api
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	struct ML_RENDERER_API render_api : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -459,36 +453,82 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool get_enabled(uint32_t capability) const = 0;
 		virtual uint32_t get_error() const = 0;
+		
 		virtual cstring get_extensions() const = 0;
+		
 		virtual int32_t get_major_version() const = 0;
+		
 		virtual int32_t get_minor_version() const = 0;
+		
 		virtual int32_t get_num_extensions() const = 0;
+		
 		virtual cstring get_renderer() const = 0;
+		
 		virtual cstring get_shading_language_version() const = 0;
+		
 		virtual cstring get_vendor() const = 0;
+		
 		virtual cstring get_version() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_active_texture(void const * value) = 0;
-		virtual void set_alpha_function(uint32_t predicate, float_t ref) = 0;
+		virtual gl::alpha_function get_alpha_function() const = 0;
+		
+		virtual color get_blend_color() const = 0;
+		
+		virtual gl::blend_equation get_blend_equation() const = 0;
+		
+		virtual gl::blend_function get_blend_function() const = 0;
+		
+		virtual color get_clear_color() const = 0;
+		
+		virtual uint32_t get_depth_function() const = 0;
+		
+		virtual bool get_depth_mask() const = 0;
+
+		virtual gl::depth_range get_depth_range() const = 0;
+		
+		virtual bool get_enabled(uint32_t capability) const = 0;
+		
+		virtual uint32_t get_front_face() const = 0;
+		
+		virtual int_rect get_viewport() const = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void set_alpha_function(gl::alpha_function const & value) = 0;
+		
 		virtual void set_blend_color(color const & value) = 0;
-		virtual void set_blend_equation(uint32_t rgb, uint32_t alpha) = 0;
-		virtual void set_blend_function(uint32_t srgb, uint32_t drgb, uint32_t salpha, uint32_t dalpha) = 0;
+		
+		virtual void set_blend_equation(gl::blend_equation const & value) = 0;
+		
+		virtual void set_blend_function(gl::blend_function const & value) = 0;
+		
 		virtual void set_clear_color(color const & value) = 0;
+		
 		virtual void set_cull_mode(uint32_t facet) = 0;
+		
 		virtual void set_depth_function(uint32_t predicate) = 0;
+		
 		virtual void set_depth_mask(bool enabled) = 0;
+
+		virtual void set_depth_range(gl::depth_range const & value) = 0;
+		
 		virtual void set_enabled(uint32_t capability, bool enabled) = 0;
+		
+		virtual void set_front_face(uint32_t front_face) = 0;
+		
 		virtual void set_viewport(int_rect const & bounds) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void clear(uint32_t flags) = 0;
-		virtual void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) = 0;
-		virtual void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) = 0;
+		
+		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
+		
+		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) = 0;
+		
 		virtual void flush() = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -500,11 +540,15 @@ namespace ml
 // context
 namespace ml
 {
+	// global render context
 	struct ML_RENDERER_API render_context final : singleton<render_context>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static auto const & api() noexcept { return get_instance().m_api; }
+		static std::unique_ptr<render_api> const & api() noexcept
+		{
+			return get_instance().m_api;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -513,7 +557,7 @@ namespace ml
 
 		render_context() noexcept;
 
-		~render_context() noexcept;
+		inline ~render_context() noexcept {}
 
 		std::unique_ptr<render_api> m_api;
 
@@ -526,100 +570,97 @@ namespace ml
 // commands
 namespace ml
 {
+	// render command type
+	namespace gl { ML_alias command = std::function<void()>; }
+
+	// render comand factory
 	class ML_NODISCARD render_command final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using command = typename std::function<void()>; // render command type
-
 		static auto const & api() noexcept { return render_context::api(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static command set_active_texture(void const * value) noexcept
+		static gl::command set_alpha_function(gl::alpha_function const & value) noexcept
 		{
-			return std::bind(&render_api::set_active_texture, api().get(), value);
+			return std::bind(&render_api::set_alpha_function, api().get(), value);
 		}
 		
-		static command set_alpha_function(uint32_t predicate, float32_t ref) noexcept
-		{
-			return std::bind(&render_api::set_alpha_function, api().get(), predicate, ref);
-		}
-		
-		static command set_blend_color(color const & value) noexcept
+		static gl::command set_blend_color(color const & value) noexcept
 		{
 			return std::bind(&render_api::set_blend_color, api().get(), value);
 		}
 
-		static command set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) noexcept
+		static gl::command set_blend_equation(gl::blend_equation const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_equation, api().get(), modeRGB, modeAlpha);
+			return std::bind(&render_api::set_blend_equation, api().get(), value);
 		}
 
-		static command set_blend_equation(uint32_t mode) noexcept
+		static gl::command set_blend_function(gl::blend_function const & value) noexcept
 		{
-			return set_blend_equation(mode, mode);
+			return std::bind(&render_api::set_blend_function, api().get(), value);
 		}
 
-		static command set_blend_function(uint32_t srgb, uint32_t drgb, uint32_t salpha, uint32_t dalpha) noexcept
-		{
-			return std::bind(&render_api::set_blend_function, api().get(), srgb, drgb, salpha, dalpha);
-		}
-
-		static command set_blend_function(uint32_t sfactor, uint32_t dfactor) noexcept
-		{
-			return set_blend_function(sfactor, dfactor, sfactor, dfactor);
-		}
-
-		static command set_clear_color(color const & value) noexcept
+		static gl::command set_clear_color(color const & value) noexcept
 		{
 			return std::bind(&render_api::set_clear_color, api().get(), value);
 		}
 
-		static command set_cull_mode(uint32_t facet) noexcept
+		static gl::command set_cull_mode(uint32_t facet) noexcept
 		{
 			return std::bind(&render_api::set_cull_mode, api().get(), facet);
 		}
 
-		static command set_depth_function(uint32_t predicate) noexcept
+		static gl::command set_depth_function(uint32_t predicate) noexcept
 		{
 			return std::bind(&render_api::set_depth_function, api().get(), predicate);
 		}
 		
-		static command set_depth_mask(bool enabled) noexcept
+		static gl::command set_depth_mask(bool enabled) noexcept
 		{
 			return std::bind(&render_api::set_depth_mask, api().get(), enabled);
 		}
 
-		static command set_enabled(uint32_t capability, bool enabled) noexcept
+		static gl::command set_depth_range(gl::depth_range const & value) noexcept
+		{
+			return std::bind(&render_api::set_depth_range, api().get(), value);
+		}
+
+		static gl::command set_enabled(uint32_t capability, bool enabled) noexcept
 		{
 			return std::bind(&render_api::set_enabled, api().get(), capability, enabled);
 		}
+
+		static gl::command set_front_face(uint32_t front_face) noexcept
+		{
+			return std::bind(&render_api::set_front_face, api().get(), front_face);
+		}
 		
-		static command set_viewport(int_rect const & bounds) noexcept
+		static gl::command set_viewport(int_rect const & bounds) noexcept
 		{
 			return std::bind(&render_api::set_viewport, api().get(), bounds);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static command clear(uint32_t flags) noexcept
+		static gl::command clear(uint32_t flags) noexcept
 		{
 			return std::bind(&render_api::clear, api().get(), flags);
 		}
 
-		static command draw_arrays(uint32_t mode, uint32_t first, uint32_t count) noexcept
+		static gl::command draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) noexcept
 		{
-			return std::bind(&render_api::draw_arrays, api().get(), mode, first, count);
+			return std::bind(&render_api::draw_arrays, api().get(), primitive, first, count);
 		}
 
-		static command draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) noexcept
+		static gl::command draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) noexcept
 		{
-			return std::bind(&render_api::draw_indexed, api().get(), mode, first, type, indices);
+			return std::bind(&render_api::draw_indexed, api().get(), primitive, first, type, indices);
 		}
 
-		static command flush() noexcept
+		static gl::command flush() noexcept
 		{
 			return std::bind(&render_api::flush, api().get());
 		}

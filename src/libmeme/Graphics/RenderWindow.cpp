@@ -23,23 +23,27 @@ namespace ml
 		m_settings.context.major = render_context::api()->get_major_version();
 		m_settings.context.minor = render_context::api()->get_minor_version();
 
-		for (auto const & fn : // commands
+		for (auto const & cmd : std::initializer_list<gl::command>
 		{
-			render_command::set_active_texture(nullptr),
+			render_command::set_enabled(gl::capability_texture_2d, true),
+			render_command::set_enabled(gl::capability_texture_cube_map, true),
 
 			render_command::set_enabled(gl::capability_alpha_test, true),
-			render_command::set_alpha_function(gl::predicate_greater, 0.001f),
+			render_command::set_alpha_function({ gl::predicate_greater, 0.001f }),
 			
 			render_command::set_enabled(gl::capability_blend, true),
-			render_command::set_blend_equation(gl::function_add),
-			render_command::set_blend_function(gl::factor_src_alpha, gl::factor_one_minus_src_alpha),
+			render_command::set_blend_color(colors::white),
+			render_command::set_blend_equation({ gl::function_add }),
+			render_command::set_blend_function({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
 			
 			render_command::set_enabled(gl::capability_cull_face, true),
 			render_command::set_cull_mode(gl::facet_back),
-			
+			render_command::set_front_face(gl::front_face_ccw),
+
 			render_command::set_enabled(gl::capability_depth_test, true),
 			render_command::set_depth_function(gl::predicate_less),
 			render_command::set_depth_mask(true),
+			render_command::set_depth_range({ 0.f, 1.f }),
 
 			render_command::set_enabled(gl::capability_multisample, ws.context.multisample),
 			render_command::set_enabled(gl::capability_framebuffer_srgb, ws.context.srgb_capable),
@@ -47,7 +51,7 @@ namespace ml
 			render_command::flush(),
 		})
 		{
-			std::invoke(fn);
+			std::invoke(cmd);
 		}
 
 		return true;

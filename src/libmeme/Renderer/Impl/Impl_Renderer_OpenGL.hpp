@@ -4,7 +4,36 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "Impl_Renderer.hpp"
+#include <libmeme/Renderer/RendererAPI.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifdef ML_OPENGL_LOADER_CUSTOM
+#	if (defined(__has_include) && __has_include(ML_OPENGL_LOADER_CUSTOM))
+#		include ML_OPENGL_LOADER_CUSTOM
+#	endif
+#elif defined(ML_IMPL_OPENGL_ES2)
+//	GLES2
+#	include <GLES2/gl2.h>
+#elif defined(ML_IMPL_OPENGL_ES3)
+//	GLES3
+#	if defined(ML_os_apple && (TARGET_OS_IOS || TARGET_OS_TV))
+#		include <OpenGLES/ES3/gl.h>
+#	else
+#		include <GLES3/gl3.h>
+#	endif
+#elif defined(ML_IMPL_OPENGL_LOADER_GLEW)
+//	glew
+#	include <GL/glew.h>
+#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
+//	gl3w
+#	include <GL/gl3w.h>
+#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
+//	glad
+#	include <glad/glad.h>
+#else
+#	error "Unknown or invalid opengl loader specified."
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -75,15 +104,29 @@ namespace ml
 // enum mappings
 namespace ml::gl
 {
-	constexpr uint32_t _clear_flags(uint32_t value) noexcept
+	constexpr uint32_t _capability(uint32_t value) noexcept
 	{
 		switch (value)
 		{
-		default					: return value;
-		case clear_flags_accum	: return GL_ACCUM_BUFFER_BIT;
-		case clear_flags_color	: return GL_COLOR_BUFFER_BIT;
-		case clear_flags_depth	: return GL_DEPTH_BUFFER_BIT;
-		case clear_flags_stencil: return GL_STENCIL_BUFFER_BIT;
+		default										: return value;
+		case capability_alpha_test					: return GL_ALPHA_TEST;
+		case capability_blend						: return GL_BLEND;
+		case capability_cull_face					: return GL_CULL_FACE;
+		case capability_depth_clamp					: return GL_DEPTH_CLAMP;
+		case capability_depth_test					: return GL_DEPTH_TEST;
+		case capability_dither						: return GL_DITHER;
+		case capability_framebuffer_srgb			: return GL_FRAMEBUFFER_SRGB;
+		case capability_line_smooth					: return GL_LINE_SMOOTH;
+		case capability_multisample					: return GL_MULTISAMPLE;
+		case capability_polygon_smooth				: return GL_POLYGON_SMOOTH;
+		case capability_sample_mask					: return GL_SAMPLE_MASK;
+		case capability_scissor_test				: return GL_SCISSOR_TEST;
+		case capability_stencil_test				: return GL_STENCIL_TEST;
+		case capability_texture_1d					: return GL_TEXTURE_1D;
+		case capability_texture_2d					: return GL_TEXTURE_2D;
+		case capability_texture_3d					: return GL_TEXTURE_2D;
+		case capability_texture_cube_map			: return GL_TEXTURE_CUBE_MAP;
+		case capability_texture_cube_map_seamless	: return GL_TEXTURE_CUBE_MAP_SEAMLESS;
 		}
 	}
 
@@ -103,25 +146,15 @@ namespace ml::gl
 		}
 	}
 
-	constexpr uint32_t _capability(uint32_t value) noexcept
+	constexpr uint32_t _clear_flags(uint32_t value) noexcept
 	{
 		switch (value)
 		{
-		default										: return value;
-		case capability_alpha_test					: return GL_ALPHA_TEST;
-		case capability_blend						: return GL_BLEND;
-		case capability_cull_face					: return GL_CULL_FACE;
-		case capability_depth_clamp					: return GL_DEPTH_CLAMP;
-		case capability_depth_test					: return GL_DEPTH_TEST;
-		case capability_dither						: return GL_DITHER;
-		case capability_framebuffer_srgb			: return GL_FRAMEBUFFER_SRGB;
-		case capability_line_smooth					: return GL_LINE_SMOOTH;
-		case capability_multisample					: return GL_MULTISAMPLE;
-		case capability_polygon_smooth				: return GL_POLYGON_SMOOTH;
-		case capability_sample_mask					: return GL_SAMPLE_MASK;
-		case capability_scissor_test				: return GL_SCISSOR_TEST;
-		case capability_stencil_test				: return GL_STENCIL_TEST;
-		case capability_texture_cube_map_seamless	: return GL_TEXTURE_CUBE_MAP_SEAMLESS;
+		default					: return value;
+		case clear_flags_accum	: return GL_ACCUM_BUFFER_BIT;
+		case clear_flags_color	: return GL_COLOR_BUFFER_BIT;
+		case clear_flags_depth	: return GL_DEPTH_BUFFER_BIT;
+		case clear_flags_stencil: return GL_STENCIL_BUFFER_BIT;
 		}
 	}
 
@@ -197,6 +230,16 @@ namespace ml::gl
 		}
 	}
 
+	constexpr uint32_t _front_face(uint32_t value) noexcept
+	{
+		switch (value)
+		{
+		default				: return value;
+		case front_face_cw	: return GL_CW;
+		case front_face_ccw	: return GL_CCW;
+		}
+	}
+
 	constexpr uint32_t _facet(uint32_t value) noexcept
 	{
 		switch (value)
@@ -258,64 +301,19 @@ namespace ml::gl
 		}
 	}
 
-	constexpr uint32_t _store(uint32_t value) noexcept
+	constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
 		switch (value)
 		{
-		default							: return value;
-		case store_unpack_swap_bytes	: return GL_UNPACK_SWAP_BYTES;
-		case store_unpack_lsb_first		: return GL_UNPACK_LSB_FIRST;
-		case store_unpack_row_length	: return GL_UNPACK_ROW_LENGTH;
-		case store_unpack_skip_rows		: return GL_UNPACK_SKIP_ROWS;
-		case store_unpack_skip_pixels	: return GL_UNPACK_SKIP_PIXELS;
-		case store_unpack_alignment		: return GL_UNPACK_ALIGNMENT;
-		case store_pack_swap_bytes		: return GL_PACK_SWAP_BYTES;
-		case store_pack_lsb_first		: return GL_PACK_LSB_FIRST;
-		case store_pack_row_length		: return GL_PACK_ROW_LENGTH;
-		case store_pack_skip_rows		: return GL_PACK_SKIP_ROWS;
-		case store_pack_skip_pixels		: return GL_PACK_SKIP_PIXELS;
-		case store_pack_alignment		: return GL_PACK_ALIGNMENT;
+		default						: return value;
+		case texture_type_1d		: return GL_TEXTURE_1D;
+		case texture_type_2d		: return GL_TEXTURE_2D;
+		case texture_type_3d		: return GL_TEXTURE_3D;
+		case texture_type_cube_map	: return GL_TEXTURE_CUBE_MAP;
 		}
 	}
 
-	constexpr uint32_t _texture(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default										: return value;
-		case texture_type_2d						: return GL_TEXTURE_2D;
-		case texture_type_3d						: return GL_TEXTURE_3D;
-		case texture_type_cube_map					: return GL_TEXTURE_CUBE_MAP;
-
-		case texture_param_nearest					: return GL_NEAREST;
-		case texture_param_linear					: return GL_LINEAR;
-		case texture_param_nearest_mipmap_nearest	: return GL_NEAREST_MIPMAP_NEAREST;
-		case texture_param_linear_mipmap_nearest	: return GL_LINEAR_MIPMAP_NEAREST;
-		case texture_param_nearest_mipmap_linear	: return GL_NEAREST_MIPMAP_LINEAR;
-		case texture_param_linear_mipmap_linear		: return GL_LINEAR_MIPMAP_LINEAR;
-		case texture_param_texture_mag_filter		: return GL_TEXTURE_MAG_FILTER;
-		case texture_param_texture_min_filter		: return GL_TEXTURE_MIN_FILTER;
-		case texture_param_texture_wrap_s			: return GL_TEXTURE_WRAP_S;
-		case texture_param_texture_wrap_t			: return GL_TEXTURE_WRAP_T;
-		case texture_param_texture_wrap_r			: return GL_TEXTURE_WRAP_R;
-		case texture_param_clamp					: return GL_CLAMP;
-		case texture_param_repeat					: return GL_REPEAT;
-		case texture_param_clamp_to_edge			: return GL_CLAMP_TO_EDGE;
-		case texture_param_texture_min_lod			: return GL_TEXTURE_MIN_LOD;
-		case texture_param_texture_max_lod			: return GL_TEXTURE_MAX_LOD;
-		case texture_param_texture_base_level		: return GL_TEXTURE_BASE_LEVEL;
-		case texture_param_texture_max_level		: return GL_TEXTURE_MAX_LEVEL;
-
-		case texture_cube_map_positive_x			: return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-		case texture_cube_map_negative_x			: return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
-		case texture_cube_map_positive_y			: return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
-		case texture_cube_map_negative_y			: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
-		case texture_cube_map_positive_z			: return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
-		case texture_cube_map_negative_z			: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
-		}
-	}
-
-	constexpr uint32_t _shader(uint32_t value) noexcept
+	constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
 		switch (value)
 		{
@@ -323,17 +321,6 @@ namespace ml::gl
 		case shader_type_vertex		: return GL_VERTEX_SHADER;
 		case shader_type_fragment	: return GL_FRAGMENT_SHADER;
 		case shader_type_geometry	: return GL_GEOMETRY_SHADER;
-		}
-	}
-
-	constexpr uint32_t _framebuffer(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default										: return value;
-		case framebuffer_default					: return GL_FRAMEBUFFER_DEFAULT;
-		case framebuffer_undefined					: return GL_FRAMEBUFFER_UNDEFINED;
-		case framebuffer_depth_stencil_attachment	: return GL_DEPTH_STENCIL_ATTACHMENT;
 		}
 	}
 
@@ -452,7 +439,7 @@ namespace ml
 			glCheck(glBindVertexArray(value ? value->m_handle : NULL));
 		}
 
-		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
+		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		uint32_t get_mode() const noexcept override { return m_mode; }
 
@@ -497,7 +484,7 @@ namespace ml
 			glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, (m_size = size), vertices));
 		}
 
-		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
+		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		uint32_t get_size() const noexcept override { return m_size; }
 
@@ -532,7 +519,7 @@ namespace ml
 			glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, (m_count = count) * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
 		}
 
-		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
+		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		uint32_t get_count() const noexcept override { return m_count; }
 
@@ -571,7 +558,7 @@ namespace ml
 				GL_TEXTURE_2D, *reinterpret_cast<uint32_t const *>(value), level));
 		}
 
-		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
+		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t m_handle{}; // handle
@@ -603,7 +590,7 @@ namespace ml
 			glCheck(glRenderbufferStorage(GL_RENDERBUFFER, gl::_format(format), width, height));
 		}
 
-		void const * get_handle() const noexcept override { return std::addressof(m_handle); }
+		void * get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t m_handle{}; // handle
@@ -629,8 +616,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool get_enabled(uint32_t capability) const override;
-		
 		uint32_t get_error() const override;
 		
 		cstring get_extensions() const override;
@@ -651,36 +636,62 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_active_texture(void const * value) override;
+		gl::alpha_function get_alpha_function() const override;
 		
-		void set_alpha_function(uint32_t predicate, float_t ref) override;
+		color get_blend_color() const override;
+		
+		gl::blend_equation	get_blend_equation() const override;
+		
+		gl::blend_function get_blend_function() const override;
+		
+		color get_clear_color() const override;
+		
+		uint32_t get_depth_function() const override;
+		
+		bool get_depth_mask() const override;
 
+		gl::depth_range get_depth_range() const override;
+		
+		bool get_enabled(uint32_t capability) const override;
+		
+		uint32_t get_front_face() const override;
+		
+		int_rect get_viewport() const override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_alpha_function(gl::alpha_function const & value) override;
+		
 		void set_blend_color(color const & value) override;
 		
-		void set_blend_equation(uint32_t modeRGB, uint32_t modeAlpha) override;
+		void set_blend_equation(gl::blend_equation const & value) override;
 		
-		void set_blend_function(uint32_t srgb, uint32_t drgb, uint32_t salpha, uint32_t dalpha) override;
+		void set_blend_function(gl::blend_function const & value) override;
 		
 		void set_clear_color(color const & value) override;
-
+		
 		void set_cull_mode(uint32_t facet) override;
 		
 		void set_depth_function(uint32_t predicate) override;
 		
 		void set_depth_mask(bool enabled) override;
+
+		void set_depth_range(gl::depth_range const & value) override;
 		
 		void set_enabled(uint32_t capability, bool enabled) override;
+		
+		void set_front_face(uint32_t front_face) override;
 		
 		void set_viewport(int_rect const & bounds) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
+
 		void clear(uint32_t flags) override;
-
-		void draw_arrays(uint32_t mode, uint32_t first, uint32_t count) override;
-
-		void draw_indexed(uint32_t mode, int32_t first, uint32_t type, void const * indices) override;
-
+		
+		void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) override;
+		
+		void draw_indexed(uint32_t primitive, int32_t first, uint32_t type, void const * indices) override;
+		
 		void flush() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
