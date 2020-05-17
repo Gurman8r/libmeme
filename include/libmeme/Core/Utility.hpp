@@ -21,33 +21,33 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read flag at index
-#define ML_flag_read(v, i)			(v & i)
+#define ML_flag_read(v, d)			(v & d)
 
 // set flag at index
-#define ML_flag_set(v, i)			(v |= i)
+#define ML_flag_set(v, d)			(v |= d)
 
 // clear flag at index
-#define ML_flag_clear(v, i)			(v &= ~i)
+#define ML_flag_clear(v, d)			(v &= ~d)
 
 // conditional set or clear flag
-#define ML_flag_write(v, i, b)		(b ? ML_flag_set(v, i) : ML_flag_clear(v, i))
+#define ML_flag_write(v, d, b)		(b ? ML_flag_set(v, d) : ML_flag_clear(v, d))
 
 // map between flag bits
-#define ML_flag_map(dst, src, i, j)	ML_flag_write(dst, i, ML_flag_read(src, j))
+#define ML_flag_map(dst, d, src, s)	ML_flag_write(dst, d, ML_flag_read(src, s))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read bit at index
-#define ML_bit_read(v, i)			ML_flag_read(v >> i, 1)
+#define ML_bit_read(v, d)			ML_flag_read(v >> d, 1)
 
 // set bit at index
-#define ML_bit_set( v, i)			ML_flag_set(v, 1 << i)
+#define ML_bit_set( v, d)			ML_flag_set(v, 1 << d)
 
 // clear bit at index
-#define ML_bit_clear(v, i)			ML_flag_clear(v, 1 << i)
+#define ML_bit_clear(v, d)			ML_flag_clear(v, 1 << d)
 
 // conditional set or clear bit
-#define ML_bit_write(v, i, b)		(b ? ML_bit_set(v, i) : ML_bit_clear(v, i))
+#define ML_bit_write(v, d, b)		(b ? ML_bit_set(v, d) : ML_bit_clear(v, d))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -166,8 +166,8 @@ namespace ml::util
 	> ML_NODISCARD constexpr auto dot(A<T, N...> const & lhs, A<T, N...> const & rhs)
 	{
 		T temp{};
-		for (size_t i = 0; i < lhs.size(); ++i)
-			temp += (lhs[i] * rhs[i]);
+		for (size_t d = 0; d < lhs.size(); ++d)
+			temp += (lhs[d] * rhs[d]);
 		return temp;
 	}
 
@@ -207,11 +207,11 @@ namespace ml::util
 	> ML_NODISCARD constexpr auto transpose(A<T, N...> const & value)
 	{
 		A<T, N...> temp{};
-		for (size_t i = 0; i < value.size(); ++i)
+		for (size_t d = 0; d < value.size(); ++d)
 		{
-			size_t const y{ i % value.width() }, x{ i / value.width() };
+			size_t const y{ d % value.width() }, x{ d / value.width() };
 			
-			temp[i] = value[y * value.width() + x];
+			temp[d] = value[y * value.width() + x];
 		}
 		return temp;
 	}

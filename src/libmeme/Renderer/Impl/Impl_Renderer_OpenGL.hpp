@@ -110,19 +110,19 @@ namespace ml::gl
 	template <class Convt> constexpr uint32_t _clear_flags(uint32_t value) noexcept
 	{
 		uint32_t temp{};
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
-			ML_flag_map(temp, value, clear_flags_accum	, GL_ACCUM_BUFFER_BIT);
-			ML_flag_map(temp, value, clear_flags_color	, GL_COLOR_BUFFER_BIT);
-			ML_flag_map(temp, value, clear_flags_depth	, GL_DEPTH_BUFFER_BIT);
-			ML_flag_map(temp, value, clear_flags_stencil, GL_STENCIL_BUFFER_BIT);
+			ML_flag_map(temp, GL_ACCUM_BUFFER_BIT	, value, clear_flags_accum);
+			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, clear_flags_color);
+			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, clear_flags_depth);
+			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, clear_flags_stencil);
 		}
 		else
 		{
-			ML_flag_map(temp, value, GL_ACCUM_BUFFER_BIT	, clear_flags_accum);
-			ML_flag_map(temp, value, GL_COLOR_BUFFER_BIT	, clear_flags_color);
-			ML_flag_map(temp, value, GL_DEPTH_BUFFER_BIT	, clear_flags_depth);
-			ML_flag_map(temp, value, GL_STENCIL_BUFFER_BIT	, clear_flags_stencil);
+			ML_flag_map(temp, clear_flags_accum		, value, GL_ACCUM_BUFFER_BIT);
+			ML_flag_map(temp, clear_flags_color		, value, GL_COLOR_BUFFER_BIT);
+			ML_flag_map(temp, clear_flags_depth		, value, GL_DEPTH_BUFFER_BIT);
+			ML_flag_map(temp, clear_flags_stencil	, value, GL_STENCIL_BUFFER_BIT);
 		}
 		return temp;
 	}
@@ -131,7 +131,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -167,7 +167,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -193,7 +193,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -229,7 +229,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -265,7 +265,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -301,7 +301,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -331,7 +331,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _cull_order(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -355,7 +355,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _facet(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -393,7 +393,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _factor(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -435,7 +435,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _format(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -489,7 +489,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -517,7 +517,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{
@@ -543,7 +543,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _attachment(uint32_t value) noexcept
 	{
-		if constexpr (Convt{})
+		if constexpr (Convt()) // to_impl
 		{
 			switch (value)
 			{

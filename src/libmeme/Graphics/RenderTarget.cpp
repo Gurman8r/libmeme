@@ -20,7 +20,7 @@ namespace ml
 		ML_bind_scope(vao);
 		ML_bind_scope(vbo);
 		ML_bind_scope(ibo);
-		gl::render_command::draw_indexed(gl::primitive_triangles, ibo.m_count, gl::type_unsigned_byte, nullptr)();
+		gl::render_command::draw_indexed(gl::primitive_triangles, ibo.m_count, gl::type_unsigned_int, nullptr)();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
