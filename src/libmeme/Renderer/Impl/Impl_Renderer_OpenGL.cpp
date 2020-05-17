@@ -117,6 +117,10 @@ namespace ml::gl
 		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
 	}
 
+	void opengl_frame_buffer::resize(vec2i const & value)
+	{
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_shader_object::opengl_shader_object()

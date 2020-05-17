@@ -679,6 +679,8 @@ namespace ml::gl
 
 		void unbind() const override;
 
+		void resize(vec2i const & value) override;
+
 		inline uint32_t get_color_attachment() const override { return m_color_attachment; }
 
 		inline uint32_t get_depth_attachment() const override { return m_depth_attachment; }

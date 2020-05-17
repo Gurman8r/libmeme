@@ -342,6 +342,8 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
+		virtual void resize(vec2i const & value) = 0;
+
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_color_attachment() const = 0;
