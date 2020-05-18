@@ -132,7 +132,7 @@ namespace ml::gl
 			switch (value)
 			{
 			default									: return value;
-			case error_no_error							: return GL_NO_ERROR;
+			case error_no_error						: return GL_NO_ERROR;
 			case error_invalid_enum					: return GL_INVALID_ENUM;
 			case error_invalid_value				: return GL_INVALID_VALUE;
 			case error_invalid_operation			: return GL_INVALID_OPERATION;
@@ -978,11 +978,6 @@ namespace ml::gl
 		return temp;
 	}
 
-	bool opengl_render_api::get_multisample_enabled() const
-	{
-		return glIsEnabled(GL_MULTISAMPLE);
-	}
-
 	int_rect opengl_render_api::get_viewport() const
 	{
 		int_rect temp{};
@@ -1066,11 +1061,6 @@ namespace ml::gl
 	void opengl_render_api::set_depth_range(depth_range const & value)
 	{
 		glCheck(glDepthRangef(value.nearVal, value.farVal));
-	}
-
-	void opengl_render_api::set_multisample_enabled(bool enabled)
-	{
-		glCheck((enabled ? &glEnable : &glDisable)(GL_MULTISAMPLE));
 	}
 
 	void opengl_render_api::set_viewport(int_rect const & bounds)

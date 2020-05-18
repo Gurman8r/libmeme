@@ -22,7 +22,7 @@ namespace ml::impl
     }
 }
 
-// invoke immediately
+// invoke on enter
 #define ML_scope \
     auto ML_anon = _ML impl::immediate_scope_tag{} + [&]() noexcept
 
@@ -49,7 +49,7 @@ namespace ml::impl
     }
 }
 
-// invoke on scope exit
+// invoke on exit
 #define ML_defer \
     auto ML_anon = _ML impl::deferred_scope_tag{} + [&]() noexcept
 

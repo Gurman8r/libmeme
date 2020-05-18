@@ -231,32 +231,45 @@ namespace ml::gl
 
 	struct ML_NODISCARD buffer_layout final
 	{
-		struct ML_NODISCARD element
+		struct ML_NODISCARD element final
 		{
 			pmr::string name	{};
-			typeof<>	type	{};
+			hash_t		type	{};
 			uint32_t	size	{};
 			uint32_t	offset	{};
 		};
 
-		pmr::vector<element> m_data;
-
 		template <class ... Args
-		> buffer_layout(Args && ... args) noexcept
-			: m_data{ pmr::vector<element>{ ML_forward(args)... } }
+		> buffer_layout(Args && ... args) noexcept : m_data{ { ML_forward(args)... } }
 		{
+			uint32_t offset{};
+			for (auto & e : m_data)
+			{
+				e.offset = offset;
+				offset += e.size;
+				m_stride += e.size;
+			}
 		}
+
+		auto elements() const & noexcept -> pmr::vector<element> const & { return m_data; }
+
+		uint32_t stride() const noexcept { return m_stride; }
+
+	private:
+		pmr::vector<element> m_data{};
+		
+		uint32_t m_stride{};
 	};
 
 	template <class T
-	> ML_NODISCARD auto layout_element(pmr::string && name) noexcept
+	> ML_NODISCARD auto make_layout_element(pmr::string && name) noexcept
 	{
 		static_assert(util::is_any_of_v<T,
 			bool, int32_t, float_t, vec2, vec3, vec4, color, mat2, mat3, mat4
 		>);
 		return buffer_layout::element
 		{
-			ML_forward(name), typeof_v<T>, sizeof(T), 0
+			ML_forward(name), hashof_v<T>, sizeof(T), 0
 		};
 	}
 
@@ -462,9 +475,14 @@ namespace ml::gl
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static render_api * const & get() noexcept;
+		static render_api * get() noexcept;
 
-		inline bool initialize() noexcept { return get()->do_initialize(); }
+		inline bool initialize() noexcept
+		{
+			bool temp{};
+			static ML_scope{ temp = this->do_initialize(); }; // once
+			return temp;
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -516,8 +534,6 @@ namespace ml::gl
 
 		virtual depth_range get_depth_range() const = 0;
 
-		virtual bool get_multisample_enabled() const = 0;
-
 		virtual int_rect get_viewport() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -540,7 +556,7 @@ namespace ml::gl
 
 		virtual void set_cull_face(uint32_t facet) = 0;
 
-		virtual void set_cull_order(uint32_t front_face) = 0;
+		virtual void set_cull_order(uint32_t order) = 0;
 		
 		virtual void set_depth_enabled(bool enabled) = 0;
 
@@ -549,8 +565,6 @@ namespace ml::gl
 		virtual void set_depth_mask(bool enabled) = 0;
 
 		virtual void set_depth_range(depth_range const & value) = 0;
-
-		virtual void set_multisample_enabled(bool enabled) = 0;
 
 		virtual void set_viewport(int_rect const & bounds) = 0;
 
@@ -647,11 +661,6 @@ namespace ml::gl
 		static command set_depth_range(depth_range const & value) noexcept
 		{
 			return std::bind(&render_api::set_depth_range, render_api::get(), value);
-		}
-
-		static command set_multisample_enabled(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_multisample_enabled, render_api::get(), enabled);
 		}
 
 		static command set_viewport(int_rect const & bounds) noexcept

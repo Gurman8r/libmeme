@@ -12,6 +12,10 @@ using impl_frame_buffer		= _ML gl::opengl_frame_buffer;
 using impl_shader_object	= _ML gl::opengl_shader_object;
 using impl_texture_object	= _ML gl::opengl_texture_object;
 
+#elif defined(ML_IMPL_RENDERER_DIRECTX)
+#elif defined(ML_IMPL_RENDERER_VULKAN)
+// etc...
+
 #else
 #error "Unknown or invalid renderer implementation specified."
 #endif
@@ -21,17 +25,10 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_api * const & render_api::get() noexcept
+	render_api * render_api::get() noexcept
 	{
-		static render_api * temp
-		{
-			new impl_render_api{}
-		};
-		static ML_defer
-		{
-			delete temp;
-		};
-		return temp;
+		static impl_render_api inst{};
+		return std::addressof(inst);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

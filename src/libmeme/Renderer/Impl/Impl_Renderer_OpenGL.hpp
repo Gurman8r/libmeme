@@ -254,8 +254,6 @@ namespace ml::gl
 
 		depth_range get_depth_range() const override;
 
-		bool get_multisample_enabled() const override;
-		
 		int_rect get_viewport() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -287,8 +285,6 @@ namespace ml::gl
 		void set_depth_mask(bool enabled) override;
 
 		void set_depth_range(depth_range const & value) override;
-
-		void set_multisample_enabled(bool enabled) override;
 
 		void set_viewport(int_rect const & bounds) override;
 
