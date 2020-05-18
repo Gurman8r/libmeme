@@ -571,8 +571,7 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertex_array::opengl_vertex_array(uint32_t mode)
-		: m_mode{ mode }
+	opengl_vertex_array::opengl_vertex_array()
 	{
 		glCheck(glGenVertexArrays(1, &m_handle));
 	}
@@ -594,8 +593,8 @@ namespace ml::gl
 
 	void opengl_vertex_array::add_vertices(shared<vertex_buffer> const & value)
 	{
-		this->bind();
-		value->bind();
+		this->bind(); m_vertices.emplace_back(value)->bind();
+
 		auto const & layout{ value->get_layout() };
 		for (auto const & e : layout.get_elements())
 		{
@@ -619,14 +618,11 @@ namespace ml::gl
 				(buffer)(intptr_t)e.offset
 			));
 		}
-		m_vertices.push_back(value);
 	}
 
 	void opengl_vertex_array::set_indices(shared<index_buffer> const & value)
 	{
-		this->bind();
-		value->bind();
-		m_indices = value;
+		this->bind(); (m_indices = value)->bind();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1121,14 +1117,14 @@ namespace ml::gl
 			nullptr));
 	}
 
-	void opengl_render_api::draw_arrays(uint32_t primitive, uint32_t first, uint32_t count)
+	void opengl_render_api::draw_arrays(uint32_t first, uint32_t count)
 	{
-		glCheck(glDrawArrays(_primitive<to_impl>(primitive), first, count));
+		glCheck(glDrawArrays(GL_TRIANGLES, first, count));
 	}
 
-	void opengl_render_api::draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices)
+	void opengl_render_api::draw_indexed(uint32_t count)
 	{
-		glCheck(glDrawElements(_primitive<to_impl>(primitive), first, _type<to_impl>(index_type), indices));
+		glCheck(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
 	}
 
 	void opengl_render_api::flush()

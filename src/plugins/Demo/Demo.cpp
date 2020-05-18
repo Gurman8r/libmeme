@@ -439,33 +439,44 @@ namespace ml
 				}
 				m_ecs.update_system<x_draw_renderers>(rt);
 
-				static auto va = gl::vertex_array::create(gl::primitive_triangles);
+				static auto va = gl::vertex_array::create();
 				static auto sh = shader{ m_shaders["3d"] };
 				static auto mt = material{ m_materials["earth"] };
 				static ML_scope // once
 				{
-					static float_t verts[] =
+					constexpr float_t tri_v[] =
+					{
+						.0f, +.5f, 0,	1, 1, 1,	0.5f, 1.0f,
+						.5f, -.5f, 0,	1, 1, 1,	1.0f, 0.0f,
+						.5f, -.5f, 0,	1, 1, 1,	0.0f, 0.0f,
+					};
+					constexpr uint32_t tri_i[] =
+					{
+						0, 1, 2,
+					};
+
+					constexpr float_t quad_v[] =
 					{
 						+1, +1, 0, 1,	1, 1, 1,	1, 1,
 						+1, -1, 0, 1,	1, 1, 1,	1, 0,
 						-1, -1, 0, 1,	1, 1, 1,	0, 0,
 						-1, +1, 0, 1,	1, 1, 1,	0, 1,
 					};
-
-					static uint32_t inds[] =
+					constexpr uint32_t quad_i[] =
 					{
 						0, 1, 3,
 						1, 2, 3,
 					};
 
-					auto vb = gl::vertex_buffer::create(verts, sizeof(verts));
-					vb->set_layout({
-						gl::layout_element<vec3>("a_position"),
-						gl::layout_element<vec3>("a_normal"),
-						gl::layout_element<vec2>("a_texcoord"),
+					auto vb = gl::vertex_buffer::create(quad_v, sizeof(quad_v));
+					vb->set_layout
+					({
+						gl::make_layout<vec3>{ "a_position"	},
+						gl::make_layout<vec3>{ "a_normal"	},
+						gl::make_layout<vec2>{ "a_texcoord" },
 					});
 					va->add_vertices(vb);
-					va->set_indices(gl::index_buffer::create(inds, 6));
+					va->set_indices(gl::index_buffer::create(quad_i, ML_arraysize(quad_i)));
 				};
 				mt	.set<vec3>("u_position"	, vec3{ .0f, 0.f, 0.f })
 					.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .15f })
@@ -473,6 +484,7 @@ namespace ml
 				sh.bind(false);
 				for (auto & u : mt) { sh.set_uniform(u); }
 				sh.bind(true);
+
 				gl::render_command::draw(va)();
 			}
 		}

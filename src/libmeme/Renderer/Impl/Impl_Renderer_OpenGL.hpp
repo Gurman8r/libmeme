@@ -17,7 +17,7 @@ namespace ml::gl
 	class opengl_vertex_array final : public vertex_array
 	{
 	public:
-		opengl_vertex_array(uint32_t mode);
+		opengl_vertex_array();
 
 		~opengl_vertex_array();
 
@@ -33,13 +33,10 @@ namespace ml::gl
 
 		inline shared<index_buffer> const & get_indices() const override { return m_indices; }
 
-		inline uint32_t get_mode() const override { return m_mode; }
-
 		inline pmr::vector<shared<vertex_buffer>> const & get_vertices() const override { return m_vertices; }
 
 	private:
 		uint32_t m_handle	{}						; // handle
-		uint32_t m_mode		{ primitive_triangles }	; // draw mode
 		uint32_t m_index	{}						; // vertex attrib index
 
 		pmr::vector<shared<vertex_buffer>>	m_vertices	{}; // vertex buffers
@@ -293,9 +290,9 @@ namespace ml::gl
 
 		void draw(shared<vertex_array> const & value) override;
 		
-		void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) override;
+		void draw_arrays(uint32_t first, uint32_t count) override;
 		
-		void draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) override;
+		void draw_indexed(uint32_t count) override;
 		
 		void flush() override;
 

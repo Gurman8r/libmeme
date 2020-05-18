@@ -7,6 +7,7 @@
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
+#include <libmeme/Core/BatchVector.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -27,11 +28,12 @@ namespace ml::gl
 	// aliases
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias			allocator	= pmr::polymorphic_allocator<byte_t>; // allocator type
-	ML_alias			buffer		= void const *			; // generic data buffer type
-	ML_alias			command		= std::function<void()>	; // render command type
-	ML_alias			handle		= void *				; // generic handle type
-	ML_alias_T(class T)	shared		= std::shared_ptr<T>	; // object pointer type
+	ML_alias buffer		= void const *			; // data buffer type
+	ML_alias command	= std::function<void()>	; // render command type
+	ML_alias handle		= void *				; // generic handle type
+	
+	template <class T
+	> ML_alias shared	= std::shared_ptr<T>	; // object pointer type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -229,101 +231,109 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// vertex buffer layout element
-	struct ML_NODISCARD buffer_element final
-	{
-		pmr::string name		{};
-		hash_t		type		{};
-		uint32_t	size		{};
-		uint32_t	offset		{};
-		bool		normalized	{};
-
-		hash_t get_base_type() const noexcept
-		{
-			switch (type)
-			{
-			default					: return 0;
-			case hashof_v<bool>		: return hashof_v<bool>;
-			case hashof_v<int32_t>	:
-			case hashof_v<vec2i>	:
-			case hashof_v<vec3i>	:
-			case hashof_v<vec4i>	:
-			case hashof_v<mat2i>	:
-			case hashof_v<mat3i>	:
-			case hashof_v<mat4i>	: return hashof_v<int32_t>;
-			case hashof_v<float_t>	:
-			case hashof_v<vec2f>	:
-			case hashof_v<vec3f>	:
-			case hashof_v<vec4f>	:
-			case hashof_v<mat2f>	:
-			case hashof_v<mat3f>	:
-			case hashof_v<mat4f>	: return hashof_v<float_t>;
-			}
-		}
-
-		uint32_t get_component_count() const noexcept
-		{
-			switch (type)
-			{
-			default					: return 0;
-			case hashof_v<bool>		:
-			case hashof_v<int32_t>	:
-			case hashof_v<float_t>	: return 1;
-			case hashof_v<vec2i>	:
-			case hashof_v<vec2f>	: return 2 * 1;
-			case hashof_v<vec3i>	:
-			case hashof_v<vec3f>	: return 3 * 1;
-			case hashof_v<vec4i>	:
-			case hashof_v<vec4f>	: return 4 * 1;
-			case hashof_v<mat2i>	:
-			case hashof_v<mat2f>	: return 2 * 2;
-			case hashof_v<mat3i>	:
-			case hashof_v<mat3f>	: return 3 * 3;
-			case hashof_v<mat4i>	:
-			case hashof_v<mat4f>	: return 4 * 4;
-			}
-		}
-	};
-
-	template <class T
-	> ML_NODISCARD auto layout_element(pmr::string const & name, bool normalized = 0) noexcept
+	// buffer layout element descriptor
+	template <class T> struct ML_NODISCARD make_layout final
 	{
 		static_assert(util::is_any_of_v<T,
 			bool,
 			int32_t, vec2i, vec3i, vec4i, mat2i, mat3i, mat4i,
 			float_t, vec2f, vec3f, vec4f, mat2f, mat3f, mat4f
 		>);
-		return buffer_element{ name, hashof_v<T>, sizeof(T), 0, normalized };
-	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		using type = T; cstring name; bool normalized;
+	};
 
 	// vertex buffer layout
 	struct ML_NODISCARD buffer_layout final
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		struct ML_NODISCARD element final
+		{
+			pmr::string name		{};
+			hash_t		type		{};
+			uint32_t	size		{};
+			uint32_t	offset		{};
+			bool		normalized	{};
+
+			hash_t get_base_type() const noexcept
+			{
+				switch (type)
+				{
+				default					: return 0;
+				case hashof_v<bool>		: return hashof_v<bool>;
+				case hashof_v<int32_t>	:
+				case hashof_v<vec2i>	:
+				case hashof_v<vec3i>	:
+				case hashof_v<vec4i>	:
+				case hashof_v<mat2i>	:
+				case hashof_v<mat3i>	:
+				case hashof_v<mat4i>	: return hashof_v<int32_t>;
+				case hashof_v<float_t>	:
+				case hashof_v<vec2f>	:
+				case hashof_v<vec3f>	:
+				case hashof_v<vec4f>	:
+				case hashof_v<mat2f>	:
+				case hashof_v<mat3f>	:
+				case hashof_v<mat4f>	: return hashof_v<float_t>;
+				}
+			}
+
+			uint32_t get_component_count() const noexcept
+			{
+				switch (type)
+				{
+				default					: return 0;
+				case hashof_v<bool>		:
+				case hashof_v<int32_t>	:
+				case hashof_v<float_t>	: return 1;
+				case hashof_v<vec2i>	:
+				case hashof_v<vec2f>	: return 2 * 1;
+				case hashof_v<vec3i>	:
+				case hashof_v<vec3f>	: return 3 * 1;
+				case hashof_v<vec4i>	:
+				case hashof_v<vec4f>	: return 4 * 1;
+				case hashof_v<mat2i>	:
+				case hashof_v<mat2f>	: return 2 * 2;
+				case hashof_v<mat3i>	:
+				case hashof_v<mat3f>	: return 3 * 3;
+				case hashof_v<mat4i>	:
+				case hashof_v<mat4f>	: return 4 * 4;
+				}
+			}
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class ... Args
-		> buffer_layout(Args && ... args) noexcept : m_elements{ ML_forward(args)... }
+		> buffer_layout(Args && ... args) noexcept
 		{
 			uint32_t offset{};
-			for (auto & e : m_elements)
+			m_data.reserve(sizeof...(Args));
+			meta::for_args([&](auto && e) noexcept
 			{
-				e.offset = offset;
-				offset += e.size;
-				m_stride += e.size;
+				using type = typename std::decay_t<decltype(e)>::type;
+				m_data.push_back
+				({
+					e.name, hashof_v<type>, sizeof(type), offset, e.normalized
+				});
+				offset += sizeof(type);
+				m_stride += sizeof(type);
 			}
+			, ML_forward(args)...);
 		}
 
-		auto const & get_elements() const & noexcept { return m_elements; }
+		auto const & get_elements() const & noexcept { return m_data; }
 
 		uint32_t get_stride() const noexcept { return m_stride; }
 
-	private:
-		pmr::vector<buffer_element> m_elements{};
-		
-		uint32_t m_stride{};
-	};
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	private:
+		pmr::vector<element> m_data{}; uint32_t m_stride{};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -351,11 +361,9 @@ namespace ml::gl
 
 		ML_NODISCARD virtual shared<index_buffer> const & get_indices() const = 0;
 		
-		ML_NODISCARD virtual uint32_t get_mode() const = 0;
-		
 		ML_NODISCARD virtual pmr::vector<shared<vertex_buffer>> const & get_vertices() const = 0;
 
-		ML_NODISCARD static shared<vertex_array> create(uint32_t mode, allocator alloc = {});
+		ML_NODISCARD static shared<vertex_array> create();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -380,9 +388,9 @@ namespace ml::gl
 
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
-		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, uint32_t usage = usage_static, allocator alloc = {});
+		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, uint32_t usage = usage_static);
 
-		ML_NODISCARD static shared<vertex_buffer> create(uint32_t size, uint32_t usage = usage_dynamic, allocator alloc = {});
+		ML_NODISCARD static shared<vertex_buffer> create(uint32_t size, uint32_t usage = usage_dynamic);
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -403,7 +411,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
-		ML_NODISCARD static shared<index_buffer> create(buffer indices, uint32_t count, allocator alloc = {});
+		ML_NODISCARD static shared<index_buffer> create(buffer indices, uint32_t count);
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -430,7 +438,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual vec2i get_size() const = 0;
 
-		ML_NODISCARD static shared<frame_buffer> create(uint32_t format, vec2i const & size, allocator alloc = {});
+		ML_NODISCARD static shared<frame_buffer> create(uint32_t format, vec2i const & size);
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -447,7 +455,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
-		ML_NODISCARD static shared<shader_object> create(allocator alloc = {});
+		ML_NODISCARD static shared<shader_object> create();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -466,7 +474,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual uint32_t get_type() const = 0;
 
-		ML_NODISCARD static shared<texture_object> create(allocator alloc = {});
+		ML_NODISCARD static shared<texture_object> create();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -624,9 +632,9 @@ namespace ml::gl
 
 		virtual void draw(shared<vertex_array> const & value) = 0;
 		
-		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
+		virtual void draw_arrays(uint32_t first, uint32_t count) = 0;
 		
-		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) = 0;
+		virtual void draw_indexed(uint32_t count) = 0;
 		
 		virtual void flush() = 0;
 
@@ -732,14 +740,14 @@ namespace ml::gl
 			return std::bind(&render_api::draw, render_api::get_instance(), value);
 		}
 
-		ML_NODISCARD static command draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) noexcept
+		ML_NODISCARD static command draw_arrays(uint32_t first, uint32_t count) noexcept
 		{
-			return std::bind(&render_api::draw_arrays, render_api::get_instance(), primitive, first, count);
+			return std::bind(&render_api::draw_arrays, render_api::get_instance(), first, count);
 		}
 
-		ML_NODISCARD static command draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) noexcept
+		ML_NODISCARD static command draw_indexed(uint32_t count) noexcept
 		{
-			return std::bind(&render_api::draw_indexed, render_api::get_instance(), primitive, first, index_type, indices);
+			return std::bind(&render_api::draw_indexed, render_api::get_instance(), count);
 		}
 
 		ML_NODISCARD static command flush() noexcept

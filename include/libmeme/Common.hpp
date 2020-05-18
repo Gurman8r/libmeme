@@ -89,15 +89,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// global typedefs
-#define ML_alias				using 
-#define ML_alias_T(...)			template <##__VA_ARGS__> using
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // misc
 #define _ML						::ml::
 #define ML_addressof(ptr)		((void *)(intptr_t)(ptr))
+#define ML_alias				using // global typedef
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
 #define ML_forward(x)			std::forward<decltype(x)>(x)
