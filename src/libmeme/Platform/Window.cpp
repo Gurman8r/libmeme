@@ -39,7 +39,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept { ML_assert(m_impl = new impl_window{}); }
+	window::window() noexcept : m_impl{ new impl_window{} } {}
 
 	window::~window() noexcept { delete m_impl; }
 

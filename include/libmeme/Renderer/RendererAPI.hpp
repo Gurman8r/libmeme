@@ -74,21 +74,21 @@ namespace ml::gl
 
 	enum draw_usage_ : uint32_t
 	{
-		draw_usage_stream,
-		draw_usage_static,
-		draw_usage_dynamic,
+		usage_stream,
+		usage_static,
+		usage_dynamic,
 	};
 
-	enum draw_mode_ : uint32_t
+	enum primitive_ : uint32_t
 	{
-		draw_mode_points,
-		draw_mode_lines,
-		draw_mode_line_loop,
-		draw_mode_line_strip,
-		draw_mode_triangles,
-		draw_mode_triangle_strip,
-		draw_mode_triangle_fan,
-		draw_mode_fill,
+		primitive_points,
+		primitive_lines,
+		primitive_line_loop,
+		primitive_line_strip,
+		primitive_triangles,
+		primitive_triangle_strip,
+		primitive_triangle_fan,
+		primitive_fill,
 	};
 
 	enum predicate_ : uint32_t
@@ -224,26 +224,88 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// utility
+// layout
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// vertex buffer layout element
+	struct ML_NODISCARD buffer_element final
+	{
+		pmr::string name		{};
+		hash_t		type		{};
+		uint32_t	size		{};
+		uint32_t	offset		{};
+		bool		normalized	{};
+
+		hash_t get_base_type() const noexcept
+		{
+			switch (type)
+			{
+			default					: return 0;
+			case hashof_v<bool>		: return hashof_v<bool>;
+			case hashof_v<int32_t>	:
+			case hashof_v<vec2i>	:
+			case hashof_v<vec3i>	:
+			case hashof_v<vec4i>	:
+			case hashof_v<mat2i>	:
+			case hashof_v<mat3i>	:
+			case hashof_v<mat4i>	: return hashof_v<int32_t>;
+			case hashof_v<float_t>	:
+			case hashof_v<vec2f>	:
+			case hashof_v<vec3f>	:
+			case hashof_v<vec4f>	:
+			case hashof_v<mat2f>	:
+			case hashof_v<mat3f>	:
+			case hashof_v<mat4f>	: return hashof_v<float_t>;
+			}
+		}
+
+		uint32_t get_component_count() const noexcept
+		{
+			switch (type)
+			{
+			default					: return 0;
+			case hashof_v<bool>		:
+			case hashof_v<int32_t>	:
+			case hashof_v<float_t>	: return 1;
+			case hashof_v<vec2i>	:
+			case hashof_v<vec2f>	: return 2 * 1;
+			case hashof_v<vec3i>	:
+			case hashof_v<vec3f>	: return 3 * 1;
+			case hashof_v<vec4i>	:
+			case hashof_v<vec4f>	: return 4 * 1;
+			case hashof_v<mat2i>	:
+			case hashof_v<mat2f>	: return 2 * 2;
+			case hashof_v<mat3i>	:
+			case hashof_v<mat3f>	: return 3 * 3;
+			case hashof_v<mat4i>	:
+			case hashof_v<mat4f>	: return 4 * 4;
+			}
+		}
+	};
+
+	template <class T
+	> ML_NODISCARD auto layout_element(pmr::string const & name, bool normalized = 0) noexcept
+	{
+		static_assert(util::is_any_of_v<T,
+			bool,
+			int32_t, vec2i, vec3i, vec4i, mat2i, mat3i, mat4i,
+			float_t, vec2f, vec3f, vec4f, mat2f, mat3f, mat4f
+		>);
+		return buffer_element{ name, hashof_v<T>, sizeof(T), 0, normalized };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// vertex buffer layout
 	struct ML_NODISCARD buffer_layout final
 	{
-		struct ML_NODISCARD element final
-		{
-			pmr::string name	{};
-			hash_t		type	{};
-			uint32_t	size	{};
-			uint32_t	offset	{};
-		};
-
 		template <class ... Args
-		> buffer_layout(Args && ... args) noexcept : m_data{ { ML_forward(args)... } }
+		> buffer_layout(Args && ... args) noexcept : m_elements{ ML_forward(args)... }
 		{
 			uint32_t offset{};
-			for (auto & e : m_data)
+			for (auto & e : m_elements)
 			{
 				e.offset = offset;
 				offset += e.size;
@@ -251,64 +313,17 @@ namespace ml::gl
 			}
 		}
 
-		auto elements() const & noexcept -> pmr::vector<element> const & { return m_data; }
+		auto const & get_elements() const & noexcept { return m_elements; }
 
-		uint32_t stride() const noexcept { return m_stride; }
+		uint32_t get_stride() const noexcept { return m_stride; }
 
 	private:
-		pmr::vector<element> m_data{};
+		pmr::vector<buffer_element> m_elements{};
 		
 		uint32_t m_stride{};
 	};
 
-	template <class T
-	> ML_NODISCARD auto make_layout_element(pmr::string && name) noexcept
-	{
-		static_assert(util::is_any_of_v<T,
-			bool, int32_t, float_t, vec2, vec3, vec4, color, mat2, mat3, mat4
-		>);
-		return buffer_layout::element
-		{
-			ML_forward(name), hashof_v<T>, sizeof(T), 0
-		};
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// states
-namespace ml::gl
-{
-	struct ML_NODISCARD alpha_function final
-	{
-		uint32_t func;
-		float_t ref;
-	};
-
-	struct ML_NODISCARD blend_equation final
-	{
-		uint32_t
-			modeRGB,
-			modeAlpha = modeRGB;
-	};
-
-	struct ML_NODISCARD blend_function final
-	{
-		uint32_t
-			sfactorRGB,
-			dfactorRGB,
-			sfactorAlpha = sfactorRGB,
-			dfactorAlpha = dfactorRGB;
-	};
-
-	struct ML_NODISCARD depth_range final
-	{
-		float_t
-			nearVal,
-			farVal;
-	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -359,17 +374,15 @@ namespace ml::gl
 
 		virtual void set_layout(buffer_layout const & value) = 0;
 
-		ML_NODISCARD virtual buffer get_data() const = 0;
-
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
 		ML_NODISCARD virtual buffer_layout const & get_layout() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
-		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, allocator alloc = {});
+		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, uint32_t usage = usage_static, allocator alloc = {});
 
-		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, uint32_t offset, allocator alloc = {});
+		ML_NODISCARD static shared<vertex_buffer> create(uint32_t size, uint32_t usage = usage_dynamic, allocator alloc = {});
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -384,8 +397,10 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
+		virtual void set_data(buffer indices, uint32_t count) = 0;
+
 		ML_NODISCARD virtual uint32_t get_count() const = 0;
-		
+
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
 		ML_NODISCARD static shared<index_buffer> create(buffer indices, uint32_t count, allocator alloc = {});
@@ -459,6 +474,41 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// states
+namespace ml::gl
+{
+	struct ML_NODISCARD alpha_function final
+	{
+		uint32_t func;
+		float_t ref;
+	};
+
+	struct ML_NODISCARD blend_equation final
+	{
+		uint32_t
+			modeRGB,
+			modeAlpha = modeRGB;
+	};
+
+	struct ML_NODISCARD blend_function final
+	{
+		uint32_t
+			sfactorRGB,
+			dfactorRGB,
+			sfactorAlpha = sfactorRGB,
+			dfactorAlpha = dfactorRGB;
+	};
+
+	struct ML_NODISCARD depth_range final
+	{
+		float_t
+			nearVal,
+			farVal;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // api
 namespace ml::gl
 {
@@ -475,7 +525,7 @@ namespace ml::gl
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static render_api * get() noexcept;
+		static render_api * get_instance() noexcept;
 
 		inline bool initialize() noexcept
 		{
@@ -571,6 +621,8 @@ namespace ml::gl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void clear(uint32_t flags) = 0;
+
+		virtual void draw(shared<vertex_array> const & value) = 0;
 		
 		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
 		
@@ -588,106 +640,111 @@ namespace ml::gl
 namespace ml::gl
 {
 	// render command generators
-	class ML_NODISCARD render_command final
+	class render_command final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static command set_alpha_enabled(bool enabled) noexcept
+		ML_NODISCARD static command set_alpha_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_alpha_enabled, render_api::get(), enabled);
+			return std::bind(&render_api::set_alpha_enabled, render_api::get_instance(), enabled);
 		}
 
-		static command set_alpha_function(alpha_function const & value) noexcept
+		ML_NODISCARD static command set_alpha_function(alpha_function const & value) noexcept
 		{
-			return std::bind(&render_api::set_alpha_function, render_api::get(), value);
+			return std::bind(&render_api::set_alpha_function, render_api::get_instance(), value);
 		}
 
-		static command set_blend_enabled(bool enabled) noexcept
+		ML_NODISCARD static command set_blend_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_blend_enabled, render_api::get(), enabled);
+			return std::bind(&render_api::set_blend_enabled, render_api::get_instance(), enabled);
 		}
 		
-		static command set_blend_color(color const & value) noexcept
+		ML_NODISCARD static command set_blend_color(color const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_color, render_api::get(), value);
+			return std::bind(&render_api::set_blend_color, render_api::get_instance(), value);
 		}
 
-		static command set_blend_equation(blend_equation const & value) noexcept
+		ML_NODISCARD static command set_blend_equation(blend_equation const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_equation, render_api::get(), value);
+			return std::bind(&render_api::set_blend_equation, render_api::get_instance(), value);
 		}
 
-		static command set_blend_function(blend_function const & value) noexcept
+		ML_NODISCARD static command set_blend_function(blend_function const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_function, render_api::get(), value);
+			return std::bind(&render_api::set_blend_function, render_api::get_instance(), value);
 		}
 
-		static command set_clear_color(color const & value) noexcept
+		ML_NODISCARD static command set_clear_color(color const & value) noexcept
 		{
-			return std::bind(&render_api::set_clear_color, render_api::get(), value);
+			return std::bind(&render_api::set_clear_color, render_api::get_instance(), value);
 		}
 
-		static command set_cull_enabled(bool enabled) noexcept
+		ML_NODISCARD static command set_cull_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_cull_enabled, render_api::get(), enabled);
+			return std::bind(&render_api::set_cull_enabled, render_api::get_instance(), enabled);
 		}
 
-		static command set_cull_face(uint32_t facet) noexcept
+		ML_NODISCARD static command set_cull_face(uint32_t facet) noexcept
 		{
-			return std::bind(&render_api::set_cull_face, render_api::get(), facet);
+			return std::bind(&render_api::set_cull_face, render_api::get_instance(), facet);
 		}
 
-		static command set_cull_order(uint32_t order) noexcept
+		ML_NODISCARD static command set_cull_order(uint32_t order) noexcept
 		{
-			return std::bind(&render_api::set_cull_order, render_api::get(), order);
+			return std::bind(&render_api::set_cull_order, render_api::get_instance(), order);
 		}
 
-		static command set_depth_enabled(bool enabled) noexcept
+		ML_NODISCARD static command set_depth_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_depth_enabled, render_api::get(), enabled);
+			return std::bind(&render_api::set_depth_enabled, render_api::get_instance(), enabled);
 		}
 
-		static command set_depth_function(uint32_t predicate) noexcept
+		ML_NODISCARD static command set_depth_function(uint32_t predicate) noexcept
 		{
-			return std::bind(&render_api::set_depth_function, render_api::get(), predicate);
+			return std::bind(&render_api::set_depth_function, render_api::get_instance(), predicate);
 		}
 		
-		static command set_depth_mask(bool enabled) noexcept
+		ML_NODISCARD static command set_depth_mask(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_depth_mask, render_api::get(), enabled);
+			return std::bind(&render_api::set_depth_mask, render_api::get_instance(), enabled);
 		}
 
-		static command set_depth_range(depth_range const & value) noexcept
+		ML_NODISCARD static command set_depth_range(depth_range const & value) noexcept
 		{
-			return std::bind(&render_api::set_depth_range, render_api::get(), value);
+			return std::bind(&render_api::set_depth_range, render_api::get_instance(), value);
 		}
 
-		static command set_viewport(int_rect const & bounds) noexcept
+		ML_NODISCARD static command set_viewport(int_rect const & bounds) noexcept
 		{
-			return std::bind(&render_api::set_viewport, render_api::get(), bounds);
+			return std::bind(&render_api::set_viewport, render_api::get_instance(), bounds);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static command clear(uint32_t flags) noexcept
+		ML_NODISCARD static command clear(uint32_t flags) noexcept
 		{
-			return std::bind(&render_api::clear, render_api::get(), flags);
+			return std::bind(&render_api::clear, render_api::get_instance(), flags);
 		}
 
-		static command draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) noexcept
+		ML_NODISCARD static command draw(shared<vertex_array> const & value) noexcept
 		{
-			return std::bind(&render_api::draw_arrays, render_api::get(), primitive, first, count);
+			return std::bind(&render_api::draw, render_api::get_instance(), value);
 		}
 
-		static command draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) noexcept
+		ML_NODISCARD static command draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) noexcept
 		{
-			return std::bind(&render_api::draw_indexed, render_api::get(), primitive, first, index_type, indices);
+			return std::bind(&render_api::draw_arrays, render_api::get_instance(), primitive, first, count);
 		}
 
-		static command flush() noexcept
+		ML_NODISCARD static command draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) noexcept
 		{
-			return std::bind(&render_api::flush, render_api::get());
+			return std::bind(&render_api::draw_indexed, render_api::get_instance(), primitive, first, index_type, indices);
+		}
+
+		ML_NODISCARD static command flush() noexcept
+		{
+			return std::bind(&render_api::flush, render_api::get_instance());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

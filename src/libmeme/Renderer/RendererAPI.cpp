@@ -25,7 +25,7 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_api * render_api::get() noexcept
+	render_api * render_api::get_instance() noexcept
 	{
 		static impl_render_api inst{};
 		return std::addressof(inst);
@@ -46,14 +46,14 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<vertex_buffer> vertex_buffer::create(buffer vertices, uint32_t size, allocator alloc)
+	shared<vertex_buffer> vertex_buffer::create(buffer vertices, uint32_t size, uint32_t usage, allocator alloc)
 	{
-		return std::allocate_shared<impl_vertex_buffer>(alloc, vertices, size);
+		return std::allocate_shared<impl_vertex_buffer>(alloc, vertices, size, usage);
 	}
 
-	shared<vertex_buffer> vertex_buffer::create(buffer vertices, uint32_t size, uint32_t offset, allocator alloc)
+	shared<vertex_buffer> vertex_buffer::create(uint32_t size, uint32_t usage, allocator alloc)
 	{
-		return std::allocate_shared<impl_vertex_buffer>(alloc, vertices, size, offset);
+		return std::allocate_shared<impl_vertex_buffer>(alloc, size, usage);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

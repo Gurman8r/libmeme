@@ -39,7 +39,7 @@ namespace ml::gl
 
 	private:
 		uint32_t m_handle	{}						; // handle
-		uint32_t m_mode		{ draw_mode_triangles }	; // draw mode
+		uint32_t m_mode		{ primitive_triangles }	; // draw mode
 		uint32_t m_index	{}						; // vertex attrib index
 
 		pmr::vector<shared<vertex_buffer>>	m_vertices	{}; // vertex buffers
@@ -52,9 +52,9 @@ namespace ml::gl
 	class opengl_vertex_buffer final : public vertex_buffer
 	{
 	public:
-		opengl_vertex_buffer(buffer vertices, uint32_t size);
+		opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t usage = usage_static);
 
-		opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t offset);
+		opengl_vertex_buffer(uint32_t size, uint32_t usage = usage_dynamic);
 
 		~opengl_vertex_buffer();
 
@@ -65,8 +65,6 @@ namespace ml::gl
 		void set_data(buffer vertices, uint32_t size, uint32_t offset = 0) override;
 
 		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
-
-		inline buffer get_data() const override { return m_data; }
 
 		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
@@ -79,7 +77,6 @@ namespace ml::gl
 		uint32_t		m_size		{}; // data size in bytes
 		uint32_t		m_usage		{}; // draw usage
 		buffer_layout	m_layout	{}; // buffer layout
-		buffer			m_data		{}; // local data
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -96,13 +93,15 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		void set_data(buffer indices, uint32_t count) override;
 
 		inline uint32_t get_count() const override { return m_count; }
 
+		inline handle get_handle() const override { return ML_addressof(m_handle); }
+
 	private:
-		uint32_t m_handle	{}; // handle
-		uint32_t m_count	{}; // index count
+		uint32_t	m_handle	{}; // handle
+		uint32_t	m_count		{}; // index count
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -291,6 +290,8 @@ namespace ml::gl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void clear(uint32_t flags) override;
+
+		void draw(shared<vertex_array> const & value) override;
 		
 		void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) override;
 		

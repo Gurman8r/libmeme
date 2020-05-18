@@ -168,9 +168,9 @@ namespace ml::gl
 			switch (value)
 			{
 			default					: return value;
-			case draw_usage_stream	: return GL_STREAM_DRAW;
-			case draw_usage_static	: return GL_STATIC_DRAW;
-			case draw_usage_dynamic	: return GL_DYNAMIC_DRAW;
+			case usage_stream	: return GL_STREAM_DRAW;
+			case usage_static	: return GL_STATIC_DRAW;
+			case usage_dynamic	: return GL_DYNAMIC_DRAW;
 			}
 		}
 		else // to_user
@@ -178,30 +178,30 @@ namespace ml::gl
 			switch (value)
 			{
 			default					: return value;
-			case GL_STREAM_DRAW		: return draw_usage_stream;
-			case GL_STATIC_DRAW		: return draw_usage_static;
-			case GL_DYNAMIC_DRAW	: return draw_usage_dynamic;
+			case GL_STREAM_DRAW		: return usage_stream;
+			case GL_STATIC_DRAW		: return usage_static;
+			case GL_DYNAMIC_DRAW	: return usage_dynamic;
 			}
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convert> constexpr uint32_t _draw_mode(uint32_t value) noexcept
+	template <class Convert> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
 		if constexpr (Convert()) // to_impl
 		{
 			switch (value)
 			{
 			default							: return value;
-			case draw_mode_points			: return GL_POINTS;
-			case draw_mode_lines			: return GL_LINES;
-			case draw_mode_line_loop		: return GL_LINE_LOOP;
-			case draw_mode_line_strip		: return GL_LINE_STRIP;
-			case draw_mode_triangles		: return GL_TRIANGLES;
-			case draw_mode_triangle_strip	: return GL_TRIANGLE_STRIP;
-			case draw_mode_triangle_fan		: return GL_TRIANGLE_FAN;
-			case draw_mode_fill				: return GL_FILL;
+			case primitive_points			: return GL_POINTS;
+			case primitive_lines			: return GL_LINES;
+			case primitive_line_loop		: return GL_LINE_LOOP;
+			case primitive_line_strip		: return GL_LINE_STRIP;
+			case primitive_triangles		: return GL_TRIANGLES;
+			case primitive_triangle_strip	: return GL_TRIANGLE_STRIP;
+			case primitive_triangle_fan		: return GL_TRIANGLE_FAN;
+			case primitive_fill				: return GL_FILL;
 			}
 		}
 		else // to_user
@@ -209,14 +209,14 @@ namespace ml::gl
 			switch (value)
 			{
 			default					: return value;
-			case GL_POINTS			: return draw_mode_points;
-			case GL_LINES			: return draw_mode_lines;
-			case GL_LINE_LOOP		: return draw_mode_line_loop;
-			case GL_LINE_STRIP		: return draw_mode_line_strip;
-			case GL_TRIANGLES		: return draw_mode_triangles;
-			case GL_TRIANGLE_STRIP	: return draw_mode_triangle_strip;
-			case GL_TRIANGLE_FAN	: return draw_mode_triangle_fan;
-			case GL_FILL			: return draw_mode_fill;
+			case GL_POINTS			: return primitive_points;
+			case GL_LINES			: return primitive_lines;
+			case GL_LINE_LOOP		: return primitive_line_loop;
+			case GL_LINE_STRIP		: return primitive_line_strip;
+			case GL_TRIANGLES		: return primitive_triangles;
+			case GL_TRIANGLE_STRIP	: return primitive_triangle_strip;
+			case GL_TRIANGLE_FAN	: return primitive_triangle_fan;
+			case GL_FILL			: return primitive_fill;
 			}
 		}
 	}
@@ -594,28 +594,54 @@ namespace ml::gl
 
 	void opengl_vertex_array::add_vertices(shared<vertex_buffer> const & value)
 	{
+		this->bind();
+		value->bind();
+		auto const & layout{ value->get_layout() };
+		for (auto const & e : layout.get_elements())
+		{
+			glCheck(glEnableVertexAttribArray(m_index));
+			glCheck(glVertexAttribPointer
+			(
+				m_index++,
+				e.get_component_count(),
+				std::invoke([&]() noexcept -> uint32_t
+				{
+					switch (e.get_base_type())
+					{
+					default					: return 0;
+					case hashof_v<bool>		: return GL_BOOL;
+					case hashof_v<int32_t>	: return GL_INT;
+					case hashof_v<float_t>	: return GL_FLOAT;
+					}
+				}),
+				e.normalized,
+				layout.get_stride(),
+				(buffer)(intptr_t)e.offset
+			));
+		}
+		m_vertices.push_back(value);
 	}
 
 	void opengl_vertex_array::set_indices(shared<index_buffer> const & value)
 	{
+		this->bind();
+		value->bind();
+		m_indices = value;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size)
-		: m_size{ size }, m_usage{ draw_usage_static }
+	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t usage)
+		: m_usage{ usage }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
-		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
+		this->bind();
+		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, _usage<to_impl>(m_usage)));
 	}
 
-	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t offset)
-		: m_size{ size }, m_usage{ draw_usage_dynamic }
+	opengl_vertex_buffer::opengl_vertex_buffer(uint32_t size, uint32_t usage)
+		: opengl_vertex_buffer{ nullptr, size, usage }
 	{
-		glCheck(glGenBuffers(1, &m_handle));
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
-		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
 	}
 
 	opengl_vertex_buffer::~opengl_vertex_buffer()
@@ -635,16 +661,17 @@ namespace ml::gl
 
 	void opengl_vertex_buffer::set_data(buffer vertices, uint32_t size, uint32_t offset)
 	{
+		m_size = size;
+		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_index_buffer::opengl_index_buffer(buffer indices, uint32_t count)
-		: m_count{ count }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
-		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
-		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_UNSIGNED_INT));
+		this->bind();
+		this->set_data(indices, count);
 	}
 
 	opengl_index_buffer::~opengl_index_buffer()
@@ -662,11 +689,18 @@ namespace ml::gl
 		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL));
 	}
 
+	void opengl_index_buffer::set_data(buffer indices, uint32_t count)
+	{
+		m_count = count;
+		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW));
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_frame_buffer::opengl_frame_buffer::opengl_frame_buffer(uint32_t format, vec2i const & size)
-		: m_format{ format }, m_size{ size }
 	{
+		m_format = format;
+		m_size = size;
 		glCheck(glGenFramebuffers(1, &m_handle));
 	}
 
@@ -1075,14 +1109,26 @@ namespace ml::gl
 		glCheck(glClear(_clear_flags<to_impl>(flags)));
 	}
 
+	void opengl_render_api::draw(shared<vertex_array> const & value)
+	{
+		value->bind();
+		value->get_vertices().front()->bind();
+		value->get_indices()->bind();
+		glCheck(glDrawElements(
+			GL_TRIANGLES,
+			value->get_indices()->get_count(),
+			GL_UNSIGNED_INT,
+			nullptr));
+	}
+
 	void opengl_render_api::draw_arrays(uint32_t primitive, uint32_t first, uint32_t count)
 	{
-		glCheck(glDrawArrays(_draw_mode<to_impl>(primitive), first, count));
+		glCheck(glDrawArrays(_primitive<to_impl>(primitive), first, count));
 	}
 
 	void opengl_render_api::draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices)
 	{
-		glCheck(glDrawElements(_draw_mode<to_impl>(primitive), first, _type<to_impl>(index_type), indices));
+		glCheck(glDrawElements(_primitive<to_impl>(primitive), first, _type<to_impl>(index_type), indices));
 	}
 
 	void opengl_render_api::flush()

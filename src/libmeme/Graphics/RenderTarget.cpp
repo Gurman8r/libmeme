@@ -12,7 +12,7 @@ namespace ml
 		ML_bind_scope(vao);
 		ML_bind_scope(vbo);
 		gl::render_command::draw_arrays(
-			gl::draw_mode_triangles, 0, vbo.m_size
+			gl::primitive_triangles, 0, vbo.m_size
 		)();
 	}
 
@@ -23,7 +23,7 @@ namespace ml
 		ML_bind_scope(vbo);
 		ML_bind_scope(ibo);
 		gl::render_command::draw_indexed(
-			gl::draw_mode_triangles, ibo.m_count, gl::type_unsigned_int, nullptr
+			gl::primitive_triangles, ibo.m_count, gl::type_unsigned_int, nullptr
 		)();
 	}
 
