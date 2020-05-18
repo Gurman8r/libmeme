@@ -25,22 +25,21 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		void add_vertices(shared<vertex_buffer> const & value) override;
+		void add_vbo(vbo_t const & value) override;
 
-		void set_indices(shared<index_buffer> const & value) override;
+		void set_ibo(ibo_t const & value) override;
 
 		inline handle get_handle() const override { return ML_addressof(m_handle); }
 
-		inline shared<index_buffer> const & get_indices() const override { return m_indices; }
+		inline ibo_t const & get_ibo() const override { return m_indices; }
 
-		inline pmr::vector<shared<vertex_buffer>> const & get_vertices() const override { return m_vertices; }
+		inline pmr::vector<vbo_t> const & get_vbos() const override { return m_vertices; }
 
 	private:
-		uint32_t m_handle	{}						; // handle
-		uint32_t m_index	{}						; // vertex attrib index
-
-		pmr::vector<shared<vertex_buffer>>	m_vertices	{}; // vertex buffers
-		shared<index_buffer>				m_indices	{}; // index buffer
+		uint32_t			m_handle	{}; // handle
+		uint32_t			m_index		{}; // attrib index
+		pmr::vector<vbo_t>	m_vertices	{}; // vertex buffers
+		ibo_t				m_indices	{}; // index buffer
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -288,7 +287,7 @@ namespace ml::gl
 
 		void clear(uint32_t flags) override;
 
-		void draw(shared<vertex_array> const & value) override;
+		void draw(vao_t const & value) override;
 		
 		void draw_arrays(uint32_t first, uint32_t count) override;
 		

@@ -37,6 +37,10 @@ namespace ml::meta
 	template <class T
 	> struct tag { using type = typename T; };
 
+	// type tag value
+	template <class T
+	> constexpr auto tag_v{ tag<T>{} };
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

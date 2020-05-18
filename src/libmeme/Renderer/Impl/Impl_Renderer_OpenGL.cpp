@@ -591,17 +591,17 @@ namespace ml::gl
 		glCheck(glBindVertexArray(NULL));
 	}
 
-	void opengl_vertex_array::add_vertices(shared<vertex_buffer> const & value)
+	void opengl_vertex_array::add_vbo(vbo_t const & value)
 	{
-		this->bind(); m_vertices.emplace_back(value)->bind();
+		this->bind();
+		value->bind();
 
-		auto const & layout{ value->get_layout() };
-		for (auto const & e : layout.get_elements())
+		uint32_t const stride{ value->get_layout().get_stride() };
+		for (auto const & e : value->get_layout())
 		{
-			glCheck(glEnableVertexAttribArray(m_index));
 			glCheck(glVertexAttribPointer
 			(
-				m_index++,
+				m_index,
 				e.get_component_count(),
 				std::invoke([&]() noexcept -> uint32_t
 				{
@@ -614,15 +614,20 @@ namespace ml::gl
 					}
 				}),
 				e.normalized,
-				layout.get_stride(),
-				(buffer)(intptr_t)e.offset
+				stride,
+				reinterpret_cast<buffer>(e.offset)
 			));
+			glCheck(glEnableVertexAttribArray(m_index++));
 		}
+
+		m_vertices.push_back(value);
 	}
 
-	void opengl_vertex_array::set_indices(shared<index_buffer> const & value)
+	void opengl_vertex_array::set_ibo(ibo_t const & value)
 	{
-		this->bind(); (m_indices = value)->bind();
+		this->bind();
+		value->bind();
+		m_indices = value;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -632,7 +637,7 @@ namespace ml::gl
 	{
 		glCheck(glGenBuffers(1, &m_handle));
 		this->bind();
-		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, _usage<to_impl>(m_usage)));
+		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, _usage<to_impl>(usage)));
 	}
 
 	opengl_vertex_buffer::opengl_vertex_buffer(uint32_t size, uint32_t usage)
@@ -1105,16 +1110,12 @@ namespace ml::gl
 		glCheck(glClear(_clear_flags<to_impl>(flags)));
 	}
 
-	void opengl_render_api::draw(shared<vertex_array> const & value)
+	void opengl_render_api::draw(vao_t const & value)
 	{
 		value->bind();
-		value->get_vertices().front()->bind();
-		value->get_indices()->bind();
-		glCheck(glDrawElements(
-			GL_TRIANGLES,
-			value->get_indices()->get_count(),
-			GL_UNSIGNED_INT,
-			nullptr));
+		value->get_vbos().front()->bind();
+		value->get_ibo()->bind();
+		this->draw_indexed(value->get_ibo()->get_count());
 	}
 
 	void opengl_render_api::draw_arrays(uint32_t first, uint32_t count)

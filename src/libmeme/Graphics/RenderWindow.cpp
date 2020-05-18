@@ -16,7 +16,7 @@ namespace ml
 		// get api instance
 		auto const api
 		{
-			gl::render_api::get_instance()
+			gl::render_api::get()
 		};
 
 		// initialize

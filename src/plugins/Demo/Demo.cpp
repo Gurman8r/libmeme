@@ -444,43 +444,31 @@ namespace ml
 				static auto mt = material{ m_materials["earth"] };
 				static ML_scope // once
 				{
-					constexpr float_t tri_v[] =
+					va->add_vbo(([vb = gl::vertex_buffer::create(util::contiguous({
+						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
+						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
+						vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
+						vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } },
+						}))
+					]()
 					{
-						.0f, +.5f, 0,	1, 1, 1,	0.5f, 1.0f,
-						.5f, -.5f, 0,	1, 1, 1,	1.0f, 0.0f,
-						.5f, -.5f, 0,	1, 1, 1,	0.0f, 0.0f,
-					};
-					constexpr uint32_t tri_i[] =
-					{
-						0, 1, 2,
-					};
+						vb->set_layout(
+						{
+							{ meta::tag_v<vec3f>, "a_position"	},
+							{ meta::tag_v<vec3f>, "a_normal"	},
+							{ meta::tag_v<vec2f>, "a_texcoord"	},
+						});
+						return vb;
+					})());
 
-					constexpr float_t quad_v[] =
-					{
-						+1, +1, 0, 1,	1, 1, 1,	1, 1,
-						+1, -1, 0, 1,	1, 1, 1,	1, 0,
-						-1, -1, 0, 1,	1, 1, 1,	0, 0,
-						-1, +1, 0, 1,	1, 1, 1,	0, 1,
-					};
-					constexpr uint32_t quad_i[] =
-					{
+					va->set_ibo(gl::index_buffer::create({
 						0, 1, 3,
 						1, 2, 3,
-					};
-
-					auto vb = gl::vertex_buffer::create(quad_v, sizeof(quad_v));
-					vb->set_layout
-					({
-						gl::make_layout<vec3>{ "a_position"	},
-						gl::make_layout<vec3>{ "a_normal"	},
-						gl::make_layout<vec2>{ "a_texcoord" },
-					});
-					va->add_vertices(vb);
-					va->set_indices(gl::index_buffer::create(quad_i, ML_arraysize(quad_i)));
+					}));
 				};
 				mt	.set<vec3>("u_position"	, vec3{ .0f, 0.f, 0.f })
-					.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .15f })
-					.set<vec3>("u_scale"	, vec3::fill(1.f));
+					.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .35f })
+					.set<vec3>("u_scale"	, vec3::fill(1.5f));
 				sh.bind(false);
 				for (auto & u : mt) { sh.set_uniform(u); }
 				sh.bind(true);
@@ -1193,7 +1181,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const api{ gl::render_api::get_instance() };
+			static auto const api{ gl::render_api::get() };
 
 			if (ImGui::BeginMenuBar())
 			{
