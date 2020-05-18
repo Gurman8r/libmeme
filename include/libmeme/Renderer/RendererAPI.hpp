@@ -10,14 +10,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render types
+// types
 namespace ml::gl
 {
 	// classes
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	class render_api;
-	class render_context;
 	class vertex_array;
 	class vertex_buffer;
 	class index_buffer;
@@ -28,23 +27,23 @@ namespace ml::gl
 	// aliases
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias			allocator	= pmr::polymorphic_allocator<byte_t>;
-	ML_alias			buffer		= void const *;
-	ML_alias			command		= std::function<void()>;
-	ML_alias			handle		= void *;
-	ML_alias_T(class T)	shared		= std::shared_ptr<T>;
-	ML_alias_T(class T)	unique		= std::unique_ptr<T>;
-	ML_alias_T(class T)	vector		= pmr::vector<T>;
+	ML_alias			allocator	= pmr::polymorphic_allocator<byte_t>; // allocator type
+	ML_alias			buffer		= void const *			; // generic data buffer type
+	ML_alias			command		= std::function<void()>	; // render command type
+	ML_alias			handle		= void *				; // generic handle type
+	ML_alias_T(class T)	shared		= std::shared_ptr<T>	; // object pointer type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render enums
+// enums
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// conversion helpers
 
 	struct to_user : std::false_type {}; // ( false type ) | backend enum -> user enum
 
@@ -63,7 +62,7 @@ namespace ml::gl
 
 	enum error_ : uint32_t
 	{
-		error_none,
+		error_no_error,
 		error_invalid_enum,
 		error_invalid_value,
 		error_invalid_operation,
@@ -73,23 +72,23 @@ namespace ml::gl
 		error_invalid_framebuffer_operation,
 	};
 
-	enum usage_ : uint32_t
+	enum draw_usage_ : uint32_t
 	{
-		usage_stream_draw,
-		usage_static_draw,
-		usage_dynamic_draw,
+		draw_usage_stream,
+		draw_usage_static,
+		draw_usage_dynamic,
 	};
 
-	enum primitive_ : uint32_t
+	enum draw_mode_ : uint32_t
 	{
-		primitive_points,
-		primitive_lines,
-		primitive_line_loop,
-		primitive_line_strip,
-		primitive_triangles,
-		primitive_triangle_strip,
-		primitive_triangle_fan,
-		primitive_fill,
+		draw_mode_points,
+		draw_mode_lines,
+		draw_mode_line_loop,
+		draw_mode_line_strip,
+		draw_mode_triangles,
+		draw_mode_triangle_strip,
+		draw_mode_triangle_fan,
+		draw_mode_fill,
 	};
 
 	enum predicate_ : uint32_t
@@ -125,10 +124,10 @@ namespace ml::gl
 		function_max,
 	};
 
-	enum cull_order_
+	enum order_
 	{
-		cull_order_cw,
-		cull_order_ccw,
+		order_clockwise,
+		order_counter_clockwise,
 	};
 
 	enum facet_ : uint32_t
@@ -225,7 +224,48 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render states
+// utility
+namespace ml::gl
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct ML_NODISCARD buffer_layout final
+	{
+		struct ML_NODISCARD element
+		{
+			pmr::string name	{};
+			typeof<>	type	{};
+			uint32_t	size	{};
+			uint32_t	offset	{};
+		};
+
+		pmr::vector<element> m_data;
+
+		template <class ... Args
+		> buffer_layout(Args && ... args) noexcept
+			: m_data{ pmr::vector<element>{ ML_forward(args)... } }
+		{
+		}
+	};
+
+	template <class T
+	> ML_NODISCARD auto layout_element(pmr::string && name) noexcept
+	{
+		static_assert(util::is_any_of_v<T,
+			bool, int32_t, float_t, vec2, vec3, vec4, color, mat2, mat3, mat4
+		>);
+		return buffer_layout::element
+		{
+			ML_forward(name), typeof_v<T>, sizeof(T), 0
+		};
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// states
 namespace ml::gl
 {
 	struct ML_NODISCARD alpha_function final
@@ -260,7 +300,7 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render objects
+// objects
 namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -275,17 +315,17 @@ namespace ml::gl
 
 		virtual void unbind() const = 0;
 
+		virtual void add_vertices(shared<vertex_buffer> const & value) = 0;
+
+		virtual void set_indices(shared<index_buffer> const & value) = 0;
+
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
-		ML_NODISCARD virtual uint32_t get_mode() const = 0;
-
-		virtual void add_vertices(shared<vertex_buffer> const & value) = 0;
-		
-		virtual void set_indices(shared<index_buffer> const & value) = 0;
-		
-		ML_NODISCARD virtual vector<shared<vertex_buffer>> const & get_vertices() const = 0;
-		
 		ML_NODISCARD virtual shared<index_buffer> const & get_indices() const = 0;
+		
+		ML_NODISCARD virtual uint32_t get_mode() const = 0;
+		
+		ML_NODISCARD virtual pmr::vector<shared<vertex_buffer>> const & get_vertices() const = 0;
 
 		ML_NODISCARD static shared<vertex_array> create(uint32_t mode, allocator alloc = {});
 	};
@@ -302,8 +342,16 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
+		virtual void set_data(buffer vertices, uint32_t size, uint32_t offset = 0) = 0;
+
+		virtual void set_layout(buffer_layout const & value) = 0;
+
+		ML_NODISCARD virtual buffer get_data() const = 0;
+
 		ML_NODISCARD virtual handle get_handle() const = 0;
-		
+
+		ML_NODISCARD virtual buffer_layout const & get_layout() const = 0;
+
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
 		ML_NODISCARD static shared<vertex_buffer> create(buffer vertices, uint32_t size, allocator alloc = {});
@@ -323,9 +371,9 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
-		
 		ML_NODISCARD virtual uint32_t get_count() const = 0;
+		
+		ML_NODISCARD virtual handle get_handle() const = 0;
 
 		ML_NODISCARD static shared<index_buffer> create(buffer indices, uint32_t count, allocator alloc = {});
 	};
@@ -344,17 +392,17 @@ namespace ml::gl
 
 		virtual void resize(vec2i const & value) = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
-
 		ML_NODISCARD virtual uint32_t get_color_attachment() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_depth_attachment() const = 0;
 
-		ML_NODISCARD virtual vec2i get_size() const = 0;
-
 		ML_NODISCARD virtual uint32_t get_format() const = 0;
 
-		ML_NODISCARD static shared<frame_buffer> create(allocator alloc = {});
+		ML_NODISCARD virtual handle get_handle() const = 0;
+
+		ML_NODISCARD virtual vec2i get_size() const = 0;
+
+		ML_NODISCARD static shared<frame_buffer> create(uint32_t format, vec2i const & size, allocator alloc = {});
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -398,20 +446,25 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render api
+// api
 namespace ml::gl
 {
 	// render api
 	class ML_RENDERER_API render_api : public trackable, public non_copyable
 	{
-	public:
+	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual ~render_api() noexcept = default;
-		
+
+		virtual bool do_initialize() = 0;
+
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool initialize() = 0;
+		static render_api * const & get() noexcept;
+
+		inline bool initialize() noexcept { return get()->do_initialize(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -507,7 +560,7 @@ namespace ml::gl
 		
 		virtual void draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) = 0;
 		
-		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, void const * indices) = 0;
+		virtual void draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) = 0;
 		
 		virtual void flush() = 0;
 
@@ -517,41 +570,10 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render context
+// commands
 namespace ml::gl
 {
-	// global render context
-	class ML_RENDERER_API render_context final : public singleton<render_context>
-	{
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static unique<render_api> const & api() noexcept
-		{
-			return get_instance().m_api;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend singleton<render_context>;
-
-		render_context() noexcept;
-		
-		~render_context() noexcept;
-
-		unique<render_api> m_api;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// render commands
-namespace ml::gl
-{
-	// command generators
+	// render command generators
 	class ML_NODISCARD render_command final
 	{
 	public:
@@ -559,104 +581,104 @@ namespace ml::gl
 
 		static command set_alpha_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_alpha_enabled, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_alpha_enabled, render_api::get(), enabled);
 		}
 
 		static command set_alpha_function(alpha_function const & value) noexcept
 		{
-			return std::bind(&render_api::set_alpha_function, render_context::api().get(), value);
+			return std::bind(&render_api::set_alpha_function, render_api::get(), value);
 		}
 
 		static command set_blend_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_blend_enabled, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_blend_enabled, render_api::get(), enabled);
 		}
 		
 		static command set_blend_color(color const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_color, render_context::api().get(), value);
+			return std::bind(&render_api::set_blend_color, render_api::get(), value);
 		}
 
 		static command set_blend_equation(blend_equation const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_equation, render_context::api().get(), value);
+			return std::bind(&render_api::set_blend_equation, render_api::get(), value);
 		}
 
 		static command set_blend_function(blend_function const & value) noexcept
 		{
-			return std::bind(&render_api::set_blend_function, render_context::api().get(), value);
+			return std::bind(&render_api::set_blend_function, render_api::get(), value);
 		}
 
 		static command set_clear_color(color const & value) noexcept
 		{
-			return std::bind(&render_api::set_clear_color, render_context::api().get(), value);
+			return std::bind(&render_api::set_clear_color, render_api::get(), value);
 		}
 
 		static command set_cull_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_cull_enabled, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_cull_enabled, render_api::get(), enabled);
 		}
 
 		static command set_cull_face(uint32_t facet) noexcept
 		{
-			return std::bind(&render_api::set_cull_face, render_context::api().get(), facet);
+			return std::bind(&render_api::set_cull_face, render_api::get(), facet);
 		}
 
 		static command set_cull_order(uint32_t order) noexcept
 		{
-			return std::bind(&render_api::set_cull_order, render_context::api().get(), order);
+			return std::bind(&render_api::set_cull_order, render_api::get(), order);
 		}
 
 		static command set_depth_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_depth_enabled, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_depth_enabled, render_api::get(), enabled);
 		}
 
 		static command set_depth_function(uint32_t predicate) noexcept
 		{
-			return std::bind(&render_api::set_depth_function, render_context::api().get(), predicate);
+			return std::bind(&render_api::set_depth_function, render_api::get(), predicate);
 		}
 		
 		static command set_depth_mask(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_depth_mask, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_depth_mask, render_api::get(), enabled);
 		}
 
 		static command set_depth_range(depth_range const & value) noexcept
 		{
-			return std::bind(&render_api::set_depth_range, render_context::api().get(), value);
+			return std::bind(&render_api::set_depth_range, render_api::get(), value);
 		}
 
 		static command set_multisample_enabled(bool enabled) noexcept
 		{
-			return std::bind(&render_api::set_multisample_enabled, render_context::api().get(), enabled);
+			return std::bind(&render_api::set_multisample_enabled, render_api::get(), enabled);
 		}
 
 		static command set_viewport(int_rect const & bounds) noexcept
 		{
-			return std::bind(&render_api::set_viewport, render_context::api().get(), bounds);
+			return std::bind(&render_api::set_viewport, render_api::get(), bounds);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static command clear(uint32_t flags) noexcept
 		{
-			return std::bind(&render_api::clear, render_context::api().get(), flags);
+			return std::bind(&render_api::clear, render_api::get(), flags);
 		}
 
 		static command draw_arrays(uint32_t primitive, uint32_t first, uint32_t count) noexcept
 		{
-			return std::bind(&render_api::draw_arrays, render_context::api().get(), primitive, first, count);
+			return std::bind(&render_api::draw_arrays, render_api::get(), primitive, first, count);
 		}
 
-		static command draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, void const * indices) noexcept
+		static command draw_indexed(uint32_t primitive, int32_t first, uint32_t index_type, buffer indices) noexcept
 		{
-			return std::bind(&render_api::draw_indexed, render_context::api().get(), primitive, first, index_type, indices);
+			return std::bind(&render_api::draw_indexed, render_api::get(), primitive, first, index_type, indices);
 		}
 
 		static command flush() noexcept
 		{
-			return std::bind(&render_api::flush, render_context::api().get());
+			return std::bind(&render_api::flush, render_api::get());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

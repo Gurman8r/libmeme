@@ -37,7 +37,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class B, class A
-	> ML_NODISCARD inline auto make_glyph(T && t, B && b, A && a) noexcept
+	> ML_NODISCARD auto make_glyph(T && t, B && b, A && a) noexcept
 	{
 		glyph g{};
 		g.graphic	= ML_forward(t);

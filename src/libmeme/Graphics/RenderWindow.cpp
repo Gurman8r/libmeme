@@ -13,8 +13,8 @@ namespace ml
 			return debug::error("render_window failed opening window");
 		}
 
-		// get api
-		auto const & api{ gl::render_context::api() };
+		// get api instance
+		auto const & api{ gl::render_api::get() };
 
 		// initialize
 		if (!api->initialize())
@@ -27,7 +27,7 @@ namespace ml
 		m_settings.context.minor = api->get_minor_version();
 
 		// run setup commands
-		for (auto const & cmd : std::initializer_list<gl::command>
+		for (auto && cmd : std::initializer_list<gl::command>
 		{
 			gl::render_command::set_alpha_enabled(true),
 			gl::render_command::set_alpha_function({ gl::predicate_greater, 0.001f }),
@@ -39,7 +39,7 @@ namespace ml
 			
 			gl::render_command::set_cull_enabled(true),
 			gl::render_command::set_cull_face(gl::facet_back),
-			gl::render_command::set_cull_order(gl::cull_order_ccw),
+			gl::render_command::set_cull_order(gl::order_counter_clockwise),
 
 			gl::render_command::set_depth_enabled(true),
 			gl::render_command::set_depth_function(gl::predicate_less),

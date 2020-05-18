@@ -206,7 +206,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Type, class Name, class ... Args
-	> ML_NODISCARD inline auto make_uniform(Name && name, Args && ... args) noexcept
+	> ML_NODISCARD auto make_uniform(Name && name, Args && ... args) noexcept
 	{
 		return uniform{ typeof_v<Type>, ML_forward(name), uniform::data_type{ ML_forward(args)... } };
 	}

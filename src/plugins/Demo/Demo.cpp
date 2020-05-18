@@ -1138,7 +1138,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			auto const & api{ gl::render_context::api() };
+			auto const & api{ gl::render_api::get() };
 
 			if (ImGui::BeginMenuBar())
 			{

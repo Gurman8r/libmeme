@@ -89,7 +89,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// global typedef macro
+// global typedefs
 #define ML_alias				using 
 #define ML_alias_T(...)			template <##__VA_ARGS__> using
 
