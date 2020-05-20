@@ -80,10 +80,10 @@ namespace ml
 
 	template <class> struct x_draw_renderers final : ecs::detail::x_base<s_draw_renderers>
 	{
-		void operator()(c_shader const & shd, c_model const & mdl, render_target & rt)
+		void operator()(c_shader const & shd, c_model const & mdl)
 		{
 			ML_bind_scope(*shd, true);
-			rt.draw(*mdl);
+			render_target::draw(*mdl);
 		}
 	};
 
@@ -131,7 +131,7 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::map<int32_t,		render_texture	> m_pipeline	{};
+		//ds::map<int32_t,		render_texture	> m_pipeline	{};
 		ds::map<pmr::string,	font			> m_fonts		{};
 		ds::map<pmr::string,	image			> m_images		{};
 		ds::map<pmr::string,	material		> m_materials	{};
@@ -164,7 +164,7 @@ namespace ml
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_renderer	{ "renderer##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
 
-		vec2 m_display_size{};
+		vec2 m_display_size{ 1280, 720 };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -210,6 +210,9 @@ namespace ml
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
 
+		gl::vao_t m_vao;
+		gl::fbo_t m_fbo;
+
 
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -251,7 +254,7 @@ namespace ml
 
 			// PIPELINE
 			{
-				(m_pipeline[0] = render_texture{ { 1280, 720 } }).generate();
+				m_fbo = gl::frame_buffer::create(gl::format_rgba, m_display_size);
 			}
 
 			// IMAGES
@@ -395,6 +398,32 @@ namespace ml
 					vec3::fill(.27f)
 					});
 			}
+
+			// TESTING
+			{
+				m_vao = gl::vertex_array::create();
+
+				m_vao->add_vbo(([vb = gl::vertex_buffer::create(util::contiguous({
+					vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
+					vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
+					vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
+					vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } }, }))
+				]()
+				{
+					vb->set_layout(
+					{
+						{ meta::tag_v<vec3f>, "a_position"	},
+						{ meta::tag_v<vec3f>, "a_normal"	},
+						{ meta::tag_v<vec2f>, "a_texcoord"	},
+					});
+					return vb;
+				})());
+
+				m_vao->set_ibo(gl::index_buffer::create({
+					0, 1, 3,
+					1, 2, 3,
+				}));
+			}
 		}
 
 		void on_update(update_event const &)
@@ -412,69 +441,37 @@ namespace ml
 			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
-			m_pipeline.for_each([&](auto, render_texture & rt)
-			{
-				rt.resize(m_display_size);
-			});
+			m_fbo->resize(m_display_size);
 		}
 
 		void on_draw(draw_event const &)
 		{
 			// draw stuff, etc...
 
-			if (m_pipeline.empty()) { return; }
+			ML_bind_scope(m_fbo.get());
 
-			if (render_texture & rt{ m_pipeline[0] })
+			for (gl::command const & cmd :
 			{
-				ML_bind_scope(rt);
-				for (gl::command const & cmd :
-				{
-					gl::render_command::set_clear_color(colors::magenta),
-					gl::render_command::set_cull_enabled(false),
-					gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
-					gl::render_command::set_viewport(rt.bounds()),
-				})
-				{
-					std::invoke(cmd);
-				}
-				m_ecs.update_system<x_draw_renderers>(rt);
-
-				static auto va = gl::vertex_array::create();
-				static auto sh = shader{ m_shaders["3d"] };
-				static auto mt = material{ m_materials["earth"] };
-				static ML_scope // once
-				{
-					va->add_vbo(([vb = gl::vertex_buffer::create(util::contiguous({
-						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
-						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
-						vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
-						vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } },
-						}))
-					]()
-					{
-						vb->set_layout(
-						{
-							{ meta::tag_v<vec3f>, "a_position"	},
-							{ meta::tag_v<vec3f>, "a_normal"	},
-							{ meta::tag_v<vec2f>, "a_texcoord"	},
-						});
-						return vb;
-					})());
-
-					va->set_ibo(gl::index_buffer::create({
-						0, 1, 3,
-						1, 2, 3,
-					}));
-				};
-				mt	.set<vec3>("u_position"	, vec3{ .0f, 0.f, 0.f })
-					.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .35f })
-					.set<vec3>("u_scale"	, vec3::fill(1.5f));
-				sh.bind(false);
-				for (auto & u : mt) { sh.set_uniform(u); }
-				sh.bind(true);
-
-				gl::render_command::draw(va)();
+				gl::render_command::set_cull_enabled(false),
+				gl::render_command::set_clear_color(colors::magenta),
+				gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
+			})
+			{
+				std::invoke(cmd);
 			}
+			m_ecs.update_system<x_draw_renderers>();
+
+			
+			static auto sh = shader{ m_shaders["3d"] };
+			static auto mt = material{ m_materials["earth"] };
+			mt	.set<vec3>("u_position"	, vec3{ .0f, 0.f, 0.f })
+				.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .35f })
+				.set<vec3>("u_scale"	, vec3::fill(1.5f));
+			sh.bind(false);
+			for (auto & u : mt) { sh.set_uniform(u); }
+			sh.bind(true);
+
+			gl::render_command::draw(m_vao)();
 		}
 
 		void on_gui_dock(dock_gui_event const &)
@@ -604,7 +601,7 @@ namespace ml
 			m_models.clear();
 			m_textures.clear();
 			m_fonts.clear();
-			m_pipeline.clear();
+
 			m_node_editor.destroy();
 		}
 
@@ -651,7 +648,7 @@ namespace ml
 			ImGui::Separator();
 			ImGui::Columns(4);
 
-			m_pipeline	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			//m_pipeline	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_materials	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
@@ -723,13 +720,13 @@ namespace ml
 
 		void show_display_gui()
 		{
-			if (m_pipeline.empty()) return;
-
-			static gui::texture_preview preview{ nullptr, {}, 4.f, 32.f };
+			static gui::texture_preview preview
+			{
+				m_fbo->get_color_attachment(),
+				m_fbo->get_size()
+			};
 			
-			preview.value = &m_pipeline.back().second.tex();
-
-			preview.render([&]()
+			preview.render([&]() noexcept
 			{
 				m_display_size = util::maintain(m_display_size, ImGui::GetContentRegionAvail());
 			});

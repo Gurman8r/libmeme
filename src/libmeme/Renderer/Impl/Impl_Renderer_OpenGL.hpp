@@ -4,7 +4,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Renderer/RendererAPI.hpp>
+#include <libmeme/Renderer/RenderAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -114,11 +114,13 @@ namespace ml::gl
 
 		void unbind() const override;
 
+		void bind_texture(uint32_t slot = 0) const override;
+
 		void resize(vec2i const & value) override;
 
-		inline uint32_t get_color_attachment() const override { return m_color_attachment; }
+		inline handle get_color_attachment() const override { return ML_addressof(m_color_attachment); }
 
-		inline uint32_t get_depth_attachment() const override { return m_depth_attachment; }
+		inline handle get_depth_attachment() const override { return ML_addressof(m_depth_attachment); }
 
 		inline uint32_t get_format() const override { return m_format; }
 

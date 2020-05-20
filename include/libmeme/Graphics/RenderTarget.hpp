@@ -17,18 +17,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		void draw(VAO const & vao, VBO const & vbo);
+		static void draw(VAO const & vao, VBO const & vbo);
 
-		void draw(VAO const & vao, VBO const & vbo, IBO const & ibo);
+		static void draw(VAO const & vao, VBO const & vbo, IBO const & ibo);
 
-		template <class T> void draw(T const * value)
+		template <class T
+		> static void draw(T const * value)
 		{
-			T::draw(*this, value);
+			T::draw(value);
 		}
 
-		template <class T> void draw(T const & value)
+		template <class T
+		> static void draw(T const & value)
 		{
-			this->draw(&value);
+			render_target::draw(&value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

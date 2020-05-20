@@ -1,13 +1,13 @@
-#ifndef _ML_RENDERER_API_HPP_
-#define _ML_RENDERER_API_HPP_
+#ifndef _ML_RENDER_API_HPP_
+#define _ML_RENDER_API_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Renderer/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Color.hpp>
+#include <libmeme/Core/FileUtility.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Rect.hpp>
-#include <libmeme/Core/BatchVector.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -16,9 +16,12 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias buffer		= void const *			; // data buffer type
-	ML_alias command	= std::function<void()>	; // render command type
-	ML_alias handle		= void *				; // generic handle type
+	ML_alias buffer		= typename void const *				; // data buffer type
+	ML_alias command	= typename std::function<void()>	; // render command type
+	ML_alias handle		= typename void *					; // generic handle type
+
+	ML_alias vertices_t	= typename pmr::vector<float_t>		; // vertices vector type
+	ML_alias indices_t	= typename pmr::vector<uint32_t>	; // indices vector type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -30,15 +33,12 @@ namespace ml::gl
 	class shader_object		; // 
 	class texture_object	; // 
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_alias vao_t = typename std::shared_ptr<vertex_array>	; // vertex array pointer
-	ML_alias vbo_t = typename std::shared_ptr<vertex_buffer>; // vertex buffer pointer
-	ML_alias ibo_t = typename std::shared_ptr<index_buffer>	; // index buffer pointer
-	ML_alias fbo_t = typename std::shared_ptr<frame_buffer>	; // frame buffer pointer
-
-	ML_alias vertices_t	= typename pmr::vector<float_t>;
-	ML_alias indices_t	= typename pmr::vector<uint32_t>;
+	ML_alias vao_t		= typename std::shared_ptr<vertex_array>	; // vertex array pointer
+	ML_alias vbo_t		= typename std::shared_ptr<vertex_buffer>	; // vertex buffer pointer
+	ML_alias ibo_t		= typename std::shared_ptr<index_buffer>	; // index buffer pointer
+	ML_alias fbo_t		= typename std::shared_ptr<frame_buffer>	; // frame buffer pointer
+	ML_alias shader_t	= typename std::shared_ptr<shader_object>	; // shader pointer type
+	ML_alias texture_t	= typename std::shared_ptr<texture_object>	; // texture pointer type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -419,9 +419,12 @@ namespace ml::gl
 
 		ML_NODISCARD static vbo_t create(buffer vertices, uint32_t size, uint32_t usage = usage_static);
 
-		ML_NODISCARD static vbo_t create(vertices_t const & vertices, uint32_t usage = usage_static);
-
 		ML_NODISCARD static vbo_t create(uint32_t size, uint32_t usage = usage_dynamic);
+
+		ML_NODISCARD static vbo_t create(vertices_t const & vertices, uint32_t usage = usage_static)
+		{
+			return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -444,7 +447,10 @@ namespace ml::gl
 
 		ML_NODISCARD static ibo_t create(buffer indices, uint32_t count);
 
-		ML_NODISCARD static ibo_t create(indices_t const & indices);
+		ML_NODISCARD static ibo_t create(indices_t const & indices)
+		{
+			return create(indices.data(), (uint32_t)indices.size());
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -459,11 +465,13 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
+		virtual void bind_texture(uint32_t slot = 0) const = 0;
+
 		virtual void resize(vec2i const & value) = 0;
 
-		ML_NODISCARD virtual uint32_t get_color_attachment() const = 0;
+		ML_NODISCARD virtual handle get_color_attachment() const = 0;
 
-		ML_NODISCARD virtual uint32_t get_depth_attachment() const = 0;
+		ML_NODISCARD virtual handle get_depth_attachment() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_format() const = 0;
 
@@ -488,7 +496,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual handle get_handle() const = 0;
 
-		ML_NODISCARD static std::shared_ptr<shader_object> create();
+		ML_NODISCARD static shader_t create();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -507,7 +515,7 @@ namespace ml::gl
 
 		ML_NODISCARD virtual uint32_t get_type() const = 0;
 
-		ML_NODISCARD static std::shared_ptr<texture_object> create();
+		ML_NODISCARD static texture_t create();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -675,123 +683,4 @@ namespace ml::gl
 	};
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// commands
-namespace ml::gl
-{
-	// render command generators
-	class render_command final
-	{
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static command set_alpha_enabled(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_alpha_enabled, render_api::get(), enabled);
-		}
-
-		ML_NODISCARD static command set_alpha_function(alpha_function const & value) noexcept
-		{
-			return std::bind(&render_api::set_alpha_function, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_blend_enabled(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_blend_enabled, render_api::get(), enabled);
-		}
-		
-		ML_NODISCARD static command set_blend_color(color const & value) noexcept
-		{
-			return std::bind(&render_api::set_blend_color, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_blend_equation(blend_equation const & value) noexcept
-		{
-			return std::bind(&render_api::set_blend_equation, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_blend_function(blend_function const & value) noexcept
-		{
-			return std::bind(&render_api::set_blend_function, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_clear_color(color const & value) noexcept
-		{
-			return std::bind(&render_api::set_clear_color, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_cull_enabled(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_cull_enabled, render_api::get(), enabled);
-		}
-
-		ML_NODISCARD static command set_cull_face(uint32_t facet) noexcept
-		{
-			return std::bind(&render_api::set_cull_face, render_api::get(), facet);
-		}
-
-		ML_NODISCARD static command set_cull_order(uint32_t order) noexcept
-		{
-			return std::bind(&render_api::set_cull_order, render_api::get(), order);
-		}
-
-		ML_NODISCARD static command set_depth_enabled(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_depth_enabled, render_api::get(), enabled);
-		}
-
-		ML_NODISCARD static command set_depth_function(uint32_t predicate) noexcept
-		{
-			return std::bind(&render_api::set_depth_function, render_api::get(), predicate);
-		}
-		
-		ML_NODISCARD static command set_depth_mask(bool enabled) noexcept
-		{
-			return std::bind(&render_api::set_depth_mask, render_api::get(), enabled);
-		}
-
-		ML_NODISCARD static command set_depth_range(depth_range const & value) noexcept
-		{
-			return std::bind(&render_api::set_depth_range, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command set_viewport(int_rect const & bounds) noexcept
-		{
-			return std::bind(&render_api::set_viewport, render_api::get(), bounds);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static command clear(uint32_t flags) noexcept
-		{
-			return std::bind(&render_api::clear, render_api::get(), flags);
-		}
-
-		ML_NODISCARD static command draw(vao_t const & value) noexcept
-		{
-			return std::bind(&render_api::draw, render_api::get(), value);
-		}
-
-		ML_NODISCARD static command draw_arrays(uint32_t first, uint32_t count) noexcept
-		{
-			return std::bind(&render_api::draw_arrays, render_api::get(), first, count);
-		}
-
-		ML_NODISCARD static command draw_indexed(uint32_t count) noexcept
-		{
-			return std::bind(&render_api::draw_indexed, render_api::get(), count);
-		}
-
-		ML_NODISCARD static command flush() noexcept
-		{
-			return std::bind(&render_api::flush, render_api::get());
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#endif // !_ML_RENDERER_API_HPP_
+#endif // !_ML_RENDER_API_HPP_

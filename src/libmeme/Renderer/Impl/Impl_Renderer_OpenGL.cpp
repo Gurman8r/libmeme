@@ -599,24 +599,38 @@ namespace ml::gl
 		uint32_t const stride{ value->get_layout().get_stride() };
 		for (auto const & e : value->get_layout())
 		{
-			glCheck(glVertexAttribPointer
-			(
-				m_index,
-				e.get_component_count(),
-				std::invoke([&]() noexcept -> uint32_t
+			if (uint32_t const type{ std::invoke([&]() noexcept -> uint32_t
+			{
+				switch (e.get_base_type())
 				{
-					switch (e.get_base_type())
-					{
-					default					: return 0;
-					case hashof_v<bool>		: return GL_BOOL;
-					case hashof_v<int32_t>	: return GL_INT;
-					case hashof_v<float_t>	: return GL_FLOAT;
-					}
-				}),
-				e.normalized,
-				stride,
-				reinterpret_cast<buffer>(e.offset)
-			));
+				default					: return 0			; // ?
+				case hashof_v<bool>		: return GL_BOOL	; // bool
+				case hashof_v<int32_t>	: return GL_INT		; // int
+				case hashof_v<float_t>	: return GL_FLOAT	; // float
+				}
+			}) }; type == GL_INT)
+			{
+				glCheck(glVertexAttribIPointer
+				(
+					m_index,
+					e.get_component_count(),
+					type,
+					stride,
+					reinterpret_cast<buffer>(e.offset)
+				));
+			}
+			else
+			{
+				glCheck(glVertexAttribPointer
+				(
+					m_index,
+					e.get_component_count(),
+					type,
+					e.normalized,
+					stride,
+					reinterpret_cast<buffer>(e.offset)
+				));
+			}
 			glCheck(glEnableVertexAttribArray(m_index++));
 		}
 
@@ -699,10 +713,9 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_frame_buffer::opengl_frame_buffer::opengl_frame_buffer(uint32_t format, vec2i const & size)
+		: m_format{ format }
 	{
-		m_format = format;
-		m_size = size;
-		glCheck(glGenFramebuffers(1, &m_handle));
+		this->resize(size);
 	}
 
 	opengl_frame_buffer::~opengl_frame_buffer()
@@ -721,8 +734,72 @@ namespace ml::gl
 		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
 	}
 
+	void opengl_frame_buffer::bind_texture(uint32_t slot) const
+	{
+		glCheck(glActiveTexture(GL_TEXTURE0 + slot));
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_color_attachment));
+	}
+
 	void opengl_frame_buffer::resize(vec2i const & value)
 	{
+		if (m_size == value) { return; }
+		
+		m_size = value;
+
+		if (m_handle)
+		{
+			glCheck(glDeleteFramebuffers(1, &m_handle));
+			glCheck(glDeleteTextures(1, &m_color_attachment));
+			glCheck(glDeleteTextures(1, &m_depth_attachment));
+		}
+
+		glCheck(glGenFramebuffers(1, &m_handle));
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, m_handle));
+		
+		// color attachment
+		glCheck(glGenTextures(1, &m_color_attachment));
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_color_attachment));
+		glCheck(glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			_format<to_impl>(m_format),
+			m_size[0],
+			m_size[1],
+			0,
+			_format<to_impl>(m_format),
+			GL_UNSIGNED_BYTE,
+			nullptr));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+		glCheck(glFramebufferTexture2D(
+			GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+			GL_TEXTURE_2D, m_color_attachment, 0));
+
+		// depth attachment
+		glCheck(glGenTextures(1, &m_depth_attachment));
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
+		glCheck(glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_DEPTH24_STENCIL8,
+			m_size[0],
+			m_size[1],
+			0,
+			GL_DEPTH_STENCIL,
+			GL_UNSIGNED_INT_24_8,
+			nullptr));
+		glCheck(glFramebufferTexture2D(
+			GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+			GL_TEXTURE_2D, m_depth_attachment, 0));
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			debug::error("framebuffer is not complete");
+		}
+
+		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
+
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1113,9 +1190,27 @@ namespace ml::gl
 	void opengl_render_api::draw(vao_t const & value)
 	{
 		value->bind();
-		value->get_vbos().front()->bind();
-		value->get_ibo()->bind();
-		this->draw_indexed(value->get_ibo()->get_count());
+		
+		if (value->get_ibo())
+		{
+			value->get_ibo()->bind();
+			
+			for (auto const & vb : value->get_vbos())
+			{
+				vb->bind();
+			}
+
+			this->draw_indexed(value->get_ibo()->get_count());
+		}
+		else
+		{
+			for (auto const & vb : value->get_vbos())
+			{
+				vb->bind();
+
+				this->draw_arrays(0, vb->get_size());
+			}
+		}
 	}
 
 	void opengl_render_api::draw_arrays(uint32_t first, uint32_t count)

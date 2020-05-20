@@ -1,4 +1,4 @@
-#include <libmeme/Renderer/RendererAPI.hpp>
+#include <libmeme/Renderer/RenderAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -42,7 +42,7 @@ namespace ml::gl
 	vao_t vertex_array::create()
 	{
 		return std::allocate_shared<impl_vertex_array>(pmr::polymorphic_allocator<byte_t>{}
-			);
+		);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -52,11 +52,6 @@ namespace ml::gl
 		return std::allocate_shared<impl_vertex_buffer>(pmr::polymorphic_allocator<byte_t>{},
 			vertices, size, usage
 		);
-	}
-
-	vbo_t vertex_buffer::create(vertices_t const & vertices, uint32_t usage)
-	{
-		return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
 	}
 
 	vbo_t vertex_buffer::create(uint32_t size, uint32_t usage)
@@ -74,11 +69,6 @@ namespace ml::gl
 			indices, count
 		);
 	}
-	
-	ibo_t index_buffer::create(indices_t const & indices)
-	{
-		return create(indices.data(), (uint32_t)indices.size());
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -91,7 +81,7 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::shared_ptr<shader_object> shader_object::create()
+	shader_t shader_object::create()
 	{
 		return std::allocate_shared<impl_shader_object>(pmr::polymorphic_allocator<byte_t>{}
 		);
@@ -99,10 +89,10 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	std::shared_ptr<texture_object> texture_object::create()
+	texture_t texture_object::create()
 	{
 		return std::allocate_shared<impl_texture_object>(pmr::polymorphic_allocator<byte_t>{}
-			);
+		);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

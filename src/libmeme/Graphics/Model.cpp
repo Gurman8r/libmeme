@@ -153,13 +153,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void model::draw(render_target & target, model const * value)
+	void model::draw(model const * value)
 	{
 		if (!value) { return; }
 		
 		for (mesh const & elem : (*value))
 		{
-			target.draw(elem);
+			render_target::draw(elem);
 		}
 	}
 

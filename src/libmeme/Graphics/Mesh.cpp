@@ -222,17 +222,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void mesh::draw(render_target & target, mesh const * value)
+	void mesh::draw(mesh const * value)
 	{
 		if (!value || !value->m_vao || !value->m_vbo) { return; }
 
 		if (value->m_ibo)
 		{
-			target.draw(value->m_vao, value->m_vbo, value->m_ibo);
+			render_target::draw(value->m_vao, value->m_vbo, value->m_ibo);
 		}
 		else
 		{
-			target.draw(value->m_vao, value->m_vbo);
+			render_target::draw(value->m_vao, value->m_vbo);
 		}
 	}
 
