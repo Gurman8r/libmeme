@@ -16,12 +16,11 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias buffer		= typename void const *				; // data buffer type
-	ML_alias command	= typename std::function<void()>	; // render command type
-	ML_alias handle		= typename void *					; // generic handle type
-
-	ML_alias vertices_t	= typename pmr::vector<float_t>		; // vertices vector type
+	ML_alias buffer_t	= typename void const *				; // data buffer type
+	ML_alias command_t	= typename std::function<void()>	; // render command type
+	ML_alias handle_t	= typename void *					; // generic handle type
 	ML_alias indices_t	= typename pmr::vector<uint32_t>	; // indices vector type
+	ML_alias vertices_t	= typename pmr::vector<float_t>		; // vertices vector type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -386,7 +385,7 @@ namespace ml::gl
 
 		virtual void set_ibo(ibo_t const & value) = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD virtual ibo_t const & get_ibo() const = 0;
 		
@@ -407,17 +406,17 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
-		virtual void set_data(buffer vertices, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void set_data(buffer_t vertices, uint32_t size, uint32_t offset = 0) = 0;
 
 		virtual void set_layout(buffer_layout const & value) = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD virtual buffer_layout const & get_layout() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
-		ML_NODISCARD static vbo_t create(buffer vertices, uint32_t size, uint32_t usage = usage_static);
+		ML_NODISCARD static vbo_t create(buffer_t vertices, uint32_t size, uint32_t usage = usage_static);
 
 		ML_NODISCARD static vbo_t create(uint32_t size, uint32_t usage = usage_dynamic);
 
@@ -439,13 +438,13 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
-		virtual void set_data(buffer indices, uint32_t count) = 0;
+		virtual void set_data(buffer_t indices, uint32_t count) = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
-		ML_NODISCARD static ibo_t create(buffer indices, uint32_t count);
+		ML_NODISCARD static ibo_t create(buffer_t indices, uint32_t count);
 
 		ML_NODISCARD static ibo_t create(indices_t const & indices)
 		{
@@ -469,13 +468,13 @@ namespace ml::gl
 
 		virtual void resize(vec2i const & value) = 0;
 
-		ML_NODISCARD virtual handle get_color_attachment() const = 0;
+		ML_NODISCARD virtual handle_t get_color_attachment() const = 0;
 
-		ML_NODISCARD virtual handle get_depth_attachment() const = 0;
+		ML_NODISCARD virtual handle_t get_depth_attachment() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_format() const = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD virtual vec2i get_size() const = 0;
 
@@ -494,7 +493,7 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD static shader_t create();
 	};
@@ -511,7 +510,7 @@ namespace ml::gl
 
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual handle get_handle() const = 0;
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_type() const = 0;
 

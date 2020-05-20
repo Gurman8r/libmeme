@@ -29,7 +29,7 @@ namespace ml::gl
 
 		void set_ibo(ibo_t const & value) override;
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 		inline ibo_t const & get_ibo() const override { return m_indices; }
 
@@ -48,7 +48,7 @@ namespace ml::gl
 	class opengl_vertex_buffer final : public vertex_buffer
 	{
 	public:
-		opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t usage = usage_static);
+		opengl_vertex_buffer(buffer_t vertices, uint32_t size, uint32_t usage = usage_static);
 
 		opengl_vertex_buffer(uint32_t size, uint32_t usage = usage_dynamic);
 
@@ -58,11 +58,11 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		void set_data(buffer vertices, uint32_t size, uint32_t offset = 0) override;
+		void set_data(buffer_t vertices, uint32_t size, uint32_t offset = 0) override;
 
 		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 		inline buffer_layout const & get_layout() const override { return m_layout; }
 
@@ -81,7 +81,7 @@ namespace ml::gl
 	class opengl_index_buffer final : public index_buffer
 	{
 	public:
-		opengl_index_buffer(buffer indices, uint32_t count);
+		opengl_index_buffer(buffer_t indices, uint32_t count);
 
 		~opengl_index_buffer();
 
@@ -89,11 +89,11 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		void set_data(buffer indices, uint32_t count) override;
+		void set_data(buffer_t indices, uint32_t count) override;
 
 		inline uint32_t get_count() const override { return m_count; }
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t	m_handle	{}; // handle
@@ -118,13 +118,13 @@ namespace ml::gl
 
 		void resize(vec2i const & value) override;
 
-		inline handle get_color_attachment() const override { return ML_addressof(m_color_attachment); }
+		inline handle_t get_color_attachment() const override { return ML_addressof(m_color_attachment); }
 
-		inline handle get_depth_attachment() const override { return ML_addressof(m_depth_attachment); }
+		inline handle_t get_depth_attachment() const override { return ML_addressof(m_depth_attachment); }
 
 		inline uint32_t get_format() const override { return m_format; }
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 		inline vec2i get_size() const override { return m_size; }
 
@@ -150,12 +150,12 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t					m_handle	{}; // handle
 		ds::map<hash_t, int32_t>	m_uniforms	{}; // uniform cache
-		ds::map<hash_t, handle>		m_textures	{}; // texture cache
+		ds::map<hash_t, handle_t>	m_textures	{}; // texture cache
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -172,7 +172,7 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		inline handle get_handle() const override { return ML_addressof(m_handle); }
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 		inline uint32_t get_type() const override { return m_type; }
 

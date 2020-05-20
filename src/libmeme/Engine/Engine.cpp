@@ -47,7 +47,7 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
-				for (auto const & cmd : std::initializer_list<gl::command>
+				for (auto const & cmd : std::initializer_list<gl::command_t>
 				{
 					gl::render_command::set_clear_color(colors::black),
 					gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),

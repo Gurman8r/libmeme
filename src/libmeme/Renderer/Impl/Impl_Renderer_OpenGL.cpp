@@ -68,15 +68,15 @@ namespace ml::gl
 				break;
 			case GL_STACK_OVERFLOW:
 				err_name = "Stack Overflow";
-				err_desc = "This command would cause a stack overflow";
+				err_desc = "This command_t would cause a stack overflow";
 				break;
 			case GL_STACK_UNDERFLOW:
 				err_name = "Stack Underflow";
-				err_desc = "This command would cause a stack underflow";
+				err_desc = "This command_t would cause a stack underflow";
 				break;
 			case GL_OUT_OF_MEMORY:
 				err_name = "Out of Memory";
-				err_desc = "There is not enough memory left to execute the command";
+				err_desc = "There is not enough memory left to execute the command_t";
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
 				err_name = "Invalid Framebuffer Operation";
@@ -616,7 +616,7 @@ namespace ml::gl
 					e.get_component_count(),
 					type,
 					stride,
-					reinterpret_cast<buffer>(e.offset)
+					reinterpret_cast<buffer_t>(e.offset)
 				));
 			}
 			else
@@ -628,7 +628,7 @@ namespace ml::gl
 					type,
 					e.normalized,
 					stride,
-					reinterpret_cast<buffer>(e.offset)
+					reinterpret_cast<buffer_t>(e.offset)
 				));
 			}
 			glCheck(glEnableVertexAttribArray(m_index++));
@@ -646,7 +646,7 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertex_buffer::opengl_vertex_buffer(buffer vertices, uint32_t size, uint32_t usage)
+	opengl_vertex_buffer::opengl_vertex_buffer(buffer_t vertices, uint32_t size, uint32_t usage)
 		: m_usage{ usage }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
@@ -674,7 +674,7 @@ namespace ml::gl
 		glCheck(glBindBuffer(GL_ARRAY_BUFFER, NULL));
 	}
 
-	void opengl_vertex_buffer::set_data(buffer vertices, uint32_t size, uint32_t offset)
+	void opengl_vertex_buffer::set_data(buffer_t vertices, uint32_t size, uint32_t offset)
 	{
 		m_size = size;
 		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
@@ -682,7 +682,7 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_index_buffer::opengl_index_buffer(buffer indices, uint32_t count)
+	opengl_index_buffer::opengl_index_buffer(buffer_t indices, uint32_t count)
 	{
 		glCheck(glGenBuffers(1, &m_handle));
 		this->bind();
@@ -704,7 +704,7 @@ namespace ml::gl
 		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL));
 	}
 
-	void opengl_index_buffer::set_data(buffer indices, uint32_t count)
+	void opengl_index_buffer::set_data(buffer_t indices, uint32_t count)
 	{
 		m_count = count;
 		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW));
@@ -760,15 +760,9 @@ namespace ml::gl
 		glCheck(glGenTextures(1, &m_color_attachment));
 		glCheck(glBindTexture(GL_TEXTURE_2D, m_color_attachment));
 		glCheck(glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			_format<to_impl>(m_format),
-			m_size[0],
-			m_size[1],
-			0,
-			_format<to_impl>(m_format),
-			GL_UNSIGNED_BYTE,
-			nullptr));
+			GL_TEXTURE_2D, 0, _format<to_impl>(m_format), m_size[0], m_size[1], 0,
+			_format<to_impl>(m_format), GL_UNSIGNED_BYTE, nullptr
+		));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
@@ -776,19 +770,14 @@ namespace ml::gl
 			GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			GL_TEXTURE_2D, m_color_attachment, 0));
 
+
 		// depth attachment
 		glCheck(glGenTextures(1, &m_depth_attachment));
 		glCheck(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
 		glCheck(glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_DEPTH24_STENCIL8,
-			m_size[0],
-			m_size[1],
-			0,
-			GL_DEPTH_STENCIL,
-			GL_UNSIGNED_INT_24_8,
-			nullptr));
+			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_size[0], m_size[1], 0,
+			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr
+		));
 		glCheck(glFramebufferTexture2D(
 			GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
 			GL_TEXTURE_2D, m_depth_attachment, 0));

@@ -408,7 +408,7 @@ namespace ml
 					vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
 					vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
 					vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } }, }))
-				]()
+				]() noexcept
 				{
 					vb->set_layout(
 					{
@@ -450,7 +450,7 @@ namespace ml
 
 			ML_bind_scope(m_fbo.get());
 
-			for (gl::command const & cmd :
+			for (gl::command_t const & cmd :
 			{
 				gl::render_command::set_cull_enabled(false),
 				gl::render_command::set_clear_color(colors::magenta),

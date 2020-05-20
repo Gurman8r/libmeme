@@ -47,7 +47,7 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vbo_t vertex_buffer::create(buffer vertices, uint32_t size, uint32_t usage)
+	vbo_t vertex_buffer::create(buffer_t vertices, uint32_t size, uint32_t usage)
 	{
 		return std::allocate_shared<impl_vertex_buffer>(pmr::polymorphic_allocator<byte_t>{},
 			vertices, size, usage
@@ -63,7 +63,7 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ibo_t index_buffer::create(buffer indices, uint32_t count)
+	ibo_t index_buffer::create(buffer_t indices, uint32_t count)
 	{
 		return std::allocate_shared<impl_index_buffer>(pmr::polymorphic_allocator<byte_t>{},
 			indices, count

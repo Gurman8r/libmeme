@@ -29,7 +29,7 @@ namespace ml
 		m_settings.context.major = api->get_major_version();
 		m_settings.context.minor = api->get_minor_version();
 
-		for (gl::command const & cmd : // setup states
+		for (gl::command_t const & cmd : // setup states
 		{
 			// alpha state
 			gl::render_command::set_alpha_enabled(true),
