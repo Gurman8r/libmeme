@@ -30,9 +30,9 @@ namespace ml
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct c_shader		: ds::wrapper<shader>			{};
-	struct c_material	: ds::wrapper<material>			{};
-	struct c_model		: ds::wrapper<mesh>	{};
+	struct c_shader		: ds::wrapper<shader>	{};
+	struct c_material	: ds::wrapper<material>	{};
+	struct c_mesh		: ds::wrapper<mesh>		{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
@@ -43,7 +43,7 @@ namespace ml
 	>;
 	using s_apply_materials = meta::list<c_shader, c_material
 	>;
-	using s_draw_models = meta::list<c_shader, c_model
+	using s_draw_models = meta::list<c_shader, c_mesh
 	>;
 
 
@@ -71,7 +71,7 @@ namespace ml
 
 	template <class> struct x_draw_models final : ecs::detail::x_base<s_draw_models>
 	{
-		void operator()(c_shader const & s, c_model const & m)
+		void operator()(c_shader const & s, c_mesh const & m)
 		{
 			ML_bind_scope(*s, true);
 			gl::render_command::draw(m->vao())();
@@ -91,7 +91,7 @@ namespace ml
 
 		// components
 		ecs::cfg::components<
-		c_shader, c_material, c_model, c_transform
+		c_shader, c_material, c_mesh, c_transform
 		>,
 
 		// signatures
@@ -375,7 +375,7 @@ namespace ml
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
-					h.add_component<c_model>	(m_meshes	[msh]);
+					h.add_component<c_mesh>	(m_meshes	[msh]);
 					h.add_component<c_transform>(tf);
 					return h;
 				};
