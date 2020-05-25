@@ -536,32 +536,6 @@ namespace ml::gl
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convert> constexpr uint32_t _attachment(uint32_t value) noexcept
-	{
-		if constexpr (Convert()) // to_impl
-		{
-			switch (value)
-			{
-			default							: return GL_COLOR_ATTACHMENT0 + value;
-			case depth_attchment			: return GL_DEPTH_ATTACHMENT;
-			case stencil_attachment			: return GL_STENCIL_ATTACHMENT;
-			case depth_stencil_attachment	: return GL_DEPTH_STENCIL_ATTACHMENT;
-			}
-		}
-		else // to_user
-		{
-			switch (value)
-			{
-			default							: return color_attachment_0 + std::distance(GL_COLOR_ATTACHMENT0, value);
-			case GL_DEPTH_ATTACHMENT		: return depth_attchment;
-			case GL_STENCIL_ATTACHMENT		: return stencil_attachment;
-			case GL_DEPTH_STENCIL_ATTACHMENT: return depth_stencil_attachment;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

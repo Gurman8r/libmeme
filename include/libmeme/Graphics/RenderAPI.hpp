@@ -194,31 +194,6 @@ namespace ml::gl
 		shader_type_geometry,
 	};
 
-	enum attachment_ : uint32_t
-	{
-		color_attachment_0,
-		color_attachment_1,
-		color_attachment_2,
-		color_attachment_3,
-		color_attachment_4,
-		color_attachment_5,
-		color_attachment_6,
-		color_attachment_7,
-		color_attachment_8,
-		color_attachment_9,
-		color_attachment_10,
-		color_attachment_11,
-		color_attachment_12,
-		color_attachment_13,
-		color_attachment_14,
-		color_attachment_15,
-		color_attachment_max,
-
-		depth_attchment,
-		stencil_attachment,
-		depth_stencil_attachment,
-	};
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
