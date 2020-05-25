@@ -367,6 +367,7 @@
 #   pragma warning(disable: 4307)   // integral constant overflow
 #   pragma warning(disable: 4308)   // negative integral constant converted to unsigned t
 #   pragma warning(disable: 4309)   // truncation of constant value
+#   pragma warning(disable: 4312)   // conversion to greater size
 #   pragma warning(disable: 4723)   // potential divide by zero
 #   pragma warning(disable: 6011)   // dereferencing NULL pointer
 #   pragma warning(disable: 6282)   // incorrect operator

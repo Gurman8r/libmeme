@@ -13,139 +13,9 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Graphics/Font.hpp>
-#include <libmeme/Graphics/Model.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
-	struct mesh_renderer final : trackable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using self_type = typename mesh_renderer;
-
-		mesh_renderer(shared<gl::vertex_array> const & vao = gl::make_vao()) noexcept
-			: m_vao{ vao }
-		{
-		}
-
-		mesh_renderer(fs::path const & path) noexcept
-			: self_type{}
-		{
-			this->load_from_file(path);
-		}
-
-		mesh_renderer(pmr::vector<float_t> const & vertices)
-			: self_type{}
-		{
-			m_vao->add_vbo(gl::make_vbo(vertices));
-		}
-
-		mesh_renderer(pmr::vector<float_t> const & vertices, pmr::vector<uint32_t> const & indices)
-			: self_type{}
-		{
-			m_vao->add_vbo(gl::make_vbo(vertices));
-			m_vao->set_ibo(gl::make_ibo(indices));
-		}
-
-		mesh_renderer(pmr::vector<vertex> const & vertices)
-			: self_type{ util::contiguous(vertices) }
-		{
-		}
-
-		mesh_renderer(pmr::vector<vertex> const & vertices, pmr::vector<uint32_t> const & indices)
-			: self_type{ util::contiguous(vertices), indices }
-		{
-		}
-
-		mesh_renderer(self_type const & other)
-			: self_type{ other.m_verts }
-		{
-		}
-
-		mesh_renderer(self_type && other) noexcept
-			: self_type{}
-		{
-			this->swap(std::move(other));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		self_type & operator=(self_type const & other)
-		{
-			self_type temp{ other };
-			this->swap(temp);
-			return (*this);
-		}
-
-		self_type & operator=(self_type && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool load_from_file(fs::path const & path)
-		{
-			m_verts = util::contiguous(model::load_model(path));
-
-			if (m_verts.empty())
-			{
-				return false;
-			}
-			else if (!m_vao)
-			{
-				m_vao = gl::make_vao();
-			}
-
-			auto vb = gl::make_vbo(m_verts);
-
-			vb->set_layout({
-				{ meta::tag_v<vec3f>, "a_position"	},
-				{ meta::tag_v<vec3f>, "a_normal"	},
-				{ meta::tag_v<vec2f>, "a_texcoord"	},
-			});
-
-			m_vao->add_vbo(vb);
-
-			m_vao->set_ibo(nullptr);
-
-			return true;
-		}
-
-		void swap(self_type & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_vao.swap(other.m_vao);
-				m_verts.swap(other.m_verts);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void draw(self_type const * value)
-		{
-			gl::render_command::draw(value->m_vao)();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		auto vao() & noexcept -> shared<gl::vertex_array> & { return m_vao; }
-
-		auto vao() const & noexcept -> shared<gl::vertex_array> const & { return m_vao; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		shared<gl::vertex_array> m_vao;
-		pmr::vector<float_t> m_verts;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
+#include <libmeme/Graphics/Mesh.hpp>
+#include <libmeme/Graphics/Material.hpp>
+#include <libmeme/Graphics/Renderer.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -162,7 +32,7 @@ namespace ml
 
 	struct c_shader		: ds::wrapper<shader>			{};
 	struct c_material	: ds::wrapper<material>			{};
-	struct c_model		: ds::wrapper<model>	{};
+	struct c_model		: ds::wrapper<mesh>	{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
@@ -195,10 +65,7 @@ namespace ml
 		void operator()(c_shader & s, c_material const & m)
 		{
 			ML_bind_scope(*s, false);
-			for (uniform const & u : *m)
-			{
-				s->set_uniform(u);
-			}
+			for (uniform const & u : *m) { s->set_uniform(u); }
 		}
 	};
 
@@ -207,7 +74,7 @@ namespace ml
 		void operator()(c_shader const & s, c_model const & m)
 		{
 			ML_bind_scope(*s, true);
-			render_target::draw(*m);
+			gl::render_command::draw(m->vao())();
 		}
 	};
 
@@ -258,7 +125,7 @@ namespace ml
 		ds::map< pmr::string, font		> m_fonts		{};
 		ds::map< pmr::string, image		> m_images		{};
 		ds::map< pmr::string, material	> m_materials	{};
-		ds::map< pmr::string, model> m_models{};
+		ds::map< pmr::string, mesh		> m_meshes		{};
 		ds::map< pmr::string, shader	> m_shaders		{};
 		ds::map< pmr::string, texture	> m_textures	{};
 
@@ -273,7 +140,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		vec2 m_resolution{ 1280, 720 };
-		shared<gl::vertex_array> m_vao{ gl::make_vao() };
 		shared<gl::frame_buffer> m_fbo{ gl::make_fbo(gl::format_rgba, m_resolution) };
 
 
@@ -468,11 +334,11 @@ namespace ml
 
 			// MODELS
 			{
-				m_models["sphere8x6"] = engine::fs().path2("assets/models/sphere8x6.obj");
-				m_models["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
-				m_models["monkey"] = engine::fs().path2("assets/models/monkey.obj");
+				m_meshes["sphere8x6"]	= engine::fs().path2("assets/models/sphere8x6.obj");
+				m_meshes["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
+				m_meshes["monkey"]		= engine::fs().path2("assets/models/monkey.obj");
 
-				m_models["triangle"] = { mesh
+				m_meshes["triangle"] =
 				{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
@@ -482,9 +348,9 @@ namespace ml
 					{
 						0, 1, 2,
 					}
-				} };
+				};
 
-				m_models["quad"] = { mesh
+				m_meshes["quad"] =
 				{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
@@ -496,20 +362,20 @@ namespace ml
 						0, 1, 3,
 						1, 2, 3,
 					}
-				} };
+				};
 			}
 
 			// ENTITIES
 			{
 				ML_defer{ m_ecs.refresh(); };
 
-				auto make_renderer = [&](auto shd, auto mat, auto mdl, auto tf)
+				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf)
 				{
 					auto & h{ m_ecs.create_handle() };
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
-					h.add_component<c_model>	(m_models	[mdl]);
+					h.add_component<c_model>	(m_meshes	[msh]);
 					h.add_component<c_transform>(tf);
 					return h;
 				};
@@ -525,30 +391,6 @@ namespace ml
 					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)
 					});
-			}
-
-			// TESTING
-			{
-				m_vao->add_vbo(([vb = gl::vertex_buffer::create(util::contiguous({
-					vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
-					vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
-					vertex{ { -1.0f, -1.0f, 0.0f }, vec3::one(), { 0.0f, 0.0f } },
-					vertex{ { -1.0f, +1.0f, 0.0f }, vec3::one(), { 0.0f, 1.0f } }, }))
-				]() noexcept
-				{
-					vb->set_layout(
-					{
-						{ meta::tag_v<vec3f>, "a_position"	},
-						{ meta::tag_v<vec3f>, "a_normal"	},
-						{ meta::tag_v<vec2f>, "a_texcoord"	},
-					});
-					return vb;
-				})());
-
-				m_vao->set_ibo(gl::index_buffer::create({
-					0, 1, 3,
-					1, 2, 3,
-				}));
 			}
 		}
 
@@ -586,18 +428,6 @@ namespace ml
 				std::invoke(cmd);
 			}
 			m_ecs.update_system<x_draw_models>();
-
-			
-			static auto sh = shader{ m_shaders["3d"] };
-			static auto mt = material{ m_materials["earth"] };
-			mt	.set<vec3>("u_position"	, vec3{ .0f, 0.f, 0.f })
-				.set<vec4>("u_rotation"	, vec4{ 0.0f, 0.1f, 0.0f, .35f })
-				.set<vec3>("u_scale"	, vec3::fill(1.5f));
-			sh.bind(false);
-			for (auto & u : mt) { sh.set_uniform(u); }
-			sh.bind(true);
-
-			gl::render_command::draw(m_vao)();
 		}
 
 		void on_gui_dock(dock_gui_event const &)
@@ -724,7 +554,7 @@ namespace ml
 			m_images.clear();
 			m_shaders.clear();
 			m_materials.clear();
-			m_models.clear();
+			m_meshes.clear();
 			m_textures.clear();
 			m_fonts.clear();
 
@@ -778,7 +608,7 @@ namespace ml
 			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_materials	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_models	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_meshes	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_shaders	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_textures	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 

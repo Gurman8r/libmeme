@@ -1,6 +1,6 @@
 #include <libmeme/Graphics/Texture.hpp>
 #include <libmeme/Graphics/GL.hpp>
-#include <libmeme/Renderer/Binder.hpp>
+#include <libmeme/Graphics/Binder.hpp>
 #include <libmeme/Core/BitSet.hpp>
 
 namespace ml::impl

@@ -1,12 +1,13 @@
 #ifndef _ML_SHADER_HPP_
 #define _ML_SHADER_HPP_
 
+#include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Graphics/Uniform.hpp>
-#include <libmeme/Renderer/Renderer.hpp>
+#include <libmeme/Graphics/RenderAPI.hpp>
 
 namespace ml
 {
-	struct ML_GRAPHICS_API shader final : trackable
+	struct shader final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

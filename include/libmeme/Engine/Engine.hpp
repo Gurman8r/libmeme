@@ -6,7 +6,7 @@
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/ScriptManager.hpp>
 #include <libmeme/Engine/TimeManager.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {

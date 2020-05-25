@@ -4,7 +4,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Renderer/RenderAPI.hpp>
+#include <libmeme/Graphics/RenderAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -38,7 +38,7 @@ namespace ml::gl
 	private:
 		uint32_t m_handle{}; // handle
 		
-		shared<index_buffer> m_indices{}; // index buffer
+		shared<index_buffer> m_indices{ nullptr }; // index buffer
 		
 		pmr::vector<shared<vertex_buffer>> m_vertices{}; // vertex buffers
 	};

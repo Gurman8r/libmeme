@@ -1,4 +1,5 @@
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
+#include <libmeme/Graphics/RenderCommand.hpp>
 
 namespace ml
 {

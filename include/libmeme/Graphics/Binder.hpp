@@ -20,6 +20,12 @@ namespace ml::impl
 			m_ptr->bind(ML_forward(args)...);
 		}
 
+		template <template <class> class Ptr, class ... Args
+		> scope_binder(Ptr<T> const & value, Args && ... args) noexcept
+			: scope_binder<T>{ value.get(), ML_forward(args)... }
+		{
+		}
+
 		template <class ... Args
 		> scope_binder(T & value, Args && ... args) noexcept
 			: scope_binder<T>{ &value, ML_forward(args)... }

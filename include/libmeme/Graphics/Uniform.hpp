@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	struct ML_GRAPHICS_API uniform final : trackable
+	struct uniform final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

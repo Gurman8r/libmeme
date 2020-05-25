@@ -3,10 +3,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Renderer/Export.hpp>
-#include <libmeme/Renderer/Binder.hpp>
+#include <libmeme/Graphics/Export.hpp>
+#include <libmeme/Graphics/Binder.hpp>
+#include <libmeme/Graphics/Vertex.hpp>
 #include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Rect.hpp>
 
@@ -263,17 +263,17 @@ namespace ml::gl
 		case hashof_v<int32_t>	:
 		case hashof_v<float_t>	: return 1;
 		case hashof_v<vec2i>	:
-		case hashof_v<vec2f>	: return vec2().size();
+		case hashof_v<vec2f>	: return 2;
 		case hashof_v<vec3i>	:
-		case hashof_v<vec3f>	: return vec3().size();
+		case hashof_v<vec3f>	: return 3;
 		case hashof_v<vec4i>	:
-		case hashof_v<vec4f>	: return vec4().size();
+		case hashof_v<vec4f>	: return 4;
 		case hashof_v<mat2i>	:
-		case hashof_v<mat2f>	: return mat2().size();
+		case hashof_v<mat2f>	: return 2 * 2;
 		case hashof_v<mat3i>	:
-		case hashof_v<mat3f>	: return mat3().size();
+		case hashof_v<mat3f>	: return 3 * 3;
 		case hashof_v<mat4i>	:
-		case hashof_v<mat4f>	: return mat4().size();
+		case hashof_v<mat4f>	: return 4 * 4;
 		}
 	}
 
@@ -406,7 +406,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// vertex array
-	class ML_RENDERER_API vertex_array : public trackable, public non_copyable
+	class ML_GRAPHICS_API vertex_array : public trackable, public non_copyable
 	{
 	public:
 		virtual ~vertex_array() = default;
@@ -438,7 +438,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// vertex buffer
-	class ML_RENDERER_API vertex_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API vertex_buffer : public trackable, public non_copyable
 	{
 	public:
 		virtual ~vertex_buffer() = default;
@@ -486,7 +486,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// index buffer
-	class ML_RENDERER_API index_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API index_buffer : public trackable, public non_copyable
 	{
 	public:
 		virtual ~index_buffer() = default;
@@ -523,7 +523,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// frame buffer
-	class ML_RENDERER_API frame_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API frame_buffer : public trackable, public non_copyable
 	{
 	public:
 		virtual ~frame_buffer() = default;
@@ -561,7 +561,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// shader
-	class ML_RENDERER_API shader_object : public trackable, public non_copyable
+	class ML_GRAPHICS_API shader_object : public trackable, public non_copyable
 	{
 	public:
 		virtual ~shader_object() = default;
@@ -613,7 +613,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// texture
-	class ML_RENDERER_API texture_object : public trackable, public non_copyable
+	class ML_GRAPHICS_API texture_object : public trackable, public non_copyable
 	{
 	public:
 		virtual ~texture_object() = default;
@@ -693,7 +693,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// render api
-	class ML_RENDERER_API render_api : public trackable, public non_copyable
+	class ML_GRAPHICS_API render_api : public trackable, public non_copyable
 	{
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1,7 +1,7 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Renderer/Renderer.hpp>
+#include <libmeme/Graphics/RenderCommand.hpp>
 
 namespace ml
 {

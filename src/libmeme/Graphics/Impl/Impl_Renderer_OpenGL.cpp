@@ -574,6 +574,7 @@ namespace ml::gl
 	opengl_vertex_array::opengl_vertex_array()
 	{
 		glCheck(glGenVertexArrays(1, &m_handle));
+		this->bind();
 	}
 
 	opengl_vertex_array::~opengl_vertex_array()
@@ -593,6 +594,8 @@ namespace ml::gl
 
 	void opengl_vertex_array::add_vbo(shared<vertex_buffer> const & value)
 	{
+		if (!value) { return; }
+
 		this->bind(); value->bind();
 
 		uint32_t const stride{ value->get_layout().get_stride() };
@@ -641,11 +644,11 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_vertex_buffer::opengl_vertex_buffer(buffer_t vertices, uint32_t size, uint32_t usage)
-		: m_usage{ usage }
+		: m_usage{ usage }, m_size{ size }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
 		this->bind();
-		glCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, _usage<to_impl>(usage)));
+		glCheck(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float_t), vertices, _usage<to_impl>(usage)));
 	}
 
 	opengl_vertex_buffer::opengl_vertex_buffer(uint32_t size, uint32_t usage)
@@ -671,12 +674,13 @@ namespace ml::gl
 	void opengl_vertex_buffer::set_data(buffer_t vertices, uint32_t size, uint32_t offset)
 	{
 		m_size = size;
-		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size, vertices));
+		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size * sizeof(float_t), vertices));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_index_buffer::opengl_index_buffer(buffer_t indices, uint32_t count)
+		: m_count{ count }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
 		this->bind();
@@ -1366,24 +1370,26 @@ namespace ml::gl
 
 	void opengl_render_api::draw(shared<vertex_array> const & value)
 	{
-		value->bind();
-		
+		if (!value) { return; }
+
+		ML_bind_scope(value);
+
 		if (value->get_ibo())
 		{
-			value->get_ibo()->bind();
-			
+			ML_bind_scope(value->get_ibo());
+
 			for (auto const & vb : value->get_vbos())
 			{
-				vb->bind();
-			}
+				ML_bind_scope(vb);
 
-			this->draw_indexed(value->get_ibo()->get_count());
+				this->draw_indexed(value->get_ibo()->get_count());
+			}
 		}
 		else
 		{
 			for (auto const & vb : value->get_vbos())
 			{
-				vb->bind();
+				ML_bind_scope(vb);
 
 				this->draw_arrays(0, vb->get_size());
 			}

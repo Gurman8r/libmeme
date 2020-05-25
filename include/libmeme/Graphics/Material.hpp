@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_GRAPHICS_API material final : trackable
+	struct material final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -71,10 +71,6 @@ namespace ml
 			swap(std::move(value));
 			return (*this);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool load_from_file(fs::path const & path) { return false; };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -3,7 +3,7 @@
 
 // WIP
 
-#include <libmeme/Renderer/RenderCommand.hpp>
+#include <libmeme/Graphics/RenderCommand.hpp>
 
 // renderer singleton
 #define ML_renderer \
