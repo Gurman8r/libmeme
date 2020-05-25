@@ -303,9 +303,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_alpha(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isalpha(elem, loc))
+			if (!std::isalpha(elem, {}))
 				return false;
 		return true;
 	}
@@ -314,9 +313,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_alnum(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isalnum(elem, loc))
+			if (!std::isalnum(elem, {}))
 				return false;
 		return true;
 	}
@@ -325,9 +323,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_graph(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isgraph(elem, loc))
+			if (!std::isgraph(elem, {}))
 				return false;
 		return true;
 	}
@@ -336,9 +333,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_print(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::isprint(elem, loc))
+			if (!std::isprint(elem, {}))
 				return false;
 		return true;
 	}
@@ -347,9 +343,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_lower(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::islower(elem, loc))
+			if (!std::islower(elem, {}))
 				return false;
 		return true;
 	}
@@ -358,9 +353,8 @@ namespace ml::util
 	> ML_NODISCARD bool is_upper(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		for (auto const & elem : value)
-			if (!std::islower(elem, loc))
+			if (!std::islower(elem, {}))
 				return false;
 		return true;
 	}
@@ -370,18 +364,16 @@ namespace ml::util
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD Str to_lower(Str value) noexcept
 	{
-		std::locale loc{};
 		for (auto & elem : value)
-			elem = std::tolower(elem, loc);
+			elem = std::tolower(elem, {});
 		return value;
 	}
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD Str to_upper(Str value) noexcept
 	{
-		std::locale loc{};
 		for (auto & elem : value)
-			elem = std::toupper(elem, loc);
+			elem = std::toupper(elem, {});
 		return value;
 	}
 
@@ -410,10 +402,9 @@ namespace ml::util
 	> ML_NODISCARD bool is_integer(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		auto it{ std::begin(value) };
 		if ((*it) == '-') it++; 
-		while (it != std::end(value) && std::isdigit(*it, loc)) ++it;
+		while (it != std::end(value) && std::isdigit(*it, {})) ++it;
 		return (it == std::end(value));
 	}
 
@@ -430,14 +421,13 @@ namespace ml::util
 	> ML_NODISCARD bool is_name(Str const & value) noexcept
 	{
 		if (value.empty()) return false;
-		std::locale loc{};
 		auto it{ std::begin(value) };
-		if (!(*it == '_') || !std::isalpha(*it, loc))
+		if (!(*it == '_') || !std::isalpha(*it, {}))
 			return false;
 		++it;
-		std::for_each(it, std::end(value), [&, loc](auto const c)
+		std::for_each(it, std::end(value), [&, {}](auto const c)
 		{
-			if ((c != '_') || !std::isalnum(c, loc))
+			if ((c != '_') || !std::isalnum(c, {}))
 			{
 				return false;
 			}

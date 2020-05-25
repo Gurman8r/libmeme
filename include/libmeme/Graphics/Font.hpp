@@ -9,17 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-		
-		using page = typename ds::map<uint32_t, glyph>;
-		
-		using page_table = typename ds::map<uint32_t, page>;
-
-		struct ML_NODISCARD info final
-		{
-			pmr::string family{};
-			std::locale locale{};
-		};
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using page				= typename ds::map<uint32_t, glyph>;
+		using page_table		= typename ds::map<uint32_t, page>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,7 +46,7 @@ namespace ml
 			{
 				std::swap(m_library, value.m_library);
 				std::swap(m_face, value.m_face);
-				std::swap(m_info, value.m_info);
+				std::swap(m_family, value.m_family);
 				m_pages.swap(value.m_pages);
 			}
 		}
@@ -74,16 +66,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_info() const noexcept -> info const & { return m_info; }
+		ML_NODISCARD auto family() const noexcept -> pmr::string const & { return m_family; }
 
-		ML_NODISCARD auto get_pages() const noexcept -> page_table const & { return m_pages; }
+		ML_NODISCARD auto pages() const noexcept -> page_table const & { return m_pages; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		void *		m_library;
 		void *		m_face;
-		info		m_info;
+		pmr::string	m_family;
 		page_table	m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

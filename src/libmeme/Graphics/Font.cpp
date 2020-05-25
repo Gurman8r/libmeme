@@ -18,7 +18,7 @@ namespace ml
 
 	font::font(allocator_type alloc) noexcept
 		: m_pages	{ alloc }
-		, m_info	{ pmr::string{ alloc }, {} }
+		, m_family	{ alloc }
 		, m_library	{}
 		, m_face	{}
 	{
@@ -32,7 +32,7 @@ namespace ml
 
 	font::font(font const & value, allocator_type alloc)
 		: m_pages	{ value.m_pages, alloc }
-		, m_info	{ { value.m_info.family, alloc }, value.m_info.locale }
+		, m_family	{ value.m_family, alloc }
 		, m_library	{ value.m_library }
 		, m_face	{ value.m_face }
 	{
@@ -92,8 +92,8 @@ namespace ml
 		// store the font faces
 		m_face = face;
 
-		// store the font information
-		m_info.family = face->family_name;
+		// store the font info
+		m_family = face->family_name;
 
 		return true;
 	}
@@ -139,7 +139,7 @@ namespace ml
 		g.advance = (uint32_t)face->glyph->advance.x;
 		
 		// only load a texture for characters requiring a graphic
-		if (!std::isspace(c, m_info.locale) && std::isgraph(c, m_info.locale))
+		if (!std::isspace(c, {}) && std::isgraph(c, {}))
 		{
 			if (!g.graphic.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
 			{

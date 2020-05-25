@@ -1,6 +1,6 @@
 #include <libmeme/Graphics/Model.hpp>
 #include <libmeme/Graphics/GL.hpp>
-#include <libmeme/Graphics/RenderTarget.hpp>
+#include <libmeme/Renderer/RenderTarget.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

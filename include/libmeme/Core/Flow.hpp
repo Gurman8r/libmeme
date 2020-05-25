@@ -10,13 +10,13 @@ namespace ml::impl
     // invoke in constructor
     template <class Fn> struct ML_NODISCARD immediate_scope final
     {
-        immediate_scope(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
+        constexpr immediate_scope(Fn && fn) noexcept { ML_invoke(ML_forward(fn)); }
     };
 
     enum class ML_NODISCARD scope_tag {};
 
     template <class Fn
-    > ML_NODISCARD auto operator+(scope_tag, Fn && fn) noexcept
+    > ML_NODISCARD constexpr auto operator+(scope_tag, Fn && fn) noexcept
     {
         return immediate_scope<Fn>{ ML_forward(fn) };
     }
@@ -24,7 +24,7 @@ namespace ml::impl
 
 // invoke on enter
 #define ML_scope \
-    auto ML_anon = ML_concat(_ML, impl::scope_tag){} + [&]() noexcept
+    auto ML_anon = _ML impl::scope_tag{} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,7 +51,7 @@ namespace ml::impl
 
 // invoke on exit
 #define ML_defer \
-    auto ML_anon = ML_concat(_ML, impl::defer_tag){} + [&]() noexcept
+    auto ML_anon = _ML impl::defer_tag{} + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

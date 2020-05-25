@@ -368,6 +368,8 @@ namespace ml::size_literals
 		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::kilo{})));
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// mebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _MiB(uint64_t n) noexcept
 	{
@@ -378,6 +380,8 @@ namespace ml::size_literals
 	{
 		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::mega{})));
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// gibibyte
 	ML_NODISCARD constexpr uint64_t operator"" _GiB(uint64_t n) noexcept
@@ -390,6 +394,8 @@ namespace ml::size_literals
 		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::giga{})));
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// tebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _TiB(uint64_t n) noexcept
 	{
@@ -401,6 +407,8 @@ namespace ml::size_literals
 		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::tera{})));
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// pebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _PiB(uint64_t n) noexcept
 	{
@@ -411,6 +419,8 @@ namespace ml::size_literals
 	{
 		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::peta{})));
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// exbibyte
 	ML_NODISCARD constexpr uint64_t operator"" _EiB(uint64_t n) noexcept

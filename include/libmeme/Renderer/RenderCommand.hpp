@@ -94,7 +94,7 @@ namespace ml::gl
 			return std::bind(&render_api::clear, render_api::get(), flags);
 		}
 
-		ML_NODISCARD static command_t draw(vao_t const & value) noexcept
+		ML_NODISCARD static command_t draw(shared<vertex_array> const & value) noexcept
 		{
 			return std::bind(&render_api::draw, render_api::get(), value);
 		}

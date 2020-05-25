@@ -4,6 +4,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Renderer/Binder.hpp>
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Memory.hpp>
@@ -16,14 +17,7 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias buffer_t	= typename void const *				; // data buffer type
-	ML_alias command_t	= typename std::function<void()>	; // render command type
-	ML_alias handle_t	= typename void *					; // generic handle type
-	ML_alias indices_t	= typename pmr::vector<uint32_t>	; // indices vector type
-	ML_alias vertices_t	= typename pmr::vector<float_t>		; // vertices vector type
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	// base classes
 	class render_api		; // 
 	class vertex_array		; // 
 	class vertex_buffer		; // 
@@ -32,12 +26,12 @@ namespace ml::gl
 	class shader_object		; // 
 	class texture_object	; // 
 
-	ML_alias vao_t		= typename std::shared_ptr<vertex_array>	; // vertex array pointer
-	ML_alias vbo_t		= typename std::shared_ptr<vertex_buffer>	; // vertex buffer pointer
-	ML_alias ibo_t		= typename std::shared_ptr<index_buffer>	; // index buffer pointer
-	ML_alias fbo_t		= typename std::shared_ptr<frame_buffer>	; // frame buffer pointer
-	ML_alias shader_t	= typename std::shared_ptr<shader_object>	; // shader pointer type
-	ML_alias texture_t	= typename std::shared_ptr<texture_object>	; // texture pointer type
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// aliases
+	ML_alias buffer_t	= typename void const *				; // data buffer type
+	ML_alias command_t	= typename std::function<void()>	; // render command type
+	ML_alias handle_t	= typename void *					; // generic handle type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -51,9 +45,9 @@ namespace ml::gl
 
 	// conversion helpers
 
-	struct to_user : std::false_type {}; // ( false type ) | backend enum -> user enum
+	struct to_user : std::false_type {}; // ( false_type ) | backend enum -> user enum
 
-	struct to_impl : std::true_type {}; // ( true type ) | user enum -> backend enum
+	struct to_impl : std::true_type {}; // ( true_type ) | user enum -> backend enum
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -235,9 +229,61 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_NODISCARD constexpr hash_t element_base_type(hash_t type) noexcept
+	{
+		switch (type)
+		{
+		default					: return 0;
+		case hashof_v<bool>		: return hashof_v<bool>;
+		case hashof_v<int32_t>	:
+		case hashof_v<vec2i>	:
+		case hashof_v<vec3i>	:
+		case hashof_v<vec4i>	:
+		case hashof_v<mat2i>	:
+		case hashof_v<mat3i>	:
+		case hashof_v<mat4i>	: return hashof_v<int32_t>;
+		case hashof_v<float_t>	:
+		case hashof_v<vec2f>	:
+		case hashof_v<vec3f>	:
+		case hashof_v<vec4f>	:
+		case hashof_v<mat2f>	:
+		case hashof_v<mat3f>	:
+		case hashof_v<mat4f>	: return hashof_v<float_t>;
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_NODISCARD constexpr uint32_t element_component_count(hash_t type) noexcept
+	{
+		switch (type)
+		{
+		default					: return 0;
+		case hashof_v<bool>		:
+		case hashof_v<int32_t>	:
+		case hashof_v<float_t>	: return 1;
+		case hashof_v<vec2i>	:
+		case hashof_v<vec2f>	: return vec2().size();
+		case hashof_v<vec3i>	:
+		case hashof_v<vec3f>	: return vec3().size();
+		case hashof_v<vec4i>	:
+		case hashof_v<vec4f>	: return vec4().size();
+		case hashof_v<mat2i>	:
+		case hashof_v<mat2f>	: return mat2().size();
+		case hashof_v<mat3i>	:
+		case hashof_v<mat3f>	: return mat3().size();
+		case hashof_v<mat4i>	:
+		case hashof_v<mat4f>	: return mat4().size();
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// vertex buffer layout element
 	struct ML_NODISCARD buffer_element final : trackable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		pmr::string name		{};
 		hash_t		type		{};
 		uint32_t	size		{};
@@ -260,51 +306,13 @@ namespace ml::gl
 			>);
 		}
 
-		hash_t get_base_type() const noexcept
-		{
-			switch (type)
-			{
-			default					: return 0;
-			case hashof_v<bool>		: return hashof_v<bool>;
-			case hashof_v<int32_t>	:
-			case hashof_v<vec2i>	:
-			case hashof_v<vec3i>	:
-			case hashof_v<vec4i>	:
-			case hashof_v<mat2i>	:
-			case hashof_v<mat3i>	:
-			case hashof_v<mat4i>	: return hashof_v<int32_t>;
-			case hashof_v<float_t>	:
-			case hashof_v<vec2f>	:
-			case hashof_v<vec3f>	:
-			case hashof_v<vec4f>	:
-			case hashof_v<mat2f>	:
-			case hashof_v<mat3f>	:
-			case hashof_v<mat4f>	: return hashof_v<float_t>;
-			}
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uint32_t get_component_count() const noexcept
-		{
-			switch (type)
-			{
-			default					: return 0;
-			case hashof_v<bool>		:
-			case hashof_v<int32_t>	:
-			case hashof_v<float_t>	: return 1;
-			case hashof_v<vec2i>	:
-			case hashof_v<vec2f>	: return 2 * 1;
-			case hashof_v<vec3i>	:
-			case hashof_v<vec3f>	: return 3 * 1;
-			case hashof_v<vec4i>	:
-			case hashof_v<vec4f>	: return 4 * 1;
-			case hashof_v<mat2i>	:
-			case hashof_v<mat2f>	: return 2 * 2;
-			case hashof_v<mat3i>	:
-			case hashof_v<mat3f>	: return 3 * 3;
-			case hashof_v<mat4i>	:
-			case hashof_v<mat4f>	: return 4 * 4;
-			}
-		}
+		hash_t get_base_type() const noexcept { return element_base_type(type); }
+
+		uint32_t get_component_count() const noexcept { return element_component_count(type); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -342,6 +350,12 @@ namespace ml::gl
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD bool empty() const noexcept { return m_elements.empty(); }
+
+		ML_NODISCARD auto size() const noexcept -> uint32_t { return (uint32_t)m_elements.size(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD auto begin() noexcept -> iterator { return m_elements.begin(); }
 
 		ML_NODISCARD auto begin() const noexcept -> const_iterator { return m_elements.begin(); }
@@ -353,6 +367,26 @@ namespace ml::gl
 		ML_NODISCARD auto end() noexcept -> iterator { return m_elements.end(); }
 
 		ML_NODISCARD auto end() const noexcept -> const_iterator { return m_elements.end(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Fn
+		> void for_each(Fn && fn) noexcept
+		{
+			for (uint32_t i = 0, imax = this->size(); i < imax; ++i)
+			{
+				std::invoke(ML_forward(fn), i, m_elements[(size_t)i]);
+			}
+		}
+
+		template <class Fn
+		> void for_each(Fn && fn) const noexcept
+		{
+			for (uint32_t i = 0, imax = this->size(); i < imax; ++i)
+			{
+				std::invoke(ML_forward(fn), i, m_elements[(size_t)i]);
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -381,18 +415,25 @@ namespace ml::gl
 
 		virtual void unbind() const = 0;
 
-		virtual void add_vbo(vbo_t const & value) = 0;
+		virtual void add_vbo(shared<vertex_buffer> const & value) = 0;
 
-		virtual void set_ibo(ibo_t const & value) = 0;
+		virtual void set_ibo(shared<index_buffer> const & value) = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
-		ML_NODISCARD virtual ibo_t const & get_ibo() const = 0;
+		ML_NODISCARD virtual shared<index_buffer> const & get_ibo() const = 0;
 		
-		ML_NODISCARD virtual pmr::vector<vbo_t> const & get_vbos() const = 0;
+		ML_NODISCARD virtual pmr::vector<shared<vertex_buffer>> const & get_vbos() const = 0;
 
-		ML_NODISCARD static vao_t create();
+		ML_NODISCARD static shared<vertex_array> create(
+		);
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_vao(Args && ... args) noexcept
+	{
+		return vertex_array::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -416,15 +457,31 @@ namespace ml::gl
 
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
-		ML_NODISCARD static vbo_t create(buffer_t vertices, uint32_t size, uint32_t usage = usage_static);
+		ML_NODISCARD static shared<vertex_buffer> create(
+			buffer_t vertices,
+			uint32_t size,
+			uint32_t usage = usage_static
+		);
 
-		ML_NODISCARD static vbo_t create(uint32_t size, uint32_t usage = usage_dynamic);
+		ML_NODISCARD static shared<vertex_buffer> create(
+			uint32_t size,
+			uint32_t usage = usage_dynamic
+		);
 
-		ML_NODISCARD static vbo_t create(vertices_t const & vertices, uint32_t usage = usage_static)
+		ML_NODISCARD static shared<vertex_buffer> create(
+			pmr::vector<float_t> const & vertices,
+			uint32_t usage = usage_static
+		)
 		{
 			return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
 		}
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_vbo(Args && ... args) noexcept
+	{
+		return vertex_buffer::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -444,13 +501,24 @@ namespace ml::gl
 
 		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
-		ML_NODISCARD static ibo_t create(buffer_t indices, uint32_t count);
+		ML_NODISCARD static shared<index_buffer> create(
+			buffer_t indices,
+			uint32_t count
+		);
 
-		ML_NODISCARD static ibo_t create(indices_t const & indices)
+		ML_NODISCARD static shared<index_buffer> create(
+			pmr::vector<uint32_t> const & indices
+		)
 		{
 			return create(indices.data(), (uint32_t)indices.size());
 		}
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_ibo(Args && ... args) noexcept
+	{
+		return index_buffer::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -478,8 +546,17 @@ namespace ml::gl
 
 		ML_NODISCARD virtual vec2i get_size() const = 0;
 
-		ML_NODISCARD static fbo_t create(uint32_t format, vec2i const & size);
+		ML_NODISCARD static shared<frame_buffer> create(
+			uint32_t format,
+			vec2i const & size
+		);
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_fbo(Args && ... args) noexcept
+	{
+		return frame_buffer::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -489,14 +566,47 @@ namespace ml::gl
 	public:
 		virtual ~shader_object() = default;
 
-		virtual void bind() const = 0;
+		virtual void bind(bool bind_textures = true) const = 0;
 		
 		virtual void unbind() const = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
-		ML_NODISCARD static shader_t create();
+		ML_NODISCARD virtual bool set_uniform(cstring name, int32_t value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, float32_t value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, vec2 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, vec3 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, vec4 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, mat2 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, mat3 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, mat4 const & value) = 0;
+
+		ML_NODISCARD virtual bool set_uniform(cstring name, handle_t value) = 0;
+
+		ML_NODISCARD static shared<shader_object> create(
+			cstring v_src,
+			cstring f_src
+		);
+
+		ML_NODISCARD static shared<shader_object> create(
+			cstring v_src,
+			cstring g_src,
+			cstring f_src
+		);
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_shader(Args && ... args) noexcept
+	{
+		return shader_object::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -514,8 +624,16 @@ namespace ml::gl
 
 		ML_NODISCARD virtual uint32_t get_type() const = 0;
 
-		ML_NODISCARD static texture_t create();
+		ML_NODISCARD static shared<texture_object> create(
+			uint32_t type
+		);
 	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_texture(Args && ... args) noexcept
+	{
+		return texture_object::create(ML_forward(args)...);
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -560,6 +678,18 @@ namespace ml::gl
 // api
 namespace ml::gl
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// api capabilities
+	struct ML_NODISCARD api_capabilities final
+	{
+		int32_t major_version, minor_version;
+		pmr::string renderer, vendor, version, shading_language_version;
+		pmr::vector<pmr::string> extensions;
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// render api
 	class ML_RENDERER_API render_api : public trackable, public non_copyable
 	{
@@ -573,7 +703,7 @@ namespace ml::gl
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static render_api * get() noexcept;
+		static render_api * const get() noexcept;
 
 		inline bool initialize() noexcept
 		{
@@ -584,23 +714,9 @@ namespace ml::gl
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		virtual api_capabilities const & get_capabilities() const = 0;
+
 		virtual uint32_t get_error() const = 0;
-		
-		virtual cstring get_extensions() const = 0;
-		
-		virtual int32_t get_major_version() const = 0;
-		
-		virtual int32_t get_minor_version() const = 0;
-		
-		virtual int32_t get_num_extensions() const = 0;
-		
-		virtual cstring get_renderer() const = 0;
-		
-		virtual cstring get_shading_language_version() const = 0;
-		
-		virtual cstring get_vendor() const = 0;
-		
-		virtual cstring get_version() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -670,7 +786,7 @@ namespace ml::gl
 
 		virtual void clear(uint32_t flags) = 0;
 
-		virtual void draw(vao_t const & value) = 0;
+		virtual void draw(shared<vertex_array> const & value) = 0;
 		
 		virtual void draw_arrays(uint32_t first, uint32_t count) = 0;
 		
@@ -680,6 +796,8 @@ namespace ml::gl
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_RENDER_API_HPP_

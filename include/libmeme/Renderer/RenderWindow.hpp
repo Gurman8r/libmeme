@@ -2,11 +2,11 @@
 #define _ML_RENDER_WINDOW_HPP_
 
 #include <libmeme/Platform/Window.hpp>
-#include <libmeme/Graphics/RenderTarget.hpp>
+#include <libmeme/Renderer/RenderTarget.hpp>
 
 namespace ml
 {
-	struct ML_GRAPHICS_API render_window : window, render_target
+	struct ML_RENDERER_API render_window : window, render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

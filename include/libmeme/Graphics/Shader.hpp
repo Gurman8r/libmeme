@@ -2,6 +2,7 @@
 #define _ML_SHADER_HPP_
 
 #include <libmeme/Graphics/Uniform.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 
 namespace ml
 {
@@ -19,114 +20,178 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader(allocator_type alloc = {});
-		
-		shader(shader_source const & source, allocator_type alloc = {});
-		
-		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {});
-		
-		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc = {});
-		
-		shader(shader const & value, allocator_type alloc = {});
-		
-		shader(shader && value, allocator_type alloc = {}) noexcept;
-		
-		~shader() noexcept;
+		shader(allocator_type alloc = {})
+			: m_object{}
+			, m_source{ std::allocator_arg, alloc }
+		{
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		shader(shader_source const & source, allocator_type alloc = {})
+			: shader{ alloc }
+		{
+			(void)load_from_source(source);
+		}
 
-		shader & operator=(shader const & value);
+		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {})
+			: shader{ alloc }
+		{
+			(void)load_from_file(v, f);
+		}
 
-		shader & operator=(shader && value) noexcept;
+		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc = {})
+			: shader{ alloc }
+		{
+			(void)load_from_file(v, g, f);
+		}
 
-		void swap(shader & value) noexcept;
+		shader(shader const & value, allocator_type alloc = {})
+			: shader{ alloc }
+		{
+			(void)load_from_source(value.m_source);
+		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool load_from_file(fs::path const & v_file, fs::path const & f_file);
-
-		ML_NODISCARD bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file);
-
-		ML_NODISCARD bool load_from_source(shader_source const & value);
-
-		ML_NODISCARD bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src);
-
-		ML_NODISCARD bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void bind(shader const * value, bool bind_textures = true);
-
-		void bind(bool bind_textures = true) const { bind(this, bind_textures); }
-
-		void unbind() const { bind(nullptr, false); }
-
-		bool destroy();
-		
-		bool generate();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool set_uniform(uniform const & value);
-		
-		bool set_uniform(pmr::string const & name, bool value);
-		
-		bool set_uniform(pmr::string const & name, int32_t value);
-		
-		bool set_uniform(pmr::string const & name, float32_t value);
-		
-		bool set_uniform(pmr::string const & name, vec2 const & value);
-		
-		bool set_uniform(pmr::string const & name, vec3 const & value);
-		
-		bool set_uniform(pmr::string const & name, vec4 const & value);
-		
-		bool set_uniform(pmr::string const & name, color const & value);
-		
-		bool set_uniform(pmr::string const & name, mat2 const & value);
-		
-		bool set_uniform(pmr::string const & name, mat3 const & value);
-		
-		bool set_uniform(pmr::string const & name, mat4 const & value);
-		
-		bool set_uniform(pmr::string const & name, texture const * value);
+		shader(shader && value, allocator_type alloc = {}) noexcept
+			: shader{ alloc }
+		{
+			swap(std::move(value));
+		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return m_handle; }
+		shader & operator=(shader const & value)
+		{
+			shader temp{ value };
+			swap(temp);
+			return (*this);
+		}
 
-		ML_NODISCARD auto address() const noexcept -> void * { return ML_addressof(m_handle); }
+		shader & operator=(shader && value) noexcept
+		{
+			swap(std::move(value));
+			return (*this);
+		}
 
-		ML_NODISCARD auto handle() const noexcept -> uint32_t const & { return m_handle; }
+		void swap(shader & value) noexcept
+		{
+			if (this != std::addressof(value))
+			{
+				m_object.swap(value.m_object);
+				m_source.swap(value.m_source);
+			}
+		}
 
-		ML_NODISCARD auto source() const noexcept -> shader_source const & { return m_source; }
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto attributes() const noexcept -> attribute_cache const & { return m_attributes; }
+		bool load_from_file(fs::path const & v_file, fs::path const & f_file)
+		{
+			return load_from_memory(
+				util::get_file_string(v_file),
+				util::get_file_string(f_file));
+		}
 
-		ML_NODISCARD auto textures() const noexcept -> texture_cache const & { return m_textures; }
+		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
+		{
+			return load_from_memory(
+				util::get_file_string(v_file),
+				util::get_file_string(g_file),
+				util::get_file_string(f_file));
+		}
 
-		ML_NODISCARD auto uniforms() const noexcept -> uniform_cache const & { return m_uniforms; }
+		bool load_from_source(shader_source const & value)
+		{
+			auto const
+				& v{ std::get<id_vertex>(value) },
+				& g{ std::get<id_geometry>(value) },
+				& f{ std::get<id_fragment>(value) };
 
+			return ((!v.empty() && !g.empty() && !f.empty())
+				? load_from_memory(v, g, f)
+				: ((!v.empty() && !f.empty())
+					? load_from_memory(v, f)
+					: false));
+		}
+
+		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
+		{
+			if (v_src.empty() || f_src.empty()) { return false; }
+		
+			m_source = { v_src, {}, f_src };
+
+			m_object = gl::make_shader(v_src.c_str(), nullptr, f_src.c_str());
+
+			return (bool)m_object;
+		}
+
+		bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src)
+		{
+			if (v_src.empty() || g_src.empty() || f_src.empty()) { return false; }
+		
+			m_source = { v_src, g_src, f_src };
+
+			m_object = gl::make_shader(v_src.c_str(), g_src.c_str(), f_src.c_str());
+
+			return (bool)m_object;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void bind(bool bind_textures = true) const { m_object->bind(bind_textures); }
+
+		void unbind() const { m_object->unbind(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> bool set_uniform(cstring name, T && value) noexcept
+		{
+			if constexpr (std::is_convertible_v<T, uniform::sampler_type>)
+			{
+				return this->set_uniform(name, value->address());
+			}
+			else
+			{
+				return m_object->set_uniform(name, ML_forward(value));
+			}
+		}
+
+		template <class T
+		> bool set_uniform(pmr::string const & name, T && value) noexcept
+		{
+			return this->set_uniform(name.c_str(), ML_forward(value));
+		}
+
+		bool set_uniform(uniform const & value) noexcept
+		{
+			if (value.name().empty()) { return false; }
+			switch (value.type().hash())
+			{
+			default					: return false;
+			case hashof_v<bool>		: return set_uniform(value.name(), *value.get<bool>());
+			case hashof_v<int32_t>	: return set_uniform(value.name(), *value.get<int32_t>());
+			case hashof_v<float_t>	: return set_uniform(value.name(), *value.get<float_t>());
+			case hashof_v<vec2>		: return set_uniform(value.name(), *value.get<vec2>());
+			case hashof_v<vec3>		: return set_uniform(value.name(), *value.get<vec3>());
+			case hashof_v<vec4>		: return set_uniform(value.name(), *value.get<vec4>());
+			case hashof_v<color>	: return set_uniform(value.name(), *value.get<color>());
+			case hashof_v<mat2>		: return set_uniform(value.name(), *value.get<mat2>());
+			case hashof_v<mat3>		: return set_uniform(value.name(), *value.get<mat3>());
+			case hashof_v<mat4>		: return set_uniform(value.name(), *value.get<mat4>());
+			case hashof_v<texture>	: return set_uniform(value.name(), *value.get<texture>());
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD operator bool() const noexcept { return (bool)m_object; }
+		
+		ML_NODISCARD gl::handle_t get_handle() const noexcept { return m_object->get_handle(); }
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t get_attribute_location(pmr::string const & value);
+		shader_source m_source;
 
-		int32_t get_uniform_location(pmr::string const & value);
-
-		int32_t compile(cstring v_src, cstring g_src, cstring f_src);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct uniform_binder;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		uint32_t		m_handle;
-		shader_source	m_source;
-		attribute_cache	m_attributes;
-		uniform_cache	m_uniforms;
-		texture_cache	m_textures;
+		shared<gl::shader_object> m_object;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

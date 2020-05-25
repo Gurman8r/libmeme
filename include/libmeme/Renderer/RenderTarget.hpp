@@ -1,15 +1,11 @@
 #ifndef _ML_RENDER_TARGET_HPP_
 #define _ML_RENDER_TARGET_HPP_
 
-// WIP
-
-#include <libmeme/Graphics/Buffers.hpp>
-#include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/Rect.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 
 namespace ml
 {
-	struct ML_GRAPHICS_API render_target
+	struct ML_RENDERER_API render_target
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -17,10 +13,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		static void draw(VAO const & vao, VBO const & vbo);
-
-		static void draw(VAO const & vao, VBO const & vbo, IBO const & ibo);
-
 		template <class T
 		> static void draw(T const * value)
 		{

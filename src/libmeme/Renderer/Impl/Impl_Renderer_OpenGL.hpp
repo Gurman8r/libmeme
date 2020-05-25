@@ -25,21 +25,22 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		void add_vbo(vbo_t const & value) override;
+		void add_vbo(shared<vertex_buffer> const & value) override;
 
-		void set_ibo(ibo_t const & value) override;
+		void set_ibo(shared<index_buffer> const & value) override;
 
 		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
-		inline ibo_t const & get_ibo() const override { return m_indices; }
+		inline shared<index_buffer> const & get_ibo() const override { return m_indices; }
 
-		inline pmr::vector<vbo_t> const & get_vbos() const override { return m_vertices; }
+		inline pmr::vector<shared<vertex_buffer>> const & get_vbos() const override { return m_vertices; }
 
 	private:
-		uint32_t			m_handle	{}; // handle
-		uint32_t			m_index		{}; // attrib index
-		pmr::vector<vbo_t>	m_vertices	{}; // vertex buffers
-		ibo_t				m_indices	{}; // index buffer
+		uint32_t m_handle{}; // handle
+		
+		shared<index_buffer> m_indices{}; // index buffer
+		
+		pmr::vector<shared<vertex_buffer>> m_vertices{}; // vertex buffers
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -142,20 +143,44 @@ namespace ml::gl
 	class opengl_shader_object final : public shader_object
 	{
 	public:
-		opengl_shader_object();
+		opengl_shader_object(cstring v_src, cstring f_src);
+
+		opengl_shader_object(cstring v_src, cstring g_src, cstring f_src);
 
 		~opengl_shader_object();
 
-		void bind() const override;
+		void bind(bool bind_textures = true) const override;
 
 		void unbind() const override;
 
 		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
+		bool set_uniform(cstring name, int32_t value) override;
+
+		bool set_uniform(cstring name, float32_t value) override;
+
+		bool set_uniform(cstring name, vec2 const & value) override;
+
+		bool set_uniform(cstring name, vec3 const & value) override;
+
+		bool set_uniform(cstring name, vec4 const & value) override;
+
+		bool set_uniform(cstring name, mat2 const & value) override;
+
+		bool set_uniform(cstring name, mat3 const & value) override;
+
+		bool set_uniform(cstring name, mat4 const & value) override;
+
+		bool set_uniform(cstring name, handle_t value) override;
+
 	private:
 		uint32_t					m_handle	{}; // handle
 		ds::map<hash_t, int32_t>	m_uniforms	{}; // uniform cache
-		ds::map<hash_t, handle_t>	m_textures	{}; // texture cache
+		ds::map<int32_t, handle_t>	m_textures	{}; // texture cache
+		
+		struct uniform_binder;
+
+		void compile(cstring v_src, cstring g_src, cstring f_src);
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -203,23 +228,9 @@ namespace ml::gl
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		api_capabilities const & get_capabilities() const override;
+
 		uint32_t get_error() const override;
-		
-		cstring get_extensions() const override;
-		
-		int32_t get_major_version() const override;
-		
-		int32_t get_minor_version() const override;
-		
-		int32_t get_num_extensions() const override;
-		
-		cstring get_renderer() const override;
-		
-		cstring get_shading_language_version() const override;
-		
-		cstring get_vendor() const override;
-		
-		cstring get_version() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -289,7 +300,7 @@ namespace ml::gl
 
 		void clear(uint32_t flags) override;
 
-		void draw(vao_t const & value) override;
+		void draw(shared<vertex_array> const & value) override;
 		
 		void draw_arrays(uint32_t first, uint32_t count) override;
 		

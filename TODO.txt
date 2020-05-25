@@ -3,3 +3,9 @@ models are upside-down
 make models/meshes DO
 make materials/uniforms DO
 loop system? sequences?
+
+template basic_vertex to do variations of vertex at CT
+
+opengl loader disambiguation header
+	select different loader functions at CT
+	macro for each opengl function

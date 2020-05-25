@@ -591,13 +591,13 @@ namespace ml::gl
 		glCheck(glBindVertexArray(NULL));
 	}
 
-	void opengl_vertex_array::add_vbo(vbo_t const & value)
+	void opengl_vertex_array::add_vbo(shared<vertex_buffer> const & value)
 	{
-		this->bind();
-		value->bind();
+		this->bind(); value->bind();
 
 		uint32_t const stride{ value->get_layout().get_stride() };
-		for (auto const & e : value->get_layout())
+
+		value->get_layout().for_each([&](uint32_t i, buffer_element const & e) noexcept
 		{
 			if (uint32_t const type{ std::invoke([&]() noexcept -> uint32_t
 			{
@@ -610,34 +610,28 @@ namespace ml::gl
 				}
 			}) }; type == GL_INT)
 			{
-				glCheck(glVertexAttribIPointer
-				(
-					m_index,
+				glCheck(glVertexAttribIPointer(i,
 					e.get_component_count(),
 					type,
 					stride,
-					reinterpret_cast<buffer_t>(e.offset)
-				));
+					reinterpret_cast<buffer_t>(e.offset)));
 			}
 			else
 			{
-				glCheck(glVertexAttribPointer
-				(
-					m_index,
+				glCheck(glVertexAttribPointer(i,
 					e.get_component_count(),
 					type,
 					e.normalized,
 					stride,
-					reinterpret_cast<buffer_t>(e.offset)
-				));
+					reinterpret_cast<buffer_t>(e.offset)));
 			}
-			glCheck(glEnableVertexAttribArray(m_index++));
-		}
+			glCheck(glEnableVertexAttribArray(i));
+		});
 
 		m_vertices.push_back(value);
 	}
 
-	void opengl_vertex_array::set_ibo(ibo_t const & value)
+	void opengl_vertex_array::set_ibo(shared<index_buffer> const & value)
 	{
 		this->bind();
 		value->bind();
@@ -793,9 +787,56 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_shader_object::opengl_shader_object()
+	struct opengl_shader_object::uniform_binder final
 	{
-		glCheck(m_handle = glCreateProgramObjectARB());
+		int32_t location{ -1 }; uint32_t current{}, previous{};
+
+		operator bool() const noexcept { return (-1 < location); }
+
+		template <class Fn
+		> uniform_binder(opengl_shader_object & self, cstring name, Fn && fn) noexcept
+		{
+			if (current = self.m_handle)
+			{
+				glCheck(previous = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
+
+				if (current != previous)
+				{
+					glCheck(glUseProgramObjectARB(current));
+				}
+
+				location = self.m_uniforms.find_or_add_fn(util::hash(name, std::strlen(name)), [&
+				]() noexcept
+				{
+					int32_t temp{};
+					glCheck(temp = glGetUniformLocationARB(current, name));
+					return temp;
+				});
+
+				if (*this)
+				{
+					std::invoke(ML_forward(fn), location);
+				}
+			}
+		}
+
+		~uniform_binder() noexcept
+		{
+			if (current && (current != previous))
+			{
+				glCheck(glUseProgramObjectARB(previous));
+			}
+		}
+	};
+
+	opengl_shader_object::opengl_shader_object(cstring v_src, cstring f_src)
+	{
+		this->compile(v_src, nullptr, f_src);
+	}
+
+	opengl_shader_object::opengl_shader_object(cstring v_src, cstring g_src, cstring f_src)
+	{
+		this->compile(v_src, g_src, f_src);
 	}
 
 	opengl_shader_object::~opengl_shader_object()
@@ -803,14 +844,196 @@ namespace ml::gl
 		glCheck(glDeleteObjectARB(m_handle));
 	}
 
-	void opengl_shader_object::bind() const
+	void opengl_shader_object::bind(bool bind_textures) const
 	{
 		glCheck(glUseProgramObjectARB(m_handle));
+
+		if (bind_textures)
+		{
+			uint32_t index{};
+			m_textures.for_each([&](int32_t location, handle_t tex)
+			{
+				glCheck(glUniform1i(location, index));
+
+				glCheck(glActiveTexture(GL_TEXTURE0 + index));
+
+				glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<uint32_t>(tex)));
+
+				index++;
+			});
+		}
 	}
 
 	void opengl_shader_object::unbind() const
 	{
 		glCheck(glUseProgramObjectARB(NULL));
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, int32_t value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniform1iARB(location, value));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, float32_t value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniform1fARB(location, value));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, vec2 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniform2fARB(location, value[0], value[1]));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, vec3 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniform3fARB(location, value[0], value[1], value[2]));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, vec4 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniform4fARB(location, value[0], value[1], value[2], value[3]));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, mat2 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniformMatrix2fvARB(location, (uint32_t)value.size(), false, value));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, mat3 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniformMatrix3fvARB(location, (uint32_t)value.size(), false, value));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, mat4 const & value)
+	{
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			glCheck(glUniformMatrix4fvARB(location, (uint32_t)value.size(), false, value));
+		});
+	}
+
+	bool opengl_shader_object::set_uniform(cstring name, handle_t value)
+	{
+		static auto const max_texture_units{ std::invoke([]() noexcept
+		{
+			int32_t temp{};
+			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &temp);
+			return static_cast<size_t>(temp);
+		}) };
+		return uniform_binder(*this, name, [&](int32_t location)
+		{
+			if (auto const it{ m_textures.find(location) })
+			{
+				(*it->second) = value;
+			}
+			else if ((m_textures.size() + 1) < max_texture_units)
+			{
+				m_textures.insert(location, value);
+			}
+		});
+	}
+
+	void opengl_shader_object::compile(cstring v_src, cstring g_src, cstring f_src)
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		auto _error_log = [&](uint32_t obj)
+		{
+			char log[1024]{};
+			glCheck(glGetInfoLogARB(obj, sizeof(log), 0, log));
+			pmr::stringstream ss{ log };
+			pmr::string line;
+			while (std::getline(ss, line))
+			{
+				std::cout << line << '\n';
+			}
+		};
+
+		auto _compile = [&_error_log](uint32_t type, cstring src) -> uint32_t
+		{
+			uint32_t obj{};
+			if (src && *src)
+			{
+				glCheck(obj = glCreateShaderObjectARB(type));
+				glCheck(glShaderSource(obj, 1, &src, nullptr));
+				glCheck(glCompileShaderARB(obj));
+
+				int32_t err{};
+				glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &err));
+				if (!err)
+				{
+					_error_log(obj);
+					glCheck(glDeleteObjectARB(obj));
+					obj = NULL;
+				}
+			}
+			return obj;
+		};
+
+		auto _link = [&_error_log](uint32_t obj) -> bool
+		{
+			glCheck(glLinkProgramARB(obj));
+			int32_t err{};
+			glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_LINK_STATUS_ARB, &err));
+			return err;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		if (m_handle)
+		{
+			glCheck(glDeleteObjectARB(m_handle));
+			m_uniforms.clear();
+			m_textures.clear();
+		}
+
+		glCheck(m_handle = glCreateProgramObjectARB());
+
+		if (uint32_t v{ _compile(GL_VERTEX_SHADER, v_src) })
+		{
+			glCheck(glAttachObjectARB(m_handle, v));
+			glCheck(glDeleteObjectARB(v));
+		}
+
+		if (uint32_t g{ _compile(GL_GEOMETRY_SHADER, g_src) })
+		{
+			glCheck(glAttachObjectARB(m_handle, g));
+			glCheck(glDeleteObjectARB(g));
+		}
+
+		if (uint32_t f{ _compile(GL_FRAGMENT_SHADER, f_src) })
+		{
+			glCheck(glAttachObjectARB(m_handle, f));
+			glCheck(glDeleteObjectARB(f));
+		}
+
+		if (!_link(m_handle))
+		{
+			glCheck(glDeleteObjectARB(m_handle));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -866,101 +1089,61 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	api_capabilities const & opengl_render_api::get_capabilities() const
+	{
+		static api_capabilities temp{};
+		static ML_scope // once
+		{
+			// renderer
+			glCheck(temp.renderer = (cstring)glGetString(GL_RENDERER));
+			
+			// vendor
+			glCheck(temp.vendor = (cstring)glGetString(GL_VENDOR));
+			
+			// version
+			glCheck(temp.version = (cstring)glGetString(GL_VERSION));
+
+			// shading language version
+			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+			// major version
+			if (glGetIntegerv(GL_MAJOR_VERSION, &temp.major_version); glGetError() == GL_INVALID_ENUM)
+			{
+				temp.major_version = std::invoke([&]() noexcept -> int32_t
+				{
+					return !temp.version.empty() ? temp.version[0] - '0' : 1;
+				});
+			}
+
+			// minor version
+			if (glGetIntegerv(GL_MINOR_VERSION, &temp.minor_version); glGetError() == GL_INVALID_ENUM)
+			{
+				temp.minor_version = std::invoke([]() noexcept -> int32_t
+				{
+					return !temp.version.empty() ? temp.version[2] - '0' : 1;
+				});
+			}
+
+			// extensions
+			{
+				int32_t num_extensions{};
+				glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions);
+				temp.extensions.reserve(num_extensions);
+
+				pmr::stringstream ss{ (cstring)glGetString(GL_EXTENSIONS) };
+				pmr::string line{};
+				while (std::getline(ss, line, ' '))
+				{
+					temp.extensions.push_back(line);
+				}
+			}
+		};
+		return temp;
+	}
+
 	uint32_t opengl_render_api::get_error() const
 	{
 		return _error<to_user>(glGetError());
-	}
-
-	cstring opengl_render_api::get_extensions() const
-	{
-		static cstring temp{};
-		static ML_scope // once
-		{
-			glCheck(temp = (cstring)glGetString(GL_EXTENSIONS));
-		};
-		return temp;
-	}
-	
-	int32_t opengl_render_api::get_major_version() const
-	{
-		static int32_t temp{};
-		static ML_scope // once
-		{
-			if (glGetIntegerv(GL_MAJOR_VERSION, &temp); glGetError() == GL_INVALID_ENUM)
-			{
-				temp = std::invoke([version = glGetString(GL_VERSION)]() noexcept
-				{
-					return version ? (version[0] - '0') : 1; // 
-				});
-			}
-		};
-		return temp;
-	}
-	
-	int32_t opengl_render_api::get_minor_version() const
-	{
-		static int32_t temp{};
-		static ML_scope // once
-		{
-			if (glGetIntegerv(GL_MINOR_VERSION, &temp); glGetError() == GL_INVALID_ENUM)
-			{
-				temp = std::invoke([version = glGetString(GL_VERSION)]() noexcept
-				{
-					return version ? (version[2] - '0') : 1;
-				});
-			}
-		};
-		return temp;
-	}
-	
-	int32_t opengl_render_api::get_num_extensions() const
-	{
-		static int32_t temp{};
-		static ML_scope // once
-		{
-			glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &temp));
-		};
-		return temp;
-	}
-	
-	cstring opengl_render_api::get_renderer() const
-	{
-		static cstring temp{};
-		static ML_scope // once
-		{
-			glCheck(temp = (cstring)glGetString(GL_RENDER));
-		};
-		return temp;
-	}
-	
-	cstring opengl_render_api::get_shading_language_version() const
-	{
-		static cstring temp{};
-		static ML_scope // once
-		{
-			glCheck(temp = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
-		};
-		return temp;
-	}
-	
-	cstring opengl_render_api::get_vendor() const
-	{
-		static cstring temp{};
-		static ML_scope // once
-		{
-			glCheck(temp = (cstring)glGetString(GL_VENDOR));
-		};
-		return temp;
-	}
-	
-	cstring opengl_render_api::get_version() const
-	{
-		static cstring temp{};
-		static ML_scope // once
-		{
-			glCheck(temp = (cstring)glGetString(GL_VERSION));
-		};
-		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1176,7 +1359,7 @@ namespace ml::gl
 		glCheck(glClear(_clear_flags<to_impl>(flags)));
 	}
 
-	void opengl_render_api::draw(vao_t const & value)
+	void opengl_render_api::draw(shared<vertex_array> const & value)
 	{
 		value->bind();
 		

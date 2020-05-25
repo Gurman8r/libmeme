@@ -25,7 +25,7 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_api * render_api::get() noexcept
+	render_api * const render_api::get() noexcept
 	{
 		static impl_render_api inst{};
 		return std::addressof(inst);
@@ -39,60 +39,77 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vao_t vertex_array::create()
+	shared<vertex_array> vertex_array::create(
+	)
 	{
-		return std::allocate_shared<impl_vertex_array>(pmr::polymorphic_allocator<byte_t>{}
-		);
+		return memory_manager::allocate_shared<impl_vertex_array>();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	vbo_t vertex_buffer::create(buffer_t vertices, uint32_t size, uint32_t usage)
+	shared<vertex_buffer> vertex_buffer::create(
+		buffer_t vertices,
+		uint32_t size,
+		uint32_t usage
+	)
 	{
-		return std::allocate_shared<impl_vertex_buffer>(pmr::polymorphic_allocator<byte_t>{},
-			vertices, size, usage
-		);
+		return memory_manager::allocate_shared<impl_vertex_buffer>(vertices, size, usage);
 	}
 
-	vbo_t vertex_buffer::create(uint32_t size, uint32_t usage)
+	shared<vertex_buffer> vertex_buffer::create(
+		uint32_t size,
+		uint32_t usage
+	)
 	{
-		return std::allocate_shared<impl_vertex_buffer>(pmr::polymorphic_allocator<byte_t>{},
-			size, usage
-		);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ibo_t index_buffer::create(buffer_t indices, uint32_t count)
-	{
-		return std::allocate_shared<impl_index_buffer>(pmr::polymorphic_allocator<byte_t>{},
-			indices, count
-		);
+		return memory_manager::allocate_shared<impl_vertex_buffer>(size, usage);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	fbo_t frame_buffer::create(uint32_t format, vec2i const & size)
+	shared<index_buffer> index_buffer::create(
+		buffer_t indices,
+		uint32_t count
+	)
 	{
-		return std::allocate_shared<impl_frame_buffer>(pmr::polymorphic_allocator<byte_t>{},
-			format, size
-		);
+		return memory_manager::allocate_shared<impl_index_buffer>(indices, count);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shader_t shader_object::create()
+	shared<frame_buffer> frame_buffer::create(
+		uint32_t format,
+		vec2i const & size
+	)
 	{
-		return std::allocate_shared<impl_shader_object>(pmr::polymorphic_allocator<byte_t>{}
-		);
+		return memory_manager::allocate_shared<impl_frame_buffer>(format, size);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	texture_t texture_object::create()
+	shared<shader_object> shader_object::create(
+		cstring v_src,
+		cstring f_src
+	)
 	{
-		return std::allocate_shared<impl_texture_object>(pmr::polymorphic_allocator<byte_t>{}
-		);
+		return memory_manager::allocate_shared<impl_shader_object>(v_src, f_src);
+	}
+
+	shared<shader_object> shader_object::create(
+		cstring v_src,
+		cstring g_src,
+		cstring f_src
+	)
+	{
+		return memory_manager::allocate_shared<impl_shader_object>(v_src, g_src, f_src);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	shared<texture_object> texture_object::create(
+		uint32_t type
+	)
+	{
+		return memory_manager::allocate_shared<impl_texture_object>();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

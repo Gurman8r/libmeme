@@ -1,5 +1,4 @@
-#include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Renderer/Renderer.hpp>
+#include <libmeme/Renderer/RenderWindow.hpp>
 
 namespace ml
 {
@@ -14,10 +13,7 @@ namespace ml
 		}
 
 		// get api instance
-		auto const api
-		{
-			gl::render_api::get()
-		};
+		auto api{ gl::render_api::get() };
 
 		// initialize
 		if (!api->initialize())
@@ -26,10 +22,10 @@ namespace ml
 		}
 
 		// validate version
-		m_settings.context.major = api->get_major_version();
-		m_settings.context.minor = api->get_minor_version();
+		m_settings.context.major = api->get_capabilities().major_version;
+		m_settings.context.minor = api->get_capabilities().minor_version;
 
-		for (gl::command_t const & cmd : // setup states
+		for (auto const & cmd : // setup states
 		{
 			// alpha state
 			gl::render_command::set_alpha_enabled(true),

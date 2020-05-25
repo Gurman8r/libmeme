@@ -12,20 +12,119 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
-#include <libmeme/Graphics/Binder.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Model.hpp>
-#include <libmeme/Graphics/RenderTexture.hpp>
-#include <libmeme/Graphics/RenderWindow.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// WIP
-#include <libmeme/Renderer/Renderer.hpp>
+namespace ml
+{
+	struct mesh_renderer final : trackable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using self_type = typename mesh_renderer;
+
+		mesh_renderer(shared<gl::vertex_array> const & vao = gl::make_vao()) noexcept
+			: m_vao{ vao }
+		{
+		}
+
+		mesh_renderer(fs::path const & path) noexcept
+			: self_type{}
+		{
+			this->load_from_file(path);
+		}
+
+		mesh_renderer(pmr::vector<float_t> const & vertices)
+			: self_type{}
+		{
+			m_vao->add_vbo(gl::make_vbo(vertices));
+		}
+
+		mesh_renderer(pmr::vector<float_t> const & vertices, pmr::vector<uint32_t> const & indices)
+			: self_type{}
+		{
+			m_vao->add_vbo(gl::make_vbo(vertices));
+
+			m_vao->set_ibo(gl::make_ibo(indices));
+		}
+
+		mesh_renderer(pmr::vector<vertex> const & vertices)
+			: self_type{ util::contiguous(vertices) }
+		{
+		}
+
+		mesh_renderer(pmr::vector<vertex> const & vertices, pmr::vector<uint32_t> const & indices)
+			: self_type{ util::contiguous(vertices), indices }
+		{
+		}
+
+		mesh_renderer(self_type const & other)
+			: m_vao{ other.m_vao }
+		{
+		}
+
+		mesh_renderer(self_type && other) noexcept
+		{
+			this->swap(std::move(other));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		self_type & operator=(self_type const & other)
+		{
+			self_type temp{ other };
+			this->swap(temp);
+			return (*this);
+		}
+
+		self_type & operator=(self_type && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool load_from_file(fs::path const & path)
+		{
+			return debug::error("TODO");
+		}
+
+		void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_vao.swap(other.m_vao);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void draw(self_type const * value)
+		{
+			gl::render_command::draw(value->m_vao)();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		auto vao() & noexcept -> shared<gl::vertex_array> & { return m_vao; }
+
+		auto vao() const & noexcept -> shared<gl::vertex_array> const & { return m_vao; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		shared<gl::vertex_array> m_vao;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// ECS CONFIG
+// ECS
 namespace ml
 {
 	// (T) TAGS
@@ -36,9 +135,10 @@ namespace ml
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct c_shader		: ds::wrapper<shader>	{};
-	struct c_material	: ds::wrapper<material> {};
-	struct c_model		: ds::wrapper<model>	{};
+	struct c_shader		: ds::wrapper<shader>			{};
+	struct c_material	: ds::wrapper<material>			{};
+	struct c_mesh		: ds::wrapper<mesh_renderer>	{};
+	struct c_model		: ds::wrapper<model>			{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
@@ -49,7 +149,9 @@ namespace ml
 	>;
 	using s_apply_materials = meta::list<c_shader, c_material
 	>;
-	using s_draw_renderers = meta::list<c_shader, c_model
+	using s_draw_meshes = meta::list<c_shader, c_mesh
+	>;
+	using s_draw_models = meta::list<c_shader, c_model
 	>;
 
 
@@ -68,22 +170,31 @@ namespace ml
 
 	template <class> struct x_apply_materials final : ecs::detail::x_base<s_apply_materials>
 	{
-		void operator()(c_shader & shd, c_material const & mat)
+		void operator()(c_shader & s, c_material const & m)
 		{
-			ML_bind_scope(*shd, false);
-			for (uniform const & u : *mat)
+			ML_bind_scope(*s, false);
+			for (uniform const & u : *m)
 			{
-				shd->set_uniform(u);
+				s->set_uniform(u);
 			}
 		}
 	};
 
-	template <class> struct x_draw_renderers final : ecs::detail::x_base<s_draw_renderers>
+	template <class> struct x_draw_meshes final : ecs::detail::x_base<s_draw_meshes>
 	{
-		void operator()(c_shader const & shd, c_model const & mdl)
+		void operator()(c_shader const & s, c_mesh const & m)
 		{
-			ML_bind_scope(*shd, true);
-			render_target::draw(*mdl);
+			ML_bind_scope(*s, true);
+			render_target::draw(m);
+		}
+	};
+
+	template <class> struct x_draw_models final : ecs::detail::x_base<s_draw_models>
+	{
+		void operator()(c_shader const & s, c_model const & m)
+		{
+			ML_bind_scope(*s, true);
+			render_target::draw(*m);
 		}
 	};
 
@@ -105,12 +216,12 @@ namespace ml
 
 		// signatures
 		ecs::cfg::signatures<
-		s_apply_transforms, s_apply_materials, s_draw_renderers
+		s_apply_transforms, s_apply_materials, s_draw_models
 		>,
 
 		// systems
 		ecs::cfg::systems<
-		x_apply_transforms, x_apply_materials, x_draw_renderers
+		x_apply_transforms, x_apply_materials, x_draw_models
 		>
 	>;
 
@@ -131,19 +242,26 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		//ds::map<int32_t,		render_texture	> m_pipeline	{};
-		ds::map<pmr::string,	font			> m_fonts		{};
-		ds::map<pmr::string,	image			> m_images		{};
-		ds::map<pmr::string,	material		> m_materials	{};
-		ds::map<pmr::string,	model			> m_models		{};
-		ds::map<pmr::string,	shader			> m_shaders		{};
-		ds::map<pmr::string,	texture			> m_textures	{};
+		ds::map< pmr::string, font		> m_fonts		{};
+		ds::map< pmr::string, image		> m_images		{};
+		ds::map< pmr::string, material	> m_materials	{};
+		ds::map< pmr::string, model		> m_models		{};
+		ds::map< pmr::string, shader	> m_shaders		{};
+		ds::map< pmr::string, texture	> m_textures	{};
 
 
 		// ECS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		entity_manager m_ecs{};
+
+
+		// Rendering
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		vec2 m_resolution{ 1280, 720 };
+		shared<gl::vertex_array> m_vao{ gl::make_vao() };
+		shared<gl::frame_buffer> m_fbo{ gl::make_fbo(gl::format_rgba, m_resolution) };
 
 
 		// GUI
@@ -163,8 +281,6 @@ namespace ml
 			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_renderer	{ "renderer##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
-
-		vec2 m_display_size{ 1280, 720 };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -210,9 +326,6 @@ namespace ml
 			highlight_memory((byte_t *)ptr, sizeof(T));
 		}
 
-		gl::vao_t m_vao;
-		gl::fbo_t m_fbo;
-
 
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -246,15 +359,15 @@ namespace ml
 		{
 			// load stuff, etc...
 
+			auto const & caps{ gl::render_api::get()->get_capabilities() };
+			debug::info(caps.renderer);
+			debug::info(caps.vendor);
+			debug::info(caps.version);
+
 			// ICON
 			if (image const icon{ engine::fs().path2("assets/textures/icon.png") })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
-			}
-
-			// PIPELINE
-			{
-				m_fbo = gl::frame_buffer::create(gl::format_rgba, m_display_size);
 			}
 
 			// IMAGES
@@ -401,8 +514,6 @@ namespace ml
 
 			// TESTING
 			{
-				m_vao = gl::vertex_array::create();
-
 				m_vao->add_vbo(([vb = gl::vertex_buffer::create(util::contiguous({
 					vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
 					vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -441,7 +552,7 @@ namespace ml
 			m_ecs.update_system<x_apply_materials>();
 
 			// pipeline
-			m_fbo->resize(m_display_size);
+			m_fbo->resize(m_resolution);
 		}
 
 		void on_draw(draw_event const &)
@@ -459,7 +570,7 @@ namespace ml
 			{
 				std::invoke(cmd);
 			}
-			m_ecs.update_system<x_draw_renderers>();
+			m_ecs.update_system<x_draw_models>();
 
 			
 			static auto sh = shader{ m_shaders["3d"] };
@@ -722,13 +833,12 @@ namespace ml
 		{
 			static gui::texture_preview preview
 			{
-				m_fbo->get_color_attachment(),
-				m_fbo->get_size()
+				m_fbo->get_color_attachment(), m_fbo->get_size()
 			};
 			
 			preview.render([&]() noexcept
 			{
-				m_display_size = util::maintain(m_display_size, ImGui::GetContentRegionAvail());
+				m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
 			});
 		}
 
@@ -1178,7 +1288,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const api{ gl::render_api::get() };
+			static auto api{ gl::render_api::get() };
 
 			if (ImGui::BeginMenuBar())
 			{

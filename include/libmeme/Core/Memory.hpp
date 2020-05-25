@@ -5,6 +5,21 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// std::shared_ptr
+	template <class T
+	> ML_alias shared = typename std::shared_ptr<T>;
+
+	// std::unique_ptr
+	template <class T
+	> ML_alias unique = typename std::unique_ptr<T>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 namespace ml::util
 {
 	// passthrough resource for collecting upstream usage metrics
@@ -183,6 +198,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// allocate shared
+		template <class T, class ... Args
+		> ML_NODISCARD static shared<T> allocate_shared(Args && ... args)
+		{
+			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// free
 		static void deallocate(void * addr) noexcept
 		{
@@ -278,12 +302,12 @@ namespace ml
 
 		void operator delete(void * addr) noexcept
 		{
-			memory_manager::deallocate(addr);
+			return memory_manager::deallocate(addr);
 		}
 
 		void operator delete[](void * addr) noexcept
 		{
-			memory_manager::deallocate(addr);
+			return memory_manager::deallocate(addr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -75,6 +75,8 @@
 #		define ML_breakpoint()	((void)0)
 #	elif defined(ML_cc_msvc)
 #		define ML_breakpoint()	::__debugbreak()
+#	elif defined(ML_cc_clang)
+#		define ML_breakpoint()	::__builtin_debugtrap()
 #	else
 #		define ML_breakpoint()	::raise(SIGTRAP)
 #	endif
@@ -86,6 +88,15 @@
 #define ML_argc					__argc
 #define ML_argv					__argv
 #define ML_wargv				__wargv
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// constexpr invoke
+#if (ML_has_cxx20)
+#	define ML_invoke(fn, ...)	std::invoke(fn, ##__VA_ARGS__)
+#else
+#	define ML_invoke(fn, ...)	(fn)(##__VA_ARGS__)
+#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

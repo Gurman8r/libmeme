@@ -1,6 +1,6 @@
 #include <libmeme/Graphics/Mesh.hpp>
-#include <libmeme/Graphics/Binder.hpp>
-#include <libmeme/Graphics/RenderTarget.hpp>
+#include <libmeme/Renderer/Binder.hpp>
+#include <libmeme/Renderer/RenderTarget.hpp>
 
 namespace ml
 {
@@ -224,15 +224,22 @@ namespace ml
 
 	void mesh::draw(mesh const * value)
 	{
-		if (!value || !value->m_vao || !value->m_vbo) { return; }
-
-		if (value->m_ibo)
+		if (!value || !value->m_vao || !value->m_vbo)
 		{
-			render_target::draw(value->m_vao, value->m_vbo, value->m_ibo);
+			return;
+		}
+		else if (value->m_ibo)
+		{
+			ML_bind_scope(value->m_vao);
+			ML_bind_scope(value->m_vbo);
+			ML_bind_scope(value->m_ibo);
+			gl::render_command::draw_indexed(value->m_ibo.m_count)();
 		}
 		else
 		{
-			render_target::draw(value->m_vao, value->m_vbo);
+			ML_bind_scope(value->m_vao);
+			ML_bind_scope(value->m_vbo);
+			gl::render_command::draw_arrays(0, value->m_vbo.m_size)();
 		}
 	}
 
