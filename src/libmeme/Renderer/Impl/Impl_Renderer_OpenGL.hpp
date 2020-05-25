@@ -153,11 +153,11 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		bool set_uniform(cstring name, bool value) override;
 
 		bool set_uniform(cstring name, int32_t value) override;
 
-		bool set_uniform(cstring name, float32_t value) override;
+		bool set_uniform(cstring name, float_t value) override;
 
 		bool set_uniform(cstring name, vec2 const & value) override;
 
@@ -172,6 +172,8 @@ namespace ml::gl
 		bool set_uniform(cstring name, mat4 const & value) override;
 
 		bool set_uniform(cstring name, handle_t value) override;
+
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t					m_handle	{}; // handle

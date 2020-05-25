@@ -570,11 +570,11 @@ namespace ml::gl
 		
 		virtual void unbind() const = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual bool set_uniform(cstring name, bool value) = 0;
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, int32_t value) = 0;
 
-		ML_NODISCARD virtual bool set_uniform(cstring name, float32_t value) = 0;
+		ML_NODISCARD virtual bool set_uniform(cstring name, float_t value) = 0;
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, vec2 const & value) = 0;
 
@@ -589,6 +589,8 @@ namespace ml::gl
 		ML_NODISCARD virtual bool set_uniform(cstring name, mat4 const & value) = 0;
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, handle_t value) = 0;
+
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD static shared<shader_object> create(
 			cstring v_src,

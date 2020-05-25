@@ -46,7 +46,6 @@ namespace ml
 			: self_type{}
 		{
 			m_vao->add_vbo(gl::make_vbo(vertices));
-
 			m_vao->set_ibo(gl::make_ibo(indices));
 		}
 
@@ -61,11 +60,12 @@ namespace ml
 		}
 
 		mesh_renderer(self_type const & other)
-			: m_vao{ other.m_vao }
+			: self_type{ other.m_verts }
 		{
 		}
 
 		mesh_renderer(self_type && other) noexcept
+			: self_type{}
 		{
 			this->swap(std::move(other));
 		}
@@ -89,7 +89,30 @@ namespace ml
 
 		bool load_from_file(fs::path const & path)
 		{
-			return debug::error("TODO");
+			m_verts = util::contiguous(model::load_model(path));
+
+			if (m_verts.empty())
+			{
+				return false;
+			}
+			else if (!m_vao)
+			{
+				m_vao = gl::make_vao();
+			}
+
+			auto vb = gl::make_vbo(m_verts);
+
+			vb->set_layout({
+				{ meta::tag_v<vec3f>, "a_position"	},
+				{ meta::tag_v<vec3f>, "a_normal"	},
+				{ meta::tag_v<vec2f>, "a_texcoord"	},
+			});
+
+			m_vao->add_vbo(vb);
+
+			m_vao->set_ibo(nullptr);
+
+			return true;
 		}
 
 		void swap(self_type & other) noexcept
@@ -97,6 +120,7 @@ namespace ml
 			if (this != std::addressof(other))
 			{
 				m_vao.swap(other.m_vao);
+				m_verts.swap(other.m_verts);
 			}
 		}
 
@@ -117,6 +141,7 @@ namespace ml
 
 	private:
 		shared<gl::vertex_array> m_vao;
+		pmr::vector<float_t> m_verts;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -137,8 +162,7 @@ namespace ml
 
 	struct c_shader		: ds::wrapper<shader>			{};
 	struct c_material	: ds::wrapper<material>			{};
-	struct c_mesh		: ds::wrapper<mesh_renderer>	{};
-	struct c_model		: ds::wrapper<model>			{};
+	struct c_model		: ds::wrapper<model>	{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
@@ -148,8 +172,6 @@ namespace ml
 	using s_apply_transforms = meta::list<c_material, c_transform
 	>;
 	using s_apply_materials = meta::list<c_shader, c_material
-	>;
-	using s_draw_meshes = meta::list<c_shader, c_mesh
 	>;
 	using s_draw_models = meta::list<c_shader, c_model
 	>;
@@ -177,15 +199,6 @@ namespace ml
 			{
 				s->set_uniform(u);
 			}
-		}
-	};
-
-	template <class> struct x_draw_meshes final : ecs::detail::x_base<s_draw_meshes>
-	{
-		void operator()(c_shader const & s, c_mesh const & m)
-		{
-			ML_bind_scope(*s, true);
-			render_target::draw(m);
 		}
 	};
 
@@ -245,7 +258,7 @@ namespace ml
 		ds::map< pmr::string, font		> m_fonts		{};
 		ds::map< pmr::string, image		> m_images		{};
 		ds::map< pmr::string, material	> m_materials	{};
-		ds::map< pmr::string, model		> m_models		{};
+		ds::map< pmr::string, model> m_models{};
 		ds::map< pmr::string, shader	> m_shaders		{};
 		ds::map< pmr::string, texture	> m_textures	{};
 
@@ -455,11 +468,12 @@ namespace ml
 
 			// MODELS
 			{
-				m_models["sphere8x6"]	= engine::fs().path2("assets/models/sphere8x6.obj");
+				m_models["sphere8x6"] = engine::fs().path2("assets/models/sphere8x6.obj");
 				m_models["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
-				m_models["monkey"]		= engine::fs().path2("assets/models/monkey.obj");
+				m_models["monkey"] = engine::fs().path2("assets/models/monkey.obj");
 
-				m_models["triangle"] = { mesh{
+				m_models["triangle"] = { mesh
+				{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
 						vertex{ {  0.5f, -0.5f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },
@@ -470,7 +484,8 @@ namespace ml
 					}
 				} };
 
-				m_models["quad"] = { mesh{
+				m_models["quad"] = { mesh
+				{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
 						vertex{ { +1.0f, -1.0f, 0.0f }, vec3::one(), { 1.0f, 0.0f } },

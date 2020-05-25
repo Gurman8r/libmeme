@@ -634,8 +634,8 @@ namespace ml::gl
 	void opengl_vertex_array::set_ibo(shared<index_buffer> const & value)
 	{
 		this->bind();
-		value->bind();
-		m_indices = value;
+
+		if (m_indices = value) { m_indices->bind(); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -869,6 +869,11 @@ namespace ml::gl
 		glCheck(glUseProgramObjectARB(NULL));
 	}
 
+	bool opengl_shader_object::set_uniform(cstring name, bool value)
+	{
+		return this->set_uniform(name, static_cast<int32_t>(value));
+	}
+
 	bool opengl_shader_object::set_uniform(cstring name, int32_t value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
@@ -877,7 +882,7 @@ namespace ml::gl
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, float32_t value)
+	bool opengl_shader_object::set_uniform(cstring name, float_t value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{

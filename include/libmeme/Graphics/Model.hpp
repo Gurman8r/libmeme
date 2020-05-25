@@ -114,6 +114,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static pmr::vector<vertex> load_model(fs::path const & path);
+
+		static pmr::vector<vertex> load_model(fs::path const & path, int32_t flags);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		storage_type m_meshes;
 
