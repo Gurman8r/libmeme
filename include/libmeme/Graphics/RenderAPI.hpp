@@ -5,6 +5,7 @@
 
 #include <libmeme/Graphics/Export.hpp>
 #include <libmeme/Graphics/Binder.hpp>
+#include <libmeme/Graphics/Image.hpp>
 #include <libmeme/Graphics/Vertex.hpp>
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Memory.hpp>
@@ -24,7 +25,7 @@ namespace ml::gl
 	class index_buffer		; // 
 	class frame_buffer		; // 
 	class shader_object		; // 
-	class texture_object	; // 
+	class texture2d			; // 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -113,6 +114,8 @@ namespace ml::gl
 		type_unsigned_int,
 		type_float,
 		type_half_float,
+
+		type_unsigned_int_24_8,
 	};
 
 	enum function_ : uint32_t
@@ -124,10 +127,10 @@ namespace ml::gl
 		function_max,
 	};
 
-	enum order_
+	enum front_face_
 	{
-		order_clockwise,
-		order_counter_clockwise,
+		front_face_cw,
+		front_face_ccw,
 	};
 
 	enum facet_ : uint32_t
@@ -168,6 +171,7 @@ namespace ml::gl
 		format_rgba,
 		format_luminance,
 		format_luminance_alpha,
+
 		format_srgb,
 		format_srgb8,
 		format_srgb_alpha,
@@ -176,8 +180,32 @@ namespace ml::gl
 		format_sluminance8_alpha8,
 		format_sluminance,
 		format_sluminance8,
+
+		format_depth_stencil,
 		format_depth24_stencil8,
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum shader_type_ : uint32_t
+	{
+		shader_type_vertex,
+		shader_type_geometry,
+		shader_type_fragment,
+
+		shader_type_MAX
+	};
+
+	enum shader_flags_ : int32_t
+	{
+		shader_flags_none = (0 << 0), // none
+
+		// none
+		shader_flags_default
+			= shader_flags_none,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum texture_type_ : uint32_t
 	{
@@ -185,13 +213,21 @@ namespace ml::gl
 		texture_type_2d,
 		texture_type_3d,
 		texture_type_cube_map,
+
+		texture_type_MAX
 	};
 
-	enum shader_type_ : uint32_t
+	enum texture_flags_ : int32_t
 	{
-		shader_type_vertex,
-		shader_type_fragment,
-		shader_type_geometry,
+		texture_flags_none		= (0 << 0), // none
+		texture_flags_smooth	= (1 << 0), // smooth
+		texture_flags_repeated	= (1 << 1), // repeated
+		texture_flags_mipmapped	= (1 << 2), // mipmapped
+
+		// smooth / repeated
+		texture_flags_default
+			= texture_flags_smooth
+			| texture_flags_repeated,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -199,9 +235,22 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// layout
+// utility
 namespace ml::gl
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_NODISCARD inline uint32_t image_format(image const & value) noexcept
+	{
+		switch (value.channels())
+		{
+		case 1	: return format_red;
+		case 3	: return format_rgb;
+		case 4	:
+		default	: return format_rgba;
+		}
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_NODISCARD constexpr hash_t element_base_type(hash_t type) noexcept
@@ -252,6 +301,14 @@ namespace ml::gl
 		}
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// layout
+namespace ml::gl
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// vertex buffer layout element
@@ -315,6 +372,15 @@ namespace ml::gl
 				offset += e.size;
 				m_stride += e.size;
 			}
+		}
+
+		buffer_layout() noexcept : buffer_layout
+		{
+			{ meta::tag_v<vec3>, "a_position"	},
+			{ meta::tag_v<vec3>, "a_normal"		},
+			{ meta::tag_v<vec2>, "a_texcoord"	},
+		}
+		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -400,8 +466,7 @@ namespace ml::gl
 		
 		ML_NODISCARD virtual pmr::vector<shared<vertex_buffer>> const & get_vbos() const = 0;
 
-		ML_NODISCARD static shared<vertex_array> create(
-		);
+		ML_NODISCARD static shared<vertex_array> create();
 	};
 
 	template <class ... Args
@@ -435,18 +500,13 @@ namespace ml::gl
 		ML_NODISCARD static shared<vertex_buffer> create(
 			buffer_t vertices,
 			uint32_t size,
-			uint32_t usage = usage_static
-		);
+			uint32_t usage = usage_static);
 
 		ML_NODISCARD static shared<vertex_buffer> create(
 			uint32_t size,
-			uint32_t usage = usage_dynamic
-		);
+			uint32_t usage = usage_dynamic);
 
-		ML_NODISCARD static shared<vertex_buffer> create(
-			pmr::vector<float_t> const & vertices,
-			uint32_t usage = usage_static
-		)
+		ML_NODISCARD static shared<vertex_buffer> create(pmr::vector<float_t> const & vertices, uint32_t usage = usage_static)
 		{
 			return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
 		}
@@ -478,12 +538,9 @@ namespace ml::gl
 
 		ML_NODISCARD static shared<index_buffer> create(
 			buffer_t indices,
-			uint32_t count
-		);
+			uint32_t count);
 
-		ML_NODISCARD static shared<index_buffer> create(
-			pmr::vector<uint32_t> const & indices
-		)
+		ML_NODISCARD static shared<index_buffer> create(pmr::vector<uint32_t> const & indices)
 		{
 			return create(indices.data(), (uint32_t)indices.size());
 		}
@@ -523,14 +580,73 @@ namespace ml::gl
 
 		ML_NODISCARD static shared<frame_buffer> create(
 			uint32_t format,
-			vec2i const & size
-		);
+			vec2i const & size);
 	};
 
 	template <class ... Args
 	> ML_NODISCARD auto make_fbo(Args && ... args) noexcept
 	{
 		return frame_buffer::create(ML_forward(args)...);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// texture2d
+	class ML_GRAPHICS_API texture2d : public trackable, public non_copyable
+	{
+	public:
+		virtual ~texture2d() = default;
+
+		virtual void bind() const = 0;
+
+		virtual void unbind() const = 0;
+
+		virtual void update(vec2i const & size, buffer_t pixels = {}) = 0;
+
+		virtual void set_mipmapped(bool value) = 0;
+
+		virtual void set_repeated(bool value) = 0;
+
+		virtual void set_smooth(bool value) = 0;
+
+		ML_NODISCARD virtual image copy_to_image() const = 0;
+
+		ML_NODISCARD virtual int32_t get_flags() const = 0;
+
+		ML_NODISCARD virtual handle_t get_handle() const = 0;
+
+		ML_NODISCARD virtual vec2i const & get_size() const = 0;
+
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return ML_flag_read(get_flags(), texture_flags_mipmapped); }
+
+		ML_NODISCARD inline bool is_repeated() const noexcept { return ML_flag_read(get_flags(), texture_flags_repeated); }
+
+		ML_NODISCARD inline bool is_smooth() const noexcept { return ML_flag_read(get_flags(), texture_flags_smooth); }
+
+		ML_NODISCARD static shared<texture2d> create(
+			vec2i const & size,	// size
+			buffer_t pixels,	// pixels
+			uint32_t iformat,	// internal format
+			uint32_t cformat,	// color format
+			uint32_t ptype,		// pixel type
+			int32_t flags);		// flags ( repeated / smooth / mipmapped )
+
+		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
+		{
+			uint32_t const fmt{ image_format(img) };
+			return create(img.size(), img.data(), fmt, fmt, type_unsigned_byte, flags);
+		}
+
+		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
+		{
+			return create(image{ path }, flags);
+		}
+	};
+
+	template <class ... Args
+	> ML_NODISCARD auto make_texture2d(Args && ... args) noexcept
+	{
+		return texture2d::create(ML_forward(args)...);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -563,53 +679,25 @@ namespace ml::gl
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, mat4 const & value) = 0;
 
-		ML_NODISCARD virtual bool set_uniform(cstring name, handle_t value) = 0;
+		ML_NODISCARD virtual bool set_uniform(cstring name, shared<texture2d> const & value) = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const = 0;
 
 		ML_NODISCARD static shared<shader_object> create(
 			cstring v_src,
-			cstring f_src
-		);
-
-		ML_NODISCARD static shared<shader_object> create(
-			cstring v_src,
 			cstring g_src,
-			cstring f_src
-		);
+			cstring f_src);
+
+		ML_NODISCARD static shared<shader_object> create(cstring v_src, cstring f_src)
+		{
+			return create(v_src, nullptr, f_src);
+		}
 	};
 
 	template <class ... Args
 	> ML_NODISCARD auto make_shader(Args && ... args) noexcept
 	{
 		return shader_object::create(ML_forward(args)...);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// texture
-	class ML_GRAPHICS_API texture_object : public trackable, public non_copyable
-	{
-	public:
-		virtual ~texture_object() = default;
-
-		virtual void bind() const = 0;
-
-		virtual void unbind() const = 0;
-
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
-
-		ML_NODISCARD virtual uint32_t get_type() const = 0;
-
-		ML_NODISCARD static shared<texture_object> create(
-			uint32_t type
-		);
-	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_texture(Args && ... args) noexcept
-	{
-		return texture_object::create(ML_forward(args)...);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -657,8 +745,8 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// api capabilities
-	struct ML_NODISCARD api_capabilities final
+	// render api capabilities
+	struct ML_NODISCARD api_info final
 	{
 		int32_t major_version, minor_version;
 		pmr::string renderer, vendor, version, shading_language_version;
@@ -677,6 +765,8 @@ namespace ml::gl
 
 		virtual bool do_initialize() = 0;
 
+		virtual void on_initialize() = 0;
+
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -685,15 +775,21 @@ namespace ml::gl
 		inline bool initialize() noexcept
 		{
 			bool temp{};
-			static ML_scope{ temp = this->do_initialize(); }; // once
+			static ML_scope // once
+			{
+				if (temp = this->do_initialize())
+				{
+					this->on_initialize();
+				}
+			};
 			return temp;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual api_capabilities const & get_capabilities() const = 0;
-
 		virtual uint32_t get_error() const = 0;
+
+		virtual api_info const & get_info() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -127,7 +127,7 @@ namespace ml
 		ds::map< pmr::string, material	> m_materials	{};
 		ds::map< pmr::string, mesh		> m_meshes		{};
 		ds::map< pmr::string, shader	> m_shaders		{};
-		ds::map< pmr::string, texture	> m_textures	{};
+		ds::map< pmr::string, shared<gl::texture2d>	> m_textures	{};
 
 
 		// ECS
@@ -140,7 +140,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		vec2 m_resolution{ 1280, 720 };
-		shared<gl::frame_buffer> m_fbo{ gl::make_fbo(gl::format_rgba, m_resolution) };
+		shared<gl::frame_buffer> m_fbo{ nullptr };
 
 
 		// GUI
@@ -238,10 +238,15 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			auto const & caps{ gl::render_api::get()->get_capabilities() };
+			auto const & caps{ gl::render_api::get()->get_info() };
 			debug::info(caps.renderer);
 			debug::info(caps.vendor);
 			debug::info(caps.version);
+
+			// RENDERING
+			{
+				m_fbo = gl::make_fbo(gl::format_rgba, m_resolution);
+			}
 
 			// ICON
 			if (image const icon{ engine::fs().path2("assets/textures/icon.png") })
@@ -256,12 +261,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= m_images["default"];
-				m_textures["doot"]			= engine::fs().path2("assets/textures/doot.png");
-				m_textures["navball"]		= engine::fs().path2("assets/textures/navball.png");
-				m_textures["earth_dm_2k"]	= engine::fs().path2("assets/textures/earth/earth_dm_2k.png");
-				m_textures["earth_sm_2k"]	= engine::fs().path2("assets/textures/earth/earth_sm_2k.png");
-				m_textures["moon_dm_2k"]	= engine::fs().path2("assets/textures/moon/moon_dm_2k.png");
+				m_textures["default"]		= gl::make_texture2d(m_images["default"]);
+				m_textures["doot"]			= gl::make_texture2d(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gl::make_texture2d(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -316,19 +321,19 @@ namespace ml
 				// 3d
 				auto const _3d = material
 				{
-					make_uniform<color	>("u_color"		, colors::white),
-					make_uniform<texture>("u_texture0"	, (texture *)nullptr)
+					make_uniform<color>("u_color", colors::white),
+					make_uniform<gl::texture2d>("u_texture0", m_textures["default"])
 				}
 				+ _timers + _camera + _tf;
 
 				// earth
 				m_materials["earth"] = material{ _3d }
-					.set<texture>("u_texture0", &m_textures["earth_dm_2k"])
+					.set<gl::texture2d>("u_texture0", m_textures["earth_dm_2k"])
 					;
 
 				// moon
 				m_materials["moon"] = material{ _3d }
-					.set<texture>("u_texture0", &m_textures["moon_dm_2k"])
+					.set<gl::texture2d>("u_texture0", m_textures["moon_dm_2k"])
 					;
 			}
 

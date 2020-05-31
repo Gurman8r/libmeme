@@ -2,7 +2,6 @@
 #define _ML_IMGUI_EXT_HPP_
 
 #include <libmeme/Engine/ImGui.hpp>
-#include <libmeme/Graphics/Texture.hpp>
 #include <libmeme/Core/StringUtility.hpp>
 
 // TOOLTIP
@@ -300,7 +299,7 @@ namespace ml::gui
 				else if (region_y > (scr_size[1] - reg_size)) region_y = (scr_size[1] - reg_size);
 
 				ImGui::Text("%u: %dx%d (%.0fx%.0f)",
-					reinterpret_cast<uint32_t>(tex_addr),
+					(uint32_t)(intptr_t)tex_addr,
 					tex_size[0], tex_size[1],
 					scr_size[0], scr_size[1]
 				);

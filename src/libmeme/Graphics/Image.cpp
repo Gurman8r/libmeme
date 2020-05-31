@@ -18,8 +18,8 @@ namespace ml
 
 		byte_t * const temp{ ::stbi_load(
 			path.string().c_str(),
-			reinterpret_cast<int32_t *>(&m_size[0]),
-			reinterpret_cast<int32_t *>(&m_size[1]),
+			&m_size[0],
+			&m_size[1],
 			reinterpret_cast<int32_t *>(&m_channels),
 			static_cast<int32_t>(req_channels)
 		) };
@@ -29,11 +29,14 @@ namespace ml
 		if (temp)
 		{
 			m_pixels.resize(capacity());
-
 			std::memcpy(&m_pixels[0], temp, capacity());
+			return true;
 		}
-
-		return (*this);
+		else
+		{
+			this->clear();
+			return false;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

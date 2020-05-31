@@ -119,9 +119,9 @@ namespace ml::gl
 
 		void resize(vec2i const & value) override;
 
-		inline handle_t get_color_attachment() const override { return ML_addressof(m_color_attachment); }
+		inline handle_t get_color_attachment() const override { return m_color->get_handle(); }
 
-		inline handle_t get_depth_attachment() const override { return ML_addressof(m_depth_attachment); }
+		inline handle_t get_depth_attachment() const override { return m_depth->get_handle(); }
 
 		inline uint32_t get_format() const override { return m_format; }
 
@@ -130,11 +130,50 @@ namespace ml::gl
 		inline vec2i get_size() const override { return m_size; }
 
 	private:
-		uint32_t	m_handle			{}; // handle
-		uint32_t	m_format			{}; // format
-		vec2i		m_size				{}; // size
-		uint32_t	m_color_attachment	{}; // color attachment
-		uint32_t	m_depth_attachment	{}; // depth attachment
+		uint32_t			m_handle	{}				; // handle
+		uint32_t			m_format	{ format_rgba }	; // format
+		vec2i				m_size		{ 1280, 720 }	; // size
+		shared<texture2d>	m_color		{}				; // color attachment
+		shared<texture2d>	m_depth		{}				; // depth attachment
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// opengl texture
+	class opengl_texture2d final : public texture2d
+	{
+	public:
+		opengl_texture2d(vec2i const & size, buffer_t pixels, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags);
+
+		~opengl_texture2d();
+
+		void bind() const override;
+
+		void unbind() const override;
+
+		void update(vec2i const & size, buffer_t pixels = {}) override;
+
+		void set_mipmapped(bool value) override;
+
+		void set_repeated(bool value) override;
+
+		void set_smooth(bool value) override;
+
+		image copy_to_image() const override;
+
+		inline int32_t get_flags() const override { return m_flags; }
+
+		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+
+		inline vec2i const & get_size() const override { return m_size; }
+
+	private:
+		uint32_t	m_handle	{}							; // handle
+		vec2i		m_size		{ 0, 0 }					; // size
+		uint32_t	m_i_format	{ format_rgba }				; // internal format
+		uint32_t	m_c_format	{ format_rgba }				; // color format
+		uint32_t	m_p_type	{ type_unsigned_byte }		; // pixel type
+		int32_t		m_flags		{ texture_flags_default }	; // flags ( repeated / smooth / mipmapped )
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -143,9 +182,13 @@ namespace ml::gl
 	class opengl_shader_object final : public shader_object
 	{
 	public:
-		opengl_shader_object(cstring v_src, cstring f_src);
-
 		opengl_shader_object(cstring v_src, cstring g_src, cstring f_src);
+
+		opengl_shader_object(cstring v_src, cstring f_src) noexcept
+			: opengl_shader_object{ v_src, nullptr, f_src }
+		{
+			this->compile(v_src, nullptr, f_src);
+		}
 
 		~opengl_shader_object();
 
@@ -171,7 +214,7 @@ namespace ml::gl
 
 		bool set_uniform(cstring name, mat4 const & value) override;
 
-		bool set_uniform(cstring name, handle_t value) override;
+		bool set_uniform(cstring name, shared<texture2d> const & value) override;
 
 		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
 
@@ -183,29 +226,6 @@ namespace ml::gl
 		struct uniform_binder;
 
 		void compile(cstring v_src, cstring g_src, cstring f_src);
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// opengl texture
-	class opengl_texture_object final : public texture_object
-	{
-	public:
-		opengl_texture_object();
-
-		~opengl_texture_object();
-
-		void bind() const override;
-
-		void unbind() const override;
-
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
-
-		inline uint32_t get_type() const override { return m_type; }
-
-	private:
-		uint32_t m_handle	{};
-		uint32_t m_type		{};
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -227,12 +247,14 @@ namespace ml::gl
 
 		bool do_initialize() override;
 
+		void on_initialize() override;
+
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		api_capabilities const & get_capabilities() const override;
-
 		uint32_t get_error() const override;
+
+		api_info const & get_info() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -1,7 +1,7 @@
 #ifndef _ML_GLYPH_HPP_
 #define _ML_GLYPH_HPP_
 
-#include <libmeme/Graphics/Texture.hpp>
+#include <libmeme/Graphics/RenderAPI.hpp>
 
 namespace ml
 {
@@ -9,9 +9,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		texture		graphic	{};
-		float_rect	bounds	{};
-		uint32_t	advance	{};
+		shared<gl::texture2d> graphic{};
+		
+		float_rect bounds{};
+	
+		uint32_t advance{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

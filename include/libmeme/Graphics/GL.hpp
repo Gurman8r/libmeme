@@ -80,8 +80,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		static bool edgeClampAvailable();
 		static auto getMaxTextureUnits() -> int32_t;
-		static auto getMaxTextureSize() -> uint32_t;
-		static auto getValidTextureSize(uint32_t value) -> uint32_t;
+		static auto getMaxTextureSize() -> int32_t;
+		static auto getValidTextureSize(int32_t value) -> int32_t;
 		static bool nonPowerOfTwoAvailable();
 		static bool textureSrgbAvailable();
 

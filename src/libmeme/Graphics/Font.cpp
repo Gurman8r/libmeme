@@ -1,5 +1,6 @@
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/GL.hpp>
+#include <libmeme/Graphics/RenderAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -112,9 +113,6 @@ namespace ml
 		// set size loading glyphs as
 		FT_Set_Pixel_Sizes(face, 0, size);
 
-		// disable byte-alignment restriction
-		GL::pixelStore(GL::UnpackAlignment, 1);
-
 		// load character glyph
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
 		{
@@ -123,8 +121,15 @@ namespace ml
 			return g;
 		}
 
+		//texture{ GL::Texture2D, GL::RGBA, GL::Red, gl::texture_flags_default };
 		// set texture
-		g.graphic = texture{ GL::Texture2D, GL::RGBA, GL::Red, texture_flags_default };
+		g.graphic = gl::make_texture2d(
+			vec2i{},
+			nullptr,
+			gl::format_rgba,
+			gl::format_red,
+			gl::type_unsigned_byte,
+			gl::texture_flags_default);
 
 		// set bounds
 		g.bounds = float_rect
@@ -141,12 +146,7 @@ namespace ml
 		// only load a texture for characters requiring a graphic
 		if (!std::isspace(c, {}) && std::isgraph(c, {}))
 		{
-			if (!g.graphic.create(face->glyph->bitmap.buffer, (vec2u)g.size()))
-			{
-				debug::warning("font failed loading glyph texture: {0}", c);
-
-				g.graphic.destroy();
-			}
+			g.graphic->update((vec2i)g.size(), face->glyph->bitmap.buffer);
 		}
 
 		return g;

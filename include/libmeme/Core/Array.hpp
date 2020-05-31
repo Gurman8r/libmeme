@@ -47,6 +47,19 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				for (size_t i = 0; i < _N; ++i)
+				{
+					util::swap(m_data[i], other.m_data[i]);
+				}
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr operator pointer() noexcept { return m_data; }
 
 		constexpr operator const_pointer() const noexcept { return m_data; }

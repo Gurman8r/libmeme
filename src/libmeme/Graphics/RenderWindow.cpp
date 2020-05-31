@@ -23,8 +23,8 @@ namespace ml
 		}
 
 		// validate version
-		m_settings.context.major = api->get_capabilities().major_version;
-		m_settings.context.minor = api->get_capabilities().minor_version;
+		m_settings.context.major = api->get_info().major_version;
+		m_settings.context.minor = api->get_info().minor_version;
 
 		for (auto const & cmd : // setup states
 		{
@@ -41,7 +41,7 @@ namespace ml
 			// cull state
 			gl::render_command::set_cull_enabled(true),
 			gl::render_command::set_cull_face(gl::facet_back),
-			gl::render_command::set_cull_order(gl::order_counter_clockwise),
+			gl::render_command::set_cull_order(gl::front_face_ccw),
 
 			// depth state
 			gl::render_command::set_depth_enabled(true),

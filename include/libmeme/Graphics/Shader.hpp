@@ -11,13 +11,8 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		enum : size_t { id_vertex, id_geometry, id_fragment, id_max };
-
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using shader_source		= typename meta::array<pmr::string, id_max>;
-		using attribute_cache	= typename ds::map<hash_t, int32_t>;
-		using uniform_cache		= typename ds::map<hash_t, int32_t>;
-		using texture_cache		= typename ds::map<int32_t, texture const *>;
+		using shader_source		= typename meta::array<pmr::string, gl::shader_type_MAX>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -101,9 +96,9 @@ namespace ml
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
-				& v{ std::get<id_vertex>(value) },
-				& g{ std::get<id_geometry>(value) },
-				& f{ std::get<id_fragment>(value) };
+				& v{ std::get<gl::shader_type_vertex>(value) },
+				& g{ std::get<gl::shader_type_geometry>(value) },
+				& f{ std::get<gl::shader_type_fragment>(value) };
 
 			return ((!v.empty() && !g.empty() && !f.empty())
 				? load_from_memory(v, g, f)
@@ -145,14 +140,7 @@ namespace ml
 		template <class T
 		> bool set_uniform(cstring name, T && value) noexcept
 		{
-			if constexpr (std::is_convertible_v<T, uniform::sampler_type>)
-			{
-				return this->set_uniform(name, value->address());
-			}
-			else
-			{
-				return m_object->set_uniform(name, ML_forward(value));
-			}
+			return m_object->set_uniform(name, ML_forward(value));
 		}
 
 		template <class T
@@ -161,23 +149,24 @@ namespace ml
 			return this->set_uniform(name.c_str(), ML_forward(value));
 		}
 
-		bool set_uniform(uniform const & value) noexcept
+		bool set_uniform(uniform const & u) noexcept
 		{
-			if (value.name().empty()) { return false; }
-			switch (value.type().hash())
+			if (u.name().empty()) { return false; }
+			switch (u.type().hash())
 			{
 			default					: return false;
-			case hashof_v<bool>		: return set_uniform(value.name(), *value.get<bool>());
-			case hashof_v<int32_t>	: return set_uniform(value.name(), *value.get<int32_t>());
-			case hashof_v<float_t>	: return set_uniform(value.name(), *value.get<float_t>());
-			case hashof_v<vec2>		: return set_uniform(value.name(), *value.get<vec2>());
-			case hashof_v<vec3>		: return set_uniform(value.name(), *value.get<vec3>());
-			case hashof_v<vec4>		: return set_uniform(value.name(), *value.get<vec4>());
-			case hashof_v<color>	: return set_uniform(value.name(), *value.get<color>());
-			case hashof_v<mat2>		: return set_uniform(value.name(), *value.get<mat2>());
-			case hashof_v<mat3>		: return set_uniform(value.name(), *value.get<mat3>());
-			case hashof_v<mat4>		: return set_uniform(value.name(), *value.get<mat4>());
-			case hashof_v<texture>	: return set_uniform(value.name(), *value.get<texture>());
+			case hashof_v<bool>		: return set_uniform(u.name(), *u.get<bool>());
+			case hashof_v<int32_t>	: return set_uniform(u.name(), *u.get<int32_t>());
+			case hashof_v<float_t>	: return set_uniform(u.name(), *u.get<float_t>());
+			case hashof_v<vec2>		: return set_uniform(u.name(), *u.get<vec2>());
+			case hashof_v<vec3>		: return set_uniform(u.name(), *u.get<vec3>());
+			case hashof_v<vec4>		: return set_uniform(u.name(), *u.get<vec4>());
+			case hashof_v<color>	: return set_uniform(u.name(), *u.get<color>());
+			case hashof_v<mat2>		: return set_uniform(u.name(), *u.get<mat2>());
+			case hashof_v<mat3>		: return set_uniform(u.name(), *u.get<mat3>());
+			case hashof_v<mat4>		: return set_uniform(u.name(), *u.get<mat4>());
+			case hashof_v<gl::texture2d>:
+				return set_uniform(u.name(), *u.get<shared<gl::texture2d>>());
 			}
 		}
 

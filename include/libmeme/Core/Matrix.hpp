@@ -62,6 +62,16 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr void swap(self_type & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_data.swap(other.m_data);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class U, size_t W, size_t H
 		> constexpr operator matrix<U, W, H>() const noexcept
 		{

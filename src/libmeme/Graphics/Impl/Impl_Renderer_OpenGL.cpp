@@ -265,30 +265,32 @@ namespace ml::gl
 		{
 			switch (value)
 			{
-			default					: return value;
-			case type_byte			: return GL_BYTE;
-			case type_unsigned_byte	: return GL_UNSIGNED_BYTE;
-			case type_short			: return GL_SHORT;
-			case type_unsigned_short: return GL_UNSIGNED_SHORT;
-			case type_int			: return GL_INT;
-			case type_unsigned_int	: return GL_UNSIGNED_INT;
-			case type_float			: return GL_FLOAT;
-			case type_half_float	: return GL_HALF_FLOAT;
+			default						: return value;
+			case type_byte				: return GL_BYTE;
+			case type_unsigned_byte		: return GL_UNSIGNED_BYTE;
+			case type_short				: return GL_SHORT;
+			case type_unsigned_short	: return GL_UNSIGNED_SHORT;
+			case type_int				: return GL_INT;
+			case type_unsigned_int		: return GL_UNSIGNED_INT;
+			case type_float				: return GL_FLOAT;
+			case type_half_float		: return GL_HALF_FLOAT;
+			case type_unsigned_int_24_8	: return GL_UNSIGNED_INT_24_8;
 			}
 		}
 		else // to_user
 		{
 			switch (value)
 			{
-			default					: return value;
-			case GL_BYTE			: return type_byte;
-			case GL_UNSIGNED_BYTE	: return type_unsigned_byte;
-			case GL_SHORT			: return type_short;
-			case GL_UNSIGNED_SHORT	: return type_unsigned_short;
-			case GL_INT				: return type_int;
-			case GL_UNSIGNED_INT	: return type_unsigned_int;
-			case GL_FLOAT			: return type_float;
-			case GL_HALF_FLOAT		: return type_half_float;
+			default						: return value;
+			case GL_BYTE				: return type_byte;
+			case GL_UNSIGNED_BYTE		: return type_unsigned_byte;
+			case GL_SHORT				: return type_short;
+			case GL_UNSIGNED_SHORT		: return type_unsigned_short;
+			case GL_INT					: return type_int;
+			case GL_UNSIGNED_INT		: return type_unsigned_int;
+			case GL_FLOAT				: return type_float;
+			case GL_HALF_FLOAT			: return type_half_float;
+			case GL_UNSIGNED_INT_24_8	: return type_unsigned_int_24_8;
 			}
 		}
 	}
@@ -325,15 +327,15 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convert> constexpr uint32_t _order(uint32_t value) noexcept
+	template <class Convert> constexpr uint32_t _front_face(uint32_t value) noexcept
 	{
 		if constexpr (Convert()) // to_impl
 		{
 			switch (value)
 			{
-			default						: return value;
-			case order_clockwise		: return GL_CW;
-			case order_counter_clockwise: return GL_CCW;
+			default				: return value;
+			case front_face_cw	: return GL_CW;
+			case front_face_ccw	: return GL_CCW;
 			}
 		}
 		else // to_user
@@ -341,8 +343,8 @@ namespace ml::gl
 			switch (value)
 			{
 			default		: return value;
-			case GL_CW	: return order_clockwise;
-			case GL_CCW	: return order_counter_clockwise;
+			case GL_CW	: return front_face_cw;
+			case GL_CCW	: return front_face_ccw;
 			}
 		}
 	}
@@ -452,6 +454,8 @@ namespace ml::gl
 			case format_sluminance8_alpha8	: return GL_SLUMINANCE8_ALPHA8;
 			case format_sluminance			: return GL_SLUMINANCE;
 			case format_sluminance8			: return GL_SLUMINANCE8;
+
+			case format_depth_stencil		: return GL_DEPTH_STENCIL;
 			case format_depth24_stencil8	: return GL_DEPTH24_STENCIL8;
 			}
 		}
@@ -476,6 +480,8 @@ namespace ml::gl
 			case GL_SLUMINANCE8_ALPHA8		: return format_sluminance8_alpha8;
 			case GL_SLUMINANCE				: return format_sluminance;
 			case GL_SLUMINANCE8				: return format_sluminance8;
+
+			case GL_DEPTH_STENCIL			: return format_depth_stencil;
 			case GL_DEPTH24_STENCIL8		: return format_depth24_stencil8;
 			}
 		}
@@ -580,7 +586,7 @@ namespace ml::gl
 			{
 				switch (e.get_base_type())
 				{
-				default					: return 0			; // ?
+				default					: return 0			; // unknown
 				case hashof_v<bool>		: return GL_BOOL	; // bool
 				case hashof_v<int32_t>	: return GL_INT		; // int
 				case hashof_v<float_t>	: return GL_FLOAT	; // float
@@ -685,7 +691,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_frame_buffer::opengl_frame_buffer::opengl_frame_buffer(uint32_t format, vec2i const & size)
-		: m_format{ format }
+		: m_format{ format }, m_size{}
 	{
 		this->resize(size);
 	}
@@ -709,58 +715,203 @@ namespace ml::gl
 	void opengl_frame_buffer::bind_texture(uint32_t slot) const
 	{
 		glCheck(glActiveTexture(GL_TEXTURE0 + slot));
-		glCheck(glBindTexture(GL_TEXTURE_2D, m_color_attachment));
+		m_color->bind();
 	}
 
 	void opengl_frame_buffer::resize(vec2i const & value)
 	{
 		if (m_size == value) { return; }
-		
-		m_size = value;
+		else { m_size = value; }
 
-		if (m_handle)
-		{
-			glCheck(glDeleteFramebuffers(1, &m_handle));
-			glCheck(glDeleteTextures(1, &m_color_attachment));
-			glCheck(glDeleteTextures(1, &m_depth_attachment));
-		}
-
+		// generate
+		if (m_handle) { glCheck(glDeleteFramebuffers(1, &m_handle)); }
 		glCheck(glGenFramebuffers(1, &m_handle));
-		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, m_handle));
-		
-		// color attachment
-		glCheck(glGenTextures(1, &m_color_attachment));
-		glCheck(glBindTexture(GL_TEXTURE_2D, m_color_attachment));
-		glCheck(glTexImage2D(
-			GL_TEXTURE_2D, 0, _format<to_impl>(m_format), m_size[0], m_size[1], 0,
-			_format<to_impl>(m_format), GL_UNSIGNED_BYTE, nullptr
-		));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-		glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		this->bind();
 
+		// color attachment
+		if (m_color) { m_color->update(m_size); }
+		else
+		{
+			m_color = make_texture2d(
+				m_size,
+				nullptr,
+				m_format,
+				m_format,
+				type_unsigned_byte,
+				texture_flags_default);
+		}
 		glCheck(glFramebufferTexture2D(
 			GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D, m_color_attachment, 0));
-
-
+			GL_TEXTURE_2D, (uint32_t)(intptr_t)get_color_attachment(), 0));
+		
 		// depth attachment
-		glCheck(glGenTextures(1, &m_depth_attachment));
-		glCheck(glBindTexture(GL_TEXTURE_2D, m_depth_attachment));
-		glCheck(glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_size[0], m_size[1], 0,
-			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr
-		));
+		if (m_depth) { m_depth->update(m_size); }
+		else
+		{
+			m_depth = make_texture2d(
+				m_size,
+				nullptr,
+				format_depth24_stencil8,
+				format_depth_stencil,
+				type_unsigned_int_24_8,
+				texture_flags_none);
+		}
 		glCheck(glFramebufferTexture2D(
 			GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-			GL_TEXTURE_2D, m_depth_attachment, 0));
+			GL_TEXTURE_2D, (uint32_t)(intptr_t)get_depth_attachment(), 0));
 
+		// check status
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
 			debug::error("framebuffer is not complete");
 		}
+	}
 
-		glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	opengl_texture2d::opengl_texture2d(vec2i const & size, buffer_t pixels, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags)
+		: m_handle{}, m_size{}
+		, m_i_format{ iformat }, m_c_format{ cformat }, m_p_type{ ptype }, m_flags{ flags }
+	{
+		this->update(size, pixels);
+	}
+
+	opengl_texture2d::~opengl_texture2d()
+	{
+		glCheck(glDeleteTextures(1, &m_handle));
+	}
+
+	void opengl_texture2d::bind() const
+	{
+		glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
+	}
+
+	void opengl_texture2d::unbind() const
+	{
+		glCheck(glBindTexture(GL_TEXTURE_2D, NULL));
+	}
+
+	void opengl_texture2d::update(vec2i const & size, buffer_t pixels)
+	{
+		if (m_size == size) { return; }
+		else { m_size = size; }
+
+		if (m_handle) { glCheck(glDeleteTextures(1, &m_handle)); }
+
+		glCheck(glGenTextures(1, &m_handle));
+
+		this->bind();
+
+		glCheck(glTexImage2D(
+			GL_TEXTURE_2D,					// target
+			0,								// level
+			_format<to_impl>(m_i_format),	// internal format
+			m_size[0],						// width
+			m_size[1],						// height
+			0,								// border
+			_format<to_impl>(m_c_format),	// color format
+			_type<to_impl>(m_p_type),		// pixel type
+			pixels));						// pixels
+
+		if (m_flags != texture_flags_none)
+		{
+			this->set_repeated(this->is_repeated());
+			this->set_smooth(this->is_smooth());
+			this->set_mipmapped(this->is_mipmapped());
+		}
+	}
+
+	void opengl_texture2d::set_mipmapped(bool value)
+	{
+		if (!m_handle) { return; }
+
+		ML_flag_write(m_flags, texture_flags_mipmapped, value);
+
+		if (this->is_smooth())
+		{
+			glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+		}
+
+		glCheck(glTexParameteri(
+			GL_TEXTURE_2D,
+			GL_TEXTURE_MAG_FILTER,
+			value
+			? this->is_smooth() ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
+			: this->is_smooth() ? GL_LINEAR : GL_NEAREST));
+	}
+
+	void opengl_texture2d::set_repeated(bool value)
+	{
+		if (!m_handle) { return; }
+
+		ML_flag_write(m_flags, texture_flags_repeated, value);
+
+		constexpr bool edgeClampAvailable{
+#if defined(GL_EXT_texture_edge_clamp) \
+|| defined(GLEW_EXT_texture_edge_clamp) \
+|| defined(GL_SGIS_texture_edge_clamp)
+			true
+#endif
+		};
+
+		glCheck(glTexParameteri(
+			GL_TEXTURE_2D,
+			GL_TEXTURE_WRAP_S,
+			value
+			? GL_REPEAT
+			: edgeClampAvailable ? GL_CLAMP_TO_EDGE : GL_CLAMP));
+
+		glCheck(glTexParameteri(
+			GL_TEXTURE_2D,
+			GL_TEXTURE_WRAP_T,
+			value
+			? GL_REPEAT
+			: edgeClampAvailable ? GL_CLAMP_TO_EDGE : GL_CLAMP));
+	}
+
+	void opengl_texture2d::set_smooth(bool value)
+	{
+		if (!m_handle) { return; }
+
+		ML_flag_write(m_flags, texture_flags_smooth, value);
+
+		glCheck(glTexParameteri(
+			GL_TEXTURE_2D,
+			GL_TEXTURE_MAG_FILTER,
+			value ? GL_LINEAR : GL_NEAREST));
+
+		glCheck(glTexParameteri(
+			GL_TEXTURE_2D,
+			GL_TEXTURE_MIN_FILTER,
+			this->is_mipmapped()
+			? value ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
+			: value ? GL_LINEAR : GL_NEAREST));
+	}
+
+	image opengl_texture2d::copy_to_image() const
+	{
+		image temp{ m_size, std::invoke([channels = m_i_format]() noexcept -> size_t
+		{
+			switch (channels)
+			{
+			case format_red		: return 1;
+			case format_rgb		: return 3;
+			case format_rgba	:
+			default				: return 4;
+			}
+		}) };
+		if (m_handle)
+		{
+			ML_bind_scope(*this);
+
+			glCheck(glGetTexImage(
+				GL_TEXTURE_2D,
+				0,
+				_format<to_impl>(m_i_format),
+				_type<to_impl>(m_p_type),
+				temp.data()));
+		}
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -807,11 +958,6 @@ namespace ml::gl
 		}
 	};
 
-	opengl_shader_object::opengl_shader_object(cstring v_src, cstring f_src)
-	{
-		this->compile(v_src, nullptr, f_src);
-	}
-
 	opengl_shader_object::opengl_shader_object(cstring v_src, cstring g_src, cstring f_src)
 	{
 		this->compile(v_src, g_src, f_src);
@@ -832,11 +978,8 @@ namespace ml::gl
 			m_textures.for_each([&](int32_t location, handle_t tex)
 			{
 				glCheck(glUniform1i(location, index));
-
 				glCheck(glActiveTexture(GL_TEXTURE0 + index));
-
-				glCheck(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<uint32_t>(tex)));
-
+				glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)tex));
 				index++;
 			});
 		}
@@ -916,7 +1059,7 @@ namespace ml::gl
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, handle_t value)
+	bool opengl_shader_object::set_uniform(cstring name, shared<texture2d> const & value)
 	{
 		static auto const max_texture_units{ std::invoke([]() noexcept
 		{
@@ -928,11 +1071,11 @@ namespace ml::gl
 		{
 			if (auto const it{ m_textures.find(location) })
 			{
-				(*it->second) = value;
+				(*it->second) = value ? value->get_handle() : nullptr;
 			}
 			else if ((m_textures.size() + 1) < max_texture_units)
 			{
-				m_textures.insert(location, value);
+				m_textures.insert(location, value ? value->get_handle() : nullptr);
 			}
 		});
 	}
@@ -1020,28 +1163,6 @@ namespace ml::gl
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_texture_object::opengl_texture_object()
-	{
-		glCheck(glGenTextures(1, &m_handle));
-	}
-
-	opengl_texture_object::~opengl_texture_object()
-	{
-		glCheck(glDeleteTextures(1, &m_handle));
-	}
-
-	void opengl_texture_object::bind() const
-	{
-		glCheck(glBindTexture(_texture_type<to_impl>(m_type), m_handle));
-	}
-
-	void opengl_texture_object::unbind() const
-	{
-		glCheck(glBindTexture(_texture_type<to_impl>(m_type), NULL));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 // opengl api
@@ -1070,11 +1191,16 @@ namespace ml::gl
 #endif
 	}
 
+	void opengl_render_api::on_initialize()
+	{
+		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	api_capabilities const & opengl_render_api::get_capabilities() const
+	api_info const & opengl_render_api::get_info() const
 	{
-		static api_capabilities temp{};
+		static api_info temp{};
 		static ML_scope // once
 		{
 			// renderer
@@ -1218,7 +1344,7 @@ namespace ml::gl
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp));
-		return _order<to_user>(temp);
+		return _front_face<to_user>(temp);
 	}
 
 	bool opengl_render_api::get_depth_enabled() const
@@ -1307,7 +1433,7 @@ namespace ml::gl
 
 	void opengl_render_api::set_cull_order(uint32_t order)
 	{
-		glCheck(glFrontFace(_order<to_impl>(order)));
+		glCheck(glFrontFace(_front_face<to_impl>(order)));
 	}
 
 	void opengl_render_api::set_depth_enabled(bool enabled)

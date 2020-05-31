@@ -28,22 +28,22 @@ namespace ml
 		{
 		}
 
-		image(vec2u const & size, allocator_type alloc = {})
+		image(vec2i const & size, allocator_type alloc = {})
 			: image{ size, 4, alloc }
 		{
 		}
 
-		image(vec2u const & size, size_t channels, allocator_type alloc = {})
+		image(vec2i const & size, size_t channels, allocator_type alloc = {})
 			: image{ size, channels, pixels_type{}, alloc }
 		{
 		}
 
-		image(vec2u const & size, pixels_type const & pixels, allocator_type alloc = {})
+		image(vec2i const & size, pixels_type const & pixels, allocator_type alloc = {})
 			: image{ size, 4, pixels, alloc }
 		{
 		}
 
-		image(vec2u const & size, size_t channels, pixels_type const & pixels, allocator_type alloc = {})
+		image(vec2i const & size, size_t channels, pixels_type const & pixels, allocator_type alloc = {})
 			: m_size{ size }
 			, m_channels{ channels }
 			, m_pixels{ pixels, alloc }
@@ -111,9 +111,9 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				std::swap(m_pixels, value.m_pixels);
+				m_pixels.swap(value.m_pixels);
 
-				std::swap(m_size, value.m_size);
+				m_size.swap(value.m_size);
 
 				std::swap(m_channels, value.m_channels);
 			}
@@ -125,7 +125,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_color(vec2u const & size, color32 const & c) noexcept
+		image & create_from_color(vec2i const & size, color32 const & c) noexcept
 		{
 			return create_from_color(size, channels(), c);
 		}
@@ -135,7 +135,7 @@ namespace ml
 			return create_from_color(size(), channels(), c);
 		}
 
-		image & create_from_color(vec2u const & size, size_t channels, color32 const & c) noexcept
+		image & create_from_color(vec2i const & size, size_t channels, color32 const & c) noexcept
 		{
 			if (size[0] && size[1] && channels)
 			{
@@ -161,7 +161,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image & create_from_pixels(vec2u const & size, pixels_type const & pixels) noexcept
+		image & create_from_pixels(vec2i const & size, pixels_type const & pixels) noexcept
 		{
 			return create_from_pixels(size, m_channels, pixels);
 		}
@@ -171,7 +171,7 @@ namespace ml
 			return create_from_pixels(m_size, m_channels, pixels);
 		}
 
-		image & create_from_pixels(vec2u const & size, size_t channels, pixels_type const & pixels) noexcept
+		image & create_from_pixels(vec2i const & size, size_t channels, pixels_type const & pixels) noexcept
 		{
 			if (!pixels.empty() && (pixels.size() == (size[0] * size[1] * channels)))
 			{
@@ -289,7 +289,7 @@ namespace ml
 		
 		ML_NODISCARD auto pixels() const noexcept -> pixels_type const & { return m_pixels; }
 		
-		ML_NODISCARD auto size() const noexcept -> vec2u const & { return m_size; }
+		ML_NODISCARD auto size() const noexcept -> vec2i const & { return m_size; }
 		
 		ML_NODISCARD auto width() const noexcept -> size_t { return m_size[0]; }
 
@@ -323,7 +323,7 @@ namespace ml
 
 		static image const & gen_default_rgba() noexcept
 		{
-			static image temp{ vec2u{ 512, 512 }, 3 };
+			static image temp{ vec2i{ 512, 512 }, 3 };
 			for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)
 			{
 				size_t const y{ i % w }, x{ i / w };
@@ -339,7 +339,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		vec2u		m_size;
+		vec2i		m_size;
 		size_t		m_channels;
 		pixels_type	m_pixels;
 

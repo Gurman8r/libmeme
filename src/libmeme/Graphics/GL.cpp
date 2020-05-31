@@ -492,13 +492,13 @@ namespace ml
 		return temp;
 	}
 
-	auto GL::getMaxTextureSize() -> uint32_t
+	auto GL::getMaxTextureSize() -> int32_t
 	{
-		static uint32_t temp{ (uint32_t)getInteger(GL::MaxTextureSize) };
+		static int32_t temp{ getInteger(GL::MaxTextureSize) };
 		return temp;
 	}
 
-	auto GL::getValidTextureSize(uint32_t value) -> uint32_t
+	auto GL::getValidTextureSize(int32_t value) -> int32_t
 	{
 		return nonPowerOfTwoAvailable() ? value : util::power_of_2(value);
 	}
