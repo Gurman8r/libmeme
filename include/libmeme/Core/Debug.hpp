@@ -31,6 +31,20 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class T
+	> void puts(T && value) noexcept
+	{
+		std::cout << ML_forward(value) << '\n';
+	}
+
+	template <class Fmt, class Arg0, class ... Args
+	> void puts(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
+	{
+		debug::puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	constexpr int32_t info() noexcept { return 1; } // true
 
 	template <class T

@@ -18,21 +18,16 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// base classes
-	class render_api		; // 
-	class vertex_array		; // 
-	class vertex_buffer		; // 
-	class index_buffer		; // 
-	class frame_buffer		; // 
-	class shader_object		; // 
-	class texture2d			; // 
+	// aliases
+	ML_alias buffer		= typename void const *				; // data buffer type
+	ML_alias command	= typename std::function<void()>	; // render command type
+	ML_alias handle		= typename void *					; // generic handle type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// aliases
-	ML_alias buffer_t	= typename void const *				; // data buffer type
-	ML_alias command_t	= typename std::function<void()>	; // render command type
-	ML_alias handle_t	= typename void *					; // generic handle type
+	// conversion helpers
+	struct to_user : std::false_type {}; // ( false_type ) | backend -> frontend
+	struct to_impl : std::true_type {}; // ( true_type ) | frontend -> backend
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -44,26 +39,17 @@ namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// conversion helpers
-
-	struct to_user : std::false_type {}; // ( false_type ) | backend enum -> user enum
-
-	struct to_impl : std::true_type {}; // ( true_type ) | user enum -> backend enum
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum clear_flags_ : uint32_t
+	enum buffer_bit_ : uint32_t
 	{
-		clear_flags_none,
-		clear_flags_accum	= 1 << 0,
-		clear_flags_color	= 1 << 1,
-		clear_flags_depth	= 1 << 2,
-		clear_flags_stencil = 1 << 3,
+		no_buffer		= 0,
+		color_buffer	= 1 << 0,
+		depth_buffer	= 1 << 1,
+		stencil_buffer	= 1 << 2,
 	};
 
 	enum error_ : uint32_t
 	{
-		error_no_error,
+		error_none,
 		error_invalid_enum,
 		error_invalid_value,
 		error_invalid_operation,
@@ -71,13 +57,14 @@ namespace ml::gl
 		error_stack_underflow,
 		error_out_of_memory,
 		error_invalid_framebuffer_operation,
+		error_context_lost,
 	};
 
-	enum draw_usage_ : uint32_t
+	enum usage_ : uint32_t
 	{
-		usage_stream,
-		usage_static,
-		usage_dynamic,
+		usage_stream_draw,
+		usage_static_draw,
+		usage_dynamic_draw,
 	};
 
 	enum primitive_ : uint32_t
@@ -190,8 +177,8 @@ namespace ml::gl
 	enum shader_type_ : uint32_t
 	{
 		shader_type_vertex,
-		shader_type_geometry,
 		shader_type_fragment,
+		shader_type_geometry,
 
 		shader_type_MAX
 	};
@@ -219,10 +206,10 @@ namespace ml::gl
 
 	enum texture_flags_ : int32_t
 	{
-		texture_flags_none		= (0 << 0), // none
-		texture_flags_smooth	= (1 << 0), // smooth
-		texture_flags_repeated	= (1 << 1), // repeated
-		texture_flags_mipmapped	= (1 << 2), // mipmapped
+		texture_flags_none		= 0,		// none
+		texture_flags_smooth	= (1 << 0),	// smooth
+		texture_flags_repeated	= (1 << 1),	// repeated
+		texture_flags_mipmapped	= (1 << 2),	// mipmapped
 
 		// smooth / repeated
 		texture_flags_default
@@ -238,80 +225,37 @@ namespace ml::gl
 // utility
 namespace ml::gl
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD inline uint32_t image_format(image const & value) noexcept
+	ML_NODISCARD constexpr uint32_t channels_to_format(size_t value) noexcept
 	{
-		switch (value.channels())
+		switch (value)
 		{
-		case 1	: return format_red;
-		case 3	: return format_rgb;
-		case 4	:
-		default	: return format_rgba;
+		default	: return 0;
+		case 1	: return gl::format_red;
+		case 3	: return gl::format_rgb;
+		case 4	: return gl::format_rgba;
 		}
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD constexpr hash_t element_base_type(hash_t type) noexcept
+	ML_NODISCARD constexpr size_t format_to_channels(uint32_t value) noexcept
 	{
-		switch (type)
+		switch (value)
 		{
-		default					: return 0;
-		case hashof_v<bool>		: return hashof_v<bool>;
-		case hashof_v<int32_t>	:
-		case hashof_v<vec2i>	:
-		case hashof_v<vec3i>	:
-		case hashof_v<vec4i>	:
-		case hashof_v<mat2i>	:
-		case hashof_v<mat3i>	:
-		case hashof_v<mat4i>	: return hashof_v<int32_t>;
-		case hashof_v<float_t>	:
-		case hashof_v<vec2f>	:
-		case hashof_v<vec3f>	:
-		case hashof_v<vec4f>	:
-		case hashof_v<mat2f>	:
-		case hashof_v<mat3f>	:
-		case hashof_v<mat4f>	: return hashof_v<float_t>;
+		default				: return 0;
+		case gl::format_red	: return 1;
+		case gl::format_rgb	: return 3;
+		case gl::format_rgba: return 4;
 		}
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD constexpr uint32_t element_component_count(hash_t type) noexcept
-	{
-		switch (type)
-		{
-		default					: return 0;
-		case hashof_v<bool>		:
-		case hashof_v<int32_t>	:
-		case hashof_v<float_t>	: return 1;
-		case hashof_v<vec2i>	:
-		case hashof_v<vec2f>	: return 2;
-		case hashof_v<vec3i>	:
-		case hashof_v<vec3f>	: return 3;
-		case hashof_v<vec4i>	:
-		case hashof_v<vec4f>	: return 4;
-		case hashof_v<mat2i>	:
-		case hashof_v<mat2f>	: return 2 * 2;
-		case hashof_v<mat3i>	:
-		case hashof_v<mat3f>	: return 3 * 3;
-		case hashof_v<mat4i>	:
-		case hashof_v<mat4f>	: return 4 * 4;
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // layout
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// vertex buffer layout element
+	// buffer element
 	struct ML_NODISCARD buffer_element final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -340,16 +284,58 @@ namespace ml::gl
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		hash_t get_base_type() const noexcept { return element_base_type(type); }
+		hash_t get_base_type() const noexcept
+		{
+			switch (type)
+			{
+			default					: return 0;
+			case hashof_v<bool>		: return hashof_v<bool>;
+			case hashof_v<int32_t>	:
+			case hashof_v<vec2i>	:
+			case hashof_v<vec3i>	:
+			case hashof_v<vec4i>	:
+			case hashof_v<mat2i>	:
+			case hashof_v<mat3i>	:
+			case hashof_v<mat4i>	: return hashof_v<int32_t>;
+			case hashof_v<float_t>	:
+			case hashof_v<vec2f>	:
+			case hashof_v<vec3f>	:
+			case hashof_v<vec4f>	:
+			case hashof_v<mat2f>	:
+			case hashof_v<mat3f>	:
+			case hashof_v<mat4f>	: return hashof_v<float_t>;
+			}
+		}
 
-		uint32_t get_component_count() const noexcept { return element_component_count(type); }
+		uint32_t get_component_count() const noexcept
+		{
+			switch (type)
+			{
+			default					: return 0;
+			case hashof_v<bool>		:
+			case hashof_v<int32_t>	:
+			case hashof_v<float_t>	: return 1;
+			case hashof_v<vec2i>	:
+			case hashof_v<vec2f>	: return 2;
+			case hashof_v<vec3i>	:
+			case hashof_v<vec3f>	: return 3;
+			case hashof_v<vec4i>	:
+			case hashof_v<vec4f>	: return 4;
+			case hashof_v<mat2i>	:
+			case hashof_v<mat2f>	: return 2 * 2;
+			case hashof_v<mat3i>	:
+			case hashof_v<mat3f>	: return 3 * 3;
+			case hashof_v<mat4i>	:
+			case hashof_v<mat4f>	: return 4 * 4;
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// vertex buffer layout
+	// buffer layout
 	struct ML_NODISCARD buffer_layout final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -442,123 +428,114 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // objects
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	class vertexarray		; // 
+	class vertexbuffer		; // 
+	class indexbuffer		; // 
+	class framebuffer		; // 
+	class shader_object		; // 
+	class texture2d			; // 
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// vertex array
-	class ML_GRAPHICS_API vertex_array : public trackable, public non_copyable
+	class ML_GRAPHICS_API vertexarray : public trackable, public non_copyable
 	{
 	public:
-		virtual ~vertex_array() = default;
+		virtual ~vertexarray() = default;
 
 		virtual void bind() const = 0;
 
 		virtual void unbind() const = 0;
 
-		virtual void add_vbo(shared<vertex_buffer> const & value) = 0;
+		virtual void add_vbo(shared<vertexbuffer> const & value) = 0;
 
-		virtual void set_ibo(shared<index_buffer> const & value) = 0;
+		virtual void set_ibo(shared<indexbuffer> const & value) = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
-		ML_NODISCARD virtual shared<index_buffer> const & get_ibo() const = 0;
+		ML_NODISCARD virtual shared<indexbuffer> const & get_ibo() const = 0;
 		
-		ML_NODISCARD virtual pmr::vector<shared<vertex_buffer>> const & get_vbos() const = 0;
+		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vbos() const = 0;
 
-		ML_NODISCARD static shared<vertex_array> create();
+		ML_NODISCARD static shared<vertexarray> create();
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_vao(Args && ... args) noexcept
-	{
-		return vertex_array::create(ML_forward(args)...);
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// vertex buffer
-	class ML_GRAPHICS_API vertex_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API vertexbuffer : public trackable, public non_copyable
 	{
 	public:
-		virtual ~vertex_buffer() = default;
+		virtual ~vertexbuffer() = default;
 
 		virtual void bind() const = 0;
 		
 		virtual void unbind() const = 0;
 
-		virtual void set_data(buffer_t vertices, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void set_data(gl::buffer vertices, uint32_t size, uint32_t offset = 0) = 0;
 
 		virtual void set_layout(buffer_layout const & value) = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
 		ML_NODISCARD virtual buffer_layout const & get_layout() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_size() const = 0;
 
-		ML_NODISCARD static shared<vertex_buffer> create(
-			buffer_t vertices,
-			uint32_t size,
-			uint32_t usage = usage_static);
+		ML_NODISCARD static shared<vertexbuffer> create(
+			gl::buffer	vertices,
+			uint32_t	size,
+			uint32_t	usage = gl::usage_static_draw);
 
-		ML_NODISCARD static shared<vertex_buffer> create(
+		ML_NODISCARD static shared<vertexbuffer> create(
 			uint32_t size,
-			uint32_t usage = usage_dynamic);
+			uint32_t usage = gl::usage_dynamic_draw);
 
-		ML_NODISCARD static shared<vertex_buffer> create(pmr::vector<float_t> const & vertices, uint32_t usage = usage_static)
+		ML_NODISCARD static shared<vertexbuffer> create(pmr::vector<float_t> const & vertices, uint32_t usage = gl::usage_static_draw)
 		{
 			return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
 		}
 	};
 
-	template <class ... Args
-	> ML_NODISCARD auto make_vbo(Args && ... args) noexcept
-	{
-		return vertex_buffer::create(ML_forward(args)...);
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// index buffer
-	class ML_GRAPHICS_API index_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API indexbuffer : public trackable, public non_copyable
 	{
 	public:
-		virtual ~index_buffer() = default;
+		virtual ~indexbuffer() = default;
 
 		virtual void bind() const = 0;
 		
 		virtual void unbind() const = 0;
 
-		virtual void set_data(buffer_t indices, uint32_t count) = 0;
+		virtual void set_data(gl::buffer indices, uint32_t count) = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
-		ML_NODISCARD static shared<index_buffer> create(
-			buffer_t indices,
-			uint32_t count);
+		ML_NODISCARD static shared<indexbuffer> create(
+			gl::buffer	indices,
+			uint32_t	count);
 
-		ML_NODISCARD static shared<index_buffer> create(pmr::vector<uint32_t> const & indices)
+		ML_NODISCARD static shared<indexbuffer> create(pmr::vector<uint32_t> const & indices)
 		{
 			return create(indices.data(), (uint32_t)indices.size());
 		}
 	};
 
-	template <class ... Args
-	> ML_NODISCARD auto make_ibo(Args && ... args) noexcept
-	{
-		return index_buffer::create(ML_forward(args)...);
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// frame buffer
-	class ML_GRAPHICS_API frame_buffer : public trackable, public non_copyable
+	class ML_GRAPHICS_API framebuffer : public trackable, public non_copyable
 	{
 	public:
-		virtual ~frame_buffer() = default;
+		virtual ~framebuffer() = default;
 
 		virtual void bind() const = 0;
 		
@@ -568,26 +545,20 @@ namespace ml::gl
 
 		virtual void resize(vec2i const & value) = 0;
 
-		ML_NODISCARD virtual handle_t get_color_attachment() const = 0;
+		ML_NODISCARD virtual shared<texture2d> const & get_color_attachment() const = 0;
 
-		ML_NODISCARD virtual handle_t get_depth_attachment() const = 0;
+		ML_NODISCARD virtual shared<texture2d> const & get_depth_attachment() const = 0;
 
 		ML_NODISCARD virtual uint32_t get_format() const = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
 		ML_NODISCARD virtual vec2i get_size() const = 0;
 
-		ML_NODISCARD static shared<frame_buffer> create(
-			uint32_t format,
-			vec2i const & size);
+		ML_NODISCARD static shared<framebuffer> create(
+			uint32_t		format,
+			vec2i const &	size);
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_fbo(Args && ... args) noexcept
-	{
-		return frame_buffer::create(ML_forward(args)...);
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -601,7 +572,7 @@ namespace ml::gl
 
 		virtual void unbind() const = 0;
 
-		virtual void update(vec2i const & size, buffer_t pixels = {}) = 0;
+		virtual void update(vec2i const & size, gl::buffer pixels = nullptr) = 0;
 
 		virtual void set_mipmapped(bool value) = 0;
 
@@ -613,41 +584,36 @@ namespace ml::gl
 
 		ML_NODISCARD virtual int32_t get_flags() const = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
 		ML_NODISCARD virtual vec2i const & get_size() const = 0;
 
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return ML_flag_read(get_flags(), texture_flags_mipmapped); }
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_flags() & gl::texture_flags_mipmapped; }
 
-		ML_NODISCARD inline bool is_repeated() const noexcept { return ML_flag_read(get_flags(), texture_flags_repeated); }
+		ML_NODISCARD inline bool is_repeated() const noexcept { return get_flags() & gl::texture_flags_repeated; }
 
-		ML_NODISCARD inline bool is_smooth() const noexcept { return ML_flag_read(get_flags(), texture_flags_smooth); }
+		ML_NODISCARD inline bool is_smooth() const noexcept { return get_flags() & gl::texture_flags_smooth; }
 
 		ML_NODISCARD static shared<texture2d> create(
-			vec2i const & size,	// size
-			buffer_t pixels,	// pixels
-			uint32_t iformat,	// internal format
-			uint32_t cformat,	// color format
-			uint32_t ptype,		// pixel type
-			int32_t flags);		// flags ( repeated / smooth / mipmapped )
+			vec2i const &	size,
+			uint32_t		iformat,
+			uint32_t		cformat,
+			uint32_t		ptype = gl::type_unsigned_byte,
+			int32_t			flags = gl::texture_flags_default,
+			gl::buffer		pixels = nullptr
+		);
 
-		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
+		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = gl::texture_flags_default) noexcept
 		{
-			uint32_t const fmt{ image_format(img) };
-			return create(img.size(), img.data(), fmt, fmt, type_unsigned_byte, flags);
+			uint32_t const fmt{ gl::channels_to_format(img.channels()) };
+			return create(img.size(), fmt, fmt, gl::type_unsigned_byte, flags, img.data());
 		}
 
-		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
+		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = gl::texture_flags_default) noexcept
 		{
 			return create(image{ path }, flags);
 		}
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_texture2d(Args && ... args) noexcept
-	{
-		return texture2d::create(ML_forward(args)...);
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -681,24 +647,13 @@ namespace ml::gl
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, shared<texture2d> const & value) = 0;
 
-		ML_NODISCARD virtual handle_t get_handle() const = 0;
+		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
 		ML_NODISCARD static shared<shader_object> create(
 			cstring v_src,
-			cstring g_src,
-			cstring f_src);
-
-		ML_NODISCARD static shared<shader_object> create(cstring v_src, cstring f_src)
-		{
-			return create(v_src, nullptr, f_src);
-		}
+			cstring f_src,
+			cstring g_src = nullptr);
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_shader(Args && ... args) noexcept
-	{
-		return shader_object::create(ML_forward(args)...);
-	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -706,7 +661,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // states
-namespace ml::gl
+namespace ml
 {
 	struct ML_NODISCARD alpha_function final
 	{
@@ -741,12 +696,12 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // api
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// render api capabilities
-	struct ML_NODISCARD api_info final
+	struct ML_NODISCARD render_api_info final
 	{
 		int32_t major_version, minor_version;
 		pmr::string renderer, vendor, version, shading_language_version;
@@ -789,7 +744,7 @@ namespace ml::gl
 
 		virtual uint32_t get_error() const = 0;
 
-		virtual api_info const & get_info() const = 0;
+		virtual render_api_info const & get_info() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -809,7 +764,7 @@ namespace ml::gl
 
 		virtual bool get_cull_enabled() const = 0;
 
-		virtual uint32_t get_cull_face() const = 0;
+		virtual uint32_t get_cull_facet() const = 0;
 
 		virtual uint32_t get_cull_order() const = 0;
 		
@@ -820,6 +775,8 @@ namespace ml::gl
 		virtual bool get_depth_mask() const = 0;
 
 		virtual depth_range get_depth_range() const = 0;
+
+		virtual bool get_stencil_enabled() const = 0;
 
 		virtual int_rect get_viewport() const = 0;
 
@@ -841,7 +798,7 @@ namespace ml::gl
 		
 		virtual void set_cull_enabled(bool enabled) = 0;
 
-		virtual void set_cull_face(uint32_t facet) = 0;
+		virtual void set_cull_facet(uint32_t facet) = 0;
 
 		virtual void set_cull_order(uint32_t order) = 0;
 		
@@ -853,13 +810,15 @@ namespace ml::gl
 
 		virtual void set_depth_range(depth_range const & value) = 0;
 
+		virtual void set_stencil_enabled(bool enabled) = 0;
+
 		virtual void set_viewport(int_rect const & bounds) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void clear(uint32_t flags) = 0;
 
-		virtual void draw(shared<vertex_array> const & value) = 0;
+		virtual void draw(shared<vertexarray> const & value) = 0;
 		
 		virtual void draw_arrays(uint32_t first, uint32_t count) = 0;
 		

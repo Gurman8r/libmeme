@@ -16,54 +16,47 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader(allocator_type alloc = {})
-			: m_object{}
-			, m_source{ std::allocator_arg, alloc }
+		shader(allocator_type alloc = {}) : m_object{}, m_source{ std::allocator_arg, alloc }
 		{
 		}
 
-		shader(shader_source const & source, allocator_type alloc = {})
-			: shader{ alloc }
+		shader(shader_source const & source, allocator_type alloc = {}) : shader{ alloc }
 		{
-			(void)load_from_source(source);
+			load_from_source(source);
 		}
 
-		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {})
-			: shader{ alloc }
+		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {}) : shader{ alloc }
 		{
-			(void)load_from_file(v, f);
+			load_from_file(v, f);
 		}
 
-		shader(fs::path const & v, fs::path const & g, fs::path const & f, allocator_type alloc = {})
-			: shader{ alloc }
+		shader(fs::path const & v, fs::path const & f, fs::path const & g, allocator_type alloc = {}) : shader{ alloc }
 		{
-			(void)load_from_file(v, g, f);
+			load_from_file(v, f, g);
 		}
 
-		shader(shader const & value, allocator_type alloc = {})
-			: shader{ alloc }
+		shader(shader const & other, allocator_type alloc = {}) : shader{ alloc }
 		{
-			(void)load_from_source(value.m_source);
+			load_from_source(other.m_source);
 		}
 
-		shader(shader && value, allocator_type alloc = {}) noexcept
-			: shader{ alloc }
+		shader(shader && other, allocator_type alloc = {}) noexcept : shader{ alloc }
 		{
-			swap(std::move(value));
+			swap(std::move(other));
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader & operator=(shader const & value)
+		shader & operator=(shader const & other)
 		{
-			shader temp{ value };
+			shader temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		shader & operator=(shader && value) noexcept
+		shader & operator=(shader && other) noexcept
 		{
-			swap(std::move(value));
+			swap(std::move(other));
 			return (*this);
 		}
 
@@ -85,23 +78,23 @@ namespace ml
 				util::get_file_string(f_file));
 		}
 
-		bool load_from_file(fs::path const & v_file, fs::path const g_file, fs::path const & f_file)
+		bool load_from_file(fs::path const & v_file, fs::path const & f_file, fs::path const g_file)
 		{
 			return load_from_memory(
 				util::get_file_string(v_file),
-				util::get_file_string(g_file),
-				util::get_file_string(f_file));
+				util::get_file_string(f_file),
+				util::get_file_string(g_file));
 		}
 
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
 				& v{ std::get<gl::shader_type_vertex>(value) },
-				& g{ std::get<gl::shader_type_geometry>(value) },
-				& f{ std::get<gl::shader_type_fragment>(value) };
+				& f{ std::get<gl::shader_type_fragment>(value) },
+				& g{ std::get<gl::shader_type_geometry>(value) };
 
-			return ((!v.empty() && !g.empty() && !f.empty())
-				? load_from_memory(v, g, f)
+			return ((!v.empty() && !f.empty() && !g.empty())
+				? load_from_memory(v, f, g)
 				: ((!v.empty() && !f.empty())
 					? load_from_memory(v, f)
 					: false));
@@ -111,20 +104,20 @@ namespace ml
 		{
 			if (v_src.empty() || f_src.empty()) { return false; }
 		
-			m_source = { v_src, {}, f_src };
+			m_source = { v_src, f_src, {} };
 
-			m_object = gl::make_shader(v_src.c_str(), nullptr, f_src.c_str());
+			m_object = shader_object::create(v_src.c_str(), f_src.c_str(), nullptr);
 
 			return (bool)m_object;
 		}
 
-		bool load_from_memory(pmr::string const & v_src, pmr::string const & g_src, pmr::string const & f_src)
+		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
-			if (v_src.empty() || g_src.empty() || f_src.empty()) { return false; }
+			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 		
-			m_source = { v_src, g_src, f_src };
+			m_source = { v_src, f_src, g_src };
 
-			m_object = gl::make_shader(v_src.c_str(), g_src.c_str(), f_src.c_str());
+			m_object = shader_object::create(v_src.c_str(), f_src.c_str(), g_src.c_str());
 
 			return (bool)m_object;
 		}
@@ -165,8 +158,7 @@ namespace ml
 			case hashof_v<mat2>		: return set_uniform(u.name(), *u.get<mat2>());
 			case hashof_v<mat3>		: return set_uniform(u.name(), *u.get<mat3>());
 			case hashof_v<mat4>		: return set_uniform(u.name(), *u.get<mat4>());
-			case hashof_v<gl::texture2d>:
-				return set_uniform(u.name(), *u.get<shared<gl::texture2d>>());
+			case hashof_v<texture2d>: return set_uniform(u.name(), *u.get<texture2d>());
 			}
 		}
 
@@ -174,14 +166,13 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return (bool)m_object; }
 		
-		ML_NODISCARD gl::handle_t get_handle() const noexcept { return m_object->get_handle(); }
+		ML_NODISCARD gl::handle get_handle() const noexcept { return m_object->get_handle(); }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		shader_source m_source;
-
-		shared<gl::shader_object> m_object;
+		shared<shader_object> m_object;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -17,6 +17,7 @@ namespace ml::impl
 		> scope_binder(T * value, Args && ... args) noexcept
 			: m_ptr{ value }
 		{
+			ML_assert(m_ptr);
 			m_ptr->bind(ML_forward(args)...);
 		}
 

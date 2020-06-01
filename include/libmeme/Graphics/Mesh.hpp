@@ -10,15 +10,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		mesh(shared<gl::vertex_array> const & vao = gl::make_vao()) noexcept
+		mesh(shared<vertexarray> const & vao = vertexarray::create()) noexcept
 			: m_vao{ vao }, m_verts{}, m_inds{}
 		{
 		}
 
 		mesh(pmr::vector<float_t> const & vertices, pmr::vector<uint32_t> const & indices = {})
-			: m_vao{ gl::make_vao() }, m_verts{ vertices }, m_inds{ indices }
+			: m_vao{ vertexarray::create() }, m_verts{ vertices }, m_inds{ indices }
 		{
-			auto vb = gl::make_vbo(m_verts);
+			auto vb = vertexbuffer::create(m_verts);
 
 			vb->set_layout({
 				{ meta::tag_v<vec3f>, "a_position"	},
@@ -28,7 +28,7 @@ namespace ml
 
 			m_vao->add_vbo(vb);
 
-			m_vao->set_ibo(!m_inds.empty() ? gl::make_ibo(m_inds) : nullptr);
+			m_vao->set_ibo(!m_inds.empty() ? indexbuffer::create(m_inds) : nullptr);
 		}
 
 		mesh(pmr::vector<vertex> const & vertices, pmr::vector<uint32_t> const & indices = {})
@@ -79,14 +79,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto vao() & noexcept -> shared<gl::vertex_array> & { return m_vao; }
+		auto vao() & noexcept -> shared<vertexarray> & { return m_vao; }
 
-		auto vao() const & noexcept -> shared<gl::vertex_array> const & { return m_vao; }
+		auto vao() const & noexcept -> shared<vertexarray> const & { return m_vao; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gl::vertex_array> m_vao;
+		shared<vertexarray> m_vao;
 		pmr::vector<uint32_t> m_inds{};
 		pmr::vector<float_t> m_verts{};
 

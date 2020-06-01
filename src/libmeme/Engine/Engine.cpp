@@ -47,11 +47,11 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
-				for (auto const & cmd : std::initializer_list<gl::command_t>
+				for (auto const & cmd :
 				{
-					gl::render_command::set_clear_color(colors::black),
-					gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
-					gl::render_command::set_viewport(m_window.get_framebuffer_size()),
+					render_command::set_clear_color(colors::black),
+					render_command::clear(gl::color_buffer | gl::depth_buffer),
+					render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
 					std::invoke(cmd);
@@ -101,7 +101,7 @@ namespace ml
 
 		// initialize windows
 		debug::info("initializing windows...");
-		if (!g_engine->m_window.initialize())
+		if (!window::initialize())
 		{
 			return debug::error("failed initializing windows");
 		}
@@ -147,7 +147,7 @@ namespace ml
 		g_engine->m_window.destroy();
 
 		// finalize windows
-		g_engine->m_window.finalize();
+		window::finalize();
 		
 		// destroy context
 		delete g_engine; g_engine = nullptr;

@@ -9,3 +9,5 @@ template basic_vertex to do variations of vertex at CT
 opengl loader disambiguation header
 	select different loader functions at CT
 	macro for each opengl function
+
+add stencil functions to api

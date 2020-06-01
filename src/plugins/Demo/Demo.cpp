@@ -2,7 +2,6 @@
 
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/PerformanceTracker.hpp>
-#include <libmeme/Core/RAII_Pointer.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -39,42 +38,42 @@ namespace ml
 	// (S) SIGNATURES
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using s_apply_transforms = meta::list<c_material, c_transform
+	using s_update_materials = meta::list<c_material, c_transform
 	>;
-	using s_apply_materials = meta::list<c_shader, c_material
+	using s_upload_uniforms = meta::list<c_shader, c_material
 	>;
-	using s_draw_models = meta::list<c_shader, c_mesh
+	using s_draw_meshes = meta::list<c_shader, c_mesh
 	>;
 
 
 	// (X) SYSTEMS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class> struct x_apply_transforms final : ecs::detail::x_base<s_apply_transforms>
+	template <class> struct x_update_materials final : ecs::detail::x_base<s_update_materials>
 	{
 		void operator()(c_material & mat, c_transform const & tf)
 		{
-			mat->set<vec3>("u_position", tf.pos)
-				.set<vec4>("u_rotation", tf.rot)
-				.set<vec3>("u_scale", tf.scl);
+			mat->set<vec3>("u_position"	, tf.pos)
+				.set<vec4>("u_rotation"	, tf.rot)
+				.set<vec3>("u_scale"	, tf.scl);
 		}
 	};
 
-	template <class> struct x_apply_materials final : ecs::detail::x_base<s_apply_materials>
+	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
 	{
-		void operator()(c_shader & s, c_material const & m)
+		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_scope(*s, false);
-			for (uniform const & u : *m) { s->set_uniform(u); }
+			ML_bind_scope(*shd, false);
+			for (uniform const & u : *mat) { shd->set_uniform(u); }
 		}
 	};
 
-	template <class> struct x_draw_models final : ecs::detail::x_base<s_draw_models>
+	template <class> struct x_draw_meshes final : ecs::detail::x_base<s_draw_meshes>
 	{
-		void operator()(c_shader const & s, c_mesh const & m)
+		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
-			ML_bind_scope(*s, true);
-			gl::render_command::draw(m->vao())();
+			ML_bind_scope(*shd, true);
+			render_command::draw(msh->vao())();
 		}
 	};
 
@@ -96,12 +95,12 @@ namespace ml
 
 		// signatures
 		ecs::cfg::signatures<
-		s_apply_transforms, s_apply_materials, s_draw_models
+		s_update_materials, s_upload_uniforms, s_draw_meshes
 		>,
 
 		// systems
 		ecs::cfg::systems<
-		x_apply_transforms, x_apply_materials, x_draw_models
+		x_update_materials, x_upload_uniforms, x_draw_meshes
 		>
 	>;
 
@@ -122,12 +121,12 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::map< pmr::string, font		> m_fonts		{};
-		ds::map< pmr::string, image		> m_images		{};
-		ds::map< pmr::string, material	> m_materials	{};
-		ds::map< pmr::string, mesh		> m_meshes		{};
-		ds::map< pmr::string, shader	> m_shaders		{};
-		ds::map< pmr::string, shared<gl::texture2d>	> m_textures	{};
+		ds::map< pmr::string, font				> m_fonts		{};
+		ds::map< pmr::string, image				> m_images		{};
+		ds::map< pmr::string, material			> m_materials	{};
+		ds::map< pmr::string, mesh				> m_meshes		{};
+		ds::map< pmr::string, shader			> m_shaders		{};
+		ds::map< pmr::string, shared<texture2d>	> m_textures	{};
 
 
 		// ECS
@@ -136,11 +135,12 @@ namespace ml
 		entity_manager m_ecs{};
 
 
-		// Rendering
+		// RENDERING
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		vec2 m_resolution{ 1280, 720 };
-		shared<gl::frame_buffer> m_fbo{ nullptr };
+
+		pmr::vector<shared<framebuffer>> m_pipeline{};
 
 
 		// GUI
@@ -165,10 +165,8 @@ namespace ml
 
 		gui::console m_console{};
 
-		raii_ptr<ax::NodeEditor::EditorContext> m_node_editor
-		{
-			[]() { return ax::NodeEditor::CreateEditor(); },
-			&ax::NodeEditor::DestroyEditor
+		ax::NodeEditor::EditorContext * m_node_editor{
+			ax::NodeEditor::CreateEditor()
 		};
 
 		gui::plot_controller m_plots
@@ -238,14 +236,17 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			auto const & caps{ gl::render_api::get()->get_info() };
-			debug::info(caps.renderer);
-			debug::info(caps.vendor);
-			debug::info(caps.version);
+			// MESSAGES
+			{
+				auto const & api_info{ render_api::get()->get_info() };
+				debug::puts(api_info.renderer);
+				debug::puts(api_info.vendor);
+				debug::puts(api_info.version);
+			}
 
 			// RENDERING
 			{
-				m_fbo = gl::make_fbo(gl::format_rgba, m_resolution);
+				m_pipeline.push_back(framebuffer::create(gl::format_rgba, m_resolution));
 			}
 
 			// ICON
@@ -261,12 +262,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gl::make_texture2d(m_images["default"]);
-				m_textures["doot"]			= gl::make_texture2d(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gl::make_texture2d(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= texture2d::create(m_images["default"]);
+				m_textures["doot"]			= texture2d::create(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= texture2d::create(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -322,18 +323,18 @@ namespace ml
 				auto const _3d = material
 				{
 					make_uniform<color>("u_color", colors::white),
-					make_uniform<gl::texture2d>("u_texture0", m_textures["default"])
+					make_uniform<texture2d>("u_texture0", m_textures["default"])
 				}
 				+ _timers + _camera + _tf;
 
 				// earth
 				m_materials["earth"] = material{ _3d }
-					.set<gl::texture2d>("u_texture0", m_textures["earth_dm_2k"])
+					.set<texture2d>("u_texture0", m_textures["earth_dm_2k"])
 					;
 
 				// moon
 				m_materials["moon"] = material{ _3d }
-					.set<gl::texture2d>("u_texture0", m_textures["moon_dm_2k"])
+					.set<texture2d>("u_texture0", m_textures["moon_dm_2k"])
 					;
 			}
 
@@ -380,7 +381,7 @@ namespace ml
 					h.add_tag<t_renderer>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
-					h.add_component<c_mesh>	(m_meshes	[msh]);
+					h.add_component<c_mesh>		(m_meshes	[msh]);
 					h.add_component<c_transform>(tf);
 					return h;
 				};
@@ -410,29 +411,37 @@ namespace ml
 			m_plots.update(engine::time().total_time().count());
 			
 			// systems
-			m_ecs.update_system<x_apply_transforms>();
-			m_ecs.update_system<x_apply_materials>();
+			m_ecs.update_system<x_update_materials>();
+			m_ecs.update_system<x_upload_uniforms>();
 
 			// pipeline
-			m_fbo->resize(m_resolution);
+			for (auto & fbo : m_pipeline)
+			{
+				fbo->resize(m_resolution);
+			}
 		}
 
 		void on_draw(draw_event const &)
 		{
 			// draw stuff, etc...
 
-			ML_bind_scope(m_fbo.get());
+			if (m_pipeline.empty()) { return; }
 
-			for (gl::command_t const & cmd :
+			if (m_pipeline[0])
 			{
-				gl::render_command::set_cull_enabled(false),
-				gl::render_command::set_clear_color(colors::magenta),
-				gl::render_command::clear(gl::clear_flags_color | gl::clear_flags_depth),
-			})
-			{
-				std::invoke(cmd);
+				ML_bind_scope(m_pipeline[0].get());
+
+				for (auto const & cmd :
+				{
+					render_command::set_cull_enabled(false),
+					render_command::set_clear_color(colors::magenta),
+					render_command::clear(gl::color_buffer | gl::depth_buffer),
+					render_command::custom(&entity_manager::update_system<x_draw_meshes>, &m_ecs),
+				})
+				{
+					std::invoke(cmd);
+				}
 			}
-			m_ecs.update_system<x_draw_models>();
 		}
 
 		void on_gui_dock(dock_gui_event const &)
@@ -563,7 +572,7 @@ namespace ml
 			m_textures.clear();
 			m_fonts.clear();
 
-			m_node_editor.destroy();
+			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -609,7 +618,6 @@ namespace ml
 			ImGui::Separator();
 			ImGui::Columns(4);
 
-			//m_pipeline	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_materials	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
@@ -683,7 +691,8 @@ namespace ml
 		{
 			static gui::texture_preview preview
 			{
-				m_fbo->get_color_attachment(), m_fbo->get_size()
+				m_pipeline.back()->get_color_attachment()->get_handle(),
+				m_pipeline.back()->get_size()
 			};
 			
 			preview.render([&]() noexcept
@@ -696,6 +705,14 @@ namespace ml
 
 		void show_documents_gui()
 		{
+			static ImGui::TextEditor text{};
+
+			static ML_scope // once
+			{
+				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
+				text.SetText("// work in progress\n\nint main()\n{\n\treturn 0;\n}");
+			};
+
 			// menu bar
 			if (ImGui::BeginMenuBar())
 			{
@@ -705,22 +722,15 @@ namespace ml
 				if (ImGui::MenuItem("open")) {}
 				if (ImGui::MenuItem("save")) {}
 				ImGui::Separator();
-				if (ImGui::MenuItem("undo")) {}
-				if (ImGui::MenuItem("redo")) {}
+				if (ImGui::MenuItem("undo")) { text.Undo(); }
+				if (ImGui::MenuItem("redo")) { text.Redo(); }
 				ImGui::Separator();
-				if (ImGui::MenuItem("cut")) {}
-				if (ImGui::MenuItem("copy")) {}
-				if (ImGui::MenuItem("paste")) {}
+				if (ImGui::MenuItem("cut")) { text.Cut(); }
+				if (ImGui::MenuItem("copy")) { text.Copy(); }
+				if (ImGui::MenuItem("paste")) { text.Paste(); }
 				ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
-
-			static ImGui::TextEditor text{};
-			static ML_scope
-			{
-				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
-				text.SetText("int main()\n{\n\treturn 0;\n}");
-			};
 
 			if (ImGui::BeginTabBar("documents##tabs"))
 			{
@@ -1138,7 +1148,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto api{ gl::render_api::get() };
+			static auto api{ render_api::get() };
 
 			if (ImGui::BeginMenuBar())
 			{
@@ -1157,8 +1167,8 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void *)
 {
-	static ml::plugin * temp{};
-	return temp ? nullptr : temp = new ml::demo{};
+	static ml::plugin * temp{ new ml::demo{} };
+	return temp;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

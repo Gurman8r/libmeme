@@ -1,5 +1,4 @@
 #include <libmeme/Graphics/Font.hpp>
-#include <libmeme/Graphics/GL.hpp>
 #include <libmeme/Graphics/RenderAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -121,17 +120,10 @@ namespace ml
 			return g;
 		}
 
-		//texture{ GL::Texture2D, GL::RGBA, GL::Red, gl::texture_flags_default };
-		// set texture
-		g.graphic = gl::make_texture2d(
-			vec2i{},
-			nullptr,
-			gl::format_rgba,
-			gl::format_red,
-			gl::type_unsigned_byte,
-			gl::texture_flags_default);
+		// graphic
+		//g.graphic = texture2d::create(vec2i{}, gl::format_rgba, gl::format_red);
 
-		// set bounds
+		// bounds
 		g.bounds = float_rect
 		{
 			face->glyph->bitmap_left,
@@ -140,9 +132,9 @@ namespace ml
 			face->glyph->bitmap.rows
 		};
 
-		// set advance
+		// advance
 		g.advance = (uint32_t)face->glyph->advance.x;
-		
+
 		// only load a texture for characters requiring a graphic
 		if (!std::isspace(c, {}) && std::isgraph(c, {}))
 		{

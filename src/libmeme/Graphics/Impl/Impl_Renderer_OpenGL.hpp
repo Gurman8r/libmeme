@@ -9,61 +9,59 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl objects
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex array
-	class opengl_vertex_array final : public vertex_array
+	class opengl_vertexarray final : public vertexarray
 	{
 	public:
-		opengl_vertex_array();
+		opengl_vertexarray();
 
-		~opengl_vertex_array();
+		~opengl_vertexarray();
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void add_vbo(shared<vertex_buffer> const & value) override;
+		void add_vbo(shared<vertexbuffer> const & value) override;
 
-		void set_ibo(shared<index_buffer> const & value) override;
+		void set_ibo(shared<indexbuffer> const & value) override;
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
-		inline shared<index_buffer> const & get_ibo() const override { return m_indices; }
+		inline shared<indexbuffer> const & get_ibo() const override { return m_indices; }
 
-		inline pmr::vector<shared<vertex_buffer>> const & get_vbos() const override { return m_vertices; }
+		inline pmr::vector<shared<vertexbuffer>> const & get_vbos() const override { return m_vertices; }
 
 	private:
-		uint32_t m_handle{}; // handle
-		
-		shared<index_buffer> m_indices{ nullptr }; // index buffer
-		
-		pmr::vector<shared<vertex_buffer>> m_vertices{}; // vertex buffers
+		uint32_t							m_handle	{}; // handle
+		shared<indexbuffer>				m_indices	{}; // index buffer
+		pmr::vector<shared<vertexbuffer>>	m_vertices	{}; // vertex buffers
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl vertex buffer
-	class opengl_vertex_buffer final : public vertex_buffer
+	class opengl_vertexbuffer final : public vertexbuffer
 	{
 	public:
-		opengl_vertex_buffer(buffer_t vertices, uint32_t size, uint32_t usage = usage_static);
+		opengl_vertexbuffer(gl::buffer vertices, uint32_t size, uint32_t usage = gl::usage_static_draw);
 
-		opengl_vertex_buffer(uint32_t size, uint32_t usage = usage_dynamic);
+		opengl_vertexbuffer(uint32_t size, uint32_t usage = gl::usage_dynamic_draw);
 
-		~opengl_vertex_buffer();
+		~opengl_vertexbuffer();
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void set_data(buffer_t vertices, uint32_t size, uint32_t offset = 0) override;
+		void set_data(gl::buffer vertices, uint32_t size, uint32_t offset = 0) override;
 
 		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline buffer_layout const & get_layout() const override { return m_layout; }
 
@@ -79,22 +77,22 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl index buffer
-	class opengl_index_buffer final : public index_buffer
+	class opengl_indexbuffer final : public indexbuffer
 	{
 	public:
-		opengl_index_buffer(buffer_t indices, uint32_t count);
+		opengl_indexbuffer(gl::buffer indices, uint32_t count);
 
-		~opengl_index_buffer();
+		~opengl_indexbuffer();
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void set_data(buffer_t indices, uint32_t count) override;
+		void set_data(gl::buffer indices, uint32_t count) override;
 
 		inline uint32_t get_count() const override { return m_count; }
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
 		uint32_t	m_handle	{}; // handle
@@ -104,12 +102,12 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// opengl frame buffer
-	class opengl_frame_buffer final : public frame_buffer
+	class opengl_framebuffer final : public framebuffer
 	{
 	public:
-		opengl_frame_buffer(uint32_t format, vec2i const & size);
+		opengl_framebuffer(uint32_t format, vec2i const & size);
 
-		~opengl_frame_buffer();
+		~opengl_framebuffer();
 
 		void bind() const override;
 
@@ -119,22 +117,22 @@ namespace ml::gl
 
 		void resize(vec2i const & value) override;
 
-		inline handle_t get_color_attachment() const override { return m_color->get_handle(); }
+		inline shared<texture2d> const & get_color_attachment() const override { return m_color; }
 
-		inline handle_t get_depth_attachment() const override { return m_depth->get_handle(); }
+		inline shared<texture2d> const & get_depth_attachment() const override { return m_depth; }
 
 		inline uint32_t get_format() const override { return m_format; }
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline vec2i get_size() const override { return m_size; }
 
 	private:
-		uint32_t			m_handle	{}				; // handle
-		uint32_t			m_format	{ format_rgba }	; // format
-		vec2i				m_size		{ 1280, 720 }	; // size
-		shared<texture2d>	m_color		{}				; // color attachment
-		shared<texture2d>	m_depth		{}				; // depth attachment
+		uint32_t			m_handle	{}	; // handle
+		uint32_t			m_format	{}	; // format
+		vec2i				m_size		{}	; // size
+		shared<texture2d>	m_color		{}	; // color attachment
+		shared<texture2d>	m_depth		{}	; // depth attachment
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -143,7 +141,7 @@ namespace ml::gl
 	class opengl_texture2d final : public texture2d
 	{
 	public:
-		opengl_texture2d(vec2i const & size, buffer_t pixels, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags);
+		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, gl::buffer pixels);
 
 		~opengl_texture2d();
 
@@ -151,7 +149,7 @@ namespace ml::gl
 
 		void unbind() const override;
 
-		void update(vec2i const & size, buffer_t pixels = {}) override;
+		void update(vec2i const & size, gl::buffer pixels = nullptr) override;
 
 		void set_mipmapped(bool value) override;
 
@@ -163,17 +161,17 @@ namespace ml::gl
 
 		inline int32_t get_flags() const override { return m_flags; }
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline vec2i const & get_size() const override { return m_size; }
 
 	private:
-		uint32_t	m_handle	{}							; // handle
-		vec2i		m_size		{ 0, 0 }					; // size
-		uint32_t	m_i_format	{ format_rgba }				; // internal format
-		uint32_t	m_c_format	{ format_rgba }				; // color format
-		uint32_t	m_p_type	{ type_unsigned_byte }		; // pixel type
-		int32_t		m_flags		{ texture_flags_default }	; // flags ( repeated / smooth / mipmapped )
+		uint32_t	m_handle	{}; // handle
+		vec2i		m_size		{}; // size
+		uint32_t	m_i_format	{}; // internal format
+		uint32_t	m_c_format	{}; // color format
+		uint32_t	m_p_type	{}; // pixel type
+		int32_t		m_flags		{}; // flags ( repeated / smooth / mipmapped )
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -182,13 +180,7 @@ namespace ml::gl
 	class opengl_shader_object final : public shader_object
 	{
 	public:
-		opengl_shader_object(cstring v_src, cstring g_src, cstring f_src);
-
-		opengl_shader_object(cstring v_src, cstring f_src) noexcept
-			: opengl_shader_object{ v_src, nullptr, f_src }
-		{
-			this->compile(v_src, nullptr, f_src);
-		}
+		opengl_shader_object(cstring v_src, cstring f_src, cstring g_src = nullptr);
 
 		~opengl_shader_object();
 
@@ -216,16 +208,14 @@ namespace ml::gl
 
 		bool set_uniform(cstring name, shared<texture2d> const & value) override;
 
-		inline handle_t get_handle() const override { return ML_addressof(m_handle); }
+		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 	private:
-		uint32_t					m_handle	{}; // handle
-		ds::map<hash_t, int32_t>	m_uniforms	{}; // uniform cache
-		ds::map<int32_t, handle_t>	m_textures	{}; // texture cache
+		uint32_t						m_handle	{}; // handle
+		ds::map<hash_t, int32_t>		m_uniforms	{}; // uniform cache
+		ds::map<int32_t, gl::handle>	m_textures	{}; // texture cache
 		
-		struct uniform_binder;
-
-		void compile(cstring v_src, cstring g_src, cstring f_src);
+		struct uniform_binder; // uniform binder
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -234,7 +224,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl api
-namespace ml::gl
+namespace ml
 {
 	class opengl_render_api final : public render_api
 	{
@@ -254,7 +244,7 @@ namespace ml::gl
 
 		uint32_t get_error() const override;
 
-		api_info const & get_info() const override;
+		render_api_info const & get_info() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -274,7 +264,7 @@ namespace ml::gl
 
 		bool get_cull_enabled() const override;
 
-		uint32_t get_cull_face() const override;
+		uint32_t get_cull_facet() const override;
 
 		uint32_t get_cull_order() const override;
 
@@ -285,6 +275,8 @@ namespace ml::gl
 		bool get_depth_mask() const override;
 
 		depth_range get_depth_range() const override;
+
+		bool get_stencil_enabled() const override;
 
 		int_rect get_viewport() const override;
 
@@ -306,7 +298,7 @@ namespace ml::gl
 		
 		void set_cull_enabled(bool enabled) override;
 
-		void set_cull_face(uint32_t facet) override;
+		void set_cull_facet(uint32_t facet) override;
 
 		void set_cull_order(uint32_t order) override;
 
@@ -318,13 +310,15 @@ namespace ml::gl
 
 		void set_depth_range(depth_range const & value) override;
 
+		void set_stencil_enabled(bool enabled) override;
+
 		void set_viewport(int_rect const & bounds) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void clear(uint32_t flags) override;
 
-		void draw(shared<vertex_array> const & value) override;
+		void draw(shared<vertexarray> const & value) override;
 		
 		void draw_arrays(uint32_t first, uint32_t count) override;
 		

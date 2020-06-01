@@ -47,7 +47,7 @@ namespace ml
 		{
 			static auto & inst{ get_instance() };
 			inst.m_previous.swap(inst.m_current);
-			inst.m_current.clear();
+			inst.m_current.clear(); // <- doesn't resize
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

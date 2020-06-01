@@ -4,13 +4,13 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
-using impl_render_api		= _ML gl::opengl_render_api		;
-using impl_vertex_array		= _ML gl::opengl_vertex_array	;
-using impl_vertex_buffer	= _ML gl::opengl_vertex_buffer	;
-using impl_index_buffer		= _ML gl::opengl_index_buffer	;
-using impl_frame_buffer		= _ML gl::opengl_frame_buffer	;
-using impl_shader_object	= _ML gl::opengl_shader_object	;
-using impl_texture2d		= _ML gl::opengl_texture2d		;
+using impl_render_api		= _ML opengl_render_api		;
+using impl_vertex_array		= _ML opengl_vertexarray	;
+using impl_vertex_buffer	= _ML opengl_vertexbuffer	;
+using impl_index_buffer		= _ML opengl_indexbuffer	;
+using impl_frame_buffer		= _ML opengl_framebuffer	;
+using impl_shader_object	= _ML opengl_shader_object	;
+using impl_texture2d		= _ML opengl_texture2d		;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -21,7 +21,7 @@ using impl_texture2d		= _ML gl::opengl_texture2d		;
 #endif
 
 // api
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,15 +35,15 @@ namespace ml::gl
 }
 
 // objects
-namespace ml::gl
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	// VERTEX ARRAY
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<vertex_array> vertex_array::create()
+	shared<vertexarray> vertexarray::create()
 	{
-		return memory_manager::allocate_shared<impl_vertex_array>();
+		return std::allocate_shared<impl_vertex_array>(memory_manager::get_allocator());
 	}
 
 
@@ -51,14 +51,16 @@ namespace ml::gl
 	// VERTEX BUFFER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<vertex_buffer> vertex_buffer::create(buffer_t vertices, uint32_t size, uint32_t usage)
+	shared<vertexbuffer> vertexbuffer::create(gl::buffer vertices, uint32_t size, uint32_t usage)
 	{
-		return memory_manager::allocate_shared<impl_vertex_buffer>(vertices, size, usage);
+		return std::allocate_shared<impl_vertex_buffer>(memory_manager::get_allocator()
+			, vertices, size, usage);
 	}
 
-	shared<vertex_buffer> vertex_buffer::create(uint32_t size, uint32_t usage)
+	shared<vertexbuffer> vertexbuffer::create(uint32_t size, uint32_t usage)
 	{
-		return memory_manager::allocate_shared<impl_vertex_buffer>(size, usage);
+		return std::allocate_shared<impl_vertex_buffer>(memory_manager::get_allocator()
+			, size, usage);
 	}
 
 	
@@ -66,9 +68,10 @@ namespace ml::gl
 	// INDEX BUFFER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<index_buffer> index_buffer::create(buffer_t indices, uint32_t count)
+	shared<indexbuffer> indexbuffer::create(gl::buffer indices, uint32_t count)
 	{
-		return memory_manager::allocate_shared<impl_index_buffer>(indices, count);
+		return std::allocate_shared<impl_index_buffer>(memory_manager::get_allocator()
+			, indices, count);
 	}
 
 
@@ -76,9 +79,10 @@ namespace ml::gl
 	// FRAME BUFFER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<frame_buffer> frame_buffer::create(uint32_t format, vec2i const & size)
+	shared<framebuffer> framebuffer::create(uint32_t format, vec2i const & size)
 	{
-		return memory_manager::allocate_shared<impl_frame_buffer>(format, size);
+		return std::allocate_shared<impl_frame_buffer>(memory_manager::get_allocator()
+			, format, size);
 	}
 
 
@@ -86,9 +90,10 @@ namespace ml::gl
 	// SHADER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<shader_object> shader_object::create(cstring v_src, cstring g_src, cstring f_src)
+	shared<shader_object> shader_object::create(cstring v_src, cstring f_src, cstring g_src)
 	{
-		return memory_manager::allocate_shared<impl_shader_object>(v_src, g_src, f_src);
+		return std::allocate_shared<impl_shader_object>(memory_manager::get_allocator()
+			, v_src, f_src, g_src);
 	}
 
 
@@ -96,9 +101,10 @@ namespace ml::gl
 	// TEXTURE2D
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<texture2d> texture2d::create(vec2i const & size, buffer_t pixels, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags)
+	shared<texture2d> texture2d::create(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, gl::buffer pixels)
 	{
-		return memory_manager::allocate_shared<impl_texture2d>(size, pixels, iformat, cformat, ptype, flags);
+		return std::allocate_shared<impl_texture2d>(memory_manager::get_allocator()
+			, size, iformat, cformat, ptype, flags, pixels);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

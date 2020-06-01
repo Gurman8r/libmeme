@@ -10,12 +10,13 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// std::shared_ptr
-	template <class T
-	> ML_alias shared = typename std::shared_ptr<T>;
+	template <class T> ML_alias shared = typename std::shared_ptr<T>;
 
 	// std::unique_ptr
-	template <class T
-	> ML_alias unique = typename std::unique_ptr<T>;
+	template <class T> ML_alias unique = typename std::unique_ptr<T>;
+
+	// std::weak_ptr
+	template <class T> ML_alias weak = typename std::weak_ptr<T>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -194,15 +195,6 @@ namespace ml
 		{
 			// allocate (count * size) zeroed bytes
 			return std::memset(allocate(count * size), 0, count * size);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// allocate shared
-		template <class T, class ... Args
-		> ML_NODISCARD static shared<T> allocate_shared(Args && ... args)
-		{
-			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

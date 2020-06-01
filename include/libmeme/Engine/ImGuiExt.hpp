@@ -352,12 +352,12 @@ namespace ml::gui
 		{
 			switch (value)
 			{
-			default:
-				if (lines.empty()) { lines.push_back({}); }
-				lines.back().push_back(value);
-				break;
 			case '\n':
-				lines.push_back({});
+				lines.emplace_back();
+				break;
+			default:
+				if (lines.empty()) { lines.emplace_back(); }
+				lines.back().push_back(value);
 				break;
 			}
 			return (*this);

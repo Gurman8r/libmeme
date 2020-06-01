@@ -9,13 +9,13 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared<gl::texture2d> graphic{};
-		
-		float_rect bounds{};
-	
-		uint32_t advance{};
+		shared<texture2d>	graphic	{};
+		float_rect			bounds	{};
+		uint32_t			advance	{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		operator bool() const noexcept { return (bool)graphic; }
 
 		auto bearing() const noexcept -> vec2 { return bounds.position(); }
 		
@@ -35,20 +35,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class T, class B, class A
-	> ML_NODISCARD auto make_glyph(T && t, B && b, A && a) noexcept
-	{
-		glyph g{};
-		g.graphic	= ML_forward(t);
-		g.bounds	= ML_forward(b);
-		g.advance	= ML_forward(a);
-		return g;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_GLYPH_HPP_
