@@ -1155,12 +1155,11 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				ML_scoped_imgui_id("alpha state");
 				bool a_enabled{ api->get_alpha_enabled() };
-				auto a_function{ api->get_alpha_function() };
+				auto a_fn{ api->get_alpha_function() };
 				ImGui::Checkbox("enabled", &a_enabled);
-				ImGui::Text("pred: %s (%u)", gl::function_names[a_function.func], a_function.func);
-				ImGui::Text("ref: %f", a_function.ref);
+				ImGui::Text("pred: %s (%u)", gl::function_names[a_fn.func], a_fn.func);
+				ImGui::Text("ref: %f", a_fn.ref);
 			}
 			ImGui::Separator();
 
@@ -1208,11 +1207,11 @@ namespace ml
 			if (ImGui::CollapsingHeader("stencil"))
 			{
 				bool s_enabled{ api->get_stencil_enabled() };
-				auto s_function{ api->get_stencil_function() };
+				auto s_fn{ api->get_stencil_function() };
 				ImGui::Checkbox("enabled", &s_enabled);
-				ImGui::Text("pred: %s (%u)", gl::predicate_names[s_function.pred], s_function.pred);
-				ImGui::Text("ref: %i", s_function.ref);
-				ImGui::Text("mask: %u", s_function.mask);
+				ImGui::Text("pred: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
+				ImGui::Text("ref: %i", s_fn.ref);
+				ImGui::Text("mask: %u", s_fn.mask);
 			}
 			ImGui::Separator();
 		}
