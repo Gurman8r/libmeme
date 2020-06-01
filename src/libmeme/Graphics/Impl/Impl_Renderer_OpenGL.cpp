@@ -701,7 +701,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_framebuffer::opengl_framebuffer::opengl_framebuffer(uint32_t format, vec2i const & size)
-		: m_format{ format }, m_size{}
+		: m_format{ format }
 	{
 		this->resize(size);
 	}
@@ -733,7 +733,7 @@ namespace ml
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		if (m_handle) { this->~opengl_framebuffer(); }
+		if (m_handle) { glCheck(glDeleteFramebuffers(1, &m_handle)); }
 		
 		glCheck(glGenFramebuffers(1, &m_handle));
 		
@@ -802,7 +802,7 @@ namespace ml
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		if (m_handle) { this->~opengl_texture2d(); }
+		if (m_handle) { glCheck(glDeleteTextures(1, &m_handle)); }
 
 		glCheck(glGenTextures(1, &m_handle));
 

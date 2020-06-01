@@ -140,7 +140,7 @@ namespace ml
 
 		vec2 m_resolution{ 1280, 720 };
 
-		pmr::vector<shared<framebuffer>> m_pipeline{};
+		ds::array<shared<framebuffer>, 1> m_pipeline{};
 
 
 		// GUI
@@ -246,7 +246,7 @@ namespace ml
 
 			// RENDERING
 			{
-				m_pipeline.push_back(framebuffer::create(gl::format_rgba, m_resolution));
+				m_pipeline[0] = framebuffer::create(gl::format_rgba, m_resolution);
 			}
 
 			// ICON
