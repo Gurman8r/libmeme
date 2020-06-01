@@ -250,15 +250,15 @@ namespace ml
 
 		bool get_alpha_enabled() const override;
 
-		alpha_function get_alpha_function() const override;
+		alpha_fn get_alpha_fn() const override;
 		
 		bool get_blend_enabled() const override;
 
 		color get_blend_color() const override;
 		
-		blend_equation get_blend_equation() const override;
+		blend_eq get_blend_eq() const override;
 		
-		blend_function get_blend_function() const override;
+		blend_fn get_blend_fn() const override;
 		
 		color get_clear_color() const override;
 
@@ -270,7 +270,7 @@ namespace ml
 
 		bool get_depth_enabled() const override;
 		
-		uint32_t get_depth_predicate() const override;
+		uint32_t get_depth_pr() const override;
 		
 		bool get_depth_mask() const override;
 
@@ -278,7 +278,7 @@ namespace ml
 
 		bool get_stencil_enabled() const override;
 
-		stencil_function get_stencil_function() const override;
+		stencil_fn get_stencil_fn() const override;
 
 		int_rect get_viewport() const override;
 
@@ -286,15 +286,15 @@ namespace ml
 
 		void set_alpha_enabled(bool enabled) override;
 
-		void set_alpha_function(alpha_function const & value) override;
+		void set_alpha_fn(alpha_fn const & value) override;
 		
 		void set_blend_color(color const & value) override;
 
 		void set_blend_enabled(bool enabled) override;
 		
-		void set_blend_equation(blend_equation const & value) override;
+		void set_blend_eq(blend_eq const & value) override;
 		
-		void set_blend_function(blend_function const & value) override;
+		void set_blend_fn(blend_fn const & value) override;
 		
 		void set_clear_color(color const & value) override;
 		
@@ -306,7 +306,7 @@ namespace ml
 
 		void set_depth_enabled(bool enabled) override;
 		
-		void set_depth_predicate(uint32_t predicate) override;
+		void set_depth_pr(uint32_t predicate) override;
 		
 		void set_depth_mask(bool enabled) override;
 
@@ -314,7 +314,7 @@ namespace ml
 
 		void set_stencil_enabled(bool enabled) override;
 
-		void set_stencil_function(stencil_function const & value) override;
+		void set_stencil_fn(stencil_fn const & value) override;
 
 		void set_viewport(int_rect const & bounds) override;
 

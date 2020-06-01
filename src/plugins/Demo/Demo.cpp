@@ -1156,7 +1156,7 @@ namespace ml
 			if (ImGui::CollapsingHeader("alpha"))
 			{
 				bool a_enabled{ api->get_alpha_enabled() };
-				auto a_fn{ api->get_alpha_function() };
+				auto a_fn{ api->get_alpha_fn() };
 				ImGui::Checkbox("enabled", &a_enabled);
 				ImGui::Text("pred: %s (%u)", gl::function_names[a_fn.func], a_fn.func);
 				ImGui::Text("ref: %f", a_fn.ref);
@@ -1167,8 +1167,8 @@ namespace ml
 			{
 				bool b_enabled{ api->get_blend_enabled() };
 				auto b_color{ api->get_blend_color() };
-				auto b_eq{ api->get_blend_equation() };
-				auto b_fn{ api->get_blend_function() };
+				auto b_eq{ api->get_blend_eq() };
+				auto b_fn{ api->get_blend_fn() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
 				ImGui::Text("modeRGB: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
@@ -1194,20 +1194,20 @@ namespace ml
 			if (ImGui::CollapsingHeader("depth"))
 			{
 				bool d_enabled{ api->get_depth_enabled() };
-				auto d_pred{ api->get_depth_predicate() };
+				auto d_pred{ api->get_depth_pr() };
 				bool d_mask{ api->get_depth_mask() };
 				auto d_range{ api->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
 				ImGui::Text("pred: %s (%u) ", gl::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
-				ImGui::Text("range: %f - %f", d_range.nearVal, d_range.farVal);
+				ImGui::Text("range: %f, %f", d_range.nearVal, d_range.farVal);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
 				bool s_enabled{ api->get_stencil_enabled() };
-				auto s_fn{ api->get_stencil_function() };
+				auto s_fn{ api->get_stencil_fn() };
 				ImGui::Checkbox("enabled", &s_enabled);
 				ImGui::Text("pred: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
 				ImGui::Text("ref: %i", s_fn.ref);

@@ -1301,7 +1301,7 @@ namespace ml
 		return temp;
 	}
 
-	alpha_function opengl_render_api::get_alpha_function() const
+	alpha_fn opengl_render_api::get_alpha_fn() const
 	{
 		return
 		{
@@ -1334,32 +1334,36 @@ namespace ml
 		return temp;
 	}
 
-	blend_equation opengl_render_api::get_blend_equation() const
+	blend_eq opengl_render_api::get_blend_eq() const
 	{
-		auto helper = [](auto value) noexcept -> uint32_t
-		{
-			uint32_t temp{};
-			glCheck(glGetIntegerv(value, (int32_t *)&temp));
-			return _function<gl::to_user>(temp);
-		};
-		return {
-			helper(GL_BLEND_EQUATION_RGB),
-			helper(GL_BLEND_EQUATION_ALPHA)
-		};
+		blend_eq temp{};
+		
+		glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&temp.modeRGB));
+		temp.modeRGB = _function<to_user>(temp.modeRGB);
+		
+		glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&temp.modeAlpha));
+		temp.modeAlpha = _function<to_user>(temp.modeAlpha);
+		
+		return temp;
 	}
 
-	blend_function opengl_render_api::get_blend_function() const
+	blend_fn opengl_render_api::get_blend_fn() const
 	{
-		auto helper = [](auto value) noexcept -> uint32_t
-		{
-			uint32_t temp{};
-			glCheck(glGetIntegerv(value, (int32_t *)&temp));
-			return _factor<gl::to_user>(temp);
-		};
-		return {
-			helper(GL_BLEND_SRC_RGB), helper(GL_BLEND_SRC_ALPHA),
-			helper(GL_BLEND_DST_RGB), helper(GL_BLEND_DST_ALPHA)
-		};
+		blend_fn temp{};
+
+		glCheck(glGetIntegerv(GL_BLEND_SRC_RGB, (int32_t *)&temp.sfactorRGB));
+		temp.sfactorRGB = _factor<to_user>(temp.sfactorRGB);
+
+		glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&temp.sfactorAlpha));
+		temp.sfactorAlpha = _factor<to_user>(temp.sfactorAlpha);
+
+		glCheck(glGetIntegerv(GL_BLEND_DST_RGB, (int32_t *)&temp.dfactorRGB));
+		temp.dfactorRGB = _factor<to_user>(temp.dfactorRGB);
+
+		glCheck(glGetIntegerv(GL_BLEND_DST_ALPHA, (int32_t *)&temp.dfactorAlpha));
+		temp.dfactorAlpha = _factor<to_user>(temp.dfactorAlpha);
+
+		return temp;
 	}
 
 	color opengl_render_api::get_clear_color() const
@@ -1404,7 +1408,7 @@ namespace ml
 		return temp;
 	}
 
-	uint32_t opengl_render_api::get_depth_predicate() const
+	uint32_t opengl_render_api::get_depth_pr() const
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp));
@@ -1425,13 +1429,17 @@ namespace ml
 		return temp;
 	}
 
-	stencil_function opengl_render_api::get_stencil_function() const
+	stencil_fn opengl_render_api::get_stencil_fn() const
 	{
-		stencil_function temp{};
+		stencil_fn temp{};
+
 		glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&temp.pred));
 		temp.pred = _predicate<to_user>(temp.pred);
+
 		glCheck(glGetIntegerv(GL_STENCIL_REF, &temp.ref));
+		
 		glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&temp.mask));
+
 		return temp;
 	}
 
@@ -1449,7 +1457,7 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_ALPHA_TEST));
 	}
 
-	void opengl_render_api::set_alpha_function(alpha_function const & value)
+	void opengl_render_api::set_alpha_fn(alpha_fn const & value)
 	{
 		glCheck(glAlphaFunc(_predicate<gl::to_impl>(value.func), value.ref));
 	}
@@ -1464,14 +1472,14 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_BLEND));
 	}
 
-	void opengl_render_api::set_blend_equation(blend_equation const & value)
+	void opengl_render_api::set_blend_eq(blend_eq const & value)
 	{
 		glCheck(glBlendEquationSeparate(
 			_function<gl::to_impl>(value.modeRGB),
 			_function<gl::to_impl>(value.modeAlpha)));
 	}
 
-	void opengl_render_api::set_blend_function(blend_function const & value)
+	void opengl_render_api::set_blend_fn(blend_fn const & value)
 	{
 		glCheck(glBlendFuncSeparate(
 			_factor<gl::to_impl>(value.sfactorRGB),
@@ -1510,7 +1518,7 @@ namespace ml
 		glCheck(glDepthMask(enabled));
 	}
 
-	void opengl_render_api::set_depth_predicate(uint32_t predicate)
+	void opengl_render_api::set_depth_pr(uint32_t predicate)
 	{
 		glCheck(glDepthFunc(_predicate<gl::to_impl>(predicate)));
 	}
@@ -1525,7 +1533,7 @@ namespace ml
 		glCheck((enabled ? &glEnable : glDisable)(GL_STENCIL_TEST));
 	}
 
-	void opengl_render_api::set_stencil_function(stencil_function const & value)
+	void opengl_render_api::set_stencil_fn(stencil_fn const & value)
 	{
 		glCheck(glStencilFunc(
 			_predicate<to_impl>(value.pred),

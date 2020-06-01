@@ -30,13 +30,13 @@ namespace ml
 		{
 			// alpha
 			render_command::set_alpha_enabled(true),
-			render_command::set_alpha_function({ gl::predicate_greater, 0.001f }),
+			render_command::set_alpha_fn({ gl::predicate_greater, 0.001f }),
 			
 			// blend
 			render_command::set_blend_enabled(true),
 			render_command::set_blend_color(colors::white),
-			render_command::set_blend_equation({ gl::function_add }),
-			render_command::set_blend_function({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
+			render_command::set_blend_eq({ gl::function_add }),
+			render_command::set_blend_fn({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
 			
 			// cull
 			render_command::set_cull_enabled(true),
@@ -45,13 +45,13 @@ namespace ml
 
 			// depth
 			render_command::set_depth_enabled(true),
-			render_command::set_depth_predicate(gl::predicate_less),
+			render_command::set_depth_pr(gl::predicate_less),
 			render_command::set_depth_mask(true),
 			render_command::set_depth_range({ 0.f, 1.f }),
 
 			// stencil
 			render_command::set_stencil_enabled(true),
-			render_command::set_stencil_function({})
+			render_command::set_stencil_fn({})
 		})
 		{
 			std::invoke(cmd);

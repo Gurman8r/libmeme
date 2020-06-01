@@ -843,24 +843,24 @@ namespace ml
 // states
 namespace ml
 {
-	struct ML_NODISCARD alpha_function final
+	struct ML_NODISCARD alpha_fn final
 	{
 		uint32_t func;
 		float_t ref;
 	};
 
-	struct ML_NODISCARD blend_equation final
+	struct ML_NODISCARD blend_eq final
 	{
 		uint32_t
-			modeRGB,
+			modeRGB = gl::function_add,
 			modeAlpha = modeRGB;
 	};
 
-	struct ML_NODISCARD blend_function final
+	struct ML_NODISCARD blend_fn final
 	{
 		uint32_t
-			sfactorRGB,
-			dfactorRGB,
+			sfactorRGB = gl::factor_src_alpha,
+			dfactorRGB = gl::factor_one_minus_src_alpha,
 			sfactorAlpha = sfactorRGB,
 			dfactorAlpha = dfactorRGB;
 	};
@@ -868,11 +868,11 @@ namespace ml
 	struct ML_NODISCARD depth_range final
 	{
 		float_t
-			nearVal,
-			farVal;
+			nearVal = 0.f,
+			farVal = 1.f;
 	};
 
-	struct ML_NODISCARD stencil_function final
+	struct ML_NODISCARD stencil_fn final
 	{
 		uint32_t pred	{ gl::predicate_always };
 		int32_t  ref	{ 0 };
@@ -937,15 +937,15 @@ namespace ml
 
 		virtual bool get_alpha_enabled() const = 0;
 
-		virtual alpha_function get_alpha_function() const = 0;
+		virtual alpha_fn get_alpha_fn() const = 0;
 		
 		virtual bool get_blend_enabled() const = 0;
 
 		virtual color get_blend_color() const = 0;
 		
-		virtual blend_equation get_blend_equation() const = 0;
+		virtual blend_eq get_blend_eq() const = 0;
 		
-		virtual blend_function get_blend_function() const = 0;
+		virtual blend_fn get_blend_fn() const = 0;
 		
 		virtual color get_clear_color() const = 0;
 
@@ -959,13 +959,13 @@ namespace ml
 
 		virtual bool get_depth_mask() const = 0;
 		
-		virtual uint32_t get_depth_predicate() const = 0;
+		virtual uint32_t get_depth_pr() const = 0;
 
 		virtual depth_range get_depth_range() const = 0;
 
 		virtual bool get_stencil_enabled() const = 0;
 
-		virtual stencil_function get_stencil_function() const = 0;
+		virtual stencil_fn get_stencil_fn() const = 0;
 
 		virtual int_rect get_viewport() const = 0;
 
@@ -973,15 +973,15 @@ namespace ml
 
 		virtual void set_alpha_enabled(bool enabled) = 0;
 
-		virtual void set_alpha_function(alpha_function const & value) = 0;
+		virtual void set_alpha_fn(alpha_fn const & value) = 0;
 		
 		virtual void set_blend_color(color const & value) = 0;
 
 		virtual void set_blend_enabled(bool enabled) = 0;
 		
-		virtual void set_blend_equation(blend_equation const & value) = 0;
+		virtual void set_blend_eq(blend_eq const & value) = 0;
 		
-		virtual void set_blend_function(blend_function const & value) = 0;
+		virtual void set_blend_fn(blend_fn const & value) = 0;
 		
 		virtual void set_clear_color(color const & value) = 0;
 		
@@ -995,13 +995,13 @@ namespace ml
 
 		virtual void set_depth_mask(bool enabled) = 0;
 
-		virtual void set_depth_predicate(uint32_t predicate) = 0;
+		virtual void set_depth_pr(uint32_t predicate) = 0;
 		
 		virtual void set_depth_range(depth_range const & value) = 0;
 
 		virtual void set_stencil_enabled(bool enabled) = 0;
 
-		virtual void set_stencil_function(stencil_function const & value) = 0;
+		virtual void set_stencil_fn(stencil_fn const & value) = 0;
 
 		virtual void set_viewport(int_rect const & bounds) = 0;
 

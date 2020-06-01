@@ -14,20 +14,14 @@ namespace ml
 	struct perspective_camera final {};
 	struct orthographic_camera final {};
 	
-	class renderer3d final : public singleton<renderer3d>
+	class ML_GRAPHICS_API renderer3d final : public singleton<renderer3d>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void begin_scene(perspective_camera const & camera) {}
+		static void begin_scene();
 
-		static void end_scene() {}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static void submit() {}
-
-		static void upload() {}
+		static void end_scene();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

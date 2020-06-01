@@ -30,9 +30,9 @@ namespace ml
 			return builtin(&render_api::set_alpha_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_alpha_function(alpha_function const & value) noexcept
+		ML_NODISCARD static auto set_alpha_fn(alpha_fn const & value) noexcept
 		{
-			return builtin(&render_api::set_alpha_function, value);
+			return builtin(&render_api::set_alpha_fn, value);
 		}
 
 		ML_NODISCARD static auto set_blend_enabled(bool enabled) noexcept
@@ -45,14 +45,14 @@ namespace ml
 			return builtin(&render_api::set_blend_color, value);
 		}
 
-		ML_NODISCARD static auto set_blend_equation(blend_equation const & value) noexcept
+		ML_NODISCARD static auto set_blend_eq(blend_eq const & value) noexcept
 		{
-			return builtin(&render_api::set_blend_equation, value);
+			return builtin(&render_api::set_blend_eq, value);
 		}
 
-		ML_NODISCARD static auto set_blend_function(blend_function const & value) noexcept
+		ML_NODISCARD static auto set_blend_fn(blend_fn const & value) noexcept
 		{
-			return builtin(&render_api::set_blend_function, value);
+			return builtin(&render_api::set_blend_fn, value);
 		}
 
 		ML_NODISCARD static auto set_clear_color(color const & value) noexcept
@@ -85,9 +85,9 @@ namespace ml
 			return builtin(&render_api::set_depth_mask, enabled);
 		}
 		
-		ML_NODISCARD static auto set_depth_predicate(uint32_t predicate) noexcept
+		ML_NODISCARD static auto set_depth_pr(uint32_t predicate) noexcept
 		{
-			return builtin(&render_api::set_depth_predicate, predicate);
+			return builtin(&render_api::set_depth_pr, predicate);
 		}
 
 		ML_NODISCARD static auto set_depth_range(depth_range const & value) noexcept
@@ -100,9 +100,9 @@ namespace ml
 			return builtin(&render_api::set_stencil_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_stencil_function(stencil_function const & value) noexcept
+		ML_NODISCARD static auto set_stencil_fn(stencil_fn const & value) noexcept
 		{
-			return builtin(&render_api::set_stencil_function, value);
+			return builtin(&render_api::set_stencil_fn, value);
 		}
 
 		ML_NODISCARD static auto set_viewport(int_rect const & bounds) noexcept

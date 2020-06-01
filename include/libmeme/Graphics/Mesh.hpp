@@ -10,28 +10,28 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using vertices_t	= typename pmr::vector<vertex>;
+		using contiguous_t	= typename pmr::vector<float_t>;
+		using indices_t		= typename pmr::vector<uint32_t>;
+
 		mesh(shared<vertexarray> const & vao = vertexarray::create()) noexcept
 			: m_vao{ vao }, m_verts{}, m_inds{}
 		{
 		}
 
-		mesh(pmr::vector<float_t> const & vertices, pmr::vector<uint32_t> const & indices = {})
+		mesh(contiguous_t const & vertices, indices_t const & indices = {}, buffer_layout const & layout = {})
 			: m_vao{ vertexarray::create() }, m_verts{ vertices }, m_inds{ indices }
 		{
 			auto vb = vertexbuffer::create(m_verts);
 
-			vb->set_layout({
-				{ meta::tag_v<vec3f>, "a_position"	},
-				{ meta::tag_v<vec3f>, "a_normal"	},
-				{ meta::tag_v<vec2f>, "a_texcoord"	},
-			});
+			vb->set_layout(layout);
 
 			m_vao->add_vbo(vb);
 
 			m_vao->set_ibo(!m_inds.empty() ? indexbuffer::create(m_inds) : nullptr);
 		}
 
-		mesh(pmr::vector<vertex> const & vertices, pmr::vector<uint32_t> const & indices = {})
+		mesh(vertices_t const & vertices, indices_t const & indices = {})
 			: mesh{ util::contiguous(vertices), indices }
 		{
 		}
@@ -86,9 +86,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<vertexarray> m_vao;
-		pmr::vector<uint32_t> m_inds{};
-		pmr::vector<float_t> m_verts{};
+		shared<vertexarray>	m_vao;
+		contiguous_t		m_verts;
+		indices_t			m_inds;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
