@@ -236,13 +236,6 @@ namespace ml
 
 			// RENDERING
 			{
-				auto const api{ render_api::get() };
-
-				auto const & info{ api->get_info() };
-				debug::puts(info.renderer);
-				debug::puts(info.vendor);
-				debug::puts(info.version);
-				
 				m_pipeline[0] = framebuffer::create(gl::format_rgba, m_resolution);
 			}
 
@@ -1147,11 +1140,17 @@ namespace ml
 		void show_renderer_gui()
 		{
 			static auto api{ render_api::get() };
+			static auto const & info{ api->get_info() };
 
 			if (ImGui::BeginMenuBar())
 			{
 				ImGui::EndMenuBar();
 			}
+
+			ImGui::Text("renderer: %s", info.renderer.c_str());
+			ImGui::Text("vendor:   %s", info.vendor.c_str());
+			ImGui::Text("version:  %s", info.version.c_str());
+			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
