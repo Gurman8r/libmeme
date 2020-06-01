@@ -19,9 +19,9 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// aliases
-	ML_alias buffer		= typename void const *				; // data buffer type
-	ML_alias command	= typename std::function<void()>	; // render command type
-	ML_alias handle		= typename void *					; // generic handle type
+	ML_alias buffer		= typename void const *				; // buffer type
+	ML_alias command	= typename std::function<void()>	; // command type
+	ML_alias handle		= typename void *					; // handle type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -41,11 +41,12 @@ namespace ml::gl
 
 	enum buffer_bit_ : uint32_t
 	{
-		no_buffer		= 0,
-		color_buffer	= 1 << 0,
-		depth_buffer	= 1 << 1,
-		stencil_buffer	= 1 << 2,
+		color_bit	= 1 << 0,
+		depth_bit	= 1 << 1,
+		stencil_bit	= 1 << 2,
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum error_ : uint32_t
 	{
@@ -60,12 +61,62 @@ namespace ml::gl
 		error_context_lost,
 	};
 
+	constexpr cstring error_names[] =
+	{
+		"none",
+		"invalid enum",
+		"invalid value",
+		"invalid operation",
+		"stack overflow",
+		"stack underflow",
+		"out of memory",
+		"invalid framebuffer operation",
+		"context lost",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum usage_ : uint32_t
 	{
 		usage_stream_draw,
 		usage_static_draw,
 		usage_dynamic_draw,
 	};
+
+	constexpr cstring usage_names[] =
+	{
+		"stream draw",
+		"static draw",
+		"dynamic draw",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum action_ : uint32_t
+	{
+		action_keep,
+		action_zero,
+		action_replace,
+		action_inc,
+		action_inc_wrap,
+		action_dec,
+		action_dec_wrap,
+		action_invert,
+	};
+
+	constexpr cstring action_names[] =
+	{
+		"keep",
+		"zero",
+		"replace",
+		"increment",
+		"increment wrap",
+		"decrement",
+		"decrement wrap",
+		"invert",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum primitive_ : uint32_t
 	{
@@ -79,6 +130,20 @@ namespace ml::gl
 		primitive_fill,
 	};
 
+	constexpr cstring primitive_names[] =
+	{
+		"points",
+		"lines",
+		"line loop",
+		"line strip",
+		"triangles",
+		"triangle strip",
+		"triangle fan",
+		"fill",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum predicate_ : uint32_t
 	{
 		predicate_never,
@@ -90,6 +155,20 @@ namespace ml::gl
 		predicate_gequal,
 		predicate_always,
 	};
+
+	constexpr cstring predicate_names[] =
+	{
+		"never",
+		"less",
+		"equal",
+		"lequal",
+		"greater",
+		"not equal",
+		"gequal",
+		"always",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum type_ : uint32_t
 	{
@@ -105,6 +184,22 @@ namespace ml::gl
 		type_unsigned_int_24_8,
 	};
 
+	constexpr cstring type_names[] =
+	{
+		"byte",
+		"unsigned byte",
+		"short",
+		"unsigned short",
+		"int",
+		"unsigned int",
+		"float",
+		"half float",
+
+		"unsigned int 24 8",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum function_ : uint32_t
 	{
 		function_add,
@@ -114,11 +209,30 @@ namespace ml::gl
 		function_max,
 	};
 
+	constexpr cstring function_names[] =
+	{
+		"add",
+		"subtract",
+		"reverse subtract",
+		"min",
+		"max",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum front_face_
 	{
 		front_face_cw,
 		front_face_ccw,
 	};
+
+	constexpr cstring front_face_names[] =
+	{
+		"cw",
+		"ccw",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum facet_ : uint32_t
 	{
@@ -132,6 +246,21 @@ namespace ml::gl
 		facet_right,
 		facet_front_and_back,
 	};
+
+	constexpr cstring facet_names[] =
+	{
+		"front left",
+		"front right",
+		"back left",
+		"back right",
+		"front",
+		"back",
+		"left",
+		"right",
+		"front and back",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum factor_ : uint32_t
 	{
@@ -147,6 +276,23 @@ namespace ml::gl
 		factor_one_minus_dst_color,
 		factor_src_alpha_saturate,
 	};
+
+	constexpr cstring factor_names[] =
+	{
+		"zero",
+		"one",
+		"src color",
+		"one minus src color",
+		"src alpha",
+		"one minus src alpha",
+		"dst alpha",
+		"one minus dst alpha",
+		"dst color",
+		"one minus dst color",
+		"src alpha saturate",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum format_ : uint32_t
 	{
@@ -172,6 +318,30 @@ namespace ml::gl
 		format_depth24_stencil8,
 	};
 
+	constexpr cstring format_names[] =
+	{
+		"red",
+		"green",
+		"blue",
+		"alpha",
+		"rgb",
+		"rgba",
+		"luminance",
+		"luminance alpha",
+
+		"srgb",
+		"srgb8",
+		"srgb alpha",
+		"srgb8 alpha8",
+		"sluminance alpha",
+		"sluminance8 alpha8",
+		"sluminance",
+		"sluminance8",
+
+		"depth stencil",
+		"depth24 stencil8",
+	};
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum shader_type_ : uint32_t
@@ -183,13 +353,11 @@ namespace ml::gl
 		shader_type_MAX
 	};
 
-	enum shader_flags_ : int32_t
+	constexpr cstring shader_type_names[shader_type_MAX] =
 	{
-		shader_flags_none = (0 << 0), // none
-
-		// none
-		shader_flags_default
-			= shader_flags_none,
+		"vertex shader",
+		"fragment shader",
+		"geometry shader",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -203,6 +371,16 @@ namespace ml::gl
 
 		texture_type_MAX
 	};
+
+	constexpr cstring texture_type_names[texture_type_MAX] =
+	{
+		"texture 1d",
+		"texture 2d",
+		"texture 3d",
+		"texture cube map",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum texture_flags_ : int32_t
 	{
@@ -476,28 +654,30 @@ namespace ml
 		
 		virtual void unbind() const = 0;
 
-		virtual void set_data(gl::buffer vertices, uint32_t size, uint32_t offset = 0) = 0;
+		virtual void set_data(gl::buffer vertices, uint32_t count, uint32_t offset = 0) = 0;
 
 		virtual void set_layout(buffer_layout const & value) = 0;
+
+		ML_NODISCARD virtual uint32_t get_count() const = 0;
 
 		ML_NODISCARD virtual gl::handle get_handle() const = 0;
 
 		ML_NODISCARD virtual buffer_layout const & get_layout() const = 0;
 
-		ML_NODISCARD virtual uint32_t get_size() const = 0;
-
 		ML_NODISCARD static shared<vertexbuffer> create(
 			gl::buffer	vertices,
-			uint32_t	size,
+			uint32_t	count,
 			uint32_t	usage = gl::usage_static_draw);
 
 		ML_NODISCARD static shared<vertexbuffer> create(
-			uint32_t size,
+			uint32_t count,
 			uint32_t usage = gl::usage_dynamic_draw);
 
-		ML_NODISCARD static shared<vertexbuffer> create(pmr::vector<float_t> const & vertices, uint32_t usage = gl::usage_static_draw)
+		ML_NODISCARD static shared<vertexbuffer> create(
+			pmr::vector<float_t> const & vertices, uint32_t usage = gl::usage_static_draw)
 		{
-			return create(vertices.data(), (uint32_t)vertices.size() * sizeof(float_t), usage);
+			return create(vertices.data(),
+				(uint32_t)vertices.size() * sizeof(float_t), usage);
 		}
 	};
 
@@ -691,6 +871,13 @@ namespace ml
 			nearVal,
 			farVal;
 	};
+
+	struct ML_NODISCARD stencil_function final
+	{
+		uint32_t pred	{ gl::predicate_always };
+		int32_t  ref	{ 0 };
+		uint32_t mask	{ static_cast<uint32_t>(-1) };
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -778,6 +965,8 @@ namespace ml
 
 		virtual bool get_stencil_enabled() const = 0;
 
+		virtual stencil_function get_stencil_function() const = 0;
+
 		virtual int_rect get_viewport() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -811,6 +1000,8 @@ namespace ml
 		virtual void set_depth_range(depth_range const & value) = 0;
 
 		virtual void set_stencil_enabled(bool enabled) = 0;
+
+		virtual void set_stencil_function(stencil_function const & value) = 0;
 
 		virtual void set_viewport(int_rect const & bounds) = 0;
 

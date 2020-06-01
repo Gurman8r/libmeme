@@ -31,7 +31,7 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T
+	template <class T = pmr::string
 	> void puts(T && value) noexcept
 	{
 		std::cout << ML_forward(value) << '\n';
@@ -45,26 +45,26 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	constexpr int32_t info() noexcept { return 1; } // true
+	constexpr int32_t ok() noexcept { return 1; } // true
 
-	template <class T
-	> int32_t info(T && value) noexcept
+	template <class T = pmr::string
+	> int32_t ok(T && value) noexcept
 	{
 		std::cout << "[ info ] " << ML_forward(value) << '\n';
-		return info();
+		return ok();
 	}
 
 	template <class Fmt, class Arg0, class ... Args
-	> int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
+	> int32_t ok(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		return ok(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr int32_t error() noexcept { return 0; } // false
 
-	template <class T
+	template <class T = pmr::string
 	> int32_t error(T && value) noexcept
 	{
 		std::cout << "[ error ] " << ML_forward(value) << '\n';
@@ -81,7 +81,7 @@ namespace ml::debug
 
 	constexpr int32_t warning() noexcept { return -1; } // true
 
-	template <class T
+	template <class T = pmr::string
 	> int32_t warning(T && value) noexcept
 	{
 		std::cout << "[ warn ] " << ML_forward(value) << '\n';

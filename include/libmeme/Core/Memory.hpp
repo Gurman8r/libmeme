@@ -23,8 +23,7 @@ namespace ml
 
 namespace ml::util
 {
-	// passthrough resource for collecting upstream usage metrics
-	// intended for use with initial buffer
+	// passthrough resource for collecting upstream metrics
 	struct test_resource final : public pmr::memory_resource, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

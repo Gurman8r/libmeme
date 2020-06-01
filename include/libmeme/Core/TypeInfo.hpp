@@ -8,8 +8,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ... T> struct nameof;
-	template <class ... T> struct typeof;
+	template <class ...> struct nameof;
+	template <class ...> struct typeof;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,15 +63,15 @@ namespace ml
 
 		static constexpr auto filter_template(pretty_function::string s) noexcept
 		{
-			size_t const t{ s.find_first_of('<') };
-			return (t != s.npos) ? s.substr(0, t) : s;
+			size_t const i{ s.find_first_of('<') };
+			return (i != s.npos) ? s.substr(0, i) : s;
 		}
 
 		static constexpr auto filter_namespace(pretty_function::string s) noexcept
 		{
-			size_t const t{ s.find_first_of('<') }; // check for template
-			return (t != s.npos)
-				? s.substr(s.substr(0, t).find_last_of(':') + 1)
+			size_t const i{ s.find_first_of('<') }; // check for template
+			return (i != s.npos)
+				? s.substr(s.substr(0, i).find_last_of(':') + 1)
 				: s.substr(s.find_last_of(':') + 1);
 		}
 
@@ -121,14 +121,14 @@ namespace ml
 
 	// get name of type
 	template <class T
-	> static constexpr auto nameof_v
+	> constexpr pretty_function::string nameof_v
 	{
-		pretty_function::string{ nameof<T>::value }
+		nameof<T>::value
 	};
 
 	// get hash of type
 	template <class T
-	> static constexpr auto hashof_v
+	> constexpr hash_t hashof_v
 	{
 		util::hash(pretty_function::string{ nameof<T>::value })
 	};
@@ -267,30 +267,30 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	static_assert("tests"
-		&& ml::nameof_v<bool>			== "bool"
-		&& ml::nameof_v<int8_t>			== "signed char"
-		&& ml::nameof_v<int16_t>		== "short"
-		&& ml::nameof_v<int32_t>		== "int"
-		&& ml::nameof_v<int64_t>		== "long long"
-		&& ml::nameof_v<uint8_t>		== "unsigned char"
-		&& ml::nameof_v<uint16_t>		== "unsigned short"
-		&& ml::nameof_v<uint32_t>		== "unsigned int"
-		&& ml::nameof_v<uint64_t>		== "unsigned long long"
-		&& ml::nameof_v<float32_t>		== "float"
-		&& ml::nameof_v<float64_t>		== "double"
-		&& ml::nameof_v<float80_t>		== "long double"
-		&& ml::nameof_v<char>			== "char"
-		&& ml::nameof_v<wchar_t>		== "wchar_t"
-		&& ml::nameof_v<char16_t>		== "char16_t"
-		&& ml::nameof_v<char32_t>		== "char32_t"
-		&& ml::nameof_v<cstring>		== "const char*"
-		&& ml::nameof_v<cwstring>		== "const wchar_t*"
-		&& ml::nameof_v<c16string>		== "const char16_t*"
-		&& ml::nameof_v<c32string>		== "const char32_t*"
-		&& ml::nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
-		&& ml::nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
-		&& ml::nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
-		&& ml::nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
+		&& nameof_v<bool>			== "bool"
+		&& nameof_v<int8_t>			== "signed char"
+		&& nameof_v<int16_t>		== "short"
+		&& nameof_v<int32_t>		== "int"
+		&& nameof_v<int64_t>		== "long long"
+		&& nameof_v<uint8_t>		== "unsigned char"
+		&& nameof_v<uint16_t>		== "unsigned short"
+		&& nameof_v<uint32_t>		== "unsigned int"
+		&& nameof_v<uint64_t>		== "unsigned long long"
+		&& nameof_v<float32_t>		== "float"
+		&& nameof_v<float64_t>		== "double"
+		&& nameof_v<float80_t>		== "long double"
+		&& nameof_v<char>			== "char"
+		&& nameof_v<wchar_t>		== "wchar_t"
+		&& nameof_v<char16_t>		== "char16_t"
+		&& nameof_v<char32_t>		== "char32_t"
+		&& nameof_v<cstring>		== "const char*"
+		&& nameof_v<cwstring>		== "const wchar_t*"
+		&& nameof_v<c16string>		== "const char16_t*"
+		&& nameof_v<c32string>		== "const char32_t*"
+		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
+		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
+		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
+		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
 	
 		, "test nameof<>");
 

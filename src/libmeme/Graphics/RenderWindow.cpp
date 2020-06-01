@@ -28,27 +28,30 @@ namespace ml
 
 		for (auto const & cmd : // setup states
 		{
-			// alpha state
+			// alpha
 			render_command::set_alpha_enabled(true),
 			render_command::set_alpha_function({ gl::predicate_greater, 0.001f }),
 			
-			// blend state
+			// blend
 			render_command::set_blend_enabled(true),
 			render_command::set_blend_color(colors::white),
 			render_command::set_blend_equation({ gl::function_add }),
 			render_command::set_blend_function({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
 			
-			// cull state
+			// cull
 			render_command::set_cull_enabled(true),
 			render_command::set_cull_facet(gl::facet_back),
 			render_command::set_cull_order(gl::front_face_ccw),
 
-			// depth state
+			// depth
 			render_command::set_depth_enabled(true),
 			render_command::set_depth_function(gl::predicate_less),
 			render_command::set_depth_mask(true),
 			render_command::set_depth_range({ 0.f, 1.f }),
 
+			// stencil
+			render_command::set_stencil_enabled(true),
+			render_command::set_stencil_function({})
 		})
 		{
 			std::invoke(cmd);

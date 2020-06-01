@@ -117,15 +117,15 @@ namespace ml
 		uint32_t temp{};
 		if constexpr (Convt()) // to backend
 		{
-			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, color_buffer);
-			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, depth_buffer);
-			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, stencil_buffer);
+			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, color_bit);
+			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, depth_bit);
+			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, stencil_bit);
 		}
 		else // to user
 		{
-			ML_flag_map(temp, color_buffer			, value, GL_COLOR_BUFFER_BIT);
-			ML_flag_map(temp, depth_buffer			, value, GL_DEPTH_BUFFER_BIT);
-			ML_flag_map(temp, stencil_buffer		, value, GL_STENCIL_BUFFER_BIT);
+			ML_flag_map(temp, color_bit		, value, GL_COLOR_BUFFER_BIT);
+			ML_flag_map(temp, depth_bit		, value, GL_DEPTH_BUFFER_BIT);
+			ML_flag_map(temp, stencil_bit	, value, GL_STENCIL_BUFFER_BIT);
 		}
 		return temp;
 	}
@@ -190,6 +190,42 @@ namespace ml
 			case GL_STREAM_DRAW		: return usage_stream_draw;
 			case GL_STATIC_DRAW		: return usage_static_draw;
 			case GL_DYNAMIC_DRAW	: return usage_dynamic_draw;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to backend
+		{
+			switch (value)
+			{
+			default				: return value;
+			case action_keep	: return GL_KEEP;
+			case action_zero	: return GL_ZERO;
+			case action_replace	: return GL_REPLACE;
+			case action_inc		: return GL_INCR;
+			case action_inc_wrap: return GL_INCR_WRAP;
+			case action_dec		: return GL_DECR;
+			case action_dec_wrap: return GL_DECR_WRAP;
+			case action_invert	: return GL_INVERT;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default				: return value;
+			case GL_KEEP		: return action_keep;
+			case GL_ZERO		: return action_zero;
+			case GL_REPLACE		: return action_replace;
+			case GL_INCR		: return action_inc;
+			case GL_INCR_WRAP	: return action_inc_wrap;
+			case GL_DECR		: return action_dec;
+			case GL_DECR_WRAP	: return action_dec_wrap;
+			case GL_INVERT		: return action_invert;
 			}
 		}
 	}
@@ -633,16 +669,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(gl::buffer vertices, uint32_t size, uint32_t usage)
-		: m_usage{ usage }, m_size{ size }
+	opengl_vertexbuffer::opengl_vertexbuffer(gl::buffer vertices, uint32_t count, uint32_t usage)
+		: m_usage{ usage }, m_count{ count }
 	{
 		glCheck(glGenBuffers(1, &m_handle));
+		
 		this->bind();
-		glCheck(glBufferData(GL_ARRAY_BUFFER, size * sizeof(float_t), vertices, _usage<gl::to_impl>(usage)));
+		
+		glCheck(glBufferData(GL_ARRAY_BUFFER, count * sizeof(float_t), vertices, _usage<gl::to_impl>(usage)));
 	}
 
-	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t size, uint32_t usage)
-		: opengl_vertexbuffer{ nullptr, size, usage }
+	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t count, uint32_t usage)
+		: opengl_vertexbuffer{ nullptr, count, usage }
 	{
 	}
 
@@ -661,10 +699,10 @@ namespace ml
 		glCheck(glBindBuffer(GL_ARRAY_BUFFER, NULL));
 	}
 
-	void opengl_vertexbuffer::set_data(gl::buffer vertices, uint32_t size, uint32_t offset)
+	void opengl_vertexbuffer::set_data(gl::buffer vertices, uint32_t count, uint32_t offset)
 	{
-		m_size = size;
-		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, size * sizeof(float_t), vertices));
+		m_count = count;
+		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, count * sizeof(float_t), vertices));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1258,7 +1296,9 @@ namespace ml
 
 	bool opengl_render_api::get_alpha_enabled() const
 	{
-		return glIsEnabled(GL_ALPHA_TEST);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&temp));
+		return temp;
 	}
 
 	alpha_function opengl_render_api::get_alpha_function() const
@@ -1282,7 +1322,9 @@ namespace ml
 
 	bool opengl_render_api::get_blend_enabled() const
 	{
-		return glIsEnabled(GL_BLEND);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&temp));
+		return temp;
 	}
 
 	color opengl_render_api::get_blend_color() const
@@ -1329,7 +1371,9 @@ namespace ml
 
 	bool opengl_render_api::get_cull_enabled() const
 	{
-		return glIsEnabled(GL_CULL_FACE);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&temp));
+		return temp;
 	}
 
 	uint32_t opengl_render_api::get_cull_facet() const
@@ -1348,7 +1392,9 @@ namespace ml
 
 	bool opengl_render_api::get_depth_enabled() const
 	{
-		return glIsEnabled(GL_DEPTH_TEST);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&temp));
+		return temp;
 	}
 
 	uint32_t opengl_render_api::get_depth_function() const
@@ -1360,7 +1406,9 @@ namespace ml
 
 	bool opengl_render_api::get_depth_mask() const
 	{
-		return glIsEnabled(GL_DEPTH_WRITEMASK);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, (uint8_t *)&temp));
+		return temp;
 	}
 
 	depth_range opengl_render_api::get_depth_range() const
@@ -1372,7 +1420,19 @@ namespace ml
 
 	bool opengl_render_api::get_stencil_enabled() const
 	{
-		return glIsEnabled(GL_STENCIL_TEST);
+		bool temp{};
+		glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&temp));
+		return temp;
+	}
+
+	stencil_function opengl_render_api::get_stencil_function() const
+	{
+		stencil_function temp{};
+		glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&temp.pred));
+		temp.pred = _predicate<to_user>(temp.pred);
+		glCheck(glGetIntegerv(GL_STENCIL_REF, &temp.ref));
+		glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&temp.mask));
+		return temp;
 	}
 
 	int_rect opengl_render_api::get_viewport() const
@@ -1465,6 +1525,14 @@ namespace ml
 		glCheck((enabled ? &glEnable : glDisable)(GL_STENCIL_TEST));
 	}
 
+	void opengl_render_api::set_stencil_function(stencil_function const & value)
+	{
+		glCheck(glStencilFunc(
+			_predicate<to_impl>(value.pred),
+			value.ref,
+			value.mask));
+	}
+
 	void opengl_render_api::set_viewport(int_rect const & bounds)
 	{
 		glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
@@ -1500,7 +1568,7 @@ namespace ml
 			{
 				ML_bind_scope(vb);
 
-				this->draw_arrays(0, vb->get_size());
+				this->draw_arrays(0, vb->get_count());
 			}
 		}
 	}

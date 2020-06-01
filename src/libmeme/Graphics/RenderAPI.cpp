@@ -51,16 +51,16 @@ namespace ml
 	// VERTEX BUFFER
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<vertexbuffer> vertexbuffer::create(gl::buffer vertices, uint32_t size, uint32_t usage)
+	shared<vertexbuffer> vertexbuffer::create(gl::buffer vertices, uint32_t count, uint32_t usage)
 	{
 		return std::allocate_shared<impl_vertex_buffer>(memory_manager::get_allocator()
-			, vertices, size, usage);
+			, vertices, count, usage);
 	}
 
-	shared<vertexbuffer> vertexbuffer::create(uint32_t size, uint32_t usage)
+	shared<vertexbuffer> vertexbuffer::create(uint32_t count, uint32_t usage)
 	{
 		return std::allocate_shared<impl_vertex_buffer>(memory_manager::get_allocator()
-			, size, usage);
+			, count, usage);
 	}
 
 	

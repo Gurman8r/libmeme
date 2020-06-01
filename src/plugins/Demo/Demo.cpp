@@ -159,15 +159,13 @@ namespace ml
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_renderer	{ "renderer##demo"		, 0, "", ImGuiWindowFlags_MenuBar };
+			m_gui_renderer	{ "renderer##demo"		, 1, "", ImGuiWindowFlags_MenuBar };
 
 		stream_sniper m_cout{ &std::cout };
 
 		gui::console m_console{};
 
-		ax::NodeEditor::EditorContext * m_node_editor{
-			ax::NodeEditor::CreateEditor()
-		};
+		ax::NodeEditor::EditorContext * m_node_editor{ ax::NodeEditor::CreateEditor() };
 
 		gui::plot_controller m_plots
 		{
@@ -236,16 +234,15 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			// MESSAGES
-			{
-				auto const & api_info{ render_api::get()->get_info() };
-				debug::puts(api_info.renderer);
-				debug::puts(api_info.vendor);
-				debug::puts(api_info.version);
-			}
-
 			// RENDERING
 			{
+				auto const api{ render_api::get() };
+
+				auto const & info{ api->get_info() };
+				debug::puts(info.renderer);
+				debug::puts(info.vendor);
+				debug::puts(info.version);
+				
 				m_pipeline[0] = framebuffer::create(gl::format_rgba, m_resolution);
 			}
 
@@ -425,8 +422,6 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			if (m_pipeline.empty()) { return; }
-
 			if (m_pipeline[0])
 			{
 				ML_bind_scope(m_pipeline[0].get());
@@ -435,8 +430,11 @@ namespace ml
 				{
 					render_command::set_cull_enabled(false),
 					render_command::set_clear_color(colors::magenta),
-					render_command::clear(gl::color_buffer | gl::depth_buffer),
-					render_command::custom(&entity_manager::update_system<x_draw_meshes>, &m_ecs),
+					render_command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
+					render_command::custom([&]()
+					{
+						m_ecs.update_system<x_draw_meshes>();
+					}),
 				})
 				{
 					std::invoke(cmd);
@@ -518,6 +516,7 @@ namespace ml
 					m_gui_memory.menu_item();
 					m_gui_nodes.menu_item();
 					m_gui_profiler.menu_item();
+					m_gui_renderer.menu_item();
 				});
 				mmb.add("settings", [&]()
 				{
@@ -552,7 +551,6 @@ namespace ml
 				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
 				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
 				m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
-				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // SCRIPTING
 				m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
 				m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
 				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
@@ -796,7 +794,7 @@ namespace ml
 					else if constexpr (std::is_same_v<T, uint32_t>)
 					{
 						auto temp{ static_cast<uint32_t>(value) };
-						ImGui::DragScalar("##value", ImGuiDataType_U32, &temp, 0.2f);
+						ImGui::DragScalar("##value", ImGuiDataType_U32 , &temp, 0.2f);
 					}
 				}
 				// POINTER
@@ -1155,8 +1153,71 @@ namespace ml
 				ImGui::EndMenuBar();
 			}
 
+			if (ImGui::CollapsingHeader("alpha"))
+			{
+				ML_scoped_imgui_id("alpha state");
+				bool a_enabled{ api->get_alpha_enabled() };
+				auto a_function{ api->get_alpha_function() };
+				ImGui::Checkbox("enabled", &a_enabled);
+				ImGui::Text("pred: %s (%u)", gl::function_names[a_function.func], a_function.func);
+				ImGui::Text("ref: %f", a_function.ref);
+			}
+			ImGui::Separator();
 
+			if (ImGui::CollapsingHeader("blend"))
+			{
+				ML_scoped_imgui_id("blend state");
+				bool b_enabled{ api->get_blend_enabled() };
+				auto b_color{ api->get_blend_color() };
+				auto b_eq{ api->get_blend_equation() };
+				auto b_fn{ api->get_blend_function() };
+				ImGui::Checkbox("enabled", &b_enabled);
+				ImGui::ColorEdit4("color", b_color);
+				ImGui::Text("modeRGB: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
+				ImGui::Text("modeAlpha: %s (%u)", gl::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
+				ImGui::Text("sFactorRGB: %s (%u)", gl::function_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
+				ImGui::Text("sFactorAlpha: %s (%u)", gl::function_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
+				ImGui::Text("dFactorRGB: %s (%u)", gl::function_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
+				ImGui::Text("dFactorAlpha: %s (%u)", gl::function_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
+			}
+			ImGui::Separator();
 
+			if (ImGui::CollapsingHeader("cull"))
+			{
+				ML_scoped_imgui_id("cull state");
+				bool c_enabled{ api->get_cull_enabled() };
+				auto c_facet{ api->get_cull_facet() };
+				auto c_order{ api->get_cull_order() };
+				ImGui::Checkbox("enabled", &c_enabled);
+				ImGui::Text("facet: %s (%u)", gl::facet_names[c_facet], c_facet);
+				ImGui::Text("order: %s (%u)", gl::front_face_names[c_order], c_order);
+			}
+			ImGui::Separator();
+
+			if (ImGui::CollapsingHeader("depth"))
+			{
+				ML_scoped_imgui_id("depth state");
+				bool d_enabled{ api->get_depth_enabled() };
+				auto d_pred{ api->get_depth_function() };
+				bool d_mask{ api->get_depth_mask() };
+				auto d_range{ api->get_depth_range() };
+				ImGui::Checkbox("enabled", &d_enabled);
+				ImGui::Text("pred: %s (%u) ", gl::predicate_names[d_pred], d_pred);
+				ImGui::Checkbox("mask", &d_mask);
+			}
+			ImGui::Separator();
+
+			if (ImGui::CollapsingHeader("stencil"))
+			{
+				ML_scoped_imgui_id("stencil state");
+				bool s_enabled{ api->get_stencil_enabled() };
+				auto s_function{ api->get_stencil_function() };
+				ImGui::Checkbox("enabled", &s_enabled);
+				ImGui::Text("pred: %s (%u)", gl::predicate_names[s_function.pred], s_function.pred);
+				ImGui::Text("ref: %i", s_function.ref);
+				ImGui::Text("mask: %u", s_function.mask);
+			}
+			ImGui::Separator();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

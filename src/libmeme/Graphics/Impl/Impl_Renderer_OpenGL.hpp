@@ -47,9 +47,9 @@ namespace ml
 	class opengl_vertexbuffer final : public vertexbuffer
 	{
 	public:
-		opengl_vertexbuffer(gl::buffer vertices, uint32_t size, uint32_t usage = gl::usage_static_draw);
+		opengl_vertexbuffer(gl::buffer vertices, uint32_t count, uint32_t usage = gl::usage_static_draw);
 
-		opengl_vertexbuffer(uint32_t size, uint32_t usage = gl::usage_dynamic_draw);
+		opengl_vertexbuffer(uint32_t count, uint32_t usage = gl::usage_dynamic_draw);
 
 		~opengl_vertexbuffer();
 
@@ -57,19 +57,19 @@ namespace ml
 
 		void unbind() const override;
 
-		void set_data(gl::buffer vertices, uint32_t size, uint32_t offset = 0) override;
+		void set_data(gl::buffer vertices, uint32_t count, uint32_t offset = 0) override;
 
 		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
+
+		inline uint32_t get_count() const override { return m_count; }
 
 		inline gl::handle get_handle() const override { return ML_addressof(m_handle); }
 
 		inline buffer_layout const & get_layout() const override { return m_layout; }
 
-		inline uint32_t get_size() const override { return m_size; }
-
 	private:
 		uint32_t		m_handle	{}; // handle
-		uint32_t		m_size		{}; // data size in bytes
+		uint32_t		m_count		{}; // element count
 		uint32_t		m_usage		{}; // draw usage
 		buffer_layout	m_layout	{}; // buffer layout
 	};
@@ -96,7 +96,7 @@ namespace ml
 
 	private:
 		uint32_t	m_handle	{}; // handle
-		uint32_t	m_count		{}; // index count
+		uint32_t	m_count		{}; // element count
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -278,6 +278,8 @@ namespace ml
 
 		bool get_stencil_enabled() const override;
 
+		stencil_function get_stencil_function() const override;
+
 		int_rect get_viewport() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -311,6 +313,8 @@ namespace ml
 		void set_depth_range(depth_range const & value) override;
 
 		void set_stencil_enabled(bool enabled) override;
+
+		void set_stencil_function(stencil_function const & value) override;
 
 		void set_viewport(int_rect const & bounds) override;
 

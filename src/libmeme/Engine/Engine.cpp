@@ -50,7 +50,7 @@ namespace ml
 				for (auto const & cmd :
 				{
 					render_command::set_clear_color(colors::black),
-					render_command::clear(gl::color_buffer | gl::depth_buffer),
+					render_command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
 					render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
@@ -93,21 +93,21 @@ namespace ml
 		if (is_initialized()) { return debug::error("engine is already initialized"); }
 
 		// create context
-		debug::info("creating engine context...");
+		debug::ok("creating engine context...");
 		if (!(g_engine = new engine_context{ j, alloc }))
 		{
 			return debug::error("failed creating engine context");
 		}
 
 		// initialize windows
-		debug::info("initializing windows...");
+		debug::ok("initializing windows...");
 		if (!window::initialize())
 		{
 			return debug::error("failed initializing windows");
 		}
 
 		// initialize scripting
-		debug::info("initializing scripts...");
+		debug::ok("initializing scripts...");
 		if (!g_engine->m_scripts.initialize())
 		{
 			return debug::error("failed initializing scripts");
@@ -116,7 +116,7 @@ namespace ml
 		// execute setup script
 		if (g_engine->m_config.contains("setup_script"))
 		{
-			debug::info("executing setup script...");
+			debug::ok("executing setup script...");
 			g_engine->m_scripts.do_file(
 				g_engine->m_fs.path2(
 					g_engine->m_config["setup_script"]));
