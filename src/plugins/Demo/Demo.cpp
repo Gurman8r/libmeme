@@ -1166,7 +1166,6 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				ML_scoped_imgui_id("blend state");
 				bool b_enabled{ api->get_blend_enabled() };
 				auto b_color{ api->get_blend_color() };
 				auto b_eq{ api->get_blend_equation() };
@@ -1175,41 +1174,39 @@ namespace ml
 				ImGui::ColorEdit4("color", b_color);
 				ImGui::Text("modeRGB: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
 				ImGui::Text("modeAlpha: %s (%u)", gl::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
-				ImGui::Text("sFactorRGB: %s (%u)", gl::function_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
-				ImGui::Text("sFactorAlpha: %s (%u)", gl::function_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
-				ImGui::Text("dFactorRGB: %s (%u)", gl::function_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
-				ImGui::Text("dFactorAlpha: %s (%u)", gl::function_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
+				ImGui::Text("sFactorRGB: %s (%u)", gl::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
+				ImGui::Text("sFactorAlpha: %s (%u)", gl::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
+				ImGui::Text("dFactorRGB: %s (%u)", gl::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
+				ImGui::Text("dFactorAlpha: %s (%u)", gl::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				ML_scoped_imgui_id("cull state");
 				bool c_enabled{ api->get_cull_enabled() };
 				auto c_facet{ api->get_cull_facet() };
 				auto c_order{ api->get_cull_order() };
 				ImGui::Checkbox("enabled", &c_enabled);
 				ImGui::Text("facet: %s (%u)", gl::facet_names[c_facet], c_facet);
-				ImGui::Text("order: %s (%u)", gl::front_face_names[c_order], c_order);
+				ImGui::Text("order: %s (%u)", gl::order_names[c_order], c_order);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				ML_scoped_imgui_id("depth state");
 				bool d_enabled{ api->get_depth_enabled() };
-				auto d_pred{ api->get_depth_function() };
+				auto d_pred{ api->get_depth_predicate() };
 				bool d_mask{ api->get_depth_mask() };
 				auto d_range{ api->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
 				ImGui::Text("pred: %s (%u) ", gl::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
+				ImGui::Text("range: %f - %f", d_range.nearVal, d_range.farVal);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				ML_scoped_imgui_id("stencil state");
 				bool s_enabled{ api->get_stencil_enabled() };
 				auto s_function{ api->get_stencil_function() };
 				ImGui::Checkbox("enabled", &s_enabled);

@@ -220,13 +220,13 @@ namespace ml::gl
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum front_face_
+	enum order_
 	{
-		front_face_cw,
-		front_face_ccw,
+		order_cw,
+		order_ccw,
 	};
 
-	constexpr cstring front_face_names[] =
+	constexpr cstring order_names[] =
 	{
 		"cw",
 		"ccw",
@@ -957,9 +957,9 @@ namespace ml
 		
 		virtual bool get_depth_enabled() const = 0;
 
-		virtual uint32_t get_depth_function() const = 0;
-		
 		virtual bool get_depth_mask() const = 0;
+		
+		virtual uint32_t get_depth_predicate() const = 0;
 
 		virtual depth_range get_depth_range() const = 0;
 
@@ -993,10 +993,10 @@ namespace ml
 		
 		virtual void set_depth_enabled(bool enabled) = 0;
 
-		virtual void set_depth_function(uint32_t predicate) = 0;
-		
 		virtual void set_depth_mask(bool enabled) = 0;
 
+		virtual void set_depth_predicate(uint32_t predicate) = 0;
+		
 		virtual void set_depth_range(depth_range const & value) = 0;
 
 		virtual void set_stencil_enabled(bool enabled) = 0;

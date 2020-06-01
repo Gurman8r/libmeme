@@ -80,14 +80,14 @@ namespace ml
 			return builtin(&render_api::set_depth_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_depth_function(uint32_t predicate) noexcept
-		{
-			return builtin(&render_api::set_depth_function, predicate);
-		}
-		
 		ML_NODISCARD static auto set_depth_mask(bool enabled) noexcept
 		{
 			return builtin(&render_api::set_depth_mask, enabled);
+		}
+		
+		ML_NODISCARD static auto set_depth_predicate(uint32_t predicate) noexcept
+		{
+			return builtin(&render_api::set_depth_predicate, predicate);
 		}
 
 		ML_NODISCARD static auto set_depth_range(depth_range const & value) noexcept

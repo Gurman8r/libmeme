@@ -372,15 +372,15 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _front_face(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _order(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to backend
 		{
 			switch (value)
 			{
-			default				: return value;
-			case front_face_cw	: return GL_CW;
-			case front_face_ccw	: return GL_CCW;
+			default			: return value;
+			case order_cw	: return GL_CW;
+			case order_ccw	: return GL_CCW;
 			}
 		}
 		else // to user
@@ -388,8 +388,8 @@ namespace ml
 			switch (value)
 			{
 			default		: return value;
-			case GL_CW	: return front_face_cw;
-			case GL_CCW	: return front_face_ccw;
+			case GL_CW	: return order_cw;
+			case GL_CCW	: return order_ccw;
 			}
 		}
 	}
@@ -1387,7 +1387,7 @@ namespace ml
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp));
-		return _front_face<gl::to_user>(temp);
+		return _order<gl::to_user>(temp);
 	}
 
 	bool opengl_render_api::get_depth_enabled() const
@@ -1397,18 +1397,18 @@ namespace ml
 		return temp;
 	}
 
-	uint32_t opengl_render_api::get_depth_function() const
-	{
-		uint32_t temp{};
-		glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp));
-		return _predicate<gl::to_user>(temp);
-	}
-
 	bool opengl_render_api::get_depth_mask() const
 	{
 		bool temp{};
 		glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, (uint8_t *)&temp));
 		return temp;
+	}
+
+	uint32_t opengl_render_api::get_depth_predicate() const
+	{
+		uint32_t temp{};
+		glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp));
+		return _predicate<gl::to_user>(temp);
 	}
 
 	depth_range opengl_render_api::get_depth_range() const
@@ -1497,7 +1497,7 @@ namespace ml
 
 	void opengl_render_api::set_cull_order(uint32_t order)
 	{
-		glCheck(glFrontFace(_front_face<gl::to_impl>(order)));
+		glCheck(glFrontFace(_order<gl::to_impl>(order)));
 	}
 
 	void opengl_render_api::set_depth_enabled(bool enabled)
@@ -1505,14 +1505,14 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_DEPTH_TEST));
 	}
 
-	void opengl_render_api::set_depth_function(uint32_t predicate)
-	{
-		glCheck(glDepthFunc(_predicate<gl::to_impl>(predicate)));
-	}
-
 	void opengl_render_api::set_depth_mask(bool enabled)
 	{
 		glCheck(glDepthMask(enabled));
+	}
+
+	void opengl_render_api::set_depth_predicate(uint32_t predicate)
+	{
+		glCheck(glDepthFunc(_predicate<gl::to_impl>(predicate)));
 	}
 
 	void opengl_render_api::set_depth_range(depth_range const & value)

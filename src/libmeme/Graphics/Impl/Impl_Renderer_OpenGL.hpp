@@ -270,7 +270,7 @@ namespace ml
 
 		bool get_depth_enabled() const override;
 		
-		uint32_t get_depth_function() const override;
+		uint32_t get_depth_predicate() const override;
 		
 		bool get_depth_mask() const override;
 
@@ -306,7 +306,7 @@ namespace ml
 
 		void set_depth_enabled(bool enabled) override;
 		
-		void set_depth_function(uint32_t predicate) override;
+		void set_depth_predicate(uint32_t predicate) override;
 		
 		void set_depth_mask(bool enabled) override;
 

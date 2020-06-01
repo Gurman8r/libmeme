@@ -41,11 +41,11 @@ namespace ml
 			// cull
 			render_command::set_cull_enabled(true),
 			render_command::set_cull_facet(gl::facet_back),
-			render_command::set_cull_order(gl::front_face_ccw),
+			render_command::set_cull_order(gl::order_ccw),
 
 			// depth
 			render_command::set_depth_enabled(true),
-			render_command::set_depth_function(gl::predicate_less),
+			render_command::set_depth_predicate(gl::predicate_less),
 			render_command::set_depth_mask(true),
 			render_command::set_depth_range({ 0.f, 1.f }),
 
