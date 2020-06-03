@@ -3,7 +3,7 @@
 
 #include <libmeme/Graphics/RenderAPI.hpp>
 
-namespace ml
+namespace ml::gl
 {
 	// render command generators
 	class render_command final
@@ -12,13 +12,13 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static gl::command builtin(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command builtin(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), render_api::get(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static gl::command custom(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command custom(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), ML_forward(args)...);
 		}
@@ -30,7 +30,7 @@ namespace ml
 			return builtin(&render_api::set_alpha_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_alpha_fn(gl::alpha_fn const & value) noexcept
+		ML_NODISCARD static auto set_alpha_fn(alpha_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_alpha_fn, value);
 		}
@@ -45,12 +45,12 @@ namespace ml
 			return builtin(&render_api::set_blend_color, value);
 		}
 
-		ML_NODISCARD static auto set_blend_eq(gl::blend_eq const & value) noexcept
+		ML_NODISCARD static auto set_blend_eq(blend_eq const & value) noexcept
 		{
 			return builtin(&render_api::set_blend_eq, value);
 		}
 
-		ML_NODISCARD static auto set_blend_fn(gl::blend_fn const & value) noexcept
+		ML_NODISCARD static auto set_blend_fn(blend_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_blend_fn, value);
 		}
@@ -90,7 +90,7 @@ namespace ml
 			return builtin(&render_api::set_depth_pr, predicate);
 		}
 
-		ML_NODISCARD static auto set_depth_range(gl::depth_range const & value) noexcept
+		ML_NODISCARD static auto set_depth_range(depth_range const & value) noexcept
 		{
 			return builtin(&render_api::set_depth_range, value);
 		}
@@ -100,7 +100,7 @@ namespace ml
 			return builtin(&render_api::set_stencil_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_stencil_fn(gl::stencil_fn const & value) noexcept
+		ML_NODISCARD static auto set_stencil_fn(stencil_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_stencil_fn, value);
 		}
@@ -135,6 +135,15 @@ namespace ml
 		ML_NODISCARD static auto flush() noexcept
 		{
 			return builtin(&render_api::flush);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class T
+		> ML_NODISCARD static auto upload(handle loc, T const & value) noexcept
+		{
+			return builtin(static_cast<void(render_api::*)(handle, T const &)
+			>(&render_api::upload), loc, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

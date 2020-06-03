@@ -9,7 +9,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl objects
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -23,11 +23,11 @@ namespace ml
 			this->bind();
 		}
 
-		~opengl_vertexarray() noexcept { this->destroy(); }
+		~opengl_vertexarray() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
 		void bind() const override;
 
@@ -37,13 +37,19 @@ namespace ml
 
 		void set_ibo(shared<indexbuffer> const & value) override;
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		inline shared<indexbuffer> const & get_ibo() const noexcept override { return m_indices; }
 
 		inline pmr::vector<shared<vertexbuffer>> const & get_vbos() const noexcept override { return m_vertices; }
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
 		uint32_t							m_handle	{}; // handle
@@ -57,43 +63,49 @@ namespace ml
 	class opengl_vertexbuffer final : public vertexbuffer
 	{
 	public:
-		opengl_vertexbuffer(gl::buffer verts, uint32_t count) noexcept : m_usage{ gl::usage_static_draw }
+		opengl_vertexbuffer(buffer verts, uint32_t count) noexcept : m_usage{ usage_static_draw }
 		{
 			this->generate();
 			this->bind();
 			this->set_data(verts, count);
 		}
 
-		opengl_vertexbuffer(uint32_t count) noexcept : m_usage{ gl::usage_dynamic_draw }
+		opengl_vertexbuffer(uint32_t count) noexcept : m_usage{ usage_dynamic_draw }
 		{
 			this->generate();
 			this->bind();
 			this->set_data(nullptr, count);
 		}
 
-		~opengl_vertexbuffer() noexcept { this->destroy(); }
+		~opengl_vertexbuffer() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void set_data(gl::buffer verts, uint32_t count) override;
+		void set_data(buffer verts, uint32_t count) override;
 
-		void set_data(gl::buffer verts, uint32_t count, uint32_t offset) override;
+		void set_data(buffer verts, uint32_t count, uint32_t offset) override;
 
 		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
 
 		inline uint32_t get_count() const noexcept override { return m_count; }
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		inline buffer_layout const & get_layout() const noexcept override { return m_layout; }
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
 		uint32_t		m_handle	{}; // handle
@@ -108,30 +120,36 @@ namespace ml
 	class opengl_indexbuffer final : public indexbuffer
 	{
 	public:
-		opengl_indexbuffer(gl::buffer inds, uint32_t count) noexcept
+		opengl_indexbuffer(buffer inds, uint32_t count) noexcept
 		{
 			this->generate();
 			this->bind();
 			this->set_data(inds, count);
 		}
 
-		~opengl_indexbuffer() noexcept { this->destroy(); }
+		~opengl_indexbuffer() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void set_data(gl::buffer inds, uint32_t count) override;
+		void set_data(buffer inds, uint32_t count) override;
 
 		inline uint32_t get_count() const noexcept override { return m_count; }
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
 		uint32_t	m_handle	{}; // handle
@@ -150,11 +168,11 @@ namespace ml
 			this->resize(size);
 		}
 
-		~opengl_framebuffer() noexcept { this->destroy(); }
+		~opengl_framebuffer() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
 		void bind() const override;
 
@@ -170,11 +188,17 @@ namespace ml
 
 		inline uint32_t get_format() const noexcept override { return m_format; }
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		inline vec2i get_size() const noexcept override { return m_size; }
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
 		uint32_t			m_handle	{}	; // handle
@@ -186,27 +210,27 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// opengl texture
+	// opengl texture2d
 	class opengl_texture2d final : public texture2d
 	{
 	public:
-		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, gl::buffer pixels) noexcept
+		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
 			: m_i_format{ iformat }, m_c_format{ cformat }, m_p_type{ ptype }, m_flags{ flags }
 		{
 			this->update(size, pixels);
 		}
 
-		~opengl_texture2d() noexcept { this->destroy(); }
+		~opengl_texture2d() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void update(vec2i const & size, gl::buffer pixels = nullptr) override;
+		void update(vec2i const & size, buffer pixels = nullptr) override;
 
 		void set_mipmapped(bool value) override;
 
@@ -218,11 +242,17 @@ namespace ml
 
 		inline int32_t get_flags() const noexcept override { return m_flags; }
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 		inline vec2i const & get_size() const noexcept override { return m_size; }
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
 		uint32_t		m_handle	{}; // handle
@@ -241,21 +271,19 @@ namespace ml
 		struct uniform_binder;
 
 	public:
-		opengl_shader() noexcept
-		{
-			this->generate();
-			this->bind(false);
-		}
+		opengl_shader() noexcept { this->generate(); }
 
-		~opengl_shader() noexcept { this->destroy(); }
+		~opengl_shader() noexcept override { this->release(); }
 
 		bool generate() override;
 
-		bool destroy() override;
+		bool release() override;
 
-		void bind(bool bind_textures = true) const override;
+		void bind() const override;
 
 		void unbind() const override;
+
+		void bind_textures() const override;
 
 		int32_t attach(uint32_t type, uint32_t count, cstring const * src) override;
 
@@ -283,12 +311,18 @@ namespace ml
 
 		inline bool nonzero() const noexcept override { return (bool)m_handle; }
 
-		inline gl::handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+
+	protected:
+		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other);
+		}
 
 	private:
-		uint32_t						m_handle	{}; // handle
-		ds::map<hash_t, int32_t>		m_uniforms	{}; // uniform cache
-		ds::map<int32_t, gl::handle>	m_textures	{}; // texture cache
+		uint32_t					m_handle	{}; // handle
+		ds::map<hash_t, int32_t>	m_uniforms	{}; // uniform cache
+		ds::map<int32_t, handle>	m_textures	{}; // texture cache
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -297,7 +331,7 @@ namespace ml
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl api
-namespace ml
+namespace ml::gl
 {
 	class opengl_render_api final : public render_api
 	{
@@ -317,21 +351,21 @@ namespace ml
 
 		uint32_t get_error() const override;
 
-		gl::api_info const & get_info() const override;
+		api_info const & get_info() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool get_alpha_enabled() const override;
 
-		gl::alpha_fn get_alpha_fn() const override;
+		alpha_fn get_alpha_fn() const override;
 		
 		bool get_blend_enabled() const override;
 
 		color get_blend_color() const override;
 		
-		gl::blend_eq get_blend_eq() const override;
+		blend_eq get_blend_eq() const override;
 		
-		gl::blend_fn get_blend_fn() const override;
+		blend_fn get_blend_fn() const override;
 		
 		color get_clear_color() const override;
 
@@ -347,11 +381,11 @@ namespace ml
 		
 		bool get_depth_mask() const override;
 
-		gl::depth_range get_depth_range() const override;
+		depth_range get_depth_range() const override;
 
 		bool get_stencil_enabled() const override;
 
-		gl::stencil_fn get_stencil_fn() const override;
+		stencil_fn get_stencil_fn() const override;
 
 		int_rect get_viewport() const override;
 
@@ -359,15 +393,15 @@ namespace ml
 
 		void set_alpha_enabled(bool enabled) override;
 
-		void set_alpha_fn(gl::alpha_fn const & value) override;
+		void set_alpha_fn(alpha_fn const & value) override;
 		
 		void set_blend_color(color const & value) override;
 
 		void set_blend_enabled(bool enabled) override;
 		
-		void set_blend_eq(gl::blend_eq const & value) override;
+		void set_blend_eq(blend_eq const & value) override;
 		
-		void set_blend_fn(gl::blend_fn const & value) override;
+		void set_blend_fn(blend_fn const & value) override;
 		
 		void set_clear_color(color const & value) override;
 		
@@ -383,11 +417,11 @@ namespace ml
 		
 		void set_depth_mask(bool enabled) override;
 
-		void set_depth_range(gl::depth_range const & value) override;
+		void set_depth_range(depth_range const & value) override;
 
 		void set_stencil_enabled(bool enabled) override;
 
-		void set_stencil_fn(gl::stencil_fn const & value) override;
+		void set_stencil_fn(stencil_fn const & value) override;
 
 		void set_viewport(int_rect const & bounds) override;
 
@@ -402,6 +436,24 @@ namespace ml
 		void draw_indexed(uint32_t count) override;
 		
 		void flush() override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void upload(handle loc, int32_t const & value) override;
+
+		void upload(handle loc, float_t const & value) override;
+
+		void upload(handle loc, vec2 const & value) override;
+
+		void upload(handle loc, vec3 const & value) override;
+
+		void upload(handle loc, vec4 const & value) override;
+
+		void upload(handle loc, mat2 const & value) override;
+
+		void upload(handle loc, mat3 const & value) override;
+
+		void upload(handle loc, mat4 const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

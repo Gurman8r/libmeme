@@ -421,9 +421,9 @@ namespace ml::gl
 		switch (value)
 		{
 		default	: return 0;
-		case 1	: return gl::format_red;
-		case 3	: return gl::format_rgb;
-		case 4	: return gl::format_rgba;
+		case 1	: return format_red;
+		case 3	: return format_rgb;
+		case 4	: return format_rgba;
 		}
 	}
 
@@ -432,9 +432,9 @@ namespace ml::gl
 		switch (value)
 		{
 		default				: return 0;
-		case gl::format_red	: return 1;
-		case gl::format_rgb	: return 3;
-		case gl::format_rgba: return 4;
+		case format_red	: return 1;
+		case format_rgb	: return 3;
+		case format_rgba: return 4;
 		}
 	}
 }
@@ -442,7 +442,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // layout
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -619,21 +619,31 @@ namespace ml
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // objects
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// base graphics object
 	class ML_GRAPHICS_API graphics_resource : public trackable, public non_copyable
 	{
 	public:
-		virtual ~graphics_resource() noexcept = default;
+		virtual ~graphics_resource() noexcept override = default;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
+		virtual bool generate() = 0;
 
-		ML_NODISCARD inline operator bool() const noexcept { return this->nonzero(); }
+		virtual bool release() = 0;
 
-	private:
+		virtual void bind() const = 0;
 
+		virtual void unbind() const = 0;
+
+		ML_NODISCARD bool is_equal(graphics_resource const & other) const noexcept
+		{
+			return this->do_is_equal(other);
+		}
+
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -651,29 +661,32 @@ namespace ml
 	class ML_GRAPHICS_API vertexarray : public graphics_resource
 	{
 	public:
-		virtual ~vertexarray() noexcept = default;
+		virtual ~vertexarray() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind() const = 0;
+		virtual void bind() const override = 0;
 
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
 
 		virtual void add_vbo(shared<vertexbuffer> const & value) = 0;
 
 		virtual void set_ibo(shared<indexbuffer> const & value) = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual shared<indexbuffer> const & get_ibo() const noexcept = 0;
 		
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vbos() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
 		ML_NODISCARD static shared<vertexarray> create() noexcept;
+
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -682,38 +695,36 @@ namespace ml
 	class ML_GRAPHICS_API vertexbuffer : public graphics_resource
 	{
 	public:
-		virtual ~vertexbuffer() noexcept = default;
+		virtual ~vertexbuffer() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind() const = 0;
+		virtual void bind() const override = 0;
 		
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
 
-		virtual void set_data(gl::buffer verts, uint32_t count) = 0;
+		virtual void set_data(buffer verts, uint32_t count) = 0;
 
-		virtual void set_data(gl::buffer verts, uint32_t count, uint32_t offset) = 0;
+		virtual void set_data(buffer verts, uint32_t count, uint32_t offset) = 0;
 
 		virtual void set_layout(buffer_layout const & value) = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const noexcept = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual buffer_layout const & get_layout() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
-		ML_NODISCARD static shared<vertexbuffer> create(gl::buffer verts, uint32_t count) noexcept;
+		ML_NODISCARD static shared<vertexbuffer> create(buffer verts, uint32_t count) noexcept;
 
 		ML_NODISCARD static shared<vertexbuffer> create(uint32_t count) noexcept;
 
-		ML_NODISCARD static shared<vertexbuffer> create(pmr::vector<float_t> const & verts) noexcept
-		{
-			return create(verts.data(), (uint32_t)verts.size() * sizeof(float_t));
-		}
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -722,30 +733,28 @@ namespace ml
 	class ML_GRAPHICS_API indexbuffer : public graphics_resource
 	{
 	public:
-		virtual ~indexbuffer() noexcept = default;
+		virtual ~indexbuffer() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind() const = 0;
+		virtual void bind() const override = 0;
 		
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
 
-		virtual void set_data(gl::buffer inds, uint32_t count) = 0;
+		virtual void set_data(buffer inds, uint32_t count) = 0;
 
 		ML_NODISCARD virtual uint32_t get_count() const noexcept = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
-		ML_NODISCARD static shared<indexbuffer> create(gl::buffer inds, uint32_t count) noexcept;
+		ML_NODISCARD static shared<indexbuffer> create(buffer inds, uint32_t count) noexcept;
 
-		ML_NODISCARD static shared<indexbuffer> create(pmr::vector<uint32_t> const & inds) noexcept
-		{
-			return create(inds.data(), (uint32_t)inds.size());
-		}
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -754,15 +763,15 @@ namespace ml
 	class ML_GRAPHICS_API framebuffer : public graphics_resource
 	{
 	public:
-		virtual ~framebuffer() noexcept = default;
+		virtual ~framebuffer() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind() const = 0;
+		virtual void bind() const override = 0;
 		
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
 
 		virtual void bind_texture(uint32_t slot = 0) const = 0;
 
@@ -774,13 +783,16 @@ namespace ml
 
 		ML_NODISCARD virtual uint32_t get_format() const noexcept = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual vec2i get_size() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
 		ML_NODISCARD static shared<framebuffer> create(uint32_t format, vec2i const & size) noexcept;
+
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -789,17 +801,17 @@ namespace ml
 	class ML_GRAPHICS_API texture2d : public graphics_resource
 	{
 	public:
-		virtual ~texture2d() noexcept = default;
+		virtual ~texture2d() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind() const = 0;
+		virtual void bind() const override = 0;
 
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
 
-		virtual void update(vec2i const & size, gl::buffer pixels = nullptr) = 0;
+		virtual void update(vec2i const & size, buffer pixels = nullptr) = 0;
 
 		virtual void set_mipmapped(bool value) = 0;
 
@@ -811,31 +823,34 @@ namespace ml
 
 		ML_NODISCARD virtual int32_t get_flags() const noexcept = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual vec2i const & get_size() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
 		ML_NODISCARD static shared<texture2d> create(
 			vec2i const &	size,
 			uint32_t		iformat,
 			uint32_t		cformat,
-			uint32_t		ptype = gl::type_unsigned_byte,
-			int32_t			flags = gl::texture_flags_default,
-			gl::buffer		pixels = nullptr
+			uint32_t		ptype = type_unsigned_byte,
+			int32_t			flags = texture_flags_default,
+			buffer			pixels = nullptr
 		) noexcept;
 
-		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = gl::texture_flags_default) noexcept
+		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
-			uint32_t const fmt{ gl::channels_to_format(img.channels()) };
-			return create(img.size(), fmt, fmt, gl::type_unsigned_byte, flags, img.data());
+			uint32_t const fmt{ channels_to_format(img.channels()) };
+			return create(img.size(), fmt, fmt, type_unsigned_byte, flags, img.data());
 		}
 
-		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = gl::texture_flags_default) noexcept
+		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
 		{
 			return create(image{ path }, flags);
 		}
+
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -844,15 +859,17 @@ namespace ml
 	class ML_GRAPHICS_API shader : public graphics_resource
 	{
 	public:
-		virtual ~shader() noexcept = default;
+		virtual ~shader() noexcept override = default;
 
-		virtual bool generate() = 0;
+		virtual bool generate() override = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool release() override = 0;
 
-		virtual void bind(bool bind_textures = true) const = 0;
+		virtual void bind() const override = 0;
 		
-		virtual void unbind() const = 0;
+		virtual void unbind() const override = 0;
+
+		virtual void bind_textures() const = 0;
 
 		virtual int32_t attach(uint32_t type, uint32_t count, cstring const * src) = 0;
 
@@ -880,23 +897,14 @@ namespace ml
 
 		ML_NODISCARD virtual bool set_uniform(cstring name, shared<texture2d> const & value) = 0;
 
-		ML_NODISCARD virtual gl::handle get_handle() const noexcept = 0;
+		ML_NODISCARD virtual handle get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual bool nonzero() const noexcept override = 0;
+		ML_NODISCARD virtual bool nonzero() const noexcept = 0;
 
 		ML_NODISCARD static shared<shader> create() noexcept;
 
-		ML_NODISCARD static shared<shader> create(cstring v_src, cstring f_src, cstring g_src = 0) noexcept
-		{
-			return ([&, &ptr = create()]()
-			{
-				ptr->attach(gl::vertex_shader, 1, &v_src);
-				ptr->attach(gl::fragment_shader, 1, &f_src);
-				ptr->attach(gl::geometry_shader, 1, &g_src);
-				ptr->link();
-				return ptr;
-			})();
-		}
+	protected:
+		virtual bool do_is_equal(graphics_resource const & other) const noexcept override = 0;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -954,7 +962,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // api
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -964,7 +972,7 @@ namespace ml
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~render_api() noexcept = default;
+		virtual ~render_api() noexcept override = default;
 
 		virtual bool do_initialize() = 0;
 
@@ -992,21 +1000,21 @@ namespace ml
 
 		virtual uint32_t get_error() const = 0;
 
-		virtual gl::api_info const & get_info() const = 0;
+		virtual api_info const & get_info() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool get_alpha_enabled() const = 0;
 
-		virtual gl::alpha_fn get_alpha_fn() const = 0;
+		virtual alpha_fn get_alpha_fn() const = 0;
 		
 		virtual bool get_blend_enabled() const = 0;
 
 		virtual color get_blend_color() const = 0;
 		
-		virtual gl::blend_eq get_blend_eq() const = 0;
+		virtual blend_eq get_blend_eq() const = 0;
 		
-		virtual gl::blend_fn get_blend_fn() const = 0;
+		virtual blend_fn get_blend_fn() const = 0;
 		
 		virtual color get_clear_color() const = 0;
 
@@ -1022,11 +1030,11 @@ namespace ml
 		
 		virtual uint32_t get_depth_pr() const = 0;
 
-		virtual gl::depth_range get_depth_range() const = 0;
+		virtual depth_range get_depth_range() const = 0;
 
 		virtual bool get_stencil_enabled() const = 0;
 
-		virtual gl::stencil_fn get_stencil_fn() const = 0;
+		virtual stencil_fn get_stencil_fn() const = 0;
 
 		virtual int_rect get_viewport() const = 0;
 
@@ -1034,15 +1042,15 @@ namespace ml
 
 		virtual void set_alpha_enabled(bool enabled) = 0;
 
-		virtual void set_alpha_fn(gl::alpha_fn const & value) = 0;
+		virtual void set_alpha_fn(alpha_fn const & value) = 0;
 		
 		virtual void set_blend_color(color const & value) = 0;
 
 		virtual void set_blend_enabled(bool enabled) = 0;
 		
-		virtual void set_blend_eq(gl::blend_eq const & value) = 0;
+		virtual void set_blend_eq(blend_eq const & value) = 0;
 		
-		virtual void set_blend_fn(gl::blend_fn const & value) = 0;
+		virtual void set_blend_fn(blend_fn const & value) = 0;
 		
 		virtual void set_clear_color(color const & value) = 0;
 		
@@ -1058,11 +1066,11 @@ namespace ml
 
 		virtual void set_depth_pr(uint32_t predicate) = 0;
 		
-		virtual void set_depth_range(gl::depth_range const & value) = 0;
+		virtual void set_depth_range(depth_range const & value) = 0;
 
 		virtual void set_stencil_enabled(bool enabled) = 0;
 
-		virtual void set_stencil_fn(gl::stencil_fn const & value) = 0;
+		virtual void set_stencil_fn(stencil_fn const & value) = 0;
 
 		virtual void set_viewport(int_rect const & bounds) = 0;
 
@@ -1077,6 +1085,24 @@ namespace ml
 		virtual void draw_indexed(uint32_t count) = 0;
 		
 		virtual void flush() = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void upload(handle loc, int32_t const & value) = 0;
+
+		virtual void upload(handle loc, float_t const & value) = 0;
+
+		virtual void upload(handle loc, vec2 const & value) = 0;
+
+		virtual void upload(handle loc, vec3 const & value) = 0;
+
+		virtual void upload(handle loc, vec4 const & value) = 0;
+
+		virtual void upload(handle loc, mat2 const & value) = 0;
+
+		virtual void upload(handle loc, mat3 const & value) = 0;
+
+		virtual void upload(handle loc, mat4 const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

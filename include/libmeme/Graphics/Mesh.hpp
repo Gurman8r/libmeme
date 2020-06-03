@@ -14,30 +14,36 @@ namespace ml
 		using contiguous_t	= typename pmr::vector<float_t>;
 		using indices_t		= typename pmr::vector<uint32_t>;
 
-		mesh(shared<vertexarray> const & vao = vertexarray::create()) noexcept
-			: m_vao{ vao }, m_verts{}, m_inds{}
+		mesh(shared<gl::vertexarray> const & vao = nullptr, contiguous_t const & verts = {}, indices_t const & inds = {}) noexcept
+			: m_vao{ vao }, m_verts{ verts }, m_inds{ inds }
 		{
 		}
 
-		mesh(contiguous_t const & vertices, indices_t const & indices = {}, buffer_layout const & layout = {})
-			: m_vao{ vertexarray::create() }, m_verts{ vertices }, m_inds{ indices }
+		mesh(contiguous_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
+			: mesh{ gl::vertexarray::create(), verts, inds }
 		{
-			auto vb = vertexbuffer::create(m_verts);
+			auto vb = gl::vertexbuffer::create
+			(
+				m_verts.data(), (uint32_t)m_verts.size() * sizeof(float_t)
+			);
 
 			vb->set_layout(layout);
 
 			m_vao->add_vbo(vb);
 
-			m_vao->set_ibo(!m_inds.empty() ? indexbuffer::create(m_inds) : nullptr);
+			m_vao->set_ibo(m_inds.empty() ? nullptr : gl::indexbuffer::create
+			(
+				m_inds.data(), (uint32_t)m_inds.size()
+			));
 		}
 
-		mesh(vertices_t const & vertices, indices_t const & indices = {})
-			: mesh{ util::contiguous(vertices), indices }
+		mesh(vertices_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
+			: mesh{ util::contiguous(verts), inds, layout }
 		{
 		}
 
-		mesh(fs::path const & path) noexcept
-			: mesh{ model_loader::read(path), {} }
+		mesh(fs::path const & path, gl::buffer_layout const & layout = {}) noexcept
+			: mesh{ model_loader::read(path), {}, layout }
 		{
 		}
 
@@ -79,14 +85,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto vao() & noexcept -> shared<vertexarray> & { return m_vao; }
+		auto vao() & noexcept -> shared<gl::vertexarray> & { return m_vao; }
 
-		auto vao() const & noexcept -> shared<vertexarray> const & { return m_vao; }
+		auto vao() const & noexcept -> shared<gl::vertexarray> const & { return m_vao; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<vertexarray>	m_vao;
+		shared<gl::vertexarray>	m_vao;
 		contiguous_t		m_verts;
 		indices_t			m_inds;
 

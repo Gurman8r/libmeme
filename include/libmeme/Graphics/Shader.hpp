@@ -1,10 +1,13 @@
 #ifndef _ML_SHADER_HPP_
 #define _ML_SHADER_HPP_
 
+// WIP
+
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Graphics/Uniform.hpp>
 #include <libmeme/Graphics/RenderAPI.hpp>
 
+// SHADER ASSET
 namespace ml
 {
 	struct shader_asset final : trackable
@@ -12,6 +15,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		
 		using shader_source = typename meta::array<pmr::string, gl::shader_type_MAX>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -45,12 +49,6 @@ namespace ml
 			swap(std::move(other));
 		}
 
-		shader_asset(shared<shader> && value, allocator_type alloc = {}) noexcept
-			: m_obj{ std::move(value) }
-			, m_src{ std::allocator_arg, alloc }
-		{
-		}
-		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		shader_asset & operator=(shader_asset const & other)
@@ -109,28 +107,53 @@ namespace ml
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
 		{
 			if (v_src.empty() || f_src.empty()) { return false; }
-		
-			m_src = { v_src, f_src, {} };
+			else { m_src = { v_src, f_src, {} }; }
+			
+			if (!m_obj) { m_obj = gl::shader::create(); }
+			else
+			{
+				m_obj->release();
+				m_obj->generate();
+			}
 
-			m_obj = shader::create(v_src.c_str(), f_src.c_str(), nullptr);
-
+			m_obj->attach(gl::vertex_shader, v_src.c_str());
+			m_obj->attach(gl::fragment_shader, f_src.c_str());
+			m_obj->link();
+			
 			return (bool)m_obj;
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
-		
-			m_src = { v_src, f_src, g_src };
-
-			m_obj = shader::create(v_src.c_str(), f_src.c_str(), g_src.c_str());
+			else { m_src = { v_src, f_src, g_src }; }
+			
+			if (!m_obj) { m_obj = gl::shader::create(); }
+			else
+			{
+				m_obj->release();
+				m_obj->generate();
+			}
+			
+			m_obj->attach(gl::vertex_shader, v_src.c_str());
+			m_obj->attach(gl::fragment_shader, f_src.c_str());
+			m_obj->attach(gl::geometry_shader, g_src.c_str());
+			m_obj->link();
 
 			return (bool)m_obj;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void bind(bool bind_textures = true) const { m_obj->bind(bind_textures); }
+		void bind(bool bind_textures = true) const
+		{
+			m_obj->bind();
+
+			if (bind_textures)
+			{
+				m_obj->bind_textures();
+			}
+		}
 
 		void unbind() const { m_obj->unbind(); }
 
@@ -153,18 +176,18 @@ namespace ml
 			if (u.name().empty()) { return false; }
 			switch (u.type().hash())
 			{
-			default					: return false;
-			case hashof_v<bool>		: return set_uniform(u.name(), *u.get<bool>());
-			case hashof_v<int32_t>	: return set_uniform(u.name(), *u.get<int32_t>());
-			case hashof_v<float_t>	: return set_uniform(u.name(), *u.get<float_t>());
-			case hashof_v<vec2>		: return set_uniform(u.name(), *u.get<vec2>());
-			case hashof_v<vec3>		: return set_uniform(u.name(), *u.get<vec3>());
-			case hashof_v<vec4>		: return set_uniform(u.name(), *u.get<vec4>());
-			case hashof_v<color>	: return set_uniform(u.name(), *u.get<color>());
-			case hashof_v<mat2>		: return set_uniform(u.name(), *u.get<mat2>());
-			case hashof_v<mat3>		: return set_uniform(u.name(), *u.get<mat3>());
-			case hashof_v<mat4>		: return set_uniform(u.name(), *u.get<mat4>());
-			case hashof_v<texture2d>: return set_uniform(u.name(), *u.get<texture2d>());
+			default						: return false;
+			case hashof_v<bool>			: return set_uniform(u.name(), *u.get<bool>());
+			case hashof_v<int32_t>		: return set_uniform(u.name(), *u.get<int32_t>());
+			case hashof_v<float_t>		: return set_uniform(u.name(), *u.get<float_t>());
+			case hashof_v<vec2>			: return set_uniform(u.name(), *u.get<vec2>());
+			case hashof_v<vec3>			: return set_uniform(u.name(), *u.get<vec3>());
+			case hashof_v<vec4>			: return set_uniform(u.name(), *u.get<vec4>());
+			case hashof_v<color>		: return set_uniform(u.name(), *u.get<color>());
+			case hashof_v<mat2>			: return set_uniform(u.name(), *u.get<mat2>());
+			case hashof_v<mat3>			: return set_uniform(u.name(), *u.get<mat3>());
+			case hashof_v<mat4>			: return set_uniform(u.name(), *u.get<mat4>());
+			case hashof_v<gl::texture2d>: return set_uniform(u.name(), *u.get<gl::texture2d>());
 			}
 		}
 
@@ -178,12 +201,15 @@ namespace ml
 
 	private:
 		shader_source m_src;
-		shared<shader> m_obj;
+		shared<gl::shader> m_obj;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+}
 
-	// WIP
+// SHADER CACHE
+namespace ml
+{
 	struct shader_cache final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -239,7 +265,7 @@ namespace ml
 			if (auto const contents{ util::get_file_contents(path) })
 			{
 				this->src(i, name) = { contents->begin(), contents->end() };
-				
+
 				return true;
 			}
 			return false;

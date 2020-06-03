@@ -9,9 +9,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared<texture2d>	graphic	{};
-		float_rect			bounds	{};
-		uint32_t			advance	{};
+		shared<gl::texture2d> graphic{};
+
+		float_rect bounds{};
+		
+		uint32_t advance{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

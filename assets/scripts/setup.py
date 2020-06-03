@@ -2,7 +2,7 @@ import libmeme          as ml       # structures
 import libmeme_engine   as engine   # systems
 
 # setup window
-print("[ i ] loading window...")
+print("[i] loading window...")
 assert(engine.window.open(ml.window_settings(
     "libmeme",
     ml.video_mode([ 1280, 720 ]),
@@ -18,12 +18,12 @@ assert(engine.window.open(ml.window_settings(
     True))                              # install callbacks
 
 # setup gui
-print("[ i ] loading gui...")
+print("[i] loading gui...")
 assert(engine.gui.initialize("#version 130"))
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
 # setup plugins
-print("[ i ] loading plugins...")
+print("[i] loading plugins...")
 assert(engine.plugins.load("demo"))
 
 # print messages

@@ -58,7 +58,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t info(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[ i ] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out() << "[i] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG info();
 	}
@@ -76,7 +76,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t error(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[ e ] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out() << "[e] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG error();
 	}
@@ -94,7 +94,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t warning(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[ w ] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out() << "[w] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG warning();
 	}

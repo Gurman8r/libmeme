@@ -9,7 +9,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using sampler2d = typename shared<texture2d>;
+		using sampler2d = typename shared<gl::texture2d>;
 
 		template <class T> static constexpr bool is_sampler2d_ish
 		{

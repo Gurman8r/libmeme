@@ -73,7 +73,7 @@ namespace ml
 		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
 			ML_bind_scope(*shd, true);
-			render_command::draw(msh->vao())();
+			gl::render_command::draw(msh->vao())();
 		}
 	};
 
@@ -126,7 +126,7 @@ namespace ml
 		ds::map< pmr::string, material			> m_materials	{};
 		ds::map< pmr::string, mesh				> m_meshes		{};
 		ds::map< pmr::string, shader_asset		> m_shaders		{};
-		ds::map< pmr::string, shared<texture2d>	> m_textures	{};
+		ds::map< pmr::string, shared<gl::texture2d>	> m_textures	{};
 
 
 		// ECS
@@ -142,7 +142,7 @@ namespace ml
 
 		vec2 m_resolution{ 1280, 720 };
 
-		ds::array<shared<framebuffer>, 1> m_pipeline{};
+		ds::array<shared<gl::framebuffer>, 1> m_pipeline{};
 
 
 		// GUI
@@ -238,7 +238,7 @@ namespace ml
 
 			// RENDERING
 			{
-				m_pipeline[0] = framebuffer::create(gl::format_rgba, m_resolution);
+				m_pipeline[0] = gl::framebuffer::create(gl::format_rgba, m_resolution);
 			}
 
 			// ICON
@@ -254,12 +254,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= texture2d::create(m_images["default"]);
-				m_textures["doot"]			= texture2d::create(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= texture2d::create(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= texture2d::create(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= gl::texture2d::create(m_images["default"]);
+				m_textures["doot"]			= gl::texture2d::create(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gl::texture2d::create(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gl::texture2d::create(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gl::texture2d::create(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gl::texture2d::create(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -326,18 +326,18 @@ namespace ml
 				auto const _3d = material
 				{
 					make_uniform<color>("u_color", colors::white),
-					make_uniform<texture2d>("u_texture0", m_textures["default"])
+					make_uniform<gl::texture2d>("u_texture0", m_textures["default"])
 				}
 				+ _timers + _camera + _tf;
 
 				// earth
 				m_materials["earth"] = material{ _3d }
-					.set<texture2d>("u_texture0", m_textures["earth_dm_2k"])
+					.set<gl::texture2d>("u_texture0", m_textures["earth_dm_2k"])
 					;
 
 				// moon
 				m_materials["moon"] = material{ _3d }
-					.set<texture2d>("u_texture0", m_textures["moon_dm_2k"])
+					.set<gl::texture2d>("u_texture0", m_textures["moon_dm_2k"])
 					;
 			}
 
@@ -411,7 +411,7 @@ namespace ml
 			if (pmr::stringstream ss{ m_cout.sstr().str() })
 			{
 				pmr::string line{};
-				while (std::getline(m_cout.sstr(), line))
+				while (std::getline(ss, line))
 				{
 					m_console.printl(line);
 				}
@@ -442,10 +442,10 @@ namespace ml
 
 				for (auto const & cmd :
 				{
-					render_command::set_cull_enabled(false),
-					render_command::set_clear_color(colors::magenta),
-					render_command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
-					render_command::custom([&]()
+					gl::render_command::set_cull_enabled(false),
+					gl::render_command::set_clear_color(colors::magenta),
+					gl::render_command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
+					gl::render_command::custom([&]()
 					{
 						m_ecs.update_system<x_draw_meshes>();
 					}),
@@ -703,7 +703,7 @@ namespace ml
 		{
 			static gui::texture_preview preview{};
 
-			shared<texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
+			shared<gl::texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
 			preview.tex_addr = tex->get_handle();
 			preview.tex_size = tex->get_size();
 			
@@ -1160,7 +1160,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto api{ render_api::get() };
+			static auto api{ gl::render_api::get() };
 			static auto const & info{ api->get_info() };
 
 			if (ImGui::BeginMenuBar())

@@ -37,7 +37,7 @@ namespace ml { using namespace gl; }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl enums
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -525,11 +525,11 @@ namespace ml
 #	define glCheck(expr) (expr)
 #else
 #	define glCheck(expr) \
-	do { expr; _ML check_error(__FILE__, __LINE__, #expr); } while (0)
+	do { expr; _ML gl::check_error(__FILE__, __LINE__, #expr); } while (0)
 #endif
 
 // errors
-namespace ml
+namespace ml::gl
 {
 	inline void check_error(cstring file, uint32_t line, cstring expr) noexcept
 	{
@@ -537,7 +537,7 @@ namespace ml
 		{
 			std::cout
 				<< "An internal graphics error occurred ( " << code << " ):\n"
-				<< " \'" << fs::path{ file }.filename() << "\' (" << line << ")\n"
+				<< " " << fs::path{ file }.filename() << " (" << line << ")\n"
 				<< " expression:\n"
 				<< "  " << expr << "\n"
 				<< " description:\n"
@@ -551,7 +551,7 @@ namespace ml
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl objects
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -565,7 +565,7 @@ namespace ml
 		}
 	}
 
-	bool opengl_vertexarray::destroy()
+	bool opengl_vertexarray::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -610,7 +610,7 @@ namespace ml
 					e.get_component_count(),
 					type,
 					stride,
-					reinterpret_cast<gl::buffer>(e.offset)));
+					reinterpret_cast<buffer>(e.offset)));
 			}
 			else
 			{
@@ -619,7 +619,7 @@ namespace ml
 					type,
 					e.normalized,
 					stride,
-					reinterpret_cast<gl::buffer>(e.offset)));
+					reinterpret_cast<buffer>(e.offset)));
 			}
 			glCheck(glEnableVertexAttribArray(i));
 		});
@@ -646,7 +646,7 @@ namespace ml
 		}
 	}
 
-	bool opengl_vertexbuffer::destroy()
+	bool opengl_vertexbuffer::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -666,7 +666,7 @@ namespace ml
 		glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
 
-	void opengl_vertexbuffer::set_data(gl::buffer verts, uint32_t count)
+	void opengl_vertexbuffer::set_data(buffer verts, uint32_t count)
 	{
 		glCheck(glBufferData(
 			GL_ARRAY_BUFFER,
@@ -675,7 +675,7 @@ namespace ml
 			_usage<to_impl>(m_usage)));
 	}
 
-	void opengl_vertexbuffer::set_data(gl::buffer verts, uint32_t count, uint32_t offset)
+	void opengl_vertexbuffer::set_data(buffer verts, uint32_t count, uint32_t offset)
 	{
 		glCheck(glBufferSubData(
 			GL_ARRAY_BUFFER,
@@ -696,7 +696,7 @@ namespace ml
 		}
 	}
 
-	bool opengl_indexbuffer::destroy()
+	bool opengl_indexbuffer::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -716,7 +716,7 @@ namespace ml
 		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	}
 
-	void opengl_indexbuffer::set_data(gl::buffer inds, uint32_t count)
+	void opengl_indexbuffer::set_data(buffer inds, uint32_t count)
 	{
 		glCheck(glBufferData(
 			GL_ELEMENT_ARRAY_BUFFER,
@@ -733,7 +733,7 @@ namespace ml
 		return m_handle;
 	}
 
-	bool opengl_framebuffer::destroy()
+	bool opengl_framebuffer::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -765,7 +765,7 @@ namespace ml
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		this->destroy();
+		this->release();
 
 		this->generate();
 
@@ -818,7 +818,7 @@ namespace ml
 		}
 	}
 
-	bool opengl_texture2d::destroy()
+	bool opengl_texture2d::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -838,12 +838,12 @@ namespace ml
 		glCheck(glBindTexture(GL_TEXTURE_2D, NULL));
 	}
 
-	void opengl_texture2d::update(vec2i const & size, gl::buffer pixels)
+	void opengl_texture2d::update(vec2i const & size, buffer pixels)
 	{
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		this->destroy();
+		this->release();
 
 		this->generate();
 
@@ -851,9 +851,9 @@ namespace ml
 
 		glCheck(glTexImage2D(
 			GL_TEXTURE_2D, 0,
-			_format<gl::to_impl>(m_i_format), m_size[0], m_size[1], 0,
-			_format<gl::to_impl>(m_c_format),
-			_type<gl::to_impl>(m_p_type),
+			_format<to_impl>(m_i_format), m_size[0], m_size[1], 0,
+			_format<to_impl>(m_c_format),
+			_type<to_impl>(m_p_type),
 			pixels));
 
 		if (m_flags != texture_flags_none)
@@ -954,8 +954,8 @@ namespace ml
 			glCheck(glGetTexImage(
 				GL_TEXTURE_2D,
 				0,
-				_format<gl::to_impl>(m_i_format),
-				_type<gl::to_impl>(m_p_type),
+				_format<to_impl>(m_i_format),
+				_type<to_impl>(m_p_type),
 				temp.data()));
 		}
 		return temp;
@@ -1015,7 +1015,7 @@ namespace ml
 		}
 	}
 
-	bool opengl_shader::destroy()
+	bool opengl_shader::release()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1027,21 +1027,9 @@ namespace ml
 		}
 	}
 
-	void opengl_shader::bind(bool bind_textures) const
+	void opengl_shader::bind() const
 	{
 		glCheck(glUseProgramObjectARB(m_handle));
-
-		if (bind_textures)
-		{
-			uint32_t index{};
-			m_textures.for_each([&](int32_t location, gl::handle tex)
-			{
-				glCheck(glUniform1iARB(location, index));
-				glCheck(glActiveTexture(GL_TEXTURE0 + index));
-				glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)tex));
-				index++;
-			});
-		}
 	}
 
 	void opengl_shader::unbind() const
@@ -1049,38 +1037,52 @@ namespace ml
 		glCheck(glUseProgramObjectARB(0));
 	}
 
+	void opengl_shader::bind_textures() const
+	{
+		int32_t index{};
+		m_textures.for_each([&](int32_t loc, handle value)
+		{
+			render_api::get()->upload(ML_addressof(loc), index);
+			
+			glCheck(glActiveTexture(GL_TEXTURE0 + index));
+			
+			glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)value));
+			
+			index++;
+		});
+	}
+
 	int32_t opengl_shader::attach(uint32_t type, uint32_t count, cstring const * src)
 	{
+		if (!m_handle) { return 0; } // not generated
+
 		if (!count || !src || !*src) { return -1; } // no source
+		
+		uint32_t obj{};
+		glCheck(obj = glCreateShaderObjectARB(_shader_type<to_impl>(type)));
+		glCheck(glShaderSource(obj, count, src, nullptr));
+		glCheck(glCompileShaderARB(obj));
+
+		int32_t status{};
+		glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &status));
+		if (status == GL_FALSE)
+		{
+			// print errors
+			int32_t log_len{};
+			pmr::vector<char> log_str{ (size_t)log_len, pmr::vector<char>::allocator_type{} };
+			glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &log_len));
+			glCheck(glGetInfoLogARB(obj, log_len, &log_len, log_str.data()));
+			debug::error(log_str.data());
+			
+			glCheck(glDeleteObjectARB(obj));
+			this->release();
+		}
 		else
 		{
-			uint32_t obj{};
-			glCheck(obj = glCreateShaderObjectARB(_shader_type<to_impl>(type)));
-			glCheck(glShaderSource(obj, count, src, nullptr));
-			glCheck(glCompileShaderARB(obj));
-
-			int32_t err{};
-			glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &err));
-			if (!err)
-			{
-				int32_t log_len{};
-				glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &log_len));
-
-				pmr::vector<char> log_str{};
-				glCheck(glGetInfoLogARB(obj, log_len, &log_len, log_str.data()));
-
-				debug::error(log_str.data());
-
-				glCheck(glDeleteObjectARB(obj));
-				return 0;
-			}
-			else
-			{
-				glCheck(glAttachObjectARB(m_handle, obj));
-				glCheck(glDeleteObjectARB(obj));
-				return 1;
-			}
+			glCheck(glAttachObjectARB(m_handle, obj));
+			glCheck(glDeleteObjectARB(obj));
 		}
+		return status;
 	}
 
 	int32_t opengl_shader::link()
@@ -1089,13 +1091,14 @@ namespace ml
 
 		glCheck(glLinkProgramARB(m_handle));
 
-		int32_t err{};
+		int32_t status{};
+		glCheck(glGetObjectParameterivARB(m_handle, GL_OBJECT_LINK_STATUS_ARB, &status));
+		if (status == GL_FALSE)
+		{
+			this->release();
+		}
 		
-		glCheck(glGetObjectParameterivARB(m_handle, GL_OBJECT_LINK_STATUS_ARB, &err));
-		
-		if (!err) { this->destroy(); }
-		
-		return err;
+		return status;
 	}
 
 	bool opengl_shader::set_uniform(cstring name, bool value)
@@ -1105,65 +1108,65 @@ namespace ml
 
 	bool opengl_shader::set_uniform(cstring name, int32_t value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniform1iARB(location, value));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, float_t value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniform1fARB(location, value));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, vec2 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniform2fARB(location, value[0], value[1]));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, vec3 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniform3fARB(location, value[0], value[1], value[2]));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, vec4 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniform4fARB(location, value[0], value[1], value[2], value[3]));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, mat2 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniformMatrix2fvARB(location, (uint32_t)value.size(), false, value));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, mat3 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniformMatrix3fvARB(location, (uint32_t)value.size(), false, value));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
 	bool opengl_shader::set_uniform(cstring name, mat4 const & value)
 	{
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			glCheck(glUniformMatrix4fvARB(location, (uint32_t)value.size(), false, value));
+			render_api::get()->upload(ML_addressof(loc), value);
 		});
 	}
 
@@ -1175,15 +1178,15 @@ namespace ml
 			glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, (int32_t *)&temp);
 			return temp;
 		}) };
-		return uniform_binder(*this, name, [&](int32_t location)
+		return uniform_binder(*this, name, [&](int32_t loc)
 		{
-			if (auto const it{ m_textures.find(location) })
+			if (auto const it{ m_textures.find(loc) })
 			{
 				(*it->second) = value ? value->get_handle() : nullptr;
 			}
 			else if ((m_textures.size() + 1) < (size_t)max_texture_units)
 			{
-				m_textures.insert(location, value ? value->get_handle() : nullptr);
+				m_textures.insert(loc, value ? value->get_handle() : nullptr);
 			}
 		});
 	}
@@ -1194,7 +1197,7 @@ namespace ml
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // opengl api
-namespace ml
+namespace ml::gl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1228,12 +1231,12 @@ namespace ml
 
 	uint32_t opengl_render_api::get_error() const
 	{
-		return _error<gl::to_user>(glGetError());
+		return _error<to_user>(glGetError());
 	}
 
-	gl::api_info const & opengl_render_api::get_info() const
+	api_info const & opengl_render_api::get_info() const
 	{
-		static gl::api_info temp{};
+		static api_info temp{};
 		static ML_scope // once
 		{
 			// major version
@@ -1292,7 +1295,7 @@ namespace ml
 		return temp;
 	}
 
-	gl::alpha_fn opengl_render_api::get_alpha_fn() const
+	alpha_fn opengl_render_api::get_alpha_fn() const
 	{
 		return
 		{
@@ -1300,7 +1303,7 @@ namespace ml
 			{
 				uint32_t func{};
 				glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&func));
-				return _predicate<gl::to_user>(func);
+				return _predicate<to_user>(func);
 			}),
 			std::invoke([]() -> float_t
 			{
@@ -1325,7 +1328,7 @@ namespace ml
 		return temp;
 	}
 
-	gl::blend_eq opengl_render_api::get_blend_eq() const
+	blend_eq opengl_render_api::get_blend_eq() const
 	{
 		blend_eq temp{};
 		
@@ -1338,7 +1341,7 @@ namespace ml
 		return temp;
 	}
 
-	gl::blend_fn opengl_render_api::get_blend_fn() const
+	blend_fn opengl_render_api::get_blend_fn() const
 	{
 		blend_fn temp{};
 
@@ -1375,14 +1378,14 @@ namespace ml
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_CULL_FACE_MODE, (int32_t *)&temp));
-		return _facet<gl::to_user>(temp);
+		return _facet<to_user>(temp);
 	}
 
 	uint32_t opengl_render_api::get_cull_order() const
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp));
-		return _order<gl::to_user>(temp);
+		return _order<to_user>(temp);
 	}
 
 	bool opengl_render_api::get_depth_enabled() const
@@ -1403,10 +1406,10 @@ namespace ml
 	{
 		uint32_t temp{};
 		glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp));
-		return _predicate<gl::to_user>(temp);
+		return _predicate<to_user>(temp);
 	}
 
-	gl::depth_range opengl_render_api::get_depth_range() const
+	depth_range opengl_render_api::get_depth_range() const
 	{
 		depth_range temp{};
 		glCheck(glGetFloatv(GL_DEPTH_RANGE, &temp.nearVal));
@@ -1420,7 +1423,7 @@ namespace ml
 		return temp;
 	}
 
-	gl::stencil_fn opengl_render_api::get_stencil_fn() const
+	stencil_fn opengl_render_api::get_stencil_fn() const
 	{
 		stencil_fn temp{};
 
@@ -1448,9 +1451,9 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_ALPHA_TEST));
 	}
 
-	void opengl_render_api::set_alpha_fn(gl::alpha_fn const & value)
+	void opengl_render_api::set_alpha_fn(alpha_fn const & value)
 	{
-		glCheck(glAlphaFunc(_predicate<gl::to_impl>(value.pred), value.ref));
+		glCheck(glAlphaFunc(_predicate<to_impl>(value.pred), value.ref));
 	}
 
 	void opengl_render_api::set_blend_color(color const & value)
@@ -1463,20 +1466,20 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_BLEND));
 	}
 
-	void opengl_render_api::set_blend_eq(gl::blend_eq const & value)
+	void opengl_render_api::set_blend_eq(blend_eq const & value)
 	{
 		glCheck(glBlendEquationSeparate(
-			_function<gl::to_impl>(value.modeRGB),
-			_function<gl::to_impl>(value.modeAlpha)));
+			_function<to_impl>(value.modeRGB),
+			_function<to_impl>(value.modeAlpha)));
 	}
 
-	void opengl_render_api::set_blend_fn(gl::blend_fn const & value)
+	void opengl_render_api::set_blend_fn(blend_fn const & value)
 	{
 		glCheck(glBlendFuncSeparate(
-			_factor<gl::to_impl>(value.sfactorRGB),
-			_factor<gl::to_impl>(value.dfactorRGB),
-			_factor<gl::to_impl>(value.sfactorAlpha),
-			_factor<gl::to_impl>(value.dfactorAlpha)));
+			_factor<to_impl>(value.sfactorRGB),
+			_factor<to_impl>(value.dfactorRGB),
+			_factor<to_impl>(value.sfactorAlpha),
+			_factor<to_impl>(value.dfactorAlpha)));
 	}
 
 	void opengl_render_api::set_clear_color(color const & value)
@@ -1491,12 +1494,12 @@ namespace ml
 
 	void opengl_render_api::set_cull_facet(uint32_t facet)
 	{
-		glCheck(glCullFace(_facet<gl::to_impl>(facet)));
+		glCheck(glCullFace(_facet<to_impl>(facet)));
 	}
 
 	void opengl_render_api::set_cull_order(uint32_t order)
 	{
-		glCheck(glFrontFace(_order<gl::to_impl>(order)));
+		glCheck(glFrontFace(_order<to_impl>(order)));
 	}
 
 	void opengl_render_api::set_depth_enabled(bool enabled)
@@ -1511,10 +1514,10 @@ namespace ml
 
 	void opengl_render_api::set_depth_pr(uint32_t predicate)
 	{
-		glCheck(glDepthFunc(_predicate<gl::to_impl>(predicate)));
+		glCheck(glDepthFunc(_predicate<to_impl>(predicate)));
 	}
 
-	void opengl_render_api::set_depth_range(gl::depth_range const & value)
+	void opengl_render_api::set_depth_range(depth_range const & value)
 	{
 		glCheck(glDepthRangef(value.nearVal, value.farVal));
 	}
@@ -1524,7 +1527,7 @@ namespace ml
 		glCheck((enabled ? &glEnable : glDisable)(GL_STENCIL_TEST));
 	}
 
-	void opengl_render_api::set_stencil_fn(gl::stencil_fn const & value)
+	void opengl_render_api::set_stencil_fn(stencil_fn const & value)
 	{
 		glCheck(glStencilFunc(
 			_predicate<to_impl>(value.pred),
@@ -1541,7 +1544,7 @@ namespace ml
 
 	void opengl_render_api::clear(uint32_t flags)
 	{
-		glCheck(glClear(_buffer_bit<gl::to_impl>(flags)));
+		glCheck(glClear(_buffer_bit<to_impl>(flags)));
 	}
 
 	void opengl_render_api::draw(shared<vertexarray> const & value)
@@ -1585,6 +1588,48 @@ namespace ml
 	void opengl_render_api::flush()
 	{
 		glCheck(glFlush());
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_render_api::upload(handle loc, int32_t const & value)
+	{
+		glCheck(glUniform1iARB((int32_t)(intptr_t)loc, value));
+	}
+
+	void opengl_render_api::upload(handle loc, float_t const & value)
+	{
+		glCheck(glUniform1fARB((int32_t)(intptr_t)loc, value));
+	}
+
+	void opengl_render_api::upload(handle loc, vec2 const & value)
+	{
+		glCheck(glUniform2fARB((int32_t)(intptr_t)loc, value[0], value[1]));
+	}
+
+	void opengl_render_api::upload(handle loc, vec3 const & value)
+	{
+		glCheck(glUniform3fARB((int32_t)(intptr_t)loc, value[0], value[1], value[2]));
+	}
+
+	void opengl_render_api::upload(handle loc, vec4 const & value)
+	{
+		glCheck(glUniform4fARB((int32_t)(intptr_t)loc, value[0], value[1], value[2], value[3]));
+	}
+
+	void opengl_render_api::upload(handle loc, mat2 const & value)
+	{
+		glCheck(glUniformMatrix2fvARB((int32_t)(intptr_t)loc, 2 * 2, false, value));
+	}
+
+	void opengl_render_api::upload(handle loc, mat3 const & value)
+	{
+		glCheck(glUniformMatrix3fvARB((int32_t)(intptr_t)loc, 3 * 3, false, value));
+	}
+
+	void opengl_render_api::upload(handle loc, mat4 const & value)
+	{
+		glCheck(glUniformMatrix4fvARB((int32_t)(intptr_t)loc, 4 * 4, false, value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
