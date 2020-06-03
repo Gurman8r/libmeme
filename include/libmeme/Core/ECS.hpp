@@ -1,8 +1,7 @@
 #ifndef _ML_ECS_HPP_
 #define _ML_ECS_HPP_
 
-// Data Oriented ECS
-// Credit to Vittorio Romeo
+// Data Oriented ECS - Vittorio Romeo
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 

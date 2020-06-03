@@ -321,7 +321,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static image const & gen_default_rgba() noexcept
+		static image const & get_default_rgba() noexcept
 		{
 			static image temp{ vec2i{ 512, 512 }, 3 };
 			for (size_t i = 0, w = temp.width(), h = temp.height(); i < w * h; ++i)

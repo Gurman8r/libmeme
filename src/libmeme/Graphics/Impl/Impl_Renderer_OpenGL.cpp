@@ -2,6 +2,8 @@
 
 #include "Impl_Renderer_OpenGL.hpp"
 
+namespace ml { using namespace gl; }
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef ML_OPENGL_LOADER_CUSTOM
@@ -34,82 +36,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// check error macro
-#if (!ML_is_debug)
-#	define glCheck(expr) (expr)
-#else
-#	define glCheck(expr) \
-	do { expr; _ML check_error(__FILE__, __LINE__, #expr); } while (0)
-#endif
-
-// errors
-namespace ml
-{
-	static void check_error(cstring file, uint32_t line, cstring expr)
-	{
-		if (auto const code{ glGetError() }; code != GL_NO_ERROR)
-		{
-			pmr::string path{ file };
-			path = path.substr(path.find_last_of("\\/") + 1);
-			pmr::string err_name{ "No Error" };
-			pmr::string err_desc{ "No Description" };
-			switch (code)
-			{
-			case GL_INVALID_ENUM:
-				err_name = "Invalid Enum";
-				err_desc = "An unacceptable value has been specified for an enumerated argument";
-				break;
-			case GL_INVALID_VALUE:
-				err_name = "Invalid Value";
-				err_desc = "A numeric argument is out of range";
-				break;
-			case GL_INVALID_OPERATION:
-				err_name = "Invalid Operation";
-				err_desc = "The specified operation is not allowed in the current state";
-				break;
-			case GL_STACK_OVERFLOW:
-				err_name = "Stack Overflow";
-				err_desc = "This command would cause a stack overflow";
-				break;
-			case GL_STACK_UNDERFLOW:
-				err_name = "Stack Underflow";
-				err_desc = "This command would cause a stack underflow";
-				break;
-			case GL_OUT_OF_MEMORY:
-				err_name = "Out of Memory";
-				err_desc = "There is not enough memory left to execute the command";
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				err_name = "Invalid Framebuffer Operation";
-				err_desc = "The object bound to frame buffer binding is not \'frame buffer complete\'";
-				break;
-			case GL_CONTEXT_LOST:
-				err_name = "Context Lost";
-				err_desc = "The OpenGL context has been lost, due to a graphics card reset";
-				break;
-			}
-			std::cout
-				<< "OpenGL Error " << code << ":\n"
-				<< " \'" << file << "\' (" << line << ")\n"
-				<< "expr:\n"
-				<< "\t" << expr << "\n"
-				<< "desc:\n"
-				<< "\t" << err_name << "\n"
-				<< "\t" << err_desc << "\n"
-				<< "\n\n";
-		}
-	}
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // opengl enums
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	using namespace gl;
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Convt> constexpr uint32_t _buffer_bit(uint32_t value) noexcept
@@ -536,27 +465,26 @@ namespace ml
 
 	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		using namespace gl;
 		if constexpr (Convt()) // to backend
 		{
 			switch (value)
 			{
-			default						: return value;
-			case texture_type_1d		: return GL_TEXTURE_1D;
-			case texture_type_2d		: return GL_TEXTURE_2D;
-			case texture_type_3d		: return GL_TEXTURE_3D;
-			case texture_type_cube_map	: return GL_TEXTURE_CUBE_MAP;
+			default					: return value;
+			case texture_1d			: return GL_TEXTURE_1D;
+			case texture_2d			: return GL_TEXTURE_2D;
+			case texture_3d			: return GL_TEXTURE_3D;
+			case texture_cube_map	: return GL_TEXTURE_CUBE_MAP;
 			}
 		}
 		else // to user
 		{
 			switch (value)
 			{
-			default						: return value;
-			case GL_TEXTURE_1D			: return texture_type_1d;
-			case GL_TEXTURE_2D			: return texture_type_2d;
-			case GL_TEXTURE_3D			: return texture_type_3d;
-			case GL_TEXTURE_CUBE_MAP	: return texture_type_cube_map;
+			default					: return value;
+			case GL_TEXTURE_1D		: return texture_1d;
+			case GL_TEXTURE_2D		: return texture_2d;
+			case GL_TEXTURE_3D		: return texture_3d;
+			case GL_TEXTURE_CUBE_MAP: return texture_cube_map;
 			}
 		}
 	}
@@ -570,9 +498,9 @@ namespace ml
 			switch (value)
 			{
 			default						: return value;
-			case shader_type_vertex		: return GL_VERTEX_SHADER;
-			case shader_type_fragment	: return GL_FRAGMENT_SHADER;
-			case shader_type_geometry	: return GL_GEOMETRY_SHADER;
+			case vertex_shader		: return GL_VERTEX_SHADER;
+			case fragment_shader	: return GL_FRAGMENT_SHADER;
+			case geometry_shader	: return GL_GEOMETRY_SHADER;
 			}
 		}
 		else // to user
@@ -580,9 +508,9 @@ namespace ml
 			switch (value)
 			{
 			default					: return value;
-			case GL_VERTEX_SHADER	: return shader_type_vertex;
-			case GL_FRAGMENT_SHADER	: return shader_type_fragment;
-			case GL_GEOMETRY_SHADER	: return shader_type_geometry;
+			case GL_VERTEX_SHADER	: return vertex_shader;
+			case GL_FRAGMENT_SHADER	: return fragment_shader;
+			case GL_GEOMETRY_SHADER	: return geometry_shader;
 			}
 		}
 	}
@@ -592,20 +520,59 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// check error macro
+#if (!ML_is_debug)
+#	define glCheck(expr) (expr)
+#else
+#	define glCheck(expr) \
+	do { expr; _ML check_error(__FILE__, __LINE__, #expr); } while (0)
+#endif
+
+// errors
+namespace ml
+{
+	inline void check_error(cstring file, uint32_t line, cstring expr) noexcept
+	{
+		if (uint32_t const code{ _error<to_user>(glGetError()) }; code != error_none)
+		{
+			std::cout
+				<< "An internal graphics error occurred ( " << code << " ):\n"
+				<< " \'" << fs::path{ file }.filename() << "\' (" << line << ")\n"
+				<< " expression:\n"
+				<< "  " << expr << "\n"
+				<< " description:\n"
+				<< "  " << error_names[code] << "\n"
+				<< "  " << error_descs[code] << "\n"
+				<< "\n";
+		}
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // opengl objects
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexarray::opengl_vertexarray()
+	bool opengl_vertexarray::generate()
 	{
-		glCheck(glGenVertexArrays(1, &m_handle));
-		this->bind();
+		if (m_handle) { return false; }
+		else
+		{
+			glCheck(glGenVertexArrays(1, &m_handle));
+			return m_handle;
+		}
 	}
 
-	opengl_vertexarray::~opengl_vertexarray()
+	bool opengl_vertexarray::destroy()
 	{
-		glCheck(glDeleteVertexArrays(1, &m_handle));
+		if (!m_handle) { return false; }
+		else
+		{
+			glCheck(glDeleteVertexArrays(1, &m_handle));
+			return !(m_handle = NULL);
+		}
 	}
 
 	void opengl_vertexarray::bind() const
@@ -615,7 +582,7 @@ namespace ml
 
 	void opengl_vertexarray::unbind() const
 	{
-		glCheck(glBindVertexArray(NULL));
+		glCheck(glBindVertexArray(0));
 	}
 
 	void opengl_vertexarray::add_vbo(shared<vertexbuffer> const & value)
@@ -669,24 +636,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(gl::buffer vertices, uint32_t count, uint32_t usage)
-		: m_usage{ usage }, m_count{ count }
+	bool opengl_vertexbuffer::generate()
 	{
-		glCheck(glGenBuffers(1, &m_handle));
-		
-		this->bind();
-		
-		glCheck(glBufferData(GL_ARRAY_BUFFER, count * sizeof(float_t), vertices, _usage<gl::to_impl>(usage)));
+		if (m_handle) { return false; }
+		else
+		{
+			glCheck(glGenBuffers(1, &m_handle));
+			return m_handle;
+		}
 	}
 
-	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t count, uint32_t usage)
-		: opengl_vertexbuffer{ nullptr, count, usage }
+	bool opengl_vertexbuffer::destroy()
 	{
-	}
-
-	opengl_vertexbuffer::~opengl_vertexbuffer()
-	{
-		glCheck(glDeleteBuffers(1, &m_handle));
+		if (!m_handle) { return false; }
+		else
+		{
+			glCheck(glDeleteBuffers(1, &m_handle));
+			return !(m_handle = NULL);
+		}
 	}
 
 	void opengl_vertexbuffer::bind() const
@@ -696,28 +663,47 @@ namespace ml
 
 	void opengl_vertexbuffer::unbind() const
 	{
-		glCheck(glBindBuffer(GL_ARRAY_BUFFER, NULL));
+		glCheck(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	}
 
-	void opengl_vertexbuffer::set_data(gl::buffer vertices, uint32_t count, uint32_t offset)
+	void opengl_vertexbuffer::set_data(gl::buffer verts, uint32_t count)
 	{
-		m_count = count;
-		glCheck(glBufferSubData(GL_ARRAY_BUFFER, offset, count * sizeof(float_t), vertices));
+		glCheck(glBufferData(
+			GL_ARRAY_BUFFER,
+			(m_count = count) * sizeof(float_t),
+			verts,
+			_usage<to_impl>(m_usage)));
+	}
+
+	void opengl_vertexbuffer::set_data(gl::buffer verts, uint32_t count, uint32_t offset)
+	{
+		glCheck(glBufferSubData(
+			GL_ARRAY_BUFFER,
+			offset,
+			(m_count = count) * sizeof(float_t),
+			verts));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_indexbuffer::opengl_indexbuffer(gl::buffer indices, uint32_t count)
-		: m_count{ count }
+	bool opengl_indexbuffer::generate()
 	{
-		glCheck(glGenBuffers(1, &m_handle));
-		this->bind();
-		this->set_data(indices, count);
+		if (m_handle) { return false; }
+		else
+		{
+			glCheck(glGenBuffers(1, &m_handle));
+			return m_handle;
+		}
 	}
 
-	opengl_indexbuffer::~opengl_indexbuffer()
+	bool opengl_indexbuffer::destroy()
 	{
-		glCheck(glDeleteBuffers(1, &m_handle));
+		if (!m_handle) { return false; }
+		else
+		{
+			glCheck(glDeleteBuffers(1, &m_handle));
+			return !(m_handle = NULL);
+		}
 	}
 
 	void opengl_indexbuffer::bind() const
@@ -727,26 +713,34 @@ namespace ml
 
 	void opengl_indexbuffer::unbind() const
 	{
-		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, NULL));
+		glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	}
 
-	void opengl_indexbuffer::set_data(gl::buffer indices, uint32_t count)
+	void opengl_indexbuffer::set_data(gl::buffer inds, uint32_t count)
 	{
-		m_count = count;
-		glCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW));
+		glCheck(glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER,
+			(m_count = count) * sizeof(uint32_t),
+			inds,
+			GL_STATIC_DRAW));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer::opengl_framebuffer(uint32_t format, vec2i const & size)
-		: m_format{ format }
+	bool opengl_framebuffer::generate()
 	{
-		this->resize(size);
+		glCheck(glGenFramebuffers(1, &m_handle));
+		return m_handle;
 	}
 
-	opengl_framebuffer::~opengl_framebuffer()
+	bool opengl_framebuffer::destroy()
 	{
-		glCheck(glDeleteFramebuffers(1, &m_handle));
+		if (!m_handle) { return false; }
+		else
+		{
+			glCheck(glDeleteFramebuffers(1, &m_handle));
+			return !(m_handle = NULL);
+		}
 	}
 
 	void opengl_framebuffer::bind() const
@@ -771,10 +765,10 @@ namespace ml
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		if (m_handle) { glCheck(glDeleteFramebuffers(1, &m_handle)); }
-		
-		glCheck(glGenFramebuffers(1, &m_handle));
-		
+		this->destroy();
+
+		this->generate();
+
 		this->bind();
 
 		// color attachment
@@ -814,15 +808,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, gl::buffer pixels)
-		: m_i_format{ iformat }, m_c_format{ cformat }, m_p_type{ ptype }, m_flags{ flags }
+	bool opengl_texture2d::generate()
 	{
-		this->update(size, pixels);
+		if (m_handle) { return false; }
+		else
+		{
+			glCheck(glGenTextures(1, &m_handle));
+			return m_handle;
+		}
 	}
 
-	opengl_texture2d::~opengl_texture2d()
+	bool opengl_texture2d::destroy()
 	{
-		glCheck(glDeleteTextures(1, &m_handle));
+		if (!m_handle) { return false; }
+		else
+		{
+			glCheck(glDeleteTextures(1, &m_handle));
+			return !(m_handle = NULL);
+		}
 	}
 
 	void opengl_texture2d::bind() const
@@ -840,9 +843,9 @@ namespace ml
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		if (m_handle) { glCheck(glDeleteTextures(1, &m_handle)); }
+		this->destroy();
 
-		glCheck(glGenTextures(1, &m_handle));
+		this->generate();
 
 		this->bind();
 
@@ -855,9 +858,11 @@ namespace ml
 
 		if (m_flags != texture_flags_none)
 		{
-			this->set_repeated(this->is_repeated());
-			this->set_smooth(this->is_smooth());
-			this->set_mipmapped(this->is_mipmapped());
+			this->set_repeated(ML_flag_read(m_flags, texture_flags_repeated));
+			
+			this->set_smooth(ML_flag_read(m_flags, texture_flags_smooth));
+			
+			this->set_mipmapped(ML_flag_read(m_flags, texture_flags_mipmapped));
 		}
 	}
 
@@ -867,7 +872,9 @@ namespace ml
 
 		ML_flag_write(m_flags, texture_flags_mipmapped, value);
 
-		if (this->is_smooth())
+		auto const is_smooth{ ML_flag_read(m_flags, texture_flags_smooth) };
+
+		if (is_smooth)
 		{
 			glCheck(glGenerateMipmap(GL_TEXTURE_2D));
 		}
@@ -876,8 +883,8 @@ namespace ml
 			GL_TEXTURE_2D,
 			GL_TEXTURE_MAG_FILTER,
 			value
-			? this->is_smooth() ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
-			: this->is_smooth() ? GL_LINEAR : GL_NEAREST));
+			? is_smooth ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
+			: is_smooth ? GL_LINEAR : GL_NEAREST));
 	}
 
 	void opengl_texture2d::set_repeated(bool value)
@@ -886,7 +893,7 @@ namespace ml
 
 		ML_flag_write(m_flags, texture_flags_repeated, value);
 
-		constexpr bool edgeClampAvailable{
+		constexpr bool edge_clamp_available{
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
@@ -899,14 +906,14 @@ namespace ml
 			GL_TEXTURE_WRAP_S,
 			value
 			? GL_REPEAT
-			: edgeClampAvailable ? GL_CLAMP_TO_EDGE : GL_CLAMP));
+			: edge_clamp_available ? GL_CLAMP_TO_EDGE : GL_CLAMP));
 
 		glCheck(glTexParameteri(
 			GL_TEXTURE_2D,
 			GL_TEXTURE_WRAP_T,
 			value
 			? GL_REPEAT
-			: edgeClampAvailable ? GL_CLAMP_TO_EDGE : GL_CLAMP));
+			: edge_clamp_available ? GL_CLAMP_TO_EDGE : GL_CLAMP));
 	}
 
 	void opengl_texture2d::set_smooth(bool value)
@@ -923,7 +930,7 @@ namespace ml
 		glCheck(glTexParameteri(
 			GL_TEXTURE_2D,
 			GL_TEXTURE_MIN_FILTER,
-			this->is_mipmapped()
+			ML_flag_read(m_flags, texture_flags_mipmapped)
 			? value ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
 			: value ? GL_LINEAR : GL_NEAREST));
 	}
@@ -956,14 +963,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct opengl_shader_object::uniform_binder final
+	struct opengl_shader::uniform_binder final
 	{
 		int32_t location{ -1 }; uint32_t current{}, previous{};
 
 		operator bool() const noexcept { return (-1 < location); }
 
 		template <class Fn
-		> uniform_binder(opengl_shader_object & self, cstring name, Fn && fn) noexcept
+		> uniform_binder(opengl_shader & self, cstring name, Fn && fn) noexcept
 		{
 			if (current = self.m_handle)
 			{
@@ -998,94 +1005,29 @@ namespace ml
 		}
 	};
 
-	opengl_shader_object::opengl_shader_object(cstring v_src, cstring f_src, cstring g_src)
+	bool opengl_shader::generate()
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		auto _print_errors = [&](uint32_t obj)
+		if (m_handle) { return false; }
+		else
 		{
-			char log[1024]{};
-			glCheck(glGetInfoLogARB(obj, sizeof(log), 0, log));
-			pmr::stringstream ss{ log };
-			pmr::string line;
-			while (std::getline(ss, line))
-			{
-				std::cout << line << '\n';
-			}
-		};
+			glCheck(m_handle = glCreateProgramObjectARB());
+			return m_handle;
+		}
+	}
 
-		auto _compile = [&_print_errors](uint32_t type, cstring src) -> uint32_t
-		{
-			uint32_t obj{};
-			if (src && *src)
-			{
-				glCheck(obj = glCreateShaderObjectARB(type));
-				glCheck(glShaderSource(obj, 1, &src, nullptr));
-				glCheck(glCompileShaderARB(obj));
-
-				int32_t err{};
-				glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &err));
-				if (!err)
-				{
-					_print_errors(obj);
-					glCheck(glDeleteObjectARB(obj));
-					obj = NULL;
-				}
-			}
-			return obj;
-		};
-
-		auto _link = [&_print_errors](uint32_t obj) -> bool
-		{
-			glCheck(glLinkProgramARB(obj));
-			int32_t err{};
-			glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_LINK_STATUS_ARB, &err));
-			return err;
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		if (m_handle)
+	bool opengl_shader::destroy()
+	{
+		if (!m_handle) { return false; }
+		else
 		{
 			glCheck(glDeleteObjectARB(m_handle));
 			m_uniforms.clear();
 			m_textures.clear();
+			return !(m_handle = NULL);
 		}
-
-		glCheck(m_handle = glCreateProgramObjectARB());
-
-		if (uint32_t v{ _compile(GL_VERTEX_SHADER, v_src) })
-		{
-			glCheck(glAttachObjectARB(m_handle, v));
-			glCheck(glDeleteObjectARB(v));
-		}
-
-		if (uint32_t g{ _compile(GL_GEOMETRY_SHADER, g_src) })
-		{
-			glCheck(glAttachObjectARB(m_handle, g));
-			glCheck(glDeleteObjectARB(g));
-		}
-
-		if (uint32_t f{ _compile(GL_FRAGMENT_SHADER, f_src) })
-		{
-			glCheck(glAttachObjectARB(m_handle, f));
-			glCheck(glDeleteObjectARB(f));
-		}
-
-		if (!_link(m_handle))
-		{
-			glCheck(glDeleteObjectARB(m_handle));
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
 
-	opengl_shader_object::~opengl_shader_object()
-	{
-		glCheck(glDeleteObjectARB(m_handle));
-	}
-
-	void opengl_shader_object::bind(bool bind_textures) const
+	void opengl_shader::bind(bool bind_textures) const
 	{
 		glCheck(glUseProgramObjectARB(m_handle));
 
@@ -1094,7 +1036,7 @@ namespace ml
 			uint32_t index{};
 			m_textures.for_each([&](int32_t location, gl::handle tex)
 			{
-				glCheck(glUniform1i(location, index));
+				glCheck(glUniform1iARB(location, index));
 				glCheck(glActiveTexture(GL_TEXTURE0 + index));
 				glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)tex));
 				index++;
@@ -1102,17 +1044,66 @@ namespace ml
 		}
 	}
 
-	void opengl_shader_object::unbind() const
+	void opengl_shader::unbind() const
 	{
-		glCheck(glUseProgramObjectARB(NULL));
+		glCheck(glUseProgramObjectARB(0));
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, bool value)
+	int32_t opengl_shader::attach(uint32_t type, uint32_t count, cstring const * src)
+	{
+		if (!count || !src || !*src) { return -1; } // no source
+		else
+		{
+			uint32_t obj{};
+			glCheck(obj = glCreateShaderObjectARB(_shader_type<to_impl>(type)));
+			glCheck(glShaderSource(obj, count, src, nullptr));
+			glCheck(glCompileShaderARB(obj));
+
+			int32_t err{};
+			glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &err));
+			if (!err)
+			{
+				int32_t log_len{};
+				glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &log_len));
+
+				pmr::vector<char> log_str{};
+				glCheck(glGetInfoLogARB(obj, log_len, &log_len, log_str.data()));
+
+				debug::error(log_str.data());
+
+				glCheck(glDeleteObjectARB(obj));
+				return 0;
+			}
+			else
+			{
+				glCheck(glAttachObjectARB(m_handle, obj));
+				glCheck(glDeleteObjectARB(obj));
+				return 1;
+			}
+		}
+	}
+
+	int32_t opengl_shader::link()
+	{
+		if (!m_handle) { return 0; }
+
+		glCheck(glLinkProgramARB(m_handle));
+
+		int32_t err{};
+		
+		glCheck(glGetObjectParameterivARB(m_handle, GL_OBJECT_LINK_STATUS_ARB, &err));
+		
+		if (!err) { this->destroy(); }
+		
+		return err;
+	}
+
+	bool opengl_shader::set_uniform(cstring name, bool value)
 	{
 		return this->set_uniform(name, static_cast<int32_t>(value));
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, int32_t value)
+	bool opengl_shader::set_uniform(cstring name, int32_t value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1120,7 +1111,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, float_t value)
+	bool opengl_shader::set_uniform(cstring name, float_t value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1128,7 +1119,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, vec2 const & value)
+	bool opengl_shader::set_uniform(cstring name, vec2 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1136,7 +1127,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, vec3 const & value)
+	bool opengl_shader::set_uniform(cstring name, vec3 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1144,7 +1135,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, vec4 const & value)
+	bool opengl_shader::set_uniform(cstring name, vec4 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1152,7 +1143,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, mat2 const & value)
+	bool opengl_shader::set_uniform(cstring name, mat2 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1160,7 +1151,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, mat3 const & value)
+	bool opengl_shader::set_uniform(cstring name, mat3 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1168,7 +1159,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, mat4 const & value)
+	bool opengl_shader::set_uniform(cstring name, mat4 const & value)
 	{
 		return uniform_binder(*this, name, [&](int32_t location)
 		{
@@ -1176,7 +1167,7 @@ namespace ml
 		});
 	}
 
-	bool opengl_shader_object::set_uniform(cstring name, shared<texture2d> const & value)
+	bool opengl_shader::set_uniform(cstring name, shared<texture2d> const & value)
 	{
 		static auto const max_texture_units{ std::invoke([]() noexcept
 		{
@@ -1235,9 +1226,14 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_api_info const & opengl_render_api::get_info() const
+	uint32_t opengl_render_api::get_error() const
 	{
-		static render_api_info temp{};
+		return _error<gl::to_user>(glGetError());
+	}
+
+	gl::api_info const & opengl_render_api::get_info() const
+	{
+		static gl::api_info temp{};
 		static ML_scope // once
 		{
 			// major version
@@ -1287,11 +1283,6 @@ namespace ml
 		return temp;
 	}
 
-	uint32_t opengl_render_api::get_error() const
-	{
-		return _error<gl::to_user>(glGetError());
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool opengl_render_api::get_alpha_enabled() const
@@ -1301,7 +1292,7 @@ namespace ml
 		return temp;
 	}
 
-	alpha_fn opengl_render_api::get_alpha_fn() const
+	gl::alpha_fn opengl_render_api::get_alpha_fn() const
 	{
 		return
 		{
@@ -1334,7 +1325,7 @@ namespace ml
 		return temp;
 	}
 
-	blend_eq opengl_render_api::get_blend_eq() const
+	gl::blend_eq opengl_render_api::get_blend_eq() const
 	{
 		blend_eq temp{};
 		
@@ -1347,7 +1338,7 @@ namespace ml
 		return temp;
 	}
 
-	blend_fn opengl_render_api::get_blend_fn() const
+	gl::blend_fn opengl_render_api::get_blend_fn() const
 	{
 		blend_fn temp{};
 
@@ -1415,7 +1406,7 @@ namespace ml
 		return _predicate<gl::to_user>(temp);
 	}
 
-	depth_range opengl_render_api::get_depth_range() const
+	gl::depth_range opengl_render_api::get_depth_range() const
 	{
 		depth_range temp{};
 		glCheck(glGetFloatv(GL_DEPTH_RANGE, &temp.nearVal));
@@ -1429,7 +1420,7 @@ namespace ml
 		return temp;
 	}
 
-	stencil_fn opengl_render_api::get_stencil_fn() const
+	gl::stencil_fn opengl_render_api::get_stencil_fn() const
 	{
 		stencil_fn temp{};
 
@@ -1457,9 +1448,9 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_ALPHA_TEST));
 	}
 
-	void opengl_render_api::set_alpha_fn(alpha_fn const & value)
+	void opengl_render_api::set_alpha_fn(gl::alpha_fn const & value)
 	{
-		glCheck(glAlphaFunc(_predicate<gl::to_impl>(value.func), value.ref));
+		glCheck(glAlphaFunc(_predicate<gl::to_impl>(value.pred), value.ref));
 	}
 
 	void opengl_render_api::set_blend_color(color const & value)
@@ -1472,14 +1463,14 @@ namespace ml
 		glCheck((enabled ? &glEnable : &glDisable)(GL_BLEND));
 	}
 
-	void opengl_render_api::set_blend_eq(blend_eq const & value)
+	void opengl_render_api::set_blend_eq(gl::blend_eq const & value)
 	{
 		glCheck(glBlendEquationSeparate(
 			_function<gl::to_impl>(value.modeRGB),
 			_function<gl::to_impl>(value.modeAlpha)));
 	}
 
-	void opengl_render_api::set_blend_fn(blend_fn const & value)
+	void opengl_render_api::set_blend_fn(gl::blend_fn const & value)
 	{
 		glCheck(glBlendFuncSeparate(
 			_factor<gl::to_impl>(value.sfactorRGB),
@@ -1523,7 +1514,7 @@ namespace ml
 		glCheck(glDepthFunc(_predicate<gl::to_impl>(predicate)));
 	}
 
-	void opengl_render_api::set_depth_range(depth_range const & value)
+	void opengl_render_api::set_depth_range(gl::depth_range const & value)
 	{
 		glCheck(glDepthRangef(value.nearVal, value.farVal));
 	}
@@ -1533,7 +1524,7 @@ namespace ml
 		glCheck((enabled ? &glEnable : glDisable)(GL_STENCIL_TEST));
 	}
 
-	void opengl_render_api::set_stencil_fn(stencil_fn const & value)
+	void opengl_render_api::set_stencil_fn(gl::stencil_fn const & value)
 	{
 		glCheck(glStencilFunc(
 			_predicate<to_impl>(value.pred),

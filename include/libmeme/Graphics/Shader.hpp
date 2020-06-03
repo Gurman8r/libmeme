@@ -7,65 +7,71 @@
 
 namespace ml
 {
-	struct shader final : trackable
+	struct shader_asset final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using shader_source		= typename meta::array<pmr::string, gl::shader_type_MAX>;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+		using shader_source = typename meta::array<pmr::string, gl::shader_type_MAX>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader(allocator_type alloc = {}) : m_object{}, m_source{ std::allocator_arg, alloc }
+		shader_asset(allocator_type alloc = {}) : m_obj{}, m_src{ std::allocator_arg, alloc }
 		{
 		}
 
-		shader(shader_source const & source, allocator_type alloc = {}) : shader{ alloc }
+		shader_asset(shader_source const & source, allocator_type alloc = {}) : shader_asset{ alloc }
 		{
 			load_from_source(source);
 		}
 
-		shader(fs::path const & v, fs::path const & f, allocator_type alloc = {}) : shader{ alloc }
+		shader_asset(fs::path const & v, fs::path const & f, allocator_type alloc = {}) : shader_asset{ alloc }
 		{
 			load_from_file(v, f);
 		}
 
-		shader(fs::path const & v, fs::path const & f, fs::path const & g, allocator_type alloc = {}) : shader{ alloc }
+		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g, allocator_type alloc = {}) : shader_asset{ alloc }
 		{
 			load_from_file(v, f, g);
 		}
 
-		shader(shader const & other, allocator_type alloc = {}) : shader{ alloc }
+		shader_asset(shader_asset const & other, allocator_type alloc = {}) : shader_asset{ alloc }
 		{
-			load_from_source(other.m_source);
+			load_from_source(other.m_src);
 		}
 
-		shader(shader && other, allocator_type alloc = {}) noexcept : shader{ alloc }
+		shader_asset(shader_asset && other, allocator_type alloc = {}) noexcept : shader_asset{ alloc }
 		{
 			swap(std::move(other));
+		}
+
+		shader_asset(shared<shader> && value, allocator_type alloc = {}) noexcept
+			: m_obj{ std::move(value) }
+			, m_src{ std::allocator_arg, alloc }
+		{
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader & operator=(shader const & other)
+		shader_asset & operator=(shader_asset const & other)
 		{
-			shader temp{ other };
+			shader_asset temp{ other };
 			swap(temp);
 			return (*this);
 		}
 
-		shader & operator=(shader && other) noexcept
+		shader_asset & operator=(shader_asset && other) noexcept
 		{
 			swap(std::move(other));
 			return (*this);
 		}
 
-		void swap(shader & value) noexcept
+		void swap(shader_asset & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
-				m_object.swap(value.m_object);
-				m_source.swap(value.m_source);
+				m_obj.swap(value.m_obj);
+				m_src.swap(value.m_src);
 			}
 		}
 
@@ -89,9 +95,9 @@ namespace ml
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
-				& v{ std::get<gl::shader_type_vertex>(value) },
-				& f{ std::get<gl::shader_type_fragment>(value) },
-				& g{ std::get<gl::shader_type_geometry>(value) };
+				& v{ std::get<gl::vertex_shader>(value) },
+				& f{ std::get<gl::fragment_shader>(value) },
+				& g{ std::get<gl::geometry_shader>(value) };
 
 			return ((!v.empty() && !f.empty() && !g.empty())
 				? load_from_memory(v, f, g)
@@ -104,36 +110,36 @@ namespace ml
 		{
 			if (v_src.empty() || f_src.empty()) { return false; }
 		
-			m_source = { v_src, f_src, {} };
+			m_src = { v_src, f_src, {} };
 
-			m_object = shader_object::create(v_src.c_str(), f_src.c_str(), nullptr);
+			m_obj = shader::create(v_src.c_str(), f_src.c_str(), nullptr);
 
-			return (bool)m_object;
+			return (bool)m_obj;
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 		
-			m_source = { v_src, f_src, g_src };
+			m_src = { v_src, f_src, g_src };
 
-			m_object = shader_object::create(v_src.c_str(), f_src.c_str(), g_src.c_str());
+			m_obj = shader::create(v_src.c_str(), f_src.c_str(), g_src.c_str());
 
-			return (bool)m_object;
+			return (bool)m_obj;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void bind(bool bind_textures = true) const { m_object->bind(bind_textures); }
+		void bind(bool bind_textures = true) const { m_obj->bind(bind_textures); }
 
-		void unbind() const { m_object->unbind(); }
+		void unbind() const { m_obj->unbind(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return m_object->set_uniform(name, ML_forward(value));
+			return m_obj->set_uniform(name, ML_forward(value));
 		}
 
 		template <class T
@@ -164,15 +170,85 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return (bool)m_object; }
+		ML_NODISCARD operator bool() const noexcept { return (bool)m_obj; }
 		
-		ML_NODISCARD gl::handle get_handle() const noexcept { return m_object->get_handle(); }
+		ML_NODISCARD gl::handle get_handle() const noexcept { return m_obj->get_handle(); }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shader_source m_source;
-		shared<shader_object> m_object;
+		shader_source m_src;
+		shared<shader> m_obj;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	// WIP
+	struct shader_cache final : trackable, non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gl::shader_type_MAX>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		shader_cache(allocator_type alloc = {})
+			: m_src{ alloc }
+		{
+		}
+
+		shader_cache(shader_cache && other, allocator_type alloc = {}) noexcept
+			: shader_cache{ alloc }
+		{
+			this->swap(std::move(other));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		shader_cache & operator=(shader_cache && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
+
+		void swap(shader_cache & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_src.swap(other.m_src);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		auto & src(uint32_t i) & noexcept { return m_src[static_cast<size_t>(i)]; }
+
+		auto const & src(uint32_t i) const & noexcept { return m_src[static_cast<size_t>(i)]; }
+
+		pmr::string & src(uint32_t i, pmr::string const & name) & noexcept
+		{
+			return this->src(i)[name];
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool load_src(uint32_t i, pmr::string const & name, fs::path const & path)
+		{
+			if (auto const contents{ util::get_file_contents(path) })
+			{
+				this->src(i, name) = { contents->begin(), contents->end() };
+				
+				return true;
+			}
+			return false;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		source_storage m_src;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

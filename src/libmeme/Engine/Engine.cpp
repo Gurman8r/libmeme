@@ -93,21 +93,21 @@ namespace ml
 		if (is_initialized()) { return debug::error("engine is already initialized"); }
 
 		// create context
-		debug::ok("creating engine context...");
+		debug::info("creating engine context...");
 		if (!(g_engine = new engine_context{ j, alloc }))
 		{
 			return debug::error("failed creating engine context");
 		}
 
 		// initialize windows
-		debug::ok("initializing windows...");
+		debug::info("initializing windows...");
 		if (!window::initialize())
 		{
 			return debug::error("failed initializing windows");
 		}
 
 		// initialize scripting
-		debug::ok("initializing scripts...");
+		debug::info("initializing scripts...");
 		if (!g_engine->m_scripts.initialize())
 		{
 			return debug::error("failed initializing scripts");
@@ -116,7 +116,7 @@ namespace ml
 		// execute setup script
 		if (g_engine->m_config.contains("setup_script"))
 		{
-			debug::ok("executing setup script...");
+			debug::info("executing setup script...");
 			g_engine->m_scripts.do_file(
 				g_engine->m_fs.path2(
 					g_engine->m_config["setup_script"]));

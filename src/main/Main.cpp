@@ -46,8 +46,6 @@ static auto const default_settings{ R"(
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Graphics/RenderAPI.hpp>
-
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

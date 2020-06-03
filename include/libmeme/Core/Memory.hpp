@@ -198,6 +198,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// allocate shared
+		template <class T, class ... Args
+		> ML_NODISCARD static shared<T> allocate_shared(Args && ... args) noexcept
+		{
+			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		// free
 		static void deallocate(void * addr) noexcept
 		{

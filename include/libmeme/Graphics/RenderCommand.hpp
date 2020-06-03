@@ -30,7 +30,7 @@ namespace ml
 			return builtin(&render_api::set_alpha_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_alpha_fn(alpha_fn const & value) noexcept
+		ML_NODISCARD static auto set_alpha_fn(gl::alpha_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_alpha_fn, value);
 		}
@@ -45,12 +45,12 @@ namespace ml
 			return builtin(&render_api::set_blend_color, value);
 		}
 
-		ML_NODISCARD static auto set_blend_eq(blend_eq const & value) noexcept
+		ML_NODISCARD static auto set_blend_eq(gl::blend_eq const & value) noexcept
 		{
 			return builtin(&render_api::set_blend_eq, value);
 		}
 
-		ML_NODISCARD static auto set_blend_fn(blend_fn const & value) noexcept
+		ML_NODISCARD static auto set_blend_fn(gl::blend_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_blend_fn, value);
 		}
@@ -90,7 +90,7 @@ namespace ml
 			return builtin(&render_api::set_depth_pr, predicate);
 		}
 
-		ML_NODISCARD static auto set_depth_range(depth_range const & value) noexcept
+		ML_NODISCARD static auto set_depth_range(gl::depth_range const & value) noexcept
 		{
 			return builtin(&render_api::set_depth_range, value);
 		}
@@ -100,7 +100,7 @@ namespace ml
 			return builtin(&render_api::set_stencil_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_stencil_fn(stencil_fn const & value) noexcept
+		ML_NODISCARD static auto set_stencil_fn(gl::stencil_fn const & value) noexcept
 		{
 			return builtin(&render_api::set_stencil_fn, value);
 		}

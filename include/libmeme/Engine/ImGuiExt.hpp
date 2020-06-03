@@ -352,12 +352,12 @@ namespace ml::gui
 		{
 			switch (value)
 			{
-			case '\n':
-				lines.emplace_back();
-				break;
 			default:
-				if (lines.empty()) { lines.emplace_back(); }
+				if (lines.empty()) { lines.push_back({}); }
 				lines.back().push_back(value);
+				break;
+			case '\n':
+				lines.push_back({});
 				break;
 			}
 			return (*this);
@@ -365,12 +365,9 @@ namespace ml::gui
 
 		console & print(pmr::string const & value)
 		{
-			if (!value.empty())
+			for (char const & c : value)
 			{
-				for (char const & c : value)
-				{
-					this->write(c);
-				}
+				this->write(c);
 			}
 			return (*this);
 		}
@@ -389,22 +386,6 @@ namespace ml::gui
 			buf.back() = 0;
 			va_end(args);
 			return this->print(buf.data());
-		}
-
-		console & printss(pmr::stringstream & value)
-		{
-			// FIXME: inefficient
-			if (auto const str{ value.str() }; !str.empty())
-			{
-				pmr::stringstream ss{ str };
-				pmr::string line{};
-				while (std::getline(value, line))
-				{
-					this->printl(line);
-				}
-				value.str({});
-			}
-			return (*this);
 		}
 
 		console & execute(cstring value)

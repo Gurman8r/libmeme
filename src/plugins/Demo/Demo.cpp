@@ -29,9 +29,9 @@ namespace ml
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct c_shader		: ds::wrapper<shader>	{};
-	struct c_material	: ds::wrapper<material>	{};
-	struct c_mesh		: ds::wrapper<mesh>		{};
+	struct c_shader		: ds::wrapper<shader_asset>	{};
+	struct c_material	: ds::wrapper<material>		{};
+	struct c_mesh		: ds::wrapper<mesh>			{};
 	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
@@ -125,7 +125,7 @@ namespace ml
 		ds::map< pmr::string, image				> m_images		{};
 		ds::map< pmr::string, material			> m_materials	{};
 		ds::map< pmr::string, mesh				> m_meshes		{};
-		ds::map< pmr::string, shader			> m_shaders		{};
+		ds::map< pmr::string, shader_asset		> m_shaders		{};
 		ds::map< pmr::string, shared<texture2d>	> m_textures	{};
 
 
@@ -137,6 +137,8 @@ namespace ml
 
 		// RENDERING
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		shader_cache m_cache{};
 
 		vec2 m_resolution{ 1280, 720 };
 
@@ -247,7 +249,7 @@ namespace ml
 
 			// IMAGES
 			{
-				m_images["default"] = image::gen_default_rgba();
+				m_images["default"] = image::get_default_rgba();
 			}
 
 			// TEXTURES
@@ -270,15 +272,26 @@ namespace ml
 
 			// SHADERS
 			{
-				m_shaders["2d"] = {
-					engine::fs().path2("assets/shaders/2D.vs.shader"),
-					engine::fs().path2("assets/shaders/basic.fs.shader")
-				};
+				m_cache.load_src(gl::vertex_shader, "2D",
+					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
-				m_shaders["3d"] = {
-					engine::fs().path2("assets/shaders/3D.vs.shader"),
-					engine::fs().path2("assets/shaders/basic.fs.shader")
-				};
+				m_cache.load_src(gl::vertex_shader, "3D",
+					engine::fs().path2("assets/shaders/3D.vs.shader"));
+
+				m_cache.load_src(gl::fragment_shader, "basic",
+					engine::fs().path2("assets/shaders/basic.fs.shader"));
+
+				m_shaders["2D"] = { {
+					m_cache.src(gl::vertex_shader, "2D"),
+					m_cache.src(gl::fragment_shader, "basic"),
+					{}
+				} };
+
+				m_shaders["3D"] = { {
+					m_cache.src(gl::vertex_shader, "3D"),
+					m_cache.src(gl::fragment_shader, "basic"),
+					{}
+				} };
 			}
 
 			// MATERIALS
@@ -376,13 +389,13 @@ namespace ml
 					return h;
 				};
 				
-				auto & earth = make_renderer("3d", "earth", "sphere32x24", c_transform{
+				auto & earth = make_renderer("3D", "earth", "sphere32x24", c_transform{
 					vec3{ -.5f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .15f },
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3d", "moon", "sphere8x6", c_transform{
+				auto & moon = make_renderer("3D", "moon", "sphere8x6", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
 					vec3::fill(.27f)
@@ -395,7 +408,15 @@ namespace ml
 			// update stuff, etc...
 
 			// console
-			m_console.printss(m_cout.sstr());
+			if (pmr::stringstream ss{ m_cout.sstr().str() })
+			{
+				pmr::string line{};
+				while (std::getline(m_cout.sstr(), line))
+				{
+					m_console.printl(line);
+				}
+				m_cout.sstr().str({});
+			}
 
 			// plots
 			m_plots.update(engine::time().total_time().count());
@@ -680,11 +701,11 @@ namespace ml
 
 		void show_display_gui()
 		{
-			static gui::texture_preview preview
-			{
-				m_pipeline.back()->get_color_attachment()->get_handle(),
-				m_pipeline.back()->get_size()
-			};
+			static gui::texture_preview preview{};
+
+			shared<texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
+			preview.tex_addr = tex->get_handle();
+			preview.tex_size = tex->get_size();
 			
 			preview.render([&]() noexcept
 			{
@@ -1157,8 +1178,8 @@ namespace ml
 				bool a_enabled{ api->get_alpha_enabled() };
 				auto a_fn{ api->get_alpha_fn() };
 				ImGui::Checkbox("enabled", &a_enabled);
-				ImGui::Text("pred: %s (%u)", gl::function_names[a_fn.func], a_fn.func);
-				ImGui::Text("ref: %f", a_fn.ref);
+				ImGui::Text("predicate: %s (%u)", gl::predicate_names[a_fn.pred], a_fn.pred);
+				ImGui::Text("reference: %f", a_fn.ref);
 			}
 			ImGui::Separator();
 
@@ -1170,12 +1191,12 @@ namespace ml
 				auto b_fn{ api->get_blend_fn() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
-				ImGui::Text("modeRGB: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
-				ImGui::Text("modeAlpha: %s (%u)", gl::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
-				ImGui::Text("sFactorRGB: %s (%u)", gl::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
-				ImGui::Text("sFactorAlpha: %s (%u)", gl::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
-				ImGui::Text("dFactorRGB: %s (%u)", gl::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
-				ImGui::Text("dFactorAlpha: %s (%u)", gl::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
+				ImGui::Text("mode rgb: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
+				ImGui::Text("mode alpha: %s (%u)", gl::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
+				ImGui::Text("src factor rgb: %s (%u)", gl::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
+				ImGui::Text("src factor alpha: %s (%u)", gl::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
+				ImGui::Text("dst factor rgb: %s (%u)", gl::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
+				ImGui::Text("dst factor alpha: %s (%u)", gl::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
 			}
 			ImGui::Separator();
 
@@ -1197,7 +1218,7 @@ namespace ml
 				bool d_mask{ api->get_depth_mask() };
 				auto d_range{ api->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
-				ImGui::Text("pred: %s (%u) ", gl::predicate_names[d_pred], d_pred);
+				ImGui::Text("predicate: %s (%u) ", gl::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
 				ImGui::Text("range: %f, %f", d_range.nearVal, d_range.farVal);
 			}
@@ -1208,8 +1229,8 @@ namespace ml
 				bool s_enabled{ api->get_stencil_enabled() };
 				auto s_fn{ api->get_stencil_fn() };
 				ImGui::Checkbox("enabled", &s_enabled);
-				ImGui::Text("pred: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
-				ImGui::Text("ref: %i", s_fn.ref);
+				ImGui::Text("predicate: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
+				ImGui::Text("reference: %i", s_fn.ref);
 				ImGui::Text("mask: %u", s_fn.mask);
 			}
 			ImGui::Separator();
@@ -1223,8 +1244,8 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void *)
 {
-	static ml::plugin * temp{ new ml::demo{} };
-	return temp;
+	static ml::plugin * temp{};
+	return temp ? temp : temp = new ml::demo{};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
