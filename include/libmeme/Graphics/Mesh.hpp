@@ -20,18 +20,21 @@ namespace ml
 		}
 
 		mesh(contiguous_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
-			: mesh{ gl::vertexarray::create(), verts, inds }
+			: mesh{ gl::vertexarray::allocate(), verts, inds }
 		{
 			// vertices
-			auto vb = gl::vertexbuffer::create
-			(
-				m_verts.data(), (uint32_t)m_verts.size()
-			);
-			vb->set_layout(layout);
-			m_vao->add_vbo(vb);
+			if (!m_verts.empty())
+			{
+				auto vb = gl::vertexbuffer::allocate
+				(
+					m_verts.data(), (uint32_t)m_verts.size()
+				);
+				vb->set_layout(layout);
+				m_vao->add_vb(vb);
+			}
 
 			// indices
-			m_vao->set_ibo(m_inds.empty() ? nullptr : gl::indexbuffer::create
+			m_vao->set_ib(m_inds.empty() ? nullptr : gl::indexbuffer::allocate
 			(
 				m_inds.data(), (uint32_t)m_inds.size()
 			));

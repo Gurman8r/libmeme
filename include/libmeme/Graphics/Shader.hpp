@@ -109,12 +109,8 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::shader::create(); }
-			else
-			{
-				m_obj->release();
-				m_obj->generate();
-			}
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
+			else { m_obj->destroy(); m_obj->generate(); }
 
 			m_obj->attach(gl::vertex_shader, v_src.c_str());
 			m_obj->attach(gl::fragment_shader, f_src.c_str());
@@ -128,12 +124,8 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::shader::create(); }
-			else
-			{
-				m_obj->release();
-				m_obj->generate();
-			}
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
+			else { m_obj->destroy(); m_obj->generate(); }
 			
 			m_obj->attach(gl::vertex_shader, v_src.c_str());
 			m_obj->attach(gl::fragment_shader, f_src.c_str());

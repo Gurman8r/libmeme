@@ -44,7 +44,7 @@ namespace ml::gl
 	template <class Convt> constexpr uint32_t _buffer_bit(uint32_t value) noexcept
 	{
 		uint32_t temp{};
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, color_bit);
 			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, depth_bit);
@@ -63,7 +63,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -101,7 +101,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -127,7 +127,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -163,7 +163,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -199,7 +199,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -235,7 +235,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -273,7 +273,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -303,7 +303,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _order(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -327,7 +327,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _facet(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -365,7 +365,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _factor(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -407,7 +407,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _format(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -465,7 +465,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -493,7 +493,7 @@ namespace ml::gl
 
 	template <class Convt> constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to backend
+		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
@@ -588,11 +588,23 @@ namespace ml::gl
 		return _error<to_user>(glGetError());
 	}
 
-	api_info const & opengl_render_api::get_info() const
+	api_info const & opengl_render_api::get_info() const &
 	{
 		static api_info temp{};
 		static ML_scope // once
 		{
+			// renderer
+			glCheck(temp.renderer = (cstring)glGetString(GL_RENDERER));
+			
+			// vendor
+			glCheck(temp.vendor = (cstring)glGetString(GL_VENDOR));
+			
+			// version
+			glCheck(temp.version = (cstring)glGetString(GL_VERSION));
+
+			// shading language version
+			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 			// major version
 			if (glGetIntegerv(GL_MAJOR_VERSION, &temp.major_version); glGetError() == GL_INVALID_ENUM)
 			{
@@ -611,18 +623,6 @@ namespace ml::gl
 				});
 			}
 
-			// renderer
-			glCheck(temp.renderer = (cstring)glGetString(GL_RENDERER));
-			
-			// vendor
-			glCheck(temp.vendor = (cstring)glGetString(GL_VENDOR));
-			
-			// version
-			glCheck(temp.version = (cstring)glGetString(GL_VERSION));
-
-			// shading language version
-			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
-
 			// extensions
 			{
 				int32_t num_extensions{};
@@ -636,7 +636,6 @@ namespace ml::gl
 					temp.extensions.push_back(line);
 				}
 			}
-
 
 			// edge clamp available
 #if defined(GL_EXT_texture_edge_clamp) \
@@ -929,20 +928,20 @@ namespace ml::gl
 
 		ML_bind_scope(value);
 
-		if (value->get_ibo())
+		if (value->get_ib())
 		{
-			ML_bind_scope(value->get_ibo());
+			ML_bind_scope(value->get_ib());
 
-			for (auto const & vb : value->get_vbos())
+			for (auto const & vb : value->get_vbs())
 			{
 				ML_bind_scope(vb);
 
-				this->draw_indexed(value->get_ibo()->get_count());
+				this->draw_indexed(value->get_ib()->get_count());
 			}
 		}
 		else
 		{
-			for (auto const & vb : value->get_vbos())
+			for (auto const & vb : value->get_vbs())
 			{
 				ML_bind_scope(vb);
 
@@ -1026,7 +1025,7 @@ namespace ml::gl
 		}
 	}
 
-	bool opengl_vertexarray::release()
+	bool opengl_vertexarray::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1046,7 +1045,7 @@ namespace ml::gl
 		glCheck(glBindVertexArray(0));
 	}
 
-	void opengl_vertexarray::add_vbo(shared<vertexbuffer> const & value)
+	void opengl_vertexarray::add_vb(shared<vertexbuffer> const & value)
 	{
 		if (!value) { return; }
 
@@ -1088,7 +1087,7 @@ namespace ml::gl
 		m_vertices.push_back(value);
 	}
 
-	void opengl_vertexarray::set_ibo(shared<indexbuffer> const & value)
+	void opengl_vertexarray::set_ib(shared<indexbuffer> const & value)
 	{
 		this->bind();
 
@@ -1111,7 +1110,7 @@ namespace ml::gl
 		}
 	}
 
-	bool opengl_vertexbuffer::release()
+	bool opengl_vertexbuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1165,7 +1164,7 @@ namespace ml::gl
 		}
 	}
 
-	bool opengl_indexbuffer::release()
+	bool opengl_indexbuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1206,7 +1205,7 @@ namespace ml::gl
 		return m_handle;
 	}
 
-	bool opengl_framebuffer::release()
+	bool opengl_framebuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1238,7 +1237,7 @@ namespace ml::gl
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		this->release();
+		this->destroy();
 
 		this->generate();
 
@@ -1248,7 +1247,7 @@ namespace ml::gl
 		if (m_color) { m_color->update(m_size); }
 		else
 		{
-			m_color = texture2d::create(
+			m_color = texture2d::allocate(
 				m_size,
 				m_format,
 				m_format,
@@ -1262,7 +1261,7 @@ namespace ml::gl
 		if (m_depth) { m_depth->update(m_size); }
 		else
 		{
-			m_depth = texture2d::create(
+			m_depth = texture2d::allocate(
 				m_size,
 				format_depth24_stencil8,
 				format_depth_stencil,
@@ -1295,7 +1294,7 @@ namespace ml::gl
 		}
 	}
 
-	bool opengl_texture2d::release()
+	bool opengl_texture2d::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1320,7 +1319,7 @@ namespace ml::gl
 		if (m_size == size) { return; }
 		else { m_size = size; }
 
-		this->release();
+		this->destroy();
 
 		this->generate();
 
@@ -1454,7 +1453,10 @@ namespace ml::gl
 
 			glCheck(previous = glGetHandleARB(GL_PROGRAM_OBJECT_ARB));
 			
-			if (current != previous) { glCheck(glUseProgramObjectARB(current)); }
+			if (current != previous)
+			{
+				glCheck(glUseProgramObjectARB(current));
+			}
 
 			if (-1 < (location = self.m_uniforms.find_or_add_fn
 			(util::hash(name, std::strlen(name)), [&]() noexcept
@@ -1487,7 +1489,7 @@ namespace ml::gl
 		}
 	}
 
-	bool opengl_shader::release()
+	bool opengl_shader::destroy()
 	{
 		if (!m_handle) { return false; }
 		else
@@ -1515,31 +1517,31 @@ namespace ml::gl
 
 		if (!count || !src || !*src) { return -1; } // no source
 		
-		// compile object
+		// compile
 		uint32_t obj{};
 		glCheck(obj = glCreateShaderObjectARB(_shader_type<to_impl>(type)));
 		glCheck(glShaderSource(obj, count, src, nullptr));
 		glCheck(glCompileShaderARB(obj));
 
-		// link object
+		// link
 		int32_t success{};
 		glCheck(glGetObjectParameterivARB(obj, GL_OBJECT_COMPILE_STATUS_ARB, &success));
 		if (success == GL_FALSE)
 		{
-			// print errors
+			// error log
 			int32_t log_len{};
-			pmr::vector<char> log_str{ (size_t)log_len, pmr::vector<char>::allocator_type{} };
 			glCheck(glGetShaderiv(m_handle, GL_INFO_LOG_LENGTH, &log_len));
+			pmr::vector<char> log_str{ (size_t)log_len, pmr::vector<char>::allocator_type{} };
 			glCheck(glGetInfoLogARB(obj, log_len, &log_len, log_str.data()));
 			debug::error(log_str.data());
 			
 			// destroy
 			glCheck(glDeleteObjectARB(obj));
-			this->release();
+			this->destroy();
 		}
 		else
 		{
-			// attach object
+			// attach
 			glCheck(glAttachObjectARB(m_handle, obj));
 			glCheck(glDeleteObjectARB(obj));
 		}
@@ -1556,7 +1558,7 @@ namespace ml::gl
 		glCheck(glGetObjectParameterivARB(m_handle, GL_OBJECT_LINK_STATUS_ARB, &status));
 		if (status == GL_FALSE)
 		{
-			this->release();
+			this->destroy();
 		}
 		
 		return status;
@@ -1565,11 +1567,11 @@ namespace ml::gl
 	void opengl_shader::bind_textures() const
 	{
 		int32_t index{};
-		m_textures.for_each([&](handle loc, handle tex)
+		m_textures.for_each([&](handle loc, handle value)
 		{
 			get_api()->upload(loc, index);
 			glCheck(glActiveTexture(GL_TEXTURE0 + index));
-			glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)tex));
+			glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)value));
 			index++;
 		});
 	}

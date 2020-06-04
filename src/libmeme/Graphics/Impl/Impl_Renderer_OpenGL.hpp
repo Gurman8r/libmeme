@@ -11,14 +11,14 @@
 // api
 namespace ml::gl
 {
-	class opengl_render_api final : public render_api
+	class opengl_render_api final : public render_api, public singleton<opengl_render_api>
 	{
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		friend class render_api;
+		friend singleton<opengl_render_api>;
 
-		~opengl_render_api() noexcept = default;
+		~opengl_render_api() noexcept override = default;
 
 		bool do_initialize() override;
 
@@ -29,7 +29,7 @@ namespace ml::gl
 
 		uint32_t get_error() const override;
 
-		api_info const & get_info() const override;
+		api_info const & get_info() const & override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -117,6 +117,11 @@ namespace ml::gl
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void upload(handle loc, bool const & value) override
+		{
+			return upload(loc, static_cast<int32_t>(value));
+		}
+
 		void upload(handle loc, int32_t const & value) override;
 
 		void upload(handle loc, float_t const & value) override;
@@ -148,36 +153,36 @@ namespace ml::gl
 	public:
 		opengl_vertexarray() noexcept
 		{
-			this->generate();
-			this->bind();
+			generate();
+			bind();
 		}
 
-		~opengl_vertexarray() noexcept override { this->release(); }
+		~opengl_vertexarray() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
 		void unbind() const override;
 
-		void add_vbo(shared<vertexbuffer> const & value) override;
+		void add_vb(shared<vertexbuffer> const & value) override;
 
-		void set_ibo(shared<indexbuffer> const & value) override;
+		void set_ib(shared<indexbuffer> const & value) override;
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
-		inline shared<indexbuffer> const & get_ibo() const noexcept override { return m_indices; }
+		shared<indexbuffer> const & get_ib() const & noexcept override { return m_indices; }
 
-		inline pmr::vector<shared<vertexbuffer>> const & get_vbos() const noexcept override { return m_vertices; }
+		pmr::vector<shared<vertexbuffer>> const & get_vbs() const & noexcept override { return m_vertices; }
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
 	private:
@@ -198,23 +203,23 @@ namespace ml::gl
 	public:
 		opengl_vertexbuffer(buffer verts, uint32_t count) noexcept : m_usage{ usage_static_draw }
 		{
-			this->generate();
-			this->bind();
-			this->set_data(verts, count);
+			generate();
+			bind();
+			set_data(verts, count);
 		}
 
 		opengl_vertexbuffer(uint32_t count) noexcept : m_usage{ usage_dynamic_draw }
 		{
-			this->generate();
-			this->bind();
-			this->set_data(nullptr, count);
+			generate();
+			bind();
+			set_data(nullptr, count);
 		}
 
-		~opengl_vertexbuffer() noexcept override { this->release(); }
+		~opengl_vertexbuffer() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
@@ -224,20 +229,20 @@ namespace ml::gl
 
 		void set_data(buffer verts, uint32_t count, uint32_t offset) override;
 
-		inline void set_layout(buffer_layout const & value) override { m_layout = value; }
+		void set_layout(buffer_layout const & value) override { m_layout = value; }
 
-		inline uint32_t get_count() const noexcept override { return m_count; }
+		uint32_t get_count() const noexcept override { return m_count; }
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
-		inline buffer_layout const & get_layout() const noexcept override { return m_layout; }
+		buffer_layout const & get_layout() const & noexcept override { return m_layout; }
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
 	private:
@@ -259,16 +264,16 @@ namespace ml::gl
 	public:
 		opengl_indexbuffer(buffer inds, uint32_t count) noexcept
 		{
-			this->generate();
-			this->bind();
-			this->set_data(inds, count);
+			generate();
+			bind();
+			set_data(inds, count);
 		}
 
-		~opengl_indexbuffer() noexcept override { this->release(); }
+		~opengl_indexbuffer() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
@@ -276,16 +281,16 @@ namespace ml::gl
 
 		void set_data(buffer inds, uint32_t count) override;
 
-		inline uint32_t get_count() const noexcept override { return m_count; }
+		uint32_t get_count() const noexcept override { return m_count; }
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
 	private:
@@ -306,14 +311,14 @@ namespace ml::gl
 		opengl_framebuffer::opengl_framebuffer(uint32_t format, vec2i const & size) noexcept
 			: m_format{ format }
 		{
-			this->resize(size);
+			resize(size);
 		}
 
-		~opengl_framebuffer() noexcept override { this->release(); }
+		~opengl_framebuffer() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
@@ -323,22 +328,22 @@ namespace ml::gl
 
 		void resize(vec2i const & value) override;
 
-		inline shared<texture2d> const & get_color_attachment() const noexcept override { return m_color; }
+		shared<texture2d> const & get_color_attachment() const & noexcept override { return m_color; }
 
-		inline shared<texture2d> const & get_depth_attachment() const noexcept override { return m_depth; }
+		shared<texture2d> const & get_depth_attachment() const & noexcept override { return m_depth; }
 
-		inline uint32_t get_format() const noexcept override { return m_format; }
+		uint32_t get_format() const noexcept override { return m_format; }
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
-		inline vec2i get_size() const noexcept override { return m_size; }
+		vec2i const & get_size() const & noexcept override { return m_size; }
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
 	private:
@@ -362,14 +367,14 @@ namespace ml::gl
 		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
 			: m_i_format{ iformat }, m_c_format{ cformat }, m_p_type{ ptype }, m_flags{ flags }
 		{
-			this->update(size, pixels);
+			update(size, pixels);
 		}
 
-		~opengl_texture2d() noexcept override { this->release(); }
+		~opengl_texture2d() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
@@ -385,18 +390,18 @@ namespace ml::gl
 
 		image copy_to_image() const override;
 
-		inline int32_t get_flags() const noexcept override { return m_flags; }
+		int32_t get_flags() const noexcept override { return m_flags; }
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
-		inline vec2i const & get_size() const noexcept override { return m_size; }
+		vec2i const & get_size() const & noexcept override { return m_size; }
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
 	private:
@@ -418,13 +423,13 @@ namespace ml::gl
 	class opengl_shader final : public shader
 	{
 	public:
-		opengl_shader() noexcept { this->generate(); }
+		opengl_shader() noexcept { generate(); }
 
-		~opengl_shader() noexcept override { this->release(); }
+		~opengl_shader() noexcept override { destroy(); }
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		void bind() const override;
 
@@ -438,17 +443,17 @@ namespace ml::gl
 
 		bool bind_uniform(cstring name, std::function<void(handle)> const & callback) override;
 
-		inline bool has_value() const noexcept override { return (bool)m_handle; }
+		bool has_value() const noexcept override { return (bool)m_handle; }
 
-		inline handle get_handle() const noexcept override { return ML_addressof(m_handle); }
+		handle get_handle() const noexcept override { return ML_addressof(m_handle); }
 
 	protected:
-		inline bool do_is_equal(graphics_resource const & other) const noexcept override
+		bool do_is_equal(graphics_resource const & other) const noexcept override
 		{
-			return this == std::addressof(other); // TODO
+			return this == std::addressof(other);
 		}
 
-		inline void do_cache_texture(handle loc, handle value) noexcept override
+		void do_cache_texture(handle loc, handle value) noexcept override
 		{
 			static auto const max_texture_slots
 			{

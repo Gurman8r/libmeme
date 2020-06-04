@@ -27,8 +27,7 @@ namespace ml::gl
 {
 	render_api * const render_api::get() noexcept
 	{
-		static impl_render_api inst{};
-		return std::addressof(inst);
+		return std::addressof(impl_render_api::get_instance());
 	}
 }
 
@@ -37,7 +36,7 @@ namespace ml::gl
 // vertexarray
 namespace ml::gl
 {
-	shared<vertexarray> vertexarray::create() noexcept
+	shared<vertexarray> vertexarray::allocate() noexcept
 	{
 		return memory_manager::allocate_shared<impl_vertex_array>();
 	}
@@ -46,12 +45,12 @@ namespace ml::gl
 // vertexbuffer
 namespace ml::gl
 {
-	shared<vertexbuffer> vertexbuffer::create(buffer verts, uint32_t count) noexcept
+	shared<vertexbuffer> vertexbuffer::allocate(buffer verts, uint32_t count) noexcept
 	{
 		return memory_manager::allocate_shared<impl_vertex_buffer>(verts, count);
 	}
 
-	shared<vertexbuffer> vertexbuffer::create(uint32_t count) noexcept
+	shared<vertexbuffer> vertexbuffer::allocate(uint32_t count) noexcept
 	{
 		return memory_manager::allocate_shared<impl_vertex_buffer>(count);
 	}
@@ -60,7 +59,7 @@ namespace ml::gl
 // indexbuffer
 namespace ml::gl
 {
-	shared<indexbuffer> indexbuffer::create(buffer inds, uint32_t count) noexcept
+	shared<indexbuffer> indexbuffer::allocate(buffer inds, uint32_t count) noexcept
 	{
 		return memory_manager::allocate_shared<impl_index_buffer>(inds, count);
 	}
@@ -69,7 +68,7 @@ namespace ml::gl
 // framebuffer
 namespace ml::gl
 {
-	shared<framebuffer> framebuffer::create(uint32_t format, vec2i const & size) noexcept
+	shared<framebuffer> framebuffer::allocate(uint32_t format, vec2i const & size) noexcept
 	{
 		return memory_manager::allocate_shared<impl_frame_buffer>(format, size);
 	}
@@ -78,7 +77,7 @@ namespace ml::gl
 // texture2d
 namespace ml::gl
 {
-	shared<texture2d> texture2d::create(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
+	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
 	{
 		return memory_manager::allocate_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
 	}
@@ -87,7 +86,7 @@ namespace ml::gl
 // shader
 namespace ml::gl
 {
-	shared<shader> shader::create() noexcept
+	shared<shader> shader::allocate() noexcept
 	{
 		return memory_manager::allocate_shared<impl_shader>();
 	}
