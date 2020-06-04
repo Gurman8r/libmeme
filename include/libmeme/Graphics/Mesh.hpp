@@ -14,44 +14,41 @@ namespace ml
 		using contiguous_t	= typename pmr::vector<float_t>;
 		using indices_t		= typename pmr::vector<uint32_t>;
 
-		mesh(shared<gl::vertexarray> const & vao = nullptr, contiguous_t const & verts = {}, indices_t const & inds = {}) noexcept
-			: m_vao{ vao }, m_verts{ verts }, m_inds{ inds }
+		explicit mesh(shared<gl::vertexarray> const & vao = nullptr) noexcept
+			: m_vao{ vao }
 		{
 		}
 
-		mesh(contiguous_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
-			: mesh{ gl::vertexarray::allocate(), verts, inds }
+		mesh(contiguous_t const & verts, gl::layout const & layout = {})
+			: mesh{ gl::make_vertexarray() }
 		{
-			// vertices
-			if (!m_verts.empty())
-			{
-				auto vb = gl::vertexbuffer::allocate
-				(
-					m_verts.data(), (uint32_t)m_verts.size()
-				);
-				vb->set_layout(layout);
-				m_vao->add_vb(vb);
-			}
-
-			// indices
-			m_vao->set_ib(m_inds.empty() ? nullptr : gl::indexbuffer::allocate
-			(
-				m_inds.data(), (uint32_t)m_inds.size()
-			));
+			add_vb(verts, layout);
 		}
 
-		mesh(vertices_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
+		mesh(contiguous_t const & verts, indices_t const & inds, gl::layout const & layout = {})
+			: mesh{ gl::make_vertexarray() }
+		{
+			add_vb(verts, layout);
+			set_ib(inds);
+		}
+
+		mesh(vertices_t const & verts, gl::layout const & layout = {})
+			: mesh{ util::contiguous(verts), layout }
+		{
+		}
+
+		mesh(vertices_t const & verts, indices_t const & inds, gl::layout const & layout = {})
 			: mesh{ util::contiguous(verts), inds, layout }
 		{
 		}
 
-		mesh(fs::path const & path, gl::buffer_layout const & layout = {}) noexcept
+		mesh(fs::path const & path, gl::layout const & layout = {}) noexcept
 			: mesh{ model_loader::read(path), {}, layout }
 		{
 		}
 
 		mesh(mesh const & other)
-			: mesh{ other.m_verts, other.m_inds }
+			: mesh{ other.m_vao }
 		{
 		}
 
@@ -81,23 +78,55 @@ namespace ml
 			if (this != std::addressof(other))
 			{
 				m_vao.swap(other.m_vao);
-				m_verts.swap(other.m_verts);
-				m_inds.swap(other.m_inds);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto vao() & noexcept -> shared<gl::vertexarray> & { return m_vao; }
+		void add_vb(contiguous_t const & verts)
+		{
+			m_vao->add_vb(gl::make_vertexbuffer(verts.data(), verts.size()));
+		}
 
-		auto vao() const & noexcept -> shared<gl::vertexarray> const & { return m_vao; }
+		void add_vb(contiguous_t const & verts, gl::layout const & layout)
+		{
+			m_vao->add_vb(std::invoke([&, vb = gl::make_vertexbuffer(verts.data(), verts.size())
+			]() noexcept
+			{
+				vb->set_layout(layout);
+				return vb;
+			}));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_ib(shared<gl::indexbuffer> const & value)
+		{
+			m_vao->set_ib(value);
+		}
+
+		void set_ib(indices_t const & inds)
+		{
+			m_vao->set_ib(inds.empty() ? nullptr : gl::make_indexbuffer
+			(
+				inds.data(), inds.size()
+			));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		gl::handle_t get_handle() const noexcept { return m_vao->get_handle(); }
+
+		auto const & get_va() const & noexcept { return m_vao; }
+
+		auto const & get_ib() const & noexcept { return m_vao->get_ib(); }
+
+		auto const & get_vbs() const & noexcept { return m_vao->get_vbs(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gl::vertexarray>	m_vao;
-		contiguous_t		m_verts;
-		indices_t			m_inds;
+		shared<gl::vertexarray> m_vao;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -20,7 +20,7 @@ namespace ml
 	{
 		for (auto & p : m_data.get<plugin *>())
 		{
-			memory_manager::deallocate(p);
+			memory::deallocate(p);
 		}
 		m_data.clear();
 	}
@@ -42,7 +42,7 @@ namespace ml
 		{
 			auto const i{ (size_t)std::distance(m_data.begin<hash_t>(), it) };
 
-			memory_manager::deallocate(m_data.get<plugin *>(i));
+			memory::deallocate(m_data.get<plugin *>(i));
 
 			m_data.erase(i);
 

@@ -20,7 +20,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// global event system
+	// event system singleton
 	class ML_CORE_API event_system final : public singleton<event_system>
 	{
 	public:

@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory_manager::~memory_manager() noexcept
+	memory::~memory() noexcept
 	{
 #if (ML_is_debug)
 		if (!m_records.empty())

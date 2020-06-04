@@ -1,10 +1,10 @@
-#include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/Performance.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	performance_tracker::~performance_tracker() noexcept {}
+	performance::~performance() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

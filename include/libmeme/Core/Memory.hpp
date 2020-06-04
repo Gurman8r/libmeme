@@ -5,23 +5,6 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
-namespace ml
-{
-	// smart pointers
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// std::shared_ptr
-	template <class T> ML_alias shared = typename std::shared_ptr<T>;
-
-	// std::unique_ptr
-	template <class T> ML_alias unique = typename std::unique_ptr<T>;
-
-	// std::weak_ptr
-	template <class T> ML_alias weak = typename std::weak_ptr<T>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
 namespace ml::util
 {
 	// passthrough resource for collecting upstream metrics
@@ -131,28 +114,36 @@ namespace ml::util
 	};
 }
 
+// memory
 namespace ml
 {
-	// global memory manager
-	class ML_CORE_API memory_manager final : public singleton<memory_manager>
+	// memory manager singleton
+	class ML_CORE_API memory final : public singleton<memory>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		struct ML_NODISCARD deleter final
+		{
+			void operator()(void * addr) const noexcept { deallocate(addr); };
+		};
 
 		struct ML_NODISCARD record final
 		{
 			size_t index; size_t size; byte_t * data;
 		};
 
+		template <class T> using shared_ptr	= typename std::shared_ptr<T>;
+		
+		template <class T> using unique_ptr	= typename std::unique_ptr<T, deleter>;
+		
+		template <class T> using weak_ptr	= typename std::weak_ptr<T>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
-
-		ML_NODISCARD static auto const & get_index() noexcept { return get_instance().m_index; }
 
 		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
 
@@ -161,7 +152,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// set test resource
-		ML_NODISCARD static bool configure(util::test_resource * res) noexcept
+		ML_NODISCARD static bool set_test_resource(util::test_resource * res) noexcept
 		{
 			static auto & inst{ get_instance() };
 
@@ -201,9 +192,21 @@ namespace ml
 
 		// allocate shared
 		template <class T, class ... Args
-		> ML_NODISCARD static shared<T> allocate_shared(Args && ... args) noexcept
+		> ML_NODISCARD static shared_ptr<T> allocate_shared(Args && ... args) noexcept
 		{
 			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// allocate unique
+		template <class T, class ... Args
+		> ML_NODISCARD static unique_ptr<T> allocate_unique(Args && ... args) noexcept
+		{
+			return unique_ptr<T>
+			{
+				::new (allocate(sizeof(T))) T{ ML_forward(args)... }, deleter{}
+			};
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -265,11 +268,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<memory_manager>;
+		friend singleton<memory>;
 
-		memory_manager() noexcept = default;
+		memory() noexcept = default;
 
-		~memory_manager() noexcept;
+		~memory() noexcept;
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
@@ -280,6 +283,24 @@ namespace ml
 	};
 }
 
+// smart pointers
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// shared pointer
+	template <class T> ML_alias shared = typename memory::shared_ptr<T>;
+
+	// unique pointer
+	template <class T> ML_alias unique = typename memory::unique_ptr<T>;
+
+	// weak pointer
+	template <class T> ML_alias weak = typename memory::weak_ptr<T>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// trackable
 namespace ml
 {
 	// trackable base
@@ -291,25 +312,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD void * operator new(size_t size) noexcept
-		{
-			return memory_manager::allocate(size);
-		}
+		ML_NODISCARD void * operator new(size_t size) noexcept { return memory::allocate(size); }
 
-		ML_NODISCARD void * operator new[](size_t size) noexcept
-		{
-			return memory_manager::allocate(size);
-		}
+		ML_NODISCARD void * operator new[](size_t size) noexcept { return memory::allocate(size); }
 
-		void operator delete(void * addr) noexcept
-		{
-			return memory_manager::deallocate(addr);
-		}
+		void operator delete(void * addr) noexcept { memory::deallocate(addr); }
 
-		void operator delete[](void * addr) noexcept
-		{
-			return memory_manager::deallocate(addr);
-		}
+		void operator delete[](void * addr) noexcept { memory::deallocate(addr); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

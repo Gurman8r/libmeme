@@ -16,7 +16,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using shader_source = typename meta::array<pmr::string, gl::shader_type_MAX>;
+		using shader_source = typename meta::array<pmr::string, gl::shader_type_max>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,9 +93,9 @@ namespace ml
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
-				& v{ std::get<gl::vertex_shader>(value) },
-				& f{ std::get<gl::fragment_shader>(value) },
-				& g{ std::get<gl::geometry_shader>(value) };
+				& v{ std::get<gl::shader_type_vertex>(value) },
+				& f{ std::get<gl::shader_type_fragment>(value) },
+				& g{ std::get<gl::shader_type_geometry>(value) };
 
 			return ((!v.empty() && !f.empty() && !g.empty())
 				? load_from_memory(v, f, g)
@@ -109,11 +109,11 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy(); m_obj->generate(); }
+			if (!m_obj) { m_obj = gl::make_shader(); }
+			else { m_obj->destroy().generate(); }
 
-			m_obj->attach(gl::vertex_shader, v_src.c_str());
-			m_obj->attach(gl::fragment_shader, f_src.c_str());
+			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
+			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
 			m_obj->link();
 			
 			return (bool)m_obj;
@@ -124,12 +124,12 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy(); m_obj->generate(); }
+			if (!m_obj) { m_obj = gl::make_shader(); }
+			else { m_obj->destroy().generate(); }
 			
-			m_obj->attach(gl::vertex_shader, v_src.c_str());
-			m_obj->attach(gl::fragment_shader, f_src.c_str());
-			m_obj->attach(gl::geometry_shader, g_src.c_str());
+			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
+			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
+			m_obj->attach(gl::shader_type_geometry, g_src.c_str());
 			m_obj->link();
 
 			return (bool)m_obj;
@@ -187,7 +187,7 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return (bool)m_obj; }
 		
-		ML_NODISCARD gl::handle get_handle() const noexcept { return m_obj->get_handle(); }
+		ML_NODISCARD gl::handle_t get_handle() const noexcept { return m_obj->get_handle(); }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -208,7 +208,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gl::shader_type_MAX>;
+		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gl::shader_type_max>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -241,22 +241,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto & src(uint32_t i) & noexcept { return m_src[static_cast<size_t>(i)]; }
+		auto & get(uint32_t i) & noexcept { return m_src[static_cast<size_t>(i)]; }
 
-		auto const & src(uint32_t i) const & noexcept { return m_src[static_cast<size_t>(i)]; }
+		auto const & get(uint32_t i) const & noexcept { return m_src[static_cast<size_t>(i)]; }
 
-		pmr::string & src(uint32_t i, pmr::string const & name) & noexcept
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pmr::string & str(uint32_t i, pmr::string const & name) & noexcept
 		{
-			return this->src(i)[name];
+			return this->get(i)[name];
+		}
+
+		cstring c_str(uint32_t i, pmr::string const & name) noexcept
+		{
+			return str(i, name).c_str();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool load_src(uint32_t i, pmr::string const & name, fs::path const & path)
+		bool read_file(uint32_t i, pmr::string const & name, fs::path const & path)
 		{
 			if (auto const contents{ util::get_file_contents(path) })
 			{
-				this->src(i, name) = { contents->begin(), contents->end() };
+				this->str(i, name) = { contents->begin(), contents->end() };
 
 				return true;
 			}

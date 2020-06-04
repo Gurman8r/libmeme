@@ -3,7 +3,7 @@
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Array.hpp>
-#include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/Performance.hpp>
 
 namespace ml
 {
@@ -32,7 +32,7 @@ namespace ml
 		{
 			++m_frame_count;
 
-			performance_tracker::refresh();
+			performance::refresh();
 
 			m_delta_time = m_loop_timer.elapsed();
 		}

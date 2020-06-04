@@ -37,8 +37,8 @@ namespace ml
 		// set allocator functions
 		ImGui::SetAllocatorFunctions
 		(
-			[](size_t s, auto) noexcept { return memory_manager::allocate(s); },
-			[](void * p, auto) noexcept { return memory_manager::deallocate(p); },
+			[](size_t s, auto) noexcept { return memory::allocate(s); },
+			[](void * p, auto) noexcept { return memory::deallocate(p); },
 			nullptr
 		);
 

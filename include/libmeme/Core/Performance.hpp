@@ -1,24 +1,20 @@
-#ifndef _ML_PERFORMANCE_TRACKER_HPP_
-#define _ML_PERFORMANCE_TRACKER_HPP_
+#ifndef _ML_PERFORMANCE_HPP_
+#define _ML_PERFORMANCE_HPP_
 
 #include <libmeme/Core/Timer.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // scope benchmark
 #define ML_benchmark_S(id) \
-	auto ML_anon = _ML performance_tracker::scope_benchmark{ id }
+	auto ML_anon = _ML performance::scope_benchmark{ id }
 
 // lambda benchmark
 #define ML_benchmark_L(id) \
-	auto ML_anon = _ML performance_tracker::lambda_benchmark{ id } + [&]() noexcept
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	auto ML_anon = _ML performance::lambda_benchmark{ id } + [&]() noexcept
 
 namespace ml
 {
-	// global performance tracker
-	class ML_CORE_API performance_tracker final : public singleton<performance_tracker>
+	// performance tracker singleton
+	class ML_CORE_API performance final : public singleton<performance>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -83,11 +79,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<performance_tracker>;
+		friend singleton<performance>;
 
-		performance_tracker() noexcept = default;
+		performance() noexcept = default;
 
-		~performance_tracker() noexcept;
+		~performance() noexcept;
 
 		frame_data m_current{}, m_previous{};
 
@@ -95,4 +91,4 @@ namespace ml
 	};
 }
 
-#endif // !_ML_PERFORMANCE_TRACKER_HPP_
+#endif // !_ML_PERFORMANCE_HPP_

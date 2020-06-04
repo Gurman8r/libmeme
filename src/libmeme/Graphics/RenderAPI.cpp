@@ -4,13 +4,14 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
-using impl_render_api		= _ML gl::opengl_render_api		;
+using impl_device			= _ML gl::opengl_device			;
 using impl_vertex_array		= _ML gl::opengl_vertexarray	;
 using impl_vertex_buffer	= _ML gl::opengl_vertexbuffer	;
 using impl_index_buffer		= _ML gl::opengl_indexbuffer	;
 using impl_frame_buffer		= _ML gl::opengl_framebuffer	;
-using impl_shader			= _ML gl::opengl_shader			;
 using impl_texture2d		= _ML gl::opengl_texture2d		;
+using impl_program			= _ML gl::opengl_program		;
+using impl_shader			= _ML gl::opengl_shader			;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -22,12 +23,16 @@ using impl_texture2d		= _ML gl::opengl_texture2d		;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// api
+// device
 namespace ml::gl
 {
-	render_api * const render_api::get() noexcept
+	unique<device> const & device::get() noexcept
 	{
-		return std::addressof(impl_render_api::get_instance());
+		static unique<device> inst{ memory::allocate_unique<impl_device>() };
+
+		static ML_scope{ ML_assert(inst->do_initialize()); };
+		
+		return inst;
 	}
 }
 
@@ -38,48 +43,57 @@ namespace ml::gl
 {
 	shared<vertexarray> vertexarray::allocate() noexcept
 	{
-		return memory_manager::allocate_shared<impl_vertex_array>();
+		return memory::allocate_shared<impl_vertex_array>();
 	}
 }
 
 // vertexbuffer
 namespace ml::gl
 {
-	shared<vertexbuffer> vertexbuffer::allocate(buffer verts, uint32_t count) noexcept
+	shared<vertexbuffer> vertexbuffer::allocate(buffer_t data, size_t count) noexcept
 	{
-		return memory_manager::allocate_shared<impl_vertex_buffer>(verts, count);
+		return memory::allocate_shared<impl_vertex_buffer>(data, count);
 	}
 
-	shared<vertexbuffer> vertexbuffer::allocate(uint32_t count) noexcept
+	shared<vertexbuffer> vertexbuffer::allocate(size_t count) noexcept
 	{
-		return memory_manager::allocate_shared<impl_vertex_buffer>(count);
+		return memory::allocate_shared<impl_vertex_buffer>(count);
 	}
 }
 
 // indexbuffer
 namespace ml::gl
 {
-	shared<indexbuffer> indexbuffer::allocate(buffer inds, uint32_t count) noexcept
+	shared<indexbuffer> indexbuffer::allocate(buffer_t data, size_t count) noexcept
 	{
-		return memory_manager::allocate_shared<impl_index_buffer>(inds, count);
+		return memory::allocate_shared<impl_index_buffer>(data, count);
 	}
 }
 
 // framebuffer
 namespace ml::gl
 {
-	shared<framebuffer> framebuffer::allocate(uint32_t format, vec2i const & size) noexcept
+	shared<framebuffer> framebuffer::allocate(vec2i const & size, uint32_t format) noexcept
 	{
-		return memory_manager::allocate_shared<impl_frame_buffer>(format, size);
+		return memory::allocate_shared<impl_frame_buffer>(size, format);
 	}
 }
 
 // texture2d
 namespace ml::gl
 {
-	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
+	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer_t pixels) noexcept
 	{
-		return memory_manager::allocate_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
+		return memory::allocate_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
+	}
+}
+
+// program
+namespace ml::gl
+{
+	shared<program> program::allocate(uint32_t type) noexcept
+	{
+		return memory::allocate_shared<impl_program>(type);
 	}
 }
 
@@ -88,7 +102,7 @@ namespace ml::gl
 {
 	shared<shader> shader::allocate() noexcept
 	{
-		return memory_manager::allocate_shared<impl_shader>();
+		return memory::allocate_shared<impl_shader>();
 	}
 }
 

@@ -20,9 +20,9 @@ namespace ml::ds
 		
 		value_type m_value;
 
-		constexpr auto operator->() noexcept -> pointer const { return &m_value; }
+		constexpr auto operator->() noexcept -> pointer { return &m_value; }
 		
-		constexpr auto operator->() const noexcept -> const_pointer const { return &m_value; }
+		constexpr auto operator->() const noexcept -> const_pointer { return &m_value; }
 
 		constexpr auto operator *() & noexcept -> reference { return m_value; }
 		

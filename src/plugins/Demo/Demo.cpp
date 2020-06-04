@@ -1,7 +1,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Core/ECS.hpp>
-#include <libmeme/Core/PerformanceTracker.hpp>
+#include <libmeme/Core/Performance.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -73,7 +73,7 @@ namespace ml
 		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
 			ML_bind_scope(*shd, true);
-			gl::render_command::draw(msh->vao())();
+			gl::render_command::draw(msh->get_va())();
 		}
 	};
 
@@ -192,7 +192,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const & testres{ memory_manager::get_testres() };
+			static auto const & testres{ memory::get_testres() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -238,10 +238,7 @@ namespace ml
 
 			// RENDERING
 			{
-				m_pipeline[0] = gl::framebuffer::allocate
-				(
-					gl::format_rgba, m_resolution
-				);
+				m_pipeline[0] = gl::make_framebuffer(m_resolution);
 			}
 
 			// ICON
@@ -257,12 +254,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gl::texture2d::allocate(m_images["default"]);
-				m_textures["doot"]			= gl::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gl::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= gl::make_texture2d(m_images["default"]);
+				m_textures["doot"]			= gl::make_texture2d(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gl::make_texture2d(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -275,24 +272,24 @@ namespace ml
 
 			// SHADERS
 			{
-				m_cache.load_src(gl::vertex_shader, "2D",
+				m_cache.read_file(gl::shader_type_vertex, "2D",
 					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
-				m_cache.load_src(gl::vertex_shader, "3D",
+				m_cache.read_file(gl::shader_type_vertex, "3D",
 					engine::fs().path2("assets/shaders/3D.vs.shader"));
 
-				m_cache.load_src(gl::fragment_shader, "basic",
+				m_cache.read_file(gl::shader_type_fragment, "basic",
 					engine::fs().path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["2D"] = { {
-					m_cache.src(gl::vertex_shader, "2D"),
-					m_cache.src(gl::fragment_shader, "basic"),
+					m_cache.str(gl::shader_type_vertex, "2D"),
+					m_cache.str(gl::shader_type_fragment, "basic"),
 					{}
 				} };
 
 				m_shaders["3D"] = { {
-					m_cache.src(gl::vertex_shader, "3D"),
-					m_cache.src(gl::fragment_shader, "basic"),
+					m_cache.str(gl::shader_type_vertex, "3D"),
+					m_cache.str(gl::shader_type_fragment, "basic"),
 					{}
 				} };
 			}
@@ -980,7 +977,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto const & testres{ memory_manager::get_testres() };
+			static auto const & testres{ memory::get_testres() };
 
 			static ML_scope // setup memory editor
 			{
@@ -1015,7 +1012,7 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				static memory_manager::record const * selected_record{};
+				static memory::record const * selected_record{};
 				char selected_address[20] = "highlight";
 				if (selected_record)
 				{
@@ -1036,7 +1033,7 @@ namespace ml
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
-					for (auto const & rec : memory_manager::get_records().values())
+					for (auto const & rec : memory::get_records().values())
 					{
 						ML_scoped_imgui_id(ML_addressof(&rec));
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
@@ -1143,7 +1140,7 @@ namespace ml
 
 			// benchmarks
 			ImGui::Columns(2);
-			if (static auto const & frame{ performance_tracker::prev() }; !frame.empty())
+			if (static auto const & frame{ performance::prev() }; !frame.empty())
 			{
 				ImGui::Separator();
 				for (auto const & elem : frame)
@@ -1163,8 +1160,8 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto api{ gl::render_api::get() };
-			static auto const & info{ api->get_info() };
+			static auto const & device{ gl::device::get() };
+			static auto const & info{ device->get_info() };
 
 			if (ImGui::BeginMenuBar())
 			{
@@ -1178,8 +1175,8 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				bool a_enabled{ api->get_alpha_enabled() };
-				auto a_fn{ api->get_alpha_fn() };
+				bool a_enabled{ device->get_alpha_enabled() };
+				auto a_fn{ device->get_alpha_fn() };
 				ImGui::Checkbox("enabled", &a_enabled);
 				ImGui::Text("predicate: %s (%u)", gl::predicate_names[a_fn.pred], a_fn.pred);
 				ImGui::Text("reference: %f", a_fn.ref);
@@ -1188,10 +1185,10 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				bool b_enabled{ api->get_blend_enabled() };
-				auto b_color{ api->get_blend_color() };
-				auto b_eq{ api->get_blend_eq() };
-				auto b_fn{ api->get_blend_fn() };
+				bool b_enabled{ device->get_blend_enabled() };
+				auto b_color{ device->get_blend_color() };
+				auto b_eq{ device->get_blend_eq() };
+				auto b_fn{ device->get_blend_fn() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
 				ImGui::Text("mode rgb: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
@@ -1205,9 +1202,9 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				bool c_enabled{ api->get_cull_enabled() };
-				auto c_facet{ api->get_cull_facet() };
-				auto c_order{ api->get_cull_order() };
+				bool c_enabled{ device->get_cull_enabled() };
+				auto c_facet{ device->get_cull_facet() };
+				auto c_order{ device->get_cull_order() };
 				ImGui::Checkbox("enabled", &c_enabled);
 				ImGui::Text("facet: %s (%u)", gl::facet_names[c_facet], c_facet);
 				ImGui::Text("order: %s (%u)", gl::order_names[c_order], c_order);
@@ -1216,10 +1213,10 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				bool d_enabled{ api->get_depth_enabled() };
-				auto d_pred{ api->get_depth_pr() };
-				bool d_mask{ api->get_depth_mask() };
-				auto d_range{ api->get_depth_range() };
+				bool d_enabled{ device->get_depth_enabled() };
+				auto d_pred{ device->get_depth_pr() };
+				bool d_mask{ device->get_depth_mask() };
+				auto d_range{ device->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
 				ImGui::Text("predicate: %s (%u) ", gl::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
@@ -1229,8 +1226,8 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				bool s_enabled{ api->get_stencil_enabled() };
-				auto s_fn{ api->get_stencil_fn() };
+				bool s_enabled{ device->get_stencil_enabled() };
+				auto s_fn{ device->get_stencil_fn() };
 				ImGui::Checkbox("enabled", &s_enabled);
 				ImGui::Text("predicate: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
 				ImGui::Text("reference: %i", s_fn.ref);

@@ -29,7 +29,7 @@ static class memcfg final : public singleton<memcfg>
 	memcfg() noexcept
 	{
 		ML_assert(pmr::set_default_resource(&test));
-		ML_assert(memory_manager::configure(&test));
+		ML_assert(memory::set_test_resource(&test));
 	}
 
 } &ML_anon{ memcfg::get_instance() };

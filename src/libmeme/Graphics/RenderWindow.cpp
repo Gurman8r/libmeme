@@ -13,20 +13,21 @@ namespace ml
 			return debug::error("render_window failed opening window");
 		}
 
-		// get api context
-		auto api{ gl::render_api::get() };
-
-		// initialize
-		if (!api->initialize())
+		// initialize device
+		if (auto const & device{ gl::device::get() })
 		{
-			return debug::error("render_window failed initializing render_api");
+			// validate version
+			m_settings.context.major = device->get_info().major_version;
+			m_settings.context.minor = device->get_info().minor_version;
+		}
+		else
+		{
+			return debug::error("render_window failed initializing device");
 		}
 
-		// validate version
-		m_settings.context.major = api->get_info().major_version;
-		m_settings.context.minor = api->get_info().minor_version;
 
-		for (auto const & cmd : // setup states
+		// setup states
+		for (auto const & cmd :
 		{
 			// alpha
 			gl::render_command::set_alpha_enabled(true),
