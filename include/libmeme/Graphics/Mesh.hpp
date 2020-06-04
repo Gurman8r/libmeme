@@ -22,15 +22,15 @@ namespace ml
 		mesh(contiguous_t const & verts, indices_t const & inds = {}, gl::buffer_layout const & layout = {})
 			: mesh{ gl::vertexarray::create(), verts, inds }
 		{
+			// vertices
 			auto vb = gl::vertexbuffer::create
 			(
-				m_verts.data(), (uint32_t)m_verts.size() * sizeof(float_t)
+				m_verts.data(), (uint32_t)m_verts.size()
 			);
-
 			vb->set_layout(layout);
-
 			m_vao->add_vbo(vb);
 
+			// indices
 			m_vao->set_ibo(m_inds.empty() ? nullptr : gl::indexbuffer::create
 			(
 				m_inds.data(), (uint32_t)m_inds.size()

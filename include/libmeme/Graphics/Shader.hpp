@@ -160,15 +160,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> bool set_uniform(cstring name, T && value) noexcept
+		> bool set_uniform(cstring name, T const & value) noexcept
 		{
-			return m_obj->set_uniform(name, ML_forward(value));
+			return m_obj->set_uniform(name, value);
 		}
 
 		template <class T
-		> bool set_uniform(pmr::string const & name, T && value) noexcept
+		> bool set_uniform(pmr::string const & name, T const & value) noexcept
 		{
-			return this->set_uniform(name.c_str(), ML_forward(value));
+			return this->set_uniform(name.c_str(), value);
 		}
 
 		bool set_uniform(uniform const & u) noexcept

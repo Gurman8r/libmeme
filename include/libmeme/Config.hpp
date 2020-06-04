@@ -358,8 +358,9 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// Disable Compiler Warnings
+// WARNINGS
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifdef ML_os_windows
 #   pragma warning(disable: 4031)   // second formal parameter list longer than the first list
 #   pragma warning(disable: 4067)   // unexpected tokens following preprocessor directive - expected a newline

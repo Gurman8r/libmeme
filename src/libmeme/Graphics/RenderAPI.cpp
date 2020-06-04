@@ -20,37 +20,32 @@ using impl_texture2d		= _ML gl::opengl_texture2d		;
 #error "Unknown or invalid renderer implementation specified."
 #endif
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // api
 namespace ml::gl
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	render_api * const render_api::get() noexcept
 	{
 		static impl_render_api inst{};
 		return std::addressof(inst);
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-// objects
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// vertexarray
 namespace ml::gl
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// VERTEX ARRAY
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	shared<vertexarray> vertexarray::create() noexcept
 	{
 		return memory_manager::allocate_shared<impl_vertex_array>();
 	}
+}
 
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// VERTEX BUFFER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// vertexbuffer
+namespace ml::gl
+{
 	shared<vertexbuffer> vertexbuffer::create(buffer verts, uint32_t count) noexcept
 	{
 		return memory_manager::allocate_shared<impl_vertex_buffer>(verts, count);
@@ -60,46 +55,42 @@ namespace ml::gl
 	{
 		return memory_manager::allocate_shared<impl_vertex_buffer>(count);
 	}
+}
 
-	
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// INDEX BUFFER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// indexbuffer
+namespace ml::gl
+{
 	shared<indexbuffer> indexbuffer::create(buffer inds, uint32_t count) noexcept
 	{
 		return memory_manager::allocate_shared<impl_index_buffer>(inds, count);
 	}
+}
 
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// FRAME BUFFER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// framebuffer
+namespace ml::gl
+{
 	shared<framebuffer> framebuffer::create(uint32_t format, vec2i const & size) noexcept
 	{
 		return memory_manager::allocate_shared<impl_frame_buffer>(format, size);
 	}
+}
 
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// TEXTURE2D
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// texture2d
+namespace ml::gl
+{
 	shared<texture2d> texture2d::create(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer pixels) noexcept
 	{
 		return memory_manager::allocate_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
 	}
+}
 
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	// SHADER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// shader
+namespace ml::gl
+{
 	shared<shader> shader::create() noexcept
 	{
 		return memory_manager::allocate_shared<impl_shader>();
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
