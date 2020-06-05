@@ -9,8 +9,9 @@
 namespace ml::util
 {
 	// passthrough resource for collecting upstream metrics
-	struct test_resource final : public pmr::memory_resource, non_copyable
+	class test_resource final : public pmr::memory_resource, public non_copyable
 	{
+	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using pointer			= typename byte_t *;
@@ -274,7 +275,7 @@ namespace ml
 		template <class T, class ... Args
 		> ML_NODISCARD static unique<T, deleter> make_unique(Args && ... args) noexcept
 		{
-			return unique<T, deleter>{ make_new<T>(ML_forward(args)...), deleter{} };
+			return unique<T, deleter>{ memory::make_new<T>(ML_forward(args)...), deleter{} };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
