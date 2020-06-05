@@ -18,10 +18,10 @@ namespace ml
 
 	void plugin_manager::clear()
 	{
-		for (auto & p : m_data.get<plugin *>())
-		{
-			memory::deallocate(p);
-		}
+		//for (auto & p : m_data.get<plugin *>())
+		//{
+		//	memory::deallocate(p);
+		//}
 		m_data.clear();
 	}
 
@@ -40,11 +40,7 @@ namespace ml
 			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
 		}; it == m_data.end<hash_t>())
 		{
-			auto const i{ (size_t)std::distance(m_data.begin<hash_t>(), it) };
-
-			memory::deallocate(m_data.get<plugin *>(i));
-
-			m_data.erase(i);
+			m_data.erase((size_t)std::distance(m_data.begin<hash_t>(), it));
 
 			return true;
 		}

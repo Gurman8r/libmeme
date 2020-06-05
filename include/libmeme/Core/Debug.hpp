@@ -9,9 +9,9 @@ namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	inline std::ostream & std_err() noexcept { return std::cerr; }
-
-	inline std::ostream & std_out() noexcept { return std::cout; }
+	static std::ostream & std_out	{ std::cout };
+	static std::ostream & std_err	{ std::cerr };
+	static std::istream & std_in	{ std::cin	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,7 +32,7 @@ namespace ml::debug
 #ifdef ML_os_windows
 		std::system("pause");
 #else
-		std::cin.get();
+		std_in.get();
 #endif
 		return exit_code;
 	}
@@ -42,7 +42,7 @@ namespace ml::debug
 	template <class Str
 	> void puts(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << ML_forward(str) << '\n';
+		_ML_DEBUG std_out << ML_forward(str) << '\n';
 	}
 
 	template <class Fmt, class Arg0, class ... Args
@@ -58,7 +58,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t info(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[i] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out << "[i] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG info();
 	}
@@ -76,7 +76,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t error(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[e] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out << "[e] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG error();
 	}
@@ -94,7 +94,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t warning(Str && str) noexcept
 	{
-		_ML_DEBUG std_out() << "[w] " << ML_forward(str) << '\n';
+		_ML_DEBUG std_out << "[w] " << ML_forward(str) << '\n';
 
 		return _ML_DEBUG warning();
 	}

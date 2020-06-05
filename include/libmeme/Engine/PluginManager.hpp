@@ -34,7 +34,7 @@ namespace ml
 			hash_t,			// hash code
 			fs::path,		// file name
 			shared_library,	// library instance
-			plugin *		// pointer to plugin
+			unique<plugin>	// pointer to plugin
 		> m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

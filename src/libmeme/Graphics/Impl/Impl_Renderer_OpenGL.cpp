@@ -36,6 +36,16 @@ namespace ml { using namespace gl; }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// check error macro
+#if (!ML_is_debug)
+#	define glCheck(expr) (expr)
+#else
+#	define glCheck(expr) \
+	do { expr; _ML gl::device::check_error(__FILE__, __LINE__, #expr); } while (0)
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // enums
 namespace ml::gl
 {
@@ -520,16 +530,6 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// check error macro
-#if (!ML_is_debug)
-#	define glCheck(expr) (expr)
-#else
-#	define glCheck(expr) \
-	do { expr; _ML gl::device::check_error(__FILE__, __LINE__, #expr); } while (0)
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // device
 namespace ml::gl
 {
@@ -537,23 +537,31 @@ namespace ml::gl
 
 	bool opengl_device::do_initialize()
 	{
+		static bool check = std::invoke([]()
+		{
 #if defined(ML_IMPL_OPENGL_LOADER_GLEW)
-		// glew
-		glewExperimental = true;
-		return (GLEW_OK == glewInit());
+			// glew
+			glewExperimental = true;
+			return (GLEW_OK == glewInit());
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-		// gl3w
-		return gl3wInit();
+			// gl3w
+			return gl3wInit();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-		// glad
-		return gladLoadGL();
+			// glad
+			return gladLoadGL();
 
 #elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-		// custom
-		return false;
+			// custom
+			return false;
 #endif
+		});
+		if (check)
+		{
+			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+		}
+		return check;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -638,7 +646,7 @@ namespace ml::gl
 			{
 				int32_t num{};
 				glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &num);
-				temp.shader_binary_formats.reserve((size_t)num);
+				temp.shader_binary_formats.resize((size_t)num);
 				glGetIntegerv(GL_SHADER_BINARY_FORMATS, (int32_t *)temp.shader_binary_formats.data());
 			}
 
@@ -657,21 +665,14 @@ namespace ml::gl
 
 	alpha_fn opengl_device::get_alpha_fn() const
 	{
-		return
-		{
-			std::invoke([]() -> uint32_t
-			{
-				uint32_t func{};
-				glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&func));
-				return _predicate<to_user>(func);
-			}),
-			std::invoke([]() -> float_t
-			{
-				float_t ref{};
-				glCheck(glGetFloatv(GL_ALPHA_TEST_REF, &ref));
-				return ref;
-			})
-		};
+		alpha_fn temp{};
+
+		glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&temp.pred));
+		temp.pred = _predicate<to_user>(temp.pred);
+
+		glCheck(glGetFloatv(GL_ALPHA_TEST_REF, &temp.ref));
+
+		return temp;
 	}
 
 	bool opengl_device::get_blend_enabled() const
@@ -1059,7 +1060,7 @@ namespace ml::gl
 					e.get_component_count(),
 					type,
 					layout.stride(),
-					reinterpret_cast<buffer_t>(e.offset)));
+					reinterpret_cast<address_t>(e.offset)));
 			}
 			else
 			{
@@ -1069,7 +1070,7 @@ namespace ml::gl
 					type,
 					e.normalized,
 					layout.stride(),
-					reinterpret_cast<buffer_t>(e.offset)));
+					reinterpret_cast<address_t>(e.offset)));
 			}
 			glCheck(glEnableVertexAttribArray((uint32_t)i));
 		}
@@ -1123,7 +1124,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	vertexbuffer & opengl_vertexbuffer::set_data(buffer_t data, size_t count)
+	vertexbuffer & opengl_vertexbuffer::set_data(address_t data, size_t count)
 	{
 		copy_buffer<float_t>(m_view, data, count);
 
@@ -1136,7 +1137,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	vertexbuffer & opengl_vertexbuffer::set_data(buffer_t data, size_t count, size_t offset)
+	vertexbuffer & opengl_vertexbuffer::set_data(address_t data, size_t count, size_t offset)
 	{
 		copy_buffer<float_t>(m_view, data, count);
 
@@ -1186,7 +1187,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	indexbuffer & opengl_indexbuffer::set_data(buffer_t data, size_t count)
+	indexbuffer & opengl_indexbuffer::set_data(address_t data, size_t count)
 	{
 		copy_buffer<uint32_t>(m_view, data, count);
 
@@ -1391,7 +1392,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	texture2d & opengl_texture2d::update(vec2i const & size, buffer_t data) &
+	texture2d & opengl_texture2d::update(vec2i const & size, address_t data) &
 	{
 		if (m_size == size) { return (*this); }
 		else { m_size = size; }

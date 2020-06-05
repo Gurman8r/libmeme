@@ -36,7 +36,7 @@ namespace ml
 		explicit shared_library(fs::path const & path, allocator_type alloc = {}) noexcept
 			: self_type{ alloc }
 		{
-			(void)this->open(path);
+			this->open(path);
 		}
 
 		explicit shared_library(self_type && value, allocator_type alloc = {}) noexcept
@@ -47,7 +47,7 @@ namespace ml
 
 		~shared_library() noexcept
 		{
-			(void)this->close();
+			this->close();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -70,9 +70,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool open(fs::path const & path);
+		bool open(fs::path const & path);
 
-		ML_NODISCARD bool close();
+		bool close();
 
 		ML_NODISCARD void * load_symbol(pmr::string const & name);
 

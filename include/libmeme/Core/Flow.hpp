@@ -8,9 +8,9 @@
 namespace ml::impl
 {
     // invoke in constructor
-    template <class Fn> struct ML_NODISCARD immediate_scope final
+    template <class Fn> struct ML_NODISCARD scope_impl final
     {
-        constexpr immediate_scope(Fn && fn) noexcept { ML_invoke(ML_forward(fn)); }
+        constexpr scope_impl(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
     };
 
     enum class ML_NODISCARD scope_tag {};
@@ -18,7 +18,7 @@ namespace ml::impl
     template <class Fn
     > ML_NODISCARD constexpr auto operator+(scope_tag, Fn && fn) noexcept
     {
-        return immediate_scope<Fn>{ ML_forward(fn) };
+        return scope_impl<Fn>{ ML_forward(fn) };
     }
 }
 
@@ -31,11 +31,11 @@ namespace ml::impl
 namespace ml::impl
 {
     // invoke in destructor
-    template <class Fn> struct ML_NODISCARD deferred_scope final
+    template <class Fn> struct ML_NODISCARD defer_impl final
     {
-        deferred_scope(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
+        defer_impl(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~deferred_scope() noexcept { std::invoke(m_fn); }
+        ~defer_impl() noexcept { std::invoke(m_fn); }
 
     private: Fn const m_fn;
     };
@@ -45,7 +45,7 @@ namespace ml::impl
     template <class Fn
     > ML_NODISCARD auto operator+(defer_tag, Fn && fn) noexcept
     {
-        return deferred_scope<Fn>{ ML_forward(fn) };
+        return defer_impl<Fn>{ ML_forward(fn) };
     }
 }
 

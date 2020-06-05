@@ -59,32 +59,32 @@ namespace ml
 		{
 		}
 
-		constexpr duration(duration const & value)
+		constexpr duration(self_type const & value)
 			: m_data{ value.m_data }
 		{
 		}
 
-		constexpr duration(duration && value) noexcept
+		constexpr duration(self_type && value) noexcept
 			: m_data{ std::move(value.m_data) }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr duration & operator=(duration const & value)
+		constexpr self_type & operator=(self_type const & value)
 		{
-			duration temp{ value };
+			self_type temp{ value };
 			swap(temp);
 			return (*this);
 		}
 
-		constexpr duration & operator=(duration && value) noexcept
+		constexpr self_type & operator=(self_type && value) noexcept
 		{
 			swap(std::move(value));
 			return (*this);
 		}
 
-		constexpr void swap(duration & value) noexcept
+		constexpr void swap(self_type & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
@@ -144,10 +144,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = duration
+		template <class U = self_type
 		> ML_NODISCARD constexpr auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<U, duration>)
+			if constexpr (std::is_same_v<U, self_type>)
 			{
 				return compare(value.m_data);
 			}
@@ -195,33 +195,33 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr duration operator+() const noexcept
+		constexpr self_type operator+() const noexcept
 		{
-			return duration{ m_data.operator+() };
+			return self_type{ m_data.operator+() };
 		}
 
-		constexpr duration operator-() const noexcept
+		constexpr self_type operator-() const noexcept
 		{
-			return duration{ m_data.operator-() };
+			return self_type{ m_data.operator-() };
 		}
 
-		constexpr duration operator++(int) noexcept
+		constexpr self_type operator++(int) noexcept
 		{
-			return duration{ m_data++ };
+			return self_type{ m_data++ };
 		}
 
-		constexpr duration operator--(int) noexcept
+		constexpr self_type operator--(int) noexcept
 		{
-			return duration{ m_data-- };
+			return self_type{ m_data-- };
 		}
 
-		constexpr duration & operator++() noexcept
+		constexpr self_type & operator++() noexcept
 		{
 			++m_data;
 			return (*this);
 		}
 
-		constexpr duration & operator--() noexcept
+		constexpr self_type & operator--() noexcept
 		{
 			--m_data;
 			return (*this);
@@ -230,35 +230,35 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> constexpr duration & operator+=(T const & value) noexcept
+		> constexpr self_type & operator+=(T const & value) noexcept
 		{
 			m_data += value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator-=(T const & value) noexcept
+		> constexpr self_type & operator-=(T const & value) noexcept
 		{
 			m_data -= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator*=(T const & value) noexcept
+		> constexpr self_type & operator*=(T const & value) noexcept
 		{
 			m_data *= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator/=(T const & value) noexcept
+		> constexpr self_type & operator/=(T const & value) noexcept
 		{
 			m_data /= value;
 			return (*this);
 		}
 
 		template <class T
-		> constexpr duration & operator%=(T const & value) noexcept
+		> constexpr self_type & operator%=(T const & value) noexcept
 		{
 			m_data %= value;
 			return (*this);
@@ -267,7 +267,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		union { base_type m_data; };
+		base_type m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

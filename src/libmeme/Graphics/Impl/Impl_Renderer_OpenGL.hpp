@@ -14,6 +14,17 @@ namespace ml::gl
 	// opengl device
 	class opengl_device final : public device
 	{
+	protected:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend class std::unique_ptr<device, default_delete>;
+
+		friend class device;
+
+		~opengl_device() noexcept override = default;
+
+		bool do_initialize() override;
+
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -127,18 +138,7 @@ namespace ml::gl
 		void upload(handle_t loc, mat3 const & value) override;
 
 		void upload(handle_t loc, mat4 const & value) override;
-
-	protected:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend class context;
-
-		friend class device;
-
-		~opengl_device() noexcept override = default;
-
-		bool do_initialize() override;
-
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
@@ -198,7 +198,7 @@ namespace ml::gl
 	class opengl_vertexbuffer final : public vertexbuffer
 	{
 	public:
-		opengl_vertexbuffer(buffer_t data, size_t count) noexcept : m_usage{ usage_static_draw }
+		opengl_vertexbuffer(address_t data, size_t count) noexcept : m_usage{ usage_static_draw }
 		{
 			generate().bind();
 			set_data(data, count);
@@ -220,15 +220,17 @@ namespace ml::gl
 
 		vertexbuffer & destroy() override;
 
-		vertexbuffer & set_data(buffer_t data, size_t count) override;
+		vertexbuffer & set_data(address_t data, size_t count) override;
 
-		vertexbuffer & set_data(buffer_t data, size_t count, size_t offset) override;
+		vertexbuffer & set_data(address_t data, size_t count, size_t offset) override;
 
 		vertexbuffer & set_layout(layout const & value) override
 		{
 			m_layout = value;
 			return (*this);
 		}
+
+		buffer_t const & get_buffer() const noexcept override { return m_view; }
 
 		size_t get_count() const noexcept override { return m_count; }
 
@@ -239,8 +241,6 @@ namespace ml::gl
 		uint32_t get_usage() const noexcept override { return m_usage; }
 
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_vertexbuffer>; }
-
-		view_t const & get_view() const noexcept override { return m_view; }
 
 	protected:
 		bool do_is_equal(device_object const & other) const noexcept override
@@ -253,7 +253,7 @@ namespace ml::gl
 		size_t			m_count		{}; // element count
 		uint32_t const	m_usage		{}; // draw usage
 		layout			m_layout	{}; // buffer layout
-		view_t			m_view		{}; // local data
+		buffer_t			m_view		{}; // local data
 	};
 }
 
@@ -266,7 +266,7 @@ namespace ml::gl
 	class opengl_indexbuffer final : public indexbuffer
 	{
 	public:
-		opengl_indexbuffer(buffer_t data, size_t count) noexcept : m_usage{ usage_static_draw }
+		opengl_indexbuffer(address_t data, size_t count) noexcept : m_usage{ usage_static_draw }
 		{
 			generate().bind();
 			set_data(data, count);
@@ -282,7 +282,9 @@ namespace ml::gl
 
 		indexbuffer & destroy() override;
 
-		indexbuffer & set_data(buffer_t data, size_t count) override;
+		indexbuffer & set_data(address_t data, size_t count) override;
+
+		buffer_t const & get_buffer() const noexcept override { return m_view; }
 
 		size_t get_count() const noexcept override { return m_count; }
 
@@ -291,8 +293,6 @@ namespace ml::gl
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_indexbuffer>; }
 
 		uint32_t get_usage() const noexcept override { return m_usage; }
-
-		view_t const & get_view() const noexcept override { return m_view; }
 
 	protected:
 		bool do_is_equal(device_object const & other) const noexcept override
@@ -304,7 +304,7 @@ namespace ml::gl
 		uint32_t		m_handle	{}; // object handle
 		size_t			m_count		{}; // element count
 		uint32_t const	m_usage		{}; // usage
-		view_t			m_view		{}; // local data
+		buffer_t			m_view		{}; // local data
 	};
 }
 
@@ -373,7 +373,7 @@ namespace ml::gl
 	class opengl_texture2d final : public texture2d
 	{
 	public:
-		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer_t data) noexcept
+		opengl_texture2d(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, address_t data) noexcept
 			: m_i_format{ iformat }, m_c_format{ cformat }, m_p_type{ ptype }, m_flags{ flags }
 		{
 			update(size, data);
@@ -395,7 +395,7 @@ namespace ml::gl
 
 		texture2d & set_smooth(bool value) & override;
 
-		texture2d & update(vec2i const & size, buffer_t data = nullptr) & override;
+		texture2d & update(vec2i const & size, address_t data = nullptr) & override;
 
 		image copy_to_image() const override;
 

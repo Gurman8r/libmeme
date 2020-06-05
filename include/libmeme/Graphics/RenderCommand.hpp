@@ -6,19 +6,19 @@
 namespace ml::gl
 {
 	// render command generators
-	class render_command final
+	class command final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static cmd_t builtin(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command_t builtin(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), device::get_context().get(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static cmd_t custom(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command_t custom(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), ML_forward(args)...);
 		}
@@ -142,7 +142,7 @@ namespace ml::gl
 		template <class T
 		> ML_NODISCARD static auto upload(handle_t loc, T const & value) noexcept
 		{
-			return builtin(static_cast<void(device::*)(handle_t, T const &)
+			return builtin(static_cast<void(device:: *)(handle_t, T const &)
 			>(&device::upload), loc, value);
 		}
 

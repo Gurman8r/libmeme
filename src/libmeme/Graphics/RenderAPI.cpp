@@ -26,11 +26,17 @@ using impl_shader			= _ML gl::opengl_shader			;
 // device
 namespace ml::gl
 {
-	device::context const & device::get_context() noexcept
+	unique<device> const & device::get_context() noexcept
 	{
-		static device::context ctx{ memory::make_unique<impl_device>() };
+		static unique<device> ctx{ _ML make_unique<impl_device>() };
 
-		static ML_scope{ ML_assert(ctx && ctx->do_initialize()); };
+		static ML_scope // once
+		{
+			if (ctx && !ctx->do_initialize())
+			{
+				ctx.reset(nullptr);
+			}
+		};
 		
 		return ctx;
 	}
@@ -43,30 +49,30 @@ namespace ml::gl
 {
 	shared<vertexarray> vertexarray::allocate() noexcept
 	{
-		return memory::make_shared<impl_vertex_array>();
+		return _ML make_shared<impl_vertex_array>();
 	}
 }
 
 // vertexbuffer
 namespace ml::gl
 {
-	shared<vertexbuffer> vertexbuffer::allocate(buffer_t data, size_t count) noexcept
+	shared<vertexbuffer> vertexbuffer::allocate(address_t data, size_t count) noexcept
 	{
-		return memory::make_shared<impl_vertex_buffer>(data, count);
+		return _ML make_shared<impl_vertex_buffer>(data, count);
 	}
 
 	shared<vertexbuffer> vertexbuffer::allocate(size_t count) noexcept
 	{
-		return memory::make_shared<impl_vertex_buffer>(count);
+		return _ML make_shared<impl_vertex_buffer>(count);
 	}
 }
 
 // indexbuffer
 namespace ml::gl
 {
-	shared<indexbuffer> indexbuffer::allocate(buffer_t data, size_t count) noexcept
+	shared<indexbuffer> indexbuffer::allocate(address_t data, size_t count) noexcept
 	{
-		return memory::make_shared<impl_index_buffer>(data, count);
+		return _ML make_shared<impl_index_buffer>(data, count);
 	}
 }
 
@@ -75,16 +81,16 @@ namespace ml::gl
 {
 	shared<framebuffer> framebuffer::allocate(vec2i const & size, uint32_t format) noexcept
 	{
-		return memory::make_shared<impl_frame_buffer>(size, format);
+		return _ML make_shared<impl_frame_buffer>(size, format);
 	}
 }
 
 // texture2d
 namespace ml::gl
 {
-	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, buffer_t pixels) noexcept
+	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, address_t pixels) noexcept
 	{
-		return memory::make_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
+		return _ML make_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
 	}
 }
 
@@ -93,7 +99,7 @@ namespace ml::gl
 {
 	shared<program> program::allocate(uint32_t type) noexcept
 	{
-		return memory::make_shared<impl_program>(type);
+		return _ML make_shared<impl_program>(type);
 	}
 }
 
@@ -102,7 +108,7 @@ namespace ml::gl
 {
 	shared<shader> shader::allocate() noexcept
 	{
-		return memory::make_shared<impl_shader>();
+		return _ML make_shared<impl_shader>();
 	}
 }
 

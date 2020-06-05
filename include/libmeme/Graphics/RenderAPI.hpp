@@ -32,10 +32,10 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// aliases
-	ML_alias buffer_t	= typename void const *				; // generic buffer data type
-	ML_alias cmd_t		= typename std::function<void()>	; // render command type
+	ML_alias address_t	= typename void const *				; // generic address type
+	ML_alias buffer_t	= typename pmr::vector<byte_t>		; // data buffer type
+	ML_alias command_t	= typename std::function<void()>	; // render command type
 	ML_alias handle_t	= typename void *					; // generic handle type
-	ML_alias view_t		= typename pmr::vector<byte_t>		; // local buffer data type
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -433,7 +433,7 @@ namespace ml::gl
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Elem
-	> void copy_buffer(view_t & dst, buffer_t src, size_t count) noexcept
+	> void copy_buffer(buffer_t & dst, address_t src, size_t count) noexcept
 	{
 		dst.resize(count * sizeof(Elem));
 
@@ -677,12 +677,19 @@ namespace ml::gl
 	// base device
 	class ML_GRAPHICS_API device : public trackable, public non_copyable
 	{
+	protected:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend class std::unique_ptr<device, default_delete>;
+
+		virtual ~device() noexcept override = default;
+
+		virtual bool do_initialize() = 0;
+
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using context = typename unique<device, memory::deleter>;
-
-		ML_NODISCARD static device::context const & get_context() noexcept;
+		ML_NODISCARD static unique<device> const & get_context() noexcept;
 
 		static void check_error(cstring file, size_t line, cstring expr) noexcept
 		{
@@ -690,12 +697,12 @@ namespace ml::gl
 			{
 				std::cout
 					<< "An internal graphics error occurred ( " << code << " )\n"
-					<< "\t" << fs::path{ file }.filename() << " (" << line << ")\n"
-					<< "expression:\n"
-					<< "\t" << expr << "\n"
-					<< "description:\n"
-					<< "\t" << error_names[code] << "\n"
-					<< "\t" << error_descs[code] << "\n"
+					<< "   " << fs::path{ file }.filename() << " (" << line << ")\n"
+					<< " expression:\n"
+					<< "   " << expr << "\n"
+					<< " description:\n"
+					<< "   " << error_names[code] << "\n"
+					<< "   " << error_descs[code] << "\n"
 					<< "\n";
 			}
 		}
@@ -809,16 +816,7 @@ namespace ml::gl
 		virtual void upload(handle_t loc, mat3 const & value) = 0;
 
 		virtual void upload(handle_t loc, mat4 const & value) = 0;
-
-	protected:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend class context;
-
-		virtual ~device() noexcept override = default;
-
-		virtual bool do_initialize() = 0;
-
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
@@ -903,7 +901,7 @@ namespace ml::gl
 	class ML_GRAPHICS_API vertexbuffer : public device_object
 	{
 	public:
-		ML_NODISCARD static shared<vertexbuffer> allocate(buffer_t data, size_t count) noexcept;
+		ML_NODISCARD static shared<vertexbuffer> allocate(address_t data, size_t count) noexcept;
 
 		ML_NODISCARD static shared<vertexbuffer> allocate(size_t count) noexcept;
 
@@ -917,11 +915,13 @@ namespace ml::gl
 
 		virtual vertexbuffer & destroy() override = 0;
 
-		virtual vertexbuffer & set_data(buffer_t data, size_t count) = 0;
+		virtual vertexbuffer & set_data(address_t data, size_t count) = 0;
 
-		virtual vertexbuffer & set_data(buffer_t data, size_t count, size_t offset) = 0;
+		virtual vertexbuffer & set_data(address_t data, size_t count, size_t offset) = 0;
 
 		virtual vertexbuffer & set_layout(layout const & value) = 0;
+
+		ML_NODISCARD virtual buffer_t const & get_buffer() const noexcept = 0;
 
 		ML_NODISCARD virtual size_t get_count() const noexcept = 0;
 
@@ -930,8 +930,6 @@ namespace ml::gl
 		ML_NODISCARD virtual layout const & get_layout() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
-
-		ML_NODISCARD virtual view_t const & get_view() const noexcept = 0;
 
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
@@ -947,7 +945,7 @@ namespace ml::gl
 	class ML_GRAPHICS_API indexbuffer : public device_object
 	{
 	public:
-		ML_NODISCARD static shared<indexbuffer> allocate(buffer_t data, size_t count) noexcept;
+		ML_NODISCARD static shared<indexbuffer> allocate(address_t data, size_t count) noexcept;
 		
 		virtual ~indexbuffer() noexcept override = default;
 
@@ -959,15 +957,15 @@ namespace ml::gl
 
 		virtual indexbuffer & destroy() override = 0;
 
-		virtual indexbuffer & set_data(buffer_t data, size_t count) = 0;
+		virtual indexbuffer & set_data(address_t data, size_t count) = 0;
+
+		ML_NODISCARD virtual buffer_t const & get_buffer() const noexcept = 0;
 
 		ML_NODISCARD virtual size_t get_count() const noexcept = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
-
-		ML_NODISCARD virtual view_t const & get_view() const noexcept = 0;
 
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
@@ -1029,7 +1027,7 @@ namespace ml::gl
 			uint32_t		cformat,
 			uint32_t		ptype	= type_unsigned_byte,
 			int32_t			flags	= texture_flags_default,
-			buffer_t		data	= nullptr
+			address_t		data	= nullptr
 		) noexcept;
 
 		ML_NODISCARD static shared<texture2d> allocate(image const & img, int32_t flags = texture_flags_default) noexcept
@@ -1068,7 +1066,7 @@ namespace ml::gl
 
 		virtual texture2d & set_smooth(bool value) & = 0;
 
-		virtual texture2d & update(vec2i const & size, buffer_t data = nullptr) & = 0;
+		virtual texture2d & update(vec2i const & size, address_t data = nullptr) & = 0;
 
 		ML_NODISCARD virtual image copy_to_image() const = 0;
 

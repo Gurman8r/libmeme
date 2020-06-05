@@ -16,34 +16,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	font::font(allocator_type alloc) noexcept
-		: m_pages	{ alloc }
-		, m_family	{ alloc }
-		, m_library	{}
-		, m_face	{}
-	{
-	}
-
-	font::font(fs::path const & path, allocator_type alloc)
-		: font{ alloc }
-	{
-		load_from_file(path);
-	}
-
-	font::font(font const & value, allocator_type alloc)
-		: m_pages	{ value.m_pages, alloc }
-		, m_family	{ value.m_family, alloc }
-		, m_library	{ value.m_library }
-		, m_face	{ value.m_face }
-	{
-	}
-
-	font::font(font && value, allocator_type alloc) noexcept
-		: font{ alloc }
-	{
-		swap(std::move(value));
-	}
-
 	font::~font() noexcept
 	{
 		if (m_face) { FT_Done_Face(static_cast<FT_Face>(m_face)); }

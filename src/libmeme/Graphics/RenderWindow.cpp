@@ -30,29 +30,29 @@ namespace ml
 		for (auto const & cmd :
 		{
 			// alpha
-			gl::render_command::set_alpha_enabled(true),
-			gl::render_command::set_alpha_fn({ gl::predicate_greater, 0.001f }),
+			gl::command::set_alpha_enabled(true),
+			gl::command::set_alpha_fn({ gl::predicate_greater, 0.001f }),
 			
 			// blend
-			gl::render_command::set_blend_enabled(true),
-			gl::render_command::set_blend_color(colors::white),
-			gl::render_command::set_blend_eq({ gl::function_add }),
-			gl::render_command::set_blend_fn({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
+			gl::command::set_blend_enabled(true),
+			gl::command::set_blend_color(colors::white),
+			gl::command::set_blend_eq({ gl::function_add }),
+			gl::command::set_blend_fn({ gl::factor_src_alpha, gl::factor_one_minus_src_alpha }),
 			
 			// cull
-			gl::render_command::set_cull_enabled(true),
-			gl::render_command::set_cull_facet(gl::facet_back),
-			gl::render_command::set_cull_order(gl::order_ccw),
+			gl::command::set_cull_enabled(true),
+			gl::command::set_cull_facet(gl::facet_back),
+			gl::command::set_cull_order(gl::order_ccw),
 
 			// depth
-			gl::render_command::set_depth_enabled(true),
-			gl::render_command::set_depth_pr(gl::predicate_less),
-			gl::render_command::set_depth_mask(true),
-			gl::render_command::set_depth_range({ 0.f, 1.f }),
+			gl::command::set_depth_enabled(true),
+			gl::command::set_depth_pr(gl::predicate_less),
+			gl::command::set_depth_mask(true),
+			gl::command::set_depth_range({ 0.f, 1.f }),
 
 			// stencil
-			gl::render_command::set_stencil_enabled(true),
-			gl::render_command::set_stencil_fn({})
+			gl::command::set_stencil_enabled(true),
+			gl::command::set_stencil_fn({})
 		})
 		{
 			std::invoke(cmd);

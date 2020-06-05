@@ -10,7 +10,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// global event listener
+	// base event listener
 	struct ML_CORE_API event_listener
 	{
 		virtual ~event_listener() noexcept;

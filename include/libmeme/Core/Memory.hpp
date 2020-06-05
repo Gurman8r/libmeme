@@ -5,10 +5,9 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
-// test resource
 namespace ml::util
 {
-	// passthrough resource for collecting upstream metrics
+	// passthrough for collecting metrics on upstream resource
 	class test_resource final : public pmr::memory_resource, public non_copyable
 	{
 	public:
@@ -28,21 +27,23 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		pointer buffer() noexcept { return m_buffer; }
+
+		const_pointer buffer() const noexcept { return m_buffer; }
+
 		pmr::memory_resource * upstream() const noexcept { return m_upstream; }
-
-		pointer const buffer() noexcept { return m_buffer; }
-
-		const_pointer const buffer() const noexcept { return m_buffer; }
-
-		bool is_valid_size() const noexcept { return (0 < m_capacity); }
-
-		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		size_t addr() const noexcept { return (size_t)m_buffer; }
+		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
 
-		size_t num_allocations() const noexcept { return m_num_alloc; }
+		bool in_range(void * addr) const noexcept { return ((pointer)addr >= begin()) && ((pointer)addr < end()); }
+
+		bool is_valid_size() const noexcept { return (0 < m_capacity); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		size_t base_addr() const noexcept { return (size_t)m_buffer; }
 
 		size_t capacity() const noexcept { return m_capacity; }
 
@@ -52,9 +53,9 @@ namespace ml::util
 
 		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_capacity; }
 
-		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
+		size_t num_allocations() const noexcept { return m_num_alloc; }
 
-		bool in_range(void * addr) const noexcept { return ((pointer)addr >= begin()) && ((pointer)addr < end()); }
+		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -68,17 +69,17 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pointer const begin() noexcept { return m_buffer; }
+		pointer begin() noexcept { return m_buffer; }
 
-		const_pointer const begin() const noexcept { return m_buffer; }
+		const_pointer begin() const noexcept { return m_buffer; }
 
-		const_pointer const cbegin() const noexcept { return begin(); }
+		const_pointer cbegin() const noexcept { return begin(); }
 
-		pointer const end() noexcept { return m_buffer + m_capacity; }
+		pointer end() noexcept { return m_buffer + m_capacity; }
 
-		const_pointer const end() const noexcept { return m_buffer + m_capacity; }
+		const_pointer end() const noexcept { return m_buffer + m_capacity; }
 
-		const_pointer const cend() const noexcept { return end(); }
+		const_pointer cend() const noexcept { return end(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -116,23 +117,6 @@ namespace ml::util
 	};
 }
 
-// smart pointers
-namespace ml
-{
-	// shared pointer
-	template <class T
-	> ML_alias shared = typename std::shared_ptr<T>;
-
-	// unique pointer
-	template <class T, class Dx = std::default_delete<T>
-	> ML_alias unique = typename std::unique_ptr<T, Dx>;
-
-	// weak pointer
-	template <class T
-	> ML_alias weak = typename std::weak_ptr<T>;
-}
-
-// memory
 namespace ml
 {
 	// memory manager singleton
@@ -150,34 +134,28 @@ namespace ml
 			size_t index; size_t size; byte_t * data;
 		};
 
-		// default deleter
-		struct ML_NODISCARD deleter final
-		{
-			void operator()(void * addr) const noexcept { deallocate(addr); }
-		};
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
 
 		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
 
-		ML_NODISCARD static auto const & get_testres() noexcept { return get_instance().m_testres; }
+		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_instance().m_testres; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// set test resource
 		ML_NODISCARD static bool set_test_resource(util::test_resource * res) noexcept
 		{
-			static auto & inst{ get_instance() };
-
 			if (!res)					{ return debug::error("resource cannot be null"); }
 			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
 			if (!res->buffer())			{ return debug::error("resource buffer cannot be null"); }
 			if (!res->is_valid_size())	{ return debug::error("resource capacity must be greater than zero"); }
 			if (!res->is_default())		{ return debug::error("resource is not the default memory resource"); }
 
-			return (inst.m_testres = res);
+			get_instance().m_testres = res;
+
+			return true;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -257,29 +235,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// make new
-		template <class T, class ... Args
-		> ML_NODISCARD static T * make_new(Args && ... args) noexcept
-		{
-			return ::new (allocate(sizeof(T))) T{ ML_forward(args)... };
-		}
-
-		// make shared
-		template <class T, class ... Args
-		> ML_NODISCARD static shared<T> make_shared(Args && ... args) noexcept
-		{
-			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
-		}
-
-		// make unique
-		template <class T, class ... Args
-		> ML_NODISCARD static unique<T, deleter> make_unique(Args && ... args) noexcept
-		{
-			return unique<T, deleter>{ memory::make_new<T>(ML_forward(args)...), deleter{} };
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
 		friend singleton<memory>;
 
@@ -296,17 +251,14 @@ namespace ml
 	};
 }
 
-// trackable
 namespace ml
 {
-	// base trackable
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// trackable base
 	struct ML_CORE_API trackable
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		virtual ~trackable() noexcept = default;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD void * operator new(size_t size) noexcept { return memory::allocate(size); }
 
@@ -315,9 +267,54 @@ namespace ml
 		void operator delete(void * addr) noexcept { memory::deallocate(addr); }
 
 		void operator delete[](void * addr) noexcept { memory::deallocate(addr); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// default delete
+	struct default_delete final
+	{
+		void operator()(void * addr) const noexcept { memory::deallocate(addr); }
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// shared pointer
+	template <class T
+	> ML_alias shared = typename std::shared_ptr<T>;
+
+	// unique pointer
+	template <class T, class Dx = default_delete
+	> ML_alias unique = typename std::unique_ptr<T, Dx>;
+
+	// weak pointer
+	template <class T
+	> ML_alias weak = typename std::weak_ptr<T>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// make new
+	template <class T, class ... Args
+	> ML_NODISCARD T * make_new(Args && ... args) noexcept
+	{
+		return ::new (memory::allocate(sizeof(T))) T{ ML_forward(args)... };
+	}
+
+	// make shared
+	template <class T, class ... Args
+	> ML_NODISCARD shared<T> make_shared(Args && ... args) noexcept
+	{
+		return std::allocate_shared<T>(memory::get_allocator(), ML_forward(args)...);
+	}
+
+	// make unique
+	template <class T, class Dx = default_delete, class ... Args
+	> ML_NODISCARD unique<T, Dx> make_unique(Args && ... args) noexcept
+	{
+		return unique<T, Dx>{ _ML make_new<T>(ML_forward(args)...), Dx{} };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_MEMORY_HPP_

@@ -73,7 +73,7 @@ namespace ml
 		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
 			ML_bind_scope(*shd, true);
-			gl::render_command::draw(msh->get_va())();
+			gl::command::draw(msh->get_va())();
 		}
 	};
 
@@ -192,7 +192,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const & testres{ memory::get_testres() };
+			static auto const & testres{ memory::get_test_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -442,10 +442,10 @@ namespace ml
 
 				for (auto const & cmd :
 				{
-					gl::render_command::set_cull_enabled(false),
-					gl::render_command::set_clear_color(colors::magenta),
-					gl::render_command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
-					gl::render_command::custom([&]() noexcept
+					gl::command::set_cull_enabled(false),
+					gl::command::set_clear_color(colors::magenta),
+					gl::command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
+					gl::command::custom([&]() noexcept
 					{
 						m_ecs.update_system<x_draw_meshes>();
 					}),
@@ -977,7 +977,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto const & testres{ memory::get_testres() };
+			static auto const & testres{ memory::get_test_resource() };
 
 			static ML_scope // setup memory editor
 			{
@@ -1073,7 +1073,7 @@ namespace ml
 			}
 
 			// memory content
-			m_mem_editor.DrawContents(testres->buffer(), testres->capacity(), testres->addr());
+			m_mem_editor.DrawContents(testres->buffer(), testres->capacity(), testres->base_addr());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1242,7 +1242,7 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void *)
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void * user_data)
 {
 	static ml::plugin * temp{};
 	return temp ? temp : temp = new ml::demo{};
