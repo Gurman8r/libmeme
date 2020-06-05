@@ -686,16 +686,16 @@ namespace ml::gl
 
 		static void check_error(cstring file, size_t line, cstring expr) noexcept
 		{
-			if (static auto const & ctx{ get_context() }; auto const err{ ctx->get_error() })
+			if (auto const code{ get_context()->get_error() }; code != error_none)
 			{
 				std::cout
-					<< "An internal graphics error occurred ( " << err << " )\n"
+					<< "An internal graphics error occurred ( " << code << " )\n"
 					<< "\t" << fs::path{ file }.filename() << " (" << line << ")\n"
 					<< "expression:\n"
 					<< "\t" << expr << "\n"
 					<< "description:\n"
-					<< "\t" << error_names[err] << "\n"
-					<< "\t" << error_descs[err] << "\n"
+					<< "\t" << error_names[code] << "\n"
+					<< "\t" << error_descs[code] << "\n"
 					<< "\n";
 			}
 		}
@@ -877,9 +877,9 @@ namespace ml::gl
 
 		virtual vertexarray & destroy() override = 0;
 
-		virtual vertexarray & add_vb(shared<vertexbuffer> const & value) & = 0;
+		virtual vertexarray & add_vb(shared<vertexbuffer> const & value) = 0;
 
-		virtual vertexarray & set_ib(shared<indexbuffer> const & value) & = 0;
+		virtual vertexarray & set_ib(shared<indexbuffer> const & value) = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const noexcept override = 0;
 

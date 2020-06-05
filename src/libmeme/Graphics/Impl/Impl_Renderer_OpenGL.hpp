@@ -164,9 +164,9 @@ namespace ml::gl
 
 		vertexarray & destroy() override;
 
-		vertexarray & add_vb(shared<vertexbuffer> const & value) & override;
+		vertexarray & add_vb(shared<vertexbuffer> const & value) override;
 
-		vertexarray & set_ib(shared<indexbuffer> const & value) & override;
+		vertexarray & set_ib(shared<indexbuffer> const & value) override;
 
 		handle_t get_handle() const noexcept override { return ML_addressof(m_handle); }
 

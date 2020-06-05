@@ -1031,7 +1031,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	vertexarray & opengl_vertexarray::add_vb(shared<vertexbuffer> const & value) &
+	vertexarray & opengl_vertexarray::add_vb(shared<vertexbuffer> const & value)
 	{
 		if (!value || !*value) { return (*this); }
 		
@@ -1077,7 +1077,7 @@ namespace ml::gl
 		return (*this);
 	}
 
-	vertexarray & opengl_vertexarray::set_ib(shared<indexbuffer> const & value) &
+	vertexarray & opengl_vertexarray::set_ib(shared<indexbuffer> const & value)
 	{
 		bind();
 
