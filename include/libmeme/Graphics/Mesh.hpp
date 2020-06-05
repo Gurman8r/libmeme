@@ -20,13 +20,13 @@ namespace ml
 		}
 
 		mesh(contiguous_t const & verts, gl::layout const & layout = {})
-			: mesh{ gl::make_vertexarray() }
+			: mesh{ gl::vertexarray::allocate() }
 		{
 			add_vb(verts, layout);
 		}
 
 		mesh(contiguous_t const & verts, indices_t const & inds, gl::layout const & layout = {})
-			: mesh{ gl::make_vertexarray() }
+			: mesh{ gl::vertexarray::allocate() }
 		{
 			add_vb(verts, layout);
 			set_ib(inds);
@@ -90,12 +90,12 @@ namespace ml
 
 		void add_vb(contiguous_t const & verts)
 		{
-			m_vao->add_vb(gl::make_vertexbuffer(verts.data(), verts.size()));
+			m_vao->add_vb(gl::vertexbuffer::allocate(verts.data(), verts.size()));
 		}
 
 		void add_vb(contiguous_t const & verts, gl::layout const & layout)
 		{
-			m_vao->add_vb(std::invoke([&, vb = gl::make_vertexbuffer(verts.data(), verts.size())
+			m_vao->add_vb(std::invoke([&, vb = gl::vertexbuffer::allocate(verts.data(), verts.size())
 			]() noexcept
 			{
 				vb->set_layout(layout);
@@ -112,7 +112,7 @@ namespace ml
 
 		void set_ib(indices_t const & inds)
 		{
-			m_vao->set_ib(inds.empty() ? nullptr : gl::make_indexbuffer
+			m_vao->set_ib(inds.empty() ? nullptr : gl::indexbuffer::allocate
 			(
 				inds.data(), inds.size()
 			));

@@ -1255,7 +1255,7 @@ namespace ml::gl
 		if (m_color) { m_color->update(m_size); }
 		else
 		{
-			m_color = make_texture2d(
+			m_color = texture2d::allocate(
 				m_size,
 				m_format,
 				m_format,
@@ -1269,7 +1269,7 @@ namespace ml::gl
 		if (m_depth) { m_depth->update(m_size); }
 		else
 		{
-			m_depth = make_texture2d(
+			m_depth = texture2d::allocate(
 				m_size,
 				format_depth24_stencil8,
 				format_depth_stencil,

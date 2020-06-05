@@ -892,12 +892,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_vertexarray(Args && ... args) noexcept
-	{
-		return vertexarray::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -942,12 +936,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_vertexbuffer(Args && ... args) noexcept
-	{
-		return vertexbuffer::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -984,12 +972,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_indexbuffer(Args && ... args) noexcept
-	{
-		return indexbuffer::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1030,12 +1012,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_framebuffer(Args && ... args) noexcept
-	{
-		return framebuffer::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1115,12 +1091,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_texture2d(Args && ... args) noexcept
-	{
-		return texture2d::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1171,12 +1141,6 @@ namespace ml::gl
 	protected:
 		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_program(Args && ... args) noexcept
-	{
-		return program::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1214,7 +1178,7 @@ namespace ml::gl
 
 		int32_t attach(uint32_t type, size_t count, cstring const * src) noexcept
 		{
-			return attach(make_program(type, count, src));
+			return attach(program::allocate(type, count, src));
 		}
 
 		int32_t attach(uint32_t type, cstring src) noexcept
@@ -1252,12 +1216,6 @@ namespace ml::gl
 
 		virtual void do_cache_texture(handle_t loc, handle_t value) noexcept = 0;
 	};
-
-	template <class ... Args
-	> ML_NODISCARD auto make_shader(Args && ... args) noexcept
-	{
-		return shader::allocate(ML_forward(args)...);
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

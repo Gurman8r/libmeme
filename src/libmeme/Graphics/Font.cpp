@@ -121,7 +121,7 @@ namespace ml
 		}
 
 		// graphic
-		g.graphic = gl::make_texture2d(vec2i{}, gl::format_rgba, gl::format_red);
+		g.graphic = gl::texture2d::allocate(vec2i{}, gl::format_rgba, gl::format_red);
 
 		// bounds
 		g.bounds = float_rect

@@ -109,7 +109,7 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::make_shader(); }
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
 			else { m_obj->destroy().generate(); }
 
 			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
@@ -124,7 +124,7 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::make_shader(); }
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
 			else { m_obj->destroy().generate(); }
 			
 			m_obj->attach(gl::shader_type_vertex, v_src.c_str());

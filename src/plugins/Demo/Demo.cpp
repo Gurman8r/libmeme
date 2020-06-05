@@ -238,7 +238,7 @@ namespace ml
 
 			// RENDERING
 			{
-				m_pipeline[0] = gl::make_framebuffer(m_resolution);
+				m_pipeline[0] = gl::framebuffer::allocate(m_resolution);
 			}
 
 			// ICON
@@ -254,12 +254,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gl::make_texture2d(m_images["default"]);
-				m_textures["doot"]			= gl::make_texture2d(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gl::make_texture2d(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gl::make_texture2d(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= gl::texture2d::allocate(m_images["default"]);
+				m_textures["doot"]			= gl::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gl::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
