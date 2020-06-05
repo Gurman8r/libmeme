@@ -296,12 +296,6 @@ namespace ml
 	};
 }
 
-// smart pointers
-namespace ml
-{
-	
-}
-
 // trackable
 namespace ml
 {
