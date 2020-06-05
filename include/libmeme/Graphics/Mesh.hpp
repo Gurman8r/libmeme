@@ -83,6 +83,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void add_vb(shared<gl::vertexbuffer> const & value)
+		{
+			m_vao->add_vb(value);
+		}
+
 		void add_vb(contiguous_t const & verts)
 		{
 			m_vao->add_vb(gl::make_vertexbuffer(verts.data(), verts.size()));

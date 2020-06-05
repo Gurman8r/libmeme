@@ -13,12 +13,12 @@ namespace ml
 			return debug::error("render_window failed opening window");
 		}
 
-		// initialize device
-		if (auto const & device{ gl::device::get() })
+		// initialize device context
+		if (auto const & ctx{ gl::device::get_context() })
 		{
 			// validate version
-			m_settings.context.major = device->get_info().major_version;
-			m_settings.context.minor = device->get_info().minor_version;
+			m_settings.context.major = ctx->get_info().major_version;
+			m_settings.context.minor = ctx->get_info().minor_version;
 		}
 		else
 		{

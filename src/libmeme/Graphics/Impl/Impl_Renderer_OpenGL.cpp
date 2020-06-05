@@ -563,9 +563,9 @@ namespace ml::gl
 		return _error<to_user>(glGetError());
 	}
 
-	device::info const & opengl_device::get_info() const
+	device_info const & opengl_device::get_info() const
 	{
-		static device::info temp{};
+		static device_info temp{};
 		static ML_scope // once
 		{
 			// renderer
@@ -576,9 +576,6 @@ namespace ml::gl
 			
 			// version
 			glCheck(temp.version = (cstring)glGetString(GL_VERSION));
-
-			// shading language version
-			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 			// major version
 			if (glGetIntegerv(GL_MAJOR_VERSION, &temp.major_version); glGetError() == GL_INVALID_ENUM)
@@ -634,6 +631,9 @@ namespace ml::gl
 			temp.geometry_shaders_available = true;
 #	endif
 #endif
+			// shading language version
+			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 			// shader binary formats
 			{
 				int32_t num{};
@@ -1352,7 +1352,7 @@ namespace ml::gl
 
 		static bool const edge_clamp_available
 		{
-			device::get()->get_info().texture_edge_clamp_available
+			device::get_context()->get_info().texture_edge_clamp_available
 		};
 
 		glCheck(glTexParameteri(
@@ -1601,7 +1601,7 @@ namespace ml::gl
 		int32_t index{};
 		m_textures.for_each([&](handle_t loc, handle_t value)
 		{
-			device::get()->upload(loc, index);
+			device::get_context()->upload(loc, index);
 			glCheck(glActiveTexture(GL_TEXTURE0 + index));
 			glCheck(glBindTexture(GL_TEXTURE_2D, (uint32_t)(intptr_t)value));
 			index++;

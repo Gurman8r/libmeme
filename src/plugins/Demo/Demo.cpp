@@ -1160,23 +1160,23 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & device{ gl::device::get() };
-			static auto const & info{ device->get_info() };
+			static auto const & ctx{ gl::device::get_context() };
+			static auto const & info{ ctx->get_info() };
 
 			if (ImGui::BeginMenuBar())
 			{
+				ImGui::Text("%s", info.renderer.c_str()); ImGui::Separator();
+				ImGui::Text("%s", info.vendor.c_str()); ImGui::Separator();
+				ImGui::Text("%s", info.version.c_str());
 				ImGui::EndMenuBar();
 			}
 
-			ImGui::Text("renderer: %s", info.renderer.c_str());
-			ImGui::Text("vendor:   %s", info.vendor.c_str());
-			ImGui::Text("version:  %s", info.version.c_str());
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				bool a_enabled{ device->get_alpha_enabled() };
-				auto a_fn{ device->get_alpha_fn() };
+				bool a_enabled{ ctx->get_alpha_enabled() };
+				auto a_fn{ ctx->get_alpha_fn() };
 				ImGui::Checkbox("enabled", &a_enabled);
 				ImGui::Text("predicate: %s (%u)", gl::predicate_names[a_fn.pred], a_fn.pred);
 				ImGui::Text("reference: %f", a_fn.ref);
@@ -1185,10 +1185,10 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				bool b_enabled{ device->get_blend_enabled() };
-				auto b_color{ device->get_blend_color() };
-				auto b_eq{ device->get_blend_eq() };
-				auto b_fn{ device->get_blend_fn() };
+				bool b_enabled{ ctx->get_blend_enabled() };
+				auto b_color{ ctx->get_blend_color() };
+				auto b_eq{ ctx->get_blend_eq() };
+				auto b_fn{ ctx->get_blend_fn() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
 				ImGui::Text("mode rgb: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
@@ -1202,9 +1202,9 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				bool c_enabled{ device->get_cull_enabled() };
-				auto c_facet{ device->get_cull_facet() };
-				auto c_order{ device->get_cull_order() };
+				bool c_enabled{ ctx->get_cull_enabled() };
+				auto c_facet{ ctx->get_cull_facet() };
+				auto c_order{ ctx->get_cull_order() };
 				ImGui::Checkbox("enabled", &c_enabled);
 				ImGui::Text("facet: %s (%u)", gl::facet_names[c_facet], c_facet);
 				ImGui::Text("order: %s (%u)", gl::order_names[c_order], c_order);
@@ -1213,10 +1213,10 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				bool d_enabled{ device->get_depth_enabled() };
-				auto d_pred{ device->get_depth_pr() };
-				bool d_mask{ device->get_depth_mask() };
-				auto d_range{ device->get_depth_range() };
+				bool d_enabled{ ctx->get_depth_enabled() };
+				auto d_pred{ ctx->get_depth_pr() };
+				bool d_mask{ ctx->get_depth_mask() };
+				auto d_range{ ctx->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
 				ImGui::Text("predicate: %s (%u) ", gl::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
@@ -1226,8 +1226,8 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				bool s_enabled{ device->get_stencil_enabled() };
-				auto s_fn{ device->get_stencil_fn() };
+				bool s_enabled{ ctx->get_stencil_enabled() };
+				auto s_fn{ ctx->get_stencil_fn() };
 				ImGui::Checkbox("enabled", &s_enabled);
 				ImGui::Text("predicate: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
 				ImGui::Text("reference: %i", s_fn.ref);

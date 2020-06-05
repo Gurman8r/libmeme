@@ -5,6 +5,7 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
+// test resource
 namespace ml::util
 {
 	// passthrough resource for collecting upstream metrics
@@ -114,6 +115,22 @@ namespace ml::util
 	};
 }
 
+// smart pointers
+namespace ml
+{
+	// shared pointer
+	template <class T
+	> ML_alias shared = typename std::shared_ptr<T>;
+
+	// unique pointer
+	template <class T, class Dx = std::default_delete<T>
+	> ML_alias unique = typename std::unique_ptr<T, Dx>;
+
+	// weak pointer
+	template <class T
+	> ML_alias weak = typename std::weak_ptr<T>;
+}
+
 // memory
 namespace ml
 {
@@ -123,23 +140,20 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// allocator type
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		struct ML_NODISCARD deleter final
-		{
-			void operator()(void * addr) const noexcept { deallocate(addr); };
-		};
-
+		// memory record
 		struct ML_NODISCARD record final
 		{
 			size_t index; size_t size; byte_t * data;
 		};
 
-		template <class T> using shared_ptr	= typename std::shared_ptr<T>;
-		
-		template <class T> using unique_ptr	= typename std::unique_ptr<T, deleter>;
-		
-		template <class T> using weak_ptr	= typename std::weak_ptr<T>;
+		// default deleter
+		struct ML_NODISCARD deleter final
+		{
+			void operator()(void * addr) const noexcept { deallocate(addr); }
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -179,34 +193,11 @@ namespace ml
 			return *inst.m_records.insert(data, { inst.m_index++, size, data }).first;
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
 			// allocate (count * size) zeroed bytes
 			return std::memset(allocate(count * size), 0, count * size);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// allocate shared
-		template <class T, class ... Args
-		> ML_NODISCARD static shared_ptr<T> allocate_shared(Args && ... args) noexcept
-		{
-			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// allocate unique
-		template <class T, class ... Args
-		> ML_NODISCARD static unique_ptr<T> allocate_unique(Args && ... args) noexcept
-		{
-			return unique_ptr<T>
-			{
-				::new (allocate(sizeof(T))) T{ ML_forward(args)... }, deleter{}
-			};
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -234,8 +225,6 @@ namespace ml
 		{
 			return reallocate(addr, size, size);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// realloc (sized)
 		ML_NODISCARD static void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
@@ -267,6 +256,29 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// make new
+		template <class T, class ... Args
+		> ML_NODISCARD static T * make_new(Args && ... args) noexcept
+		{
+			return ::new (allocate(sizeof(T))) T{ ML_forward(args)... };
+		}
+
+		// make shared
+		template <class T, class ... Args
+		> ML_NODISCARD static shared<T> make_shared(Args && ... args) noexcept
+		{
+			return std::allocate_shared<T>(get_allocator(), ML_forward(args)...);
+		}
+
+		// make unique
+		template <class T, class ... Args
+		> ML_NODISCARD static unique<T, deleter> make_unique(Args && ... args) noexcept
+		{
+			return unique<T, deleter>{ make_new<T>(ML_forward(args)...), deleter{} };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		friend singleton<memory>;
 
@@ -286,24 +298,13 @@ namespace ml
 // smart pointers
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// shared pointer
-	template <class T> ML_alias shared = typename memory::shared_ptr<T>;
-
-	// unique pointer
-	template <class T> ML_alias unique = typename memory::unique_ptr<T>;
-
-	// weak pointer
-	template <class T> ML_alias weak = typename memory::weak_ptr<T>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
 }
 
 // trackable
 namespace ml
 {
-	// trackable base
+	// base trackable
 	struct ML_CORE_API trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

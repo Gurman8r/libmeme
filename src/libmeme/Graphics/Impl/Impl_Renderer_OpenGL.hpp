@@ -11,23 +11,15 @@
 // device
 namespace ml::gl
 {
+	// opengl device
 	class opengl_device final : public device
 	{
-	protected:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend class device;
-
-		bool do_initialize() override;
-
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		~opengl_device() noexcept override = default;
-
 		uint32_t get_error() const noexcept override;
 
-		device::device::info const & get_info() const override;
+		device_info const & get_info() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -136,6 +128,17 @@ namespace ml::gl
 
 		void upload(handle_t loc, mat4 const & value) override;
 
+	protected:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend class context;
+
+		friend class device;
+
+		~opengl_device() noexcept override = default;
+
+		bool do_initialize() override;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
@@ -174,7 +177,7 @@ namespace ml::gl
 		pmr::vector<shared<vertexbuffer>> const & get_vbs() const noexcept override { return m_vertices; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -240,7 +243,7 @@ namespace ml::gl
 		view_t const & get_view() const noexcept override { return m_view; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -292,7 +295,7 @@ namespace ml::gl
 		view_t const & get_view() const noexcept override { return m_view; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -347,7 +350,7 @@ namespace ml::gl
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_framebuffer>; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -411,7 +414,7 @@ namespace ml::gl
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_texture2d>; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -456,7 +459,7 @@ namespace ml::gl
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_program>; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -501,7 +504,7 @@ namespace ml::gl
 		typeof<> get_typeof() const noexcept override { return typeof_v<opengl_shader>; }
 
 	protected:
-		bool do_is_equal(resource const & other) const noexcept override
+		bool do_is_equal(device_object const & other) const noexcept override
 		{
 			return this == std::addressof(other);
 		}
@@ -510,7 +513,7 @@ namespace ml::gl
 		{
 			static auto const max_texture_slots
 			{
-				(size_t)device::get()->get_info().max_texture_slots
+				(size_t)device::get_context()->get_info().max_texture_slots
 			};
 			if (auto const it{ m_textures.find(loc) })
 			{

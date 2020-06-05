@@ -14,7 +14,7 @@ namespace ml::gl
 		template <class Fn, class ... Args
 		> ML_NODISCARD static cmd_t builtin(Fn && fn, Args && ... args) noexcept
 		{
-			return std::bind(ML_forward(fn), device::get().get(), ML_forward(args)...);
+			return std::bind(ML_forward(fn), device::get_context().get(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args

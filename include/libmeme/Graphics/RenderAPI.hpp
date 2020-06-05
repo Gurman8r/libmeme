@@ -20,7 +20,7 @@ namespace ml::gl
 
 	// interfaces
 	class device			;
-	class resource			;
+	class device_object		;
 	class vertexarray		;
 	class vertexbuffer		;
 	class indexbuffer		;
@@ -646,64 +646,65 @@ namespace ml::gl
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// device info
+namespace ml
+{
+	// device info
+	struct ML_NODISCARD device_info final : public trackable
+	{
+		// version
+		pmr::string renderer, vendor, version;
+		int32_t major_version, minor_version;
+		pmr::vector<pmr::string> extensions;
+
+		// textures
+		bool texture_edge_clamp_available;
+		uint32_t max_texture_slots;
+
+		// shaders
+		bool shaders_available;
+		bool geometry_shaders_available;
+		pmr::string shading_language_version;
+		pmr::vector<uint32_t> shader_binary_formats;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // device
 namespace ml::gl
 {
 	// base device
 	class ML_GRAPHICS_API device : public trackable, public non_copyable
 	{
-	protected:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual bool do_initialize() = 0;
-
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~device() noexcept override = default;
+		using context = typename unique<device, memory::deleter>;
 
-		ML_NODISCARD static unique<device> const & get() noexcept;
+		ML_NODISCARD static device::context const & get_context() noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct ML_NODISCARD info final : public trackable
+		static void check_error(cstring file, size_t line, cstring expr) noexcept
 		{
-			// version
-			pmr::string renderer, vendor, version, shading_language_version;
-			int32_t major_version, minor_version;
-			pmr::vector<pmr::string> extensions;
-
-			// textures
-			bool texture_edge_clamp_available;
-			uint32_t max_texture_slots;
-
-			// shaders
-			bool shaders_available;
-			bool geometry_shaders_available;
-			pmr::vector<uint32_t> shader_binary_formats;
-		};
-
-		ML_NODISCARD virtual device::info const & get_info() const = 0;
+			if (static auto const & ctx{ get_context() }; auto const err{ ctx->get_error() })
+			{
+				std::cout
+					<< "An internal graphics error occurred ( " << err << " )\n"
+					<< "\t" << fs::path{ file }.filename() << " (" << line << ")\n"
+					<< "expression:\n"
+					<< "\t" << expr << "\n"
+					<< "description:\n"
+					<< "\t" << error_names[err] << "\n"
+					<< "\t" << error_descs[err] << "\n"
+					<< "\n";
+			}
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD virtual uint32_t get_error() const noexcept = 0;
 
-		static void check_error(cstring file, size_t line, cstring expr) noexcept
-		{
-			if (auto const code{ device::get()->get_error() }; code != error_none)
-			{
-				std::cout
-					<< "An internal graphics error occurred ( " << code << " ):\n"
-					<< " " << fs::path{ file }.filename() << " (" << line << ")\n"
-					<< " expression:\n"
-					<< "  " << expr << "\n"
-					<< " description:\n"
-					<< "  " << error_names[code] << "\n"
-					<< "  " << error_descs[code] << "\n"
-					<< "\n";
-			}
-		}
+		ML_NODISCARD virtual device_info const & get_info() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -809,38 +810,49 @@ namespace ml::gl
 
 		virtual void upload(handle_t loc, mat4 const & value) = 0;
 
+	protected:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		friend class context;
+
+		virtual ~device() noexcept override = default;
+
+		virtual bool do_initialize() = 0;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// resource
+// device object
 namespace ml::gl
 {
-	// base device resource
-	class ML_GRAPHICS_API resource : public trackable, public non_copyable
+	// base device object
+	class ML_GRAPHICS_API device_object : public trackable, public non_copyable
 	{
 	public:
-		virtual ~resource() noexcept override = default;
+		virtual ~device_object() noexcept override = default;
 
-		virtual resource & generate() = 0;
+		virtual device_object & generate() = 0;
 
-		virtual resource & destroy() = 0;
+		virtual device_object & destroy() = 0;
 
 		ML_NODISCARD virtual handle_t get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> get_typeof() const noexcept = 0;
 
-		ML_NODISCARD operator bool() const noexcept { return get_handle(); }
+		ML_NODISCARD virtual bool has_value() const noexcept { return (bool)get_handle(); }
 
-		ML_NODISCARD bool is_equal(resource const & other) const noexcept
+		ML_NODISCARD operator bool() const noexcept { return has_value(); }
+
+		ML_NODISCARD bool is_equal(device_object const & other) const noexcept
 		{
 			return do_is_equal(other);
 		}
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept = 0;
 	};
 }
 
@@ -850,7 +862,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base vertexarray
-	class ML_GRAPHICS_API vertexarray : public resource
+	class ML_GRAPHICS_API vertexarray : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<vertexarray> allocate() noexcept;
@@ -878,7 +890,7 @@ namespace ml::gl
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vbs() const noexcept = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -894,7 +906,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base vertexbuffer
-	class ML_GRAPHICS_API vertexbuffer : public resource
+	class ML_GRAPHICS_API vertexbuffer : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<vertexbuffer> allocate(buffer_t data, size_t count) noexcept;
@@ -928,7 +940,7 @@ namespace ml::gl
 		ML_NODISCARD virtual view_t const & get_view() const noexcept = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -944,7 +956,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base indexbuffer
-	class ML_GRAPHICS_API indexbuffer : public resource
+	class ML_GRAPHICS_API indexbuffer : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<indexbuffer> allocate(buffer_t data, size_t count) noexcept;
@@ -970,7 +982,7 @@ namespace ml::gl
 		ML_NODISCARD virtual view_t const & get_view() const noexcept = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -986,7 +998,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base framebuffer
-	class ML_GRAPHICS_API framebuffer : public resource
+	class ML_GRAPHICS_API framebuffer : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<framebuffer> allocate(vec2i const & size, uint32_t format = format_rgba) noexcept;
@@ -1016,7 +1028,7 @@ namespace ml::gl
 		ML_NODISCARD virtual vec2i const & get_size() const noexcept = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -1032,7 +1044,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base texture2d
-	class ML_GRAPHICS_API texture2d : public resource
+	class ML_GRAPHICS_API texture2d : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<texture2d> allocate(
@@ -1101,7 +1113,7 @@ namespace ml::gl
 		ML_NODISCARD virtual typeof<> get_typeof() const noexcept override = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -1117,7 +1129,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base program
-	class ML_GRAPHICS_API program : public resource
+	class ML_GRAPHICS_API program : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<program> allocate(uint32_t type) noexcept;
@@ -1157,7 +1169,7 @@ namespace ml::gl
 		ML_NODISCARD virtual typeof<> get_typeof() const noexcept override = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 	};
 
 	template <class ... Args
@@ -1173,7 +1185,7 @@ namespace ml::gl
 namespace ml::gl
 {
 	// base shader
-	class ML_GRAPHICS_API shader : public resource
+	class ML_GRAPHICS_API shader : public device_object
 	{
 	public:
 		ML_NODISCARD static shared<shader> allocate() noexcept;
@@ -1226,7 +1238,7 @@ namespace ml::gl
 				}
 				else
 				{
-					device::get()->upload(loc, value);
+					device::get_context()->upload(loc, value);
 				}
 			});
 		}
@@ -1236,7 +1248,7 @@ namespace ml::gl
 		ML_NODISCARD virtual typeof<> get_typeof() const noexcept override = 0;
 
 	protected:
-		virtual bool do_is_equal(resource const & other) const noexcept override = 0;
+		virtual bool do_is_equal(device_object const & other) const noexcept override = 0;
 
 		virtual void do_cache_texture(handle_t loc, handle_t value) noexcept = 0;
 	};
