@@ -11,11 +11,11 @@ namespace ml::debug
 
 	static std::ostream & std_out	{ std::cout };
 	static std::ostream & std_err	{ std::cerr };
-	static std::istream & std_in	{ std::cin	};
+	static std::istream & std_in	{ std::cin };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	inline int32_t clear(int32_t const exit_code = 0) noexcept
+	inline int32_t clear(int32_t exit_code = 0) noexcept
 	{
 #ifdef ML_os_windows
 		std::system("cls");
@@ -27,7 +27,7 @@ namespace ml::debug
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	inline int32_t pause(int32_t const exit_code = 0) noexcept
+	inline int32_t pause(int32_t exit_code = 0) noexcept
 	{
 #ifdef ML_os_windows
 		std::system("pause");

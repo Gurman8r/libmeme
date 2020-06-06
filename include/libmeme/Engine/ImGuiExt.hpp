@@ -324,15 +324,13 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using arguments = typename pmr::vector<pmr::string>;
+		using args_type = typename pmr::vector<pmr::string>;
 
-		using command = typename std::pair<
-			cstring, std::function<void(arguments)>
-		>;
+		using cmd_type = typename std::pair<cstring, std::function<void(args_type)>>;
 
 		ds::array<char, 256>		input			{};
 		pmr::vector<pmr::string>	lines			{};
-		pmr::vector<command>		commands		{};
+		pmr::vector<cmd_type>		commands		{};
 		pmr::vector<pmr::string>	history			{};
 		int32_t						history_pos		{ -1 };
 		ImGuiTextFilter				filter			{};
@@ -401,7 +399,7 @@ namespace ml::gui
 			}
 			history.push_back(value);
 
-			// process command
+			// process cmd_type
 			if (auto toks{ util::tokenize(value, " ") }; !toks.empty())
 			{
 				// FIXME: inefficient
@@ -418,7 +416,7 @@ namespace ml::gui
 				}
 				else
 				{
-					this->printf("unknown command: \'%s\'\n", toks.front().c_str());
+					this->printf("unknown cmd_type: \'%s\'\n", toks.front().c_str());
 				}
 			}
 

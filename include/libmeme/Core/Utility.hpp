@@ -21,10 +21,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read flag at index
-#define ML_flag_read(v, d)			(v & d)
+#define ML_flag_read(v, d)			(bool)(v & d)
 
 // set flag at index
-#define ML_flag_set(v, d)			(v |= d)
+#define ML_flag_set(v, d)			(bool)(v |= d)
 
 // clear flag at index
 #define ML_flag_clear(v, d)			(v &= ~d)
@@ -61,6 +61,13 @@ namespace ml::util
 	> constexpr bool is_any_of_v
 	{
 		std::disjunction_v<std::is_same<T, Ts>...>
+	};
+
+	// is integral or float
+	template <class T
+	> constexpr bool is_integral_or_float_v
+	{
+		std::is_integral_v<T> || std::is_floating_point_v<T>
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

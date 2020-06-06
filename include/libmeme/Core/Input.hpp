@@ -246,7 +246,7 @@ namespace ml::impl
 
 		ML_NODISCARD auto operator()() const noexcept
 		{
-			return (*this)(std::cin);
+			return (*this)(debug::std_in);
 		}
 	};
 

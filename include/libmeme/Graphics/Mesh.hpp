@@ -22,14 +22,14 @@ namespace ml
 		mesh(contiguous_t const & verts, gl::layout const & layout = {})
 			: mesh{ gl::vertexarray::allocate() }
 		{
-			add_vb(verts, layout);
+			add_vertices(verts, layout);
 		}
 
 		mesh(contiguous_t const & verts, indices_t const & inds, gl::layout const & layout = {})
 			: mesh{ gl::vertexarray::allocate() }
 		{
-			add_vb(verts, layout);
-			set_ib(inds);
+			add_vertices(verts, layout);
+			set_indices(inds);
 		}
 
 		mesh(vertices_t const & verts, gl::layout const & layout = {})
@@ -83,19 +83,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void add_vb(shared<gl::vertexbuffer> const & value)
+		void add_vertices(shared<gl::vertexbuffer> const & value) noexcept
 		{
-			m_vao->add_vb(value);
+			m_vao->add_vertices(value);
 		}
 
-		void add_vb(contiguous_t const & verts)
+		void add_vertices(contiguous_t const & verts) noexcept
 		{
-			m_vao->add_vb(gl::vertexbuffer::allocate(verts.data(), verts.size()));
+			this->add_vertices(gl::vertexbuffer::allocate(verts.data(), verts.size()));
 		}
 
-		void add_vb(contiguous_t const & verts, gl::layout const & layout)
+		void add_vertices(contiguous_t const & verts, gl::layout const & layout) noexcept
 		{
-			m_vao->add_vb(std::invoke([&, vb = gl::vertexbuffer::allocate(verts.data(), verts.size())
+			this->add_vertices(std::invoke([&, vb = gl::vertexbuffer::allocate(verts.data(), verts.size())
 			]() noexcept
 			{
 				vb->set_layout(layout);
@@ -105,14 +105,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_ib(shared<gl::indexbuffer> const & value)
+		void set_indices(shared<gl::indexbuffer> const & value) noexcept
 		{
-			m_vao->set_ib(value);
+			m_vao->set_indices(value);
 		}
 
-		void set_ib(indices_t const & inds)
+		void set_indices(indices_t const & inds) noexcept
 		{
-			m_vao->set_ib(inds.empty() ? nullptr : gl::indexbuffer::allocate
+			this->set_indices(inds.empty() ? nullptr : gl::indexbuffer::allocate
 			(
 				inds.data(), inds.size()
 			));
@@ -124,9 +124,9 @@ namespace ml
 
 		auto const & get_va() const & noexcept { return m_vao; }
 
-		auto const & get_ib() const & noexcept { return m_vao->get_ib(); }
+		auto const & get_indices() const & noexcept { return m_vao->get_indices(); }
 
-		auto const & get_vbs() const & noexcept { return m_vao->get_vbs(); }
+		auto const & get_vertices() const & noexcept { return m_vao->get_vertices(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

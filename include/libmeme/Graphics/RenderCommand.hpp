@@ -6,7 +6,7 @@
 namespace ml::gl
 {
 	// render command generators
-	class command final
+	class render_command final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

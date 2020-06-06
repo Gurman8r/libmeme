@@ -10,8 +10,9 @@ using impl_vertex_buffer	= _ML gl::opengl_vertexbuffer	;
 using impl_index_buffer		= _ML gl::opengl_indexbuffer	;
 using impl_frame_buffer		= _ML gl::opengl_framebuffer	;
 using impl_texture2d		= _ML gl::opengl_texture2d		;
-using impl_program			= _ML gl::opengl_program		;
+using impl_texture_cube		= int							;
 using impl_shader			= _ML gl::opengl_shader			;
+using impl_program			= _ML gl::opengl_program		;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -53,6 +54,8 @@ namespace ml::gl
 	}
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // vertexbuffer
 namespace ml::gl
 {
@@ -67,6 +70,8 @@ namespace ml::gl
 	}
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // indexbuffer
 namespace ml::gl
 {
@@ -75,6 +80,8 @@ namespace ml::gl
 		return _ML make_shared<impl_index_buffer>(data, count);
 	}
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // framebuffer
 namespace ml::gl
@@ -85,30 +92,47 @@ namespace ml::gl
 	}
 }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // texture2d
 namespace ml::gl
 {
-	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t iformat, uint32_t cformat, uint32_t ptype, int32_t flags, address_t pixels) noexcept
+	shared<texture2d> texture2d::allocate(vec2i const & size, uint32_t i_format, uint32_t c_format, uint32_t p_type, int32_t flags, address_t data) noexcept
 	{
-		return _ML make_shared<impl_texture2d>(size, iformat, cformat, ptype, flags, pixels);
+		return _ML make_shared<impl_texture2d>(size, i_format, c_format, p_type, flags, data);
 	}
 }
 
-// program
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// texture_cube
 namespace ml::gl
 {
-	shared<program> program::allocate(uint32_t type) noexcept
+	shared<texture_cube> texture_cube::allocate() noexcept
 	{
-		return _ML make_shared<impl_program>(type);
+		return impl_texture_cube{};
 	}
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // shader
 namespace ml::gl
 {
-	shared<shader> shader::allocate() noexcept
+	shared<shader> shader::allocate(uint32_t type) noexcept
 	{
-		return _ML make_shared<impl_shader>();
+		return _ML make_shared<impl_shader>(type);
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// program
+namespace ml::gl
+{
+	shared<program> program::allocate() noexcept
+	{
+		return _ML make_shared<impl_program>();
 	}
 }
 

@@ -109,8 +109,12 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy().generate(); }
+			if (!m_obj) { m_obj = gl::program::allocate(); }
+			else
+			{
+				m_obj->destroy();
+				m_obj->generate();
+			}
 
 			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
 			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
@@ -124,30 +128,28 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy().generate(); }
+			if (!m_obj) { m_obj = gl::program::allocate(); }
+			else
+			{
+				m_obj->destroy();
+				m_obj->generate();
+			}
 			
 			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
 			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
 			m_obj->attach(gl::shader_type_geometry, g_src.c_str());
 			m_obj->link();
 
-			return (bool)m_obj;
+			return m_obj->get_status();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void bind(bool bind_textures = true) const
-		{
-			m_obj->bind();
-
-			if (bind_textures)
-			{
-				m_obj->bind_textures();
-			}
-		}
+		void bind() const { m_obj->bind(); }
 
 		void unbind() const { m_obj->unbind(); }
+
+		void bind_textures() const { m_obj->bind_textures(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -185,15 +187,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD operator bool() const noexcept { return (bool)m_obj; }
-		
-		ML_NODISCARD gl::handle_t get_handle() const noexcept { return m_obj->get_handle(); }
+		ML_NODISCARD auto program() const & noexcept -> shared<gl::program> const & { return m_obj; }
+
+		ML_NODISCARD auto source() const & noexcept -> shader_source const & { return m_src; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shader_source m_src;
-		shared<gl::shader> m_obj;
+		shared<gl::program> m_obj;
+		shader_source		m_src;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

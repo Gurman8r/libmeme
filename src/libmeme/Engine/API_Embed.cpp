@@ -52,15 +52,15 @@ namespace ml::embed
 			{
 				std::reference_wrapper<std::ostream> m_os;
 
-				output(std::ostream & os = std::cout) noexcept : m_os{ os }
+				output(std::ostream & os = debug::std_out) noexcept : m_os{ os }
 				{
 				}
 
 				int32_t fileno() const noexcept
 				{
 					if (auto const addr{ std::addressof(m_os.get()) }; !addr) { return -2; }
-					else if (addr == std::addressof(std::cout)) { return 1; }
-					else if (addr == std::addressof(std::cerr)) { return 2; }
+					else if (addr == std::addressof(debug::std_out)) { return 1; }
+					else if (addr == std::addressof(debug::std_err)) { return 2; }
 					else { return -1; }
 				}
 
@@ -75,12 +75,12 @@ namespace ml::embed
 
 			static auto & cerr(py::object) noexcept
 			{
-				static output temp{ std::cerr }; return temp;
+				static output temp{ debug::std_err }; return temp;
 			}
 
 			static auto & cout(py::object) noexcept
 			{
-				static output temp{ std::cout }; return temp;
+				static output temp{ debug::std_out }; return temp;
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

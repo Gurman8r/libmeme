@@ -63,8 +63,11 @@ namespace ml
 	{
 		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_scope(*shd, false);
-			for (uniform const & u : *mat) { shd->set_uniform(u); }
+			ML_bind_scope(*shd);
+			for (uniform const & u : *mat)
+			{
+				shd->set_uniform(u);
+			}
 		}
 	};
 
@@ -72,8 +75,9 @@ namespace ml
 	{
 		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
-			ML_bind_scope(*shd, true);
-			gl::command::draw(msh->get_va())();
+			ML_bind_scope(*shd);
+			shd->bind_textures();
+			gl::render_command::draw(msh->get_va())();
 		}
 	};
 
@@ -442,10 +446,10 @@ namespace ml
 
 				for (auto const & cmd :
 				{
-					gl::command::set_cull_enabled(false),
-					gl::command::set_clear_color(colors::magenta),
-					gl::command::clear(gl::color_bit | gl::depth_bit | gl::stencil_bit),
-					gl::command::custom([&]() noexcept
+					gl::render_command::set_cull_enabled(false),
+					gl::render_command::set_clear_color(colors::magenta),
+					gl::render_command::clear(gl::color_buffer_bit | gl::depth_buffer_bit | gl::stencil_buffer_bit),
+					gl::render_command::custom([&]() noexcept
 					{
 						m_ecs.update_system<x_draw_meshes>();
 					}),

@@ -284,8 +284,8 @@ namespace ml
 	> ML_alias shared = typename std::shared_ptr<T>;
 
 	// unique pointer
-	template <class T, class Dx = default_delete
-	> ML_alias unique = typename std::unique_ptr<T, Dx>;
+	template <class T
+	> ML_alias unique = typename std::unique_ptr<T, default_delete>;
 
 	// weak pointer
 	template <class T
@@ -308,10 +308,10 @@ namespace ml
 	}
 
 	// make unique
-	template <class T, class Dx = default_delete, class ... Args
-	> ML_NODISCARD unique<T, Dx> make_unique(Args && ... args) noexcept
+	template <class T, class ... Args
+	> ML_NODISCARD unique<T> make_unique(Args && ... args) noexcept
 	{
-		return unique<T, Dx>{ _ML make_new<T>(ML_forward(args)...), Dx{} };
+		return unique<T>{ _ML make_new<T>(ML_forward(args)...), default_delete{} };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

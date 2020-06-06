@@ -11,26 +11,19 @@ namespace ml::impl
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class T> struct ML_NODISCARD scope_binder final
+	template <class Bindable> struct ML_NODISCARD scope_binder final
 	{
 		template <class ... Args
-		> scope_binder(T * value, Args && ... args) noexcept
-			: m_ptr{ value }
+		> scope_binder(Bindable * p, Args && ... args) noexcept : m_ptr{ p }
 		{
 			ML_assert(m_ptr);
 			m_ptr->bind(ML_forward(args)...);
 		}
 
-		template <template <class> class Ptr, class ... Args
-		> scope_binder(Ptr<T> const & value, Args && ... args) noexcept
-			: scope_binder<T>{ value.get(), ML_forward(args)... }
-		{
-		}
-
 		template <class ... Args
-		> scope_binder(T & value, Args && ... args) noexcept
-			: scope_binder<T>{ &value, ML_forward(args)... }
+		> scope_binder(Bindable & r, Args && ... args) noexcept : m_ptr{ std::addressof(r) }
 		{
+			m_ptr->bind(ML_forward(args)...);
 		}
 
 		~scope_binder() noexcept
@@ -38,7 +31,8 @@ namespace ml::impl
 			m_ptr->unbind();
 		}
 
-	private: T * const m_ptr;
+	private:
+		Bindable * const m_ptr;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
