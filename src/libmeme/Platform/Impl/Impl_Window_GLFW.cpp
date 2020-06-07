@@ -36,7 +36,7 @@ namespace ml
 	static GLFWimage const * make_glfw_image(size_t w, size_t h, byte_t const * p) noexcept
 	{
 		static ds::set<GLFWimage> cache{};
-		return &cache.find_or_add({ (int32_t)w, (int32_t)h, (byte_t *)p });
+		return &cache.find_or_add(GLFWimage{ (int32_t)w, (int32_t)h, (byte_t *)p });
 	}
 }
 
@@ -191,7 +191,8 @@ namespace ml
 			GLFW_CONTEXT_CREATION_API,
 			GLFW_SCALE_TO_MONITOR,
 		};
-		return glfwGetWindowAttrib(m_window, attribs[static_cast<size_t>(value)]);
+		ML_assert(value < ML_arraysize(attribs));
+		return glfwGetWindowAttrib(m_window, attribs[value]);
 	}
 
 	int_rect glfw_window::get_bounds() const

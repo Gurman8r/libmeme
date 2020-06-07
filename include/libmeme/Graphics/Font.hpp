@@ -91,8 +91,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		void *		m_library;
-		void *		m_face;
+		pvoid_t		m_library;
+		pvoid_t		m_face;
 		pmr::string	m_family;
 		page_table	m_pages;
 

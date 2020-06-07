@@ -3,16 +3,36 @@
 
 #include <libmeme/Core/StringUtility.hpp>
 
-#define _ML_DEBUG _ML debug::
+// debug info message prefix
+#ifndef ML_IMPL_DEBUG_MSG_I
+#define ML_IMPL_DEBUG_MSG_I "[i] "
+#endif
+
+// debug error message prefix
+#ifndef ML_IMPL_DEBUG_MSG_E
+#define ML_IMPL_DEBUG_MSG_E "[e] "
+#endif
+
+// debug warning message prefix
+#ifndef ML_IMPL_DEBUG_MSG_W
+#define ML_IMPL_DEBUG_MSG_W "[w] "
+#endif
+
+// breakpoint
+#ifndef ML_breakpoint
+#	if (!ML_is_debug)
+#		define ML_breakpoint()	((void)0)
+#	elif defined(ML_cc_msvc)
+#		define ML_breakpoint()	::__debugbreak()
+#	elif defined(ML_cc_clang)
+#		define ML_breakpoint()	::__builtin_debugtrap()
+#	else
+#		define ML_breakpoint()	::raise(SIGTRAP)
+#	endif
+#endif
 
 namespace ml::debug
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static std::ostream & std_out	{ std::cout };
-	static std::ostream & std_err	{ std::cerr };
-	static std::istream & std_in	{ std::cin };
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	inline int32_t clear(int32_t exit_code = 0) noexcept
@@ -42,7 +62,7 @@ namespace ml::debug
 	template <class Str
 	> void puts(Str && str) noexcept
 	{
-		_ML_DEBUG std_out << ML_forward(str) << '\n';
+		std::cout << ML_forward(str) << '\n';
 	}
 
 	template <class Fmt, class Arg0, class ... Args
@@ -58,7 +78,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t info(Str && str) noexcept
 	{
-		_ML_DEBUG std_out << "[i] " << ML_forward(str) << '\n';
+		std::cout << ML_IMPL_DEBUG_MSG_I << ML_forward(str) << '\n';
 
 		return _ML_DEBUG info();
 	}
@@ -76,7 +96,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t error(Str && str) noexcept
 	{
-		_ML_DEBUG std_out << "[e] " << ML_forward(str) << '\n';
+		std::cout << ML_IMPL_DEBUG_MSG_E << ML_forward(str) << '\n';
 
 		return _ML_DEBUG error();
 	}
@@ -94,7 +114,7 @@ namespace ml::debug
 	template <class Str
 	> int32_t warning(Str && str) noexcept
 	{
-		_ML_DEBUG std_out << "[w] " << ML_forward(str) << '\n';
+		std::cout << ML_IMPL_DEBUG_MSG_W << ML_forward(str) << '\n';
 
 		return _ML_DEBUG warning();
 	}

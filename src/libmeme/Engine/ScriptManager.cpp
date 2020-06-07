@@ -47,7 +47,7 @@ namespace ml
 			return &temp;
 		})());
 
-		Py_SetProgramName(fs::path{ ML_argv[0] }.filename().c_str());
+		Py_SetProgramName(fs::path{ __argv[0] }.filename().c_str());
 
 		Py_SetPythonHome(m_library_home.c_str());
 

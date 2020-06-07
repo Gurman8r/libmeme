@@ -33,7 +33,7 @@
 #define ML_flag_write(v, d, b)		(b ? ML_flag_set(v, d) : ML_flag_clear(v, d))
 
 // map between flag bits
-#define ML_flag_map(dst, d, src, s)	ML_flag_write(dst, d, ML_flag_read(src, s))
+#define ML_flag_map(temp, d, value, s)	ML_flag_write(temp, d, ML_flag_read(value, s))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -56,19 +56,41 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// is any of
+	// requires T is any of
 	template <class T, class ... Ts
 	> constexpr bool is_any_of_v
 	{
 		std::disjunction_v<std::is_same<T, Ts>...>
 	};
 
-	// is integral or float
+	// requires T is integral or float
 	template <class T
-	> constexpr bool is_integral_or_float_v
+	> constexpr bool is_integral_or_floating_point_v
 	{
-		std::is_integral_v<T> || std::is_floating_point_v<T>
+		std::is_enum_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>
 	};
+
+	// requires To is trivially default constructible and is copy/move constructible
+	template <class To, class From
+	> static constexpr bool is_trivial_conversion_v
+	{
+		(sizeof(To) == sizeof(From))		&&
+		std::is_trivially_copyable_v<From>	&&
+		std::is_trivial_v<To>				&&
+		(std::is_copy_constructible_v<To> || std::is_move_constructible_v<To>)
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// bit cast
+	template <class To, class From
+	> To bit_cast(From const & value) noexcept
+	{
+		static_assert(is_trivial_conversion_v<To, From>, "invalid bit_cast");
+		To temp{};
+		std::memcpy(&temp, &value, sizeof(To));
+		return temp;
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

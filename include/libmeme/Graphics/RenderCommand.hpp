@@ -3,8 +3,11 @@
 
 #include <libmeme/Graphics/RenderAPI.hpp>
 
-namespace ml::gl
+namespace ml::gfx
 {
+	// render command type
+	ML_alias command_t = typename std::function<void()>;
+
 	// render command generators
 	class render_command final
 	{
@@ -140,16 +143,16 @@ namespace ml::gl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD static auto upload(register_t loc, T value) noexcept
+		> ML_NODISCARD static auto upload(uniform_id loc, T value) noexcept
 		{
-			return builtin(static_cast<void(device:: *)(handle_t, T)
+			return builtin(static_cast<void(device:: *)(resource_id, T)
 			>(&device::upload), loc, value);
 		}
 
 		template <class T
-		> ML_NODISCARD static auto upload(register_t loc, T const & value) noexcept
+		> ML_NODISCARD static auto upload(uniform_id loc, T const & value) noexcept
 		{
-			return builtin(static_cast<void(device:: *)(handle_t, T const &)
+			return builtin(static_cast<void(device:: *)(resource_id, T const &)
 			>(&device::upload), loc, value);
 		}
 

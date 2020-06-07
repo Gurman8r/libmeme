@@ -49,9 +49,9 @@ namespace ml
 			case hashof_v<begin_draw_event>: {
 				for (auto const & cmd :
 				{
-					gl::render_command::set_clear_color(colors::black),
-					gl::render_command::clear(gl::color_buffer_bit | gl::depth_buffer_bit | gl::stencil_buffer_bit),
-					gl::render_command::set_viewport(m_window.get_framebuffer_size()),
+					gfx::render_command::set_clear_color(colors::black),
+					gfx::render_command::clear(gfx::color_buffer_bit | gfx::depth_buffer_bit | gfx::stencil_buffer_bit),
+					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
 					std::invoke(cmd);

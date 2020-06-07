@@ -41,7 +41,7 @@ namespace ml::meta
 	template <class Tp, class Fn, size_t ... Is
 	> constexpr void impl_tuple_expand(Tp && tp, Fn && fn, std::index_sequence<Is...>) noexcept
 	{
-		ML_invoke(ML_forward(fn), std::get<Is>(ML_forward(tp))...);
+		ML_forward(fn)(std::get<Is>(ML_forward(tp))...);
 	}
 
 	template <class Tp, class Fn
@@ -58,7 +58,7 @@ namespace ml::meta
 	{
 		(void)std::initializer_list<int32_t>
 		{
-			(ML_invoke(ML_forward(fn), ML_forward(args)), 0)...
+			(ML_forward(fn)(ML_forward(args)), 0)...
 		};
 	}
 

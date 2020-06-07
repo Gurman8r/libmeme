@@ -93,7 +93,11 @@ namespace ml
 		}
 
 		// graphic
-		g.graphic = gl::texture2d::allocate({ {}, gl::format_rgba, gl::format_red }, nullptr);
+		g.graphic = gfx::texture2d::allocate({
+			vec2i{},
+			{ gfx::format_rgba, gfx::format_red },
+			gfx::type_unsigned_byte,
+			gfx::texture_flags_default });
 
 		// bounds
 		g.bounds = float_rect

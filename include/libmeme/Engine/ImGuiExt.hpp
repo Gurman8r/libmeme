@@ -81,10 +81,9 @@ namespace ml::gui
 
 		enum : int32_t { lines, histogram };
 
-		using delta_t	= typename float_t;
-		using buffer_t	= typename pmr::vector<delta_t>;
+		using buffer_t	= typename pmr::vector<float_t>;
 		using overtxt_t	= typename ds::array<char, 32>;
-		using get_fn_t	= typename std::function<delta_t(void)>;
+		using get_fn_t	= typename std::function<float_t(void)>;
 
 		buffer_t	buffer	{};
 		int32_t		mode	{};
@@ -114,19 +113,19 @@ namespace ml::gui
 			update(std::invoke(get_fn));
 		}
 
-		template <class Delta = delta_t
+		template <class Delta = float_t
 		> void update(Delta const v) noexcept
 		{
 			static_assert(std::is_floating_point_v<Delta>);
 			if (!animate || buffer.empty()) { return; }
 			std::sprintf(overtxt.data(), fmt, v);
-			buffer[offset] = static_cast<delta_t>(v);
+			buffer[offset] = static_cast<float_t>(v);
 			offset = (offset + 1) % buffer.size();
 		}
 
 		void render() const noexcept
 		{
-			ML_scoped_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(this);
 
 			// expand to available width
 			float_t width{ size[0] };
@@ -143,14 +142,14 @@ namespace ml::gui
 					, buffer.data(), (int32_t)buffer.size(), offset
 					, overtxt.data()
 					, scale[0], scale[1], { width, size[1] }
-					, sizeof(delta_t)
+					, sizeof(float_t)
 				);
 			case histogram:
 				return ImGui::PlotHistogram(label
 					, buffer.data(), (int32_t)buffer.size(), offset
 					, overtxt.data()
 					, scale[0], scale[1], { width, size[1] }
-					, sizeof(delta_t)
+					, sizeof(float_t)
 				);
 			}
 		}
@@ -217,7 +216,7 @@ namespace ml::gui
 		> void render(Fn && fn, Args && ... args) noexcept
 		{
 			if (!open) { return; }
-			ML_scoped_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(this);
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
@@ -426,7 +425,7 @@ namespace ml::gui
 
 		console & render()
 		{
-			ML_scoped_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(this);
 
 			// HEADER
 			filter.Draw("filter", 180); ImGui::SameLine();
@@ -622,7 +621,7 @@ namespace ml::gui
 		{
 			if (m_path.empty() || !fs::is_directory(m_path)) { return; }
 
-			ML_scoped_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(this);
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 2, 2 });
 			ImGui::Separator();

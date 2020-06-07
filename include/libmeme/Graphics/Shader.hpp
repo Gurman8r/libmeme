@@ -16,7 +16,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using shader_source = typename meta::array<pmr::string, gl::shader_type_max>;
+		using shader_source = typename meta::array<pmr::string, gfx::max_shader_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,9 +93,9 @@ namespace ml
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
-				& v{ std::get<gl::shader_type_vertex>(value) },
-				& f{ std::get<gl::shader_type_fragment>(value) },
-				& g{ std::get<gl::shader_type_geometry>(value) };
+				& v{ std::get<gfx::vertex_shader>(value) },
+				& f{ std::get<gfx::fragment_shader>(value) },
+				& g{ std::get<gfx::geometry_shader>(value) };
 
 			return ((!v.empty() && !f.empty() && !g.empty())
 				? load_from_memory(v, f, g)
@@ -109,11 +109,11 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy(); m_obj->generate(); }
+			if (m_obj) { m_obj->revalue(); }
+			else { m_obj = gfx::shader::allocate(); }
 
-			m_obj->attach(gl::shader_type_vertex, v_src);
-			m_obj->attach(gl::shader_type_fragment, f_src);
+			m_obj->attach(gfx::program::allocate(gfx::vertex_shader		, v_src));
+			m_obj->attach(gfx::program::allocate(gfx::fragment_shader	, f_src));
 
 			return m_obj->link();
 		}
@@ -123,23 +123,35 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::shader::allocate(); }
-			else { m_obj->destroy(); m_obj->generate(); }
+			if (m_obj) { m_obj->revalue(); }
+			else { m_obj = gfx::shader::allocate(); }
 			
-			m_obj->attach(gl::shader_type_vertex, v_src);
-			m_obj->attach(gl::shader_type_fragment, f_src);
-			m_obj->attach(gl::shader_type_geometry, g_src);
+			m_obj->attach(gfx::program::allocate(gfx::vertex_shader		, v_src));
+			m_obj->attach(gfx::program::allocate(gfx::fragment_shader	, f_src));
+			m_obj->attach(gfx::program::allocate(gfx::geometry_shader	, g_src));
 
 			return m_obj->link();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void bind() const { m_obj->bind(); }
+		template <class ... Args
+		> static void bind(shader_asset const * value, Args && ... args) noexcept
+		{
+			gfx::shader::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+		}
 
-		void unbind() const { m_obj->unbind(); }
+		template <class ... Args
+		> static void bind(shared<shader_asset> const & value, Args && ... args) noexcept
+		{
+			gfx::shader::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+		}
 
-		void bind_textures() const { m_obj->bind_textures(); }
+		void bind() const noexcept { gfx::shader::bind(m_obj); }
+
+		void unbind() const noexcept { gfx::shader::bind(nullptr); }
+
+		void bind_textures() const noexcept { m_obj->bind_textures(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -171,20 +183,20 @@ namespace ml
 			case hashof_v<mat2>			: return set_uniform(u.name(), *u.get<mat2>());
 			case hashof_v<mat3>			: return set_uniform(u.name(), *u.get<mat3>());
 			case hashof_v<mat4>			: return set_uniform(u.name(), *u.get<mat4>());
-			case hashof_v<gl::texture2d>: return set_uniform(u.name(), *u.get<gl::texture2d>());
+			case hashof_v<gfx::texture2d>: return set_uniform(u.name(), *u.get<gfx::texture2d>());
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto program() const & noexcept -> shared<gl::shader> const & { return m_obj; }
+		ML_NODISCARD auto program() const & noexcept -> shared<gfx::shader> const & { return m_obj; }
 
 		ML_NODISCARD auto source() const & noexcept -> shader_source const & { return m_src; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gl::shader>	m_obj;
+		shared<gfx::shader>	m_obj;
 		shader_source		m_src;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -200,7 +212,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gl::shader_type_max>;
+		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gfx::max_shader_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

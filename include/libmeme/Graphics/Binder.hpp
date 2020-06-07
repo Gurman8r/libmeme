@@ -16,23 +16,21 @@ namespace ml::impl
 		template <class ... Args
 		> scope_binder(Bindable * p, Args && ... args) noexcept : m_ptr{ p }
 		{
-			ML_assert(m_ptr);
-			m_ptr->bind(ML_forward(args)...);
+			Bindable::bind(m_ptr, ML_forward(args)...);
 		}
 
 		template <class ... Args
 		> scope_binder(Bindable & r, Args && ... args) noexcept : m_ptr{ std::addressof(r) }
 		{
-			m_ptr->bind(ML_forward(args)...);
+			Bindable::bind(m_ptr, ML_forward(args)...);
 		}
 
 		~scope_binder() noexcept
 		{
-			m_ptr->unbind();
+			Bindable::bind(nullptr);
 		}
 
-	private:
-		Bindable * const m_ptr;
+	private: Bindable * const m_ptr;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -77,7 +77,7 @@ namespace ml
 		{
 			ML_bind_scope(*shd);
 			shd->bind_textures();
-			gl::render_command::draw(msh->get_va())();
+			gfx::render_command::draw(msh->get_va())();
 		}
 	};
 
@@ -130,7 +130,7 @@ namespace ml
 		ds::map< pmr::string, material				> m_materials	{};
 		ds::map< pmr::string, mesh					> m_meshes		{};
 		ds::map< pmr::string, shader_asset			> m_shaders		{};
-		ds::map< pmr::string, shared<gl::texture2d>	> m_textures	{};
+		ds::map< pmr::string, shared<gfx::texture2d>	> m_textures	{};
 
 
 		// ECS
@@ -146,7 +146,7 @@ namespace ml
 
 		vec2 m_resolution{ 1280, 720 };
 
-		ds::array<shared<gl::framebuffer>, 1> m_pipeline{};
+		ds::array<shared<gfx::framebuffer>, 1> m_pipeline{};
 
 
 		// GUI
@@ -242,7 +242,7 @@ namespace ml
 
 			// RENDERING
 			{
-				m_pipeline[0] = gl::framebuffer::allocate(m_resolution);
+				m_pipeline[0] = gfx::framebuffer::allocate({ m_resolution });
 			}
 
 			// ICON
@@ -258,12 +258,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gl::texture2d::allocate(m_images["default"]);
-				m_textures["doot"]			= gl::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gl::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gl::texture2d::allocate(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= gfx::texture2d::allocate(m_images["default"]);
+				m_textures["doot"]			= gfx::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gfx::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -276,24 +276,24 @@ namespace ml
 
 			// SHADERS
 			{
-				m_cache.read_file(gl::shader_type_vertex, "2D",
+				m_cache.read_file(gfx::vertex_shader, "2D",
 					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
-				m_cache.read_file(gl::shader_type_vertex, "3D",
+				m_cache.read_file(gfx::vertex_shader, "3D",
 					engine::fs().path2("assets/shaders/3D.vs.shader"));
 
-				m_cache.read_file(gl::shader_type_fragment, "basic",
+				m_cache.read_file(gfx::fragment_shader, "basic",
 					engine::fs().path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["2D"] = { {
-					m_cache.str(gl::shader_type_vertex, "2D"),
-					m_cache.str(gl::shader_type_fragment, "basic"),
+					m_cache.str(gfx::vertex_shader, "2D"),
+					m_cache.str(gfx::fragment_shader, "basic"),
 					{}
 				} };
 
 				m_shaders["3D"] = { {
-					m_cache.str(gl::shader_type_vertex, "3D"),
-					m_cache.str(gl::shader_type_fragment, "basic"),
+					m_cache.str(gfx::vertex_shader, "3D"),
+					m_cache.str(gfx::fragment_shader, "basic"),
 					{}
 				} };
 			}
@@ -330,18 +330,18 @@ namespace ml
 				auto const _3d = material
 				{
 					make_uniform<color>("u_color", colors::white),
-					make_uniform<gl::texture2d>("u_texture0", m_textures["default"])
+					make_uniform<gfx::texture2d>("u_texture0", m_textures["default"])
 				}
 				+ _timers + _camera + _tf;
 
 				// earth
 				m_materials["earth"] = material{ _3d }
-					.set<gl::texture2d>("u_texture0", m_textures["earth_dm_2k"])
+					.set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"])
 					;
 
 				// moon
 				m_materials["moon"] = material{ _3d }
-					.set<gl::texture2d>("u_texture0", m_textures["moon_dm_2k"])
+					.set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"])
 					;
 			}
 
@@ -446,10 +446,10 @@ namespace ml
 
 				for (auto const & cmd :
 				{
-					gl::render_command::set_cull_enabled(false),
-					gl::render_command::set_clear_color(colors::magenta),
-					gl::render_command::clear(gl::color_buffer_bit | gl::depth_buffer_bit | gl::stencil_buffer_bit),
-					gl::render_command::custom([&]() noexcept
+					gfx::render_command::set_cull_enabled(false),
+					gfx::render_command::set_clear_color(colors::magenta),
+					gfx::render_command::clear(gfx::color_buffer_bit | gfx::depth_buffer_bit | gfx::stencil_buffer_bit),
+					gfx::render_command::custom([&]() noexcept
 					{
 						m_ecs.update_system<x_draw_meshes>();
 					}),
@@ -517,7 +517,7 @@ namespace ml
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
-					ML_scoped_imgui_id(ML_addressof(this));
+					ML_scoped_imgui_id(this);
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
 						engine::window().set_should_close(true);
@@ -525,7 +525,7 @@ namespace ml
 				});
 				mmb.add("tools", [&]()
 				{
-					ML_scoped_imgui_id(ML_addressof(this));
+					ML_scoped_imgui_id(this);
 					m_gui_assets.menu_item();
 					m_gui_console.menu_item();
 					m_gui_display.menu_item();
@@ -538,7 +538,7 @@ namespace ml
 				});
 				mmb.add("settings", [&]()
 				{
-					ML_scoped_imgui_id(ML_addressof(this));
+					ML_scoped_imgui_id(this);
 					bool fullscreen{ engine::window().is_fullscreen() };
 					if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
 					{
@@ -547,7 +547,7 @@ namespace ml
 				});
 				mmb.add("help", [&]()
 				{
-					ML_scoped_imgui_id(ML_addressof(this));
+					ML_scoped_imgui_id(this);
 					m_imgui_demo.menu_item();
 					m_imgui_metrics.menu_item();
 					m_imgui_about.menu_item();
@@ -555,7 +555,7 @@ namespace ml
 			};
 
 			// draw
-			ML_scoped_imgui_id(ML_addressof(this));
+			ML_scoped_imgui_id(this);
 			{
 				// IMGUI
 				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
@@ -599,7 +599,7 @@ namespace ml
 
 			auto draw_asset = [&](auto const & n, auto const & v)
 			{
-				ML_scoped_imgui_id(ML_addressof(&v));
+				ML_scoped_imgui_id(&v);
 
 				// type
 				using T = typename std::decay_t<decltype(v)>;
@@ -707,7 +707,7 @@ namespace ml
 		{
 			static gui::texture_preview preview{};
 
-			shared<gl::texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
+			shared<gfx::texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
 			preview.tex_addr = tex->get_handle();
 			preview.tex_size = tex->get_size();
 			
@@ -769,7 +769,7 @@ namespace ml
 			// SHOW VALUE
 			auto show_value = [&](auto const & value)
 			{
-				ML_scoped_imgui_id(ML_addressof(&value));
+				ML_scoped_imgui_id(&value);
 
 				using T = typename std::decay_t<decltype(value)>;
 				static constexpr auto info{ typeof_v<T> };
@@ -1039,7 +1039,7 @@ namespace ml
 					ImGui::Separator();
 					for (auto const & rec : memory::get_records().values())
 					{
-						ML_scoped_imgui_id(ML_addressof(&rec));
+						ML_scoped_imgui_id(&rec);
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
 						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
@@ -1132,7 +1132,7 @@ namespace ml
 			// plots
 			m_plots.for_each([&](gui::plot & p)
 			{
-				ML_scoped_imgui_id(ML_addressof(&p));
+				ML_scoped_imgui_id(&p);
 				p.render();
 				if (ImGui::BeginPopupContextItem("plot settings"))
 				{
@@ -1164,7 +1164,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & ctx{ gl::device::get_context() };
+			static auto const & ctx{ gfx::device::get_context() };
 			static auto const & info{ ctx->get_devinfo() };
 
 			if (ImGui::BeginMenuBar())
@@ -1182,7 +1182,7 @@ namespace ml
 				bool a_enabled{ ctx->get_alpha_enabled() };
 				auto a_fn{ ctx->get_alpha_fn() };
 				ImGui::Checkbox("enabled", &a_enabled);
-				ImGui::Text("predicate: %s (%u)", gl::predicate_names[a_fn.pred], a_fn.pred);
+				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a_fn.pred], a_fn.pred);
 				ImGui::Text("reference: %f", a_fn.ref);
 			}
 			ImGui::Separator();
@@ -1195,12 +1195,12 @@ namespace ml
 				auto b_fn{ ctx->get_blend_fn() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
-				ImGui::Text("mode rgb: %s (%u)", gl::function_names[b_eq.modeRGB], b_eq.modeRGB);
-				ImGui::Text("mode alpha: %s (%u)", gl::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
-				ImGui::Text("src factor rgb: %s (%u)", gl::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
-				ImGui::Text("src factor alpha: %s (%u)", gl::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
-				ImGui::Text("dst factor rgb: %s (%u)", gl::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
-				ImGui::Text("dst factor alpha: %s (%u)", gl::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
+				ImGui::Text("mode rgb: %s (%u)", gfx::function_names[b_eq.modeRGB], b_eq.modeRGB);
+				ImGui::Text("mode alpha: %s (%u)", gfx::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
+				ImGui::Text("src factor rgb: %s (%u)", gfx::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
+				ImGui::Text("src factor alpha: %s (%u)", gfx::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
+				ImGui::Text("dst factor rgb: %s (%u)", gfx::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
+				ImGui::Text("dst factor alpha: %s (%u)", gfx::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
 			}
 			ImGui::Separator();
 
@@ -1210,8 +1210,8 @@ namespace ml
 				auto c_facet{ ctx->get_cull_facet() };
 				auto c_order{ ctx->get_cull_order() };
 				ImGui::Checkbox("enabled", &c_enabled);
-				ImGui::Text("facet: %s (%u)", gl::facet_names[c_facet], c_facet);
-				ImGui::Text("order: %s (%u)", gl::order_names[c_order], c_order);
+				ImGui::Text("facet: %s (%u)", gfx::facet_names[c_facet], c_facet);
+				ImGui::Text("order: %s (%u)", gfx::order_names[c_order], c_order);
 			}
 			ImGui::Separator();
 
@@ -1222,7 +1222,7 @@ namespace ml
 				bool d_mask{ ctx->get_depth_mask() };
 				auto d_range{ ctx->get_depth_range() };
 				ImGui::Checkbox("enabled", &d_enabled);
-				ImGui::Text("predicate: %s (%u) ", gl::predicate_names[d_pred], d_pred);
+				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d_pred], d_pred);
 				ImGui::Checkbox("mask", &d_mask);
 				ImGui::Text("range: %f, %f", d_range.nearVal, d_range.farVal);
 			}
@@ -1233,7 +1233,7 @@ namespace ml
 				bool s_enabled{ ctx->get_stencil_enabled() };
 				auto s_fn{ ctx->get_stencil_fn() };
 				ImGui::Checkbox("enabled", &s_enabled);
-				ImGui::Text("predicate: %s (%u)", gl::predicate_names[s_fn.pred], s_fn.pred);
+				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s_fn.pred], s_fn.pred);
 				ImGui::Text("reference: %i", s_fn.ref);
 				ImGui::Text("mask: %u", s_fn.mask);
 			}

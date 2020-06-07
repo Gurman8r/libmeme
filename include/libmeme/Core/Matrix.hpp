@@ -18,8 +18,8 @@ namespace ml::ds
 
 		static_assert(0 < _H, "matrix height negative or zero");
 
-		static_assert(std::is_integral_v<_T> || std::is_floating_point_v<_T>,
-			"matrices only support integral and floating point types"
+		static_assert(util::is_integral_or_floating_point_v<_T>,
+			"matrix only support integral and floating point types"
 		);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

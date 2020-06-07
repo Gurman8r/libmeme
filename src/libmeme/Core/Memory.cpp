@@ -15,7 +15,7 @@ namespace ml
 
 			enum : std::streamsize { W = 20 };
 
-			debug::std_out << std::left
+			std::cout << std::left
 				<< std::setw(W) << "index"
 				<< std::setw(W) << "size"
 				<< std::setw(W) << "address"
@@ -23,7 +23,7 @@ namespace ml
 
 			m_records.for_each([&](auto, auto const & rec)
 			{
-				debug::std_out << std::left
+				std::cout << std::left
 					<< std::setw(W) << rec.index
 					<< std::setw(W) << rec.size
 					<< std::setw(W) << rec.data

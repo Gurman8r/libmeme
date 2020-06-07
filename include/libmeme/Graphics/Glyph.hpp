@@ -9,7 +9,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared<gl::texture2d> graphic{};
+		shared<gfx::texture2d> graphic{};
 
 		float_rect bounds{};
 		

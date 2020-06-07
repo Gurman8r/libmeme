@@ -21,42 +21,32 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		image(allocator_type alloc = {})
-			: m_size{ 0 }
+		explicit image(allocator_type alloc) noexcept
+			: m_size	{ 0 }
 			, m_channels{ 0 }
-			, m_pixels{ alloc }
+			, m_pixels	{ alloc }
 		{
 		}
 
-		image(vec2i const & size, allocator_type alloc = {})
-			: image{ size, 4, alloc }
+		image(vec2i const & size, size_t channels, pixels_type const & pix)
 		{
 		}
 
-		image(vec2i const & size, size_t channels, allocator_type alloc = {})
-			: image{ size, channels, pixels_type{}, alloc }
-		{
-		}
-
-		image(vec2i const & size, pixels_type const & pixels, allocator_type alloc = {})
-			: image{ size, 4, pixels, alloc }
-		{
-		}
-
-		image(vec2i const & size, size_t channels, pixels_type const & pixels, allocator_type alloc = {})
-			: m_size{ size }
+		image(vec2i const & size, size_t channels = 4, allocator_type alloc = {}) noexcept
+			: m_size	{ size }
 			, m_channels{ channels }
-			, m_pixels{ pixels, alloc }
+			, m_pixels	{ capacity(), 0, alloc }
 		{
-			if (size_t const cap{ capacity() }; m_pixels.empty() || (m_pixels.size() != cap))
-			{
-				m_pixels.resize(cap);
-			}
 		}
 
-		image(fs::path const & path, allocator_type alloc = {})
-			: image{ path, false, alloc }
+		image() noexcept : image{ allocator_type{} }
 		{
+		}
+
+		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {})
+			: image{ alloc }
+		{
+			load_from_file(path, flip_v, req_channels);
 		}
 
 		image(fs::path const & path, bool flip_v, allocator_type alloc = {})
@@ -64,16 +54,15 @@ namespace ml
 		{
 		}
 
-		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {})
-			: image{ alloc }
+		image(fs::path const & path, allocator_type alloc = {})
+			: image{ path, false, alloc }
 		{
-			(void)load_from_file(path, flip_v, req_channels);
 		}
 
 		image(image const & value, allocator_type alloc = {})
-			: m_size{ value.m_size }
+			: m_size	{ value.m_size }
 			, m_channels{ value.m_channels }
-			, m_pixels{ value.m_pixels }
+			, m_pixels	{ value.m_pixels }
 		{
 		}
 
@@ -120,8 +109,13 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-		ML_NODISCARD bool load_from_file(fs::path const & path, bool flip_v = 0, size_t req_channels = 0);
+
+		static bool read_pixels(fs::path const & path, pixels_type & px, vec2i & sz, size_t & ch, int32_t rc = 4, bool fv = 0);
+
+		bool load_from_file(fs::path const & path, int32_t rc = 0, bool fv = 0) noexcept
+		{
+			return read_pixels(path, m_pixels, m_size, m_channels, rc, fv);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

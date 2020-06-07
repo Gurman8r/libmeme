@@ -12,31 +12,23 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool image::load_from_file(fs::path const & path, bool flip_v, size_t req_channels)
+	bool image::read_pixels(fs::path const & path, pixels_type & px, vec2i & sz, size_t & ch, int32_t rc, bool fv)
 	{
-		::stbi_set_flip_vertically_on_load(flip_v);
+		px.clear();
 
-		byte_t * const temp{ ::stbi_load(
-			path.string().c_str(),
-			&m_size[0],
-			&m_size[1],
-			reinterpret_cast<int32_t *>(&m_channels),
-			static_cast<int32_t>(req_channels)
-		) };
-		
-		ML_defer{ ::stbi_image_free(temp); };
+		stbi_set_flip_vertically_on_load(fv);
 
-		if (temp)
+		if (byte_t * const temp
 		{
-			m_pixels.resize(capacity());
-			std::memcpy(&m_pixels[0], temp, capacity());
-			return true;
-		}
-		else
+			stbi_load(path.string().c_str(), &sz[0], &sz[1], (int32_t *)&ch, rc)
+		})
 		{
-			this->clear();
-			return false;
+			px = { temp, temp + (sz[0] * sz[1] * ch) };
+
+			stbi_image_free(temp);
 		}
+
+		return !px.empty();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

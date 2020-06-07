@@ -34,11 +34,37 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// concat implementation
-#define _ML_CONCAT_(a, b)		a##b
+#define ML_alias				using		// global typedef
+#define _ML						::ml::		// memelib
+#define _ML_DEBUG				_ML debug::	// debug
+#define _ML_DS					_ML ds::	// data structures
+#define _ML_ECS					_ML ecs::	// entity component system
+#define _ML_GFX					_ML gfx::	// graphics
+#define _ML_IMPL				_ML impl::	// implementation
+#define _ML_META				_ML meta::	// metaprogramming
+#define _ML_UTIL				_ML util::	// utility
 
-// concatenate expressions 
-#define ML_concat(a, b)			_ML_CONCAT_(a, b)
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// assert
+#ifndef ML_assert
+#   define ML_assert(expr)		assert(expr)
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// misc
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
+#define ML_forward(x)			std::forward<decltype(x)>(x)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// concatenate implementation
+#define ML_cat_impl(a, b)		a##b
+
+// concatenate
+#define ML_cat(a, b)			ML_cat_impl(a, b)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -52,122 +78,82 @@
 
 // anonymous expressions		_ml_expr_#_
 #if defined(__COUNTER__)
-#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__COUNTER__, _))))
+#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, ML_concat(_, ML_concat(__LINE__, _))))
+#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__LINE__, _))))
 #else
-#	define ML_anon_expr(expr)	ML_concat(_ml_, ML_concat(expr, _))
+#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, _))
 #endif
 #define ML_anon					ML_anon_expr(anon) // _ml_anon_#_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// assert
-#ifndef ML_assert
-#   define ML_assert(expr)		assert(expr)
-#endif
+// declare handle
+#define ML_declhandle(type) \
+	struct ML_cat(type, __) final { _ML int32_t unused; }; \
+	using type = typename ML_cat(type, __) *
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// breakpoint
-#ifndef ML_breakpoint
-#	if (!ML_is_debug)
-#		define ML_breakpoint()	((void)0)
-#	elif defined(ML_cc_msvc)
-#		define ML_breakpoint()	::__debugbreak()
-#	elif defined(ML_cc_clang)
-#		define ML_breakpoint()	::__builtin_debugtrap()
-#	else
-#		define ML_breakpoint()	::raise(SIGTRAP)
-#	endif
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// command line
-#define ML_argc					__argc
-#define ML_argv					__argv
-#define ML_wargv				__wargv
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// constexpr invoke
-#if (ML_has_cxx20)
-#	define ML_invoke(fn, ...)	std::invoke(fn, ##__VA_ARGS__)
-#else
-#	define ML_invoke(fn, ...)	(fn)(##__VA_ARGS__)
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// misc
-#define _ML						::ml::
-#define ML_addressof(ptr)		((void *)(intptr_t)(ptr))
-#define ML_alias				using // global typedef
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-#define ML_forward(x)			std::forward<decltype(x)>(x)
+// get handle
+#define ML_gethandle(type, x) ((type)(_ML intptr_t)(x))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
-	// integral types
+	// core types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	int8_t		= typename ML_int8;
-	ML_alias	int16_t		= typename ML_int16;
-	ML_alias	int32_t		= typename ML_int32;
-	ML_alias	int64_t		= typename ML_int64;
+	ML_alias	int8_t		= typename ML_int8		;
+	ML_alias	int16_t		= typename ML_int16		;
+	ML_alias	int32_t		= typename ML_int32		;
+	ML_alias	int64_t		= typename ML_int64		;
 
-	ML_alias	uint8_t		= typename ML_uint8;
-	ML_alias	uint16_t	= typename ML_uint16;
-	ML_alias	uint32_t	= typename ML_uint32;
-	ML_alias	uint64_t	= typename ML_uint64;
+	ML_alias	uint8_t		= typename ML_uint8		;
+	ML_alias	uint16_t	= typename ML_uint16	;
+	ML_alias	uint32_t	= typename ML_uint32	;
+	ML_alias	uint64_t	= typename ML_uint64	;
 
-	ML_alias	byte_t		= typename ML_byte;
-	ML_alias	intmax_t	= typename ML_intmax;
-	ML_alias	uintmax_t	= typename ML_uintmax;
-	ML_alias	ulong_t		= typename ML_ulong;
+	ML_alias	byte_t		= typename ML_byte		;
+	ML_alias	intmax_t	= typename ML_intmax	;
+	ML_alias	uintmax_t	= typename ML_uintmax	;
+	ML_alias	ulong_t		= typename ML_ulong		;
 
-	// floating types
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_alias	float32_t	= typename ML_float32;
-	ML_alias	float64_t	= typename ML_float64;
-	ML_alias	float80_t	= typename ML_float80;
+	ML_alias	float32_t	= typename ML_float32	;
+	ML_alias	float64_t	= typename ML_float64	;
+	ML_alias	float80_t	= typename ML_float80	;
 
 	// helper types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	double_t	= typename float64_t;
-	ML_alias	float_t		= typename float32_t;
-	ML_alias	hash_t		= typename uint64_t;
-	ML_alias	intptr_t	= typename intmax_t;
-	ML_alias	ptrdiff_t	= typename intmax_t;
-	ML_alias	max_align_t = typename float64_t;
-	ML_alias	size_t		= typename uintmax_t;
+	ML_alias	double_t	= typename float64_t	;
+	ML_alias	float_t		= typename float32_t	;
+	ML_alias	hash_t		= typename uint64_t		;
+	ML_alias	intptr_t	= typename intmax_t		;
+	ML_alias	ptrdiff_t	= typename intmax_t		;
+	ML_alias	pvoid_t		= typename void *		;
+	ML_alias	max_align_t = typename float64_t	;
+	ML_alias	size_t		= typename uintmax_t	;
 
 	// string types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	cstring		= typename char const *;
-	ML_alias	cwstring	= typename wchar_t const *;
+	ML_alias	cstring		= typename char const *		;
+	ML_alias	cwstring	= typename wchar_t const *	;
 #if (ML_has_cxx20)
-	ML_alias	c8string	= typename char8_t const *;
+	ML_alias	c8string	= typename char8_t const *	;
 #endif
-	ML_alias	c16string	= typename char16_t const *;
-	ML_alias	c32string	= typename char32_t const *;
+	ML_alias	c16string	= typename char16_t const *	;
+	ML_alias	c32string	= typename char32_t const *	;
 
 	// standard namespaces
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	namespace std		= ::std;
-	namespace chrono	= std::chrono;
-	namespace fs		= std::filesystem;
-	namespace pmr		= std::pmr;
+	namespace std		= ::std				;
+	namespace chrono	= std::chrono		;
+	namespace fs		= std::filesystem	;
+	namespace pmr		= std::pmr			;
 #if (ML_has_cxx20)
-	namespace ranges	= std::ranges;
+	namespace ranges	= std::ranges		;
 	namespace views		= std::ranges::views;
 #endif
 

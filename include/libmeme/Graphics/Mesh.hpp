@@ -14,35 +14,35 @@ namespace ml
 		using contiguous_t	= typename pmr::vector<float_t>;
 		using indices_t		= typename pmr::vector<uint32_t>;
 
-		mesh(uint32_t mode = gl::primitive_triangles) noexcept
-			: m_vao{ gl::vertexarray::allocate(mode) }
+		mesh(uint32_t mode = gfx::primitive_triangles) noexcept
+			: m_vao{ gfx::vertexarray::allocate(mode) }
 		{
 		}
 
-		mesh(contiguous_t const & verts, gl::buffer_layout const & buffer_layout = {})
+		mesh(contiguous_t const & verts, gfx::buffer_layout const & buffer_layout = {})
 			: mesh{}
 		{
 			add_vertices(verts, buffer_layout);
 		}
 
-		mesh(contiguous_t const & verts, indices_t const & inds, gl::buffer_layout const & buffer_layout = {})
+		mesh(contiguous_t const & verts, indices_t const & inds, gfx::buffer_layout const & buffer_layout = {})
 			: mesh{}
 		{
 			add_vertices(verts, buffer_layout);
 			set_indices(inds);
 		}
 
-		mesh(vertices_t const & verts, gl::buffer_layout const & buffer_layout = {})
+		mesh(vertices_t const & verts, gfx::buffer_layout const & buffer_layout = {})
 			: mesh{ util::contiguous(verts), buffer_layout }
 		{
 		}
 
-		mesh(vertices_t const & verts, indices_t const & inds, gl::buffer_layout const & buffer_layout = {})
+		mesh(vertices_t const & verts, indices_t const & inds, gfx::buffer_layout const & buffer_layout = {})
 			: mesh{ util::contiguous(verts), inds, buffer_layout }
 		{
 		}
 
-		mesh(fs::path const & path, gl::buffer_layout const & buffer_layout = {}) noexcept
+		mesh(fs::path const & path, gfx::buffer_layout const & buffer_layout = {}) noexcept
 			: mesh{ model_loader::read(path), {}, buffer_layout }
 		{
 		}
@@ -81,19 +81,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void add_vertices(shared<gl::vertexbuffer> const & value) noexcept
+		void add_vertices(shared<gfx::vertexbuffer> const & value) noexcept
 		{
 			m_vao->add_vertices(value);
 		}
 
 		void add_vertices(contiguous_t const & verts) noexcept
 		{
-			add_vertices(gl::vertexbuffer::allocate(verts.size(), verts.data()));
+			add_vertices(gfx::vertexbuffer::allocate(verts.size(), verts.data()));
 		}
 
-		void add_vertices(contiguous_t const & verts, gl::buffer_layout const & buffer_layout) noexcept
+		void add_vertices(contiguous_t const & verts, gfx::buffer_layout const & buffer_layout) noexcept
 		{
-			add_vertices(std::invoke([&, vb = gl::vertexbuffer::allocate(verts.size(), verts.data())
+			add_vertices(std::invoke([&, vb = gfx::vertexbuffer::allocate(verts.size(), verts.data())
 			]() noexcept
 			{
 				vb->set_layout(buffer_layout);
@@ -103,14 +103,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_indices(shared<gl::indexbuffer> const & value) noexcept
+		void set_indices(shared<gfx::indexbuffer> const & value) noexcept
 		{
 			m_vao->set_indices(value);
 		}
 
 		void set_indices(indices_t const & inds) noexcept
 		{
-			set_indices(inds.empty() ? nullptr : gl::indexbuffer::allocate
+			set_indices(inds.empty() ? nullptr : gfx::indexbuffer::allocate
 			(
 				inds.size(), inds.data()
 			));
@@ -127,7 +127,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gl::vertexarray> m_vao;
+		shared<gfx::vertexarray> m_vao;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -4,15 +4,15 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_Renderer_OpenGL.hpp"
-using impl_device		= _ML gl::opengl_device			;
-using impl_vertexarray	= _ML gl::opengl_vertexarray	;
-using impl_vertexbuffer	= _ML gl::opengl_vertexbuffer	;
-using impl_indexbuffer	= _ML gl::opengl_indexbuffer	;
-using impl_framebuffer	= _ML gl::opengl_framebuffer	;
-using impl_texture2d	= _ML gl::opengl_texture2d		;
-using impl_texturecube	= _ML gl::opengl_texturecube	;
-using impl_program		= _ML gl::opengl_program		;
-using impl_shader		= _ML gl::opengl_shader			;
+using impl_device		= _ML_GFX opengl_device			;
+using impl_vertexarray	= _ML_GFX opengl_vertexarray	;
+using impl_vertexbuffer	= _ML_GFX opengl_vertexbuffer	;
+using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
+using impl_texture2d	= _ML_GFX opengl_texture2d		;
+using impl_texturecube	= _ML_GFX opengl_texturecube	;
+using impl_framebuffer	= _ML_GFX opengl_framebuffer	;
+using impl_program		= _ML_GFX opengl_program		;
+using impl_shader		= _ML_GFX opengl_shader			;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -25,7 +25,7 @@ using impl_shader		= _ML gl::opengl_shader			;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // device
-namespace ml::gl
+namespace ml::gfx
 {
 	unique<device> const & device::get_context() noexcept
 	{
@@ -40,7 +40,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // vertexarray
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<vertexarray> vertexarray::allocate(uint32_t mode) noexcept
 	{
@@ -56,7 +56,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // vertexbuffer
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<vertexbuffer> vertexbuffer::allocate(uint32_t usage, size_t count, address_t data) noexcept
 	{
@@ -72,7 +72,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // indexbuffer
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<indexbuffer> indexbuffer::allocate(uint32_t usage, size_t count, address_t data) noexcept
 	{
@@ -88,7 +88,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // texture
-namespace ml::gl
+namespace ml::gfx
 {
 	void texture::bind(texture const * value, uint32_t slot) noexcept
 	{
@@ -106,7 +106,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // texture2d
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<texture2d> texture2d::allocate(texopts const & opts, address_t data) noexcept
 	{
@@ -122,7 +122,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // texturecube
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<texturecube> texturecube::allocate(texopts const & opts) noexcept
 	{
@@ -138,13 +138,13 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // framebuffer
-namespace ml::gl
+namespace ml::gfx
 {
-	shared<framebuffer> framebuffer::allocate(vec2i const & size, uint32_t format) noexcept
+	shared<framebuffer> framebuffer::allocate(texopts const & opts)
 	{
-		return _ML make_shared<impl_framebuffer>(size, format);
+		return _ML make_shared<impl_framebuffer>(opts);
 	}
-
+	
 	void framebuffer::bind(framebuffer const * value) noexcept
 	{
 		impl_framebuffer::do_bind(static_cast<impl_framebuffer const *>(value));
@@ -154,7 +154,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // program
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<program> program::allocate(uint32_t type) noexcept
 	{
@@ -165,7 +165,7 @@ namespace ml::gl
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // shader
-namespace ml::gl
+namespace ml::gfx
 {
 	shared<shader> shader::allocate() noexcept
 	{
