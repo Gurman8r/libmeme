@@ -142,7 +142,7 @@ namespace ml::ds
 
 		void assign(init_type value)
 		{
-			if (!this->empty()) { this->clear(); }
+			this->clear();
 
 			for (auto it = value.begin(); it != value.end(); ++it)
 			{

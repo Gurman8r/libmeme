@@ -16,12 +16,13 @@ namespace ml
 		// validate version
 		if (auto const & ctx{ gl::device::get_context() })
 		{
-			m_settings.context.major = ctx->get_info().major_version;
-			m_settings.context.minor = ctx->get_info().minor_version;
+			m_settings.context.major = ctx->get_devinfo().major_version;
+			m_settings.context.minor = ctx->get_devinfo().minor_version;
+			debug::info("using device version {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		}
 		else
 		{
-			return debug::error("render_window failed initializing device");
+			debug::error("failed initializing device context");
 		}
 
 

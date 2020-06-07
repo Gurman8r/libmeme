@@ -109,18 +109,13 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gl::program::allocate(); }
-			else
-			{
-				m_obj->destroy();
-				m_obj->generate();
-			}
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
+			else { m_obj->destroy(); m_obj->generate(); }
 
-			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
-			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
-			m_obj->link();
-			
-			return (bool)m_obj;
+			m_obj->attach(gl::shader_type_vertex, v_src);
+			m_obj->attach(gl::shader_type_fragment, f_src);
+
+			return m_obj->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
@@ -128,19 +123,14 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gl::program::allocate(); }
-			else
-			{
-				m_obj->destroy();
-				m_obj->generate();
-			}
+			if (!m_obj) { m_obj = gl::shader::allocate(); }
+			else { m_obj->destroy(); m_obj->generate(); }
 			
-			m_obj->attach(gl::shader_type_vertex, v_src.c_str());
-			m_obj->attach(gl::shader_type_fragment, f_src.c_str());
-			m_obj->attach(gl::shader_type_geometry, g_src.c_str());
-			m_obj->link();
+			m_obj->attach(gl::shader_type_vertex, v_src);
+			m_obj->attach(gl::shader_type_fragment, f_src);
+			m_obj->attach(gl::shader_type_geometry, g_src);
 
-			return m_obj->get_status();
+			return m_obj->link();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -154,15 +144,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> bool set_uniform(cstring name, T const & value) noexcept
+		> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return m_obj->set_uniform(name, value);
+			return m_obj->set_uniform(name, ML_forward(value));
 		}
 
 		template <class T
-		> bool set_uniform(pmr::string const & name, T const & value) noexcept
+		> bool set_uniform(pmr::string const & name, T && value) noexcept
 		{
-			return this->set_uniform(name.c_str(), value);
+			return this->set_uniform(name.c_str(), ML_forward(value));
 		}
 
 		bool set_uniform(uniform const & u) noexcept
@@ -187,14 +177,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto program() const & noexcept -> shared<gl::program> const & { return m_obj; }
+		ML_NODISCARD auto program() const & noexcept -> shared<gl::shader> const & { return m_obj; }
 
 		ML_NODISCARD auto source() const & noexcept -> shader_source const & { return m_src; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gl::program> m_obj;
+		shared<gl::shader>	m_obj;
 		shader_source		m_src;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1165,13 +1165,13 @@ namespace ml
 		void show_renderer_gui()
 		{
 			static auto const & ctx{ gl::device::get_context() };
-			static auto const & info{ ctx->get_info() };
+			static auto const & info{ ctx->get_devinfo() };
 
 			if (ImGui::BeginMenuBar())
 			{
-				ImGui::Text("%s", info.renderer.c_str()); ImGui::Separator();
 				ImGui::Text("%s", info.vendor.c_str()); ImGui::Separator();
-				ImGui::Text("%s", info.version.c_str());
+				ImGui::Text("%s", info.renderer.c_str()); ImGui::Separator();
+				ImGui::Text("%s", info.version.c_str()); ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
 

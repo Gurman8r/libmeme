@@ -122,14 +122,14 @@ namespace ml::gl
 			return builtin(&device::draw, value);
 		}
 
-		ML_NODISCARD static auto draw_arrays(uint32_t first, size_t count) noexcept
+		ML_NODISCARD static auto draw_arrays(uint32_t mode, uint32_t first, size_t count) noexcept
 		{
-			return builtin(&device::draw_arrays, first, count);
+			return builtin(&device::draw_arrays, mode, first, count);
 		}
 
-		ML_NODISCARD static auto draw_indexed(size_t count) noexcept
+		ML_NODISCARD static auto draw_indexed(uint32_t mode, size_t count) noexcept
 		{
-			return builtin(&device::draw_indexed, count);
+			return builtin(&device::draw_indexed, mode, count);
 		}
 
 		ML_NODISCARD static auto flush() noexcept
@@ -140,7 +140,14 @@ namespace ml::gl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD static auto upload(handle_t loc, T const & value) noexcept
+		> ML_NODISCARD static auto upload(register_t loc, T value) noexcept
+		{
+			return builtin(static_cast<void(device:: *)(handle_t, T)
+			>(&device::upload), loc, value);
+		}
+
+		template <class T
+		> ML_NODISCARD static auto upload(register_t loc, T const & value) noexcept
 		{
 			return builtin(static_cast<void(device:: *)(handle_t, T const &)
 			>(&device::upload), loc, value);
