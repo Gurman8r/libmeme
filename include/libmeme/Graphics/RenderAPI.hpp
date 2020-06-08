@@ -38,13 +38,12 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	ML_alias address_t		= typename void const *							; // data address
 	ML_alias buffer_t		= typename pmr::vector<byte_t>					; // buffer data
-	ML_alias source_t		= typename pmr::vector<pmr::string>				; // shader source
+	ML_alias pgm_src_t		= typename pmr::vector<pmr::string>				; // program source
 	ML_alias pgm_cache_t	= typename ds::map<uint32_t, shared<program>>	; // program cache
 	ML_alias tex_cache_t	= typename ds::map<uniform_id, shared<texture>>	; // texture cache
 	ML_alias uni_cache_t	= typename ds::map<hash_t, uniform_id>			; // uniform cache
-	ML_alias reg_clbk_t		= typename std::function<void(uniform_id)>		; // uniform callback
+	ML_alias uni_binder_t	= typename std::function<void(uniform_id)>		; // uniform binder
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -430,7 +429,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Elem
+	template <class Elem = byte_t
 	> buffer_t bufcpy(size_t count, address_t data, buffer_t::allocator_type alloc = {}) noexcept
 	{
 		return data
@@ -569,7 +568,7 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// default vertex buffer layout
-	static constexpr std::initializer_list<buffer_element> default_layout
+	constexpr std::initializer_list<buffer_element> default_layout
 	{
 		{ vec3{}, "a_position"	},
 		{ vec3{}, "a_normal"	},
@@ -828,11 +827,11 @@ namespace ml::gfx
 
 		virtual bool generate() = 0;
 
-		virtual bool release() = 0;
+		virtual bool destroy() = 0;
 
 		virtual bool revalue() = 0;
 
-		virtual resource_id get_handle() const noexcept = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept = 0;
 
@@ -877,7 +876,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -936,7 +935,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -986,7 +985,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1072,7 +1071,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1157,7 +1156,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1219,7 +1218,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1269,7 +1268,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1332,7 +1331,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1341,28 +1340,28 @@ namespace ml::gfx
 		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
 
 	public:
-		virtual bool compile(source_t const & src) = 0;
+		virtual bool compile(pgm_src_t const & src) = 0;
 
 		inline bool compile(size_t count, cstring const * src) noexcept
 		{
-			return compile(source_t{ src, src + count });
+			return compile(pgm_src_t{ src, src + count });
 		}
 
 		inline bool compile(pmr::string const & src) noexcept
 		{
-			return compile(source_t{ src });
+			return compile(pgm_src_t{ src });
 		}
 
 		inline bool compile(cstring src) noexcept
 		{
-			return compile(source_t{ src });
+			return compile(pgm_src_t{ src });
 		}
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
 
-		ML_NODISCARD virtual source_t const & get_source() const noexcept = 0;
+		ML_NODISCARD virtual pgm_src_t const & get_source() const noexcept = 0;
 
 	protected:
 		virtual bool do_is_equal(device_resource const & other) const noexcept override = 0;
@@ -1393,7 +1392,7 @@ namespace ml::gfx
 
 		virtual bool generate() override = 0;
 
-		virtual bool release() override = 0;
+		virtual bool destroy() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1416,35 +1415,11 @@ namespace ml::gfx
 	public:
 		virtual bool attach(shared<program> const & value) = 0;
 
-		inline bool attach(uint32_t type, source_t const & src) noexcept
-		{
-			return attach(program::allocate(type, src));
-		}
-
-		inline bool attach(uint32_t type, size_t count, cstring const * src) noexcept
-		{
-			return attach(program::allocate(type, count, src));
-		}
-
-		inline bool attach(uint32_t type, pmr::string const & src) noexcept
-		{
-			return attach(program::allocate(type, src));
-		}
-
-		inline bool attach(uint32_t type, cstring src) noexcept
-		{
-			return attach(program::allocate(type, src));
-		}
-
 		virtual bool detach(shared<program> const & value) = 0;
 
 		virtual bool link() = 0;
 
-		virtual bool bind_uniform(cstring name, reg_clbk_t const & fn) = 0;
-
-		inline auto compile()
-		{
-		}
+		virtual bool bind_uniform(cstring name, uni_binder_t const & fn) = 0;
 
 		inline void bind_textures() const
 		{

@@ -34,7 +34,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_alias				using		// global typedef
 #define _ML						::ml::		// memelib
 #define _ML_DEBUG				_ML debug::	// debug
 #define _ML_DS					_ML ds::	// data structures
@@ -50,13 +49,6 @@
 #ifndef ML_assert
 #   define ML_assert(expr)		assert(expr)
 #endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// misc
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-#define ML_forward(x)			std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,11 +82,18 @@
 
 // declare handle
 #define ML_declhandle(type) \
-	struct ML_cat(type, __) final { _ML int32_t unused; }; \
-	using type = typename ML_cat(type, __) *
+	struct ML_cat(type, __) { _ML int32_t unused; }; using type = typename ML_cat(type, __) *
 
 // get handle
 #define ML_gethandle(type, x) ((type)(_ML intptr_t)(x))
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// misc
+#define ML_alias				using // global typedef
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
+#define ML_forward(x)			std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -125,6 +124,7 @@ namespace ml
 	// helper types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_alias	address_t	= typename void const * ;
 	ML_alias	double_t	= typename float64_t	;
 	ML_alias	float_t		= typename float32_t	;
 	ML_alias	hash_t		= typename uint64_t		;

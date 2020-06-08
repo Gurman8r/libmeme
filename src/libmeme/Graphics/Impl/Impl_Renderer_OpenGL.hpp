@@ -164,7 +164,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -218,7 +218,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -269,7 +269,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -321,7 +321,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -381,7 +381,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -430,7 +430,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -472,7 +472,7 @@ namespace ml::gfx
 		uint32_t		m_handle		{}; // handle
 		pmr::string		m_error_log		{}; // error log
 		uint32_t const	m_shader_type	{}; // type
-		source_t		m_source		{}; // source
+		pgm_src_t		m_source		{}; // source
 
 	public:
 		opengl_program(uint32_t type);
@@ -481,7 +481,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -490,13 +490,13 @@ namespace ml::gfx
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 	public:
-		bool compile(source_t const & src) override;
+		bool compile(pgm_src_t const & src) override;
 
 		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
 
 		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
 
-		source_t const & get_source() const noexcept override { return m_source; }
+		pgm_src_t const & get_source() const noexcept override { return m_source; }
 
 	protected:
 		bool do_is_equal(device_resource const & other) const noexcept override
@@ -545,7 +545,7 @@ namespace ml::gfx
 
 		bool generate() override;
 
-		bool release() override;
+		bool destroy() override;
 
 		bool revalue() override;
 
@@ -560,7 +560,7 @@ namespace ml::gfx
 
 		bool link() override;
 
-		bool bind_uniform(cstring name, reg_clbk_t const & fn) override
+		bool bind_uniform(cstring name, uni_binder_t const & fn) override
 		{
 			opengl_uniform_binder u{ *this, name };
 			if (u) { std::invoke(fn, u.location); }

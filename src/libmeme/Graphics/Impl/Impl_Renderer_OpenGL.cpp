@@ -1038,7 +1038,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_vertexbuffer::release()
+	bool opengl_vertexbuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 		glCheck(glDeleteBuffers(1, &m_handle));
@@ -1104,7 +1104,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_indexbuffer::release()
+	bool opengl_indexbuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1168,7 +1168,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_vertexarray::release()
+	bool opengl_vertexarray::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1289,7 +1289,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_texture2d::release()
+	bool opengl_texture2d::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1478,7 +1478,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_texturecube::release()
+	bool opengl_texturecube::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1544,7 +1544,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_framebuffer::release()
+	bool opengl_framebuffer::destroy()
 	{
 		if (!m_handle) { return false; }
 
@@ -1653,7 +1653,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_program::release()
+	bool opengl_program::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1671,9 +1671,9 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_program::compile(source_t const & src)
+	bool opengl_program::compile(pgm_src_t const & src)
 	{
-		// copy source
+		// check empty
 		if ((m_source = src).empty()) { return false; }
 
 		// compile
@@ -1750,7 +1750,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_shader::release()
+	bool opengl_shader::destroy()
 	{
 		if (!m_handle) { return false; }
 		
@@ -1775,22 +1775,19 @@ namespace ml::gfx
 	bool opengl_shader::attach(shared<program> const & value)
 	{
 		if (!m_handle || !value || !*value) { return false; }
-
-		if (m_programs.try_emplace(value->get_shader_type(), value).second)
+		else if (m_programs.try_emplace(value->get_shader_type(), value).second)
 		{
 			glCheck(glAttachObjectARB(m_handle, (uint32_t)(intptr_t)value->get_handle()));
 
 			return true;
 		}
-		
-		return false;
+		else { return false; }
 	}
 
 	bool opengl_shader::detach(shared<program> const & value)
 	{
 		if (!m_handle || !value || !*value) { return false; }
-
-		if (auto const it{ m_programs.find(value->get_shader_type()) })
+		else if (auto const it{ m_programs.find(value->get_shader_type()) })
 		{
 			glCheck(glDetachObjectARB(m_handle, (uint32_t)(intptr_t)value->get_handle()));
 
@@ -1798,12 +1795,14 @@ namespace ml::gfx
 
 			return true;
 		}
-
-		return false;
+		else { return false; }
 	}
 
 	bool opengl_shader::link()
 	{
+		// check empty
+		if (m_programs.empty()) { return false; }
+
 		// link
 		glCheck(glLinkProgramARB(m_handle));
 
