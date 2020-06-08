@@ -960,47 +960,47 @@ namespace ml::gfx
 
 	void opengl_device::upload(uniform_id loc, bool value)
 	{
-		glCheck(glUniform1iARB((int32_t)(intptr_t)loc, (int32_t)value));
+		glCheck(glUniform1iARB(ML_handle(int32_t, loc), (int32_t)value));
 	}
 
 	void opengl_device::upload(uniform_id loc, int32_t value)
 	{
-		glCheck(glUniform1iARB((int32_t)(intptr_t)loc, value));
+		glCheck(glUniform1iARB(ML_handle(int32_t, loc), value));
 	}
 
 	void opengl_device::upload(uniform_id loc, float_t value)
 	{
-		glCheck(glUniform1fARB((int32_t)(intptr_t)loc, value));
+		glCheck(glUniform1fARB(ML_handle(int32_t, loc), value));
 	}
 
 	void opengl_device::upload(uniform_id loc, vec2 const & value)
 	{
-		glCheck(glUniform2fARB((int32_t)(intptr_t)loc, value[0], value[1]));
+		glCheck(glUniform2fARB(ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
 	void opengl_device::upload(uniform_id loc, vec3 const & value)
 	{
-		glCheck(glUniform3fARB((int32_t)(intptr_t)loc, value[0], value[1], value[2]));
+		glCheck(glUniform3fARB(ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
 	void opengl_device::upload(uniform_id loc, vec4 const & value)
 	{
-		glCheck(glUniform4fARB((int32_t)(intptr_t)loc, value[0], value[1], value[2], value[3]));
+		glCheck(glUniform4fARB(ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
 	void opengl_device::upload(uniform_id loc, mat2 const & value)
 	{
-		glCheck(glUniformMatrix2fvARB((int32_t)(intptr_t)loc, 2 * 2, false, value));
+		glCheck(glUniformMatrix2fvARB(ML_handle(int32_t, loc), 2 * 2, false, value));
 	}
 
 	void opengl_device::upload(uniform_id loc, mat3 const & value)
 	{
-		glCheck(glUniformMatrix3fvARB((int32_t)(intptr_t)loc, 3 * 3, false, value));
+		glCheck(glUniformMatrix3fvARB(ML_handle(int32_t, loc), 3 * 3, false, value));
 	}
 
 	void opengl_device::upload(uniform_id loc, mat4 const & value)
 	{
-		glCheck(glUniformMatrix4fvARB((int32_t)(intptr_t)loc, 4 * 4, false, value));
+		glCheck(glUniformMatrix4fvARB(ML_handle(int32_t, loc), 4 * 4, false, value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1583,7 +1583,7 @@ namespace ml::gfx
 			GL_FRAMEBUFFER,
 			GL_COLOR_ATTACHMENT0,
 			GL_TEXTURE_2D,
-			(uint32_t)(intptr_t)m_color->get_handle(),
+			ML_handle(uint32_t, m_color->get_handle()),
 			0));
 
 		// depth attachment
@@ -1600,7 +1600,7 @@ namespace ml::gfx
 			GL_FRAMEBUFFER,
 			GL_DEPTH_STENCIL_ATTACHMENT,
 			GL_TEXTURE_2D,
-			(uint32_t)(intptr_t)m_depth->get_handle(),
+			ML_handle(uint32_t, m_depth->get_handle()),
 			0));
 
 		// check status
@@ -1717,7 +1717,7 @@ namespace ml::gfx
 		{
 			int32_t temp{};
 			glCheck(temp = glGetUniformLocationARB(self, name));
-			return ML_gethandle(uniform_id, temp);
+			return ML_handle(uniform_id, temp);
 		});
 	}
 
@@ -1777,7 +1777,7 @@ namespace ml::gfx
 		if (!m_handle || !value || !*value) { return false; }
 		else if (m_programs.try_emplace(value->get_shader_type(), value).second)
 		{
-			glCheck(glAttachObjectARB(m_handle, (uint32_t)(intptr_t)value->get_handle()));
+			glCheck(glAttachObjectARB(m_handle, ML_handle(uint32_t, value->get_handle())));
 
 			return true;
 		}
@@ -1789,7 +1789,7 @@ namespace ml::gfx
 		if (!m_handle || !value || !*value) { return false; }
 		else if (auto const it{ m_programs.find(value->get_shader_type()) })
 		{
-			glCheck(glDetachObjectARB(m_handle, (uint32_t)(intptr_t)value->get_handle()));
+			glCheck(glDetachObjectARB(m_handle, ML_handle(uint32_t, value->get_handle())));
 
 			m_programs.erase(it->first);
 

@@ -3,19 +3,28 @@
 
 #include <libmeme/Core/StringUtility.hpp>
 
-// debug info message prefix
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// info message
 #ifndef ML_IMPL_DEBUG_MSG_I
 #define ML_IMPL_DEBUG_MSG_I "[i] "
 #endif
 
-// debug error message prefix
+// error message
 #ifndef ML_IMPL_DEBUG_MSG_E
 #define ML_IMPL_DEBUG_MSG_E "[e] "
 #endif
 
-// debug warning message prefix
+// warning message
 #ifndef ML_IMPL_DEBUG_MSG_W
 #define ML_IMPL_DEBUG_MSG_W "[w] "
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// assert
+#ifndef ML_assert
+#   define ML_assert(expr)		assert(expr)
 #endif
 
 // breakpoint

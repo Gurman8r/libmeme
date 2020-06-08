@@ -5,6 +5,10 @@
 
 namespace ml
 {
+	ML_decl_handle(font_face)	; // font face
+	ML_decl_handle(font_library); // font library
+	ML_decl_handle(font_stroker); // font stroker
+
 	struct ML_GRAPHICS_API font final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,6 +24,7 @@ namespace ml
 			, m_family	{ alloc }
 			, m_library	{}
 			, m_face	{}
+			, m_stroker	{}
 		{
 		}
 
@@ -33,6 +38,7 @@ namespace ml
 			, m_family	{ value.m_family, alloc }
 			, m_library	{ value.m_library }
 			, m_face	{ value.m_face }
+			, m_stroker	{ value.m_stroker }
 		{
 		}
 
@@ -64,6 +70,7 @@ namespace ml
 			{
 				std::swap(m_library, value.m_library);
 				std::swap(m_face, value.m_face);
+				std::swap(m_stroker, value.m_stroker);
 				std::swap(m_family, value.m_family);
 				m_pages.swap(value.m_pages);
 			}
@@ -91,10 +98,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		pvoid_t		m_library;
-		pvoid_t		m_face;
-		pmr::string	m_family;
-		page_table	m_pages;
+		font_library	m_library;
+		font_face		m_face;
+		font_stroker	m_stroker;
+		pmr::string		m_family;
+		page_table		m_pages;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

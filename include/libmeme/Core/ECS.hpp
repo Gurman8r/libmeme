@@ -5,8 +5,9 @@
 // https://github.com/SuperV1234/cppcon2015
 // https://www.youtube.com/watch?v=NTWSeQtHZ9M
 
-#include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Core/BatchVector.hpp>
+#include <libmeme/Core/BitSet.hpp>
+#include <libmeme/Core/Debug.hpp>
 
 // ECS
 namespace ml::ecs

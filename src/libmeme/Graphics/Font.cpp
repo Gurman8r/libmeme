@@ -18,8 +18,11 @@ namespace ml
 
 	font::~font() noexcept
 	{
-		if (m_face) { FT_Done_Face(static_cast<FT_Face>(m_face)); }
-		if (m_library) { FT_Done_FreeType(static_cast<FT_Library>(m_library)); }
+		if (m_face) { FT_Done_Face((FT_Face)m_face); }
+
+		if (m_library) { FT_Done_FreeType((FT_Library)m_library); }
+
+		if (m_stroker) { FT_Stroker_Done((FT_Stroker)m_stroker); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -29,43 +32,34 @@ namespace ml
 		if (m_library) { return false; }
 
 		// load freetype library instance
-		FT_Library library;
-		if (FT_Init_FreeType(&library) != 0)
+		if (FT_Init_FreeType((FT_Library *)&m_library) != 0)
 		{
 			return debug::error("failed initializing FreeType: {0}", path);
 		}
 
 		// load the new fonts face from the specified file
-		FT_Face face;
-		if (FT_New_Face(library, path.string().c_str(), 0, &face) != 0)
+		if (FT_New_Face((FT_Library)m_library, path.string().c_str(), 0, (FT_Face *)&m_face) != 0)
 		{
 			return debug::error("failed creating font face: {0}", path);
 		}
 
 		// load the stroker that will be used to outline the fonts
-		FT_Stroker stroker;
-		if (FT_Stroker_New(library, &stroker) != 0)
+		if (FT_Stroker_New((FT_Library)m_library, (FT_Stroker *)&m_stroker) != 0)
 		{
-			FT_Done_Face(face);
+			FT_Done_Face((FT_Face)m_face);
 			return debug::error("failed creating font stroker: {0}", path);
 		}
 
 		// select the unicode character map
-		if (FT_Select_Charmap(face, FT_ENCODING_UNICODE) != 0)
+		if (FT_Select_Charmap((FT_Face)m_face, FT_ENCODING_UNICODE) != 0)
 		{
-			FT_Stroker_Done(stroker);
-			FT_Done_Face(face);
+			FT_Stroker_Done((FT_Stroker)m_stroker);
+			FT_Done_Face((FT_Face)m_face);
 			return debug::error("failed selecting font unicode character map: {0}", path);
 		}
 
-		// store loaded font library
-		m_library = library;
-
-		// store the font faces
-		m_face = face;
-
-		// store the font info
-		m_family = face->family_name;
+		// store the font family
+		m_family = ((FT_Face)m_face)->family_name;
 
 		return true;
 	}
@@ -76,16 +70,14 @@ namespace ml
 	{
 		glyph g{};
 
-		auto face{ static_cast<FT_Face>(m_face) };
-		
 		// face not loaded
-		if (!face) { return g; }
+		if (!m_face) { return g; }
 
 		// set size loading glyphs as
-		FT_Set_Pixel_Sizes(face, 0, size);
+		FT_Set_Pixel_Sizes(((FT_Face)m_face), 0, size);
 
 		// load character glyph
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER) != 0)
+		if (FT_Load_Char(((FT_Face)m_face), c, FT_LOAD_RENDER) != 0)
 		{
 			debug::warning("font failed loading glyph: \'{0}\'", c);
 			
@@ -102,19 +94,19 @@ namespace ml
 		// bounds
 		g.bounds = float_rect
 		{
-			face->glyph->bitmap_left,
-			face->glyph->bitmap_top,
-			face->glyph->bitmap.width,
-			face->glyph->bitmap.rows
+			((FT_Face)m_face)->glyph->bitmap_left,
+			((FT_Face)m_face)->glyph->bitmap_top,
+			((FT_Face)m_face)->glyph->bitmap.width,
+			((FT_Face)m_face)->glyph->bitmap.rows
 		};
 
 		// advance
-		g.advance = (uint32_t)face->glyph->advance.x;
+		g.advance = (uint32_t)((FT_Face)m_face)->glyph->advance.x;
 
 		// only load a texture for characters requiring a graphic
 		if (!std::isspace(c, {}) && std::isgraph(c, {}))
 		{
-			g.graphic->update((vec2i)g.size(), face->glyph->bitmap.buffer);
+			g.graphic->update((vec2i)g.size(), ((FT_Face)m_face)->glyph->bitmap.buffer);
 		}
 
 		return g;

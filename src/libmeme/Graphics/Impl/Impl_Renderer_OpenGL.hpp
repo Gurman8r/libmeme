@@ -168,7 +168,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -222,7 +222,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -273,7 +273,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -325,7 +325,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -385,7 +385,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -434,7 +434,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -485,7 +485,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
@@ -527,11 +527,11 @@ namespace ml::gfx
 		// uniform binder
 		struct ML_NODISCARD opengl_uniform_binder final
 		{
-			uniform_id location{ ML_gethandle(uniform_id, -1) };
+			uniform_id location{ ML_handle(uniform_id, -1) };
 
 			uint32_t self{}, last{};
 
-			operator bool() const noexcept { return -1 < (int32_t)(intptr_t)location; }
+			operator bool() const noexcept { return -1 < ML_handle(int32_t, location); }
 
 			opengl_uniform_binder(opengl_shader & s, cstring name);
 
@@ -549,7 +549,7 @@ namespace ml::gfx
 
 		bool revalue() override;
 
-		resource_id get_handle() const noexcept override { return ML_gethandle(resource_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 

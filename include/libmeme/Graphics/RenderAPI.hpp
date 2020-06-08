@@ -33,11 +33,12 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_declhandle(resource_id) 	; // resource object handle
-	ML_declhandle(uniform_id) 	; // uniform binding handle
+	ML_decl_handle(resource_id) 	; // resource object handle
+	ML_decl_handle(uniform_id) 		; // uniform binding handle
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
+	ML_alias address_t		= typename void const *							; // input data address
 	ML_alias buffer_t		= typename pmr::vector<byte_t>					; // buffer data
 	ML_alias pgm_src_t		= typename pmr::vector<pmr::string>				; // program source
 	ML_alias pgm_cache_t	= typename ds::map<uint32_t, shared<program>>	; // program cache

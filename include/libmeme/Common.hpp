@@ -45,10 +45,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// assert
-#ifndef ML_assert
-#   define ML_assert(expr)		assert(expr)
-#endif
+#define ML_alias				using // global typedef
+
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
+
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
+
+#define ML_forward(x)			std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -81,19 +84,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle
-#define ML_declhandle(type) \
-	struct ML_cat(type, __) { _ML int32_t unused; }; using type = typename ML_cat(type, __) *
+#define ML_decl_handle(name)		struct ML_cat(name, __) { _ML int32_t unused; }; using name = typename ML_cat(name, __) *
 
-// get handle
-#define ML_gethandle(type, x) ((type)(_ML intptr_t)(x))
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// misc
-#define ML_alias				using // global typedef
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-#define ML_forward(x)			std::forward<decltype(x)>(x)
+// convert handle
+#define ML_handle(type, value)	((type)(_ML intptr_t)(value))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -124,13 +118,11 @@ namespace ml
 	// helper types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	address_t	= typename void const * ;
 	ML_alias	double_t	= typename float64_t	;
 	ML_alias	float_t		= typename float32_t	;
 	ML_alias	hash_t		= typename uint64_t		;
 	ML_alias	intptr_t	= typename intmax_t		;
 	ML_alias	ptrdiff_t	= typename intmax_t		;
-	ML_alias	pvoid_t		= typename void *		;
 	ML_alias	max_align_t = typename float64_t	;
 	ML_alias	size_t		= typename uintmax_t	;
 
