@@ -113,6 +113,8 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using entity_manager = ecs::manager<entity_traits>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -276,24 +278,24 @@ namespace ml
 
 			// SHADERS
 			{
-				m_cache.read_file(gfx::vertex_shader, "2D",
+				m_cache.read_file(gfx::shader_type_vertex, "2D",
 					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
-				m_cache.read_file(gfx::vertex_shader, "3D",
+				m_cache.read_file(gfx::shader_type_vertex, "3D",
 					engine::fs().path2("assets/shaders/3D.vs.shader"));
 
-				m_cache.read_file(gfx::fragment_shader, "basic",
+				m_cache.read_file(gfx::shader_type_fragment, "basic",
 					engine::fs().path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["2D"] = { {
-					m_cache.str(gfx::vertex_shader, "2D"),
-					m_cache.str(gfx::fragment_shader, "basic"),
+					m_cache.str(gfx::shader_type_vertex, "2D"),
+					m_cache.str(gfx::shader_type_fragment, "basic"),
 					{}
 				} };
 
 				m_shaders["3D"] = { {
-					m_cache.str(gfx::vertex_shader, "3D"),
-					m_cache.str(gfx::fragment_shader, "basic"),
+					m_cache.str(gfx::shader_type_vertex, "3D"),
+					m_cache.str(gfx::shader_type_fragment, "basic"),
 					{}
 				} };
 			}
@@ -707,7 +709,7 @@ namespace ml
 		{
 			static gui::texture_preview preview{};
 
-			shared<gfx::texture2d> const & tex{ m_pipeline.back()->get_color_attachment() };
+			auto const & tex{ m_pipeline.back()->get_color_attachments().front() };
 			preview.tex_addr = tex->get_handle();
 			preview.tex_size = tex->get_size();
 			

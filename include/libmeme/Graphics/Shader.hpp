@@ -16,7 +16,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using shader_source = typename meta::array<pmr::string, gfx::max_shader_type>;
+		using shader_source = typename meta::array<pmr::string, gfx::shader_type_max>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,9 +93,9 @@ namespace ml
 		bool load_from_source(shader_source const & value)
 		{
 			auto const
-				& v{ std::get<gfx::vertex_shader>(value) },
-				& f{ std::get<gfx::fragment_shader>(value) },
-				& g{ std::get<gfx::geometry_shader>(value) };
+				& v{ std::get<gfx::shader_type_vertex	>(value) },
+				& f{ std::get<gfx::shader_type_fragment	>(value) },
+				& g{ std::get<gfx::shader_type_geometry	>(value) };
 
 			return ((!v.empty() && !f.empty() && !g.empty())
 				? load_from_memory(v, f, g)
@@ -109,11 +109,11 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (m_obj) { m_obj->revalue(); }
-			else { m_obj = gfx::shader::allocate(); }
+			if (!m_obj) { m_obj = gfx::program::allocate(); }
+			else { m_obj->revalue(); }
 
-			m_obj->attach(gfx::program::allocate(gfx::vertex_shader		, v_src));
-			m_obj->attach(gfx::program::allocate(gfx::fragment_shader	, f_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex	, v_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
 
 			return m_obj->link();
 		}
@@ -123,12 +123,12 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (m_obj) { m_obj->revalue(); }
-			else { m_obj = gfx::shader::allocate(); }
+			if (!m_obj) { m_obj = gfx::program::allocate(); }
+			else { m_obj->revalue(); }
 			
-			m_obj->attach(gfx::program::allocate(gfx::vertex_shader		, v_src));
-			m_obj->attach(gfx::program::allocate(gfx::fragment_shader	, f_src));
-			m_obj->attach(gfx::program::allocate(gfx::geometry_shader	, g_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex	, v_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_geometry	, g_src));
 
 			return m_obj->link();
 		}
@@ -138,18 +138,18 @@ namespace ml
 		template <class ... Args
 		> static void bind(shader_asset const * value, Args && ... args) noexcept
 		{
-			gfx::shader::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+			gfx::program::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
 		}
 
 		template <class ... Args
 		> static void bind(shared<shader_asset> const & value, Args && ... args) noexcept
 		{
-			gfx::shader::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+			gfx::program::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
 		}
 
-		void bind() const noexcept { gfx::shader::bind(m_obj); }
+		void bind() const noexcept { gfx::program::bind(m_obj); }
 
-		void unbind() const noexcept { gfx::shader::bind(nullptr); }
+		void unbind() const noexcept { gfx::program::bind(nullptr); }
 
 		void bind_textures() const noexcept { m_obj->bind_textures(); }
 
@@ -169,35 +169,34 @@ namespace ml
 
 		bool set_uniform(uniform const & u) noexcept
 		{
-			if (u.name().empty()) { return false; }
-			switch (u.type().hash())
+			switch (u.name().empty() ? 0 : u.type().hash())
 			{
-			default						: return false;
-			case hashof_v<bool>			: return set_uniform(u.name(), *u.get<bool>());
-			case hashof_v<int32_t>		: return set_uniform(u.name(), *u.get<int32_t>());
-			case hashof_v<float_t>		: return set_uniform(u.name(), *u.get<float_t>());
-			case hashof_v<vec2>			: return set_uniform(u.name(), *u.get<vec2>());
-			case hashof_v<vec3>			: return set_uniform(u.name(), *u.get<vec3>());
-			case hashof_v<vec4>			: return set_uniform(u.name(), *u.get<vec4>());
-			case hashof_v<color>		: return set_uniform(u.name(), *u.get<color>());
-			case hashof_v<mat2>			: return set_uniform(u.name(), *u.get<mat2>());
-			case hashof_v<mat3>			: return set_uniform(u.name(), *u.get<mat3>());
-			case hashof_v<mat4>			: return set_uniform(u.name(), *u.get<mat4>());
-			case hashof_v<gfx::texture2d>: return set_uniform(u.name(), *u.get<gfx::texture2d>());
+			default							: return false;
+			case hashof_v<bool>				: return set_uniform(u.name(), *u.get<bool>());
+			case hashof_v<int32_t>			: return set_uniform(u.name(), *u.get<int32_t>());
+			case hashof_v<float_t>			: return set_uniform(u.name(), *u.get<float_t>());
+			case hashof_v<vec2>				: return set_uniform(u.name(), *u.get<vec2>());
+			case hashof_v<vec3>				: return set_uniform(u.name(), *u.get<vec3>());
+			case hashof_v<vec4>				: return set_uniform(u.name(), *u.get<vec4>());
+			case hashof_v<color>			: return set_uniform(u.name(), *u.get<color>());
+			case hashof_v<mat2>				: return set_uniform(u.name(), *u.get<mat2>());
+			case hashof_v<mat3>				: return set_uniform(u.name(), *u.get<mat3>());
+			case hashof_v<mat4>				: return set_uniform(u.name(), *u.get<mat4>());
+			case hashof_v<gfx::texture2d>	: return set_uniform(u.name(), *u.get<gfx::texture2d>());
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto program() const & noexcept -> shared<gfx::shader> const & { return m_obj; }
+		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_obj; }
 
 		ML_NODISCARD auto source() const & noexcept -> shader_source const & { return m_src; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gfx::shader>	m_obj;
-		shader_source		m_src;
+		shared<gfx::program>	m_obj;
+		shader_source			m_src;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -212,7 +211,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gfx::max_shader_type>;
+		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gfx::shader_type_max>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

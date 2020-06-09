@@ -11,8 +11,8 @@ using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
 using impl_texture2d	= _ML_GFX opengl_texture2d		;
 using impl_texturecube	= _ML_GFX opengl_texturecube	;
 using impl_framebuffer	= _ML_GFX opengl_framebuffer	;
-using impl_program		= _ML_GFX opengl_program		;
-using impl_shader		= _ML_GFX opengl_shader			;
+using impl_program		= _ML_GFX opengl_shader		;
+using impl_shader		= _ML_GFX opengl_program			;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -153,10 +153,10 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// program
+// shader
 namespace ml::gfx
 {
-	shared<program> program::allocate(uint32_t type) noexcept
+	shared<shader> shader::allocate(uint32_t type) noexcept
 	{
 		return _ML make_shared<impl_program>(type);
 	}
@@ -164,15 +164,15 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// shader
+// program
 namespace ml::gfx
 {
-	shared<shader> shader::allocate() noexcept
+	shared<program> program::allocate() noexcept
 	{
 		return _ML make_shared<impl_shader>();
 	}
 
-	void shader::bind(shader const * value) noexcept
+	void program::bind(program const * value) noexcept
 	{
 		impl_shader::do_bind(static_cast<impl_shader const *>(value));
 	}

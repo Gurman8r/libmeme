@@ -49,7 +49,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	hash_t plugin_manager::generate(fs::path const & path, void * user_data)
+	hash_t plugin_manager::load(fs::path const & path, void * user_data)
 	{
 		// path empty
 		if (path.empty()) { return 0; }

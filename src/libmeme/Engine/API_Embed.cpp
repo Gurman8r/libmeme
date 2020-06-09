@@ -441,7 +441,7 @@ namespace ml::embed
 			.def(py::init<>())
 			.def_static("clear", []() { engine::plugins().clear(); })
 			.def_static("free", [](cstring s) { return engine::plugins().free(s); })
-			.def_static("load", [](cstring s) { return engine::plugins().generate(s); })
+			.def_static("load", [](cstring s) { return engine::plugins().load(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

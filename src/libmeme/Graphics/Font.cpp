@@ -18,11 +18,11 @@ namespace ml
 
 	font::~font() noexcept
 	{
+		if (m_stroker) { FT_Stroker_Done((FT_Stroker)m_stroker); }
+
 		if (m_face) { FT_Done_Face((FT_Face)m_face); }
 
 		if (m_library) { FT_Done_FreeType((FT_Library)m_library); }
-
-		if (m_stroker) { FT_Stroker_Done((FT_Stroker)m_stroker); }
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -32,29 +32,32 @@ namespace ml
 		if (m_library) { return false; }
 
 		// load freetype library instance
-		if (FT_Init_FreeType((FT_Library *)&m_library) != 0)
+		if (FT_Init_FreeType((FT_Library *)&m_library))
 		{
-			return debug::error("failed initializing FreeType: {0}", path);
+			return debug::error("failed creating font library: {0}", path);
 		}
 
 		// load the new fonts face from the specified file
-		if (FT_New_Face((FT_Library)m_library, path.string().c_str(), 0, (FT_Face *)&m_face) != 0)
+		if (FT_New_Face((FT_Library)m_library, path.string().c_str(), 0, (FT_Face *)&m_face))
 		{
+			FT_Done_FreeType((FT_Library)m_library);
 			return debug::error("failed creating font face: {0}", path);
 		}
 
 		// load the stroker that will be used to outline the fonts
-		if (FT_Stroker_New((FT_Library)m_library, (FT_Stroker *)&m_stroker) != 0)
+		if (FT_Stroker_New((FT_Library)m_library, (FT_Stroker *)&m_stroker))
 		{
 			FT_Done_Face((FT_Face)m_face);
+			FT_Done_FreeType((FT_Library)m_library);
 			return debug::error("failed creating font stroker: {0}", path);
 		}
 
 		// select the unicode character map
-		if (FT_Select_Charmap((FT_Face)m_face, FT_ENCODING_UNICODE) != 0)
+		if (FT_Select_Charmap((FT_Face)m_face, FT_ENCODING_UNICODE))
 		{
 			FT_Stroker_Done((FT_Stroker)m_stroker);
 			FT_Done_Face((FT_Face)m_face);
+			FT_Done_FreeType((FT_Library)m_library);
 			return debug::error("failed selecting font unicode character map: {0}", path);
 		}
 
@@ -86,9 +89,10 @@ namespace ml
 
 		// graphic
 		g.graphic = gfx::texture2d::allocate({
-			vec2i{},
-			{ gfx::format_rgba, gfx::format_red },
-			gfx::type_unsigned_byte,
+			vec2i{}, {
+			gfx::format_rgba,
+			gfx::format_red,
+			gfx::type_unsigned_byte },
 			gfx::texture_flags_default });
 
 		// bounds

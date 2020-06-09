@@ -108,8 +108,6 @@ namespace ml
 	void glfw_window::destroy()
 	{
 		glfwDestroyWindow(m_window);
-		m_window = nullptr;
-		m_monitor = nullptr;
 	}
 
 	void glfw_window::iconify()

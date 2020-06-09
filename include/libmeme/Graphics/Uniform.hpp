@@ -11,7 +11,7 @@ namespace ml
 
 		using sampler2d = typename shared<gfx::texture2d>;
 
-		template <class T> static constexpr bool is_sampler2d_ish
+		template <class T> static constexpr bool is_sampler_ish
 		{
 			!std::is_same_v<T, sampler2d> &&
 			std::is_convertible_v<std::add_pointer_t<T>, std::add_pointer_t<sampler2d::element_type>>
@@ -120,7 +120,7 @@ namespace ml
 		template <class T
 		> ML_NODISCARD bool holds() const noexcept
 		{
-			if constexpr (is_sampler2d_ish<T>)
+			if constexpr (is_sampler_ish<T>)
 			{
 				return this->holds<sampler2d>();
 			}
@@ -135,7 +135,7 @@ namespace ml
 		template <class T
 		> ML_NODISCARD decltype(auto) get() const noexcept
 		{
-			if constexpr (is_sampler2d_ish<T>)
+			if constexpr (is_sampler_ish<T>)
 			{
 				return this->get<sampler2d>();
 			}
@@ -154,7 +154,7 @@ namespace ml
 		template <class T, class ... Args
 		> bool set(Args && ... args) noexcept
 		{
-			if constexpr (is_sampler2d_ish<T>)
+			if constexpr (is_sampler_ish<T>)
 			{
 				return this->set<sampler2d>(ML_forward(args)...);
 			}

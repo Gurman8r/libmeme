@@ -162,9 +162,9 @@ namespace ml::gfx
 
 		~opengl_vertexbuffer() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -216,9 +216,9 @@ namespace ml::gfx
 
 		~opengl_indexbuffer() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -267,9 +267,9 @@ namespace ml::gfx
 
 		~opengl_vertexarray() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -319,9 +319,9 @@ namespace ml::gfx
 
 		~opengl_texture2d() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -379,9 +379,9 @@ namespace ml::gfx
 
 		~opengl_texturecube() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -418,19 +418,20 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_type_info{ typeof_v<opengl_framebuffer> };
 
-		uint32_t			m_handle	{}	; // handle
-		texopts				m_opts		{}	; // texture options
-		shared<texture2d>	m_color		{}	; // color attachment
-		shared<texture2d>	m_depth		{}	; // depth attachment
+		uint32_t			m_handle		{}	; // handle
+		texopts				m_opts			{}	; // texture options
+		tex_buffer_t		m_attachments	{}	; // color attachments
+		shared<texture2d>	m_depth			{}	; // depth attachment
 
+		
 	public:
 		opengl_framebuffer(texopts const & opts);
 
 		~opengl_framebuffer() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -439,9 +440,13 @@ namespace ml::gfx
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 	public:
+		bool attach(shared<texture2d> const & value) override;
+
+		bool detach(shared<texture2d> const & value) override;
+
 		void resize(vec2i const & value) override;
 
-		shared<texture2d> const & get_color_attachment() const noexcept override { return m_color; }
+		pmr::vector<shared<texture2d>> const & get_color_attachments() const noexcept override { return m_attachments; }
 
 		shared<texture2d> const & get_depth_attachment() const noexcept override { return m_depth; }
 
@@ -450,55 +455,6 @@ namespace ml::gfx
 	protected:
 		static void do_bind(opengl_framebuffer const * value);
 
-		bool do_is_equal(device_resource const & other) const noexcept override
-		{
-			return this == std::addressof(other); // TODO
-		}
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// program
-namespace ml::gfx
-{
-	// opengl program
-	class opengl_program final : public program
-	{
-		friend class program;
-
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_program> };
-
-		uint32_t		m_handle		{}; // handle
-		pmr::string		m_error_log		{}; // error log
-		uint32_t const	m_shader_type	{}; // type
-		pgm_src_t		m_source		{}; // source
-
-	public:
-		opengl_program(uint32_t type);
-
-		~opengl_program() override;
-
-		bool generate() override;
-
-		bool destroy() override;
-
-		bool revalue() override;
-
-		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
-
-		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
-
-	public:
-		bool compile(pgm_src_t const & src) override;
-
-		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
-
-		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
-
-		pgm_src_t const & get_source() const noexcept override { return m_source; }
-
-	protected:
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
 			return this == std::addressof(other); // TODO
@@ -520,7 +476,56 @@ namespace ml::gfx
 
 		uint32_t		m_handle		{}; // handle
 		pmr::string		m_error_log		{}; // error log
-		pgm_cache_t		m_programs		{}; // program cache
+		uint32_t const	m_shader_type	{}; // type
+		shader_src_t	m_source		{}; // source
+
+	public:
+		opengl_shader(uint32_t type);
+
+		~opengl_shader() override;
+
+		bool instantiate() override;
+
+		bool invalidate() override;
+
+		bool revalue() override;
+
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
+
+		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
+
+	public:
+		bool compile(shader_src_t const & src) override;
+
+		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
+
+		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
+
+		shader_src_t const & get_source() const noexcept override { return m_source; }
+
+	protected:
+		bool do_is_equal(device_resource const & other) const noexcept override
+		{
+			return this == std::addressof(other); // TODO
+		}
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// program
+namespace ml::gfx
+{
+	// opengl program
+	class opengl_program final : public program
+	{
+		friend class program;
+
+		static constexpr typeof<> s_type_info{ typeof_v<opengl_program> };
+
+		uint32_t		m_handle		{}; // handle
+		pmr::string		m_error_log		{}; // error log
+		shader_map_t	m_shaders		{}; // shader cache
 		tex_cache_t		m_textures		{}; // texture cache
 		uni_cache_t		m_uniforms		{}; // uniform cache
 
@@ -533,19 +538,19 @@ namespace ml::gfx
 
 			operator bool() const noexcept { return -1 < ML_handle(int32_t, location); }
 
-			opengl_uniform_binder(opengl_shader & s, cstring name);
+			opengl_uniform_binder(opengl_program & s, cstring name);
 
 			~opengl_uniform_binder();
 		};
 
 	public:
-		opengl_shader();
+		opengl_program();
 
-		~opengl_shader() override;
+		~opengl_program() override;
 
-		bool generate() override;
+		bool instantiate() override;
 
-		bool destroy() override;
+		bool invalidate() override;
 
 		bool revalue() override;
 
@@ -554,9 +559,9 @@ namespace ml::gfx
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 	public:
-		bool attach(shared<program> const & value) override;
+		bool attach(shared<shader> const & value) override;
 
-		bool detach(shared<program> const & value) override;
+		bool detach(shared<shader> const & value) override;
 
 		bool link() override;
 
@@ -567,16 +572,16 @@ namespace ml::gfx
 			return u;
 		}
 
-		pmr::string const & get_error_log() const noexcept { return m_error_log; }
+		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
 
-		pgm_cache_t const & get_programs() const noexcept override { return m_programs; }
+		shader_map_t const & get_shaders() const noexcept override { return m_shaders; }
 
 		tex_cache_t const & get_textures() const noexcept override { return m_textures; }
 
 		uni_cache_t const & get_uniforms() const noexcept override { return m_uniforms; }
 
 	protected:
-		static void do_bind(opengl_shader const * value);
+		static void do_bind(opengl_program const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{

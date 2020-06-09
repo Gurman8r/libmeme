@@ -25,7 +25,7 @@ namespace ml
 
 		bool free(fs::path const & path);
 
-		hash_t generate(fs::path const & path, void * user_data = nullptr);
+		hash_t load(fs::path const & path, void * user_data = nullptr);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

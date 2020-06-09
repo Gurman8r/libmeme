@@ -28,23 +28,24 @@ namespace ml::gfx
 	class texturecube		;
 	class framebuffer		;
 
-	class program			;
 	class shader			;
+	class program			;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_handle(resource_id) 	; // resource object handle
-	ML_decl_handle(uniform_id) 		; // uniform binding handle
+	ML_decl_handle(resource_id) 	; // object handle
+	ML_decl_handle(uniform_id) 		; // uniform binding
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
+
 	ML_alias address_t		= typename void const *							; // input data address
 	ML_alias buffer_t		= typename pmr::vector<byte_t>					; // buffer data
-	ML_alias pgm_src_t		= typename pmr::vector<pmr::string>				; // program source
-	ML_alias pgm_cache_t	= typename ds::map<uint32_t, shared<program>>	; // program cache
+	ML_alias shader_map_t	= typename ds::map<uint32_t, shared<shader>>	; // shader map
+	ML_alias shader_src_t	= typename pmr::vector<pmr::string>				; // shader source
+	ML_alias tex_buffer_t	= typename pmr::vector<shared<texture2d>>		; // texture buffer
 	ML_alias tex_cache_t	= typename ds::map<uniform_id, shared<texture>>	; // texture cache
-	ML_alias uni_cache_t	= typename ds::map<hash_t, uniform_id>			; // uniform cache
 	ML_alias uni_binder_t	= typename std::function<void(uniform_id)>		; // uniform binder
+	ML_alias uni_cache_t	= typename ds::map<hash_t, uniform_id>			; // uniform cache
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -116,9 +117,9 @@ namespace ml::gfx
 
 	enum usage_ : uint32_t
 	{
-		stream_draw,
-		static_draw,
-		dynamic_draw,
+		usage_stream_draw,
+		usage_static_draw,
+		usage_dynamic_draw,
 	};
 
 	constexpr cstring usage_names[] =
@@ -384,11 +385,11 @@ namespace ml::gfx
 
 	enum shader_type_ : uint32_t
 	{
-		vertex_shader,
-		fragment_shader,
-		geometry_shader,
+		shader_type_vertex,
+		shader_type_fragment,
+		shader_type_geometry,
 
-		max_shader_type,
+		shader_type_max,
 	};
 
 	constexpr cstring shader_type_names[] =
@@ -440,7 +441,7 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD constexpr uint32_t channel_format(size_t value) noexcept
+	ML_NODISCARD constexpr uint32_t get_channel_format(size_t value) noexcept
 	{
 		switch (value)
 		{
@@ -451,7 +452,7 @@ namespace ml::gfx
 		}
 	}
 
-	ML_NODISCARD constexpr size_t bits_per_pixel(uint32_t value) noexcept
+	ML_NODISCARD constexpr size_t get_bits_per_pixel(uint32_t value) noexcept
 	{
 		switch (value)
 		{
@@ -465,7 +466,7 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// get element base type
-	ML_NODISCARD constexpr hash_t element_base_type(hash_t type) noexcept
+	ML_NODISCARD constexpr hash_t get_element_base_type(hash_t type) noexcept
 	{
 		switch (type)
 		{
@@ -488,15 +489,15 @@ namespace ml::gfx
 		}
 	}
 
-	template <class T> ML_NODISCARD constexpr hash_t element_base_type() noexcept
+	template <class T> ML_NODISCARD constexpr hash_t get_element_base_type() noexcept
 	{
-		return element_base_type(hashof_v<T>);
+		return get_element_base_type(hashof_v<T>);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// get element component count
-	ML_NODISCARD constexpr uint32_t element_component_count(hash_t type) noexcept
+	ML_NODISCARD constexpr uint32_t get_element_component_count(hash_t type) noexcept
 	{
 		switch (type)
 		{
@@ -519,9 +520,9 @@ namespace ml::gfx
 		}
 	}
 
-	template <class T> ML_NODISCARD constexpr uint32_t element_component_count() noexcept
+	template <class T> ML_NODISCARD constexpr uint32_t get_element_component_count() noexcept
 	{
-		return element_component_count(hashof_v<T>);
+		return get_element_component_count(hashof_v<T>);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -671,6 +672,9 @@ namespace ml::gfx
 		// textures
 		bool texture_edge_clamp_available;
 		uint32_t max_texture_slots;
+
+		// framebuffers
+		uint32_t max_color_attachments;
 
 		// shaders
 		bool shaders_available;
@@ -826,9 +830,9 @@ namespace ml::gfx
 	public:
 		virtual ~device_resource() override = default;
 
-		virtual bool generate() = 0;
+		virtual bool instantiate() = 0;
 
-		virtual bool destroy() = 0;
+		virtual bool invalidate() = 0;
 
 		virtual bool revalue() = 0;
 
@@ -869,15 +873,15 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<vertexbuffer> allocate(size_t count, address_t data = nullptr) noexcept
 		{
-			return allocate(data ? static_draw : dynamic_draw, count, data);
+			return allocate(data ? usage_static_draw : usage_dynamic_draw, count, data);
 		}
 
 	public:
 		virtual ~vertexbuffer() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -928,15 +932,15 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<indexbuffer> allocate(size_t count, address_t data = nullptr) noexcept
 		{
-			return allocate(data ? static_draw : dynamic_draw, count, data);
+			return allocate(data ? usage_static_draw : usage_dynamic_draw, count, data);
 		}
 
 	public:
 		virtual ~indexbuffer() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -984,9 +988,9 @@ namespace ml::gfx
 	public:
 		virtual ~vertexarray() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1043,23 +1047,21 @@ namespace ml::gfx
 			| texture_flags_repeated,
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// texture format
 	struct ML_NODISCARD texfmt final
 	{
-		uint32_t color{ format_rgba }, pixel{ color };
+		uint32_t
+			color	{ format_rgba },		// color format
+			pixel	{ color },				// pixel format
+			type	{ type_unsigned_byte };	// pixel type
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// texture options
 	struct ML_NODISCARD texopts final
 	{
-		vec2i		size		{ 0, 0 }					; // texture size
-		texfmt		format		{ format_rgba }				; // color / pixel format
-		uint32_t	pixel_type	{ type_unsigned_byte }		; // pixel type
-		int32_t		flags		{ texture_flags_default }	; // flags
+		vec2i		size	{ 0, 0 }					; // texture size
+		texfmt		format	{ format_rgba }				; // texture format
+		int32_t		flags	{ texture_flags_default }	; // texture flags
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1070,9 +1072,9 @@ namespace ml::gfx
 	public:
 		virtual ~texture() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1101,23 +1103,21 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual uint32_t get_texture_type() const noexcept = 0;
 
-		ML_NODISCARD inline uint32_t get_color_format() const noexcept { return get_format().color; }
+		ML_NODISCARD inline uint32_t get_color_format() const noexcept { return get_texopts().format.color; }
 
 		ML_NODISCARD inline int32_t get_flags() const noexcept { return get_texopts().flags; }
 
-		ML_NODISCARD inline texfmt const & get_format() const noexcept { return get_texopts().format; }
+		ML_NODISCARD inline uint32_t get_pixel_format() const noexcept { return get_texopts().format.pixel; }
 
-		ML_NODISCARD inline uint32_t get_pixel_format() const noexcept { return get_format().pixel; }
-
-		ML_NODISCARD inline uint32_t get_pixel_type() const noexcept { return get_texopts().pixel_type; }
+		ML_NODISCARD inline uint32_t get_pixel_type() const noexcept { return get_texopts().format.type; }
 
 		ML_NODISCARD inline vec2i const & get_size() const noexcept { return get_texopts().size; }
 
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_flags() & texture_flags_mipmapped; }
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_texopts().flags & texture_flags_mipmapped; }
 
-		ML_NODISCARD inline bool is_repeated() const noexcept { return get_flags() & texture_flags_repeated; }
+		ML_NODISCARD inline bool is_repeated() const noexcept { return get_texopts().flags & texture_flags_repeated; }
 
-		ML_NODISCARD inline bool is_smooth() const noexcept { return get_flags() & texture_flags_smooth; }
+		ML_NODISCARD inline bool is_smooth() const noexcept { return get_texopts().flags & texture_flags_smooth; }
 
 	protected:
 		virtual bool do_is_equal(device_resource const & other) const noexcept override = 0;
@@ -1139,12 +1139,7 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<texture2d> allocate(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
-			return allocate({
-				img.size(),
-				{ channel_format(img.channels()) },
-				type_unsigned_byte,
-				flags },
-				img.data());
+			return allocate({ img.size(), { get_channel_format(img.channels()) }, flags }, img.data());
 		}
 
 		ML_NODISCARD static shared<texture2d> allocate(fs::path const & path, int32_t flags = texture_flags_default) noexcept
@@ -1155,9 +1150,9 @@ namespace ml::gfx
 	public:
 		virtual ~texture2d() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1217,9 +1212,9 @@ namespace ml::gfx
 	public:
 		virtual ~texturecube() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1267,9 +1262,9 @@ namespace ml::gfx
 	public:
 		virtual ~framebuffer() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1290,9 +1285,13 @@ namespace ml::gfx
 		inline void unbind() const noexcept { bind(nullptr); }
 
 	public:
+		virtual bool attach(shared<texture2d> const & value) = 0;
+
+		virtual bool detach(shared<texture2d> const & value) = 0;
+
 		virtual void resize(vec2i const & value) = 0;
 
-		ML_NODISCARD virtual shared<texture2d> const & get_color_attachment() const noexcept = 0;
+		ML_NODISCARD virtual tex_buffer_t const & get_color_attachments() const noexcept = 0;
 
 		ML_NODISCARD virtual shared<texture2d> const & get_depth_attachment() const noexcept = 0;
 
@@ -1300,69 +1299,8 @@ namespace ml::gfx
 
 		inline void bind_texture(uint32_t slot = 0) const noexcept
 		{
-			texture2d::bind(get_color_attachment(), slot);
+			texture2d::bind(get_color_attachments()[(size_t)slot], slot);
 		}
-
-	protected:
-		virtual bool do_is_equal(device_resource const & other) const noexcept override = 0;
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// program
-namespace ml::gfx
-{
-	// base program
-	class ML_GRAPHICS_API program : public device_resource
-	{
-	public:
-		ML_NODISCARD static shared<program> allocate(uint32_t type) noexcept;
-
-		template <class ... Args
-		> ML_NODISCARD static shared<program> allocate(uint32_t type, Args && ... args) noexcept
-		{
-			auto temp{ allocate(type) };
-			temp->compile(ML_forward(args)...);
-			return temp;
-		}
-
-	public:
-		virtual ~program() override = default;
-
-		virtual bool generate() override = 0;
-
-		virtual bool destroy() override = 0;
-
-		virtual bool revalue() override = 0;
-
-		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
-
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
-
-	public:
-		virtual bool compile(pgm_src_t const & src) = 0;
-
-		inline bool compile(size_t count, cstring const * src) noexcept
-		{
-			return compile(pgm_src_t{ src, src + count });
-		}
-
-		inline bool compile(pmr::string const & src) noexcept
-		{
-			return compile(pgm_src_t{ src });
-		}
-
-		inline bool compile(cstring src) noexcept
-		{
-			return compile(pgm_src_t{ src });
-		}
-
-		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
-
-		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
-
-		ML_NODISCARD virtual pgm_src_t const & get_source() const noexcept = 0;
 
 	protected:
 		virtual bool do_is_equal(device_resource const & other) const noexcept override = 0;
@@ -1378,22 +1316,22 @@ namespace ml::gfx
 	class ML_GRAPHICS_API shader : public device_resource
 	{
 	public:
-		ML_NODISCARD static shared<shader> allocate() noexcept;
+		ML_NODISCARD static shared<shader> allocate(uint32_t type) noexcept;
 
-		ML_NODISCARD static shared<shader> allocate(pmr::vector<shared<program>> const & vs) noexcept
+		template <class ... Args
+		> ML_NODISCARD static shared<shader> allocate(uint32_t type, Args && ... args) noexcept
 		{
-			auto temp{ allocate() };
-			for (auto const & pgm : vs) { temp->attach(pgm); }
-			temp->link();
+			auto temp{ allocate(type) };
+			temp->compile(ML_forward(args)...);
 			return temp;
 		}
-		
+
 	public:
 		virtual ~shader() override = default;
 
-		virtual bool generate() override = 0;
+		virtual bool instantiate() override = 0;
 
-		virtual bool destroy() override = 0;
+		virtual bool invalidate() override = 0;
 
 		virtual bool revalue() override = 0;
 
@@ -1402,11 +1340,72 @@ namespace ml::gfx
 		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
 
 	public:
-		static void bind(shader const * value) noexcept;
+		virtual bool compile(shader_src_t const & src) = 0;
 
-		static void bind(shared<shader> const & value) noexcept
+		inline bool compile(size_t count, cstring const * src) noexcept
 		{
-			bind(static_cast<shader const *>(value.get()));
+			return compile(shader_src_t{ src, src + count });
+		}
+
+		inline bool compile(pmr::string const & src) noexcept
+		{
+			return compile(shader_src_t{ src });
+		}
+
+		inline bool compile(cstring src) noexcept
+		{
+			return compile(shader_src_t{ src });
+		}
+
+		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
+
+		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
+
+		ML_NODISCARD virtual shader_src_t const & get_source() const noexcept = 0;
+
+	protected:
+		virtual bool do_is_equal(device_resource const & other) const noexcept override = 0;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// program
+namespace ml::gfx
+{
+	// base program
+	class ML_GRAPHICS_API program : public device_resource
+	{
+	public:
+		ML_NODISCARD static shared<program> allocate() noexcept;
+
+		ML_NODISCARD static shared<program> allocate(pmr::vector<shared<shader>> const & vs) noexcept
+		{
+			auto temp{ allocate() };
+			for (auto const & pgm : vs) { temp->attach(pgm); }
+			temp->link();
+			return temp;
+		}
+		
+	public:
+		virtual ~program() override = default;
+
+		virtual bool instantiate() override = 0;
+
+		virtual bool invalidate() override = 0;
+
+		virtual bool revalue() override = 0;
+
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
+
+		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+
+	public:
+		static void bind(program const * value) noexcept;
+
+		static void bind(shared<program> const & value) noexcept
+		{
+			bind(static_cast<program const *>(value.get()));
 		}
 
 		inline void bind() const noexcept { bind(this); }
@@ -1414,9 +1413,9 @@ namespace ml::gfx
 		inline void unbind() const noexcept { bind(nullptr); }
 
 	public:
-		virtual bool attach(shared<program> const & value) = 0;
+		virtual bool attach(shared<shader> const & value) = 0;
 
-		virtual bool detach(shared<program> const & value) = 0;
+		virtual bool detach(shared<shader> const & value) = 0;
 
 		virtual bool link() = 0;
 
@@ -1450,7 +1449,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
-		ML_NODISCARD virtual pgm_cache_t const & get_programs() const noexcept = 0;
+		ML_NODISCARD virtual shader_map_t const & get_shaders() const noexcept = 0;
 
 		ML_NODISCARD virtual tex_cache_t const & get_textures() const noexcept = 0;
 
