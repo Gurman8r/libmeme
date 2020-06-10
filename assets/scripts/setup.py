@@ -27,7 +27,7 @@ print("[i] loading plugins...")
 assert(engine.plugins.load("demo"))
 
 # print messages
-print(f"# {ml.project.name} | {ml.build.arch!r}-bit | {ml.build.configuration}")
+print(f"# {ml.project.libname} | {ml.build.arch!r}-bit | {ml.build.configuration}")
 print(f"# {ml.project.url}")
 print("# type \'help\' for a list of commands")
 print("")

@@ -11,8 +11,8 @@ using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
 using impl_texture2d	= _ML_GFX opengl_texture2d		;
 using impl_texturecube	= _ML_GFX opengl_texturecube	;
 using impl_framebuffer	= _ML_GFX opengl_framebuffer	;
-using impl_program		= _ML_GFX opengl_shader		;
-using impl_shader		= _ML_GFX opengl_program			;
+using impl_program		= _ML_GFX opengl_shader			;
+using impl_shader		= _ML_GFX opengl_program		;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -27,13 +27,32 @@ using impl_shader		= _ML_GFX opengl_program			;
 // device
 namespace ml::gfx
 {
+	static device * g_devctx{};
+
+	bool device::create_context(context_settings const & cs)
+	{
+		bool temp{};
+		static ML_scope // once
+		{
+			if (!g_devctx && (g_devctx = new impl_device))
+			{
+				if (temp = g_devctx->do_initialize(cs))
+				{
+					get_context()->on_initialize();
+				}
+				else
+				{
+					delete g_devctx;
+				}
+			}
+		};
+		return temp;
+	}
+
 	unique<device> const & device::get_context() noexcept
 	{
-		static unique<device> ctx{ _ML make_unique<impl_device>() };
-
-		static ML_scope{ if (!ctx->do_initialize()) { ctx.reset(nullptr); } };
-
-		return ctx;
+		static unique<device> temp{ g_devctx };
+		return temp;
 	}
 }
 

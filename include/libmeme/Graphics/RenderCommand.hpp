@@ -5,7 +5,7 @@
 
 namespace ml::gfx
 {
-	// render command type
+	// render command types
 	ML_alias command_t = typename std::function<void()>;
 
 	// render command generators

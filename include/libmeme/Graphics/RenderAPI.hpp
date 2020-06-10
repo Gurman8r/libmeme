@@ -1,13 +1,13 @@
 #ifndef _ML_RENDER_API_HPP_
 #define _ML_RENDER_API_HPP_
 
-#include <libmeme/Graphics/Export.hpp>
-#include <libmeme/Graphics/Binder.hpp>
-#include <libmeme/Graphics/Image.hpp>
-#include <libmeme/Graphics/Vertex.hpp>
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Rect.hpp>
+#include <libmeme/Graphics/Binder.hpp>
+#include <libmeme/Graphics/Image.hpp>
+#include <libmeme/Graphics/Vertex.hpp>
+#include <libmeme/Platform/ContextSettings.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -33,8 +33,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_handle(resource_id) 	; // object handle
-	ML_decl_handle(uniform_id) 		; // uniform binding
+	ML_declhandle(resource_id) 	; // object handle
+	ML_declhandle(uniform_id) 	; // uniform binding
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -115,22 +115,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum usage_ : uint32_t
-	{
-		usage_stream_draw,
-		usage_static_draw,
-		usage_dynamic_draw,
-	};
-
-	constexpr cstring usage_names[] =
-	{
-		"stream draw",
-		"static draw",
-		"dynamic draw",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	enum action_ : uint32_t
 	{
 		action_keep,
@@ -153,122 +137,6 @@ namespace ml::gfx
 		"decrement",
 		"decrement wrap",
 		"invert",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum primitive_ : uint32_t
-	{
-		primitive_points,
-		primitive_lines,
-		primitive_line_loop,
-		primitive_line_strip,
-		primitive_triangles,
-		primitive_triangle_strip,
-		primitive_triangle_fan,
-		primitive_fill,
-	};
-
-	constexpr cstring primitive_names[] =
-	{
-		"points",
-		"lines",
-		"line loop",
-		"line strip",
-		"triangles",
-		"triangle strip",
-		"triangle fan",
-		"fill",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum predicate_ : uint32_t
-	{
-		predicate_never,
-		predicate_less,
-		predicate_equal,
-		predicate_lequal,
-		predicate_greater,
-		predicate_notequal,
-		predicate_gequal,
-		predicate_always,
-	};
-
-	constexpr cstring predicate_names[] =
-	{
-		"never",
-		"less",
-		"equal",
-		"lequal",
-		"greater",
-		"not equal",
-		"gequal",
-		"always",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum type_ : uint32_t
-	{
-		type_byte,
-		type_unsigned_byte,
-		type_short,
-		type_unsigned_short,
-		type_int,
-		type_unsigned_int,
-		type_float,
-		type_half_float,
-
-		type_unsigned_int_24_8,
-	};
-
-	constexpr cstring type_names[] =
-	{
-		"byte",
-		"unsigned byte",
-		"short",
-		"unsigned short",
-		"int",
-		"unsigned int",
-		"float",
-		"half float",
-
-		"unsigned int 24 8",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum function_ : uint32_t
-	{
-		function_add,
-		function_subtract,
-		function_reverse_subtract,
-		function_min,
-		function_max,
-	};
-
-	constexpr cstring function_names[] =
-	{
-		"add",
-		"subtract",
-		"reverse subtract",
-		"min",
-		"max",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum order_
-	{
-		order_cw,
-		order_ccw,
-	};
-
-	constexpr cstring order_names[] =
-	{
-		"cw",
-		"ccw",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -383,6 +251,92 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	enum function_ : uint32_t
+	{
+		function_add,
+		function_subtract,
+		function_reverse_subtract,
+		function_min,
+		function_max,
+	};
+
+	constexpr cstring function_names[] =
+	{
+		"add",
+		"subtract",
+		"reverse subtract",
+		"min",
+		"max",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum order_
+	{
+		order_cw,
+		order_ccw,
+	};
+
+	constexpr cstring order_names[] =
+	{
+		"clockwise",
+		"counter-clockwise",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum predicate_ : uint32_t
+	{
+		predicate_never,
+		predicate_less,
+		predicate_equal,
+		predicate_lequal,
+		predicate_greater,
+		predicate_notequal,
+		predicate_gequal,
+		predicate_always,
+	};
+
+	constexpr cstring predicate_names[] =
+	{
+		"never",
+		"less",
+		"equal",
+		"lequal",
+		"greater",
+		"not equal",
+		"gequal",
+		"always",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum primitive_ : uint32_t
+	{
+		primitive_points,
+		primitive_lines,
+		primitive_line_loop,
+		primitive_line_strip,
+		primitive_triangles,
+		primitive_triangle_strip,
+		primitive_triangle_fan,
+		primitive_fill,
+	};
+
+	constexpr cstring primitive_names[] =
+	{
+		"points",
+		"lines",
+		"line loop",
+		"line strip",
+		"triangles",
+		"triangle strip",
+		"triangle fan",
+		"fill",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	enum shader_type_ : uint32_t
 	{
 		shader_type_vertex,
@@ -419,6 +373,52 @@ namespace ml::gfx
 		"texture 2d",
 		"texture 3d",
 		"texture cube map",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum type_ : uint32_t
+	{
+		type_byte,
+		type_unsigned_byte,
+		type_short,
+		type_unsigned_short,
+		type_int,
+		type_unsigned_int,
+		type_float,
+		type_half_float,
+
+		type_unsigned_int_24_8,
+	};
+
+	constexpr cstring type_names[] =
+	{
+		"byte",
+		"unsigned byte",
+		"short",
+		"unsigned short",
+		"int",
+		"unsigned int",
+		"float",
+		"half float",
+
+		"unsigned int 24 8",
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum usage_ : uint32_t
+	{
+		usage_stream_draw,
+		usage_static_draw,
+		usage_dynamic_draw,
+	};
+
+	constexpr cstring usage_names[] =
+	{
+		"stream draw",
+		"static draw",
+		"dynamic draw",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -675,13 +675,13 @@ namespace ml::gfx
 
 		// framebuffers
 		uint32_t max_color_attachments;
+		uint32_t max_samples;
 
 		// shaders
 		bool shaders_available;
 		bool geometry_shaders_available;
 		bool separate_shaders_available;
 		pmr::string shading_language_version;
-		pmr::vector<uint32_t> shader_binary_formats;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -696,10 +696,14 @@ namespace ml::gfx
 
 		virtual ~device() override = default;
 
-		virtual bool do_initialize() = 0;
+		virtual bool do_initialize(context_settings const & cs) = 0;
+
+		virtual void on_initialize() = 0;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static bool create_context(context_settings const & cs);
 
 		ML_NODISCARD static unique<device> const & get_context() noexcept;
 

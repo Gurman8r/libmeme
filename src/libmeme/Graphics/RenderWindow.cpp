@@ -10,21 +10,20 @@ namespace ml
 		// open window
 		if (!window::open(ws, install_callbacks))
 		{
-			return debug::error("render_window failed opening window");
+			return debug::error("failed opening window");
 		}
 
-		// validate version
-		if (auto const & ctx{ gfx::device::get_context() })
-		{
-			m_settings.context.major = ctx->get_devinfo().major_version;
-			m_settings.context.minor = ctx->get_devinfo().minor_version;
-			debug::info("device api version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
-		}
-		else
+		// create device context
+		if (!gfx::device::create_context(ws.context))
 		{
 			return debug::error("failed initializing device context");
 		}
-
+		
+		// validate version
+		auto const & ctx{ gfx::device::get_context() };
+		m_settings.context.major = ctx->get_devinfo().major_version;
+		m_settings.context.minor = ctx->get_devinfo().minor_version;
+		debug::info("renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 
 		// setup states
 		for (auto const & cmd :

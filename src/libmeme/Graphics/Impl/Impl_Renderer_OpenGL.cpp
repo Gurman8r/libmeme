@@ -2,8 +2,11 @@
 
 #include "Impl_Renderer_OpenGL.hpp"
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// opengl loader
 #ifdef ML_OPENGL_LOADER_CUSTOM
-#	if (defined(__has_include) && __has_include(ML_OPENGL_LOADER_CUSTOM))
+#	if defined(__has_include) && __has_include(ML_OPENGL_LOADER_CUSTOM)
 #		include ML_OPENGL_LOADER_CUSTOM
 #	endif
 
@@ -32,6 +35,34 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// opengl init
+#ifndef ML_IMPL_OPENGL_INIT
+#	if defined(ML_IMPL_OPENGL_LOADER_GLEW)
+//										glew
+#		define ML_IMPL_OPENGL_INIT()	((glewExperimental = true) && (glewInit() == GLEW_OK))
+
+#	elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
+//										gl3w
+#		define ML_IMPL_OPENGL_INIT()	gl3wInit()
+
+#	elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
+//										glad
+#		define ML_IMPL_OPENGL_INIT()	gladLoadGL()
+#	else
+//										custom
+#		define ML_IMPL_OPENGL_INIT()	false
+#	endif
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// check error macro
+#if ML_is_debug
+#	define glCheck(expr) do{ (expr); _ML gfx::check_error(__FILE__, __LINE__, #expr); } while(0)
+#else
+#	define glCheck(expr) (expr)
+#endif
+
 namespace ml::gfx
 {
 	// check error
@@ -40,7 +71,7 @@ namespace ml::gfx
 		if (auto const code{ device::get_context()->get_error() }; code != error_none)
 		{
 			std::cout
-				<< "An internal OpenGL error occurred ( " << code << " )\n"
+				<< "An internal graphics error occurred ( " << code << " )\n"
 				<< "|  " << fs::path{ file }.filename() << " (" << line << ")\n"
 				<< "| expression:\n"
 				<< "|  " << expr << "\n"
@@ -51,13 +82,6 @@ namespace ml::gfx
 		}
 	}
 }
-
-// check error macro
-#if ML_is_debug
-#	define glCheck(expr) do{ (expr); _ML gfx::check_error(__FILE__, __LINE__, #expr); } while(0)
-#else
-#	define glCheck(expr) (expr)
-#endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -124,32 +148,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default					: return value;
-			case usage_stream_draw	: return GL_STREAM_DRAW;
-			case usage_static_draw	: return GL_STATIC_DRAW;
-			case usage_dynamic_draw	: return GL_DYNAMIC_DRAW;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default					: return value;
-			case GL_STREAM_DRAW		: return usage_stream_draw;
-			case GL_STATIC_DRAW		: return usage_static_draw;
-			case GL_DYNAMIC_DRAW	: return usage_dynamic_draw;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to impl
@@ -180,170 +178,6 @@ namespace ml::gfx
 			case GL_DECR		: return action_dec;
 			case GL_DECR_WRAP	: return action_dec_wrap;
 			case GL_INVERT		: return action_invert;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default							: return value;
-			case primitive_points			: return GL_POINTS;
-			case primitive_lines			: return GL_LINES;
-			case primitive_line_loop		: return GL_LINE_LOOP;
-			case primitive_line_strip		: return GL_LINE_STRIP;
-			case primitive_triangles		: return GL_TRIANGLES;
-			case primitive_triangle_strip	: return GL_TRIANGLE_STRIP;
-			case primitive_triangle_fan		: return GL_TRIANGLE_FAN;
-			case primitive_fill				: return GL_FILL;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default					: return value;
-			case GL_POINTS			: return primitive_points;
-			case GL_LINES			: return primitive_lines;
-			case GL_LINE_LOOP		: return primitive_line_loop;
-			case GL_LINE_STRIP		: return primitive_line_strip;
-			case GL_TRIANGLES		: return primitive_triangles;
-			case GL_TRIANGLE_STRIP	: return primitive_triangle_strip;
-			case GL_TRIANGLE_FAN	: return primitive_triangle_fan;
-			case GL_FILL			: return primitive_fill;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default					: return value;
-			case predicate_never	: return GL_NEVER;
-			case predicate_less		: return GL_LESS;
-			case predicate_equal	: return GL_EQUAL;
-			case predicate_lequal	: return GL_LEQUAL;
-			case predicate_greater	: return GL_GREATER;
-			case predicate_notequal	: return GL_NOTEQUAL;
-			case predicate_gequal	: return GL_GEQUAL;
-			case predicate_always	: return GL_ALWAYS;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default			: return value;
-			case GL_NEVER	: return predicate_never;
-			case GL_LESS	: return predicate_less;
-			case GL_EQUAL	: return predicate_equal;
-			case GL_LEQUAL	: return predicate_lequal;
-			case GL_GREATER	: return predicate_greater;
-			case GL_NOTEQUAL: return predicate_notequal;
-			case GL_GEQUAL	: return predicate_gequal;
-			case GL_ALWAYS	: return predicate_always;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default						: return value;
-			case type_byte				: return GL_BYTE;
-			case type_unsigned_byte		: return GL_UNSIGNED_BYTE;
-			case type_short				: return GL_SHORT;
-			case type_unsigned_short	: return GL_UNSIGNED_SHORT;
-			case type_int				: return GL_INT;
-			case type_unsigned_int		: return GL_UNSIGNED_INT;
-			case type_float				: return GL_FLOAT;
-			case type_half_float		: return GL_HALF_FLOAT;
-			case type_unsigned_int_24_8	: return GL_UNSIGNED_INT_24_8;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default						: return value;
-			case GL_BYTE				: return type_byte;
-			case GL_UNSIGNED_BYTE		: return type_unsigned_byte;
-			case GL_SHORT				: return type_short;
-			case GL_UNSIGNED_SHORT		: return type_unsigned_short;
-			case GL_INT					: return type_int;
-			case GL_UNSIGNED_INT		: return type_unsigned_int;
-			case GL_FLOAT				: return type_float;
-			case GL_HALF_FLOAT			: return type_half_float;
-			case GL_UNSIGNED_INT_24_8	: return type_unsigned_int_24_8;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default							: return value;
-			case function_add				: return GL_FUNC_ADD;
-			case function_subtract			: return GL_FUNC_SUBTRACT;
-			case function_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
-			case function_min				: return GL_MIN;
-			case function_max				: return GL_MAX;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default							: return value;
-			case GL_FUNC_ADD				: return function_add;
-			case GL_FUNC_SUBTRACT			: return function_subtract;
-			case GL_FUNC_REVERSE_SUBTRACT	: return function_reverse_subtract;
-			case GL_MIN						: return function_min;
-			case GL_MAX						: return function_max;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _order(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default			: return value;
-			case order_cw	: return GL_CW;
-			case order_ccw	: return GL_CCW;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default		: return value;
-			case GL_CW	: return order_cw;
-			case GL_CCW	: return order_ccw;
 			}
 		}
 	}
@@ -488,17 +322,111 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default							: return value;
+			case function_add				: return GL_FUNC_ADD;
+			case function_subtract			: return GL_FUNC_SUBTRACT;
+			case function_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
+			case function_min				: return GL_MIN;
+			case function_max				: return GL_MAX;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default							: return value;
+			case GL_FUNC_ADD				: return function_add;
+			case GL_FUNC_SUBTRACT			: return function_subtract;
+			case GL_FUNC_REVERSE_SUBTRACT	: return function_reverse_subtract;
+			case GL_MIN						: return function_min;
+			case GL_MAX						: return function_max;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _order(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default			: return value;
+			case order_cw	: return GL_CW;
+			case order_ccw	: return GL_CCW;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default		: return value;
+			case GL_CW	: return order_cw;
+			case GL_CCW	: return order_ccw;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
 			default					: return value;
-			case texture_type_1d			: return GL_TEXTURE_1D;
-			case texture_type_2d			: return GL_TEXTURE_2D;
-			case texture_type_3d			: return GL_TEXTURE_3D;
-			case texture_type_cubemap	: return GL_TEXTURE_CUBE_MAP;
+			case predicate_never	: return GL_NEVER;
+			case predicate_less		: return GL_LESS;
+			case predicate_equal	: return GL_EQUAL;
+			case predicate_lequal	: return GL_LEQUAL;
+			case predicate_greater	: return GL_GREATER;
+			case predicate_notequal	: return GL_NOTEQUAL;
+			case predicate_gequal	: return GL_GEQUAL;
+			case predicate_always	: return GL_ALWAYS;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default			: return value;
+			case GL_NEVER	: return predicate_never;
+			case GL_LESS	: return predicate_less;
+			case GL_EQUAL	: return predicate_equal;
+			case GL_LEQUAL	: return predicate_lequal;
+			case GL_GREATER	: return predicate_greater;
+			case GL_NOTEQUAL: return predicate_notequal;
+			case GL_GEQUAL	: return predicate_gequal;
+			case GL_ALWAYS	: return predicate_always;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default							: return value;
+			case primitive_points			: return GL_POINTS;
+			case primitive_lines			: return GL_LINES;
+			case primitive_line_loop		: return GL_LINE_LOOP;
+			case primitive_line_strip		: return GL_LINE_STRIP;
+			case primitive_triangles		: return GL_TRIANGLES;
+			case primitive_triangle_strip	: return GL_TRIANGLE_STRIP;
+			case primitive_triangle_fan		: return GL_TRIANGLE_FAN;
+			case primitive_fill				: return GL_FILL;
 			}
 		}
 		else // to user
@@ -506,10 +434,14 @@ namespace ml::gfx
 			switch (value)
 			{
 			default					: return value;
-			case GL_TEXTURE_1D		: return texture_type_1d;
-			case GL_TEXTURE_2D		: return texture_type_2d;
-			case GL_TEXTURE_3D		: return texture_type_3d;
-			case GL_TEXTURE_CUBE_MAP: return texture_type_cubemap;
+			case GL_POINTS			: return primitive_points;
+			case GL_LINES			: return primitive_lines;
+			case GL_LINE_LOOP		: return primitive_line_loop;
+			case GL_LINE_STRIP		: return primitive_line_strip;
+			case GL_TRIANGLES		: return primitive_triangles;
+			case GL_TRIANGLE_STRIP	: return primitive_triangle_strip;
+			case GL_TRIANGLE_FAN	: return primitive_triangle_fan;
+			case GL_FILL			: return primitive_fill;
 			}
 		}
 	}
@@ -541,6 +473,98 @@ namespace ml::gfx
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default						: return value;
+			case texture_type_1d		: return GL_TEXTURE_1D;
+			case texture_type_2d		: return GL_TEXTURE_2D;
+			case texture_type_3d		: return GL_TEXTURE_3D;
+			case texture_type_cubemap	: return GL_TEXTURE_CUBE_MAP;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_TEXTURE_1D		: return texture_type_1d;
+			case GL_TEXTURE_2D		: return texture_type_2d;
+			case GL_TEXTURE_3D		: return texture_type_3d;
+			case GL_TEXTURE_CUBE_MAP: return texture_type_cubemap;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default						: return value;
+			case type_byte				: return GL_BYTE;
+			case type_unsigned_byte		: return GL_UNSIGNED_BYTE;
+			case type_short				: return GL_SHORT;
+			case type_unsigned_short	: return GL_UNSIGNED_SHORT;
+			case type_int				: return GL_INT;
+			case type_unsigned_int		: return GL_UNSIGNED_INT;
+			case type_float				: return GL_FLOAT;
+			case type_half_float		: return GL_HALF_FLOAT;
+			case type_unsigned_int_24_8	: return GL_UNSIGNED_INT_24_8;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default						: return value;
+			case GL_BYTE				: return type_byte;
+			case GL_UNSIGNED_BYTE		: return type_unsigned_byte;
+			case GL_SHORT				: return type_short;
+			case GL_UNSIGNED_SHORT		: return type_unsigned_short;
+			case GL_INT					: return type_int;
+			case GL_UNSIGNED_INT		: return type_unsigned_int;
+			case GL_FLOAT				: return type_float;
+			case GL_HALF_FLOAT			: return type_half_float;
+			case GL_UNSIGNED_INT_24_8	: return type_unsigned_int_24_8;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default					: return value;
+			case usage_stream_draw	: return GL_STREAM_DRAW;
+			case usage_static_draw	: return GL_STATIC_DRAW;
+			case usage_dynamic_draw	: return GL_DYNAMIC_DRAW;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default					: return value;
+			case GL_STREAM_DRAW		: return usage_stream_draw;
+			case GL_STATIC_DRAW		: return usage_static_draw;
+			case GL_DYNAMIC_DRAW	: return usage_dynamic_draw;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -550,114 +574,96 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool opengl_device::do_initialize()
+	bool opengl_device::do_initialize(context_settings const & cs)
 	{
-#if defined(ML_IMPL_OPENGL_LOADER_GLEW)
-		// glew
-		glewExperimental = true;
-		return glewInit() == GLEW_OK;
+		if (!ML_IMPL_OPENGL_INIT()) { return debug::error("failed initializing opengl"); }
 
-#elif defined(ML_IMPL_OPENGL_LOADER_GL3W)
-		// gl3w
-		return gl3wInit();
-
-#elif defined(ML_IMPL_OPENGL_LOADER_GLAD)
-		// glad
-		return gladLoadGL();
-
-#elif defined(ML_IMPL_OPENGL_LOADER_CUSTOM)
-		// custom
-		return false;
-#endif
+		glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+		
+		glCheck((cs.multisample ? &glEnable : &glDisable)(GL_MULTISAMPLE));
+		
+		glCheck((cs.srgb_capable ? &glEnable : glDisable)(GL_FRAMEBUFFER_SRGB));
+		
+		return true;
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	devinfo const & opengl_device::get_devinfo() const noexcept
+	void opengl_device::on_initialize()
 	{
-		static devinfo temp{};
-		static ML_scope // once
+		// renderer
+		glCheck(m_info.renderer = (cstring)glGetString(GL_RENDERER));
+
+		// vendor
+		glCheck(m_info.vendor = (cstring)glGetString(GL_VENDOR));
+
+		// version
+		glCheck(m_info.version = (cstring)glGetString(GL_VERSION));
+
+		// major version
+		if (glGetIntegerv(GL_MAJOR_VERSION, &m_info.major_version); glGetError() == GL_INVALID_ENUM)
 		{
-			// renderer
-			glCheck(temp.renderer = (cstring)glGetString(GL_RENDERER));
-			
-			// vendor
-			glCheck(temp.vendor = (cstring)glGetString(GL_VENDOR));
-			
-			// version
-			glCheck(temp.version = (cstring)glGetString(GL_VERSION));
+			m_info.major_version = !m_info.version.empty() ? m_info.version[0] - '0' : 1;
+		}
 
-			// major version
-			if (glGetIntegerv(GL_MAJOR_VERSION, &temp.major_version); glGetError() == GL_INVALID_ENUM)
+		// minor version
+		if (glGetIntegerv(GL_MINOR_VERSION, &m_info.minor_version); glGetError() == GL_INVALID_ENUM)
+		{
+			m_info.minor_version = !m_info.version.empty() ? m_info.version[2] - '0' : 1;
+		}
+
+		// extensions
+		{
+			int32_t num{};
+			glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &num));
+			m_info.extensions.reserve(num);
+
+			pmr::stringstream ss{};
+			glCheck(ss.str((cstring)glGetString(GL_EXTENSIONS)));
+
+			pmr::string line{};
+			while (std::getline(ss, line, ' '))
 			{
-				temp.major_version = !temp.version.empty() ? temp.version[0] - '0' : 1;
+				m_info.extensions.push_back(line);
 			}
+		}
 
-			// minor version
-			if (glGetIntegerv(GL_MINOR_VERSION, &temp.minor_version); glGetError() == GL_INVALID_ENUM)
-			{
-				temp.minor_version = !temp.version.empty() ? temp.version[2] - '0' : 1;
-			}
-
-			// extensions
-			{
-				int32_t num{};
-				glGetIntegerv(GL_NUM_EXTENSIONS, &num);
-				temp.extensions.reserve(num);
-				
-				pmr::stringstream ss{};
-				glCheck(ss.str((cstring)glGetString(GL_EXTENSIONS)));
-
-				pmr::string line{};
-				while (std::getline(ss, line, ' '))
-				{
-					temp.extensions.push_back(line);
-				}
-			}
-
-			// edge clamp available
+	// edge clamp available
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-			temp.texture_edge_clamp_available = true;
+		m_info.texture_edge_clamp_available = true;
 #endif
-			// max texture slots
-			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&temp.max_texture_slots);
+		// max texture slots
+		glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_info.max_texture_slots));
 
-			// max color attachments
-			glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&temp.max_color_attachments);
+		// max color attachments
+		glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_info.max_color_attachments));
 
-			// shaders available
+		// max samples
+		glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_info.max_samples));
+
+		// shaders available
 #if defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-			temp.shaders_available = true;
+		m_info.shaders_available = true;
 
-			// geometry shaders available
+		// geometry shaders available
 #	ifdef GL_ARB_geometry_shader4
-			temp.geometry_shaders_available = true;
+		m_info.geometry_shaders_available = true;
 #	endif
 
-			// separate shader objects available
-#	ifdef GL_EXT_separate_shader_objects
-			temp.separate_shaders_available = true;
+		// separate shader objects available
+#	ifdef GL_ARB_separate_shader_objects
+		m_info.separate_shaders_available = true;
 #	endif
 
 #endif
-			// shading language version
-			glCheck(temp.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-			// shader binary formats
-			{
-				int32_t num{};
-				glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &num);
-				temp.shader_binary_formats.resize((size_t)num);
-				glGetIntegerv(GL_SHADER_BINARY_FORMATS, (int32_t *)temp.shader_binary_formats.data());
-			}
-		};
-		return temp;
+		// shading language version
+		glCheck(m_info.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	uint32_t opengl_device::get_error() const noexcept
 	{
@@ -1197,7 +1203,9 @@ namespace ml::gfx
 	{
 		if (!m_handle || !value || !*value) { return; }
 		
-		bind(); m_vertices.emplace_back(value)->bind();
+		bind();
+		
+		m_vertices.emplace_back(value)->bind();
 
 		auto const & layout{ value->get_layout() };
 
@@ -1358,8 +1366,7 @@ namespace ml::gfx
 		revalue(); bind();
 
 		glCheck(glTexSubImage2D(
-			GL_TEXTURE_2D,
-			0,
+			GL_TEXTURE_2D, 0,
 			pos[0],
 			pos[1],
 			m_opts.size[0],

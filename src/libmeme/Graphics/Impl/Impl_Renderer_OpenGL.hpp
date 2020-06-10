@@ -23,12 +23,16 @@ namespace ml::gfx
 
 		~opengl_device() override = default;
 
-		bool do_initialize() override;
+		bool do_initialize(context_settings const & settings) override;
+
+		void on_initialize() override;
+
+		devinfo m_info;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		devinfo const & get_devinfo() const noexcept override;
+		devinfo const & get_devinfo() const noexcept override { return m_info; }
 
 		uint32_t get_error() const noexcept override;
 

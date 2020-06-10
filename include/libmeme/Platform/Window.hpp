@@ -11,7 +11,7 @@ namespace ml
 
 		window() noexcept;
 
-		virtual ~window() noexcept;
+		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,7 +99,7 @@ namespace ml
 
 		ML_NODISCARD static window_handle get_current_context();
 
-		ML_NODISCARD static void * get_proc_address(cstring value);
+		ML_NODISCARD static window_proc get_proc_address(cstring value);
 		
 		ML_NODISCARD static pmr::vector<monitor_handle> const & get_monitors();
 
@@ -164,7 +164,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		struct window_base * m_impl;
+		unique<struct window_base> m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -6,8 +6,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define ML__author              "Melody Gurman"
-#define ML__name                "libmeme"
-#define ML__version             0
+#define ML__libname             "libmeme"
+#define ML__version             "0.0.0"
 #define ML__url                 "https://www.github.com/Gurman8r/libmeme"
 #define ML__date                __DATE__
 #define ML__time                __TIME__
@@ -33,7 +33,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(__cplusplus)
-//                              Lang
 #   if defined(_MSVC_LANG)
 #       define ML_lang           _MSVC_LANG
 #   else

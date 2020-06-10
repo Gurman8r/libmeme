@@ -9,9 +9,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias cursor_handle	= typename void *;
-	ML_alias monitor_handle	= typename void *;
-	ML_alias window_handle	= typename void *;
+	ML_declhandle(cursor_handle);
+	ML_declhandle(monitor_handle);
+	ML_declhandle(window_handle);
+	ML_declhandle(window_proc);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

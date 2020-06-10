@@ -104,7 +104,7 @@ namespace ml
 
 		static window_handle get_current_context();
 
-		static void * get_proc_address(cstring value);
+		static window_proc get_proc_address(cstring value);
 		
 		static pmr::vector<monitor_handle> const & get_monitors();
 

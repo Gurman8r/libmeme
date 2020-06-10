@@ -45,16 +45,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_alias				using // global typedef
-
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
-
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
-
-#define ML_forward(x)			std::forward<decltype(x)>(x)
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // concatenate implementation
 #define ML_cat_impl(a, b)		a##b
 
@@ -73,22 +63,32 @@
 
 // anonymous expressions		_ml_expr_#_
 #if defined(__COUNTER__)
-#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__COUNTER__, _))))
+#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__LINE__, _))))
+#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__LINE__, _))))
 #else
-#	define ML_anon_expr(expr)	ML_cat(_ml_, ML_cat(expr, _))
+#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, _))
 #endif
-#define ML_anon					ML_anon_expr(anon) // _ml_anon_#_
+#define ML_anon					ML_make_anon(anon) // _ml_anon_#_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle
-#define ML_decl_handle(name)	struct ML_cat(name, __) { _ML int32_t unused; }; \
+#define ML_declhandle(name)		struct ML_cat(name, __) { _ML int32_t unused; }; \
 								using name = typename ML_cat(name, __) *
 
 // handle cast
 #define ML_handle(type, value)	((type)(_ML intptr_t)(value))
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#define ML_alias				using // global typedef
+
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr)) // fixed array size
+
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0) // compare
+
+#define ML_forward(x)			std::forward<decltype(x)>(x) // autoforward
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -119,7 +119,6 @@ namespace ml
 	// helper types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	double_t	= typename float64_t	;
 	ML_alias	float_t		= typename float32_t	;
 	ML_alias	hash_t		= typename uint64_t		;
 	ML_alias	intptr_t	= typename intmax_t		;

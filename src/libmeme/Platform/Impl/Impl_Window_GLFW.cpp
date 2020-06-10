@@ -134,7 +134,7 @@ namespace ml
 
 	bool glfw_window::is_fullscreen() const
 	{
-		return m_monitor && (m_monitor == get_primary_monitor());
+		return m_monitor && ((monitor_handle)m_monitor == get_primary_monitor());
 	}
 
 	bool glfw_window::is_open() const
@@ -228,7 +228,7 @@ namespace ml
 
 	window_handle glfw_window::get_handle() const
 	{
-		return m_window;
+		return (window_handle)m_window;
 	}
 
 	int32_t glfw_window::get_input_mode(int32_t mode) const
@@ -249,7 +249,7 @@ namespace ml
 	window_handle glfw_window::get_native_handle() const
 	{
 #ifdef ML_os_windows
-		return glfwGetWin32Window(m_window);
+		return (window_handle)glfwGetWin32Window(m_window);
 #else
 		return m_window;
 #endif
@@ -276,7 +276,7 @@ namespace ml
 
 	void glfw_window::set_cursor(cursor_handle value)
 	{
-		glfwSetCursor(m_window, static_cast<GLFWcursor *>(value));
+		glfwSetCursor(m_window, (GLFWcursor *)value);
 	}
 	
 	void glfw_window::set_cursor_mode(int32_t value)
@@ -367,7 +367,7 @@ namespace ml
 
 	cursor_handle glfw_window::create_custom_cursor(size_t w, size_t h, byte_t const * p)
 	{
-		return glfwCreateCursor(make_glfw_image(w, h, p), (int32_t)w, (int32_t)h);
+		return (cursor_handle)glfwCreateCursor(make_glfw_image(w, h, p), (int32_t)w, (int32_t)h);
 	}
 
 	cursor_handle glfw_window::create_standard_cursor(int32_t value)
@@ -384,7 +384,7 @@ namespace ml
 			GLFW_RESIZE_NWSE_CURSOR,
 			GLFW_ARROW_CURSOR,
 		};
-		return glfwCreateStandardCursor(shapes[static_cast<size_t>(value)]);
+		return (cursor_handle)glfwCreateStandardCursor(shapes[static_cast<size_t>(value)]);
 	}
 
 	int32_t glfw_window::extension_supported(cstring value)
@@ -394,12 +394,12 @@ namespace ml
 
 	window_handle glfw_window::get_current_context()
 	{
-		return glfwGetCurrentContext();
+		return (window_handle)glfwGetCurrentContext();
 	}
 
-	void * glfw_window::get_proc_address(cstring value)
+	window_proc glfw_window::get_proc_address(cstring value)
 	{
-		return glfwGetProcAddress(value);
+		return (window_proc)glfwGetProcAddress(value);
 	}
 
 	pmr::vector<monitor_handle> const & glfw_window::get_monitors()
@@ -412,7 +412,7 @@ namespace ml
 			temp.reserve((size_t)count);
 			for (size_t i = 0, imax = (size_t)count; i < imax; ++i)
 			{
-				temp.push_back(monitors[i]);
+				temp.push_back((monitor_handle)monitors[i]);
 			}
 		};
 		return temp;
@@ -420,7 +420,7 @@ namespace ml
 
 	monitor_handle glfw_window::get_primary_monitor()
 	{
-		return glfwGetPrimaryMonitor();
+		return (monitor_handle)glfwGetPrimaryMonitor();
 	}
 
 	float64_t glfw_window::get_time()
@@ -437,7 +437,7 @@ namespace ml
 
 	void glfw_window::destroy_cursor(cursor_handle value)
 	{
-		glfwDestroyCursor(static_cast<GLFWcursor *>(value));
+		glfwDestroyCursor((GLFWcursor *)value);
 	}
 
 	void glfw_window::finalize()
@@ -452,7 +452,7 @@ namespace ml
 
 	void glfw_window::set_current_context(window_handle value)
 	{
-		glfwMakeContextCurrent(static_cast<GLFWwindow *>(value));
+		glfwMakeContextCurrent((GLFWwindow *)value);
 	}
 
 	void glfw_window::set_swap_interval(int32_t value)

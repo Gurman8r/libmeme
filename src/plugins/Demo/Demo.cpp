@@ -242,7 +242,7 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			// RENDERING
+			// FRAMEBUFFERS
 			{
 				m_pipeline[0] = gfx::framebuffer::allocate({ m_resolution });
 			}
@@ -347,7 +347,7 @@ namespace ml
 					;
 			}
 
-			// MODELS
+			// MESHES
 			{
 				m_meshes["sphere8x6"]	= engine::fs().path2("assets/models/sphere8x6.obj");
 				m_meshes["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
@@ -538,15 +538,15 @@ namespace ml
 					m_gui_profiler.menu_item();
 					m_gui_renderer.menu_item();
 				});
-				mmb.add("settings", [&]()
-				{
-					ML_scoped_imgui_id(this);
-					bool fullscreen{ engine::window().is_fullscreen() };
-					if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
-					{
-						engine::window().set_fullscreen(fullscreen);
-					}
-				});
+				//mmb.add("settings", [&]()
+				//{
+				//	ML_scoped_imgui_id(this);
+				//	bool fullscreen{ engine::window().is_fullscreen() };
+				//	if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
+				//	{
+				//		engine::window().set_fullscreen(fullscreen);
+				//	}
+				//});
 				mmb.add("help", [&]()
 				{
 					ML_scoped_imgui_id(this);
@@ -1251,7 +1251,7 @@ namespace ml
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void * user_data)
 {
 	static ml::plugin * temp{};
-	return temp ? temp : temp = new ml::demo{};
+	return temp ? temp : temp = new ml::demo;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
