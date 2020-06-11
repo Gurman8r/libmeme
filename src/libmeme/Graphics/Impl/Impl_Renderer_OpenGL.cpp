@@ -590,31 +590,31 @@ namespace ml::gfx
 	void opengl_device::on_initialize()
 	{
 		// renderer
-		glCheck(m_info.renderer = (cstring)glGetString(GL_RENDERER));
+		glCheck(m_devinfo.renderer = (cstring)glGetString(GL_RENDERER));
 
 		// vendor
-		glCheck(m_info.vendor = (cstring)glGetString(GL_VENDOR));
+		glCheck(m_devinfo.vendor = (cstring)glGetString(GL_VENDOR));
 
 		// version
-		glCheck(m_info.version = (cstring)glGetString(GL_VERSION));
+		glCheck(m_devinfo.version = (cstring)glGetString(GL_VERSION));
 
 		// major version
-		if (glGetIntegerv(GL_MAJOR_VERSION, &m_info.major_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MAJOR_VERSION, &m_devinfo.major_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_info.major_version = !m_info.version.empty() ? m_info.version[0] - '0' : 1;
+			m_devinfo.major_version = !m_devinfo.version.empty() ? m_devinfo.version[0] - '0' : 1;
 		}
 
 		// minor version
-		if (glGetIntegerv(GL_MINOR_VERSION, &m_info.minor_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MINOR_VERSION, &m_devinfo.minor_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_info.minor_version = !m_info.version.empty() ? m_info.version[2] - '0' : 1;
+			m_devinfo.minor_version = !m_devinfo.version.empty() ? m_devinfo.version[2] - '0' : 1;
 		}
 
 		// extensions
 		{
 			int32_t num{};
 			glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &num));
-			m_info.extensions.reserve(num);
+			m_devinfo.extensions.reserve(num);
 
 			pmr::stringstream ss{};
 			glCheck(ss.str((cstring)glGetString(GL_EXTENSIONS)));
@@ -622,7 +622,7 @@ namespace ml::gfx
 			pmr::string line{};
 			while (std::getline(ss, line, ' '))
 			{
-				m_info.extensions.push_back(line);
+				m_devinfo.extensions.push_back(line);
 			}
 		}
 
@@ -630,37 +630,37 @@ namespace ml::gfx
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		m_info.texture_edge_clamp_available = true;
+		m_devinfo.texture_edge_clamp_available = true;
 #endif
 		// max texture slots
-		glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_info.max_texture_slots));
+		glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_devinfo.max_texture_slots));
 
 		// max color attachments
-		glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_info.max_color_attachments));
+		glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_devinfo.max_color_attachments));
 
 		// max samples
-		glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_info.max_samples));
+		glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_devinfo.max_samples));
 
 		// shaders available
 #if defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		m_info.shaders_available = true;
+		m_devinfo.shaders_available = true;
 
 		// geometry shaders available
 #	ifdef GL_ARB_geometry_shader4
-		m_info.geometry_shaders_available = true;
+		m_devinfo.geometry_shaders_available = true;
 #	endif
 
 		// separate shader objects available
 #	ifdef GL_ARB_separate_shader_objects
-		m_info.separate_shaders_available = true;
+		m_devinfo.separate_shaders_available = true;
 #	endif
 
 #endif
 		// shading language version
-		glCheck(m_info.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+		glCheck(m_devinfo.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1040,21 +1040,7 @@ namespace ml::gfx
 		glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	bool opengl_vertexbuffer::instantiate()
-	{
-		if (m_handle) { return false; }
-		glCheck(glGenBuffers(1, &m_handle));
-		return m_handle;
-	}
-
 	bool opengl_vertexbuffer::invalidate()
-	{
-		if (!m_handle) { return false; }
-		glCheck(glDeleteBuffers(1, &m_handle));
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_vertexbuffer::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteBuffers(1, &m_handle));}
 		glCheck(glGenBuffers(1, &m_handle));
@@ -1104,25 +1090,7 @@ namespace ml::gfx
 		glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	bool opengl_indexbuffer::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(glGenBuffers(1, &m_handle));
-		
-		return m_handle;
-	}
-
 	bool opengl_indexbuffer::invalidate()
-	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteBuffers(1, &m_handle));
-		
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_indexbuffer::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteBuffers(1, &m_handle)); }
 		
@@ -1168,27 +1136,7 @@ namespace ml::gfx
 		glCheck(glDeleteVertexArrays(1, &m_handle));
 	}
 
-	bool opengl_vertexarray::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(glGenVertexArrays(1, &m_handle));
-		
-		return m_handle;
-	}
-
 	bool opengl_vertexarray::invalidate()
-	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteVertexArrays(1, &m_handle));
-		
-		m_vertices.clear(); m_indices.reset();
-		
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_vertexarray::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteVertexArrays(1, &m_handle)); }
 		
@@ -1291,26 +1239,10 @@ namespace ml::gfx
 		glCheck(glDeleteTextures(1, &m_handle));
 	}
 
-	bool opengl_texture2d::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(glGenTextures(1, &m_handle));
-		
-		return m_handle;
-	}
-
 	bool opengl_texture2d::invalidate()
 	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteTextures(1, &m_handle));
-		
-		return !(m_handle = NULL);
-	}
+		if (!m_lock) { return debug::error("texture2d is not locked"); }
 
-	bool opengl_texture2d::revalue()
-	{
 		if (m_handle) { glCheck(glDeleteTextures(1, &m_handle)); }
 		
 		glCheck(glGenTextures(1, &m_handle));
@@ -1339,7 +1271,7 @@ namespace ml::gfx
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		revalue(); bind();
+		invalidate(); bind();
 		
 		glCheck(glTexImage2D(
 			GL_TEXTURE_2D, 0,
@@ -1363,7 +1295,7 @@ namespace ml::gfx
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		revalue(); bind();
+		invalidate(); bind();
 
 		glCheck(glTexSubImage2D(
 			GL_TEXTURE_2D, 0,
@@ -1479,26 +1411,10 @@ namespace ml::gfx
 		glCheck(glDeleteTextures(1, &m_handle));
 	}
 
-	bool opengl_texturecube::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(glGenTextures(1, &m_handle));
-		
-		return m_handle;
-	}
-
 	bool opengl_texturecube::invalidate()
 	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteTextures(1, &m_handle));
-		
-		return !(m_handle = NULL);
-	}
+		if (!m_lock) { return debug::error("texture2d is not locked"); }
 
-	bool opengl_texturecube::revalue()
-	{
 		if (m_handle) { glCheck(glDeleteTextures(1, &m_handle)); }
 		
 		glCheck(glGenTextures(1, &m_handle));
@@ -1545,27 +1461,7 @@ namespace ml::gfx
 		glCheck(glDeleteFramebuffers(1, &m_handle));
 	}
 
-	bool opengl_framebuffer::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(glGenFramebuffers(1, &m_handle));
-		
-		return m_handle;
-	}
-
 	bool opengl_framebuffer::invalidate()
-	{
-		if (!m_handle) { return false; }
-
-		glCheck(glDeleteFramebuffers(1, &m_handle));
-
-		m_attachments.clear(); m_depth.reset();
-
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_framebuffer::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteFramebuffers(1, &m_handle)); }
 		
@@ -1616,7 +1512,7 @@ namespace ml::gfx
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		revalue(); bind();
+		invalidate(); bind();
 
 		// color attachments
 		if (m_attachments.empty()) { m_attachments.push_back(texture2d::allocate(m_opts)); }
@@ -1692,25 +1588,7 @@ namespace ml::gfx
 		glCheck(glDeleteObjectARB(m_handle));
 	}
 
-	bool opengl_shader::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(m_handle = glCreateShaderObjectARB(_shader_type<to_impl>(m_shader_type)));
-		
-		return m_handle;
-	}
-
 	bool opengl_shader::invalidate()
-	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteObjectARB(m_handle));
-		
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_shader::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteObjectARB(m_handle)); }
 		
@@ -1791,27 +1669,7 @@ namespace ml::gfx
 		glCheck(glDeleteObjectARB(m_handle));
 	}
 
-	bool opengl_program::instantiate()
-	{
-		if (m_handle) { return false; }
-		
-		glCheck(m_handle = glCreateProgramObjectARB());
-		
-		return m_handle;
-	}
-
 	bool opengl_program::invalidate()
-	{
-		if (!m_handle) { return false; }
-		
-		glCheck(glDeleteObjectARB(m_handle));
-		
-		m_shaders.clear(); m_uniforms.clear(); m_textures.clear();
-		
-		return !(m_handle = NULL);
-	}
-
-	bool opengl_program::revalue()
 	{
 		if (m_handle) { glCheck(glDeleteObjectARB(m_handle)); }
 		

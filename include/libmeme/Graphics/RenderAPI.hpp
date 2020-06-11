@@ -834,11 +834,7 @@ namespace ml::gfx
 	public:
 		virtual ~device_resource() override = default;
 
-		virtual bool instantiate() = 0;
-
 		virtual bool invalidate() = 0;
-
-		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
@@ -883,11 +879,7 @@ namespace ml::gfx
 	public:
 		virtual ~vertexbuffer() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -942,11 +934,7 @@ namespace ml::gfx
 	public:
 		virtual ~indexbuffer() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -992,11 +980,7 @@ namespace ml::gfx
 	public:
 		virtual ~vertexarray() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1076,11 +1060,7 @@ namespace ml::gfx
 	public:
 		virtual ~texture() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1154,11 +1134,7 @@ namespace ml::gfx
 	public:
 		virtual ~texture2d() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1216,11 +1192,7 @@ namespace ml::gfx
 	public:
 		virtual ~texturecube() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1266,11 +1238,7 @@ namespace ml::gfx
 	public:
 		virtual ~framebuffer() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1333,11 +1301,7 @@ namespace ml::gfx
 	public:
 		virtual ~shader() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
@@ -1394,11 +1358,7 @@ namespace ml::gfx
 	public:
 		virtual ~program() override = default;
 
-		virtual bool instantiate() override = 0;
-
 		virtual bool invalidate() override = 0;
-
-		virtual bool revalue() override = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 

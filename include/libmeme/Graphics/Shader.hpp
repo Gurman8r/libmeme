@@ -110,7 +110,7 @@ namespace ml
 			else { m_src = { v_src, f_src, {} }; }
 			
 			if (!m_obj) { m_obj = gfx::program::allocate(); }
-			else { m_obj->revalue(); }
+			else { m_obj->invalidate(); }
 
 			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex	, v_src));
 			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
@@ -124,9 +124,9 @@ namespace ml
 			else { m_src = { v_src, f_src, g_src }; }
 			
 			if (!m_obj) { m_obj = gfx::program::allocate(); }
-			else { m_obj->revalue(); }
+			else { m_obj->invalidate(); }
 			
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex	, v_src));
+			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex		, v_src));
 			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
 			m_obj->attach(gfx::shader::allocate(gfx::shader_type_geometry	, g_src));
 

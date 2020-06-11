@@ -27,12 +27,12 @@ namespace ml::gfx
 
 		void on_initialize() override;
 
-		devinfo m_info;
+		devinfo m_devinfo;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		devinfo const & get_devinfo() const noexcept override { return m_info; }
+		devinfo const & get_devinfo() const noexcept override { return m_devinfo; }
 
 		uint32_t get_error() const noexcept override;
 
@@ -166,11 +166,7 @@ namespace ml::gfx
 
 		~opengl_vertexbuffer() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -220,11 +216,7 @@ namespace ml::gfx
 
 		~opengl_indexbuffer() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -271,11 +263,7 @@ namespace ml::gfx
 
 		~opengl_vertexarray() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -323,11 +311,7 @@ namespace ml::gfx
 
 		~opengl_texture2d() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -383,11 +367,7 @@ namespace ml::gfx
 
 		~opengl_texturecube() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -433,11 +413,7 @@ namespace ml::gfx
 
 		~opengl_framebuffer() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -488,11 +464,7 @@ namespace ml::gfx
 
 		~opengl_shader() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
@@ -552,11 +524,7 @@ namespace ml::gfx
 
 		~opengl_program() override;
 
-		bool instantiate() override;
-
 		bool invalidate() override;
-
-		bool revalue() override;
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
