@@ -43,13 +43,13 @@
 	url = https://github.com/ocornut/imgui_club.git
 [submodule "ext/json"]
 	path = ext/json
-	url = https://github.com/nlohmann/json.git
+	url = https://github.com/nlohmann/json
 [submodule "ext/ImGuizmo"]
 	path = ext/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
 [submodule "ext/imgui-node-editor"]
 	path = ext/imgui-node-editor
-	url = https://github.com/Gurman8r/imgui-node-editor.git
+	url = https://github.com/thedmd/imgui-node-editor.git
 [submodule "ext/implot"]
 	path = ext/implot
-	url = https://github.com/epezent/implot.git
+	url = https://github.com/epezent/implot
