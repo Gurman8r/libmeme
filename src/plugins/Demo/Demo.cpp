@@ -24,15 +24,15 @@ namespace ml
 	// (T) TAGS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct t_renderer {};
+	struct t_default {};
 
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct c_shader		: ds::wrapper<shader_asset>	{};
-	struct c_material	: ds::wrapper<material>		{};
-	struct c_mesh		: ds::wrapper<mesh>			{};
-	struct c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
+	struct	c_shader	: ds::wrapper<shader_asset>	{};
+	using	c_material	= typename shared<material>;
+	using	c_mesh		= typename shared<mesh>;
+	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
 
 	// (S) SIGNATURES
@@ -89,7 +89,7 @@ namespace ml
 
 		// tags
 		ecs::cfg::tags<
-		t_renderer
+		t_default
 		>,
 
 		// components
@@ -127,12 +127,12 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::map< pmr::string, font					> m_fonts		{};
-		ds::map< pmr::string, image					> m_images		{};
-		ds::map< pmr::string, material				> m_materials	{};
-		ds::map< pmr::string, mesh					> m_meshes		{};
+		ds::map< pmr::string, shared<font>			> m_fonts		{};
+		ds::map< pmr::string, shared<image>			> m_images		{};
+		ds::map< pmr::string, shared<material>		> m_materials	{};
+		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
 		ds::map< pmr::string, shader_asset			> m_shaders		{};
-		ds::map< pmr::string, shared<gfx::texture2d>	> m_textures	{};
+		ds::map< pmr::string, shared<gfx::texture2d>> m_textures	{};
 
 
 		// ECS
@@ -255,12 +255,12 @@ namespace ml
 
 			// IMAGES
 			{
-				m_images["default"] = image::get_default_rgba();
+				m_images["default"] = make_shared<image>(image::get_default_rgba());
 			}
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gfx::texture2d::allocate(m_images["default"]);
+				m_textures["default"]		= gfx::texture2d::allocate(*m_images["default"]);
 				m_textures["doot"]			= gfx::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
 				m_textures["navball"]		= gfx::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
 				m_textures["earth_dm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
@@ -270,10 +270,10 @@ namespace ml
 
 			// FONTS
 			{
-				m_fonts["clacon"]			= engine::fs().path2("assets/fonts/clacon.ttf");
-				m_fonts["consolas"]			= engine::fs().path2("assets/fonts/consolas.ttf");
-				m_fonts["lucida_console"]	= engine::fs().path2("assets/fonts/lucida_console.ttf");
-				m_fonts["minecraft"]		= engine::fs().path2("assets/fonts/minecraft.ttf");
+				m_fonts["clacon"]			= make_shared<font>(engine::fs().path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"]			= make_shared<font>(engine::fs().path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"]	= make_shared<font>(engine::fs().path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"]		= make_shared<font>(engine::fs().path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -337,23 +337,21 @@ namespace ml
 				+ _timers + _camera + _tf;
 
 				// earth
-				m_materials["earth"] = material{ _3d }
-					.set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"])
-					;
+				auto & earth{ m_materials["earth"] = make_shared<material>(_3d) };
+				earth->set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"]);
 
 				// moon
-				m_materials["moon"] = material{ _3d }
-					.set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"])
-					;
+				auto & moon{ m_materials["moon"] = make_shared<material>(_3d) };
+				moon->set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"]);
 			}
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"]	= engine::fs().path2("assets/models/sphere8x6.obj");
-				m_meshes["sphere32x24"] = engine::fs().path2("assets/models/sphere32x24.obj");
-				m_meshes["monkey"]		= engine::fs().path2("assets/models/monkey.obj");
+				m_meshes["sphere8x6"]	= make_shared<mesh>(engine::fs().path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"] = make_shared<mesh>(engine::fs().path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"]		= make_shared<mesh>(engine::fs().path2("assets/models/monkey.obj"));
 
-				m_meshes["triangle"] =
+				m_meshes["triangle"] = make_shared<mesh>(mesh
 				{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
@@ -363,9 +361,9 @@ namespace ml
 					{
 						0, 1, 2,
 					}
-				};
+				});
 
-				m_meshes["quad"] =
+				m_meshes["quad"] = make_shared<mesh>(mesh
 				{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
@@ -377,7 +375,7 @@ namespace ml
 						0, 1, 3,
 						1, 2, 3,
 					}
-				};
+				});
 			}
 
 			// ENTITIES
@@ -387,7 +385,7 @@ namespace ml
 				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf)
 				{
 					auto & h{ m_ecs.create_handle() };
-					h.add_tag<t_renderer>();
+					h.add_tag<t_default>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
 					h.add_component<c_material>	(m_materials[mat]);
 					h.add_component<c_mesh>		(m_meshes	[msh]);
@@ -450,7 +448,7 @@ namespace ml
 				{
 					gfx::render_command::set_cull_enabled(false),
 					gfx::render_command::set_clear_color(colors::magenta),
-					gfx::render_command::clear(gfx::color_buffer_bit | gfx::depth_buffer_bit | gfx::stencil_buffer_bit),
+					gfx::render_command::clear(gfx::buffer_bit_color | gfx::buffer_bit_depth | gfx::buffer_bit_stencil),
 					gfx::render_command::custom([&]() noexcept
 					{
 						m_ecs.update_system<x_draw_meshes>();
@@ -556,9 +554,9 @@ namespace ml
 				});
 			};
 
-			// draw
-			ML_scoped_imgui_id(this);
 			{
+				ML_scoped_imgui_id(this);
+
 				// IMGUI
 				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
 				if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }

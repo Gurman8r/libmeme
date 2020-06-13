@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct mesh final : trackable
+	struct mesh final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,23 +47,12 @@ namespace ml
 		{
 		}
 
-		mesh(mesh const & other) : m_vao{ other.m_vao }
-		{
-		}
-
 		mesh(mesh && other) noexcept : m_vao{}
 		{
 			swap(std::move(other));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		mesh & operator=(mesh const & other)
-		{
-			mesh temp{ other };
-			swap(temp);
-			return (*this);
-		}
 
 		mesh & operator=(mesh && other) noexcept
 		{

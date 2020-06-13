@@ -18,10 +18,6 @@ namespace ml
 
 	void plugin_manager::clear()
 	{
-		//for (auto & p : m_data.get<plugin *>())
-		//{
-		//	memory::deallocate(p);
-		//}
 		m_data.clear();
 	}
 

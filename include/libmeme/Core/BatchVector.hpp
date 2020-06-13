@@ -38,9 +38,9 @@ namespace ml::ds
 		template <size_t I>	using value_i			= typename meta::nth<I, value_types>;
 		template <size_t I>	using vector_i			= typename meta::nth<I, vector_types>;
 		template <size_t I>	using iterator_i		= typename vector_i<I>::iterator;
-		template <class U>	using iterator_t		= typename pmr::vector<U>::iterator;
+		template <class  U>	using iterator_t		= typename pmr::vector<U>::iterator;
 		template <size_t I>	using const_iterator_i	= typename vector_i<I>::const_iterator;
-		template <class U>	using const_iterator_t	= typename pmr::vector<U>::const_iterator;
+		template <class  U>	using const_iterator_t	= typename pmr::vector<U>::const_iterator;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

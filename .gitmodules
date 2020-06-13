@@ -50,3 +50,6 @@
 [submodule "ext/imgui-node-editor"]
 	path = ext/imgui-node-editor
 	url = https://github.com/Gurman8r/imgui-node-editor.git
+[submodule "ext/implot"]
+	path = ext/implot
+	url = https://github.com/epezent/implot.git

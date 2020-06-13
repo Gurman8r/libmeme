@@ -82,13 +82,13 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_alias				using // global typedef
+#define ML_alias				using // global typedef macro
 
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr)) // fixed array size
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr)) // array size macro
 
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0) // compare
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0) // comparison macro
 
-#define ML_forward(x)			std::forward<decltype(x)>(x) // autoforward
+#define ML_forward(x)			std::forward<decltype(x)>(x) // auto-forward macro
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

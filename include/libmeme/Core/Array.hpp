@@ -14,7 +14,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type				= typename _T;
-		using self_type					= typename array<value_type, _N>;
+		using self_type					= typename _ML_DS array<value_type, _N>;
 		using storage_type				= typename value_type[_N];
 		using size_type					= typename size_t;
 		using difference_type			= typename ptrdiff_t;
@@ -145,7 +145,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		using value_type				= typename _T;
-		using self_type					= typename array<value_type, 0>;
+		using self_type					= typename _ML_DS array<value_type, 0>;
 		using storage_type				= typename value_type[1];
 		using size_type					= typename size_t;
 		using difference_type			= typename ptrdiff_t;

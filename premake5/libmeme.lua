@@ -69,6 +69,8 @@ files{
 	"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include/**.**",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Source/**.**",
+	"%{ext_dir}implot/**.h",
+	"%{ext_dir}implot/**.cpp",
 }
 
 libdirs{

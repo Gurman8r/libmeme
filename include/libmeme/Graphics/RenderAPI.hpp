@@ -67,9 +67,15 @@ namespace ml::gfx
 
 	enum buffer_bit_ : uint32_t
 	{
-		color_buffer_bit	= 1 << 0,
-		depth_buffer_bit	= 1 << 1,
-		stencil_buffer_bit	= 1 << 2,
+		buffer_bit_none		= 0,
+		buffer_bit_color	= 1 << 0,
+		buffer_bit_depth	= 1 << 1,
+		buffer_bit_stencil	= 1 << 2,
+
+		buffer_bit_all
+			= buffer_bit_color
+			| buffer_bit_depth
+			| buffer_bit_stencil,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

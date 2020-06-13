@@ -95,15 +95,15 @@ namespace ml::gfx
 		uint32_t temp{};
 		if constexpr (Convt()) // to impl
 		{
-			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, color_buffer_bit);
-			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, depth_buffer_bit);
-			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, stencil_buffer_bit);
+			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, buffer_bit_color);
+			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, buffer_bit_depth);
+			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, buffer_bit_stencil);
 		}
 		else // to user
 		{
-			ML_flag_map(temp, color_buffer_bit		, value, GL_COLOR_BUFFER_BIT);
-			ML_flag_map(temp, depth_buffer_bit		, value, GL_DEPTH_BUFFER_BIT);
-			ML_flag_map(temp, stencil_buffer_bit	, value, GL_STENCIL_BUFFER_BIT);
+			ML_flag_map(temp, buffer_bit_color		, value, GL_COLOR_BUFFER_BIT);
+			ML_flag_map(temp, buffer_bit_depth		, value, GL_DEPTH_BUFFER_BIT);
+			ML_flag_map(temp, buffer_bit_stencil	, value, GL_STENCIL_BUFFER_BIT);
 		}
 		return temp;
 	}

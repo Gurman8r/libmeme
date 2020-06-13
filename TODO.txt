@@ -13,3 +13,5 @@ opengl loader disambiguation header
 add stencil functions to api
 
 shader cache
+
+constant buffer / uniform buffer

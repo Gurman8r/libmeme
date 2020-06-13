@@ -21,33 +21,33 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read flag at index
-#define ML_flag_read(v, d)			(bool)(v & d)
+#define ML_flag_read(val, i)		(bool)((val) & (i))
 
 // set flag at index
-#define ML_flag_set(v, d)			(bool)(v |= d)
+#define ML_flag_set(val, i)			((val) |= (i))
 
 // clear flag at index
-#define ML_flag_clear(v, d)			(v &= ~d)
+#define ML_flag_clear(val, i)		((val) &= ~(i))
 
 // conditional set or clear flag
-#define ML_flag_write(v, d, b)		(b ? ML_flag_set(v, d) : ML_flag_clear(v, d))
+#define ML_flag_write(val, i, cond)	((cond) ? ML_flag_set(val, i) : ML_flag_clear(val, i))
 
 // map between flag bits
-#define ML_flag_map(temp, d, value, s)	ML_flag_write(temp, d, ML_flag_read(value, s))
+#define ML_flag_map(dst, d, src, s)	ML_flag_write(dst, d, ML_flag_read(src, s))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read bit at index
-#define ML_bit_read(v, d)			ML_flag_read(v >> d, 1)
+#define ML_bit_read(val, i)			ML_flag_read(val >> i, 1)
 
 // set bit at index
-#define ML_bit_set( v, d)			ML_flag_set(v, 1 << d)
+#define ML_bit_set(val, i)			ML_flag_set(val, 1 << i)
 
 // clear bit at index
-#define ML_bit_clear(v, d)			ML_flag_clear(v, 1 << d)
+#define ML_bit_clear(val, i)		ML_flag_clear(val, 1 << i)
 
 // conditional set or clear bit
-#define ML_bit_write(v, d, b)		(b ? ML_bit_set(v, d) : ML_bit_clear(v, d))
+#define ML_bit_write(val, i, cond)	ML_flag_write(val, 1 << i, cond)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

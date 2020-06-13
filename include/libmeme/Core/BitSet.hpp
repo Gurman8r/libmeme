@@ -11,27 +11,32 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = typename bitset<_Count>;
+		static constexpr size_t bit_count{ _Count };
+
+		static_assert(0 < bit_count, "bit count negative or zero");
+
+		using self_type = typename _ML_DS bitset<bit_count>;
+
+		using array_type = typename _ML_DS array<bool, bit_count>;
 
 		using value_type = typename std::conditional_t<
-			_Count <= sizeof(uint32_t) * 8,
+			bit_count <= sizeof(uint32_t) * 8,
 			uint32_t,
 			uint64_t
 		>;
 
-		static constexpr ptrdiff_t bitsperword{ sizeof(value_type) * 8 };
+		static constexpr ptrdiff_t bits_per_word{ sizeof(value_type) * 8 };
 		
-		static constexpr ptrdiff_t word_count{ (_Count - 1) / bitsperword };
+		static constexpr ptrdiff_t word_count{ (bit_count - 1) / bits_per_word };
 
-		using storage_type = typename array<value_type, word_count + 1>;
+		using storage_type = typename _ML_DS array<value_type, word_count + 1>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		constexpr bitset() noexcept : m_words{} {}
 
-		template <class T, class = std::enable_if_t<
-			std::is_integral_v<T>
-		>> constexpr bitset(T const value) noexcept
+		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
+		> constexpr bitset(T const value) noexcept
 			: m_words{ static_cast<value_type>(value) }
 		{
 		}
@@ -58,21 +63,12 @@ namespace ml::ds
 		{
 		}
 
-		constexpr bitset(array<bool, _Count> const & arr) noexcept
+		constexpr bitset(array_type const & value) noexcept
 			: m_words{}
 		{
-			for (auto it = arr.begin(); it != arr.end(); ++it)
+			for (auto it = value.begin(); it != value.end(); ++it)
 			{
 				write(std::distance(str.begin(), it), *it);
-			}
-		}
-
-		constexpr bitset(std::string_view const & str) noexcept
-			: self_type{}
-		{
-			for (auto it = str.begin(); it != str.end(); ++it)
-			{
-				write(std::distance(str.begin(), it), (*it) != '0');
 			}
 		}
 
@@ -91,97 +87,12 @@ namespace ml::ds
 			return (*this);
 		}
 
-		template <class T, class = std::enable_if_t<
-			std::is_integral_v<T>
-		>> constexpr self_type & operator=(T const value) noexcept
+		template <class T, class = std::enable_if_t<std::is_integral_v<T>>
+		> constexpr self_type & operator=(T const value) noexcept
 		{
 			self_type temp{ value };
 			swap(temp);
 			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr operator bool() const noexcept
-		{
-			return m_words;
-		}
-
-		ML_NODISCARD constexpr operator storage_type const & () const & noexcept
-		{
-			return m_words;
-		}
-
-		ML_NODISCARD constexpr bool operator[](size_t const i) const noexcept
-		{
-			return read(i);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr array<bool, _Count> arr() const noexcept
-		{
-			array<bool, _Count> temp{};
-			for (size_t i = 0; i < _Count; ++i)
-				temp[i] = read(i);
-			return temp;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> constexpr bool clear() noexcept
-		{
-			static_assert(I < _Count, "bitset subscript out of range");
-			return clear(I);
-		}
-
-		constexpr bool clear(size_t const i) noexcept
-		{
-			bool const b{ read(i) };
-			m_words[i / bitsperword] &= ~(value_type{ 1 } << i % bitsperword);
-			return b;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> ML_NODISCARD constexpr bool read() const noexcept
-		{
-			static_assert(I < _Count, "bitset subscript out of range");
-			return read(I);
-		}
-
-		ML_NODISCARD constexpr bool read(size_t const i) const noexcept
-		{
-			return m_words[i / bitsperword] & (value_type{ 1 } << i % bitsperword);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr void reset() noexcept
-		{
-			m_words = {};
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I> constexpr bool set() noexcept
-		{
-			static_assert(I < _Count, "bitset subscript out of range");
-			return set(I);
-		}
-
-		constexpr bool set(size_t const i) noexcept
-		{
-			bool const b{ !read(i) };
-			m_words[i / bitsperword] |= (value_type{ 1 } << i % bitsperword);
-			return b;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD constexpr size_t size() const noexcept
-		{
-			return _Count;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -196,73 +107,109 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr storage_type & words() noexcept
+		ML_NODISCARD constexpr operator bool() const noexcept { return m_words; }
+
+		ML_NODISCARD constexpr operator storage_type const & () const & noexcept { return m_words; }
+
+		ML_NODISCARD constexpr bool operator[](size_t const i) const noexcept { return read(i); }
+
+		ML_NODISCARD constexpr auto words() noexcept -> storage_type & { return m_words; }
+
+		ML_NODISCARD constexpr auto words() const noexcept -> storage_type const & { return m_words; }
+
+		ML_NODISCARD constexpr auto size() const noexcept -> size_t { return bit_count; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD constexpr bool read(size_t const i) const noexcept
 		{
-			return m_words;
+			return ML_bit_read(m_words[i / bits_per_word], i % bits_per_word);
 		}
 
-		ML_NODISCARD constexpr storage_type const & words() const noexcept
+		constexpr bool clear(size_t const i) noexcept
 		{
-			return m_words;
+			bool const temp{ this->read(i) };
+			
+			ML_bit_clear(m_words[i / bits_per_word], i % bits_per_word);
+			
+			return temp;
+		}
+
+		constexpr bool set(size_t const i) noexcept
+		{
+			bool const temp{ !this->read(i) };
+			
+			ML_bit_set(m_words[i / bits_per_word], i % bits_per_word);
+			
+			return temp;
+		}
+
+		constexpr bool write(size_t const i, bool const b) noexcept
+		{
+			return b ? this->set(i) : this->clear(i);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I> constexpr bool write(bool b) noexcept
+		ML_NODISCARD constexpr array_type arr() const noexcept
 		{
-			static_assert(I < _Count, "bitset subscript out of range");
-			return write(I, b);
-		}
-
-		constexpr bool write(size_t const i, bool b) noexcept
-		{
-			return b ? set(i) : clear(i);
+			array_type temp{};
+			for (size_t i = 0; i < bit_count; ++i)
+			{
+				temp[i] = read(i);
+			}
+			return temp;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T> ML_NODISCARD constexpr bool operator==(T value) const
+		template <class Other = self_type
+		> constexpr auto compare(Other const & other) const noexcept
 		{
-			if constexpr (std::is_same_v<T, self_type>)
+			if constexpr (std::is_same_v<Other, self_type>)
 			{
-				return m_words == value.m_words;
+				return ML_compare(m_words, other.m_words);
 			}
 			else
 			{
-				return (*this) == self_type{ value };
+				return this->compare(self_type{ other });
 			}
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator!=(T value) const
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator==(Other const & other) const
 		{
-			return !(*this == value);
+			return this->compare(other) == 0;
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<(T value) const
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator!=(Other const & other) const
 		{
-			if constexpr (std::is_same_v<T, self_type>)
-			{
-				return m_words < value.m_words;
-			}
-			else
-			{
-				return (*this) < self_type{ value };
-			}
+			return this->compare(other) != 0;
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>(T value) const
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator<(Other const & other) const
 		{
-			return !(*this < value);
+			return this->compare(other) < 0;
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator<=(T value) const
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator>(Other const & other) const
 		{
-			return (*this < value) || (*this == value);
+			return this->compare(other) > 0;
 		}
 
-		template <class T> ML_NODISCARD constexpr bool operator>=(T value) const
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator<=(Other const & other) const
 		{
-			return (*this > value) || (*this == value);
+			return this->compare(other) <= 0;
+		}
+
+		template <class Other = self_type
+		> ML_NODISCARD constexpr bool operator>=(Other const & other) const
+		{
+			return this->compare(other) >= 0;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
