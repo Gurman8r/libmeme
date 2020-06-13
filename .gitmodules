@@ -45,7 +45,11 @@
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
 [submodule "ext/imgui-node-editor"]
 	path = ext/imgui-node-editor
-	url = https://github.com/thedmd/imgui-node-editor.git
+	url = https://github.com/Gurman8r/imgui-node-editor.git
 [submodule "ext/implot"]
 	path = ext/implot
 	url = https://github.com/epezent/implot
+[submodule "ext/imgui"]
+	path = ext/imgui
+	url = https://github.com/Gurman8r/imgui.git
+	branch = docking

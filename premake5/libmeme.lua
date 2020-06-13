@@ -30,7 +30,6 @@ defines{
 	"IMGUI_USER_CONFIG=<libmeme/Config.hpp>",
 	"IMGUI_API=ML_API_EXPORT",
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
-	"IM_ASSERT_USER_ERROR=IM_ASSERT",
 }
 
 includedirs{
@@ -70,8 +69,8 @@ files{
 	"%{ext_dir}imgui_club/imgui_memory_editor/imgui_memory_editor.h",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include/**.**",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Source/**.**",
-	"%{ext_dir}implot/**.h",
-	"%{ext_dir}implot/**.cpp",
+	--"%{ext_dir}implot/**.h",
+	--"%{ext_dir}implot/**.cpp",
 }
 
 libdirs{
