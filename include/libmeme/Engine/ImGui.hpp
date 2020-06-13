@@ -48,6 +48,7 @@
 #include <ImGuiColorTextEdit/TextEditor.h>
 #include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>
 #include <imgui-node-editor/NodeEditor/Include/imgui_node_editor.h>
+#include <implot/implot.h>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -30,6 +30,7 @@ defines{
 	"IMGUI_USER_CONFIG=<libmeme/Config.hpp>",
 	"IMGUI_API=ML_API_EXPORT",
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
+	"IM_ASSERT_USER_ERROR=IM_ASSERT",
 }
 
 includedirs{

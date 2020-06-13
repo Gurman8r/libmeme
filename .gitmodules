@@ -1,7 +1,3 @@
-[submodule "ext/imgui"]
-	path = ext/imgui
-	url = https://github.com/Gurman8r/imgui.git
-	branch = docking
 [submodule "ext/assimp"]
 	path = ext/assimp
 	url = https://github.com/Gurman8r/assimp.git
