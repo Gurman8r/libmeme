@@ -1,6 +1,6 @@
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
-group			""
+group			"assets"
 project			"assets"
 targetname 		"%{prj.name}"
 targetdir		"%{bin_lib}/%{cfg.platform}/%{cfg.buildcfg}/"

@@ -62,9 +62,9 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, user_data) })
+				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN, user_data) })
 				{
-					m_data.push_back(code, path, std::move(lib), p.value());
+					m_data.push_back(code, path, std::move(lib), optl.value());
 
 					return code;
 				}

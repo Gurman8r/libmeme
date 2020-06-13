@@ -5,7 +5,7 @@
 
 namespace ml
 {
-	ML_declhandle(font_face	); // font face
+	ML_declhandle(font_face		); // font face
 	ML_declhandle(font_library	); // font library
 	ML_declhandle(font_stroker	); // font stroker
 

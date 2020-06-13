@@ -1249,7 +1249,7 @@ namespace ml
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void * user_data)
 {
 	static ml::plugin * temp{};
-	return temp ? temp : temp = new ml::demo;
+	return temp ? temp : temp = new ml::demo{};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

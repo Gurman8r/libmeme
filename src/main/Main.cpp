@@ -72,9 +72,9 @@ ml::int32_t main()
 	{
 		engine::time().begin_loop(); ML_defer{ engine::time().end_loop(); };
 
-		ML_benchmark_L("| begin loop")	{ event_system::fire_event<begin_loop_event>(); };
+		ML_benchmark_L("| begin loop")	{ event_system::fire_event<begin_loop_event>();	};
 		ML_benchmark_L("|  update")		{ event_system::fire_event<update_event>();		};
-		ML_benchmark_L("|  begin draw")	{ event_system::fire_event<begin_draw_event>(); };
+		ML_benchmark_L("|  begin draw")	{ event_system::fire_event<begin_draw_event>();	};
 		ML_benchmark_L("|   draw")		{ event_system::fire_event<draw_event>();		};
 		ML_benchmark_L("|   begin gui")	{ event_system::fire_event<begin_gui_event>();	};
 		ML_benchmark_L("|    draw gui")	{ event_system::fire_event<draw_gui_event>();	};
