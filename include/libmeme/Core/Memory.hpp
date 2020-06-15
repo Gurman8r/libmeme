@@ -166,7 +166,7 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// allocate the requested bytes
-			auto const data{ inst.m_allocator.allocate(size) };
+			byte_t * const data{ inst.m_allocator.allocate(size) };
 
 			// create record
 			return *inst.m_records.insert(data, { inst.m_index++, size, data }).first;
@@ -223,7 +223,7 @@ namespace ml
 			}
 			else
 			{
-				auto const temp{ allocate(newsz) };
+				void * const temp{ allocate(newsz) };
 				if (temp)
 				{
 					std::memcpy(temp, addr, oldsz);
@@ -238,8 +238,6 @@ namespace ml
 	private:
 		friend singleton<memory>;
 
-		memory() noexcept = default;
-
 		~memory() noexcept;
 
 		allocator_type			m_allocator	{};	// allocator
@@ -253,8 +251,6 @@ namespace ml
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// trackable base
 	struct ML_CORE_API trackable
 	{
@@ -268,13 +264,22 @@ namespace ml
 
 		void operator delete[](void * addr) noexcept { memory::deallocate(addr); }
 	};
+}
 
+namespace ml
+{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// default delete
-	struct default_delete final
+	template <class ...> struct default_delete;
+
+	template <> struct default_delete<>
 	{
 		void operator()(void * addr) const noexcept { memory::deallocate(addr); }
+	};
+
+	template <class T> struct default_delete<T>
+	{
+		void operator()(T * addr) const noexcept { memory::deallocate(addr); }
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -284,12 +289,8 @@ namespace ml
 	> ML_alias shared = typename std::shared_ptr<T>;
 
 	// unique pointer
-	template <class T, class Dx = default_delete
+	template <class T, class Dx = default_delete<T>
 	> ML_alias unique = typename std::unique_ptr<T, Dx>;
-
-	// weak pointer
-	template <class T
-	> ML_alias weak = typename std::weak_ptr<T>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -308,7 +309,7 @@ namespace ml
 	}
 
 	// make unique
-	template <class T, class Dx = default_delete, class ... Args
+	template <class T, class Dx = default_delete<T>, class ... Args
 	> ML_NODISCARD unique<T, Dx> make_unique(Args && ... args) noexcept
 	{
 		return unique<T, Dx>{ _ML make_new<T>(ML_forward(args)...), Dx{} };

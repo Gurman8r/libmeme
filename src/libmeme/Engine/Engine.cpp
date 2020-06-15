@@ -50,7 +50,7 @@ namespace ml
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
-					gfx::render_command::clear(gfx::buffer_bit_color | gfx::buffer_bit_depth | gfx::buffer_bit_stencil),
+					gfx::render_command::clear(gfx::buffer_bit_all),
 					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
@@ -71,7 +71,10 @@ namespace ml
 			} break;
 
 			case hashof_v<end_draw_event>: {
-				m_window.swap_buffers();
+				if ML_UNLIKELY(m_window.get_hint(window_hints_doublebuffer))
+				{
+					m_window.swap_buffers();
+				}
 			} break;
 
 			case hashof_v<end_loop_event>: {
@@ -138,10 +141,10 @@ namespace ml
 		g_engine->m_plugins.clear();
 
 		// finalize gui
-		(void)g_engine->m_gui.finalize();
+		g_engine->m_gui.finalize();
 
 		// finalize scripting
-		(void)g_engine->m_scripts.finalize();
+		g_engine->m_scripts.finalize();
 
 		// destroy window
 		g_engine->m_window.destroy();

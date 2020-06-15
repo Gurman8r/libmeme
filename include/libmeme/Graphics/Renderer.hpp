@@ -5,16 +5,9 @@
 
 #include <libmeme/Graphics/RenderCommand.hpp>
 
-// renderer singleton
-#define ML_renderer \
-	_ML renderer::get_instance()
-
 namespace ml
 {
-	struct perspective_camera final {};
-	struct orthographic_camera final {};
-	
-	class ML_GRAPHICS_API renderer3d final : public singleton<renderer3d>
+	class ML_GRAPHICS_API renderer3d final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,11 +15,6 @@ namespace ml
 		static void begin_scene();
 
 		static void end_scene();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend singleton<renderer3d>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

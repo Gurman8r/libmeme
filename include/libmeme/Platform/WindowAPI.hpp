@@ -9,10 +9,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_declhandle(cursor_handle);
-	ML_declhandle(monitor_handle);
-	ML_declhandle(window_handle);
-	ML_declhandle(window_proc);
+	ML_decl_handle(cursor_handle);
+	ML_decl_handle(monitor_handle);
+	ML_decl_handle(window_handle);
+	ML_decl_handle(window_proc);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

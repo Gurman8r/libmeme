@@ -16,7 +16,7 @@ namespace ml
 
 	script_manager::~script_manager() noexcept
 	{
-		(void)finalize();
+		finalize();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,22 +30,18 @@ namespace ml
 	{
 		if (is_initialized()) { return false; }
 
-		PyObject_SetArenaAllocator(([]() noexcept
+		PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]() noexcept
 		{
-			static PyObjectArenaAllocator temp
+			temp.alloc = [](auto, size_t s) noexcept
 			{
-				nullptr,
-				[](auto, size_t s) noexcept
-				{
-					return pmr::get_default_resource()->allocate(s);
-				},
-				[](auto, void * p, size_t s) noexcept
-				{
-					return pmr::get_default_resource()->deallocate(p, s);
-				}
+				return pmr::get_default_resource()->allocate(s);
+			};
+			temp.free = [](auto, void * p, size_t s) noexcept
+			{
+				return pmr::get_default_resource()->deallocate(p, s);
 			};
 			return &temp;
-		})());
+		}));
 
 		Py_SetProgramName(fs::path{ __argv[0] }.filename().c_str());
 
@@ -53,7 +49,7 @@ namespace ml
 
 		Py_InitializeEx(1);
 
-		return is_initialized();
+		return Py_IsInitialized();
 	}
 
 	bool script_manager::finalize()

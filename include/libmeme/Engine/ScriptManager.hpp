@@ -26,7 +26,7 @@ namespace ml
 
 		ML_NODISCARD bool initialize();
 
-		ML_NODISCARD bool finalize();
+		bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

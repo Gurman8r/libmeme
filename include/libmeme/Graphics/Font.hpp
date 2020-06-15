@@ -5,9 +5,9 @@
 
 namespace ml
 {
-	ML_declhandle(font_face		); // font face
-	ML_declhandle(font_library	); // font library
-	ML_declhandle(font_stroker	); // font stroker
+	ML_decl_handle(font_face		); // font face
+	ML_decl_handle(font_library	); // font library
+	ML_decl_handle(font_stroker	); // font stroker
 
 	struct ML_GRAPHICS_API font final
 	{
@@ -68,10 +68,11 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				std::swap(m_library, value.m_library);
-				std::swap(m_face, value.m_face);
-				std::swap(m_stroker, value.m_stroker);
-				std::swap(m_family, value.m_family);
+				std::swap(m_library	, value.m_library);
+				std::swap(m_face	, value.m_face);
+				std::swap(m_stroker	, value.m_stroker);
+				
+				m_family.swap(value.m_family);
 				m_pages.swap(value.m_pages);
 			}
 		}
@@ -84,7 +85,7 @@ namespace ml
 
 		ML_NODISCARD glyph load_glyph(uint32_t c, uint32_t size);
 
-		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size)
+		ML_NODISCARD glyph & get_glyph(uint32_t c, uint32_t size) noexcept
 		{
 			return m_pages[size].find_or_add_fn(c, &font::load_glyph, this, c, size);
 		}

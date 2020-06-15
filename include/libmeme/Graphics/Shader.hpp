@@ -109,11 +109,11 @@ namespace ml
 			if (v_src.empty() || f_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, {} }; }
 			
-			if (!m_obj) { m_obj = gfx::program::allocate(); }
+			if (!m_obj) { m_obj = gfx::program::create(); }
 			else { m_obj->invalidate(); }
 
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex	, v_src));
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
+			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
+			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
 
 			return m_obj->link();
 		}
@@ -123,12 +123,12 @@ namespace ml
 			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
 			else { m_src = { v_src, f_src, g_src }; }
 			
-			if (!m_obj) { m_obj = gfx::program::allocate(); }
+			if (!m_obj) { m_obj = gfx::program::create(); }
 			else { m_obj->invalidate(); }
 			
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_vertex		, v_src));
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_fragment	, f_src));
-			m_obj->attach(gfx::shader::allocate(gfx::shader_type_geometry	, g_src));
+			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
+			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
+			m_obj->attach(gfx::shader::create(gfx::shader_type_geometry	, g_src));
 
 			return m_obj->link();
 		}

@@ -3,7 +3,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
-#include "Impl/Impl_Renderer_OpenGL.hpp"
+#include "Impl/Impl_RenderAPI_OpenGL.hpp"
 using impl_device		= _ML_GFX opengl_device			;
 using impl_vertexarray	= _ML_GFX opengl_vertexarray	;
 using impl_vertexbuffer	= _ML_GFX opengl_vertexbuffer	;
@@ -27,32 +27,31 @@ using impl_shader		= _ML_GFX opengl_program		;
 // device
 namespace ml::gfx
 {
-	static device * g_devctx{};
+	devctx device::g_devctx{};
 
 	bool device::create_context(context_settings const & cs)
 	{
-		bool temp{};
-		static ML_scope // once
-		{
-			if (!g_devctx && (g_devctx = new impl_device))
-			{
-				if (temp = g_devctx->do_initialize(cs))
-				{
-					get_context()->on_initialize();
-				}
-				else
-				{
-					delete g_devctx;
-				}
-			}
-		};
-		return temp;
-	}
+		static ML_defer{ delete g_devctx; }; // delete on exit
 
-	unique<device> const & device::get_context() noexcept
-	{
-		static unique<device> temp{ g_devctx };
-		return temp;
+		if (!g_devctx && (g_devctx = new impl_device))
+		{
+			if (g_devctx->do_initialize(cs))
+			{
+				g_devctx->on_initialize();
+
+				return true; // success
+			}
+			else
+			{
+				delete g_devctx;
+
+				return debug::error("failed initializing device context");
+			}
+		}
+		else
+		{
+			return debug::error("device context is already initialized");
+		}
 	}
 }
 
@@ -61,7 +60,7 @@ namespace ml::gfx
 // vertexarray
 namespace ml::gfx
 {
-	shared<vertexarray> vertexarray::allocate(uint32_t mode) noexcept
+	shared<vertexarray> vertexarray::create(uint32_t mode) noexcept
 	{
 		return _ML make_shared<impl_vertexarray>(mode);
 	}
@@ -77,7 +76,7 @@ namespace ml::gfx
 // vertexbuffer
 namespace ml::gfx
 {
-	shared<vertexbuffer> vertexbuffer::allocate(uint32_t usage, size_t count, address_t data) noexcept
+	shared<vertexbuffer> vertexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<impl_vertexbuffer>(usage, count, data);
 	}
@@ -93,7 +92,7 @@ namespace ml::gfx
 // indexbuffer
 namespace ml::gfx
 {
-	shared<indexbuffer> indexbuffer::allocate(uint32_t usage, size_t count, address_t data) noexcept
+	shared<indexbuffer> indexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<impl_indexbuffer>(usage, count, data);
 	}
@@ -127,7 +126,7 @@ namespace ml::gfx
 // texture2d
 namespace ml::gfx
 {
-	shared<texture2d> texture2d::allocate(texopts const & opts, address_t data) noexcept
+	shared<texture2d> texture2d::create(texopts const & opts, address_t data) noexcept
 	{
 		return _ML make_shared<impl_texture2d>(opts, data);
 	}
@@ -143,7 +142,7 @@ namespace ml::gfx
 // texturecube
 namespace ml::gfx
 {
-	shared<texturecube> texturecube::allocate(texopts const & opts) noexcept
+	shared<texturecube> texturecube::create(texopts const & opts) noexcept
 	{
 		return _ML make_shared<impl_texturecube>(opts);
 	}
@@ -159,7 +158,7 @@ namespace ml::gfx
 // framebuffer
 namespace ml::gfx
 {
-	shared<framebuffer> framebuffer::allocate(texopts const & opts)
+	shared<framebuffer> framebuffer::create(texopts const & opts)
 	{
 		return _ML make_shared<impl_framebuffer>(opts);
 	}
@@ -175,9 +174,9 @@ namespace ml::gfx
 // shader
 namespace ml::gfx
 {
-	shared<shader> shader::allocate(uint32_t type) noexcept
+	shared<shader> shader::create(uint32_t type, int32_t flags) noexcept
 	{
-		return _ML make_shared<impl_program>(type);
+		return _ML make_shared<impl_program>(type, flags);
 	}
 }
 
@@ -186,7 +185,7 @@ namespace ml::gfx
 // program
 namespace ml::gfx
 {
-	shared<program> program::allocate() noexcept
+	shared<program> program::create() noexcept
 	{
 		return _ML make_shared<impl_shader>();
 	}

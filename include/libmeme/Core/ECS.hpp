@@ -38,7 +38,7 @@ namespace ml::ecs::detail
 }
 
 // (T) TAGS
-namespace ml::ecs::cfg
+namespace ml::ecs::detail
 {
 	template <class ... Tags
 	> struct tags final
@@ -82,7 +82,7 @@ namespace ml::ecs::cfg
 }
 
 // (C) COMPONENTS
-namespace ml::ecs::cfg
+namespace ml::ecs::detail
 {
 	template <class ... Components
 	> struct components final
@@ -128,7 +128,7 @@ namespace ml::ecs::cfg
 }
 
 // (S) SIGNATURES
-namespace ml::ecs::cfg
+namespace ml::ecs::detail
 {
 	template <class ... Signatures
 	> struct signatures final
@@ -164,7 +164,7 @@ namespace ml::ecs::cfg
 }
 
 // (X) SYSTEMS
-namespace ml::ecs::cfg
+namespace ml::ecs::detail
 {
 	template <template <class> class ... Systems
 	> struct systems final
@@ -203,7 +203,7 @@ namespace ml::ecs::cfg
 }
 
 // (O) OPTIONS
-namespace ml::ecs::cfg
+namespace ml::ecs::detail
 {
 	template <
 		size_t	GrowBase = 5,
@@ -229,11 +229,11 @@ namespace ml::ecs::cfg
 namespace ml::ecs
 {
 	template <
-		class T = cfg::tags			<>,	// Tags
-		class C = cfg::components	<>,	// Components
-		class S = cfg::signatures	<>,	// Signatures
-		class X = cfg::systems		<>,	// Systems
-		class O = cfg::options		<>	// Options
+		class T = detail::tags			<>,	// Tags
+		class C = detail::components	<>,	// Components
+		class S = detail::signatures	<>,	// Signatures
+		class X = detail::systems		<>,	// Systems
+		class O = detail::options		<>	// Options
 	> struct traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -383,12 +383,12 @@ namespace ml::ecs
 namespace ml::ecs::impl
 {
 	// object oriented abstraction over manager/entity interface
-	template <class M = manager<>
+	template <class U = manager<>
 	> struct handle final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = typename _ML_ECS impl::handle<M>;
+		using self_type = typename _ML_ECS impl::handle<U>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -506,9 +506,9 @@ namespace ml::ecs::impl
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend M;
+		friend U;
 
-		M *		m_manager;	// pointer to owning manager
+		U *		m_manager;	// pointer to owning manager
 		size_t	m_entity;	// index of real entity data
 		size_t	m_self;		// index of real handle data
 		int32_t	m_counter;	// validity check counter
@@ -693,7 +693,7 @@ namespace ml::ecs
 			{
 				m_size = 0;
 			}
-			else m_size = m_size_next = ([&]()
+			else m_size = m_size_next = std::invoke([&]() noexcept
 			{
 				// arrange all alive entities towards the left
 				size_t dead{}, alive{ m_size_next - 1 };
@@ -733,7 +733,7 @@ namespace ml::ecs
 					++dead; --alive;
 				}
 				return dead;
-			})();
+			});
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1128,45 +1128,45 @@ namespace ml::ecs::tests
 	using S3 = meta::list<C1, T0, C3, T2>;	// 01010101
 
 	// traits
-	using M = traits<
-		cfg::tags		<T0, T1, T2>,
-		cfg::components	<C0, C1, C2, C3, C4>,
-		cfg::signatures	<S0, S1, S2, S3>,
-		cfg::systems	<>
+	using U = traits<
+		detail::tags		<T0, T1, T2>,
+		detail::components	<C0, C1, C2, C3, C4>,
+		detail::signatures	<S0, S1, S2, S3>,
+		detail::systems		<>
 	>;
 
 	// tests
-	static_assert(M::tag_count				== 3);
-	static_assert(M::component_count		== 5);
-	static_assert(M::signature_count		== 4);
-	static_assert(M::system_count			== 0);
+	static_assert(U::tag_count				== 3);
+	static_assert(U::component_count		== 5);
+	static_assert(U::signature_count		== 4);
+	static_assert(U::system_count			== 0);
 
-	static_assert(M::component_id<C0>()		== 0);
-	static_assert(M::component_id<C1>()		== 1);
-	static_assert(M::component_id<C2>()		== 2);
-	static_assert(M::component_id<C3>()		== 3);
-	static_assert(M::component_id<C4>()		== 4);
-	static_assert(M::tag_id<T0>()			== 0);
-	static_assert(M::tag_id<T1>()			== 1);
-	static_assert(M::tag_id<T2>()			== 2);
-	static_assert(M::signature_id<S0>()		== 0);
-	static_assert(M::signature_id<S1>()		== 1);
-	static_assert(M::signature_id<S2>()		== 2);
-	static_assert(M::signature_id<S3>()		== 3);
+	static_assert(U::component_id<C0>()		== 0);
+	static_assert(U::component_id<C1>()		== 1);
+	static_assert(U::component_id<C2>()		== 2);
+	static_assert(U::component_id<C3>()		== 3);
+	static_assert(U::component_id<C4>()		== 4);
+	static_assert(U::tag_id<T0>()			== 0);
+	static_assert(U::tag_id<T1>()			== 1);
+	static_assert(U::tag_id<T2>()			== 2);
+	static_assert(U::signature_id<S0>()		== 0);
+	static_assert(U::signature_id<S1>()		== 1);
+	static_assert(U::signature_id<S2>()		== 2);
+	static_assert(U::signature_id<S3>()		== 3);
 
-	static_assert(M::component_bit<C0>()	== 0);
-	static_assert(M::component_bit<C1>()	== 1);
-	static_assert(M::component_bit<C2>()	== 2);
-	static_assert(M::component_bit<C3>()	== 3);
-	static_assert(M::component_bit<C4>()	== 4);
-	static_assert(M::tag_bit<T0>()			== 5);
-	static_assert(M::tag_bit<T1>()			== 6);
-	static_assert(M::tag_bit<T2>()			== 7);
+	static_assert(U::component_bit<C0>()	== 0);
+	static_assert(U::component_bit<C1>()	== 1);
+	static_assert(U::component_bit<C2>()	== 2);
+	static_assert(U::component_bit<C3>()	== 3);
+	static_assert(U::component_bit<C4>()	== 4);
+	static_assert(U::tag_bit<T0>()			== 5);
+	static_assert(U::tag_bit<T1>()			== 6);
+	static_assert(U::tag_bit<T2>()			== 7);
 
-	static_assert(M::signature_bitset<S0>() == 0b00000000);
-	static_assert(M::signature_bitset<S1>() == 0b00000011);
-	static_assert(M::signature_bitset<S2>() == 0b00110001);
-	static_assert(M::signature_bitset<S3>() == 0b10101010);
+	static_assert(U::signature_bitset<S0>() == 0b00000000);
+	static_assert(U::signature_bitset<S1>() == 0b00000011);
+	static_assert(U::signature_bitset<S2>() == 0b00110001);
+	static_assert(U::signature_bitset<S3>() == 0b10101010);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

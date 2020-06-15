@@ -152,10 +152,8 @@ namespace ml
 
 	void window::swap_buffers()
 	{
-		if ML_UNLIKELY(get_hint(window_hints_doublebuffer))
-		{
-			m_window->swap_buffers();
-		}
+		m_window->swap_buffers();
+		
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

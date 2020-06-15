@@ -344,15 +344,20 @@
 #endif
 
 // visibility
-#ifdef ML_cc_msvc
-#   define ML_API_EXPORT        __declspec(dllexport)
-#   define ML_API_IMPORT        __declspec(dllimport)
-#elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
-#   define ML_API_EXPORT        __attribute__ ((visibility ("default")))
-#   define ML_API_IMPORT        __attribute__ ((visibility ("hidden")))
+#ifndef ML_STATIC
+#	ifdef ML_cc_msvc
+#	   define ML_API_EXPORT     __declspec(dllexport)
+#	   define ML_API_IMPORT     __declspec(dllimport)
+#	elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
+#	   define ML_API_EXPORT    __attribute__ ((visibility ("default")))
+#	   define ML_API_IMPORT    __attribute__ ((visibility ("hidden")))
+#	else
+#	   define ML_API_EXPORT
+#	   define ML_API_IMPORT
+#	endif
 #else
-#   define ML_API_EXPORT
-#   define ML_API_IMPORT
+#	   define ML_API_EXPORT
+#	   define ML_API_IMPORT
 #endif
 
 

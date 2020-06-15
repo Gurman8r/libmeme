@@ -81,8 +81,6 @@ namespace ml
 	private:
 		friend singleton<performance>;
 
-		performance() noexcept = default;
-
 		~performance() noexcept;
 
 		frame_data m_current{}, m_previous{};

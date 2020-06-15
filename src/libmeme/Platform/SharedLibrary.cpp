@@ -4,11 +4,13 @@
 
 // platform specific
 #if defined(ML_os_windows)
-#	include <Windows.h>
-#elif defined(ML_os_apple)
+#include <Windows.h>
+
 #elif defined(ML_os_unix)
 //	https://reemus.blogspot.com/2009/02/dynamic-load-library-linux.html
+
 #else
+#error "shared libraries are unavailable"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

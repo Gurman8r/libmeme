@@ -88,22 +88,22 @@ namespace ml
 	using entity_traits = ecs::traits<
 
 		// tags
-		ecs::cfg::tags<
+		ecs::detail::tags<
 		t_default
 		>,
 
 		// components
-		ecs::cfg::components<
+		ecs::detail::components<
 		c_shader, c_material, c_mesh, c_transform
 		>,
 
 		// signatures
-		ecs::cfg::signatures<
+		ecs::detail::signatures<
 		s_update_materials, s_upload_uniforms, s_draw_meshes
 		>,
 
 		// systems
-		ecs::cfg::systems<
+		ecs::detail::systems<
 		x_update_materials, x_upload_uniforms, x_draw_meshes
 		>
 	>;
@@ -115,6 +115,69 @@ namespace ml
 	using entity_manager = ecs::manager<entity_traits>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+//#include <glm/glm/glm.hpp>
+//#include <glm/glm/gtc/matrix_transform.hpp>
+
+// CAMERA
+namespace ml
+{
+	struct perspective_camera final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		vec3	position	{ 0, 0, 3 };
+		vec3	forward		{ 0, 0, -1 };
+		vec3	up			{ 0, 1, 0 };
+		vec3	right		{ 1, 0, 0 };
+		vec3	world_up	{ 0, 1, 0 };
+		float_t pitch		{ 0.f };
+		float_t yaw			{ -90.f };
+		float_t zoom		{ 45.f };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void swap(perspective_camera & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				position.swap(other.position);
+				forward	.swap(other.forward);
+				up		.swap(other.up);
+				right	.swap(other.right);
+				world_up.swap(other.world_up);
+				
+				std::swap(pitch	, other.pitch);
+				std::swap(yaw	, other.yaw);
+				std::swap(zoom	, other.zoom);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml
+{
+	template <class T, class Update
+	> struct cbuffer final
+	{
+		cbuffer(Update && fn) : m_update{ ML_forward(fn) }
+		{
+		}
+
+	private:
+		Update const m_update;
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -144,11 +207,13 @@ namespace ml
 		// RENDERING
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		perspective_camera m_camera{};
+
 		shader_cache m_cache{};
 
 		vec2 m_resolution{ 1280, 720 };
 
-		ds::array<shared<gfx::framebuffer>, 1> m_pipeline{};
+		ds::array<shared<gfx::framebuffer>, 1> m_fbo{};
 
 
 		// GUI
@@ -244,7 +309,7 @@ namespace ml
 
 			// FRAMEBUFFERS
 			{
-				m_pipeline[0] = gfx::framebuffer::allocate({ m_resolution });
+				m_fbo[0] = gfx::framebuffer::create({ m_resolution });
 			}
 
 			// ICON
@@ -260,12 +325,12 @@ namespace ml
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gfx::texture2d::allocate(*m_images["default"]);
-				m_textures["doot"]			= gfx::texture2d::allocate(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gfx::texture2d::allocate(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gfx::texture2d::allocate(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"]		= gfx::texture2d::create(*m_images["default"]);
+				m_textures["doot"]			= gfx::texture2d::create(engine::fs().path2("assets/textures/doot.png"));
+				m_textures["navball"]		= gfx::texture2d::create(engine::fs().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
@@ -312,8 +377,8 @@ namespace ml
 				// camera
 				auto const _camera = material
 				{
-					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
-					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
+					make_uniform<vec3f	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
+					make_uniform<vec3f	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov"	, 45.0f),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
@@ -395,13 +460,13 @@ namespace ml
 				
 				auto & earth = make_renderer("3D", "earth", "sphere32x24", c_transform{
 					vec3{ -.5f, 0.f, 0.f },
-					vec4{ 0.0f, 0.1f, 0.0f, .15f },
+					vec4{ 0.0f, 0.1f, 0.0f, -.15f },
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3D", "moon", "sphere8x6", c_transform{
+				auto & moon = make_renderer("3D", "moon", "monkey", c_transform{
 					vec3{ 1.f, 0.f, 0.f },
-					vec4{ 0.0f, 0.1f, 0.0f, -.25f },
+					vec4{ 0.0f, 0.1f, 0.0f, .25f },
 					vec3::fill(.27f)
 					});
 			}
@@ -430,7 +495,7 @@ namespace ml
 			m_ecs.update_system<x_upload_uniforms>();
 
 			// pipeline
-			for (auto & fbo : m_pipeline)
+			for (auto & fbo : m_fbo)
 			{
 				fbo->resize(m_resolution);
 			}
@@ -440,9 +505,9 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			if (m_pipeline[0])
+			if (m_fbo[0])
 			{
-				ML_bind_scope(m_pipeline[0].get());
+				ML_bind_scope(m_fbo[0].get());
 
 				for (auto const & cmd :
 				{
@@ -707,14 +772,13 @@ namespace ml
 		{
 			static gui::texture_preview preview{};
 
-			auto const & tex{ m_pipeline.back()->get_color_attachments().front() };
+			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
 			preview.tex_addr = tex->get_handle();
 			preview.tex_size = tex->get_size();
 			
-			preview.render([&]() noexcept
-			{
-				m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
-			});
+			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
+			
+			preview.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1180,7 +1244,7 @@ namespace ml
 			if (ImGui::CollapsingHeader("alpha"))
 			{
 				bool a_enabled{ ctx->get_alpha_enabled() };
-				auto a_fn{ ctx->get_alpha_fn() };
+				auto a_fn{ ctx->get_alpha_mode() };
 				ImGui::Checkbox("enabled", &a_enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a_fn.pred], a_fn.pred);
 				ImGui::Text("reference: %f", a_fn.ref);
@@ -1191,47 +1255,44 @@ namespace ml
 			{
 				bool b_enabled{ ctx->get_blend_enabled() };
 				auto b_color{ ctx->get_blend_color() };
-				auto b_eq{ ctx->get_blend_eq() };
-				auto b_fn{ ctx->get_blend_fn() };
+				auto b_mode{ ctx->get_blend_mode() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
-				ImGui::Text("mode rgb: %s (%u)", gfx::function_names[b_eq.modeRGB], b_eq.modeRGB);
-				ImGui::Text("mode alpha: %s (%u)", gfx::function_names[b_eq.modeAlpha], b_eq.modeAlpha);
-				ImGui::Text("src factor rgb: %s (%u)", gfx::factor_names[b_fn.sfactorRGB], b_fn.sfactorRGB);
-				ImGui::Text("src factor alpha: %s (%u)", gfx::factor_names[b_fn.sfactorAlpha], b_fn.sfactorAlpha);
-				ImGui::Text("dst factor rgb: %s (%u)", gfx::factor_names[b_fn.dfactorRGB], b_fn.dfactorRGB);
-				ImGui::Text("dst factor alpha: %s (%u)", gfx::factor_names[b_fn.dfactorAlpha], b_fn.dfactorAlpha);
+				ImGui::Text("color equation: %s (%u)", gfx::function_names[b_mode.color_equation], b_mode.color_equation);
+				ImGui::Text("color src factor: %s (%u)", gfx::factor_names[b_mode.color_sfactor], b_mode.color_sfactor);
+				ImGui::Text("color dst factor: %s (%u)", gfx::factor_names[b_mode.color_dfactor], b_mode.color_dfactor);
+				ImGui::Text("alpha equation: %s (%u)", gfx::function_names[b_mode.alpha_equation], b_mode.alpha_equation);
+				ImGui::Text("alpha src factor: %s (%u)", gfx::factor_names[b_mode.alpha_sfactor], b_mode.alpha_sfactor);
+				ImGui::Text("alpha dst factor: %s (%u)", gfx::factor_names[b_mode.alpha_dfactor], b_mode.alpha_dfactor);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
 				bool c_enabled{ ctx->get_cull_enabled() };
-				auto c_facet{ ctx->get_cull_facet() };
-				auto c_order{ ctx->get_cull_order() };
+				auto c_mode{ ctx->get_cull_mode() };
 				ImGui::Checkbox("enabled", &c_enabled);
-				ImGui::Text("facet: %s (%u)", gfx::facet_names[c_facet], c_facet);
-				ImGui::Text("order: %s (%u)", gfx::order_names[c_order], c_order);
+				ImGui::Text("facet: %s (%u)", gfx::facet_names[c_mode.facet], c_mode.facet);
+				ImGui::Text("order: %s (%u)", gfx::order_names[c_mode.order], c_mode.order);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
 				bool d_enabled{ ctx->get_depth_enabled() };
-				auto d_pred{ ctx->get_depth_pr() };
-				bool d_mask{ ctx->get_depth_mask() };
-				auto d_range{ ctx->get_depth_range() };
+				bool d_mask{ ctx->get_depth_write() };
+				auto d_mode{ ctx->get_depth_mode() };
 				ImGui::Checkbox("enabled", &d_enabled);
-				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d_pred], d_pred);
+				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d_mode.pred], d_mode.pred);
 				ImGui::Checkbox("mask", &d_mask);
-				ImGui::Text("range: %f, %f", d_range.nearVal, d_range.farVal);
+				ImGui::Text("range: %f, %f", d_mode.range[0], d_mode.range[1]);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
 				bool s_enabled{ ctx->get_stencil_enabled() };
-				auto s_fn{ ctx->get_stencil_fn() };
+				auto s_fn{ ctx->get_stencil_mode() };
 				ImGui::Checkbox("enabled", &s_enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s_fn.pred], s_fn.pred);
 				ImGui::Text("reference: %i", s_fn.ref);

@@ -19,7 +19,7 @@ namespace ml::gfx
 
 		friend class device;
 
-		friend class std::unique_ptr<device, default_delete>;
+		friend class std::unique_ptr<device, default_delete<>>;
 
 		~opengl_device() override = default;
 
@@ -34,41 +34,33 @@ namespace ml::gfx
 
 		devinfo const & get_devinfo() const noexcept override { return m_devinfo; }
 
-		uint32_t get_error() const noexcept override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool get_alpha_enabled() const override;
 
-		alpha_fn get_alpha_fn() const override;
+		alpha_mode get_alpha_mode() const override;
 		
 		bool get_blend_enabled() const override;
 
 		color get_blend_color() const override;
 		
-		blend_eq get_blend_eq() const override;
-		
-		blend_fn get_blend_fn() const override;
+		blend_mode get_blend_mode() const override;
 		
 		color get_clear_color() const override;
 
 		bool get_cull_enabled() const override;
 
-		uint32_t get_cull_facet() const override;
-
-		uint32_t get_cull_order() const override;
+		cull_mode get_cull_mode() const override;
 
 		bool get_depth_enabled() const override;
 		
-		uint32_t get_depth_pr() const override;
-		
-		bool get_depth_mask() const override;
+		depth_mode get_depth_mode() const override;
 
-		depth_range get_depth_range() const override;
+		bool get_depth_write() const override;
 
 		bool get_stencil_enabled() const override;
 
-		stencil_fn get_stencil_fn() const override;
+		stencil_mode get_stencil_mode() const override;
 
 		int_rect get_viewport() const override;
 
@@ -76,35 +68,29 @@ namespace ml::gfx
 
 		void set_alpha_enabled(bool enabled) override;
 
-		void set_alpha_fn(alpha_fn const & value) override;
+		void set_alpha_mode(alpha_mode const & value) override;
 		
 		void set_blend_color(color const & value) override;
 
 		void set_blend_enabled(bool enabled) override;
 		
-		void set_blend_eq(blend_eq const & value) override;
-		
-		void set_blend_fn(blend_fn const & value) override;
+		void set_blend_mode(blend_mode const & value) override;
 		
 		void set_clear_color(color const & value) override;
 		
 		void set_cull_enabled(bool enabled) override;
 
-		void set_cull_facet(uint32_t facet) override;
-
-		void set_cull_order(uint32_t order) override;
+		void set_cull_mode(cull_mode const & value) override;
 
 		void set_depth_enabled(bool enabled) override;
 		
-		void set_depth_pr(uint32_t predicate) override;
-		
-		void set_depth_mask(bool enabled) override;
+		void set_depth_mode(depth_mode const & value) override;
 
-		void set_depth_range(depth_range const & value) override;
+		void set_depth_write(bool enabled) override;
 
 		void set_stencil_enabled(bool enabled) override;
 
-		void set_stencil_fn(stencil_fn const & value) override;
+		void set_stencil_mode(stencil_mode const & value) override;
 
 		void set_viewport(int_rect const & bounds) override;
 
@@ -457,10 +443,11 @@ namespace ml::gfx
 		uint32_t		m_handle		{}; // handle
 		pmr::string		m_error_log		{}; // error log
 		uint32_t const	m_shader_type	{}; // type
+		int32_t const	m_flags			{};
 		shader_src_t	m_source		{}; // source
 
 	public:
-		opengl_shader(uint32_t type);
+		opengl_shader(uint32_t type, int32_t flags = shader_flags_default);
 
 		~opengl_shader() override;
 
@@ -475,9 +462,11 @@ namespace ml::gfx
 
 		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
 
+		int32_t get_flags() const noexcept override { return m_flags; }
+
 		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
 
-		shader_src_t const & get_source() const noexcept override { return m_source; }
+		pmr::vector<pmr::string> const & get_source() const noexcept override { return m_source; }
 
 	protected:
 		bool do_is_equal(device_resource const & other) const noexcept override
@@ -514,9 +503,9 @@ namespace ml::gfx
 
 			operator bool() const noexcept { return -1 < ML_handle(int32_t, location); }
 
-			opengl_uniform_binder(opengl_program & s, cstring name);
+			opengl_uniform_binder(opengl_program & s, cstring name) noexcept;
 
-			~opengl_uniform_binder();
+			~opengl_uniform_binder() noexcept;
 		};
 
 	public:

@@ -115,8 +115,6 @@ namespace ml
 	private:
 		friend singleton<event_system>;
 
-		event_system() noexcept = default;
-
 		~event_system() noexcept;
 
 		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};

@@ -200,8 +200,8 @@ namespace ml::util
 		return temp;
 	}
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto determinant(M<T, 4, 4> const & v)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto determinant(U<T, 4, 4> const & v)
 	{
 		return
 			v[0] * (v[15] * v[5] - v[7] * v[13]) -
@@ -247,13 +247,13 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto inverse(M<T, 4, 4> const & v)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto inverse(U<T, 4, 4> const & v)
 	{
-		auto const det{ determinant<M, T>(v) };
+		auto const det{ determinant<U, T>(v) };
 		return (det == T{})
-			? M<T, 4, 4>::identity()
-			: M<T, 4, 4>
+			? U<T, 4, 4>::identity()
+			: U<T, 4, 4>
 			{
 				+(v[15] * v[5] - v[7] * v[13]) / det,
 				-(v[15] * v[4] - v[7] * v[12]) / det,
@@ -267,10 +267,10 @@ namespace ml::util
 			};
 	}
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 3> & v, M<T, 4, 4> const & m)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto rebase(const U<T, 3, 3> & v, U<T, 4, 4> const & m)
 	{
-		return M<T, 3, 3>
+		return U<T, 3, 3>
 		{
 			m[0] * v[0] + m[4] * v[3] + m[8] * v[6],
 			m[1] * v[0] + m[5] * v[3] + m[9] * v[6],
@@ -284,10 +284,10 @@ namespace ml::util
 		};
 	}
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, M<T, 4, 4> const & m)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto rebase(const U<T, 3, 1> & v, U<T, 4, 4> const & m)
 	{
-		return M<T, 3, 1>
+		return U<T, 3, 1>
 		{
 			m[0] * v[0] * m[4] * v[1] * m[8] * v[2] * m[12],
 			m[1] * v[0] * m[5] * v[1] * m[9] * v[2] * m[13],
@@ -297,16 +297,16 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto cross(M<T, 2, 1> const & a, M<T, 2, 1> const & b)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto cross(U<T, 2, 1> const & a, U<T, 2, 1> const & b)
 	{
 		return a[0] * b[1] - b[0] * a[1];
 	}
 
-	template <template <class, size_t, size_t> class M, class T
-	> ML_NODISCARD constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
+	template <template <class, size_t, size_t> class U, class T
+	> ML_NODISCARD constexpr auto cross(const U<T, 3, 1> & a, const U<T, 3, 1> & b)
 	{
-		return M<T, 3, 1>
+		return U<T, 3, 1>
 		{
 			a[1] * b[2] - b[1] * a[2],
 			a[2] * b[0] - b[2] * a[0],

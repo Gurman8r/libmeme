@@ -15,7 +15,7 @@ namespace ml
 		using indices_t		= typename pmr::vector<uint32_t>;
 
 		mesh(uint32_t mode = gfx::primitive_triangles) noexcept
-			: m_vao{ gfx::vertexarray::allocate(mode) }
+			: m_vao{ gfx::vertexarray::create(mode) }
 		{
 		}
 
@@ -77,12 +77,12 @@ namespace ml
 
 		void add_vertices(contiguous_t const & verts) noexcept
 		{
-			add_vertices(gfx::vertexbuffer::allocate(verts.size(), verts.data()));
+			add_vertices(gfx::vertexbuffer::create(verts.size(), verts.data()));
 		}
 
 		void add_vertices(contiguous_t const & verts, gfx::buffer_layout const & buffer_layout) noexcept
 		{
-			add_vertices(std::invoke([&, vb = gfx::vertexbuffer::allocate(verts.size(), verts.data())
+			add_vertices(std::invoke([&, vb = gfx::vertexbuffer::create(verts.size(), verts.data())
 			]() noexcept
 			{
 				vb->set_layout(buffer_layout);
@@ -99,7 +99,7 @@ namespace ml
 
 		void set_indices(indices_t const & inds) noexcept
 		{
-			set_indices(inds.empty() ? nullptr : gfx::indexbuffer::allocate
+			set_indices(inds.empty() ? nullptr : gfx::indexbuffer::create
 			(
 				inds.size(), inds.data()
 			));

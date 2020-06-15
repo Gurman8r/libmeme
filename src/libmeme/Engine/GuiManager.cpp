@@ -86,8 +86,7 @@ namespace ml
 		ImGui::DestroyContext();
 
 		m_gui_context = nullptr;
-
-		return !is_initialized();
+		return !m_gui_context;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

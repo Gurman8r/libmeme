@@ -10,8 +10,6 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	class ML_ENGINE_API ML_NODISCARD engine final
 	{
 	public:

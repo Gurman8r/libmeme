@@ -190,7 +190,7 @@ namespace ml
 			GLFW_SCALE_TO_MONITOR,
 		};
 		ML_assert(value < ML_arraysize(attribs));
-		return glfwGetWindowAttrib(m_window, attribs[value]);
+		return glfwGetWindowAttrib(m_window, attribs[(uint32_t)value]);
 	}
 
 	int_rect glfw_window::get_bounds() const
@@ -384,7 +384,7 @@ namespace ml
 			GLFW_RESIZE_NWSE_CURSOR,
 			GLFW_ARROW_CURSOR,
 		};
-		return (cursor_handle)glfwCreateStandardCursor(shapes[static_cast<size_t>(value)]);
+		return (cursor_handle)glfwCreateStandardCursor(shapes[(size_t)value]);
 	}
 
 	int32_t glfw_window::extension_supported(cstring value)
@@ -407,12 +407,14 @@ namespace ml
 		static pmr::vector<monitor_handle> temp{};
 		static ML_scope // once
 		{
-			int32_t count{};
-			GLFWmonitor ** monitors{ glfwGetMonitors(&count) };
-			temp.reserve((size_t)count);
-			for (size_t i = 0, imax = (size_t)count; i < imax; ++i)
+			if (int32_t count{}; GLFWmonitor ** monitors{ glfwGetMonitors(&count) })
 			{
-				temp.push_back((monitor_handle)monitors[i]);
+				temp.reserve((size_t)count);
+
+				for (size_t i = 0, imax = (size_t)count; i < imax; ++i)
+				{
+					temp.push_back((monitor_handle)monitors[i]);
+				}
 			}
 		};
 		return temp;

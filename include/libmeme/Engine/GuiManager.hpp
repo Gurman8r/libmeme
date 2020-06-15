@@ -25,7 +25,7 @@ namespace ml
 
 		ML_NODISCARD bool initialize(struct window const & w, cstring shading_language_version);
 
-		ML_NODISCARD bool finalize();
+		bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

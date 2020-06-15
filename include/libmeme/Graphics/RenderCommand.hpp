@@ -5,7 +5,7 @@
 
 namespace ml::gfx
 {
-	// render command types
+	// render command type
 	ML_alias command_t = typename std::function<void()>;
 
 	// render command generators
@@ -17,7 +17,7 @@ namespace ml::gfx
 		template <class Fn, class ... Args
 		> ML_NODISCARD static command_t builtin(Fn && fn, Args && ... args) noexcept
 		{
-			return std::bind(ML_forward(fn), device::get_context().get(), ML_forward(args)...);
+			return std::bind(ML_forward(fn), device::get_context(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args
@@ -33,9 +33,9 @@ namespace ml::gfx
 			return builtin(&device::set_alpha_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_alpha_fn(alpha_fn const & value) noexcept
+		ML_NODISCARD static auto set_alpha_mode(alpha_mode const & value) noexcept
 		{
-			return builtin(&device::set_alpha_fn, value);
+			return builtin(&device::set_alpha_mode, value);
 		}
 
 		ML_NODISCARD static auto set_blend_enabled(bool enabled) noexcept
@@ -48,14 +48,9 @@ namespace ml::gfx
 			return builtin(&device::set_blend_color, value);
 		}
 
-		ML_NODISCARD static auto set_blend_eq(blend_eq const & value) noexcept
+		ML_NODISCARD static auto set_blend_mode(blend_mode const & value) noexcept
 		{
-			return builtin(&device::set_blend_eq, value);
-		}
-
-		ML_NODISCARD static auto set_blend_fn(blend_fn const & value) noexcept
-		{
-			return builtin(&device::set_blend_fn, value);
+			return builtin(&device::set_blend_mode, value);
 		}
 
 		ML_NODISCARD static auto set_clear_color(color const & value) noexcept
@@ -68,14 +63,9 @@ namespace ml::gfx
 			return builtin(&device::set_cull_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_cull_facet(uint32_t facet) noexcept
+		ML_NODISCARD static auto set_cull_mode(cull_mode const & value) noexcept
 		{
-			return builtin(&device::set_cull_facet, facet);
-		}
-
-		ML_NODISCARD static auto set_cull_order(uint32_t order) noexcept
-		{
-			return builtin(&device::set_cull_order, order);
+			return builtin(&device::set_cull_mode, value);
 		}
 
 		ML_NODISCARD static auto set_depth_enabled(bool enabled) noexcept
@@ -83,19 +73,14 @@ namespace ml::gfx
 			return builtin(&device::set_depth_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_depth_mask(bool enabled) noexcept
+		ML_NODISCARD static auto set_depth_write(bool enabled) noexcept
 		{
-			return builtin(&device::set_depth_mask, enabled);
-		}
-		
-		ML_NODISCARD static auto set_depth_pr(uint32_t predicate) noexcept
-		{
-			return builtin(&device::set_depth_pr, predicate);
+			return builtin(&device::set_depth_write, enabled);
 		}
 
-		ML_NODISCARD static auto set_depth_range(depth_range const & value) noexcept
+		ML_NODISCARD static auto set_depth_mode(depth_mode const & value) noexcept
 		{
-			return builtin(&device::set_depth_range, value);
+			return builtin(&device::set_depth_mode, value);
 		}
 
 		ML_NODISCARD static auto set_stencil_enabled(bool enabled) noexcept
@@ -103,9 +88,9 @@ namespace ml::gfx
 			return builtin(&device::set_stencil_enabled, enabled);
 		}
 
-		ML_NODISCARD static auto set_stencil_fn(stencil_fn const & value) noexcept
+		ML_NODISCARD static auto set_stencil_mode(stencil_mode const & value) noexcept
 		{
-			return builtin(&device::set_stencil_fn, value);
+			return builtin(&device::set_stencil_mode, value);
 		}
 
 		ML_NODISCARD static auto set_viewport(int_rect const & bounds) noexcept
@@ -145,14 +130,14 @@ namespace ml::gfx
 		template <class T
 		> ML_NODISCARD static auto upload(uniform_id loc, T value) noexcept
 		{
-			return builtin(static_cast<void(device:: *)(resource_id, T)
+			return builtin(static_cast<void(device:: *)(uniform_id, T)
 			>(&device::upload), loc, value);
 		}
 
 		template <class T
 		> ML_NODISCARD static auto upload(uniform_id loc, T const & value) noexcept
 		{
-			return builtin(static_cast<void(device:: *)(resource_id, T const &)
+			return builtin(static_cast<void(device:: *)(uniform_id, T const &)
 			>(&device::upload), loc, value);
 		}
 

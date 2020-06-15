@@ -74,7 +74,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle
-#define ML_declhandle(name)		struct ML_cat(name, __) { _ML int32_t unused; }; \
+#define ML_decl_handle(name)	struct ML_cat(name, __) { _ML int32_t unused; }; \
 								using name = typename ML_cat(name, __) *
 
 // handle cast

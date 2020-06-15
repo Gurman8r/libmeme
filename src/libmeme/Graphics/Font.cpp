@@ -88,7 +88,7 @@ namespace ml
 		}
 
 		// graphic
-		g.graphic = gfx::texture2d::allocate({
+		g.graphic = gfx::texture2d::create({
 			vec2i{}, {
 			gfx::format_rgba,
 			gfx::format_red,
@@ -111,6 +111,10 @@ namespace ml
 		if (!std::isspace(c, {}) && std::isgraph(c, {}))
 		{
 			g.graphic->update((vec2i)g.size(), ((FT_Face)m_face)->glyph->bitmap.buffer);
+		}
+		else
+		{
+			g.graphic->update((vec2i)g.size(), nullptr);
 		}
 
 		return g;

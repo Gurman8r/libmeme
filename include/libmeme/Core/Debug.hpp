@@ -24,8 +24,14 @@
 
 // assert
 #ifndef ML_assert
-#   define ML_assert(expr)		assert(expr)
+#	ifndef NDEBUG
+#		define ML_assert(expr)	assert(expr)
+#	else
+#		define ML_assert(expr)	(expr)
+#	endif
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // breakpoint
 #ifndef ML_breakpoint
@@ -39,6 +45,8 @@
 #		define ML_breakpoint()	::raise(SIGTRAP)
 #	endif
 #endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml::debug
 {
