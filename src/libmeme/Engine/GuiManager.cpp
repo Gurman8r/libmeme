@@ -85,8 +85,7 @@ namespace ml
 
 		ImGui::DestroyContext();
 
-		m_gui_context = nullptr;
-		return !m_gui_context;
+		return !(m_gui_context = nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -213,9 +212,9 @@ namespace ml
 		{
 			switch (hash(to_lower(path.string())))
 			{
-			default: return false;
-			case hash("classic")	: ImGui::StyleColorsClassic();
-			case hash("dark")		: ImGui::StyleColorsDark();
+			default				: return false;
+			case hash("classic"): ImGui::StyleColorsClassic();
+			case hash("dark")	: ImGui::StyleColorsDark();
 			case hash("light")	: ImGui::StyleColorsLight(); 
 			}
 			return true;
