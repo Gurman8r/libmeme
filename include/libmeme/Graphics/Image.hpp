@@ -21,6 +21,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		image() noexcept : image{ allocator_type{} }
+		{
+		}
+
 		explicit image(allocator_type alloc) noexcept
 			: m_size	{ 0 }
 			, m_channels{ 0 }
@@ -28,7 +32,10 @@ namespace ml
 		{
 		}
 
-		image(vec2i const & size, size_t channels, pixels_type const & pix)
+		image(vec2i const & size, size_t channels, pixels_type const & pix, allocator_type alloc = {})
+			: m_size	{ size }
+			, m_channels{ channels }
+			, m_pixels	{ pix, alloc }
 		{
 		}
 
@@ -39,30 +46,14 @@ namespace ml
 		{
 		}
 
-		image() noexcept : image{ allocator_type{} }
-		{
-		}
-
-		image(fs::path const & path, bool flip_v, size_t req_channels, allocator_type alloc = {})
+		image(fs::path const & path, bool flip_v = false, size_t req_channels = 0, allocator_type alloc = {})
 			: image{ alloc }
 		{
 			load_from_file(path, flip_v, req_channels);
 		}
 
-		image(fs::path const & path, bool flip_v, allocator_type alloc = {})
-			: image{ path, flip_v, 0, alloc }
-		{
-		}
-
-		image(fs::path const & path, allocator_type alloc = {})
-			: image{ path, false, alloc }
-		{
-		}
-
 		image(image const & value, allocator_type alloc = {})
-			: m_size	{ value.m_size }
-			, m_channels{ value.m_channels }
-			, m_pixels	{ value.m_pixels }
+			: image{ value.m_size, value.m_channels, value.m_pixels, alloc }
 		{
 		}
 

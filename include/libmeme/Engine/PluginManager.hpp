@@ -21,9 +21,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear();
+		void clear() noexcept { m_data.clear(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool free(fs::path const & path);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		hash_t load(fs::path const & path, void * user_data = nullptr);
 
@@ -31,10 +35,10 @@ namespace ml
 
 	private:
 		ds::batch_vector<
-			hash_t,			// hash code
-			fs::path,		// file name
+			hash_t,			// file hash
+			fs::path,		// file path
 			shared_library,	// library instance
-			unique<plugin>	// pointer to plugin
+			unique<plugin>	// plugin instance
 		> m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -27,7 +27,7 @@
 #	ifndef NDEBUG
 #		define ML_assert(expr)	assert(expr)
 #	else
-#		define ML_assert(expr)	(expr)
+#		define ML_assert(expr)	(void)(expr)
 #	endif
 #endif
 
@@ -69,7 +69,7 @@ namespace ml::debug
 #ifdef ML_os_windows
 		std::system("pause");
 #else
-		std_in.get();
+		std::cin.get();
 #endif
 		return exit_code;
 	}

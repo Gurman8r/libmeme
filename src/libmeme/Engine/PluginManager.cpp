@@ -16,25 +16,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void plugin_manager::clear()
-	{
-		m_data.clear();
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	bool plugin_manager::free(fs::path const & path)
 	{
 		// path empty
 		if (path.empty()) { return false; }
 
-		// hash code
+		// file hash
 		auto const code{ util::hash(path.filename().string()) };
 
-		// lookup code
-		if (auto const it{
-			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
-		}; it == m_data.end<hash_t>())
+		// lookup hash
+		if (auto const it{ std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code) }
+		; it == m_data.end<hash_t>())
 		{
 			m_data.erase((size_t)std::distance(m_data.begin<hash_t>(), it));
 
@@ -50,13 +42,12 @@ namespace ml
 		// path empty
 		if (path.empty()) { return 0; }
 
-		// hash code
+		// file hash
 		auto const code{ util::hash(path.filename().string()) };
 
-		// lookup code
-		if (auto const it{
-			std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code)
-		}; it == m_data.end<hash_t>())
+		// lookup hash
+		if (auto const it{ std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code) }
+		; it == m_data.end<hash_t>())
 		{
 			// load library
 			if (shared_library lib{ path })

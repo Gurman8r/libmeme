@@ -39,8 +39,21 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ new impl_window }
+	window::window() noexcept
+		: m_window	{ new impl_window }
+		, m_settings{}
 	{
+	}
+
+	window::window(window_settings const & ws, bool install_callbacks) noexcept
+		: window{}
+	{
+		ML_assert(this->open(ws, install_callbacks));
+	}
+
+	window::~window() noexcept
+	{
+		delete m_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -128,12 +141,12 @@ namespace ml
 		return is_open();
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void window::destroy()
+	void window::close()
 	{
-		m_window->destroy();
+		m_window->close();
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::iconify()
 	{
@@ -291,11 +304,6 @@ namespace ml
 		m_window->set_monitor(value, bounds);
 	}
 
-	void window::set_should_close(bool value)
-	{
-		m_window->set_should_close(value);
-	}
-
 	void window::set_size(vec2i const & value)
 	{
 		m_window->set_size(value);
@@ -349,34 +357,11 @@ namespace ml
 		return impl_window::get_time();
 	}
 
-	bool window::initialize()
-	{
-#ifdef ML_os_windows
-		if (auto const cw{ GetConsoleWindow() })
-		{
-			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_GRAYED);
-		}
-#endif
-		return impl_window::initialize();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::destroy_cursor(cursor_handle value)
 	{
 		impl_window::destroy_cursor(value);
-	}
-
-	void window::finalize()
-	{
-		impl_window::finalize();
-
-#ifdef ML_os_windows
-		if (auto const cw{ GetConsoleWindow() })
-		{
-			EnableMenuItem(GetSystemMenu(cw, false), SC_CLOSE, MF_ENABLED);
-		}
-#endif
 	}
 
 	void window::poll_events()

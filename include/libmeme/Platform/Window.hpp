@@ -5,21 +5,25 @@
 
 namespace ml
 {
+	struct window_base;
+
 	struct ML_PLATFORM_API window : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		window() noexcept;
 
-		virtual ~window() noexcept = default;
+		explicit window(window_settings const & ws, bool install_callbacks = true) noexcept;
+
+		virtual ~window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD virtual bool open(window_settings const & ws, bool install_callbacks = true);
+		
+		virtual void close();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void destroy();
 
 		void iconify();
 
@@ -83,8 +87,6 @@ namespace ml
 		
 		void set_monitor(monitor_handle value, int_rect const & bounds = {});
 
-		void set_should_close(bool value);
-		
 		void set_size(vec2i const & value);
 		
 		void set_title(cstring value);
@@ -107,13 +109,9 @@ namespace ml
 
 		ML_NODISCARD static float64_t get_time();
 
-		ML_NODISCARD static bool initialize();
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void destroy_cursor(cursor_handle value);
-
-		static void finalize();
 
 		static void poll_events();
 
@@ -159,12 +157,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		window_settings m_settings{};
+		window_settings m_settings;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		unique<struct window_base> m_window;
+		window_base * m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

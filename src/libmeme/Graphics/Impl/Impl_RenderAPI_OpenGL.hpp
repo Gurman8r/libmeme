@@ -19,13 +19,9 @@ namespace ml::gfx
 
 		friend class device;
 
-		friend class std::unique_ptr<device, default_delete<>>;
+		opengl_device(context_settings const & cs);
 
-		~opengl_device() override = default;
-
-		bool do_initialize(context_settings const & settings) override;
-
-		void on_initialize() override;
+		~opengl_device() noexcept override;
 
 		devinfo m_devinfo;
 
@@ -553,7 +549,7 @@ namespace ml::gfx
 		{
 			static auto const max_texture_slots
 			{
-				(size_t)device::get_context()->get_devinfo().max_texture_slots
+				(size_t)device::get_current_context()->get_devinfo().max_texture_slots
 			};
 			if (auto const it{ m_textures.find(loc) })
 			{

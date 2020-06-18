@@ -473,7 +473,7 @@ namespace ml::embed
 		py::class_<ml_engine_window>(m, "window")
 			.def(py::init<>())
 			.def_static("open"					, [](window_settings const & ws, bool ic) { return engine::window().open(ws, ic); })
-			.def_static("destroy"				, []() { engine::window().destroy(); })
+			.def_static("close"					, []() { engine::window().close(); })
 			.def_static("iconify"				, []() { engine::window().iconify(); })
 			.def_static("maximize"				, []() { engine::window().maximize(); })
 			.def_static("restore"				, []() { engine::window().restore(); })
@@ -505,12 +505,10 @@ namespace ml::embed
 			.def_static("set_opacity"			, [](float_t v) { engine::window().set_opacity(v); })
 			.def_static("set_position"			, [](vec2i v) { engine::window().set_position(v); })
 			.def_static("set_monitor"			, [](monitor_handle v, vec4i b) { engine::window().set_monitor(v, b); })
-			.def_static("set_should_close"		, [](bool v) { engine::window().set_should_close(v); })
 			.def_static("set_size"				, [](vec2i v) { engine::window().set_size(v); })
 			.def_static("set_title"				, [](cstring v) { engine::window().set_title(v); })
 
 			.def_static("destroy_cursor"		, [](cursor_handle v) { window::destroy_cursor(v); })
-			.def_static("finalize"				, []() { window::finalize(); })
 			.def_static("poll_events"			, []() { window::poll_events(); })
 			.def_static("set_current_context"	, [](window_handle v) { window::set_current_context(v); })
 			.def_static("set_swap_interval"		, [](int32_t v) { window::set_swap_interval(v); })
@@ -522,7 +520,6 @@ namespace ml::embed
 			.def_static("get_proc_address"		, [](cstring v) { return window::get_proc_address(v); })
 			.def_static("get_monitors"			, []() { return window::get_monitors(); })
 			.def_static("get_time"				, []() { return window::get_time(); })
-			.def_static("initialize"			, []() { return window::initialize(); })
 
 			.def_static("get_context_settings"	, []() { return engine::window().get_context_settings(); })
 			.def_static("get_hint"				, [](int32_t v) { return engine::window().get_hint(v); })
@@ -539,7 +536,7 @@ namespace ml::embed
 			, sys = py::module::import("sys")
 		]()
 		{
-			m.def("exit", [](py::args) { engine::window().set_should_close(true); });
+			m.def("exit", [](py::args) { engine::window().close(); });
 			builtins.attr("exit") = m.attr("exit");
 			sys.attr("exit") = m.attr("exit");
 		})();

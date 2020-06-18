@@ -574,23 +574,18 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool opengl_device::do_initialize(context_settings const & cs)
+	opengl_device::opengl_device(context_settings const & cs)
 	{
-		if (!ML_IMPL_OPENGL_INIT()) { return debug::error("failed initializing opengl device"); }
-		else
+		// INIT
+		static ML_scope{ ML_assert(ML_IMPL_OPENGL_INIT()); };
 		{
 			glCheck((cs.multisample ? &glEnable : &glDisable)(GL_MULTISAMPLE));
-
+			
 			glCheck((cs.srgb_capable ? &glEnable : glDisable)(GL_FRAMEBUFFER_SRGB));
-
+			
 			glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-
-			return true;
 		}
-	}
 
-	void opengl_device::on_initialize()
-	{
 		// VERSION
 		{
 			// renderer
@@ -654,7 +649,6 @@ namespace ml::gfx
 		
 		// SHADERS
 		{
-
 			// shaders available
 #if defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
@@ -682,6 +676,10 @@ namespace ml::gfx
 			// get error
 			m_devinfo.get_error = []() noexcept { return _error_type<to_user>(glGetError()); };
 		}
+	}
+
+	opengl_device::~opengl_device()
+	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -726,17 +724,17 @@ namespace ml::gfx
 		glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&temp.color_equation));
 		temp.color_equation = _function<to_user>(temp.color_equation);
 
-		glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&temp.alpha_equation));
-		temp.alpha_equation = _function<to_user>(temp.alpha_equation);
-
 		glCheck(glGetIntegerv(GL_BLEND_SRC_RGB, (int32_t *)&temp.color_sfactor));
 		temp.color_sfactor = _factor<to_user>(temp.color_sfactor);
 
-		glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&temp.alpha_sfactor));
-		temp.alpha_sfactor = _factor<to_user>(temp.alpha_sfactor);
-
 		glCheck(glGetIntegerv(GL_BLEND_DST_RGB, (int32_t *)&temp.color_dfactor));
 		temp.color_dfactor = _factor<to_user>(temp.color_dfactor);
+
+		glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&temp.alpha_equation));
+		temp.alpha_equation = _function<to_user>(temp.alpha_equation);
+
+		glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&temp.alpha_sfactor));
+		temp.alpha_sfactor = _factor<to_user>(temp.alpha_sfactor);
 
 		glCheck(glGetIntegerv(GL_BLEND_DST_ALPHA, (int32_t *)&temp.alpha_dfactor));
 		temp.alpha_dfactor = _factor<to_user>(temp.alpha_dfactor);
@@ -1336,7 +1334,7 @@ namespace ml::gfx
 
 		static bool const edge_clamp_available
 		{
-			device::get_context()->get_devinfo().texture_edge_clamp_available
+			device::get_current_context()->get_devinfo().texture_edge_clamp_available
 		};
 
 		glCheck(glTexParameteri(GL_TEXTURE_2D,
@@ -1475,7 +1473,7 @@ namespace ml::gfx
 	{
 		static auto const max_color_attachments
 		{
-			(size_t)device::get_context()->get_devinfo().max_color_attachments
+			(size_t)device::get_current_context()->get_devinfo().max_color_attachments
 		};
 		if (value
 			&& (m_attachments.size() < max_color_attachments)

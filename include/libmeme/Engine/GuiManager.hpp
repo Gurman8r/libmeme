@@ -7,6 +7,8 @@
 
 namespace ml
 {
+	struct window;
+
 	struct ML_ENGINE_API gui_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,9 +25,9 @@ namespace ml
 
 		ML_NODISCARD bool is_initialized() noexcept;
 
-		ML_NODISCARD bool initialize(struct window const & w, cstring shading_language_version);
+		ML_NODISCARD bool initialize(window const & w, cstring shading_language_version);
 
-		bool finalize();
+		ML_NODISCARD bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,14 +101,15 @@ namespace ml
 		// MAIN MENU BAR
 		struct ML_ENGINE_API main_menu_bar_data final : non_copyable
 		{
-			using menus_t = pmr::vector<
-				std::pair<cstring, pmr::vector<std::function<void()>>>
-			>;
+			using menus_t = pmr::vector<std::pair<
+				cstring,
+				pmr::vector<std::function<void()>
+			>>>;
 			
 			bool		visible;
 			menus_t		menus;
 
-			template <class Fn> void add(cstring label, Fn && fn)
+			template <class Fn> decltype(auto) add(cstring label, Fn && fn) & noexcept
 			{
 				auto it{ std::find_if(menus.begin(), menus.end(), [&
 				](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
@@ -115,7 +118,7 @@ namespace ml
 					menus.push_back({ label, {} });
 					it = (menus.end() - 1);
 				}
-				it->second.emplace_back(ML_forward(fn));
+				return it->second.emplace_back(ML_forward(fn));
 			}
 
 		private:

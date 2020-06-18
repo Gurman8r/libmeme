@@ -1,8 +1,6 @@
 #ifndef _ML_SCRIPT_MANAGER_HPP_
 #define _ML_SCRIPT_MANAGER_HPP_
 
-// WIP
-
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 
@@ -26,13 +24,17 @@ namespace ml
 
 		ML_NODISCARD bool initialize();
 
-		bool finalize();
+		ML_NODISCARD bool finalize();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		int32_t do_file(fs::path const & value);
 
 		int32_t do_string(pmr::string const & value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto library_home() const & noexcept -> fs::path const & { return m_library_home; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

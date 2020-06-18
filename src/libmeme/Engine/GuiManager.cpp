@@ -20,7 +20,7 @@ namespace ml
 
 	gui_manager::~gui_manager() noexcept
 	{
-		(void)finalize();
+		ML_assert(finalize());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -157,7 +157,7 @@ namespace ml
 			}
 		}
 
-		// MAIN MENU
+		// MAIN MENU BAR
 		if (auto & m{ m_main_menu }; m.visible)
 		{
 			ML_scoped_imgui_id(&m);

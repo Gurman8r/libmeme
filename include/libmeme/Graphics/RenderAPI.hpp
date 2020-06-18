@@ -432,41 +432,18 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// utility
+// buffer
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// buffer copy
 	template <class Elem = byte_t
 	> buffer_t bufcpy(size_t count, address_t data, buffer_t::allocator_type alloc = {}) noexcept
 	{
 		return data
 			? buffer_t{ (byte_t *)data, (byte_t *)data + count * sizeof(Elem), alloc }
-			: buffer_t{ count * sizeof(Elem), byte_t{}, alloc };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_NODISCARD constexpr uint32_t get_channel_format(size_t value) noexcept
-	{
-		switch (value)
-		{
-		default	: return 0;
-		case 1	: return format_red;
-		case 3	: return format_rgb;
-		case 4	: return format_rgba;
-		}
-	}
-
-	ML_NODISCARD constexpr size_t get_bits_per_pixel(uint32_t value) noexcept
-	{
-		switch (value)
-		{
-		default			: return 0;
-		case format_red	: return 1;
-		case format_rgb	: return 3;
-		case format_rgba: return 4;
-		}
+			: buffer_t{ count * sizeof(Elem), (byte_t)0, alloc };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -531,14 +508,6 @@ namespace ml::gfx
 		return get_element_component_count(hashof_v<T>);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// buffer layout
-namespace ml::gfx
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// vertex buffer layout element
@@ -667,11 +636,6 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// device context
-	ML_alias devctx = typename device *;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// device info
 	struct ML_NODISCARD devinfo final : trackable, non_copyable
 	{
@@ -706,25 +670,23 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static devctx g_devctx; // global device context
+		static device * g_devctx; // global device context
 
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		friend class std::unique_ptr<device, default_delete<>>;
-
-		virtual ~device() override = default;
-
-		virtual bool do_initialize(context_settings const & cs) = 0;
-
-		virtual void on_initialize() = 0;
+		virtual ~device() noexcept = default;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static bool create_context(context_settings const & cs);
+		static device * create_context(context_settings const & cs);
 
-		ML_NODISCARD static devctx const & get_context() noexcept { return g_devctx; }
+		static void destroy_context(device * value);
+
+		ML_NODISCARD static device * get_current_context() noexcept { return g_devctx; }
+
+		static void set_current_context(device * value) noexcept { g_devctx = value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1060,6 +1022,30 @@ namespace ml::gfx
 		texfmt		format	{ format_rgba }				; // texture format
 		int32_t		flags	{ texture_flags_default }	; // texture flags
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_NODISCARD constexpr uint32_t get_channel_format(size_t value) noexcept
+	{
+		switch (value)
+		{
+		default	: return 0;
+		case 1	: return format_red;
+		case 3	: return format_rgb;
+		case 4	: return format_rgba;
+		}
+	}
+
+	ML_NODISCARD constexpr size_t get_bits_per_pixel(uint32_t value) noexcept
+	{
+		switch (value)
+		{
+		default			: return 0;
+		case format_red	: return 1;
+		case format_rgb	: return 3;
+		case format_rgba: return 4;
+		}
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1413,7 +1399,7 @@ namespace ml::gfx
 			{
 				texture::bind(tex, slot);
 
-				device::get_context()->upload(loc, (int32_t)slot++);
+				device::get_current_context()->upload(loc, (int32_t)slot++);
 			});
 		}
 
@@ -1427,7 +1413,7 @@ namespace ml::gfx
 				}
 				else
 				{
-					device::get_context()->upload(loc, ML_forward(value));
+					device::get_current_context()->upload(loc, ML_forward(value));
 				}
 			});
 		}

@@ -5,6 +5,23 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	render_window::render_window() noexcept
+		: window	{}
+		, m_device	{}
+	{
+	}
+
+	render_window::render_window(window_settings const & ws, bool install_callbacks) noexcept
+		: render_window{}
+	{
+		ML_assert(this->open(ws, install_callbacks));
+	}
+
+	render_window::~render_window() noexcept
+	{
+		gfx::device::destroy_context(m_device);
+	}
+
 	bool render_window::open(window_settings const & ws, bool install_callbacks)
 	{
 		// open window
@@ -14,15 +31,14 @@ namespace ml
 		}
 
 		// create device context
-		if (!gfx::device::create_context(ws.context))
+		if (!(m_device = gfx::device::create_context(ws.context)))
 		{
 			return debug::error("failed initializing device context");
 		}
 
 		// validate version
-		auto const & ctx{ gfx::device::get_context() };
-		m_settings.context.major = ctx->get_devinfo().major_version;
-		m_settings.context.minor = ctx->get_devinfo().minor_version;
+		m_settings.context.major = m_device->get_devinfo().major_version;
+		m_settings.context.minor = m_device->get_devinfo().minor_version;
 		debug::info("renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		
 		// setup render states
@@ -43,8 +59,8 @@ namespace ml
 
 			// depth
 			gfx::render_command::set_depth_enabled(true),
-			gfx::render_command::set_depth_write(true),
 			gfx::render_command::set_depth_mode({ gfx::predicate_less, { 0.f, 1.f } }),
+			gfx::render_command::set_depth_write(true),
 
 			// stencil
 			gfx::render_command::set_stencil_enabled(true),
@@ -55,6 +71,11 @@ namespace ml
 		}
 
 		return true;
+	}
+
+	void render_window::close()
+	{
+		window::close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

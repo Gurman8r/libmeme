@@ -27,31 +27,24 @@ using impl_shader		= _ML_GFX opengl_program		;
 // device
 namespace ml::gfx
 {
-	devctx device::g_devctx{};
+	device * device::g_devctx{};
 
-	bool device::create_context(context_settings const & cs)
+	device * device::create_context(context_settings const & cs)
 	{
-		static ML_defer{ delete g_devctx; }; // delete on exit
+		auto temp{ new impl_device{ cs } };
+		
+		if (!g_devctx) { set_current_context(temp); }
+		
+		return temp;
+	}
 
-		if (!g_devctx && (g_devctx = new impl_device))
-		{
-			if (g_devctx->do_initialize(cs))
-			{
-				g_devctx->on_initialize();
+	void device::destroy_context(device * value)
+	{
+		if (!value) { value = g_devctx; }
 
-				return true; // success
-			}
-			else
-			{
-				delete g_devctx;
+		if (g_devctx == value) { set_current_context(nullptr); }
 
-				return debug::error("failed initializing device context");
-			}
-		}
-		else
-		{
-			return debug::error("device context is already initialized");
-		}
+		delete value;
 	}
 }
 

@@ -377,8 +377,8 @@ namespace ml
 				// camera
 				auto const _camera = material
 				{
-					make_uniform<vec3f	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
-					make_uniform<vec3f	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
+					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
+					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
 					make_uniform<float_t>("u_cam.fov"	, 45.0f),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
@@ -585,7 +585,7 @@ namespace ml
 					ML_scoped_imgui_id(this);
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
-						engine::window().set_should_close(true);
+						engine::window().close();
 					}
 				});
 				mmb.add("tools", [&]()
@@ -728,7 +728,7 @@ namespace ml
 
 				m_console.commands.push_back({ "exit", [&](auto args)
 				{
-					engine::window().set_should_close(true);
+					engine::window().close();
 				} });
 
 				m_console.commands.push_back({ "help", [&](auto args)
@@ -1228,14 +1228,15 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & ctx{ gfx::device::get_context() };
-			static auto const & info{ ctx->get_devinfo() };
+			auto const ctx{ gfx::device::get_current_context() };
+			auto const & info{ ctx->get_devinfo() };
 
 			if (ImGui::BeginMenuBar())
 			{
-				ImGui::Text("%s", info.vendor.c_str()); ImGui::Separator();
-				ImGui::Text("%s", info.renderer.c_str()); ImGui::Separator();
-				ImGui::Text("%s", info.version.c_str()); ImGui::Separator();
+				ImGui::Text("%s", info.vendor.c_str()); gui::tooltip("vendor"); ImGui::Separator();
+				ImGui::Text("%s", info.renderer.c_str()); gui::tooltip("renderer"); ImGui::Separator();
+				ImGui::Text("%s", info.version.c_str()); gui::tooltip("version"); ImGui::Separator();
+				ImGui::Text("%s", info.shading_language_version.c_str()); gui::tooltip("shading language version"); ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
 
@@ -1259,11 +1260,11 @@ namespace ml
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
 				ImGui::Text("color equation: %s (%u)", gfx::function_names[b_mode.color_equation], b_mode.color_equation);
-				ImGui::Text("color src factor: %s (%u)", gfx::factor_names[b_mode.color_sfactor], b_mode.color_sfactor);
-				ImGui::Text("color dst factor: %s (%u)", gfx::factor_names[b_mode.color_dfactor], b_mode.color_dfactor);
+				ImGui::Text("color sfactor: %s (%u)", gfx::factor_names[b_mode.color_sfactor], b_mode.color_sfactor);
+				ImGui::Text("color dfactor: %s (%u)", gfx::factor_names[b_mode.color_dfactor], b_mode.color_dfactor);
 				ImGui::Text("alpha equation: %s (%u)", gfx::function_names[b_mode.alpha_equation], b_mode.alpha_equation);
-				ImGui::Text("alpha src factor: %s (%u)", gfx::factor_names[b_mode.alpha_sfactor], b_mode.alpha_sfactor);
-				ImGui::Text("alpha dst factor: %s (%u)", gfx::factor_names[b_mode.alpha_dfactor], b_mode.alpha_dfactor);
+				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_names[b_mode.alpha_sfactor], b_mode.alpha_sfactor);
+				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_names[b_mode.alpha_dfactor], b_mode.alpha_dfactor);
 			}
 			ImGui::Separator();
 

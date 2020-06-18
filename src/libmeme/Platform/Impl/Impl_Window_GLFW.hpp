@@ -14,17 +14,19 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		glfw_window() noexcept = default;
+		glfw_window() noexcept;
 
-		~glfw_window() noexcept { this->destroy(); }
+		explicit glfw_window(window_settings const & ws) noexcept;
+
+		~glfw_window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool open(window_settings const & ws) override;
+		
+		void close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		void destroy() override;
 
 		void iconify() override;
 		
@@ -88,8 +90,6 @@ namespace ml
 		
 		void set_monitor(monitor_handle value, int_rect const & bounds = {}) override;
 
-		void set_should_close(bool value) override;
-		
 		void set_size(vec2i const & value) override;
 		
 		void set_title(cstring value) override;
@@ -112,13 +112,9 @@ namespace ml
 
 		static float64_t get_time();
 
-		static bool initialize();
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void destroy_cursor(cursor_handle value);
-
-		static void finalize();
 
 		static void poll_events();
 

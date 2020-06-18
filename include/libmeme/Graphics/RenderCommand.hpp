@@ -17,7 +17,7 @@ namespace ml::gfx
 		template <class Fn, class ... Args
 		> ML_NODISCARD static command_t builtin(Fn && fn, Args && ... args) noexcept
 		{
-			return std::bind(ML_forward(fn), device::get_context(), ML_forward(args)...);
+			return std::bind(ML_forward(fn), device::get_current_context(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args

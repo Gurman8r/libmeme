@@ -95,25 +95,11 @@ namespace ml
 		// already initialized
 		if (is_initialized()) { return debug::error("engine is already initialized"); }
 
-		// create context
-		debug::info("creating engine context...");
-		if (!(g_engine = new engine_context{ j, alloc }))
+		// create engine context
+		if (debug::info("creating engine context...")
+		; !(g_engine = new engine_context{ j, alloc }))
 		{
 			return debug::error("failed creating engine context");
-		}
-
-		// initialize windows
-		debug::info("initializing windows...");
-		if (!window::initialize())
-		{
-			return debug::error("failed initializing windows");
-		}
-
-		// initialize scripting
-		debug::info("initializing scripts...");
-		if (!g_engine->m_scripts.initialize())
-		{
-			return debug::error("failed initializing scripts");
 		}
 
 		// execute setup script
@@ -126,7 +112,7 @@ namespace ml
 		}
 
 		// success
-		return is_initialized();
+		return g_engine;
 	}
 
 	bool engine::finalize() noexcept
@@ -134,27 +120,12 @@ namespace ml
 		// not initialized
 		if (!is_initialized()) { return debug::error("engine is not initialized"); }
 
-		// need to clear menus before plugins because menu code can live inside plugins
+		// FIXME?: need to clear menus before plugins because menu code can live INSIDE plugins
 		g_engine->m_gui.main_menu_bar().menus.clear();
 
-		// clear plugins
-		g_engine->m_plugins.clear();
-
-		// finalize gui
-		g_engine->m_gui.finalize();
-
-		// finalize scripting
-		g_engine->m_scripts.finalize();
-
-		// destroy window
-		g_engine->m_window.destroy();
-
-		// finalize windows
-		window::finalize();
-		
-		// destroy context
-		delete g_engine; g_engine = nullptr;
-		return !is_initialized();
+		// destroy engine context
+		delete g_engine;
+		return !(g_engine = nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

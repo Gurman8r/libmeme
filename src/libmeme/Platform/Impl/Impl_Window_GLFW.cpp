@@ -45,6 +45,28 @@ namespace ml
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	
+	glfw_window::glfw_window() noexcept
+		: m_window	{}
+		, m_monitor	{}
+	{
+		static ML_scope{ ML_assert(glfwInit()); };
+	}
+
+	glfw_window::glfw_window(window_settings const & ws) noexcept
+		: glfw_window{}
+	{
+		ML_assert(this->open(ws));
+	}
+
+	glfw_window::~glfw_window() noexcept
+	{
+		static ML_defer{ glfwTerminate(); };
+
+		glfwDestroyWindow(m_window);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool glfw_window::open(window_settings const & ws)
 	{
@@ -103,12 +125,12 @@ namespace ml
 		);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void glfw_window::destroy()
+	void glfw_window::close()
 	{
-		glfwDestroyWindow(m_window);
+		glfwSetWindowShouldClose(m_window, true);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void glfw_window::iconify()
 	{
@@ -144,7 +166,7 @@ namespace ml
 
 	int32_t glfw_window::get_attribute(int32_t value) const
 	{
-		static constexpr int32_t attribs[] =
+		static constexpr int32_t temp[] =
 		{
 			GLFW_FOCUSED,
 			GLFW_ICONIFIED,
@@ -189,8 +211,8 @@ namespace ml
 			GLFW_CONTEXT_CREATION_API,
 			GLFW_SCALE_TO_MONITOR,
 		};
-		ML_assert(value < ML_arraysize(attribs));
-		return glfwGetWindowAttrib(m_window, attribs[(uint32_t)value]);
+		ML_assert(value < ML_arraysize(temp));
+		return glfwGetWindowAttrib(m_window, temp[(size_t)value]);
 	}
 
 	int_rect glfw_window::get_bounds() const
@@ -281,16 +303,14 @@ namespace ml
 	
 	void glfw_window::set_cursor_mode(int32_t value)
 	{
-		set_input_mode(GLFW_CURSOR, std::invoke([&]() noexcept
+		static constexpr int32_t temp[] =
 		{
-			switch (value)
-			{
-			case cursor_mode_hidden		: return GLFW_CURSOR_HIDDEN;
-			case cursor_mode_disabled	: return GLFW_CURSOR_DISABLED;
-			case cursor_mode_normal		:
-			default						: return GLFW_CURSOR_NORMAL;
-			}
-		}));
+			GLFW_CURSOR_NORMAL,
+			GLFW_CURSOR_HIDDEN,
+			GLFW_CURSOR_DISABLED,
+		};
+		ML_assert(value < ML_arraysize(temp));
+		set_input_mode(GLFW_CURSOR, temp[(size_t)value]);
 	}
 
 	void glfw_window::set_cursor_position(vec2d const & value)
@@ -325,32 +345,26 @@ namespace ml
 
 	void glfw_window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
-		if (m_monitor = (GLFWmonitor *)value)
+		m_monitor = (GLFWmonitor *)value;
+		if (m_monitor)
 		{
-			if (auto const vm{ glfwGetVideoMode(m_monitor) })
-			{
-				glfwSetWindowMonitor(m_window, m_monitor,
-					bounds.left(),
-					bounds.top(),
-					vm->width,
-					vm->height,
-					vm->refreshRate);
-			}
+			auto const vm{ glfwGetVideoMode(m_monitor) };
+			glfwSetWindowMonitor(m_window, m_monitor,
+				bounds.left(),
+				bounds.top(),
+				vm->width,
+				vm->height,
+				vm->refreshRate);
 		}
 		else
 		{
-			glfwSetWindowMonitor(m_window, nullptr,
+			glfwSetWindowMonitor(m_window, m_monitor,
 				bounds.left(),
 				bounds.top(),
 				bounds.width(),
 				bounds.height(),
 				GLFW_DONT_CARE);
 		}
-	}
-
-	void glfw_window::set_should_close(bool value)
-	{
-		glfwSetWindowShouldClose(m_window, value);
 	}
 
 	void glfw_window::set_size(vec2i const & value)
@@ -372,7 +386,7 @@ namespace ml
 
 	cursor_handle glfw_window::create_standard_cursor(int32_t value)
 	{
-		static constexpr int32_t shapes[] =
+		static constexpr int32_t temp[] =
 		{
 			GLFW_ARROW_CURSOR,
 			GLFW_IBEAM_CURSOR,
@@ -384,7 +398,8 @@ namespace ml
 			GLFW_RESIZE_NWSE_CURSOR,
 			GLFW_ARROW_CURSOR,
 		};
-		return (cursor_handle)glfwCreateStandardCursor(shapes[(size_t)value]);
+		ML_assert(value < ML_arraysize(temp));
+		return (cursor_handle)glfwCreateStandardCursor(temp[(size_t)value]);
 	}
 
 	int32_t glfw_window::extension_supported(cstring value)
@@ -430,21 +445,11 @@ namespace ml
 		return glfwGetTime();
 	}
 
-	bool glfw_window::initialize()
-	{
-		return glfwInit();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void glfw_window::destroy_cursor(cursor_handle value)
 	{
 		glfwDestroyCursor((GLFWcursor *)value);
-	}
-
-	void glfw_window::finalize()
-	{
-		glfwTerminate();
 	}
 
 	void glfw_window::poll_events()
