@@ -18,6 +18,77 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+//#include <glm/glm/glm.hpp>
+//#include <glm/glm/gtc/matrix_transform.hpp>
+
+// CAMERA (WIP)
+namespace ml
+{
+	struct perspective_camera final
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		vec3	position	{ 0, 0, 3 };
+		vec3	forward		{ 0, 0, -1 };
+		vec3	up			{ 0, 1, 0 };
+		vec3	right		{ 1, 0, 0 };
+		vec3	world_up	{ 0, 1, 0 };
+		float_t pitch		{ 0.f };
+		float_t yaw			{ -90.f };
+		float_t zoom		{ 45.f };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void swap(perspective_camera & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				position.swap(other.position);
+				forward	.swap(other.forward);
+				up		.swap(other.up);
+				right	.swap(other.right);
+				world_up.swap(other.world_up);
+				
+				std::swap(pitch	, other.pitch);
+				std::swap(yaw	, other.yaw);
+				std::swap(zoom	, other.zoom);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+// CBUFFER (WIP)
+namespace ml
+{
+	template <class T, class Update
+	> struct cbuffer final
+	{
+		explicit cbuffer(Update && fn) noexcept : m_update{ ML_forward(fn) }
+		{
+		}
+
+		template <class ... Args
+		> decltype(auto) operator()(Args && ... args) noexcept
+		{
+			return std::invoke(m_update, ML_forward(args)...);
+		}
+
+	private:
+		Update const m_update;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // ECS
 namespace ml
 {
@@ -115,69 +186,6 @@ namespace ml
 	using entity_manager = ecs::manager<entity_traits>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-//#include <glm/glm/glm.hpp>
-//#include <glm/glm/gtc/matrix_transform.hpp>
-
-// CAMERA
-namespace ml
-{
-	struct perspective_camera final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		vec3	position	{ 0, 0, 3 };
-		vec3	forward		{ 0, 0, -1 };
-		vec3	up			{ 0, 1, 0 };
-		vec3	right		{ 1, 0, 0 };
-		vec3	world_up	{ 0, 1, 0 };
-		float_t pitch		{ 0.f };
-		float_t yaw			{ -90.f };
-		float_t zoom		{ 45.f };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(perspective_camera & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				position.swap(other.position);
-				forward	.swap(other.forward);
-				up		.swap(other.up);
-				right	.swap(other.right);
-				world_up.swap(other.world_up);
-				
-				std::swap(pitch	, other.pitch);
-				std::swap(yaw	, other.yaw);
-				std::swap(zoom	, other.zoom);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
-	template <class T, class Update
-	> struct cbuffer final
-	{
-		cbuffer(Update && fn) : m_update{ ML_forward(fn) }
-		{
-		}
-
-	private:
-		Update const m_update;
-	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
