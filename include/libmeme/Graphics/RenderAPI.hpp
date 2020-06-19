@@ -675,7 +675,7 @@ namespace ml::gfx
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~device() noexcept = default;
+		virtual ~device() = default;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -772,22 +772,36 @@ namespace ml::gfx
 
 		virtual void upload(uniform_id loc, float_t value) = 0;
 
-		virtual void upload(uniform_id loc, vec2 const & value) = 0;
+		virtual void upload(uniform_id loc, vec2f const & value) = 0;
 
-		virtual void upload(uniform_id loc, vec3 const & value) = 0;
+		virtual void upload(uniform_id loc, vec3f const & value) = 0;
 
-		virtual void upload(uniform_id loc, vec4 const & value) = 0;
+		virtual void upload(uniform_id loc, vec4f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat2 const & value) = 0;
+		virtual void upload(uniform_id loc, mat2f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat3 const & value) = 0;
+		virtual void upload(uniform_id loc, mat3f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat4 const & value) = 0;
+		virtual void upload(uniform_id loc, mat4f const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// device context
+namespace ml::gfx
+{
+	class ML_GRAPHICS_API device_context final : public trackable, public non_copyable
+	{
+	public:
+
+	private:
+
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1357,8 +1371,14 @@ namespace ml::gfx
 		ML_NODISCARD static shared<program> create(pmr::vector<shared<shader>> const & vs) noexcept
 		{
 			auto temp{ create() };
-			for (auto const & pgm : vs) { temp->attach(pgm); }
-			temp->link();
+			for (auto const & pgm : vs)
+			{
+				temp->attach(pgm);
+			}
+			if (!temp->link())
+			{
+				std::cout << temp->get_error_log().data() << '\n';
+			}
 			return temp;
 		}
 		
@@ -1388,20 +1408,13 @@ namespace ml::gfx
 
 		virtual bool detach(shared<shader> const & value) = 0;
 
-		virtual bool link() = 0;
+		ML_NODISCARD virtual bool link() = 0;
+
+		ML_NODISCARD virtual bool validate() = 0;
+
+		virtual void bind_textures() const = 0;
 
 		virtual bool bind_uniform(cstring name, uni_binder_t const & fn) = 0;
-
-		inline void bind_textures() const
-		{
-			uint32_t slot{};
-			get_textures().for_each([&](uniform_id loc, shared<texture> const & tex) noexcept
-			{
-				texture::bind(tex, slot);
-
-				device::get_current_context()->upload(loc, (int32_t)slot++);
-			});
-		}
 
 		template <class T> bool set_uniform(cstring name, T && value) noexcept
 		{

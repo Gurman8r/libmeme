@@ -25,7 +25,7 @@ namespace ml
 
 		ML_NODISCARD bool is_initialized() noexcept;
 
-		ML_NODISCARD bool initialize(window const & w, cstring shading_language_version);
+		ML_NODISCARD bool initialize(window const & w);
 
 		ML_NODISCARD bool finalize();
 

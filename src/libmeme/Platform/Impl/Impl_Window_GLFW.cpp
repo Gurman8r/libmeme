@@ -50,13 +50,13 @@ namespace ml
 		: m_window	{}
 		, m_monitor	{}
 	{
-		static ML_scope{ ML_assert(glfwInit()); };
+		static ML_scope{ glfwInit(); };
 	}
 
 	glfw_window::glfw_window(window_settings const & ws) noexcept
 		: glfw_window{}
 	{
-		ML_assert(this->open(ws));
+		(void)this->open(ws);
 	}
 
 	glfw_window::~glfw_window() noexcept

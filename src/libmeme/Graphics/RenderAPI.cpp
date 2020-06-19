@@ -2,7 +2,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_RENDERER_OPENGL3)
 #include "Impl/Impl_RenderAPI_OpenGL.hpp"
 using impl_device		= _ML_GFX opengl_device			;
 using impl_vertexarray	= _ML_GFX opengl_vertexarray	;

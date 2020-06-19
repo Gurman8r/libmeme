@@ -19,7 +19,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		basic_timer(bool start_me = true) noexcept : m_running{ start_me }
+		basic_timer(bool running = true) noexcept
+			: m_running		{ running }
+			, m_start_time	{ clock::now() }
+			, m_stop_time	{ m_start_time }
+			, m_elapsed		{}
 		{
 		}
 
@@ -63,10 +67,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool		m_running		{}					; // 
-		time_point	m_start_time	{ clock::now() }	; // 
-		time_point	m_stop_time		{ m_start_time }	; // 
-		duration	m_elapsed		{}					; // 
+		bool		m_running	; // 
+		time_point	m_start_time; // 
+		time_point	m_stop_time	; // 
+		duration	m_elapsed	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

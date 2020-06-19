@@ -65,19 +65,21 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 // CBUFFER (WIP)
 namespace ml
 {
+	template <class ...
+	> struct cbuffer;
+
 	template <class T, class Update
-	> struct cbuffer final
+	> struct cbuffer<T, Update> final
 	{
 		explicit cbuffer(Update && fn) noexcept : m_update{ ML_forward(fn) }
 		{
 		}
 
 		template <class ... Args
-		> decltype(auto) operator()(Args && ... args) noexcept
+		> ML_NODISCARD decltype(auto) operator()(Args && ... args) noexcept
 		{
 			return std::invoke(m_update, ML_forward(args)...);
 		}
@@ -190,6 +192,75 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+namespace ml::gfx
+{
+	struct pipeline final : trackable, non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		using storage_type = typename ds::batch_vector
+		<
+			shared<texture2d>,	// 
+			command_t			// 
+		>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pipeline(allocator_type alloc = {}) noexcept
+			: m_data{ alloc }
+		{
+		}
+
+		pipeline(storage_type::init_type init, allocator_type alloc = {})
+			: m_data{ init, alloc }
+		{
+		}
+
+		pipeline(storage_type const & value, allocator_type alloc = {})
+			: m_data{ value, alloc }
+		{
+		}
+
+		pipeline(storage_type && value, allocator_type alloc = {}) noexcept
+			: m_data{ std::move(value), alloc }
+		{
+		}
+
+		pipeline(pipeline && other, allocator_type alloc = {}) noexcept
+			: pipeline{ std::move(other.m_data), alloc }
+		{
+			
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pipeline & operator=(pipeline && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
+
+		void swap(pipeline & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_data.swap(other.m_data);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_data;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // DEMO
 namespace ml
 {
@@ -216,6 +287,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		perspective_camera m_camera{};
+
+		gfx::pipeline m_pipeline
+		{
+			std::make_tuple(nullptr, []() { /* test */ })
+		};
 
 		shader_cache m_cache{};
 

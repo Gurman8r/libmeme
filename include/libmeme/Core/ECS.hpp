@@ -397,9 +397,9 @@ namespace ml::ecs::impl
 			return m_manager && m_manager->is_valid_handle(*this);
 		}
 
-		ML_NODISCARD operator bool() const noexcept
+		ML_NODISCARD explicit operator bool() const noexcept
 		{
-			return this->valid(); // true if valid
+			return this->valid();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -511,7 +511,7 @@ namespace ml::ecs::impl
 		U *		m_manager;	// pointer to owning manager
 		size_t	m_entity;	// index of real entity data
 		size_t	m_self;		// index of real handle data
-		int32_t	m_counter;	// validity check counter
+		int32_t	m_counter;	// reference counter
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

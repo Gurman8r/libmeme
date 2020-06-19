@@ -123,7 +123,7 @@ namespace ml::util
 	> ML_NODISCARD constexpr bool range_equal(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? ((*lBegin == *rBegin) && _ML util::range_equal(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			? ((*lBegin == *rBegin) && _ML_UTIL range_equal(lBegin + 1, lEnd, rBegin + 1, rEnd))
 			: (lBegin == lEnd && rBegin == rEnd);
 	}
 
@@ -133,7 +133,7 @@ namespace ml::util
 	> ML_NODISCARD constexpr bool range_less(LI lBegin, LI lEnd, RI rBegin, RI rEnd)
 	{
 		return (lBegin != lEnd && rBegin != rEnd)
-			? ((*lBegin < *rBegin) && _ML util::range_less(lBegin + 1, lEnd, rBegin + 1, rEnd))
+			? ((*lBegin < *rBegin) && _ML_UTIL range_less(lBegin + 1, lEnd, rBegin + 1, rEnd))
 			: (lBegin == lEnd && rBegin == rEnd);
 	}
 
@@ -149,8 +149,8 @@ namespace ml::util
 	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs < rhs
-			? _ML util::min(ML_forward(lhs), ML_forward(rest)...)
-			: _ML util::min(ML_forward(rhs), ML_forward(rest)...);
+			? _ML_UTIL min(ML_forward(lhs), ML_forward(rest)...)
+			: _ML_UTIL min(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
@@ -165,8 +165,8 @@ namespace ml::util
 	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
 	{
 		return lhs > rhs
-			? _ML util::max(ML_forward(lhs), ML_forward(rest)...)
-			: _ML util::max(ML_forward(rhs), ML_forward(rest)...);
+			? _ML_UTIL max(ML_forward(lhs), ML_forward(rest)...)
+			: _ML_UTIL max(ML_forward(rhs), ML_forward(rest)...);
 	}
 
 	template <class Only
@@ -200,8 +200,8 @@ namespace ml::util
 		return temp;
 	}
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto determinant(U<T, 4, 4> const & v)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto determinant(M<T, 4, 4> const & v)
 	{
 		return
 			v[0] * (v[15] * v[5] - v[7] * v[13]) -
@@ -221,7 +221,7 @@ namespace ml::util
 	template <template <class, size_t ...> class A, class T, size_t ... N
 	> ML_NODISCARD constexpr auto magnitude(A<T, N...> const & value)
 	{
-		return gcem::sqrt(sqr_magnitude<A, T, N...>(value));
+		return gcem::sqrt(_ML_UTIL sqr_magnitude<A, T, N...>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -229,13 +229,13 @@ namespace ml::util
 	template <template <class, size_t ...> class A, class T, size_t ... N
 	> ML_NODISCARD constexpr auto normalize(A<T, N...> const & value)
 	{
-		return (value / magnitude<A, T, N...>(value));
+		return (value / _ML_UTIL magnitude<A, T, N...>(value));
 	}
 
-	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto transpose(A<T, N...> const & value)
+	template <template <class, size_t, size_t> class M, class T, size_t W, size_t H
+	> ML_NODISCARD constexpr auto transpose(M<T, W, H> const & value)
 	{
-		A<T, N...> temp{};
+		M<T, W, H> temp{};
 		for (size_t d = 0; d < value.size(); ++d)
 		{
 			size_t const y{ d % value.width() }, x{ d / value.width() };
@@ -247,13 +247,13 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto inverse(U<T, 4, 4> const & v)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto inverse(M<T, 4, 4> const & v)
 	{
-		auto const det{ determinant<U, T>(v) };
+		auto const det{ _ML_UTIL determinant<M, T>(v) };
 		return (det == T{})
-			? U<T, 4, 4>::identity()
-			: U<T, 4, 4>
+			? M<T, 4, 4>::identity()
+			: M<T, 4, 4>
 			{
 				+(v[15] * v[5] - v[7] * v[13]) / det,
 				-(v[15] * v[4] - v[7] * v[12]) / det,
@@ -267,10 +267,10 @@ namespace ml::util
 			};
 	}
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto rebase(const U<T, 3, 3> & v, U<T, 4, 4> const & m)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 3> & v, M<T, 4, 4> const & m)
 	{
-		return U<T, 3, 3>
+		return M<T, 3, 3>
 		{
 			m[0] * v[0] + m[4] * v[3] + m[8] * v[6],
 			m[1] * v[0] + m[5] * v[3] + m[9] * v[6],
@@ -284,10 +284,10 @@ namespace ml::util
 		};
 	}
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto rebase(const U<T, 3, 1> & v, U<T, 4, 4> const & m)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto rebase(const M<T, 3, 1> & v, M<T, 4, 4> const & m)
 	{
-		return U<T, 3, 1>
+		return M<T, 3, 1>
 		{
 			m[0] * v[0] * m[4] * v[1] * m[8] * v[2] * m[12],
 			m[1] * v[0] * m[5] * v[1] * m[9] * v[2] * m[13],
@@ -297,16 +297,16 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto cross(U<T, 2, 1> const & a, U<T, 2, 1> const & b)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto cross(M<T, 2, 1> const & a, M<T, 2, 1> const & b)
 	{
 		return a[0] * b[1] - b[0] * a[1];
 	}
 
-	template <template <class, size_t, size_t> class U, class T
-	> ML_NODISCARD constexpr auto cross(const U<T, 3, 1> & a, const U<T, 3, 1> & b)
+	template <template <class, size_t, size_t> class M, class T
+	> ML_NODISCARD constexpr auto cross(const M<T, 3, 1> & a, const M<T, 3, 1> & b)
 	{
-		return U<T, 3, 1>
+		return M<T, 3, 1>
 		{
 			a[1] * b[2] - b[1] * a[2],
 			a[2] * b[0] - b[2] * a[0],
@@ -365,8 +365,9 @@ namespace ml::util
 		{
 			return gcem::round(gcem::pow(T{ 2 }, gcem::ceil(gcem::log(v) / gcem::log(T{ 2 }))));
 		}
-		else if constexpr (std::is_integral_v<T>)
+		else
 		{
+			static_assert(std::is_integral_v<T>);
 			v--;
 			if constexpr (sizeof(T) >= 1)
 				v |= v >> 1; v |= v >> 2; v |= v >> 4;	// 8-bit
@@ -389,12 +390,12 @@ namespace ml::size_literals
 	// kibibyte
 	ML_NODISCARD constexpr uint64_t operator"" _KiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::kilo{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::kilo{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _KiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::kilo{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::kilo{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -402,12 +403,12 @@ namespace ml::size_literals
 	// mebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _MiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::mega{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::mega{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _MiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::mega{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::mega{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -415,12 +416,12 @@ namespace ml::size_literals
 	// gibibyte
 	ML_NODISCARD constexpr uint64_t operator"" _GiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::giga{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::giga{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _GiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::giga{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::giga{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -428,12 +429,12 @@ namespace ml::size_literals
 	// tebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _TiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::tera{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::tera{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _TiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::tera{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::tera{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -441,12 +442,12 @@ namespace ml::size_literals
 	// pebibyte
 	ML_NODISCARD constexpr uint64_t operator"" _PiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::peta{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::peta{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _PiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::peta{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::peta{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -454,12 +455,12 @@ namespace ml::size_literals
 	// exbibyte
 	ML_NODISCARD constexpr uint64_t operator"" _EiB(uint64_t n) noexcept
 	{
-		return util::power_of_2(util::ratio_cast(n, std::exa{}));
+		return _ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::exa{}));
 	}
 
 	ML_NODISCARD constexpr uint64_t operator"" _EiB(float80_t n) noexcept
 	{
-		return static_cast<uint64_t>(util::power_of_2(util::ratio_cast(n, std::exa{})));
+		return static_cast<uint64_t>(_ML_UTIL power_of_2(_ML_UTIL ratio_cast(n, std::exa{})));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

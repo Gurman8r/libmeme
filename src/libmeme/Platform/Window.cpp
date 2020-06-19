@@ -48,7 +48,7 @@ namespace ml
 	window::window(window_settings const & ws, bool install_callbacks) noexcept
 		: window{}
 	{
-		ML_assert(this->open(ws, install_callbacks));
+		(void)this->open(ws, install_callbacks);
 	}
 
 	window::~window() noexcept

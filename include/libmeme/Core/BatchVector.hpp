@@ -98,7 +98,7 @@ namespace ml::ds
 
 		self_type & operator=(vector_tuple && value) noexcept
 		{
-			this->(std::move(value));
+			this->swap(std::move(value));
 			return (*this);
 		}
 

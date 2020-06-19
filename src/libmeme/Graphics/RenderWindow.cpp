@@ -14,7 +14,7 @@ namespace ml
 	render_window::render_window(window_settings const & ws, bool install_callbacks) noexcept
 		: render_window{}
 	{
-		ML_assert(this->open(ws, install_callbacks));
+		(void)this->open(ws, install_callbacks);
 	}
 
 	render_window::~render_window() noexcept

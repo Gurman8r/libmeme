@@ -1,4 +1,4 @@
-#if defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_RENDERER_OPENGL3)
 #ifndef _ML_IMPL_RENDERER_OPENGL_HPP_
 #define _ML_IMPL_RENDERER_OPENGL_HPP_
 
@@ -21,7 +21,7 @@ namespace ml::gfx
 
 		opengl_device(context_settings const & cs);
 
-		~opengl_device() noexcept override;
+		~opengl_device() override;
 
 		devinfo m_devinfo;
 
@@ -110,17 +110,17 @@ namespace ml::gfx
 
 		void upload(uniform_id loc, float_t value) override;
 
-		void upload(uniform_id loc, vec2 const & value) override;
+		void upload(uniform_id loc, vec2f const & value) override;
 
-		void upload(uniform_id loc, vec3 const & value) override;
+		void upload(uniform_id loc, vec3f const & value) override;
 
-		void upload(uniform_id loc, vec4 const & value) override;
+		void upload(uniform_id loc, vec4f const & value) override;
 
-		void upload(uniform_id loc, mat2 const & value) override;
+		void upload(uniform_id loc, mat2f const & value) override;
 
-		void upload(uniform_id loc, mat3 const & value) override;
+		void upload(uniform_id loc, mat3f const & value)  override;
 
-		void upload(uniform_id loc, mat4 const & value) override;
+		void upload(uniform_id loc, mat4f const & value) override;
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -522,6 +522,19 @@ namespace ml::gfx
 
 		bool link() override;
 
+		bool validate() override;
+
+		void bind_textures() const override
+		{
+			uint32_t slot{};
+			get_textures().for_each([&](uniform_id loc, shared<texture> const & tex) noexcept
+			{
+				texture::bind(tex, slot);
+
+				device::get_current_context()->upload(loc, (int32_t)slot++);
+			});
+		}
+
 		bool bind_uniform(cstring name, uni_binder_t const & fn) override
 		{
 			opengl_uniform_binder u{ *this, name };
@@ -566,4 +579,4 @@ namespace ml::gfx
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_IMPL_RENDERER_OPENGL_HPP_
-#endif // ML_IMPL_RENDERER_OPENGL
+#endif // ML_IMPL_RENDERER_OPENGL3

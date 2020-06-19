@@ -24,11 +24,7 @@
 
 // assert
 #ifndef ML_assert
-#	ifndef NDEBUG
-#		define ML_assert(expr)	assert(expr)
-#	else
-#		define ML_assert(expr)	(void)(expr)
-#	endif
+#define ML_assert(expr)	assert(expr)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

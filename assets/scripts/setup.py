@@ -19,7 +19,7 @@ assert(engine.window.open(ml.window_settings(
 
 # setup gui
 print("[i] loading gui...")
-assert(engine.gui.initialize("#version 130"))
+assert(engine.gui.initialize())
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
 # setup plugins

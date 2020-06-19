@@ -15,12 +15,14 @@ namespace ml
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }
 	{
-		static ML_scope{ ML_assert(IMGUI_CHECKVERSION()); }; // check imgui version
+		static ML_scope{ IMGUI_CHECKVERSION(); };
 	}
 
 	gui_manager::~gui_manager() noexcept
 	{
-		ML_assert(finalize());
+		(void)finalize();
+
+		ML_assert(!is_initialized());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,7 +32,7 @@ namespace ml
 		return (m_gui_context != nullptr);
 	}
 
-	bool gui_manager::initialize(window const & w, cstring shading_language_version)
+	bool gui_manager::initialize(window const & w)
 	{
 		if (is_initialized()) { return false; }
 
@@ -61,15 +63,19 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// setup backend
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW)
+#	if defined(ML_IMPL_RENDERER_OPENGL3)
 		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)w.get_handle(), true))
 		{
 			return debug::error("Failed initializing ImGui platform");
 		}
-		if (!ImGui_ImplOpenGL3_Init(shading_language_version))
+		if (!ImGui_ImplOpenGL3_Init("#version 130"))
 		{
 			return debug::error("Failed initializing ImGui renderer");
 		}
+#	else
+#	endif
+#else
 #endif
 		return is_initialized();
 	}
@@ -78,13 +84,15 @@ namespace ml
 	{
 		if (!is_initialized()) { return false; }
 
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW)
+#	if defined(ML_IMPL_RENDERER_OPENGL3)
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+#	else
+#	endif
+#else
 #endif
-
 		ImGui::DestroyContext();
-
 		return !(m_gui_context = nullptr);
 	}
 
@@ -92,11 +100,14 @@ namespace ml
 
 	void gui_manager::new_frame()
 	{
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_WINDOW_GLFW)
+#	if defined(ML_IMPL_RENDERER_OPENGL3)
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
+#	else
+#	endif
+#else
 #endif
-
 		ImGui::NewFrame();
 	}
 
@@ -186,8 +197,9 @@ namespace ml
 	{
 		ImGui::Render();
 
-#if defined(ML_IMPL_RENDERER_OPENGL)
+#if defined(ML_IMPL_RENDERER_OPENGL3)
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#else
 #endif
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{

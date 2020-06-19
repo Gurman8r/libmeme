@@ -51,13 +51,14 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// setup engine
-	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
+	engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{
 		ML_defer{ f.close(); };
 		if (f) { f >> j; } else { j = default_settings; }
 		return j;
-	})));
-	ML_defer{ ML_assert(engine::finalize()); };
+	}));
+	ML_assert(engine::is_initialized());
+	ML_defer{ engine::finalize(); };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
