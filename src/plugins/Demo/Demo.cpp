@@ -150,7 +150,7 @@ namespace ml
 		{
 			ML_bind_scope(*shd);
 			shd->bind_textures();
-			gfx::render_command::draw(msh->get_va())();
+			gfx::render_command::draw(msh->get_vao())();
 		}
 	};
 
@@ -595,7 +595,7 @@ namespace ml
 				{
 					gfx::render_command::set_cull_enabled(false),
 					gfx::render_command::set_clear_color(colors::magenta),
-					gfx::render_command::clear(gfx::buffer_bit_color | gfx::buffer_bit_depth | gfx::buffer_bit_stencil),
+					gfx::render_command::clear(gfx::buffer_bit_all),
 					gfx::render_command::custom([&]() noexcept
 					{
 						m_ecs.update_system<x_draw_meshes>();

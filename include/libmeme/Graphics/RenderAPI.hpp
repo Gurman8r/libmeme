@@ -841,6 +841,8 @@ namespace ml::gfx
 
 		ML_NODISCARD operator bool() const noexcept { return (bool)m_device; }
 
+		ML_NODISCARD operator device * const & () const noexcept { return m_device; }
+
 		ML_NODISCARD auto operator->() const noexcept -> device * const & { return m_device; }
 
 		ML_NODISCARD auto get() const noexcept -> device * const & { return m_device; }

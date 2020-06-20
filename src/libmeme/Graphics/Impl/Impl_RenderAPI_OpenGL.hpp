@@ -25,8 +25,8 @@ namespace ml::gfx
 
 		~opengl_device() noexcept override = default;
 
-		context_settings	m_settings	; // 
-		devinfo				m_devinfo	; // 
+		context_settings	m_settings	; // context settings
+		devinfo				m_devinfo	; // device info
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

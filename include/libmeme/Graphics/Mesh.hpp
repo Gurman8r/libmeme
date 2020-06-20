@@ -107,11 +107,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto const & get_va() const & noexcept { return m_vao; }
+		shared<gfx::vertexarray> const & get_vao() const & noexcept { return m_vao; }
 
-		auto const & get_indices() const & noexcept { return m_vao->get_indices(); }
+		shared<gfx::indexbuffer> const & get_indices() const & noexcept { return m_vao->get_indices(); }
 
-		auto const & get_vertices() const & noexcept { return m_vao->get_vertices(); }
+		pmr::vector<shared<gfx::vertexbuffer>> const & get_vertices() const & noexcept { return m_vao->get_vertices(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

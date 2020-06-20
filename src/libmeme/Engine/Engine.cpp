@@ -50,7 +50,7 @@ namespace ml
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
-					gfx::render_command::clear(gfx::buffer_bit_all),
+					gfx::render_command::clear(gfx::buffer_bit_color),
 					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
