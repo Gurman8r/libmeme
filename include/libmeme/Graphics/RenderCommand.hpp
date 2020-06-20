@@ -6,7 +6,7 @@
 namespace ml::gfx
 {
 	// render command type
-	ML_alias command_t = typename std::function<void()>;
+	ML_alias command = typename std::function<void()>;
 
 	// render command generators
 	class render_command final
@@ -15,13 +15,13 @@ namespace ml::gfx
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static command_t builtin(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command builtin(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), device::get_current_context(), ML_forward(args)...);
 		}
 
 		template <class Fn, class ... Args
-		> ML_NODISCARD static command_t custom(Fn && fn, Args && ... args) noexcept
+		> ML_NODISCARD static command custom(Fn && fn, Args && ... args) noexcept
 		{
 			return std::bind(ML_forward(fn), ML_forward(args)...);
 		}

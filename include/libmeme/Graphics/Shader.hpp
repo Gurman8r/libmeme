@@ -16,7 +16,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 		
-		using shader_source = typename meta::array<pmr::string, gfx::shader_type_max>;
+		using shader_source = typename meta::array<pmr::string, gfx::shader_type_MAX>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -110,7 +110,7 @@ namespace ml
 			else { m_src = { v_src, f_src, {} }; }
 			
 			if (!m_obj) { m_obj = gfx::program::create(); }
-			else { m_obj->invalidate(); }
+			else { m_obj->revalue(); }
 
 			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
 			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
@@ -124,7 +124,7 @@ namespace ml
 			else { m_src = { v_src, f_src, g_src }; }
 			
 			if (!m_obj) { m_obj = gfx::program::create(); }
-			else { m_obj->invalidate(); }
+			else { m_obj->revalue(); }
 			
 			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
 			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
@@ -211,7 +211,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gfx::shader_type_max>;
+		using source_storage = ds::array<ds::map<pmr::string, pmr::string>, gfx::shader_type_MAX>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

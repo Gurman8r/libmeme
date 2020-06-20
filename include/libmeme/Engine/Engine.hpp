@@ -15,9 +15,9 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		class engine_context;
-
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		class engine_context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

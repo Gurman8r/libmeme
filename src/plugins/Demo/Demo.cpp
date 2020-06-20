@@ -203,7 +203,7 @@ namespace ml::gfx
 		using storage_type = typename ds::batch_vector
 		<
 			shared<texture2d>,	// 
-			command_t			// 
+			command			// 
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -292,7 +292,7 @@ namespace ml
 		{
 			std::make_tuple(nullptr, []() { /* test */ })
 		};
-
+		
 		shader_cache m_cache{};
 
 		vec2 m_resolution{ 1280, 720 };
@@ -391,15 +391,15 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			// FRAMEBUFFERS
-			{
-				m_fbo[0] = gfx::framebuffer::create({ m_resolution });
-			}
-
 			// ICON
 			if (image const icon{ engine::fs().path2("assets/textures/icon.png") })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
+			}
+
+			// FRAMEBUFFERS
+			{
+				m_fbo[0] = gfx::framebuffer::create({ m_resolution });
 			}
 
 			// IMAGES
@@ -1312,8 +1312,8 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			auto const ctx{ gfx::device::get_current_context() };
-			auto const & info{ ctx->get_devinfo() };
+			static auto const & ctx	{ engine::window().get_device_context() };
+			static auto const & info{ engine::window().get_device_info() };
 
 			if (ImGui::BeginMenuBar())
 			{

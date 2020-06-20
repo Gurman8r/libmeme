@@ -39,21 +39,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept
-		: m_window	{ new impl_window }
-		, m_settings{}
+	window::window() noexcept : m_window{ new impl_window }, m_settings{}
 	{
 	}
 
-	window::window(window_settings const & ws, bool install_callbacks) noexcept
-		: window{}
+	window::window(window_settings const & ws, bool install_callbacks) noexcept : window{}
 	{
 		(void)this->open(ws, install_callbacks);
-	}
-
-	window::~window() noexcept
-	{
-		delete m_window;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -87,45 +87,37 @@ namespace ml
 
 	bool engine::is_initialized() noexcept
 	{
-		return (g_engine != nullptr);
+		return (bool)g_engine;
 	}
 
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
-		// already initialized
-		if (is_initialized()) { return debug::error("engine is already initialized"); }
-
-		// create engine context
-		if (debug::info("creating engine context...")
-		; !(g_engine = new engine_context{ j, alloc }))
+		if (g_engine) { return debug::error("engine is already initialized"); }
+		else
 		{
-			return debug::error("failed creating engine context");
-		}
+			if (debug::info("creating engine context...")
+			; !(g_engine = new engine_context{ j, alloc }))
+			{
+				return debug::error("failed creating engine context");
+			}
 
-		// execute setup script
-		if (g_engine->m_config.contains("setup_script"))
-		{
-			debug::info("executing setup script...");
-			g_engine->m_scripts.do_file(
-				g_engine->m_fs.path2(
-					g_engine->m_config["setup_script"]));
+			return g_engine;
 		}
-
-		// success
-		return g_engine;
 	}
 
 	bool engine::finalize() noexcept
 	{
-		// not initialized
-		if (!is_initialized()) { return debug::error("engine is not initialized"); }
+		if (!g_engine) { return debug::error("engine is not initialized"); }
+		else
+		{
+			// FIXME: need to manually clear gui callbacks before plugins
+			// callbacks can live inside plugins' memory and will crash if not cleared first
+			g_engine->m_gui.main_menu_bar().menus.clear();
 
-		// FIXME?: need to clear menus before plugins because menu code can live INSIDE plugins
-		g_engine->m_gui.main_menu_bar().menus.clear();
+			delete g_engine;
 
-		// destroy engine context
-		delete g_engine;
-		return !(g_engine = nullptr);
+			return !(g_engine = nullptr);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

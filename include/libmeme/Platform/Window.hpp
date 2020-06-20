@@ -15,7 +15,7 @@ namespace ml
 
 		explicit window(window_settings const & ws, bool install_callbacks = true) noexcept;
 
-		virtual ~window() noexcept;
+		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -162,7 +162,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		window_base * m_window;
+		unique<window_base> m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

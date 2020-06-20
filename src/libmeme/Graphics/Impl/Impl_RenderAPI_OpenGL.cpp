@@ -59,10 +59,10 @@
 // helpers / disambiguation
 
 // enable / disable
-#define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)(id)
+#define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
 
 // get error
-#define ML_glGetError() _ML_GFX _error_type<_ML_GFX to_user>(glGetError())
+#define ML_glGetError() _ML_GFX _error_type<_ML_GFX to_user>( glGetError() )
 
 // check error
 #if ML_is_debug
@@ -621,10 +621,11 @@ namespace ml::gfx
 
 	opengl_device::opengl_device(context_settings const & cs)
 	{
-		// INIT
-		{
-			static ML_scope{ ML_IMPL_OPENGL_INIT(); };
+		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
+		ML_assert(opengl_init && "OpenGL is not initialized");
 
+		// INTERNAL SETUP
+		{
 			ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
 			
 			ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
@@ -721,10 +722,6 @@ namespace ml::gfx
 			// get error
 			m_devinfo.get_error = []() noexcept { return ML_glGetError(); };
 		}
-	}
-
-	opengl_device::~opengl_device()
-	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1064,7 +1061,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t usage, size_t count, address_t data)
+	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t usage, size_t count, address data)
 		: m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1072,7 +1069,7 @@ namespace ml::gfx
 		ML_glCheck(glBufferData(
 			GL_ARRAY_BUFFER,
 			(uint32_t)m_buffer.size(),
-			(address_t)m_buffer.data(),
+			(address)m_buffer.data(),
 			_usage<to_impl>(m_usage)));
 	}
 
@@ -1081,7 +1078,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	bool opengl_vertexbuffer::invalidate()
+	bool opengl_vertexbuffer::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
 
@@ -1092,14 +1089,14 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	void opengl_vertexbuffer::set_data(size_t count, address_t data, size_t offset)
+	void opengl_vertexbuffer::set_data(size_t count, address data, size_t offset)
 	{
 		m_buffer = bufcpy<float_t>(count, data);
 		ML_glCheck(glBufferSubData(
 			GL_ARRAY_BUFFER,
 			offset,
 			(uint32_t)m_buffer.size(),
-			(address_t)m_buffer.data()));
+			(address)m_buffer.data()));
 	}
 
 	void opengl_vertexbuffer::do_bind(opengl_vertexbuffer const * value)
@@ -1117,7 +1114,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_indexbuffer::opengl_indexbuffer(uint32_t usage, size_t count, address_t data)
+	opengl_indexbuffer::opengl_indexbuffer(uint32_t usage, size_t count, address data)
 		: m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1125,7 +1122,7 @@ namespace ml::gfx
 		ML_glCheck(glBufferData(
 			GL_ELEMENT_ARRAY_BUFFER,
 			(uint32_t)m_buffer.size(),
-			(address_t)m_buffer.data(),
+			(address)m_buffer.data(),
 			_usage<to_impl>(m_usage)));
 	}
 
@@ -1134,7 +1131,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteBuffers(1, &m_handle));
 	}
 
-	bool opengl_indexbuffer::invalidate()
+	bool opengl_indexbuffer::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
 		
@@ -1145,14 +1142,14 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	void opengl_indexbuffer::set_data(size_t count, address_t data, size_t offset)
+	void opengl_indexbuffer::set_data(size_t count, address data, size_t offset)
 	{
 		m_buffer = bufcpy<uint32_t>(count, data);
 		ML_glCheck(glBufferSubData(
 			GL_ELEMENT_ARRAY_BUFFER,
 			offset,
 			(uint32_t)m_buffer.size(),
-			(address_t)m_buffer.data()));
+			(address)m_buffer.data()));
 	}
 
 	void opengl_indexbuffer::do_bind(opengl_indexbuffer const * value)
@@ -1182,7 +1179,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteVertexArrays(1, &m_handle));
 	}
 
-	bool opengl_vertexarray::invalidate()
+	bool opengl_vertexarray::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteVertexArrays(1, &m_handle)); }
 		
@@ -1223,7 +1220,7 @@ namespace ml::gfx
 					get_element_component_count(e.type),
 					type,
 					layout.stride(),
-					reinterpret_cast<address_t>(e.offset)));
+					reinterpret_cast<address>(e.offset)));
 			}
 			else
 			{
@@ -1233,7 +1230,7 @@ namespace ml::gfx
 					type,
 					e.normalized,
 					layout.stride(),
-					reinterpret_cast<address_t>(e.offset)));
+					reinterpret_cast<address>(e.offset)));
 			}
 			ML_glCheck(glEnableVertexAttribArray((uint32_t)i));
 		}
@@ -1261,7 +1258,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(texopts const & opts, address_t data)
+	opengl_texture2d::opengl_texture2d(texopts const & opts, address data)
 		: m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
@@ -1285,7 +1282,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteTextures(1, &m_handle));
 	}
 
-	bool opengl_texture2d::invalidate()
+	bool opengl_texture2d::revalue()
 	{
 		if (!m_lock) { return debug::error("texture2d is not locked"); }
 
@@ -1310,14 +1307,14 @@ namespace ml::gfx
 		debug::warning("texture lock/unlock NYI");
 	}
 
-	void opengl_texture2d::update(vec2i const & size, address_t data)
+	void opengl_texture2d::update(vec2i const & size, address data)
 	{
 		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
 
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		invalidate(); bind();
+		revalue(); bind();
 		
 		ML_glCheck(glTexImage2D(
 			GL_TEXTURE_2D, 0,
@@ -1334,14 +1331,14 @@ namespace ml::gfx
 		set_mipmapped(m_opts.flags & texture_flags_mipmapped);
 	}
 
-	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, address_t data)
+	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, address data)
 	{
 		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
 
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		invalidate(); bind();
+		revalue(); bind();
 
 		ML_glCheck(glTexSubImage2D(
 			GL_TEXTURE_2D, 0,
@@ -1383,7 +1380,7 @@ namespace ml::gfx
 
 		static bool const edge_clamp_available
 		{
-			device::get_current_context()->get_devinfo().texture_edge_clamp_available
+			device::get_current_context()->get_device_info().texture_edge_clamp_available
 		};
 
 		ML_glCheck(glTexParameteri(GL_TEXTURE_2D,
@@ -1457,7 +1454,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteTextures(1, &m_handle));
 	}
 
-	bool opengl_texturecube::invalidate()
+	bool opengl_texturecube::revalue()
 	{
 		if (!m_lock) { return debug::error("texturecube is not locked"); }
 
@@ -1507,7 +1504,7 @@ namespace ml::gfx
 		ML_glCheck(glDeleteFramebuffers(1, &m_handle));
 	}
 
-	bool opengl_framebuffer::invalidate()
+	bool opengl_framebuffer::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteFramebuffers(1, &m_handle)); }
 		
@@ -1522,7 +1519,7 @@ namespace ml::gfx
 	{
 		static auto const max_color_attachments
 		{
-			(size_t)device::get_current_context()->get_devinfo().max_color_attachments
+			(size_t)device::get_current_context()->get_device_info().max_color_attachments
 		};
 		
 		if (m_attachments.size() < max_color_attachments &&
@@ -1552,7 +1549,7 @@ namespace ml::gfx
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
 
-		invalidate(); bind();
+		revalue(); bind();
 
 		// color attachments
 		if (m_attachments.empty()) { m_attachments.push_back(texture2d::create(m_opts)); }
@@ -1628,7 +1625,7 @@ namespace ml::gfx
 		ML_glCheck(ML_glDeleteShader(m_handle));
 	}
 
-	bool opengl_shader::invalidate()
+	bool opengl_shader::revalue()
 	{
 		if (m_handle) { ML_glCheck(ML_glDeleteShader(m_handle)); }
 		
@@ -1637,7 +1634,7 @@ namespace ml::gfx
 		return m_handle;
 	}
 
-	bool opengl_shader::compile(shader_src_t const & src)
+	bool opengl_shader::compile(pmr::vector<pmr::string> const & src)
 	{
 		// check empty
 		if ((m_source = src).empty()) { return false; }
@@ -1700,7 +1697,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_program::opengl_program()
+	opengl_program::opengl_program(int32_t flags)
+		: m_flags{ flags }
 	{
 		ML_glCheck(m_handle = ML_glCreateProgram());
 	}
@@ -1710,7 +1708,7 @@ namespace ml::gfx
 		ML_glCheck(ML_glDeleteProgram(m_handle));
 	}
 
-	bool opengl_program::invalidate()
+	bool opengl_program::revalue()
 	{
 		if (m_handle) { ML_glCheck(ML_glDeleteProgram(m_handle)); }
 		

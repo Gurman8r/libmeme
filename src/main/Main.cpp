@@ -62,7 +62,14 @@ ml::int32_t main()
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// application loop
+	// application sequence
+	if (engine::config().contains("setup_script"))
+	{
+		engine::scripts().do_file(
+			engine::fs().path2(
+				engine::config()["setup_script"]));
+	}
+
 	if (!engine::window().is_open()) { return EXIT_FAILURE; }
 	
 	event_system::fire_event<load_event>();
@@ -73,15 +80,15 @@ ml::int32_t main()
 	{
 		engine::time().begin_loop(); ML_defer{ engine::time().end_loop(); };
 
-		ML_benchmark_L("| begin loop")	{ event_system::fire_event<begin_loop_event>();	};
-		ML_benchmark_L("|  update")		{ event_system::fire_event<update_event>();		};
-		ML_benchmark_L("|  begin draw")	{ event_system::fire_event<begin_draw_event>();	};
-		ML_benchmark_L("|   draw")		{ event_system::fire_event<draw_event>();		};
-		ML_benchmark_L("|   begin gui")	{ event_system::fire_event<begin_gui_event>();	};
-		ML_benchmark_L("|    draw gui")	{ event_system::fire_event<draw_gui_event>();	};
-		ML_benchmark_L("|   end gui")	{ event_system::fire_event<end_gui_event>();	};
-		ML_benchmark_L("|  end draw")	{ event_system::fire_event<end_draw_event>();	};
-		ML_benchmark_L("| end loop")	{ event_system::fire_event<end_loop_event>();	};
+		ML_benchmark_L("| begin loop")	{ event_system::fire_event<	begin_loop_event	>(); };
+		ML_benchmark_L("|  update")		{ event_system::fire_event<	update_event		>(); };
+		ML_benchmark_L("|  begin draw")	{ event_system::fire_event<	begin_draw_event	>(); };
+		ML_benchmark_L("|   draw")		{ event_system::fire_event<	draw_event			>(); };
+		ML_benchmark_L("|   begin gui")	{ event_system::fire_event<	begin_gui_event		>(); };
+		ML_benchmark_L("|    draw gui")	{ event_system::fire_event<	draw_gui_event		>(); };
+		ML_benchmark_L("|   end gui")	{ event_system::fire_event<	end_gui_event		>(); };
+		ML_benchmark_L("|  end draw")	{ event_system::fire_event<	end_draw_event		>(); };
+		ML_benchmark_L("| end loop")	{ event_system::fire_event<	end_loop_event		>(); };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

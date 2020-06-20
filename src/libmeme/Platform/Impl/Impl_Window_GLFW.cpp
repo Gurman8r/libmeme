@@ -46,15 +46,12 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	glfw_window::glfw_window() noexcept
-		: m_window	{}
-		, m_monitor	{}
+	glfw_window::glfw_window() noexcept : m_window{}, m_monitor{}
 	{
 		static ML_scope{ glfwInit(); };
 	}
 
-	glfw_window::glfw_window(window_settings const & ws) noexcept
-		: glfw_window{}
+	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
 	{
 		(void)this->open(ws);
 	}
