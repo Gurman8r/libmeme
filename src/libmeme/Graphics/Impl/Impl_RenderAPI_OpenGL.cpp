@@ -94,7 +94,7 @@
 #define ML_glGetObjectInfoLogLength(obj, x)			glGetShaderiv( obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, x )
 #define ML_glGetObjectInfoLog(obj, size, len, str)	glGetProgramInfoLog( obj, size, len, str )
 
-// uniform
+// uniforms
 #define ML_glGetUniformLocation(obj, name)			ML_handle( _ML_GFX uniform_id, glGetUniformLocationARB(obj, name) )
 #define ML_glUniform1i(loc, x)						glUniform1iARB( ML_handle(int32_t, loc), x )
 #define ML_glUniform1f(loc, x)						glUniform1fARB( ML_handle(int32_t, loc), x )
@@ -619,10 +619,12 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_device::opengl_device(context_settings const & cs)
+	opengl_device::opengl_device(context_settings const & cs) : m_settings{ cs }
 	{
+		ML_assert("invalid client api specified" && m_settings.api == window_client_opengl);
+
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
-		ML_assert(opengl_init && "OpenGL is not initialized");
+		ML_assert("failed initializing OpenGL" && opengl_init);
 
 		// INTERNAL SETUP
 		{
@@ -633,7 +635,7 @@ namespace ml::gfx
 			ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		}
 
-		// VERSION
+		// VERSION INFO
 		{
 			// renderer
 			ML_glCheck(m_devinfo.renderer = (cstring)glGetString(GL_RENDERER));
@@ -673,7 +675,7 @@ namespace ml::gfx
 			}
 		}
 
-		// TEXTURES
+		// TEXTURE INFO
 		{
 			// edge clamp available
 #if defined(GL_EXT_texture_edge_clamp) \
@@ -685,7 +687,7 @@ namespace ml::gfx
 			ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_devinfo.max_texture_slots));
 		}
 
-		// FRAMEBUFFERS
+		// FRAMEBUFFER INFO
 		{
 			// max color attachments
 			ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_devinfo.max_color_attachments));
@@ -694,7 +696,7 @@ namespace ml::gfx
 			ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_devinfo.max_samples));
 		}
 		
-		// SHADERS
+		// SHADER INFO
 		{
 			// shaders available
 #if defined(GL_ARB_shading_language_100) \
@@ -1415,8 +1417,9 @@ namespace ml::gfx
 
 	image opengl_texture2d::copy_to_image() const
 	{
-		image temp{ m_opts.size, get_bits_per_pixel(m_opts.format.color) };
-		if (!m_lock) { debug::error("texture2d is not locked"); return temp; }
+		if (!m_lock) { debug::error("texture2d is not locked"); return image{}; }
+
+		image temp{ m_opts.size, calc_bits_per_pixel(m_opts.format.color) };
 		if (m_handle)
 		{
 			ML_bind_scope(*this);

@@ -107,7 +107,7 @@ namespace ml
 
 		ML_NODISCARD static monitor_handle get_primary_monitor();
 
-		ML_NODISCARD static float64_t get_time();
+		ML_NODISCARD static duration get_time();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

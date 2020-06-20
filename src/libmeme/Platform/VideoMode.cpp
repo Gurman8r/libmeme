@@ -25,6 +25,7 @@ namespace ml
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
 			temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
 			temp.depth = dm.dmBitsPerPel;
+
 #elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
 #else
@@ -46,6 +47,7 @@ namespace ml
 			{
 				temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
 			}
+
 #elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
 #else

@@ -6,6 +6,12 @@
 #include <libmeme/Core/Input.hpp>
 #include <libmeme/Platform/Window.hpp>
 
+#define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
+#define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
+#define ML_ImGui_Shutdown()				ML_scope{ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
+#define ML_ImGui_NewFrame()				ML_scope{ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
+#define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
+
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,10 +33,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::is_initialized() noexcept
-	{
-		return (m_gui_context != nullptr);
-	}
+	bool gui_manager::is_initialized() const noexcept { return (bool)m_gui_context; }
 
 	bool gui_manager::initialize(window const & w)
 	{
@@ -62,21 +65,18 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		// setup backend
-#if defined(ML_IMPL_WINDOW_GLFW)
-#	if defined(ML_IMPL_RENDERER_OPENGL3)
-		if (!ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)w.get_handle(), true))
+		// init platform
+		if (!ML_ImGui_Init_Platform(w.get_handle(), true))
 		{
 			return debug::error("Failed initializing ImGui platform");
 		}
-		if (!ImGui_ImplOpenGL3_Init("#version 130"))
+
+		// init renderer
+		if (!ML_ImGui_Init_Renderer())
 		{
 			return debug::error("Failed initializing ImGui renderer");
 		}
-#	else
-#	endif
-#else
-#endif
+
 		return is_initialized();
 	}
 
@@ -84,15 +84,10 @@ namespace ml
 	{
 		if (!is_initialized()) { return false; }
 
-#if defined(ML_IMPL_WINDOW_GLFW)
-#	if defined(ML_IMPL_RENDERER_OPENGL3)
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-#	else
-#	endif
-#else
-#endif
+		ML_ImGui_Shutdown();
+		
 		ImGui::DestroyContext();
+		
 		return !(m_gui_context = nullptr);
 	}
 
@@ -100,14 +95,8 @@ namespace ml
 
 	void gui_manager::new_frame()
 	{
-#if defined(ML_IMPL_WINDOW_GLFW)
-#	if defined(ML_IMPL_RENDERER_OPENGL3)
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-#	else
-#	endif
-#else
-#endif
+		ML_ImGui_NewFrame();
+
 		ImGui::NewFrame();
 	}
 
@@ -197,10 +186,8 @@ namespace ml
 	{
 		ImGui::Render();
 
-#if defined(ML_IMPL_RENDERER_OPENGL3)
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#else
-#endif
+		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
+
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			auto backup_context{ window::get_current_context() };

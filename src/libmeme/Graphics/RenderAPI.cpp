@@ -32,7 +32,7 @@ namespace ml::gfx
 	device * device::create_context(context_settings const & cs)
 	{
 		auto temp{ new impl_device{ cs } };
-		
+
 		if (!g_devctx) { set_current_context(temp); }
 		
 		return temp;

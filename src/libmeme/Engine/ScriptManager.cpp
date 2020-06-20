@@ -27,28 +27,21 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool script_manager::is_initialized() noexcept
-	{
-		return Py_IsInitialized();
-	}
+	bool script_manager::is_initialized() const noexcept { return Py_IsInitialized(); }
 
 	bool script_manager::initialize()
 	{
 		if (is_initialized()) { return false; }
 
-		PyObject_SetArenaAllocator(std::invoke([]() noexcept
+		PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]() noexcept
 		{
-			static PyObjectArenaAllocator temp
+			temp.alloc = [](auto, size_t s) noexcept
 			{
-				nullptr,
-				[](auto, size_t s) noexcept
-				{
-					return pmr::get_default_resource()->allocate(s);
-				},
-				[](auto, void * p, size_t s) noexcept
-				{
-					return pmr::get_default_resource()->deallocate(p, s);
-				}
+				return pmr::get_default_resource()->allocate(s);
+			};
+			temp.free = [](auto, void * p, size_t s) noexcept
+			{
+				return pmr::get_default_resource()->deallocate(p, s);
 			};
 			return &temp;
 		}));

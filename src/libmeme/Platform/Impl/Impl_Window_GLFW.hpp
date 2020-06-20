@@ -110,7 +110,7 @@ namespace ml
 
 		static monitor_handle get_primary_monitor();
 
-		static float64_t get_time();
+		static duration get_time();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -14,18 +14,26 @@ namespace ml
 		(void)this->open(ws, install_callbacks);
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	bool render_window::open(window_settings const & ws, bool install_callbacks)
 	{
 		// open window
-		if (!window::open(ws, install_callbacks)) { return debug::error("failed opening window"); }
+		if (!window::open(ws, install_callbacks))
+		{
+			return debug::error("failed opening window");
+		}
 
 		// create device context
-		if (!m_context.create(ws.context)) { return debug::error("failed creating device context"); }
+		if (!m_context.reset(gfx::device::create_context(ws.context)))
+		{
+			return debug::error("failed creating device context");
+		}
 
 		// validate version
 		m_settings.context.major = get_device_info().major_version;
 		m_settings.context.minor = get_device_info().minor_version;
-		debug::info("device api version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
+		debug::info("using renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		
 		// setup render states
 		for (auto const & cmd :
@@ -61,6 +69,8 @@ namespace ml
 
 	void render_window::close()
 	{
+		m_context.reset();
+
 		window::close();
 	}
 

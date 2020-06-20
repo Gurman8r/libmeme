@@ -2,8 +2,8 @@
 #define _ML_RENDER_API_HPP_
 
 #include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Rect.hpp>
+#include <libmeme/Platform/WindowAPI.hpp>
 #include <libmeme/Graphics/Binder.hpp>
 #include <libmeme/Graphics/Image.hpp>
 #include <libmeme/Graphics/Vertex.hpp>
@@ -656,8 +656,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// base device
 	class ML_GRAPHICS_API device : public trackable, public non_copyable
 	{
@@ -686,7 +684,11 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD virtual context_settings const & get_context_settings() const noexcept = 0;
+
 		ML_NODISCARD virtual devinfo const & get_device_info() const noexcept = 0;
+
+		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -801,29 +803,17 @@ namespace ml::gfx
 		device * m_device;
 
 	public:
-		device_context() noexcept : m_device{} {}
+		device_context() noexcept : m_device{ device::get_current_context() } {}
 
-		explicit device_context(device * ctx) noexcept : m_device{ ctx } { reset(ctx); }
+		explicit device_context(device * ctx) noexcept : m_device{ ctx } { device::set_current_context(ctx); }
 
-		explicit device_context(context_settings const & cs) : m_device{} { create(cs); }
+		explicit device_context(context_settings const & cs) : m_device{ device::create_context(cs) } {}
 
 		explicit device_context(device_context && other) noexcept : m_device{} { swap(std::move(other)); }
 
-		~device_context() noexcept { destroy(); }
+		~device_context() noexcept { reset(); }
 
 		device_context & operator=(device_context && other) noexcept { return swap(std::move(other)); }
-
-		bool create(context_settings const & cs) noexcept
-		{
-			return !m_device && (m_device = device::create_context(cs));
-		}
-
-		bool destroy() noexcept
-		{
-			auto const temp{ release() };
-			if (temp) { device::destroy_context(m_device); }
-			return temp;
-		}
 
 		device * release() noexcept
 		{
@@ -834,8 +824,11 @@ namespace ml::gfx
 
 		device * reset(device * value = nullptr) noexcept
 		{
-			destroy();
-			return m_device = value;
+			if (m_device)
+			{
+				device::destroy_context(m_device);
+			}
+			return (m_device = value);
 		}
 
 		device_context & swap(device_context & other) noexcept
@@ -1111,7 +1104,7 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD constexpr uint32_t get_channel_format(size_t value) noexcept
+	ML_NODISCARD constexpr uint32_t calc_channel_format(size_t value) noexcept
 	{
 		switch (value)
 		{
@@ -1122,7 +1115,7 @@ namespace ml::gfx
 		}
 	}
 
-	ML_NODISCARD constexpr size_t get_bits_per_pixel(uint32_t value) noexcept
+	ML_NODISCARD constexpr size_t calc_bits_per_pixel(uint32_t value) noexcept
 	{
 		switch (value)
 		{
@@ -1198,7 +1191,7 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
-			return create({ img.size(), { get_channel_format(img.channels()) }, flags }, img.data());
+			return create({ img.size(), { calc_channel_format(img.channels()) }, flags }, img.data());
 		}
 
 		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = texture_flags_default) noexcept

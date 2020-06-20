@@ -20,13 +20,7 @@
 using impl_window = _ML glfw_window;
 
 #elif defined(ML_IMPL_WINDOW_SDL)
-#include "Impl/Impl_Window_SDL.hpp"
-using impl_window = _ML sdl_window;
-
 #elif defined(ML_IMPL_WINDOW_SFML)
-#include "Impl/Impl_Window_SFML.hpp"
-using impl_window = _ML impl_window_sfml;
-
 // etc...
 
 #else
@@ -39,7 +33,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ new impl_window }, m_settings{}
+	window::window() noexcept : m_window{ make_new<impl_window>() }, m_settings{}
 	{
 	}
 
@@ -57,7 +51,7 @@ namespace ml
 		if (!ws.video)			{ return debug::error("invalid window video"); }
 		if (!ws.context)		{ return debug::error("invalid window context"); }
 		if (!ws.hints)			{ return debug::error("invalid window hints"); }
-		if (!m_window->open(ws)){ return debug::error("failed opening window impl"); }
+		if (!m_window->open(ws)){ return debug::error("failed opening window implementation"); }
 
 		// store settings
 		m_settings = ws;
@@ -344,7 +338,7 @@ namespace ml
 		return impl_window::get_primary_monitor();
 	}
 
-	float64_t window::get_time()
+	duration window::get_time()
 	{
 		return impl_window::get_time();
 	}

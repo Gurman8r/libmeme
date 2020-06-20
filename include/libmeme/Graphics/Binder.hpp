@@ -30,6 +30,11 @@ namespace ml::impl
 			Bindable::bind(nullptr);
 		}
 
+		operator bool() const noexcept
+		{
+			return m_ptr;
+		}
+
 	private: Bindable * const m_ptr;
 	};
 

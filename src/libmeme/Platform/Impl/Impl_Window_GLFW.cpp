@@ -48,7 +48,8 @@ namespace ml
 	
 	glfw_window::glfw_window() noexcept : m_window{}, m_monitor{}
 	{
-		static ML_scope{ glfwInit(); };
+		static bool const glfw_init{ (bool)glfwInit() };
+		ML_assert("failed initializing GLFW" && glfw_init);
 	}
 
 	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
@@ -67,8 +68,7 @@ namespace ml
 
 	bool glfw_window::open(window_settings const & ws)
 	{
-		// already open
-		if (m_window) { return false; }
+		if (is_open()) { return false; } // already open
 
 		// window hints
 		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
@@ -106,20 +106,22 @@ namespace ml
 		glfwWindowHint(GLFW_FLOATING,				ws.hints & window_hints_floating);
 		glfwWindowHint(GLFW_MAXIMIZED,				ws.hints & window_hints_maximized);
 		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_doublebuffer);
-		//glfwWindowHint(GLFW_RED_BITS,				8);
-		//glfwWindowHint(GLFW_GREEN_BITS,				8);
-		//glfwWindowHint(GLFW_BLUE_BITS,				8);
-		//glfwWindowHint(GLFW_ALPHA_BITS,				8);
-		//glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
+		glfwWindowHint(GLFW_RED_BITS,				8);
+		glfwWindowHint(GLFW_GREEN_BITS,				8);
+		glfwWindowHint(GLFW_BLUE_BITS,				8);
+		glfwWindowHint(GLFW_ALPHA_BITS,				8);
+		glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
 		
 		// create window
-		return m_window = glfwCreateWindow(
+		m_window = glfwCreateWindow(
 			ws.video.size[0],
 			ws.video.size[1],
 			ws.title.c_str(),
 			nullptr,
 			nullptr
 		);
+
+		return is_open();
 	}
 
 	void glfw_window::close()
@@ -163,53 +165,56 @@ namespace ml
 
 	int32_t glfw_window::get_attribute(int32_t value) const
 	{
-		static constexpr int32_t temp[] =
+		return glfwGetWindowAttrib(m_window, std::invoke([&]() noexcept
 		{
-			GLFW_FOCUSED,
-			GLFW_ICONIFIED,
-			GLFW_RESIZABLE,
-			GLFW_VISIBLE,
-			GLFW_DECORATED,
-			GLFW_AUTO_ICONIFY,
-			GLFW_FLOATING,
-			GLFW_MAXIMIZED,
-			GLFW_CENTER_CURSOR,
-			GLFW_TRANSPARENT_FRAMEBUFFER,
-			GLFW_HOVERED,
-			GLFW_FOCUS_ON_SHOW,
+			switch (value)
+			{
+			default: return 0;
 
-			GLFW_RED_BITS,
-			GLFW_GREEN_BITS,
-			GLFW_BLUE_BITS,
-			GLFW_ALPHA_BITS,
-			GLFW_DEPTH_BITS,
-			GLFW_STENCIL_BITS,
-			GLFW_ACCUM_RED_BITS,
-			GLFW_ACCUM_GREEN_BITS,
-			GLFW_ACCUM_BLUE_BITS,
-			GLFW_ACCUM_ALPHA_BITS,
-			GLFW_AUX_BUFFERS,
-			GLFW_STEREO,
-			GLFW_SAMPLES,
-			GLFW_SRGB_CAPABLE,
-			GLFW_REFRESH_RATE,
-			GLFW_DOUBLEBUFFER,
-
-			GLFW_CLIENT_API,
-			GLFW_CONTEXT_VERSION_MAJOR,
-			GLFW_CONTEXT_VERSION_MINOR,
-			GLFW_CONTEXT_REVISION,
-			GLFW_CONTEXT_ROBUSTNESS,
-			GLFW_OPENGL_FORWARD_COMPAT,
-			GLFW_OPENGL_DEBUG_CONTEXT,
-			GLFW_OPENGL_PROFILE,
-			GLFW_CONTEXT_RELEASE_BEHAVIOR,
-			GLFW_CONTEXT_NO_ERROR,
-			GLFW_CONTEXT_CREATION_API,
-			GLFW_SCALE_TO_MONITOR,
-		};
-		ML_assert(value < ML_arraysize(temp));
-		return glfwGetWindowAttrib(m_window, temp[(size_t)value]);
+			case window_attr_focused					: return GLFW_FOCUSED;
+			case window_attr_iconified					: return GLFW_ICONIFIED;
+			case window_attr_resizable					: return GLFW_RESIZABLE;
+			case window_attr_visible					: return GLFW_VISIBLE;
+			case window_attr_decorated					: return GLFW_DECORATED;
+			case window_attr_auto_iconify				: return GLFW_AUTO_ICONIFY;
+			case window_attr_floating					: return GLFW_FLOATING;
+			case window_attr_maximized					: return GLFW_MAXIMIZED;
+			case window_attr_center_cursor				: return GLFW_CENTER_CURSOR;
+			case window_attr_transparent_framebuffer	: return GLFW_TRANSPARENT_FRAMEBUFFER;
+			case window_attr_hovered					: return GLFW_HOVERED;
+			case window_attr_focus_on_show				: return GLFW_FOCUS_ON_SHOW;
+			
+			case window_attr_red_bits					: return GLFW_RED_BITS;
+			case window_attr_green_bits					: return GLFW_GREEN_BITS;
+			case window_attr_blue_bits					: return GLFW_BLUE_BITS;
+			case window_attr_alpha_bits					: return GLFW_ALPHA_BITS;
+			case window_attr_depth_bits					: return GLFW_DEPTH_BITS;
+			case window_attr_stencil_bits				: return GLFW_STENCIL_BITS;
+			case window_attr_accum_red_bits				: return GLFW_ACCUM_RED_BITS;
+			case window_attr_accum_green_bits			: return GLFW_ACCUM_GREEN_BITS;
+			case window_attr_accum_blue_bits			: return GLFW_ACCUM_BLUE_BITS;
+			case window_attr_accum_alpha_bits			: return GLFW_ACCUM_ALPHA_BITS;
+			case window_attr_aux_buffers				: return GLFW_AUX_BUFFERS;
+			case window_attr_stereo						: return GLFW_STEREO;
+			case window_attr_samples					: return GLFW_SAMPLES;
+			case window_attr_srgb_capable				: return GLFW_SRGB_CAPABLE;
+			case window_attr_refresh_rate				: return GLFW_REFRESH_RATE;
+			case window_attr_doublebuffer				: return GLFW_DOUBLEBUFFER;
+			
+			case window_attr_client_api					: return GLFW_CLIENT_API;
+			case window_attr_context_version_major		: return GLFW_CONTEXT_VERSION_MAJOR;
+			case window_attr_context_version_minor		: return GLFW_CONTEXT_VERSION_MINOR;
+			case window_attr_context_revision			: return GLFW_CONTEXT_REVISION;
+			case window_attr_context_robustness			: return GLFW_CONTEXT_ROBUSTNESS;
+			case window_attr_backend_forward_compat		: return GLFW_OPENGL_FORWARD_COMPAT;
+			case window_attr_backend_debug_context		: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case window_attr_backend_profile			: return GLFW_OPENGL_PROFILE;
+			case window_attr_context_release_behavior	: return GLFW_CONTEXT_RELEASE_BEHAVIOR;
+			case window_attr_context_no_error			: return GLFW_CONTEXT_NO_ERROR;
+			case window_attr_context_creation_api		: return GLFW_CONTEXT_CREATION_API;
+			case window_attr_scale_to_monitor			: return GLFW_SCALE_TO_MONITOR;
+			}
+		}));
 	}
 
 	int_rect glfw_window::get_bounds() const
@@ -300,14 +305,16 @@ namespace ml
 	
 	void glfw_window::set_cursor_mode(int32_t value)
 	{
-		static constexpr int32_t temp[] =
+		set_input_mode(GLFW_CURSOR, std::invoke([&]() noexcept
 		{
-			GLFW_CURSOR_NORMAL,
-			GLFW_CURSOR_HIDDEN,
-			GLFW_CURSOR_DISABLED,
-		};
-		ML_assert(value < ML_arraysize(temp));
-		set_input_mode(GLFW_CURSOR, temp[(size_t)value]);
+			switch (value)
+			{
+			default						: return 0;
+			case cursor_mode_normal		: return GLFW_CURSOR_NORMAL;
+			case cursor_mode_hidden		: return GLFW_CURSOR_HIDDEN;
+			case cursor_mode_disabled	: return GLFW_CURSOR_DISABLED;
+			}
+		}));
 	}
 
 	void glfw_window::set_cursor_position(vec2d const & value)
@@ -383,20 +390,28 @@ namespace ml
 
 	cursor_handle glfw_window::create_standard_cursor(int32_t value)
 	{
-		static constexpr int32_t temp[] =
+		return (cursor_handle)glfwCreateStandardCursor(std::invoke([&]() noexcept
 		{
-			GLFW_ARROW_CURSOR,
-			GLFW_IBEAM_CURSOR,
-			GLFW_CROSSHAIR_CURSOR,
-			GLFW_POINTING_HAND_CURSOR,
-			GLFW_RESIZE_EW_CURSOR,
-			GLFW_RESIZE_NS_CURSOR,
-			GLFW_RESIZE_NESW_CURSOR,
-			GLFW_RESIZE_NWSE_CURSOR,
-			GLFW_ARROW_CURSOR,
-		};
-		ML_assert(value < ML_arraysize(temp));
-		return (cursor_handle)glfwCreateStandardCursor(temp[(size_t)value]);
+			switch (value)
+			{
+			default							: return 0;
+			case cursor_shape_arrow			: return GLFW_ARROW_CURSOR;
+			case cursor_shape_ibeam			: return GLFW_IBEAM_CURSOR;
+			case cursor_shape_crosshair		: return GLFW_CROSSHAIR_CURSOR;
+			case cursor_shape_pointing_hand	: return GLFW_POINTING_HAND_CURSOR;
+			case cursor_shape_ew			: return GLFW_RESIZE_EW_CURSOR;
+			case cursor_shape_ns			: return GLFW_RESIZE_NS_CURSOR;
+			case cursor_shape_nesw			: return GLFW_RESIZE_NESW_CURSOR;
+			case cursor_shape_nwse			: return GLFW_RESIZE_NWSE_CURSOR;
+			case cursor_shape_resize_all	: return GLFW_RESIZE_ALL_CURSOR;
+			case cursor_shape_not_allowed	: return GLFW_NOT_ALLOWED_CURSOR;
+
+			// glfw doesn't have these
+			case cursor_shape_hresize		: return GLFW_HRESIZE_CURSOR;
+			case cursor_shape_vresize		: return GLFW_VRESIZE_CURSOR;
+			case cursor_shape_hand			: return GLFW_HAND_CURSOR;
+			}
+		}));
 	}
 
 	int32_t glfw_window::extension_supported(cstring value)
@@ -437,9 +452,9 @@ namespace ml
 		return (monitor_handle)glfwGetPrimaryMonitor();
 	}
 
-	float64_t glfw_window::get_time()
+	duration glfw_window::get_time()
 	{
-		return glfwGetTime();
+		return duration{ glfwGetTime() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -21,16 +21,23 @@ namespace ml::gfx
 
 		friend class device_context;
 
+		static constexpr typeof<> s_type_info{ typeof_v<opengl_device> };
+
 		opengl_device(context_settings const & cs);
 
 		~opengl_device() noexcept override = default;
 
 		devinfo m_devinfo;
+		context_settings m_settings;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		context_settings const & get_context_settings() const noexcept override { return m_settings; }
+
 		devinfo const & get_device_info() const noexcept override { return m_devinfo; }
+
+		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -143,7 +150,7 @@ namespace ml::gfx
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // draw usage
 		buffer_layout	m_layout	{}; // buffer layout
-		buffer		m_buffer	{}; // local data
+		buffer			m_buffer	{}; // local data
 
 	public:
 		opengl_vertexbuffer(uint32_t usage, size_t count, address data);
@@ -193,7 +200,7 @@ namespace ml::gfx
 
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // usage
-		buffer		m_buffer	{}; // local data
+		buffer			m_buffer	{}; // local data
 
 	public:
 		opengl_indexbuffer(uint32_t usage, size_t count, address data);
@@ -386,10 +393,10 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_type_info{ typeof_v<opengl_framebuffer> };
 
-		uint32_t			m_handle		{}	; // handle
-		texopts				m_opts			{}	; // texture options
-		pmr::vector<shared<texture2d>>		m_attachments	{}	; // color attachments
-		shared<texture2d>	m_depth			{}	; // depth attachment
+		uint32_t						m_handle		{}	; // handle
+		texopts							m_opts			{}	; // texture options
+		pmr::vector<shared<texture2d>>	m_attachments	{}	; // color attachments
+		shared<texture2d>				m_depth			{}	; // depth attachment
 
 		
 	public:

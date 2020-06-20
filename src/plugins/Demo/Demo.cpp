@@ -18,8 +18,8 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-//#include <glm/glm/glm.hpp>
-//#include <glm/glm/gtc/matrix_transform.hpp>
+#include <glm/glm/glm.hpp>
+#include <glm/glm/gtc/matrix_transform.hpp>
 
 // CAMERA (WIP)
 namespace ml
@@ -463,7 +463,7 @@ namespace ml
 				{
 					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
 					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
-					make_uniform<float_t>("u_cam.fov"	, 45.0f),
+					make_uniform<float_t>("u_cam.fov"	, -45.0f),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
 					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
@@ -543,13 +543,13 @@ namespace ml
 				};
 				
 				auto & earth = make_renderer("3D", "earth", "sphere32x24", c_transform{
-					vec3{ -.5f, 0.f, 0.f },
+					vec3{ .5f, -.1f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.15f },
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3D", "moon", "monkey", c_transform{
-					vec3{ 1.f, 0.f, 0.f },
+				auto & moon = make_renderer("3D", "moon", "sphere8x6", c_transform{
+					vec3{ -1.f, .1f, 0.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .25f },
 					vec3::fill(.27f)
 					});
@@ -589,10 +589,8 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			if (m_fbo[0])
+			if (ML_bind_scope(m_fbo[0].get()))
 			{
-				ML_bind_scope(m_fbo[0].get());
-
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_cull_enabled(false),
