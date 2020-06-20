@@ -19,16 +19,14 @@ namespace ml::gfx
 
 		friend class device;
 
-		friend class device_context;
-
 		static constexpr typeof<> s_type_info{ typeof_v<opengl_device> };
 
 		opengl_device(context_settings const & cs);
 
 		~opengl_device() noexcept override = default;
 
-		devinfo m_devinfo;
-		context_settings m_settings;
+		context_settings	m_settings	; // 
+		devinfo				m_devinfo	; // 
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

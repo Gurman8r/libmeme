@@ -354,8 +354,8 @@ namespace ml
 		{
 			auto const vm{ glfwGetVideoMode(m_monitor) };
 			glfwSetWindowMonitor(m_window, m_monitor,
-				bounds.left(),
-				bounds.top(),
+				0,
+				0,
 				vm->width,
 				vm->height,
 				vm->refreshRate);

@@ -662,12 +662,10 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static device * g_devctx; // global device context
+		static device * g_devctx; // pointer to current context
 
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		friend class device_context;
 
 		virtual ~device() noexcept override = default;
 

@@ -2,6 +2,7 @@
 #define _ML_CONTEXT_SETTINGS_HPP_
 
 #include <libmeme/Common.hpp>
+#include <libmeme/Core/JSON.hpp>
 
 namespace ml
 {

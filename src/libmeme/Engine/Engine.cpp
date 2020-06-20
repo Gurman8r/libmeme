@@ -107,7 +107,7 @@ namespace ml
 		if (!g_engine) { return debug::error("engine is not initialized"); }
 		else
 		{
-			// FIXME: need to manually clear gui callbacks before plugins
+			// FIXME: need to manually clear gui callbacks before plugins are destroyed
 			// callbacks can live inside plugins' memory and will crash if not cleared first
 			g_engine->m_gui.main_menu_bar().menus.clear();
 

@@ -3,10 +3,29 @@
 
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Duration.hpp>
-#include <libmeme/Platform/WindowSettings.hpp>
+#include <libmeme/Platform/ContextSettings.hpp>
+#include <libmeme/Platform/VideoMode.hpp>
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct ML_NODISCARD window_settings final
+	{
+		pmr::string			title	{};
+		video_mode			video	{};
+		context_settings	context	{};
+		int32_t				hints	{};
+	};
+
+	inline void from_json(json const & j, window_settings & value)
+	{
+		j.at("title").get_to(value.title);
+		j.at("video").get_to(value.video);
+		j.at("context").get_to(value.context);
+		j.at("hints").get_to(value.hints);
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_decl_handle(cursor_handle)	; // cursor handle

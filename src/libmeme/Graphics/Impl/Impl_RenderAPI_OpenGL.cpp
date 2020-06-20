@@ -58,11 +58,11 @@
 
 // helpers / disambiguation
 
+// get error
+#define ML_glGetError std::bind( &_ML_GFX _error_type<_ML_GFX to_user>, glGetError() )
+
 // enable / disable
 #define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
-
-// get error
-#define ML_glGetError() _ML_GFX _error_type<_ML_GFX to_user>( glGetError() )
 
 // check error
 #if ML_is_debug
@@ -619,11 +619,14 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_device::opengl_device(context_settings const & cs) : m_settings{ cs }
+	opengl_device::opengl_device(context_settings const & cs)
+		: m_settings{ cs }
+		, m_devinfo	{}
 	{
 		ML_assert("invalid client api specified" && m_settings.api == window_client_opengl);
 
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
+
 		ML_assert("failed initializing OpenGL" && opengl_init);
 
 		// INTERNAL SETUP
@@ -722,7 +725,7 @@ namespace ml::gfx
 		// FUNCTIONS
 		{
 			// get error
-			m_devinfo.get_error = []() noexcept { return ML_glGetError(); };
+			m_devinfo.get_error = ML_glGetError;
 		}
 	}
 
