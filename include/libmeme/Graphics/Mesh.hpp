@@ -77,12 +77,12 @@ namespace ml
 
 		void add_vertices(contiguous_t const & verts) noexcept
 		{
-			add_vertices(gfx::vertexbuffer::create(verts.size(), verts.data()));
+			m_vao->add_vertices(gfx::vertexbuffer::create(verts.size(), verts.data()));
 		}
 
 		void add_vertices(contiguous_t const & verts, gfx::buffer_layout const & buffer_layout) noexcept
 		{
-			add_vertices(std::invoke([&, vb = gfx::vertexbuffer::create(verts.size(), verts.data())
+			m_vao->add_vertices(std::invoke([&, vb = gfx::vertexbuffer::create(verts.size(), verts.data())
 			]() noexcept
 			{
 				vb->set_layout(buffer_layout);
@@ -99,7 +99,7 @@ namespace ml
 
 		void set_indices(indices_t const & inds) noexcept
 		{
-			set_indices(inds.empty() ? nullptr : gfx::indexbuffer::create
+			m_vao->set_indices(inds.empty() ? nullptr : gfx::indexbuffer::create
 			(
 				inds.size(), inds.data()
 			));
