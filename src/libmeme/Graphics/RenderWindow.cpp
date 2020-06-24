@@ -36,7 +36,7 @@ namespace ml
 		debug::info("using renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		
 		// setup render states
-		for (auto const & cmd :
+		for (gfx::command const & cmd :
 		{
 			// alpha
 			gfx::render_command::set_alpha_enabled(true),

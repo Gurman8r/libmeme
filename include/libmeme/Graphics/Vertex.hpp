@@ -13,13 +13,13 @@ namespace ml
 
 		using storage_type = typename ds::array<float_t, size>;
 
-		constexpr explicit vertex(vec3 const & p, vec3 const & n, vec2 const & t) : m_data{
+		explicit vertex(vec3 const & p, vec3 const & n, vec2 const & t) : m_data{
 			p[0], p[1], p[2], n[0], n[1], n[2], t[0], t[1]
 		}
 		{
 		}
 
-		constexpr vertex(std::initializer_list<float_t> init) : m_data{}
+		vertex(std::initializer_list<float_t> init) : m_data{}
 		{
 			for (auto it{ init.begin() }; it != init.end(); ++it)
 			{
@@ -30,24 +30,24 @@ namespace ml
 			}
 		}
 
-		constexpr vertex(storage_type const & storage) : m_data{ storage }
+		vertex(storage_type const & storage) : m_data{ storage }
 		{
 		}
 
-		constexpr vertex(storage_type && storage) noexcept : m_data{ std::move(storage) }
+		vertex(storage_type && storage) noexcept : m_data{ std::move(storage) }
 		{
 		}
 
-		constexpr vertex(vertex const & value) : m_data{ value.m_data }
+		vertex(vertex const & value) : m_data{ value.m_data }
 		{
 		}
 
-		constexpr vertex(vertex && value) noexcept : m_data{}
+		vertex(vertex && value) noexcept : m_data{}
 		{
 			swap(std::move(value));
 		}
 
-		constexpr vertex() noexcept : m_data{}
+		vertex() noexcept : m_data{}
 		{
 		}
 
@@ -66,7 +66,7 @@ namespace ml
 			return (*this);
 		}
 
-		constexpr void swap(vertex & value) noexcept
+		void swap(vertex & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
@@ -76,50 +76,42 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr decltype(auto) operator[](size_t const i) { return m_data[i]; }
+		auto operator[](size_t const i) & noexcept -> float_t & { return m_data[i]; }
 		
-		constexpr decltype(auto) operator[](size_t const i) const { return m_data[i]; }
+		auto operator[](size_t const i) const & noexcept -> float_t const & { return m_data[i]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD constexpr vec3 position() const noexcept
+		ML_NODISCARD vec3 const & position() const noexcept
 		{
-			return { m_data[0], m_data[1], m_data[2] };
+			return *reinterpret_cast<vec3 const *>(&m_data[0]);
 		}
 
-		ML_NODISCARD constexpr vec3 normal() const noexcept
+		ML_NODISCARD vec3 const & normal() const noexcept
 		{
-			return { m_data[3], m_data[4], m_data[5] };
+			return *reinterpret_cast<vec3 const *>(&m_data[3]);
 		}
 
-		ML_NODISCARD constexpr vec2 texcoord() const noexcept
+		ML_NODISCARD vec2 const & texcoord() const noexcept
 		{
-			return { m_data[6], m_data[7] };
+			return *reinterpret_cast<vec2 const *>(&m_data[6]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr vertex & position(vec3 const & value) noexcept
+		vec3 & position(vec3 const & value) noexcept
 		{
-			m_data[0] = value[0];
-			m_data[1] = value[1];
-			m_data[2] = value[2];
-			return (*this);
+			return *reinterpret_cast<vec3 *>(&m_data[0]);
 		}
 
-		constexpr vertex & normal(vec3 const & value) noexcept
+		vec3 & normal(vec3 const & value) noexcept
 		{
-			m_data[3] = value[0];
-			m_data[4] = value[1];
-			m_data[5] = value[2];
-			return (*this);
+			return *reinterpret_cast<vec3 *>(&m_data[3]);
 		}
 
-		constexpr vertex & texcoord(vec2 const & value) noexcept
+		vec2 & texcoord(vec2 const & value) noexcept
 		{
-			m_data[6] = value[0];
-			m_data[7] = value[1];
-			return (*this);
+			return *reinterpret_cast<vec2 *>(&m_data[6]);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

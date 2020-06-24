@@ -3,6 +3,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/Matrix.hpp>
 
 #ifndef IM_VEC2_CLASS_EXTRA

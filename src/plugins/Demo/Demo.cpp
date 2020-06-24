@@ -461,9 +461,9 @@ namespace ml
 				// camera
 				auto const _camera = material
 				{
-					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 3.f }),
-					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, -1.f }),
-					make_uniform<float_t>("u_cam.fov"	, -45.0f),
+					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 0.f }),
+					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, 1.f }),
+					make_uniform<float_t>("u_cam.fov"	, 45.f * ML_deg2rag),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
 					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
@@ -543,13 +543,13 @@ namespace ml
 				};
 				
 				auto & earth = make_renderer("3D", "earth", "sphere32x24", c_transform{
-					vec3{ .5f, -.1f, 0.f },
+					vec3{ -.5f, -.2f, 5.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.15f },
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3D", "moon", "sphere8x6", c_transform{
-					vec3{ -1.f, .1f, 0.f },
+				auto & moon = make_renderer("3D", "moon", "monkey", c_transform{ // sphere8x6
+					vec3{ 1.f, .2f, 5.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .25f },
 					vec3::fill(.27f)
 					});
@@ -591,7 +591,7 @@ namespace ml
 
 			if (ML_bind_scope(m_fbo[0].get()))
 			{
-				for (auto const & cmd :
+				for (gfx::command const & cmd :
 				{
 					gfx::render_command::set_cull_enabled(false),
 					gfx::render_command::set_clear_color(colors::magenta),

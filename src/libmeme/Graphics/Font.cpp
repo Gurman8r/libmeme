@@ -87,13 +87,8 @@ namespace ml
 			return g;
 		}
 
-		// graphic
-		g.graphic = gfx::texture2d::create({
-			vec2i{}, {
-			gfx::format_rgba,
-			gfx::format_red,
-			gfx::type_unsigned_byte },
-			gfx::texture_flags_default });
+		// advance
+		g.advance = (uint32_t)((FT_Face)m_face)->glyph->advance.x;
 
 		// bounds
 		g.bounds = float_rect
@@ -104,18 +99,24 @@ namespace ml
 			((FT_Face)m_face)->glyph->bitmap.rows
 		};
 
-		// advance
-		g.advance = (uint32_t)((FT_Face)m_face)->glyph->advance.x;
+		// graphic
+		g.graphic = gfx::texture2d::create
+		({
+			vec2i{}, {
+			gfx::format_rgba,
+			gfx::format_red,
+			gfx::type_unsigned_byte },
+			gfx::texture_flags_default
+		});
 
 		// only load a texture for characters requiring a graphic
-		if (!std::isspace(c, {}) && std::isgraph(c, {}))
-		{
-			g.graphic->update((vec2i)g.size(), ((FT_Face)m_face)->glyph->bitmap.buffer);
-		}
-		else
-		{
-			g.graphic->update((vec2i)g.size(), nullptr);
-		}
+		g.graphic->update
+		(
+			(vec2i)g.size(),
+			(!std::isspace(c, {}) && std::isgraph(c, {}))
+			? ((FT_Face)m_face)->glyph->bitmap.buffer
+			: nullptr
+		);
 
 		return g;
 	}

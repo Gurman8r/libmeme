@@ -32,10 +32,10 @@ namespace ml
 		{
 		}
 
-		image(vec2i const & size, size_t channels, pixels_type const & pix, allocator_type alloc = {})
+		image(vec2i const & size, size_t channels, pixels_type const & pixels, allocator_type alloc = {})
 			: m_size	{ size }
 			, m_channels{ channels }
-			, m_pixels	{ pix, alloc }
+			, m_pixels	{ pixels, alloc }
 		{
 		}
 
@@ -46,10 +46,10 @@ namespace ml
 		{
 		}
 
-		image(fs::path const & path, bool flip_v = false, size_t req_channels = 0, allocator_type alloc = {})
+		image(fs::path const & path, size_t rc = 0, bool fv = true, allocator_type alloc = {})
 			: image{ alloc }
 		{
-			load_from_file(path, flip_v, req_channels);
+			load_from_file(path, rc, fv);
 		}
 
 		image(image const & value, allocator_type alloc = {})
@@ -101,9 +101,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool read_pixels(fs::path const & path, pixels_type & px, vec2i & sz, size_t & ch, int32_t rc = 4, bool fv = 0);
+		static bool read_pixels(fs::path const & path, pixels_type & px, vec2i & sz, size_t & ch, int32_t rc = 4, bool fv = true);
 
-		bool load_from_file(fs::path const & path, int32_t rc = 0, bool fv = 0) noexcept
+		bool load_from_file(fs::path const & path, int32_t rc = 0, bool fv = true) noexcept
 		{
 			return read_pixels(path, m_pixels, m_size, m_channels, rc, fv);
 		}

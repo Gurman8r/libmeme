@@ -277,8 +277,10 @@ namespace ml::gui
 			}) };
 
 			ImGui::Image(
-				tex_addr, scr_size,
-				{ 0, 0 }, { 1, 1 },
+				tex_addr,
+				scr_size,
+				{ 1, 1 },
+				{ 0, 0 },
 				{ 1.f, 1.f, 1.f, 1.f },
 				{ 1.f, 1.f, 1.f, .5f }
 			);
@@ -286,25 +288,32 @@ namespace ml::gui
 			// zoom tooltip region
 			if ((0.f < reg_size) && (0.f < reg_zoom)) tooltip_ex([&]() noexcept
 			{
-				float_t region_x{ io.MousePos.x - scr_pos.x - reg_size * .5f };
-				if (region_x < 0.f) region_x = 0.f;
-				else if (region_x > (scr_size[0] - reg_size)) region_x = (scr_size[0] - reg_size);
+				float_t rx{ io.MousePos.x - scr_pos.x - reg_size * .5f };
+				if (rx < 0.f) { rx = 0.f; }
+				else if (rx > scr_size[0] - reg_size) { rx = (scr_size[0] - reg_size); }
 
-				float_t region_y{ io.MousePos.y - scr_pos.y - reg_size * .5f };
-				if (region_y < 0.f) region_y = 0.f;
-				else if (region_y > (scr_size[1] - reg_size)) region_y = (scr_size[1] - reg_size);
+				float_t ry{ io.MousePos.y - scr_pos.y - reg_size * .5f };
+				if (ry < 0.f) { ry = 0.f; }
+				else if (ry > scr_size[1] - reg_size) { ry = (scr_size[1] - reg_size); }
 
 				ImGui::Text("%u: %dx%d (%.0fx%.0f)",
 					(uint32_t)(intptr_t)tex_addr,
 					tex_size[0], tex_size[1],
 					scr_size[0], scr_size[1]
 				);
-				ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-				ImGui::Text("Max: (%.2f, %.2f)", region_x + reg_size, region_y + reg_size);
-				ImGui::Image(tex_addr,
+				ImGui::Text("Min: (%.2f, %.2f)", rx, ry);
+				ImGui::Text("Max: (%.2f, %.2f)", rx + reg_size, ry + reg_size);
+				ImGui::Image(
+					tex_addr,
 					{ reg_size * reg_zoom, reg_size * reg_zoom },
-					{ region_x / scr_size[0], region_y / scr_size[1] },
-					{ (region_x + reg_size) / scr_size[0], (region_y + reg_size) / scr_size[1] },
+					{
+						1.f - (rx / scr_size[0]),
+						1.f - (ry / scr_size[1])
+					},
+					{
+						1.f - ((rx + reg_size) / scr_size[0]),
+						1.f - ((ry + reg_size) / scr_size[1])
+					},
 					{ 1.f, 1.f, 1.f, 1.f },
 					{ 1.f, 1.f, 1.f, .5f }
 				);

@@ -9,6 +9,17 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// pi
+#define ML_pi						3.1415926f
+
+// degrees to radians
+#define ML_deg2rag					(ML_pi / 180.f)
+
+// radians to degrees
+#define ML_rad2deg					(180.f / ML_pi)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // macro min
 #define ML_min(a, b)				((a) < (b) ? (a) : (b))
 

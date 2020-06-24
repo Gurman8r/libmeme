@@ -78,5 +78,5 @@ void main()
     gl_Position = (p * v * m) * vec4(a_position * u_scale, 1.0);
     V.position  = gl_Position.xyz;
     V.normal    = (transpose(inverse(m)) * vec4(a_normal, 1.0)).xyz;
-    V.texcoord  = -a_texcoord;
+    V.texcoord  = a_texcoord;
 }
