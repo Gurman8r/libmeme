@@ -280,8 +280,8 @@ namespace ml::gui
 			ImGui::Image(
 				tex_addr,
 				scr_size,
-				{ 1, 1 },
-				{ 0, 0 },
+				{ 0, 1 },
+				{ 1, 0 },
 				colors::white,
 				colors::gray
 			);
@@ -308,11 +308,11 @@ namespace ml::gui
 					tex_addr,
 					{ reg_size * reg_zoom, reg_size * reg_zoom },
 					{
-						1.f - (rx / scr_size[0]),
+						(rx / scr_size[0]),
 						1.f - (ry / scr_size[1])
 					},
 					{
-						1.f - ((rx + reg_size) / scr_size[0]),
+						((rx + reg_size) / scr_size[0]),
 						1.f - ((ry + reg_size) / scr_size[1])
 					},
 					colors::white,
