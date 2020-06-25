@@ -59,7 +59,7 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_gui_event>: {
-				m_gui.new_frame();
+				m_gui.begin_frame();
 			} break;
 
 			case hashof_v<draw_gui_event>: {
@@ -67,7 +67,7 @@ namespace ml
 			} break;
 
 			case hashof_v<end_gui_event>: {
-				m_gui.render_frame();
+				m_gui.end_frame();
 			} break;
 
 			case hashof_v<end_draw_event>: {

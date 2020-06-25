@@ -29,6 +29,7 @@
 #	include <compare>
 #	include <concepts>
 #	include <format>
+#	include <numbers>
 #	include <ranges>
 #endif
 

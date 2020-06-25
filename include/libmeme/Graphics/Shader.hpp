@@ -1,7 +1,7 @@
 #ifndef _ML_SHADER_HPP_
 #define _ML_SHADER_HPP_
 
-// WIP
+// kind of a mess (WIP)
 
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Graphics/Uniform.hpp>
@@ -14,37 +14,31 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-		
-		using shader_source = typename meta::array<pmr::string, gfx::shader_type_MAX>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		shader_asset(allocator_type alloc = {}) : m_obj{}, m_src{ std::allocator_arg, alloc }
+		shader_asset() : m_obj{}
 		{
 		}
 
-		shader_asset(shader_source const & source, allocator_type alloc = {}) : shader_asset{ alloc }
-		{
-			load_from_source(source);
-		}
-
-		shader_asset(fs::path const & v, fs::path const & f, allocator_type alloc = {}) : shader_asset{ alloc }
+		shader_asset(fs::path const & v, fs::path const & f) : m_obj{}
 		{
 			load_from_file(v, f);
 		}
 
-		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g, allocator_type alloc = {}) : shader_asset{ alloc }
+		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g) : m_obj{}
 		{
 			load_from_file(v, f, g);
 		}
 
-		shader_asset(shader_asset const & other, allocator_type alloc = {}) : shader_asset{ alloc }
+		shader_asset(ds::map<uint32_t, shared<gfx::shader>> const & value) : m_obj{}
 		{
-			load_from_source(other.m_src);
+			load_from_memory(value);
 		}
 
-		shader_asset(shader_asset && other, allocator_type alloc = {}) noexcept : shader_asset{ alloc }
+		shader_asset(shader_asset const & other) : m_obj{}
+		{
+			load_from_memory(other.m_obj->get_shaders());
+		}
+
+		shader_asset(shader_asset && other) noexcept : m_obj{}
 		{
 			swap(std::move(other));
 		}
@@ -69,7 +63,6 @@ namespace ml
 			if (this != std::addressof(value))
 			{
 				m_obj.swap(value.m_obj);
-				m_src.swap(value.m_src);
 			}
 		}
 
@@ -90,25 +83,21 @@ namespace ml
 				util::get_file_string(g_file));
 		}
 
-		bool load_from_source(shader_source const & value)
+		bool load_from_memory(ds::map<uint32_t, shared<gfx::shader>> const & value)
 		{
-			auto const
-				& v{ std::get<gfx::shader_type_vertex	>(value) },
-				& f{ std::get<gfx::shader_type_fragment	>(value) },
-				& g{ std::get<gfx::shader_type_geometry	>(value) };
+			if (!m_obj) { m_obj = gfx::program::create(); }
+			else { m_obj->revalue(); }
 
-			return ((!v.empty() && !f.empty() && !g.empty())
-				? load_from_memory(v, f, g)
-				: ((!v.empty() && !f.empty())
-					? load_from_memory(v, f)
-					: false));
+			value.for_each([&](uint32_t type, shared<gfx::shader> const & sh)
+			{
+				m_obj->attach(gfx::shader::create(type, sh->get_source()));
+			});
+
+			return m_obj->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
 		{
-			if (v_src.empty() || f_src.empty()) { return false; }
-			else { m_src = { v_src, f_src, {} }; }
-			
 			if (!m_obj) { m_obj = gfx::program::create(); }
 			else { m_obj->revalue(); }
 
@@ -120,9 +109,6 @@ namespace ml
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
-			if (v_src.empty() || f_src.empty() || g_src.empty()) { return false; }
-			else { m_src = { v_src, f_src, g_src }; }
-			
 			if (!m_obj) { m_obj = gfx::program::create(); }
 			else { m_obj->revalue(); }
 			
@@ -135,16 +121,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ... Args
-		> static void bind(shader_asset const * value, Args && ... args) noexcept
+		static void bind(shader_asset const * value) noexcept
 		{
-			gfx::program::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+			gfx::program::bind(value ? value->m_obj : nullptr);
 		}
 
-		template <class ... Args
-		> static void bind(shared<shader_asset> const & value, Args && ... args) noexcept
+		static void bind(shared<shader_asset> const & value) noexcept
 		{
-			gfx::program::bind(value ? value->m_obj : nullptr, ML_forward(args)...);
+			gfx::program::bind(value ? value->m_obj : nullptr);
 		}
 
 		void bind() const noexcept { gfx::program::bind(m_obj); }
@@ -190,13 +174,10 @@ namespace ml
 
 		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_obj; }
 
-		ML_NODISCARD auto source() const & noexcept -> shader_source const & { return m_src; }
-		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gfx::program>	m_obj;
-		shader_source			m_src;
+		shared<gfx::program> m_obj;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -9,17 +9,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// pi
-#define ML_pi						3.1415926f
-
-// degrees to radians
-#define ML_deg2rag					(ML_pi / 180.f)
-
-// radians to degrees
-#define ML_rad2deg					(180.f / ML_pi)
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // macro min
 #define ML_min(a, b)				((a) < (b) ? (a) : (b))
 
@@ -59,6 +48,21 @@
 
 // conditional set or clear bit
 #define ML_bit_write(val, i, cond)	ML_flag_write(val, 1 << i, cond)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// Trig
+namespace ml
+{
+	template <class T = float_t
+	> static constexpr auto pi_v{ static_cast<T>(3.14159265358979L) };
+
+	template <class T = float_t
+	> static constexpr auto deg2rag_v{ _ML pi_v<T> / T{ 180 } };
+
+	template <class T = float_t
+	> static constexpr auto rad2deg_v{ T{ 180 } / _ML pi_v<T> };
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

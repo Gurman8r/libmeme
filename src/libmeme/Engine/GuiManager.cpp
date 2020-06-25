@@ -93,7 +93,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::new_frame()
+	void gui_manager::begin_frame()
 	{
 		ML_ImGui_NewFrame();
 
@@ -182,7 +182,7 @@ namespace ml
 		}
 	}
 
-	void gui_manager::render_frame()
+	void gui_manager::end_frame()
 	{
 		ImGui::Render();
 

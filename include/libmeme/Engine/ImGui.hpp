@@ -4,7 +4,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/Color.hpp>
 
 #ifndef IM_VEC2_CLASS_EXTRA
 #define IM_VEC2_CLASS_EXTRA								\
@@ -20,6 +20,9 @@
 #define IM_VEC4_CLASS_EXTRA								\
 	constexpr ImVec4(_ML vec4 const & v) noexcept		\
 		: x{ v[0] }, y{ v[1] }, z{ v[2] }, w{ v[3] }	\
+	{}													\
+	constexpr ImVec4(_ML color const & c) noexcept		\
+		: x{ c[0] }, y{ c[1] }, z{ c[2] }, w{ c[3] }	\
 	{}													\
 	constexpr operator _ML vec4() const noexcept {		\
 		return { x, y, z, w };							\

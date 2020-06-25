@@ -102,7 +102,7 @@ namespace ml
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct	c_shader	: ds::wrapper<shader_asset>	{};
+	using	c_shader	= typename shader_asset;
 	using	c_material	= typename shared<material>;
 	using	c_mesh		= typename shared<mesh>;
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
@@ -136,10 +136,10 @@ namespace ml
 	{
 		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_scope(*shd);
+			ML_bind_scope(shd);
 			for (uniform const & u : *mat)
 			{
-				shd->set_uniform(u);
+				shd.set_uniform(u);
 			}
 		}
 	};
@@ -148,8 +148,8 @@ namespace ml
 	{
 		void operator()(c_shader const & shd, c_mesh const & msh)
 		{
-			ML_bind_scope(*shd);
-			shd->bind_textures();
+			ML_bind_scope(shd);
+			shd.bind_textures();
 			gfx::render_command::draw(msh->get_vao())();
 		}
 	};
@@ -192,6 +192,7 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// PIPELINE (WIP)
 namespace ml::gfx
 {
 	struct pipeline final : trackable, non_copyable
@@ -329,18 +330,18 @@ namespace ml
 			gui::plot::create(120
 				, gui::plot::histogram
 				, "##frame time"
-				, "%.3f ms/frame"
+				, []() noexcept { return "%.3f ms/frame"; }
+				, []() noexcept { return 1000.f / engine::time().frame_rate(); }
 				, vec2{ 0.f, 64.f }
-				, vec2{ FLT_MAX, FLT_MAX }
-				, []() { return 1000.f / engine::time().frame_rate(); }),
+				, vec2{ FLT_MAX, FLT_MAX }),
 
 			gui::plot::create(120
 				, gui::plot::histogram
 				, "##frame rate"
-				, "%.1f fps"
+				, []() noexcept { return "%.1f fps"; }
+				, []() noexcept { return engine::time().frame_rate(); }
 				, vec2{ 0.f, 64.f }
-				, vec2{ FLT_MAX, FLT_MAX }
-				, []() { return engine::time().frame_rate(); }),
+				, vec2{ FLT_MAX, FLT_MAX }),
 		};
 
 		MemoryEditor m_mem_editor{};
@@ -436,17 +437,13 @@ namespace ml
 				m_cache.read_file(gfx::shader_type_fragment, "basic",
 					engine::fs().path2("assets/shaders/basic.fs.shader"));
 
-				m_shaders["2D"] = { {
+				m_shaders["2D"].load_from_memory(
 					m_cache.str(gfx::shader_type_vertex, "2D"),
-					m_cache.str(gfx::shader_type_fragment, "basic"),
-					{}
-				} };
+					m_cache.str(gfx::shader_type_fragment, "basic"));
 
-				m_shaders["3D"] = { {
+				m_shaders["3D"].load_from_memory(
 					m_cache.str(gfx::shader_type_vertex, "3D"),
-					m_cache.str(gfx::shader_type_fragment, "basic"),
-					{}
-				} };
+					m_cache.str(gfx::shader_type_fragment, "basic"));
 			}
 
 			// MATERIALS
@@ -463,7 +460,7 @@ namespace ml
 				{
 					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 0.f }),
 					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, 1.f }),
-					make_uniform<float_t>("u_cam.fov"	, 45.f * ML_deg2rag),
+					make_uniform<float_t>("u_cam.fov"	, 45.f * deg2rag_v<float_t>),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
 					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
@@ -531,7 +528,7 @@ namespace ml
 			{
 				ML_defer{ m_ecs.refresh(); };
 
-				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf)
+				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf) noexcept
 				{
 					auto & h{ m_ecs.create_handle() };
 					h.add_tag<t_default>();

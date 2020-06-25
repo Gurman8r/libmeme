@@ -31,11 +31,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void new_frame();
+		void begin_frame();
 
 		void draw_default();
 
-		void render_frame();
+		void end_frame();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

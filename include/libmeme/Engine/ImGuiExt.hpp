@@ -83,18 +83,19 @@ namespace ml::gui
 
 		using buffer_t	= typename pmr::vector<float_t>;
 		using overtxt_t	= typename ds::array<char, 32>;
-		using get_fn_t	= typename std::function<float_t(void)>;
+		using get_str_t = typename std::function<cstring()>;
+		using get_fn_t	= typename std::function<float_t()>;
 
-		buffer_t	buffer	{};
-		int32_t		mode	{};
-		cstring		label	{};
-		cstring		fmt		{ "%f" };
-		vec2		size	{};
-		vec2		scale	{ FLT_MAX, FLT_MAX };
-		get_fn_t	get_fn	{ []() { return 0.f; } };
-		int32_t		offset	{};
-		overtxt_t	overtxt	{ "" };
-		bool		animate	{ true };
+		buffer_t	buffer		{};
+		int32_t		mode		{};
+		cstring		label		{};
+		get_str_t	get_fmt		{ []() noexcept { return "%f"; } };
+		get_fn_t	get_value	{ []() noexcept { return 0.f; } };
+		vec2		size		{};
+		vec2		scale		{ FLT_MAX, FLT_MAX };
+		int32_t		offset		{};
+		char		overtxt[32]	{};
+		bool		animate		{ true };
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -109,8 +110,8 @@ namespace ml::gui
 
 		void update() noexcept
 		{
-			ML_assert(get_fn);
-			update(std::invoke(get_fn));
+			ML_assert(get_value);
+			update(std::invoke(get_value));
 		}
 
 		template <class Delta = float_t
@@ -118,7 +119,7 @@ namespace ml::gui
 		{
 			static_assert(std::is_floating_point_v<Delta>);
 			if (!animate || buffer.empty()) { return; }
-			std::sprintf(overtxt.data(), fmt, v);
+			std::sprintf(overtxt, get_fmt(), v);
 			buffer[offset] = static_cast<float_t>(v);
 			offset = (offset + 1) % buffer.size();
 		}
@@ -140,14 +141,14 @@ namespace ml::gui
 			case lines:
 				return ImGui::PlotLines(label
 					, buffer.data(), (int32_t)buffer.size(), offset
-					, overtxt.data()
+					, overtxt
 					, scale[0], scale[1], { width, size[1] }
 					, sizeof(float_t)
 				);
 			case histogram:
 				return ImGui::PlotHistogram(label
 					, buffer.data(), (int32_t)buffer.size(), offset
-					, overtxt.data()
+					, overtxt
 					, scale[0], scale[1], { width, size[1] }
 					, sizeof(float_t)
 				);
@@ -259,7 +260,7 @@ namespace ml::gui
 	{
 		void *	tex_addr	{ nullptr };
 		vec2i	tex_size	{};
-		vec2	img_size	{ 0.f, 0.f };
+		vec2	img_size	{};
 		float_t	reg_zoom	{ 4.f };
 		float_t	reg_size	{ 32.f };
 
@@ -281,18 +282,18 @@ namespace ml::gui
 				scr_size,
 				{ 1, 1 },
 				{ 0, 0 },
-				{ 1.f, 1.f, 1.f, 1.f },
-				{ 1.f, 1.f, 1.f, .5f }
+				colors::white,
+				colors::gray
 			);
 
 			// zoom tooltip region
 			if ((0.f < reg_size) && (0.f < reg_zoom)) tooltip_ex([&]() noexcept
 			{
-				float_t rx{ io.MousePos.x - scr_pos.x - reg_size * .5f };
+				float_t rx{ io.MousePos[0] - scr_pos[0] - reg_size * .5f };
 				if (rx < 0.f) { rx = 0.f; }
 				else if (rx > scr_size[0] - reg_size) { rx = (scr_size[0] - reg_size); }
 
-				float_t ry{ io.MousePos.y - scr_pos.y - reg_size * .5f };
+				float_t ry{ io.MousePos[1] - scr_pos[1] - reg_size * .5f };
 				if (ry < 0.f) { ry = 0.f; }
 				else if (ry > scr_size[1] - reg_size) { ry = (scr_size[1] - reg_size); }
 
@@ -314,8 +315,8 @@ namespace ml::gui
 						1.f - ((rx + reg_size) / scr_size[0]),
 						1.f - ((ry + reg_size) / scr_size[1])
 					},
-					{ 1.f, 1.f, 1.f, 1.f },
-					{ 1.f, 1.f, 1.f, .5f }
+					colors::white,
+					colors::gray
 				);
 			});
 		}
