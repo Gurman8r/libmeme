@@ -37,14 +37,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL3)
-#	include <imgui/examples/imgui_impl_glfw.h>
-#	include <imgui/examples/imgui_impl_opengl3.h>
-#else
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 #include <ImGuiColorTextEdit/TextEditor.h>
 #include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>
 #include <imgui-node-editor/NodeEditor/Include/imgui_node_editor.h>
@@ -52,7 +44,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// ImGui::PushID(...); ML_defer{ ImGui::PopID(...); };
+// ImGui::PushID(...); ML_defer{ ImGui::PopID(); };
 #define ML_scoped_imgui_id(...) \
 	auto ML_anon = _ML_IMPL scoped_imgui_id{ ##__VA_ARGS__ }
 

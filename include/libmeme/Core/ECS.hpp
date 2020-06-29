@@ -1048,9 +1048,9 @@ namespace ml::ecs
 			});
 		}
 
-		// update all systems matching a signature
+		// invoke system on all entities matching the system's signature
 		template <template <class> class X, class ... Extra
-		> self_type & update_system(Extra && ... extra) noexcept
+		> self_type & invoke_system(Extra && ... extra) noexcept
 		{
 			return this->for_system<X>([&](auto & x, auto && ... req_comp) noexcept
 			{

@@ -216,7 +216,7 @@ namespace ml::gui
 		template <class Fn, class ... Args
 		> void render(Fn && fn, Args && ... args) noexcept
 		{
-			if (!open) { return; }
+			if (!open || (fn == (Fn)nullptr)) { return; }
 			ML_scoped_imgui_id(this);
 			ML_defer{ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
@@ -330,29 +330,69 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using args_type = typename pmr::vector<pmr::string>;
+		using self_type			= typename _ML_GUI console;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using command_name		= typename pmr::string;
+		using command_args		= typename pmr::vector<pmr::string>;
+		using command_clbk		= typename std::function<void(command_args)>;
+		using command_info		= typename pmr::vector<pmr::string>;
 
-		using cmd_type = typename std::pair<cstring, std::function<void(args_type)>>;
+		struct ML_NODISCARD command_data final
+		{
+			command_name name; // name
+			command_clbk clbk; // callback
+			command_info info; // information
 
-		ds::array<char, 256>		input			{};
-		pmr::vector<pmr::string>	lines			{};
-		pmr::vector<cmd_type>		commands		{};
-		pmr::vector<pmr::string>	history			{};
-		int32_t						history_pos		{ -1 };
-		ImGuiTextFilter				filter			{};
-		bool						auto_scroll		{ true };
-		bool						scroll_to_bot	{};
-		cstring						overload		{};
+			template <class Other = command_data
+			> auto compare(Other const & other) const noexcept
+			{
+				if constexpr (std::is_same_v<Other, command_data>)
+				{
+					if (this == std::addressof(other)) { return 0; }
+					else { return this->compare(other.name); }
+				}
+				else if constexpr (std::is_convertible_v<Other, command_name>)
+				{
+					return ML_compare(name, other);
+				}
+			}
+
+			template <class Other = command_data
+			> bool operator==(command_data const & other) const noexcept { return compare(other) == 0; }
+
+			template <class Other = command_data
+			> bool operator<(command_data const & other) const noexcept { return compare(other) < 0; }
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		console & clear()
+		console(allocator_type alloc = {}) noexcept
+			: commands	{ alloc }
+			, history	{ alloc }
+			, lines		{ alloc }
+		{
+		}
+
+		pmr::vector<command_data>	commands		{}		; // commands
+		pmr::vector<pmr::string>	history			{}		; // history buffer
+		pmr::vector<pmr::string>	lines			{}		; // text buffer
+
+		ds::array<char, 256>		input			{}		; // input buffer
+		int32_t						history_pos		{ -1 }	; // history index
+		ImGuiTextFilter				filter			{}		; // text filter
+		bool						auto_scroll		{ true }; // auto-scroll
+		bool						scroll_to_bot	{}		; // scroll-to-bottom
+		cstring						command_lock	{}		; // forced command
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		self_type & clear() noexcept
 		{
 			lines.clear();
 			return (*this);
 		}
 
-		console & write(char const value)
+		self_type & write(char const value) noexcept
 		{
 			switch (value)
 			{
@@ -367,7 +407,7 @@ namespace ml::gui
 			return (*this);
 		}
 
-		console & print(pmr::string const & value)
+		self_type & print(pmr::string const & value) noexcept
 		{
 			for (char const & c : value)
 			{
@@ -376,15 +416,15 @@ namespace ml::gui
 			return (*this);
 		}
 
-		console & printl(pmr::string const & value = {})
+		self_type & printl(pmr::string const & value = {}) noexcept
 		{
 			return this->print(value).write('\n');
 		}
 
-		console & printf(cstring fmt, ...)
+		self_type & printf(cstring fmt, ...) noexcept
 		{
 			ds::array<char, 1024> buf{};
-			va_list args;
+			va_list args{};
 			va_start(args, fmt);
 			std::vsnprintf(buf.data(), buf.size(), fmt, args);
 			buf.back() = 0;
@@ -392,7 +432,7 @@ namespace ml::gui
 			return this->print(buf.data());
 		}
 
-		console & execute(cstring value)
+		self_type & execute(cstring value) noexcept
 		{
 			this->printf("# %s\n", value);
 
@@ -405,24 +445,23 @@ namespace ml::gui
 			}
 			history.push_back(value);
 
-			// process cmd_type
+			// process command
 			if (auto toks{ util::tokenize(value, " ") }; !toks.empty())
 			{
-				// FIXME: inefficient
-
-				if (overload) { toks.insert(toks.begin(), overload); }
-
 				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&
-				](auto & e) { return e.first == toks.front(); }) }
+				](auto & cmd) noexcept
+				{
+					return cmd.name == (command_lock ? command_lock : toks.front());
+				}) }
 				; it != commands.end())
 				{
-					toks.erase(toks.begin());
+					if (!command_lock) { toks.erase(toks.begin()); }
 
-					std::invoke(it->second, std::move(toks));
+					std::invoke(it->clbk, std::move(toks));
 				}
 				else
 				{
-					this->printf("unknown cmd_type: \'%s\'\n", toks.front().c_str());
+					this->printf("unknown command: \'%s\'\n", toks.front().c_str());
 				}
 			}
 
@@ -430,14 +469,15 @@ namespace ml::gui
 			return (*this);
 		}
 
-		console & render()
+		self_type & render()
 		{
 			ML_scoped_imgui_id(this);
 
 			// HEADER
 			filter.Draw("filter", 180); ImGui::SameLine();
 			ImGui::Checkbox("auto-scroll", &auto_scroll); ImGui::SameLine();
-			if (ImGui::Button("clear")) clear(); //ImGui::SameLine();
+			if (ImGui::Button("clear")) clear(); ImGui::SameLine();
+			ImGui::Text("lock: %s", command_lock ? command_lock : "-"); //ImGui::SameLine();
 			ImGui::Separator();
 
 			float_t const footer_height{ ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing() };
@@ -453,19 +493,28 @@ namespace ml::gui
 				if (!filter.PassFilter(str)) continue;
 
 				bool pop_color{};
-				if (std::strstr(str, "[error]"))
+				if (std::strstr(str, ML_IMPL_DEBUG_MSG_I))
 				{
-					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.4f, 0.4f, 1.0f }); pop_color = true;
+					// [ info ] (green)
+					ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 1.0f, 0.0f, 1.0f }); pop_color = true;
 				}
-				else if (std::strncmp(str, "# ", 2) == 0)
+				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_E))
 				{
+					// [ error ] (red)
+					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.2f, 0.4f, 1.0f }); pop_color = true;
+				}
+				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_W))
+				{
+					// [ warning ] (yellow)
+					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.75f, 0.0f, 1.0f }); pop_color = true;
+				}
+				else if (0 == std::strncmp(str, "# ", 2))
+				{
+					// # (orange)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
 				}
 				ImGui::TextUnformatted(str);
-				if (pop_color)
-				{
-					ImGui::PopStyleColor();
-				}
+				if (pop_color) { ImGui::PopStyleColor(); }
 			}
 			if (scroll_to_bot || (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()))
 			{
@@ -532,8 +581,8 @@ namespace ml::gui
 				// Build a list of candidates
 				pmr::vector<cstring> candidates;
 				for (size_t i = 0; i < commands.size(); i++)
-					if (std::strncmp(commands[i].first, word_start, (size_t)(word_end - word_start)) == 0)
-						candidates.push_back(commands[i].first);
+					if (std::strncmp(commands[i].name.c_str(), word_start, (size_t)(word_end - word_start)) == 0)
+						candidates.push_back(commands[i].name.c_str());
 
 				if (candidates.size() == 0)
 				{

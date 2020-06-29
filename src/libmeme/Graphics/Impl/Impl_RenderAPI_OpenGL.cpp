@@ -1636,6 +1636,8 @@ namespace ml::gfx
 		if (m_handle) { ML_glCheck(ML_glDeleteShader(m_handle)); }
 		
 		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
+
+		m_source.clear();
 		
 		return m_handle;
 	}

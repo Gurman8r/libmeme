@@ -70,7 +70,7 @@ ml::int32_t main()
 				engine::config()["setup_script"]));
 	}
 
-	if (!engine::window().is_open()) { return EXIT_FAILURE; }
+	if (!engine::window().is_open()) { return EXIT_FAILURE; } // nothing to do
 	
 	event_system::fire_event<load_event>();
 	

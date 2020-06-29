@@ -204,7 +204,7 @@ namespace ml::gfx
 		using storage_type = typename ds::batch_vector
 		<
 			shared<texture2d>,	// 
-			command			// 
+			command				// 
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -558,12 +558,11 @@ namespace ml
 			// update stuff, etc...
 
 			// console
-			if (pmr::stringstream ss{ m_cout.sstr().str() })
+			if (pmr::string const str{ m_cout.sstr().str() }; size_t const imax{ str.size() })
 			{
-				pmr::string line{};
-				while (std::getline(ss, line))
+				for (size_t i = 0; i < imax; ++i)
 				{
-					m_console.printl(line);
+					m_console.write(str[i]);
 				}
 				m_cout.sstr().str({});
 			}
@@ -572,8 +571,8 @@ namespace ml
 			m_plots.update(engine::time().total_time().count());
 			
 			// systems
-			m_ecs.update_system<x_update_materials>();
-			m_ecs.update_system<x_upload_uniforms>();
+			m_ecs.invoke_system<x_update_materials>();
+			m_ecs.invoke_system<x_upload_uniforms>();
 
 			// pipeline
 			for (auto & fbo : m_fbo)
@@ -595,7 +594,7 @@ namespace ml
 					gfx::render_command::clear(gfx::buffer_bit_all),
 					gfx::render_command::custom([&]() noexcept
 					{
-						m_ecs.update_system<x_draw_meshes>();
+						m_ecs.invoke_system<x_draw_meshes>();
 					}),
 				})
 				{
@@ -798,49 +797,87 @@ namespace ml
 			ML_defer{ m_console.render(); };
 
 			// setup commands
-			if (m_console.commands.empty())
+			if ML_UNLIKELY(m_console.commands.empty())
 			{
-				m_console.commands.push_back({ "clear", [&](auto args)
+				m_console.commands.push_back({ "clear", [&](auto && args) noexcept
 				{
 					m_console.clear();
+				},
+				{
+					"clear the console window",
 				} });
 
-				m_console.commands.push_back({ "exit", [&](auto args)
+				m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 				{
 					engine::window().close();
+				},
+				{
+					"shutdown the application",
 				} });
 
-				m_console.commands.push_back({ "help", [&](auto args)
+				m_console.commands.push_back({ "help", [&](auto && args) noexcept
 				{
-					for (auto const & e : m_console.commands)
+					if (args.empty())
 					{
-						std::cout << e.first << "\n";
+						for (auto const & cmd : m_console.commands)
+						{
+							std::cout << cmd.name << '\n';
+						}
 					}
+					else if (args.size() == 1)
+					{
+						if (auto const it{ std::find_if(
+							m_console.commands.begin(),
+							m_console.commands.end(),
+							[&](auto & e) noexcept { return (e.name == args.front()); }) }
+						; it != m_console.commands.end())
+						{
+							for (auto const & str : it->info)
+							{
+								std::cout << str << '\n';
+							}
+						}
+						else
+						{
+							std::cout << "unknown command: " << args.front() << '\n';
+						}
+					}
+				},
+				{
+					"help [CMD]",
+					"display list of commands",
 				} });
 
-				m_console.commands.push_back({ "history", [&](auto args)
+				m_console.commands.push_back({ "history", [&](auto && args) noexcept
 				{
-					for (auto const & e : m_console.history)
+					for (auto const & str : m_console.history)
 					{
-						std::cout << e << "\n";
+						std::cout << str << '\n';
 					}
+				},
+				{
+					"display command history",
 				} });
 
-				m_console.commands.push_back({ "python", [&](auto args)
+				m_console.commands.push_back({ "py", [&](auto && args) noexcept
 				{
-					if (!m_console.overload && args.empty())
+					if (!m_console.command_lock && args.empty())
 					{
-						m_console.overload = "python";
-						static ML_scope{ std::cout << "# type \'\\\' to exit\n"; };
+						m_console.command_lock = "py";
+
+						static ML_scope{ std::cout << "# type \'\\\' to stop using python\n"; };
 					}
-					else if (m_console.overload && (args.front() == "\\"))
+					else if (m_console.command_lock && (args.front() == "\\"))
 					{
-						m_console.overload = nullptr;
+						m_console.command_lock = nullptr;
 					}
 					else
 					{
 						engine::scripts().do_string(util::detokenize(args));
 					}
+				},
+				{
+					"execute python code",
 				} });
 			}
 		}
@@ -1287,14 +1324,15 @@ namespace ml
 
 			// benchmarks
 			ImGui::Columns(2);
-			if (static auto const & frame{ performance::prev() }; !frame.empty())
+			
+			if (static auto const & prev{ performance::get_previous() }; !prev.empty())
 			{
 				ImGui::Separator();
-				for (auto const & elem : frame)
+				for (auto const & e : prev)
 				{
-					char time[20] = ""; std::sprintf(time, "%.7fs", elem.second.count());
-					ImGui::Selectable(elem.first); gui::tooltip(time); ImGui::NextColumn();
-					ImGui::Selectable(time); gui::tooltip(elem.first); ImGui::NextColumn();
+					char time_str[20] = ""; std::sprintf(time_str, "%.7fs", e.time.count());
+					ImGui::Selectable(e.name); gui::tooltip(time_str); ImGui::NextColumn();
+					ImGui::Selectable(time_str); gui::tooltip(e.name); ImGui::NextColumn();
 				}
 			}
 			ImGui::Separator();

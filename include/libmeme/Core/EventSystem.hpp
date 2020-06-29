@@ -50,10 +50,10 @@ namespace ml
 			static auto & inst{ get_instance() };
 
 			// get category
-			if (auto const v{ inst.m_listeners.find(ev.ID) })
+			if (auto const c{ inst.m_listeners.find(ev.ID) })
 			{
 				// for each listener
-				for (auto const & l : (*v->second))
+				for (auto const & l : (*c->second))
 				{
 					// handle event
 					l->on_event(ev);
@@ -79,13 +79,13 @@ namespace ml
 			if (!value) { return; }
 
 			// get category
-			if (auto const v{ inst.m_listeners.find(id) })
+			if (auto const c{ inst.m_listeners.find(id) })
 			{
 				// get listener
-				if (auto const l{ v->second->find(value) }; l != v->second->end())
+				if (auto const l{ c->second->find(value) }; l != c->second->end())
 				{
 					// remove listener
-					v->second->erase(l);
+					c->second->erase(l);
 				}
 			}
 		}

@@ -35,15 +35,18 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define _ML						::ml::		// memelib
-#define _ML_DEBUG				_ML debug::	// debug
-#define _ML_DS					_ML ds::	// data structures
-#define _ML_ECS					_ML ecs::	// entity component system
-#define _ML_EMBED				_ML embed:: // embedded api
-#define _ML_GFX					_ML gfx::	// graphics
-#define _ML_IMPL				_ML impl::	// implementation
-#define _ML_META				_ML meta::	// metaprogramming
-#define _ML_UTIL				_ML util::	// utility
+// common namespaces
+
+#define _ML						::	ml		:: // memelib
+#define _ML_DEBUG				_ML	debug	:: // debug
+#define _ML_DS					_ML	ds		:: // data structures
+#define _ML_ECS					_ML	ecs		:: // entity component system
+#define _ML_EMBED				_ML	embed	:: // embedded api
+#define _ML_GFX					_ML	gfx		:: // graphics
+#define _ML_GUI					_ML	gui		:: // gui
+#define _ML_IMPL				_ML	impl	:: // implementation
+#define _ML_META				_ML	meta	:: // metaprogramming
+#define _ML_UTIL				_ML	util	:: // utility
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

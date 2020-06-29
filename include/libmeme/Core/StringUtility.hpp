@@ -231,7 +231,7 @@ namespace ml::util
 		{
 			ss << str << delim;
 		}
-		return pmr::string{ ss.str() };
+		return ss.str();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

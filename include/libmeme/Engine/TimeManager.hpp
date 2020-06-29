@@ -32,7 +32,7 @@ namespace ml
 		{
 			++m_frame_count;
 
-			performance::refresh();
+			performance::refresh_samples();
 
 			m_delta_time = m_loop_timer.elapsed();
 		}
@@ -57,7 +57,7 @@ namespace ml
 		uint64_t	m_frame_count	{}			; // frame count
 
 		// fps tracker
-		struct fps_tracker final : non_copyable
+		struct ML_NODISCARD fps_tracker final : trackable, non_copyable
 		{
 			using frame_times = ds::array<float_t, 120>;
 

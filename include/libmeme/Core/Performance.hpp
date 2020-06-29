@@ -19,32 +19,14 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using frame_data = typename pmr::vector<std::pair<cstring, duration>>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// get previous frame
-		ML_NODISCARD static frame_data const & prev() noexcept
+		struct ML_NODISCARD sample_type final
 		{
-			static auto & inst{ get_instance() };
-			return inst.m_previous;
-		}
+			cstring name; duration time;
+		};
 
-		// add to current frame
-		template <class ... Args
-		> static void push(Args && ... args) noexcept
-		{
-			static auto & inst{ get_instance() };
-			inst.m_current.emplace_back(ML_forward(args)...);
-		}
+		//using sample_type = typename std::pair<cstring, duration>;
 
-		// swap frames and clear current
-		static void refresh() noexcept
-		{
-			static auto & inst{ get_instance() };
-			inst.m_previous.swap(inst.m_current);
-			inst.m_current.clear();
-		}
+		using sample_buffer = typename pmr::vector<sample_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -53,7 +35,7 @@ namespace ml
 		{
 			explicit scope_benchmark(cstring id) noexcept : id{ id } {}
 
-			~scope_benchmark() noexcept { push(id, t.elapsed()); }
+			~scope_benchmark() noexcept { push_sample(id, t.elapsed()); }
 
 		private: cstring const id; timer t{};
 		};
@@ -69,12 +51,36 @@ namespace ml
 			{
 				timer t{};
 				std::invoke(ML_forward(fn));
-				push(id, t.elapsed());
+				push_sample(id, t.elapsed());
 				return (*this);
 			}
 
 		private: cstring const id;
 		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		// get previous frame
+		ML_NODISCARD static auto const & get_previous() noexcept
+		{
+			return get_instance().m_previous;
+		}
+
+		// add to current frame
+		template <class ... Args
+		> static void push_sample(Args && ... args) noexcept
+		{
+			static auto & inst{ get_instance() };
+			inst.m_current.emplace_back(sample_type{ ML_forward(args)... });
+		}
+
+		// swap frames and clear current
+		static void refresh_samples() noexcept
+		{
+			static auto & inst{ get_instance() };
+			inst.m_previous.swap(inst.m_current);
+			inst.m_current.clear();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -83,7 +89,7 @@ namespace ml
 
 		~performance() noexcept;
 
-		frame_data m_current{}, m_previous{};
+		sample_buffer m_current{}, m_previous{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

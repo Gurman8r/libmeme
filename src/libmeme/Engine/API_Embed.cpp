@@ -532,8 +532,7 @@ namespace ml::embed
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// SETUP
-		([&m, builtins = py::module::import("builtins")
-			, sys = py::module::import("sys")
+		([&m, builtins = py::module::import("builtins"), sys = py::module::import("sys")
 		]()
 		{
 			m.def("exit", [](py::args) { engine::window().close(); });

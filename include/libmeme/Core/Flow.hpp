@@ -33,11 +33,11 @@ namespace ml::impl
     // invoke in destructor
     template <class Fn> struct ML_NODISCARD defer_impl final
     {
-        defer_impl(Fn && fn) noexcept : m_update{ ML_forward(fn) } {}
+        defer_impl(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~defer_impl() noexcept { std::invoke(m_update); }
+        ~defer_impl() noexcept { std::invoke(m_fn); }
 
-    private: Fn const m_update;
+    private: Fn const m_fn;
     };
 
     enum class ML_NODISCARD defer_tag {};

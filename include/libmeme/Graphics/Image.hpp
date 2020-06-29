@@ -46,7 +46,7 @@ namespace ml
 		{
 		}
 
-		image(fs::path const & path, size_t rc = 0, bool fv = true, allocator_type alloc = {})
+		image(fs::path const & path, int32_t rc = 0, bool fv = true, allocator_type alloc = {})
 			: image{ alloc }
 		{
 			load_from_file(path, rc, fv);
