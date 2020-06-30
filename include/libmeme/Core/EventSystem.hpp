@@ -99,13 +99,13 @@ namespace ml
 			if (!value) { return; }
 
 			// for each category
-			inst.m_listeners.for_each([&](auto, auto & v) noexcept
+			inst.m_listeners.for_each([&](auto, auto & c) noexcept
 			{
 				// get listener
-				if (auto const l{ v.find(value) }; l != v.end())
+				if (auto const l{ c.find(value) }; l != c.end())
 				{
 					// remove listener
-					v.erase(l);
+					c.erase(l);
 				}
 			});
 		}
@@ -115,6 +115,9 @@ namespace ml
 	private:
 		friend singleton<event_system>;
 
+#ifdef ML_STATIC
+		static self_type g_instance;
+#endif
 		~event_system() noexcept;
 
 		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};

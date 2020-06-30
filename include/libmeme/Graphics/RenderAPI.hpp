@@ -16,21 +16,23 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class device			;
-	class device_context	;
-	class device_resource	;
+	struct	devinfo			;
+	class	device			;
+	class	device_context	;
+	class	device_resource	;
 
-	class vertexbuffer		;
-	class indexbuffer		;
-	class vertexarray		;
+	class	vertexbuffer	;
+	class	indexbuffer		;
+	class	vertexarray		;
 
-	class texture			;
-	class texture2d			;
-	class texturecube		;
-	class framebuffer		;
+	struct	texopts			;
+	class	texture			;
+	class	texture2d		;
+	class	texturecube		;
+	class	framebuffer		;
 
-	class shader			;
-	class program			;
+	class	shader			;
+	class	program			;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

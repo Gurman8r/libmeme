@@ -91,6 +91,76 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// PIPELINE (WIP)
+namespace ml::gfx
+{
+	struct pipeline final : trackable, non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		using storage_type = typename ds::batch_vector
+		<
+			shared<texture2d>,	// 
+			command				// 
+		>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pipeline(allocator_type alloc = {}) noexcept
+			: m_data{ alloc }
+		{
+		}
+
+		pipeline(storage_type::init_type init, allocator_type alloc = {})
+			: m_data{ init, alloc }
+		{
+		}
+
+		pipeline(storage_type const & value, allocator_type alloc = {})
+			: m_data{ value, alloc }
+		{
+		}
+
+		pipeline(storage_type && value, allocator_type alloc = {}) noexcept
+			: m_data{ std::move(value), alloc }
+		{
+		}
+
+		pipeline(pipeline && other, allocator_type alloc = {}) noexcept
+			: pipeline{ std::move(other.m_data), alloc }
+		{
+			
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		pipeline & operator=(pipeline && other) noexcept
+		{
+			this->swap(std::move(other));
+			return (*this);
+		}
+
+		void swap(pipeline & other) noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				m_data.swap(other.m_data);
+			}
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		storage_type m_data;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // ECS
 namespace ml
 {
@@ -192,76 +262,6 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// PIPELINE (WIP)
-namespace ml::gfx
-{
-	struct pipeline final : trackable, non_copyable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		using storage_type = typename ds::batch_vector
-		<
-			shared<texture2d>,	// 
-			command				// 
-		>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		pipeline(allocator_type alloc = {}) noexcept
-			: m_data{ alloc }
-		{
-		}
-
-		pipeline(storage_type::init_type init, allocator_type alloc = {})
-			: m_data{ init, alloc }
-		{
-		}
-
-		pipeline(storage_type const & value, allocator_type alloc = {})
-			: m_data{ value, alloc }
-		{
-		}
-
-		pipeline(storage_type && value, allocator_type alloc = {}) noexcept
-			: m_data{ std::move(value), alloc }
-		{
-		}
-
-		pipeline(pipeline && other, allocator_type alloc = {}) noexcept
-			: pipeline{ std::move(other.m_data), alloc }
-		{
-			
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		pipeline & operator=(pipeline && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		void swap(pipeline & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_data.swap(other.m_data);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_data;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // DEMO
 namespace ml
 {
@@ -310,14 +310,14 @@ namespace ml
 			m_imgui_about	{ "About Dear ImGui"	, 0, "", ImGuiWindowFlags_None },
 			m_gui_assets	{ "assets##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_console	{ "console##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_display	{ "display##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar },
 			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
 			m_gui_files		{ "files##demo"			, 0, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_renderer	{ "renderer##demo"		, 1, "", ImGuiWindowFlags_MenuBar };
+			m_gui_renderer	{ "renderer##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
+			m_gui_viewport	{ "viewport##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -526,7 +526,7 @@ namespace ml
 
 			// ENTITIES
 			{
-				ML_defer{ m_ecs.refresh(); };
+				ML_defer{ m_ecs.apply(); };
 
 				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf) noexcept
 				{
@@ -634,7 +634,7 @@ namespace ml
 				d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
 				// dock windows
-				d.dock(m_gui_display.title		, d[left_up]);
+				d.dock(m_gui_viewport.title		, d[left_up]);
 				d.dock(m_gui_ecs.title			, d[left_dn]);
 				d.dock(m_gui_assets.title		, d[left_dn]);
 				d.dock(m_gui_files.title		, d[left_dn]);
@@ -671,13 +671,13 @@ namespace ml
 					ML_ImGui_ScopeID(this);
 					m_gui_assets.menu_item();
 					m_gui_console.menu_item();
-					m_gui_display.menu_item();
 					m_gui_docs.menu_item();
 					m_gui_ecs.menu_item();
 					m_gui_memory.menu_item();
 					m_gui_nodes.menu_item();
 					m_gui_profiler.menu_item();
 					m_gui_renderer.menu_item();
+					m_gui_viewport.menu_item();
 				});
 				//mmb.add("settings", [&]()
 				//{
@@ -706,7 +706,7 @@ namespace ml
 				if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
 
 				// WIDGETS
-				m_gui_display	.render(&demo::show_display_gui		, this); // DISPLAY
+				m_gui_viewport	.render(&demo::show_viewport_gui		, this); // DISPLAY
 				m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
 				m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
 				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
@@ -824,7 +824,7 @@ namespace ml
 							std::cout << cmd.name << '\n';
 						}
 					}
-					else if (args.size() == 1)
+					else
 					{
 						if (auto const it{ std::find_if(
 							m_console.commands.begin(),
@@ -844,8 +844,9 @@ namespace ml
 					}
 				},
 				{
-					"help [CMD]",
 					"display list of commands",
+					"help",
+					"help [CMD]",
 				} });
 
 				m_console.commands.push_back({ "history", [&](auto && args) noexcept
@@ -880,21 +881,6 @@ namespace ml
 					"execute python code",
 				} });
 			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void show_display_gui()
-		{
-			static gui::texture_preview preview{};
-
-			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
-			preview.tex_addr = tex->get_handle();
-			preview.tex_size = tex->get_size();
-			
-			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
-			
-			preview.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1417,6 +1403,21 @@ namespace ml
 				ImGui::Text("mask: %u", s_fn.mask);
 			}
 			ImGui::Separator();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_viewport_gui()
+		{
+			static gui::texture_preview preview{};
+
+			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
+			preview.tex_addr = tex->get_handle();
+			preview.tex_size = tex->get_size();
+
+			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
+
+			preview.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

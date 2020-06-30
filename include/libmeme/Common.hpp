@@ -87,7 +87,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_alias				using // global typedef macro
+#define ML_alias				using // global typedef
 
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr)) // array size macro
 

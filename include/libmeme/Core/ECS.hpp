@@ -9,13 +9,6 @@
 #include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Core/Debug.hpp>
 
-// ECS
-namespace ml::ecs
-{
-	template <class
-	> struct manager;
-}
-
 // UTILITY
 namespace ml::ecs::detail
 {
@@ -25,14 +18,15 @@ namespace ml::ecs::detail
 	template <class Signature
 	> struct x_base
 	{
-		using signature = typename Signature;
+		using signature_type = typename Signature;
 	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// used to store "template template" systems in type lists
+	// for storing "template template" systems in type lists
 	template <template <class> class System
-	> struct x_wrapper final {};
+	> struct x_wrapper final
+	{
+		template <class U> using type = typename System<U>;
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -40,8 +34,9 @@ namespace ml::ecs::detail
 // (T) TAGS
 namespace ml::ecs::detail
 {
+	// tags
 	template <class ... Tags
-	> struct tags final
+	> struct ML_NODISCARD tags final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -84,8 +79,9 @@ namespace ml::ecs::detail
 // (C) COMPONENTS
 namespace ml::ecs::detail
 {
+	// components
 	template <class ... Components
-	> struct components final
+	> struct ML_NODISCARD components final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -130,8 +126,9 @@ namespace ml::ecs::detail
 // (S) SIGNATURES
 namespace ml::ecs::detail
 {
+	// signatures
 	template <class ... Signatures
-	> struct signatures final
+	> struct ML_NODISCARD signatures final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -166,14 +163,15 @@ namespace ml::ecs::detail
 // (X) SYSTEMS
 namespace ml::ecs::detail
 {
+	// systems
 	template <template <class> class ... Systems
-	> struct systems final
+	> struct ML_NODISCARD systems final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using self_type = typename systems<Systems...>;
 
-		using type_list = typename meta::list<detail::template x_wrapper<Systems>...>;
+		using type_list = typename meta::list<_ML_ECS detail::template x_wrapper<Systems>...>;
 
 		template <class U
 		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
@@ -188,7 +186,7 @@ namespace ml::ecs::detail
 		template <template <class> class X
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<detail::x_wrapper<X>, type_list>();
+			return meta::contains<_ML_ECS detail::x_wrapper<X>, type_list>();
 		}
 
 		template <template <class> class X
@@ -205,17 +203,18 @@ namespace ml::ecs::detail
 // (O) OPTIONS
 namespace ml::ecs::detail
 {
+	// options
 	template <
 		size_t	GrowBase = 5,
 		class	GrowMult = std::ratio<2, 1>
-	> struct options final
+	> struct ML_NODISCARD options final
 	{
 		// growth base amount
 		static constexpr size_t grow_base{ GrowBase };
 		static_assert(0 < grow_base, "growth base negative or zero");
 
 		// growth multiplier
-		static constexpr float_t grow_mult{ util::ratio_cast(1.f, GrowMult{}) };
+		static constexpr float_t grow_mult{ util::ratio_cast<GrowMult>() };
 		static_assert(1.f <= grow_mult, "expression would result in negative growth");
 
 		static constexpr size_t calc_growth(size_t const cap) noexcept
@@ -229,12 +228,12 @@ namespace ml::ecs::detail
 namespace ml::ecs
 {
 	template <
-		class T = detail::tags			<>,	// Tags
-		class C = detail::components	<>,	// Components
-		class S = detail::signatures	<>,	// Signatures
-		class X = detail::systems		<>,	// Systems
-		class O = detail::options		<>	// Options
-	> struct traits final
+		class T = detail::tags			<>,	// tags
+		class C = detail::components	<>,	// components
+		class S = detail::signatures	<>,	// signatures
+		class X = detail::systems		<>,	// systems
+		class O = detail::options		<>	// options
+	> struct ML_NODISCARD traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -343,175 +342,35 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr signature_storage generate_signature_bitsets() noexcept
-		{
-			// generate bitsets for each signature
-			signature_storage temp{};
-			meta::for_types<typename signatures::type_list
-			>([&temp](auto s)
-			{
-				// get the signature's bitset
-				auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
-
-				// enable component bits
-				meta::for_types<components::template filter<decltype(s)::type>
-				>([&b](auto c)
-				{
-					b.set(self_type::component_bit<decltype(c)::type>());
-				});
-
-				// enable tag bits
-				meta::for_types<tags::template filter<decltype(s)::type>
-				>([&b](auto t)
-				{
-					b.set(self_type::tag_bit<decltype(t)::type>());
-				});
-			});
-			return temp;
-		}
-
 		static constexpr signature_storage m_signature_bitsets
 		{
-			generate_signature_bitsets()
+			([&]() noexcept -> signature_storage
+			{
+				// generate bitsets for each signature
+				signature_storage temp{};
+				meta::for_types<typename signatures::type_list
+				>([&temp](auto s)
+				{
+					// get the signature's bitset
+					auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
+
+					// enable component bits
+					meta::for_types<components::template filter<decltype(s)::type>
+					>([&b](auto c)
+					{
+						b.set(self_type::component_bit<decltype(c)::type>());
+					});
+
+					// enable tag bits
+					meta::for_types<tags::template filter<decltype(s)::type>
+					>([&b](auto t)
+					{
+						b.set(self_type::tag_bit<decltype(t)::type>());
+					});
+				});
+				return temp;
+			})()
 		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-// (H) HANDLE
-namespace ml::ecs::impl
-{
-	// object oriented abstraction over manager/entity interface
-	template <class U = manager<>
-	> struct handle final
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using self_type = typename _ML_ECS impl::handle<U>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool valid() const noexcept
-		{
-			return m_manager && m_manager->is_valid_handle(*this);
-		}
-
-		ML_NODISCARD explicit operator bool() const noexcept
-		{
-			return this->valid();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD bool alive() const noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->is_alive(*this);
-		}
-
-		handle & kill() noexcept
-		{
-			ML_assert(m_manager);
-			m_manager->kill(*this);
-			return (*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class T
-		> self_type & add_tag() noexcept
-		{
-			ML_assert(m_manager);
-			m_manager->template add_tag<T>(*this);
-			return (*this);
-		}
-
-		template <class T
-		> self_type & del_tag() noexcept
-		{
-			ML_assert(m_manager);
-			m_manager->template del_tag<T>(*this);
-			return (*this);
-		}
-
-		template <class T
-		> bool has_tag() noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template has_tag<T>(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class C, class ... Args
-		> auto & add_component(Args && ... args) noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template add_component<C>(*this, ML_forward(args)...);
-		}
-
-		template <class C
-		> auto & add_component() noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template add_component<C>(*this);
-		}
-
-		template <class C
-		> self_type & del_component() noexcept
-		{
-			ML_assert(m_manager);
-			m_manager->template del_component<C>(*this);
-			return (*this);
-		}
-
-		template <class C
-		> ML_NODISCARD auto & get_component() noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template get_component<C>(*this);
-		}
-
-		template <class C
-		> ML_NODISCARD auto const & get_component() const noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template get_component<C>(*this);
-		}
-
-		template <class C
-		> ML_NODISCARD bool has_component() const noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template has_component<C>(*this);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <class C
-		> ML_NODISCARD bool matches_signature() const noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template matches_signature<C>(*this);
-		}
-
-		template <template <class> class X
-		> ML_NODISCARD bool matches_system() const noexcept
-		{
-			ML_assert(m_manager);
-			return m_manager->template matches_system<X>();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		friend U;
-
-		U *		m_manager;	// pointer to owning manager
-		size_t	m_entity;	// index of real entity data
-		size_t	m_self;		// index of real handle data
-		int32_t	m_counter;	// reference counter
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -528,8 +387,8 @@ namespace ml::ecs
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using traits_type		= typename U;
 		using self_type			= typename manager<traits_type>;
-		using handle			= typename _ML_ECS impl::handle<self_type>;
-		using handle_storage	= typename pmr::vector<handle>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using tags				= typename traits_type::tags;
 		using components		= typename traits_type::components;
@@ -542,16 +401,152 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		struct handle;
+
+		using handle_storage = typename pmr::vector<handle>;
+
 		enum : size_t { id_alive, id_index, id_handle, id_bitset };
 
 		using entity_storage = typename ds::batch_vector
 		<
 			bool,	  // state of entity ( alive / dead )
-			size_t,	  // index of component data
-			size_t,	  // index of managing handle
+			size_t,	  // component data index
+			size_t,	  // managing handle index
 			signature // component signature bitset
 		>;
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// object oriented abstraction over manager interface
+		struct handle final
+		{
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			ML_NODISCARD bool is_valid_handle() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->is_valid_handle(*this);
+			}
+
+			ML_NODISCARD explicit operator bool() const noexcept
+			{
+				return this->is_valid_handle();
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			ML_NODISCARD bool is_alive() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->is_alive(*this);
+			}
+
+			handle & kill() noexcept
+			{
+				ML_assert(m_manager);
+				m_manager->kill(*this);
+				return (*this);
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			template <class T
+			> handle & add_tag() noexcept
+			{
+				ML_assert(m_manager);
+				m_manager->template add_tag<T>(*this);
+				return (*this);
+			}
+
+			template <class T
+			> handle & del_tag() noexcept
+			{
+				ML_assert(m_manager);
+				m_manager->template del_tag<T>(*this);
+				return (*this);
+			}
+
+			template <class T
+			> bool has_tag() noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template has_tag<T>(*this);
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			template <class C, class ... Args
+			> auto & add_component(Args && ... args) noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template add_component<C>(*this, ML_forward(args)...);
+			}
+
+			template <class C
+			> auto & add_component() noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template add_component<C>(*this);
+			}
+
+			template <class C
+			> handle & del_component() noexcept
+			{
+				ML_assert(m_manager);
+				m_manager->template del_component<C>(*this);
+				return (*this);
+			}
+
+			template <class C
+			> ML_NODISCARD auto & get_component() noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template get_component<C>(*this);
+			}
+
+			template <class C
+			> ML_NODISCARD auto const & get_component() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template get_component<C>(*this);
+			}
+
+			template <class C
+			> ML_NODISCARD bool has_component() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template has_component<C>(*this);
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			template <class C
+			> ML_NODISCARD bool matches_signature() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template matches_signature<C>(*this);
+			}
+
+			template <template <class> class X
+			> ML_NODISCARD bool matches_system() const noexcept
+			{
+				ML_assert(m_manager);
+				return m_manager->template matches_system<X>();
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		private:
+			friend self_type;
+
+			self_type *	m_manager	; // owning manager
+			size_t		m_entity	; // entity index
+			size_t		m_self		; // handle index
+			int32_t		m_counter	; // reference counter
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		};
+		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		manager(allocator_type alloc = {}) noexcept
@@ -580,7 +575,7 @@ namespace ml::ecs
 		manager(size_t const cap, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
-			this->grow_to(cap);
+			this->grow(cap);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -648,46 +643,7 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear() noexcept
-		{
-			for (size_t i = 0; i < m_capacity; ++i)
-			{
-				m_entities.expand_all(i, [&](auto & a, auto & e, auto & h, auto & b)
-				{
-					a = false;	// alive
-					e = i;		// index
-					h = i;		// handle
-					b = {};		// bitset
-				});
-				
-				auto & h{ m_handles[i] };
-				h.m_entity = i;
-				h.m_counter = 0;
-			}
-			m_size = m_size_next = 0;
-		}
-
-		void grow_to(size_t const cap)
-		{
-			if (cap <= m_capacity) { return; }
-
-			m_components.resize(cap);
-			m_handles.resize(cap);
-			m_entities.reserve(cap);
-
-			for (size_t i = m_capacity; i < cap; ++i)
-			{
-				m_entities.push_back(false, i, i, signature{});
-
-				auto & h{ m_handles[i] };
-				h.m_manager = this;
-				h.m_entity = i;
-				h.m_counter = 0;
-			}
-			m_capacity = cap;
-		}
-
-		void refresh() noexcept
+		void apply() noexcept
 		{
 			if (m_size_next == 0)
 			{
@@ -736,6 +692,45 @@ namespace ml::ecs
 			});
 		}
 
+		void clear() noexcept
+		{
+			for (size_t i = 0; i < m_capacity; ++i)
+			{
+				m_entities.expand_all(i, [&](auto & a, auto & e, auto & h, auto & b)
+				{
+					a = false;	// alive
+					e = i;		// index
+					h = i;		// handle
+					b = {};		// bitset
+				});
+				
+				auto & h{ m_handles[i] };
+				h.m_entity = i;
+				h.m_counter = 0;
+			}
+			m_size = m_size_next = 0;
+		}
+
+		void grow(size_t const cap)
+		{
+			if (cap <= m_capacity) { return; }
+
+			m_components.resize(cap);
+			m_handles.resize(cap);
+			m_entities.reserve(cap);
+
+			for (size_t i = m_capacity; i < cap; ++i)
+			{
+				m_entities.push_back(false, i, i, signature{});
+
+				auto & h{ m_handles[i] };
+				h.m_manager = this;
+				h.m_entity = i;
+				h.m_counter = 0;
+			}
+			m_capacity = cap;
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD size_t create_entity()
@@ -743,7 +738,7 @@ namespace ml::ecs
 			// grow if needed
 			if (m_capacity <= m_size_next)
 			{
-				this->grow_to(options::calc_growth(m_capacity));
+				this->grow(options::calc_growth(m_capacity));
 			}
 
 			size_t const i{ m_size_next++ };
@@ -751,8 +746,6 @@ namespace ml::ecs
 			m_entities.get<id_bitset>(i) = {};
 			return i;
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD bool is_alive(size_t const i) const
 		{
@@ -763,8 +756,6 @@ namespace ml::ecs
 		{
 			return this->is_alive(h.m_entity);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		self_type & kill(size_t const i)
 		{
@@ -798,8 +789,6 @@ namespace ml::ecs
 		{
 			return (h.m_counter == this->get_handle(h).m_counter);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD handle & get_handle(size_t const i)
 		{
@@ -986,7 +975,7 @@ namespace ml::ecs
 		template <template <class> class X
 		> ML_NODISCARD bool matches_system(size_t const i) const noexcept
 		{
-			return this->matches_signature<typename X<traits_type>::signature>(i);
+			return this->matches_signature<typename X<traits_type>::signature_type>(i);
 		}
 
 		template <template <class> class X
@@ -1036,11 +1025,11 @@ namespace ml::ecs
 			});
 		}
 
-		// invoke function on all systems matching a signature
+		// invoke function on all alive entities matching a system
 		template <template <class> class X, class Fn
 		> self_type & for_system(Fn && fn) noexcept
 		{
-			return this->for_matching<typename X<traits_type>::signature
+			return this->for_matching<typename X<traits_type>::signature_type
 			>([&, &x = std::get<traits_type::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp) noexcept
 			{
@@ -1048,7 +1037,7 @@ namespace ml::ecs
 			});
 		}
 
-		// invoke system on all entities matching the system's signature
+		// invoke system on all alive entities
 		template <template <class> class X, class ... Extra
 		> self_type & invoke_system(Extra && ... extra) noexcept
 		{
@@ -1091,14 +1080,14 @@ namespace ml::ecs
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		size_t m_capacity;	// storage capacity		(total allocated slots)
-		size_t m_size;		// current size			(size excluding newly created entities)
-		size_t m_size_next;	// size after refresh	(size including newly created entities)
+		size_t m_capacity	; // total allocated slots
+		size_t m_size		; // size excluding newly created entities
+		size_t m_size_next	; // size including newly created entities
 		
-		entity_storage		m_entities;		// entity data
-		handle_storage		m_handles;		// handle data
-		component_storage	m_components;	// component data
-		system_storage		m_systems;		// systems data
+		entity_storage		m_entities	; // entity data
+		handle_storage		m_handles	; // handle data
+		component_storage	m_components; // component data
+		system_storage		m_systems	; // system data
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

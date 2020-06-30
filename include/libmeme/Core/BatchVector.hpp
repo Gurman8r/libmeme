@@ -28,10 +28,10 @@ namespace ml::ds
 			std::tuple_size_v<value_tuple>
 		};
 
-		static constexpr auto make_index_sequence() noexcept
+		static constexpr auto tuple_sequence
 		{
-			return std::make_index_sequence<tuple_size>{};
-		}
+			std::make_index_sequence<tuple_size>{}
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -251,12 +251,12 @@ namespace ml::ds
 
 		ML_NODISCARD auto get(size_t const i) noexcept
 		{
-			return this->get(i, make_index_sequence());
+			return this->get(i, tuple_sequence);
 		}
 
 		ML_NODISCARD auto get(size_t const i) const noexcept
 		{
-			return this->get(i, make_index_sequence());
+			return this->get(i, tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -341,12 +341,12 @@ namespace ml::ds
 
 		ML_NODISCARD auto back() noexcept
 		{
-			return this->back(make_index_sequence());
+			return this->back(tuple_sequence);
 		}
 
 		ML_NODISCARD auto back() const noexcept
 		{
-			return this->back(make_index_sequence());
+			return this->back(tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -431,12 +431,12 @@ namespace ml::ds
 
 		ML_NODISCARD auto front() noexcept
 		{
-			return this->front(make_index_sequence());
+			return this->front(tuple_sequence);
 		}
 
 		ML_NODISCARD auto front() const noexcept
 		{
-			return this->front(make_index_sequence());
+			return this->front(tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -479,12 +479,12 @@ namespace ml::ds
 
 		template <class Fn> void expand_all(Fn && fn) noexcept
 		{
-			this->expand(ML_forward(fn), make_index_sequence());
+			this->expand(ML_forward(fn), tuple_sequence);
 		}
 
 		template <class Fn> void expand_all(Fn && fn) const noexcept
 		{
-			this->expand(ML_forward(fn), make_index_sequence());
+			this->expand(ML_forward(fn), tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -527,12 +527,12 @@ namespace ml::ds
 
 		template <class Fn> void expand_all(size_t const i, Fn && fn) noexcept
 		{
-			this->expand(i, ML_forward(fn), make_index_sequence());
+			this->expand(i, ML_forward(fn), tuple_sequence);
 		}
 
 		template <class Fn> void expand_all(size_t const i, Fn && fn) const noexcept
 		{
-			this->expand(i, ML_forward(fn), make_index_sequence());
+			this->expand(i, ML_forward(fn), tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

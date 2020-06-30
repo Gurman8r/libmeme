@@ -356,6 +356,27 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class R, class T = float_t
+	> ML_NODISCARD constexpr auto ratio_cast(T v = T{ 1 }) noexcept
+	{
+		if constexpr (((T)R::num == (T)1) && ((T)R::den == (T)1))
+		{
+			return v;
+		}
+		else if constexpr ((T)R::num != (T)1 && (T)R::den == (T)1)
+		{
+			return v * (T)R::num;
+		}
+		else if constexpr ((T)R::num == (T)1 && (T)R::den != (T)1)
+		{
+			return v / (T)R::den;
+		}
+		else
+		{
+			return v * (T)R::num / (T)R::den;
+		}
+	}
+
 	template <class T, int64_t Num, int64_t Den
 	> ML_NODISCARD constexpr auto ratio_cast(T v, std::ratio<Num, Den> const & r)
 	{

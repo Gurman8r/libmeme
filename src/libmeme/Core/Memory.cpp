@@ -4,6 +4,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifdef ML_STATIC
+	memory memory::g_instance{};
+#endif
+
 	memory::~memory() noexcept
 	{
 #if (ML_is_debug)

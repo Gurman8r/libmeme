@@ -3,13 +3,7 @@
 
 #include <libmeme/Core/Timer.hpp>
 
-// scope benchmark
-#define ML_benchmark_S(id) \
-	auto ML_anon = _ML performance::scope_benchmark{ id }
-
-// lambda benchmark
-#define ML_benchmark_L(id) \
-	auto ML_anon = _ML performance::lambda_benchmark{ id } + [&]() noexcept
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -19,43 +13,9 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD sample_type final
+		struct ML_NODISCARD sample final
 		{
 			cstring name; duration time;
-		};
-
-		//using sample_type = typename std::pair<cstring, duration>;
-
-		using sample_buffer = typename pmr::vector<sample_type>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// scope benchmark
-		struct ML_NODISCARD scope_benchmark final
-		{
-			explicit scope_benchmark(cstring id) noexcept : id{ id } {}
-
-			~scope_benchmark() noexcept { push_sample(id, t.elapsed()); }
-
-		private: cstring const id; timer t{};
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// lambda benchmark
-		struct ML_NODISCARD lambda_benchmark final
-		{
-			explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
-
-			template <class Fn> auto const & operator+(Fn && fn) const & noexcept
-			{
-				timer t{};
-				std::invoke(ML_forward(fn));
-				push_sample(id, t.elapsed());
-				return (*this);
-			}
-
-		private: cstring const id;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,7 +31,7 @@ namespace ml
 		> static void push_sample(Args && ... args) noexcept
 		{
 			static auto & inst{ get_instance() };
-			inst.m_current.emplace_back(sample_type{ ML_forward(args)... });
+			inst.m_current.emplace_back(sample{ ML_forward(args)... });
 		}
 
 		// swap frames and clear current
@@ -87,12 +47,64 @@ namespace ml
 	private:
 		friend singleton<performance>;
 
+#ifdef ML_STATIC
+		static self_type g_instance;
+#endif
+
 		~performance() noexcept;
 
-		sample_buffer m_current{}, m_previous{};
+		pmr::vector<sample> m_current{}, m_previous{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::impl
+{
+
+	// scope benchmark
+	struct ML_NODISCARD scope_benchmark final
+	{
+		explicit scope_benchmark(cstring id) noexcept : id{ id } {}
+
+		~scope_benchmark() noexcept { performance::push_sample(id, t.elapsed()); }
+
+	private: cstring const id; timer t{};
+	};
+}
+
+// scope benchmark
+#define ML_benchmark_S(id) \
+	auto ML_anon = _ML_IMPL scope_benchmark{ id }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::impl
+{
+	// lambda benchmark
+	struct ML_NODISCARD lambda_benchmark final
+	{
+		explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
+
+		template <class Fn> auto const & operator+(Fn && fn) const & noexcept
+		{
+			timer t{};
+			std::invoke(ML_forward(fn));
+			performance::push_sample(id, t.elapsed());
+			return (*this);
+		}
+
+	private: cstring const id;
+	};
+
+}
+
+// lambda benchmark
+#define ML_benchmark_L(id) \
+	auto ML_anon = _ML_IMPL lambda_benchmark{ id } + [&]() noexcept
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_PERFORMANCE_HPP_

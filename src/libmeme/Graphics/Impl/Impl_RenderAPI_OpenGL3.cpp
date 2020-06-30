@@ -59,10 +59,9 @@
 // helpers / disambiguation
 
 // get error
+#ifndef ML_glGetError
 #define ML_glGetError std::bind( &_ML_GFX _error_type<_ML_GFX to_user>, glGetError() )
-
-// enable / disable
-#define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
+#endif
 
 // check error
 #if ML_is_debug
@@ -70,6 +69,13 @@
 #else
 #	define ML_glCheck(expr) (expr)
 #endif
+
+// enable / disable
+#define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
+
+// info log
+#define ML_glGetObjectInfoLogLength(obj, x)			glGetShaderiv( obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, x )
+#define ML_glGetObjectInfoLog(obj, size, len, str)	glGetProgramInfoLog( obj, size, len, str )
 
 // shaders
 #define ML_glCreateShader(type)						glCreateShaderObjectARB( _ML_GFX _shader_type<_ML_GFX to_impl>(type) )
@@ -89,10 +95,6 @@
 #define ML_glGetProgramLinkStatus(obj, x)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, x )
 #define ML_glValidateProgram(obj)					glValidateProgramARB( obj )
 #define ML_glGetProgramValidateStatus(obj, x)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, x )
-
-// info log
-#define ML_glGetObjectInfoLogLength(obj, x)			glGetShaderiv( obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, x )
-#define ML_glGetObjectInfoLog(obj, size, len, str)	glGetProgramInfoLog( obj, size, len, str )
 
 // uniforms
 #define ML_glGetUniformLocation(obj, name)			ML_handle( _ML_GFX uniform_id, glGetUniformLocationARB(obj, name) )
@@ -623,11 +625,11 @@ namespace ml::gfx
 		: m_settings{ cs }
 		, m_devinfo	{}
 	{
-		ML_assert("invalid client api specified" && m_settings.api == window_client_opengl);
+		ML_assert("invalid client api specified" && (m_settings.api == window_client_opengl));
 
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
 
-		ML_assert("failed initializing OpenGL" && opengl_init);
+		ML_assert("failed initializing opengl3_device" && opengl_init);
 
 		// INTERNAL SETUP
 		{

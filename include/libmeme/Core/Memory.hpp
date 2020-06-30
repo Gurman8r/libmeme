@@ -237,6 +237,10 @@ namespace ml
 	private:
 		friend singleton<memory>;
 
+#ifdef ML_STATIC
+		static self_type g_instance;
+#endif
+
 		~memory() noexcept;
 
 		allocator_type			m_allocator	{};	// allocator
