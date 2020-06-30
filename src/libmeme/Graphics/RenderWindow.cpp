@@ -5,27 +5,27 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, m_context{}
+	render_window::render_window() noexcept : window{}, m_devctx{}
 	{
 	}
 
-	render_window::render_window(window_settings const & ws, bool install_callbacks) noexcept : render_window{}
+	render_window::render_window(window_settings const & ws, bool ic) noexcept : render_window{}
 	{
-		(void)this->open(ws, install_callbacks);
+		ML_assert(this->open(ws, ic));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::open(window_settings const & ws, bool install_callbacks)
+	bool render_window::open(window_settings const & ws, bool ic)
 	{
-		// open window
-		if (!window::open(ws, install_callbacks))
+		// open base window
+		if (!window::open(ws, ic))
 		{
 			return debug::error("failed opening window");
 		}
 
 		// create device context
-		if (!m_context.reset(gfx::device::create_context(ws.context)))
+		if (!m_devctx.reset(gfx::device::create_context(ws.context)))
 		{
 			return debug::error("failed creating device context");
 		}
@@ -36,7 +36,7 @@ namespace ml
 		debug::info("using renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		
 		// setup render states
-		for (gfx::command const & cmd :
+		for (auto const & cmd :
 		{
 			// alpha
 			gfx::render_command::set_alpha_enabled(true),
@@ -45,7 +45,7 @@ namespace ml
 			// blend
 			gfx::render_command::set_blend_enabled(true),
 			gfx::render_command::set_blend_color(colors::white),
-			gfx::render_command::set_blend_mode({ gfx::function_add, gfx::factor_src_alpha, gfx::factor_one_minus_src_alpha }),
+			gfx::render_command::set_blend_mode({ gfx::equation_add, gfx::factor_src_alpha, gfx::factor_one_minus_src_alpha }),
 
 			// cull
 			gfx::render_command::set_cull_enabled(true),
@@ -69,7 +69,7 @@ namespace ml
 
 	void render_window::close()
 	{
-		m_context.reset();
+		m_devctx.reset();
 
 		window::close();
 	}

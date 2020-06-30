@@ -309,11 +309,11 @@ namespace ml::gui
 					{ reg_size * reg_zoom, reg_size * reg_zoom },
 					{
 						(rx / scr_size[0]),
-						1.f - (ry / scr_size[1])
+						(1.f - (ry / scr_size[1]))
 					},
 					{
 						((rx + reg_size) / scr_size[0]),
-						1.f - ((ry + reg_size) / scr_size[1])
+						(1.f - ((ry + reg_size) / scr_size[1]))
 					},
 					colors::white,
 					colors::gray

@@ -5,8 +5,14 @@
 // platform specific
 #if defined(ML_os_windows)
 #	include <Windows.h>
+
+#elif defined(ML_os_android)
 #elif defined(ML_os_apple)
-#elif defined(ML_os_unix)
+#elif defined(ML_os_freebsd)
+#elif defined(ML_os_linux)
+
+#else
+#	error "video_mode is unavailable"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

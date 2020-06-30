@@ -68,11 +68,11 @@
 #       define ML_has_cxx11     1
 
 #   else
-#       error "This version of C++ is not supported."
+#       error "this version of C++ is not supported"
 #   endif
 
 #else
-#   error "This system does not support C++."
+#   error "this system does not support C++"
 #endif
 
 
@@ -85,16 +85,16 @@
 #   define ML_os_windows        1
 #   define ML_os_name           "Windows"
 
-#elif defined(__APPLE__) && defined(__MACH__)
+#elif defined(__unix__)
+//                              Unix
+#   define ML_os_unix           1
+
+#   if defined(__APPLE__) && defined(__MACH__)
 //                              Apple
 #   define ML_os_apple          1
 #   define ML_os_name           "Apple"
 
-#elif defined(__unix__)
-//                              Unix
-#	define ML_os_unix           1
-
-#   if defined(__ANDROID__)
+#   elif defined(__ANDROID__)
 //                              Android
 #       define ML_os_android    1
 #       define ML_os_name       "Android"
@@ -110,11 +110,11 @@
 #       define ML_os_name       "FreeBSD"
 
 #   else
-#       error "This unix operating system is not supported."
+#       error "this unix operating system is not supported"
 #   endif
 
 #else
-#   error "This operating system is not supported."
+#   error "this operating system is not supported"
 #endif
 
 
@@ -159,7 +159,7 @@
 #   endif
 
 #else
-#   error "Unable to detect platform architecture."
+#   error "Unable to detect platform architecture"
 #endif
 
 
@@ -180,7 +180,7 @@
 #   elif (ML_cc_version >= 1800)
 #       define ML_cc_name       "Visual Studio 2013"
 #   else
-#       error "This version of Visual Studio is not supported."
+#       error "this version of Visual Studio is not supported"
 #   endif
 
 #elif defined(__clang__)
@@ -238,7 +238,7 @@
 #   define ML_cc_name           "WebAssembly"
 
 #else
-#   error "This compiler is not supported."
+#   error "this compiler is not supported"
 #endif
 
 

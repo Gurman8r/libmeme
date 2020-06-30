@@ -13,9 +13,14 @@
 #	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
+
+#elif defined(ML_os_android)
 #elif defined(ML_os_apple)
-#elif defined(ML_os_unix)
+#elif defined(ML_os_freebsd)
+#elif defined(ML_os_linux)
+
 #else
+#	error "glfw_window is unavailable"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -75,21 +80,21 @@ namespace ml
 		{
 			switch (ws.context.api)
 			{
-			case window_client_opengl	: return GLFW_OPENGL_API;
-			case window_client_vulkan	:
-			case window_client_directx	:
-			case window_client_unknown	:
-			default						: return GLFW_NO_API;
+			case client_api_opengl	: return GLFW_OPENGL_API;
+			case client_api_vulkan	:
+			case client_api_directx	:
+			case client_api_unknown	:
+			default					: return GLFW_NO_API;
 			}
 		}));
 		glfwWindowHint(GLFW_OPENGL_PROFILE, std::invoke([&]() noexcept
 		{
 			switch (ws.context.profile)
 			{
-			case window_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
-			case window_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case window_profile_debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case window_profile_any		:
+			case client_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
+			case client_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case client_profile_debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case client_profile_any		:
 			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		}));

@@ -47,10 +47,10 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
-				for (gfx::command const & cmd :
+				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
-					gfx::render_command::clear(gfx::buffer_bit_color),
+					gfx::render_command::clear(gfx::clear_color),
 					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{

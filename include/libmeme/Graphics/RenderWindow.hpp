@@ -12,26 +12,26 @@ namespace ml
 
 		render_window() noexcept;
 
-		explicit render_window(window_settings const & ws, bool install_callbacks = true) noexcept;
+		explicit render_window(window_settings const & ws, bool ic = true) noexcept;
 
 		virtual ~render_window() noexcept override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws, bool install_callbacks = true) override;
+		ML_NODISCARD virtual bool open(window_settings const & ws, bool ic = true) override;
 
 		virtual void close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_device_context() const noexcept -> gfx::device_context const & { return m_context; }
+		ML_NODISCARD auto get_device_context() const noexcept -> gfx::devctx const & { return m_devctx; }
 
-		ML_NODISCARD auto get_device_info() const noexcept -> gfx::devinfo const & { return m_context->get_device_info(); }
+		ML_NODISCARD auto get_device_info() const noexcept -> gfx::devinfo const & { return m_devctx->get_device_info(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		gfx::device_context m_context;
+		gfx::devctx m_devctx;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

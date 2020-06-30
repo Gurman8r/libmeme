@@ -13,13 +13,13 @@ namespace ml
 
 		window() noexcept;
 
-		explicit window(window_settings const & ws, bool install_callbacks = true) noexcept;
+		explicit window(window_settings const & ws, bool ic = true) noexcept;
 
 		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws, bool install_callbacks = true);
+		ML_NODISCARD virtual bool open(window_settings const & ws, bool ic = true);
 		
 		virtual void close();
 

@@ -18,7 +18,7 @@ namespace ml::gfx
 
 	struct	devinfo			;
 	class	device			;
-	class	device_context	;
+	class	devctx	;
 	class	device_resource	;
 
 	class	vertexbuffer	;
@@ -33,16 +33,6 @@ namespace ml::gfx
 
 	class	shader			;
 	class	program			;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_decl_handle(resource_id) ; // object handle
-	ML_decl_handle(uniform_id) 	; // uniform binding
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_alias address	= typename void const *			; // data address
-	ML_alias buffer		= typename pmr::vector<byte_t>	; // byte buffer
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -63,22 +53,49 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum buffer_bit_ : uint32_t
+	enum action_ : uint32_t
 	{
-		buffer_bit_none		= 0,
-		buffer_bit_color	= 1 << 0,
-		buffer_bit_depth	= 1 << 1,
-		buffer_bit_stencil	= 1 << 2,
+		action_keep,
+		action_zero,
+		action_replace,
+		action_inc,
+		action_inc_wrap,
+		action_dec,
+		action_dec_wrap,
+		action_invert,
+	};
 
-		buffer_bit_all
-			= buffer_bit_color
-			| buffer_bit_depth
-			| buffer_bit_stencil,
+	constexpr cstring action_names[] =
+	{
+		"keep",
+		"zero",
+		"replace",
+		"increment",
+		"increment wrap",
+		"decrement",
+		"decrement wrap",
+		"invert",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum error_type_ : uint32_t
+	enum clear_ : uint32_t
+	{
+		clear_none		= 0,		// none
+		clear_color		= 1 << 0,	// color buffer bit
+		clear_depth		= 1 << 1,	// depth buffer bit
+		clear_stencil	= 1 << 2,	// stencil buffer bit
+
+		// color / depth / stencil
+		clear_all
+			= clear_color
+			| clear_depth
+			| clear_stencil,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	enum error_ : uint32_t
 	{
 		error_none,
 		error_invalid_enum,
@@ -119,28 +136,22 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum action_ : uint32_t
+	enum equation_ : uint32_t
 	{
-		action_keep,
-		action_zero,
-		action_replace,
-		action_inc,
-		action_inc_wrap,
-		action_dec,
-		action_dec_wrap,
-		action_invert,
+		equation_add,
+		equation_subtract,
+		equation_reverse_subtract,
+		equation_min,
+		equation_max,
 	};
 
-	constexpr cstring action_names[] =
+	constexpr cstring function_names[] =
 	{
-		"keep",
-		"zero",
-		"replace",
-		"increment",
-		"increment wrap",
-		"decrement",
-		"decrement wrap",
-		"invert",
+		"add",
+		"subtract",
+		"reverse subtract",
+		"min",
+		"max",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -251,26 +262,6 @@ namespace ml::gfx
 
 		"depth stencil",
 		"depth24 stencil8",
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum function_ : uint32_t
-	{
-		function_add,
-		function_subtract,
-		function_reverse_subtract,
-		function_min,
-		function_max,
-	};
-
-	constexpr cstring function_names[] =
-	{
-		"add",
-		"subtract",
-		"reverse subtract",
-		"min",
-		"max",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -430,18 +421,26 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// buffers
+// utility
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	ML_decl_handle(resource_id) ; // resource handle
+	ML_decl_handle(uniform_id) 	; // uniform handle
+
+	ML_alias address_t	= typename void const *			; // data address
+	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// buffer copy
 	template <class Elem = byte_t
-	> buffer bufcpy(size_t count, address data, buffer::allocator_type alloc = {}) noexcept
+	> buffer_t bufcpy(size_t count, address_t data, buffer_t::allocator_type alloc = {}) noexcept
 	{
 		return data
-			? buffer{ (byte_t *)data, (byte_t *)data + count * sizeof(Elem), alloc }
-			: buffer{ count * sizeof(Elem), (byte_t)0, alloc };
+			? buffer_t{ (byte_t *)data, (byte_t *)data + count * sizeof(Elem), alloc }
+			: buffer_t{ count * sizeof(Elem), (byte_t)0, alloc };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -508,7 +507,7 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// vertex buffer layout element
+	// vertex buffer element
 	struct ML_NODISCARD buffer_element final
 	{
 		template <class T
@@ -542,16 +541,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// default vertex buffer layout
-	constexpr std::initializer_list<buffer_element> default_layout
-	{
-		{ vec3{}, "a_position"	},
-		{ vec3{}, "a_normal"	},
-		{ vec2{}, "a_texcoord"	},
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// vertex buffer layout
 	struct ML_NODISCARD buffer_layout final
 	{
@@ -560,6 +549,13 @@ namespace ml::gfx
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;
 		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
+
+		static constexpr std::initializer_list<buffer_element> default_layout
+		{
+			{ vec3{}, "a_position"	},
+			{ vec3{}, "a_normal"	},
+			{ vec2{}, "a_texcoord"	},
+		};
 
 		buffer_layout(std::initializer_list<buffer_element> init = default_layout) noexcept
 			: m_elements{ init.begin(), init.end() }
@@ -601,7 +597,7 @@ namespace ml::gfx
 	struct ML_NODISCARD blend_mode final
 	{
 		uint32_t
-			color_equation	{ function_add },
+			color_equation	{ equation_add },
 			color_sfactor	{ factor_src_alpha },
 			color_dfactor	{ factor_one_minus_src_alpha },
 			alpha_equation	{ color_equation },
@@ -796,24 +792,26 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// device context
-	class ML_GRAPHICS_API device_context final : public trackable, public non_copyable
+	class ML_GRAPHICS_API devctx final : public trackable, public non_copyable
 	{
 		std::thread::id m_thread_id{ std::this_thread::get_id() };
 
 		device * m_device;
 
 	public:
-		device_context() noexcept : m_device{ device::get_current_context() } {}
+		devctx() noexcept : m_device{ device::get_current_context() } {}
+		
+		explicit devctx(std::nullptr_t) noexcept : m_device{} {}
 
-		explicit device_context(device * ctx) noexcept : m_device{ ctx } { device::set_current_context(ctx); }
+		explicit devctx(device * ctx) noexcept : m_device{ ctx } { device::set_current_context(ctx); }
 
-		explicit device_context(context_settings const & cs) : m_device{ device::create_context(cs) } {}
+		explicit devctx(context_settings const & cs) : m_device{ device::create_context(cs) } {}
 
-		explicit device_context(device_context && other) noexcept : m_device{} { swap(std::move(other)); }
+		explicit devctx(devctx && other) noexcept : m_device{} { swap(std::move(other)); }
 
-		~device_context() noexcept { reset(); }
+		~devctx() noexcept { reset(); }
 
-		device_context & operator=(device_context && other) noexcept { return swap(std::move(other)); }
+		devctx & operator=(devctx && other) noexcept { return swap(std::move(other)); }
 
 		device * release() noexcept
 		{
@@ -822,7 +820,7 @@ namespace ml::gfx
 			return temp;
 		}
 
-		device * reset(device * value = nullptr) noexcept
+		device * reset(device * value = {}) noexcept
 		{
 			if (m_device)
 			{
@@ -831,7 +829,7 @@ namespace ml::gfx
 			return (m_device = value);
 		}
 
-		device_context & swap(device_context & other) noexcept
+		devctx & swap(devctx & other) noexcept
 		{
 			if (this != std::addressof(other))
 			{
@@ -907,9 +905,9 @@ namespace ml::gfx
 	class ML_GRAPHICS_API vertexbuffer : public device_resource
 	{
 	public:
-		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address data) noexcept;
+		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
 
-		ML_NODISCARD static shared<vertexbuffer> create(size_t count, address data = nullptr) noexcept
+		ML_NODISCARD static shared<vertexbuffer> create(size_t count, address_t data = nullptr) noexcept
 		{
 			return create(data ? usage_static_draw : usage_dynamic_draw, count, data);
 		}
@@ -936,11 +934,11 @@ namespace ml::gfx
 		inline void unbind() const noexcept { bind(nullptr); }
 
 	public:
-		virtual void set_data(size_t count, address data, size_t offset = 0) = 0;
+		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
 
 		virtual void set_layout(buffer_layout const & value) = 0;
 
-		ML_NODISCARD virtual buffer const & get_buffer() const noexcept = 0;
+		ML_NODISCARD virtual buffer_t const & get_buffer() const noexcept = 0;
 
 		ML_NODISCARD virtual size_t get_count() const noexcept = 0;
 
@@ -966,9 +964,9 @@ namespace ml::gfx
 	class ML_GRAPHICS_API indexbuffer : public device_resource
 	{
 	public:
-		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address data) noexcept;
+		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
 
-		ML_NODISCARD static shared<indexbuffer> create(size_t count, address data = nullptr) noexcept
+		ML_NODISCARD static shared<indexbuffer> create(size_t count, address_t data = nullptr) noexcept
 		{
 			return create(data ? usage_static_draw : usage_dynamic_draw, count, data);
 		}
@@ -995,9 +993,9 @@ namespace ml::gfx
 		inline void unbind() const noexcept { bind(nullptr); }
 
 	public:
-		virtual void set_data(size_t count, address data, size_t offset = 0) = 0;
+		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
 
-		ML_NODISCARD virtual buffer const & get_buffer() const noexcept = 0;
+		ML_NODISCARD virtual buffer_t const & get_buffer() const noexcept = 0;
 
 		ML_NODISCARD virtual size_t get_count() const noexcept = 0;
 
@@ -1189,7 +1187,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
-		ML_NODISCARD static shared<texture2d> create(texopts const & opts, address data = nullptr) noexcept;
+		ML_NODISCARD static shared<texture2d> create(texopts const & opts, address_t data = nullptr) noexcept;
 
 		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
@@ -1227,9 +1225,9 @@ namespace ml::gfx
 
 		virtual void unlock() override = 0;
 
-		virtual void update(vec2i const & size, address data = nullptr) = 0;
+		virtual void update(vec2i const & size, address_t data = nullptr) = 0;
 
-		virtual void update(vec2i const & pos, vec2i const & size, address data) = 0;
+		virtual void update(vec2i const & pos, vec2i const & size, address_t data) = 0;
 
 		virtual void set_mipmapped(bool value) = 0;
 
@@ -1421,6 +1419,7 @@ namespace ml::gfx
 // program
 namespace ml::gfx
 {
+	// program flags
 	enum program_flags_ : int32_t
 	{
 		program_flags_none = (0 << 0), // none

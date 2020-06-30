@@ -19,7 +19,7 @@ using impl_program		= _ML_GFX opengl3_program		;
 // etc...
 
 #else
-#error "Unknown or invalid renderer implementation specified."
+#	error "Unknown or invalid renderer implementation specified."
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -69,7 +69,7 @@ namespace ml::gfx
 // vertexbuffer
 namespace ml::gfx
 {
-	shared<vertexbuffer> vertexbuffer::create(uint32_t usage, size_t count, address data) noexcept
+	shared<vertexbuffer> vertexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<impl_vertexbuffer>(usage, count, data);
 	}
@@ -85,7 +85,7 @@ namespace ml::gfx
 // indexbuffer
 namespace ml::gfx
 {
-	shared<indexbuffer> indexbuffer::create(uint32_t usage, size_t count, address data) noexcept
+	shared<indexbuffer> indexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<impl_indexbuffer>(usage, count, data);
 	}
@@ -119,7 +119,7 @@ namespace ml::gfx
 // texture2d
 namespace ml::gfx
 {
-	shared<texture2d> texture2d::create(texopts const & opts, address data) noexcept
+	shared<texture2d> texture2d::create(texopts const & opts, address_t data) noexcept
 	{
 		return _ML make_shared<impl_texture2d>(opts, data);
 	}

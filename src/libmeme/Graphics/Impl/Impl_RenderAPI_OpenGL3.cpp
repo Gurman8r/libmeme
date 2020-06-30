@@ -30,7 +30,7 @@
 #	include <glad/glad.h>
 
 #else
-#	error "Unknown or invalid opengl loader specified."
+#	error "unknown or invalid opengl loader specified"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -60,12 +60,12 @@
 
 // get error
 #ifndef ML_glGetError
-#define ML_glGetError std::bind( &_ML_GFX _error_type<_ML_GFX to_user>, glGetError() )
+#define ML_glGetError std::bind( &_ML_GFX _error<_ML_GFX to_user>, glGetError() )
 #endif
 
 // check error
 #if ML_is_debug
-#	define ML_glCheck(expr) do{ (expr); _ML_GFX gl_check_error(#expr, __FILE__, __LINE__); } while(0)
+#	define ML_glCheck(expr) do{ (expr); gl_check_error(#expr, __FILE__, __LINE__); } while(0)
 #else
 #	define ML_glCheck(expr) (expr)
 #endif
@@ -114,27 +114,63 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _buffer_bit(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
+	{
+		if constexpr (Convt()) // to impl
+		{
+			switch (value)
+			{
+			default				: return value;
+			case action_keep	: return GL_KEEP;
+			case action_zero	: return GL_ZERO;
+			case action_replace	: return GL_REPLACE;
+			case action_inc		: return GL_INCR;
+			case action_inc_wrap: return GL_INCR_WRAP;
+			case action_dec		: return GL_DECR;
+			case action_dec_wrap: return GL_DECR_WRAP;
+			case action_invert	: return GL_INVERT;
+			}
+		}
+		else // to user
+		{
+			switch (value)
+			{
+			default				: return value;
+			case GL_KEEP		: return action_keep;
+			case GL_ZERO		: return action_zero;
+			case GL_REPLACE		: return action_replace;
+			case GL_INCR		: return action_inc;
+			case GL_INCR_WRAP	: return action_inc_wrap;
+			case GL_DECR		: return action_dec;
+			case GL_DECR_WRAP	: return action_dec_wrap;
+			case GL_INVERT		: return action_invert;
+			}
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Convt> constexpr uint32_t _clear(uint32_t value) noexcept
 	{
 		uint32_t temp{};
 		if constexpr (Convt()) // to impl
 		{
-			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, buffer_bit_color);
-			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, buffer_bit_depth);
-			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, buffer_bit_stencil);
+			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, clear_color	);
+			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, clear_depth	);
+			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, clear_stencil	);
 		}
 		else // to user
 		{
-			ML_flag_map(temp, buffer_bit_color		, value, GL_COLOR_BUFFER_BIT);
-			ML_flag_map(temp, buffer_bit_depth		, value, GL_DEPTH_BUFFER_BIT);
-			ML_flag_map(temp, buffer_bit_stencil	, value, GL_STENCIL_BUFFER_BIT);
+			ML_flag_map(temp, clear_color	, value, GL_COLOR_BUFFER_BIT	);
+			ML_flag_map(temp, clear_depth	, value, GL_DEPTH_BUFFER_BIT	);
+			ML_flag_map(temp, clear_stencil	, value, GL_STENCIL_BUFFER_BIT	);
 		}
 		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _error_type(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to impl
 		{
@@ -172,36 +208,30 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
+	template <class Convt> constexpr uint32_t _equation(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to impl
 		{
 			switch (value)
 			{
-			default				: return value;
-			case action_keep	: return GL_KEEP;
-			case action_zero	: return GL_ZERO;
-			case action_replace	: return GL_REPLACE;
-			case action_inc		: return GL_INCR;
-			case action_inc_wrap: return GL_INCR_WRAP;
-			case action_dec		: return GL_DECR;
-			case action_dec_wrap: return GL_DECR_WRAP;
-			case action_invert	: return GL_INVERT;
+			default							: return value;
+			case equation_add				: return GL_FUNC_ADD;
+			case equation_subtract			: return GL_FUNC_SUBTRACT;
+			case equation_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
+			case equation_min				: return GL_MIN;
+			case equation_max				: return GL_MAX;
 			}
 		}
 		else // to user
 		{
 			switch (value)
 			{
-			default				: return value;
-			case GL_KEEP		: return action_keep;
-			case GL_ZERO		: return action_zero;
-			case GL_REPLACE		: return action_replace;
-			case GL_INCR		: return action_inc;
-			case GL_INCR_WRAP	: return action_inc_wrap;
-			case GL_DECR		: return action_dec;
-			case GL_DECR_WRAP	: return action_dec_wrap;
-			case GL_INVERT		: return action_invert;
+			default							: return value;
+			case GL_FUNC_ADD				: return equation_add;
+			case GL_FUNC_SUBTRACT			: return equation_subtract;
+			case GL_FUNC_REVERSE_SUBTRACT	: return equation_reverse_subtract;
+			case GL_MIN						: return equation_min;
+			case GL_MAX						: return equation_max;
 			}
 		}
 	}
@@ -340,36 +370,6 @@ namespace ml::gfx
 
 			case GL_DEPTH_STENCIL			: return format_depth_stencil;
 			case GL_DEPTH24_STENCIL8		: return format_depth24_stencil8;
-			}
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Convt> constexpr uint32_t _function(uint32_t value) noexcept
-	{
-		if constexpr (Convt()) // to impl
-		{
-			switch (value)
-			{
-			default							: return value;
-			case function_add				: return GL_FUNC_ADD;
-			case function_subtract			: return GL_FUNC_SUBTRACT;
-			case function_reverse_subtract	: return GL_FUNC_REVERSE_SUBTRACT;
-			case function_min				: return GL_MIN;
-			case function_max				: return GL_MAX;
-			}
-		}
-		else // to user
-		{
-			switch (value)
-			{
-			default							: return value;
-			case GL_FUNC_ADD				: return function_add;
-			case GL_FUNC_SUBTRACT			: return function_subtract;
-			case GL_FUNC_REVERSE_SUBTRACT	: return function_reverse_subtract;
-			case GL_MIN						: return function_min;
-			case GL_MAX						: return function_max;
 			}
 		}
 	}
@@ -625,7 +625,7 @@ namespace ml::gfx
 		: m_settings{ cs }
 		, m_devinfo	{}
 	{
-		ML_assert("invalid client api specified" && (m_settings.api == window_client_opengl));
+		ML_assert("invalid client api specified" && (m_settings.api == client_api_opengl));
 
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
 
@@ -771,7 +771,7 @@ namespace ml::gfx
 		blend_mode temp{};
 
 		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&temp.color_equation));
-		temp.color_equation = _function<to_user>(temp.color_equation);
+		temp.color_equation = _equation<to_user>(temp.color_equation);
 
 		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_RGB, (int32_t *)&temp.color_sfactor));
 		temp.color_sfactor = _factor<to_user>(temp.color_sfactor);
@@ -780,7 +780,7 @@ namespace ml::gfx
 		temp.color_dfactor = _factor<to_user>(temp.color_dfactor);
 
 		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&temp.alpha_equation));
-		temp.alpha_equation = _function<to_user>(temp.alpha_equation);
+		temp.alpha_equation = _equation<to_user>(temp.alpha_equation);
 
 		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&temp.alpha_sfactor));
 		temp.alpha_sfactor = _factor<to_user>(temp.alpha_sfactor);
@@ -903,8 +903,8 @@ namespace ml::gfx
 			_factor<to_impl>(value.alpha_dfactor)));
 
 		ML_glCheck(glBlendEquationSeparate(
-			_function<to_impl>(value.color_equation),
-			_function<to_impl>(value.alpha_equation)));
+			_equation<to_impl>(value.color_equation),
+			_equation<to_impl>(value.alpha_equation)));
 	}
 
 	void opengl3_device::set_clear_color(color const & value)
@@ -943,12 +943,13 @@ namespace ml::gfx
 
 	void opengl3_device::set_stencil_enabled(bool enabled)
 	{
-		ML_glCheck((enabled ? &glEnable : glDisable)(GL_STENCIL_TEST));
+		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, enabled));
 	}
 
 	void opengl3_device::set_stencil_mode(stencil_mode const & value)
 	{
-		ML_glCheck(glStencilFunc(
+		ML_glCheck(glStencilFuncSeparate(
+			GL_FRONT_AND_BACK,
 			_predicate<to_impl>(value.pred),
 			value.ref,
 			value.mask));
@@ -963,7 +964,7 @@ namespace ml::gfx
 
 	void opengl3_device::clear(uint32_t flags)
 	{
-		ML_glCheck(glClear(_buffer_bit<to_impl>(flags)));
+		ML_glCheck(glClear(_clear<to_impl>(flags)));
 	}
 
 	void opengl3_device::draw(shared<vertexarray> const & value)
@@ -1068,7 +1069,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl3_vertexbuffer::opengl3_vertexbuffer(uint32_t usage, size_t count, address data)
+	opengl3_vertexbuffer::opengl3_vertexbuffer(uint32_t usage, size_t count, address_t data)
 		: m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1076,7 +1077,7 @@ namespace ml::gfx
 		ML_glCheck(glBufferData(
 			GL_ARRAY_BUFFER,
 			(uint32_t)m_buffer.size(),
-			(address)m_buffer.data(),
+			m_buffer.data(),
 			_usage<to_impl>(m_usage)));
 	}
 
@@ -1096,14 +1097,14 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	void opengl3_vertexbuffer::set_data(size_t count, address data, size_t offset)
+	void opengl3_vertexbuffer::set_data(size_t count, address_t data, size_t offset)
 	{
 		m_buffer = bufcpy<float_t>(count, data);
 		ML_glCheck(glBufferSubData(
 			GL_ARRAY_BUFFER,
 			offset,
 			(uint32_t)m_buffer.size(),
-			(address)m_buffer.data()));
+			m_buffer.data()));
 	}
 
 	void opengl3_vertexbuffer::do_bind(opengl3_vertexbuffer const * value)
@@ -1121,7 +1122,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl3_indexbuffer::opengl3_indexbuffer(uint32_t usage, size_t count, address data)
+	opengl3_indexbuffer::opengl3_indexbuffer(uint32_t usage, size_t count, address_t data)
 		: m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1129,7 +1130,7 @@ namespace ml::gfx
 		ML_glCheck(glBufferData(
 			GL_ELEMENT_ARRAY_BUFFER,
 			(uint32_t)m_buffer.size(),
-			(address)m_buffer.data(),
+			m_buffer.data(),
 			_usage<to_impl>(m_usage)));
 	}
 
@@ -1149,14 +1150,14 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	void opengl3_indexbuffer::set_data(size_t count, address data, size_t offset)
+	void opengl3_indexbuffer::set_data(size_t count, address_t data, size_t offset)
 	{
 		m_buffer = bufcpy<uint32_t>(count, data);
 		ML_glCheck(glBufferSubData(
 			GL_ELEMENT_ARRAY_BUFFER,
 			offset,
 			(uint32_t)m_buffer.size(),
-			(address)m_buffer.data()));
+			m_buffer.data()));
 	}
 
 	void opengl3_indexbuffer::do_bind(opengl3_indexbuffer const * value)
@@ -1203,7 +1204,7 @@ namespace ml::gfx
 		
 		bind();
 		
-		m_vertices.emplace_back(value)->bind();
+		value->bind();
 
 		auto const & layout{ value->get_layout() };
 
@@ -1227,7 +1228,7 @@ namespace ml::gfx
 					get_element_component_count(e.type),
 					type,
 					layout.stride(),
-					reinterpret_cast<address>(e.offset)));
+					reinterpret_cast<address_t>(e.offset)));
 			}
 			else
 			{
@@ -1237,10 +1238,12 @@ namespace ml::gfx
 					type,
 					e.normalized,
 					layout.stride(),
-					reinterpret_cast<address>(e.offset)));
+					reinterpret_cast<address_t>(e.offset)));
 			}
 			ML_glCheck(glEnableVertexAttribArray((uint32_t)i));
 		}
+
+		m_vertices.push_back(value);
 	}
 
 	void opengl3_vertexarray::set_indices(shared<indexbuffer> const & value)
@@ -1265,7 +1268,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl3_texture2d::opengl3_texture2d(texopts const & opts, address data)
+	opengl3_texture2d::opengl3_texture2d(texopts const & opts, address_t data)
 		: m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
@@ -1314,7 +1317,7 @@ namespace ml::gfx
 		debug::warning("texture lock/unlock NYI");
 	}
 
-	void opengl3_texture2d::update(vec2i const & size, address data)
+	void opengl3_texture2d::update(vec2i const & size, address_t data)
 	{
 		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
 
@@ -1338,7 +1341,7 @@ namespace ml::gfx
 		set_mipmapped(m_opts.flags & texture_flags_mipmapped);
 	}
 
-	void opengl3_texture2d::update(vec2i const & pos, vec2i const & size, address data)
+	void opengl3_texture2d::update(vec2i const & pos, vec2i const & size, address_t data)
 	{
 		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
 

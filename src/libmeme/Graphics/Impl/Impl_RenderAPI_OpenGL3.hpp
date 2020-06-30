@@ -148,10 +148,10 @@ namespace ml::gfx
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // draw usage
 		buffer_layout	m_layout	{}; // buffer layout
-		buffer			m_buffer	{}; // local data
+		buffer_t			m_buffer	{}; // local data
 
 	public:
-		opengl3_vertexbuffer(uint32_t usage, size_t count, address data);
+		opengl3_vertexbuffer(uint32_t usage, size_t count, address_t data);
 
 		~opengl3_vertexbuffer() override;
 
@@ -162,11 +162,11 @@ namespace ml::gfx
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 	public:
-		void set_data(size_t count, address data, size_t offset = 0) override;
+		void set_data(size_t count, address_t data, size_t offset = 0) override;
 
 		void set_layout(buffer_layout const & value) override { m_layout = value; }
 
-		buffer const & get_buffer() const noexcept override { return m_buffer; }
+		buffer_t const & get_buffer() const noexcept override { return m_buffer; }
 
 		size_t get_count() const noexcept override { return m_buffer.size() / sizeof(float_t); }
 
@@ -198,10 +198,10 @@ namespace ml::gfx
 
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // usage
-		buffer			m_buffer	{}; // local data
+		buffer_t			m_buffer	{}; // local data
 
 	public:
-		opengl3_indexbuffer(uint32_t usage, size_t count, address data);
+		opengl3_indexbuffer(uint32_t usage, size_t count, address_t data);
 
 		~opengl3_indexbuffer() override;
 
@@ -212,9 +212,9 @@ namespace ml::gfx
 		typeof<> const & get_type_info() const noexcept override { return s_type_info; }
 
 	public:
-		void set_data(size_t count, address data, size_t offset = 0) override;
+		void set_data(size_t count, address_t data, size_t offset = 0) override;
 
-		buffer const & get_buffer() const noexcept override { return m_buffer; }
+		buffer_t const & get_buffer() const noexcept override { return m_buffer; }
 
 		size_t get_count() const noexcept override { return m_buffer.size() / sizeof(uint32_t); }
 
@@ -296,7 +296,7 @@ namespace ml::gfx
 		bool		m_lock		{ true }	; // locked
 
 	public:
-		opengl3_texture2d(texopts const & opts, address data);
+		opengl3_texture2d(texopts const & opts, address_t data);
 
 		~opengl3_texture2d() override;
 
@@ -311,9 +311,9 @@ namespace ml::gfx
 
 		void unlock() override;
 
-		void update(vec2i const & size, address data = nullptr) override;
+		void update(vec2i const & size, address_t data = nullptr) override;
 
-		void update(vec2i const & pos, vec2i const & size, address data) override;
+		void update(vec2i const & pos, vec2i const & size, address_t data) override;
 
 		void set_mipmapped(bool value) override;
 

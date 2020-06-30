@@ -1,33 +1,41 @@
 import libmeme          as ml       # structures
 import libmeme_engine   as engine   # systems
 
-# setup window
-print("[i] loading window...")
-assert(engine.window.open(ml.window_settings(
-    "libmeme",
-    ml.video_mode([ 1280, 720 ]),
-    ml.context_settings(
-        ml.window_client.opengl,        # renderer client
-        4, 6,                           # client version
-        ml.window_profile.compat,       # client profile
-        24,                             # depth bits
-        8,                              # stencil bits
-        True,                           # multisample
-        False),                         # sRGB capable
-    ml.window_hints.default_maximized), # window hints
-    True))                              # install callbacks
+ws = ml.window_settings(
+    "libmeme",                      # title
+    ml.video_mode
+    (
+        [ 1280, 720 ],              # resolution
+        32                          # color depth
+    ),
+    ml.context_settings
+    (
+        ml.client_api.opengl,       # client api
+        4, 6,                       # api version
+        ml.client_profile.compat,   # api profile
+        24,                         # depth bits
+        8,                          # stencil bits
+        True,                       # multisample
+        False                       # sRGB capable
+    ),
+    ml.window_hints.default_max     # hints
+    )
 
-# setup gui
-print("[i] loading gui...")
+# open window
+print("[i] opening window...")
+assert(engine.window.open(ws, True))
+
+# initialize gui
+print("[i] initializing gui...")
 assert(engine.gui.initialize())
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
-# setup plugins
+# load plugins
 print("[i] loading plugins...")
 assert(engine.plugins.load("demo"))
 
 # print messages
-print(f"# {ml.project.libname} | {ml.build.arch!r}-bit | {ml.build.configuration}")
-print(f"# {ml.project.url}")
+print(f"# {ml.prj.libname} | {ml.cfg.arch!r}-bit | {ml.cfg.configuration}")
+print(f"# {ml.prj.url}")
 print("# type \'help\' for a list of commands")
 print("")

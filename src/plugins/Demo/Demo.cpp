@@ -4,7 +4,7 @@
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
-#include <libmeme/Engine/API_Embed.hpp>
+#include <libmeme/Embed/API_Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
@@ -428,22 +428,26 @@ namespace ml
 
 			// SHADERS
 			{
-				m_cache.read_file(gfx::shader_type_vertex, "2D",
+				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
 					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
-				m_cache.read_file(gfx::shader_type_vertex, "3D",
+				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
 					engine::fs().path2("assets/shaders/3D.vs.shader"));
 
-				m_cache.read_file(gfx::shader_type_fragment, "basic",
+				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
 					engine::fs().path2("assets/shaders/basic.fs.shader"));
 
-				m_shaders["2D"].load_from_memory(
-					m_cache.str(gfx::shader_type_vertex, "2D"),
-					m_cache.str(gfx::shader_type_fragment, "basic"));
+				m_shaders["basic_2D"].load_from_memory
+				(
+					m_cache.str(gfx::shader_type_vertex		, "vs_2D"),
+					m_cache.str(gfx::shader_type_fragment	, "fs_basic")
+				);
 
-				m_shaders["3D"].load_from_memory(
-					m_cache.str(gfx::shader_type_vertex, "3D"),
-					m_cache.str(gfx::shader_type_fragment, "basic"));
+				m_shaders["basic_3D"].load_from_memory
+				(
+					m_cache.str(gfx::shader_type_vertex		, "vs_3D"),
+					m_cache.str(gfx::shader_type_fragment	, "fs_basic")
+				);
 			}
 
 			// MATERIALS
@@ -539,13 +543,13 @@ namespace ml
 					return h;
 				};
 				
-				auto & earth = make_renderer("3D", "earth", "sphere32x24", c_transform{
+				auto & earth = make_renderer("basic_3D", "earth", "sphere32x24", c_transform{
 					vec3{ -.5f, -.2f, 5.f },
 					vec4{ 0.0f, 0.1f, 0.0f, -.15f },
 					vec3::fill(1.f)
 					});
 
-				auto & moon = make_renderer("3D", "moon", "monkey", c_transform{ // sphere8x6
+				auto & moon = make_renderer("basic_3D", "moon", "monkey", c_transform{ // sphere8x6
 					vec3{ 1.f, .2f, 5.f },
 					vec4{ 0.0f, 0.1f, 0.0f, .25f },
 					vec3::fill(.27f)
@@ -587,11 +591,11 @@ namespace ml
 
 			if (ML_bind_scope(m_fbo[0].get()))
 			{
-				for (gfx::command const & cmd :
+				for (auto const & cmd :
 				{
 					gfx::render_command::set_cull_enabled(false),
 					gfx::render_command::set_clear_color(colors::magenta),
-					gfx::render_command::clear(gfx::buffer_bit_all),
+					gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
 					gfx::render_command::custom([&]() noexcept
 					{
 						m_ecs.invoke_system<x_draw_meshes>();

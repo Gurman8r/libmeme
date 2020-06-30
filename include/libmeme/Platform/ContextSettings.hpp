@@ -40,6 +40,18 @@ namespace ml
 		j.at("srgb_capable").get_to(value.srgb_capable);
 	}
 
+	inline void to_json(json & j, context_settings const & value)
+	{
+		j["api"] = value.api;
+		j["major"] = value.major;
+		j["minor"] = value.minor;
+		j["profile"] = value.profile;
+		j["depth_bits"] = value.depth_bits;
+		j["stencil_bits"] = value.stencil_bits;
+		j["multisample"] = value.multisample;
+		j["srgb_capable"] = value.srgb_capable;
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

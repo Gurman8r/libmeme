@@ -8,14 +8,16 @@
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL3)
-#	include <imgui/examples/imgui_impl_glfw.h>
-#	include <imgui/examples/imgui_impl_opengl3.h>
-#	define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
-#	define ML_ImGui_Init_Renderer()			ImGui_ImplOpenGL3_Init("#version 130")
-#	define ML_ImGui_Shutdown()				ML_scope{ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
-#	define ML_ImGui_NewFrame()				ML_scope{ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
-#	define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
+#include <imgui/examples/imgui_impl_glfw.h>
+#include <imgui/examples/imgui_impl_opengl3.h>
+#define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
+#define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
+#define ML_ImGui_Shutdown()				ML_scope{ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
+#define ML_ImGui_NewFrame()				ML_scope{ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
+#define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
+
 #else
+#	error "unknown or invalid imgui implementation"
 #endif
 
 namespace ml

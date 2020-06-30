@@ -57,6 +57,12 @@ namespace ml
 		j.at("depth").get_to(value.depth);
 	}
 
+	inline void to_json(json & j, video_mode const & value)
+	{
+		j["size"] = value.size;
+		j["depth"] = value.depth;
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

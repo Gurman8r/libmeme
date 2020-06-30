@@ -26,6 +26,14 @@ namespace ml
 		j.at("hints").get_to(value.hints);
 	}
 
+	inline void to_json(json & j, window_settings const & value)
+	{
+		j["title"] = value.title;
+		j["video"] = value.video;
+		j["context"] = value.context;
+		j["hints"] = value.hints;
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_decl_handle(cursor_handle)	; // cursor handle
@@ -56,101 +64,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum window_attr_ : int32_t
+	// client api
+	enum client_api_ : int32_t
 	{
-		window_attr_focused,
-		window_attr_iconified,
-		window_attr_resizable,
-		window_attr_visible,
-		window_attr_decorated,
-		window_attr_auto_iconify,
-		window_attr_floating,
-		window_attr_maximized,
-		window_attr_center_cursor,
-		window_attr_transparent_framebuffer,
-		window_attr_hovered,
-		window_attr_focus_on_show,
-
-		window_attr_red_bits,
-		window_attr_green_bits,
-		window_attr_blue_bits,
-		window_attr_alpha_bits,
-		window_attr_depth_bits,
-		window_attr_stencil_bits,
-		window_attr_accum_red_bits,
-		window_attr_accum_green_bits,
-		window_attr_accum_blue_bits,
-		window_attr_accum_alpha_bits,
-		window_attr_aux_buffers,
-		window_attr_stereo,
-		window_attr_samples,
-		window_attr_srgb_capable,
-		window_attr_refresh_rate,
-		window_attr_doublebuffer,
-
-		window_attr_client_api,
-		window_attr_context_version_major,
-		window_attr_context_version_minor,
-		window_attr_context_revision,
-		window_attr_context_robustness,
-		window_attr_backend_forward_compat,
-		window_attr_backend_debug_context,
-		window_attr_backend_profile,
-		window_attr_context_release_behavior,
-		window_attr_context_no_error,
-		window_attr_context_creation_api,
-		window_attr_scale_to_monitor,
+		client_api_unknown	, // unknown
+		client_api_opengl	, // opengl
+		client_api_vulkan	, // vulkan
+		client_api_directx	, // directx
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	enum window_client_ : int32_t
+	// client profile
+	enum client_profile_ : int32_t
 	{
-		window_client_unknown	, // unknown
-		window_client_opengl	, // opengl
-		window_client_vulkan	, // vulkan
-		window_client_directx	, // directx
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_profile_ : int32_t
-	{
-		window_profile_any		, // any
-		window_profile_core		, // core
-		window_profile_compat	, // compat
-		window_profile_debug	, // debug
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum window_hints_ : int32_t
-	{
-		window_hints_none				= 0,		// none
-		window_hints_resizable			= (1 << 0),	// resizable	
-		window_hints_visible			= (1 << 1),	// visible	
-		window_hints_decorated			= (1 << 2),	// decorated	
-		window_hints_focused			= (1 << 3),	// focused	
-		window_hints_auto_iconify		= (1 << 4),	// auto_iconify
-		window_hints_floating			= (1 << 5),	// floating	
-		window_hints_maximized			= (1 << 6),	// maximized	
-		window_hints_doublebuffer		= (1 << 7),	// doublebuffer
-
-		// resizable / visible / decorated / focused / auto iconify
-		window_hints_default
-			= window_hints_resizable
-			| window_hints_visible
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify,
-
-		// resizable / decorated / focused / auto iconify / maximized
-		window_hints_default_maximized
-			= window_hints_resizable
-			| window_hints_decorated
-			| window_hints_focused
-			| window_hints_auto_iconify
-			| window_hints_maximized,
+		client_profile_any		, // any
+		client_profile_core		, // core
+		client_profile_compat	, // compat
+		client_profile_debug	, // debug
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -347,6 +278,87 @@ namespace ml
 		mouse_button_5, // mb 5
 		mouse_button_6, // mb 6
 		mouse_button_7, // mb 7
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// window attribute
+	enum window_attr_ : int32_t
+	{
+		window_attr_focused,
+		window_attr_iconified,
+		window_attr_resizable,
+		window_attr_visible,
+		window_attr_decorated,
+		window_attr_auto_iconify,
+		window_attr_floating,
+		window_attr_maximized,
+		window_attr_center_cursor,
+		window_attr_transparent_framebuffer,
+		window_attr_hovered,
+		window_attr_focus_on_show,
+
+		window_attr_red_bits,
+		window_attr_green_bits,
+		window_attr_blue_bits,
+		window_attr_alpha_bits,
+		window_attr_depth_bits,
+		window_attr_stencil_bits,
+		window_attr_accum_red_bits,
+		window_attr_accum_green_bits,
+		window_attr_accum_blue_bits,
+		window_attr_accum_alpha_bits,
+		window_attr_aux_buffers,
+		window_attr_stereo,
+		window_attr_samples,
+		window_attr_srgb_capable,
+		window_attr_refresh_rate,
+		window_attr_doublebuffer,
+
+		window_attr_client_api,
+		window_attr_context_version_major,
+		window_attr_context_version_minor,
+		window_attr_context_revision,
+		window_attr_context_robustness,
+		window_attr_backend_forward_compat,
+		window_attr_backend_debug_context,
+		window_attr_backend_profile,
+		window_attr_context_release_behavior,
+		window_attr_context_no_error,
+		window_attr_context_creation_api,
+		window_attr_scale_to_monitor,
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// window hints
+	enum window_hints_ : int32_t
+	{
+		window_hints_none				= 0,		// none
+		window_hints_resizable			= (1 << 0),	// resizable	
+		window_hints_visible			= (1 << 1),	// visible	
+		window_hints_decorated			= (1 << 2),	// decorated	
+		window_hints_focused			= (1 << 3),	// focused	
+		window_hints_auto_iconify		= (1 << 4),	// auto_iconify
+		window_hints_floating			= (1 << 5),	// floating	
+		window_hints_maximized			= (1 << 6),	// maximized	
+		window_hints_doublebuffer		= (1 << 7),	// doublebuffer
+
+		// resizable / visible / decorated / focused / auto iconify
+		window_hints_default
+			= window_hints_resizable
+			| window_hints_visible
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify,
+
+		// resizable / decorated / focused / auto iconify / maximized
+		window_hints_default_max
+			= window_hints_resizable
+			| window_hints_decorated
+			| window_hints_focused
+			| window_hints_auto_iconify
+			| window_hints_maximized,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

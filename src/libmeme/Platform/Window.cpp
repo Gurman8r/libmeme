@@ -19,12 +19,12 @@
 #include "Impl/Impl_Window_GLFW.hpp"
 using impl_window = _ML glfw_window;
 
+#elif defined(ML_IMPL_WINDOW_WIN32)
 #elif defined(ML_IMPL_WINDOW_SDL)
 #elif defined(ML_IMPL_WINDOW_SFML)
-// etc...
 
 #else
-#error "Unknown or invalid window implementation specified."
+#	error "window is unavailable"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,14 +37,14 @@ namespace ml
 	{
 	}
 
-	window::window(window_settings const & ws, bool install_callbacks) noexcept : window{}
+	window::window(window_settings const & ws, bool ic) noexcept : window{}
 	{
-		(void)this->open(ws, install_callbacks);
+		(void)this->open(ws, ic);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::open(window_settings const & ws, bool install_callbacks)
+	bool window::open(window_settings const & ws, bool ic)
 	{
 		if (is_open())			{ return debug::error("window is already open"); }
 		if (ws.title.empty())	{ return debug::error("invalid window title"); }
@@ -66,7 +66,7 @@ namespace ml
 		if (get_hint(window_hints_maximized)) { maximize(); }
 
 		// install callbacks
-		if (install_callbacks)
+		if (ic)
 		{
 			set_char_callback([
 			](auto, auto ... x) noexcept { event_system::fire_event<window_char_event>(ML_forward(x)...); });
