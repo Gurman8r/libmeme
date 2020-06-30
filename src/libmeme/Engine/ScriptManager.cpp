@@ -13,16 +13,12 @@ namespace ml
 	{
 		j["library_home"].get_to(m_library_home);
 
-		(void)initialize();
-
-		ML_assert(is_initialized());
+		ML_assert(initialize());
 	}
 
 	script_manager::~script_manager() noexcept
 	{
-		(void)finalize();
-
-		ML_assert(!is_initialized());
+		ML_assert(!is_initialized() || finalize());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

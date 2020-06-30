@@ -12,18 +12,18 @@
 namespace ml::gfx
 {
 	// opengl device
-	class opengl_device final : public device
+	class opengl3_device final : public device
 	{
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		friend class device;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_device> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_device> };
 
-		opengl_device(context_settings const & cs);
+		opengl3_device(context_settings const & cs);
 
-		~opengl_device() noexcept override = default;
+		~opengl3_device() noexcept override = default;
 
 		context_settings	m_settings	; // context settings
 		devinfo				m_devinfo	; // device info
@@ -139,11 +139,11 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl vertexbuffer
-	class opengl_vertexbuffer final : public vertexbuffer
+	class opengl3_vertexbuffer final : public vertexbuffer
 	{
 		friend class vertexbuffer;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_vertexbuffer> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_vertexbuffer> };
 
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // draw usage
@@ -151,9 +151,9 @@ namespace ml::gfx
 		buffer			m_buffer	{}; // local data
 
 	public:
-		opengl_vertexbuffer(uint32_t usage, size_t count, address data);
+		opengl3_vertexbuffer(uint32_t usage, size_t count, address data);
 
-		~opengl_vertexbuffer() override;
+		~opengl3_vertexbuffer() override;
 
 		bool revalue() override;
 
@@ -175,7 +175,7 @@ namespace ml::gfx
 		uint32_t get_usage() const noexcept override { return m_usage; }
 
 	protected:
-		static void do_bind(opengl_vertexbuffer const * value);
+		static void do_bind(opengl3_vertexbuffer const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -190,20 +190,20 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl indexbuffer
-	class opengl_indexbuffer final : public indexbuffer
+	class opengl3_indexbuffer final : public indexbuffer
 	{
 		friend class indexbuffer;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_indexbuffer> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_indexbuffer> };
 
 		uint32_t		m_handle	{}; // handle
 		uint32_t const	m_usage		{}; // usage
 		buffer			m_buffer	{}; // local data
 
 	public:
-		opengl_indexbuffer(uint32_t usage, size_t count, address data);
+		opengl3_indexbuffer(uint32_t usage, size_t count, address data);
 
-		~opengl_indexbuffer() override;
+		~opengl3_indexbuffer() override;
 
 		bool revalue() override;
 
@@ -221,7 +221,7 @@ namespace ml::gfx
 		uint32_t get_usage() const noexcept override { return m_usage; }
 
 	protected:
-		static void do_bind(opengl_indexbuffer const * value);
+		static void do_bind(opengl3_indexbuffer const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -236,21 +236,21 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl vertexarray
-	class opengl_vertexarray final : public vertexarray
+	class opengl3_vertexarray final : public vertexarray
 	{
 		friend class vertexarray;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_vertexarray> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_vertexarray> };
 
 		uint32_t							m_handle	{}; // handle
-		uint32_t const						m_mode		{}; // primitive type
+		uint32_t const						m_primitive	{}; // primitive type
 		shared<indexbuffer>					m_indices	{}; // index buffer
 		pmr::vector<shared<vertexbuffer>>	m_vertices	{}; // vertex buffers
 
 	public:
-		opengl_vertexarray(uint32_t mode);
+		opengl3_vertexarray(uint32_t primitive);
 
-		~opengl_vertexarray() override;
+		~opengl3_vertexarray() override;
 
 		bool revalue() override;
 
@@ -265,12 +265,12 @@ namespace ml::gfx
 
 		shared<indexbuffer> const & get_indices() const noexcept override { return m_indices; }
 
-		uint32_t get_mode() const noexcept override { return m_mode; }
+		uint32_t get_primitive() const noexcept override { return m_primitive; }
 
 		pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept override { return m_vertices; }
 
 	protected:
-		static void do_bind(opengl_vertexarray const * value);
+		static void do_bind(opengl3_vertexarray const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -285,20 +285,20 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl texture2d
-	class opengl_texture2d final : public texture2d
+	class opengl3_texture2d final : public texture2d
 	{
 		friend class texture2d;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_texture2d> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_texture2d> };
 
 		uint32_t	m_handle	{}			; // handle
 		texopts		m_opts		{}			; // texture options
 		bool		m_lock		{ true }	; // locked
 
 	public:
-		opengl_texture2d(texopts const & opts, address data);
+		opengl3_texture2d(texopts const & opts, address data);
 
-		~opengl_texture2d() override;
+		~opengl3_texture2d() override;
 
 		bool revalue() override;
 
@@ -326,7 +326,7 @@ namespace ml::gfx
 		texopts const & get_texopts() const noexcept { return m_opts; }
 
 	protected:
-		static void do_bind(opengl_texture2d const * value, uint32_t slot);
+		static void do_bind(opengl3_texture2d const * value, uint32_t slot);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -341,20 +341,20 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl texturecube
-	class opengl_texturecube : public texturecube
+	class opengl3_texturecube : public texturecube
 	{
 		friend class texturecube;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_texturecube> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_texturecube> };
 
 		uint32_t	m_handle	{}			; // handle
 		texopts		m_opts		{}			; // texture options
 		bool		m_lock		{ true }	; // locked
 
 	public:
-		opengl_texturecube(texopts const & opts);
+		opengl3_texturecube(texopts const & opts);
 
-		~opengl_texturecube() override;
+		~opengl3_texturecube() override;
 
 		bool revalue() override;
 
@@ -370,7 +370,7 @@ namespace ml::gfx
 		texopts const & get_texopts() const noexcept { return m_opts; }
 
 	protected:
-		static void do_bind(opengl_texturecube const * value, uint32_t slot);
+		static void do_bind(opengl3_texturecube const * value, uint32_t slot);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -385,11 +385,11 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl framebuffer
-	class opengl_framebuffer final : public framebuffer
+	class opengl3_framebuffer final : public framebuffer
 	{
 		friend class framebuffer;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_framebuffer> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_framebuffer> };
 
 		uint32_t						m_handle		{}	; // handle
 		texopts							m_opts			{}	; // texture options
@@ -398,9 +398,9 @@ namespace ml::gfx
 
 		
 	public:
-		opengl_framebuffer(texopts const & opts);
+		opengl3_framebuffer(texopts const & opts);
 
-		~opengl_framebuffer() override;
+		~opengl3_framebuffer() override;
 
 		bool revalue() override;
 
@@ -422,7 +422,7 @@ namespace ml::gfx
 		texopts const & get_texopts() const noexcept override { return m_opts; }
 
 	protected:
-		static void do_bind(opengl_framebuffer const * value);
+		static void do_bind(opengl3_framebuffer const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{
@@ -437,11 +437,11 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl shader
-	class opengl_shader final : public shader
+	class opengl3_shader final : public shader
 	{
 		friend class shader;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_shader> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_shader> };
 
 		uint32_t					m_handle		{}; // handle
 		pmr::string					m_error_log		{}; // error log
@@ -450,9 +450,9 @@ namespace ml::gfx
 		pmr::vector<pmr::string>	m_source		{}; // source
 
 	public:
-		opengl_shader(uint32_t type, int32_t flags = shader_flags_default);
+		opengl3_shader(uint32_t type, int32_t flags = shader_flags_default);
 
-		~opengl_shader() override;
+		~opengl3_shader() override;
 
 		bool revalue() override;
 
@@ -485,15 +485,15 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl program
-	class opengl_program final : public program
+	class opengl3_program final : public program
 	{
 		friend class program;
 
-		static constexpr typeof<> s_type_info{ typeof_v<opengl_program> };
+		static constexpr typeof<> s_type_info{ typeof_v<opengl3_program> };
 
 		uint32_t								m_handle		{}; // handle
 		pmr::string								m_error_log		{}; // error log
-		int32_t									m_flags			{}; // program flags
+		int32_t const							m_flags			{}; // program flags
 		ds::map<uint32_t, shared<shader>>		m_shaders		{}; // shader cache
 		ds::map<uniform_id, shared<texture>>	m_textures		{}; // texture cache
 		ds::map<hash_t, uniform_id>				m_uniforms		{}; // uniform cache
@@ -507,15 +507,15 @@ namespace ml::gfx
 
 			operator bool() const noexcept { return -1 < ML_handle(int32_t, location); }
 
-			opengl_uniform_binder(opengl_program & s, cstring name) noexcept;
+			opengl_uniform_binder(opengl3_program & s, cstring name) noexcept;
 
 			~opengl_uniform_binder() noexcept;
 		};
 
 	public:
-		opengl_program(int32_t flags = program_flags_default);
+		opengl3_program(int32_t flags = program_flags_default);
 
-		~opengl_program() override;
+		~opengl3_program() override;
 
 		bool revalue() override;
 
@@ -550,7 +550,7 @@ namespace ml::gfx
 		ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept override { return m_uniforms; }
 
 	protected:
-		static void do_bind(opengl_program const * value);
+		static void do_bind(opengl3_program const * value);
 
 		bool do_is_equal(device_resource const & other) const noexcept override
 		{

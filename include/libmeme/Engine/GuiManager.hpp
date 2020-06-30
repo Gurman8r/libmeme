@@ -109,7 +109,7 @@ namespace ml
 			bool		visible;
 			menus_t		menus;
 
-			template <class Fn> decltype(auto) add(cstring label, Fn && fn) & noexcept
+			template <class Fn> auto & add(cstring label, Fn && fn) & noexcept
 			{
 				auto it{ std::find_if(menus.begin(), menus.end(), [&
 				](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };

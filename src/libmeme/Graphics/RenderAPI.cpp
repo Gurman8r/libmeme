@@ -3,16 +3,16 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_IMPL_RENDERER_OPENGL3)
-#include "Impl/Impl_RenderAPI_OpenGL.hpp"
-using impl_device		= _ML_GFX opengl_device			;
-using impl_vertexarray	= _ML_GFX opengl_vertexarray	;
-using impl_vertexbuffer	= _ML_GFX opengl_vertexbuffer	;
-using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
-using impl_texture2d	= _ML_GFX opengl_texture2d		;
-using impl_texturecube	= _ML_GFX opengl_texturecube	;
-using impl_framebuffer	= _ML_GFX opengl_framebuffer	;
-using impl_program		= _ML_GFX opengl_shader			;
-using impl_shader		= _ML_GFX opengl_program		;
+#include "Impl/Impl_RenderAPI_OpenGL3.hpp"
+using impl_device		= _ML_GFX opengl3_device		;
+using impl_vertexarray	= _ML_GFX opengl3_vertexarray	;
+using impl_vertexbuffer	= _ML_GFX opengl3_vertexbuffer	;
+using impl_indexbuffer	= _ML_GFX opengl3_indexbuffer	;
+using impl_texture2d	= _ML_GFX opengl3_texture2d		;
+using impl_texturecube	= _ML_GFX opengl3_texturecube	;
+using impl_framebuffer	= _ML_GFX opengl3_framebuffer	;
+using impl_shader		= _ML_GFX opengl3_shader		;
+using impl_program		= _ML_GFX opengl3_program		;
 
 #elif defined(ML_IMPL_RENDERER_DIRECTX)
 #elif defined(ML_IMPL_RENDERER_VULKAN)
@@ -53,9 +53,9 @@ namespace ml::gfx
 // vertexarray
 namespace ml::gfx
 {
-	shared<vertexarray> vertexarray::create(uint32_t mode) noexcept
+	shared<vertexarray> vertexarray::create(uint32_t primitive) noexcept
 	{
-		return _ML make_shared<impl_vertexarray>(mode);
+		return _ML make_shared<impl_vertexarray>(primitive);
 	}
 
 	void vertexarray::bind(vertexarray const * value) noexcept
@@ -169,7 +169,7 @@ namespace ml::gfx
 {
 	shared<shader> shader::create(uint32_t type, int32_t flags) noexcept
 	{
-		return _ML make_shared<impl_program>(type, flags);
+		return _ML make_shared<impl_shader>(type, flags);
 	}
 }
 
@@ -180,12 +180,12 @@ namespace ml::gfx
 {
 	shared<program> program::create(int32_t flags) noexcept
 	{
-		return _ML make_shared<impl_shader>(flags);
+		return _ML make_shared<impl_program>(flags);
 	}
 
 	void program::bind(program const * value) noexcept
 	{
-		impl_shader::do_bind(static_cast<impl_shader const *>(value));
+		impl_program::do_bind(static_cast<impl_program const *>(value));
 	}
 }
 

@@ -66,6 +66,20 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr explicit operator std::array<_T, _N> & () & noexcept
+		{
+			using A = std::array<_T, _N>;
+			return (A &)(*(A *)this);
+		}
+
+		constexpr explicit operator std::array<_T, _N> const & () const & noexcept
+		{
+			using A = std::array<_T, _N>;
+			return (A const &)(*(A const *)this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr auto operator*() & noexcept -> reference { return (*m_data); }
 
 		constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
@@ -181,6 +195,20 @@ namespace ml::ds
 		constexpr operator pointer() noexcept { return m_data; }
 
 		constexpr operator const_pointer() const noexcept { return m_data; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		constexpr explicit operator std::array<_T, 0> & () & noexcept
+		{
+			using A = std::array<_T, 0>;
+			return (A &)(*(A *)this);
+		}
+
+		constexpr explicit operator std::array<_T, 0> const & () const & noexcept
+		{
+			using A = std::array<_T, 0>;
+			return (A const &)(*(A const *)this);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -342,17 +370,17 @@ namespace std
 namespace ml::ds
 {
 	template <class T, size_t N
-	> void to_json(json & j, array<T, N> const & value)
-	{
-		// sue me
-		j = *reinterpret_cast<std::array<T, N> const *>(&value);
-	}
-
-	template <class T, size_t N
 	> void from_json(json const & j, array<T, N> & value)
 	{
 		// sue me
-		j.get_to(*reinterpret_cast<std::array<T, N> *>(&value));
+		j.get_to((std::array<T, N> &)value);
+	}
+
+	template <class T, size_t N
+	> void to_json(json & j, array<T, N> const & value)
+	{
+		// sue me
+		j = (std::array<T, N> const &)value;
 	}
 }
 

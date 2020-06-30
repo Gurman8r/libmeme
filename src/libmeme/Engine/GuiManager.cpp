@@ -32,9 +32,7 @@ namespace ml
 
 	gui_manager::~gui_manager() noexcept
 	{
-		(void)finalize();
-
-		ML_assert(!is_initialized());
+		ML_assert(!is_initialized() || finalize());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -108,12 +106,12 @@ namespace ml
 
 	void gui_manager::draw_default()
 	{
-		ML_scoped_imgui_id(this);
+		ML_ImGui_ScopeID(this);
 
 		// DOCKSPACE
 		if (auto & d{ m_dockspace }; d.visible)
 		{
-			ML_scoped_imgui_id(&d);
+			ML_ImGui_ScopeID(&d);
 			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
@@ -165,7 +163,7 @@ namespace ml
 		// MAIN MENU BAR
 		if (auto & m{ m_main_menu }; m.visible)
 		{
-			ML_scoped_imgui_id(&m);
+			ML_ImGui_ScopeID(&m);
 
 			if (ImGui::BeginMainMenuBar())
 			{

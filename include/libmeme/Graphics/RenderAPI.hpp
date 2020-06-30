@@ -1019,7 +1019,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API vertexarray : public device_resource
 	{
 	public:
-		ML_NODISCARD static shared<vertexarray> create(uint32_t mode = primitive_triangles) noexcept;
+		ML_NODISCARD static shared<vertexarray> create(uint32_t primitive = primitive_triangles) noexcept;
 
 	public:
 		virtual ~vertexarray() override = default;
@@ -1049,7 +1049,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<indexbuffer> const & get_indices() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_primitive() const noexcept = 0;
 		
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
 
@@ -1437,8 +1437,8 @@ namespace ml::gfx
 		ML_NODISCARD static shared<program> create(pmr::vector<shared<shader>> const & vs, int32_t flags = program_flags_default) noexcept
 		{
 			auto temp{ create(flags) };
-			for (auto const & pgm : vs)
-				temp->attach(pgm);
+			for (auto const & s : vs)
+				temp->attach(s);
 			if (!temp->link())
 				std::cout << temp->get_error_log().data() << '\n';
 			return temp;

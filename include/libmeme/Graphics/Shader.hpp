@@ -166,7 +166,9 @@ namespace ml
 			case hashof_v<mat2>				: return set_uniform(u.name(), *u.get<mat2>());
 			case hashof_v<mat3>				: return set_uniform(u.name(), *u.get<mat3>());
 			case hashof_v<mat4>				: return set_uniform(u.name(), *u.get<mat4>());
-			case hashof_v<gfx::texture2d>	: return set_uniform(u.name(), *u.get<gfx::texture2d>());
+			case hashof_v<gfx::texture>		:
+			case hashof_v<gfx::texture2d>	:
+			case hashof_v<gfx::texturecube>	: return set_uniform(u.name(), *u.get<gfx::texture>());
 			}
 		}
 

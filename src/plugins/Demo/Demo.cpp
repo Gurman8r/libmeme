@@ -660,7 +660,7 @@ namespace ml
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
-					ML_scoped_imgui_id(this);
+					ML_ImGui_ScopeID(this);
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
 						engine::window().close();
@@ -668,7 +668,7 @@ namespace ml
 				});
 				mmb.add("tools", [&]()
 				{
-					ML_scoped_imgui_id(this);
+					ML_ImGui_ScopeID(this);
 					m_gui_assets.menu_item();
 					m_gui_console.menu_item();
 					m_gui_display.menu_item();
@@ -690,7 +690,7 @@ namespace ml
 				//});
 				mmb.add("help", [&]()
 				{
-					ML_scoped_imgui_id(this);
+					ML_ImGui_ScopeID(this);
 					m_imgui_demo.menu_item();
 					m_imgui_metrics.menu_item();
 					m_imgui_about.menu_item();
@@ -698,7 +698,7 @@ namespace ml
 			};
 
 			{
-				ML_scoped_imgui_id(this);
+				ML_ImGui_ScopeID(this);
 
 				// IMGUI
 				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
@@ -742,7 +742,7 @@ namespace ml
 
 			auto draw_asset = [&](auto const & n, auto const & v)
 			{
-				ML_scoped_imgui_id(&v);
+				ML_ImGui_ScopeID(&v);
 
 				// type
 				using T = typename std::decay_t<decltype(v)>;
@@ -867,7 +867,7 @@ namespace ml
 
 						static ML_scope{ std::cout << "# type \'\\\' to stop using python\n"; };
 					}
-					else if (m_console.command_lock && (args.front() == "\\"))
+					else if ((args.front() == "\\") && (0 == std::strcmp("py", m_console.command_lock)))
 					{
 						m_console.command_lock = nullptr;
 					}
@@ -949,7 +949,7 @@ namespace ml
 			// SHOW VALUE
 			auto show_value = [&](auto const & value)
 			{
-				ML_scoped_imgui_id(&value);
+				ML_ImGui_ScopeID(&value);
 
 				using T = typename std::decay_t<decltype(value)>;
 				static constexpr auto info{ typeof_v<T> };
@@ -1040,7 +1040,7 @@ namespace ml
 					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
 					>([&](auto type)
 					{
-						ML_scoped_imgui_id(i);
+						ML_ImGui_ScopeID(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
@@ -1091,7 +1091,7 @@ namespace ml
 			ImGui::Separator();
 			m_ecs.for_entities([&](size_t const e)
 			{
-				ML_scoped_imgui_id(static_cast<int32_t>(e));
+				ML_ImGui_ScopeID(static_cast<int32_t>(e));
 				ImGui::AlignTextToFramePadding();
 				
 				bool const e_open{ ImGui::TreeNode(
@@ -1107,7 +1107,7 @@ namespace ml
 					m_ecs.for_components(e, [&](auto & c)
 					{
 						ImGui::Separator();
-						ML_scoped_imgui_id(&c);
+						ML_ImGui_ScopeID(&c);
 						using C = typename std::decay_t<decltype(c)>;
 						static constexpr auto cname{ nameof_v<C> };
 
@@ -1219,7 +1219,7 @@ namespace ml
 					ImGui::Separator();
 					for (auto const & rec : memory::get_records().values())
 					{
-						ML_scoped_imgui_id(&rec);
+						ML_ImGui_ScopeID(&rec);
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
 						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
@@ -1312,7 +1312,7 @@ namespace ml
 			// plots
 			m_plots.for_each([&](gui::plot & p)
 			{
-				ML_scoped_imgui_id(&p);
+				ML_ImGui_ScopeID(&p);
 				p.render();
 				if (ImGui::BeginPopupContextItem("plot settings"))
 				{

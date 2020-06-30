@@ -123,6 +123,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		constexpr explicit operator std::array<_T, _W * _H> & () & noexcept
+		{
+			return (std::array<_T, _W * _H> &)m_data;
+		}
+
+		constexpr explicit operator std::array<_T, _W * _H> const & () const & noexcept
+		{
+			return (std::array<_T, _W * _H> const &)m_data;
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		constexpr auto operator*() & noexcept -> reference { return (*m_data); }
 
 		constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }
@@ -241,7 +253,7 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// define additional custom code
+		// define additional code
 #ifdef ML_MATRIX_CLASS_EXTRA
 		ML_MATRIX_CLASS_EXTRA
 #endif // ML_MATRIX_CLASS_EXTRA
@@ -626,17 +638,17 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t W, size_t H
-	> void to_json(json & j, matrix<T, W, H> const & value)
+	> void from_json(json const & j, matrix<T, W, H> & value)
 	{
-		j = value.m_data;
+		j.get_to(value.m_data);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, size_t W, size_t H
-	> void from_json(json const & j, matrix<T, W, H> & value)
+	> void to_json(json & j, matrix<T, W, H> const & value)
 	{
-		j.get_to(value.m_data);
+		j = value.m_data;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -33,7 +33,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ make_new<impl_window>() }, m_settings{}
+	window::window() noexcept : m_window{ new impl_window }, m_settings{}
 	{
 	}
 

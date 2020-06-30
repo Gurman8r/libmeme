@@ -78,7 +78,7 @@ namespace ml::util
 		std::disjunction_v<std::is_same<T, Ts>...>
 	};
 
-	// requires T is integral or float
+	// requires T is integral or floating point
 	template <class T
 	> constexpr bool is_integral_or_floating_point_v
 	{

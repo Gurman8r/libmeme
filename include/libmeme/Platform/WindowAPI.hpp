@@ -106,35 +106,35 @@ namespace ml
 
 	enum window_client_ : int32_t
 	{
-		window_client_unknown,
-		window_client_opengl,
-		window_client_vulkan,
-		window_client_directx,
+		window_client_unknown	, // unknown
+		window_client_opengl	, // opengl
+		window_client_vulkan	, // vulkan
+		window_client_directx	, // directx
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum window_profile_ : int32_t
 	{
-		window_profile_any,
-		window_profile_core,
-		window_profile_compat,
-		window_profile_debug,
+		window_profile_any		, // any
+		window_profile_core		, // core
+		window_profile_compat	, // compat
+		window_profile_debug	, // debug
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	enum window_hints_ : int32_t
 	{
-		window_hints_none				= 0,
-		window_hints_resizable			= (1 << 0),
-		window_hints_visible			= (1 << 1),
-		window_hints_decorated			= (1 << 2),
-		window_hints_focused			= (1 << 3),
-		window_hints_auto_iconify		= (1 << 4),
-		window_hints_floating			= (1 << 5),
-		window_hints_maximized			= (1 << 6),
-		window_hints_doublebuffer		= (1 << 7),
+		window_hints_none				= 0,		// none
+		window_hints_resizable			= (1 << 0),	// resizable	
+		window_hints_visible			= (1 << 1),	// visible	
+		window_hints_decorated			= (1 << 2),	// decorated	
+		window_hints_focused			= (1 << 3),	// focused	
+		window_hints_auto_iconify		= (1 << 4),	// auto_iconify
+		window_hints_floating			= (1 << 5),	// floating	
+		window_hints_maximized			= (1 << 6),	// maximized	
+		window_hints_doublebuffer		= (1 << 7),	// doublebuffer
 
 		// resizable / visible / decorated / focused / auto iconify
 		window_hints_default
@@ -158,9 +158,9 @@ namespace ml
 	// cursor modes
 	enum cursor_mode_ : int32_t
 	{
-		cursor_mode_normal,
-		cursor_mode_hidden,
-		cursor_mode_disabled,
+		cursor_mode_normal		, // normal
+		cursor_mode_hidden		, // hidden
+		cursor_mode_disabled	, // disabled
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -188,9 +188,9 @@ namespace ml
 	// input state
 	enum input_state_ : int32_t
 	{
-		input_state_release,	// high -> low
-		input_state_press,		// low -> high
-		input_state_repeat		// high -> high
+		input_state_release	, // release | high -> low
+		input_state_press	, // press | low -> high
+		input_state_repeat	, // repeat | high -> high
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -212,126 +212,126 @@ namespace ml
 	// key codes
 	enum key_code_ : int32_t
 	{
-		key_code_space			= 32,
-		key_code_apostrophe		= 39,
-		key_code_comma			= 44,
-		key_code_minus			= 45,
-		key_code_period			= 46,
-		key_code_slash			= 47,
-		key_code_num0			= 48,
-		key_code_num1			= 49,
-		key_code_num2			= 50,
-		key_code_num3			= 51,
-		key_code_num4			= 52,
-		key_code_num5			= 53,
-		key_code_num6			= 54,
-		key_code_num7			= 55,
-		key_code_num8			= 56,
-		key_code_num9			= 57,
-		key_code_semicolon		= 59,
-		key_code_equal			= 61,
-		key_code_a				= 65,
-		key_code_b				= 66,
-		key_code_c				= 67,
-		key_code_d				= 68,
-		key_code_e				= 69,
-		key_code_f				= 70,
-		key_code_g				= 71,
-		key_code_h				= 72,
-		key_code_i				= 73,
-		key_code_j				= 74,
-		key_code_k				= 75,
-		key_code_l				= 76,
-		key_code_m				= 77,
-		key_code_n				= 78,
-		key_code_o				= 79,
-		key_code_p				= 80,
-		key_code_q				= 81,
-		key_code_r				= 82,
-		key_code_s				= 83,
-		key_code_t				= 84,
-		key_code_u				= 85,
-		key_code_v				= 86,
-		key_code_w				= 87,
-		key_code_x				= 88,
-		key_code_y				= 89,
-		key_code_z				= 90,
-		key_code_left_bracket	= 91,
-		key_code_backslash		= 92,
-		key_code_right_bracket	= 93,
-		key_code_grave_accent	= 96,
-		key_code_world_1		= 161,
-		key_code_world_2		= 162,
-		key_code_escape			= 256,
-		key_code_enter			= 257,
-		key_code_tab			= 258,
-		key_code_backspace		= 259,
-		key_code_insert			= 260,
-		key_code_del			= 261,
-		key_code_right			= 262,
-		key_code_left			= 263,
-		key_code_down			= 264,
-		key_code_up				= 265,
-		key_code_page_up		= 266,
-		key_code_page_down		= 267,
-		key_code_home			= 268,
-		key_code_end			= 269,
-		key_code_caps_lock		= 280,
-		key_code_scroll_lock	= 281,
-		key_code_num_lock		= 282,
-		key_code_print_screen	= 283,
-		key_code_pause			= 284,
-		key_code_f1				= 290,
-		key_code_f2				= 291,
-		key_code_f3				= 292,
-		key_code_f4				= 293,
-		key_code_f5				= 294,
-		key_code_f6				= 295,
-		key_code_f7				= 296,
-		key_code_f8				= 297,
-		key_code_f9				= 298,
-		key_code_f10			= 299,
-		key_code_f11			= 300,
-		key_code_f12			= 301,
-		key_code_f13			= 302,
-		key_code_f14			= 303,
-		key_code_f15			= 304,
-		key_code_f16			= 305,
-		key_code_f17			= 306,
-		key_code_f18			= 307,
-		key_code_f19			= 308,
-		key_code_f20			= 309,
-		key_code_f21			= 310,
-		key_code_f22			= 311,
-		key_code_f23			= 312,
-		key_code_f24			= 313,
-		key_code_f25			= 314,
-		key_code_kp_0			= 320,
-		key_code_kp_1			= 321,
-		key_code_kp_2			= 322,
-		key_code_kp_3			= 323,
-		key_code_kp_4			= 324,
-		key_code_kp_5			= 325,
-		key_code_kp_6			= 326,
-		key_code_kp_7			= 327,
-		key_code_kp_8			= 328,
-		key_code_kp_9			= 329,
-		key_code_kp_decimal		= 330,
-		key_code_kp_divide		= 331,
-		key_code_kp_multiply	= 332,
-		key_code_kp_subtract	= 333,
-		key_code_kp_add			= 334,
-		key_code_kp_enter		= 335,
-		key_code_kp_equal		= 336,
-		key_code_left_shift		= 340,
-		key_code_left_control	= 341,
-		key_code_left_alt		= 342,
-		key_code_left_super		= 343,
-		key_code_right_shift	= 344,
-		key_code_right_control	= 345,
-		key_code_right_alt		= 346,
-		key_code_right_super	= 347,
-		key_code_menu			= 348,
+		key_code_space			= 32,	// space
+		key_code_apostrophe		= 39,	// apostrophe
+		key_code_comma			= 44,	// comma
+		key_code_minus			= 45,	// minus
+		key_code_period			= 46,	// period
+		key_code_slash			= 47,	// slash
+		key_code_num_0			= 48,	// 0
+		key_code_num_1			= 49,	// 1
+		key_code_num_2			= 50,	// 2
+		key_code_num_3			= 51,	// 3
+		key_code_num_4			= 52,	// 4
+		key_code_num_5			= 53,	// 5
+		key_code_num_6			= 54,	// 6
+		key_code_num_7			= 55,	// 7
+		key_code_num_8			= 56,	// 8
+		key_code_num_9			= 57,	// 9
+		key_code_semicolon		= 59,	// semicolon
+		key_code_equal			= 61,	// equal
+		key_code_a				= 65,	// a
+		key_code_b				= 66,	// b
+		key_code_c				= 67,	// c
+		key_code_d				= 68,	// d
+		key_code_e				= 69,	// e
+		key_code_f				= 70,	// f
+		key_code_g				= 71,	// g
+		key_code_h				= 72,	// h
+		key_code_i				= 73,	// i
+		key_code_j				= 74,	// j
+		key_code_k				= 75,	// k
+		key_code_l				= 76,	// l
+		key_code_m				= 77,	// m
+		key_code_n				= 78,	// n
+		key_code_o				= 79,	// o
+		key_code_p				= 80,	// p
+		key_code_q				= 81,	// q
+		key_code_r				= 82,	// r
+		key_code_s				= 83,	// s
+		key_code_t				= 84,	// t
+		key_code_u				= 85,	// u
+		key_code_v				= 86,	// v
+		key_code_w				= 87,	// w
+		key_code_x				= 88,	// x
+		key_code_y				= 89,	// y
+		key_code_z				= 90,	// z
+		key_code_left_bracket	= 91,	// left bracket
+		key_code_backslash		= 92,	// backslash
+		key_code_right_bracket	= 93,	// right bracket
+		key_code_grave_accent	= 96,	// grave accent
+		key_code_world_1		= 161,	// world 1
+		key_code_world_2		= 162,	// world 2
+		key_code_escape			= 256,	// escape
+		key_code_enter			= 257,	// enter
+		key_code_tab			= 258,	// tab
+		key_code_backspace		= 259,	// backspace
+		key_code_insert			= 260,	// insert
+		key_code_del			= 261,	// del
+		key_code_right			= 262,	// right
+		key_code_left			= 263,	// left
+		key_code_down			= 264,	// down
+		key_code_up				= 265,	// up
+		key_code_page_up		= 266,	// page up
+		key_code_page_down		= 267,	// page down
+		key_code_home			= 268,	// home
+		key_code_end			= 269,	// end
+		key_code_caps_lock		= 280,	// caps lock
+		key_code_scroll_lock	= 281,	// scroll lock
+		key_code_num_lock		= 282,	// num lock
+		key_code_print_screen	= 283,	// print screen
+		key_code_pause			= 284,	// pause
+		key_code_fn_1			= 290,	// f1
+		key_code_fn_2			= 291,	// f2
+		key_code_fn_3			= 292,	// f3
+		key_code_fn_4			= 293,	// f4
+		key_code_fn_5			= 294,	// f5
+		key_code_fn_6			= 295,	// f6
+		key_code_fn_7			= 296,	// f7
+		key_code_fn_8			= 297,	// f8
+		key_code_fn_9			= 298,	// f9
+		key_code_fn_10			= 299,	// f10
+		key_code_fn_11			= 300,	// f11
+		key_code_fn_12			= 301,	// f12
+		key_code_fn_13			= 302,	// f13
+		key_code_fn_14			= 303,	// f14
+		key_code_fn_15			= 304,	// f15
+		key_code_fn_16			= 305,	// f16
+		key_code_fn_17			= 306,	// f17
+		key_code_fn_18			= 307,	// f18
+		key_code_fn_19			= 308,	// f19
+		key_code_fn_20			= 309,	// f20
+		key_code_fn_21			= 310,	// f21
+		key_code_fn_22			= 311,	// f22
+		key_code_fn_23			= 312,	// f23
+		key_code_fn_24			= 313,	// f24
+		key_code_fn_25			= 314,	// f25
+		key_code_kp_0			= 320,	// kp 0
+		key_code_kp_1			= 321,	// kp 1
+		key_code_kp_2			= 322,	// kp 2
+		key_code_kp_3			= 323,	// kp 3
+		key_code_kp_4			= 324,	// kp 4
+		key_code_kp_5			= 325,	// kp 5
+		key_code_kp_6			= 326,	// kp 6
+		key_code_kp_7			= 327,	// kp 7
+		key_code_kp_8			= 328,	// kp 8
+		key_code_kp_9			= 329,	// kp 9
+		key_code_kp_decimal		= 330,	// kp decimal
+		key_code_kp_divide		= 331,	// kp divide
+		key_code_kp_multiply	= 332,	// kp multiply
+		key_code_kp_subtract	= 333,	// kp subtract
+		key_code_kp_add			= 334,	// kp add
+		key_code_kp_enter		= 335,	// kp enter
+		key_code_kp_equal		= 336,	// kp equal
+		key_code_left_shift		= 340,	// left shift
+		key_code_left_control	= 341,	// left control
+		key_code_left_alt		= 342,	// left alt
+		key_code_left_super		= 343,	// left super
+		key_code_right_shift	= 344,	// right shift
+		key_code_right_control	= 345,	// right control
+		key_code_right_alt		= 346,	// right alt
+		key_code_right_super	= 347,	// right super
+		key_code_menu			= 348,	// menu
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -339,14 +339,14 @@ namespace ml
 	// mouse buttons
 	enum mouse_button_ : int32_t
 	{
-		mouse_button_0,
-		mouse_button_1,
-		mouse_button_2,
-		mouse_button_3,
-		mouse_button_4,
-		mouse_button_5,
-		mouse_button_6,
-		mouse_button_7,
+		mouse_button_0, // mb 0
+		mouse_button_1, // mb 1
+		mouse_button_2, // mb 2
+		mouse_button_3, // mb 3
+		mouse_button_4, // mb 4
+		mouse_button_5, // mb 5
+		mouse_button_6, // mb 6
+		mouse_button_7, // mb 7
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

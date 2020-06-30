@@ -21,6 +21,10 @@ defines{
 	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 }
 
+undefines{
+	"NDEBUG",
+}
+
 includedirs{
 	"%{sln_dir}include",
 	"%{sln_dir}src/plugins",

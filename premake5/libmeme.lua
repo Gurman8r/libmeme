@@ -32,6 +32,10 @@ defines{
 	"IMGUI_IMPL_OPENGL_LOADER_GLEW",
 }
 
+undefines{
+	"NDEBUG",
+}
+
 includedirs{
 	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}include",

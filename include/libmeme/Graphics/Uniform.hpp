@@ -9,12 +9,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using sampler2d = typename shared<gfx::texture2d>;
+		using sampler = typename shared<gfx::texture>;
 
 		template <class T> static constexpr bool is_sampler_ish
 		{
-			!std::is_same_v<T, sampler2d> &&
-			std::is_convertible_v<std::add_pointer_t<T>, std::add_pointer_t<sampler2d::element_type>>
+			!std::is_same_v<T, sampler> &&
+			std::is_convertible_v<std::add_pointer_t<T>, std::add_pointer_t<sampler::element_type>>
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,7 +23,7 @@ namespace ml
 			bool, int32_t, float32_t,
 			vec2, vec3, vec4, color,
 			mat2, mat3, mat4,
-			sampler2d
+			sampler
 		>;
 
 		using variable_type = typename meta::rename<std::variant, allowed_types>;
@@ -122,7 +122,7 @@ namespace ml
 		{
 			if constexpr (is_sampler_ish<T>)
 			{
-				return this->holds<sampler2d>();
+				return this->holds<sampler>();
 			}
 			else
 			{
@@ -137,7 +137,7 @@ namespace ml
 		{
 			if constexpr (is_sampler_ish<T>)
 			{
-				return this->get<sampler2d>();
+				return this->get<sampler>();
 			}
 			else if (auto const v{ this->var() }; std::holds_alternative<T>(v))
 			{
@@ -156,7 +156,7 @@ namespace ml
 		{
 			if constexpr (is_sampler_ish<T>)
 			{
-				return this->set<sampler2d>(ML_forward(args)...);
+				return this->set<sampler>(ML_forward(args)...);
 			}
 			else if (this->holds<T>())
 			{

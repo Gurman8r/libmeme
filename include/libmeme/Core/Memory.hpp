@@ -154,7 +154,6 @@ namespace ml
 			if (!res->is_default())		{ return debug::error("resource is not the default memory resource"); }
 
 			get_instance().m_testres = res;
-
 			return true;
 		}
 
@@ -168,8 +167,8 @@ namespace ml
 			// allocate the requested bytes
 			byte_t * const data{ inst.m_allocator.allocate(size) };
 
-			// create record
-			return *inst.m_records.insert(data, { inst.m_index++, size, data }).first;
+			// create the record
+			return inst.m_records.insert(data, { inst.m_index++, size, data }).second->data;
 		}
 
 		// calloc
