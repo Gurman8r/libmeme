@@ -15,21 +15,21 @@ namespace ml::embed
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// PROJECT
-		struct ml_project {};
-		py::class_<ml_project>(m, "prj")
+		// LIBRARY
+		struct ml_lib {};
+		py::class_<ml_lib>(m, "lib")
 			.def(py::init<>())
-			.def_property_readonly_static("author"	, [](py::object) { return ML__author; })
+			.def_property_readonly_static("auth"	, [](py::object) { return ML__auth; })
 			.def_property_readonly_static("date"	, [](py::object) { return ML__date; })
-			.def_property_readonly_static("libname"	, [](py::object) { return ML__libname; })
+			.def_property_readonly_static("name"	, [](py::object) { return ML__name; })
 			.def_property_readonly_static("time"	, [](py::object) { return ML__time; })
 			.def_property_readonly_static("url"		, [](py::object) { return ML__url; })
-			.def_property_readonly_static("version"	, [](py::object) { return ML__version; })
+			.def_property_readonly_static("ver"		, [](py::object) { return ML__ver; })
 			;
 
 		// CONFIG
-		struct ml_build {};
-		py::class_<ml_build>(m, "cfg")
+		struct ml_cfg {};
+		py::class_<ml_cfg>(m, "cfg")
 			.def(py::init<>())
 			.def_property_readonly_static("arch",			[](py::object) { return ML_arch; })
 			.def_property_readonly_static("cc_name",		[](py::object) { return ML_cc_name; })
@@ -38,7 +38,7 @@ namespace ml::embed
 			.def_property_readonly_static("is_debug",		[](py::object) { return ML_is_debug; })
 			.def_property_readonly_static("lang",			[](py::object) { return ML_lang; })
 			.def_property_readonly_static("platform",		[](py::object) { return ML_platform; })
-			.def_property_readonly_static("system",			[](py::object) { return ML_os_name; })
+			.def_property_readonly_static("os_name",		[](py::object) { return ML_os_name; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -105,22 +105,22 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// CLIENT API
-		py::class_<client_api_>(m, "client_api")
+		// CONTEXT API
+		py::class_<context_api_>(m, "context_api")
 			.def(py::init<>())
-			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)client_api_unknown; })
-			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)client_api_opengl; })
-			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)client_api_vulkan; })
-			.def_property_readonly_static("directx", [](py::object) { return (int32_t)client_api_directx; })
+			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)context_api_unknown; })
+			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)context_api_opengl; })
+			.def_property_readonly_static("vulkan", [](py::object) { return (int32_t)context_api_vulkan; })
+			.def_property_readonly_static("directx", [](py::object) { return (int32_t)context_api_directx; })
 			;
 
-		// CLIENT PROFILE
-		py::class_<client_profile_>(m, "client_profile")
+		// CONTEXT PROFILE
+		py::class_<context_profile_>(m, "context_profile")
 			.def(py::init<>())
-			.def_property_readonly_static("any", [](py::object) { return (int32_t)client_profile_any; })
-			.def_property_readonly_static("core", [](py::object) { return (int32_t)client_profile_core; })
-			.def_property_readonly_static("compat", [](py::object) { return (int32_t)client_profile_compat; })
-			.def_property_readonly_static("debug", [](py::object) { return (int32_t)client_profile_debug; })
+			.def_property_readonly_static("any", [](py::object) { return (int32_t)context_profile_any; })
+			.def_property_readonly_static("core", [](py::object) { return (int32_t)context_profile_core; })
+			.def_property_readonly_static("compat", [](py::object) { return (int32_t)context_profile_compat; })
+			.def_property_readonly_static("debug", [](py::object) { return (int32_t)context_profile_debug; })
 			;
 
 		// CURSOR MODE
@@ -323,7 +323,7 @@ namespace ml::embed
 			.def_property_readonly_static("refresh_rate", [](py::object) { return (int32_t)window_attr_refresh_rate; })
 			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_attr_doublebuffer; })
 
-			.def_property_readonly_static("client_api", [](py::object) { return (int32_t)window_attr_client_api; })
+			.def_property_readonly_static("context_api", [](py::object) { return (int32_t)window_attr_client_api; })
 			.def_property_readonly_static("context_version_major", [](py::object) { return (int32_t)window_attr_context_version_major; })
 			.def_property_readonly_static("context_version_minor", [](py::object) { return (int32_t)window_attr_context_version_minor; })
 			.def_property_readonly_static("context_revision", [](py::object) { return (int32_t)window_attr_context_revision; })
@@ -373,9 +373,11 @@ namespace ml::embed
 		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
 			.def(py::init<vec2i const &>())
-			.def(py::init<vec2i const &, uint32_t>())
-			.def_readwrite("size"				, &video_mode::size)
-			.def_readwrite("depth"				, &video_mode::depth)
+			.def(py::init<vec2i const &, int32_t>())
+			.def(py::init<vec2i const &, int32_t, int32_t>())
+			.def_readwrite("resolution"			, &video_mode::resolution)
+			.def_readwrite("bits_per_pixel"		, &video_mode::bits_per_pixel)
+			.def_readwrite("refresh_rate"		, &video_mode::refresh_rate)
 			.def_static("get_desktop_mode"		, &video_mode::get_desktop_mode)
 			.def_static("get_fullscreen_modes"	, &video_mode::get_fullscreen_modes)
 			;
@@ -427,8 +429,8 @@ namespace ml::embed
 		struct ml_engine_gui {};
 		py::class_<ml_engine_gui>(m, "gui")
 			.def(py::init<>())
-			.def_static("initialize", []() { return engine::gui().initialize(engine::window()); })
-			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
+			.def_static("initialize"	, []() { return engine::gui().initialize(engine::window()); })
+			.def_static("load_style"	, [](cstring s) { return engine::gui().load_style(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -437,9 +439,9 @@ namespace ml::embed
 		struct ml_engine_plugins {};
 		py::class_<ml_engine_plugins>(m, "plugins")
 			.def(py::init<>())
-			.def_static("clear", []() { engine::plugins().clear(); })
-			.def_static("free", [](cstring s) { return engine::plugins().free(s); })
-			.def_static("load", [](cstring s) { return engine::plugins().load(s); })
+			.def_static("clear"			, []() { engine::plugins().clear(); })
+			.def_static("free"			, [](cstring s) { return engine::plugins().free(s); })
+			.def_static("load"			, [](cstring s) { return engine::plugins().load(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -448,8 +450,8 @@ namespace ml::embed
 		struct ml_engine_scripts {};
 		py::class_<ml_engine_scripts>(m, "scripts")
 			.def(py::init<>())
-			.def_static("do_file", [](cstring s) { return engine::scripts().do_file(s); })
-			.def_static("do_string", [](cstring s) { return engine::scripts().do_string(s); })
+			.def_static("do_file"		, [](cstring s) { return engine::scripts().do_file(s); })
+			.def_static("do_string"		, [](cstring s) { return engine::scripts().do_string(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -458,10 +460,10 @@ namespace ml::embed
 		struct ml_engine_time {};
 		py::class_<ml_engine_time>(m, "time")
 			.def(py::init<>())
-			.def_property_readonly_static("total_time", [](py::object) { return engine::time().total_time().count(); })
-			.def_property_readonly_static("delta_time", [](py::object) { return engine::time().delta_time().count(); })
-			.def_property_readonly_static("frame_count", [](py::object) { return engine::time().frame_count(); })
-			.def_property_readonly_static("frame_rate", [](py::object) { return engine::time().frame_rate(); })
+			.def_property_readonly_static("total_time"	, [](py::object) { return engine::time().total_time().count(); })
+			.def_property_readonly_static("delta_time"	, [](py::object) { return engine::time().delta_time().count(); })
+			.def_property_readonly_static("frame_count"	, [](py::object) { return engine::time().frame_count(); })
+			.def_property_readonly_static("frame_rate"	, [](py::object) { return engine::time().frame_rate(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

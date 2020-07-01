@@ -3,24 +3,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "Impl_Window_Glfw.hpp"
+
 #include <glfw/glfw3.h>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#undef APIENTRY
+#ifdef APIENTRY
+#endif
 
-// platform specific
+#include <libmeme/Platform/Native.hpp>
+
 #if defined(ML_os_windows)
-#	undef APIENTRY
-#	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
-
-#elif defined(ML_os_android)
-#elif defined(ML_os_apple)
-#elif defined(ML_os_freebsd)
-#elif defined(ML_os_linux)
-
-#else
-#	error "glfw_window is unavailable"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,7 +27,8 @@ bool operator<(GLFWimage const & lhs, GLFWimage const & rhs)
 
 bool operator==(GLFWimage const & lhs, GLFWimage const & rhs)
 {
-	return !(lhs < rhs) && !(rhs < lhs);
+	return (std::addressof(lhs) == std::addressof(rhs))
+		|| (!(lhs < rhs) && !(rhs < lhs));
 }
 
 namespace ml
@@ -54,12 +49,13 @@ namespace ml
 	glfw_window::glfw_window() noexcept : m_window{}, m_monitor{}
 	{
 		static bool const glfw_init{ (bool)glfwInit() };
+
 		ML_assert("failed initializing GLFW" && glfw_init);
 	}
 
 	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
 	{
-		(void)this->open(ws);
+		ML_assert(this->open(ws));
 	}
 
 	glfw_window::~glfw_window() noexcept
@@ -73,17 +69,18 @@ namespace ml
 
 	bool glfw_window::open(window_settings const & ws)
 	{
-		if (is_open()) { return false; } // already open
+		// check already open
+		if (is_open()) { return false; }
 
 		// window hints
 		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
 		{
 			switch (ws.context.api)
 			{
-			case client_api_opengl	: return GLFW_OPENGL_API;
-			case client_api_vulkan	:
-			case client_api_directx	:
-			case client_api_unknown	:
+			case context_api_opengl	: return GLFW_OPENGL_API;
+			case context_api_vulkan	:
+			case context_api_directx:
+			case context_api_unknown:
 			default					: return GLFW_NO_API;
 			}
 		}));
@@ -91,10 +88,10 @@ namespace ml
 		{
 			switch (ws.context.profile)
 			{
-			case client_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
-			case client_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
-			case client_profile_debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case client_profile_any		:
+			case context_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
+			case context_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
+			case context_profile_debug	: return GLFW_OPENGL_DEBUG_CONTEXT;
+			case context_profile_any	:
 			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		}));
@@ -111,16 +108,16 @@ namespace ml
 		glfwWindowHint(GLFW_FLOATING,				ws.hints & window_hints_floating);
 		glfwWindowHint(GLFW_MAXIMIZED,				ws.hints & window_hints_maximized);
 		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_doublebuffer);
-		glfwWindowHint(GLFW_RED_BITS,				8);
-		glfwWindowHint(GLFW_GREEN_BITS,				8);
-		glfwWindowHint(GLFW_BLUE_BITS,				8);
-		glfwWindowHint(GLFW_ALPHA_BITS,				8);
-		glfwWindowHint(GLFW_REFRESH_RATE,			GLFW_DONT_CARE);
+		glfwWindowHint(GLFW_RED_BITS,				ws.video.bits_per_pixel);
+		glfwWindowHint(GLFW_GREEN_BITS,				ws.video.bits_per_pixel);
+		glfwWindowHint(GLFW_BLUE_BITS,				ws.video.bits_per_pixel);
+		glfwWindowHint(GLFW_ALPHA_BITS,				ws.video.bits_per_pixel);
+		glfwWindowHint(GLFW_REFRESH_RATE,			ws.video.refresh_rate);
 		
 		// create window
 		m_window = glfwCreateWindow(
-			ws.video.size[0],
-			ws.video.size[1],
+			ws.video.resolution[0],
+			ws.video.resolution[1],
 			ws.title.c_str(),
 			nullptr,
 			nullptr

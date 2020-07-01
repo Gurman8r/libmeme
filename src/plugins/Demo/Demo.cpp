@@ -129,7 +129,7 @@ namespace ml::gfx
 		}
 
 		pipeline(pipeline && other, allocator_type alloc = {}) noexcept
-			: pipeline{ std::move(other.m_data), alloc }
+			: m_data{ std::move(other.m_data), alloc }
 		{
 			
 		}
@@ -1366,10 +1366,10 @@ namespace ml
 				auto b_mode{ ctx->get_blend_mode() };
 				ImGui::Checkbox("enabled", &b_enabled);
 				ImGui::ColorEdit4("color", b_color);
-				ImGui::Text("color equation: %s (%u)", gfx::function_names[b_mode.color_equation], b_mode.color_equation);
+				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b_mode.color_equation], b_mode.color_equation);
 				ImGui::Text("color sfactor: %s (%u)", gfx::factor_names[b_mode.color_sfactor], b_mode.color_sfactor);
 				ImGui::Text("color dfactor: %s (%u)", gfx::factor_names[b_mode.color_dfactor], b_mode.color_dfactor);
-				ImGui::Text("alpha equation: %s (%u)", gfx::function_names[b_mode.alpha_equation], b_mode.alpha_equation);
+				ImGui::Text("alpha equation: %s (%u)", gfx::equation_names[b_mode.alpha_equation], b_mode.alpha_equation);
 				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_names[b_mode.alpha_sfactor], b_mode.alpha_sfactor);
 				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_names[b_mode.alpha_dfactor], b_mode.alpha_dfactor);
 			}

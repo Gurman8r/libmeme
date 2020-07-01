@@ -5,9 +5,9 @@
 // PROJECT
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML__author              "Melody Gurman"
-#define ML__libname             "libmeme"
-#define ML__version             "0.0.0"
+#define ML__auth                "Melody Gurman"
+#define ML__name                "libmeme"
+#define ML__ver                 "0.0.0"
 #define ML__url                 "https://www.github.com/Gurman8r/libmeme"
 #define ML__date                __DATE__
 #define ML__time                __TIME__
@@ -19,11 +19,11 @@
 
 #if defined(_DEBUG)
 //                              Debug
-#   define ML_is_debug          true
+#   define ML_is_debug          1
 #   define ML_configuration     "debug"
 #else
 //                              Release
-#   define ML_is_debug          false
+#   define ML_is_debug          0
 #   define ML_configuration     "release"
 #endif
 
@@ -91,8 +91,8 @@
 
 #   if defined(__APPLE__) && defined(__MACH__)
 //                              Apple
-#   define ML_os_apple          1
-#   define ML_os_name           "Apple"
+#       define ML_os_apple      1
+#       define ML_os_name       "Apple"
 
 #   elif defined(__ANDROID__)
 //                              Android
@@ -159,7 +159,7 @@
 #   endif
 
 #else
-#   error "Unable to detect platform architecture"
+#   error "unable to detect platform architecture"
 #endif
 
 
@@ -307,8 +307,22 @@
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// ATTRIBUTES
+// MISC
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// has attribute
+#ifdef __has_cpp_attribute
+#   define ML_has_attr(expr)    __has_cpp_attribute(expr)
+#else
+#   define ML_has_attr(expr)    (0)
+#endif
+
+// has include
+#ifdef __has_include
+#   define ML_has_include(expr) __has_include(expr)
+#else
+#   define ML_has_include(expr) (0)
+#endif
 
 // nodiscard
 #if __has_cpp_attribute(nodiscard) >= 201603L
@@ -345,19 +359,19 @@
 
 // visibility
 #ifndef ML_STATIC
-#	ifdef ML_cc_msvc
-#	   define ML_API_EXPORT     __declspec(dllexport)
-#	   define ML_API_IMPORT     __declspec(dllimport)
-#	elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
-#	   define ML_API_EXPORT    __attribute__ ((visibility ("default")))
-#	   define ML_API_IMPORT    __attribute__ ((visibility ("hidden")))
-#	else
-#	   define ML_API_EXPORT
-#	   define ML_API_IMPORT
-#	endif
+#   ifdef ML_cc_msvc
+#      define ML_API_EXPORT     __declspec(dllexport)
+#      define ML_API_IMPORT     __declspec(dllimport)
+#   elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
+#      define ML_API_EXPORT    __attribute__ ((visibility ("default")))
+#      define ML_API_IMPORT    __attribute__ ((visibility ("hidden")))
+#   else
+#      define ML_API_EXPORT
+#      define ML_API_IMPORT
+#   endif
 #else
-#	   define ML_API_EXPORT
-#	   define ML_API_IMPORT
+#      define ML_API_EXPORT
+#      define ML_API_IMPORT
 #endif
 
 

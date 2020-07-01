@@ -1,21 +1,5 @@
 #include <libmeme/Platform/VideoMode.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// platform specific
-#if defined(ML_os_windows)
-#	include <Windows.h>
-
-#elif defined(ML_os_android)
-#elif defined(ML_os_apple)
-#elif defined(ML_os_freebsd)
-#elif defined(ML_os_linux)
-
-#else
-#	error "video_mode is unavailable"
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <libmeme/Platform/Native.hpp>
 
 namespace ml
 {
@@ -29,10 +13,13 @@ namespace ml
 #if defined(ML_os_windows)
 			DEVMODE dm; dm.dmSize = sizeof(dm);
 			EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &dm);
-			temp.size = vec2i{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight };
-			temp.depth = dm.dmBitsPerPel;
+			temp =
+			{
+				{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
+				(int32_t)dm.dmBitsPerPel,
+				(int32_t)dm.dmDisplayFrequency
+			};
 
-#elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
 #else
 #endif
@@ -49,12 +36,16 @@ namespace ml
 		{
 #if defined(ML_os_windows)
 			DEVMODE dm; dm.dmSize = sizeof(dm);
-			for (int32_t count = 0; EnumDisplaySettings(nullptr, count, &dm); ++count)
+			for (int32_t i = 0; EnumDisplaySettings(nullptr, i, &dm); ++i)
 			{
-				temp.insert({ { (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight }, dm.dmBitsPerPel });
+				temp.insert
+				({
+					{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
+					(int32_t)dm.dmBitsPerPel,
+					(int32_t)dm.dmDisplayFrequency
+				});
 			}
 
-#elif defined(ML_os_apple)
 #elif defined(ML_os_unix)
 #else
 #endif

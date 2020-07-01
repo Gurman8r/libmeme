@@ -23,7 +23,7 @@ namespace ml::gfx
 
 		opengl3_device(context_settings const & cs);
 
-		~opengl3_device() noexcept override = default;
+		~opengl3_device() noexcept override;
 
 		context_settings	m_settings	; // context settings
 		devinfo				m_devinfo	; // device info
@@ -99,7 +99,7 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear(uint32_t flags) override;
+		void clear(uint32_t mask) override;
 
 		void draw(shared<vertexarray> const & value) override;
 		
@@ -243,12 +243,12 @@ namespace ml::gfx
 		static constexpr typeof<> s_type_info{ typeof_v<opengl3_vertexarray> };
 
 		uint32_t							m_handle	{}; // handle
-		uint32_t const						m_primitive	{}; // primitive type
+		uint32_t const						m_primitive	{}; // prim type
 		shared<indexbuffer>					m_indices	{}; // index buffer
 		pmr::vector<shared<vertexbuffer>>	m_vertices	{}; // vertex buffers
 
 	public:
-		opengl3_vertexarray(uint32_t primitive);
+		opengl3_vertexarray(uint32_t prim);
 
 		~opengl3_vertexarray() override;
 

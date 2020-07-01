@@ -100,9 +100,9 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto clear(uint32_t flags) noexcept
+		ML_NODISCARD static auto clear(uint32_t mask) noexcept
 		{
-			return builtin(&device::clear, flags);
+			return builtin(&device::clear, mask);
 		}
 
 		ML_NODISCARD static auto draw(shared<vertexarray> const & value) noexcept

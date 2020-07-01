@@ -1,19 +1,18 @@
-import libmeme          as ml
-import libmeme_engine   as engine
+import libmeme          as ml       # data
+import libmeme_engine   as engine   # systems
 
-# open window
-print("[i] opening window...")
+# setup window
+print("[i] loading window...")
 assert(engine.window.open(
     ml.window_settings(
         "libmeme",                      # title
         ml.video_mode(
             [ 1280, 720 ],              # resolution
-            8,                          # bits per pixel
-            -1),                        # refresh rate
+            32),                        # color depth
         ml.context_settings(
-            ml.context_api.opengl,      # api
-            4, 6,                       # version
-            ml.context_profile.compat,  # profile
+            ml.client_api.opengl,       # client api
+            4, 6,                       # api version
+            ml.client_profile.compat,   # api profile
             24,                         # depth bits
             8,                          # stencil bits
             True,                       # multisample
@@ -21,17 +20,17 @@ assert(engine.window.open(
         ml.window_hints.default_max),   # hints
     True))                              # install callbacks
 
-# initialize gui
-print("[i] initializing gui...")
+# setup gui
+print("[i] loading gui...")
 assert(engine.gui.initialize())
 engine.gui.load_style(engine.fs.path2("assets/styles/obsidian.style"))
 
-# load plugins
+# setup plugins
 print("[i] loading plugins...")
 assert(engine.plugins.load("demo"))
 
-# print messages
-print(f"# {ml.lib.name} | {ml.cfg.arch!r}-bit | {ml.cfg.configuration}")
-print(f"# {ml.lib.url}")
+# messages
+print(f"# {ml.prj.libname} | {ml.cfg.arch!r}-bit | {ml.cfg.configuration}")
+print(f"# {ml.prj.url}")
 print("# type \'help\' for a list of commands")
 print("")

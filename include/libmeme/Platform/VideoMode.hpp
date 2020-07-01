@@ -9,58 +9,59 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// video mode
 	struct ML_PLATFORM_API ML_NODISCARD video_mode final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		vec2i		size	{ 640, 480 };
-		uint32_t	depth	{ 32 };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		constexpr operator bool() const noexcept
-		{
-			return size.nonzero() && depth;
-		}
-
-		constexpr bool operator==(video_mode const & other) const noexcept
-		{
-			return (this == std::addressof(other))
-				|| (size == other.size && depth == other.depth);
-		}
-
-		constexpr bool operator!=(video_mode const & other) const noexcept
-		{
-			return !(*this == other);
-		}
-
-		constexpr bool operator<(video_mode const & other) const noexcept
-		{
-			return (this != std::addressof(other))
-				&& (size < other.size || depth < other.depth);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		vec2i		resolution		{ 640, 480 };
+		int32_t		bits_per_pixel	{ 8 };
+		int32_t		refresh_rate	{ -1 };
 
 		static video_mode const & get_desktop_mode();
 
 		static ds::set<video_mode> const & get_fullscreen_modes();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		bool operator==(video_mode const & other) const noexcept
+		{
+			if (this == std::addressof(other)) { return true; }
+			else
+			{
+				return resolution		== other.resolution
+					|| bits_per_pixel	== other.bits_per_pixel
+					|| refresh_rate		== other.refresh_rate;
+			}
+		}
+
+		bool operator<(video_mode const & other) const noexcept
+		{
+			if (this == std::addressof(other)) { return false; }
+			else
+			{
+				return resolution		< other.resolution
+					|| bits_per_pixel	< other.bits_per_pixel
+					|| refresh_rate		< other.refresh_rate;
+			}
+		}
+
+		bool operator!=(video_mode const & other) const noexcept
+		{
+			return !(*this == other);
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	inline void from_json(json const & j, video_mode & value)
 	{
-		j.at("size").get_to(value.size);
-		j.at("depth").get_to(value.depth);
+		j.at("resolution").get_to(value.resolution);
+		j.at("bits_per_pixel").get_to(value.bits_per_pixel);
+		j.at("refresh_rate").get_to(value.refresh_rate);
 	}
 
 	inline void to_json(json & j, video_mode const & value)
 	{
-		j["size"] = value.size;
-		j["depth"] = value.depth;
+		j["resolution"] = value.resolution;
+		j["bits_per_pixel"] = value.bits_per_pixel;
+		j["refresh_rate"] = value.refresh_rate;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

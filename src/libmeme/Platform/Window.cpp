@@ -2,19 +2,11 @@
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Platform/Native.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// platform specific
-#if defined(ML_os_windows)
-#	include <Windows.h>
-#elif defined(ML_os_apple)
-#elif defined(ML_os_unix)
-#else
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// implementation
 #if defined(ML_IMPL_WINDOW_GLFW)
 #include "Impl/Impl_Window_GLFW.hpp"
 using impl_window = _ML glfw_window;
@@ -39,28 +31,24 @@ namespace ml
 
 	window::window(window_settings const & ws, bool ic) noexcept : window{}
 	{
-		(void)this->open(ws, ic);
+		ML_assert(this->open(ws, ic));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool window::open(window_settings const & ws, bool ic)
 	{
-		if (is_open())			{ return debug::error("window is already open"); }
-		if (ws.title.empty())	{ return debug::error("invalid window title"); }
-		if (!ws.video)			{ return debug::error("invalid window video"); }
-		if (!ws.context)		{ return debug::error("invalid window context"); }
-		if (!ws.hints)			{ return debug::error("invalid window hints"); }
-		if (!m_window->open(ws)){ return debug::error("failed opening window implementation"); }
-
-		// store settings
-		m_settings = ws;
+		// open backend
+		if (!m_window->open(m_settings = ws))
+		{
+			return debug::error("failed opening window implementation");
+		}
 		
 		// make context current
 		set_current_context(get_handle());
 
 		// centered
-		set_position((video_mode::get_desktop_mode().size - ws.video.size) / 2);
+		set_position((video_mode::get_desktop_mode().resolution - ws.video.resolution) / 2);
 
 		// maximized
 		if (get_hint(window_hints_maximized)) { maximize(); }
@@ -260,8 +248,9 @@ namespace ml
 
 		if (!value)
 		{
-			set_size(m_settings.video.size);
-			set_position((video_mode::get_desktop_mode().size - get_framebuffer_size()) / 2);
+			set_size(m_settings.video.resolution);
+			
+			set_position((video_mode::get_desktop_mode().resolution - get_framebuffer_size()) / 2);
 		}
 	}
 

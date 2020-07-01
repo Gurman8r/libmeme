@@ -16,6 +16,10 @@ defines{
 	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
 }
 
+undefines{
+	"NDEBUG",
+}
+
 includedirs{
 	"%{ext_dir}glfw/include",
 	"%{ext_dir}glfw/include",

@@ -115,6 +115,9 @@ filter{ "system:Windows" }
 	includedirs{
 		"%{ext_dir}cpython/PC",
 	}
+	buildoptions{
+		"/bigobj"
+	}
 
 filter{ "system:Windows", "configurations:Debug" }
 	linkoptions{

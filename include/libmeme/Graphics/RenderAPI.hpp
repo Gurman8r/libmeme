@@ -18,7 +18,7 @@ namespace ml::gfx
 
 	struct	devinfo			;
 	class	device			;
-	class	devctx	;
+	class	devctx			;
 	class	device_resource	;
 
 	class	vertexbuffer	;
@@ -145,7 +145,7 @@ namespace ml::gfx
 		equation_max,
 	};
 
-	constexpr cstring function_names[] =
+	constexpr cstring equation_names[] =
 	{
 		"add",
 		"subtract",
@@ -429,6 +429,8 @@ namespace ml::gfx
 	ML_decl_handle(resource_id) ; // resource handle
 	ML_decl_handle(uniform_id) 	; // uniform handle
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	ML_alias address_t	= typename void const *			; // data address
 	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
 
@@ -647,9 +649,6 @@ namespace ml::gfx
 		bool geometry_shaders_available;
 		bool separate_shaders_available;
 		pmr::string shading_language_version;
-
-		// functions
-		std::function<uint32_t()> get_error;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -748,13 +747,13 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void clear(uint32_t flags) = 0;
+		virtual void clear(uint32_t mask) = 0;
 
 		virtual void draw(shared<vertexarray> const & value) = 0;
 
-		virtual void draw_arrays(uint32_t mode, size_t first, size_t count) = 0;
+		virtual void draw_arrays(uint32_t prim, size_t first, size_t count) = 0;
 		
-		virtual void draw_indexed(uint32_t mode, size_t count) = 0;
+		virtual void draw_indexed(uint32_t prim, size_t count) = 0;
 		
 		virtual void flush() = 0;
 
@@ -1019,7 +1018,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API vertexarray : public device_resource
 	{
 	public:
-		ML_NODISCARD static shared<vertexarray> create(uint32_t primitive = primitive_triangles) noexcept;
+		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept;
 
 	public:
 		virtual ~vertexarray() override = default;

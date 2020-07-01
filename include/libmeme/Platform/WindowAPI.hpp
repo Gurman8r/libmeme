@@ -64,28 +64,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// client api
-	enum client_api_ : int32_t
-	{
-		client_api_unknown	, // unknown
-		client_api_opengl	, // opengl
-		client_api_vulkan	, // vulkan
-		client_api_directx	, // directx
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// client profile
-	enum client_profile_ : int32_t
-	{
-		client_profile_any		, // any
-		client_profile_core		, // core
-		client_profile_compat	, // compat
-		client_profile_debug	, // debug
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// cursor modes
 	enum cursor_mode_ : int32_t
 	{

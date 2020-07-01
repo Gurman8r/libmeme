@@ -17,7 +17,7 @@
 #define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
 
 #else
-#	error "unknown or invalid imgui implementation"
+#	error "gui is unavailable"
 #endif
 
 namespace ml

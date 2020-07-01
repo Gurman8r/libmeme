@@ -6,7 +6,7 @@
 
 // opengl loader
 #ifdef ML_OPENGL_LOADER_CUSTOM
-#	if defined(__has_include) && __has_include(ML_OPENGL_LOADER_CUSTOM)
+#	if ML_has_include(ML_OPENGL_LOADER_CUSTOM)
 #		include ML_OPENGL_LOADER_CUSTOM
 #	endif
 
@@ -89,8 +89,8 @@
 #define ML_glDeleteProgram(obj)						glDeleteObjectARB( obj )
 #define ML_glGetProgram()							glGetHandleARB( GL_PROGRAM_OBJECT_ARB )
 #define ML_glUseProgram(obj)						glUseProgramObjectARB( obj )
-#define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, x )
-#define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, x )
+#define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, ML_handle(uint32_t, x) )
+#define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, ML_handle(uint32_t, x) )
 #define ML_glLinkProgram(obj)						glLinkProgramARB( obj )
 #define ML_glGetProgramLinkStatus(obj, x)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, x )
 #define ML_glValidateProgram(obj)					glValidateProgramARB( obj )
@@ -625,14 +625,12 @@ namespace ml::gfx
 		: m_settings{ cs }
 		, m_devinfo	{}
 	{
-		ML_assert("invalid client api specified" && (m_settings.api == client_api_opengl));
-
-		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
-
-		ML_assert("failed initializing opengl3_device" && opengl_init);
-
-		// INTERNAL SETUP
+		// INIT
 		{
+			static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
+
+			ML_assert("failed initializing opengl3" && opengl_init);
+
 			ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
 			
 			ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
@@ -640,7 +638,7 @@ namespace ml::gfx
 			ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		}
 
-		// VERSION INFO
+		// VERSION
 		{
 			// renderer
 			ML_glCheck(m_devinfo.renderer = (cstring)glGetString(GL_RENDERER));
@@ -680,7 +678,7 @@ namespace ml::gfx
 			}
 		}
 
-		// TEXTURE INFO
+		// TEXTURES
 		{
 			// edge clamp available
 #if defined(GL_EXT_texture_edge_clamp) \
@@ -692,7 +690,7 @@ namespace ml::gfx
 			ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_devinfo.max_texture_slots));
 		}
 
-		// FRAMEBUFFER INFO
+		// FRAMEBUFFERS
 		{
 			// max color attachments
 			ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_devinfo.max_color_attachments));
@@ -701,7 +699,7 @@ namespace ml::gfx
 			ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_devinfo.max_samples));
 		}
 		
-		// SHADER INFO
+		// SHADERS
 		{
 			// shaders available
 #if defined(GL_ARB_shading_language_100) \
@@ -723,12 +721,10 @@ namespace ml::gfx
 			// shading language version
 			ML_glCheck(m_devinfo.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 		}
+	}
 
-		// FUNCTIONS
-		{
-			// get error
-			m_devinfo.get_error = ML_glGetError;
-		}
+	opengl3_device::~opengl3_device() noexcept
+	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -962,26 +958,26 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl3_device::clear(uint32_t flags)
+	void opengl3_device::clear(uint32_t mask)
 	{
-		ML_glCheck(glClear(_clear<to_impl>(flags)));
+		ML_glCheck(glClear(_clear<to_impl>(mask)));
 	}
 
 	void opengl3_device::draw(shared<vertexarray> const & value)
 	{
-		// can be moved into header
+		// could be moved into header file
 
-		if (!value) { return; }
+		if (!value || value->get_vertices().empty()) { return; }
 
-		value->bind();
+		vertexarray::bind(value);
 
 		if (auto const & ib{ value->get_indices() })
 		{
-			ib->bind();
+			indexbuffer::bind(value->get_indices());
 
 			for (auto const & vb : value->get_vertices())
 			{
-				vb->bind();
+				vertexbuffer::bind(vb);
 
 				draw_indexed(value->get_primitive(), ib->get_count());
 			}
@@ -990,21 +986,21 @@ namespace ml::gfx
 		{
 			for (auto const & vb : value->get_vertices())
 			{
-				vb->bind();
+				vertexbuffer::bind(vb);
 
 				draw_arrays(value->get_primitive(), 0, vb->get_count());
 			}
 		}
 	}
 
-	void opengl3_device::draw_arrays(uint32_t mode, size_t first, size_t count)
+	void opengl3_device::draw_arrays(uint32_t prim, size_t first, size_t count)
 	{
-		ML_glCheck(glDrawArrays(_primitive<to_impl>(mode), (uint32_t)first, (uint32_t)count));
+		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
 	}
 
-	void opengl3_device::draw_indexed(uint32_t mode, size_t count)
+	void opengl3_device::draw_indexed(uint32_t prim, size_t count)
 	{
-		ML_glCheck(glDrawElements(_primitive<to_impl>(mode), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
+		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
 	}
 
 	void opengl3_device::flush()
@@ -1175,8 +1171,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl3_vertexarray::opengl3_vertexarray(uint32_t primitive)
-		: m_primitive{ primitive }
+	opengl3_vertexarray::opengl3_vertexarray(uint32_t prim)
+		: m_primitive{ prim }
 	{
 		ML_glCheck(glGenVertexArrays(1, &m_handle));
 		ML_glCheck(glBindVertexArray(m_handle));
@@ -1738,7 +1734,7 @@ namespace ml::gfx
 		{
 			if (m_handle && value && *value)
 			{
-				ML_glCheck(ML_glAttachShader(m_handle, ML_handle(uint32_t, value->get_handle())));
+				ML_glCheck(ML_glAttachShader(m_handle, value->get_handle()));
 			}
 
 			return true;
@@ -1752,7 +1748,7 @@ namespace ml::gfx
 		{
 			if (m_handle && value && *value)
 			{
-				ML_glCheck(ML_glDetachShader(m_handle, ML_handle(uint32_t, value->get_handle())));
+				ML_glCheck(ML_glDetachShader(m_handle, value->get_handle()));
 			}
 
 			m_shaders.erase(it->first);

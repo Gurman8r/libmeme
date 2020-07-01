@@ -343,25 +343,15 @@ namespace ml::gui
 			command_clbk clbk; // callback
 			command_info info; // information
 
-			template <class Other = command_data
-			> auto compare(Other const & other) const noexcept
+			bool operator==(command_data const & other) const noexcept
 			{
-				if constexpr (std::is_same_v<Other, command_data>)
-				{
-					if (this == std::addressof(other)) { return 0; }
-					else { return this->compare(other.name); }
-				}
-				else if constexpr (std::is_convertible_v<Other, command_name>)
-				{
-					return ML_compare(name, other);
-				}
+				return (this == std::addressof(other)) || (name == other.name);
 			}
 
-			template <class Other = command_data
-			> bool operator==(command_data const & other) const noexcept { return compare(other) == 0; }
-
-			template <class Other = command_data
-			> bool operator<(command_data const & other) const noexcept { return compare(other) < 0; }
+			bool operator<(command_data const & other) const noexcept
+			{
+				return (this != std::addressof(other)) && (name < other.name);
+			}
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
