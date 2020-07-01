@@ -526,6 +526,48 @@ namespace ml
 						1, 2, 3,
 					}
 				});
+
+				m_meshes["skybox"] = make_shared<mesh>(mesh
+				{
+					{
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f, -1.0f }, vec3::one(), vec2::zero() },
+						vertex{ { -1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+						vertex{ {  1.0f, -1.0f,  1.0f }, vec3::one(), vec2::zero() },
+					}
+				});
 			}
 
 			// ENTITIES
