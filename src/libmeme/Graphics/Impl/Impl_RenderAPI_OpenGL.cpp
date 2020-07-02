@@ -937,15 +937,15 @@ namespace ml::gfx
 
 		if (!value || value->get_vertices().empty()) { return; }
 
-		vertexarray::bind(value);
+		value->bind();
 
 		if (auto const & ib{ value->get_indices() })
 		{
-			indexbuffer::bind(value->get_indices());
+			ib->bind();
 
 			for (auto const & vb : value->get_vertices())
 			{
-				vertexbuffer::bind(vb);
+				vb->bind();
 
 				draw_indexed(value->get_primitive(), ib->get_count());
 			}
@@ -954,7 +954,7 @@ namespace ml::gfx
 		{
 			for (auto const & vb : value->get_vertices())
 			{
-				vertexbuffer::bind(vb);
+				vb->bind();
 
 				draw_arrays(value->get_primitive(), 0, vb->get_count());
 			}

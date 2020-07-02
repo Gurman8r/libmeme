@@ -1412,7 +1412,7 @@ namespace ml::gfx
 			{
 				texture::bind(tex, slot);
 
-				device::get_default()->get_context()->upload(loc, (int32_t)slot++);
+				get_device()->get_context()->upload(loc, (int32_t)slot++);
 			});
 		}
 
@@ -1426,7 +1426,7 @@ namespace ml::gfx
 				}
 				else
 				{
-					device::get_default()->get_context()->upload(loc, ML_forward(value));
+					get_device()->get_context()->upload(loc, ML_forward(value));
 				}
 			});
 		}

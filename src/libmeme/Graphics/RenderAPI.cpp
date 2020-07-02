@@ -144,14 +144,14 @@ namespace ml::gfx
 
 	shared<shader> shader::create(uint32_t type, int32_t flags) noexcept
 	{
-		return make_shared<impl_shader>(nullptr, type, flags);
+		return make_shared<impl_shader>(device::get_default(), type, flags);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<program> program::create(int32_t flags) noexcept
 	{
-		return make_shared<impl_program>(nullptr, flags);
+		return make_shared<impl_program>(device::get_default(), flags);
 	}
 
 	void program::bind(program const * value) noexcept
