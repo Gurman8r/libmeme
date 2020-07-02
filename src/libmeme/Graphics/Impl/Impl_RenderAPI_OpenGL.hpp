@@ -22,7 +22,6 @@ namespace ml::gfx
 
 		shared<devctx>	m_devctx	{}; // 
 		devinfo			m_devinfo	{}; // 
-		std::thread::id	m_thread_id	{ std::this_thread::get_id() };
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,13 +32,13 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, this); }
+
 		void set_context(shared<devctx> const & value) noexcept override { m_devctx = value; }
 
 		shared<devctx> const & get_context() const noexcept override { return m_devctx; }
 
 		devinfo const & get_info() const noexcept override { return m_devinfo; }
-
-		std::thread::id const & get_thread_id() const noexcept override { return m_thread_id; }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -67,7 +66,7 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		opengl_devctx(device * dev, context_settings const & cs);
+		opengl_devctx(device * parent, context_settings const & cs);
 
 		~opengl_devctx() override = default;
 
@@ -75,7 +74,7 @@ namespace ml::gfx
 
 		context_settings const & get_context_settings() const noexcept override { return m_settings; }
 
-		object_id get_handle() const noexcept override { return nullptr; }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, this); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -194,13 +193,13 @@ namespace ml::gfx
 		pmr::vector<shared<vertexbuffer>>	m_vertices	{}; // vertex buffers
 
 	public:
-		opengl_vertexarray(device * dev, uint32_t prim);
+		opengl_vertexarray(device * parent, uint32_t prim);
 
 		~opengl_vertexarray() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -239,13 +238,13 @@ namespace ml::gfx
 		buffer_t			m_buffer	{}; // local data
 
 	public:
-		opengl_vertexbuffer(device * dev, uint32_t usage, size_t count, address_t data);
+		opengl_vertexbuffer(device * parent, uint32_t usage, size_t count, address_t data);
 
 		~opengl_vertexbuffer() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -285,13 +284,13 @@ namespace ml::gfx
 		buffer_t		m_buffer	{}; // local data
 
 	public:
-		opengl_indexbuffer(device * dev, uint32_t usage, size_t count, address_t data);
+		opengl_indexbuffer(device * parent, uint32_t usage, size_t count, address_t data);
 
 		~opengl_indexbuffer() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -327,13 +326,13 @@ namespace ml::gfx
 		bool		m_lock		{ true }	; // locked
 
 	public:
-		opengl_texture2d(device * dev, texopts const & opts, address_t data);
+		opengl_texture2d(device * parent, texopts const & opts, address_t data);
 
 		~opengl_texture2d() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -379,13 +378,13 @@ namespace ml::gfx
 		bool		m_lock		{ true }	; // locked
 
 	public:
-		opengl_texturecube(device * dev, texopts const & opts);
+		opengl_texturecube(device * parent, texopts const & opts);
 
 		~opengl_texturecube() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -421,13 +420,13 @@ namespace ml::gfx
 
 		
 	public:
-		opengl_framebuffer(device * dev, texopts const & opts);
+		opengl_framebuffer(device * parent, texopts const & opts);
 
 		~opengl_framebuffer() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -469,13 +468,13 @@ namespace ml::gfx
 		pmr::vector<pmr::string>	m_source		{}; // source
 
 	public:
-		opengl_shader(device * dev, uint32_t type, int32_t flags = shader_flags_default);
+		opengl_shader(device * parent, uint32_t type, int32_t flags = shader_flags_default);
 
 		~opengl_shader() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -529,13 +528,13 @@ namespace ml::gfx
 		};
 
 	public:
-		opengl_program(device * dev, int32_t flags = program_flags_default);
+		opengl_program(device * parent, int32_t flags = program_flags_default);
 
 		~opengl_program() override;
 
 		bool revalue() override;
 
-		object_id get_handle() const noexcept override { return ML_handle(object_id, m_handle); }
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 

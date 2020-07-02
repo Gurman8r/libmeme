@@ -681,8 +681,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_devctx::opengl_devctx(device * dev, context_settings const & cs)
-		: devctx{ dev }, m_settings{ cs }
+	opengl_devctx::opengl_devctx(device * parent, context_settings const & cs)
+		: devctx{ parent }, m_settings{ cs }
 	{
 		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
 		
@@ -1033,8 +1033,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexarray::opengl_vertexarray(device * dev, uint32_t prim)
-		: vertexarray{ dev }, m_primitive{ prim }
+	opengl_vertexarray::opengl_vertexarray(device * parent, uint32_t prim)
+		: vertexarray{ parent }, m_primitive{ prim }
 	{
 		ML_glCheck(glGenVertexArrays(1, &m_handle));
 		ML_glCheck(glBindVertexArray(m_handle));
@@ -1058,7 +1058,7 @@ namespace ml::gfx
 
 	void opengl_vertexarray::add_vertices(shared<vertexbuffer> const & value)
 	{
-		if (!m_handle || !value || !*value) { return; }
+		if (!m_handle || !value) { return; }
 		
 		bind();
 		
@@ -1126,8 +1126,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(device * dev, uint32_t usage, size_t count, address_t data)
-		: vertexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
+	opengl_vertexbuffer::opengl_vertexbuffer(device * parent, uint32_t usage, size_t count, address_t data)
+		: vertexbuffer{ parent }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
 		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
@@ -1179,8 +1179,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_indexbuffer::opengl_indexbuffer(device * dev, uint32_t usage, size_t count, address_t data)
-		: indexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
+	opengl_indexbuffer::opengl_indexbuffer(device * parent, uint32_t usage, size_t count, address_t data)
+		: indexbuffer{ parent }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
 		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
@@ -1232,8 +1232,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(device * dev, texopts const & opts, address_t data)
-		: texture2d{ dev }, m_opts{ opts }
+	opengl_texture2d::opengl_texture2d(device * parent, texopts const & opts, address_t data)
+		: texture2d{ parent }, m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 		ML_glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
@@ -1354,7 +1354,7 @@ namespace ml::gfx
 
 		static bool const edge_clamp_available
 		{
-			device::get_default()->get_info().texture_edge_clamp_available
+			get_device()->get_info().texture_edge_clamp_available
 		};
 
 		ML_glCheck(glTexParameteri(GL_TEXTURE_2D,
@@ -1419,8 +1419,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(device * dev, texopts const & opts)
-		: texturecube{ dev }, m_opts{ opts }
+	opengl_texturecube::opengl_texturecube(device * parent, texopts const & opts)
+		: texturecube{ parent }, m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 	}
@@ -1470,8 +1470,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(device * dev, texopts const & opts)
-		: framebuffer{ dev }, m_opts{ opts }
+	opengl_framebuffer::opengl_framebuffer(device * parent, texopts const & opts)
+		: framebuffer{ parent }, m_opts{ opts }
 	{
 		resize(m_opts.size);
 	}
@@ -1496,7 +1496,7 @@ namespace ml::gfx
 	{
 		static auto const max_color_attachments
 		{
-			(size_t)device::get_default()->get_info().max_color_attachments
+			(size_t)get_device()->get_info().max_color_attachments
 		};
 		
 		if (m_attachments.size() < max_color_attachments &&
@@ -1591,8 +1591,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_shader::opengl_shader(device * dev, uint32_t type, int32_t flags)
-		: shader{ dev }, m_shader_type{ type }, m_flags{ flags }
+	opengl_shader::opengl_shader(device * parent, uint32_t type, int32_t flags)
+		: shader{ parent }, m_shader_type{ type }, m_flags{ flags }
 	{
 		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
 	}
@@ -1676,8 +1676,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_program::opengl_program(device * dev, int32_t flags)
-		: program{ dev }, m_flags{ flags }
+	opengl_program::opengl_program(device * parent, int32_t flags)
+		: program{ parent }, m_flags{ flags }
 	{
 		ML_glCheck(m_handle = ML_glCreateProgram());
 	}
@@ -1702,7 +1702,7 @@ namespace ml::gfx
 	{
 		if (m_shaders.try_emplace(value->get_shader_type(), value).second)
 		{
-			if (m_handle && value && *value)
+			if (m_handle && value)
 			{
 				ML_glCheck(ML_glAttachShader(m_handle, value->get_handle()));
 			}
@@ -1716,7 +1716,7 @@ namespace ml::gfx
 	{
 		if (auto const it{ m_shaders.find(value->get_shader_type()) })
 		{
-			if (m_handle && value && *value)
+			if (m_handle && value)
 			{
 				ML_glCheck(ML_glDetachShader(m_handle, value->get_handle()));
 			}
@@ -1777,7 +1777,5 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // ML_IMPL_RENDERER_OPENGL

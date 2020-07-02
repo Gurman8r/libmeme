@@ -17,12 +17,12 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	class	device			;
+	class	devchild		;
 	class	devctx			;
-	class	devobj			;
 
+	class	vertexarray		;
 	class	vertexbuffer	;
 	class	indexbuffer		;
-	class	vertexarray		;
 
 	class	texture			;
 	class	texture2d		;
@@ -34,8 +34,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_handle(	object_id	); // object handle
-	ML_decl_handle(	uniform_id	); // uniform handle
+	ML_decl_handle(	resource_id	); // resource handle
+	ML_decl_handle(	uniform_id	); // uniform location
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -713,13 +713,13 @@ namespace ml::gfx
 
 		virtual ~device() override = default;
 
+		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
+
 		virtual void set_context(shared<devctx> const & value) noexcept = 0;
 
 		ML_NODISCARD virtual shared<devctx> const & get_context() const noexcept = 0;
 
 		ML_NODISCARD virtual devinfo const & get_info() const noexcept = 0;
-
-		ML_NODISCARD virtual std::thread::id const & get_thread_id() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
 
@@ -729,43 +729,36 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// devobj
+// devchild
 namespace ml::gfx
 {
-	// base device object
-	class ML_GRAPHICS_API devobj : public trackable, public non_copyable
+	// base device child
+	class ML_GRAPHICS_API devchild : public trackable, public non_copyable
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		device * const m_device;
+		device * const m_parent;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit devobj(device * dev) noexcept : m_device{ dev }
+		explicit devchild(device * parent) noexcept : m_parent{ parent }
 		{
 		}
 
-		virtual ~devobj() override = default;
+		virtual ~devchild() override = default;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline device * get_device() const noexcept { return m_parent; }
+
+		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
 
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline device * get_device() const noexcept { return m_device; }
-
-		ML_NODISCARD inline bool has_value() const noexcept { return get_handle() != nullptr; }
-
-		ML_NODISCARD inline operator bool() const noexcept { return has_value(); }
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -774,7 +767,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base device context
-	class ML_GRAPHICS_API devctx : public devobj
+	class ML_GRAPHICS_API devctx : public devchild
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -784,7 +777,7 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit devctx(device * dev) noexcept : devobj{ dev }
+		explicit devctx(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -794,9 +787,9 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual context_settings const & get_context_settings() const noexcept = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -900,13 +893,13 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base vertexarray
-	class ML_GRAPHICS_API vertexarray : public devobj
+	class ML_GRAPHICS_API vertexarray : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept;
 
 	public:
-		explicit vertexarray(device * dev) noexcept : devobj{ dev }
+		explicit vertexarray(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -914,7 +907,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -946,7 +939,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base vertexbuffer
-	class ML_GRAPHICS_API vertexbuffer : public devobj
+	class ML_GRAPHICS_API vertexbuffer : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
@@ -957,7 +950,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit vertexbuffer(device * dev) noexcept : devobj{ dev }
+		explicit vertexbuffer(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -965,7 +958,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -999,7 +992,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base indexbuffer
-	class ML_GRAPHICS_API indexbuffer : public devobj
+	class ML_GRAPHICS_API indexbuffer : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
@@ -1010,7 +1003,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit indexbuffer(device * dev) noexcept : devobj{ dev }
+		explicit indexbuffer(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -1018,7 +1011,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1081,10 +1074,10 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base texture
-	class ML_GRAPHICS_API texture : public devobj
+	class ML_GRAPHICS_API texture : public devchild
 	{
 	public:
-		explicit texture(device * dev) noexcept : devobj{ dev }
+		explicit texture(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -1092,7 +1085,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1154,7 +1147,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit texture2d(device * dev) noexcept : texture{ dev }
+		explicit texture2d(device * parent) noexcept : texture{ parent }
 		{
 		}
 
@@ -1162,7 +1155,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1210,7 +1203,7 @@ namespace ml::gfx
 		ML_NODISCARD static shared<texturecube> create(texopts const & opts) noexcept;
 
 	public:
-		explicit texturecube(device * dev) noexcept : texture{ dev }
+		explicit texturecube(device * parent) noexcept : texture{ parent }
 		{
 		}
 
@@ -1218,7 +1211,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1248,13 +1241,13 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base framebuffer
-	class ML_GRAPHICS_API framebuffer : public devobj
+	class ML_GRAPHICS_API framebuffer : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<framebuffer> create(texopts const & opts) noexcept;
 
 	public:
-		explicit framebuffer(device * dev) noexcept : devobj{ dev }
+		explicit framebuffer(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -1262,7 +1255,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1313,7 +1306,7 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base shader
-	class ML_GRAPHICS_API shader : public devobj
+	class ML_GRAPHICS_API shader : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<shader> create(uint32_t type, int32_t flags = shader_flags_default) noexcept;
@@ -1327,7 +1320,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit shader(device * dev) noexcept : devobj{ dev }
+		explicit shader(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -1335,7 +1328,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -1376,13 +1369,13 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base program
-	class ML_GRAPHICS_API program : public devobj
+	class ML_GRAPHICS_API program : public devchild
 	{
 	public:
 		ML_NODISCARD static shared<program> create(int32_t flags = program_flags_default) noexcept;
 
 	public:
-		explicit program(device * dev) noexcept : devobj{ dev }
+		explicit program(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
@@ -1390,7 +1383,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
