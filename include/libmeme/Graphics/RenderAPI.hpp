@@ -23,10 +23,12 @@ namespace ml::gfx
 	class	vertexbuffer	;
 	class	indexbuffer		;
 	class	vertexarray		;
+
 	class	texture			;
 	class	texture2d		;
 	class	texturecube		;
 	class	framebuffer		;
+
 	class	shader			;
 	class	program			;
 
@@ -48,22 +50,6 @@ namespace ml::gfx
 // enums
 namespace ml::gfx
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	enum clear_ : uint32_t
-	{
-		clear_none		= 0,		// none
-		clear_color		= 1 << 0,	// color buffer bit
-		clear_depth		= 1 << 1,	// depth buffer bit
-		clear_stencil	= 1 << 2,	// stencil buffer bit
-
-		// color / depth / stencil
-		clear_all
-			= clear_color
-			| clear_depth
-			| clear_stencil,
-	};
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// conversion helpers
@@ -409,16 +395,16 @@ namespace ml::gfx
 
 	enum usage_ : uint32_t
 	{
-		usage_stream_draw,
-		usage_static_draw,
-		usage_dynamic_draw,
+		usage_stream,
+		usage_static,
+		usage_dynamic,
 	};
 
 	constexpr cstring usage_names[] =
 	{
-		"stream draw",
-		"static draw",
-		"dynamic draw",
+		"stream",
+		"static",
+		"dynamic",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -426,7 +412,7 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// utility
+// util
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -527,7 +513,13 @@ namespace ml::gfx
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// layout
+namespace ml::gfx
+{
 	// buffer element
 	struct ML_NODISCARD buffer_element final
 	{
@@ -571,14 +563,14 @@ namespace ml::gfx
 		using reverse_iterator			= typename storage_type::reverse_iterator;
 		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
 
-		static constexpr std::initializer_list<buffer_element> default_layout
+		static constexpr std::initializer_list<buffer_element> default_3d
 		{
 			{ vec3{}, "a_position"	},
 			{ vec3{}, "a_normal"	},
 			{ vec2{}, "a_texcoord"	},
 		};
 
-		buffer_layout(std::initializer_list<buffer_element> init = default_layout) noexcept
+		buffer_layout(std::initializer_list<buffer_element> init = default_3d) noexcept
 			: m_elements{ init.begin(), init.end() }
 		{
 			uint32_t offset{};
@@ -598,77 +590,75 @@ namespace ml::gfx
 		uint32_t		m_stride	{}; // stride
 		storage_type	m_elements	{}; // elements
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// state
+namespace ml::gfx
+{
+	// clear flags
+	enum clear_ : uint32_t
+	{
+		clear_none		= 0,		// none
+		clear_color		= 1 << 0,	// color buffer bit
+		clear_depth		= 1 << 1,	// depth buffer bit
+		clear_stencil	= 1 << 2,	// stencil buffer bit
+
+		// color / depth / stencil
+		clear_all
+			= clear_color
+			| clear_depth
+			| clear_stencil,
+	};
+
 	// alpha state
 	struct ML_NODISCARD alpha_mode final
 	{
-		uint32_t	pred{ predicate_greater };
-		float_t		ref{ 0.001f };
+		uint32_t	pred	{ predicate_greater };
+		float_t		ref		{ 0.001f };
 	};
 
 	// blend state
 	struct ML_NODISCARD blend_mode final
 	{
 		uint32_t
-			color_equation{ equation_add },
-			color_sfactor{ factor_src_alpha },
-			color_dfactor{ factor_one_minus_src_alpha },
-			alpha_equation{ color_equation },
-			alpha_sfactor{ color_sfactor },
-			alpha_dfactor{ color_dfactor };
+			color_equation	{ equation_add },
+			color_sfactor	{ factor_src_alpha },
+			color_dfactor	{ factor_one_minus_src_alpha },
+			alpha_equation	{ color_equation },
+			alpha_sfactor	{ color_sfactor },
+			alpha_dfactor	{ color_dfactor };
 	};
 
 	// cull state
 	struct ML_NODISCARD cull_mode final
 	{
-		uint32_t	facet{ facet_back };
-		uint32_t	order{ order_ccw };
+		uint32_t	facet	{ facet_back };
+		uint32_t	order	{ order_ccw };
 	};
 
 	// depth state
 	struct ML_NODISCARD depth_mode final
 	{
-		uint32_t	pred{ predicate_less };
-		vec2		range{ 0.f, 1.f };
+		uint32_t	pred	{ predicate_less };
+		vec2		range	{ 0.f, 1.f };
 	};
 
 	// stencil state (WIP)
 	struct ML_NODISCARD stencil_mode final
 	{
-		uint32_t	pred{ predicate_always };
-		int32_t		ref{ 0 };
-		uint32_t	mask{ 0xffffffff };
+		uint32_t	pred	{ predicate_always };
+		int32_t		ref		{ 0 };
+		uint32_t	mask	{ 0xffffffff };
 	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device
-namespace ml::gfx
-{
-	// device (WIP)
-	class ML_GRAPHICS_API device final : public non_copyable
-	{
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static devctx * create_context(context_settings const & cs) noexcept;
-
-		static void destroy_context(devctx * value) noexcept;
-
-		ML_NODISCARD static devctx * get_current_context() noexcept;
-
-		static devctx * set_current_context(devctx * value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// device context
+// devinfo
 namespace ml::gfx
 {
 	// device info
@@ -692,27 +682,121 @@ namespace ml::gfx
 		bool geometry_shaders_available;
 		pmr::string shading_language_version;
 	};
+}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// base device context
-	class ML_GRAPHICS_API devctx : public trackable, public non_copyable
+// device
+namespace ml::gfx
+{
+	// base device
+	class ML_GRAPHICS_API device : public trackable, public non_copyable
 	{
-	protected:
+	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		friend class device;
-
-		virtual ~devctx() noexcept override = default;
+		static device * g_device; // pointer to default device
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static device * create() noexcept;
+
+		static void destroy(device * value) noexcept;
+
+		ML_NODISCARD static device * get_default() noexcept { return g_device; }
+
+		static device * set_default(device * value) noexcept { return g_device = value; }
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual ~device() override = default;
+
+		virtual void set_context(shared<devctx> const & value) noexcept = 0;
+
+		ML_NODISCARD virtual shared<devctx> const & get_context() const noexcept = 0;
+
+		ML_NODISCARD virtual devinfo const & get_info() const noexcept = 0;
+
+		ML_NODISCARD virtual std::thread::id const & get_thread_id() const noexcept = 0;
+
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// devobj
+namespace ml::gfx
+{
+	// base device object
+	class ML_GRAPHICS_API devobj : public trackable, public non_copyable
+	{
+	private:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		device * const m_device;
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		explicit devobj(device * dev) noexcept : m_device{ dev }
+		{
+		}
+
+		virtual ~devobj() override = default;
+
+		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
+
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline device * get_device() const noexcept { return m_device; }
+
+		ML_NODISCARD inline bool has_value() const noexcept { return get_handle() != nullptr; }
+
+		ML_NODISCARD inline operator bool() const noexcept { return has_value(); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// devctx
+namespace ml::gfx
+{
+	// base device context
+	class ML_GRAPHICS_API devctx : public devobj
+	{
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static shared<devctx> create(context_settings const & cs) noexcept;
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit devctx(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
+		virtual ~devctx() override = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		ML_NODISCARD virtual context_settings const & get_context_settings() const noexcept = 0;
 
-		ML_NODISCARD virtual devinfo const & get_device_info() const noexcept = 0;
+		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -812,24 +896,47 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device object
+// vertexarray
 namespace ml::gfx
 {
-	// base device object
-	class ML_GRAPHICS_API devobj : public trackable, public non_copyable
+	// base vertexarray
+	class ML_GRAPHICS_API vertexarray : public devobj
 	{
 	public:
-		virtual ~devobj() override = default;
+		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept;
+
+	public:
+		explicit vertexarray(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
+		virtual ~vertexarray() override = default;
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
+		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
-		ML_NODISCARD inline bool has_value() const noexcept { return get_handle(); }
+	public:
+		virtual void add_vertices(shared<vertexbuffer> const & value) = 0;
 
-		ML_NODISCARD inline operator bool() const noexcept { return has_value(); }
+		virtual void set_indices(shared<indexbuffer> const & value) = 0;
+
+		ML_NODISCARD virtual shared<indexbuffer> const & get_indices() const noexcept = 0;
+
+		ML_NODISCARD virtual uint32_t get_primitive() const noexcept = 0;
+		
+		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
+
+	public:
+		static void bind(vertexarray const * value) noexcept;
+
+		static void bind(shared<vertexarray> const & value) noexcept { bind(value.get()); }
+
+		inline void bind() const noexcept { bind(this); }
+
+		inline void unbind() const noexcept { bind(nullptr); }
 	};
 }
 
@@ -846,17 +953,21 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<vertexbuffer> create(size_t count, address_t data = {}) noexcept
 		{
-			return create(data ? usage_static_draw : usage_dynamic_draw, count, data);
+			return create(data ? usage_static : usage_dynamic, count, data);
 		}
 
 	public:
+		explicit vertexbuffer(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~vertexbuffer() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
@@ -895,17 +1006,21 @@ namespace ml::gfx
 
 		ML_NODISCARD static shared<indexbuffer> create(size_t count, address_t data = {}) noexcept
 		{
-			return create(data ? usage_static_draw : usage_dynamic_draw, count, data);
+			return create(data ? usage_static : usage_dynamic, count, data);
 		}
 
 	public:
+		explicit indexbuffer(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~indexbuffer() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
@@ -920,48 +1035,6 @@ namespace ml::gfx
 		static void bind(indexbuffer const * value) noexcept;
 
 		static void bind(shared<indexbuffer> const & value) noexcept { bind(value.get()); }
-
-		inline void bind() const noexcept { bind(this); }
-
-		inline void unbind() const noexcept { bind(nullptr); }
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// vertexarray
-namespace ml::gfx
-{
-	// base vertexarray
-	class ML_GRAPHICS_API vertexarray : public devobj
-	{
-	public:
-		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept;
-
-	public:
-		virtual ~vertexarray() override = default;
-
-		virtual bool revalue() override = 0;
-
-		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
-
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
-
-	public:
-		virtual void add_vertices(shared<vertexbuffer> const & value) = 0;
-
-		virtual void set_indices(shared<indexbuffer> const & value) = 0;
-
-		ML_NODISCARD virtual shared<indexbuffer> const & get_indices() const noexcept = 0;
-
-		ML_NODISCARD virtual uint32_t get_primitive() const noexcept = 0;
-		
-		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
-
-	public:
-		static void bind(vertexarray const * value) noexcept;
-
-		static void bind(shared<vertexarray> const & value) noexcept { bind(value.get()); }
 
 		inline void bind() const noexcept { bind(this); }
 
@@ -1011,13 +1084,17 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture : public devobj
 	{
 	public:
+		explicit texture(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~texture() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual void lock() = 0;
@@ -1077,13 +1154,17 @@ namespace ml::gfx
 		}
 
 	public:
+		explicit texture2d(device * dev) noexcept : texture{ dev }
+		{
+		}
+
 		virtual ~texture2d() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual void lock() override = 0;
@@ -1129,13 +1210,17 @@ namespace ml::gfx
 		ML_NODISCARD static shared<texturecube> create(texopts const & opts) noexcept;
 
 	public:
+		explicit texturecube(device * dev) noexcept : texture{ dev }
+		{
+		}
+
 		virtual ~texturecube() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual void lock() override = 0;
@@ -1169,13 +1254,17 @@ namespace ml::gfx
 		ML_NODISCARD static shared<framebuffer> create(texopts const & opts) noexcept;
 
 	public:
+		explicit framebuffer(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~framebuffer() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual bool attach(shared<texture2d> const & value) = 0;
@@ -1238,13 +1327,17 @@ namespace ml::gfx
 		}
 
 	public:
+		explicit shader(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~shader() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual bool compile(pmr::vector<pmr::string> const & src) = 0;
@@ -1289,13 +1382,17 @@ namespace ml::gfx
 		ML_NODISCARD static shared<program> create(int32_t flags = program_flags_default) noexcept;
 
 	public:
+		explicit program(device * dev) noexcept : devobj{ dev }
+		{
+		}
+
 		virtual ~program() override = default;
 
-		virtual bool revalue() override = 0;
+		virtual bool revalue() = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_type_info() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
 		virtual bool attach(shared<shader> const & value) = 0;
@@ -1315,7 +1412,7 @@ namespace ml::gfx
 			{
 				texture::bind(tex, slot);
 
-				device::get_current_context()->upload(loc, (int32_t)slot++);
+				device::get_default()->get_context()->upload(loc, (int32_t)slot++);
 			});
 		}
 
@@ -1329,7 +1426,7 @@ namespace ml::gfx
 				}
 				else
 				{
-					device::get_current_context()->upload(loc, ML_forward(value));
+					device::get_default()->get_context()->upload(loc, ML_forward(value));
 				}
 			});
 		}

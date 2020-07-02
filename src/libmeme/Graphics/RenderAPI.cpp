@@ -4,7 +4,8 @@
 
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_RenderAPI_OpenGL.hpp"
-using impl_device		= _ML_GFX opengl_devctx			;
+using impl_device		= _ML_GFX opengl_device			;
+using impl_devctx		= _ML_GFX opengl_devctx			;
 using impl_vertexarray	= _ML_GFX opengl_vertexarray	;
 using impl_vertexbuffer	= _ML_GFX opengl_vertexbuffer	;
 using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
@@ -29,34 +30,24 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static devctx * g_devctx{};
+	device * device::g_device{};
 
-	devctx * device::create_context(context_settings const & cs) noexcept
+	device * device::create() noexcept
 	{
-		auto temp{ new impl_device{ cs } };
+		auto * temp{ new impl_device{} };
 
-		if (!g_devctx) { set_current_context(temp); }
-		
+		if (!g_device) { set_default(temp); }
+
 		return temp;
 	}
 
-	void device::destroy_context(devctx * value) noexcept
+	void device::destroy(device * value) noexcept
 	{
-		if (!value) { value = g_devctx; }
+		if (!value) { value = g_device; }
 
-		if (g_devctx == value) { set_current_context(nullptr); }
+		if (g_device == value) { set_default(nullptr); }
 
 		delete value;
-	}
-
-	devctx * device::get_current_context() noexcept
-	{
-		return g_devctx;
-	}
-
-	devctx * device::set_current_context(devctx * value) noexcept
-	{
-		return g_devctx = value;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,38 +57,50 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void vertexbuffer::bind(vertexbuffer const * value) noexcept
+	ML_NODISCARD shared<devctx> devctx::create(context_settings const & cs) noexcept
 	{
-		impl_vertexbuffer::do_bind(static_cast<impl_vertexbuffer const *>(value));
+		return make_shared<impl_devctx>(device::get_default(), cs);
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+namespace ml::gfx
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	shared<vertexarray> vertexarray::create(uint32_t primitive) noexcept
+	{
+		return make_shared<impl_vertexarray>(device::get_default(), primitive);
+	}
+
+	void vertexarray::bind(vertexarray const * value) noexcept
+	{
+		impl_vertexarray::do_bind(static_cast<impl_vertexarray const *>(value));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<vertexbuffer> vertexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
-		return _ML make_shared<impl_vertexbuffer>(usage, count, data);
+		return make_shared<impl_vertexbuffer>(device::get_default(), usage, count, data);
+	}
+
+	void vertexbuffer::bind(vertexbuffer const * value) noexcept
+	{
+		impl_vertexbuffer::do_bind(static_cast<impl_vertexbuffer const *>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<indexbuffer> indexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
-		return _ML make_shared<impl_indexbuffer>(usage, count, data);
+		return make_shared<impl_indexbuffer>(device::get_default(), usage, count, data);
 	}
 
 	void indexbuffer::bind(indexbuffer const * value) noexcept
 	{
 		impl_indexbuffer::do_bind(static_cast<impl_indexbuffer const *>(value));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	shared<vertexarray> vertexarray::create(uint32_t primitive) noexcept
-	{
-		return _ML make_shared<impl_vertexarray>(primitive);
-	}
-
-	void vertexarray::bind(vertexarray const * value) noexcept
-	{
-		impl_vertexarray::do_bind(static_cast<impl_vertexarray const *>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -118,7 +121,7 @@ namespace ml::gfx
 
 	shared<texture2d> texture2d::create(texopts const & opts, address_t data) noexcept
 	{
-		return _ML make_shared<impl_texture2d>(opts, data);
+		return make_shared<impl_texture2d>(device::get_default(), opts, data);
 	}
 
 	void texture2d::bind(texture2d const * value, uint32_t slot) noexcept
@@ -130,7 +133,7 @@ namespace ml::gfx
 
 	shared<texturecube> texturecube::create(texopts const & opts) noexcept
 	{
-		return _ML make_shared<impl_texturecube>(opts);
+		return make_shared<impl_texturecube>(device::get_default(), opts);
 	}
 
 	void texturecube::bind(texturecube const * value, uint32_t slot) noexcept
@@ -142,7 +145,7 @@ namespace ml::gfx
 
 	shared<framebuffer> framebuffer::create(texopts const & opts) noexcept
 	{
-		return _ML make_shared<impl_framebuffer>(opts);
+		return make_shared<impl_framebuffer>(device::get_default(), opts);
 	}
 
 	void framebuffer::bind(framebuffer const * value) noexcept
@@ -154,14 +157,14 @@ namespace ml::gfx
 
 	shared<shader> shader::create(uint32_t type, int32_t flags) noexcept
 	{
-		return _ML make_shared<impl_shader>(type, flags);
+		return make_shared<impl_shader>(nullptr, type, flags);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<program> program::create(int32_t flags) noexcept
 	{
-		return _ML make_shared<impl_program>(flags);
+		return make_shared<impl_program>(nullptr, flags);
 	}
 
 	void program::bind(program const * value) noexcept

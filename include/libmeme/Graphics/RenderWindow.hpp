@@ -24,12 +24,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_device_context() const & noexcept -> unique<gfx::devctx> const & { return m_ctx; }
+		ML_NODISCARD auto get_device() const & noexcept -> unique<gfx::device> const & { return m_dev; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		unique<gfx::devctx> m_ctx;
+		unique<gfx::device> m_dev;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

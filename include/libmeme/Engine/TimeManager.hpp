@@ -57,7 +57,7 @@ namespace ml
 		uint64_t	m_frame_count	{}			; // frame count
 
 		// fps tracker
-		struct ML_NODISCARD fps_tracker final : trackable, non_copyable
+		struct ML_NODISCARD fps_tracker final : non_copyable
 		{
 			using frame_times = ds::array<float_t, 120>;
 

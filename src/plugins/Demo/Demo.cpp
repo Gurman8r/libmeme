@@ -1376,8 +1376,9 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & ctx	{ engine::window().get_device_context() };
-			static auto const & info{ ctx->get_device_info() };
+			static auto const & dev{ engine::window().get_device() };
+			static auto const & ctx	{ dev->get_context() };
+			static auto const & info{ dev->get_info() };
 
 			if (ImGui::BeginMenuBar())
 			{

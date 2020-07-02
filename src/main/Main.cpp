@@ -59,9 +59,6 @@ ml::int32_t main()
 	})));
 	ML_defer{ engine::finalize(); };
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// application sequence
 	if (engine::config().contains("setup_script"))
 	{
 		engine::scripts().do_file(
@@ -69,7 +66,10 @@ ml::int32_t main()
 				engine::config()["setup_script"]));
 	}
 
-	if (!engine::window().is_open()) { return EXIT_FAILURE; } // nothing to do
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// application sequence
+	if (!engine::window().is_open()) { return EXIT_FAILURE; }
 	
 	event_system::fire_event<load_event>();
 	

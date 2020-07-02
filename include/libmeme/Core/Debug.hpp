@@ -6,8 +6,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // assert
-#if !defined(ML_assert) && defined(assert)
-#	define ML_assert(expr)	assert(expr)
+#if !defined(ML_assert)
+#	ifdef assert
+#		define ML_assert(expr)	assert(expr)
+#	else
+#		define ML_assert(expr) (expr)
+#	endif
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

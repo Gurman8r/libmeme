@@ -428,7 +428,7 @@ namespace ml::ecs
 				return m_manager->is_valid_handle(*this);
 			}
 
-			ML_NODISCARD explicit operator bool() const noexcept
+			ML_NODISCARD operator bool() const noexcept
 			{
 				return this->is_valid_handle();
 			}
@@ -520,11 +520,11 @@ namespace ml::ecs
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			template <class C
+			template <class S
 			> ML_NODISCARD bool matches_signature() const noexcept
 			{
 				ML_assert(m_manager);
-				return m_manager->template matches_signature<C>(*this);
+				return m_manager->template matches_signature<S>(*this);
 			}
 
 			template <template <class> class X

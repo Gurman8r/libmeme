@@ -7,6 +7,13 @@ constant buffer / uniform buffer
 cameras w/ controller gui
 template basic_vertex to do variations of vertex at CT
 
+window
+	get_device
+		create_context
+		destroy_context
+		get_context
+		get_info
+
 
 device
 	devinfo

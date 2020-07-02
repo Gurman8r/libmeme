@@ -150,26 +150,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _clear(uint32_t value) noexcept
-	{
-		uint32_t temp{};
-		if constexpr (Convt()) // to impl
-		{
-			ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, value, clear_color	);
-			ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, value, clear_depth	);
-			ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, value, clear_stencil	);
-		}
-		else // to user
-		{
-			ML_flag_map(temp, clear_color	, value, GL_COLOR_BUFFER_BIT	);
-			ML_flag_map(temp, clear_depth	, value, GL_DEPTH_BUFFER_BIT	);
-			ML_flag_map(temp, clear_stencil	, value, GL_STENCIL_BUFFER_BIT	);
-		}
-		return temp;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
 		if constexpr (Convt()) // to impl
@@ -571,9 +551,9 @@ namespace ml::gfx
 			switch (value)
 			{
 			default					: return value;
-			case usage_stream_draw	: return GL_STREAM_DRAW;
-			case usage_static_draw	: return GL_STATIC_DRAW;
-			case usage_dynamic_draw	: return GL_DYNAMIC_DRAW;
+			case usage_stream	: return GL_STREAM_DRAW;
+			case usage_static	: return GL_STATIC_DRAW;
+			case usage_dynamic	: return GL_DYNAMIC_DRAW;
 			}
 		}
 		else // to user
@@ -581,9 +561,9 @@ namespace ml::gfx
 			switch (value)
 			{
 			default					: return value;
-			case GL_STREAM_DRAW		: return usage_stream_draw;
-			case GL_STATIC_DRAW		: return usage_static_draw;
-			case GL_DYNAMIC_DRAW	: return usage_dynamic_draw;
+			case GL_STREAM_DRAW		: return usage_stream;
+			case GL_STATIC_DRAW		: return usage_static;
+			case GL_DYNAMIC_DRAW	: return usage_dynamic;
 			}
 		}
 	}
@@ -616,22 +596,13 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device context
+// device
 namespace ml::gfx
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_devctx::opengl_devctx(context_settings const & cs) : m_settings{ cs }
+	opengl_device::opengl_device() : device{}
 	{
-		// INIT
-		{
-			static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
-			ML_assert("failed initializing opengl" && opengl_init);
-
-			ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
-			ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
-			ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-		}
+		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
+		ML_assert("failed initializing opengl" && opengl_init);
 
 		// renderer
 		ML_glCheck(m_devinfo.renderer = (cstring)glGetString(GL_RENDERER));
@@ -700,6 +671,24 @@ namespace ml::gfx
 #endif
 		// shading language version
 		ML_glCheck(m_devinfo.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// device context
+namespace ml::gfx
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_devctx::opengl_devctx(device * dev, context_settings const & cs)
+		: devctx{ dev }, m_settings{ cs }
+	{
+		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
+		
+		ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
+		
+		ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -935,7 +924,11 @@ namespace ml::gfx
 
 	void opengl_devctx::clear(uint32_t mask)
 	{
-		ML_glCheck(glClear(_clear<to_impl>(mask)));
+		uint32_t temp{};
+		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color);
+		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth);
+		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil);
+		ML_glCheck(glClear(temp));
 	}
 
 	void opengl_devctx::draw(shared<vertexarray> const & value)
@@ -1035,119 +1028,13 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// vertexbuffer
-namespace ml::gfx
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_vertexbuffer::opengl_vertexbuffer(uint32_t usage, size_t count, address_t data)
-		: m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
-	{
-		ML_glCheck(glGenBuffers(1, &m_handle));
-		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
-		ML_glCheck(glBufferData(
-			GL_ARRAY_BUFFER,
-			(uint32_t)m_buffer.size(),
-			m_buffer.data(),
-			_usage<to_impl>(m_usage)));
-	}
-
-	opengl_vertexbuffer::~opengl_vertexbuffer()
-	{
-		ML_glCheck(glDeleteBuffers(1, &m_handle));
-	}
-
-	bool opengl_vertexbuffer::revalue()
-	{
-		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
-
-		ML_glCheck(glGenBuffers(1, &m_handle));
-
-		m_buffer.clear();
-
-		return (bool)m_handle;
-	}
-
-	void opengl_vertexbuffer::set_data(size_t count, address_t data, size_t offset)
-	{
-		m_buffer = bufcpy<float_t>(count, data);
-		ML_glCheck(glBufferSubData(
-			GL_ARRAY_BUFFER,
-			offset,
-			(uint32_t)m_buffer.size(),
-			m_buffer.data()));
-	}
-
-	void opengl_vertexbuffer::do_bind(opengl_vertexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// indexbuffer
-namespace ml::gfx
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_indexbuffer::opengl_indexbuffer(uint32_t usage, size_t count, address_t data)
-		: m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
-	{
-		ML_glCheck(glGenBuffers(1, &m_handle));
-		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
-		ML_glCheck(glBufferData(
-			GL_ELEMENT_ARRAY_BUFFER,
-			(uint32_t)m_buffer.size(),
-			m_buffer.data(),
-			_usage<to_impl>(m_usage)));
-	}
-
-	opengl_indexbuffer::~opengl_indexbuffer()
-	{
-		ML_glCheck(glDeleteBuffers(1, &m_handle));
-	}
-
-	bool opengl_indexbuffer::revalue()
-	{
-		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
-		
-		ML_glCheck(glGenBuffers(1, &m_handle));
-
-		m_buffer.clear();
-		
-		return (bool)m_handle;
-	}
-
-	void opengl_indexbuffer::set_data(size_t count, address_t data, size_t offset)
-	{
-		m_buffer = bufcpy<uint32_t>(count, data);
-		ML_glCheck(glBufferSubData(
-			GL_ELEMENT_ARRAY_BUFFER,
-			offset,
-			(uint32_t)m_buffer.size(),
-			m_buffer.data()));
-	}
-
-	void opengl_indexbuffer::do_bind(opengl_indexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // vertexarray
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexarray::opengl_vertexarray(uint32_t prim)
-		: m_primitive{ prim }
+	opengl_vertexarray::opengl_vertexarray(device * dev, uint32_t prim)
+		: vertexarray{ dev }, m_primitive{ prim }
 	{
 		ML_glCheck(glGenVertexArrays(1, &m_handle));
 		ML_glCheck(glBindVertexArray(m_handle));
@@ -1234,13 +1121,119 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// vertexbuffer
+namespace ml::gfx
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_vertexbuffer::opengl_vertexbuffer(device * dev, uint32_t usage, size_t count, address_t data)
+		: vertexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
+	{
+		ML_glCheck(glGenBuffers(1, &m_handle));
+		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
+		ML_glCheck(glBufferData(
+			GL_ARRAY_BUFFER,
+			(uint32_t)m_buffer.size(),
+			m_buffer.data(),
+			_usage<to_impl>(m_usage)));
+	}
+
+	opengl_vertexbuffer::~opengl_vertexbuffer()
+	{
+		ML_glCheck(glDeleteBuffers(1, &m_handle));
+	}
+
+	bool opengl_vertexbuffer::revalue()
+	{
+		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
+
+		ML_glCheck(glGenBuffers(1, &m_handle));
+
+		m_buffer.clear();
+
+		return (bool)m_handle;
+	}
+
+	void opengl_vertexbuffer::set_data(size_t count, address_t data, size_t offset)
+	{
+		m_buffer = bufcpy<float_t>(count, data);
+		ML_glCheck(glBufferSubData(
+			GL_ARRAY_BUFFER,
+			offset,
+			(uint32_t)m_buffer.size(),
+			m_buffer.data()));
+	}
+
+	void opengl_vertexbuffer::do_bind(opengl_vertexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// indexbuffer
+namespace ml::gfx
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	opengl_indexbuffer::opengl_indexbuffer(device * dev, uint32_t usage, size_t count, address_t data)
+		: indexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
+	{
+		ML_glCheck(glGenBuffers(1, &m_handle));
+		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
+		ML_glCheck(glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER,
+			(uint32_t)m_buffer.size(),
+			m_buffer.data(),
+			_usage<to_impl>(m_usage)));
+	}
+
+	opengl_indexbuffer::~opengl_indexbuffer()
+	{
+		ML_glCheck(glDeleteBuffers(1, &m_handle));
+	}
+
+	bool opengl_indexbuffer::revalue()
+	{
+		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
+		
+		ML_glCheck(glGenBuffers(1, &m_handle));
+
+		m_buffer.clear();
+		
+		return (bool)m_handle;
+	}
+
+	void opengl_indexbuffer::set_data(size_t count, address_t data, size_t offset)
+	{
+		m_buffer = bufcpy<uint32_t>(count, data);
+		ML_glCheck(glBufferSubData(
+			GL_ELEMENT_ARRAY_BUFFER,
+			offset,
+			(uint32_t)m_buffer.size(),
+			m_buffer.data()));
+	}
+
+	void opengl_indexbuffer::do_bind(opengl_indexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // texture2d
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(texopts const & opts, address_t data)
-		: m_opts{ opts }
+	opengl_texture2d::opengl_texture2d(device * dev, texopts const & opts, address_t data)
+		: texture2d{ dev }, m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 		ML_glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
@@ -1361,7 +1354,7 @@ namespace ml::gfx
 
 		static bool const edge_clamp_available
 		{
-			device::get_current_context()->get_device_info().texture_edge_clamp_available
+			device::get_default()->get_info().texture_edge_clamp_available
 		};
 
 		ML_glCheck(glTexParameteri(GL_TEXTURE_2D,
@@ -1426,7 +1419,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(texopts const & opts) : m_opts{ opts }
+	opengl_texturecube::opengl_texturecube(device * dev, texopts const & opts)
+		: texturecube{ dev }, m_opts{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 	}
@@ -1476,7 +1470,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(texopts const & opts) : m_opts{ opts }
+	opengl_framebuffer::opengl_framebuffer(device * dev, texopts const & opts)
+		: framebuffer{ dev }, m_opts{ opts }
 	{
 		resize(m_opts.size);
 	}
@@ -1501,7 +1496,7 @@ namespace ml::gfx
 	{
 		static auto const max_color_attachments
 		{
-			(size_t)device::get_current_context()->get_device_info().max_color_attachments
+			(size_t)device::get_default()->get_info().max_color_attachments
 		};
 		
 		if (m_attachments.size() < max_color_attachments &&
@@ -1596,8 +1591,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_shader::opengl_shader(uint32_t type, int32_t flags)
-		: m_shader_type{ type }, m_flags{ flags }
+	opengl_shader::opengl_shader(device * dev, uint32_t type, int32_t flags)
+		: shader{ dev }, m_shader_type{ type }, m_flags{ flags }
 	{
 		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
 	}
@@ -1681,8 +1676,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_program::opengl_program(int32_t flags)
-		: m_flags{ flags }
+	opengl_program::opengl_program(device * dev, int32_t flags)
+		: program{ dev }, m_flags{ flags }
 	{
 		ML_glCheck(m_handle = ML_glCreateProgram());
 	}

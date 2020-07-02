@@ -291,6 +291,10 @@ namespace ml
 	template <class T, class Dx = default_delete<T>
 	> ML_alias unique = typename std::unique_ptr<T, Dx>;
 
+	// weak pointer
+	template <class T
+	> ML_alias weak = typename std::weak_ptr<T>;
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// make new

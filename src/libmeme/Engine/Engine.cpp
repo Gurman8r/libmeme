@@ -98,27 +98,34 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool engine::is_initialized() noexcept { return (bool)g_engine; }
+	bool engine::is_initialized() noexcept
+	{
+		return (bool)g_engine;
+	}
 
 	bool engine::initialize(json const & j, allocator_type alloc) noexcept
 	{
-		if (g_engine) { return debug::error("engine is already initialized"); }
+		if (is_initialized()) { return debug::error("engine is already initialized"); }
 		else
 		{
-			debug::info("creating engine context...");
+			debug::info("initializing engine context...");
 
-			return (g_engine = new engine_context{ j, alloc });
+			ML_assert((g_engine = new engine_context{ j, alloc }));
+
+			return is_initialized();
 		}
 	}
 
 	bool engine::finalize() noexcept
 	{
-		if (!g_engine) { return debug::error("engine is not initialized"); }
+		if (!is_initialized()) { return debug::error("engine is not initialized"); }
 		else
 		{
-			delete g_engine;
+			debug::info("finalizing engine context...");
 
-			return !(g_engine = nullptr);
+			delete g_engine; g_engine = nullptr;
+
+			return !is_initialized();
 		}
 	}
 
@@ -126,43 +133,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(g_engine && "engine::config");
+		ML_assert("engine::config" && g_engine);
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(g_engine && "engine::fs");
+		ML_assert("engine::fs" && g_engine);
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(g_engine && "engine::gui");
+		ML_assert("engine::gui" && g_engine);
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(g_engine && "engine::plugins");
+		ML_assert("engine::plugins" && g_engine);
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(g_engine && "engine::scripts");
+		ML_assert("engine::scripts" && g_engine);
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(g_engine && "engine::time");
+		ML_assert("engine::time" && g_engine);
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(g_engine && "engine::window");
+		ML_assert("engine::window" && g_engine);
 		return g_engine->m_window;
 	}
 

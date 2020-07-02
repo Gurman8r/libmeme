@@ -39,7 +39,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::is_initialized() const noexcept { return (bool)m_gui_context; }
+	bool gui_manager::is_initialized() const noexcept
+	{
+		return (bool)m_gui_context;
+	}
 
 	bool gui_manager::initialize(window const & w)
 	{
