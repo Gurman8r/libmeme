@@ -23,9 +23,6 @@ using impl_program		= _ML_GFX opengl_program		;
 #	error "Unknown or invalid renderer implementation specified."
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// device
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,22 +48,12 @@ namespace ml::gfx
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-namespace ml::gfx
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_NODISCARD shared<devctx> devctx::create(context_settings const & cs) noexcept
 	{
 		return make_shared<impl_devctx>(device::get_default(), cs);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-namespace ml::gfx
-{
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<vertexarray> vertexarray::create(uint32_t primitive) noexcept
