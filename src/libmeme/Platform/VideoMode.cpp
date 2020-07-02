@@ -16,8 +16,7 @@ namespace ml
 			temp =
 			{
 				{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
-				(int32_t)dm.dmBitsPerPel,
-				(int32_t)dm.dmDisplayFrequency
+				(int32_t)dm.dmBitsPerPel, (int32_t)dm.dmDisplayFrequency
 			};
 
 #elif defined(ML_os_unix)
@@ -41,8 +40,7 @@ namespace ml
 				temp.insert
 				({
 					{ (int32_t)dm.dmPelsWidth, (int32_t)dm.dmPelsHeight },
-					(int32_t)dm.dmBitsPerPel,
-					(int32_t)dm.dmDisplayFrequency
+					(int32_t)dm.dmBitsPerPel, (int32_t)dm.dmDisplayFrequency
 				});
 			}
 

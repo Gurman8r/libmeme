@@ -9,8 +9,10 @@ namespace ml
 
 	static engine::engine_context * g_engine{};
 	
-	class engine::engine_context final : trackable, non_copyable, event_listener
+	struct engine::engine_context final : trackable, non_copyable, event_listener
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		friend class		engine		;
 		json				m_config	; // config
 		file_manager		m_fs		; // files
@@ -19,6 +21,8 @@ namespace ml
 		script_manager		m_scripts	; // scripts
 		time_manager		m_time		; // timers
 		render_window		m_window	; // window
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		engine_context(json const & j, allocator_type alloc) noexcept
 			: m_config	{ json{ j } }
@@ -37,6 +41,13 @@ namespace ml
 			event_system::add_listener<	end_draw_event	>(this);
 			event_system::add_listener<	end_loop_event	>(this);
 		}
+
+		~engine_context() noexcept override
+		{
+			m_gui.main_menu_bar().menus.clear();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void on_event(event const & ev) override
 		{
@@ -71,7 +82,7 @@ namespace ml
 			} break;
 
 			case hashof_v<end_draw_event>: {
-				if ML_UNLIKELY(m_window.get_hint(window_hints_doublebuffer))
+				if ML_UNLIKELY(m_window.get_hint(window_hints_double_buffer))
 				{
 					m_window.swap_buffers();
 				}
@@ -81,6 +92,8 @@ namespace ml
 			} break;
 			}
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,13 +105,9 @@ namespace ml
 		if (g_engine) { return debug::error("engine is already initialized"); }
 		else
 		{
-			if (debug::info("creating engine context...")
-			; !(g_engine = new engine_context{ j, alloc }))
-			{
-				return debug::error("failed creating engine context");
-			}
+			debug::info("creating engine context...");
 
-			return g_engine;
+			return (g_engine = new engine_context{ j, alloc });
 		}
 	}
 
@@ -107,10 +116,6 @@ namespace ml
 		if (!g_engine) { return debug::error("engine is not initialized"); }
 		else
 		{
-			// FIXME: need to manually clear gui callbacks before plugins are destroyed
-			// callbacks can live inside plugins' memory and will crash if not cleared first
-			g_engine->m_gui.main_menu_bar().menus.clear();
-
 			delete g_engine;
 
 			return !(g_engine = nullptr);

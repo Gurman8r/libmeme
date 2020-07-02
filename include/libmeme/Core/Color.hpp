@@ -186,8 +186,6 @@ namespace ml
 
 	namespace colors
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		static constexpr auto clear		= color{ 0.0f, 0.0f, 0.0f, 0.0f };
 		static constexpr auto white		= color{ 1.0f, 1.0f, 1.0f, 1.0f };
 		static constexpr auto gray		= color{ 0.5f, 0.5f, 0.5f, 1.0f };
@@ -204,8 +202,6 @@ namespace ml
 		static constexpr auto fuchsia	= color{ 1.0f, 0.0f, 0.5f, 1.0f };
 		static constexpr auto aqua		= color{ 0.0f, 1.0f, 0.5f, 1.0f };
 		static constexpr auto azure		= color{ 0.0f, 0.5f, 1.0f, 1.0f };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

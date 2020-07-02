@@ -43,24 +43,24 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias window_char_fn				= typename void(*)(window_handle, uint32_t);
-	ML_alias window_char_mods_fn		= typename void(*)(window_handle, uint32_t, int32_t);
-	ML_alias window_close_fn			= typename void(*)(window_handle);
-	ML_alias window_content_scale_fn	= typename void(*)(window_handle, float_t, float_t);
-	ML_alias window_cursor_enter_fn		= typename void(*)(window_handle, int32_t);
-	ML_alias window_cursor_position_fn	= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_drop_fn				= typename void(*)(window_handle, int32_t, cstring[]);
+	ML_alias window_char_fn				= typename void(*)(void *, uint32_t);
+	ML_alias window_char_mods_fn		= typename void(*)(void *, uint32_t, int32_t);
+	ML_alias window_close_fn			= typename void(*)(void *);
+	ML_alias window_content_scale_fn	= typename void(*)(void *, float_t, float_t);
+	ML_alias window_cursor_enter_fn		= typename void(*)(void *, int32_t);
+	ML_alias window_cursor_position_fn	= typename void(*)(void *, float64_t, float64_t);
+	ML_alias window_drop_fn				= typename void(*)(void *, int32_t, cstring[]);
 	ML_alias window_error_fn			= typename void(*)(int32_t, cstring);
-	ML_alias window_focus_fn			= typename void(*)(window_handle, int32_t);
-	ML_alias window_framebuffer_size_fn	= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_iconify_fn			= typename void(*)(window_handle, int32_t);
-	ML_alias window_key_fn				= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
-	ML_alias window_maximize_fn			= typename void(*)(window_handle, int32_t);
-	ML_alias window_mouse_fn			= typename void(*)(window_handle, int32_t, int32_t, int32_t);
-	ML_alias window_position_fn			= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_refresh_fn			= typename void(*)(window_handle);
-	ML_alias window_scroll_fn			= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_size_fn				= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_focus_fn			= typename void(*)(void *, int32_t);
+	ML_alias window_framebuffer_size_fn	= typename void(*)(void *, int32_t, int32_t);
+	ML_alias window_iconify_fn			= typename void(*)(void *, int32_t);
+	ML_alias window_key_fn				= typename void(*)(void *, int32_t, int32_t, int32_t, int32_t);
+	ML_alias window_maximize_fn			= typename void(*)(void *, int32_t);
+	ML_alias window_mouse_fn			= typename void(*)(void *, int32_t, int32_t, int32_t);
+	ML_alias window_position_fn			= typename void(*)(void *, int32_t, int32_t);
+	ML_alias window_refresh_fn			= typename void(*)(void *);
+	ML_alias window_scroll_fn			= typename void(*)(void *, float64_t, float64_t);
+	ML_alias window_size_fn				= typename void(*)(void *, int32_t, int32_t);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,30 +90,6 @@ namespace ml
 		cursor_shape_hresize,
 		cursor_shape_vresize,
 		cursor_shape_hand,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// input state
-	enum input_state_ : int32_t
-	{
-		input_state_release	, // release | high -> low
-		input_state_press	, // press | low -> high
-		input_state_repeat	, // repeat | high -> high
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// input modifiers
-	enum input_mods_ : int32_t
-	{
-		input_mods_none			= (0 << 0),	// none
-		input_mods_shift		= (0 << 1),	// shift
-		input_mods_ctrl			= (1 << 1),	// ctrl
-		input_mods_alt			= (1 << 2),	// alt
-		input_mods_super		= (1 << 3),	// super
-		input_mods_caps_lock	= (1 << 4),	// caps
-		input_mods_num_lock		= (1 << 5)	// numlock
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -245,22 +221,46 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// mouse buttons
-	enum mouse_button_ : int32_t
+	// key modifiers
+	enum key_mods_ : int32_t
 	{
-		mouse_button_0, // mb 0
-		mouse_button_1, // mb 1
-		mouse_button_2, // mb 2
-		mouse_button_3, // mb 3
-		mouse_button_4, // mb 4
-		mouse_button_5, // mb 5
-		mouse_button_6, // mb 6
-		mouse_button_7, // mb 7
+		key_mods_none		= (0 << 0),	// none
+		key_mods_shift		= (0 << 1),	// shift
+		key_mods_ctrl		= (1 << 1),	// ctrl
+		key_mods_alt		= (1 << 2),	// alt
+		key_mods_super		= (1 << 3),	// super
+		key_mods_caps_lock	= (1 << 4),	// caps
+		key_mods_num_lock	= (1 << 5)	// numlock
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// window attribute
+	// key states
+	enum key_state_ : int32_t
+	{
+		key_state_release	, // release | hi -> lo
+		key_state_press		, // press   | lo -> hi
+		key_state_repeat	, // repeat  | hi -> hi
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// mouse buttons
+	enum mouse_button_ : int32_t
+	{
+		mouse_button_0, // mouse button 0
+		mouse_button_1, // mouse button 1
+		mouse_button_2, // mouse button 2
+		mouse_button_3, // mouse button 3
+		mouse_button_4, // mouse button 4
+		mouse_button_5, // mouse button 5
+		mouse_button_6, // mouse button 6
+		mouse_button_7, // mouse button 7
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// window attributes
 	enum window_attr_ : int32_t
 	{
 		window_attr_focused,
@@ -291,7 +291,7 @@ namespace ml
 		window_attr_samples,
 		window_attr_srgb_capable,
 		window_attr_refresh_rate,
-		window_attr_doublebuffer,
+		window_attr_double_buffer,
 
 		window_attr_client_api,
 		window_attr_context_version_major,
@@ -312,31 +312,35 @@ namespace ml
 	// window hints
 	enum window_hints_ : int32_t
 	{
-		window_hints_none				= 0,		// none
-		window_hints_resizable			= (1 << 0),	// resizable	
-		window_hints_visible			= (1 << 1),	// visible	
-		window_hints_decorated			= (1 << 2),	// decorated	
-		window_hints_focused			= (1 << 3),	// focused	
-		window_hints_auto_iconify		= (1 << 4),	// auto_iconify
-		window_hints_floating			= (1 << 5),	// floating	
-		window_hints_maximized			= (1 << 6),	// maximized	
-		window_hints_doublebuffer		= (1 << 7),	// doublebuffer
+		window_hints_none				= (0 << 0),		// none
+		window_hints_resizable			= (1 << 0),		// resizable
+		window_hints_visible			= (1 << 1),		// visible
+		window_hints_decorated			= (1 << 2),		// decorated
+		window_hints_focused			= (1 << 3),		// focused
+		window_hints_auto_iconify		= (1 << 4),		// auto iconify
+		window_hints_floating			= (1 << 5),		// floating
+		window_hints_maximized			= (1 << 6),		// maximized
+		window_hints_double_buffer		= (1 << 7),		// double buffer
+		window_hints_center_cursor		= (1 << 8),		// center cursor
+		window_hints_focus_on_show		= (1 << 9),		// focus on show
 
-		// resizable / visible / decorated / focused / auto iconify
+		// resizable / visible / decorated / focused / auto iconify / focus on show
 		window_hints_default
 			= window_hints_resizable
 			| window_hints_visible
 			| window_hints_decorated
 			| window_hints_focused
-			| window_hints_auto_iconify,
+			| window_hints_auto_iconify
+			| window_hints_focus_on_show,
 
-		// resizable / decorated / focused / auto iconify / maximized
+		// resizable / decorated / focused / auto iconify / maximized / focus on show
 		window_hints_default_max
 			= window_hints_resizable
 			| window_hints_decorated
 			| window_hints_focused
 			| window_hints_auto_iconify
-			| window_hints_maximized,
+			| window_hints_maximized
+			| window_hints_focus_on_show,
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

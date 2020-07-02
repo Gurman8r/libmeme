@@ -35,8 +35,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_fullscreen() const;
-
 		ML_NODISCARD bool is_open() const;
 
 		ML_NODISCARD int32_t get_attribute(int32_t value) const;
@@ -65,6 +63,8 @@ namespace ml
 
 		ML_NODISCARD vec2i get_position() const;
 
+		ML_NODISCARD void * get_user_pointer() const;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void set_clipboard_string(cstring value);
@@ -74,8 +74,6 @@ namespace ml
 		void set_cursor_mode(int32_t value);
 		
 		void set_cursor_position(vec2d const & value);
-		
-		void set_fullscreen(bool value);
 		
 		void set_icon(size_t w, size_t h, byte_t const * p);
 
@@ -90,6 +88,8 @@ namespace ml
 		void set_size(vec2i const & value);
 		
 		void set_title(cstring value);
+
+		void set_user_pointer(void * value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -142,17 +142,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_context_settings() const noexcept -> context_settings const & { return m_settings.context; }
+		ML_NODISCARD auto get_context_settings() const & noexcept -> context_settings const & { return m_settings.context; }
 
 		ML_NODISCARD bool get_hint(int32_t const i) const noexcept { return ML_flag_read(m_settings.hints, i); }
 
-		ML_NODISCARD auto get_hints() const noexcept -> int32_t { return m_settings.hints; }
+		ML_NODISCARD auto get_hints() const & noexcept -> int32_t { return m_settings.hints; }
 
-		ML_NODISCARD auto get_settings() const noexcept -> window_settings const & { return m_settings; }
+		ML_NODISCARD auto get_title() const & noexcept -> pmr::string const & { return m_settings.title; }
 
-		ML_NODISCARD auto get_title() const noexcept -> pmr::string const & { return m_settings.title; }
+		ML_NODISCARD auto get_video_mode() const & noexcept -> video_mode const & { return m_settings.video; }
 
-		ML_NODISCARD auto get_video_mode() const noexcept -> video_mode const & { return m_settings.video; }
+		ML_NODISCARD auto get_window_settings() const & noexcept -> window_settings const & { return m_settings; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -162,7 +162,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		unique<window_base> m_window;
+		unique<window_base> m_wnd;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

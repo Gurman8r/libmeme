@@ -3,9 +3,9 @@
 #ifndef ML_EMBED_PYTHON
 #define ML_EMBED_PYTHON
 #endif
-#include <libmeme/Embed/API_Embed.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 
-namespace ml::embed
+namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -144,26 +144,6 @@ namespace ml::embed
 			.def_property_readonly_static("nwse", [](py::object) { return (int32_t)cursor_shape_nwse; })
 			;
 
-		// INPUT STATE
-		py::class_<input_state_>(m, "input_state")
-			.def(py::init<>())
-			.def_property_readonly_static("release", [](py::object) { return (int32_t)input_state_release; })
-			.def_property_readonly_static("press", [](py::object) { return (int32_t)input_state_press; })
-			.def_property_readonly_static("repeat", [](py::object) { return (int32_t)input_state_repeat; })
-			;
-
-		// INPUT MODS
-		py::class_<input_mods_>(m, "input_mods")
-			.def(py::init<>())
-			.def_property_readonly_static("none", [](py::object) { return (int32_t)input_mods_none; })
-			.def_property_readonly_static("shift", [](py::object) { return (int32_t)input_mods_shift; })
-			.def_property_readonly_static("ctrl", [](py::object) { return (int32_t)input_mods_ctrl; })
-			.def_property_readonly_static("alt", [](py::object) { return (int32_t)input_mods_alt; })
-			.def_property_readonly_static("super", [](py::object) { return (int32_t)input_mods_super; })
-			.def_property_readonly_static("caps_lock", [](py::object) { return (int32_t)input_mods_caps_lock; })
-			.def_property_readonly_static("num_lock", [](py::object) { return (int32_t)input_mods_num_lock; })
-			;
-
 		// KEY CODE
 		py::class_<key_code_>(m, "key_code")
 			.def(py::init<>())
@@ -289,68 +269,90 @@ namespace ml::embed
 			.def_property_readonly_static("menu"			, [](py::object) { return (int32_t)key_code_menu; })
 			;
 
+		// KEY MODS
+		py::class_<key_mods_>(m, "key_mods")
+			.def(py::init<>())
+			.def_property_readonly_static("none", [](py::object) { return (int32_t)key_mods_none; })
+			.def_property_readonly_static("shift", [](py::object) { return (int32_t)key_mods_shift; })
+			.def_property_readonly_static("ctrl", [](py::object) { return (int32_t)key_mods_ctrl; })
+			.def_property_readonly_static("alt", [](py::object) { return (int32_t)key_mods_alt; })
+			.def_property_readonly_static("super", [](py::object) { return (int32_t)key_mods_super; })
+			.def_property_readonly_static("caps_lock", [](py::object) { return (int32_t)key_mods_caps_lock; })
+			.def_property_readonly_static("num_lock", [](py::object) { return (int32_t)key_mods_num_lock; })
+			;
+
+		// KEY STATE
+		py::class_<key_state_>(m, "key_state")
+			.def(py::init<>())
+			.def_property_readonly_static("release", [](py::object) { return (int32_t)key_state_release; })
+			.def_property_readonly_static("press", [](py::object) { return (int32_t)key_state_press; })
+			.def_property_readonly_static("repeat", [](py::object) { return (int32_t)key_state_repeat; })
+			;
+
 		// WINDOW ATTRIBUTES
 		py::class_<window_attr_>(m, "window_attr")
 			.def(py::init<>())
 
-			.def_property_readonly_static("focused", [](py::object) { return (int32_t)window_attr_focused; })
-			.def_property_readonly_static("iconified", [](py::object) { return (int32_t)window_attr_iconified; })
-			.def_property_readonly_static("resizable", [](py::object) { return (int32_t)window_attr_resizable; })
-			.def_property_readonly_static("visible", [](py::object) { return (int32_t)window_attr_visible; })
-			.def_property_readonly_static("decorated", [](py::object) { return (int32_t)window_attr_decorated; })
-			.def_property_readonly_static("auto_iconify", [](py::object) { return (int32_t)window_attr_auto_iconify; })
-			.def_property_readonly_static("floating", [](py::object) { return (int32_t)window_attr_floating; })
-			.def_property_readonly_static("maximized", [](py::object) { return (int32_t)window_attr_maximized; })
-			.def_property_readonly_static("center_cursor", [](py::object) { return (int32_t)window_attr_center_cursor; })
-			.def_property_readonly_static("transparent_framebuffer", [](py::object) { return (int32_t)window_attr_transparent_framebuffer; })
-			.def_property_readonly_static("hovered", [](py::object) { return (int32_t)window_attr_hovered; })
-			.def_property_readonly_static("focus_on_show", [](py::object) { return (int32_t)window_attr_focus_on_show; })
+			.def_property_readonly_static("focused"					, [](py::object) { return (int32_t)window_attr_focused; })
+			.def_property_readonly_static("iconified"				, [](py::object) { return (int32_t)window_attr_iconified; })
+			.def_property_readonly_static("resizable"				, [](py::object) { return (int32_t)window_attr_resizable; })
+			.def_property_readonly_static("visible"					, [](py::object) { return (int32_t)window_attr_visible; })
+			.def_property_readonly_static("decorated"				, [](py::object) { return (int32_t)window_attr_decorated; })
+			.def_property_readonly_static("auto_iconify"			, [](py::object) { return (int32_t)window_attr_auto_iconify; })
+			.def_property_readonly_static("floating"				, [](py::object) { return (int32_t)window_attr_floating; })
+			.def_property_readonly_static("maximized"				, [](py::object) { return (int32_t)window_attr_maximized; })
+			.def_property_readonly_static("center_cursor"			, [](py::object) { return (int32_t)window_attr_center_cursor; })
+			.def_property_readonly_static("transparent_framebuffer"	, [](py::object) { return (int32_t)window_attr_transparent_framebuffer; })
+			.def_property_readonly_static("hovered"					, [](py::object) { return (int32_t)window_attr_hovered; })
+			.def_property_readonly_static("focus_on_show"			, [](py::object) { return (int32_t)window_attr_focus_on_show; })
 
-			.def_property_readonly_static("red_bits", [](py::object) { return (int32_t)window_attr_red_bits; })
-			.def_property_readonly_static("green_bits", [](py::object) { return (int32_t)window_attr_green_bits; })
-			.def_property_readonly_static("blue_bits", [](py::object) { return (int32_t)window_attr_blue_bits; })
-			.def_property_readonly_static("alpha_bits", [](py::object) { return (int32_t)window_attr_alpha_bits; })
-			.def_property_readonly_static("depth_bits", [](py::object) { return (int32_t)window_attr_depth_bits; })
-			.def_property_readonly_static("stencil_bits", [](py::object) { return (int32_t)window_attr_stencil_bits; })
-			.def_property_readonly_static("accum_red_bits", [](py::object) { return (int32_t)window_attr_accum_red_bits; })
-			.def_property_readonly_static("accum_green_bits", [](py::object) { return (int32_t)window_attr_accum_green_bits; })
-			.def_property_readonly_static("accum_blue_bits", [](py::object) { return (int32_t)window_attr_accum_blue_bits; })
-			.def_property_readonly_static("accum_alpha_bits", [](py::object) { return (int32_t)window_attr_accum_alpha_bits; })
-			.def_property_readonly_static("aux_buffers", [](py::object) { return (int32_t)window_attr_aux_buffers; })
-			.def_property_readonly_static("stereo", [](py::object) { return (int32_t)window_attr_stereo; })
-			.def_property_readonly_static("samples", [](py::object) { return (int32_t)window_attr_samples; })
-			.def_property_readonly_static("srgb_capable", [](py::object) { return (int32_t)window_attr_srgb_capable; })
-			.def_property_readonly_static("refresh_rate", [](py::object) { return (int32_t)window_attr_refresh_rate; })
-			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_attr_doublebuffer; })
+			.def_property_readonly_static("red_bits"				, [](py::object) { return (int32_t)window_attr_red_bits; })
+			.def_property_readonly_static("green_bits"				, [](py::object) { return (int32_t)window_attr_green_bits; })
+			.def_property_readonly_static("blue_bits"				, [](py::object) { return (int32_t)window_attr_blue_bits; })
+			.def_property_readonly_static("alpha_bits"				, [](py::object) { return (int32_t)window_attr_alpha_bits; })
+			.def_property_readonly_static("depth_bits"				, [](py::object) { return (int32_t)window_attr_depth_bits; })
+			.def_property_readonly_static("stencil_bits"			, [](py::object) { return (int32_t)window_attr_stencil_bits; })
+			.def_property_readonly_static("accum_red_bits"			, [](py::object) { return (int32_t)window_attr_accum_red_bits; })
+			.def_property_readonly_static("accum_green_bits"		, [](py::object) { return (int32_t)window_attr_accum_green_bits; })
+			.def_property_readonly_static("accum_blue_bits"			, [](py::object) { return (int32_t)window_attr_accum_blue_bits; })
+			.def_property_readonly_static("accum_alpha_bits"		, [](py::object) { return (int32_t)window_attr_accum_alpha_bits; })
+			.def_property_readonly_static("aux_buffers"				, [](py::object) { return (int32_t)window_attr_aux_buffers; })
+			.def_property_readonly_static("stereo"					, [](py::object) { return (int32_t)window_attr_stereo; })
+			.def_property_readonly_static("samples"					, [](py::object) { return (int32_t)window_attr_samples; })
+			.def_property_readonly_static("srgb_capable"			, [](py::object) { return (int32_t)window_attr_srgb_capable; })
+			.def_property_readonly_static("refresh_rate"			, [](py::object) { return (int32_t)window_attr_refresh_rate; })
+			.def_property_readonly_static("double_buffer"			, [](py::object) { return (int32_t)window_attr_double_buffer; })
 
-			.def_property_readonly_static("context_api", [](py::object) { return (int32_t)window_attr_client_api; })
-			.def_property_readonly_static("context_version_major", [](py::object) { return (int32_t)window_attr_context_version_major; })
-			.def_property_readonly_static("context_version_minor", [](py::object) { return (int32_t)window_attr_context_version_minor; })
-			.def_property_readonly_static("context_revision", [](py::object) { return (int32_t)window_attr_context_revision; })
-			.def_property_readonly_static("context_robustness", [](py::object) { return (int32_t)window_attr_context_robustness; })
-			.def_property_readonly_static("context_forward_compat", [](py::object) { return (int32_t)window_attr_backend_forward_compat; })
-			.def_property_readonly_static("context_debug_context", [](py::object) { return (int32_t)window_attr_backend_debug_context; })
-			.def_property_readonly_static("renderer_profile", [](py::object) { return (int32_t)window_attr_backend_profile; })
+			.def_property_readonly_static("context_api"				, [](py::object) { return (int32_t)window_attr_client_api; })
+			.def_property_readonly_static("context_version_major"	, [](py::object) { return (int32_t)window_attr_context_version_major; })
+			.def_property_readonly_static("context_version_minor"	, [](py::object) { return (int32_t)window_attr_context_version_minor; })
+			.def_property_readonly_static("context_revision"		, [](py::object) { return (int32_t)window_attr_context_revision; })
+			.def_property_readonly_static("context_robustness"		, [](py::object) { return (int32_t)window_attr_context_robustness; })
+			.def_property_readonly_static("context_forward_compat"	, [](py::object) { return (int32_t)window_attr_backend_forward_compat; })
+			.def_property_readonly_static("context_debug_context"	, [](py::object) { return (int32_t)window_attr_backend_debug_context; })
+			.def_property_readonly_static("renderer_profile"		, [](py::object) { return (int32_t)window_attr_backend_profile; })
 			.def_property_readonly_static("context_release_behavior", [](py::object) { return (int32_t)window_attr_context_release_behavior; })
-			.def_property_readonly_static("context_no_error", [](py::object) { return (int32_t)window_attr_context_no_error; })
-			.def_property_readonly_static("context_creation_api", [](py::object) { return (int32_t)window_attr_context_creation_api; })
-			.def_property_readonly_static("scale_to_monitor", [](py::object) { return (int32_t)window_attr_scale_to_monitor; })
+			.def_property_readonly_static("context_no_error"		, [](py::object) { return (int32_t)window_attr_context_no_error; })
+			.def_property_readonly_static("context_creation_api"	, [](py::object) { return (int32_t)window_attr_context_creation_api; })
+			.def_property_readonly_static("scale_to_monitor"		, [](py::object) { return (int32_t)window_attr_scale_to_monitor; })
 			;
 
 		// WINDOW HINTS
 		py::class_<window_hints_>(m, "window_hints")
 			.def(py::init<>())
-			.def_property_readonly_static("none"		, [](py::object) { return (int32_t)window_hints_none; })
-			.def_property_readonly_static("resizable"	, [](py::object) { return (int32_t)window_hints_resizable; })
-			.def_property_readonly_static("visible"		, [](py::object) { return (int32_t)window_hints_visible; })
-			.def_property_readonly_static("decorated"	, [](py::object) { return (int32_t)window_hints_decorated; })
-			.def_property_readonly_static("focused"		, [](py::object) { return (int32_t)window_hints_focused; })
-			.def_property_readonly_static("auto_iconify", [](py::object) { return (int32_t)window_hints_auto_iconify; })
-			.def_property_readonly_static("floating"	, [](py::object) { return (int32_t)window_hints_floating; })
-			.def_property_readonly_static("maximized"	, [](py::object) { return (int32_t)window_hints_maximized; })
-			.def_property_readonly_static("doublebuffer", [](py::object) { return (int32_t)window_hints_doublebuffer; })
-			.def_property_readonly_static("default"		, [](py::object) { return (int32_t)window_hints_default; })
-			.def_property_readonly_static("default_max"	, [](py::object) { return (int32_t)window_hints_default_max; })
+			.def_property_readonly_static("none"			, [](py::object) { return (int32_t)window_hints_none; })
+			.def_property_readonly_static("resizable"		, [](py::object) { return (int32_t)window_hints_resizable; })
+			.def_property_readonly_static("visible"			, [](py::object) { return (int32_t)window_hints_visible; })
+			.def_property_readonly_static("decorated"		, [](py::object) { return (int32_t)window_hints_decorated; })
+			.def_property_readonly_static("focused"			, [](py::object) { return (int32_t)window_hints_focused; })
+			.def_property_readonly_static("auto_iconify"	, [](py::object) { return (int32_t)window_hints_auto_iconify; })
+			.def_property_readonly_static("floating"		, [](py::object) { return (int32_t)window_hints_floating; })
+			.def_property_readonly_static("maximized"		, [](py::object) { return (int32_t)window_hints_maximized; })
+			.def_property_readonly_static("double_buffer"	, [](py::object) { return (int32_t)window_hints_double_buffer; })
+			.def_property_readonly_static("center_cursor"	, [](py::object) { return (int32_t)window_hints_center_cursor; })
+			.def_property_readonly_static("focus_on_show"	, [](py::object) { return (int32_t)window_hints_focus_on_show; })
+			.def_property_readonly_static("default"			, [](py::object) { return (int32_t)window_hints_default; })
+			.def_property_readonly_static("default_max"		, [](py::object) { return (int32_t)window_hints_default_max; })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -479,7 +481,6 @@ namespace ml::embed
 			.def_static("restore"				, []() { engine::window().restore(); })
 			.def_static("swap_buffers"			, []() { engine::window().swap_buffers(); })
 
-			.def_static("is_fullscreen"			, []() { return engine::window().is_fullscreen(); })
 			.def_static("is_open"				, []() { return engine::window().is_open(); })
 			.def_static("get_attribute"			, [](int32_t v) { return engine::window().get_attribute(v); })
 			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
@@ -499,7 +500,6 @@ namespace ml::embed
 			.def_static("set_cursor"			, [](cursor_handle v) { engine::window().set_cursor(v); })
 			.def_static("set_cursor_mode"		, [](int32_t v) { engine::window().set_cursor_mode(v); })
 			.def_static("set_cursor_position"	, [](vec2d v) { engine::window().set_cursor_position(v); })
-			.def_static("set_fullscreen"		, [](bool v) { engine::window().set_fullscreen(v); })
 			.def_static("set_icon"				, [](size_t w, size_t h, byte_t const * p) { engine::window().set_icon(w, h, p); })
 			.def_static("set_input_mode"		, [](int32_t m, int32_t v) { engine::window().set_input_mode(m, v); })
 			.def_static("set_opacity"			, [](float_t v) { engine::window().set_opacity(v); })
@@ -524,9 +524,9 @@ namespace ml::embed
 			.def_static("get_context_settings"	, []() { return engine::window().get_context_settings(); })
 			.def_static("get_hint"				, [](int32_t v) { return engine::window().get_hint(v); })
 			.def_static("get_hints"				, []() { return engine::window().get_hints(); })
-			.def_static("get_settings"			, []() { return engine::window().get_settings(); })
 			.def_static("get_title"				, []() { return engine::window().get_title(); })
 			.def_static("get_video_mode"		, []() { return engine::window().get_video_mode(); })
+			.def_static("get_window_settings"	, []() { return engine::window().get_window_settings(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

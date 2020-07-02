@@ -25,7 +25,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ new impl_window }, m_settings{}
+	window::window() noexcept : m_wnd{ new impl_window }, m_settings{}
 	{
 	}
 
@@ -39,13 +39,16 @@ namespace ml
 	bool window::open(window_settings const & ws, bool ic)
 	{
 		// open backend
-		if (!m_window->open(m_settings = ws))
+		if (!m_wnd->open(m_settings = ws))
 		{
 			return debug::error("failed opening window implementation");
 		}
 		
-		// make context current
+		// make current context
 		set_current_context(get_handle());
+
+		// user pointer
+		set_user_pointer(this);
 
 		// centered
 		set_position((video_mode::get_desktop_mode().resolution - ws.video.resolution) / 2);
@@ -53,7 +56,7 @@ namespace ml
 		// maximized
 		if (get_hint(window_hints_maximized)) { maximize(); }
 
-		// install callbacks
+		// install default callbacks
 		if (ic)
 		{
 			set_char_callback([
@@ -117,177 +120,169 @@ namespace ml
 
 	void window::close()
 	{
-		m_window->close();
+		m_wnd->close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::iconify()
 	{
-		m_window->iconify();
+		m_wnd->iconify();
 	}
 
 	void window::maximize()
 	{
-		m_window->maximize();
+		m_wnd->maximize();
 	}
 
 	void window::restore()
 	{
-		m_window->restore();
+		m_wnd->restore();
 	}
 
 	void window::swap_buffers()
 	{
-		m_window->swap_buffers();
-		
+		m_wnd->swap_buffers();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::is_fullscreen() const
-	{
-		return m_window->is_fullscreen();
-	}
-
 	bool window::is_open() const
 	{
-		return m_window->is_open();
+		return m_wnd->is_open();
 	}
 	
 	int32_t window::get_attribute(int32_t value) const
 	{
-		return m_window->get_attribute(value);
+		return m_wnd->get_attribute(value);
 	}
 
 	int_rect window::get_bounds() const
 	{
-		return m_window->get_bounds();
+		return m_wnd->get_bounds();
 	}
 
 	cstring window::get_clipboard_string() const
 	{
-		return m_window->get_clipboard_string();
+		return m_wnd->get_clipboard_string();
 	}
 
 	vec2 window::get_content_scale() const
 	{
-		return m_window->get_content_scale();
+		return m_wnd->get_content_scale();
 	}
 
 	vec2 window::get_cursor_position() const
 	{
-		return m_window->get_cursor_position();
+		return m_wnd->get_cursor_position();
 	}
 
 	vec2i window::get_framebuffer_size() const
 	{
-		return m_window->get_framebuffer_size();
+		return m_wnd->get_framebuffer_size();
 	}
 
 	window_handle window::get_handle() const
 	{
-		return m_window->get_handle();
+		return m_wnd->get_handle();
 	}
 
 	int32_t window::get_input_mode(int32_t mode) const
 	{
-		return m_window->get_input_mode(mode);
+		return m_wnd->get_input_mode(mode);
 	}
 
 	int32_t	window::get_key(int32_t key) const
 	{
-		return m_window->get_key(key);
+		return m_wnd->get_key(key);
 	}
 
 	int32_t	window::get_mouse_button(int32_t button) const
 	{
-		return m_window->get_mouse_button(button);
+		return m_wnd->get_mouse_button(button);
 	}
 
 	window_handle window::get_native_handle() const
 	{
-		return m_window->get_native_handle();
+		return m_wnd->get_native_handle();
 	}
 
 	float_t window::get_opacity() const
 	{
-		return m_window->get_opacity();
+		return m_wnd->get_opacity();
 	}
 
 	vec2i window::get_position() const
 	{
-		return m_window->get_position();
+		return m_wnd->get_position();
+	}
+
+	void * window::get_user_pointer() const
+	{
+		return m_wnd->get_user_pointer();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::set_clipboard_string(cstring value)
 	{
-		m_window->set_clipboard_string(value);
+		m_wnd->set_clipboard_string(value);
 	}
 
 	void window::set_cursor(cursor_handle value)
 	{
-		m_window->set_cursor(value);
+		m_wnd->set_cursor(value);
 	}
 	
 	void window::set_cursor_mode(int32_t value)
 	{
-		m_window->set_cursor_mode(value);
+		m_wnd->set_cursor_mode(value);
 	}
 
 	void window::set_cursor_position(vec2d const & value)
 	{
-		m_window->set_cursor_position(value);
-	}
-
-	void window::set_fullscreen(bool value)
-	{
-		m_window->set_fullscreen(value);
-
-		if (!value)
-		{
-			set_size(m_settings.video.resolution);
-			
-			set_position((video_mode::get_desktop_mode().resolution - get_framebuffer_size()) / 2);
-		}
+		m_wnd->set_cursor_position(value);
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p)
 	{
-		m_window->set_icon(w, h, p);
+		m_wnd->set_icon(w, h, p);
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value)
 	{
-		m_window->set_input_mode(mode, value);
+		m_wnd->set_input_mode(mode, value);
 	}
 
 	void window::set_opacity(float_t value)
 	{
-		m_window->set_opacity(value);
+		m_wnd->set_opacity(value);
 	}
 
 	void window::set_position(vec2i const & value)
 	{
-		m_window->set_position(value);
+		m_wnd->set_position(value);
 	}
 
 	void window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
-		m_window->set_monitor(value, bounds);
+		m_wnd->set_monitor(value, bounds);
 	}
 
 	void window::set_size(vec2i const & value)
 	{
-		m_window->set_size(value);
+		m_wnd->set_size(value);
 	}
 
 	void window::set_title(cstring value)
 	{
 		m_settings.title = value;
-		m_window->set_title(value);
+		m_wnd->set_title(value);
+	}
+
+	void window::set_user_pointer(void * value)
+	{
+		m_wnd->set_user_pointer(value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -358,92 +353,92 @@ namespace ml
 
 	window_char_fn window::set_char_callback(window_char_fn fn)
 	{
-		return m_window->set_char_callback(fn);
+		return m_wnd->set_char_callback(fn);
 	}
 
 	window_char_mods_fn window::set_char_mods_callback(window_char_mods_fn fn)
 	{
-		return m_window->set_char_mods_callback(fn);
+		return m_wnd->set_char_mods_callback(fn);
 	}
 
 	window_close_fn window::set_close_callback(window_close_fn fn)
 	{
-		return m_window->set_close_callback(fn);
+		return m_wnd->set_close_callback(fn);
 	}
 
 	window_content_scale_fn window::set_content_scale_callback(window_content_scale_fn fn)
 	{
-		return m_window->set_content_scale_callback(fn);
+		return m_wnd->set_content_scale_callback(fn);
 	}
 	
 	window_cursor_enter_fn window::set_cursor_enter_callback(window_cursor_enter_fn fn)
 	{
-		return m_window->set_cursor_enter_callback(fn);
+		return m_wnd->set_cursor_enter_callback(fn);
 	}
 
 	window_cursor_position_fn window::set_cursor_position_callback(window_cursor_position_fn fn)
 	{
-		return m_window->set_cursor_position_callback(fn);
+		return m_wnd->set_cursor_position_callback(fn);
 	}
 
 	window_drop_fn window::set_drop_callback(window_drop_fn fn)
 	{
-		return m_window->set_drop_callback(fn);
+		return m_wnd->set_drop_callback(fn);
 	}
 
 	window_error_fn window::set_error_callback(window_error_fn fn)
 	{
-		return m_window->set_error_callback(fn);
+		return m_wnd->set_error_callback(fn);
 	}
 
 	window_focus_fn window::set_focus_callback(window_focus_fn fn)
 	{
-		return m_window->set_focus_callback(fn);
+		return m_wnd->set_focus_callback(fn);
 	}
 
 	window_framebuffer_size_fn window::set_framebuffer_size_callback(window_framebuffer_size_fn fn)
 	{
-		return m_window->set_framebuffer_size_callback(fn);
+		return m_wnd->set_framebuffer_size_callback(fn);
 	}
 
 	window_iconify_fn window::set_iconify_callback(window_iconify_fn fn)
 	{
-		return m_window->set_iconify_callback(fn);
+		return m_wnd->set_iconify_callback(fn);
 	}
 	
 	window_key_fn window::set_key_callback(window_key_fn fn)
 	{
-		return m_window->set_key_callback(fn);
+		return m_wnd->set_key_callback(fn);
 	}
 
 	window_maximize_fn window::set_maximize_callback(window_maximize_fn fn)
 	{
-		return m_window->set_maximize_callback(fn);
+		return m_wnd->set_maximize_callback(fn);
 	}
 	
 	window_mouse_fn window::set_mouse_callback(window_mouse_fn fn)
 	{
-		return m_window->set_mouse_callback(fn);
+		return m_wnd->set_mouse_callback(fn);
 	}
 	
 	window_position_fn window::set_position_callback(window_position_fn fn)
 	{
-		return m_window->set_position_callback(fn);
+		return m_wnd->set_position_callback(fn);
 	}
 
 	window_refresh_fn window::set_refresh_callback(window_refresh_fn fn)
 	{
-		return m_window->set_refresh_callback(fn);
+		return m_wnd->set_refresh_callback(fn);
 	}
 
 	window_scroll_fn window::set_scroll_callback(window_scroll_fn fn)
 	{
-		return m_window->set_scroll_callback(fn);
+		return m_wnd->set_scroll_callback(fn);
 	}
 	
 	window_size_fn window::set_size_callback(window_size_fn fn)
 	{
-		return m_window->set_size_callback(fn);
+		return m_wnd->set_size_callback(fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

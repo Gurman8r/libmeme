@@ -47,10 +47,6 @@ namespace ml
 	private:
 		friend singleton<performance>;
 
-#ifdef ML_STATIC
-		static self_type g_instance;
-#endif
-
 		~performance() noexcept;
 
 		pmr::vector<sample> m_current{}, m_previous{};

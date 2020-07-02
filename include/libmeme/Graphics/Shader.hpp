@@ -14,31 +14,31 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader_asset() : m_obj{}
+		shader_asset() : m_pgm{}
 		{
 		}
 
-		shader_asset(fs::path const & v, fs::path const & f) : m_obj{}
+		shader_asset(fs::path const & v, fs::path const & f) : m_pgm{}
 		{
 			load_from_file(v, f);
 		}
 
-		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g) : m_obj{}
+		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g) : m_pgm{}
 		{
 			load_from_file(v, f, g);
 		}
 
-		shader_asset(ds::map<uint32_t, shared<gfx::shader>> const & value) : m_obj{}
+		shader_asset(ds::map<uint32_t, shared<gfx::shader>> const & value) : m_pgm{}
 		{
 			load_from_memory(value);
 		}
 
-		shader_asset(shader_asset const & other) : m_obj{}
+		shader_asset(shader_asset const & other) : m_pgm{}
 		{
-			load_from_memory(other.m_obj->get_shaders());
+			load_from_memory(other.m_pgm->get_shaders());
 		}
 
-		shader_asset(shader_asset && other) noexcept : m_obj{}
+		shader_asset(shader_asset && other) noexcept : m_pgm{}
 		{
 			swap(std::move(other));
 		}
@@ -62,7 +62,7 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				m_obj.swap(value.m_obj);
+				m_pgm.swap(value.m_pgm);
 			}
 		}
 
@@ -83,66 +83,66 @@ namespace ml
 				util::get_file_string(g_file));
 		}
 
-		bool load_from_memory(ds::map<uint32_t, shared<gfx::shader>> const & value)
+		bool load_from_memory(ds::map<uint32_t, shared<gfx::shader>> const & vs)
 		{
-			if (!m_obj) { m_obj = gfx::program::create(); }
-			else { m_obj->revalue(); }
+			if (m_pgm) { m_pgm->revalue(); }
+			else { m_pgm = gfx::program::create(); }
 
-			value.for_each([&](uint32_t type, shared<gfx::shader> const & sh)
+			vs.for_each([&](auto, shared<gfx::shader> const & sh)
 			{
-				m_obj->attach(gfx::shader::create(type, sh->get_source()));
+				m_pgm->attach(sh);
 			});
 
-			return m_obj->link();
+			return m_pgm->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
 		{
-			if (!m_obj) { m_obj = gfx::program::create(); }
-			else { m_obj->revalue(); }
+			if (m_pgm) { m_pgm->revalue(); }
+			else { m_pgm = gfx::program::create(); }
 
-			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
-			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
 
-			return m_obj->link();
+			return m_pgm->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
-			if (!m_obj) { m_obj = gfx::program::create(); }
-			else { m_obj->revalue(); }
-			
-			m_obj->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
-			m_obj->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
-			m_obj->attach(gfx::shader::create(gfx::shader_type_geometry	, g_src));
+			if (m_pgm) { m_pgm->revalue(); }
+			else { m_pgm = gfx::program::create(); }
 
-			return m_obj->link();
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_geometry	, g_src));
+
+			return m_pgm->link();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static void bind(shader_asset const * value) noexcept
 		{
-			gfx::program::bind(value ? value->m_obj : nullptr);
+			gfx::program::bind(value ? value->m_pgm : nullptr);
 		}
 
 		static void bind(shared<shader_asset> const & value) noexcept
 		{
-			gfx::program::bind(value ? value->m_obj : nullptr);
+			gfx::program::bind(value ? value->m_pgm : nullptr);
 		}
 
-		void bind() const noexcept { gfx::program::bind(m_obj); }
+		void bind() const noexcept { gfx::program::bind(m_pgm); }
 
 		void unbind() const noexcept { gfx::program::bind(nullptr); }
 
-		void bind_textures() const noexcept { m_obj->bind_textures(); }
+		void bind_textures() const noexcept { m_pgm->bind_textures(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return m_obj->set_uniform(name, ML_forward(value));
+			return m_pgm->set_uniform(name, ML_forward(value));
 		}
 
 		template <class T
@@ -174,12 +174,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_obj; }
+		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_pgm; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gfx::program> m_obj;
+		shared<gfx::program> m_pgm;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

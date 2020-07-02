@@ -12,13 +12,19 @@ namespace ml
 	// video mode
 	struct ML_PLATFORM_API ML_NODISCARD video_mode final
 	{
-		vec2i		resolution		{ 640, 480 };
-		int32_t		bits_per_pixel	{ 8 };
-		int32_t		refresh_rate	{ -1 };
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		vec2i	resolution		{ 640, 480 }; // 
+		int32_t	bits_per_pixel	{ 8 }		; // 
+		int32_t	refresh_rate	{ -1 }		; // 
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static video_mode const & get_desktop_mode();
 
 		static ds::set<video_mode> const & get_fullscreen_modes();
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		bool operator==(video_mode const & other) const noexcept
 		{
@@ -46,6 +52,8 @@ namespace ml
 		{
 			return !(*this == other);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

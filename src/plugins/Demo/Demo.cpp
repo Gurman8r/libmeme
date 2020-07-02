@@ -4,7 +4,6 @@
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
-#include <libmeme/Embed/API_Embed.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
@@ -103,7 +102,7 @@ namespace ml::gfx
 		using storage_type = typename ds::batch_vector
 		<
 			shared<texture2d>,	// 
-			command				// 
+			command_t			// 
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1378,7 +1377,7 @@ namespace ml
 		void show_renderer_gui()
 		{
 			static auto const & ctx	{ engine::window().get_device_context() };
-			static auto const & info{ engine::window().get_device_info() };
+			static auto const & info{ ctx->get_device_info() };
 
 			if (ImGui::BeginMenuBar())
 			{

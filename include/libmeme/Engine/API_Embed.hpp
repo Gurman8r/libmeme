@@ -5,10 +5,6 @@
 
 #include <libmeme/Core/Matrix.hpp>
 
-namespace pybind11 {}
-
-namespace ml::embed { namespace py = pybind11; }
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifdef ML_EMBED_PYTHON
@@ -18,6 +14,8 @@ namespace ml::embed { namespace py = pybind11; }
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
+
+namespace ml { namespace py = pybind11; }
 
 namespace pybind11::detail
 {

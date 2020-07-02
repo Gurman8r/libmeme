@@ -1,19 +1,24 @@
-rework graphics buffers
-models are upside-down
 make models/meshes DO
 make materials/uniforms DO
 loop system? sequences?
 
+shader cache
+constant buffer / uniform buffer
+cameras w/ controller gui
 template basic_vertex to do variations of vertex at CT
 
-opengl loader disambiguation header
-	select different loader functions at CT
-	macro for each opengl function
 
-add stencil functions to api
+device
+	devinfo
+	devobj
+		devctx
+		vertexarray
+		vertexbuffer
+		indexbuffer
+		texture
+			texture2d
+			texturecube
+		framebuffer
+		shader
+		program
 
-shader cache
-
-constant buffer / uniform buffer
-
-cameras w/ controller gui

@@ -38,8 +38,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool is_fullscreen() const override;
-
 		bool is_open() const override;
 
 		int32_t get_attribute(int32_t value) const override;
@@ -68,6 +66,8 @@ namespace ml
 
 		vec2i get_position() const override;
 
+		void * get_user_pointer() const override;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void set_clipboard_string(cstring value) override;
@@ -77,8 +77,6 @@ namespace ml
 		void set_cursor_mode(int32_t value) override;
 		
 		void set_cursor_position(vec2d const & value) override;
-		
-		void set_fullscreen(bool value) override;
 		
 		void set_icon(size_t w, size_t h, byte_t const * p) override;
 
@@ -93,6 +91,8 @@ namespace ml
 		void set_size(vec2i const & value) override;
 		
 		void set_title(cstring value) override;
+
+		void set_user_pointer(void * value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

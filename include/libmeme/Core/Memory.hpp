@@ -237,10 +237,6 @@ namespace ml
 	private:
 		friend singleton<memory>;
 
-#ifdef ML_STATIC
-		static self_type g_instance;
-#endif
-
 		~memory() noexcept;
 
 		allocator_type			m_allocator	{};	// allocator
@@ -280,9 +276,9 @@ namespace ml
 		void operator()(void * addr) const noexcept { memory::deallocate(addr); }
 	};
 
-	template <class T> struct default_delete<T>
+	template <class T> struct default_delete<T> : default_delete<>
 	{
-		void operator()(T * addr) const noexcept { memory::deallocate(addr); }
+		using default_delete<>::operator();
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

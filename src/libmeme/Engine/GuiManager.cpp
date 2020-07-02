@@ -7,7 +7,7 @@
 #include <libmeme/Platform/Window.hpp>
 
 // GLFW / OpenGL3
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL3)
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 #include <imgui/examples/imgui_impl_glfw.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
 #define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
@@ -17,7 +17,7 @@
 #define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
 
 #else
-#	error "gui is unavailable"
+#	error "imgui is unavailable"
 #endif
 
 namespace ml

@@ -115,9 +115,6 @@ namespace ml
 	private:
 		friend singleton<event_system>;
 
-#ifdef ML_STATIC
-		static self_type g_instance;
-#endif
 		~event_system() noexcept;
 
 		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};

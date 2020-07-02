@@ -100,6 +100,7 @@ namespace ml
 		glfwWindowHint(GLFW_DEPTH_BITS,				ws.context.depth_bits);
 		glfwWindowHint(GLFW_STENCIL_BITS,			ws.context.stencil_bits);
 		glfwWindowHint(GLFW_SRGB_CAPABLE,			ws.context.srgb_capable);
+		
 		glfwWindowHint(GLFW_RESIZABLE,				ws.hints & window_hints_resizable);
 		glfwWindowHint(GLFW_VISIBLE,				ws.hints & window_hints_visible);
 		glfwWindowHint(GLFW_DECORATED,				ws.hints & window_hints_decorated);
@@ -107,7 +108,10 @@ namespace ml
 		glfwWindowHint(GLFW_AUTO_ICONIFY,			ws.hints & window_hints_auto_iconify);
 		glfwWindowHint(GLFW_FLOATING,				ws.hints & window_hints_floating);
 		glfwWindowHint(GLFW_MAXIMIZED,				ws.hints & window_hints_maximized);
-		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_doublebuffer);
+		glfwWindowHint(GLFW_DOUBLEBUFFER,			ws.hints & window_hints_double_buffer);
+		glfwWindowHint(GLFW_CENTER_CURSOR,			ws.hints & window_hints_center_cursor);
+		glfwWindowHint(GLFW_FOCUS_ON_SHOW,			ws.hints & window_hints_focus_on_show);
+		
 		glfwWindowHint(GLFW_RED_BITS,				ws.video.bits_per_pixel);
 		glfwWindowHint(GLFW_GREEN_BITS,				ws.video.bits_per_pixel);
 		glfwWindowHint(GLFW_BLUE_BITS,				ws.video.bits_per_pixel);
@@ -155,11 +159,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool glfw_window::is_fullscreen() const
-	{
-		return m_monitor && ((monitor_handle)m_monitor == get_primary_monitor());
-	}
-
 	bool glfw_window::is_open() const
 	{
 		return m_window && !glfwWindowShouldClose(m_window);
@@ -201,7 +200,7 @@ namespace ml
 			case window_attr_samples					: return GLFW_SAMPLES;
 			case window_attr_srgb_capable				: return GLFW_SRGB_CAPABLE;
 			case window_attr_refresh_rate				: return GLFW_REFRESH_RATE;
-			case window_attr_doublebuffer				: return GLFW_DOUBLEBUFFER;
+			case window_attr_double_buffer				: return GLFW_DOUBLEBUFFER;
 			
 			case window_attr_client_api					: return GLFW_CLIENT_API;
 			case window_attr_context_version_major		: return GLFW_CONTEXT_VERSION_MAJOR;
@@ -293,6 +292,11 @@ namespace ml
 		return temp;
 	}
 
+	void * glfw_window::get_user_pointer() const
+	{
+		return glfwGetWindowUserPointer(m_window);
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void glfw_window::set_clipboard_string(cstring value)
@@ -322,11 +326,6 @@ namespace ml
 	void glfw_window::set_cursor_position(vec2d const & value)
 	{
 		glfwSetCursorPos(m_window, value[0], value[1]);
-	}
-
-	void glfw_window::set_fullscreen(bool value)
-	{
-		set_monitor(value ? get_primary_monitor() : nullptr);
 	}
 
 	void glfw_window::set_icon(size_t w, size_t h, byte_t const * p)
@@ -381,6 +380,11 @@ namespace ml
 	void glfw_window::set_title(cstring value)
 	{
 		glfwSetWindowTitle(m_window, value);
+	}
+
+	void glfw_window::set_user_pointer(void * value)
+	{
+		glfwSetWindowUserPointer(m_window, value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

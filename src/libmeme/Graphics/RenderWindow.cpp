@@ -5,7 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, m_devctx{}
+	render_window::render_window() noexcept : window{}, m_ctx{}
 	{
 	}
 
@@ -14,25 +14,30 @@ namespace ml
 		ML_assert(this->open(ws, ic));
 	}
 
+	render_window::~render_window() noexcept
+	{
+		gfx::device::destroy_context(m_ctx.release());
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool render_window::open(window_settings const & ws, bool ic)
 	{
-		// open base window
+		// open window
 		if (!window::open(ws, ic))
 		{
 			return debug::error("failed opening window");
 		}
 
 		// create device context
-		if (!m_devctx.reset(gfx::device::create_context(ws.context)))
+		if (m_ctx.reset(gfx::device::create_context(ws.context)); !m_ctx)
 		{
-			return debug::error("failed creating device context");
+			return debug::error("failed creating devctx context");
 		}
 
 		// validate version
-		m_settings.context.major = get_device_info().major_version;
-		m_settings.context.minor = get_device_info().minor_version;
+		m_settings.context.major = m_ctx->get_device_info().major_version;
+		m_settings.context.minor = m_ctx->get_device_info().minor_version;
 		debug::info("using renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
 		
 		// setup render states
@@ -69,7 +74,7 @@ namespace ml
 
 	void render_window::close()
 	{
-		m_devctx.reset();
+		gfx::device::destroy_context(m_ctx.release());
 
 		window::close();
 	}

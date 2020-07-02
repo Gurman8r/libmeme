@@ -14,7 +14,7 @@ namespace ml
 
 		explicit render_window(window_settings const & ws, bool ic = true) noexcept;
 
-		virtual ~render_window() noexcept override = default;
+		virtual ~render_window() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,14 +24,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_device_context() const noexcept -> gfx::devctx const & { return m_devctx; }
-
-		ML_NODISCARD auto get_device_info() const noexcept -> gfx::devinfo const & { return m_devctx->get_device_info(); }
+		ML_NODISCARD auto get_device_context() const & noexcept -> unique<gfx::devctx> const & { return m_ctx; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		gfx::devctx m_devctx;
+		unique<gfx::devctx> m_ctx;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
