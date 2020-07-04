@@ -6,11 +6,16 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // assert
-#if !defined(ML_assert)
-#	ifdef assert
-#		define ML_assert(expr)	assert(expr)
+#ifndef ML_assert
+
+#	if defined(assert)
+#		define ML_assert(expr) \
+			assert(expr)
+
 #	else
-#		define ML_assert(expr) (expr)
+#		define ML_assert(expr) \
+			((void)(expr))
+
 #	endif
 #endif
 
@@ -18,14 +23,16 @@
 
 // breakpoint
 #ifndef ML_breakpoint
-#	if (!ML_is_debug)
-#		define ML_breakpoint()	((void)0)
-#	elif defined(ML_cc_msvc)
+
+#	if defined(ML_cc_msvc)
 #		define ML_breakpoint()	::__debugbreak()
+
 #	elif defined(ML_cc_clang)
 #		define ML_breakpoint()	::__builtin_debugtrap()
+
 #	else
 #		define ML_breakpoint()	::raise(SIGTRAP)
+
 #	endif
 #endif
 

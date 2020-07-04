@@ -12,17 +12,17 @@ namespace ml
 
 	struct ML_NODISCARD window_settings final
 	{
-		pmr::string			title	{};
-		video_mode			video	{};
-		context_settings	context	{};
-		int32_t				hints	{};
+		pmr::string			title		{};
+		video_mode			video		{};
+		context_settings	ctxconfig	{};
+		int32_t				hints		{};
 	};
 
 	inline void from_json(json const & j, window_settings & value)
 	{
 		j.at("title").get_to(value.title);
 		j.at("video").get_to(value.video);
-		j.at("context").get_to(value.context);
+		j.at("context").get_to(value.ctxconfig);
 		j.at("hints").get_to(value.hints);
 	}
 
@@ -30,7 +30,7 @@ namespace ml
 	{
 		j["title"] = value.title;
 		j["video"] = value.video;
-		j["context"] = value.context;
+		j["context"] = value.ctxconfig;
 		j["hints"] = value.hints;
 	}
 
@@ -39,7 +39,6 @@ namespace ml
 	ML_decl_handle(cursor_handle)	; // cursor handle
 	ML_decl_handle(monitor_handle)	; // monitor handle
 	ML_decl_handle(window_handle)	; // window handle
-	ML_decl_handle(window_proc)		; // window procedure
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -681,8 +681,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_devctx::opengl_devctx(device * parent, context_settings const & cs)
-		: devctx{ parent }, m_settings{ cs }
+	opengl_context::opengl_context(device * parent, context_settings const & cs)
+		: context{ parent }, m_settings{ cs }
 	{
 		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
 		
@@ -693,14 +693,14 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool opengl_devctx::get_alpha_enabled() const
+	bool opengl_context::get_alpha_enabled() const
 	{
 		bool temp{};
 		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&temp));
 		return temp;
 	}
 
-	alpha_mode opengl_devctx::get_alpha_mode() const
+	alpha_mode opengl_context::get_alpha_mode() const
 	{
 		alpha_mode temp{};
 
@@ -712,21 +712,21 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_devctx::get_blend_enabled() const
+	bool opengl_context::get_blend_enabled() const
 	{
 		bool temp{};
 		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&temp));
 		return temp;
 	}
 
-	color opengl_devctx::get_blend_color() const
+	color opengl_context::get_blend_color() const
 	{
 		color temp{};
 		ML_glCheck(glGetFloatv(GL_BLEND_COLOR, temp));
 		return temp;
 	}
 
-	blend_mode opengl_devctx::get_blend_mode() const
+	blend_mode opengl_context::get_blend_mode() const
 	{
 		blend_mode temp{};
 
@@ -751,21 +751,21 @@ namespace ml::gfx
 		return temp;
 	}
 
-	color opengl_devctx::get_clear_color() const
+	color opengl_context::get_clear_color() const
 	{
 		color temp{};
 		ML_glCheck(glGetFloatv(GL_COLOR_CLEAR_VALUE, temp));
 		return temp;
 	}
 
-	bool opengl_devctx::get_cull_enabled() const
+	bool opengl_context::get_cull_enabled() const
 	{
 		bool temp{};
 		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&temp));
 		return temp;
 	}
 
-	cull_mode opengl_devctx::get_cull_mode() const
+	cull_mode opengl_context::get_cull_mode() const
 	{
 		cull_mode temp{};
 
@@ -778,24 +778,17 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_devctx::get_depth_enabled() const
+	bool opengl_context::get_depth_enabled() const
 	{
 		bool temp{};
 		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&temp));
 		return temp;
 	}
 
-	bool opengl_devctx::get_depth_write() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_DEPTH_WRITEMASK, (uint8_t *)&temp));
-		return temp;
-	}
-
-	depth_mode opengl_devctx::get_depth_mode() const
+	depth_mode opengl_context::get_depth_mode() const
 	{
 		depth_mode temp{};
-		
+
 		ML_glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp.pred));
 		temp.pred = _predicate<to_user>(temp.pred);
 		
@@ -804,14 +797,14 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_devctx::get_stencil_enabled() const
+	bool opengl_context::get_stencil_enabled() const
 	{
 		bool temp{};
 		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&temp));
 		return temp;
 	}
 
-	stencil_mode opengl_devctx::get_stencil_mode() const
+	stencil_mode opengl_context::get_stencil_mode() const
 	{
 		stencil_mode temp{};
 
@@ -825,7 +818,7 @@ namespace ml::gfx
 		return temp;
 	}
 
-	int_rect opengl_devctx::get_viewport() const
+	int_rect opengl_context::get_viewport() const
 	{
 		int_rect temp{};
 		ML_glCheck(glGetIntegerv(GL_VIEWPORT, temp));
@@ -834,27 +827,27 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_devctx::set_alpha_enabled(bool enabled)
+	void opengl_context::set_alpha_enabled(bool enabled)
 	{
 		ML_glCheck(ML_glEnable(GL_ALPHA_TEST, enabled));
 	}
 
-	void opengl_devctx::set_alpha_mode(alpha_mode const & value)
+	void opengl_context::set_alpha_mode(alpha_mode const & value)
 	{
 		ML_glCheck(glAlphaFunc(_predicate<to_impl>(value.pred), value.ref));
 	}
 
-	void opengl_devctx::set_blend_color(color const & value)
+	void opengl_context::set_blend_color(color const & value)
 	{
 		ML_glCheck(glBlendColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_devctx::set_blend_enabled(bool enabled)
+	void opengl_context::set_blend_enabled(bool enabled)
 	{
 		ML_glCheck(ML_glEnable(GL_BLEND, enabled));
 	}
 
-	void opengl_devctx::set_blend_mode(blend_mode const & value)
+	void opengl_context::set_blend_mode(blend_mode const & value)
 	{
 		ML_glCheck(glBlendFuncSeparate(
 			_factor<to_impl>(value.color_sfactor),
@@ -867,46 +860,41 @@ namespace ml::gfx
 			_equation<to_impl>(value.alpha_equation)));
 	}
 
-	void opengl_devctx::set_clear_color(color const & value)
+	void opengl_context::set_clear_color(color const & value)
 	{
 		ML_glCheck(glClearColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_devctx::set_cull_enabled(bool enabled)
+	void opengl_context::set_cull_enabled(bool enabled)
 	{
 		ML_glCheck(ML_glEnable(GL_CULL_FACE, enabled));
 	}
 
-	void opengl_devctx::set_cull_mode(cull_mode const & value)
+	void opengl_context::set_cull_mode(cull_mode const & value)
 	{
 		ML_glCheck(glCullFace(_facet<to_impl>(value.facet)));
 		
 		ML_glCheck(glFrontFace(_order<to_impl>(value.order)));
 	}
 
-	void opengl_devctx::set_depth_enabled(bool enabled)
+	void opengl_context::set_depth_enabled(bool enabled)
 	{
 		ML_glCheck(ML_glEnable(GL_DEPTH_TEST, enabled));
 	}
 
-	void opengl_devctx::set_depth_mode(depth_mode const & value)
+	void opengl_context::set_depth_mode(depth_mode const & value)
 	{
 		ML_glCheck(glDepthFunc(_predicate<to_impl>(value.pred)));
 
 		ML_glCheck(glDepthRangef(value.range[0], value.range[1]));
 	}
 
-	void opengl_devctx::set_depth_write(bool enabled)
-	{
-		ML_glCheck(glDepthMask(enabled));
-	}
-
-	void opengl_devctx::set_stencil_enabled(bool enabled)
+	void opengl_context::set_stencil_enabled(bool enabled)
 	{
 		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, enabled));
 	}
 
-	void opengl_devctx::set_stencil_mode(stencil_mode const & value)
+	void opengl_context::set_stencil_mode(stencil_mode const & value)
 	{
 		ML_glCheck(glStencilFuncSeparate(
 			GL_FRONT_AND_BACK,
@@ -915,23 +903,23 @@ namespace ml::gfx
 			value.mask));
 	}
 
-	void opengl_devctx::set_viewport(int_rect const & bounds)
+	void opengl_context::set_viewport(int_rect const & bounds)
 	{
 		ML_glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_devctx::clear(uint32_t mask)
+	void opengl_context::clear(uint32_t mask)
 	{
 		uint32_t temp{};
-		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color);
-		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth);
-		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil);
+		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
+		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth		);
+		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil	);
 		ML_glCheck(glClear(temp));
 	}
 
-	void opengl_devctx::draw(shared<vertexarray> const & value)
+	void opengl_context::draw(shared<vertexarray> const & value)
 	{
 		// could be moved into header file
 
@@ -961,64 +949,64 @@ namespace ml::gfx
 		}
 	}
 
-	void opengl_devctx::draw_arrays(uint32_t prim, size_t first, size_t count)
+	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
 	{
 		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
 	}
 
-	void opengl_devctx::draw_indexed(uint32_t prim, size_t count)
+	void opengl_context::draw_indexed(uint32_t prim, size_t count)
 	{
 		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
 	}
 
-	void opengl_devctx::flush()
+	void opengl_context::flush()
 	{
 		ML_glCheck(glFlush());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_devctx::upload(uniform_id loc, bool value)
+	void opengl_context::upload(uniform_id loc, bool value)
 	{
 		ML_glCheck(ML_glUniform1i(loc, (int32_t)value));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, int32_t value)
+	void opengl_context::upload(uniform_id loc, int32_t value)
 	{
 		ML_glCheck(ML_glUniform1i(loc, value));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, float_t value)
+	void opengl_context::upload(uniform_id loc, float_t value)
 	{
 		ML_glCheck(ML_glUniform1f(loc, value));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, vec2f const & value)
+	void opengl_context::upload(uniform_id loc, vec2f const & value)
 	{
 		ML_glCheck(ML_glUniform2f(loc, value[0], value[1]));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, vec3f const & value)
+	void opengl_context::upload(uniform_id loc, vec3f const & value)
 	{
 		ML_glCheck(ML_glUniform3f(loc, value[0], value[1], value[2]));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, vec4f const & value)
+	void opengl_context::upload(uniform_id loc, vec4f const & value)
 	{
 		ML_glCheck(ML_glUniform4f(loc, value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, mat2f const & value)
+	void opengl_context::upload(uniform_id loc, mat2f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix2fv(loc, false, value));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, mat3f const & value)
+	void opengl_context::upload(uniform_id loc, mat3f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix3fv(loc, false, value));
 	}
 
-	void opengl_devctx::upload(uniform_id loc, mat4f const & value)
+	void opengl_context::upload(uniform_id loc, mat4f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix4fv(loc, false, value));
 	}
@@ -1072,7 +1060,7 @@ namespace ml::gfx
 
 			if (uint32_t const type{ std::invoke([&]() noexcept -> uint32_t
 			{
-				switch (get_element_base_type(e.type))
+				switch (e.get_base_type())
 				{
 				default					: return 0			; // unknown
 				case hashof_v<bool>		: return GL_BOOL	; // bool
@@ -1083,7 +1071,7 @@ namespace ml::gfx
 			{
 				ML_glCheck(glVertexAttribIPointer(
 					(uint32_t)i,
-					get_element_component_count(e.type),
+					e.get_component_count(),
 					type,
 					layout.stride(),
 					reinterpret_cast<address_t>(e.offset)));
@@ -1092,7 +1080,7 @@ namespace ml::gfx
 			{
 				ML_glCheck(glVertexAttribPointer(
 					(uint32_t)i,
-					get_element_component_count(e.type),
+					e.get_component_count(),
 					type,
 					e.normalized,
 					layout.stride(),

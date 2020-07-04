@@ -20,10 +20,10 @@ namespace ml
 		return m_handle = std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return LoadLibraryExW(m_path.c_str(), nullptr, 0);
+			return ::LoadLibraryExW(m_path.c_str(), nullptr, 0);
 
 #elif defined(ML_os_unix)
-			return dlopen(path.string().c_str(), RTLD_LOCAL | RTLD_LAZY);
+			return ::dlopen(path.string().c_str(), RTLD_LOCAL | RTLD_LAZY);
 
 #else
 			return nullptr;
@@ -48,10 +48,10 @@ namespace ml
 		return std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return FreeLibrary(static_cast<HINSTANCE>(m_handle));
+			return ::FreeLibrary(static_cast<HINSTANCE>(m_handle));
 
 #elif defined(ML_os_unix)
-			return dlclose(m_handle);
+			return ::dlclose(m_handle);
 
 #else
 			return false;
@@ -70,10 +70,10 @@ namespace ml
 		return m_symbols.find_or_add_fn(util::hash(name), [&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());
+			return ::GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());
 
 #elif defined(ML_os_unix)
-			return dlsym(m_handle, name.c_str());
+			return ::dlsym(m_handle, name.c_str());
 
 #else
 			return nullptr;

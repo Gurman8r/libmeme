@@ -16,16 +16,18 @@ window
 
 
 device
+	devctx
 	devinfo
-	devobj
-		devctx
-		vertexarray
-		vertexbuffer
-		indexbuffer
-		texture
-			texture2d
-			texturecube
-		framebuffer
-		shader
-		program
+
+devchild
+	devctx
+	vertexarray
+	vertexbuffer
+	indexbuffer
+	texture
+		texture2d
+		texturecube
+	framebuffer
+	shader
+	program
 

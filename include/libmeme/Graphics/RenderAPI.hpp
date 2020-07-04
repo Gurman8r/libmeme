@@ -18,7 +18,7 @@ namespace ml::gfx
 
 	class	device			;
 	class	devchild		;
-	class	devctx			;
+	class	context			;
 
 	class	vertexarray		;
 	class	vertexbuffer	;
@@ -550,6 +550,16 @@ namespace ml::gfx
 		{
 			static_assert(is_valid_type<Elem>);
 		}
+
+		constexpr hash_t get_base_type() const noexcept
+		{
+			return _ML_GFX get_element_base_type(type);
+		}
+
+		constexpr uint32_t get_component_count() const noexcept
+		{
+			return _ML_GFX get_element_component_count(type);
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -596,69 +606,7 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// state
-namespace ml::gfx
-{
-	// clear flags
-	enum clear_ : uint32_t
-	{
-		clear_none		= 0,		// none
-		clear_color		= 1 << 0,	// color buffer bit
-		clear_depth		= 1 << 1,	// depth buffer bit
-		clear_stencil	= 1 << 2,	// stencil buffer bit
-
-		// color / depth / stencil
-		clear_all
-			= clear_color
-			| clear_depth
-			| clear_stencil,
-	};
-
-	// alpha state
-	struct ML_NODISCARD alpha_mode final
-	{
-		uint32_t	pred	{ predicate_greater };
-		float_t		ref		{ 0.001f };
-	};
-
-	// blend state
-	struct ML_NODISCARD blend_mode final
-	{
-		uint32_t
-			color_equation	{ equation_add },
-			color_sfactor	{ factor_src_alpha },
-			color_dfactor	{ factor_one_minus_src_alpha },
-			alpha_equation	{ color_equation },
-			alpha_sfactor	{ color_sfactor },
-			alpha_dfactor	{ color_dfactor };
-	};
-
-	// cull state
-	struct ML_NODISCARD cull_mode final
-	{
-		uint32_t	facet	{ facet_back };
-		uint32_t	order	{ order_ccw };
-	};
-
-	// depth state
-	struct ML_NODISCARD depth_mode final
-	{
-		uint32_t	pred	{ predicate_less };
-		vec2		range	{ 0.f, 1.f };
-	};
-
-	// stencil state (WIP)
-	struct ML_NODISCARD stencil_mode final
-	{
-		uint32_t	pred	{ predicate_always };
-		int32_t		ref		{ 0 };
-		uint32_t	mask	{ 0xffffffff };
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// devinfo
+// device
 namespace ml::gfx
 {
 	// device info
@@ -682,13 +630,7 @@ namespace ml::gfx
 		bool geometry_shaders_available;
 		pmr::string shading_language_version;
 	};
-}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// device
-namespace ml::gfx
-{
 	// base device
 	class ML_GRAPHICS_API device : public trackable, public non_copyable
 	{
@@ -696,6 +638,11 @@ namespace ml::gfx
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static device * g_device; // pointer to default device
+
+	protected:
+		friend class std::unique_ptr<device, default_delete<device>>;
+
+		virtual ~device() override = default;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -711,13 +658,11 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~device() override = default;
+		virtual void set_context(shared<context> const & value) noexcept = 0;
+
+		ML_NODISCARD virtual shared<context> const & get_context() const noexcept = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
-
-		virtual void set_context(shared<devctx> const & value) noexcept = 0;
-
-		ML_NODISCARD virtual shared<devctx> const & get_context() const noexcept = 0;
 
 		ML_NODISCARD virtual devinfo const & get_info() const noexcept = 0;
 
@@ -763,31 +708,87 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// devctx
+// context
 namespace ml::gfx
 {
+	// clear flags
+	enum clear_ : uint32_t
+	{
+		clear_none		= 0,		// none
+		clear_color		= 1 << 0,	// color buffer bit
+		clear_depth		= 1 << 1,	// depth buffer bit
+		clear_stencil	= 1 << 2,	// stencil buffer bit
+
+		// color / depth / stencil
+		clear_all
+			= clear_color
+			| clear_depth
+			| clear_stencil,
+	};
+
+	// alpha mode
+	struct ML_NODISCARD alpha_mode final
+	{
+		uint32_t	pred	{ predicate_greater };
+		float_t		ref		{ 0.001f };
+	};
+
+	// blend mode
+	struct ML_NODISCARD blend_mode final
+	{
+		uint32_t
+			color_equation	{ equation_add },
+			color_sfactor	{ factor_src_alpha },
+			color_dfactor	{ factor_one_minus_src_alpha },
+			alpha_equation	{ color_equation },
+			alpha_sfactor	{ color_sfactor },
+			alpha_dfactor	{ color_dfactor };
+	};
+
+	// cull mode
+	struct ML_NODISCARD cull_mode final
+	{
+		uint32_t	facet	{ facet_back };
+		uint32_t	order	{ order_ccw };
+	};
+
+	// depth mode
+	struct ML_NODISCARD depth_mode final
+	{
+		uint32_t	pred	{ predicate_less };
+		vec2		range	{ 0.f, 1.f };
+	};
+
+	// stencil mode (WIP)
+	struct ML_NODISCARD stencil_mode final
+	{
+		uint32_t	pred	{ predicate_always };
+		int32_t		ref		{ 0 };
+		uint32_t	mask	{ 0xffffffff };
+	};
+
 	// base device context
-	class ML_GRAPHICS_API devctx : public devchild
+	class ML_GRAPHICS_API context : public devchild
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static shared<devctx> create(context_settings const & cs) noexcept;
+		ML_NODISCARD static shared<context> create(context_settings const & cs) noexcept;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit devctx(device * parent) noexcept : devchild{ parent }
+		explicit context(device * parent) noexcept : devchild{ parent }
 		{
 		}
 
-		virtual ~devctx() override = default;
+		virtual ~context() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual context_settings const & get_context_settings() const noexcept = 0;
-
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
+
+		ML_NODISCARD virtual context_settings const & get_settings() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
@@ -802,7 +803,7 @@ namespace ml::gfx
 		ML_NODISCARD virtual color get_blend_color() const = 0;
 		
 		ML_NODISCARD virtual blend_mode get_blend_mode() const = 0;
-		
+
 		ML_NODISCARD virtual color get_clear_color() const = 0;
 
 		ML_NODISCARD virtual bool get_cull_enabled() const = 0;
@@ -812,8 +813,6 @@ namespace ml::gfx
 		ML_NODISCARD virtual bool get_depth_enabled() const = 0;
 
 		ML_NODISCARD virtual depth_mode get_depth_mode() const = 0;
-
-		ML_NODISCARD virtual bool get_depth_write() const = 0;
 
 		ML_NODISCARD virtual bool get_stencil_enabled() const = 0;
 
@@ -832,9 +831,9 @@ namespace ml::gfx
 		virtual void set_blend_enabled(bool enabled) = 0;
 		
 		virtual void set_blend_mode(blend_mode const & value) = 0;
-		
+
 		virtual void set_clear_color(color const & value) = 0;
-		
+
 		virtual void set_cull_enabled(bool enabled) = 0;
 
 		virtual void set_cull_mode(cull_mode const & value) = 0;
@@ -842,8 +841,6 @@ namespace ml::gfx
 		virtual void set_depth_enabled(bool enabled) = 0;
 
 		virtual void set_depth_mode(depth_mode const & value) = 0;
-
-		virtual void set_depth_write(bool enabled) = 0;
 
 		virtual void set_stencil_enabled(bool enabled) = 0;
 
@@ -1043,7 +1040,7 @@ namespace ml::gfx
 	// texture flags
 	enum texture_flags_ : int32_t
 	{
-		texture_flags_none		= (0 << 0), // none
+		texture_flags_none		= 0 << 0, // none
 		texture_flags_smooth	= (1 << 0), // smooth
 		texture_flags_repeated	= (1 << 1), // repeated
 		texture_flags_mipmapped = (1 << 2), // mipmapped
@@ -1070,8 +1067,6 @@ namespace ml::gfx
 		texfmt		format	{ format_rgba }				; // texture format
 		int32_t		flags	{ texture_flags_default }	; // texture flags
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base texture
 	class ML_GRAPHICS_API texture : public devchild
@@ -1108,11 +1103,11 @@ namespace ml::gfx
 
 		ML_NODISCARD inline vec2i const & get_size() const noexcept { return get_texture_options().size; }
 
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_texture_options().flags & texture_flags_mipmapped; }
+		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_flags() & texture_flags_mipmapped; }
 
-		ML_NODISCARD inline bool is_repeated() const noexcept { return get_texture_options().flags & texture_flags_repeated; }
+		ML_NODISCARD inline bool is_repeated() const noexcept { return get_flags() & texture_flags_repeated; }
 
-		ML_NODISCARD inline bool is_smooth() const noexcept { return get_texture_options().flags & texture_flags_smooth; }
+		ML_NODISCARD inline bool is_smooth() const noexcept { return get_flags() & texture_flags_smooth; }
 
 	public:
 		static void bind(texture const * value, uint32_t slot = 0) noexcept;
@@ -1296,14 +1291,12 @@ namespace ml::gfx
 	// shader flags
 	enum shader_flags_ : int32_t
 	{
-		shader_flags_none = (0 << 0), // none
+		shader_flags_none = 0 << 0, // none
 
 		// none
 		shader_flags_default
 			= shader_flags_none,
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base shader
 	class ML_GRAPHICS_API shader : public devchild
@@ -1359,14 +1352,12 @@ namespace ml::gfx
 	// program flags
 	enum program_flags_ : int32_t
 	{
-		program_flags_none = (0 << 0), // none
+		program_flags_none = 0 << 0, // none
 
 		// none
 		program_flags_default
 			= program_flags_none,
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base program
 	class ML_GRAPHICS_API program : public devchild

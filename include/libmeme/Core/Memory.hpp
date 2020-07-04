@@ -273,7 +273,10 @@ namespace ml
 
 	template <> struct default_delete<>
 	{
-		void operator()(void * addr) const noexcept { memory::deallocate(addr); }
+		void operator()(void * addr) const noexcept
+		{
+			memory::deallocate(addr);
+		}
 	};
 
 	template <class T> struct default_delete<T> : default_delete<>

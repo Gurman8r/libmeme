@@ -351,20 +351,20 @@
 #   define ML_NEVER_INLINE      __declspec(noinline)
 #elif defined(ML_cc_clang) || defined(ML_cc_gcc)
 #   define ML_ALWAYS_INLINE     inline __attribute__((always_inline))
-#   define ML_NEVER_INLINE      __attribute__ ((noinline))
+#   define ML_NEVER_INLINE      __attribute__((noinline))
 #else
 #   define ML_ALWAYS_INLINE     inline
 #   define ML_NEVER_INLINE
 #endif
 
-// visibility
+// api visibility
 #ifndef ML_STATIC
 #   ifdef ML_cc_msvc
 #      define ML_API_EXPORT     __declspec(dllexport)
 #      define ML_API_IMPORT     __declspec(dllimport)
 #   elif (defined(ML_cc_clang) || defined(ML_cc_gcc)) && (ML_cc_version >= 4)
-#      define ML_API_EXPORT    __attribute__ ((visibility ("default")))
-#      define ML_API_IMPORT    __attribute__ ((visibility ("hidden")))
+#      define ML_API_EXPORT    __attribute__((visibility("default")))
+#      define ML_API_IMPORT    __attribute__((visibility("hidden")))
 #   else
 #      define ML_API_EXPORT
 #      define ML_API_IMPORT

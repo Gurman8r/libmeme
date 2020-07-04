@@ -5,7 +5,7 @@
 #if defined(ML_IMPL_RENDERER_OPENGL)
 #include "Impl/Impl_RenderAPI_OpenGL.hpp"
 using impl_device		= _ML_GFX opengl_device			;
-using impl_devctx		= _ML_GFX opengl_devctx			;
+using impl_devctx		= _ML_GFX opengl_context		;
 using impl_vertexarray	= _ML_GFX opengl_vertexarray	;
 using impl_vertexbuffer	= _ML_GFX opengl_vertexbuffer	;
 using impl_indexbuffer	= _ML_GFX opengl_indexbuffer	;
@@ -31,7 +31,7 @@ namespace ml::gfx
 
 	device * device::create() noexcept
 	{
-		auto * temp{ new impl_device{} };
+		device * temp{ new impl_device{} };
 
 		if (!g_device) { set_default(temp); }
 
@@ -49,7 +49,7 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_NODISCARD shared<devctx> devctx::create(context_settings const & cs) noexcept
+	shared<context> context::create(context_settings const & cs) noexcept
 	{
 		return make_shared<impl_devctx>(device::get_default(), cs);
 	}

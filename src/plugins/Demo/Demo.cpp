@@ -1430,11 +1430,9 @@ namespace ml
 			if (ImGui::CollapsingHeader("depth"))
 			{
 				bool d_enabled{ ctx->get_depth_enabled() };
-				bool d_mask{ ctx->get_depth_write() };
 				auto d_mode{ ctx->get_depth_mode() };
 				ImGui::Checkbox("enabled", &d_enabled);
 				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d_mode.pred], d_mode.pred);
-				ImGui::Checkbox("mask", &d_mask);
 				ImGui::Text("range: %f, %f", d_mode.range[0], d_mode.range[1]);
 			}
 			ImGui::Separator();

@@ -8,7 +8,7 @@ assert(engine.window.open(
         "libmeme",                      # title
         ml.video_mode(
             [ 1280, 720 ],              # resolution
-            8,                          # bits per pixel
+            [ 8, 8, 8, 8 ],             # bits per pixel
             -1),                        # refresh rate
         ml.context_settings(
             ml.context_api.opengl,      # api

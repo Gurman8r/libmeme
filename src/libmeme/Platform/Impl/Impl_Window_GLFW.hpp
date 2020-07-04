@@ -66,6 +66,10 @@ namespace ml
 
 		vec2i get_position() const override;
 
+		vec2i get_size() const override;
+
+		cstring get_title() const override;
+
 		void * get_user_pointer() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -104,7 +108,7 @@ namespace ml
 
 		static window_handle get_current_context();
 
-		static window_proc get_proc_address(cstring value);
+		static void * get_proc_address(cstring value);
 		
 		static pmr::vector<monitor_handle> const & get_monitors();
 
@@ -146,8 +150,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		GLFWwindow	* m_window	{};
-		GLFWmonitor	* m_monitor	{};
+		pmr::string		m_title		;
+		GLFWwindow	*	m_window	;
+		GLFWmonitor	*	m_monitor	;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

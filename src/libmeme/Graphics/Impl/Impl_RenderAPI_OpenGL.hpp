@@ -20,7 +20,7 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_device> };
 
-		shared<devctx>	m_devctx	{}; // 
+		shared<context>	m_devctx	{}; // 
 		devinfo			m_devinfo	{}; // 
 
 	public:
@@ -34,9 +34,9 @@ namespace ml::gfx
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, this); }
 
-		void set_context(shared<devctx> const & value) noexcept override { m_devctx = value; }
+		void set_context(shared<context> const & value) noexcept override { m_devctx = value; }
 
-		shared<devctx> const & get_context() const noexcept override { return m_devctx; }
+		shared<context> const & get_context() const noexcept override { return m_devctx; }
 
 		devinfo const & get_info() const noexcept override { return m_devinfo; }
 
@@ -52,29 +52,29 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl device context
-	class opengl_devctx final : public devctx
+	class opengl_context final : public context
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		friend class devctx;
+		friend class context;
 
-		static constexpr typeof<> s_typeof{ typeof_v<opengl_devctx> };
+		static constexpr typeof<> s_typeof{ typeof_v<opengl_context> };
 
 		context_settings m_settings; // context settings
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		opengl_devctx(device * parent, context_settings const & cs);
+		opengl_context(device * parent, context_settings const & cs);
 
-		~opengl_devctx() override = default;
+		~opengl_context() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		context_settings const & get_context_settings() const noexcept override { return m_settings; }
-
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, this); }
+
+		context_settings const & get_settings() const noexcept override { return m_settings; }
 
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
@@ -89,9 +89,9 @@ namespace ml::gfx
 		color get_blend_color() const override;
 		
 		blend_mode get_blend_mode() const override;
-		
-		color get_clear_color() const override;
 
+		color get_clear_color() const override;
+		
 		bool get_cull_enabled() const override;
 
 		cull_mode get_cull_mode() const override;
@@ -99,8 +99,6 @@ namespace ml::gfx
 		bool get_depth_enabled() const override;
 		
 		depth_mode get_depth_mode() const override;
-
-		bool get_depth_write() const override;
 
 		bool get_stencil_enabled() const override;
 
@@ -119,7 +117,7 @@ namespace ml::gfx
 		void set_blend_enabled(bool enabled) override;
 		
 		void set_blend_mode(blend_mode const & value) override;
-		
+
 		void set_clear_color(color const & value) override;
 		
 		void set_cull_enabled(bool enabled) override;
@@ -129,8 +127,6 @@ namespace ml::gfx
 		void set_depth_enabled(bool enabled) override;
 		
 		void set_depth_mode(depth_mode const & value) override;
-
-		void set_depth_write(bool enabled) override;
 
 		void set_stencil_enabled(bool enabled) override;
 
@@ -144,9 +140,9 @@ namespace ml::gfx
 
 		void draw(shared<vertexarray> const & value) override;
 		
-		void draw_arrays(uint32_t mode, size_t first, size_t count) override;
+		void draw_arrays(uint32_t prim, size_t first, size_t count) override;
 		
-		void draw_indexed(uint32_t mode, size_t count) override;
+		void draw_indexed(uint32_t prim, size_t count) override;
 		
 		void flush() override;
 

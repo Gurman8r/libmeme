@@ -23,10 +23,13 @@ namespace ml
 
 	bool render_window::open(window_settings const & ws, bool ic)
 	{
+		// check already open
+		if (is_open()) { return debug::error("render_window is already open"); }
+
 		// open window
 		if (!window::open(ws, ic))
 		{
-			return debug::error("failed opening window");
+			return debug::error("failed opening render_window");
 		}
 
 		// create device
@@ -35,13 +38,13 @@ namespace ml
 			return debug::error("failed creating device");
 		}
 
-		// create context
-		m_dev->set_context(gfx::devctx::create(ws.context));
-
 		// validate version
-		m_settings.context.major = m_dev->get_info().major_version;
-		m_settings.context.minor = m_dev->get_info().minor_version;
-		debug::info("using renderer version: {0}.{1}", m_settings.context.major, m_settings.context.minor);
+		m_settings.ctxconfig.major = m_dev->get_info().major_version;
+		m_settings.ctxconfig.minor = m_dev->get_info().minor_version;
+		debug::info("using renderer version: {0}.{1}", m_settings.ctxconfig.major, m_settings.ctxconfig.minor);
+
+		// create context
+		m_dev->set_context(gfx::context::create(m_settings.ctxconfig));
 		
 		// setup states
 		for (auto const & cmd :
@@ -62,7 +65,6 @@ namespace ml
 			// depth
 			gfx::render_command::set_depth_enabled(true),
 			gfx::render_command::set_depth_mode({ gfx::predicate_less, { 0.f, 1.f } }),
-			gfx::render_command::set_depth_write(true),
 
 			// stencil
 			gfx::render_command::set_stencil_enabled(true),

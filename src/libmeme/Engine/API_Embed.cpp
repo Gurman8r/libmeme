@@ -375,8 +375,8 @@ namespace ml
 		py::class_<video_mode>(m, "video_mode")
 			.def(py::init<>())
 			.def(py::init<vec2i const &>())
-			.def(py::init<vec2i const &, int32_t>())
-			.def(py::init<vec2i const &, int32_t, int32_t>())
+			.def(py::init<vec2i const &, vec4b const &>())
+			.def(py::init<vec2i const &, vec4b const &, int32_t>())
 			.def_readwrite("resolution"			, &video_mode::resolution)
 			.def_readwrite("bits_per_pixel"		, &video_mode::bits_per_pixel)
 			.def_readwrite("refresh_rate"		, &video_mode::refresh_rate)
@@ -390,7 +390,7 @@ namespace ml
 			.def(py::init<pmr::string const &, video_mode const &, context_settings const &, int32_t>())
 			.def_readwrite("title"	, &window_settings::title)
 			.def_readwrite("video"	, &window_settings::video)
-			.def_readwrite("context", &window_settings::context)
+			.def_readwrite("context", &window_settings::ctxconfig)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
 
@@ -520,13 +520,6 @@ namespace ml
 			.def_static("get_proc_address"		, [](cstring v) { return window::get_proc_address(v); })
 			.def_static("get_monitors"			, []() { return window::get_monitors(); })
 			.def_static("get_time"				, []() { return window::get_time(); })
-
-			.def_static("get_context_settings"	, []() { return engine::window().get_context_settings(); })
-			.def_static("get_hint"				, [](int32_t v) { return engine::window().get_hint(v); })
-			.def_static("get_hints"				, []() { return engine::window().get_hints(); })
-			.def_static("get_title"				, []() { return engine::window().get_title(); })
-			.def_static("get_video_mode"		, []() { return engine::window().get_video_mode(); })
-			.def_static("get_window_settings"	, []() { return engine::window().get_window_settings(); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
