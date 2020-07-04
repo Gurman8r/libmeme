@@ -71,7 +71,7 @@ namespace ml
 			gfx::render_command::set_stencil_mode({ gfx::predicate_always, 0, 0xffffffff }),
 		})
 		{
-			std::invoke(cmd);
+			std::invoke(cmd, m_dev->get_context().get());
 		}
 
 		return true;

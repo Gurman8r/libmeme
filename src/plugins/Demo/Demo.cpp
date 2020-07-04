@@ -215,11 +215,11 @@ namespace ml
 
 	template <class> struct x_draw_meshes final : ecs::detail::x_base<s_draw_meshes>
 	{
-		void operator()(c_shader const & shd, c_mesh const & msh)
+		void operator()(c_shader const & shd, c_mesh const & msh, gfx::context * ctx)
 		{
 			ML_bind_scope(shd);
 			shd.bind_textures();
-			gfx::render_command::draw(msh->get_vao())();
+			std::invoke(gfx::render_command::draw(msh->get_vao()), ctx);
 		}
 	};
 
@@ -290,7 +290,7 @@ namespace ml
 
 		gfx::pipeline m_pipeline
 		{
-			std::make_tuple(nullptr, []() { /* test */ })
+			std::make_tuple(nullptr, [](gfx::context *) { /* test */ })
 		};
 		
 		shader_cache m_cache{};
@@ -637,13 +637,13 @@ namespace ml
 					gfx::render_command::set_cull_enabled(false),
 					gfx::render_command::set_clear_color(colors::magenta),
 					gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
-					gfx::render_command::custom([&]() noexcept
+					gfx::render_command::make([&](gfx::context * ctx) noexcept
 					{
-						m_ecs.invoke_system<x_draw_meshes>();
+						m_ecs.invoke_system<x_draw_meshes>(ctx);
 					}),
 				})
 				{
-					std::invoke(cmd);
+					std::invoke(cmd, gfx::device::get_default()->get_context().get());
 				}
 			}
 		}
