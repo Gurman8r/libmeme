@@ -16,6 +16,7 @@ dependson{
 files{
 	"%{sln_dir}premake5/%{prj.name}.lua",
 	"%{sln_dir}assets/**.**",
+	"%{sln_dir}media/**.**",
 	"%{sln_dir}premake5.lua",
 	"%{sln_dir}README.md",
 	"%{sln_dir}TODO.txt",

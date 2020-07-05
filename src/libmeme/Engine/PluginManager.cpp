@@ -21,18 +21,21 @@ namespace ml
 		// path empty
 		if (path.empty()) { return false; }
 
-		// file hash
-		auto const code{ util::hash(path.filename().string()) };
-
-		// lookup hash
-		if (auto const it{ std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code) }
+		// lookup file
+		if (auto const it{ m_data.find<hash_t>
+		(
+			util::hash(path.filename().string())
+		) }
 		; it == m_data.end<hash_t>())
 		{
-			m_data.erase((size_t)std::distance(m_data.begin<hash_t>(), it));
+			m_data.erase(m_data.indexof<hash_t>(it));
 
 			return true;
 		}
-		return false;
+		else
+		{
+			return false;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,12 +45,9 @@ namespace ml
 		// path empty
 		if (path.empty()) { return 0; }
 
-		// file hash
-		auto const code{ util::hash(path.filename().string()) };
-
-		// lookup hash
-		if (auto const it{ std::find(m_data.begin<hash_t>(), m_data.end<hash_t>(), code) }
-		; it == m_data.end<hash_t>())
+		// lookup file
+		if (auto const code{ util::hash(path.filename().string()) }
+		; m_data.find<hash_t>(code) == m_data.end<hash_t>())
 		{
 			// load library
 			if (shared_library lib{ path })

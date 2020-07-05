@@ -44,7 +44,7 @@ namespace ml
 		debug::info("using renderer version: {0}.{1}", m_settings.ctxconfig.major, m_settings.ctxconfig.minor);
 
 		// create context
-		m_dev->set_context(gfx::context::create(m_settings.ctxconfig));
+		m_dev->set_context(m_dev->create_context(m_settings.ctxconfig));
 		
 		// setup states
 		for (auto const & cmd :

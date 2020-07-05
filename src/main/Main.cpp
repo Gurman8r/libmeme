@@ -38,9 +38,9 @@ static class memcfg final : public singleton<memcfg>
 
 static auto const default_settings{ R"(
 {
-	"content_home": "../../../../",
-	"library_home": "../../../../",
-	"setup_script": "assets/scripts/setup.py"
+	"content_home"	: "../../../../",
+	"library_home"	: "../../../../",
+	"setup_script"	: "assets/scripts/setup.py"
 }
 )"_json };
 
@@ -49,7 +49,7 @@ static auto const default_settings{ R"(
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
+
 	// setup engine
 	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{

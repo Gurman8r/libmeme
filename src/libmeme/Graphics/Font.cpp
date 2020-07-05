@@ -100,7 +100,7 @@ namespace ml
 		};
 
 		// graphic
-		g.graphic = gfx::texture2d::create
+		g.graphic = gfx::device::get_default()->create_texture2d
 		({
 			vec2i{}, {
 			gfx::format_rgba,

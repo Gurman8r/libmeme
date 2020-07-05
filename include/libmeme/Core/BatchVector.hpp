@@ -631,6 +631,18 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <size_t I> ML_NODISCARD size_t indexof(const_iterator_i<I> it) const noexcept
+		{
+			return (size_t)std::distance(this->cbegin<I>(), it);
+		}
+
+		template <class T> ML_NODISCARD size_t indexof(const_iterator_t<T> it) const noexcept
+		{
+			return (size_t)std::distance(this->cbegin<T>(), it);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <size_t I> ML_NODISCARD size_t max_size() const noexcept
 		{
 			return this->get<I>().max_size();
@@ -800,6 +812,32 @@ namespace ml::ds
 			{
 				v.erase(v.begin() + first, v.begin() + last);
 			});
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class U
+		> ML_NODISCARD iterator_i<I> find(U && value) noexcept
+		{
+			return std::find(this->begin<I>(), this->end<I>(), ML_forward(value));
+		}
+
+		template <size_t I, class U
+		> ML_NODISCARD const_iterator_i<I> find(U && value) const noexcept
+		{
+			return std::find(this->cbegin<I>(), this->cend<I>(), ML_forward(value));
+		}
+
+		template <class T, class U
+		> ML_NODISCARD iterator_t<T> find(U && value) noexcept
+		{
+			return std::find(this->begin<T>(), this->end<T>(), ML_forward(value));
+		}
+
+		template <class T, class U
+		> ML_NODISCARD const_iterator_t<T> find(U && value) const noexcept
+		{
+			return std::find(this->cbegin<T>(), this->cend<T>(), ML_forward(value));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -101,8 +101,8 @@ namespace ml
 			if (m_pgm) { m_pgm->revalue(); }
 			else { m_pgm = gfx::program::create(); }
 
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, { v_src }));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, { f_src }));
 
 			return m_pgm->link();
 		}
@@ -112,28 +112,18 @@ namespace ml
 			if (m_pgm) { m_pgm->revalue(); }
 			else { m_pgm = gfx::program::create(); }
 
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, v_src));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, f_src));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_geometry	, g_src));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, { v_src }));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, { f_src }));
+			m_pgm->attach(gfx::shader::create(gfx::shader_type_geometry	, { g_src }));
 
 			return m_pgm->link();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void bind(shader_asset const * value) noexcept
-		{
-			gfx::program::bind(value ? value->m_pgm : nullptr);
-		}
+		void bind() const noexcept { m_pgm->bind(); }
 
-		static void bind(shared<shader_asset> const & value) noexcept
-		{
-			gfx::program::bind(value ? value->m_pgm : nullptr);
-		}
-
-		void bind() const noexcept { gfx::program::bind(m_pgm); }
-
-		void unbind() const noexcept { gfx::program::bind(nullptr); }
+		void unbind() const noexcept { m_pgm->unbind(); }
 
 		void bind_textures() const noexcept { m_pgm->bind_textures(); }
 

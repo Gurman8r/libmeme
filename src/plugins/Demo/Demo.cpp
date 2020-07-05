@@ -205,11 +205,12 @@ namespace ml
 	{
 		void operator()(c_shader & shd, c_material const & mat)
 		{
-			ML_bind_scope(shd);
+			shd.bind();
 			for (uniform const & u : *mat)
 			{
 				shd.set_uniform(u);
 			}
+			shd.unbind();
 		}
 	};
 
@@ -217,9 +218,10 @@ namespace ml
 	{
 		void operator()(c_shader const & shd, c_mesh const & msh, gfx::context * ctx)
 		{
-			ML_bind_scope(shd);
+			shd.bind();
 			shd.bind_textures();
 			std::invoke(gfx::render_command::draw(msh->get_vao()), ctx);
+			shd.unbind();
 		}
 	};
 

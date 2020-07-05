@@ -21,65 +21,6 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto clear(uint32_t mask) noexcept
-		{
-			return make_command(&context::clear, mask);
-		}
-
-		ML_NODISCARD static auto draw(shared<vertexarray> const & value) noexcept
-		{
-			return make_command(&context::draw, value);
-		}
-
-		ML_NODISCARD static auto draw_arrays(uint32_t prim, uint32_t first, size_t count) noexcept
-		{
-			return make_command(&context::draw_arrays, prim, first, count);
-		}
-
-		ML_NODISCARD static auto draw_indexed(uint32_t prim, size_t count) noexcept
-		{
-			return make_command(&context::draw_indexed, prim, count);
-		}
-
-		ML_NODISCARD static auto flush() noexcept
-		{
-			return make_command(&context::flush);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static auto bind_vertexarray(vertexarray const * value) noexcept
-		{
-			return make_command(&context::bind_vertexarray, value);
-		}
-
-		ML_NODISCARD static auto bind_vertexbuffer(vertexbuffer const * value) noexcept
-		{
-			return make_command(&context::bind_vertexbuffer, value);
-		}
-
-		ML_NODISCARD static auto bind_indexbuffer(indexbuffer const * value) noexcept
-		{
-			return make_command(&context::bind_indexbuffer, value);
-		}
-
-		ML_NODISCARD static auto bind_texture(texture const * value, uint32_t slot = 0) noexcept
-		{
-			return make_command(&context::bind_texture, value, slot);
-		}
-
-		ML_NODISCARD static auto bind_framebuffer(framebuffer const * value) noexcept
-		{
-			return make_command(&context::bind_framebuffer, value);
-		}
-
-		ML_NODISCARD static auto bind_program(program const * value) noexcept
-		{
-			return make_command(&context::bind_program, value);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		ML_NODISCARD static auto set_alpha_enabled(bool enabled) noexcept
 		{
 			return make_command(&context::set_alpha_enabled, enabled);
@@ -143,6 +84,65 @@ namespace ml::gfx
 		ML_NODISCARD static auto set_viewport(int_rect const & bounds) noexcept
 		{
 			return make_command(&context::set_viewport, bounds);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto clear(uint32_t mask) noexcept
+		{
+			return make_command(&context::clear, mask);
+		}
+
+		ML_NODISCARD static auto draw(shared<vertexarray> const & value) noexcept
+		{
+			return make_command(&context::draw, value);
+		}
+
+		ML_NODISCARD static auto draw_arrays(uint32_t prim, uint32_t first, size_t count) noexcept
+		{
+			return make_command(&context::draw_arrays, prim, first, count);
+		}
+
+		ML_NODISCARD static auto draw_indexed(uint32_t prim, size_t count) noexcept
+		{
+			return make_command(&context::draw_indexed, prim, count);
+		}
+
+		ML_NODISCARD static auto flush() noexcept
+		{
+			return make_command(&context::flush);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto bind_vertexarray(vertexarray const * value) noexcept
+		{
+			return make_command(&context::bind_vertexarray, value);
+		}
+
+		ML_NODISCARD static auto bind_vertexbuffer(vertexbuffer const * value) noexcept
+		{
+			return make_command(&context::bind_vertexbuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_indexbuffer(indexbuffer const * value) noexcept
+		{
+			return make_command(&context::bind_indexbuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_texture(texture const * value, uint32_t slot = 0) noexcept
+		{
+			return make_command(&context::bind_texture, value, slot);
+		}
+
+		ML_NODISCARD static auto bind_framebuffer(framebuffer const * value) noexcept
+		{
+			return make_command(&context::bind_framebuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_program(program const * value) noexcept
+		{
+			return make_command(&context::bind_program, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

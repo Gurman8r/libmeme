@@ -4,7 +4,6 @@
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Platform/WindowAPI.hpp>
-#include <libmeme/Graphics/Binder.hpp>
 #include <libmeme/Graphics/Image.hpp>
 #include <libmeme/Graphics/Vertex.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
@@ -423,7 +422,7 @@ namespace ml::gfx
 	{
 		return data
 			? buffer_t{ (byte_t *)data, (byte_t *)data + count * sizeof(Elem), alloc }
-		: buffer_t{ count * sizeof(Elem), (byte_t)0, alloc };
+			: buffer_t{ count * sizeof(Elem), (byte_t)0, alloc };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -606,6 +605,43 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// texture options
+namespace ml::gfx
+{
+	// texture flags
+	enum texture_flags_ : int32_t
+	{
+		texture_flags_none		= 0 << 0, // none
+		texture_flags_smooth	= 1 << 0, // smooth
+		texture_flags_repeated	= 1 << 1, // repeated
+		texture_flags_mipmapped = 1 << 2, // mipmapped
+
+		// smooth / repeated
+		texture_flags_default
+			= texture_flags_smooth
+			| texture_flags_repeated,
+	};
+
+	// texture format
+	struct ML_NODISCARD texfmt final
+	{
+		uint32_t
+			color	{ format_rgba },		// color format
+			pixel	{ color },				// pixel format
+			type	{ type_unsigned_byte };	// pixel type
+	};
+
+	// texture options
+	struct ML_NODISCARD texopts final
+	{
+		vec2i		size	{ 0, 0 }					; // texture size
+		texfmt		format	{ format_rgba }				; // texture format
+		int32_t		flags	{ texture_flags_default }	; // texture flags
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // device
 namespace ml::gfx
 {
@@ -667,6 +703,27 @@ namespace ml::gfx
 		ML_NODISCARD virtual devinfo const & get_info() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD virtual shared<context> create_context(context_settings const & cs) noexcept = 0;
+
+		ML_NODISCARD virtual shared<vertexarray> create_vertexarray(uint32_t prim) noexcept = 0;
+
+		ML_NODISCARD virtual shared<vertexbuffer> create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept = 0;
+
+		ML_NODISCARD virtual shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept = 0;
+
+		ML_NODISCARD virtual shared<texture2d> create_texture2d(texopts const & opts, address_t data = {}) noexcept = 0;
+
+		ML_NODISCARD virtual shared<texturecube> create_texturecube(texopts const & opts) noexcept = 0;
+
+		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(texopts const & opts) noexcept = 0;
+
+		ML_NODISCARD virtual shared<shader> create_shader(uint32_t type, pmr::vector<pmr::string> const & src = {}) noexcept = 0;
+
+		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -767,13 +824,16 @@ namespace ml::gfx
 		uint32_t	mask	{ 0xffffffff };
 	};
 
-	// base device context
+	// base context
 	class ML_GRAPHICS_API context : public devchild
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static shared<context> create(context_settings const & cs) noexcept;
+		ML_NODISCARD static shared<context> create(context_settings const & cs) noexcept
+		{
+			return device::get_default()->create_context(cs);
+		}
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -791,32 +851,6 @@ namespace ml::gfx
 		ML_NODISCARD virtual context_settings const & get_settings() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual void clear(uint32_t mask) = 0;
-
-		virtual void draw(shared<vertexarray> const & value) = 0;
-
-		virtual void draw_arrays(uint32_t prim, size_t first, size_t count) = 0;
-
-		virtual void draw_indexed(uint32_t prim, size_t count) = 0;
-
-		virtual void flush() = 0;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual void bind_vertexarray(vertexarray const * value) = 0;
-
-		virtual void bind_vertexbuffer(vertexbuffer const * value) = 0;
-
-		virtual void bind_indexbuffer(indexbuffer const * value) = 0;
-
-		virtual void bind_texture(texture const * value, uint32_t slot = 0) = 0;
-
-		virtual void bind_framebuffer(framebuffer const * value) = 0;
-
-		virtual void bind_program(program const * value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -876,6 +910,32 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		virtual void clear(uint32_t mask) = 0;
+
+		virtual void draw(shared<vertexarray> const & value) = 0;
+
+		virtual void draw_arrays(uint32_t prim, size_t first, size_t count) = 0;
+
+		virtual void draw_indexed(uint32_t prim, size_t count) = 0;
+
+		virtual void flush() = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void bind_vertexarray(vertexarray const * value) = 0;
+
+		virtual void bind_vertexbuffer(vertexbuffer const * value) = 0;
+
+		virtual void bind_indexbuffer(indexbuffer const * value) = 0;
+
+		virtual void bind_texture(texture const * value, uint32_t slot = 0) = 0;
+
+		virtual void bind_framebuffer(framebuffer const * value) = 0;
+
+		virtual void bind_program(program const * value) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual void upload(uniform_id loc, bool value) = 0;
 
 		virtual void upload(uniform_id loc, int32_t value) = 0;
@@ -907,7 +967,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API vertexarray : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept;
+		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept
+		{
+			return device::get_default()->create_vertexarray(prim);
+		}
 
 	public:
 		explicit vertexarray(device * parent) noexcept : devchild{ parent }
@@ -934,16 +997,6 @@ namespace ml::gfx
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
 
 	public:
-		static void bind(vertexarray const * value) noexcept
-		{
-			device::get_default()->get_context()->bind_vertexarray(value);
-		}
-
-		static void bind(shared<vertexarray> const & value) noexcept
-		{
-			device::get_default()->get_context()->bind_vertexarray(value.get());
-		}
-
 		inline void bind() const noexcept
 		{
 			get_device()->get_context()->bind_vertexarray(this);
@@ -965,7 +1018,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API vertexbuffer : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
+		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept
+		{
+			return device::get_default()->create_vertexbuffer(usage, count, data);
+		}
 
 		ML_NODISCARD static shared<vertexbuffer> create(size_t count, address_t data = {}) noexcept
 		{
@@ -999,16 +1055,6 @@ namespace ml::gfx
 		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
 
 	public:
-		static void bind(vertexbuffer const * value) noexcept
-		{
-			device::get_default()->get_context()->bind_vertexbuffer(value);
-		}
-
-		static void bind(shared<vertexbuffer> const & value) noexcept
-		{
-			device::get_default()->get_context()->bind_vertexbuffer(value.get());
-		}
-
 		inline void bind() const noexcept
 		{
 			get_device()->get_context()->bind_vertexbuffer(this);
@@ -1030,7 +1076,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API indexbuffer : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept;
+		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept
+		{
+			return device::get_default()->create_indexbuffer(usage, count, data);
+		}
 
 		ML_NODISCARD static shared<indexbuffer> create(size_t count, address_t data = {}) noexcept
 		{
@@ -1060,16 +1109,6 @@ namespace ml::gfx
 		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
 
 	public:
-		static void bind(indexbuffer const * value) noexcept
-		{
-			device::get_default()->get_context()->bind_indexbuffer(value);
-		}
-
-		static void bind(shared<indexbuffer> const & value) noexcept
-		{
-			device::get_default()->get_context()->bind_indexbuffer(value.get());
-		}
-
 		inline void bind() const noexcept
 		{
 			get_device()->get_context()->bind_indexbuffer(this);
@@ -1087,37 +1126,6 @@ namespace ml::gfx
 // texture
 namespace ml::gfx
 {
-	// texture flags
-	enum texture_flags_ : int32_t
-	{
-		texture_flags_none		= 0 << 0, // none
-		texture_flags_smooth	= (1 << 0), // smooth
-		texture_flags_repeated	= (1 << 1), // repeated
-		texture_flags_mipmapped = (1 << 2), // mipmapped
-
-		// smooth / repeated
-		texture_flags_default
-			= texture_flags_smooth
-			| texture_flags_repeated,
-	};
-
-	// texture format
-	struct ML_NODISCARD texfmt final
-	{
-		uint32_t
-			color	{ format_rgba },		// color format
-			pixel	{ color },				// pixel format
-			type	{ type_unsigned_byte };	// pixel type
-	};
-
-	// texture options
-	struct ML_NODISCARD texopts final
-	{
-		vec2i		size	{ 0, 0 }					; // texture size
-		texfmt		format	{ format_rgba }				; // texture format
-		int32_t		flags	{ texture_flags_default }	; // texture flags
-	};
-
 	// base texture
 	class ML_GRAPHICS_API texture : public devchild
 	{
@@ -1160,16 +1168,6 @@ namespace ml::gfx
 		ML_NODISCARD inline bool is_smooth() const noexcept { return get_flags() & texture_flags_smooth; }
 
 	public:
-		static void bind(texture const * value, uint32_t slot = 0) noexcept
-		{
-			device::get_default()->get_context()->bind_texture(value, slot);
-		}
-
-		static void bind(shared<texture> const & value, uint32_t slot = 0) noexcept
-		{
-			device::get_default()->get_context()->bind_texture(value.get(), slot);
-		}
-
 		inline void bind(uint32_t slot = 0) const noexcept
 		{
 			get_device()->get_context()->bind_texture(this, slot);
@@ -1191,7 +1189,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
-		ML_NODISCARD static shared<texture2d> create(texopts const & opts, address_t data = {}) noexcept;
+		ML_NODISCARD static shared<texture2d> create(texopts const & opts, address_t data = {}) noexcept
+		{
+			return device::get_default()->create_texture2d(opts, data);
+		}
 
 		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
@@ -1248,7 +1249,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texturecube : public texture
 	{
 	public:
-		ML_NODISCARD static shared<texturecube> create(texopts const & opts) noexcept;
+		ML_NODISCARD static shared<texturecube> create(texopts const & opts) noexcept
+		{
+			return device::get_default()->create_texturecube(opts);
+		}
 
 	public:
 		explicit texturecube(device * parent) noexcept : texture{ parent }
@@ -1283,7 +1287,10 @@ namespace ml::gfx
 	class ML_GRAPHICS_API framebuffer : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<framebuffer> create(texopts const & opts) noexcept;
+		ML_NODISCARD static shared<framebuffer> create(texopts const & opts) noexcept
+		{
+			return device::get_default()->create_framebuffer(opts);
+		}
 
 	public:
 		explicit framebuffer(device * parent) noexcept : devchild{ parent }
@@ -1311,25 +1318,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual texopts const & get_options() const noexcept = 0;
 
-		inline void bind_texture(uint32_t slot = 0) const noexcept
-		{
-			get_device()->get_context()->bind_texture
-			(
-				get_color_attachments()[(size_t)slot].get(), slot
-			);
-		}
-
 	public:
-		static void bind(framebuffer const * value) noexcept
-		{
-			device::get_default()->get_context()->bind_framebuffer(value);
-		}
-
-		static void bind(shared<framebuffer> const & value) noexcept
-		{
-			device::get_default()->get_context()->bind_framebuffer(value.get());
-		}
-
 		inline void bind() const noexcept
 		{
 			get_device()->get_context()->bind_framebuffer(this);
@@ -1339,6 +1328,14 @@ namespace ml::gfx
 		{
 			get_device()->get_context()->bind_framebuffer(nullptr);
 		}
+
+		inline void bind_texture(uint32_t slot = 0) const noexcept
+		{
+			get_device()->get_context()->bind_texture
+			(
+				get_color_attachments()[(size_t)slot].get(), slot
+			);
+		}
 	};
 }
 
@@ -1347,28 +1344,13 @@ namespace ml::gfx
 // shader
 namespace ml::gfx
 {
-	// shader flags
-	enum shader_flags_ : int32_t
-	{
-		shader_flags_none = 0 << 0, // none
-
-		// none
-		shader_flags_default
-			= shader_flags_none,
-	};
-
 	// base shader
 	class ML_GRAPHICS_API shader : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<shader> create(uint32_t type, int32_t flags = shader_flags_default) noexcept;
-
-		template <class Src
-		> ML_NODISCARD static shared<shader> create(uint32_t type, Src && src, int32_t flags = shader_flags_default) noexcept
+		ML_NODISCARD static shared<shader> create(uint32_t type, pmr::vector<pmr::string> const & src) noexcept
 		{
-			auto temp{ create(type, flags) };
-			temp->compile(ML_forward(src));
-			return temp;
+			return device::get_default()->create_shader(type, src);
 		}
 
 	public:
@@ -1395,8 +1377,6 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
-		ML_NODISCARD virtual int32_t get_flags() const noexcept = 0;
-
 		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
 
 		ML_NODISCARD virtual pmr::vector<pmr::string> const & get_source() const noexcept = 0;
@@ -1408,21 +1388,14 @@ namespace ml::gfx
 // program
 namespace ml::gfx
 {
-	// program flags
-	enum program_flags_ : int32_t
-	{
-		program_flags_none = 0 << 0, // none
-
-		// none
-		program_flags_default
-			= program_flags_none,
-	};
-
 	// base program
 	class ML_GRAPHICS_API program : public devchild
 	{
 	public:
-		ML_NODISCARD static shared<program> create(int32_t flags = program_flags_default) noexcept;
+		ML_NODISCARD static shared<program> create() noexcept
+		{
+			return device::get_default()->create_program();
+		}
 
 	public:
 		explicit program(device * parent) noexcept : devchild{ parent }
@@ -1448,7 +1421,26 @@ namespace ml::gfx
 
 		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
 
-		inline void bind_textures() const
+		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
+
+		ML_NODISCARD virtual ds::map<uint32_t, shared<shader>> const & get_shaders() const noexcept = 0;
+
+		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
+
+		ML_NODISCARD virtual ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept = 0;
+
+	public:
+		inline void bind() const noexcept
+		{
+			get_device()->get_context()->bind_program(this);
+		}
+
+		inline void unbind() const noexcept
+		{
+			get_device()->get_context()->bind_program(nullptr);
+		}
+
+		inline void bind_textures() const noexcept
 		{
 			uint32_t slot{};
 			get_textures().for_each([&, &ctx = get_device()->get_context()
@@ -1462,8 +1454,6 @@ namespace ml::gfx
 
 		template <class T> bool set_uniform(cstring name, T && value) noexcept
 		{
-			auto const ctx{ get_device()->get_context() };
-
 			return bind_uniform(name, [&](uniform_id loc) noexcept
 			{
 				if constexpr (std::is_convertible_v<T, shared<texture>>)
@@ -1475,37 +1465,6 @@ namespace ml::gfx
 					get_device()->get_context()->upload(loc, ML_forward(value));
 				}
 			});
-		}
-
-		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
-
-		ML_NODISCARD virtual int32_t get_flags() const noexcept = 0;
-
-		ML_NODISCARD virtual ds::map<uint32_t, shared<shader>> const & get_shaders() const noexcept = 0;
-
-		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
-
-		ML_NODISCARD virtual ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept = 0;
-
-	public:
-		static void bind(program const * value) noexcept
-		{
-			device::get_default()->get_context()->bind_program(value);
-		}
-
-		static void bind(shared<program> const & value) noexcept
-		{
-			device::get_default()->get_context()->bind_program(value.get());
-		}
-
-		inline void bind() const noexcept
-		{
-			get_device()->get_context()->bind_program(this);
-		}
-
-		inline void unbind() const noexcept
-		{
-			get_device()->get_context()->bind_program(nullptr);
 		}
 
 	protected:

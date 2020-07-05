@@ -337,8 +337,8 @@ namespace ml::meta
 	> ML_alias all_types = typename rename<bound_all<TMF>::template type, TL>;
 
 	// example
-	static_assert(all<std::is_const, const int>{});
-	static_assert(all_types<std::is_const, list<const int>>{});
+	static_assert(all<std::is_const, int const>{});
+	static_assert(all_types<std::is_const, list<int const, float const>>{});
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

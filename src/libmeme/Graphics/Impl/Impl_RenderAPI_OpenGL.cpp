@@ -598,6 +598,8 @@ namespace ml::gfx
 // device
 namespace ml::gfx
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	opengl_device::opengl_device() : device{}
 	{
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
@@ -667,10 +669,59 @@ namespace ml::gfx
 		m_devinfo.geometry_shaders_available = true;
 #	endif
 
-#endif
 		// shading language version
 		ML_glCheck(m_devinfo.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+#endif
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	shared<context> opengl_device::create_context(context_settings const & cs) noexcept
+	{
+		return _ML make_shared<opengl_context>(this, cs);
+	}
+
+	shared<vertexarray> opengl_device::create_vertexarray(uint32_t prim) noexcept
+	{
+		return _ML make_shared<opengl_vertexarray>(this, prim);
+	}
+
+	shared<vertexbuffer> opengl_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	{
+		return _ML make_shared<opengl_vertexbuffer>(this, usage, count, data);
+	}
+
+	shared<indexbuffer> opengl_device::create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	{
+		return _ML make_shared<opengl_indexbuffer>(this, usage, count, data);
+	}
+
+	shared<texture2d> opengl_device::create_texture2d(texopts const & opts, address_t data) noexcept
+	{
+		return _ML make_shared<opengl_texture2d>(this, opts, data);
+	}
+
+	shared<texturecube> opengl_device::create_texturecube(texopts const & opts) noexcept
+	{
+		return _ML make_shared<opengl_texturecube>(this, opts);
+	}
+
+	shared<framebuffer> opengl_device::create_framebuffer(texopts const & opts) noexcept
+	{
+		return _ML make_shared<opengl_framebuffer>(this, opts);
+	}
+
+	shared<shader> opengl_device::create_shader(uint32_t type, pmr::vector<pmr::string> const & src) noexcept
+	{
+		return _ML make_shared<opengl_shader>(this, type, src);
+	}
+
+	shared<program> opengl_device::create_program() noexcept
+	{
+		return _ML make_shared<opengl_program>(this);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -690,103 +741,6 @@ namespace ml::gfx
 		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
 		ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
 		ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void opengl_context::clear(uint32_t mask)
-	{
-		uint32_t temp{};
-		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
-		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth		);
-		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil	);
-		ML_glCheck(glClear(temp));
-	}
-
-	void opengl_context::draw(shared<vertexarray> const & value)
-	{
-		// could be moved into header file
-
-		if (!value || value->get_vertices().empty()) { return; }
-
-		bind_vertexarray(value.get());
-
-		if (auto const & ib{ value->get_indices() })
-		{
-			bind_indexbuffer(ib.get());
-
-			for (auto const & vb : value->get_vertices())
-			{
-				bind_vertexbuffer(vb.get());
-
-				draw_indexed(value->get_primitive(), ib->get_count());
-			}
-		}
-		else
-		{
-			for (auto const & vb : value->get_vertices())
-			{
-				bind_vertexbuffer(vb.get());
-
-				draw_arrays(value->get_primitive(), 0, vb->get_count());
-			}
-		}
-	}
-
-	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
-	{
-		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
-	}
-
-	void opengl_context::draw_indexed(uint32_t prim, size_t count)
-	{
-		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
-	}
-
-	void opengl_context::flush()
-	{
-		ML_glCheck(glFlush());
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void opengl_context::bind_vertexarray(vertexarray const * value)
-	{
-		ML_glCheck(glBindVertexArray(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
-	}
-
-	void opengl_context::bind_vertexbuffer(vertexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
-	}
-
-	void opengl_context::bind_indexbuffer(indexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
-	}
-
-	void opengl_context::bind_texture(texture const * value, uint32_t slot)
-	{
-		ML_glCheck(glBindTextureUnit(slot, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
-	}
-
-	void opengl_context::bind_framebuffer(framebuffer const * value)
-	{
-		if (value)
-		{
-			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, ML_handle(uint32_t, value->get_handle())));
-
-			set_viewport({ vec2i::zero(), value->get_options().size });
-		}
-		else
-		{
-			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
-		}
-	}
-
-	void opengl_context::bind_program(program const * value)
-	{
-		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1004,6 +958,103 @@ namespace ml::gfx
 	void opengl_context::set_viewport(int_rect const & bounds)
 	{
 		ML_glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_context::clear(uint32_t mask)
+	{
+		uint32_t temp{};
+		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
+		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth		);
+		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil	);
+		ML_glCheck(glClear(temp));
+	}
+
+	void opengl_context::draw(shared<vertexarray> const & value)
+	{
+		// could be moved into header file
+
+		if (!value || value->get_vertices().empty()) { return; }
+
+		bind_vertexarray(value.get());
+
+		if (auto const & ib{ value->get_indices() })
+		{
+			bind_indexbuffer(ib.get());
+
+			for (auto const & vb : value->get_vertices())
+			{
+				bind_vertexbuffer(vb.get());
+
+				draw_indexed(value->get_primitive(), ib->get_count());
+			}
+		}
+		else
+		{
+			for (auto const & vb : value->get_vertices())
+			{
+				bind_vertexbuffer(vb.get());
+
+				draw_arrays(value->get_primitive(), 0, vb->get_count());
+			}
+		}
+	}
+
+	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
+	{
+		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
+	}
+
+	void opengl_context::draw_indexed(uint32_t prim, size_t count)
+	{
+		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
+	}
+
+	void opengl_context::flush()
+	{
+		ML_glCheck(glFlush());
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_context::bind_vertexarray(vertexarray const * value)
+	{
+		ML_glCheck(glBindVertexArray(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_vertexbuffer(vertexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_indexbuffer(indexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_texture(texture const * value, uint32_t slot)
+	{
+		ML_glCheck(glBindTextureUnit(slot, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_framebuffer(framebuffer const * value)
+	{
+		if (value)
+		{
+			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, ML_handle(uint32_t, value->get_handle())));
+
+			set_viewport({ vec2i::zero(), value->get_options().size });
+		}
+		else
+		{
+			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
+		}
+	}
+
+	void opengl_context::bind_program(program const * value)
+	{
+		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1536,7 +1587,7 @@ namespace ml::gfx
 		revalue(); bind();
 
 		// color attachments
-		if (m_attachments.empty()) { m_attachments.push_back(texture2d::create(m_opts)); }
+		if (m_attachments.empty()) { m_attachments.push_back(get_device()->create_texture2d(m_opts)); }
 		for (size_t i = 0, imax = m_attachments.size(); i < imax; ++i)
 		{
 			m_attachments[i]->update(m_opts.size);
@@ -1553,7 +1604,7 @@ namespace ml::gfx
 		if (m_depth) { m_depth->update(m_opts.size); }
 		else
 		{
-			m_depth = texture2d::create({
+			m_depth = get_device()->create_texture2d({
 				m_opts.size, {
 				format_depth24_stencil8,
 				format_depth_stencil,
@@ -1584,10 +1635,12 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_shader::opengl_shader(device * parent, uint32_t type, int32_t flags)
-		: shader{ parent }, m_shader_type{ type }, m_flags{ flags }
+	opengl_shader::opengl_shader(device * parent, uint32_t type, pmr::vector<pmr::string> const & src)
+		: shader{ parent }, m_shader_type{ type }
 	{
 		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
+
+		compile(src);
 	}
 
 	opengl_shader::~opengl_shader()
@@ -1669,8 +1722,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_program::opengl_program(device * parent, int32_t flags)
-		: program{ parent }, m_flags{ flags }
+	opengl_program::opengl_program(device * parent)
+		: program{ parent }
 	{
 		ML_glCheck(m_handle = ML_glCreateProgram());
 	}
