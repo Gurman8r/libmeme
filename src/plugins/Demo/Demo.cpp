@@ -392,7 +392,7 @@ namespace ml
 			// load stuff, etc...
 
 			// ICON
-			if (image const icon{ engine::fs().path2("assets/textures/icon.png") })
+			if (image const icon{ engine::fs().path2("assets/textures/icon.png"), 0, false })
 			{
 				engine::window().set_icon(icon.width(), icon.height(), icon.data());
 			}
