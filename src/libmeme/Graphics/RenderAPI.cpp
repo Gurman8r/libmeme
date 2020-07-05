@@ -61,21 +61,11 @@ namespace ml::gfx
 		return make_shared<impl_vertexarray>(device::get_default(), primitive);
 	}
 
-	void vertexarray::bind(vertexarray const * value) noexcept
-	{
-		impl_vertexarray::do_bind(static_cast<impl_vertexarray const *>(value));
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<vertexbuffer> vertexbuffer::create(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return make_shared<impl_vertexbuffer>(device::get_default(), usage, count, data);
-	}
-
-	void vertexbuffer::bind(vertexbuffer const * value) noexcept
-	{
-		impl_vertexbuffer::do_bind(static_cast<impl_vertexbuffer const *>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -85,35 +75,11 @@ namespace ml::gfx
 		return make_shared<impl_indexbuffer>(device::get_default(), usage, count, data);
 	}
 
-	void indexbuffer::bind(indexbuffer const * value) noexcept
-	{
-		impl_indexbuffer::do_bind(static_cast<impl_indexbuffer const *>(value));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void texture::bind(texture const * value, uint32_t slot) noexcept
-	{
-		switch (value ? value->get_texture_type() : texture_type_2d)
-		{
-		case texture_type_2d:
-			return texture2d::bind(static_cast<texture2d const *>(value), slot);
-
-		case texture_type_cubemap:
-			return texturecube::bind(static_cast<texturecube const *>(value), slot);
-		}
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<texture2d> texture2d::create(texopts const & opts, address_t data) noexcept
 	{
 		return make_shared<impl_texture2d>(device::get_default(), opts, data);
-	}
-
-	void texture2d::bind(texture2d const * value, uint32_t slot) noexcept
-	{
-		impl_texture2d::do_bind(static_cast<impl_texture2d const *>(value), slot);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -123,21 +89,11 @@ namespace ml::gfx
 		return make_shared<impl_texturecube>(device::get_default(), opts);
 	}
 
-	void texturecube::bind(texturecube const * value, uint32_t slot) noexcept
-	{
-		impl_texturecube::do_bind(static_cast<impl_texturecube const *>(value), slot);
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	shared<framebuffer> framebuffer::create(texopts const & opts) noexcept
 	{
 		return make_shared<impl_framebuffer>(device::get_default(), opts);
-	}
-
-	void framebuffer::bind(framebuffer const * value) noexcept
-	{
-		impl_framebuffer::do_bind(static_cast<impl_framebuffer const *>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -152,11 +108,6 @@ namespace ml::gfx
 	shared<program> program::create(int32_t flags) noexcept
 	{
 		return make_shared<impl_program>(device::get_default(), flags);
-	}
-
-	void program::bind(program const * value) noexcept
-	{
-		impl_program::do_bind(static_cast<impl_program const *>(value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

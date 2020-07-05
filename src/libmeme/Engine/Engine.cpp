@@ -61,11 +61,13 @@ namespace ml
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
+
 					gfx::render_command::clear(gfx::clear_color),
+					
 					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
-					std::invoke(cmd, gfx::device::get_default()->get_context().get());
+					std::invoke(cmd, m_window.get_device()->get_context().get());
 				}
 			} break;
 

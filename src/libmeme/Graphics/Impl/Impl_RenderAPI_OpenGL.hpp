@@ -80,6 +80,32 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void clear(uint32_t mask) override;
+
+		void draw(shared<vertexarray> const & value) override;
+
+		void draw_arrays(uint32_t prim, size_t first, size_t count) override;
+
+		void draw_indexed(uint32_t prim, size_t count) override;
+
+		void flush() override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void bind_vertexarray(vertexarray const * value) override;
+
+		void bind_vertexbuffer(vertexbuffer const * value) override;
+
+		void bind_indexbuffer(indexbuffer const * value) override;
+
+		void bind_texture(texture const * value, uint32_t slot = 0) override;
+
+		void bind_framebuffer(framebuffer const * value) override;
+
+		void bind_program(program const * value) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		bool get_alpha_enabled() const override;
 
 		alpha_mode get_alpha_mode() const override;
@@ -136,18 +162,6 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear(uint32_t mask) override;
-
-		void draw(shared<vertexarray> const & value) override;
-		
-		void draw_arrays(uint32_t prim, size_t first, size_t count) override;
-		
-		void draw_indexed(uint32_t prim, size_t count) override;
-		
-		void flush() override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void upload(uniform_id loc, bool value) override;
 
 		void upload(uniform_id loc, int32_t value) override;
@@ -179,8 +193,6 @@ namespace ml::gfx
 	class opengl_vertexarray final : public vertexarray
 	{
 	private:
-		friend class vertexarray;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_vertexarray> };
 
 		uint32_t							m_handle	{}; // handle
@@ -209,9 +221,6 @@ namespace ml::gfx
 		uint32_t get_primitive() const noexcept override { return m_primitive; }
 
 		pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept override { return m_vertices; }
-
-	protected:
-		static void do_bind(opengl_vertexarray const * value);
 	};
 }
 
@@ -224,8 +233,6 @@ namespace ml::gfx
 	class opengl_vertexbuffer final : public vertexbuffer
 	{
 	private:
-		friend class vertexbuffer;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_vertexbuffer> };
 
 		uint32_t		m_handle	{}; // handle
@@ -256,9 +263,6 @@ namespace ml::gfx
 		buffer_layout const & get_layout() const noexcept override { return m_layout; }
 
 		uint32_t get_usage() const noexcept override { return m_usage; }
-
-	protected:
-		static void do_bind(opengl_vertexbuffer const * value);
 	};
 }
 
@@ -271,8 +275,6 @@ namespace ml::gfx
 	class opengl_indexbuffer final : public indexbuffer
 	{
 	private:
-		friend class indexbuffer;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_indexbuffer> };
 
 		uint32_t		m_handle	{}; // handle
@@ -298,9 +300,6 @@ namespace ml::gfx
 		size_t get_count() const noexcept override { return m_buffer.size() / sizeof(uint32_t); }
 
 		uint32_t get_usage() const noexcept override { return m_usage; }
-
-	protected:
-		static void do_bind(opengl_indexbuffer const * value);
 	};
 }
 
@@ -313,8 +312,6 @@ namespace ml::gfx
 	class opengl_texture2d final : public texture2d
 	{
 	private:
-		friend class texture2d;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_texture2d> };
 
 		uint32_t	m_handle	{}			; // handle
@@ -349,10 +346,7 @@ namespace ml::gfx
 
 		image copy_to_image() const override;
 
-		texopts const & get_texture_options() const noexcept { return m_opts; }
-
-	protected:
-		static void do_bind(opengl_texture2d const * value, uint32_t slot);
+		texopts const & get_options() const noexcept { return m_opts; }
 	};
 }
 
@@ -365,8 +359,6 @@ namespace ml::gfx
 	class opengl_texturecube : public texturecube
 	{
 	private:
-		friend class texturecube;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_texturecube> };
 
 		uint32_t	m_handle	{}			; // handle
@@ -389,10 +381,7 @@ namespace ml::gfx
 
 		void unlock() override;
 
-		texopts const & get_texture_options() const noexcept { return m_opts; }
-
-	protected:
-		static void do_bind(opengl_texturecube const * value, uint32_t slot);
+		texopts const & get_options() const noexcept { return m_opts; }
 	};
 }
 
@@ -405,8 +394,6 @@ namespace ml::gfx
 	class opengl_framebuffer final : public framebuffer
 	{
 	private:
-		friend class framebuffer;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_framebuffer> };
 
 		uint32_t						m_handle		{}	; // handle
@@ -437,10 +424,7 @@ namespace ml::gfx
 
 		shared<texture2d> const & get_depth_attachment() const noexcept override { return m_depth; }
 
-		texopts const & get_texture_options() const noexcept override { return m_opts; }
-
-	protected:
-		static void do_bind(opengl_framebuffer const * value);
+		texopts const & get_options() const noexcept override { return m_opts; }
 	};
 }
 
@@ -453,8 +437,6 @@ namespace ml::gfx
 	class opengl_shader final : public shader
 	{
 	private:
-		friend class shader;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_shader> };
 
 		uint32_t					m_handle		{}; // handle
@@ -484,8 +466,6 @@ namespace ml::gfx
 		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
 
 		pmr::vector<pmr::string> const & get_source() const noexcept override { return m_source; }
-
-	protected:
 	};
 }
 
@@ -498,8 +478,6 @@ namespace ml::gfx
 	class opengl_program final : public program
 	{
 	private:
-		friend class program;
-
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_program> };
 
 		uint32_t								m_handle		{}; // handle
@@ -560,9 +538,7 @@ namespace ml::gfx
 
 		ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept override { return m_uniforms; }
 
-	protected:
-		static void do_bind(opengl_program const * value);
-
+	public:
 		void do_cache_texture(uniform_id loc, shared<texture> const & value) noexcept override
 		{
 			static auto const max_texture_slots

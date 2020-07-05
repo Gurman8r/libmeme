@@ -5,113 +5,144 @@
 
 namespace ml::gfx
 {
-	// command type
-	ML_alias command_t = typename std::function<void(context *)>;
+	// command
+	ML_alias command_t = typename std::function< void(context *) >;
 
-	// command generators
+	// make command
+	template <class Fn, class ... Args
+	> ML_NODISCARD command_t make_command(Fn && fn, Args && ... args) noexcept
+	{
+		return std::bind(ML_forward(fn), std::placeholders::_1, ML_forward(args)...);
+	}
+
+	// builtin commands
 	class render_command final
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Fn, class ... Args
-		> ML_NODISCARD static command_t make(Fn && fn, Args && ... args) noexcept
+		ML_NODISCARD static auto clear(uint32_t mask) noexcept
 		{
-			return std::bind(ML_forward(fn), std::placeholders::_1, ML_forward(args)...);
+			return make_command(&context::clear, mask);
+		}
+
+		ML_NODISCARD static auto draw(shared<vertexarray> const & value) noexcept
+		{
+			return make_command(&context::draw, value);
+		}
+
+		ML_NODISCARD static auto draw_arrays(uint32_t prim, uint32_t first, size_t count) noexcept
+		{
+			return make_command(&context::draw_arrays, prim, first, count);
+		}
+
+		ML_NODISCARD static auto draw_indexed(uint32_t prim, size_t count) noexcept
+		{
+			return make_command(&context::draw_indexed, prim, count);
+		}
+
+		ML_NODISCARD static auto flush() noexcept
+		{
+			return make_command(&context::flush);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto bind_vertexarray(vertexarray const * value) noexcept
+		{
+			return make_command(&context::bind_vertexarray, value);
+		}
+
+		ML_NODISCARD static auto bind_vertexbuffer(vertexbuffer const * value) noexcept
+		{
+			return make_command(&context::bind_vertexbuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_indexbuffer(indexbuffer const * value) noexcept
+		{
+			return make_command(&context::bind_indexbuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_texture(texture const * value, uint32_t slot = 0) noexcept
+		{
+			return make_command(&context::bind_texture, value, slot);
+		}
+
+		ML_NODISCARD static auto bind_framebuffer(framebuffer const * value) noexcept
+		{
+			return make_command(&context::bind_framebuffer, value);
+		}
+
+		ML_NODISCARD static auto bind_program(program const * value) noexcept
+		{
+			return make_command(&context::bind_program, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static auto set_alpha_enabled(bool enabled) noexcept
 		{
-			return make(&context::set_alpha_enabled, enabled);
+			return make_command(&context::set_alpha_enabled, enabled);
 		}
 
 		ML_NODISCARD static auto set_alpha_mode(alpha_mode const & value) noexcept
 		{
-			return make(&context::set_alpha_mode, value);
+			return make_command(&context::set_alpha_mode, value);
 		}
 
 		ML_NODISCARD static auto set_blend_enabled(bool enabled) noexcept
 		{
-			return make(&context::set_blend_enabled, enabled);
+			return make_command(&context::set_blend_enabled, enabled);
 		}
 		
 		ML_NODISCARD static auto set_blend_color(color const & value) noexcept
 		{
-			return make(&context::set_blend_color, value);
+			return make_command(&context::set_blend_color, value);
 		}
 
 		ML_NODISCARD static auto set_blend_mode(blend_mode const & value) noexcept
 		{
-			return make(&context::set_blend_mode, value);
+			return make_command(&context::set_blend_mode, value);
 		}
 
 		ML_NODISCARD static auto set_clear_color(color const & value) noexcept
 		{
-			return make(&context::set_clear_color, value);
+			return make_command(&context::set_clear_color, value);
 		}
 
 		ML_NODISCARD static auto set_cull_enabled(bool enabled) noexcept
 		{
-			return make(&context::set_cull_enabled, enabled);
+			return make_command(&context::set_cull_enabled, enabled);
 		}
 
 		ML_NODISCARD static auto set_cull_mode(cull_mode const & value) noexcept
 		{
-			return make(&context::set_cull_mode, value);
+			return make_command(&context::set_cull_mode, value);
 		}
 
 		ML_NODISCARD static auto set_depth_enabled(bool enabled) noexcept
 		{
-			return make(&context::set_depth_enabled, enabled);
+			return make_command(&context::set_depth_enabled, enabled);
 		}
 
 		ML_NODISCARD static auto set_depth_mode(depth_mode const & value) noexcept
 		{
-			return make(&context::set_depth_mode, value);
+			return make_command(&context::set_depth_mode, value);
 		}
 
 		ML_NODISCARD static auto set_stencil_enabled(bool enabled) noexcept
 		{
-			return make(&context::set_stencil_enabled, enabled);
+			return make_command(&context::set_stencil_enabled, enabled);
 		}
 
 		ML_NODISCARD static auto set_stencil_mode(stencil_mode const & value) noexcept
 		{
-			return make(&context::set_stencil_mode, value);
+			return make_command(&context::set_stencil_mode, value);
 		}
 
 		ML_NODISCARD static auto set_viewport(int_rect const & bounds) noexcept
 		{
-			return make(&context::set_viewport, bounds);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static auto clear(uint32_t mask) noexcept
-		{
-			return make(&context::clear, mask);
-		}
-
-		ML_NODISCARD static auto draw(shared<vertexarray> const & value) noexcept
-		{
-			return make(&context::draw, value);
-		}
-
-		ML_NODISCARD static auto draw_arrays(uint32_t prim, uint32_t first, size_t count) noexcept
-		{
-			return make(&context::draw_arrays, prim, first, count);
-		}
-
-		ML_NODISCARD static auto draw_indexed(uint32_t prim, size_t count) noexcept
-		{
-			return make(&context::draw_indexed, prim, count);
-		}
-
-		ML_NODISCARD static auto flush() noexcept
-		{
-			return make(&context::flush);
+			return make_command(&context::set_viewport, bounds);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -119,14 +150,14 @@ namespace ml::gfx
 		template <class T
 		> ML_NODISCARD static auto upload(uniform_id loc, T value) noexcept
 		{
-			return make(static_cast<void(context:: *)(uniform_id, T)
+			return make_command(static_cast<void(context:: *)(uniform_id, T)
 			>(&context::upload), loc, value);
 		}
 
 		template <class T
 		> ML_NODISCARD static auto upload(uniform_id loc, T const & value) noexcept
 		{
-			return make(static_cast<void(context:: *)(uniform_id, T const &)
+			return make_command(static_cast<void(context:: *)(uniform_id, T const &)
 			>(&context::upload), loc, value);
 		}
 

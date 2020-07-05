@@ -56,12 +56,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// helpers / disambiguation
+// helpers / custom stuff
+
 
 // get error
-#ifndef ML_glGetError
 #define ML_glGetError std::bind( &_ML_GFX _error<_ML_GFX to_user>, glGetError() )
-#endif
 
 // check error
 #if ML_is_debug
@@ -684,11 +683,110 @@ namespace ml::gfx
 	opengl_context::opengl_context(device * parent, context_settings const & cs)
 		: context{ parent }, m_settings{ cs }
 	{
+		ML_assert(cs.api == context_api_opengl);
+		ML_assert(cs.major == parent->get_info().major_version);
+		ML_assert(cs.minor == parent->get_info().minor_version);
+
 		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
-		
 		ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
-		
 		ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_context::clear(uint32_t mask)
+	{
+		uint32_t temp{};
+		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
+		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth		);
+		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil	);
+		ML_glCheck(glClear(temp));
+	}
+
+	void opengl_context::draw(shared<vertexarray> const & value)
+	{
+		// could be moved into header file
+
+		if (!value || value->get_vertices().empty()) { return; }
+
+		bind_vertexarray(value.get());
+
+		if (auto const & ib{ value->get_indices() })
+		{
+			bind_indexbuffer(ib.get());
+
+			for (auto const & vb : value->get_vertices())
+			{
+				bind_vertexbuffer(vb.get());
+
+				draw_indexed(value->get_primitive(), ib->get_count());
+			}
+		}
+		else
+		{
+			for (auto const & vb : value->get_vertices())
+			{
+				bind_vertexbuffer(vb.get());
+
+				draw_arrays(value->get_primitive(), 0, vb->get_count());
+			}
+		}
+	}
+
+	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
+	{
+		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
+	}
+
+	void opengl_context::draw_indexed(uint32_t prim, size_t count)
+	{
+		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
+	}
+
+	void opengl_context::flush()
+	{
+		ML_glCheck(glFlush());
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void opengl_context::bind_vertexarray(vertexarray const * value)
+	{
+		ML_glCheck(glBindVertexArray(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_vertexbuffer(vertexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_indexbuffer(indexbuffer const * value)
+	{
+		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_texture(texture const * value, uint32_t slot)
+	{
+		ML_glCheck(glBindTextureUnit(slot, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
+	void opengl_context::bind_framebuffer(framebuffer const * value)
+	{
+		if (value)
+		{
+			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, ML_handle(uint32_t, value->get_handle())));
+
+			set_viewport({ vec2i::zero(), value->get_options().size });
+		}
+		else
+		{
+			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
+		}
+	}
+
+	void opengl_context::bind_program(program const * value)
+	{
+		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -910,62 +1008,6 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::clear(uint32_t mask)
-	{
-		uint32_t temp{};
-		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
-		ML_flag_map(temp, GL_DEPTH_BUFFER_BIT	, mask, clear_depth		);
-		ML_flag_map(temp, GL_STENCIL_BUFFER_BIT	, mask, clear_stencil	);
-		ML_glCheck(glClear(temp));
-	}
-
-	void opengl_context::draw(shared<vertexarray> const & value)
-	{
-		// could be moved into header file
-
-		if (!value || value->get_vertices().empty()) { return; }
-
-		value->bind();
-
-		if (auto const & ib{ value->get_indices() })
-		{
-			ib->bind();
-
-			for (auto const & vb : value->get_vertices())
-			{
-				vb->bind();
-
-				draw_indexed(value->get_primitive(), ib->get_count());
-			}
-		}
-		else
-		{
-			for (auto const & vb : value->get_vertices())
-			{
-				vb->bind();
-
-				draw_arrays(value->get_primitive(), 0, vb->get_count());
-			}
-		}
-	}
-
-	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
-	{
-		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
-	}
-
-	void opengl_context::draw_indexed(uint32_t prim, size_t count)
-	{
-		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
-	}
-
-	void opengl_context::flush()
-	{
-		ML_glCheck(glFlush());
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	void opengl_context::upload(uniform_id loc, bool value)
 	{
 		ML_glCheck(ML_glUniform1i(loc, (int32_t)value));
@@ -1099,11 +1141,6 @@ namespace ml::gfx
 		if (m_indices = value) { m_indices->bind(); }
 	}
 
-	void opengl_vertexarray::do_bind(opengl_vertexarray const * value)
-	{
-		ML_glCheck(glBindVertexArray(value ? value->m_handle : NULL));
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
@@ -1152,11 +1189,6 @@ namespace ml::gfx
 			m_buffer.data()));
 	}
 
-	void opengl_vertexbuffer::do_bind(opengl_vertexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? value->m_handle : NULL));
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
@@ -1203,11 +1235,6 @@ namespace ml::gfx
 			offset,
 			(uint32_t)m_buffer.size(),
 			m_buffer.data()));
-	}
-
-	void opengl_indexbuffer::do_bind(opengl_indexbuffer const * value)
-	{
-		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? value->m_handle : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1382,19 +1409,16 @@ namespace ml::gfx
 		image temp{ m_opts.size, calc_bits_per_pixel(m_opts.format.color) };
 		if (m_handle)
 		{
-			ML_bind_scope(*this);
+			bind();
 
 			ML_glCheck(glGetTexImage(GL_TEXTURE_2D, 0,
 				_format<to_impl>(m_opts.format.color),
 				_type<to_impl>(m_opts.format.type),
 				temp.data()));
+
+			unbind();
 		}
 		return temp;
-	}
-
-	void opengl_texture2d::do_bind(opengl_texture2d const * value, uint32_t slot)
-	{
-		ML_glCheck(glBindTextureUnit(slot, value ? value->m_handle : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1441,11 +1465,6 @@ namespace ml::gfx
 		m_lock = false;
 
 		debug::warning("texture lock/unlock NYI");
-	}
-
-	void opengl_texturecube::do_bind(opengl_texturecube const * value, uint32_t slot)
-	{
-		ML_glCheck(glBindTextureUnit(slot, value ? value->m_handle : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1552,20 +1571,6 @@ namespace ml::gfx
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
 			debug::error("framebuffer is not complete");
-		}
-	}
-
-	void opengl_framebuffer::do_bind(opengl_framebuffer const * value)
-	{
-		if (value)
-		{
-			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, value->m_handle));
-
-			ML_glCheck(glViewport(0, 0, value->m_opts.size[0], value->m_opts.size[1]));
-		}
-		else
-		{
-			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, NULL));
 		}
 	}
 
@@ -1756,11 +1761,6 @@ namespace ml::gfx
 			m_error_log.push_back(0);
 		}
 		return success;
-	}
-
-	void opengl_program::do_bind(opengl_program const * value)
-	{
-		ML_glCheck(ML_glUseProgram(value ? value->m_handle : NULL));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

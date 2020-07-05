@@ -630,21 +630,25 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			if (ML_bind_scope(m_fbo[0].get()))
+			for (auto const & cmd :
 			{
-				for (auto const & cmd :
+				gfx::render_command::bind_framebuffer(m_fbo[0].get()),
+
+				gfx::render_command::set_cull_enabled(false),
+
+				gfx::render_command::set_clear_color(colors::magenta),
+
+				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
+
+				gfx::make_command([&](gfx::context * ctx) noexcept
 				{
-					gfx::render_command::set_cull_enabled(false),
-					gfx::render_command::set_clear_color(colors::magenta),
-					gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
-					gfx::render_command::make([&](gfx::context * ctx) noexcept
-					{
-						m_ecs.invoke_system<x_draw_meshes>(ctx);
-					}),
-				})
-				{
-					std::invoke(cmd, gfx::device::get_default()->get_context().get());
-				}
+					m_ecs.invoke_system<x_draw_meshes>(ctx);
+				}),
+
+				gfx::render_command::bind_framebuffer(nullptr),
+			})
+			{
+				std::invoke(cmd, engine::window().get_device()->get_context().get());
 			}
 		}
 
