@@ -35,9 +35,10 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// namespaces
+// library
 
-#define _ML						::ml::		// memelib
+#define ML_alias				using		// global typedef
+#define _ML						::ml::		// root
 #define _ML_DEBUG				_ML debug::	// debug
 #define _ML_DS					_ML ds::	// data structures
 #define _ML_ECS					_ML ecs::	// entity component system
@@ -87,18 +88,31 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define ML_alias				using // global typedef
+// macro array size
+#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 
-#define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr)) // array size macro
+// macro comparison
+#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
 
-#define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0) // comparison macro
-
-#define ML_forward(x)			std::forward<decltype(x)>(x) // auto-forward macro
+// macro forward
+#define ML_forward(x)			std::forward<decltype(x)>(x)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
+	// standard namespaces
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	namespace std		= ::std;
+	namespace chrono	= std::chrono;
+	namespace fs		= std::filesystem;
+	namespace pmr		= std::pmr;
+#if (ML_has_cxx20)
+	namespace ranges	= std::ranges;
+	namespace views		= std::ranges::views;
+#endif
+
 	// core types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -131,7 +145,7 @@ namespace ml
 	ML_alias	max_align_t = typename float64_t	;
 	ML_alias	size_t		= typename uintmax_t	;
 
-	// string types
+	// c-string types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_alias	cstring		= typename char const *		;
@@ -141,18 +155,6 @@ namespace ml
 #endif
 	ML_alias	c16string	= typename char16_t const *	;
 	ML_alias	c32string	= typename char32_t const *	;
-
-	// standard namespaces
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	namespace std		= ::std				;
-	namespace chrono	= std::chrono		;
-	namespace fs		= std::filesystem	;
-	namespace pmr		= std::pmr			;
-#if (ML_has_cxx20)
-	namespace ranges	= std::ranges		;
-	namespace views		= std::ranges::views;
-#endif
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -22,11 +22,8 @@ namespace ml
 		if (path.empty()) { return false; }
 
 		// lookup file
-		if (auto const it{ m_data.find<hash_t>
-		(
-			util::hash(path.filename().string())
-		) }
-		; it == m_data.end<hash_t>())
+		if (auto const it{ m_data.find<hash_t>(util::hash(path.filename().string())) }
+		; it != m_data.end<hash_t>())
 		{
 			m_data.erase(m_data.indexof<hash_t>(it));
 

@@ -150,7 +150,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		pmr::string		m_title		;
+		cstring			m_title		;
 		GLFWwindow	*	m_window	;
 		GLFWmonitor	*	m_monitor	;
 

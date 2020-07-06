@@ -48,7 +48,7 @@ namespace ml
 		return std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return ::FreeLibrary(static_cast<HINSTANCE>(m_handle));
+			return ::FreeLibrary((HINSTANCE)m_handle);
 
 #elif defined(ML_os_unix)
 			return ::dlclose(m_handle);
@@ -70,7 +70,7 @@ namespace ml
 		return m_symbols.find_or_add_fn(util::hash(name), [&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return ::GetProcAddress(static_cast<HINSTANCE>(m_handle), name.c_str());
+			return ::GetProcAddress((HINSTANCE)m_handle, name.c_str());
 
 #elif defined(ML_os_unix)
 			return ::dlsym(m_handle, name.c_str());

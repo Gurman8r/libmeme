@@ -112,7 +112,7 @@ namespace ml
 		{
 			debug::info("initializing engine context...");
 
-			ML_assert((g_engine = new engine_context{ j, alloc }));
+			g_engine = new engine_context{ j, alloc };
 
 			return is_initialized();
 		}
@@ -135,43 +135,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert("engine::config" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert("engine::fs" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert("engine::gui" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert("engine::plugins" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert("engine::scripts" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert("engine::time" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert("engine::window" && g_engine);
+		ML_assert(is_initialized());
 		return g_engine->m_window;
 	}
 

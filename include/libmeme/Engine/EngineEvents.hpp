@@ -7,37 +7,37 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(load_event) {};
+	ML_decl_event(load_event) {};
 
-	ML_event(unload_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(begin_loop_event) {};
-
-	ML_event(end_loop_event) {};
+	ML_decl_event(unload_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(begin_draw_event) {};
+	ML_decl_event(begin_loop_event) {};
 
-	ML_event(end_draw_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_event(begin_gui_event) {};
-
-	ML_event(end_gui_event) {};
+	ML_decl_event(end_loop_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(update_event) {};
+	ML_decl_event(begin_draw_event) {};
 
-	ML_event(draw_event) {};
+	ML_decl_event(end_draw_event) {};
 
-	ML_event(dock_gui_event) {};
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_event(draw_gui_event) {};
+	ML_decl_event(begin_gui_event) {};
+
+	ML_decl_event(end_gui_event) {};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_decl_event(update_event) {};
+
+	ML_decl_event(draw_event) {};
+
+	ML_decl_event(dock_gui_event) {};
+
+	ML_decl_event(draw_gui_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

@@ -25,7 +25,7 @@ namespace ml
 		{
 			m_loop_timer.restart();
 
-			m_frame_rate = m_fps.update(m_delta_time.count<float_t>());
+			m_frame_rate = m_fps(m_delta_time.count<float_t>());
 		}
 
 		void end_loop() noexcept
@@ -56,16 +56,20 @@ namespace ml
 		float_t		m_frame_rate	{}			; // frame rate
 		uint64_t	m_frame_count	{}			; // frame count
 
-		// fps tracker
 		struct ML_NODISCARD fps_tracker final : non_copyable
 		{
-			using frame_times = ds::array<float_t, 120>;
+			using buffer	= pmr::vector<float_t>;
+			using allocator	= buffer::allocator_type;
 
-			float_t		accum{}; // accumulator
-			size_t		index{}; // frame index
-			frame_times times{}; // frame times
+			float_t	accum{}; // accumulator
+			size_t	index{}; // frame index
+			buffer	times{}; // frame times
 
-			float_t update(float_t const dt) noexcept
+			explicit fps_tracker(size_t const n) noexcept : times{ n, allocator{} }
+			{
+			}
+
+			float_t operator()(float_t const dt) noexcept
 			{
 				accum += dt - times[index];
 				times[index] = dt;
@@ -73,7 +77,7 @@ namespace ml
 				return (0.f < accum) ? 1.f / (accum / (float_t)times.size()) : FLT_MAX;
 			}
 
-		} m_fps{};
+		} m_fps{ 120 };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

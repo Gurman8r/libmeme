@@ -74,15 +74,15 @@ namespace ml
 
 		bool close();
 
-		ML_NODISCARD void * load_symbol(pmr::string const & name);
+		void * load_symbol(pmr::string const & name);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD auto load_symbol(pmr::string const & name)
+		> ML_NODISCARD auto load_symbol(pmr::string const & name) noexcept
 		{
 			return reinterpret_cast<T>(this->load_symbol(name));
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class Name, class ... Args
 		> auto call(Name && name, Args && ... args)

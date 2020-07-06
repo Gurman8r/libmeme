@@ -299,7 +299,7 @@ namespace ml
 
 	cstring glfw_window::get_title() const
 	{
-		return m_title.c_str();
+		return m_title;
 	}
 
 	void * glfw_window::get_user_pointer() const
@@ -389,7 +389,7 @@ namespace ml
 
 	void glfw_window::set_title(cstring value)
 	{
-		glfwSetWindowTitle(m_window, (m_title = value).c_str());
+		glfwSetWindowTitle(m_window, m_title = value);
 	}
 
 	void glfw_window::set_user_pointer(void * value)

@@ -1,16 +1,10 @@
 #include <libmeme/Engine/Engine.hpp>
 
-#ifndef ML_EMBED_PYTHON
-#define ML_EMBED_PYTHON
-#endif
 #include <libmeme/Engine/API_Embed.hpp>
 
+// LIBMEME
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// LIBMEME (structures)
 	PYBIND11_EMBEDDED_MODULE(libmeme, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -407,11 +401,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
+}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// LIBMEME_ENGINE (systems)
+// LIBMEME_ENGINE
+namespace ml
+{
 	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -535,7 +529,4 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

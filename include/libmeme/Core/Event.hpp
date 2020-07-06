@@ -5,8 +5,8 @@
 #include <libmeme/Core/TypeInfo.hpp>
 
 // event declarator helper
-#define ML_event(type) \
-	struct type final : _ML event_impl<type>
+#define ML_decl_event(type) \
+	struct type final : _ML event_helper<type>
 
 namespace ml
 {
@@ -33,9 +33,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// template event interface
-	template <class T> struct event_impl : event
+	template <class T> struct event_helper : event
 	{
-		constexpr event_impl() noexcept : event{ hashof_v<T> }
+		constexpr event_helper() noexcept : event{ hashof_v<T> }
 		{
 		}
 	};

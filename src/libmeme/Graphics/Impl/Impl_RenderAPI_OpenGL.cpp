@@ -58,9 +58,8 @@
 
 // helpers / custom stuff
 
-
 // get error
-#define ML_glGetError std::bind( &_ML_GFX _error<_ML_GFX to_user>, glGetError() )
+#define ML_glGetError() _ML_GFX _error<_ML_GFX to_user>( glGetError() )
 
 // check error
 #if ML_is_debug

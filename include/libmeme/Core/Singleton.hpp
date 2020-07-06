@@ -5,22 +5,35 @@
 
 namespace ml
 {
-	template <class T> struct singleton : non_copyable
+	template <class Derived, bool HasGetter = false
+	> struct singleton : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type = typename T;
+		using self_type = typename Derived;
+
+		static constexpr bool has_getter
+		{
+			HasGetter
+		};
+
+		using base_type = typename singleton
+		<
+			self_type, has_getter
+		>;
 
 		ML_NODISCARD static self_type & get_instance() noexcept
 		{
-#ifndef ML_STATIC
-			static self_type inst{};
-			return inst;
-#else
-			return self_type::g_instance;
-#endif
+			if constexpr (!has_getter)
+			{
+				static self_type inst{}; return inst;
+			}
+			else
+			{
+				return *self_type::do_get_instance();
+			}
 		}
-		
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

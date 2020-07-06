@@ -12,7 +12,7 @@
 #include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
-#include <libmeme/Graphics/Material.hpp>
+#include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -172,7 +172,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using	c_shader	= typename shader_asset;
-	using	c_material	= typename shared<material>;
+	using	c_material	= typename shared<uniform_buffer>;
 	using	c_mesh		= typename shared<mesh>;
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 
@@ -273,7 +273,7 @@ namespace ml
 
 		ds::map< pmr::string, shared<font>			> m_fonts		{};
 		ds::map< pmr::string, shared<image>			> m_images		{};
-		ds::map< pmr::string, shared<material>		> m_materials	{};
+		ds::map< pmr::string, shared<uniform_buffer>		> m_materials	{};
 		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
 		ds::map< pmr::string, shader_asset			> m_shaders		{};
 		ds::map< pmr::string, shared<gfx::texture2d>> m_textures	{};
@@ -454,25 +454,25 @@ namespace ml
 			// MATERIALS
 			{
 				// timers
-				auto const _timers = material
+				auto const _timers = uniform_buffer
 				{
 					make_uniform<float_t>("u_time"	, []() { return engine::time().total_time().count<float_t>(); }),
 					make_uniform<float_t>("u_delta"	, []() { return engine::time().delta_time().count<float_t>(); })
 				};
 
 				// camera
-				auto const _camera = material
+				auto const _camera = uniform_buffer
 				{
 					make_uniform<vec3	>("u_cam.pos"	, vec3{ 0, 0, 0.f }),
 					make_uniform<vec3	>("u_cam.dir"	, vec3{ 0, 0, 1.f }),
-					make_uniform<float_t>("u_cam.fov"	, 45.f * deg2rag_v<float_t>),
+					make_uniform<float_t>("u_cam.fov"	, 45.f * util::deg2rag_v<float_t>),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
 					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
 				};
 
 				// transform
-				auto const _tf = material
+				auto const _tf = uniform_buffer
 				{
 					make_uniform<vec3	>("u_position"	, vec3{}),
 					make_uniform<vec4	>("u_rotation"	, vec4{}),
@@ -480,7 +480,7 @@ namespace ml
 				};
 
 				// 3d
-				auto const _3d = material
+				auto const _3d = uniform_buffer
 				{
 					make_uniform<color>("u_color", colors::white),
 					make_uniform<gfx::texture2d>("u_texture0", m_textures["default"])
@@ -488,11 +488,11 @@ namespace ml
 				+ _timers + _camera + _tf;
 
 				// earth
-				auto & earth{ m_materials["earth"] = make_shared<material>(_3d) };
+				auto & earth{ m_materials["earth"] = make_shared<uniform_buffer>(_3d) };
 				earth->set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"]);
 
 				// moon
-				auto & moon{ m_materials["moon"] = make_shared<material>(_3d) };
+				auto & moon{ m_materials["moon"] = make_shared<uniform_buffer>(_3d) };
 				moon->set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"]);
 			}
 

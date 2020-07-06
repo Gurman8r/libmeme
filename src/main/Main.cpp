@@ -57,6 +57,7 @@ ml::int32_t main()
 		if (f) { f >> j; } else { j = default_settings; }
 		return j;
 	})));
+
 	ML_defer{ engine::finalize(); };
 
 	if (engine::config().contains("setup_script"))

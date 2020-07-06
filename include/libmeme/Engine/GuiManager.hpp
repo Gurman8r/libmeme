@@ -23,9 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_initialized() const noexcept;
-
-		ML_NODISCARD bool initialize(window const & w);
+		ML_NODISCARD bool initialize(window const & wnd);
 
 		ML_NODISCARD bool finalize();
 

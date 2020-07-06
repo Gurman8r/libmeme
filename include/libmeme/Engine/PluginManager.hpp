@@ -13,8 +13,6 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		explicit plugin_manager(json const & j, allocator_type alloc) noexcept;
 
 		~plugin_manager() noexcept;
@@ -23,11 +21,7 @@ namespace ml
 
 		void clear() noexcept { m_data.clear(); }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		bool free(fs::path const & path);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		hash_t load(fs::path const & path, void * user_data = nullptr);
 

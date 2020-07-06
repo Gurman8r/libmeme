@@ -8,10 +8,10 @@
 
 #elif defined(ML_os_unix)
 #	include <unistd.h>
-#	include <dlfcn.h>
+#	if defined(ML_os_linux)
+#		include <dlfcn.h>
+#	endif
 
-#else
-#	error "unknown or invalid platform"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

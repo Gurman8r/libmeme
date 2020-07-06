@@ -52,16 +52,16 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // Trig
-namespace ml
+namespace ml::util
 {
 	template <class T = float_t
 	> static constexpr auto pi_v{ static_cast<T>(3.14159265358979L) };
 
 	template <class T = float_t
-	> static constexpr auto deg2rag_v{ _ML pi_v<T> / T{ 180 } };
+	> static constexpr auto deg2rag_v{ _ML_UTIL pi_v<T> / T{ 180 } };
 
 	template <class T = float_t
-	> static constexpr auto rad2deg_v{ T{ 180 } / _ML pi_v<T> };
+	> static constexpr auto rad2deg_v{ T{ 180 } / _ML_UTIL pi_v<T> };
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

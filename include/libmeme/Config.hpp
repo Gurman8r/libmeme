@@ -85,16 +85,16 @@
 #   define ML_os_windows        1
 #   define ML_os_name           "Windows"
 
+#elif defined(__APPLE__) && defined(__MACH__)
+//                              Apple
+#   define ML_os_apple          1
+#   define ML_os_name           "Apple"
+
 #elif defined(__unix__)
 //                              Unix
 #   define ML_os_unix           1
 
-#   if defined(__APPLE__) && defined(__MACH__)
-//                              Apple
-#       define ML_os_apple      1
-#       define ML_os_name       "Apple"
-
-#   elif defined(__ANDROID__)
+#   if defined(__ANDROID__)
 //                              Android
 #       define ML_os_android    1
 #       define ML_os_name       "Android"

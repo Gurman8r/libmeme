@@ -35,7 +35,7 @@ namespace ml::util
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool is_default() const noexcept { return (this == pmr::get_default_resource()); }
+		bool use_default() const noexcept { return (this == pmr::get_default_resource()); }
 
 		bool in_range(void * addr) const noexcept { return ((pointer)addr >= begin()) && ((pointer)addr < end()); }
 
@@ -120,7 +120,7 @@ namespace ml::util
 namespace ml
 {
 	// memory manager singleton
-	class ML_CORE_API memory final : public singleton<memory>
+	class ML_CORE_API memory final : public singleton<memory, true>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -151,7 +151,7 @@ namespace ml
 			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
 			if (!res->buffer())			{ return debug::error("resource buffer cannot be null"); }
 			if (!res->is_valid_size())	{ return debug::error("resource capacity must be greater than zero"); }
-			if (!res->is_default())		{ return debug::error("resource is not the default memory resource"); }
+			if (!res->use_default())		{ return debug::error("resource is not the default memory resource"); }
 
 			get_instance().m_testres = res;
 			return true;
@@ -235,9 +235,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<memory>;
+		friend base_type;
 
 		~memory() noexcept;
+
+		static self_type * do_get_instance() noexcept
+		{
+			static self_type inst{};
+			return std::addressof(inst);
+		}
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
@@ -296,7 +302,7 @@ namespace ml
 
 	// weak pointer
 	template <class T
-	> ML_alias weak = typename std::weak_ptr<T>;
+	> ML_alias weakptr = typename std::weak_ptr<T>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

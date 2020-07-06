@@ -29,26 +29,23 @@ namespace ml
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }
 	{
-		static ML_scope{ IMGUI_CHECKVERSION(); };
+		IMGUI_CHECKVERSION();
+
+		ML_assert(!ImGui::GetCurrentContext());
 	}
 
 	gui_manager::~gui_manager() noexcept
 	{
-		ML_assert(!is_initialized() || finalize());
+		ML_assert(finalize());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	bool gui_manager::is_initialized() const noexcept
+	bool gui_manager::initialize(window const & wnd)
 	{
-		return (bool)m_gui_context;
-	}
+		if (ImGui::GetCurrentContext()) { return false; }
 
-	bool gui_manager::initialize(window const & w)
-	{
-		if (is_initialized()) { return false; }
-
-		// set allocator functions
+		// allocators
 		ImGui::SetAllocatorFunctions
 		(
 			[](size_t s, auto) noexcept { return memory::allocate(s); },
@@ -56,42 +53,38 @@ namespace ml
 			nullptr
 		);
 
-		// create editor_context
+		// create context
 		if (!(m_gui_context = ImGui::CreateContext()))
 		{
-			return debug::error("failed creating imgui context");
+			return debug::error("failed creating ImGuiContext");
 		}
 
+		// config
 		auto & im_io{ ImGui::GetIO() };
-		auto & im_style{ ImGui::GetStyle() };
-
-		// imgui paths
 		im_io.LogFilename = nullptr;
 		im_io.IniFilename = nullptr;
-
-		// config flags
 		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// init platform
-		if (!ML_ImGui_Init_Platform(w.get_handle(), true))
+		if (!ML_ImGui_Init_Platform(wnd.get_handle(), true))
 		{
-			return debug::error("Failed initializing ImGui platform");
+			return debug::error("failed initializing ImGui platform");
 		}
 
 		// init renderer
 		if (!ML_ImGui_Init_Renderer())
 		{
-			return debug::error("Failed initializing ImGui renderer");
+			return debug::error("failed initializing ImGui renderer");
 		}
 
-		return is_initialized();
+		return ImGui::GetCurrentContext();
 	}
 
 	bool gui_manager::finalize()
 	{
-		if (!is_initialized()) { return false; }
+		if (!ImGui::GetCurrentContext()) { return false; }
 
 		ML_ImGui_Shutdown();
 		

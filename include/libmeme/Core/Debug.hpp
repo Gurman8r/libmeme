@@ -7,16 +7,7 @@
 
 // assert
 #ifndef ML_assert
-
-#	if defined(assert)
-#		define ML_assert(expr) \
-			assert(expr)
-
-#	else
-#		define ML_assert(expr) \
-			((void)(expr))
-
-#	endif
+#	define ML_assert(expr) assert(expr)
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

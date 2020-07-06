@@ -59,7 +59,6 @@ namespace ml
 
 namespace ml::impl
 {
-
 	// scope benchmark
 	struct ML_NODISCARD scope_benchmark final
 	{
@@ -94,7 +93,6 @@ namespace ml::impl
 
 	private: cstring const id;
 	};
-
 }
 
 // lambda benchmark

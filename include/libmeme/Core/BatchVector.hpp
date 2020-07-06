@@ -1,7 +1,7 @@
 #ifndef _ML_BATCH_VECTOR_HPP_
 #define _ML_BATCH_VECTOR_HPP_
 
-#include <libmeme/Core/Meta.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml::ds
 {
@@ -9,12 +9,12 @@ namespace ml::ds
 
 	// tuple<vector<Ts>...>
 	template <class ... _Ts
-	> struct batch_vector final
+	> struct batch_vector final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename batch_vector<_Ts...>;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using value_types		= typename meta::list<_Ts...>;
 		using value_tuple		= typename meta::tuple<value_types>;
 		using vector_types		= typename meta::remap<pmr::vector, value_types>;
@@ -172,7 +172,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t ... Is
-		> ML_NODISCARD decltype(auto) get(size_t const i, std::index_sequence<Is...>) noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i, std::index_sequence<Is...>) noexcept
 		{
 			if constexpr (1 == sizeof...(Is))
 			{
@@ -185,7 +185,7 @@ namespace ml::ds
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD decltype(auto) get(size_t const i, std::index_sequence<Is...>) const noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i, std::index_sequence<Is...>) const noexcept
 		{
 			if constexpr (1 == sizeof...(Is))
 			{
@@ -198,7 +198,7 @@ namespace ml::ds
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD decltype(auto) get(size_t const i) noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i) noexcept
 		{
 			if constexpr (1 == sizeof...(Is))
 			{
@@ -211,7 +211,7 @@ namespace ml::ds
 		}
 
 		template <size_t ... Is
-		> ML_NODISCARD decltype(auto) get(size_t const i) const noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i) const noexcept
 		{
 			if constexpr (1 == sizeof...(Is))
 			{
@@ -224,7 +224,7 @@ namespace ml::ds
 		}
 
 		template <class ... Ts
-		> ML_NODISCARD decltype(auto) get(size_t const i) noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i) noexcept
 		{
 			if constexpr (1 == sizeof...(Ts))
 			{
@@ -237,7 +237,7 @@ namespace ml::ds
 		}
 
 		template <class ... Ts
-		> ML_NODISCARD decltype(auto) get(size_t const i) const noexcept
+		> ML_NODISCARD decltype(auto) at(size_t const i) const noexcept
 		{
 			if constexpr (1 == sizeof...(Ts))
 			{
@@ -251,12 +251,12 @@ namespace ml::ds
 
 		ML_NODISCARD auto get(size_t const i) noexcept
 		{
-			return this->get(i, tuple_sequence);
+			return this->at(i, tuple_sequence);
 		}
 
 		ML_NODISCARD auto get(size_t const i) const noexcept
 		{
-			return this->get(i, tuple_sequence);
+			return this->at(i, tuple_sequence);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -492,37 +492,37 @@ namespace ml::ds
 		template <class Fn, size_t ... Is
 		> void expand(size_t const i, Fn && fn, std::index_sequence<Is...>) noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+			std::invoke(ML_forward(fn), this->at<Is>(i)...);
 		}
 
 		template <class Fn, size_t ... Is
 		> void expand(size_t const i, Fn && fn, std::index_sequence<Is...>) const noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+			std::invoke(ML_forward(fn), this->at<Is>(i)...);
 		}
 
 		template <size_t ... Is, class Fn
 		> void expand(size_t const i, Fn && fn) noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+			std::invoke(ML_forward(fn), this->at<Is>(i)...);
 		}
 
 		template <size_t ... Is, class Fn
 		> void expand(size_t const i, Fn && fn) const noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Is>(i)...);
+			std::invoke(ML_forward(fn), this->at<Is>(i)...);
 		}
 
 		template <class ... Ts, class Fn
 		> void expand(size_t const i, Fn && fn) noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
+			std::invoke(ML_forward(fn), this->at<Ts>(i)...);
 		}
 
 		template <class ... Ts, class Fn
 		> void expand(size_t const i, Fn && fn) const noexcept
 		{
-			std::invoke(ML_forward(fn), this->get<Ts>(i)...);
+			std::invoke(ML_forward(fn), this->at<Ts>(i)...);
 		}
 
 		template <class Fn> void expand_all(size_t const i, Fn && fn) noexcept
@@ -631,18 +631,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I> ML_NODISCARD size_t indexof(const_iterator_i<I> it) const noexcept
-		{
-			return (size_t)std::distance(this->cbegin<I>(), it);
-		}
-
-		template <class T> ML_NODISCARD size_t indexof(const_iterator_t<T> it) const noexcept
-		{
-			return (size_t)std::distance(this->cbegin<T>(), it);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		template <size_t I> ML_NODISCARD size_t max_size() const noexcept
 		{
 			return this->get<I>().max_size();
@@ -663,6 +651,18 @@ namespace ml::ds
 		template <class T> ML_NODISCARD size_t size() const noexcept
 		{
 			return this->get<T>().size();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I> ML_NODISCARD size_t indexof(const_iterator_i<I> it) const noexcept
+		{
+			return (size_t)std::distance(this->cbegin<I>(), it);
+		}
+
+		template <class T> ML_NODISCARD size_t indexof(const_iterator_t<T> it) const noexcept
+		{
+			return (size_t)std::distance(this->cbegin<T>(), it);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -816,25 +816,25 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I, class U
+		template <size_t I, class U = value_i<I>
 		> ML_NODISCARD iterator_i<I> find(U && value) noexcept
 		{
 			return std::find(this->begin<I>(), this->end<I>(), ML_forward(value));
 		}
 
-		template <size_t I, class U
+		template <size_t I, class U = value_i<I>
 		> ML_NODISCARD const_iterator_i<I> find(U && value) const noexcept
 		{
 			return std::find(this->cbegin<I>(), this->cend<I>(), ML_forward(value));
 		}
 
-		template <class T, class U
+		template <class T, class U = T
 		> ML_NODISCARD iterator_t<T> find(U && value) noexcept
 		{
 			return std::find(this->begin<T>(), this->end<T>(), ML_forward(value));
 		}
 
-		template <class T, class U
+		template <class T, class U = T
 		> ML_NODISCARD const_iterator_t<T> find(U && value) const noexcept
 		{
 			return std::find(this->cbegin<T>(), this->cend<T>(), ML_forward(value));
@@ -866,7 +866,7 @@ namespace ml::ds
 			}
 			else
 			{
-				return this->get(i);
+				return this->at(i);
 			}
 		}
 
@@ -879,19 +879,19 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I, class U = value_i<I>
-		> void push_back(U && value) noexcept
+		> decltype(auto) push_back(U && value)
 		{
-			this->get<I>().push_back(ML_forward(value));
+			return this->get<I>().emplace_back(ML_forward(value));
 		}
 
 		template <class T, class U = T
-		> void push_back(U && value) noexcept
+		> decltype(auto) push_back(U && value)
 		{
-			this->get<T>().push_back(ML_forward(value));
+			return this->get<T>().emplace_back(ML_forward(value));
 		}
 
 		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> void push_back(Tp && value) noexcept
+		> decltype(auto) push_back(Tp && value)
 		{
 			static_assert(tuple_size <= N);
 			if constexpr (I < N)
@@ -900,74 +900,6 @@ namespace ml::ds
 
 				this->push_back<Tp, I + 1, N>(ML_forward(value));
 			}
-		}
-
-		template <class ... Args
-		> void push_back(Args && ... args) noexcept
-		{
-			this->push_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I, class U = value_i<I>
-		> decltype(auto) emplace(size_t const i, U && value) noexcept
-		{
-			return this->get<I>().emplace(this->begin<I>() + i, ML_forward(value));
-		}
-
-		template <class T, class U = T
-		> decltype(auto) emplace(size_t const i, U && value) noexcept
-		{
-			return this->get<T>().emplace(this->begin<T>() + i, ML_forward(value));
-		}
-
-		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> auto emplace(size_t const i, Tp && value)
-		{
-			static_assert(tuple_size <= N);
-			if constexpr (I < N)
-			{
-				this->emplace<I>(i, ML_forward(std::get<I>(ML_forward(value))));
-
-				return this->emplace<Tp, I + 1>(i, ML_forward(value));
-			}
-			else
-			{
-				return this->get(i);
-			}
-		}
-
-		template <class ... Args
-		> auto emplace(size_t const i, Args && ... args)
-		{
-			return this->emplace<value_tuple, 0>(i, value_tuple{ ML_forward(args)... });
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		template <size_t I, class U = value_i<I>
-		> decltype(auto) emplace_back(U && value) noexcept
-		{
-			return this->get<I>().emplace_back(ML_forward(value));
-		}
-
-		template <class T, class U = T
-		> decltype(auto) emplace_back(U && value) noexcept
-		{
-			return this->get<T>().emplace_back(ML_forward(value));
-		}
-
-		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> auto emplace_back(Tp && value) noexcept
-		{
-			static_assert(tuple_size <= N);
-			if constexpr (I < N)
-			{
-				this->emplace_back<I>(ML_forward(std::get<I>(ML_forward(value))));
-
-				return this->emplace_back<Tp, I + 1, N>(ML_forward(value));
-			}
 			else
 			{
 				return this->back();
@@ -975,9 +907,9 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> auto emplace_back(Args && ... args) noexcept
+		> decltype(auto) push_back(Args && ... args)
 		{
-			return this->emplace_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
+			return this->push_back<value_tuple, 0>(value_tuple{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
