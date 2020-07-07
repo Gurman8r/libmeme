@@ -87,8 +87,8 @@
 #define ML_glDeleteProgram(obj)						glDeleteObjectARB( obj )
 #define ML_glGetProgram()							glGetHandleARB( GL_PROGRAM_OBJECT_ARB )
 #define ML_glUseProgram(obj)						glUseProgramObjectARB( obj )
-#define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, ML_handle(uint32_t, x) )
-#define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, ML_handle(uint32_t, x) )
+#define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, x )
+#define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, x )
 #define ML_glLinkProgram(obj)						glLinkProgramARB( obj )
 #define ML_glGetProgramLinkStatus(obj, x)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, x )
 #define ML_glValidateProgram(obj)					glValidateProgramARB( obj )
@@ -96,14 +96,14 @@
 
 // uniforms
 #define ML_glGetUniformLocation(obj, name)			ML_handle( _ML_GFX uniform_id, glGetUniformLocationARB(obj, name) )
-#define ML_glUniform1i(loc, x)						glUniform1iARB( ML_handle(int32_t, loc), x )
-#define ML_glUniform1f(loc, x)						glUniform1fARB( ML_handle(int32_t, loc), x )
-#define ML_glUniform2f(loc, x, y)					glUniform2fARB( ML_handle(int32_t, loc), x, y )
-#define ML_glUniform3f(loc, x, y, z)				glUniform3fARB( ML_handle(int32_t, loc), x, y, z )
-#define ML_glUniform4f(loc, x, y, z, w)				glUniform4fARB( ML_handle(int32_t, loc), x, y, z, w )
-#define ML_glUniformMatrix2fv(loc, transpose, ptr)	glUniformMatrix2fvARB( ML_handle(int32_t, loc), 2 * 2, transpose, ptr )
-#define ML_glUniformMatrix3fv(loc, transpose, ptr)	glUniformMatrix3fvARB( ML_handle(int32_t, loc), 3 * 3, transpose, ptr )
-#define ML_glUniformMatrix4fv(loc, transpose, ptr)	glUniformMatrix4fvARB( ML_handle(int32_t, loc), 4 * 4, transpose, ptr )
+#define ML_glUniform1i(loc, x)						glUniform1iARB( loc, x )
+#define ML_glUniform1f(loc, x)						glUniform1fARB( loc, x )
+#define ML_glUniform2f(loc, x, y)					glUniform2fARB( loc, x, y )
+#define ML_glUniform3f(loc, x, y, z)				glUniform3fARB( loc, x, y, z )
+#define ML_glUniform4f(loc, x, y, z, w)				glUniform4fARB( loc, x, y, z, w )
+#define ML_glUniformMatrix2fv(loc, transpose, ptr)	glUniformMatrix2fvARB( loc, 2 * 2, transpose, ptr )
+#define ML_glUniformMatrix3fv(loc, transpose, ptr)	glUniformMatrix3fvARB( loc, 3 * 3, transpose, ptr )
+#define ML_glUniformMatrix4fv(loc, transpose, ptr)	glUniformMatrix4fvARB( loc, 4 * 4, transpose, ptr )
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -710,14 +710,14 @@ namespace ml::gfx
 		return _ML make_shared<opengl_framebuffer>(this, opts);
 	}
 
-	shared<shader> opengl_device::create_shader(uint32_t type, pmr::vector<pmr::string> const & src) noexcept
-	{
-		return _ML make_shared<opengl_shader>(this, type, src);
-	}
-
 	shared<program> opengl_device::create_program() noexcept
 	{
 		return _ML make_shared<opengl_program>(this);
+	}
+
+	shared<shader> opengl_device::create_shader(uint32_t type, pmr::string const & src) noexcept
+	{
+		return _ML make_shared<opengl_shader>(this, type, src);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1056,51 +1056,59 @@ namespace ml::gfx
 		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
+	void opengl_context::bind_shader(shader const * value)
+	{
+		ML_glCheck(glUseProgramStages(
+			m_handle,
+			GL_VERTEX_SHADER_BIT,
+			value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void opengl_context::upload(uniform_id loc, bool value)
 	{
-		ML_glCheck(ML_glUniform1i(loc, (int32_t)value));
+		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), (int32_t)value));
 	}
 
 	void opengl_context::upload(uniform_id loc, int32_t value)
 	{
-		ML_glCheck(ML_glUniform1i(loc, value));
+		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), value));
 	}
 
 	void opengl_context::upload(uniform_id loc, float_t value)
 	{
-		ML_glCheck(ML_glUniform1f(loc, value));
+		ML_glCheck(ML_glUniform1f(ML_handle(int32_t, loc), value));
 	}
 
 	void opengl_context::upload(uniform_id loc, vec2f const & value)
 	{
-		ML_glCheck(ML_glUniform2f(loc, value[0], value[1]));
+		ML_glCheck(ML_glUniform2f(ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
 	void opengl_context::upload(uniform_id loc, vec3f const & value)
 	{
-		ML_glCheck(ML_glUniform3f(loc, value[0], value[1], value[2]));
+		ML_glCheck(ML_glUniform3f(ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
 	void opengl_context::upload(uniform_id loc, vec4f const & value)
 	{
-		ML_glCheck(ML_glUniform4f(loc, value[0], value[1], value[2], value[3]));
+		ML_glCheck(ML_glUniform4f(ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
 	void opengl_context::upload(uniform_id loc, mat2f const & value)
 	{
-		ML_glCheck(ML_glUniformMatrix2fv(loc, false, value));
+		ML_glCheck(ML_glUniformMatrix2fv(ML_handle(int32_t, loc), false, value));
 	}
 
 	void opengl_context::upload(uniform_id loc, mat3f const & value)
 	{
-		ML_glCheck(ML_glUniformMatrix3fv(loc, false, value));
+		ML_glCheck(ML_glUniformMatrix3fv(ML_handle(int32_t, loc), false, value));
 	}
 
 	void opengl_context::upload(uniform_id loc, mat4f const & value)
 	{
-		ML_glCheck(ML_glUniformMatrix4fv(loc, false, value));
+		ML_glCheck(ML_glUniformMatrix4fv(ML_handle(int32_t, loc), false, value));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1629,66 +1637,6 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// shader
-namespace ml::gfx
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	opengl_shader::opengl_shader(device * parent, uint32_t type, pmr::vector<pmr::string> const & src)
-		: shader{ parent }, m_shader_type{ type }
-	{
-		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
-
-		compile(src);
-	}
-
-	opengl_shader::~opengl_shader()
-	{
-		ML_glCheck(ML_glDeleteShader(m_handle));
-	}
-
-	bool opengl_shader::revalue()
-	{
-		if (m_handle) { ML_glCheck(ML_glDeleteShader(m_handle)); }
-		
-		ML_glCheck(m_handle = ML_glCreateShader(m_shader_type));
-
-		m_source.clear();
-		
-		return (bool)m_handle;
-	}
-
-	bool opengl_shader::compile(pmr::vector<pmr::string> const & src)
-	{
-		// check empty
-		if ((m_source = src).empty()) { return false; }
-
-		// compile
-		cstring src_addr{ m_source.front().c_str() };
-		ML_glCheck(ML_glShaderSource(m_handle, m_source.size(), &src_addr, nullptr));
-		ML_glCheck(ML_glCompileShader(m_handle));
-
-		// check errors
-		m_error_log.clear();
-		int32_t success{};
-		ML_glCheck(ML_glGetShaderCompileStatus(m_handle, &success));
-		if (!success)
-		{
-			// error log
-			int32_t log_len{};
-			ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
-			m_error_log.resize((size_t)log_len);
-			ML_glCheck(ML_glGetObjectInfoLog(m_handle, log_len, &log_len, m_error_log.data()));
-			m_error_log.push_back(0);
-		}
-		return success;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // program
 namespace ml::gfx
 {
@@ -1743,30 +1691,55 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	bool opengl_program::attach(shared<shader> const & value)
+	bool opengl_program::attach(uint32_t type, size_t count, cstring * str)
 	{
-		if (m_shaders.try_emplace(value->get_shader_type(), value).second)
-		{
-			if (m_handle && value)
-			{
-				ML_glCheck(ML_glAttachShader(m_handle, value->get_handle()));
-			}
+		if (!count || !str || !*str || m_shaders.contains(type)) { return false; }
 
-			return true;
+		// create shader
+		uint32_t temp{};
+		ML_glCheck(temp = ML_glCreateShader(type));
+
+		// compile shader
+		ML_glCheck(ML_glShaderSource(temp, count, str, nullptr));
+		ML_glCheck(ML_glCompileShader(temp));
+
+		// check compile errors
+		int32_t success{};
+		ML_glCheck(ML_glGetShaderCompileStatus(temp, &success));
+		if (m_error_log.clear(); !success)
+		{
+			// error log
+			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(temp, &log_len));
+			m_error_log.resize((size_t)log_len);
+			ML_glCheck(ML_glGetObjectInfoLog(temp, log_len, &log_len, m_error_log.data()));
+			m_error_log.push_back(0);
+
+			// delete shader
+			ML_glCheck(ML_glDeleteShader(temp));
 		}
-		return false;
+		else
+		{
+			// attach shader
+			ML_glCheck(ML_glAttachShader(m_handle, temp));
+			m_shaders.insert(type, ML_handle(resource_id, temp));
+			m_source[type] = { str, str + count };
+		}
+		return success;
 	}
 
-	bool opengl_program::detach(shared<shader> const & value)
+	bool opengl_program::detach(uint32_t type)
 	{
-		if (auto const it{ m_shaders.find(value->get_shader_type()) })
+		if (auto const it{ m_shaders.find(type) })
 		{
-			if (m_handle && value)
-			{
-				ML_glCheck(ML_glDetachShader(m_handle, value->get_handle()));
-			}
+			// detach shader
+			ML_glCheck(ML_glDetachShader(m_handle, ML_handle(uint32_t, *it->second)));
+
+			// delete shader
+			ML_glCheck(ML_glDeleteShader(ML_handle(uint32_t, *it->second)));
 
 			m_shaders.erase(it->first);
+
+			m_source[type].clear();
 
 			return true;
 		}
@@ -1778,15 +1751,13 @@ namespace ml::gfx
 		// link
 		ML_glCheck(ML_glLinkProgram(m_handle));
 
-		// check errors
-		m_error_log.clear();
+		// check linker errors
 		int32_t success{};
 		ML_glCheck(ML_glGetProgramLinkStatus(m_handle, &success));
-		if (!success)
+		if (m_error_log.clear(); !success)
 		{
 			// error log
-			int32_t log_len{};
-			ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
+			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
 			m_error_log.resize((size_t)log_len);
 			ML_glCheck(ML_glGetObjectInfoLog(m_handle, log_len, &log_len, m_error_log.data()));
 			m_error_log.push_back(0);
@@ -1799,15 +1770,13 @@ namespace ml::gfx
 		// validate
 		ML_glCheck(ML_glValidateProgram(m_handle));
 
-		// check errors
-		m_error_log.clear();
+		// check validation errors
 		int32_t success{};
 		ML_glCheck(ML_glGetProgramValidateStatus(m_handle, &success));
-		if (!success)
+		if (m_error_log.clear(); !success)
 		{
 			// error log
-			int32_t log_len{};
-			ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
+			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
 			m_error_log.resize((size_t)log_len);
 			ML_glCheck(ML_glGetObjectInfoLog(m_handle, log_len, &log_len, m_error_log.data()));
 			m_error_log.push_back(0);
@@ -1817,5 +1786,28 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// shader
+namespace ml::gfx
+{
+	opengl_shader::opengl_shader(device * parent, uint32_t type, pmr::string const & src)
+		: shader{ parent }, m_shader_type{ type }, m_source{ src }
+	{
+		glCreateShaderProgramEXT(_shader_type<to_impl>(type), src.c_str());
+	}
+
+	opengl_shader::~opengl_shader()
+	{
+	}
+
+	bool opengl_shader::revalue()
+	{
+		return (bool)m_handle;
+	}
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // ML_IMPL_RENDERER_OPENGL

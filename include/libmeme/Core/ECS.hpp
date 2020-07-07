@@ -25,7 +25,8 @@ namespace ml::ecs::detail
 	template <template <class> class System
 	> struct x_wrapper final
 	{
-		template <class U> using type = typename System<U>;
+		template <class Traits
+		> using type = typename System<Traits>;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -171,10 +172,10 @@ namespace ml::ecs::detail
 
 		using self_type = typename systems<Systems...>;
 
-		using type_list = typename meta::list<_ML_ECS detail::template x_wrapper<Systems>...>;
+		using type_list = typename meta::list<x_wrapper<Systems>...>;
 
-		template <class U
-		> using storage_type = typename meta::tuple<meta::list<Systems<U>...>>;
+		template <class Traits
+		> using storage_type = typename meta::tuple<meta::list<Systems<Traits>...>>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -186,14 +187,14 @@ namespace ml::ecs::detail
 		template <template <class> class X
 		> static constexpr bool contains() noexcept
 		{
-			return meta::contains<_ML_ECS detail::x_wrapper<X>, type_list>();
+			return meta::contains<x_wrapper<X>, type_list>();
 		}
 
 		template <template <class> class X
 		> static constexpr size_t index() noexcept
 		{
 			static_assert(self_type::contains<X>(), "system not found");
-			return meta::index_of<detail::x_wrapper<X>, type_list>();
+			return meta::index_of<x_wrapper<X>, type_list>();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -209,7 +210,9 @@ namespace ml::ecs::detail
 		class	GrowMult = std::ratio<2, 1>
 	> struct ML_NODISCARD options final
 	{
-		// growth base amount
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// base growth amount
 		static constexpr size_t grow_base{ GrowBase };
 		static_assert(0 < grow_base, "growth base negative or zero");
 
@@ -217,10 +220,13 @@ namespace ml::ecs::detail
 		static constexpr float_t grow_mult{ util::ratio_cast<GrowMult>() };
 		static_assert(1.f <= grow_mult, "expression would result in negative growth");
 
+		// growth calculator
 		static constexpr size_t calc_growth(size_t const cap) noexcept
 		{
 			return (size_t)((float_t)(cap + grow_base) * grow_mult);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
@@ -409,28 +415,23 @@ namespace ml::ecs
 
 		using entity_storage = typename ds::batch_vector
 		<
-			bool,	  // state of entity ( alive / dead )
-			size_t,	  // component data index
-			size_t,	  // managing handle index
-			signature // component signature bitset
+			bool,		// state of entity ( alive / dead )
+			size_t,		// component index
+			size_t,		// handle index
+			signature	// component signature
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// object oriented abstraction over manager interface
+		// object oriented abstraction over entity/manager interface
 		struct handle final
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD bool is_valid_handle() const noexcept
+			ML_NODISCARD operator bool() const noexcept
 			{
 				ML_assert(m_manager);
 				return m_manager->is_valid_handle(*this);
-			}
-
-			ML_NODISCARD operator bool() const noexcept
-			{
-				return this->is_valid_handle();
 			}
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1064,7 +1065,7 @@ namespace ml::ecs
 		}
 
 		template <class ... Ts
-		> struct expand_call_helper
+		> struct expand_call_helper final
 		{
 			template <class Fn
 			> static void call(size_t const i, self_type & self, Fn && fn) noexcept

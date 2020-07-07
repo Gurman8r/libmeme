@@ -13,13 +13,13 @@ namespace ml::ds
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type			= typename batch_vector<_Ts...>;
-		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using value_types		= typename meta::list<_Ts...>;
-		using value_tuple		= typename meta::tuple<value_types>;
+		using self_type			= typename batch_vector<_Ts...>					;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>	;
+		using value_types		= typename meta::list<_Ts...>					;
+		using value_tuple		= typename meta::tuple<value_types>				;
 		using vector_types		= typename meta::remap<pmr::vector, value_types>;
-		using vector_tuple		= typename meta::tuple<vector_types>;
-		using init_type			= typename std::initializer_list<value_tuple>;
+		using vector_tuple		= typename meta::tuple<vector_types>			;
+		using init_type			= typename std::initializer_list<value_tuple>	;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -54,7 +54,7 @@ namespace ml::ds
 		{
 			this->reserve(value.size());
 
-			for (auto & elem : value)
+			for (auto const & elem : value)
 			{
 				this->push_back(elem);
 			}
@@ -249,12 +249,12 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD auto get(size_t const i) noexcept
+		ML_NODISCARD auto at(size_t const i) noexcept
 		{
 			return this->at(i, tuple_sequence);
 		}
 
-		ML_NODISCARD auto get(size_t const i) const noexcept
+		ML_NODISCARD auto at(size_t const i) const noexcept
 		{
 			return this->at(i, tuple_sequence);
 		}
@@ -339,12 +339,12 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD auto back() noexcept
+		ML_NODISCARD decltype(auto) back() noexcept
 		{
 			return this->back(tuple_sequence);
 		}
 
-		ML_NODISCARD auto back() const noexcept
+		ML_NODISCARD decltype(auto) back() const noexcept
 		{
 			return this->back(tuple_sequence);
 		}
@@ -429,12 +429,12 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD auto front() noexcept
+		ML_NODISCARD decltype(auto) front() noexcept
 		{
 			return this->front(tuple_sequence);
 		}
 
-		ML_NODISCARD auto front() const noexcept
+		ML_NODISCARD decltype(auto) front() const noexcept
 		{
 			return this->front(tuple_sequence);
 		}
@@ -655,12 +655,12 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <size_t I> ML_NODISCARD size_t indexof(const_iterator_i<I> it) const noexcept
+		template <size_t I> ML_NODISCARD size_t index_of(const_iterator_i<I> it) const noexcept
 		{
 			return (size_t)std::distance(this->cbegin<I>(), it);
 		}
 
-		template <class T> ML_NODISCARD size_t indexof(const_iterator_t<T> it) const noexcept
+		template <class T> ML_NODISCARD size_t index_of(const_iterator_t<T> it) const noexcept
 		{
 			return (size_t)std::distance(this->cbegin<T>(), it);
 		}
@@ -843,19 +843,19 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I, class U = value_i<I>
-		> auto insert(size_t const i, U && value) noexcept
+		> iterator_i<I> insert(size_t const i, U && value) noexcept
 		{
 			return this->get<I>().insert(this->begin<I>() + i, ML_forward(value));
 		}
 
 		template <class T, class U = T
-		> auto insert(size_t const i, U && value) noexcept
+		> iterator_t<T> insert(size_t const i, U && value) noexcept
 		{
 			return this->get<T>().insert(this->begin<T>() + i, ML_forward(value));
 		}
 
 		template <class Tp, size_t I, size_t N = std::tuple_size_v<Tp>
-		> auto insert(size_t const i, Tp && value)
+		> decltype(auto) insert(size_t const i, Tp && value)
 		{
 			static_assert(tuple_size <= N);
 			if constexpr (I < N)
@@ -871,7 +871,7 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> auto insert(size_t const i, Args && ... args)
+		> decltype(auto) insert(size_t const i, Args && ... args)
 		{
 			return this->insert<value_tuple, 0>(i, value_tuple{ ML_forward(args)... });
 		}
@@ -898,7 +898,7 @@ namespace ml::ds
 			{
 				this->push_back<I>(ML_forward(std::get<I>(ML_forward(value))));
 
-				this->push_back<Tp, I + 1, N>(ML_forward(value));
+				return this->push_back<Tp, I + 1, N>(ML_forward(value));
 			}
 			else
 			{

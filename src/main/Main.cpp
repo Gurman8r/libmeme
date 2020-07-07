@@ -51,6 +51,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// setup engine
+
 	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{
 		ML_defer{ f.close(); };
@@ -67,10 +68,11 @@ ml::int32_t main()
 				engine::config()["setup_script"]));
 	}
 
+	if (!engine::window().is_open()) { return EXIT_FAILURE; }
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// application sequence
-	if (!engine::window().is_open()) { return EXIT_FAILURE; }
 	
 	event_system::fire_event<load_event>();
 	

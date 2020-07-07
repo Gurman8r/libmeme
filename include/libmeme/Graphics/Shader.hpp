@@ -14,31 +14,34 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shader_asset() : m_pgm{}
+		shader_asset() : m_obj{}
 		{
 		}
 
-		shader_asset(fs::path const & v, fs::path const & f) : m_pgm{}
+		shader_asset(fs::path const & v, fs::path const & f) : m_obj{}
 		{
 			load_from_file(v, f);
 		}
 
-		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g) : m_pgm{}
+		shader_asset(fs::path const & v, fs::path const & f, fs::path const & g) : m_obj{}
 		{
 			load_from_file(v, f, g);
 		}
 
-		shader_asset(ds::map<uint32_t, shared<gfx::shader>> const & value) : m_pgm{}
+		shader_asset(ds::map<uint32_t, pmr::vector<pmr::string>> const & value) : m_obj{}
 		{
 			load_from_memory(value);
 		}
 
-		shader_asset(shader_asset const & other) : m_pgm{}
+		shader_asset(shader_asset const & other) : m_obj{}
 		{
-			load_from_memory(other.m_pgm->get_shaders());
+			if (other.m_obj)
+			{
+				load_from_memory(other.m_obj->get_source());
+			}
 		}
 
-		shader_asset(shader_asset && other) noexcept : m_pgm{}
+		shader_asset(shader_asset && other) noexcept : m_obj{}
 		{
 			swap(std::move(other));
 		}
@@ -62,7 +65,7 @@ namespace ml
 		{
 			if (this != std::addressof(value))
 			{
-				m_pgm.swap(value.m_pgm);
+				m_obj.swap(value.m_obj);
 			}
 		}
 
@@ -83,56 +86,56 @@ namespace ml
 				util::get_file_string(g_file));
 		}
 
-		bool load_from_memory(ds::map<uint32_t, shared<gfx::shader>> const & vs)
+		bool load_from_memory(ds::map<uint32_t, pmr::vector<pmr::string>> const & src)
 		{
-			if (m_pgm) { m_pgm->revalue(); }
-			else { m_pgm = gfx::program::create(); }
+			if (m_obj) { m_obj->revalue(); }
+			else { m_obj = gfx::program::create(); }
 
-			vs.for_each([&](auto, shared<gfx::shader> const & sh)
+			src.for_each([&](auto type, auto const & str) noexcept
 			{
-				m_pgm->attach(sh);
+				m_obj->attach(type, str);
 			});
 
-			return m_pgm->link();
+			return m_obj->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src)
 		{
-			if (m_pgm) { m_pgm->revalue(); }
-			else { m_pgm = gfx::program::create(); }
+			if (m_obj) { m_obj->revalue(); }
+			else { m_obj = gfx::program::create(); }
 
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, { v_src }));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, { f_src }));
+			m_obj->attach(gfx::shader_type_vertex, v_src);
+			m_obj->attach(gfx::shader_type_fragment, f_src);
 
-			return m_pgm->link();
+			return m_obj->link();
 		}
 
 		bool load_from_memory(pmr::string const & v_src, pmr::string const & f_src, pmr::string const & g_src)
 		{
-			if (m_pgm) { m_pgm->revalue(); }
-			else { m_pgm = gfx::program::create(); }
+			if (m_obj) { m_obj->revalue(); }
+			else { m_obj = gfx::program::create(); }
 
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_vertex	, { v_src }));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_fragment	, { f_src }));
-			m_pgm->attach(gfx::shader::create(gfx::shader_type_geometry	, { g_src }));
+			m_obj->attach(gfx::shader_type_vertex	, v_src);
+			m_obj->attach(gfx::shader_type_fragment	, f_src);
+			m_obj->attach(gfx::shader_type_geometry	, g_src);
 
-			return m_pgm->link();
+			return m_obj->link();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void bind() const noexcept { m_pgm->bind(); }
+		void bind() const noexcept { m_obj->bind(); }
 
-		void unbind() const noexcept { m_pgm->unbind(); }
+		void unbind() const noexcept { m_obj->unbind(); }
 
-		void bind_textures() const noexcept { m_pgm->bind_textures(); }
+		void bind_textures() const noexcept { m_obj->bind_textures(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
 		> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return m_pgm->set_uniform(name, ML_forward(value));
+			return m_obj->set_uniform(name, ML_forward(value));
 		}
 
 		template <class T
@@ -164,12 +167,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_pgm; }
+		ML_NODISCARD auto program() const & noexcept -> shared<gfx::program> const & { return m_obj; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		shared<gfx::program> m_pgm;
+		shared<gfx::program> m_obj;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

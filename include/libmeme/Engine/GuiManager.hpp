@@ -41,11 +41,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_imgui_demo(bool * p_open = {});
+		void show_imgui_demo(bool * p_open = nullptr);
 
-		void show_imgui_metrics(bool * p_open = {});
+		void show_imgui_metrics(bool * p_open = nullptr);
 
-		void show_imgui_about(bool * p_open = {});
+		void show_imgui_about(bool * p_open = nullptr);
+
+		void show_imgui_style_editor(void * ref = nullptr);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

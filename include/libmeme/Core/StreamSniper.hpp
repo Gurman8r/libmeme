@@ -22,7 +22,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit basic_stream_sniper(ostream_type * value = {}) noexcept
+		basic_stream_sniper(ostream_type * value = {}) noexcept
 		{
 			this->update(value);
 		}

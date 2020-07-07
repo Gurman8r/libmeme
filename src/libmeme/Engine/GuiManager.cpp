@@ -356,6 +356,11 @@ namespace ml
 		ImGui::ShowAboutWindow(p_open);
 	}
 
+	void gui_manager::show_imgui_style_editor(void * ref)
+	{
+		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	uint32_t gui_manager::dockspace_data::begin_builder(int32_t flags)

@@ -90,110 +90,41 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// PIPELINE (WIP)
-namespace ml::gfx
-{
-	struct pipeline final : trackable, non_copyable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		using storage_type = typename ds::batch_vector
-		<
-			shared<texture2d>,	// 
-			command_t			// 
-		>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		pipeline(allocator_type alloc = {}) noexcept
-			: m_data{ alloc }
-		{
-		}
-
-		pipeline(storage_type::init_type init, allocator_type alloc = {})
-			: m_data{ init, alloc }
-		{
-		}
-
-		pipeline(storage_type const & value, allocator_type alloc = {})
-			: m_data{ value, alloc }
-		{
-		}
-
-		pipeline(storage_type && value, allocator_type alloc = {}) noexcept
-			: m_data{ std::move(value), alloc }
-		{
-		}
-
-		pipeline(pipeline && other, allocator_type alloc = {}) noexcept
-			: m_data{ std::move(other.m_data), alloc }
-		{
-			
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		pipeline & operator=(pipeline && other) noexcept
-		{
-			this->swap(std::move(other));
-			return (*this);
-		}
-
-		void swap(pipeline & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-				m_data.swap(other.m_data);
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		storage_type m_data;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // ECS
 namespace ml
 {
 	// (T) TAGS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct t_default {};
+	struct	t_default {};
+
 
 	// (C) COMPONENTS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using	c_shader	= typename shader_asset;
-	using	c_material	= typename shared<uniform_buffer>;
-	using	c_mesh		= typename shared<mesh>;
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
+	using	c_shader	= typename shader_asset;
+	using	c_uniforms	= typename shared<uniform_buffer>;
+	using	c_mesh		= typename shared<mesh>;
 
 
 	// (S) SIGNATURES
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	using s_update_materials = meta::list<c_material, c_transform
+	using s_update_uniforms = meta::list<c_uniforms, c_transform
 	>;
-	using s_upload_uniforms = meta::list<c_shader, c_material
+	using s_upload_uniforms = meta::list<c_shader, c_uniforms
 	>;
-	using s_draw_meshes = meta::list<c_shader, c_mesh
+	using s_render_meshes = meta::list<c_shader, c_mesh
 	>;
 
 
 	// (X) SYSTEMS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class> struct x_update_materials final : ecs::detail::x_base<s_update_materials>
+	template <class> struct x_update_uniforms final : ecs::detail::x_base<s_update_uniforms>
 	{
-		void operator()(c_material & mat, c_transform const & tf)
+		void operator()(c_uniforms & mat, c_transform const & tf)
 		{
 			mat->set<vec3>("u_position"	, tf.pos)
 				.set<vec4>("u_rotation"	, tf.rot)
@@ -203,18 +134,18 @@ namespace ml
 
 	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
 	{
-		void operator()(c_shader & shd, c_material const & mat)
+		void operator()(c_shader & shd, c_uniforms const & uni)
 		{
 			shd.bind();
-			for (uniform const & u : *mat)
+			for (uniform const & elem : *uni)
 			{
-				shd.set_uniform(u);
+				shd.set_uniform(elem);
 			}
 			shd.unbind();
 		}
 	};
 
-	template <class> struct x_draw_meshes final : ecs::detail::x_base<s_draw_meshes>
+	template <class> struct x_render_meshes final : ecs::detail::x_base<s_render_meshes>
 	{
 		void operator()(c_shader const & shd, c_mesh const & msh, gfx::context * ctx)
 		{
@@ -238,17 +169,17 @@ namespace ml
 
 		// components
 		ecs::detail::components<
-		c_shader, c_material, c_mesh, c_transform
+		c_shader, c_uniforms, c_mesh, c_transform
 		>,
 
 		// signatures
 		ecs::detail::signatures<
-		s_update_materials, s_upload_uniforms, s_draw_meshes
+		s_update_uniforms, s_upload_uniforms, s_render_meshes
 		>,
 
 		// systems
 		ecs::detail::systems<
-		x_update_materials, x_upload_uniforms, x_draw_meshes
+		x_update_uniforms, x_upload_uniforms, x_render_meshes
 		>
 	>;
 
@@ -273,7 +204,7 @@ namespace ml
 
 		ds::map< pmr::string, shared<font>			> m_fonts		{};
 		ds::map< pmr::string, shared<image>			> m_images		{};
-		ds::map< pmr::string, shared<uniform_buffer>		> m_materials	{};
+		ds::map< pmr::string, shared<uniform_buffer>> m_uniforms	{};
 		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
 		ds::map< pmr::string, shader_asset			> m_shaders		{};
 		ds::map< pmr::string, shared<gfx::texture2d>> m_textures	{};
@@ -289,11 +220,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		perspective_camera m_camera{};
-
-		gfx::pipeline m_pipeline
-		{
-			std::make_tuple(nullptr, [](gfx::context *) { /* test */ })
-		};
 		
 		shader_cache m_cache{};
 
@@ -429,6 +355,8 @@ namespace ml
 
 			// SHADERS
 			{
+				using namespace gfx;
+
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
 					engine::fs().path2("assets/shaders/2D.vs.shader"));
 
@@ -488,11 +416,11 @@ namespace ml
 				+ _timers + _camera + _tf;
 
 				// earth
-				auto & earth{ m_materials["earth"] = make_shared<uniform_buffer>(_3d) };
+				auto & earth{ m_uniforms["earth"] = make_shared<uniform_buffer>(_3d) };
 				earth->set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"]);
 
 				// moon
-				auto & moon{ m_materials["moon"] = make_shared<uniform_buffer>(_3d) };
+				auto & moon{ m_uniforms["moon"] = make_shared<uniform_buffer>(_3d) };
 				moon->set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"]);
 			}
 
@@ -580,7 +508,7 @@ namespace ml
 					auto & h{ m_ecs.create_handle() };
 					h.add_tag<t_default>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
-					h.add_component<c_material>	(m_materials[mat]);
+					h.add_component<c_uniforms>	(m_uniforms[mat]);
 					h.add_component<c_mesh>		(m_meshes	[msh]);
 					h.add_component<c_transform>(tf);
 					return h;
@@ -618,7 +546,7 @@ namespace ml
 			m_plots.update(engine::time().total_time().count());
 			
 			// systems
-			m_ecs.invoke_system<x_update_materials>();
+			m_ecs.invoke_system<x_update_uniforms>();
 			m_ecs.invoke_system<x_upload_uniforms>();
 
 			// pipeline
@@ -644,7 +572,7 @@ namespace ml
 
 				gfx::make_command([&](gfx::context * ctx) noexcept
 				{
-					m_ecs.invoke_system<x_draw_meshes>(ctx);
+					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
 
 				gfx::render_command::bind_framebuffer(nullptr),
@@ -777,7 +705,7 @@ namespace ml
 			m_ecs.clear();
 			m_images.clear();
 			m_shaders.clear();
-			m_materials.clear();
+			m_uniforms.clear();
 			m_meshes.clear();
 			m_textures.clear();
 			m_fonts.clear();
@@ -830,7 +758,7 @@ namespace ml
 
 			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_materials	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_uniforms	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_meshes	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_shaders	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
 			m_textures	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });

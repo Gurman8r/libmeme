@@ -6,7 +6,4 @@ shader cache
 constant buffer / uniform buffer
 cameras w/ controller gui
 template basic_vertex to do variations of vertex at CT
-
 object import settings
-
-combine shader & program

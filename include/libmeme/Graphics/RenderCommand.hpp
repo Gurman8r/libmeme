@@ -6,11 +6,14 @@
 namespace ml::gfx
 {
 	// command
-	ML_alias command_t = typename std::function< void(context *) >;
+	struct command final : public std::function<void(context *)>
+	{
+		using function::function;
+	};
 
 	// make command
 	template <class Fn, class ... Args
-	> ML_NODISCARD command_t make_command(Fn && fn, Args && ... args) noexcept
+	> ML_NODISCARD command make_command(Fn && fn, Args && ... args) noexcept
 	{
 		return std::bind(ML_forward(fn), std::placeholders::_1, ML_forward(args)...);
 	}

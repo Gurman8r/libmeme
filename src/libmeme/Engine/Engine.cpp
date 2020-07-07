@@ -58,6 +58,7 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
+
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
@@ -135,43 +136,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(is_initialized());
+		ML_assert(g_engine);
 		return g_engine->m_window;
 	}
 

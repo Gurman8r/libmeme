@@ -18,16 +18,13 @@ namespace ml::gfx
 	class	device			;
 	class	devchild		;
 	class	context			;
-
 	class	vertexarray		;
 	class	vertexbuffer	;
 	class	indexbuffer		;
-
 	class	texture			;
 	class	texture2d		;
 	class	texturecube		;
 	class	framebuffer		;
-
 	class	shader			;
 	class	program			;
 
@@ -38,8 +35,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias address_t	= typename void const *				; // data address
-	ML_alias buffer_t	= typename pmr::vector<byte_t>		; // byte buffer
+	ML_alias address_t	= typename void const *			; // data address
+	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -519,6 +516,8 @@ namespace ml::gfx
 // layout
 namespace ml::gfx
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// buffer element
 	struct ML_NODISCARD buffer_element final
 	{
@@ -721,9 +720,9 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(texopts const & opts) noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(uint32_t type, pmr::vector<pmr::string> const & src = {}) noexcept = 0;
-
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
+
+		ML_NODISCARD virtual shared<shader> create_shader(uint32_t type, pmr::string const & src) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -931,6 +930,8 @@ namespace ml::gfx
 		virtual void bind_texture(texture const * value, uint32_t slot = 0) = 0;
 
 		virtual void bind_framebuffer(framebuffer const * value) = 0;
+
+		virtual void bind_shader(shader const * value) = 0;
 
 		virtual void bind_program(program const * value) = 0;
 
@@ -1341,50 +1342,6 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// shader
-namespace ml::gfx
-{
-	// base shader
-	class ML_GRAPHICS_API shader : public devchild
-	{
-	public:
-		ML_NODISCARD static shared<shader> create(uint32_t type, pmr::vector<pmr::string> const & src) noexcept
-		{
-			return device::get_default()->create_shader(type, src);
-		}
-
-	public:
-		explicit shader(device * parent) noexcept : devchild{ parent }
-		{
-		}
-
-		virtual ~shader() override = default;
-
-		virtual bool revalue() = 0;
-
-		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
-
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
-
-	public:
-		virtual bool compile(pmr::vector<pmr::string> const & src) = 0;
-
-		inline bool compile(size_t count, cstring const * src) noexcept { return compile(pmr::vector<pmr::string>{ src, src + count }); }
-
-		inline bool compile(pmr::string const & src) noexcept { return compile(pmr::vector<pmr::string>{ src }); }
-
-		inline bool compile(cstring src) noexcept { return compile(pmr::vector<pmr::string>{ src }); }
-
-		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
-
-		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
-
-		ML_NODISCARD virtual pmr::vector<pmr::string> const & get_source() const noexcept = 0;
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // program
 namespace ml::gfx
 {
@@ -1411,9 +1368,23 @@ namespace ml::gfx
 		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
 
 	public:
-		virtual bool attach(shared<shader> const & value) = 0;
+		virtual bool attach(uint32_t type, size_t count, cstring * str) = 0;
 
-		virtual bool detach(shared<shader> const & value) = 0;
+		inline bool attach(uint32_t type, pmr::string const & str) noexcept
+		{
+			if (str.empty()) { return false; }
+			cstring temp{ str.c_str() };
+			return attach(type, 1, &temp);
+		}
+
+		inline bool attach(uint32_t type, pmr::vector<pmr::string> const & str) noexcept
+		{
+			if (str.empty()) { return false; }
+			cstring temp{ str.front().c_str() };
+			return attach(type, str.size(), &temp);
+		}
+
+		virtual bool detach(uint32_t type) = 0;
 
 		ML_NODISCARD virtual bool link() = 0;
 
@@ -1423,7 +1394,9 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<uint32_t, shared<shader>> const & get_shaders() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<uint32_t, resource_id> const & get_shaders() const noexcept = 0;
+
+		ML_NODISCARD virtual ds::map<uint32_t, pmr::vector<pmr::string>> const & get_source() const noexcept = 0;
 
 		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
 
@@ -1469,6 +1442,51 @@ namespace ml::gfx
 
 	protected:
 		virtual void do_cache_texture(uniform_id loc, shared<texture> const & value) noexcept = 0;
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// shader
+namespace ml::gfx
+{
+	// base shader
+	class ML_GRAPHICS_API shader : public devchild
+	{
+	public:
+		ML_NODISCARD static shared<shader> create(uint32_t type, pmr::string const & str) noexcept
+		{
+			return device::get_default()->create_shader(type, str);
+		}
+
+	public:
+		explicit shader(device * parent) noexcept : devchild{ parent }
+		{
+		}
+
+		virtual ~shader() override = default;
+
+		virtual bool revalue() = 0;
+
+		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
+
+		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+
+	public:
+		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
+
+		ML_NODISCARD virtual pmr::string const & get_source() const noexcept = 0;
+
+	public:
+		inline void bind() const noexcept
+		{
+			get_device()->get_context()->bind_shader(this);
+		}
+
+		inline void unbind() const noexcept
+		{
+			get_device()->get_context()->bind_shader(nullptr);
+		}
 	};
 }
 

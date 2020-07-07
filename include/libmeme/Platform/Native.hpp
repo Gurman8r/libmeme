@@ -1,7 +1,11 @@
 #ifndef _ML_NATIVE_HPP_
 #define _ML_NATIVE_HPP_
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Config.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #if defined(ML_os_windows)
 #	include <Windows.h>

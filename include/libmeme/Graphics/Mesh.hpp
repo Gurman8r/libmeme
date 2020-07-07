@@ -77,7 +77,10 @@ namespace ml
 
 		void add_vertices(contiguous_t const & verts) noexcept
 		{
-			m_vao->add_vertices(gfx::vertexbuffer::create(verts.size(), verts.data()));
+			m_vao->add_vertices(gfx::vertexbuffer::create
+			(
+				verts.size(), verts.data()
+			));
 		}
 
 		void add_vertices(contiguous_t const & verts, gfx::buffer_layout const & buffer_layout) noexcept

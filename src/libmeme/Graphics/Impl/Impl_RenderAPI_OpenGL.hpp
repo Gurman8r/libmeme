@@ -60,9 +60,9 @@ namespace ml::gfx
 
 		shared<framebuffer> create_framebuffer(texopts const & opts) noexcept override;
 
-		shared<shader> create_shader(uint32_t type, pmr::vector<pmr::string> const & src) noexcept override;
-
 		shared<program> create_program() noexcept override;
+
+		shared<shader> create_shader(uint32_t type, pmr::string const & src) noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -182,6 +182,8 @@ namespace ml::gfx
 		void bind_framebuffer(framebuffer const * value) override;
 
 		void bind_program(program const * value) override;
+
+		void bind_shader(shader const * value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -453,44 +455,6 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// shader
-namespace ml::gfx
-{
-	// opengl shader
-	class opengl_shader final : public shader
-	{
-	private:
-		static constexpr typeof<> s_typeof{ typeof_v<opengl_shader> };
-
-		uint32_t					m_handle		{}; // handle
-		pmr::string					m_error_log		{}; // error log
-		uint32_t const				m_shader_type	{}; // type
-		pmr::vector<pmr::string>	m_source		{}; // source
-
-	public:
-		opengl_shader(device * parent, uint32_t type, pmr::vector<pmr::string> const & src);
-
-		~opengl_shader() override;
-
-		bool revalue() override;
-
-		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
-
-		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
-
-	public:
-		bool compile(pmr::vector<pmr::string> const & src) override;
-
-		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
-
-		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
-
-		pmr::vector<pmr::string> const & get_source() const noexcept override { return m_source; }
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // program
 namespace ml::gfx
 {
@@ -500,11 +464,12 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_typeof{ typeof_v<opengl_program> };
 
-		uint32_t								m_handle		{}; // handle
-		pmr::string								m_error_log		{}; // error log
-		ds::map<uint32_t, shared<shader>>		m_shaders		{}; // shader cache
-		ds::map<uniform_id, shared<texture>>	m_textures		{}; // texture cache
-		ds::map<hash_t, uniform_id>				m_uniforms		{}; // uniform cache
+		uint32_t									m_handle		{}; // handle
+		pmr::string									m_error_log		{}; // error log
+		ds::map<uint32_t, resource_id>				m_shaders		{}; // shader cache
+		ds::map<uint32_t, pmr::vector<pmr::string>>	m_source		{}; // source cache
+		ds::map<uniform_id, shared<texture>>		m_textures		{}; // texture cache
+		ds::map<hash_t, uniform_id>					m_uniforms		{}; // uniform cache
 
 		// uniform binder
 		struct ML_NODISCARD opengl_uniform_binder final
@@ -532,9 +497,9 @@ namespace ml::gfx
 		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
 
 	public:
-		bool attach(shared<shader> const & value) override;
+		bool attach(uint32_t type, size_t count, cstring * str) override;
 
-		bool detach(shared<shader> const & value) override;
+		bool detach(uint32_t type) override;
 
 		bool link() override;
 
@@ -549,7 +514,9 @@ namespace ml::gfx
 
 		pmr::string const & get_error_log() const noexcept override { return m_error_log; }
 
-		ds::map<uint32_t, shared<shader>> const & get_shaders() const noexcept override { return m_shaders; }
+		ds::map<uint32_t, resource_id> const & get_shaders() const noexcept override { return m_shaders; }
+
+		ds::map<uint32_t, pmr::vector<pmr::string>> const & get_source() const noexcept override { return m_source; }
 
 		ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept override { return m_textures; }
 
@@ -571,6 +538,39 @@ namespace ml::gfx
 				m_textures.insert(loc, value);
 			}
 		}
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// shader
+namespace ml::gfx
+{
+	// opengl shader
+	class opengl_shader final : public shader
+	{
+	private:
+		static constexpr typeof<> s_typeof{ typeof_v<opengl_program> };
+
+		uint32_t	m_handle		{}; // handle
+		uint32_t	m_shader_type	{}; // shader type
+		pmr::string	m_source		{}; // shader source
+
+	public:
+		opengl_shader(device * parent, uint32_t type, pmr::string const & src);
+
+		~opengl_shader() override;
+
+		bool revalue() override;
+
+		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
+
+		typeof<> const & get_typeof() const noexcept override { return s_typeof; }
+
+	public:
+		uint32_t get_shader_type() const noexcept override { return m_shader_type; }
+
+		pmr::string const & get_source() const noexcept override { return m_source; }
 	};
 }
 

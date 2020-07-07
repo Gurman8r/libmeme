@@ -25,7 +25,7 @@ namespace ml
 		if (auto const it{ m_data.find<hash_t>(util::hash(path.filename().string())) }
 		; it != m_data.end<hash_t>())
 		{
-			m_data.erase(m_data.indexof<hash_t>(it));
+			m_data.erase(m_data.index_of<hash_t>(it));
 
 			return true;
 		}

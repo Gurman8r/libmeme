@@ -45,7 +45,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend singleton<performance>;
+		friend base_type;
 
 		~performance() noexcept;
 
