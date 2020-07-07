@@ -685,7 +685,7 @@ namespace ml
 				if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
 
 				// WIDGETS
-				m_gui_viewport	.render(&demo::show_viewport_gui		, this); // DISPLAY
+				m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
 				m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
 				m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
 				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
@@ -776,90 +776,89 @@ namespace ml
 			ML_defer{ m_console.render(); };
 
 			// setup commands
-			if ML_UNLIKELY(m_console.commands.empty())
+			if (!m_console.commands.empty()) { return; }
+
+			m_console.commands.push_back({ "clear", [&](auto && args) noexcept
 			{
-				m_console.commands.push_back({ "clear", [&](auto && args) noexcept
-				{
-					m_console.clear();
-				},
-				{
-					"clear the console window",
-				} });
+				m_console.clear();
+			},
+			{
+				"clear the console window",
+			} });
 
-				m_console.commands.push_back({ "exit", [&](auto && args) noexcept
-				{
-					engine::window().close();
-				},
-				{
-					"shutdown the application",
-				} });
+			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
+			{
+				engine::window().close();
+			},
+			{
+				"shutdown the application",
+			} });
 
-				m_console.commands.push_back({ "help", [&](auto && args) noexcept
+			m_console.commands.push_back({ "help", [&](auto && args) noexcept
+			{
+				if (args.empty())
 				{
-					if (args.empty())
+					for (auto const & cmd : m_console.commands)
 					{
-						for (auto const & cmd : m_console.commands)
+						std::cout << cmd.name << '\n';
+					}
+				}
+				else
+				{
+					if (auto const it{ std::find_if(
+						m_console.commands.begin(),
+						m_console.commands.end(),
+						[&](auto & e) noexcept { return (e.name == args.front()); }) }
+					; it != m_console.commands.end())
+					{
+						for (auto const & str : it->info)
 						{
-							std::cout << cmd.name << '\n';
+							std::cout << str << '\n';
 						}
 					}
 					else
 					{
-						if (auto const it{ std::find_if(
-							m_console.commands.begin(),
-							m_console.commands.end(),
-							[&](auto & e) noexcept { return (e.name == args.front()); }) }
-						; it != m_console.commands.end())
-						{
-							for (auto const & str : it->info)
-							{
-								std::cout << str << '\n';
-							}
-						}
-						else
-						{
-							std::cout << "unknown command: " << args.front() << '\n';
-						}
+						std::cout << "unknown command: " << args.front() << '\n';
 					}
-				},
-				{
-					"display list of commands",
-					"help",
-					"help [CMD]",
-				} });
+				}
+			},
+			{
+				"display list of commands",
+				"help",
+				"help [CMD]",
+			} });
 
-				m_console.commands.push_back({ "history", [&](auto && args) noexcept
+			m_console.commands.push_back({ "history", [&](auto && args) noexcept
+			{
+				for (auto const & str : m_console.history)
 				{
-					for (auto const & str : m_console.history)
-					{
-						std::cout << str << '\n';
-					}
-				},
-				{
-					"display command history",
-				} });
+					std::cout << str << '\n';
+				}
+			},
+			{
+				"display command history",
+			} });
 
-				m_console.commands.push_back({ "py", [&](auto && args) noexcept
+			m_console.commands.push_back({ "py", [&](auto && args) noexcept
+			{
+				if (!m_console.command_lock && args.empty())
 				{
-					if (!m_console.command_lock && args.empty())
-					{
-						m_console.command_lock = "py";
+					m_console.command_lock = "py";
 
-						static ML_scope{ std::cout << "# type \'\\\' to stop using python\n"; };
-					}
-					else if ((args.front() == "\\") && (0 == std::strcmp("py", m_console.command_lock)))
-					{
-						m_console.command_lock = nullptr;
-					}
-					else
-					{
-						engine::scripts().do_string(util::detokenize(args));
-					}
-				},
+					static ML_scope{ std::cout << "# type \'\\\' to stop using python\n"; };
+				}
+				else if ((args.front() == "\\") && (0 == std::strcmp("py", m_console.command_lock)))
 				{
-					"execute python code",
-				} });
-			}
+					m_console.command_lock = nullptr;
+				}
+				else
+				{
+					engine::scripts().do_string(util::detokenize(args));
+				}
+			},
+			{
+				"execute python code",
+			} });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

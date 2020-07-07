@@ -249,12 +249,12 @@ namespace ml::ds
 			}
 		}
 
-		ML_NODISCARD auto at(size_t const i) noexcept
+		ML_NODISCARD decltype(auto) at(size_t const i) noexcept
 		{
 			return this->at(i, tuple_sequence);
 		}
 
-		ML_NODISCARD auto at(size_t const i) const noexcept
+		ML_NODISCARD decltype(auto) at(size_t const i) const noexcept
 		{
 			return this->at(i, tuple_sequence);
 		}
