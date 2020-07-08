@@ -49,8 +49,7 @@ namespace ml
 	glfw_window::glfw_window() noexcept : m_title{}, m_window {}, m_monitor{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
-
-		ML_assert("failed initializing GLFW" && glfw_init);
+		ML_assert("failed initializing glfw window" && glfw_init);
 	}
 
 	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
@@ -60,9 +59,11 @@ namespace ml
 
 	glfw_window::~glfw_window() noexcept
 	{
-		static ML_defer{ glfwTerminate(); };
-
 		glfwDestroyWindow(m_window);
+
+		set_error_callback(nullptr);
+
+		static ML_defer{ glfwTerminate(); };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,6 +72,8 @@ namespace ml
 	{
 		// check already open
 		if (is_open()) { return debug::error("glfw_window is already open"); }
+
+		glfwDefaultWindowHints();
 
 		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
 		{
@@ -183,23 +186,6 @@ namespace ml
 			case window_attr_hovered					: return GLFW_HOVERED;
 			case window_attr_focus_on_show				: return GLFW_FOCUS_ON_SHOW;
 			
-			case window_attr_red_bits					: return GLFW_RED_BITS;
-			case window_attr_green_bits					: return GLFW_GREEN_BITS;
-			case window_attr_blue_bits					: return GLFW_BLUE_BITS;
-			case window_attr_alpha_bits					: return GLFW_ALPHA_BITS;
-			case window_attr_depth_bits					: return GLFW_DEPTH_BITS;
-			case window_attr_stencil_bits				: return GLFW_STENCIL_BITS;
-			case window_attr_accum_red_bits				: return GLFW_ACCUM_RED_BITS;
-			case window_attr_accum_green_bits			: return GLFW_ACCUM_GREEN_BITS;
-			case window_attr_accum_blue_bits			: return GLFW_ACCUM_BLUE_BITS;
-			case window_attr_accum_alpha_bits			: return GLFW_ACCUM_ALPHA_BITS;
-			case window_attr_aux_buffers				: return GLFW_AUX_BUFFERS;
-			case window_attr_stereo						: return GLFW_STEREO;
-			case window_attr_samples					: return GLFW_SAMPLES;
-			case window_attr_srgb_capable				: return GLFW_SRGB_CAPABLE;
-			case window_attr_refresh_rate				: return GLFW_REFRESH_RATE;
-			case window_attr_double_buffer				: return GLFW_DOUBLEBUFFER;
-			
 			case window_attr_client_api					: return GLFW_CLIENT_API;
 			case window_attr_context_version_major		: return GLFW_CONTEXT_VERSION_MAJOR;
 			case window_attr_context_version_minor		: return GLFW_CONTEXT_VERSION_MINOR;
@@ -299,7 +285,7 @@ namespace ml
 
 	cstring glfw_window::get_title() const
 	{
-		return m_title;
+		return m_title.c_str();
 	}
 
 	void * glfw_window::get_user_pointer() const
@@ -389,7 +375,7 @@ namespace ml
 
 	void glfw_window::set_title(cstring value)
 	{
-		glfwSetWindowTitle(m_window, m_title = value);
+		glfwSetWindowTitle(m_window, (m_title = value).c_str());
 	}
 
 	void glfw_window::set_user_pointer(void * value)
@@ -470,7 +456,7 @@ namespace ml
 
 	duration glfw_window::get_time()
 	{
-		return duration{ glfwGetTime() };
+		return glfwGetTime();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

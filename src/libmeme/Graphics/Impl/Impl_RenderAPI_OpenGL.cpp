@@ -71,10 +71,6 @@
 // enable / disable
 #define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
 
-// info log
-#define ML_glGetObjectInfoLogLength(obj, x)			glGetShaderiv( obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, x )
-#define ML_glGetObjectInfoLog(obj, size, len, str)	glGetProgramInfoLog( obj, size, len, str )
-
 // shaders
 #define ML_glCreateShader(type)						glCreateShaderObjectARB( _ML_GFX _shader_type<_ML_GFX to_impl>(type) )
 #define ML_glDeleteShader(obj)						glDeleteObjectARB( obj )
@@ -95,7 +91,6 @@
 #define ML_glGetProgramValidateStatus(obj, x)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, x )
 
 // uniforms
-#define ML_glGetUniformLocation(obj, name)			ML_handle( _ML_GFX uniform_id, glGetUniformLocationARB(obj, name) )
 #define ML_glUniform1i(loc, x)						glUniform1iARB( loc, x )
 #define ML_glUniform1f(loc, x)						glUniform1fARB( loc, x )
 #define ML_glUniform2f(loc, x, y)					glUniform2fARB( loc, x, y )
@@ -571,10 +566,10 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// check error
+// utility
 namespace ml::gfx
 {
-	// check opengl error
+	// check error
 	static void gl_check_error(cstring expr, cstring file, size_t line) noexcept
 	{
 		if (auto const code{ ML_glGetError() })
@@ -590,6 +585,16 @@ namespace ml::gfx
 				<< "\n";
 		}
 	}
+
+	// get program info log
+	static void gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
+	{
+		int32_t log_len{};
+		ML_glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &log_len));
+		buf.resize((size_t)log_len);
+		ML_glCheck(glGetProgramInfoLog(obj, log_len, &log_len, buf.data()));
+		buf.push_back(0);
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -602,34 +607,34 @@ namespace ml::gfx
 	opengl_device::opengl_device() : device{}
 	{
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
-		ML_assert("failed initializing opengl" && opengl_init);
+		ML_assert("failed initializing opengl device" && opengl_init);
 
 		// renderer
-		ML_glCheck(m_devinfo.renderer = (cstring)glGetString(GL_RENDERER));
+		ML_glCheck(m_settings.renderer = (cstring)glGetString(GL_RENDERER));
 
 		// vendor
-		ML_glCheck(m_devinfo.vendor = (cstring)glGetString(GL_VENDOR));
+		ML_glCheck(m_settings.vendor = (cstring)glGetString(GL_VENDOR));
 
 		// version
-		ML_glCheck(m_devinfo.version = (cstring)glGetString(GL_VERSION));
+		ML_glCheck(m_settings.version = (cstring)glGetString(GL_VERSION));
 
 		// major version
-		if (glGetIntegerv(GL_MAJOR_VERSION, &m_devinfo.major_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MAJOR_VERSION, &m_settings.major_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_devinfo.major_version = !m_devinfo.version.empty() ? m_devinfo.version[0] - '0' : 1;
+			m_settings.major_version = !m_settings.version.empty() ? m_settings.version[0] - '0' : 1;
 		}
 
 		// minor version
-		if (glGetIntegerv(GL_MINOR_VERSION, &m_devinfo.minor_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MINOR_VERSION, &m_settings.minor_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_devinfo.minor_version = !m_devinfo.version.empty() ? m_devinfo.version[2] - '0' : 1;
+			m_settings.minor_version = !m_settings.version.empty() ? m_settings.version[2] - '0' : 1;
 		}
 
 		// extensions
 		{
 			int32_t num{};
 			ML_glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &num));
-			m_devinfo.extensions.reserve(num);
+			m_settings.extensions.reserve(num);
 
 			pmr::stringstream ss{};
 			ML_glCheck(ss.str((cstring)glGetString(GL_EXTENSIONS)));
@@ -637,7 +642,7 @@ namespace ml::gfx
 			pmr::string line{};
 			while (std::getline(ss, line, ' '))
 			{
-				m_devinfo.extensions.push_back(line);
+				m_settings.extensions.push_back(line);
 			}
 		}
 
@@ -645,44 +650,48 @@ namespace ml::gfx
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		m_devinfo.texture_edge_clamp_available = true;
+		m_settings.texture_edge_clamp_available = true;
 #endif
 		// max texture slots
-		ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_devinfo.max_texture_slots));
+		ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_settings.max_texture_slots));
 
 		// max color attachments
-		ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_devinfo.max_color_attachments));
+		ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_settings.max_color_attachments));
 
 		// max samples
-		ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_devinfo.max_samples));
+		ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_settings.max_samples));
 
 		// shaders available
 #if defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		m_devinfo.shaders_available = true;
+		m_settings.shaders_available = true;
 
 		// geometry shaders available
 #	ifdef GL_ARB_geometry_shader4
-		m_devinfo.geometry_shaders_available = true;
+		m_settings.geometry_shaders_available = true;
 #	endif
 
 		// shading language version
-		ML_glCheck(m_devinfo.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+		ML_glCheck(m_settings.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
+	}
+
+	opengl_device::~opengl_device()
+	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<context> opengl_device::create_context(context_settings const & cs) noexcept
+	shared<device_context> opengl_device::create_context(context_settings const & cs) noexcept
 	{
 		return _ML make_shared<opengl_context>(this, cs);
 	}
 
-	shared<vertexarray> opengl_device::create_vertexarray(uint32_t prim) noexcept
+	shared<vertexarray> opengl_device::create_vertexarray(uint32_t mode) noexcept
 	{
-		return _ML make_shared<opengl_vertexarray>(this, prim);
+		return _ML make_shared<opengl_vertexarray>(this, mode);
 	}
 
 	shared<vertexbuffer> opengl_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
@@ -715,9 +724,9 @@ namespace ml::gfx
 		return _ML make_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_device::create_shader(uint32_t type, pmr::string const & src) noexcept
+	shared<shader> opengl_device::create_shader(descriptor<shader> const & settings) noexcept
 	{
-		return _ML make_shared<opengl_shader>(this, type, src);
+		return _ML make_shared<opengl_shader>(this, settings);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -731,7 +740,7 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_context::opengl_context(device * parent, context_settings const & cs)
-		: context{ parent }, m_settings{ cs }
+		: device_context{ parent }, m_settings{ cs }
 	{
 		ML_assert(cs.api == context_api_opengl);
 		ML_assert(cs.major == parent->get_info().major_version);
@@ -978,7 +987,7 @@ namespace ml::gfx
 
 		bind_vertexarray(value.get());
 
-		if (auto const & ib{ value->get_indices() })
+		if (auto const mode{ value->get_mode() }; auto const & ib{ value->get_indices() })
 		{
 			bind_indexbuffer(ib.get());
 
@@ -986,7 +995,7 @@ namespace ml::gfx
 			{
 				bind_vertexbuffer(vb.get());
 
-				draw_indexed(value->get_primitive(), ib->get_count());
+				draw_indexed(mode, ib->get_count());
 			}
 		}
 		else
@@ -995,19 +1004,19 @@ namespace ml::gfx
 			{
 				bind_vertexbuffer(vb.get());
 
-				draw_arrays(value->get_primitive(), 0, vb->get_count());
+				draw_arrays(mode, 0, vb->get_count());
 			}
 		}
 	}
 
-	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
+	void opengl_context::draw_arrays(uint32_t mode, size_t first, size_t count)
 	{
-		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
+		ML_glCheck(glDrawArrays(_primitive<to_impl>(mode), (uint32_t)first, (uint32_t)count));
 	}
 
-	void opengl_context::draw_indexed(uint32_t prim, size_t count)
+	void opengl_context::draw_indexed(uint32_t mode, size_t count)
 	{
-		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
+		ML_glCheck(glDrawElements(_primitive<to_impl>(mode), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
 	}
 
 	void opengl_context::flush()
@@ -1121,8 +1130,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexarray::opengl_vertexarray(device * parent, uint32_t prim)
-		: vertexarray{ parent }, m_primitive{ prim }
+	opengl_vertexarray::opengl_vertexarray(device * parent, uint32_t mode)
+		: vertexarray{ parent }, m_primitive{ mode }
 	{
 		ML_glCheck(glGenVertexArrays(1, &m_handle));
 		ML_glCheck(glBindVertexArray(m_handle));
@@ -1136,10 +1145,10 @@ namespace ml::gfx
 	bool opengl_vertexarray::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteVertexArrays(1, &m_handle)); }
-		
-		ML_glCheck(glGenVertexArrays(1, &m_handle));
 
 		m_vertices.clear(); m_indices.reset();
+		
+		ML_glCheck(glGenVertexArrays(1, &m_handle));
 
 		return (bool)m_handle;
 	}
@@ -1230,9 +1239,9 @@ namespace ml::gfx
 	{
 		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
 
-		ML_glCheck(glGenBuffers(1, &m_handle));
-
 		m_buffer.clear();
+
+		ML_glCheck(glGenBuffers(1, &m_handle));
 
 		return (bool)m_handle;
 	}
@@ -1277,10 +1286,10 @@ namespace ml::gfx
 	bool opengl_indexbuffer::revalue()
 	{
 		if (m_handle) { ML_glCheck(glDeleteBuffers(1, &m_handle)); }
-		
-		ML_glCheck(glGenBuffers(1, &m_handle));
 
 		m_buffer.clear();
+		
+		ML_glCheck(glGenBuffers(1, &m_handle));
 		
 		return (bool)m_handle;
 	}
@@ -1331,7 +1340,7 @@ namespace ml::gfx
 
 	bool opengl_texture2d::revalue()
 	{
-		if (!m_lock) { return debug::error("texture2d is not locked"); }
+		if (!m_locked) { return debug::error("texture2d is not locked"); }
 
 		if (m_handle) { ML_glCheck(glDeleteTextures(1, &m_handle)); }
 		
@@ -1342,21 +1351,21 @@ namespace ml::gfx
 
 	void opengl_texture2d::lock()
 	{
-		m_lock = true;
+		m_locked = true;
 
 		debug::warning("texture lock/unlock NYI");
 	}
 
 	void opengl_texture2d::unlock()
 	{
-		m_lock = false;
+		m_locked = false;
 
 		debug::warning("texture lock/unlock NYI");
 	}
 
 	void opengl_texture2d::update(vec2i const & size, address_t data)
 	{
-		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
+		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
@@ -1380,7 +1389,7 @@ namespace ml::gfx
 
 	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, address_t data)
 	{
-		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
+		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
 		if (m_handle && (m_opts.size == size)) { return; }
 		else { m_opts.size = size; }
@@ -1404,7 +1413,7 @@ namespace ml::gfx
 
 	void opengl_texture2d::set_mipmapped(bool value)
 	{
-		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
+		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
 		ML_flag_write(m_opts.flags, texture_flags_mipmapped, value);
 
@@ -1421,7 +1430,7 @@ namespace ml::gfx
 
 	void opengl_texture2d::set_repeated(bool value)
 	{
-		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
+		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
 		ML_flag_write(m_opts.flags, texture_flags_repeated, value);
 
@@ -1445,7 +1454,7 @@ namespace ml::gfx
 
 	void opengl_texture2d::set_smooth(bool value)
 	{
-		if (!m_lock) { return (void)debug::error("texture2d is not locked"); }
+		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
 		ML_flag_write(m_opts.flags, texture_flags_smooth, value);
 
@@ -1462,7 +1471,7 @@ namespace ml::gfx
 
 	image opengl_texture2d::copy_to_image() const
 	{
-		if (!m_lock) { debug::error("texture2d is not locked"); return image{}; }
+		if (!m_locked) { debug::error("texture2d is not locked"); return image{}; }
 
 		image temp{ m_opts.size, calc_bits_per_pixel(m_opts.format.color) };
 		if (m_handle)
@@ -1502,7 +1511,7 @@ namespace ml::gfx
 
 	bool opengl_texturecube::revalue()
 	{
-		if (!m_lock) { return debug::error("texturecube is not locked"); }
+		if (!m_locked) { return debug::error("texturecube is not locked"); }
 
 		if (m_handle) { ML_glCheck(glDeleteTextures(1, &m_handle)); }
 		
@@ -1513,14 +1522,14 @@ namespace ml::gfx
 
 	void opengl_texturecube::lock()
 	{
-		m_lock = true;
+		m_locked = true;
 
 		debug::warning("texture lock/unlock NYI");
 	}
 
 	void opengl_texturecube::unlock()
 	{
-		m_lock = false;
+		m_locked = false;
 
 		debug::warning("texture lock/unlock NYI");
 	}
@@ -1594,7 +1603,10 @@ namespace ml::gfx
 		revalue(); bind();
 
 		// color attachments
-		if (m_attachments.empty()) { m_attachments.push_back(get_device()->create_texture2d(m_opts)); }
+		if (m_attachments.empty())
+		{
+			m_attachments.push_back(get_device()->create_texture2d(m_opts));
+		}
 		for (size_t i = 0, imax = m_attachments.size(); i < imax; ++i)
 		{
 			m_attachments[i]->update(m_opts.size);
@@ -1653,9 +1665,9 @@ namespace ml::gfx
 		location = p.m_uniforms.find_or_add_fn(util::hash(name, util::strlen(name)), [&
 		]() noexcept
 		{
-			uniform_id temp{};
-			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
-			return temp;
+			int32_t temp{};
+			ML_glCheck(temp = glGetUniformLocationARB(self, name));
+			return ML_handle(uniform_id, temp);
 		});
 	}
 
@@ -1683,10 +1695,10 @@ namespace ml::gfx
 	bool opengl_program::revalue()
 	{
 		if (m_handle) { ML_glCheck(ML_glDeleteProgram(m_handle)); }
+
+		m_uniforms.clear(); m_textures.clear(); m_shaders.clear();
 		
 		ML_glCheck(m_handle = ML_glCreateProgram());
-		
-		m_uniforms.clear(); m_textures.clear(); m_shaders.clear();
 		
 		return (bool)m_handle;
 	}
@@ -1706,15 +1718,10 @@ namespace ml::gfx
 		// check compile errors
 		int32_t success{};
 		ML_glCheck(ML_glGetShaderCompileStatus(temp, &success));
-		if (m_error_log.clear(); !success)
+		if (!success)
 		{
-			// error log
-			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(temp, &log_len));
-			m_error_log.resize((size_t)log_len);
-			ML_glCheck(ML_glGetObjectInfoLog(temp, log_len, &log_len, m_error_log.data()));
-			m_error_log.push_back(0);
-
-			// delete shader
+			gl_get_program_info_log(m_handle, m_error_log);
+			
 			ML_glCheck(ML_glDeleteShader(temp));
 		}
 		else
@@ -1754,32 +1761,9 @@ namespace ml::gfx
 		// check linker errors
 		int32_t success{};
 		ML_glCheck(ML_glGetProgramLinkStatus(m_handle, &success));
-		if (m_error_log.clear(); !success)
+		if (!success)
 		{
-			// error log
-			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
-			m_error_log.resize((size_t)log_len);
-			ML_glCheck(ML_glGetObjectInfoLog(m_handle, log_len, &log_len, m_error_log.data()));
-			m_error_log.push_back(0);
-		}
-		return success;
-	}
-
-	bool opengl_program::validate()
-	{
-		// validate
-		ML_glCheck(ML_glValidateProgram(m_handle));
-
-		// check validation errors
-		int32_t success{};
-		ML_glCheck(ML_glGetProgramValidateStatus(m_handle, &success));
-		if (m_error_log.clear(); !success)
-		{
-			// error log
-			int32_t log_len{}; ML_glCheck(ML_glGetObjectInfoLogLength(m_handle, &log_len));
-			m_error_log.resize((size_t)log_len);
-			ML_glCheck(ML_glGetObjectInfoLog(m_handle, log_len, &log_len, m_error_log.data()));
-			m_error_log.push_back(0);
+			gl_get_program_info_log(m_handle, m_error_log);
 		}
 		return success;
 	}
@@ -1792,19 +1776,139 @@ namespace ml::gfx
 // shader
 namespace ml::gfx
 {
-	opengl_shader::opengl_shader(device * parent, uint32_t type, pmr::string const & src)
-		: shader{ parent }, m_shader_type{ type }, m_source{ src }
+	opengl_shader::uniform_binder::uniform_binder(opengl_shader & s, cstring name) noexcept
 	{
-		glCreateShaderProgramEXT(_shader_type<to_impl>(type), src.c_str());
+		if (!name || !*name || !(self = s.m_handle)) { return; }
+
+		ML_glCheck(last = ML_glGetProgram());
+
+		if (self != last) { ML_glCheck(ML_glUseProgram(self)); }
+
+		location = s.m_uniforms.find_or_add_fn(util::hash(name, util::strlen(name)), [&
+		]() noexcept
+		{
+			int32_t temp{};
+			ML_glCheck(temp = glGetUniformLocationARB(self, name));
+			return ML_handle(uniform_id, temp);
+		});
+	}
+
+	opengl_shader::uniform_binder::~uniform_binder() noexcept
+	{
+		if (self && (self != last))
+		{
+			ML_glCheck(ML_glUseProgram(last));
+		}
+	}
+
+	opengl_shader::opengl_shader(device * parent, descriptor<shader> const & settings)
+		: shader{ parent }
+	{
+		cstring temp_addr{ settings.code.front().data() };
+
+		compile(settings.type, settings.code.size(), &temp_addr);
 	}
 
 	opengl_shader::~opengl_shader()
 	{
+		ML_glCheck(ML_glDeleteProgram(m_handle));
 	}
 
-	bool opengl_shader::revalue()
+	bool opengl_shader::compile(uint32_t type, size_t count, cstring * str)
 	{
+		if (!count || !str || !*str) { return false; }
+
+		if (m_handle)
+		{
+			ML_glCheck(ML_glDeleteProgram(m_handle));
+			
+			m_uniforms.clear(); m_textures.clear();
+		}
+
+		m_settings.type = type;
+
+		m_settings.code = { str, str + count };
+
+		uint32_t temp{};
+		ML_glCheck(temp = glCreateShader(_shader_type<to_impl>(type)));
+		if (!temp) { return 0; }
+
+		ML_glCheck(glShaderSource(temp, count, str, nullptr));
+		ML_glCheck(glCompileShader(temp));
+
+		ML_glCheck(m_handle = glCreateProgram());
+		if (m_handle)
+		{
+			int32_t compiled{};
+			ML_glCheck(glGetShaderiv(temp, GL_COMPILE_STATUS, &compiled));
+			ML_glCheck(glProgramParameteri(m_handle, GL_PROGRAM_SEPARABLE, true));
+			if (m_log.clear(); !compiled)
+			{
+				gl_get_program_info_log(temp, m_log);
+			}
+			else
+			{
+				ML_glCheck(glAttachShader(m_handle, temp));
+				ML_glCheck(glLinkProgram(m_handle));
+				ML_glCheck(glDetachShader(m_handle, temp));
+			}
+		}
+
+		ML_glCheck(glDeleteShader(temp));
+
 		return (bool)m_handle;
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, bool value)
+	{
+		do_upload(loc, (int32_t)value);
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, int32_t value)
+	{
+		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), value));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, float_t value)
+	{
+		ML_glCheck(glProgramUniform1f(m_handle, ML_handle(int32_t, loc), value));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, vec2f const & value)
+	{
+		ML_glCheck(glProgramUniform2f(m_handle, ML_handle(int32_t, loc), value[0], value[1]));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, vec3f const & value)
+	{
+		ML_glCheck(glProgramUniform3f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2]));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, vec4f const & value)
+	{
+		ML_glCheck(glProgramUniform4f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, mat2f const & value, bool transpose)
+	{
+		ML_glCheck(glProgramUniformMatrix2fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, mat3f const & value, bool transpose)
+	{
+		ML_glCheck(glProgramUniformMatrix3fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, mat4f const & value, bool transpose)
+	{
+		ML_glCheck(glProgramUniformMatrix4fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
+	}
+	
+	void opengl_shader::do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot)
+	{
+		get_device()->get_context()->bind_texture(value.get(), slot);
+
+		do_upload(loc, (int32_t)slot);
 	}
 }
 

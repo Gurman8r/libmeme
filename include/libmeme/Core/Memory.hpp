@@ -151,7 +151,7 @@ namespace ml
 			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
 			if (!res->buffer())			{ return debug::error("resource buffer cannot be null"); }
 			if (!res->is_valid_size())	{ return debug::error("resource capacity must be greater than zero"); }
-			if (!res->use_default())		{ return debug::error("resource is not the default memory resource"); }
+			if (!res->use_default())	{ return debug::error("resource is not the default memory resource"); }
 
 			get_instance().m_testres = res;
 			return true;
@@ -302,7 +302,7 @@ namespace ml
 
 	// weak pointer
 	template <class T
-	> ML_alias weakptr = typename std::weak_ptr<T>;
+	> ML_alias weak = typename std::weak_ptr<T>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

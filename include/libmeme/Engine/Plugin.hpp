@@ -15,7 +15,9 @@
 
 namespace ml
 {
-	struct plugin : trackable, non_copyable, event_listener
+	ML_decl_handle(plugin_handle);
+
+	struct plugin : non_copyable, trackable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

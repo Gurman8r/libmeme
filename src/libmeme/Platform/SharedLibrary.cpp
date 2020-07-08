@@ -22,7 +22,7 @@ namespace ml
 #if defined(ML_os_windows)
 			return ::LoadLibraryExW(m_path.c_str(), nullptr, 0);
 
-#elif defined(ML_os_unix)
+#elif defined(ML_os_linux)
 			return ::dlopen(path.string().c_str(), RTLD_LOCAL | RTLD_LAZY);
 
 #else
@@ -50,7 +50,7 @@ namespace ml
 #if defined(ML_os_windows)
 			return ::FreeLibrary((HINSTANCE)m_handle);
 
-#elif defined(ML_os_unix)
+#elif defined(ML_os_linux)
 			return ::dlclose(m_handle);
 
 #else
@@ -61,19 +61,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::load_symbol(pmr::string const & name)
+	void * shared_library::get_symbol(cstring value)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
-		return m_symbols.find_or_add_fn(util::hash(name), [&]() noexcept
+		return m_symbols.find_or_add_fn(util::hash(value, util::strlen(value)), [&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return ::GetProcAddress((HINSTANCE)m_handle, name.c_str());
+			return ::GetProcAddress((HINSTANCE)m_handle, value);
 
 #elif defined(ML_os_unix)
-			return ::dlsym(m_handle, name.c_str());
+			return ::dlsym(m_handle, value);
 
 #else
 			return nullptr;

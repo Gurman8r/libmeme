@@ -7,7 +7,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API plugin_manager final : trackable, non_copyable
+	struct ML_ENGINE_API plugin_manager final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

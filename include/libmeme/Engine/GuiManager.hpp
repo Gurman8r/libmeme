@@ -9,7 +9,7 @@ namespace ml
 {
 	struct window;
 
-	struct ML_ENGINE_API gui_manager final : trackable, non_copyable
+	struct ML_ENGINE_API gui_manager final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

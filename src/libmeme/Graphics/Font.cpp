@@ -80,9 +80,9 @@ namespace ml
 		FT_Set_Pixel_Sizes(((FT_Face)m_face), 0, size);
 
 		// load character glyph
-		if (FT_Load_Char(((FT_Face)m_face), c, FT_LOAD_RENDER) != 0)
+		if (FT_Load_Char(((FT_Face)m_face), c, FT_LOAD_RENDER))
 		{
-			debug::warning("font failed loading glyph: \'{0}\'", c);
+			debug::warning("font failed loading character: \'{0}\'", c);
 			
 			return g;
 		}

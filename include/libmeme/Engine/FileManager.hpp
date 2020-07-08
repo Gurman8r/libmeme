@@ -9,7 +9,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API file_manager final : trackable, non_copyable
+	struct ML_ENGINE_API file_manager final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

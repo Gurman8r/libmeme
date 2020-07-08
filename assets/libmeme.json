@@ -1,6 +1,5 @@
 {
 	"content_home"	: "../../../../",
 	"library_home"	: "../../../../",
-	"setup_script"	: "assets/scripts/setup.py",
-	"plugins"		: [ "demo" ]
+	"setup_script"	: "assets/scripts/setup.py"
 }

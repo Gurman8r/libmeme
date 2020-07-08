@@ -5,46 +5,43 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, m_dev{}
+	render_window::render_window() noexcept : window{}, m_device{}
 	{
 	}
 
-	render_window::render_window(window_settings const & ws, bool ic) noexcept : render_window{}
+	render_window::render_window(window_settings const & ws) noexcept : render_window{}
 	{
-		ML_assert(this->open(ws, ic));
+		ML_assert(open(ws));
 	}
 
 	render_window::~render_window() noexcept
 	{
-		gfx::device::destroy(m_dev.release());
+		gfx::device::destroy(m_device.release());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool render_window::open(window_settings const & ws, bool ic)
+	bool render_window::open(window_settings const & ws)
 	{
 		// check already open
 		if (is_open()) { return debug::error("render_window is already open"); }
 
-		// open window
-		if (!window::open(ws, ic))
-		{
-			return debug::error("failed opening render_window");
-		}
+		// open render_window
+		if (!window::open(ws)) { return debug::error("failed opening render_window"); }
 
 		// create device
-		if (m_dev.reset(gfx::device::create()); !m_dev)
+		if (m_device.reset(gfx::device::create()); !m_device)
 		{
 			return debug::error("failed creating device");
 		}
 
 		// validate version
-		m_settings.ctxconfig.major = m_dev->get_info().major_version;
-		m_settings.ctxconfig.minor = m_dev->get_info().minor_version;
-		debug::info("using renderer version: {0}.{1}", m_settings.ctxconfig.major, m_settings.ctxconfig.minor);
+		m_ws.ctxconfig.major = m_device->get_info().major_version;
+		m_ws.ctxconfig.minor = m_device->get_info().minor_version;
+		debug::info("using renderer version: {0}.{1}", m_ws.ctxconfig.major, m_ws.ctxconfig.minor);
 
 		// create context
-		m_dev->set_context(m_dev->create_context(m_settings.ctxconfig));
+		m_device->set_context(m_device->create_context(m_ws.ctxconfig));
 		
 		// setup states
 		for (auto const & cmd :
@@ -71,7 +68,7 @@ namespace ml
 			gfx::render_command::set_stencil_mode({ gfx::predicate_always, 0, 0xffffffff }),
 		})
 		{
-			std::invoke(cmd, m_dev->get_context().get());
+			std::invoke(cmd, m_device->get_context().get());
 		}
 
 		return true;
@@ -79,7 +76,7 @@ namespace ml
 
 	void render_window::close()
 	{
-		gfx::device::destroy(m_dev.release());
+		gfx::device::destroy(m_device.release());
 
 		window::close();
 	}

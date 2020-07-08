@@ -560,7 +560,8 @@ namespace ml::ds
 	> void to_json(json & j, basic_flat_set<flat_set_traits<Ty, Pr, Mt, Th>> const & value)
 	{
 		using storage_type = typename basic_flat_set<
-			flat_set_traits<Ty, Pr, Mt, Th>>::storage_type;
+			flat_set_traits<Ty, Pr, Mt, Th>
+		>::storage_type;
 		j = *reinterpret_cast<storage_type const *>(&value);
 	}
 
@@ -572,7 +573,8 @@ namespace ml::ds
 	> void from_json(json const & j, basic_flat_set<flat_set_traits<Ty, Pr, Mt, Th>> & value)
 	{
 		using storage_type = typename basic_flat_set<
-			flat_set_traits<Ty, Pr, Mt, Th>>::storage_type;
+			flat_set_traits<Ty, Pr, Mt, Th>
+		>::storage_type;
 		if (j.is_array())
 		{
 			storage_type temp{};

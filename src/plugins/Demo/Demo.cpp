@@ -134,12 +134,12 @@ namespace ml
 
 	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
 	{
-		void operator()(c_shader & shd, c_uniforms const & uni)
+		void operator()(c_shader & shd, c_uniforms const & ubuf)
 		{
 			shd.bind();
-			for (uniform const & elem : *uni)
+			for (uniform const & u : *ubuf)
 			{
-				shd.set_uniform(elem);
+				shd.set_uniform(u);
 			}
 			shd.unbind();
 		}
@@ -147,11 +147,11 @@ namespace ml
 
 	template <class> struct x_render_meshes final : ecs::detail::x_base<s_render_meshes>
 	{
-		void operator()(c_shader const & shd, c_mesh const & msh, gfx::context * ctx)
+		void operator()(c_shader const & shd, c_mesh const & msh, gfx::device_context * ctx)
 		{
 			shd.bind();
 			shd.bind_textures();
-			std::invoke(gfx::render_command::draw(msh->get_vao()), ctx);
+			ctx->draw(msh->get_vao());
 			shd.unbind();
 		}
 	};
@@ -570,7 +570,7 @@ namespace ml
 
 				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
 
-				gfx::make_command([&](gfx::context * ctx) noexcept
+				gfx::make_command([&](gfx::device_context * ctx) noexcept
 				{
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
@@ -1131,7 +1131,7 @@ namespace ml
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= engine::window().get_hint(window_hints_maximized) ? 32 : 16;
+				m_mem_editor.Cols				= engine::window().get_attribute(window_attr_maximized) ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;

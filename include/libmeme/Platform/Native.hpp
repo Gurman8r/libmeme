@@ -12,7 +12,7 @@
 
 #elif defined(ML_os_unix)
 #	include <unistd.h>
-#	if defined(ML_os_linux)
+#	if ML_has_include(<dlfcn.h>)
 #		include <dlfcn.h>
 #	endif
 

@@ -7,10 +7,12 @@
 
 namespace ml::impl
 {
-    // invoke in constructor
+    // invoke function in constructor
     template <class Fn> struct ML_NODISCARD scope_impl final
     {
-        constexpr scope_impl(Fn && fn) noexcept { std::invoke(ML_forward(fn)); }
+        constexpr scope_impl(Fn && fn) noexcept { ML_forward(fn)(); }
+
+        constexpr operator bool() const noexcept { return true; }
     };
 
     enum class ML_NODISCARD scope_tag {};
@@ -22,7 +24,7 @@ namespace ml::impl
     }
 }
 
-// invoke on enter
+// invoke body on enter
 #define ML_scope \
     auto ML_anon = _ML_IMPL scope_tag{} + [&]() noexcept
 
@@ -30,12 +32,12 @@ namespace ml::impl
 
 namespace ml::impl
 {
-    // invoke in destructor
+    // invoke function in destructor
     template <class Fn> struct ML_NODISCARD defer_impl final
     {
         defer_impl(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~defer_impl() noexcept { std::invoke(m_fn); }
+        ~defer_impl() noexcept { m_fn(); }
 
     private: Fn const m_fn;
     };
@@ -49,7 +51,7 @@ namespace ml::impl
     }
 }
 
-// invoke on exit
+// invoke body on exit
 #define ML_defer \
     auto ML_anon = _ML_IMPL defer_tag{} + [&]() noexcept
 

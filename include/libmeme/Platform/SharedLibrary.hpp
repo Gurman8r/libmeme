@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_PLATFORM_API shared_library final : trackable, non_copyable
+	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -74,20 +74,14 @@ namespace ml
 
 		bool close();
 
-		void * load_symbol(pmr::string const & name);
+		void * get_symbol(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class T
-		> ML_NODISCARD auto load_symbol(pmr::string const & name) noexcept
+		template <class Ret, class ... Args
+		> auto call(cstring method_name, Args && ... args) noexcept
 		{
-			return reinterpret_cast<T>(this->load_symbol(name));
-		}
-
-		template <class Ret, class Name, class ... Args
-		> auto call(Name && name, Args && ... args)
-		{
-			if (auto const fn{ this->load_symbol<Ret(*)(Args...)>(ML_forward(name)) })
+			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_symbol(method_name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{

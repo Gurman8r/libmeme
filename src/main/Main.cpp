@@ -19,7 +19,7 @@ using namespace ml::size_literals;
 
 static class memcfg final : public singleton<memcfg>
 {
-	friend singleton<memcfg>;
+	friend base_type;
 
 	ds::array<byte_t, MEM_RESERVED>		data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };

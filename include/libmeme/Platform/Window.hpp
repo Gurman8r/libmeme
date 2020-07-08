@@ -7,19 +7,19 @@ namespace ml
 {
 	struct window_base;
 
-	struct ML_PLATFORM_API window : trackable, non_copyable
+	struct ML_PLATFORM_API window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		window() noexcept;
 
-		explicit window(window_settings const & ws, bool ic = true) noexcept;
+		explicit window(window_settings const & ws) noexcept;
 
 		virtual ~window() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws, bool ic = true);
+		virtual bool open(window_settings const & ws);
 		
 		virtual void close();
 
@@ -146,25 +146,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool get_hint(int32_t const i) const noexcept
-		{
-			return ML_flag_read(m_settings.hints, i);
-		}
-
-		ML_NODISCARD auto get_settings() const & noexcept -> window_settings const &
-		{
-			return m_settings;
-		}
+		ML_NODISCARD bool has_hint(int32_t value) const noexcept { return m_ws.hints & value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		window_settings m_settings;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		window_settings m_ws;
 
 	private:
-		unique<window_base> m_wnd;
+		unique<window_base> m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

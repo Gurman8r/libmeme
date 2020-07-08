@@ -139,7 +139,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_alias	float_t		= typename float32_t	;
-	ML_alias	hash_t		= typename uint64_t		;
+	ML_alias	hash_t		= typename uintmax_t	;
 	ML_alias	intptr_t	= typename intmax_t		;
 	ML_alias	ptrdiff_t	= typename intmax_t		;
 	ML_alias	max_align_t = typename float64_t	;

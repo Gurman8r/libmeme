@@ -9,7 +9,7 @@ namespace ml
 
 	static engine::engine_context * g_engine{};
 	
-	struct engine::engine_context final : trackable, non_copyable, event_listener
+	struct engine::engine_context final : non_copyable, trackable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -58,7 +58,6 @@ namespace ml
 			} break;
 
 			case hashof_v<begin_draw_event>: {
-
 				for (auto const & cmd :
 				{
 					gfx::render_command::set_clear_color(colors::black),
@@ -85,7 +84,7 @@ namespace ml
 			} break;
 
 			case hashof_v<end_draw_event>: {
-				if ML_UNLIKELY(m_window.get_hint(window_hints_double_buffer))
+				if (m_window.has_hint(window_hints_double_buffer))
 				{
 					m_window.swap_buffers();
 				}

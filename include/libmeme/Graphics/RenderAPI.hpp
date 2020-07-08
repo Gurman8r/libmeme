@@ -15,28 +15,42 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class	device			;
-	class	devchild		;
-	class	context			;
-	class	vertexarray		;
-	class	vertexbuffer	;
-	class	indexbuffer		;
-	class	texture			;
-	class	texture2d		;
-	class	texturecube		;
-	class	framebuffer		;
-	class	shader			;
-	class	program			;
+	class	device			; // 
+	class	device_context	; // 
+	class	vertexarray		; // 
+	class	vertexbuffer	; // 
+	class	indexbuffer		; // 
+	class	texture			; // 
+	class	texture2d		; // 
+	class	texturecube		; // 
+	class	framebuffer		; // 
+	class	shader			; // 
+	class	program			; // 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_handle(	resource_id	); // resource handle
-	ML_decl_handle(	uniform_id	); // uniform location
+	ML_decl_handle(	resource_id		); // resource handle
+	ML_decl_handle(	attribute_id	); // attribute location
+	ML_decl_handle(	uniform_id		); // uniform location
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_alias address_t	= typename void const *			; // data address
 	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class ...
+	> struct descriptor;
+
+	template <> struct descriptor<	device_context	>;
+	template <> struct descriptor<	vertexarray		>;
+	template <> struct descriptor<	vertexbuffer	>;
+	template <> struct descriptor<	indexbuffer		>;
+	template <> struct descriptor<	texture2d		>;
+	template <> struct descriptor<	texturecube		>;
+	template <> struct descriptor<	framebuffer		>;
+	template <> struct descriptor<	shader			>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -48,7 +62,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// conversion helpers
+	// internal conversion helpers
 	
 	struct to_user : std::false_type {}; // ( false_type ) | backend -> frontend
 
@@ -644,8 +658,8 @@ namespace ml::gfx
 // device
 namespace ml::gfx
 {
-	// device info
-	struct ML_NODISCARD devinfo final : trackable, non_copyable
+	// device descriptor
+	template <> struct ML_NODISCARD descriptor<device> final
 	{
 		// version
 		pmr::string renderer, vendor, version;
@@ -666,8 +680,12 @@ namespace ml::gfx
 		pmr::string shading_language_version;
 	};
 
+	void from_json(json const & j, descriptor<device> & v) = delete; // not supported
+
+	void to_json(json & j, descriptor<device> const & v) = delete; // not supported
+
 	// base device
-	class ML_GRAPHICS_API device : public trackable, public non_copyable
+	class ML_GRAPHICS_API device : public non_copyable, public trackable
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -693,22 +711,22 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_context(shared<context> const & value) noexcept = 0;
+		virtual void set_context(shared<device_context> const & value) noexcept = 0;
 
-		ML_NODISCARD virtual shared<context> const & get_context() const noexcept = 0;
+		ML_NODISCARD virtual shared<device_context> const & get_context() const noexcept = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual devinfo const & get_info() const noexcept = 0;
+		ML_NODISCARD virtual descriptor<device> const & get_info() const noexcept = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept = 0;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual shared<context> create_context(context_settings const & cs) noexcept = 0;
+		ML_NODISCARD virtual shared<device_context> create_context(context_settings const & cs) noexcept = 0;
 
-		ML_NODISCARD virtual shared<vertexarray> create_vertexarray(uint32_t prim) noexcept = 0;
+		ML_NODISCARD virtual shared<vertexarray> create_vertexarray(uint32_t mode) noexcept = 0;
 
 		ML_NODISCARD virtual shared<vertexbuffer> create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept = 0;
 
@@ -722,7 +740,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(uint32_t type, pmr::string const & src) noexcept = 0;
+		ML_NODISCARD virtual shared<shader> create_shader(descriptor<shader> const & settings) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -730,33 +748,38 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// devchild
+// device child
 namespace ml::gfx
 {
 	// base device child
-	class ML_GRAPHICS_API devchild : public trackable, public non_copyable
+	template <class Derived
+	> class device_child : public non_copyable, public trackable
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static constexpr typeof<> g_base_type{ typeof_v<device_child<Derived>> };
 
 		device * const m_parent;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit devchild(device * parent) noexcept : m_parent{ parent }
+		explicit device_child(device * parent) noexcept : m_parent{ parent }
 		{
 		}
 
-		virtual ~devchild() override = default;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD inline device * get_device() const noexcept { return m_parent; }
+		virtual ~device_child() override = default;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD inline typeof<> const & get_base_type() const noexcept { return g_base_type; }
+
+		ML_NODISCARD inline device * get_device() const noexcept { return m_parent; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -764,7 +787,7 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// context
+// device context
 namespace ml::gfx
 {
 	// clear flags
@@ -823,13 +846,59 @@ namespace ml::gfx
 		uint32_t	mask	{ 0xffffffff };
 	};
 
-	// base context
-	class ML_GRAPHICS_API context : public devchild
+	// device context descriptor
+	template <> struct ML_NODISCARD descriptor<device_context> final
+	{
+		pmr::string	name		{ "Device Context" };
+		int32_t		client		{ context_api_unknown };
+		int32_t		source		{};
+		int32_t		major		{},
+					minor		{};
+		bool		forward		{},
+					debug		{},
+					noerror		{};
+		int32_t		profile		{ context_profile_any };
+		int32_t		robustness	{};
+		int32_t		release		{};
+	};
+
+	static void from_json(json const & j, descriptor<device_context> & v)
+	{
+		j["name"		].get_to(v.name);
+		j["client"		].get_to(v.client);
+		j["source"		].get_to(v.source);
+		j["major"		].get_to(v.major);
+		j["minor"		].get_to(v.minor);
+		j["forward"		].get_to(v.forward);
+		j["debug"		].get_to(v.debug);
+		j["noerror"		].get_to(v.noerror);
+		j["profile"		].get_to(v.profile);
+		j["robustness"	].get_to(v.robustness);
+		j["release"		].get_to(v.release);
+	}
+
+	static void to_json(json & j, descriptor<device_context> const & v)
+	{
+		j["name"		] = v.name;
+		j["client"		] = v.client;
+		j["source"		] = v.source;
+		j["major"		] = v.major;
+		j["minor"		] = v.minor;
+		j["forward"		] = v.forward;
+		j["debug"		] = v.debug;
+		j["noerror"		] = v.noerror;
+		j["profile"		] = v.profile;
+		j["robustness"	] = v.robustness;
+		j["release"		] = v.release;
+	}
+
+	// base device context
+	class ML_GRAPHICS_API device_context : public device_child<device_context>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static shared<context> create(context_settings const & cs) noexcept
+		ML_NODISCARD static auto create(context_settings const & cs) noexcept
 		{
 			return device::get_default()->create_context(cs);
 		}
@@ -837,11 +906,11 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit context(device * parent) noexcept : devchild{ parent }
+		explicit device_context(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
-		virtual ~context() override = default;
+		virtual ~device_context() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -849,7 +918,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual context_settings const & get_settings() const noexcept = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -913,9 +982,9 @@ namespace ml::gfx
 
 		virtual void draw(shared<vertexarray> const & value) = 0;
 
-		virtual void draw_arrays(uint32_t prim, size_t first, size_t count) = 0;
+		virtual void draw_arrays(uint32_t mode, size_t first, size_t count) = 0;
 
-		virtual void draw_indexed(uint32_t prim, size_t count) = 0;
+		virtual void draw_indexed(uint32_t mode, size_t count) = 0;
 
 		virtual void flush() = 0;
 
@@ -964,17 +1033,33 @@ namespace ml::gfx
 // vertexarray
 namespace ml::gfx
 {
+	// vertexarray descriptor
+	template <> struct ML_NODISCARD descriptor<vertexarray> final
+	{
+		pmr::string	name{ "Vertexarray" };
+	};
+
+	static void from_json(json const & j, descriptor<vertexarray> & v)
+	{
+		j["name"].get_to(v.name);
+	}
+
+	static void to_json(json & j, descriptor<vertexarray> const & v)
+	{
+		j["name"] = v.name;
+	}
+
 	// base vertexarray
-	class ML_GRAPHICS_API vertexarray : public devchild
+	class ML_GRAPHICS_API vertexarray : public device_child<vertexarray>
 	{
 	public:
-		ML_NODISCARD static shared<vertexarray> create(uint32_t prim = primitive_triangles) noexcept
+		ML_NODISCARD static auto create(uint32_t mode = primitive_triangles) noexcept
 		{
-			return device::get_default()->create_vertexarray(prim);
+			return device::get_default()->create_vertexarray(mode);
 		}
 
 	public:
-		explicit vertexarray(device * parent) noexcept : devchild{ parent }
+		explicit vertexarray(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -982,9 +1067,7 @@ namespace ml::gfx
 
 		virtual bool revalue() = 0;
 
-		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
-
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void add_vertices(shared<vertexbuffer> const & value) = 0;
@@ -993,7 +1076,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<indexbuffer> const & get_indices() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_primitive() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
 		
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
 
@@ -1015,22 +1098,41 @@ namespace ml::gfx
 // vertexbuffer
 namespace ml::gfx
 {
+	// vertexbuffer descriptor
+	template <> struct ML_NODISCARD descriptor<vertexbuffer> final
+	{
+		pmr::string	name	{ "Vertexbuffer" };
+		uint32_t	usage	{ usage_static };
+	};
+
+	static void from_json(json const & j, descriptor<vertexbuffer> & v)
+	{
+		j["name"].get_to(v.name);
+		j["usage"].get_to(v.usage);
+	}
+
+	static void to_json(json & j, descriptor<vertexbuffer> const & v)
+	{
+		j["name"] = v.name;
+		j["usage"] = v.usage;
+	}
+
 	// base vertexbuffer
-	class ML_GRAPHICS_API vertexbuffer : public devchild
+	class ML_GRAPHICS_API vertexbuffer : public device_child<vertexbuffer>
 	{
 	public:
-		ML_NODISCARD static shared<vertexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept
+		ML_NODISCARD static auto create(uint32_t usage, size_t count, address_t data) noexcept
 		{
 			return device::get_default()->create_vertexbuffer(usage, count, data);
 		}
 
-		ML_NODISCARD static shared<vertexbuffer> create(size_t count, address_t data = {}) noexcept
+		ML_NODISCARD static auto create(size_t count, address_t data = {}) noexcept
 		{
 			return create(data ? usage_static : usage_dynamic, count, data);
 		}
 
 	public:
-		explicit vertexbuffer(device * parent) noexcept : devchild{ parent }
+		explicit vertexbuffer(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1040,7 +1142,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
@@ -1073,22 +1175,38 @@ namespace ml::gfx
 // indexbuffer
 namespace ml::gfx
 {
+	// indexbuffer descriptor
+	template <> struct ML_NODISCARD descriptor<indexbuffer> final
+	{
+		pmr::string	name{ "Indexbuffer" };
+	};
+
+	static void from_json(json const & j, descriptor<indexbuffer> & v)
+	{
+		j["name"].get_to(v.name);
+	}
+
+	static void to_json(json & j, descriptor<indexbuffer> const & v)
+	{
+		j["name"] = v.name;
+	}
+
 	// base indexbuffer
-	class ML_GRAPHICS_API indexbuffer : public devchild
+	class ML_GRAPHICS_API indexbuffer : public device_child<indexbuffer>
 	{
 	public:
-		ML_NODISCARD static shared<indexbuffer> create(uint32_t usage, size_t count, address_t data) noexcept
+		ML_NODISCARD static auto create(uint32_t usage, size_t count, address_t data) noexcept
 		{
 			return device::get_default()->create_indexbuffer(usage, count, data);
 		}
 
-		ML_NODISCARD static shared<indexbuffer> create(size_t count, address_t data = {}) noexcept
+		ML_NODISCARD static auto create(size_t count, address_t data = {}) noexcept
 		{
 			return create(data ? usage_static : usage_dynamic, count, data);
 		}
 
 	public:
-		explicit indexbuffer(device * parent) noexcept : devchild{ parent }
+		explicit indexbuffer(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1098,7 +1216,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
@@ -1128,10 +1246,10 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base texture
-	class ML_GRAPHICS_API texture : public devchild
+	class ML_GRAPHICS_API texture : public device_child<texture>
 	{
 	public:
-		explicit texture(device * parent) noexcept : devchild{ parent }
+		explicit texture(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1141,7 +1259,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void lock() = 0;
@@ -1150,7 +1268,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual texopts const & get_options() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_texture_type() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
 
 		ML_NODISCARD inline uint32_t get_color_format() const noexcept { return get_options().format.color; }
 
@@ -1186,21 +1304,61 @@ namespace ml::gfx
 // texture2d
 namespace ml::gfx
 {
+	// texture2d descriptor
+	template <> struct ML_NODISCARD descriptor<texture2d> final
+	{
+		pmr::string	name		{ "Texture2D" };
+		fs::path	path		{};
+		vec2i		size		{};
+		uint32_t	color_format{ format_rgba };
+		uint32_t	pixel_format{ color_format };
+		uint32_t	pixel_type	{ type_unsigned_byte };
+		bool		repeated	{ true },
+					smooth		{ true },
+					mipmapped	{ false };
+	};
+
+	static void from_json(json const & j, descriptor<texture2d> & v)
+	{
+		j["name"		].get_to(v.name);
+		j["path"		].get_to(v.path);
+		j["size"		].get_to(v.size);
+		j["color_format"].get_to(v.color_format);
+		j["pixel_format"].get_to(v.pixel_format);
+		j["pixel_type"	].get_to(v.pixel_type);
+		j["repeated"	].get_to(v.repeated);
+		j["smooth"		].get_to(v.smooth);
+		j["mipmapped"	].get_to(v.mipmapped);
+	}
+
+	static void to_json(json & j, descriptor<texture2d> const & v)
+	{
+		j["name"		] = v.name;
+		j["path"		] = v.path;
+		j["size"		] = v.size;
+		j["color_format"] = v.color_format;
+		j["pixel_format"] = v.pixel_format;
+		j["pixel_type"	] = v.pixel_type;
+		j["repeated"	] = v.repeated;
+		j["smooth"		] = v.smooth;
+		j["mipmapped"	] = v.mipmapped;
+	}
+
 	// base texture2d
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
-		ML_NODISCARD static shared<texture2d> create(texopts const & opts, address_t data = {}) noexcept
+		ML_NODISCARD static auto create(texopts const & opts, address_t data = {}) noexcept
 		{
 			return device::get_default()->create_texture2d(opts, data);
 		}
 
-		ML_NODISCARD static shared<texture2d> create(image const & img, int32_t flags = texture_flags_default) noexcept
+		ML_NODISCARD static auto create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
 			return create({ img.size(), { calc_channel_format(img.channels()) }, flags }, img.data());
 		}
 
-		ML_NODISCARD static shared<texture2d> create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
+		ML_NODISCARD static auto create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
 		{
 			return create(image{ path }, flags);
 		}
@@ -1216,7 +1374,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void lock() override = 0;
@@ -1237,7 +1395,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual texopts const & get_options() const noexcept override = 0;
 
-		ML_NODISCARD inline uint32_t get_texture_type() const noexcept { return texture_type_2d; }
+		ML_NODISCARD inline uint32_t get_type() const noexcept { return texture_type_2d; }
 	};
 }
 
@@ -1246,11 +1404,51 @@ namespace ml::gfx
 // texturecube
 namespace ml::gfx
 {
+	// texturecube descriptor
+	template <> struct ML_NODISCARD descriptor<texturecube> final
+	{
+		pmr::string				name		{ "TextureCube" };
+		ds::array<fs::path, 6>	paths		{};
+		vec2i					size		{};
+		uint32_t				color_format{ format_rgba };
+		uint32_t				pixel_format{ color_format };
+		uint32_t				pixel_type	{ type_unsigned_byte };
+		bool					repeated	{ true },
+								smooth		{ true },
+								mipmapped	{ false };
+	};
+
+	static void from_json(json const & j, descriptor<texturecube> & v)
+	{
+		j["name"		].get_to(v.name);
+		j["paths"		].get_to(v.paths);
+		j["size"		].get_to(v.size);
+		j["color_format"].get_to(v.color_format);
+		j["pixel_format"].get_to(v.pixel_format);
+		j["pixel_type"	].get_to(v.pixel_type);
+		j["repeated"	].get_to(v.repeated);
+		j["smooth"		].get_to(v.smooth);
+		j["mipmapped"	].get_to(v.mipmapped);
+	}
+
+	static void to_json(json & j, descriptor<texturecube> const & v)
+	{
+		j["name"		] = v.name;
+		j["paths"		] = v.paths;
+		j["size"		] = v.size;
+		j["color_format"] = v.color_format;
+		j["pixel_format"] = v.pixel_format;
+		j["pixel_type"	] = v.pixel_type;
+		j["repeated"	] = v.repeated;
+		j["smooth"		] = v.smooth;
+		j["mipmapped"	] = v.mipmapped;
+	}
+
 	// base texturecube
 	class ML_GRAPHICS_API texturecube : public texture
 	{
 	public:
-		ML_NODISCARD static shared<texturecube> create(texopts const & opts) noexcept
+		ML_NODISCARD static auto create(texopts const & opts) noexcept
 		{
 			return device::get_default()->create_texturecube(opts);
 		}
@@ -1266,7 +1464,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual void lock() override = 0;
@@ -1275,7 +1473,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual texopts const & get_options() const noexcept override = 0;
 
-		ML_NODISCARD inline uint32_t get_texture_type() const noexcept override { return texture_type_cubemap; }
+		ML_NODISCARD inline uint32_t get_type() const noexcept override { return texture_type_cubemap; }
 	};
 }
 
@@ -1284,17 +1482,48 @@ namespace ml::gfx
 // framebuffer
 namespace ml::gfx
 {
+	// framebuffer descriptor
+	template <> struct ML_NODISCARD descriptor<framebuffer> final
+	{
+		pmr::string	name			{ "Framebuffer" };
+		vec4i		bits_per_pixel	{ 8, 8, 8, 8 };
+		int32_t		depth_bits		{ 8 },
+					stencil_bits	{ 24 };
+		int32_t		samples			{};
+		bool		stereo			{};
+	};
+
+	static void from_json(json const & j, descriptor<framebuffer> & v)
+	{
+		j["name"			].get_to(v.name);
+		j["bits_per_pixel"	].get_to(v.bits_per_pixel);
+		j["depth_bits"		].get_to(v.depth_bits);
+		j["stencil_bits"	].get_to(v.stencil_bits);
+		j["samples"			].get_to(v.samples);
+		j["stereo"			].get_to(v.stereo);
+	}
+
+	static void to_json(json & j, descriptor<framebuffer> const & v)
+	{
+		j["name"			] = v.name;
+		j["bits_per_pixel"	] = v.bits_per_pixel;
+		j["depth_bits"		] = v.depth_bits;
+		j["stencil_bits"	] = v.stencil_bits;
+		j["samples"			] = v.samples;
+		j["stereo"			] = v.stereo;
+	}
+
 	// base framebuffer
-	class ML_GRAPHICS_API framebuffer : public devchild
+	class ML_GRAPHICS_API framebuffer : public device_child<framebuffer>
 	{
 	public:
-		ML_NODISCARD static shared<framebuffer> create(texopts const & opts) noexcept
+		ML_NODISCARD static auto create(texopts const & opts) noexcept
 		{
 			return device::get_default()->create_framebuffer(opts);
 		}
 
 	public:
-		explicit framebuffer(device * parent) noexcept : devchild{ parent }
+		explicit framebuffer(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1304,7 +1533,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual bool attach(shared<texture2d> const & value) = 0;
@@ -1346,16 +1575,16 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// base program
-	class ML_GRAPHICS_API program : public devchild
+	class ML_GRAPHICS_API program : public device_child<program>
 	{
 	public:
-		ML_NODISCARD static shared<program> create() noexcept
+		ML_NODISCARD static auto create() noexcept
 		{
 			return device::get_default()->create_program();
 		}
 
 	public:
-		explicit program(device * parent) noexcept : devchild{ parent }
+		explicit program(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1365,7 +1594,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
 		virtual bool attach(uint32_t type, size_t count, cstring * str) = 0;
@@ -1387,8 +1616,6 @@ namespace ml::gfx
 		virtual bool detach(uint32_t type) = 0;
 
 		ML_NODISCARD virtual bool link() = 0;
-
-		ML_NODISCARD virtual bool validate() = 0;
 
 		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
 
@@ -1450,32 +1677,65 @@ namespace ml::gfx
 // shader
 namespace ml::gfx
 {
+	// shader descriptor
+	template <> struct ML_NODISCARD descriptor<shader> final
+	{
+		using source_t = pmr::vector<pmr::string>;
+
+		pmr::string	name	{ "Shader" };
+		fs::path	path	{};
+		uint32_t	type	{ shader_type_vertex };
+		source_t	code	{};
+	};
+
+	static void from_json(json const & j, descriptor<shader> & v)
+	{
+		j["name"].get_to(v.name);
+		j["path"].get_to(v.path);
+		j["type"].get_to(v.type);
+		j["code"].get_to(v.code);
+	}
+
+	static void to_json(json & j, descriptor<shader> const & v)
+	{
+		j["name"] = v.name;
+		j["path"] = v.path;
+		j["type"] = v.type;
+		j["code"] = v.code;
+	}
+
 	// base shader
-	class ML_GRAPHICS_API shader : public devchild
+	class ML_GRAPHICS_API shader : public device_child<shader>
 	{
 	public:
-		ML_NODISCARD static shared<shader> create(uint32_t type, pmr::string const & str) noexcept
+		ML_NODISCARD static auto create(descriptor<shader> const & settings) noexcept
 		{
-			return device::get_default()->create_shader(type, str);
+			return device::get_default()->create_shader(settings);
 		}
 
 	public:
-		explicit shader(device * parent) noexcept : devchild{ parent }
+		explicit shader(device * parent) noexcept : device_child{ parent }
 		{
 		}
 
 		virtual ~shader() override = default;
 
-		virtual bool revalue() = 0;
-
 		ML_NODISCARD virtual resource_id get_handle() const noexcept override = 0;
 
-		ML_NODISCARD virtual typeof<> const & get_typeof() const noexcept override = 0;
+		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
-		ML_NODISCARD virtual uint32_t get_shader_type() const noexcept = 0;
+		virtual bool compile(uint32_t type, size_t count, cstring * str) = 0;
 
-		ML_NODISCARD virtual pmr::string const & get_source() const noexcept = 0;
+		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
+
+		ML_NODISCARD virtual pmr::string const & get_info_log() const noexcept = 0;
+
+		ML_NODISCARD virtual pmr::vector<pmr::string> const & get_source() const noexcept = 0;
+
+		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
+
+		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
@@ -1487,6 +1747,54 @@ namespace ml::gfx
 		{
 			get_device()->get_context()->bind_shader(nullptr);
 		}
+
+		inline void bind_textures() noexcept
+		{
+			uint32_t slot{};
+			get_textures().for_each([&](uniform_id loc, shared<texture> const & tex) noexcept
+			{
+				do_upload(loc, tex, slot++);
+			});
+		}
+
+		template <class T, class ... Args
+		> bool set_uniform(cstring name, T && value, Args && ... args) noexcept
+		{
+			return bind_uniform(name, [&](uniform_id loc) noexcept
+			{
+				if constexpr (std::is_convertible_v<T, shared<texture>>)
+				{
+					do_cache(loc, ML_forward(value), ML_forward(args)...);
+				}
+				else
+				{
+					do_upload(ML_forward(value), ML_forward(args)...);
+				}
+			});
+		}
+
+	protected:
+		virtual void do_cache(uniform_id loc, shared<texture> const & value) = 0;
+
+		virtual void do_upload(uniform_id loc, bool value) = 0;
+
+		virtual void do_upload(uniform_id loc, int32_t value) = 0;
+
+		virtual void do_upload(uniform_id loc, float_t value) = 0;
+
+		virtual void do_upload(uniform_id loc, vec2f const & value) = 0;
+
+		virtual void do_upload(uniform_id loc, vec3f const & value) = 0;
+
+		virtual void do_upload(uniform_id loc, vec4f const & value) = 0;
+
+		virtual void do_upload(uniform_id loc, mat2f const & value, bool transpose = false) = 0;
+
+		virtual void do_upload(uniform_id loc, mat3f const & value, bool transpose = false) = 0;
+
+		virtual void do_upload(uniform_id loc, mat4f const & value, bool transpose = false) = 0;
+
+		virtual void do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot = 0) = 0;
 	};
 }
 

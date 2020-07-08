@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct ML_ENGINE_API script_manager final : trackable, non_copyable
+	struct ML_ENGINE_API script_manager final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

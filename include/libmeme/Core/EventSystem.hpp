@@ -26,12 +26,12 @@ namespace ml
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static bool add_listener(hash_t id, event_listener * value) noexcept
+		static bool add_listener(hash_t type, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 			
 			// insert listener into category
-			return value && inst.m_listeners[id].insert(value).second;
+			return value && inst.m_listeners[type].insert(value).second;
 		}
 		
 		template <class Ev
@@ -70,14 +70,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void remove_listener(hash_t id, event_listener * value) noexcept
+		static void remove_listener(hash_t type, event_listener * value) noexcept
 		{
 			static auto & inst{ get_instance() };
 
 			if (!value) { return; }
 
 			// get category
-			if (auto const c{ inst.m_listeners.find(id) })
+			if (auto const c{ inst.m_listeners.find(type) })
 			{
 				// get listener
 				if (auto const l{ c->second->find(value) }; l != c->second->end())

@@ -52,7 +52,7 @@ namespace ml
 				// load plugin
 				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN, user_data) })
 				{
-					m_data.push_back(code, path, std::move(lib), optl.value());
+					m_data.emplace_back(code, path, std::move(lib), *optl);
 
 					return code;
 				}

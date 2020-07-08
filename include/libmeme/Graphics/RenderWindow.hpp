@@ -12,24 +12,24 @@ namespace ml
 
 		render_window() noexcept;
 
-		explicit render_window(window_settings const & ws, bool ic = true) noexcept;
+		explicit render_window(window_settings const & ws) noexcept;
 
 		virtual ~render_window() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool open(window_settings const & ws, bool ic = true) override;
+		virtual bool open(window_settings const & ws) override;
 
 		virtual void close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_device() const & noexcept -> unique<gfx::device> const & { return m_dev; }
+		ML_NODISCARD auto get_device() const & noexcept -> unique<gfx::device> const & { return m_device; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		unique<gfx::device> m_dev;
+		unique<gfx::device> m_device;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -1,11 +1,82 @@
 make models/meshes DO
 make materials/uniforms DO
-loop system? sequences?
+loop system / sequencing
 
-shader cache
+shader cache/builder
 constant buffer / uniform buffer
 cameras w/ controller gui
 template basic_vertex to do variations of vertex at CT
 object import settings
-refactor application framework (engine)
+refactor application framework (engine & window)
 separate shader objects
+
+
+common
+	+ files
+	+ generics
+	+ serialization
+	+ utility
+system
+	+ events
+	+ memory
+	+ timers
+platform
+	+ context
+	+ window
+	+ monitor
+	+ cursor
+	+ keyboard
+	+ mouse
+render_api
+	+ render_device
+	+ render_context
+	+ buffers
+	+ framebuffer
+	+ pipelines
+	+ render_pass
+	+ shader
+	+ states
+	+ swap_chain
+	+ texture
+graphics
+	+ renderer
+		+ renderer_2d
+		+ renderer_3d
+	+ animation
+	+ camera
+	+ font
+	+ material
+	+ model
+	+ scene
+	+ sprite
+	+ vfx
+engine
+	+ application
+	+ gui
+	+ plugins
+	+ scripting
+launcher
+	+ main
+
+/bin
+/config
+/content
+/ext
+/include
+/plugins
+	/%plugin%
+		/bin
+		/content
+		/resource
+		/src
+		%plugin%.json
+		%plugin%.lua
+/resource
+/src
+libmeme.json
+
+
+ml_plugin_enabled
+ml_plugin_disabled
+
+
