@@ -91,6 +91,7 @@
 #define ML_glGetProgramValidateStatus(obj, x)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, x )
 
 // uniforms
+#define ML_glGetUniformLocation(obj, name)			glGetUniformLocation( obj, name )
 #define ML_glUniform1i(loc, x)						glUniform1iARB( loc, x )
 #define ML_glUniform1f(loc, x)						glUniform1fARB( loc, x )
 #define ML_glUniform2f(loc, x, y)					glUniform2fARB( loc, x, y )
@@ -589,10 +590,10 @@ namespace ml::gfx
 	// get program info log
 	static void gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
 	{
-		int32_t log_len{};
-		ML_glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &log_len));
-		buf.resize((size_t)log_len);
-		ML_glCheck(glGetProgramInfoLog(obj, log_len, &log_len, buf.data()));
+		int32_t max_len{};
+		ML_glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &max_len));
+		buf.resize((size_t)max_len);
+		ML_glCheck(glGetProgramInfoLog(obj, max_len, &max_len, buf.data()));
 		buf.push_back(0);
 	}
 }
@@ -610,31 +611,31 @@ namespace ml::gfx
 		ML_assert("failed initializing opengl device" && opengl_init);
 
 		// renderer
-		ML_glCheck(m_settings.renderer = (cstring)glGetString(GL_RENDERER));
+		ML_glCheck(m_desc.renderer = (cstring)glGetString(GL_RENDERER));
 
 		// vendor
-		ML_glCheck(m_settings.vendor = (cstring)glGetString(GL_VENDOR));
+		ML_glCheck(m_desc.vendor = (cstring)glGetString(GL_VENDOR));
 
 		// version
-		ML_glCheck(m_settings.version = (cstring)glGetString(GL_VERSION));
+		ML_glCheck(m_desc.version = (cstring)glGetString(GL_VERSION));
 
 		// major version
-		if (glGetIntegerv(GL_MAJOR_VERSION, &m_settings.major_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MAJOR_VERSION, &m_desc.major_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_settings.major_version = !m_settings.version.empty() ? m_settings.version[0] - '0' : 1;
+			m_desc.major_version = !m_desc.version.empty() ? m_desc.version[0] - '0' : 1;
 		}
 
 		// minor version
-		if (glGetIntegerv(GL_MINOR_VERSION, &m_settings.minor_version); glGetError() == GL_INVALID_ENUM)
+		if (glGetIntegerv(GL_MINOR_VERSION, &m_desc.minor_version); glGetError() == GL_INVALID_ENUM)
 		{
-			m_settings.minor_version = !m_settings.version.empty() ? m_settings.version[2] - '0' : 1;
+			m_desc.minor_version = !m_desc.version.empty() ? m_desc.version[2] - '0' : 1;
 		}
 
 		// extensions
 		{
 			int32_t num{};
 			ML_glCheck(glGetIntegerv(GL_NUM_EXTENSIONS, &num));
-			m_settings.extensions.reserve(num);
+			m_desc.extensions.reserve(num);
 
 			pmr::stringstream ss{};
 			ML_glCheck(ss.str((cstring)glGetString(GL_EXTENSIONS)));
@@ -642,7 +643,7 @@ namespace ml::gfx
 			pmr::string line{};
 			while (std::getline(ss, line, ' '))
 			{
-				m_settings.extensions.push_back(line);
+				m_desc.extensions.push_back(line);
 			}
 		}
 
@@ -650,31 +651,31 @@ namespace ml::gfx
 #if defined(GL_EXT_texture_edge_clamp) \
 || defined(GLEW_EXT_texture_edge_clamp) \
 || defined(GL_SGIS_texture_edge_clamp)
-		m_settings.texture_edge_clamp_available = true;
+		m_desc.texture_edge_clamp_available = true;
 #endif
 		// max texture slots
-		ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_settings.max_texture_slots));
+		ML_glCheck(glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (int32_t *)&m_desc.max_texture_slots));
 
 		// max color attachments
-		ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_settings.max_color_attachments));
+		ML_glCheck(glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, (int32_t *)&m_desc.max_color_attachments));
 
 		// max samples
-		ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_settings.max_samples));
+		ML_glCheck(glGetIntegerv(GL_MAX_SAMPLES, (int32_t *)&m_desc.max_samples));
 
 		// shaders available
 #if defined(GL_ARB_shading_language_100) \
 || defined(GL_ARB_shader_objects) \
 || defined(GL_ARB_vertex_shader) \
 || defined(GL_ARB_fragment_shader)
-		m_settings.shaders_available = true;
+		m_desc.shaders_available = true;
 
 		// geometry shaders available
 #	ifdef GL_ARB_geometry_shader4
-		m_settings.geometry_shaders_available = true;
+		m_desc.geometry_shaders_available = true;
 #	endif
 
 		// shading language version
-		ML_glCheck(m_settings.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
+		ML_glCheck(m_desc.shading_language_version = (cstring)glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
 	}
 
@@ -724,9 +725,9 @@ namespace ml::gfx
 		return _ML make_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_device::create_shader(descriptor<shader> const & settings) noexcept
+	shared<shader> opengl_device::create_shader(descriptor<shader> const & desc) noexcept
 	{
-		return _ML make_shared<opengl_shader>(this, settings);
+		return _ML make_shared<opengl_shader>(this, desc);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -740,7 +741,7 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	opengl_context::opengl_context(device * parent, context_settings const & cs)
-		: device_context{ parent }, m_settings{ cs }
+		: device_context{ parent }, m_desc{ cs }
 	{
 		ML_assert(cs.api == context_api_opengl);
 		ML_assert(cs.major == parent->get_info().major_version);
@@ -753,16 +754,11 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool opengl_context::get_alpha_enabled() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&temp));
-		return temp;
-	}
-
 	alpha_mode opengl_context::get_alpha_mode() const
 	{
 		alpha_mode temp{};
+
+		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&temp.enabled));
 
 		ML_glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&temp.pred));
 		temp.pred = _predicate<to_user>(temp.pred);
@@ -772,23 +768,13 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_context::get_blend_enabled() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&temp));
-		return temp;
-	}
-
-	color opengl_context::get_blend_color() const
-	{
-		color temp{};
-		ML_glCheck(glGetFloatv(GL_BLEND_COLOR, temp));
-		return temp;
-	}
-
 	blend_mode opengl_context::get_blend_mode() const
 	{
 		blend_mode temp{};
+
+		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&temp.enabled));
+
+		ML_glCheck(glGetFloatv(GL_BLEND_COLOR, temp.color));
 
 		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&temp.color_equation));
 		temp.color_equation = _equation<to_user>(temp.color_equation);
@@ -818,16 +804,11 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_context::get_cull_enabled() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&temp));
-		return temp;
-	}
-
 	cull_mode opengl_context::get_cull_mode() const
 	{
 		cull_mode temp{};
+
+		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&temp.enabled));
 
 		ML_glCheck(glGetIntegerv(GL_CULL_FACE_MODE, (int32_t *)&temp.facet));
 		temp.facet = _facet<to_user>(temp.facet);
@@ -838,16 +819,11 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_context::get_depth_enabled() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&temp));
-		return temp;
-	}
-
 	depth_mode opengl_context::get_depth_mode() const
 	{
 		depth_mode temp{};
+
+		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&temp.enabled));
 
 		ML_glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp.pred));
 		temp.pred = _predicate<to_user>(temp.pred);
@@ -857,16 +833,11 @@ namespace ml::gfx
 		return temp;
 	}
 
-	bool opengl_context::get_stencil_enabled() const
-	{
-		bool temp{};
-		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&temp));
-		return temp;
-	}
-
 	stencil_mode opengl_context::get_stencil_mode() const
 	{
 		stencil_mode temp{};
+
+		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&temp.enabled));
 
 		ML_glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&temp.pred));
 		temp.pred = _predicate<to_user>(temp.pred);
@@ -887,28 +858,23 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::set_alpha_enabled(bool enabled)
-	{
-		ML_glCheck(ML_glEnable(GL_ALPHA_TEST, enabled));
-	}
-
 	void opengl_context::set_alpha_mode(alpha_mode const & value)
 	{
+		ML_glCheck(ML_glEnable(GL_ALPHA_TEST, value.enabled));
+
 		ML_glCheck(glAlphaFunc(_predicate<to_impl>(value.pred), value.ref));
-	}
-
-	void opengl_context::set_blend_color(color const & value)
-	{
-		ML_glCheck(glBlendColor(value[0], value[1], value[2], value[3]));
-	}
-
-	void opengl_context::set_blend_enabled(bool enabled)
-	{
-		ML_glCheck(ML_glEnable(GL_BLEND, enabled));
 	}
 
 	void opengl_context::set_blend_mode(blend_mode const & value)
 	{
+		ML_glCheck(ML_glEnable(GL_BLEND, value.enabled));
+		
+		ML_glCheck(glBlendColor(
+			value.color[0],
+			value.color[1],
+			value.color[2],
+			value.color[3]));
+		
 		ML_glCheck(glBlendFuncSeparate(
 			_factor<to_impl>(value.color_sfactor),
 			_factor<to_impl>(value.color_dfactor),
@@ -925,37 +891,28 @@ namespace ml::gfx
 		ML_glCheck(glClearColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_context::set_cull_enabled(bool enabled)
-	{
-		ML_glCheck(ML_glEnable(GL_CULL_FACE, enabled));
-	}
-
 	void opengl_context::set_cull_mode(cull_mode const & value)
 	{
+		ML_glCheck(ML_glEnable(GL_CULL_FACE, value.enabled));
+		
 		ML_glCheck(glCullFace(_facet<to_impl>(value.facet)));
 		
 		ML_glCheck(glFrontFace(_order<to_impl>(value.order)));
 	}
 
-	void opengl_context::set_depth_enabled(bool enabled)
-	{
-		ML_glCheck(ML_glEnable(GL_DEPTH_TEST, enabled));
-	}
-
 	void opengl_context::set_depth_mode(depth_mode const & value)
 	{
+		ML_glCheck(ML_glEnable(GL_DEPTH_TEST, value.enabled));
+		
 		ML_glCheck(glDepthFunc(_predicate<to_impl>(value.pred)));
 
 		ML_glCheck(glDepthRangef(value.range[0], value.range[1]));
 	}
 
-	void opengl_context::set_stencil_enabled(bool enabled)
-	{
-		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, enabled));
-	}
-
 	void opengl_context::set_stencil_mode(stencil_mode const & value)
 	{
+		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, value.enabled));
+
 		ML_glCheck(glStencilFuncSeparate(
 			GL_FRONT_AND_BACK,
 			_predicate<to_impl>(value.pred),
@@ -1666,7 +1623,7 @@ namespace ml::gfx
 		]() noexcept
 		{
 			int32_t temp{};
-			ML_glCheck(temp = glGetUniformLocationARB(self, name));
+			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
 			return ML_handle(uniform_id, temp);
 		});
 	}
@@ -1788,7 +1745,7 @@ namespace ml::gfx
 		]() noexcept
 		{
 			int32_t temp{};
-			ML_glCheck(temp = glGetUniformLocationARB(self, name));
+			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
 			return ML_handle(uniform_id, temp);
 		});
 	}
@@ -1801,12 +1758,12 @@ namespace ml::gfx
 		}
 	}
 
-	opengl_shader::opengl_shader(device * parent, descriptor<shader> const & settings)
+	opengl_shader::opengl_shader(device * parent, descriptor<shader> const & desc)
 		: shader{ parent }
 	{
-		cstring temp_addr{ settings.code.front().data() };
+		cstring temp_addr{ desc.code.front().data() };
 
-		compile(settings.type, settings.code.size(), &temp_addr);
+		compile(desc.type, desc.code.size(), &temp_addr);
 	}
 
 	opengl_shader::~opengl_shader()
@@ -1825,9 +1782,9 @@ namespace ml::gfx
 			m_uniforms.clear(); m_textures.clear();
 		}
 
-		m_settings.type = type;
+		m_desc.type = type;
 
-		m_settings.code = { str, str + count };
+		m_desc.code = { str, str + count };
 
 		uint32_t temp{};
 		ML_glCheck(temp = glCreateShader(_shader_type<to_impl>(type)));
@@ -1861,12 +1818,17 @@ namespace ml::gfx
 
 	void opengl_shader::do_upload(uniform_id loc, bool value)
 	{
-		do_upload(loc, (int32_t)value);
+		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
 	void opengl_shader::do_upload(uniform_id loc, int32_t value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), value));
+	}
+
+	void opengl_shader::do_upload(uniform_id loc, uint32_t value)
+	{
+		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
 	void opengl_shader::do_upload(uniform_id loc, float_t value)
@@ -1908,7 +1870,7 @@ namespace ml::gfx
 	{
 		get_device()->get_context()->bind_texture(value.get(), slot);
 
-		do_upload(loc, (int32_t)slot);
+		ML_glCheck(glProgramUniform1ui(m_handle, ML_handle(int32_t, loc), (int32_t)slot));
 	}
 }
 

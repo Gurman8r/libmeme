@@ -24,8 +24,8 @@ namespace ml::gfx
 	class	texture2d		; // 
 	class	texturecube		; // 
 	class	framebuffer		; // 
-	class	shader			; // 
 	class	program			; // 
+	class	shader			; // 
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -680,9 +680,9 @@ namespace ml::gfx
 		pmr::string shading_language_version;
 	};
 
-	void from_json(json const & j, descriptor<device> & v) = delete; // not supported
+	void from_json(json const & j, descriptor<device> & v) = delete; // NYI
 
-	void to_json(json & j, descriptor<device> const & v) = delete; // not supported
+	void to_json(json & j, descriptor<device> const & v) = delete; // NYI
 
 	// base device
 	class ML_GRAPHICS_API device : public non_copyable, public trackable
@@ -740,7 +740,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(descriptor<shader> const & settings) noexcept = 0;
+		ML_NODISCARD virtual shared<shader> create_shader(descriptor<shader> const & desc) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -808,6 +808,7 @@ namespace ml::gfx
 	// alpha mode
 	struct ML_NODISCARD alpha_mode final
 	{
+		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_greater };
 		float_t		ref		{ 0.001f };
 	};
@@ -815,6 +816,8 @@ namespace ml::gfx
 	// blend mode
 	struct ML_NODISCARD blend_mode final
 	{
+		bool	enabled	{ true };
+		color	color	{ colors::white };
 		uint32_t
 			color_equation	{ equation_add },
 			color_sfactor	{ factor_src_alpha },
@@ -827,6 +830,7 @@ namespace ml::gfx
 	// cull mode
 	struct ML_NODISCARD cull_mode final
 	{
+		bool		enabled	{ true };
 		uint32_t	facet	{ facet_back };
 		uint32_t	order	{ order_ccw };
 	};
@@ -834,6 +838,7 @@ namespace ml::gfx
 	// depth mode
 	struct ML_NODISCARD depth_mode final
 	{
+		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_less };
 		vec2		range	{ 0.f, 1.f };
 	};
@@ -841,6 +846,7 @@ namespace ml::gfx
 	// stencil mode (WIP)
 	struct ML_NODISCARD stencil_mode final
 	{
+		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_always };
 		int32_t		ref		{ 0 };
 		uint32_t	mask	{ 0xffffffff };
@@ -922,27 +928,15 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual bool get_alpha_enabled() const = 0;
-
 		ML_NODISCARD virtual alpha_mode get_alpha_mode() const = 0;
-		
-		ML_NODISCARD virtual bool get_blend_enabled() const = 0;
-
-		ML_NODISCARD virtual color get_blend_color() const = 0;
 		
 		ML_NODISCARD virtual blend_mode get_blend_mode() const = 0;
 
 		ML_NODISCARD virtual color get_clear_color() const = 0;
 
-		ML_NODISCARD virtual bool get_cull_enabled() const = 0;
-
 		ML_NODISCARD virtual cull_mode get_cull_mode() const = 0;
 
-		ML_NODISCARD virtual bool get_depth_enabled() const = 0;
-
 		ML_NODISCARD virtual depth_mode get_depth_mode() const = 0;
-
-		ML_NODISCARD virtual bool get_stencil_enabled() const = 0;
 
 		ML_NODISCARD virtual stencil_mode get_stencil_mode() const = 0;
 
@@ -950,27 +944,15 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_alpha_enabled(bool enabled) = 0;
-
 		virtual void set_alpha_mode(alpha_mode const & value) = 0;
-		
-		virtual void set_blend_color(color const & value) = 0;
-
-		virtual void set_blend_enabled(bool enabled) = 0;
 		
 		virtual void set_blend_mode(blend_mode const & value) = 0;
 
 		virtual void set_clear_color(color const & value) = 0;
 
-		virtual void set_cull_enabled(bool enabled) = 0;
-
 		virtual void set_cull_mode(cull_mode const & value) = 0;
 
-		virtual void set_depth_enabled(bool enabled) = 0;
-
 		virtual void set_depth_mode(depth_mode const & value) = 0;
-
-		virtual void set_stencil_enabled(bool enabled) = 0;
 
 		virtual void set_stencil_mode(stencil_mode const & value) = 0;
 
@@ -1487,8 +1469,8 @@ namespace ml::gfx
 	{
 		pmr::string	name			{ "Framebuffer" };
 		vec4i		bits_per_pixel	{ 8, 8, 8, 8 };
-		int32_t		depth_bits		{ 8 },
-					stencil_bits	{ 24 };
+		int32_t		stencil_bits	{ 24 },
+					depth_bits		{ 8 };
 		int32_t		samples			{};
 		bool		stereo			{};
 	};
@@ -1497,8 +1479,8 @@ namespace ml::gfx
 	{
 		j["name"			].get_to(v.name);
 		j["bits_per_pixel"	].get_to(v.bits_per_pixel);
-		j["depth_bits"		].get_to(v.depth_bits);
 		j["stencil_bits"	].get_to(v.stencil_bits);
+		j["depth_bits"		].get_to(v.depth_bits);
 		j["samples"			].get_to(v.samples);
 		j["stereo"			].get_to(v.stereo);
 	}
@@ -1507,8 +1489,8 @@ namespace ml::gfx
 	{
 		j["name"			] = v.name;
 		j["bits_per_pixel"	] = v.bits_per_pixel;
-		j["depth_bits"		] = v.depth_bits;
 		j["stencil_bits"	] = v.stencil_bits;
+		j["depth_bits"		] = v.depth_bits;
 		j["samples"			] = v.samples;
 		j["stereo"			] = v.stereo;
 	}
@@ -1708,9 +1690,9 @@ namespace ml::gfx
 	class ML_GRAPHICS_API shader : public device_child<shader>
 	{
 	public:
-		ML_NODISCARD static auto create(descriptor<shader> const & settings) noexcept
+		ML_NODISCARD static auto create(descriptor<shader> const & desc) noexcept
 		{
-			return device::get_default()->create_shader(settings);
+			return device::get_default()->create_shader(desc);
 		}
 
 	public:
@@ -1779,6 +1761,8 @@ namespace ml::gfx
 		virtual void do_upload(uniform_id loc, bool value) = 0;
 
 		virtual void do_upload(uniform_id loc, int32_t value) = 0;
+
+		virtual void do_upload(uniform_id loc, uint32_t value) = 0;
 
 		virtual void do_upload(uniform_id loc, float_t value) = 0;
 

@@ -564,8 +564,6 @@ namespace ml
 			{
 				gfx::render_command::bind_framebuffer(m_fbo[0].get()),
 
-				gfx::render_command::set_cull_enabled(false),
-
 				gfx::render_command::set_clear_color(colors::magenta),
 
 				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
@@ -1326,58 +1324,52 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				bool a_enabled{ ctx->get_alpha_enabled() };
-				auto a_fn{ ctx->get_alpha_mode() };
-				ImGui::Checkbox("enabled", &a_enabled);
-				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a_fn.pred], a_fn.pred);
-				ImGui::Text("reference: %f", a_fn.ref);
+				auto a{ ctx->get_alpha_mode() };
+				ImGui::Checkbox("enabled", &a.enabled);
+				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a.pred], a.pred);
+				ImGui::Text("reference: %f", a.ref);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				bool b_enabled{ ctx->get_blend_enabled() };
-				auto b_color{ ctx->get_blend_color() };
-				auto b_mode{ ctx->get_blend_mode() };
-				ImGui::Checkbox("enabled", &b_enabled);
-				ImGui::ColorEdit4("color", b_color);
-				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b_mode.color_equation], b_mode.color_equation);
-				ImGui::Text("color sfactor: %s (%u)", gfx::factor_names[b_mode.color_sfactor], b_mode.color_sfactor);
-				ImGui::Text("color dfactor: %s (%u)", gfx::factor_names[b_mode.color_dfactor], b_mode.color_dfactor);
-				ImGui::Text("alpha equation: %s (%u)", gfx::equation_names[b_mode.alpha_equation], b_mode.alpha_equation);
-				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_names[b_mode.alpha_sfactor], b_mode.alpha_sfactor);
-				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_names[b_mode.alpha_dfactor], b_mode.alpha_dfactor);
+				auto b{ ctx->get_blend_mode() };
+				ImGui::Checkbox("enabled", &b.enabled);
+				ImGui::ColorEdit4("color", b.color);
+				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b.color_equation], b.color_equation);
+				ImGui::Text("color sfactor: %s (%u)", gfx::factor_names[b.color_sfactor], b.color_sfactor);
+				ImGui::Text("color dfactor: %s (%u)", gfx::factor_names[b.color_dfactor], b.color_dfactor);
+				ImGui::Text("alpha equation: %s (%u)", gfx::equation_names[b.alpha_equation], b.alpha_equation);
+				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_names[b.alpha_sfactor], b.alpha_sfactor);
+				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_names[b.alpha_dfactor], b.alpha_dfactor);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				bool c_enabled{ ctx->get_cull_enabled() };
-				auto c_mode{ ctx->get_cull_mode() };
-				ImGui::Checkbox("enabled", &c_enabled);
-				ImGui::Text("facet: %s (%u)", gfx::facet_names[c_mode.facet], c_mode.facet);
-				ImGui::Text("order: %s (%u)", gfx::order_names[c_mode.order], c_mode.order);
+				auto c{ ctx->get_cull_mode() };
+				ImGui::Checkbox("enabled", &c.enabled);
+				ImGui::Text("facet: %s (%u)", gfx::facet_names[c.facet], c.facet);
+				ImGui::Text("order: %s (%u)", gfx::order_names[c.order], c.order);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				bool d_enabled{ ctx->get_depth_enabled() };
-				auto d_mode{ ctx->get_depth_mode() };
-				ImGui::Checkbox("enabled", &d_enabled);
-				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d_mode.pred], d_mode.pred);
-				ImGui::Text("range: %f, %f", d_mode.range[0], d_mode.range[1]);
+				auto d{ ctx->get_depth_mode() };
+				ImGui::Checkbox("enabled", &d.enabled);
+				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
+				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
 			}
 			ImGui::Separator();
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				bool s_enabled{ ctx->get_stencil_enabled() };
-				auto s_fn{ ctx->get_stencil_mode() };
-				ImGui::Checkbox("enabled", &s_enabled);
-				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s_fn.pred], s_fn.pred);
-				ImGui::Text("reference: %i", s_fn.ref);
-				ImGui::Text("mask: %u", s_fn.mask);
+				auto s{ ctx->get_stencil_mode() };
+				ImGui::Checkbox("enabled", &s.enabled);
+				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s.pred], s.pred);
+				ImGui::Text("reference: %i", s.ref);
+				ImGui::Text("mask: %u", s.mask);
 			}
 			ImGui::Separator();
 		}

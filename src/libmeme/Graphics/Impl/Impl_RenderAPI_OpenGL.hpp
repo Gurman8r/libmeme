@@ -18,8 +18,8 @@ namespace ml::gfx
 
 		static constexpr typeof<> g_self_type{ typeof_v<opengl_device> };
 
-		descriptor<device>			m_settings	{}; // 
-		shared<device_context>		m_context	{}; // 
+		descriptor<device>			m_desc		{}; // descriptor
+		shared<device_context>		m_context	{}; // context
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,7 @@ namespace ml::gfx
 
 		shared<device_context> const & get_context() const noexcept override { return m_context; }
 
-		descriptor<device> const & get_info() const noexcept override { return m_settings; }
+		descriptor<device> const & get_info() const noexcept override { return m_desc; }
 
 		typeof<> const & get_self_type() const noexcept override { return g_self_type; }
 
@@ -60,7 +60,7 @@ namespace ml::gfx
 
 		shared<program> create_program() noexcept override;
 
-		shared<shader> create_shader(descriptor<shader> const & settings) noexcept override;
+		shared<shader> create_shader(descriptor<shader> const & desc) noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -80,7 +80,7 @@ namespace ml::gfx
 		static constexpr typeof<> g_self_type{ typeof_v<opengl_context> };
 
 		uint32_t			m_handle	{}; // pipeline handle (WIP)
-		context_settings	m_settings	{}; // context settings
+		context_settings	m_desc	{}; // context settings
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -93,33 +93,21 @@ namespace ml::gfx
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, m_handle); }
 
-		context_settings const & get_settings() const noexcept override { return m_settings; }
+		context_settings const & get_settings() const noexcept override { return m_desc; }
 
 		typeof<> const & get_self_type() const noexcept override { return g_self_type; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool get_alpha_enabled() const override;
-
 		alpha_mode get_alpha_mode() const override;
-		
-		bool get_blend_enabled() const override;
-
-		color get_blend_color() const override;
 		
 		blend_mode get_blend_mode() const override;
 
 		color get_clear_color() const override;
 		
-		bool get_cull_enabled() const override;
-
 		cull_mode get_cull_mode() const override;
 
-		bool get_depth_enabled() const override;
-		
 		depth_mode get_depth_mode() const override;
-
-		bool get_stencil_enabled() const override;
 
 		stencil_mode get_stencil_mode() const override;
 
@@ -127,27 +115,15 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_alpha_enabled(bool enabled) override;
-
 		void set_alpha_mode(alpha_mode const & value) override;
-		
-		void set_blend_color(color const & value) override;
-
-		void set_blend_enabled(bool enabled) override;
 		
 		void set_blend_mode(blend_mode const & value) override;
 
 		void set_clear_color(color const & value) override;
 		
-		void set_cull_enabled(bool enabled) override;
-
 		void set_cull_mode(cull_mode const & value) override;
 
-		void set_depth_enabled(bool enabled) override;
-		
 		void set_depth_mode(depth_mode const & value) override;
-
-		void set_stencil_enabled(bool enabled) override;
 
 		void set_stencil_mode(stencil_mode const & value) override;
 
@@ -546,14 +522,14 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> g_self_type{ typeof_v<opengl_shader> };
 
-		descriptor<shader>					m_settings	{}; // settings
+		descriptor<shader>						m_desc		{}; // descriptor
 		uint32_t								m_handle	{}; // handle
 		pmr::string								m_log		{}; // error log
 		uint32_t								m_type		{}; // shader type
 		pmr::vector<pmr::string>				m_source	{}; // source
+		ds::map<hash_t, attribute_id>			m_attribs	{}; // attributes
 		ds::map<hash_t, uniform_id>				m_uniforms	{}; // uniforms
 		ds::map<uniform_id, shared<texture>>	m_textures	{}; // textures
-		ds::map<hash_t, attribute_id>			m_attribs	{}; // attributes
 
 		struct ML_NODISCARD uniform_binder final
 		{
@@ -569,7 +545,7 @@ namespace ml::gfx
 		};
 
 	public:
-		opengl_shader(device * parent, descriptor<shader> const & settings);
+		opengl_shader(device * parent, descriptor<shader> const & desc);
 
 		~opengl_shader() override;
 
@@ -615,6 +591,8 @@ namespace ml::gfx
 		void do_upload(uniform_id loc, bool value) override;
 
 		void do_upload(uniform_id loc, int32_t value) override;
+
+		void do_upload(uniform_id loc, uint32_t value) override;
 
 		void do_upload(uniform_id loc, float_t value) override;
 

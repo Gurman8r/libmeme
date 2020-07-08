@@ -24,24 +24,9 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto set_alpha_enabled(bool enabled) noexcept
-		{
-			return make_command(&device_context::set_alpha_enabled, enabled);
-		}
-
 		ML_NODISCARD static auto set_alpha_mode(alpha_mode const & value) noexcept
 		{
 			return make_command(&device_context::set_alpha_mode, value);
-		}
-
-		ML_NODISCARD static auto set_blend_enabled(bool enabled) noexcept
-		{
-			return make_command(&device_context::set_blend_enabled, enabled);
-		}
-		
-		ML_NODISCARD static auto set_blend_color(color const & value) noexcept
-		{
-			return make_command(&device_context::set_blend_color, value);
 		}
 
 		ML_NODISCARD static auto set_blend_mode(blend_mode const & value) noexcept
@@ -54,29 +39,14 @@ namespace ml::gfx
 			return make_command(&device_context::set_clear_color, value);
 		}
 
-		ML_NODISCARD static auto set_cull_enabled(bool enabled) noexcept
-		{
-			return make_command(&device_context::set_cull_enabled, enabled);
-		}
-
 		ML_NODISCARD static auto set_cull_mode(cull_mode const & value) noexcept
 		{
 			return make_command(&device_context::set_cull_mode, value);
 		}
 
-		ML_NODISCARD static auto set_depth_enabled(bool enabled) noexcept
-		{
-			return make_command(&device_context::set_depth_enabled, enabled);
-		}
-
 		ML_NODISCARD static auto set_depth_mode(depth_mode const & value) noexcept
 		{
 			return make_command(&device_context::set_depth_mode, value);
-		}
-
-		ML_NODISCARD static auto set_stencil_enabled(bool enabled) noexcept
-		{
-			return make_command(&device_context::set_stencil_enabled, enabled);
 		}
 
 		ML_NODISCARD static auto set_stencil_mode(stencil_mode const & value) noexcept

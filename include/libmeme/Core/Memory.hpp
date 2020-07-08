@@ -285,9 +285,19 @@ namespace ml
 		}
 	};
 
-	template <class T> struct default_delete<T> : default_delete<>
+	template <class T> struct default_delete<T>
 	{
-		using default_delete<>::operator();
+		void operator()(T * addr) const noexcept
+		{
+			if constexpr (std::is_base_of_v<T, trackable>)
+			{
+				delete addr;
+			}
+			else
+			{
+				memory::deallocate(addr);
+			}
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

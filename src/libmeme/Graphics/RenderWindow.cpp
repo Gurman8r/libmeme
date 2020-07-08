@@ -46,26 +46,41 @@ namespace ml
 		// setup states
 		for (auto const & cmd :
 		{
-			// alpha
-			gfx::render_command::set_alpha_enabled(true),
-			gfx::render_command::set_alpha_mode({ gfx::predicate_greater, 0.001f }),
+			// alpha state
+			gfx::render_command::set_alpha_mode
+			({
+				true,
+				gfx::predicate_greater, 0.001f
+			}),
 
-			// blend
-			gfx::render_command::set_blend_enabled(true),
-			gfx::render_command::set_blend_color(colors::white),
-			gfx::render_command::set_blend_mode({ gfx::equation_add, gfx::factor_src_alpha, gfx::factor_one_minus_src_alpha }),
+			// blend state
+			gfx::render_command::set_blend_mode
+			({
+				true,
+				colors::white,
+				gfx::equation_add, gfx::factor_src_alpha, gfx::factor_one_minus_src_alpha
+			}),
 
-			// cull
-			gfx::render_command::set_cull_enabled(true),
-			gfx::render_command::set_cull_mode({ gfx::facet_back, gfx::order_ccw }),
+			// cull state
+			gfx::render_command::set_cull_mode
+			({
+				false,
+				gfx::facet_back, gfx::order_ccw
+			}),
 
-			// depth
-			gfx::render_command::set_depth_enabled(true),
-			gfx::render_command::set_depth_mode({ gfx::predicate_less, { 0.f, 1.f } }),
+			// depth state
+			gfx::render_command::set_depth_mode
+			({
+				true,
+				gfx::predicate_less, { 0.f, 1.f }
+			}),
 
-			// stencil
-			gfx::render_command::set_stencil_enabled(true),
-			gfx::render_command::set_stencil_mode({ gfx::predicate_always, 0, 0xffffffff }),
+			// stencil state
+			gfx::render_command::set_stencil_mode
+			({
+				true,
+				gfx::predicate_always, 0, 0xffffffff
+			}),
 		})
 		{
 			std::invoke(cmd, m_device->get_context().get());

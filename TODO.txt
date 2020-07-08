@@ -16,7 +16,7 @@ common
 	+ generics
 	+ serialization
 	+ utility
-system
+core
 	+ events
 	+ memory
 	+ timers
@@ -27,7 +27,6 @@ platform
 	+ cursor
 	+ keyboard
 	+ mouse
-render_api
 	+ render_device
 	+ render_context
 	+ buffers
