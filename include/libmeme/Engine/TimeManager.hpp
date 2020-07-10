@@ -25,7 +25,7 @@ namespace ml
 		{
 			m_loop_timer.restart();
 
-			m_frame_rate = m_fps(m_delta_time.count<float_t>());
+			m_frame_rate = m_fps((float_t)m_delta_time.count());
 		}
 
 		void end_loop() noexcept

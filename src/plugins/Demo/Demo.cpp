@@ -384,8 +384,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, []() { return engine::time().total_time().count<float_t>(); }),
-					make_uniform<float_t>("u_delta"	, []() { return engine::time().delta_time().count<float_t>(); })
+					make_uniform<float_t>("u_time"	, []() { return (float_t)engine::time().total_time().count(); }),
+					make_uniform<float_t>("u_delta"	, []() { return (float_t)engine::time().delta_time().count(); })
 				};
 
 				// camera

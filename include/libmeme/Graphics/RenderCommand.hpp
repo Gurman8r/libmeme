@@ -121,16 +121,16 @@ namespace ml::gfx
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD static auto upload(location_id loc, T value) noexcept
+		> ML_NODISCARD static auto upload(binding_id loc, T value) noexcept
 		{
-			return make_command(static_cast<void(render_context:: *)(location_id, T)
+			return make_command(static_cast<void(render_context:: *)(binding_id, T)
 			>(&render_context::upload), loc, value);
 		}
 
 		template <class T
-		> ML_NODISCARD static auto upload(location_id loc, T const & value) noexcept
+		> ML_NODISCARD static auto upload(binding_id loc, T const & value) noexcept
 		{
-			return make_command(static_cast<void(render_context:: *)(location_id, T const &)
+			return make_command(static_cast<void(render_context:: *)(binding_id, T const &)
 			>(&render_context::upload), loc, value);
 		}
 

@@ -72,11 +72,11 @@
 #define ML_glEnable(id, enabled) (enabled ? &glEnable : &glDisable)( id )
 
 // shader functions
-#define ML_glCreateShader(type)						glCreateShaderObjectARB( _ML_GFX _shader_type<_ML_GFX to_impl>(type) )
+#define ML_glCreateShader(type)						glCreateShaderObjectARB( type )
 #define ML_glDeleteShader(obj)						glDeleteObjectARB( obj )
-#define ML_glShaderSource(obj, count, str, len)		glShaderSourceARB( obj, (uint32_t)count, str, len )
+#define ML_glShaderSource(obj, count, str, len)		glShaderSourceARB( obj, count, str, len )
 #define ML_glCompileShader(obj)						glCompileShaderARB( obj )
-#define ML_glGetShaderCompileStatus(obj, x)			glGetObjectParameterivARB( obj, GL_OBJECT_COMPILE_STATUS_ARB, x )
+#define ML_glGetShaderCompileStatus(obj, out)		glGetObjectParameterivARB( obj, GL_OBJECT_COMPILE_STATUS_ARB, out )
 
 // program functions
 #define ML_glCreateProgram()						glCreateProgramObjectARB()
@@ -86,9 +86,9 @@
 #define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, x )
 #define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, x )
 #define ML_glLinkProgram(obj)						glLinkProgramARB( obj )
-#define ML_glGetProgramLinkStatus(obj, x)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, x )
+#define ML_glGetProgramLinkStatus(obj, out)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, out )
 #define ML_glValidateProgram(obj)					glValidateProgramARB( obj )
-#define ML_glGetProgramValidateStatus(obj, x)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, x )
+#define ML_glGetProgramValidateStatus(obj, out)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, out )
 
 // uniform functions
 #define ML_glGetUniformLocation(obj, name)			glGetUniformLocationARB( obj, name )
@@ -108,9 +108,9 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _action(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _action(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -125,7 +125,7 @@ namespace ml::gfx
 			case action_invert	: return GL_INVERT;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -140,13 +140,18 @@ namespace ml::gfx
 			case GL_INVERT		: return action_invert;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _error(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _error(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -162,7 +167,7 @@ namespace ml::gfx
 			case error_context_lost					: return GL_CONTEXT_LOST;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -178,13 +183,18 @@ namespace ml::gfx
 			case GL_CONTEXT_LOST					: return error_context_lost;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _equation(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _equation(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -196,7 +206,7 @@ namespace ml::gfx
 			case equation_max				: return GL_MAX;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -208,13 +218,18 @@ namespace ml::gfx
 			case GL_MAX						: return equation_max;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _facet(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _facet(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -230,7 +245,7 @@ namespace ml::gfx
 			case facet_front_and_back	: return GL_FRONT_AND_BACK;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -246,13 +261,18 @@ namespace ml::gfx
 			case GL_FRONT_AND_BACK	: return facet_front_and_back;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _factor(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _factor(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -270,7 +290,7 @@ namespace ml::gfx
 			case factor_src_alpha_saturate	: return GL_SRC_ALPHA_SATURATE;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -288,13 +308,18 @@ namespace ml::gfx
 			case GL_SRC_ALPHA_SATURATE	: return factor_src_alpha_saturate;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _format(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _format(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -320,7 +345,7 @@ namespace ml::gfx
 			case format_depth24_stencil8	: return GL_DEPTH24_STENCIL8;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -346,13 +371,18 @@ namespace ml::gfx
 			case GL_DEPTH24_STENCIL8		: return format_depth24_stencil8;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _order(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _order(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -361,7 +391,7 @@ namespace ml::gfx
 			case order_ccw	: return GL_CCW;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -370,13 +400,18 @@ namespace ml::gfx
 			case GL_CCW	: return order_ccw;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _predicate(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _predicate(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -391,7 +426,7 @@ namespace ml::gfx
 			case predicate_always	: return GL_ALWAYS;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -406,13 +441,18 @@ namespace ml::gfx
 			case GL_ALWAYS	: return predicate_always;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _primitive(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _primitive(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -427,7 +467,7 @@ namespace ml::gfx
 			case primitive_fill				: return GL_FILL;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -442,13 +482,18 @@ namespace ml::gfx
 			case GL_FILL			: return primitive_fill;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _shader_type(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _shader_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
@@ -458,7 +503,7 @@ namespace ml::gfx
 			case shader_type_geometry	: return GL_GEOMETRY_SHADER;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -468,24 +513,29 @@ namespace ml::gfx
 			case GL_GEOMETRY_SHADER	: return shader_type_geometry;
 			}
 		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _texture_type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
-			default						: return value;
-			case texture_type_1d		: return GL_TEXTURE_1D;
-			case texture_type_2d		: return GL_TEXTURE_2D;
-			case texture_type_3d		: return GL_TEXTURE_3D;
-			case texture_type_cubemap	: return GL_TEXTURE_CUBE_MAP;
+			default					: return value;
+			case texture_type_1d	: return GL_TEXTURE_1D;
+			case texture_type_2d	: return GL_TEXTURE_2D;
+			case texture_type_3d	: return GL_TEXTURE_3D;
+			case texture_type_cube	: return GL_TEXTURE_CUBE_MAP;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -493,64 +543,74 @@ namespace ml::gfx
 			case GL_TEXTURE_1D		: return texture_type_1d;
 			case GL_TEXTURE_2D		: return texture_type_2d;
 			case GL_TEXTURE_3D		: return texture_type_3d;
-			case GL_TEXTURE_CUBE_MAP: return texture_type_cubemap;
+			case GL_TEXTURE_CUBE_MAP: return texture_type_cube;
 			}
+		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _type(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _type(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
-			default						: return value;
-			case type_byte				: return GL_BYTE;
-			case type_unsigned_byte		: return GL_UNSIGNED_BYTE;
-			case type_short				: return GL_SHORT;
-			case type_unsigned_short	: return GL_UNSIGNED_SHORT;
-			case type_int				: return GL_INT;
-			case type_unsigned_int		: return GL_UNSIGNED_INT;
-			case type_float				: return GL_FLOAT;
-			case type_half_float		: return GL_HALF_FLOAT;
-			case type_unsigned_int_24_8	: return GL_UNSIGNED_INT_24_8;
+			default				: return value;
+			case type_byte		: return GL_BYTE;
+			case type_ubyte		: return GL_UNSIGNED_BYTE;
+			case type_short		: return GL_SHORT;
+			case type_ushort	: return GL_UNSIGNED_SHORT;
+			case type_int		: return GL_INT;
+			case type_uint		: return GL_UNSIGNED_INT;
+			case type_float		: return GL_FLOAT;
+			case type_half_float: return GL_HALF_FLOAT;
+			case type_uint_24_8	: return GL_UNSIGNED_INT_24_8;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
 			default						: return value;
 			case GL_BYTE				: return type_byte;
-			case GL_UNSIGNED_BYTE		: return type_unsigned_byte;
+			case GL_UNSIGNED_BYTE		: return type_ubyte;
 			case GL_SHORT				: return type_short;
-			case GL_UNSIGNED_SHORT		: return type_unsigned_short;
+			case GL_UNSIGNED_SHORT		: return type_ushort;
 			case GL_INT					: return type_int;
-			case GL_UNSIGNED_INT		: return type_unsigned_int;
+			case GL_UNSIGNED_INT		: return type_uint;
 			case GL_FLOAT				: return type_float;
 			case GL_HALF_FLOAT			: return type_half_float;
-			case GL_UNSIGNED_INT_24_8	: return type_unsigned_int_24_8;
+			case GL_UNSIGNED_INT_24_8	: return type_uint_24_8;
 			}
+		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Convt> constexpr uint32_t _usage(uint32_t value) noexcept
+	template <class convt> constexpr uint32_t _usage(uint32_t value) noexcept
 	{
-		if constexpr (Convt()) // to impl
+		if constexpr (convt{} == to_impl{})
 		{
 			switch (value)
 			{
-			default					: return value;
+			default				: return value;
 			case usage_stream	: return GL_STREAM_DRAW;
 			case usage_static	: return GL_STATIC_DRAW;
 			case usage_dynamic	: return GL_DYNAMIC_DRAW;
 			}
 		}
-		else // to user
+		else if constexpr (convt{} == to_user{})
 		{
 			switch (value)
 			{
@@ -559,6 +619,11 @@ namespace ml::gfx
 			case GL_STATIC_DRAW		: return usage_static;
 			case GL_DYNAMIC_DRAW	: return usage_dynamic;
 			}
+		}
+		else
+		{
+			static_assert(0, "invalid enum conversion");
+			return static_cast<uint32_t>(-1);
 		}
 	}
 
@@ -588,13 +653,14 @@ namespace ml::gfx
 	}
 
 	// get program info log
-	static void gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
+	static auto & gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
 	{
 		int32_t max_len{};
 		ML_glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &max_len));
 		buf.resize((size_t)max_len);
 		ML_glCheck(glGetProgramInfoLog(obj, max_len, &max_len, buf.data()));
 		buf.push_back(0);
+		return buf;
 	}
 }
 
@@ -705,19 +771,19 @@ namespace ml::gfx
 		return _ML make_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
-	shared<texture2d> opengl_device::create_texture2d(descriptor<texture2d> const & opts, address_t data) noexcept
+	shared<texture2d> opengl_device::create_texture2d(descriptor<texture2d> const & value, address_t data) noexcept
 	{
-		return _ML make_shared<opengl_texture2d>(this, opts, data);
+		return _ML make_shared<opengl_texture2d>(this, value, data);
 	}
 
-	shared<texturecube> opengl_device::create_texturecube(descriptor<texturecube> const & opts) noexcept
+	shared<texturecube> opengl_device::create_texturecube(descriptor<texturecube> const & value) noexcept
 	{
-		return _ML make_shared<opengl_texturecube>(this, opts);
+		return _ML make_shared<opengl_texturecube>(this, value);
 	}
 
-	shared<framebuffer> opengl_device::create_framebuffer(descriptor<framebuffer> const & opts) noexcept
+	shared<framebuffer> opengl_device::create_framebuffer(descriptor<framebuffer> const & value) noexcept
 	{
-		return _ML make_shared<opengl_framebuffer>(this, opts);
+		return _ML make_shared<opengl_framebuffer>(this, value);
 	}
 
 	shared<program> opengl_device::create_program() noexcept
@@ -725,9 +791,9 @@ namespace ml::gfx
 		return _ML make_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_device::create_shader(descriptor<shader> const & opts) noexcept
+	shared<shader> opengl_device::create_shader(descriptor<shader> const & value) noexcept
 	{
-		return _ML make_shared<opengl_shader>(this, opts);
+		return _ML make_shared<opengl_shader>(this, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1033,47 +1099,47 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::upload(location_id loc, bool value)
+	void opengl_context::upload(binding_id loc, bool value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_context::upload(location_id loc, int32_t value)
+	void opengl_context::upload(binding_id loc, int32_t value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_context::upload(location_id loc, float_t value)
+	void opengl_context::upload(binding_id loc, float_t value)
 	{
 		ML_glCheck(ML_glUniform1f(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_context::upload(location_id loc, vec2f const & value)
+	void opengl_context::upload(binding_id loc, vec2f const & value)
 	{
 		ML_glCheck(ML_glUniform2f(ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
-	void opengl_context::upload(location_id loc, vec3f const & value)
+	void opengl_context::upload(binding_id loc, vec3f const & value)
 	{
 		ML_glCheck(ML_glUniform3f(ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
-	void opengl_context::upload(location_id loc, vec4f const & value)
+	void opengl_context::upload(binding_id loc, vec4f const & value)
 	{
 		ML_glCheck(ML_glUniform4f(ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_context::upload(location_id loc, mat2f const & value)
+	void opengl_context::upload(binding_id loc, mat2f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix2fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_context::upload(location_id loc, mat3f const & value)
+	void opengl_context::upload(binding_id loc, mat3f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix3fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_context::upload(location_id loc, mat4f const & value)
+	void opengl_context::upload(binding_id loc, mat4f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix4fv(ML_handle(int32_t, loc), false, value));
 	}
@@ -1268,8 +1334,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(render_device * parent, descriptor<texture2d> const & opts, address_t data)
-		: texture2d{ parent }, m_desc{ opts }
+	opengl_texture2d::opengl_texture2d(render_device * parent, descriptor<texture2d> const & value, address_t data)
+		: texture2d{ parent }, m_desc{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 		ML_glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
@@ -1455,8 +1521,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(render_device * parent, descriptor<texturecube> const & opts)
-		: texturecube{ parent }, m_desc{ opts }
+	opengl_texturecube::opengl_texturecube(render_device * parent, descriptor<texturecube> const & value)
+		: texturecube{ parent }, m_desc{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 	}
@@ -1501,8 +1567,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(render_device * parent, descriptor<framebuffer> const & opts)
-		: framebuffer{ parent }, m_desc{ opts }
+	opengl_framebuffer::opengl_framebuffer(render_device * parent, descriptor<framebuffer> const & value)
+		: framebuffer{ parent }, m_desc{ value }
 	{
 		resize(m_desc.size);
 	}
@@ -1593,7 +1659,7 @@ namespace ml::gfx
 				m_desc.name,
 				fs::path{},
 				m_desc.size,
-				{ format_depth24_stencil8, format_depth_stencil, type_unsigned_int_24_8 },
+				{ format_depth24_stencil8, format_depth_stencil, type_uint_24_8 },
 				m_desc.flags
 				});
 		}
@@ -1634,7 +1700,7 @@ namespace ml::gfx
 		{
 			int32_t temp{};
 			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
-			return ML_handle(location_id, temp);
+			return ML_handle(binding_id, temp);
 		});
 	}
 
@@ -1676,10 +1742,10 @@ namespace ml::gfx
 
 		// create shader
 		uint32_t temp{};
-		ML_glCheck(temp = ML_glCreateShader(type));
+		ML_glCheck(temp = ML_glCreateShader(_shader_type<to_impl>(type)));
 
 		// compile shader
-		ML_glCheck(ML_glShaderSource(temp, count, str, nullptr));
+		ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, nullptr));
 		ML_glCheck(ML_glCompileShader(temp));
 
 		// check compile errors
@@ -1695,7 +1761,7 @@ namespace ml::gfx
 		{
 			// attach shader
 			ML_glCheck(ML_glAttachShader(m_handle, temp));
-			m_shaders.insert(type, ML_handle(resource_id, temp));
+			m_shaders.insert(type, ML_handle(object_id, temp));
 			m_source[type] = { str, str + count };
 		}
 		return success;
@@ -1756,7 +1822,7 @@ namespace ml::gfx
 		{
 			int32_t temp{};
 			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
-			return ML_handle(location_id, temp);
+			return ML_handle(binding_id, temp);
 		});
 	}
 
@@ -1768,11 +1834,11 @@ namespace ml::gfx
 		}
 	}
 
-	opengl_shader::opengl_shader(render_device * parent, descriptor<shader> const & opts)
+	opengl_shader::opengl_shader(render_device * parent, descriptor<shader> const & value)
 		: shader{ parent }
 	{
-		cstring temp_addr{ opts.code.front().data() };
-		compile(opts.type, opts.code.size(), &temp_addr);
+		cstring temp_addr{ value.code.front().data() };
+		compile(value.type, value.code.size(), &temp_addr);
 	}
 
 	opengl_shader::~opengl_shader()
@@ -1794,10 +1860,10 @@ namespace ml::gfx
 		m_desc.code = { str, str + count };
 
 		uint32_t temp{};
-		ML_glCheck(temp = ML_glCreateShader(type));
+		ML_glCheck(temp = ML_glCreateShader(_shader_type<to_impl>(type)));
 		if (temp)
 		{
-			ML_glCheck(ML_glShaderSource(temp, count, str, nullptr));
+			ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, nullptr));
 			ML_glCheck(ML_glCompileShader(temp));
 
 			ML_glCheck(m_handle = ML_glCreateProgram());
@@ -1827,57 +1893,57 @@ namespace ml::gfx
 		}
 	}
 
-	void opengl_shader::do_upload(location_id loc, bool value)
+	void opengl_shader::do_upload(binding_id loc, bool value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, int32_t value)
+	void opengl_shader::do_upload(binding_id loc, int32_t value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, uint32_t value)
+	void opengl_shader::do_upload(binding_id loc, uint32_t value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, float_t value)
+	void opengl_shader::do_upload(binding_id loc, float_t value)
 	{
 		ML_glCheck(glProgramUniform1f(m_handle, ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, vec2f const & value)
+	void opengl_shader::do_upload(binding_id loc, vec2f const & value)
 	{
 		ML_glCheck(glProgramUniform2f(m_handle, ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
-	void opengl_shader::do_upload(location_id loc, vec3f const & value)
+	void opengl_shader::do_upload(binding_id loc, vec3f const & value)
 	{
 		ML_glCheck(glProgramUniform3f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
-	void opengl_shader::do_upload(location_id loc, vec4f const & value)
+	void opengl_shader::do_upload(binding_id loc, vec4f const & value)
 	{
 		ML_glCheck(glProgramUniform4f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_shader::do_upload(location_id loc, mat2f const & value, bool transpose)
+	void opengl_shader::do_upload(binding_id loc, mat2f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix2fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, mat3f const & value, bool transpose)
+	void opengl_shader::do_upload(binding_id loc, mat3f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix3fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 
-	void opengl_shader::do_upload(location_id loc, mat4f const & value, bool transpose)
+	void opengl_shader::do_upload(binding_id loc, mat4f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix4fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 	
-	void opengl_shader::do_upload(location_id loc, shared<texture> const & value, uint32_t slot)
+	void opengl_shader::do_upload(binding_id loc, shared<texture> const & value, uint32_t slot)
 	{
 		get_device()->get_context()->bind_texture(value.get(), slot);
 

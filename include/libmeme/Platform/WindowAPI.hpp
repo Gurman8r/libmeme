@@ -1,8 +1,7 @@
 #ifndef _ML_WINDOW_API_HPP_
 #define _ML_WINDOW_API_HPP_
 
-#include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Duration.hpp>
+#include <libmeme/Core/Timer.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
 #include <libmeme/Platform/VideoMode.hpp>
 

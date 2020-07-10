@@ -100,18 +100,18 @@ namespace ml
 		};
 
 		// graphic
-		g.graphic = gfx::render_device::get_default()->create_texture2d
-		({
-			{}, {}, {}, { gfx::format_rgba, gfx::format_red }
-		});
+		g.graphic = gfx::texture2d::create
+		(
+			{ {}, {}, {}, { gfx::format_rgba, gfx::format_red } }
+		);
 
 		// only load a texture for characters requiring a graphic
 		g.graphic->update
 		(
 			(vec2i)g.size(),
-			(!std::isspace(c, {}) && std::isgraph(c, {}))
-			? ((FT_Face)m_face)->glyph->bitmap.buffer
-			: nullptr
+			(!std::isspace(c, {}) && std::isgraph(c, {})
+				? ((FT_Face)m_face)->glyph->bitmap.buffer
+				: nullptr)
 		);
 
 		return g;

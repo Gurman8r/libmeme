@@ -452,7 +452,7 @@ namespace ml
 
 	duration glfw_window::get_time()
 	{
-		return glfwGetTime();
+		return duration{ glfwGetTime() };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

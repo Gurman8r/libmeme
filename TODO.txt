@@ -11,12 +11,11 @@ refactor application framework (engine & window)
 separate shader objects
 
 
-common
+core
 	+ files
 	+ generics
 	+ serialization
 	+ utility
-core
 	+ events
 	+ memory
 	+ timers
