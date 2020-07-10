@@ -5,8 +5,6 @@
 
 namespace ml
 {
-	struct window_base;
-
 	struct ML_PLATFORM_API window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -148,15 +146,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool has_hint(int32_t value) const noexcept { return m_ws.hints & value; }
+		ML_NODISCARD bool has_hint(int32_t value) const noexcept { return m_wndcfg.hints & value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		window_settings m_ws;
+		window_settings m_wndcfg;
 
 	private:
-		unique<window_base> m_window;
+		unique<struct window_base> m_window;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

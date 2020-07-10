@@ -722,7 +722,7 @@ namespace ml::ecs
 
 			for (size_t i = m_capacity; i < cap; ++i)
 			{
-				m_entities.emplace_back(false, i, i, signature{});
+				m_entities.push_back(false, i, i, signature{});
 
 				auto & h{ m_handles[i] };
 				h.m_manager = this;

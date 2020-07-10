@@ -67,15 +67,15 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// anonymous expressions		_ml_expr_#_
+// anonymous expressions		_expr_#_
 #if defined(__COUNTER__)
-#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__COUNTER__, _))))
+#	define ML_make_anon(expr)	ML_cat(_, ML_cat(expr, ML_cat(_, ML_cat(__COUNTER__, _))))
 #elif defined(__LINE__)
-#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, ML_cat(_, ML_cat(__LINE__, _))))
+#	define ML_make_anon(expr)	ML_cat(_, ML_cat(expr, ML_cat(_, ML_cat(__LINE__, _))))
 #else
-#	define ML_make_anon(expr)	ML_cat(_ml_, ML_cat(expr, _))
+#	define ML_make_anon(expr)	ML_cat(_, ML_cat(expr, _))
 #endif
-#define ML_anon					ML_make_anon(anon) // _ml_anon_#_
+#define ML_anon					ML_make_anon(anonymous) // _anonymous_#_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -37,7 +37,7 @@ namespace ml::impl
     {
         defer_impl(Fn && fn) noexcept : m_fn{ ML_forward(fn) } {}
 
-        ~defer_impl() noexcept { m_fn(); }
+        ~defer_impl() noexcept { std::invoke(m_fn); }
 
     private: Fn const m_fn;
     };

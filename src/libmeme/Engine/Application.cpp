@@ -277,7 +277,7 @@ namespace ml
 				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN) }
 				; optl.has_value())
 				{
-					m_plugins.emplace_back(code, path, std::move(lib), optl.value());
+					m_plugins.push_back(code, path, std::move(lib), optl.value());
 
 					return ML_handle(plugin_handle, code);
 				}

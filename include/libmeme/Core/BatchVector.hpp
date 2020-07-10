@@ -7,7 +7,7 @@ namespace ml::ds
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// tuple<vector<Ts>...>
+	// tuple< vector<T>... >
 	template <class ... _Ts
 	> struct batch_vector final : trackable
 	{
@@ -858,7 +858,7 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I, class It = const_iterator_i<I>, class U = value_i<I>
-		> iterator_i<I> emplace(It it, U && value) noexcept
+		> iterator_i<I> insert(It it, U && value) noexcept
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
@@ -871,7 +871,7 @@ namespace ml::ds
 		}
 
 		template <class T, class It = const_iterator_t<T>, class U = value_t<T>
-		> iterator_t<T> emplace(It it, U && value) noexcept
+		> iterator_t<T> insert(It it, U && value) noexcept
 		{
 			if constexpr (std::is_integral_v<It>)
 			{
@@ -886,26 +886,26 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I, class U = value_i<I>
-		> decltype(auto) emplace_back(U && value) noexcept
+		> decltype(auto) push_back(U && value) noexcept
 		{
 			return this->get<I>().emplace_back(ML_forward(value));
 		}
 
 		template <class T, class U = value_t<T>
-		> decltype(auto) emplace_back(U && value)
+		> decltype(auto) push_back(U && value)
 		{
 			return this->get<T>().emplace_back(ML_forward(value));
 		}
 
 		template <class Tpl, size_t I, size_t N = std::tuple_size_v<Tpl>
-		> decltype(auto) emplace_back(Tpl && value)
+		> decltype(auto) push_back(Tpl && value)
 		{
 			static_assert(tuple_size <= N);
 			if constexpr (I < N)
 			{
-				this->emplace_back<I>(std::get<I>(ML_forward(value)));
+				this->push_back<I>(std::get<I>(ML_forward(value)));
 
-				return this->emplace_back<Tpl, I + 1, N>(ML_forward(value));
+				return this->push_back<Tpl, I + 1, N>(ML_forward(value));
 			}
 			else
 			{
@@ -914,9 +914,9 @@ namespace ml::ds
 		}
 
 		template <class ... Args
-		> decltype(auto) emplace_back(Args && ... args)
+		> decltype(auto) push_back(Args && ... args)
 		{
-			return this->emplace_back<value_tuple, 0, tuple_size
+			return this->push_back<value_tuple, 0, tuple_size
 			>(value_tuple{ ML_forward(args)... });
 		}
 

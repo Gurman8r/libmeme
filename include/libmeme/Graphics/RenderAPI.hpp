@@ -28,21 +28,16 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	template <class ...
+	> struct descriptor;
+
 	ML_decl_handle(	resource_id	); // object handle
 	ML_decl_handle(	location_id	); // binding handle
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	ML_alias address_t	= typename void const *			; // data address
 	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ...
-	> struct import_settings;
-
-	template <class ...
-	> struct descriptor;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -615,43 +610,6 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// texture options
-namespace ml::gfx
-{
-	// texture flags
-	enum texture_flags_ : int32_t
-	{
-		texture_flags_none		= 0 << 0, // none
-		texture_flags_smooth	= 1 << 0, // smooth
-		texture_flags_repeated	= 1 << 1, // repeated
-		texture_flags_mipmapped = 1 << 2, // mipmapped
-
-		// smooth / repeated
-		texture_flags_default
-			= texture_flags_smooth
-			| texture_flags_repeated,
-	};
-
-	// texture format
-	struct ML_NODISCARD texfmt final
-	{
-		uint32_t
-			color	{ format_rgba },		// color format
-			pixel	{ color },				// pixel format
-			type	{ type_unsigned_byte };	// pixel type
-	};
-
-	// texture options
-	struct ML_NODISCARD texopts final
-	{
-		vec2i		size	{ 0, 0 }					; // texture size
-		texfmt		format	{ format_rgba }				; // texture format
-		int32_t		flags	{ texture_flags_default }	; // texture flags
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // device
 namespace ml::gfx
 {
@@ -676,10 +634,6 @@ namespace ml::gfx
 		bool geometry_shaders_available;
 		pmr::string shading_language_version;
 	};
-
-	void from_json(json const & j, descriptor<render_device> & v) = delete; // NYI
-
-	void to_json(json & j, descriptor<render_device> const & v) = delete; // NYI
 
 
 	// base device
@@ -709,9 +663,9 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_active_context(shared<render_context> const & value) noexcept = 0;
+		virtual void set_context(shared<render_context> const & value) noexcept = 0;
 
-		ML_NODISCARD virtual shared<render_context> const & get_active_context() const noexcept = 0;
+		ML_NODISCARD virtual shared<render_context> const & get_context() const noexcept = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
@@ -730,15 +684,15 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept = 0;
 
-		ML_NODISCARD virtual shared<texture2d> create_texture2d(texopts const & opts, address_t data = {}) noexcept = 0;
+		ML_NODISCARD virtual shared<texture2d> create_texture2d(descriptor<texture2d> const & opts, address_t data = {}) noexcept = 0;
 
-		ML_NODISCARD virtual shared<texturecube> create_texturecube(texopts const & opts) noexcept = 0;
+		ML_NODISCARD virtual shared<texturecube> create_texturecube(descriptor<texturecube> const & opts) noexcept = 0;
 
-		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(texopts const & opts) noexcept = 0;
+		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(descriptor<framebuffer> const & opts) noexcept = 0;
 
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(import_settings<shader> const & desc) noexcept = 0;
+		ML_NODISCARD virtual shared<shader> create_shader(descriptor<shader> const & opts) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -851,7 +805,7 @@ namespace ml::gfx
 	};
 
 	// device context import settings
-	template <> struct ML_NODISCARD import_settings<render_context> final
+	template <> struct ML_NODISCARD descriptor<render_context> final
 	{
 		pmr::string	name		{ "Device Context" };
 		int32_t		client		{ context_api_unknown };
@@ -866,7 +820,7 @@ namespace ml::gfx
 		int32_t		release		{};
 	};
 
-	static void from_json(json const & j, import_settings<render_context> & v)
+	static void from_json(json const & j, descriptor<render_context> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["client"		].get_to(v.client);
@@ -881,7 +835,7 @@ namespace ml::gfx
 		j["release"		].get_to(v.release);
 	}
 
-	static void to_json(json & j, import_settings<render_context> const & v)
+	static void to_json(json & j, descriptor<render_context> const & v)
 	{
 		j["name"		] = v.name;
 		j["client"		] = v.client;
@@ -981,9 +935,9 @@ namespace ml::gfx
 
 		virtual void bind_framebuffer(framebuffer const * value) = 0;
 
-		virtual void bind_shader(shader const * value) = 0;
-
 		virtual void bind_program(program const * value) = 0;
+
+		virtual void bind_shader(shader const * value) = 0; // WIP
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1015,17 +969,17 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// vertexarray import settings
-	template <> struct ML_NODISCARD import_settings<vertexarray> final
+	template <> struct ML_NODISCARD descriptor<vertexarray> final
 	{
-		pmr::string	name{ "Vertex Array" };
+		pmr::string	name{ "VertexArray" };
 	};
 
-	static void from_json(json const & j, import_settings<vertexarray> & v)
+	static void from_json(json const & j, descriptor<vertexarray> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, import_settings<vertexarray> const & v)
+	static void to_json(json & j, descriptor<vertexarray> const & v)
 	{
 		j["name"] = v.name;
 	}
@@ -1069,12 +1023,12 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_vertexarray(this);
+			get_device()->get_context()->bind_vertexarray(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_vertexarray(nullptr);
+			get_device()->get_context()->bind_vertexarray(nullptr);
 		}
 	};
 }
@@ -1085,19 +1039,19 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// vertexbuffer import settings
-	template <> struct ML_NODISCARD import_settings<vertexbuffer> final
+	template <> struct ML_NODISCARD descriptor<vertexbuffer> final
 	{
-		pmr::string	name	{ "Vertex Buffer" };
+		pmr::string	name	{ "VertexBuffer" };
 		uint32_t	usage	{ usage_static };
 	};
 
-	static void from_json(json const & j, import_settings<vertexbuffer> & v)
+	static void from_json(json const & j, descriptor<vertexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 		j["usage"].get_to(v.usage);
 	}
 
-	static void to_json(json & j, import_settings<vertexbuffer> const & v)
+	static void to_json(json & j, descriptor<vertexbuffer> const & v)
 	{
 		j["name"] = v.name;
 		j["usage"] = v.usage;
@@ -1143,12 +1097,12 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_vertexbuffer(this);
+			get_device()->get_context()->bind_vertexbuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_vertexbuffer(nullptr);
+			get_device()->get_context()->bind_vertexbuffer(nullptr);
 		}
 	};
 }
@@ -1159,17 +1113,17 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// indexbuffer import settings
-	template <> struct ML_NODISCARD import_settings<indexbuffer> final
+	template <> struct ML_NODISCARD descriptor<indexbuffer> final
 	{
-		pmr::string	name{ "Index Buffer" };
+		pmr::string	name{ "IndexBuffer" };
 	};
 
-	static void from_json(json const & j, import_settings<indexbuffer> & v)
+	static void from_json(json const & j, descriptor<indexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, import_settings<indexbuffer> const & v)
+	static void to_json(json & j, descriptor<indexbuffer> const & v)
 	{
 		j["name"] = v.name;
 	}
@@ -1214,12 +1168,12 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_indexbuffer(this);
+			get_device()->get_context()->bind_indexbuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_indexbuffer(nullptr);
+			get_device()->get_context()->bind_indexbuffer(nullptr);
 		}
 	};
 }
@@ -1229,6 +1183,42 @@ namespace ml::gfx
 // texture
 namespace ml::gfx
 {
+	// texture flags
+	enum texture_flags_ : int32_t
+	{
+		texture_flags_none		= 0 << 0, // none
+		texture_flags_smooth	= 1 << 0, // smooth
+		texture_flags_repeat	= 1 << 1, // repeated
+		texture_flags_mipmap = 1 << 2, // mipmapped
+
+		// smooth / repeated
+		texture_flags_default
+			= texture_flags_smooth
+			| texture_flags_repeat,
+	};
+
+	// texture format
+	struct ML_NODISCARD tex_format final
+	{
+		uint32_t	color	{ format_rgba },
+					pixel	{ color },
+					type	{ type_unsigned_byte };
+	};
+
+	static void from_json(json const & j, tex_format & v)
+	{
+		j["color"].get_to(v.color);
+		j["pixel"].get_to(v.pixel);
+		j["type"].get_to(v.type);
+	}
+
+	static void to_json(json & j, tex_format const & v)
+	{
+		j["color"] = v.color;
+		j["pixel"] = v.pixel;
+		j["type"] = v.type;
+	}
+
 	// base texture
 	class ML_GRAPHICS_API texture : public device_child<texture>
 	{
@@ -1250,35 +1240,17 @@ namespace ml::gfx
 
 		virtual void unlock() = 0;
 
-		ML_NODISCARD virtual texopts const & get_options() const noexcept = 0;
-
 		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
-
-		ML_NODISCARD inline uint32_t get_color_format() const noexcept { return get_options().format.color; }
-
-		ML_NODISCARD inline int32_t get_flags() const noexcept { return get_options().flags; }
-
-		ML_NODISCARD inline uint32_t get_pixel_format() const noexcept { return get_options().format.pixel; }
-
-		ML_NODISCARD inline uint32_t get_pixel_type() const noexcept { return get_options().format.type; }
-
-		ML_NODISCARD inline vec2i const & get_size() const noexcept { return get_options().size; }
-
-		ML_NODISCARD inline bool is_mipmapped() const noexcept { return get_flags() & texture_flags_mipmapped; }
-
-		ML_NODISCARD inline bool is_repeated() const noexcept { return get_flags() & texture_flags_repeated; }
-
-		ML_NODISCARD inline bool is_smooth() const noexcept { return get_flags() & texture_flags_smooth; }
 
 	public:
 		inline void bind(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_active_context()->bind_texture(this, slot);
+			get_device()->get_context()->bind_texture(this, slot);
 		}
 
 		inline void unbind(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_active_context()->bind_texture(nullptr, slot);
+			get_device()->get_context()->bind_texture(nullptr, slot);
 		}
 	};
 }
@@ -1289,43 +1261,37 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// texture2d import settings
-	template <> struct ML_NODISCARD import_settings<texture2d> final
+	template <> struct ML_NODISCARD descriptor<texture2d> final
 	{
-		pmr::string	name		{ "Texture 2D" };
+		pmr::string	name		{ "Texture2D" };
 		fs::path	path		{};
 		vec2i		size		{};
-		uint32_t	color_format{ format_rgba };
-		uint32_t	pixel_format{ color_format };
-		uint32_t	pixel_type	{ type_unsigned_byte };
-		bool		repeated	{ true },
-					smooth		{ true },
-					mipmapped	{ false };
+		tex_format	format		{ format_rgba };
+		int32_t		flags		{ texture_flags_default };
 	};
 
-	static void from_json(json const & j, import_settings<texture2d> & v)
+	static void from_json(json const & j, descriptor<texture2d> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["path"		].get_to(v.path);
 		j["size"		].get_to(v.size);
-		j["color_format"].get_to(v.color_format);
-		j["pixel_format"].get_to(v.pixel_format);
-		j["pixel_type"	].get_to(v.pixel_type);
-		j["repeated"	].get_to(v.repeated);
-		j["smooth"		].get_to(v.smooth);
-		j["mipmapped"	].get_to(v.mipmapped);
+		j["format"		].get_to(v.format);
+
+		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
 	}
 
-	static void to_json(json & j, import_settings<texture2d> const & v)
+	static void to_json(json & j, descriptor<texture2d> const & v)
 	{
 		j["name"		] = v.name;
 		j["path"		] = v.path;
 		j["size"		] = v.size;
-		j["color_format"] = v.color_format;
-		j["pixel_format"] = v.pixel_format;
-		j["pixel_type"	] = v.pixel_type;
-		j["repeated"	] = v.repeated;
-		j["smooth"		] = v.smooth;
-		j["mipmapped"	] = v.mipmapped;
+		j["format"		] = v.format;
+
+		j["repeat"		] = ML_flag_read(v.flags, texture_flags_repeat);
+		j["smooth"		] = ML_flag_read(v.flags, texture_flags_smooth);
+		j["mipmap"		] = ML_flag_read(v.flags, texture_flags_mipmap);
 	}
 
 
@@ -1333,14 +1299,22 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
-		ML_NODISCARD static auto create(texopts const & opts, address_t data = {}) noexcept
+		ML_NODISCARD static auto create(descriptor<texture2d> const & opts, address_t data = {}) noexcept
 		{
 			return render_device::get_default()->create_texture2d(opts, data);
 		}
 
 		ML_NODISCARD static auto create(image const & img, int32_t flags = texture_flags_default) noexcept
 		{
-			return create({ img.size(), { calc_channel_format(img.channels()) }, flags }, img.data());
+			return create(
+			{
+				"Texture2D",
+				fs::path{},
+				img.size(),
+				{ calc_channel_format(img.channels()) },
+				flags
+			}
+			, img.data());
 		}
 
 		ML_NODISCARD static auto create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
@@ -1378,7 +1352,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual image copy_to_image() const = 0;
 
-		ML_NODISCARD virtual texopts const & get_options() const noexcept override = 0;
+		ML_NODISCARD virtual descriptor<texture2d> const & get_desc() const noexcept = 0;
 
 		ML_NODISCARD inline uint32_t get_type() const noexcept { return texture_type_2d; }
 	};
@@ -1390,43 +1364,39 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// texturecube import settings
-	template <> struct ML_NODISCARD import_settings<texturecube> final
+	template <> struct ML_NODISCARD descriptor<texturecube> final
 	{
-		pmr::string				name		{ "Texture Cube" };
-		ds::array<fs::path, 6>	paths		{};
-		vec2i					size		{};
-		uint32_t				color_format{ format_rgba };
-		uint32_t				pixel_format{ color_format };
-		uint32_t				pixel_type	{ type_unsigned_byte };
-		bool					repeated	{ true },
-								smooth		{ true },
-								mipmapped	{ false };
+		using paths_t = ds::array<fs::path, 6>;
+
+		pmr::string	name		{ "TextureCube" };
+		paths_t		paths		{};
+		vec2i		size		{};
+		tex_format	format		{ format_rgba };
+		int32_t		flags		{ texture_flags_default };
 	};
 
-	static void from_json(json const & j, import_settings<texturecube> & v)
+	static void from_json(json const & j, descriptor<texturecube> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["paths"		].get_to(v.paths);
 		j["size"		].get_to(v.size);
-		j["color_format"].get_to(v.color_format);
-		j["pixel_format"].get_to(v.pixel_format);
-		j["pixel_type"	].get_to(v.pixel_type);
-		j["repeated"	].get_to(v.repeated);
-		j["smooth"		].get_to(v.smooth);
-		j["mipmapped"	].get_to(v.mipmapped);
+		j["format"		].get_to(v.format);
+
+		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
 	}
 
-	static void to_json(json & j, import_settings<texturecube> const & v)
+	static void to_json(json & j, descriptor<texturecube> const & v)
 	{
 		j["name"		] = v.name;
 		j["paths"		] = v.paths;
 		j["size"		] = v.size;
-		j["color_format"] = v.color_format;
-		j["pixel_format"] = v.pixel_format;
-		j["pixel_type"	] = v.pixel_type;
-		j["repeated"	] = v.repeated;
-		j["smooth"		] = v.smooth;
-		j["mipmapped"	] = v.mipmapped;
+		j["format"		] = v.format;
+
+		j["repeat"		] = ML_flag_read(v.flags, texture_flags_repeat);
+		j["smooth"		] = ML_flag_read(v.flags, texture_flags_smooth);
+		j["mipmap"		] = ML_flag_read(v.flags, texture_flags_mipmap);
 	}
 
 
@@ -1434,7 +1404,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texturecube : public texture
 	{
 	public:
-		ML_NODISCARD static auto create(texopts const & opts) noexcept
+		ML_NODISCARD static auto create(descriptor<texturecube> const & opts) noexcept
 		{
 			return render_device::get_default()->create_texturecube(opts);
 		}
@@ -1457,7 +1427,7 @@ namespace ml::gfx
 
 		virtual void unlock() override = 0;
 
-		ML_NODISCARD virtual texopts const & get_options() const noexcept override = 0;
+		ML_NODISCARD virtual descriptor<texturecube> const & get_desc() const noexcept = 0;
 
 		ML_NODISCARD inline uint32_t get_type() const noexcept override { return texture_type_cubemap; }
 	};
@@ -1469,10 +1439,12 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// framebuffer import settings
-	template <> struct ML_NODISCARD import_settings<framebuffer> final
+	template <> struct ML_NODISCARD descriptor<framebuffer> final
 	{
-		pmr::string	name			{ "Frame Buffer" };
+		pmr::string	name			{ "FrameBuffer" };
 		vec2i		size			{};
+		tex_format	format			{ format_rgba };
+		int32_t		flags			{ texture_flags_default };
 		vec4i		bits_per_pixel	{ 8, 8, 8, 8 };
 		int32_t		stencil_bits	{ 24 },
 					depth_bits		{ 8 };
@@ -1480,10 +1452,16 @@ namespace ml::gfx
 		bool		stereo			{};
 	};
 
-	static void from_json(json const & j, import_settings<framebuffer> & v)
+	static void from_json(json const & j, descriptor<framebuffer> & v)
 	{
 		j["name"			].get_to(v.name);
 		j["size"			].get_to(v.size);
+		j["format"			].get_to(v.format);
+
+		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
+		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
+
 		j["bits_per_pixel"	].get_to(v.bits_per_pixel);
 		j["stencil_bits"	].get_to(v.stencil_bits);
 		j["depth_bits"		].get_to(v.depth_bits);
@@ -1491,10 +1469,16 @@ namespace ml::gfx
 		j["stereo"			].get_to(v.stereo);
 	}
 
-	static void to_json(json & j, import_settings<framebuffer> const & v)
+	static void to_json(json & j, descriptor<framebuffer> const & v)
 	{
 		j["name"			] = v.name;
 		j["size"			] = v.size;
+		j["format"			] = v.format;
+
+		j["repeat"			] = ML_flag_read(v.flags, texture_flags_repeat);
+		j["smooth"			] = ML_flag_read(v.flags, texture_flags_smooth);
+		j["mipmap"			] = ML_flag_read(v.flags, texture_flags_mipmap);
+
 		j["bits_per_pixel"	] = v.bits_per_pixel;
 		j["stencil_bits"	] = v.stencil_bits;
 		j["depth_bits"		] = v.depth_bits;
@@ -1507,7 +1491,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API framebuffer : public device_child<framebuffer>
 	{
 	public:
-		ML_NODISCARD static auto create(texopts const & opts) noexcept
+		ML_NODISCARD static auto create(descriptor<framebuffer> const & opts) noexcept
 		{
 			return render_device::get_default()->create_framebuffer(opts);
 		}
@@ -1536,22 +1520,22 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<texture2d> const & get_depth_attachment() const noexcept = 0;
 
-		ML_NODISCARD virtual texopts const & get_options() const noexcept = 0;
+		ML_NODISCARD virtual descriptor<framebuffer> const & get_desc() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_framebuffer(this);
+			get_device()->get_context()->bind_framebuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_framebuffer(nullptr);
+			get_device()->get_context()->bind_framebuffer(nullptr);
 		}
 
 		inline void bind_texture(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_active_context()->bind_texture
+			get_device()->get_context()->bind_texture
 			(
 				get_color_attachments()[(size_t)slot].get(), slot
 			);
@@ -1622,18 +1606,18 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_program(this);
+			get_device()->get_context()->bind_program(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_program(nullptr);
+			get_device()->get_context()->bind_program(nullptr);
 		}
 
 		inline void bind_textures() const noexcept
 		{
 			uint32_t slot{};
-			get_textures().for_each([&, &ctx = get_device()->get_active_context()
+			get_textures().for_each([&, &ctx = get_device()->get_context()
 			](location_id loc, shared<texture> const & tex) noexcept
 			{
 				ctx->bind_texture(tex.get(), slot);
@@ -1652,7 +1636,7 @@ namespace ml::gfx
 				}
 				else
 				{
-					get_device()->get_active_context()->upload(loc, ML_forward(value));
+					get_device()->get_context()->upload(loc, ML_forward(value));
 				}
 			});
 		}
@@ -1668,7 +1652,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// shader import settings
-	template <> struct ML_NODISCARD import_settings<shader> final
+	template <> struct ML_NODISCARD descriptor<shader> final
 	{
 		using source_t = pmr::vector<pmr::string>;
 
@@ -1678,7 +1662,7 @@ namespace ml::gfx
 		source_t	code	{};
 	};
 
-	static void from_json(json const & j, import_settings<shader> & v)
+	static void from_json(json const & j, descriptor<shader> & v)
 	{
 		j["name"].get_to(v.name);
 		j["path"].get_to(v.path);
@@ -1686,7 +1670,7 @@ namespace ml::gfx
 		j["code"].get_to(v.code);
 	}
 
-	static void to_json(json & j, import_settings<shader> const & v)
+	static void to_json(json & j, descriptor<shader> const & v)
 	{
 		j["name"] = v.name;
 		j["path"] = v.path;
@@ -1699,9 +1683,9 @@ namespace ml::gfx
 	class ML_GRAPHICS_API shader : public device_child<shader>
 	{
 	public:
-		ML_NODISCARD static auto create(import_settings<shader> const & desc) noexcept
+		ML_NODISCARD static auto create(descriptor<shader> const & opts) noexcept
 		{
-			return render_device::get_default()->create_shader(desc);
+			return render_device::get_default()->create_shader(opts);
 		}
 
 	public:
@@ -1731,12 +1715,12 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_active_context()->bind_shader(this);
+			get_device()->get_context()->bind_shader(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_active_context()->bind_shader(nullptr);
+			get_device()->get_context()->bind_shader(nullptr);
 		}
 
 		inline void bind_textures() noexcept

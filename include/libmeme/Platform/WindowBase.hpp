@@ -10,7 +10,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~window_base() noexcept = default;
+		virtual ~window_base() = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -89,6 +89,36 @@ namespace ml
 		virtual void set_title(cstring) = 0;
 
 		virtual void set_user_pointer(void *) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static void poll_events() = delete;
+
+		static void set_current_context(window_handle) = delete;
+
+		static void set_swap_interval(int32_t) = delete;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static int32_t extension_supported(cstring) = delete;
+
+		static window_handle get_current_context() = delete;
+
+		static void * get_proc_address(cstring) = delete;
+		
+		static pmr::vector<monitor_handle> const & get_monitors() = delete;
+
+		static monitor_handle get_primary_monitor() = delete;
+
+		static duration get_time() = delete;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		static cursor_handle create_custom_cursor(size_t, size_t, byte_t const *) = delete;
+
+		static cursor_handle create_standard_cursor(int32_t) = delete;
+
+		static void destroy_cursor(cursor_handle) = delete;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

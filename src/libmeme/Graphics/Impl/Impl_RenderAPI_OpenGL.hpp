@@ -18,8 +18,8 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_device> };
 
-		descriptor<render_device>	m_desc		{}; // settings
-		shared<render_context>		m_context	{}; // context
+		descriptor<render_device>	m_desc	{}; // device settings
+		shared<render_context>		m_ctx	{}; // render context
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -33,9 +33,9 @@ namespace ml::gfx
 
 		resource_id get_handle() const noexcept override { return ML_handle(resource_id, this); }
 
-		void set_active_context(shared<render_context> const & value) noexcept override { m_context = value; }
+		void set_context(shared<render_context> const & value) noexcept override { m_ctx = value; }
 
-		shared<render_context> const & get_active_context() const noexcept override { return m_context; }
+		shared<render_context> const & get_context() const noexcept override { return m_ctx; }
 
 		descriptor<render_device> const & get_info() const noexcept override { return m_desc; }
 
@@ -52,15 +52,15 @@ namespace ml::gfx
 
 		shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept override;
 
-		shared<texture2d> create_texture2d(texopts const & opts, address_t data) noexcept override;
+		shared<texture2d> create_texture2d(descriptor<texture2d> const & opts, address_t data) noexcept override;
 
-		shared<texturecube> create_texturecube(texopts const & opts) noexcept override;
+		shared<texturecube> create_texturecube(descriptor<texturecube> const & opts) noexcept override;
 
-		shared<framebuffer> create_framebuffer(texopts const & opts) noexcept override;
+		shared<framebuffer> create_framebuffer(descriptor<framebuffer> const & opts) noexcept override;
 
 		shared<program> create_program() noexcept override;
 
-		shared<shader> create_shader(import_settings<shader> const & desc) noexcept override;
+		shared<shader> create_shader(descriptor<shader> const & opts) noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -311,12 +311,12 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_texture2d> };
 
-		uint32_t	m_handle	{}			; // handle
-		texopts		m_opts		{}			; // texture options
-		bool		m_locked	{ true }	; // locked
+		descriptor<texture2d>	m_desc		{}			; // 
+		uint32_t					m_handle	{}			; // handle
+		bool						m_locked	{ true }	; // locked
 
 	public:
-		opengl_texture2d(render_device * parent, texopts const & opts, address_t data);
+		opengl_texture2d(render_device * parent, descriptor<texture2d> const & opts, address_t data);
 
 		~opengl_texture2d() override;
 
@@ -343,7 +343,7 @@ namespace ml::gfx
 
 		image copy_to_image() const override;
 
-		texopts const & get_options() const noexcept { return m_opts; }
+		descriptor<texture2d> const & get_desc() const noexcept { return m_desc; }
 	};
 }
 
@@ -358,12 +358,12 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_texturecube> };
 
-		uint32_t	m_handle	{}			; // handle
-		texopts		m_opts		{}			; // texture options
-		bool		m_locked	{ true }	; // locked
+		descriptor<texturecube>	m_desc		{}			; // descriptor
+		uint32_t						m_handle	{}			; // handle
+		bool							m_locked	{ true }	; // locked
 
 	public:
-		opengl_texturecube(render_device * parent, texopts const & opts);
+		opengl_texturecube(render_device * parent, descriptor<texturecube> const & opts);
 
 		~opengl_texturecube() override;
 
@@ -378,7 +378,7 @@ namespace ml::gfx
 
 		void unlock() override;
 
-		texopts const & get_options() const noexcept { return m_opts; }
+		descriptor<texturecube> const & get_desc() const noexcept { return m_desc; }
 	};
 }
 
@@ -393,14 +393,14 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_framebuffer> };
 
+		descriptor<framebuffer>			m_desc			{}	; // descriptor
 		uint32_t						m_handle		{}	; // handle
-		texopts							m_opts			{}	; // texture options
 		pmr::vector<shared<texture2d>>	m_attachments	{}	; // color attachments
 		shared<texture2d>				m_depth			{}	; // depth attachment
 
 		
 	public:
-		opengl_framebuffer(render_device * parent, texopts const & opts);
+		opengl_framebuffer(render_device * parent, descriptor<framebuffer> const & opts);
 
 		~opengl_framebuffer() override;
 
@@ -421,7 +421,7 @@ namespace ml::gfx
 
 		shared<texture2d> const & get_depth_attachment() const noexcept override { return m_depth; }
 
-		texopts const & get_options() const noexcept override { return m_opts; }
+		descriptor<framebuffer> const & get_desc() const noexcept override { return m_desc; }
 	};
 }
 
@@ -441,7 +441,7 @@ namespace ml::gfx
 		ds::map<uint32_t, resource_id>				m_shaders		{}; // shader cache
 		ds::map<uint32_t, pmr::vector<pmr::string>>	m_source		{}; // source cache
 		ds::map<location_id, shared<texture>>		m_textures		{}; // texture cache
-		ds::map<hash_t, location_id>					m_uniforms		{}; // uniform cache
+		ds::map<hash_t, location_id>				m_uniforms		{}; // uniform cache
 
 		// uniform binder
 		struct ML_NODISCARD opengl_uniform_binder final
@@ -522,7 +522,7 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_shader> };
 
-		import_settings<shader>						m_desc		{}; // import_settings
+		descriptor<shader>						m_desc		{}; // descriptor
 		uint32_t								m_handle	{}; // handle
 		pmr::string								m_log		{}; // error log
 		uint32_t								m_type		{}; // shader type
@@ -545,7 +545,7 @@ namespace ml::gfx
 		};
 
 	public:
-		opengl_shader(render_device * parent, import_settings<shader> const & desc);
+		opengl_shader(render_device * parent, descriptor<shader> const & opts);
 
 		~opengl_shader() override;
 

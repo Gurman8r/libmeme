@@ -705,17 +705,17 @@ namespace ml::gfx
 		return _ML make_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
-	shared<texture2d> opengl_device::create_texture2d(texopts const & opts, address_t data) noexcept
+	shared<texture2d> opengl_device::create_texture2d(descriptor<texture2d> const & opts, address_t data) noexcept
 	{
 		return _ML make_shared<opengl_texture2d>(this, opts, data);
 	}
 
-	shared<texturecube> opengl_device::create_texturecube(texopts const & opts) noexcept
+	shared<texturecube> opengl_device::create_texturecube(descriptor<texturecube> const & opts) noexcept
 	{
 		return _ML make_shared<opengl_texturecube>(this, opts);
 	}
 
-	shared<framebuffer> opengl_device::create_framebuffer(texopts const & opts) noexcept
+	shared<framebuffer> opengl_device::create_framebuffer(descriptor<framebuffer> const & opts) noexcept
 	{
 		return _ML make_shared<opengl_framebuffer>(this, opts);
 	}
@@ -725,9 +725,9 @@ namespace ml::gfx
 		return _ML make_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_device::create_shader(import_settings<shader> const & desc) noexcept
+	shared<shader> opengl_device::create_shader(descriptor<shader> const & opts) noexcept
 	{
-		return _ML make_shared<opengl_shader>(this, desc);
+		return _ML make_shared<opengl_shader>(this, opts);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1010,7 +1010,7 @@ namespace ml::gfx
 		{
 			ML_glCheck(glBindFramebuffer(GL_FRAMEBUFFER, ML_handle(uint32_t, value->get_handle())));
 
-			set_viewport({ vec2i::zero(), value->get_options().size });
+			set_viewport({ vec2i::zero(), value->get_desc().size });
 		}
 		else
 		{
@@ -1020,7 +1020,7 @@ namespace ml::gfx
 
 	void opengl_context::bind_program(program const * value)
 	{
-		ML_glCheck(glUseProgramObjectARB(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
+		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
 	void opengl_context::bind_shader(shader const * value)
@@ -1268,24 +1268,24 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(render_device * parent, texopts const & opts, address_t data)
-		: texture2d{ parent }, m_opts{ opts }
+	opengl_texture2d::opengl_texture2d(render_device * parent, descriptor<texture2d> const & opts, address_t data)
+		: texture2d{ parent }, m_desc{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 		ML_glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
 		ML_glCheck(glTexImage2D(
 			GL_TEXTURE_2D,
 			0,
-			_format<to_impl>(m_opts.format.color),
-			m_opts.size[0],
-			m_opts.size[1],
+			_format<to_impl>(m_desc.format.color),
+			m_desc.size[0],
+			m_desc.size[1],
 			0,
-			_format<to_impl>(m_opts.format.pixel),
-			_type<to_impl>(m_opts.format.type),
+			_format<to_impl>(m_desc.format.pixel),
+			_type<to_impl>(m_desc.format.type),
 			data));
-		set_repeated(m_opts.flags & texture_flags_repeated);
-		set_smooth(m_opts.flags & texture_flags_smooth);
-		set_mipmapped(m_opts.flags & texture_flags_mipmapped);
+		set_repeated(m_desc.flags & texture_flags_repeat);
+		set_smooth(m_desc.flags & texture_flags_smooth);
+		set_mipmapped(m_desc.flags & texture_flags_mipmap);
 	}
 
 	opengl_texture2d::~opengl_texture2d()
@@ -1322,33 +1322,33 @@ namespace ml::gfx
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
-		if (m_handle && (m_opts.size == size)) { return; }
-		else { m_opts.size = size; }
+		if (m_handle && (m_desc.size == size)) { return; }
+		else { m_desc.size = size; }
 
 		revalue(); bind();
 		
 		ML_glCheck(glTexImage2D(
 			GL_TEXTURE_2D,
 			0,
-			_format<to_impl>(m_opts.format.color),
-			m_opts.size[0],
-			m_opts.size[1],
+			_format<to_impl>(m_desc.format.color),
+			m_desc.size[0],
+			m_desc.size[1],
 			0,
-			_format<to_impl>(m_opts.format.pixel),
-			_type<to_impl>(m_opts.format.type),
+			_format<to_impl>(m_desc.format.pixel),
+			_type<to_impl>(m_desc.format.type),
 			data));
 		
-		set_repeated(m_opts.flags & texture_flags_repeated);
-		set_smooth(m_opts.flags & texture_flags_smooth);
-		set_mipmapped(m_opts.flags & texture_flags_mipmapped);
+		set_repeated(m_desc.flags & texture_flags_repeat);
+		set_smooth(m_desc.flags & texture_flags_smooth);
+		set_mipmapped(m_desc.flags & texture_flags_mipmap);
 	}
 
 	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, address_t data)
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
-		if (m_handle && (m_opts.size == size)) { return; }
-		else { m_opts.size = size; }
+		if (m_handle && (m_desc.size == size)) { return; }
+		else { m_desc.size = size; }
 
 		revalue(); bind();
 
@@ -1357,24 +1357,24 @@ namespace ml::gfx
 			0,
 			pos[0],
 			pos[1],
-			m_opts.size[0],
-			m_opts.size[1],
-			_format<to_impl>(m_opts.format.color),
-			_type<to_impl>(m_opts.format.type),
+			m_desc.size[0],
+			m_desc.size[1],
+			_format<to_impl>(m_desc.format.color),
+			_type<to_impl>(m_desc.format.type),
 			data));
 		
-		set_repeated(m_opts.flags & texture_flags_repeated);
-		set_smooth(m_opts.flags & texture_flags_smooth);
-		set_mipmapped(m_opts.flags & texture_flags_mipmapped);
+		set_repeated(m_desc.flags & texture_flags_repeat);
+		set_smooth(m_desc.flags & texture_flags_smooth);
+		set_mipmapped(m_desc.flags & texture_flags_mipmap);
 	}
 
 	void opengl_texture2d::set_mipmapped(bool value)
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
-		ML_flag_write(m_opts.flags, texture_flags_mipmapped, value);
+		ML_flag_write(m_desc.flags, texture_flags_mipmap, value);
 
-		bool const smooth{ ML_flag_read(m_opts.flags, texture_flags_smooth) };
+		bool const smooth{ ML_flag_read(m_desc.flags, texture_flags_smooth) };
 
 		if (smooth) { ML_glCheck(glGenerateMipmap(GL_TEXTURE_2D)); }
 
@@ -1389,7 +1389,7 @@ namespace ml::gfx
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
-		ML_flag_write(m_opts.flags, texture_flags_repeated, value);
+		ML_flag_write(m_desc.flags, texture_flags_repeat, value);
 
 		static bool const edge_clamp_available
 		{
@@ -1413,7 +1413,7 @@ namespace ml::gfx
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
-		ML_flag_write(m_opts.flags, texture_flags_smooth, value);
+		ML_flag_write(m_desc.flags, texture_flags_smooth, value);
 
 		ML_glCheck(glTexParameteri(GL_TEXTURE_2D,
 			GL_TEXTURE_MAG_FILTER,
@@ -1421,7 +1421,7 @@ namespace ml::gfx
 
 		ML_glCheck(glTexParameteri(GL_TEXTURE_2D,
 			GL_TEXTURE_MIN_FILTER,
-			ML_flag_read(m_opts.flags, texture_flags_mipmapped)
+			ML_flag_read(m_desc.flags, texture_flags_mipmap)
 			? value ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR
 			: value ? GL_LINEAR : GL_NEAREST));
 	}
@@ -1430,14 +1430,14 @@ namespace ml::gfx
 	{
 		if (!m_locked) { debug::error("texture2d is not locked"); return image{}; }
 
-		image temp{ m_opts.size, calc_bits_per_pixel(m_opts.format.color) };
+		image temp{ m_desc.size, calc_bits_per_pixel(m_desc.format.color) };
 		if (m_handle)
 		{
 			bind();
 
 			ML_glCheck(glGetTexImage(GL_TEXTURE_2D, 0,
-				_format<to_impl>(m_opts.format.color),
-				_type<to_impl>(m_opts.format.type),
+				_format<to_impl>(m_desc.format.color),
+				_type<to_impl>(m_desc.format.type),
 				temp.data()));
 
 			unbind();
@@ -1455,8 +1455,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(render_device * parent, texopts const & opts)
-		: texturecube{ parent }, m_opts{ opts }
+	opengl_texturecube::opengl_texturecube(render_device * parent, descriptor<texturecube> const & opts)
+		: texturecube{ parent }, m_desc{ opts }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 	}
@@ -1501,10 +1501,10 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(render_device * parent, texopts const & opts)
-		: framebuffer{ parent }, m_opts{ opts }
+	opengl_framebuffer::opengl_framebuffer(render_device * parent, descriptor<framebuffer> const & opts)
+		: framebuffer{ parent }, m_desc{ opts }
 	{
-		resize(m_opts.size);
+		resize(m_desc.size);
 	}
 
 	opengl_framebuffer::~opengl_framebuffer()
@@ -1554,19 +1554,25 @@ namespace ml::gfx
 
 	void opengl_framebuffer::resize(vec2i const & size)
 	{
-		if (m_handle && (m_opts.size == size)) { return; }
-		else { m_opts.size = size; }
+		if (m_handle && (m_desc.size == size)) { return; }
+		else { m_desc.size = size; }
 
 		revalue(); bind();
 
 		// color attachments
 		if (m_attachments.empty())
 		{
-			m_attachments.push_back(get_device()->create_texture2d(m_opts));
+			m_attachments.push_back(get_device()->create_texture2d({
+				m_desc.name,
+				fs::path{},
+				m_desc.size,
+				m_desc.format,
+				m_desc.flags
+				}));
 		}
 		for (size_t i = 0, imax = m_attachments.size(); i < imax; ++i)
 		{
-			m_attachments[i]->update(m_opts.size);
+			m_attachments[i]->update(m_desc.size);
 
 			ML_glCheck(glFramebufferTexture2D(
 				GL_FRAMEBUFFER,
@@ -1577,15 +1583,19 @@ namespace ml::gfx
 		}
 
 		// depth attachment
-		if (m_depth) { m_depth->update(m_opts.size); }
+		if (m_depth)
+		{
+			m_depth->update(m_desc.size);
+		}
 		else
 		{
 			m_depth = get_device()->create_texture2d({
-				m_opts.size, {
-				format_depth24_stencil8,
-				format_depth_stencil,
-				type_unsigned_int_24_8 },
-				m_opts.flags });
+				m_desc.name,
+				fs::path{},
+				m_desc.size,
+				{ format_depth24_stencil8, format_depth_stencil, type_unsigned_int_24_8 },
+				m_desc.flags
+				});
 		}
 		ML_glCheck(glFramebufferTexture2D(
 			GL_FRAMEBUFFER,
@@ -1758,11 +1768,11 @@ namespace ml::gfx
 		}
 	}
 
-	opengl_shader::opengl_shader(render_device * parent, import_settings<shader> const & desc)
+	opengl_shader::opengl_shader(render_device * parent, descriptor<shader> const & opts)
 		: shader{ parent }
 	{
-		cstring temp_addr{ desc.code.front().data() };
-		compile(desc.type, desc.code.size(), &temp_addr);
+		cstring temp_addr{ opts.code.front().data() };
+		compile(opts.type, opts.code.size(), &temp_addr);
 	}
 
 	opengl_shader::~opengl_shader()
@@ -1869,7 +1879,7 @@ namespace ml::gfx
 	
 	void opengl_shader::do_upload(location_id loc, shared<texture> const & value, uint32_t slot)
 	{
-		get_device()->get_active_context()->bind_texture(value.get(), slot);
+		get_device()->get_context()->bind_texture(value.get(), slot);
 
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)slot));
 	}

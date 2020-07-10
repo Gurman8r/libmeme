@@ -2,11 +2,9 @@
 #include <libmeme/Core/StringUtility.hpp>
 #include <libmeme/Core/EventSystem.hpp>
 #include <libmeme/Platform/WindowEvents.hpp>
-#include <libmeme/Platform/Native.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// implementation
 #if defined(ML_IMPL_WINDOW_GLFW)
 #include "Impl/Impl_Window_GLFW.hpp"
 using impl_window = _ML glfw_window;
@@ -17,7 +15,7 @@ using impl_window = _ML glfw_window;
 // etc...
 
 #else
-#	error "window is unavailable"
+#	error ""
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,7 +24,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ new impl_window }, m_ws{}
+	window::window() noexcept : m_window{ new impl_window }, m_wndcfg{}
 	{
 		ML_assert("failed creating window implementation" && m_window);
 	}
@@ -44,7 +42,7 @@ namespace ml
 		if (is_open()) { return debug::error("window is already open"); }
 
 		// open backend
-		if (!m_window->open(m_ws = ws)) { return debug::error("failed opening window"); }
+		if (!m_window->open(m_wndcfg = ws)) { return debug::error("failed opening window"); }
 		
 		// make current context
 		set_current_context(get_handle());

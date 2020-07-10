@@ -17,13 +17,26 @@ namespace ml
 {
 	ML_decl_handle(plugin_handle);
 
+	struct plugin_manager;
+
 	struct plugin : non_copyable, trackable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		explicit plugin(plugin_manager * mgr) noexcept : m_parent{ mgr }
+		{
+		}
+
 		virtual ~plugin() noexcept = default;
 
 		virtual void on_event(event const &) override = 0;
+
+		plugin_manager * const & get_manager() const & noexcept { return m_parent; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		plugin_manager * const m_parent;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -103,9 +103,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
-	using	c_shader	= typename shader_asset;
-	using	c_uniforms	= typename shared<uniform_buffer>;
-	using	c_mesh		= typename shared<mesh>;
+	using	c_shader	= shader_asset;
+	using	c_uniforms	= shared<uniform_buffer>;
+	using	c_mesh		= shared<mesh>;
 
 
 	// (S) SIGNATURES
@@ -290,7 +290,7 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo() noexcept
+		demo(plugin_manager * mgr) noexcept : plugin{ mgr }
 		{
 			event_system::add_listener<	load_event		>(this);
 			event_system::add_listener<	update_event	>(this);
@@ -327,7 +327,7 @@ namespace ml
 
 			// FRAMEBUFFERS
 			{
-				m_fbo[0] = gfx::framebuffer::create({ m_resolution });
+				m_fbo[0] = gfx::framebuffer::create({ "FrameBuffer", m_resolution });
 			}
 
 			// IMAGES
@@ -560,7 +560,7 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			for (gfx::command const & cmd :
+			for (auto const & cmd :
 			{
 				gfx::render_command::bind_framebuffer(m_fbo[0].get()),
 
@@ -643,7 +643,7 @@ namespace ml
 						engine::window().close();
 					}
 				});
-				mmb.add("tools", [&]()
+				mmb.add("view", [&]()
 				{
 					ML_ImGui_ScopeID(this);
 					m_gui_assets.menu_item();
@@ -754,12 +754,12 @@ namespace ml
 			ImGui::Separator();
 			ImGui::Columns(4);
 
-			m_fonts		.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_images	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_uniforms	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_meshes	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_shaders	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
-			m_textures	.for_each([&](auto && ... args) { draw_asset(ML_forward(args)...); });
+			m_fonts		.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
+			m_images	.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
+			m_uniforms	.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
+			m_meshes	.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
+			m_shaders	.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
+			m_textures	.for_each([&](auto && ... x) { draw_asset(ML_forward(x)...); });
 
 			ImGui::Columns(1);
 
@@ -845,7 +845,7 @@ namespace ml
 
 					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
 				}
-				else if ((args.front() == "\\") && (0 == std::strcmp("py", m_console.command_lock)))
+				else if ((args.front() == "\\") && (!std::strcmp("py", m_console.command_lock)))
 				{
 					m_console.command_lock = nullptr;
 				}
@@ -865,7 +865,7 @@ namespace ml
 		{
 			static ImGui::TextEditor text{};
 
-			static ML_scope(&) // once
+			static ML_scope(&) // setup text editor
 			{
 				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				text.SetText("// work in progress\n\nint main()\n{\n\treturn 0;\n}");
@@ -1309,7 +1309,7 @@ namespace ml
 		{
 			static auto const & wnd{ engine::window() };
 			static auto const & dev{ wnd.get_render_device() };
-			static auto const & ctx	{ dev->get_active_context() };
+			static auto const & ctx	{ dev->get_context() };
 			static auto const & info{ dev->get_info() };
 
 			if (ImGui::BeginMenuBar())
@@ -1383,7 +1383,7 @@ namespace ml
 
 			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
 			preview.tex_addr = tex->get_handle();
-			preview.tex_size = tex->get_size();
+			preview.tex_size = tex->get_desc().size;
 
 			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
 
@@ -1396,9 +1396,9 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::plugin_manager * mgr)
 {
-	return ml::make_new<ml::demo>();
+	return ml::make_new<ml::demo>(mgr);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

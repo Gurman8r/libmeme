@@ -46,17 +46,17 @@ ml::int32_t main()
 
 	struct ML_NODISCARD ctx_config final // testing
 	{
-		int32_t	client		; // 
-		int32_t major		, // 
-				minor		, // 
-				revision	; // 
-		int32_t profile		; // 
-		int32_t source		, // 
-				robustness	, // 
-				release		; // 
-		bool	forward		, // 
-				debug		, // 
-				noerror		; // 
+		int32_t	client		{ 0 };
+		int32_t major		{ 1 },
+				minor		{ 0 },
+				revision	{ 0 };
+		int32_t profile		{ 0 };
+		int32_t source		{ 0 },
+				robustness	{ 0 },
+				release		{ 0 };
+		bool	forward		{ 0 },
+				debug		{ 0 },
+				noerror		{ 0 };
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

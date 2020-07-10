@@ -16,7 +16,7 @@ namespace ml::util
 	template <class T
 	> ML_NODISCARD constexpr hash_t hash(T const * arr, hash_t size, hash_t seed) noexcept
 	{
-		return (size > 0)
+		return size
 			? hash(arr + 1, size - 1, (seed ^ static_cast<hash_t>(*arr)) * fnv1a_prime)
 			: seed;
 	}

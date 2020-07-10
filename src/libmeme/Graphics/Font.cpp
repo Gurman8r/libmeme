@@ -102,11 +102,7 @@ namespace ml
 		// graphic
 		g.graphic = gfx::render_device::get_default()->create_texture2d
 		({
-			vec2i{}, {
-			gfx::format_rgba,
-			gfx::format_red,
-			gfx::type_unsigned_byte },
-			gfx::texture_flags_default
+			{}, {}, {}, { gfx::format_rgba, gfx::format_red }
 		});
 
 		// only load a texture for characters requiring a graphic

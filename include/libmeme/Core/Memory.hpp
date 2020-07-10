@@ -284,7 +284,7 @@ namespace ml
 	{
 		void operator()(T * addr) const noexcept
 		{
-			default_delete<>{}(addr);
+			memory::deallocate(addr);
 		}
 	};
 

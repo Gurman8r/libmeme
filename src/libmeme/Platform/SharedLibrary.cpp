@@ -11,6 +11,8 @@
 #		include <dlfcn.h>
 #	endif
 
+#else
+#	error ""
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

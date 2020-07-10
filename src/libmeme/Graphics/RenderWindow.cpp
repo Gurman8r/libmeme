@@ -36,12 +36,12 @@ namespace ml
 		}
 
 		// validate version
-		m_ws.ctxconfig.major = m_dev->get_info().major_version;
-		m_ws.ctxconfig.minor = m_dev->get_info().minor_version;
-		debug::info("using renderer version: {0}.{1}", m_ws.ctxconfig.major, m_ws.ctxconfig.minor);
+		m_wndcfg.ctxconfig.major = m_dev->get_info().major_version;
+		m_wndcfg.ctxconfig.minor = m_dev->get_info().minor_version;
+		debug::info("using renderer version: {0}.{1}", m_wndcfg.ctxconfig.major, m_wndcfg.ctxconfig.minor);
 
 		// create context
-		m_dev->set_active_context(m_ctx = m_dev->create_context(m_ws.ctxconfig));
+		m_dev->set_context(m_ctx = m_dev->create_context(m_wndcfg.ctxconfig));
 		
 		// setup states
 		for (auto const & cmd :
