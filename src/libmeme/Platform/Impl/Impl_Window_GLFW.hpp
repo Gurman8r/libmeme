@@ -100,9 +100,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
-		
-		static cursor_handle create_standard_cursor(int32_t value);
+		static void poll_events();
+
+		static void set_current_context(window_handle value);
+
+		static void set_swap_interval(int32_t value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static int32_t extension_supported(cstring value);
 
@@ -118,13 +122,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
+
+		static cursor_handle create_standard_cursor(int32_t value);
+
 		static void destroy_cursor(cursor_handle value);
-
-		static void poll_events();
-
-		static void set_current_context(window_handle value);
-
-		static void set_swap_interval(int32_t value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

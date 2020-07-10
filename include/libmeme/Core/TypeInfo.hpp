@@ -1,8 +1,77 @@
 #ifndef _ML_TYPE_INFO_HPP_
 #define _ML_TYPE_INFO_HPP_
 
-#include <libmeme/Core/PrettyFunction.hpp>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// Based on CTTI:
+// https://github.com/Manu343726/ctti
+// https://github.com/Manu343726/ctti/blob/master/include/ctti/detail/pretty_function.hpp
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include <libmeme/Core/Hash.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// ctti string class
+#ifndef ML_CTTI_STRING
+#define ML_CTTI_STRING std::basic_string_view<char,struct std::char_traits<char> >
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// pretty function
+#if defined(ML_cc_msvc)
+#	define ML_PRETTY_FUNCTION		__FUNCSIG__
+#	define ML_PRETTY_TYPE_PREFIX	"class " ML_stringify(ML_CTTI_STRING) " __cdecl ml::pretty_function::type<"
+#	define ML_PRETTY_TYPE_SUFFIX	">(void)"
+#	define ML_PRETTY_VALUE_PREFIX	"class " ML_stringify(ML_CTTI_STRING) " __cdecl ml::pretty_function::value<"
+#	define ML_PRETTY_VALUE_DELIM	"; T Value = "
+#	define ML_PRETTY_VALUE_SUFFIX	">(void)"
+#elif defined(ML_cc_clang)
+#	define ML_PRETTY_FUNCTION		__PRETTY_FUNCTION__
+#	define ML_PRETTY_TYPE_PREFIX	ML_stringify(ML_CTTI_STRING) " ml::pretty_function::type() [T = "
+#	define ML_PRETTY_TYPE_SUFFIX	"]"
+#	define ML_PRETTY_VALUE_PREFIX	ML_stringify(ML_CTTI_STRING) " ml::pretty_function::value() [T = "
+#	define ML_PRETTY_VALUE_DELIM	"; Value = "
+#	define ML_PRETTY_VALUE_SUFFIX	"]"
+#elif defined(ML_cc_gcc)
+#	define ML_PRETTY_FUNCTION		__PRETTY_FUNCTION__
+#	define ML_PRETTY_TYPE_PREFIX	"constexpr " ML_stringify(ML_CTTI_STRING) " ml::pretty_function::type() [with T = "
+#	define ML_PRETTY_TYPE_SUFFIX	"]"
+#	define ML_PRETTY_VALUE_PREFIX	"constexpr " ML_stringify(ML_CTTI_STRING) " ml::pretty_function::value() [with T = "
+#	define ML_PRETTY_VALUE_DELIM	"; Value = "
+#	define ML_PRETTY_VALUE_SUFFIX	"]"
+#else
+#	error Type information is not available.
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml::pretty_function
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_alias string = typename ML_CTTI_STRING;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class T
+	> ML_NODISCARD static constexpr string type()
+	{
+		return { ML_PRETTY_FUNCTION };
+	}
+
+	template <class T, T Value
+	> ML_NODISCARD static constexpr string value()
+	{
+		return { ML_PRETTY_FUNCTION };
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -135,6 +204,43 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	static_assert("tests"
+		&& nameof_v<bool>			== "bool"
+		&& nameof_v<int8_t>			== "signed char"
+		&& nameof_v<int16_t>		== "short"
+		&& nameof_v<int32_t>		== "int"
+		&& nameof_v<int64_t>		== "long long"
+		&& nameof_v<uint8_t>		== "unsigned char"
+		&& nameof_v<uint16_t>		== "unsigned short"
+		&& nameof_v<uint32_t>		== "unsigned int"
+		&& nameof_v<uint64_t>		== "unsigned long long"
+		&& nameof_v<float32_t>		== "float"
+		&& nameof_v<float64_t>		== "double"
+		&& nameof_v<float80_t>		== "long double"
+		&& nameof_v<char>			== "char"
+		&& nameof_v<wchar_t>		== "wchar_t"
+		&& nameof_v<char16_t>		== "char16_t"
+		&& nameof_v<char32_t>		== "char32_t"
+		&& nameof_v<cstring>		== "const char*"
+		&& nameof_v<cwstring>		== "const wchar_t*"
+		&& nameof_v<c16string>		== "const char16_t*"
+		&& nameof_v<c32string>		== "const char32_t*"
+		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
+		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
+		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
+		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
+	
+		, "test nameof<>");
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	template <class T> struct ML_NODISCARD typeof<T> final
 	{
 		constexpr typeof() noexcept = default;
@@ -265,36 +371,8 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	static_assert("tests"
-		&& nameof_v<bool>			== "bool"
-		&& nameof_v<int8_t>			== "signed char"
-		&& nameof_v<int16_t>		== "short"
-		&& nameof_v<int32_t>		== "int"
-		&& nameof_v<int64_t>		== "long long"
-		&& nameof_v<uint8_t>		== "unsigned char"
-		&& nameof_v<uint16_t>		== "unsigned short"
-		&& nameof_v<uint32_t>		== "unsigned int"
-		&& nameof_v<uint64_t>		== "unsigned long long"
-		&& nameof_v<float32_t>		== "float"
-		&& nameof_v<float64_t>		== "double"
-		&& nameof_v<float80_t>		== "long double"
-		&& nameof_v<char>			== "char"
-		&& nameof_v<wchar_t>		== "wchar_t"
-		&& nameof_v<char16_t>		== "char16_t"
-		&& nameof_v<char32_t>		== "char32_t"
-		&& nameof_v<cstring>		== "const char*"
-		&& nameof_v<cwstring>		== "const wchar_t*"
-		&& nameof_v<c16string>		== "const char16_t*"
-		&& nameof_v<c32string>		== "const char32_t*"
-		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
-		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
-		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
-		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
-	
-		, "test nameof<>");
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #endif // !_ML_TYPE_INFO_HPP_

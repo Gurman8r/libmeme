@@ -6,13 +6,9 @@
 
 #include <glfw/glfw3.h>
 
-#undef APIENTRY
-#ifdef APIENTRY
-#endif
-
-#include <libmeme/Platform/Native.hpp>
-
 #if defined(ML_os_windows)
+#	undef APIENTRY
+#	include <Windows.h>
 #	define GLFW_EXPOSE_NATIVE_WIN32
 #	include <glfw/glfw3native.h>
 #endif
@@ -59,11 +55,11 @@ namespace ml
 
 	glfw_window::~glfw_window() noexcept
 	{
+		static ML_defer(&){ glfwTerminate(); };
+
 		glfwDestroyWindow(m_window);
 
 		set_error_callback(nullptr);
-
-		static ML_defer{ glfwTerminate(); };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -434,7 +430,7 @@ namespace ml
 	pmr::vector<monitor_handle> const & glfw_window::get_monitors()
 	{
 		static pmr::vector<monitor_handle> temp{};
-		static ML_scope // once
+		static ML_scope(&) // once
 		{
 			if (int32_t count{}; GLFWmonitor ** monitors{ glfwGetMonitors(&count) })
 			{

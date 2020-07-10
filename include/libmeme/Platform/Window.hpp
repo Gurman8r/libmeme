@@ -97,9 +97,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept;
-		
-		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value) noexcept;
+		static void poll_events() noexcept;
+
+		static void set_current_context(window_handle value) noexcept;
+
+		static void set_swap_interval(int32_t value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static int32_t extension_supported(cstring value) noexcept;
 
@@ -115,13 +119,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept;
+
+		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value) noexcept;
+
 		static void destroy_cursor(cursor_handle value) noexcept;
-
-		static void poll_events() noexcept;
-
-		static void set_current_context(window_handle value) noexcept;
-
-		static void set_swap_interval(int32_t value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

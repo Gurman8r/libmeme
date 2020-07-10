@@ -28,10 +28,10 @@ namespace ml
 
 		static bool add_listener(hash_t type, event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 			
 			// insert listener into category
-			return value && inst.m_listeners[type].insert(value).second;
+			return value && self.m_listeners[type].insert(value).second;
 		}
 		
 		template <class Ev
@@ -46,10 +46,10 @@ namespace ml
 
 		static void fire_event(event const & ev) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 
 			// get category
-			if (auto const c{ inst.m_listeners.find(ev.ID) })
+			if (auto const c{ self.m_listeners.find(ev.ID) })
 			{
 				// for each listener
 				for (auto const & l : (*c->second))
@@ -72,12 +72,12 @@ namespace ml
 
 		static void remove_listener(hash_t type, event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 
 			if (!value) { return; }
 
 			// get category
-			if (auto const c{ inst.m_listeners.find(type) })
+			if (auto const c{ self.m_listeners.find(type) })
 			{
 				// get listener
 				if (auto const l{ c->second->find(value) }; l != c->second->end())
@@ -92,12 +92,12 @@ namespace ml
 
 		static void remove_listener(event_listener * value) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 
 			if (!value) { return; }
 
 			// for each category
-			inst.m_listeners.for_each([&](auto, auto & c) noexcept
+			self.m_listeners.for_each([&](auto, auto & c) noexcept
 			{
 				// get listener
 				if (auto const l{ c.find(value) }; l != c.end())
@@ -111,7 +111,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend base_type;
+		friend singleton;
 
 		~event_system() noexcept;
 

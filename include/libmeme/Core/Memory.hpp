@@ -120,7 +120,7 @@ namespace ml::util
 namespace ml
 {
 	// memory manager singleton
-	class ML_CORE_API memory final : public singleton<memory, true>
+	class ML_CORE_API memory final : public singleton<memory>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -162,13 +162,13 @@ namespace ml
 		// malloc
 		ML_NODISCARD static void * allocate(size_t size) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 
 			// allocate the requested bytes
-			byte_t * const data{ inst.m_allocator.allocate(size) };
+			byte_t * const data{ self.m_allocator.allocate(size) };
 
 			// create the record
-			return inst.m_records.insert(data, { inst.m_index++, size, data }).second->data;
+			return self.m_records.insert(data, { self.m_index++, size, data }).second->data;
 		}
 
 		// calloc
@@ -183,16 +183,16 @@ namespace ml
 		// free
 		static void deallocate(void * addr) noexcept
 		{
-			static auto & inst{ get_instance() };
+			static auto & self{ get_instance() };
 
 			// find the record
-			if (auto const it{ inst.m_records.find(addr) })
+			if (auto const it{ self.m_records.find(addr) })
 			{
 				// free the allocation
-				inst.m_allocator.deallocate(it->second->data, it->second->size);
+				self.m_allocator.deallocate(it->second->data, it->second->size);
 
 				// erase the record
-				inst.m_records.erase(it->first);
+				self.m_records.erase(it->first);
 			}
 		}
 
@@ -235,15 +235,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend base_type;
+		friend singleton;
 
 		~memory() noexcept;
-
-		static self_type * do_get_instance() noexcept
-		{
-			static self_type inst{};
-			return std::addressof(inst);
-		}
 
 		allocator_type			m_allocator	{};	// allocator
 		size_t					m_index		{};	// record index
@@ -275,7 +269,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ...> struct default_delete;
+	template <class ...
+	> struct default_delete;
 
 	template <> struct default_delete<>
 	{
@@ -289,14 +284,7 @@ namespace ml
 	{
 		void operator()(T * addr) const noexcept
 		{
-			if constexpr (std::is_base_of_v<T, trackable>)
-			{
-				delete addr;
-			}
-			else
-			{
-				memory::deallocate(addr);
-			}
+			default_delete<>{}(addr);
 		}
 	};
 

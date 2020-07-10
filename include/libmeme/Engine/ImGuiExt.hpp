@@ -218,7 +218,7 @@ namespace ml::gui
 		{
 			if (!open || (fn == (Fn)nullptr)) { return; }
 			ML_ImGui_ScopeID(this);
-			ML_defer{ ImGui::End(); };
+			ML_defer(&){ ImGui::End(); };
 			if (ImGui::Begin(title, &open, flags))
 			{
 				std::invoke(ML_forward(fn), ML_forward(args)...);

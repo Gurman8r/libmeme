@@ -67,7 +67,7 @@ namespace ml
 					gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 				})
 				{
-					std::invoke(cmd, m_window.get_device()->get_context().get());
+					std::invoke(cmd, m_window.get_render_context().get());
 				}
 			} break;
 

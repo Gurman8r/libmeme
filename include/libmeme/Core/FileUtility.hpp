@@ -12,7 +12,7 @@ namespace ml::util
 	> ML_NODISCARD static inline std::optional<Buf> get_file_contents(fs::path const & path)
 	{
 		std::basic_ifstream<Ch, std::char_traits<Ch>> file{ path, std::ios_base::binary };
-		ML_defer{ file.close(); };
+		ML_defer(&){ file.close(); };
 		if (!file) { return std::nullopt; }
 
 		Buf temp{};

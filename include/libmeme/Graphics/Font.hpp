@@ -43,9 +43,9 @@ namespace ml
 // font
 namespace ml
 {
-	ML_decl_handle(font_face	); // font face
-	ML_decl_handle(font_library	); // font library
-	ML_decl_handle(font_stroker	); // font stroker
+	ML_decl_handle(	font_face		); // font face handle
+	ML_decl_handle(	font_library	); // font library handle
+	ML_decl_handle(	font_stroker	); // font stroker handle
 
 	struct ML_GRAPHICS_API font final
 	{

@@ -6,13 +6,14 @@
 
 namespace ml
 {
+	ML_decl_handle(library_handle);
+
 	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using self_type			= typename shared_library;
-		using handle_type		= typename void *;
 		using symbol_table		= typename ds::map<hash_t, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -74,14 +75,14 @@ namespace ml
 
 		bool close();
 
-		void * get_symbol(cstring value);
+		void * read(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
 		> auto call(cstring method_name, Args && ... args) noexcept
 		{
-			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_symbol(method_name)) })
+			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(read(method_name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{
@@ -104,7 +105,7 @@ namespace ml
 
 		ML_NODISCARD operator bool() const noexcept { return this->good(); }
 
-		ML_NODISCARD auto handle() const noexcept -> handle_type const & { return m_handle; }
+		ML_NODISCARD auto handle() const noexcept -> library_handle const & { return m_handle; }
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
@@ -169,7 +170,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		handle_type		m_handle;
+		library_handle	m_handle;
 		fs::path		m_path;
 		symbol_table	m_symbols;
 

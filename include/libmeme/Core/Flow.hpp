@@ -24,9 +24,9 @@ namespace ml::impl
     }
 }
 
-// invoke body on enter
-#define ML_scope \
-    auto ML_anon = _ML_IMPL scope_tag{} + [&]() noexcept
+// scope
+#define ML_scope(...) \
+    auto ML_anon = _ML_IMPL scope_tag{} + [##__VA_ARGS__]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,9 +51,9 @@ namespace ml::impl
     }
 }
 
-// invoke body on exit
-#define ML_defer \
-    auto ML_anon = _ML_IMPL defer_tag{} + [&]() noexcept
+// defer
+#define ML_defer(...) \
+    auto ML_anon = _ML_IMPL defer_tag{} + [##__VA_ARGS__]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

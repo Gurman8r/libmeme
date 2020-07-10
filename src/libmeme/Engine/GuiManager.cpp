@@ -12,8 +12,8 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
 #define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
-#define ML_ImGui_Shutdown()				ML_scope{ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
-#define ML_ImGui_NewFrame()				ML_scope{ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
+#define ML_ImGui_Shutdown()				ML_scope(&){ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
+#define ML_ImGui_NewFrame()				ML_scope(&){ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
 #define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
 
 #else
@@ -223,7 +223,7 @@ namespace ml
 
 		// open file
 		std::ifstream file{ path };
-		ML_defer{ file.close(); };
+		ML_defer(&){ file.close(); };
 		if (!file) return false;
 
 		// style ref

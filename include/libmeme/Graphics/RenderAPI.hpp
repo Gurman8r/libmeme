@@ -5,7 +5,6 @@
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Platform/WindowAPI.hpp>
 #include <libmeme/Graphics/Image.hpp>
-#include <libmeme/Graphics/Vertex.hpp>
 #include <libmeme/Platform/ContextSettings.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +14,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	class	device			; // 
-	class	device_context	; // 
+	class	render_device	; // 
+	class	render_context	; // 
 	class	vertexarray		; // 
 	class	vertexbuffer	; // 
 	class	indexbuffer		; // 
@@ -29,9 +28,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_handle(	resource_id		); // resource handle
-	ML_decl_handle(	attribute_id	); // attribute location
-	ML_decl_handle(	uniform_id		); // uniform location
+	ML_decl_handle(	resource_id	); // object handle
+	ML_decl_handle(	location_id	); // binding handle
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -41,16 +39,10 @@ namespace ml::gfx
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class ...
-	> struct descriptor;
+	> struct import_settings;
 
-	template <> struct descriptor<	device_context	>;
-	template <> struct descriptor<	vertexarray		>;
-	template <> struct descriptor<	vertexbuffer	>;
-	template <> struct descriptor<	indexbuffer		>;
-	template <> struct descriptor<	texture2d		>;
-	template <> struct descriptor<	texturecube		>;
-	template <> struct descriptor<	framebuffer		>;
-	template <> struct descriptor<	shader			>;
+	template <class ...
+	> struct descriptor;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -585,15 +577,9 @@ namespace ml::gfx
 		using reverse_iterator			= typename storage_type::reverse_iterator;
 		using const_reverse_iterator	= typename storage_type::const_reverse_iterator;
 
-		static constexpr std::initializer_list<buffer_element> default_3d
-		{
-			{ vec3{}, "a_position"	},
-			{ vec3{}, "a_normal"	},
-			{ vec2{}, "a_texcoord"	},
-		};
-
-		buffer_layout(std::initializer_list<buffer_element> init = default_3d) noexcept
-			: m_elements{ init.begin(), init.end() }
+		template <class It
+		> buffer_layout(It first, It last) noexcept
+			: m_elements{ first, last }
 		{
 			uint32_t offset{};
 			for (auto & e : m_elements)
@@ -602,6 +588,17 @@ namespace ml::gfx
 				offset += e.size;
 				m_stride += e.size;
 			}
+		}
+
+		buffer_layout(std::initializer_list<buffer_element> init) noexcept
+			: buffer_layout{ init.begin(), init.end() }
+		{
+		}
+
+		template <size_t N
+		> buffer_layout(const buffer_element(&arr)[N]) noexcept
+			: buffer_layout{ &arr[0], &arr[N] }
+		{
 		}
 
 		ML_NODISCARD auto elements() const noexcept -> storage_type const & { return m_elements; }
@@ -658,8 +655,8 @@ namespace ml::gfx
 // device
 namespace ml::gfx
 {
-	// device descriptor
-	template <> struct ML_NODISCARD descriptor<device> final
+	// device runtime settings
+	template <> struct ML_NODISCARD descriptor<render_device> final
 	{
 		// version
 		pmr::string renderer, vendor, version;
@@ -680,53 +677,54 @@ namespace ml::gfx
 		pmr::string shading_language_version;
 	};
 
-	void from_json(json const & j, descriptor<device> & v) = delete; // NYI
+	void from_json(json const & j, descriptor<render_device> & v) = delete; // NYI
 
-	void to_json(json & j, descriptor<device> const & v) = delete; // NYI
+	void to_json(json & j, descriptor<render_device> const & v) = delete; // NYI
+
 
 	// base device
-	class ML_GRAPHICS_API device : public non_copyable, public trackable
+	class ML_GRAPHICS_API render_device : public non_copyable, public trackable
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static device * g_device; // pointer to default device
+		static render_device * g_device; // pointer to default device
 
 	protected:
-		friend class std::unique_ptr<device, default_delete<device>>;
+		friend class std::unique_ptr<render_device, default_delete<render_device>>;
 
-		virtual ~device() override = default;
-
-	public:
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static device * create() noexcept;
-
-		static void destroy(device * value) noexcept;
-
-		ML_NODISCARD static device * get_default() noexcept { return g_device; }
-
-		static device * set_default(device * value) noexcept { return g_device = value; }
+		virtual ~render_device() override = default;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_context(shared<device_context> const & value) noexcept = 0;
+		ML_NODISCARD static render_device * create() noexcept;
 
-		ML_NODISCARD virtual shared<device_context> const & get_context() const noexcept = 0;
+		static void destroy(render_device * value) noexcept;
+
+		ML_NODISCARD static render_device * get_default() noexcept { return g_device; }
+
+		static render_device * set_default(render_device * value) noexcept { return g_device = value; }
+
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void set_active_context(shared<render_context> const & value) noexcept = 0;
+
+		ML_NODISCARD virtual shared<render_context> const & get_active_context() const noexcept = 0;
 
 		ML_NODISCARD virtual resource_id get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual descriptor<device> const & get_info() const noexcept = 0;
+		ML_NODISCARD virtual descriptor<render_device> const & get_info() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept = 0;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual shared<device_context> create_context(context_settings const & cs) noexcept = 0;
+		ML_NODISCARD virtual shared<render_context> create_context(context_settings const & cs) noexcept = 0;
 
-		ML_NODISCARD virtual shared<vertexarray> create_vertexarray(uint32_t mode) noexcept = 0;
+		ML_NODISCARD virtual shared<vertexarray> create_vertexarray(uint32_t prim) noexcept = 0;
 
 		ML_NODISCARD virtual shared<vertexbuffer> create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept = 0;
 
@@ -740,7 +738,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(descriptor<shader> const & desc) noexcept = 0;
+		ML_NODISCARD virtual shared<shader> create_shader(import_settings<shader> const & desc) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -758,14 +756,14 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr typeof<> g_base_type{ typeof_v<device_child<Derived>> };
+		static constexpr typeof<> s_base_type{ typeof_v<device_child<Derived>> };
 
-		device * const m_parent;
+		render_device * const m_parent;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit device_child(device * parent) noexcept : m_parent{ parent }
+		explicit device_child(render_device * parent) noexcept : m_parent{ parent }
 		{
 		}
 
@@ -777,9 +775,9 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD inline typeof<> const & get_base_type() const noexcept { return g_base_type; }
+		ML_NODISCARD inline typeof<> const & get_base_type() const noexcept { return s_base_type; }
 
-		ML_NODISCARD inline device * get_device() const noexcept { return m_parent; }
+		ML_NODISCARD inline render_device * get_device() const noexcept { return m_parent; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -805,19 +803,19 @@ namespace ml::gfx
 			| clear_stencil,
 	};
 
-	// alpha mode
-	struct ML_NODISCARD alpha_mode final
+	// alpha state
+	struct ML_NODISCARD alpha_state final
 	{
 		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_greater };
 		float_t		ref		{ 0.001f };
 	};
 
-	// blend mode
-	struct ML_NODISCARD blend_mode final
+	// blend state
+	struct ML_NODISCARD blend_state final
 	{
-		bool	enabled	{ true };
-		color	color	{ colors::white };
+		bool		enabled	{ true };
+		color		color	{ colors::white };
 		uint32_t
 			color_equation	{ equation_add },
 			color_sfactor	{ factor_src_alpha },
@@ -827,24 +825,24 @@ namespace ml::gfx
 			alpha_dfactor	{ color_dfactor };
 	};
 
-	// cull mode
-	struct ML_NODISCARD cull_mode final
+	// cull state
+	struct ML_NODISCARD cull_state final
 	{
 		bool		enabled	{ true };
 		uint32_t	facet	{ facet_back };
 		uint32_t	order	{ order_ccw };
 	};
 
-	// depth mode
-	struct ML_NODISCARD depth_mode final
+	// depth state
+	struct ML_NODISCARD depth_state final
 	{
 		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_less };
 		vec2		range	{ 0.f, 1.f };
 	};
 
-	// stencil mode (WIP)
-	struct ML_NODISCARD stencil_mode final
+	// stencil state (WIP)
+	struct ML_NODISCARD stencil_state final
 	{
 		bool		enabled	{ true };
 		uint32_t	pred	{ predicate_always };
@@ -852,8 +850,8 @@ namespace ml::gfx
 		uint32_t	mask	{ 0xffffffff };
 	};
 
-	// device context descriptor
-	template <> struct ML_NODISCARD descriptor<device_context> final
+	// device context import settings
+	template <> struct ML_NODISCARD import_settings<render_context> final
 	{
 		pmr::string	name		{ "Device Context" };
 		int32_t		client		{ context_api_unknown };
@@ -868,7 +866,7 @@ namespace ml::gfx
 		int32_t		release		{};
 	};
 
-	static void from_json(json const & j, descriptor<device_context> & v)
+	static void from_json(json const & j, import_settings<render_context> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["client"		].get_to(v.client);
@@ -883,7 +881,7 @@ namespace ml::gfx
 		j["release"		].get_to(v.release);
 	}
 
-	static void to_json(json & j, descriptor<device_context> const & v)
+	static void to_json(json & j, import_settings<render_context> const & v)
 	{
 		j["name"		] = v.name;
 		j["client"		] = v.client;
@@ -898,25 +896,26 @@ namespace ml::gfx
 		j["release"		] = v.release;
 	}
 
+
 	// base device context
-	class ML_GRAPHICS_API device_context : public device_child<device_context>
+	class ML_GRAPHICS_API render_context : public device_child<render_context>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static auto create(context_settings const & cs) noexcept
 		{
-			return device::get_default()->create_context(cs);
+			return render_device::get_default()->create_context(cs);
 		}
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit device_context(device * parent) noexcept : device_child{ parent }
+		explicit render_context(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
-		virtual ~device_context() override = default;
+		virtual ~render_context() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -928,33 +927,33 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual alpha_mode get_alpha_mode() const = 0;
+		ML_NODISCARD virtual alpha_state get_alpha_state() const = 0;
 		
-		ML_NODISCARD virtual blend_mode get_blend_mode() const = 0;
+		ML_NODISCARD virtual blend_state get_blend_state() const = 0;
 
 		ML_NODISCARD virtual color get_clear_color() const = 0;
 
-		ML_NODISCARD virtual cull_mode get_cull_mode() const = 0;
+		ML_NODISCARD virtual cull_state get_cull_state() const = 0;
 
-		ML_NODISCARD virtual depth_mode get_depth_mode() const = 0;
+		ML_NODISCARD virtual depth_state get_depth_state() const = 0;
 
-		ML_NODISCARD virtual stencil_mode get_stencil_mode() const = 0;
+		ML_NODISCARD virtual stencil_state get_stencil_state() const = 0;
 
 		ML_NODISCARD virtual int_rect get_viewport() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_alpha_mode(alpha_mode const & value) = 0;
+		virtual void set_alpha_state(alpha_state const & value) = 0;
 		
-		virtual void set_blend_mode(blend_mode const & value) = 0;
+		virtual void set_blend_state(blend_state const & value) = 0;
 
 		virtual void set_clear_color(color const & value) = 0;
 
-		virtual void set_cull_mode(cull_mode const & value) = 0;
+		virtual void set_cull_state(cull_state const & value) = 0;
 
-		virtual void set_depth_mode(depth_mode const & value) = 0;
+		virtual void set_depth_state(depth_state const & value) = 0;
 
-		virtual void set_stencil_mode(stencil_mode const & value) = 0;
+		virtual void set_stencil_state(stencil_state const & value) = 0;
 
 		virtual void set_viewport(int_rect const & bounds) = 0;
 
@@ -964,9 +963,9 @@ namespace ml::gfx
 
 		virtual void draw(shared<vertexarray> const & value) = 0;
 
-		virtual void draw_arrays(uint32_t mode, size_t first, size_t count) = 0;
+		virtual void draw_arrays(uint32_t prim, size_t first, size_t count) = 0;
 
-		virtual void draw_indexed(uint32_t mode, size_t count) = 0;
+		virtual void draw_indexed(uint32_t prim, size_t count) = 0;
 
 		virtual void flush() = 0;
 
@@ -988,23 +987,23 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void upload(uniform_id loc, bool value) = 0;
+		virtual void upload(location_id loc, bool value) = 0;
 
-		virtual void upload(uniform_id loc, int32_t value) = 0;
+		virtual void upload(location_id loc, int32_t value) = 0;
 
-		virtual void upload(uniform_id loc, float_t value) = 0;
+		virtual void upload(location_id loc, float_t value) = 0;
 
-		virtual void upload(uniform_id loc, vec2f const & value) = 0;
+		virtual void upload(location_id loc, vec2f const & value) = 0;
 
-		virtual void upload(uniform_id loc, vec3f const & value) = 0;
+		virtual void upload(location_id loc, vec3f const & value) = 0;
 
-		virtual void upload(uniform_id loc, vec4f const & value) = 0;
+		virtual void upload(location_id loc, vec4f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat2f const & value) = 0;
+		virtual void upload(location_id loc, mat2f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat3f const & value) = 0;
+		virtual void upload(location_id loc, mat3f const & value) = 0;
 
-		virtual void upload(uniform_id loc, mat4f const & value) = 0;
+		virtual void upload(location_id loc, mat4f const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -1015,33 +1014,34 @@ namespace ml::gfx
 // vertexarray
 namespace ml::gfx
 {
-	// vertexarray descriptor
-	template <> struct ML_NODISCARD descriptor<vertexarray> final
+	// vertexarray import settings
+	template <> struct ML_NODISCARD import_settings<vertexarray> final
 	{
-		pmr::string	name{ "Vertexarray" };
+		pmr::string	name{ "Vertex Array" };
 	};
 
-	static void from_json(json const & j, descriptor<vertexarray> & v)
+	static void from_json(json const & j, import_settings<vertexarray> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, descriptor<vertexarray> const & v)
+	static void to_json(json & j, import_settings<vertexarray> const & v)
 	{
 		j["name"] = v.name;
 	}
+
 
 	// base vertexarray
 	class ML_GRAPHICS_API vertexarray : public device_child<vertexarray>
 	{
 	public:
-		ML_NODISCARD static auto create(uint32_t mode = primitive_triangles) noexcept
+		ML_NODISCARD static auto create(uint32_t prim = primitive_triangles) noexcept
 		{
-			return device::get_default()->create_vertexarray(mode);
+			return render_device::get_default()->create_vertexarray(prim);
 		}
 
 	public:
-		explicit vertexarray(device * parent) noexcept : device_child{ parent }
+		explicit vertexarray(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1054,23 +1054,27 @@ namespace ml::gfx
 	public:
 		virtual void add_vertices(shared<vertexbuffer> const & value) = 0;
 
+		virtual void set_layout(buffer_layout const & value) = 0;
+
 		virtual void set_indices(shared<indexbuffer> const & value) = 0;
+
+		ML_NODISCARD virtual buffer_layout const & get_layout() const noexcept = 0;
 
 		ML_NODISCARD virtual shared<indexbuffer> const & get_indices() const noexcept = 0;
 
-		ML_NODISCARD virtual uint32_t get_mode() const noexcept = 0;
+		ML_NODISCARD virtual uint32_t get_primitive() const noexcept = 0;
 		
 		ML_NODISCARD virtual pmr::vector<shared<vertexbuffer>> const & get_vertices() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_vertexarray(this);
+			get_device()->get_active_context()->bind_vertexarray(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_vertexarray(nullptr);
+			get_device()->get_active_context()->bind_vertexarray(nullptr);
 		}
 	};
 }
@@ -1080,24 +1084,25 @@ namespace ml::gfx
 // vertexbuffer
 namespace ml::gfx
 {
-	// vertexbuffer descriptor
-	template <> struct ML_NODISCARD descriptor<vertexbuffer> final
+	// vertexbuffer import settings
+	template <> struct ML_NODISCARD import_settings<vertexbuffer> final
 	{
-		pmr::string	name	{ "Vertexbuffer" };
+		pmr::string	name	{ "Vertex Buffer" };
 		uint32_t	usage	{ usage_static };
 	};
 
-	static void from_json(json const & j, descriptor<vertexbuffer> & v)
+	static void from_json(json const & j, import_settings<vertexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 		j["usage"].get_to(v.usage);
 	}
 
-	static void to_json(json & j, descriptor<vertexbuffer> const & v)
+	static void to_json(json & j, import_settings<vertexbuffer> const & v)
 	{
 		j["name"] = v.name;
 		j["usage"] = v.usage;
 	}
+
 
 	// base vertexbuffer
 	class ML_GRAPHICS_API vertexbuffer : public device_child<vertexbuffer>
@@ -1105,7 +1110,7 @@ namespace ml::gfx
 	public:
 		ML_NODISCARD static auto create(uint32_t usage, size_t count, address_t data) noexcept
 		{
-			return device::get_default()->create_vertexbuffer(usage, count, data);
+			return render_device::get_default()->create_vertexbuffer(usage, count, data);
 		}
 
 		ML_NODISCARD static auto create(size_t count, address_t data = {}) noexcept
@@ -1114,7 +1119,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit vertexbuffer(device * parent) noexcept : device_child{ parent }
+		explicit vertexbuffer(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1129,25 +1134,21 @@ namespace ml::gfx
 	public:
 		virtual void set_data(size_t count, address_t data, size_t offset = 0) = 0;
 
-		virtual void set_layout(buffer_layout const & value) = 0;
-
 		ML_NODISCARD virtual buffer_t const & get_buffer() const noexcept = 0;
 
 		ML_NODISCARD virtual size_t get_count() const noexcept = 0;
-
-		ML_NODISCARD virtual buffer_layout const & get_layout() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_usage() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_vertexbuffer(this);
+			get_device()->get_active_context()->bind_vertexbuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_vertexbuffer(nullptr);
+			get_device()->get_active_context()->bind_vertexbuffer(nullptr);
 		}
 	};
 }
@@ -1157,21 +1158,22 @@ namespace ml::gfx
 // indexbuffer
 namespace ml::gfx
 {
-	// indexbuffer descriptor
-	template <> struct ML_NODISCARD descriptor<indexbuffer> final
+	// indexbuffer import settings
+	template <> struct ML_NODISCARD import_settings<indexbuffer> final
 	{
-		pmr::string	name{ "Indexbuffer" };
+		pmr::string	name{ "Index Buffer" };
 	};
 
-	static void from_json(json const & j, descriptor<indexbuffer> & v)
+	static void from_json(json const & j, import_settings<indexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, descriptor<indexbuffer> const & v)
+	static void to_json(json & j, import_settings<indexbuffer> const & v)
 	{
 		j["name"] = v.name;
 	}
+
 
 	// base indexbuffer
 	class ML_GRAPHICS_API indexbuffer : public device_child<indexbuffer>
@@ -1179,7 +1181,7 @@ namespace ml::gfx
 	public:
 		ML_NODISCARD static auto create(uint32_t usage, size_t count, address_t data) noexcept
 		{
-			return device::get_default()->create_indexbuffer(usage, count, data);
+			return render_device::get_default()->create_indexbuffer(usage, count, data);
 		}
 
 		ML_NODISCARD static auto create(size_t count, address_t data = {}) noexcept
@@ -1188,7 +1190,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit indexbuffer(device * parent) noexcept : device_child{ parent }
+		explicit indexbuffer(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1212,12 +1214,12 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_indexbuffer(this);
+			get_device()->get_active_context()->bind_indexbuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_indexbuffer(nullptr);
+			get_device()->get_active_context()->bind_indexbuffer(nullptr);
 		}
 	};
 }
@@ -1231,7 +1233,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture : public device_child<texture>
 	{
 	public:
-		explicit texture(device * parent) noexcept : device_child{ parent }
+		explicit texture(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1271,12 +1273,12 @@ namespace ml::gfx
 	public:
 		inline void bind(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_context()->bind_texture(this, slot);
+			get_device()->get_active_context()->bind_texture(this, slot);
 		}
 
 		inline void unbind(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_context()->bind_texture(nullptr, slot);
+			get_device()->get_active_context()->bind_texture(nullptr, slot);
 		}
 	};
 }
@@ -1286,10 +1288,10 @@ namespace ml::gfx
 // texture2d
 namespace ml::gfx
 {
-	// texture2d descriptor
-	template <> struct ML_NODISCARD descriptor<texture2d> final
+	// texture2d import settings
+	template <> struct ML_NODISCARD import_settings<texture2d> final
 	{
-		pmr::string	name		{ "Texture2D" };
+		pmr::string	name		{ "Texture 2D" };
 		fs::path	path		{};
 		vec2i		size		{};
 		uint32_t	color_format{ format_rgba };
@@ -1300,7 +1302,7 @@ namespace ml::gfx
 					mipmapped	{ false };
 	};
 
-	static void from_json(json const & j, descriptor<texture2d> & v)
+	static void from_json(json const & j, import_settings<texture2d> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["path"		].get_to(v.path);
@@ -1313,7 +1315,7 @@ namespace ml::gfx
 		j["mipmapped"	].get_to(v.mipmapped);
 	}
 
-	static void to_json(json & j, descriptor<texture2d> const & v)
+	static void to_json(json & j, import_settings<texture2d> const & v)
 	{
 		j["name"		] = v.name;
 		j["path"		] = v.path;
@@ -1326,13 +1328,14 @@ namespace ml::gfx
 		j["mipmapped"	] = v.mipmapped;
 	}
 
+
 	// base texture2d
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
 		ML_NODISCARD static auto create(texopts const & opts, address_t data = {}) noexcept
 		{
-			return device::get_default()->create_texture2d(opts, data);
+			return render_device::get_default()->create_texture2d(opts, data);
 		}
 
 		ML_NODISCARD static auto create(image const & img, int32_t flags = texture_flags_default) noexcept
@@ -1346,7 +1349,7 @@ namespace ml::gfx
 		}
 
 	public:
-		explicit texture2d(device * parent) noexcept : texture{ parent }
+		explicit texture2d(render_device * parent) noexcept : texture{ parent }
 		{
 		}
 
@@ -1386,10 +1389,10 @@ namespace ml::gfx
 // texturecube
 namespace ml::gfx
 {
-	// texturecube descriptor
-	template <> struct ML_NODISCARD descriptor<texturecube> final
+	// texturecube import settings
+	template <> struct ML_NODISCARD import_settings<texturecube> final
 	{
-		pmr::string				name		{ "TextureCube" };
+		pmr::string				name		{ "Texture Cube" };
 		ds::array<fs::path, 6>	paths		{};
 		vec2i					size		{};
 		uint32_t				color_format{ format_rgba };
@@ -1400,7 +1403,7 @@ namespace ml::gfx
 								mipmapped	{ false };
 	};
 
-	static void from_json(json const & j, descriptor<texturecube> & v)
+	static void from_json(json const & j, import_settings<texturecube> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["paths"		].get_to(v.paths);
@@ -1413,7 +1416,7 @@ namespace ml::gfx
 		j["mipmapped"	].get_to(v.mipmapped);
 	}
 
-	static void to_json(json & j, descriptor<texturecube> const & v)
+	static void to_json(json & j, import_settings<texturecube> const & v)
 	{
 		j["name"		] = v.name;
 		j["paths"		] = v.paths;
@@ -1426,17 +1429,18 @@ namespace ml::gfx
 		j["mipmapped"	] = v.mipmapped;
 	}
 
+
 	// base texturecube
 	class ML_GRAPHICS_API texturecube : public texture
 	{
 	public:
 		ML_NODISCARD static auto create(texopts const & opts) noexcept
 		{
-			return device::get_default()->create_texturecube(opts);
+			return render_device::get_default()->create_texturecube(opts);
 		}
 
 	public:
-		explicit texturecube(device * parent) noexcept : texture{ parent }
+		explicit texturecube(render_device * parent) noexcept : texture{ parent }
 		{
 		}
 
@@ -1464,10 +1468,11 @@ namespace ml::gfx
 // framebuffer
 namespace ml::gfx
 {
-	// framebuffer descriptor
-	template <> struct ML_NODISCARD descriptor<framebuffer> final
+	// framebuffer import settings
+	template <> struct ML_NODISCARD import_settings<framebuffer> final
 	{
-		pmr::string	name			{ "Framebuffer" };
+		pmr::string	name			{ "Frame Buffer" };
+		vec2i		size			{};
 		vec4i		bits_per_pixel	{ 8, 8, 8, 8 };
 		int32_t		stencil_bits	{ 24 },
 					depth_bits		{ 8 };
@@ -1475,9 +1480,10 @@ namespace ml::gfx
 		bool		stereo			{};
 	};
 
-	static void from_json(json const & j, descriptor<framebuffer> & v)
+	static void from_json(json const & j, import_settings<framebuffer> & v)
 	{
 		j["name"			].get_to(v.name);
+		j["size"			].get_to(v.size);
 		j["bits_per_pixel"	].get_to(v.bits_per_pixel);
 		j["stencil_bits"	].get_to(v.stencil_bits);
 		j["depth_bits"		].get_to(v.depth_bits);
@@ -1485,9 +1491,10 @@ namespace ml::gfx
 		j["stereo"			].get_to(v.stereo);
 	}
 
-	static void to_json(json & j, descriptor<framebuffer> const & v)
+	static void to_json(json & j, import_settings<framebuffer> const & v)
 	{
 		j["name"			] = v.name;
+		j["size"			] = v.size;
 		j["bits_per_pixel"	] = v.bits_per_pixel;
 		j["stencil_bits"	] = v.stencil_bits;
 		j["depth_bits"		] = v.depth_bits;
@@ -1495,17 +1502,18 @@ namespace ml::gfx
 		j["stereo"			] = v.stereo;
 	}
 
+
 	// base framebuffer
 	class ML_GRAPHICS_API framebuffer : public device_child<framebuffer>
 	{
 	public:
 		ML_NODISCARD static auto create(texopts const & opts) noexcept
 		{
-			return device::get_default()->create_framebuffer(opts);
+			return render_device::get_default()->create_framebuffer(opts);
 		}
 
 	public:
-		explicit framebuffer(device * parent) noexcept : device_child{ parent }
+		explicit framebuffer(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1533,17 +1541,17 @@ namespace ml::gfx
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_framebuffer(this);
+			get_device()->get_active_context()->bind_framebuffer(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_framebuffer(nullptr);
+			get_device()->get_active_context()->bind_framebuffer(nullptr);
 		}
 
 		inline void bind_texture(uint32_t slot = 0) const noexcept
 		{
-			get_device()->get_context()->bind_texture
+			get_device()->get_active_context()->bind_texture
 			(
 				get_color_attachments()[(size_t)slot].get(), slot
 			);
@@ -1562,11 +1570,11 @@ namespace ml::gfx
 	public:
 		ML_NODISCARD static auto create() noexcept
 		{
-			return device::get_default()->create_program();
+			return render_device::get_default()->create_program();
 		}
 
 	public:
-		explicit program(device * parent) noexcept : device_child{ parent }
+		explicit program(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1599,7 +1607,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual bool link() = 0;
 
-		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
+		virtual bool bind_uniform(cstring name, std::function<void(location_id)> const & fn) = 0;
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
@@ -1607,26 +1615,26 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual ds::map<uint32_t, pmr::vector<pmr::string>> const & get_source() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<location_id, shared<texture>> const & get_textures() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<hash_t, location_id> const & get_uniforms() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_program(this);
+			get_device()->get_active_context()->bind_program(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_program(nullptr);
+			get_device()->get_active_context()->bind_program(nullptr);
 		}
 
 		inline void bind_textures() const noexcept
 		{
 			uint32_t slot{};
-			get_textures().for_each([&, &ctx = get_device()->get_context()
-			](uniform_id loc, shared<texture> const & tex) noexcept
+			get_textures().for_each([&, &ctx = get_device()->get_active_context()
+			](location_id loc, shared<texture> const & tex) noexcept
 			{
 				ctx->bind_texture(tex.get(), slot);
 
@@ -1636,7 +1644,7 @@ namespace ml::gfx
 
 		template <class T> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return bind_uniform(name, [&](uniform_id loc) noexcept
+			return bind_uniform(name, [&](location_id loc) noexcept
 			{
 				if constexpr (std::is_convertible_v<T, shared<texture>>)
 				{
@@ -1644,13 +1652,13 @@ namespace ml::gfx
 				}
 				else
 				{
-					get_device()->get_context()->upload(loc, ML_forward(value));
+					get_device()->get_active_context()->upload(loc, ML_forward(value));
 				}
 			});
 		}
 
 	protected:
-		virtual void do_cache_texture(uniform_id loc, shared<texture> const & value) noexcept = 0;
+		virtual void do_cache_texture(location_id loc, shared<texture> const & value) noexcept = 0;
 	};
 }
 
@@ -1659,8 +1667,8 @@ namespace ml::gfx
 // shader
 namespace ml::gfx
 {
-	// shader descriptor
-	template <> struct ML_NODISCARD descriptor<shader> final
+	// shader import settings
+	template <> struct ML_NODISCARD import_settings<shader> final
 	{
 		using source_t = pmr::vector<pmr::string>;
 
@@ -1670,7 +1678,7 @@ namespace ml::gfx
 		source_t	code	{};
 	};
 
-	static void from_json(json const & j, descriptor<shader> & v)
+	static void from_json(json const & j, import_settings<shader> & v)
 	{
 		j["name"].get_to(v.name);
 		j["path"].get_to(v.path);
@@ -1678,7 +1686,7 @@ namespace ml::gfx
 		j["code"].get_to(v.code);
 	}
 
-	static void to_json(json & j, descriptor<shader> const & v)
+	static void to_json(json & j, import_settings<shader> const & v)
 	{
 		j["name"] = v.name;
 		j["path"] = v.path;
@@ -1686,17 +1694,18 @@ namespace ml::gfx
 		j["code"] = v.code;
 	}
 
+
 	// base shader
 	class ML_GRAPHICS_API shader : public device_child<shader>
 	{
 	public:
-		ML_NODISCARD static auto create(descriptor<shader> const & desc) noexcept
+		ML_NODISCARD static auto create(import_settings<shader> const & desc) noexcept
 		{
-			return device::get_default()->create_shader(desc);
+			return render_device::get_default()->create_shader(desc);
 		}
 
 	public:
-		explicit shader(device * parent) noexcept : device_child{ parent }
+		explicit shader(render_device * parent) noexcept : device_child{ parent }
 		{
 		}
 
@@ -1709,76 +1718,76 @@ namespace ml::gfx
 	public:
 		virtual bool compile(uint32_t type, size_t count, cstring * str) = 0;
 
-		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
+		virtual bool bind_uniform(cstring name, std::function<void(location_id)> const & fn) = 0;
 
 		ML_NODISCARD virtual pmr::string const & get_info_log() const noexcept = 0;
 
 		ML_NODISCARD virtual pmr::vector<pmr::string> const & get_source() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<location_id, shared<texture>> const & get_textures() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
 		{
-			get_device()->get_context()->bind_shader(this);
+			get_device()->get_active_context()->bind_shader(this);
 		}
 
 		inline void unbind() const noexcept
 		{
-			get_device()->get_context()->bind_shader(nullptr);
+			get_device()->get_active_context()->bind_shader(nullptr);
 		}
 
 		inline void bind_textures() noexcept
 		{
 			uint32_t slot{};
-			get_textures().for_each([&](uniform_id loc, shared<texture> const & tex) noexcept
+			get_textures().for_each([&](location_id loc, shared<texture> const & tex) noexcept
 			{
 				do_upload(loc, tex, slot++);
 			});
 		}
 
-		template <class T, class ... Args
-		> bool set_uniform(cstring name, T && value, Args && ... args) noexcept
+		template <class T, class ... Extra
+		> bool set_uniform(cstring name, T && value, Extra && ... extra) noexcept
 		{
-			return bind_uniform(name, [&](uniform_id loc) noexcept
+			return bind_uniform(name, [&](location_id loc) noexcept
 			{
 				if constexpr (std::is_convertible_v<T, shared<texture>>)
 				{
-					do_cache(loc, ML_forward(value), ML_forward(args)...);
+					do_cache(loc, ML_forward(value));
 				}
 				else
 				{
-					do_upload(ML_forward(value), ML_forward(args)...);
+					do_upload(ML_forward(value), ML_forward(extra)...);
 				}
 			});
 		}
 
 	protected:
-		virtual void do_cache(uniform_id loc, shared<texture> const & value) = 0;
+		virtual void do_cache(location_id loc, shared<texture> const & value) = 0;
 
-		virtual void do_upload(uniform_id loc, bool value) = 0;
+		virtual void do_upload(location_id loc, bool value) = 0;
 
-		virtual void do_upload(uniform_id loc, int32_t value) = 0;
+		virtual void do_upload(location_id loc, int32_t value) = 0;
 
-		virtual void do_upload(uniform_id loc, uint32_t value) = 0;
+		virtual void do_upload(location_id loc, uint32_t value) = 0;
 
-		virtual void do_upload(uniform_id loc, float_t value) = 0;
+		virtual void do_upload(location_id loc, float_t value) = 0;
 
-		virtual void do_upload(uniform_id loc, vec2f const & value) = 0;
+		virtual void do_upload(location_id loc, vec2f const & value) = 0;
 
-		virtual void do_upload(uniform_id loc, vec3f const & value) = 0;
+		virtual void do_upload(location_id loc, vec3f const & value) = 0;
 
-		virtual void do_upload(uniform_id loc, vec4f const & value) = 0;
+		virtual void do_upload(location_id loc, vec4f const & value) = 0;
 
-		virtual void do_upload(uniform_id loc, mat2f const & value, bool transpose = false) = 0;
+		virtual void do_upload(location_id loc, mat2f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(uniform_id loc, mat3f const & value, bool transpose = false) = 0;
+		virtual void do_upload(location_id loc, mat3f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(uniform_id loc, mat4f const & value, bool transpose = false) = 0;
+		virtual void do_upload(location_id loc, mat4f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot = 0) = 0;
+		virtual void do_upload(location_id loc, shared<texture> const & value, uint32_t slot = 0) = 0;
 	};
 }
 

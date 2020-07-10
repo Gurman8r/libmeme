@@ -26,7 +26,11 @@ namespace ml
 
 		application(window_settings const & ws, allocator_type alloc = {}) noexcept;
 
-		~application() noexcept override;
+		virtual ~application() noexcept override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void on_event(event const & ev) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,32 +40,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void on_event(event const & ev) override;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		plugin_handle load_plugin(fs::path const & path);
-
 		bool free_plugin(plugin_handle value);
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD auto get_frame_count() const noexcept -> uint64_t { return m_frame_count; }
-
-		ML_NODISCARD auto get_frame_rate() const noexcept -> float_t { return m_frame_rate; }
-
-		ML_NODISCARD auto get_frame_time() const noexcept -> duration { return m_frame_time; }
+		plugin_handle load_plugin(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		timer					m_loop_timer	{ false };
-		duration				m_frame_time	{};
-		uint64_t				m_frame_count	{};
-		float_t					m_frame_rate	{};
-		float_t					m_fps_accum		{};
-		size_t					m_fps_index		{};
-		pmr::vector<float_t>	m_fps_times		{ 120, allocator_type{} };
+		struct // performance
+		{
+			using fps_times_t = pmr::vector<float_t>;
+
+			timer		loop_timer	{ false };
+			duration	delta_time	{};
+			uint64_t	frame_count	{};
+			float_t		frame_rate	{};
+			float_t		fps_accum	{};
+			size_t		fps_index	{};
+			fps_times_t	fps_times	{ 120, allocator_type{} };
+		}
+		m_perf;
 		
 		ImGuiContext * m_imgui{};
 

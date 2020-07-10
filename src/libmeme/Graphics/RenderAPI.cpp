@@ -20,18 +20,18 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	device * device::g_device{};
+	render_device * render_device::g_device{};
 
-	device * device::create() noexcept
+	render_device * render_device::create() noexcept
 	{
-		device * temp{ new impl_device{} };
+		render_device * temp{ new impl_device{} };
 
 		if (!g_device) { set_default(temp); }
 
 		return temp;
 	}
 
-	void device::destroy(device * value) noexcept
+	void render_device::destroy(render_device * value) noexcept
 	{
 		if (!value) { value = g_device; }
 

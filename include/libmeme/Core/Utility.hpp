@@ -82,10 +82,12 @@ namespace ml::util
 	template <class T
 	> constexpr bool is_integral_or_floating_point_v
 	{
-		std::is_enum_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>
+		std::is_integral_v<T> ||
+		std::is_floating_point_v<T> ||
+		std::is_same_v<T, std::byte>
 	};
 
-	// requires To is trivially default constructible and is copy/move constructible
+	// requires To is trivially default constructible and is copy or move constructible
 	template <class To, class From
 	> static constexpr bool is_trivial_conversion_v
 	{

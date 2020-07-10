@@ -34,7 +34,7 @@ namespace ml
 		// open scene
 		Assimp::Importer _ai;
 		aiScene const * s{ _ai.ReadFile(path.string().c_str(), flags) };
-		ML_defer{ _ai.FreeScene(); };
+		ML_defer(&){ _ai.FreeScene(); };
 		if (!s) { return verts; }
 
 		// for each mesh

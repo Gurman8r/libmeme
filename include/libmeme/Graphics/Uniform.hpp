@@ -136,7 +136,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> ML_NODISCARD decltype(auto) get() const noexcept
+		> ML_NODISCARD auto get() const noexcept
 		{
 			if constexpr (is_sampler_ish<T>)
 			{
@@ -225,7 +225,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type				= typename ds::set<uniform>;
+		using storage_type				= typename _ML_DS set<uniform>;
 		using iterator					= typename storage_type::iterator;
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;

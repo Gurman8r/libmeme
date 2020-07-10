@@ -2,7 +2,7 @@
 #include <libmeme/Engine/API_Embed.hpp>
 
 // LIBMEME
-namespace ml
+namespace ml::embed
 {
 	PYBIND11_EMBEDDED_MODULE(libmeme, m)
 	{
@@ -386,7 +386,7 @@ namespace ml
 }
 
 // LIBMEME_ENGINE
-namespace ml
+namespace ml::embed
 {
 	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
 	{
@@ -418,8 +418,8 @@ namespace ml
 		py::class_<ml_engine_plugins>(m, "plugins")
 			.def(py::init<>())
 			.def_static("clear"			, []() { engine::plugins().clear(); })
-			.def_static("free"			, [](cstring s) { return engine::plugins().free(s); })
-			.def_static("load"			, [](cstring s) { return engine::plugins().load(s); })
+			.def_static("free"			, [](intptr_t s) { return engine::plugins().free((plugin_handle)s); })
+			.def_static("load"			, [](cstring s) { return (intptr_t)engine::plugins().load(s); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

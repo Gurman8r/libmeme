@@ -1,5 +1,19 @@
 #include <libmeme/Platform/SharedLibrary.hpp>
-#include <libmeme/Platform/Native.hpp>
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#if defined(ML_os_windows)
+#	include <Windows.h>
+
+#elif defined(ML_os_unix)
+#	include <unistd.h>
+#	if ML_has_include(<dlfcn.h>)
+#		include <dlfcn.h>
+#	endif
+
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 namespace ml
 {
@@ -17,7 +31,7 @@ namespace ml
 		}
 
 		// open library
-		return m_handle = std::invoke([&]() noexcept
+		return m_handle = (library_handle)std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return ::LoadLibraryExW(m_path.c_str(), nullptr, 0);
@@ -61,7 +75,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::get_symbol(cstring value)
+	void * shared_library::read(cstring value)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }

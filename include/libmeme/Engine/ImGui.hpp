@@ -44,7 +44,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// ImGui::PushID(...); ML_defer{ ImGui::PopID(); };
+// ImGui::PushID(...); ML_defer(&){ ImGui::PopID(); };
 #define ML_ImGui_ScopeID(...) \
 	auto ML_anon = _ML_IMPL scoped_imgui_id{ ##__VA_ARGS__ }
 
@@ -53,9 +53,15 @@ namespace ml::impl
 	struct ML_NODISCARD scoped_imgui_id final
 	{
 		template <class ... Args
-		> scoped_imgui_id(Args && ... args) noexcept { ImGui::PushID(ML_forward(args)...); }
+		> scoped_imgui_id(Args && ... args) noexcept
+		{
+			ImGui::PushID(ML_forward(args)...);
+		}
 
-		~scoped_imgui_id() noexcept { ImGui::PopID(); }
+		~scoped_imgui_id() noexcept
+		{
+			ImGui::PopID();
+		}
 	};
 }
 

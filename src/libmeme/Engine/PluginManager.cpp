@@ -16,13 +16,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool plugin_manager::free(fs::path const & path)
+	bool plugin_manager::free(plugin_handle value)
 	{
-		// path empty
-		if (path.empty()) { return false; }
+		if (!value) { return false; }
 
-		// lookup file
-		if (auto const it{ m_data.find<hash_t>(util::hash(path.filename().string())) }
+		if (auto const it{ m_data.find<hash_t>(ML_handle(hash_t, value)) }
 		; it != m_data.end<hash_t>())
 		{
 			m_data.erase(m_data.index_of<hash_t>(it));
@@ -37,7 +35,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	hash_t plugin_manager::load(fs::path const & path, void * user_data)
+	plugin_handle plugin_manager::load(fs::path const & path)
 	{
 		// path empty
 		if (path.empty()) { return 0; }
@@ -50,16 +48,17 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN, user_data) })
+				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN) }
+				; optl.has_value())
 				{
-					m_data.emplace_back(code, path, std::move(lib), *optl);
+					m_data.emplace_back(code, path, std::move(lib), optl.value());
 
-					return code;
+					return ML_handle(plugin_handle, code);
 				}
 			}
 		}
 
-		return 0;
+		return nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

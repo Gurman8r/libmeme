@@ -7,26 +7,16 @@ using namespace ml::size_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef MEM_RESERVED
-#define MEM_RESERVED	128.0_MiB
-#endif
-
-#ifndef CONFIG_FILE
-#define CONFIG_FILE		"../../../../assets/libmeme.json"
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-static class memcfg final : public singleton<memcfg>
+static class memcfg : public singleton<memcfg>
 {
-	friend base_type;
+	friend singleton;
 
-	ds::array<byte_t, MEM_RESERVED>		data{};
+	ds::array<byte_t, 120_MiB>			data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 	pmr::unsynchronized_pool_resource	pool{ &mono };
 	util::test_resource					test{ &pool, data.data(), data.size() };
 
-	memcfg() noexcept
+	memcfg()
 	{
 		ML_assert(pmr::set_default_resource(&test));
 		ML_assert(memory::set_test_resource(&test));
@@ -35,6 +25,10 @@ static class memcfg final : public singleton<memcfg>
 } &ML_anon{ memcfg::get_instance() };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef CONFIG_FILE
+#define CONFIG_FILE "../../../../assets/libmeme.json"
+#endif
 
 static auto const default_settings{ R"(
 {
@@ -50,16 +44,32 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// setup engine
+	struct ML_NODISCARD ctx_config final // testing
+	{
+		int32_t	client		; // 
+		int32_t major		, // 
+				minor		, // 
+				revision	; // 
+		int32_t profile		; // 
+		int32_t source		, // 
+				robustness	, // 
+				release		; // 
+		bool	forward		, // 
+				debug		, // 
+				noerror		; // 
+	};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// setup engine
 	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{
-		ML_defer{ f.close(); };
+		ML_defer(&){ f.close(); };
 		if (f) { f >> j; } else { j = default_settings; }
 		return j;
 	})));
-
-	ML_defer{ engine::finalize(); };
+	
+	ML_defer(&){ engine::finalize(); };
 
 	if (engine::config().contains("setup_script"))
 	{
@@ -68,19 +78,21 @@ ml::int32_t main()
 				engine::config()["setup_script"]));
 	}
 
-	if (!engine::window().is_open()) { return EXIT_FAILURE; }
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// application sequence
+	if (!engine::window().is_open())
+	{
+		return EXIT_FAILURE;
+	}
 	
 	event_system::fire_event<load_event>();
 	
-	ML_defer{ event_system::fire_event<unload_event>(); };
+	ML_defer(&){ event_system::fire_event<unload_event>(); };
 	
 	while (engine::window().is_open())
 	{
-		engine::time().begin_loop(); ML_defer{ engine::time().end_loop(); };
+		engine::time().begin_loop(); ML_defer(&){ engine::time().end_loop(); };
 
 		ML_benchmark_L("| begin loop")	{ event_system::fire_event<	begin_loop_event	>(); };
 		ML_benchmark_L("|  update")		{ event_system::fire_event<	update_event		>(); };

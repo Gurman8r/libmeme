@@ -124,9 +124,9 @@ namespace ml
 
 	template <class> struct x_update_uniforms final : ecs::detail::x_base<s_update_uniforms>
 	{
-		void operator()(c_uniforms & mat, c_transform const & tf)
+		void operator()(c_uniforms & ufm, c_transform const & tf)
 		{
-			mat->set<vec3>("u_position"	, tf.pos)
+			ufm->set<vec3>("u_position"	, tf.pos)
 				.set<vec4>("u_rotation"	, tf.rot)
 				.set<vec3>("u_scale"	, tf.scl);
 		}
@@ -134,10 +134,10 @@ namespace ml
 
 	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
 	{
-		void operator()(c_shader & shd, c_uniforms const & ubuf)
+		void operator()(c_shader & shd, c_uniforms const & ufm)
 		{
 			shd.bind();
-			for (uniform const & u : *ubuf)
+			for (uniform const & u : *ufm)
 			{
 				shd.set_uniform(u);
 			}
@@ -147,7 +147,7 @@ namespace ml
 
 	template <class> struct x_render_meshes final : ecs::detail::x_base<s_render_meshes>
 	{
-		void operator()(c_shader const & shd, c_mesh const & msh, gfx::device_context * ctx)
+		void operator()(c_shader const & shd, c_mesh const & msh, gfx::render_context * ctx)
 		{
 			shd.bind();
 			shd.bind_textures();
@@ -501,7 +501,7 @@ namespace ml
 
 			// ENTITIES
 			{
-				ML_defer{ m_ecs.apply(); };
+				ML_defer(&){ m_ecs.apply(); };
 
 				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf) noexcept
 				{
@@ -560,7 +560,7 @@ namespace ml
 		{
 			// draw stuff, etc...
 
-			for (auto const & cmd :
+			for (gfx::command const & cmd :
 			{
 				gfx::render_command::bind_framebuffer(m_fbo[0].get()),
 
@@ -568,7 +568,7 @@ namespace ml
 
 				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
 
-				gfx::make_command([&](gfx::device_context * ctx) noexcept
+				gfx::make_command([&](gfx::render_context * ctx) noexcept
 				{
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
@@ -576,7 +576,7 @@ namespace ml
 				gfx::render_command::bind_framebuffer(nullptr),
 			})
 			{
-				std::invoke(cmd, engine::window().get_device()->get_context().get());
+				std::invoke(cmd, engine::window().get_render_context().get());
 			}
 		}
 
@@ -631,7 +631,7 @@ namespace ml
 		{
 			// gui stuff, etc...
 
-			static ML_scope // setup main menu bar
+			static ML_scope(&) // setup main menu bar
 			{
 				auto & mmb{ engine::gui().main_menu_bar() };
 				mmb.visible = true;
@@ -771,10 +771,10 @@ namespace ml
 		void show_console_gui()
 		{
 			// render console
-			ML_defer{ m_console.render(); };
+			ML_defer(&){ m_console.render(); };
 
 			// setup commands
-			if (!m_console.commands.empty()) { return; }
+			if ML_LIKELY(!m_console.commands.empty()) { return; }
 
 			m_console.commands.push_back({ "clear", [&](auto && args) noexcept
 			{
@@ -843,7 +843,7 @@ namespace ml
 				{
 					m_console.command_lock = "py";
 
-					static ML_scope{ std::cout << "# type \'\\\' to stop using python\n"; };
+					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
 				}
 				else if ((args.front() == "\\") && (0 == std::strcmp("py", m_console.command_lock)))
 				{
@@ -865,7 +865,7 @@ namespace ml
 		{
 			static ImGui::TextEditor text{};
 
-			static ML_scope // once
+			static ML_scope(&) // once
 			{
 				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				text.SetText("// work in progress\n\nint main()\n{\n\treturn 0;\n}");
@@ -1125,7 +1125,7 @@ namespace ml
 		{
 			static auto const & testres{ memory::get_test_resource() };
 
-			static ML_scope // setup memory editor
+			static ML_scope(&) // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
@@ -1169,13 +1169,13 @@ namespace ml
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
 					ImGui::Columns(3);
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
+					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
 					ImGui::Text("address"); ImGui::NextColumn();
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					static ML_scope{ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
@@ -1307,8 +1307,9 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev{ engine::window().get_device() };
-			static auto const & ctx	{ dev->get_context() };
+			static auto const & wnd{ engine::window() };
+			static auto const & dev{ wnd.get_render_device() };
+			static auto const & ctx	{ dev->get_active_context() };
 			static auto const & info{ dev->get_info() };
 
 			if (ImGui::BeginMenuBar())
@@ -1324,7 +1325,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				auto a{ ctx->get_alpha_mode() };
+				auto a{ ctx->get_alpha_state() };
 				ImGui::Checkbox("enabled", &a.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a.pred], a.pred);
 				ImGui::Text("reference: %f", a.ref);
@@ -1333,7 +1334,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				auto b{ ctx->get_blend_mode() };
+				auto b{ ctx->get_blend_state() };
 				ImGui::Checkbox("enabled", &b.enabled);
 				ImGui::ColorEdit4("color", b.color);
 				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b.color_equation], b.color_equation);
@@ -1347,7 +1348,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				auto c{ ctx->get_cull_mode() };
+				auto c{ ctx->get_cull_state() };
 				ImGui::Checkbox("enabled", &c.enabled);
 				ImGui::Text("facet: %s (%u)", gfx::facet_names[c.facet], c.facet);
 				ImGui::Text("order: %s (%u)", gfx::order_names[c.order], c.order);
@@ -1356,7 +1357,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				auto d{ ctx->get_depth_mode() };
+				auto d{ ctx->get_depth_state() };
 				ImGui::Checkbox("enabled", &d.enabled);
 				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
 				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
@@ -1365,7 +1366,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				auto s{ ctx->get_stencil_mode() };
+				auto s{ ctx->get_stencil_state() };
 				ImGui::Checkbox("enabled", &s.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s.pred], s.pred);
 				ImGui::Text("reference: %i", s.ref);
@@ -1395,10 +1396,9 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(void * user_data)
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main()
 {
-	static ml::plugin * temp{};
-	return temp ? temp : temp = new ml::demo{};
+	return ml::make_new<ml::demo>();
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

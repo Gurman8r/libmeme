@@ -21,9 +21,9 @@ namespace ml
 
 		void clear() noexcept { m_data.clear(); }
 
-		bool free(fs::path const & path);
+		bool free(plugin_handle value);
 
-		hash_t load(fs::path const & path, void * user_data = nullptr);
+		plugin_handle load(fs::path const & path);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

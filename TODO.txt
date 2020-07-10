@@ -21,14 +21,14 @@ core
 	+ memory
 	+ timers
 platform
+	+ library
 	+ context
 	+ window
-	+ monitor
-	+ cursor
-	+ keyboard
-	+ mouse
+	+ input
+render_api
 	+ render_device
 	+ render_context
+	+ render_command
 	+ buffers
 	+ framebuffer
 	+ pipelines
@@ -37,10 +37,9 @@ platform
 	+ states
 	+ swap_chain
 	+ texture
-graphics
-	+ renderer
-		+ renderer_2d
-		+ renderer_3d
+renderer
+	+ renderer_2d
+	+ renderer_3d
 	+ animation
 	+ camera
 	+ font
@@ -49,7 +48,7 @@ graphics
 	+ scene
 	+ sprite
 	+ vfx
-engine
+sdk
 	+ application
 	+ gui
 	+ plugins
@@ -74,8 +73,5 @@ launcher
 /src
 libmeme.json
 
-
-ml_plugin_enabled
-ml_plugin_disabled
 
 

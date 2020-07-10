@@ -69,13 +69,13 @@ namespace ml::ds
 		constexpr explicit operator std::array<_T, _N> & () & noexcept
 		{
 			using A = std::array<_T, _N>;
-			return (A &)(*(A *)this);
+			return (A &)*(A *)this;
 		}
 
 		constexpr explicit operator std::array<_T, _N> const & () const & noexcept
 		{
 			using A = std::array<_T, _N>;
-			return (A const &)(*(A const *)this);
+			return (A const &)*(A const *)this;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

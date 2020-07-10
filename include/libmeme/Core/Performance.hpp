@@ -8,7 +8,7 @@
 namespace ml
 {
 	// performance tracker singleton
-	class ML_CORE_API performance final : public singleton<performance>
+	struct ML_CORE_API performance final : public singleton<performance>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -30,22 +30,22 @@ namespace ml
 		template <class ... Args
 		> static void push_sample(Args && ... args) noexcept
 		{
-			static auto & inst{ get_instance() };
-			inst.m_current.emplace_back(sample{ ML_forward(args)... });
+			static auto & self{ get_instance() };
+			self.m_current.emplace_back(sample{ ML_forward(args)... });
 		}
 
 		// swap frames and clear current
 		static void refresh_samples() noexcept
 		{
-			static auto & inst{ get_instance() };
-			inst.m_previous.swap(inst.m_current);
-			inst.m_current.clear();
+			static auto & self{ get_instance() };
+			self.m_previous.swap(self.m_current);
+			self.m_current.clear();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend base_type;
+		friend singleton;
 
 		~performance() noexcept;
 

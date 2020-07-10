@@ -9,8 +9,8 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
 #define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
-#define ML_ImGui_Shutdown()				ML_scope{ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
-#define ML_ImGui_NewFrame()				ML_scope{ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
+#define ML_ImGui_Shutdown()				ML_scope(&){ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
+#define ML_ImGui_NewFrame()				ML_scope(&){ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
 #define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
 
 #else
@@ -41,6 +41,92 @@ namespace ml
 
 	application::~application() noexcept
 	{
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void application::on_event(event const & ev)
+	{
+		switch (ev.ID)
+		{
+		case hashof_v<begin_loop_event>: // BEGIN LOOP
+		{
+			m_perf.loop_timer.restart();
+
+			m_perf.frame_rate = std::invoke([&, dt = m_perf.delta_time.count<float_t>()]() noexcept
+			{
+				m_perf.fps_accum += dt - m_perf.fps_times[m_perf.fps_index];
+				m_perf.fps_times[m_perf.fps_index] = dt;
+				m_perf.fps_index = (m_perf.fps_index + 1) % m_perf.fps_times.size();
+				return (0.f < m_perf.fps_accum) ? 1.f / (m_perf.fps_accum / (float_t)m_perf.fps_times.size()) : FLT_MAX;
+			});
+
+			poll_events();
+		}
+		break;
+
+		case hashof_v<begin_draw_event>: // BEGIN DRAW
+		{
+			for (auto const & cmd :
+			{
+				gfx::render_command::set_clear_color(colors::black),
+
+				gfx::render_command::clear(gfx::clear_color),
+					
+				gfx::render_command::set_viewport(get_framebuffer_size()),
+			})
+			{
+				std::invoke(cmd, get_render_context().get());
+			}
+		}
+		break;
+
+		case hashof_v<begin_gui_event>: // BEGIN GUI
+		{
+			ML_ImGui_NewFrame();
+
+			ImGui::NewFrame();
+		}
+		break;
+
+		case hashof_v<draw_gui_event>: // DRAW GUI
+		{
+		}
+		break;
+
+		case hashof_v<end_gui_event>: // END GUI
+		{
+			ImGui::Render();
+			ML_ImGui_RenderDrawData(ImGui::GetDrawData());
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				auto backup_context{ get_current_context() };
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+				set_current_context(backup_context);
+			}
+		}
+		break;
+
+		case hashof_v<end_draw_event>: // END DRAW
+		{
+			if (has_hint(window_hints_double_buffer))
+			{
+				swap_buffers();
+			}
+		}
+		break;
+
+		case hashof_v<end_loop_event>: // END LOOP
+		{
+			++m_perf.frame_count;
+
+			performance::refresh_samples();
+
+			m_perf.delta_time = m_perf.loop_timer.elapsed();
+		}
+		break;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -158,100 +244,47 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void application::on_event(event const & ev)
+	bool application::free_plugin(plugin_handle value)
 	{
-		switch (ev.ID)
-		{
-		case hashof_v<begin_loop_event>: // BEGIN LOOP
-		{
-			m_loop_timer.restart();
+		if (!value) { return false; }
 
-			m_frame_time = std::invoke([&, dt = m_frame_time.count<float_t>()]() noexcept
-			{
-				m_fps_accum += dt - m_fps_times[m_fps_index];
-				m_fps_times[m_fps_index] = dt;
-				m_fps_index = (m_fps_index + 1) % m_fps_times.size();
-				return (0.f < m_fps_accum) ? 1.f / (m_fps_accum / (float_t)m_fps_times.size()) : FLT_MAX;
-			});
+		if (auto const it{ m_plugins.find<hash_t>(ML_handle(hash_t, value)) }
+		; it != m_plugins.end<hash_t>())
+		{
+			m_plugins.erase(m_plugins.index_of<hash_t>(it));
 
-			poll_events();
+			return true;
 		}
-		break;
-
-		case hashof_v<begin_draw_event>: // BEGIN DRAW
+		else
 		{
-			for (auto const & cmd :
-			{
-				gfx::render_command::set_clear_color(colors::black),
-
-				gfx::render_command::clear(gfx::clear_color),
-					
-				gfx::render_command::set_viewport(get_framebuffer_size()),
-			})
-			{
-				std::invoke(cmd, get_device()->get_context().get());
-			}
-		}
-		break;
-
-		case hashof_v<begin_gui_event>: // BEGIN GUI
-		{
-			ML_ImGui_NewFrame();
-
-			ImGui::NewFrame();
-		}
-		break;
-
-		case hashof_v<draw_gui_event>: // DRAW GUI
-		{
-		}
-		break;
-
-		case hashof_v<end_gui_event>: // END GUI
-		{
-			ImGui::Render();
-			ML_ImGui_RenderDrawData(ImGui::GetDrawData());
-			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				auto backup_context{ get_current_context() };
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				set_current_context(backup_context);
-			}
-		}
-		break;
-
-		case hashof_v<end_draw_event>: // END DRAW
-		{
-			if (has_hint(window_hints_double_buffer))
-			{
-				swap_buffers();
-			}
-		}
-		break;
-
-		case hashof_v<end_loop_event>: // END LOOP
-		{
-			++m_frame_count;
-
-			performance::refresh_samples();
-
-			m_frame_time = m_loop_timer.elapsed();
-		}
-		break;
+			return false;
 		}
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	plugin_handle application::load_plugin(fs::path const & path)
 	{
-		return 0;
-	}
+		// path empty
+		if (path.empty()) { return 0; }
 
-	bool application::free_plugin(plugin_handle value)
-	{
-		return false;
+		// lookup file
+		if (auto const code{ util::hash(path.filename().string()) }
+		; m_plugins.find<hash_t>(code) == m_plugins.end<hash_t>())
+		{
+			// load library
+			if (shared_library lib{ path })
+			{
+				// load plugin
+				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN) }
+				; optl.has_value())
+				{
+					m_plugins.emplace_back(code, path, std::move(lib), optl.value());
+
+					return ML_handle(plugin_handle, code);
+				}
+			}
+		}
+
+		return nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
