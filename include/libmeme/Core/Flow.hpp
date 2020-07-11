@@ -26,7 +26,7 @@ namespace ml::impl
 
 // scope
 #define ML_scope(...) \
-    auto ML_anon = _ML_IMPL scope_tag{} + [##__VA_ARGS__]() noexcept
+    auto ML_anon = _ML impl::scope_tag{} + [##__VA_ARGS__]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -53,7 +53,7 @@ namespace ml::impl
 
 // defer
 #define ML_defer(...) \
-    auto ML_anon = _ML_IMPL defer_tag{} + [##__VA_ARGS__]() noexcept
+    auto ML_anon = _ML impl::defer_tag{} + [##__VA_ARGS__]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -6,7 +6,7 @@
 
 // event declarator helper
 #define ML_decl_event(type) \
-	struct type final : _ML event_helper<type>
+	struct type final : _ML impl::event_helper<type>
 
 namespace ml
 {
@@ -31,13 +31,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event interface
-	template <class T> struct event_helper : event
+	namespace impl
 	{
-		constexpr event_helper() noexcept : event{ hashof_v<T> }
+		// event interface
+		template <class T> struct event_helper : event
 		{
-		}
-	};
+			constexpr event_helper() noexcept : event{ hashof_v<T> }
+			{
+			}
+		};
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

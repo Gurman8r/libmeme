@@ -39,7 +39,7 @@ namespace ml::util
 	template <class Ch
 	> static constexpr bool is_char_v
 	{
-		_ML_UTIL is_any_of_v<Ch, char, wchar_t, char16_t, char32_t>
+		_ML util::is_any_of_v<Ch, char, wchar_t, char16_t, char32_t>
 	};
 
 	template <class Ch
@@ -51,7 +51,7 @@ namespace ml::util
 	template <class T, class Ch = char
 	> static constexpr bool is_cstring_v
 	{
-		_ML_UTIL is_char_v<Ch> &&
+		_ML util::is_char_v<Ch> &&
 		std::is_convertible_v<T const &, Ch const *>
 	};
 
@@ -64,7 +64,7 @@ namespace ml::util
 	template <class T, class Ch = char, class Traits = std::char_traits<Ch>
 	> static constexpr bool is_string_view_v
 	{
-		_ML_UTIL is_cstring_v<T, Ch> ||
+		_ML util::is_cstring_v<T, Ch> ||
 		std::is_convertible_v<T const &, std::basic_string_view<Ch, Traits>>
 	};
 
@@ -77,7 +77,7 @@ namespace ml::util
 	template <class T, class Ch = char
 	> static constexpr bool is_string_v
 	{
-		_ML_UTIL is_any_of_v<T, std::basic_string<Ch>, pmr::basic_string<Ch>>
+		_ML util::is_any_of_v<T, std::basic_string<Ch>, pmr::basic_string<Ch>>
 	};
 
 	template <class T, class Ch = char
@@ -97,7 +97,7 @@ namespace ml::util
 	template <class Ch = char
 	> ML_NODISCARD constexpr size_t strlen(Ch const * str)
 	{
-		return ((*str) ? (1 + _ML_UTIL strlen(str + 1)) : 0);
+		return ((*str) ? (1 + _ML util::strlen(str + 1)) : 0);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -291,12 +291,12 @@ namespace ml
 
 		demo(plugin_manager * mgr) noexcept : plugin{ mgr }
 		{
-			event_bus::add_listener<	load_event		>(this);
-			event_bus::add_listener<	update_event	>(this);
-			event_bus::add_listener<	draw_event		>(this);
-			event_bus::add_listener<	dock_gui_event	>(this);
-			event_bus::add_listener<	draw_gui_event	>(this);
-			event_bus::add_listener<	unload_event	>(this);
+			event_bus::add_listener<load_event		>(this);
+			event_bus::add_listener<update_event	>(this);
+			event_bus::add_listener<draw_event		>(this);
+			event_bus::add_listener<dock_gui_event	>(this);
+			event_bus::add_listener<draw_gui_event	>(this);
+			event_bus::add_listener<unload_event	>(this);
 		}
 
 		void on_event(event const & ev) override

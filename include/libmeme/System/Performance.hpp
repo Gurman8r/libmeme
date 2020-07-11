@@ -70,7 +70,7 @@ namespace ml::impl
 
 // scope benchmark
 #define ML_benchmark_S(id) \
-	auto ML_anon = _ML_IMPL scope_benchmark{ id }
+	auto ML_anon = _ML impl::scope_benchmark{ id }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -95,7 +95,7 @@ namespace ml::impl
 
 // lambda benchmark
 #define ML_benchmark_L(id) \
-	auto ML_anon = _ML_IMPL lambda_benchmark{ id } + [&]() noexcept
+	auto ML_anon = _ML impl::lambda_benchmark{ id } + [&]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

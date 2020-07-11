@@ -25,8 +25,8 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using value_type				= typename _T;
-		using self_type					= typename _ML_DS matrix<value_type, _W, _H>;
-		using storage_type				= typename _ML_DS array<value_type, _W * _H>;
+		using self_type					= typename _ML ds::matrix<value_type, _W, _H>;
+		using storage_type				= typename _ML ds::array<value_type, _W * _H>;
 		using size_type					= typename storage_type::size_type;
 		using difference_type			= typename storage_type::difference_type;
 		using pointer					= typename storage_type::pointer;

@@ -19,13 +19,13 @@ namespace pybind11::detail
 {
 	// array caster
 	template <class T, size_t N
-	> struct type_caster<_ML_DS array<T, N>>
-		: array_caster<_ML_DS array<T, N>, T, false, N> {};
+	> struct type_caster<_ML ds::array<T, N>>
+		: array_caster<_ML ds::array<T, N>, T, false, N> {};
 	
 	// matrix caster
 	template <class T, size_t W, size_t H
-	> struct type_caster<_ML_DS matrix<T, W, H>>
-		: array_caster<_ML_DS matrix<T, W, H>, T, false, W * H> {};
+	> struct type_caster<_ML ds::matrix<T, W, H>>
+		: array_caster<_ML ds::matrix<T, W, H>, T, false, W * H> {};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

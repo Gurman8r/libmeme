@@ -470,7 +470,7 @@ namespace ml::gfx
 
 	template <class T> ML_NODISCARD constexpr hash_t get_element_base_type() noexcept
 	{
-		return _ML_GFX get_element_base_type(hashof_v<T>);
+		return _ML gfx::get_element_base_type(hashof_v<T>);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -501,7 +501,7 @@ namespace ml::gfx
 
 	template <class T> ML_NODISCARD constexpr uint32_t get_element_component_count() noexcept
 	{
-		return _ML_GFX get_element_component_count(hashof_v<T>);
+		return _ML gfx::get_element_component_count(hashof_v<T>);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -547,12 +547,12 @@ namespace ml::gfx
 
 		constexpr hash_t get_base_type() const noexcept
 		{
-			return _ML_GFX get_element_base_type(type);
+			return _ML gfx::get_element_base_type(type);
 		}
 
 		constexpr uint32_t get_component_count() const noexcept
 		{
-			return _ML_GFX get_element_component_count(type);
+			return _ML gfx::get_element_component_count(type);
 		}
 	};
 

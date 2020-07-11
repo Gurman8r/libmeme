@@ -80,7 +80,7 @@ namespace ml::debug
 	template <class Fmt, class Arg0, class ... Args
 	> void puts(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		_ML_DEBUG puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		_ML debug::puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -92,13 +92,13 @@ namespace ml::debug
 	{
 		std::cout << ML_IMPL_DEBUG_MSG_I << ML_forward(str) << '\n';
 
-		return _ML_DEBUG info();
+		return _ML debug::info();
 	}
 
 	template <class Fmt, class Arg0, class ... Args
 	> int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return _ML_DEBUG info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		return _ML debug::info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -110,13 +110,13 @@ namespace ml::debug
 	{
 		std::cout << ML_IMPL_DEBUG_MSG_E << ML_forward(str) << '\n';
 
-		return _ML_DEBUG error();
+		return _ML debug::error();
 	}
 
 	template <class Fmt, class Arg0, class ... Args
 	> int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return _ML_DEBUG error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		return _ML debug::error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -128,13 +128,13 @@ namespace ml::debug
 	{
 		std::cout << ML_IMPL_DEBUG_MSG_W << ML_forward(str) << '\n';
 
-		return _ML_DEBUG warning();
+		return _ML debug::warning();
 	}
 
 	template <class Fmt, class Arg0, class ... Args
 	> int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return _ML_DEBUG warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		return _ML debug::warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -330,7 +330,7 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type			= typename _ML_GUI console;
+		using self_type			= typename _ML gui::console;
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
 		using command_name		= typename pmr::string;
 		using command_args		= typename pmr::vector<pmr::string>;

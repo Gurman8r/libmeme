@@ -46,7 +46,7 @@
 
 // ImGui::PushID(...); ML_defer(&){ ImGui::PopID(); };
 #define ML_ImGui_ScopeID(...) \
-	auto ML_anon = _ML_IMPL imgui_scope_id{ ##__VA_ARGS__ }
+	auto ML_anon = _ML impl::imgui_scope_id{ ##__VA_ARGS__ }
 
 namespace ml::impl
 {

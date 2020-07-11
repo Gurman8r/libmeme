@@ -225,7 +225,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type			= typename pmr::polymorphic_allocator<byte_t>;
-		using storage_type				= typename _ML_DS set<uniform>;
+		using storage_type				= typename _ML ds::set<uniform>;
 		using iterator					= typename storage_type::iterator;
 		using const_iterator			= typename storage_type::const_iterator;
 		using reverse_iterator			= typename storage_type::reverse_iterator;

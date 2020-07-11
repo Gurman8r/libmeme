@@ -35,20 +35,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// library
-
-#define ML_alias				using		// global typedef
-#define _ML						::ml::		// root
-#define _ML_DEBUG				_ML debug::	// debug
-#define _ML_DS					_ML ds::	// data structures
-#define _ML_ECS					_ML ecs::	// entity component system
-#define _ML_EMBED				_ML embed::	// embedded api
-#define _ML_GFX					_ML gfx::	// graphics
-#define _ML_GUI					_ML gui::	// gui
-#define _ML_IMPL				_ML impl::	// implementation
-#define _ML_META				_ML meta::	// metaprogramming
-#define _ML_UTIL				_ML util::	// utility
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // concatenate implementation
@@ -79,14 +65,11 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// declare handle
-#define ML_decl_handle(name)	struct ML_cat(name, __) { _ML int32_t unused; }; \
-								using name = typename ML_cat(name, __) *
+// root namespace
+#define _ML						::ml::
 
-// handle cast
-#define ML_handle(type, value)	((type)(_ML intptr_t)(value))
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// global typedef
+#define ML_alias				using
 
 // macro array size
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
@@ -96,6 +79,15 @@
 
 // macro forward
 #define ML_forward(x)			std::forward<decltype(x)>(x)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// declare handle
+#define ML_decl_handle(name)	struct ML_cat(name, __) { _ML int32_t unused; }; \
+								using name = typename ML_cat(name, __) *
+
+// handle cast
+#define ML_handle(type, value)	((type)(_ML intptr_t)(value))
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

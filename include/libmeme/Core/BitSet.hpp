@@ -15,9 +15,9 @@ namespace ml::ds
 
 		static_assert(0 < bit_count, "bit count negative or zero");
 
-		using self_type = typename _ML_DS bitset<bit_count>;
+		using self_type = typename _ML ds::bitset<bit_count>;
 
-		using array_type = typename _ML_DS array<bool, bit_count>;
+		using array_type = typename _ML ds::array<bool, bit_count>;
 
 		using value_type = typename std::conditional_t<
 			bit_count <= sizeof(uint32_t) * 8,
@@ -29,7 +29,7 @@ namespace ml::ds
 		
 		static constexpr ptrdiff_t word_count{ (bit_count - 1) / bits_per_word };
 
-		using storage_type = typename _ML_DS array<value_type, word_count + 1>;
+		using storage_type = typename _ML ds::array<value_type, word_count + 1>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
