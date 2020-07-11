@@ -139,55 +139,55 @@ namespace ml
 		// install callbacks
 		{
 			m_wnd.set_char_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_char_event>(ML_forward(x)...); });
 
 			m_wnd.set_char_mods_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_mods_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_char_mods_event>(ML_forward(x)...); });
 
 			m_wnd.set_close_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_close_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_close_event>(ML_forward(x)...); });
 
 			m_wnd.set_cursor_enter_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_cursor_enter_event>(ML_forward(x)...); });
 
 			m_wnd.set_cursor_position_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_position_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_cursor_position_event>(ML_forward(x)...); });
 
 			m_wnd.set_content_scale_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_content_scale_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_content_scale_event>(ML_forward(x)...); });
 
 			m_wnd.set_drop_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_drop_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_drop_event>(ML_forward(x)...); });
 
 			m_wnd.set_focus_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_focus_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_focus_event>(ML_forward(x)...); });
 
 			m_wnd.set_framebuffer_size_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_framebuffer_size_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_framebuffer_size_event>(ML_forward(x)...); });
 
 			m_wnd.set_iconify_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_iconify_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_iconify_event>(ML_forward(x)...); });
 
 			m_wnd.set_key_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_key_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_key_event>(ML_forward(x)...); });
 
 			m_wnd.set_maximize_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_maximize_event>(ML_forward(x)...);  });
+			](auto, auto ... x) noexcept { event_bus::fire<window_maximize_event>(ML_forward(x)...);  });
 
 			m_wnd.set_mouse_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_mouse_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_mouse_event>(ML_forward(x)...); });
 
 			m_wnd.set_position_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_position_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_position_event>(ML_forward(x)...); });
 
 			m_wnd.set_refresh_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_refresh_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_refresh_event>(ML_forward(x)...); });
 
 			m_wnd.set_scroll_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_scroll_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_scroll_event>(ML_forward(x)...); });
 
 			m_wnd.set_size_callback([
-			](auto, auto ... x) noexcept { event_bus::fire_event<window_size_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire<window_size_event>(ML_forward(x)...); });
 		}
 
 		// setup imgui

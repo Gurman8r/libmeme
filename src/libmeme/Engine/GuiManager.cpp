@@ -143,7 +143,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						event_bus::fire_event<dock_gui_event>();
+						event_bus::fire<dock_gui_event>();
 					}
 
 					ImGui::DockSpace(

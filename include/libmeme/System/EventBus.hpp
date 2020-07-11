@@ -38,13 +38,12 @@ namespace ml
 		> static bool add_listener(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-
 			return add_listener(hashof_v<Ev>, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void fire_event(event const & ev) noexcept
+		static void fire(event const & ev) noexcept
 		{
 			static auto & self{ get_instance() };
 
@@ -61,11 +60,10 @@ namespace ml
 		}
 
 		template <class Ev, class ... Args
-		> static void fire_event(Args && ... args) noexcept
+		> static void fire(Args && ... args) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-
-			return fire_event(Ev{ ML_forward(args)... });
+			return fire(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
