@@ -13,8 +13,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using self_type			= typename shared_library;
-		using symbol_table		= typename ds::map<hash_t, void *>;
+		using function_table	= typename ds::map<hash_t, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -32,18 +31,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		shared_library(allocator_type alloc = {}) noexcept
-			: m_handle{}, m_path{}, m_symbols{ alloc }
+			: m_handle{}, m_path{}, m_functions{ alloc }
 		{
 		}
 
 		explicit shared_library(fs::path const & path, allocator_type alloc = {}) noexcept
-			: self_type{ alloc }
+			: shared_library{ alloc }
 		{
 			this->open(path);
 		}
 
-		explicit shared_library(self_type && value, allocator_type alloc = {}) noexcept
-			: self_type{ alloc }
+		explicit shared_library(shared_library && value, allocator_type alloc = {}) noexcept
+			: shared_library{ alloc }
 		{
 			this->swap(std::move(value));
 		}
@@ -55,19 +54,19 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		self_type & operator=(self_type && value) noexcept
+		shared_library & operator=(shared_library && value) noexcept
 		{
 			this->swap(std::move(value));
 			return (*this);
 		}
 
-		void swap(self_type & value) noexcept
+		void swap(shared_library & value) noexcept
 		{
 			if (this != std::addressof(value))
 			{
 				std::swap(m_handle, value.m_handle);
 				m_path.swap(value.m_path);
-				m_symbols.swap(value.m_symbols);
+				m_functions.swap(value.m_functions);
 			}
 		}
 
@@ -77,14 +76,14 @@ namespace ml
 
 		bool close();
 
-		void * read(cstring value);
+		void * get_proc_address(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
 		> auto call(cstring method_name, Args && ... args) noexcept
 		{
-			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(read(method_name)) })
+			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_proc_address(method_name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{
@@ -103,22 +102,22 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD operator bool() const noexcept { return m_handle; }
+
 		ML_NODISCARD bool good() const noexcept { return m_handle; }
 
-		ML_NODISCARD operator bool() const noexcept { return this->good(); }
+		ML_NODISCARD auto get_handle() const noexcept -> library_handle const & { return m_handle; }
 
-		ML_NODISCARD auto handle() const noexcept -> library_handle const & { return m_handle; }
+		ML_NODISCARD auto get_path() const noexcept -> fs::path const & { return m_path; }
 
-		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
-
-		ML_NODISCARD auto symbols() const noexcept -> symbol_table const & { return m_symbols; }
+		ML_NODISCARD auto get_functions() const noexcept -> function_table const & { return m_functions; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD auto compare(U const & value) const noexcept
 		{
-			if constexpr (std::is_same_v<U, self_type>)
+			if constexpr (std::is_same_v<U, shared_library>)
 			{
 				return (this != std::addressof(value)) ? compare(value.m_path) : 0;
 			}
@@ -133,37 +132,37 @@ namespace ml
 			}
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator==(U const & value) const noexcept
 		{
 			return compare(value) == 0;
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator!=(U const & value) const noexcept
 		{
 			return compare(value) != 0;
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator<(U const & value) const noexcept
 		{
 			return compare(value) < 0;
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator>(U const & value) const noexcept
 		{
 			return compare(value) > 0;
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator<=(U const & value) const noexcept
 		{
 			return compare(value) <= 0;
 		}
 
-		template <class U = self_type
+		template <class U = shared_library
 		> ML_NODISCARD bool operator>=(U const & value) const noexcept
 		{
 			return compare(value) >= 0;
@@ -174,7 +173,7 @@ namespace ml
 	private:
 		library_handle	m_handle;
 		fs::path		m_path;
-		symbol_table	m_symbols;
+		function_table	m_functions;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

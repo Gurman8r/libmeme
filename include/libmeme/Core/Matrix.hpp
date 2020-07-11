@@ -123,18 +123,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		constexpr explicit operator std::array<_T, _W * _H> & () & noexcept
-		{
-			return (std::array<_T, _W * _H> &)m_data;
-		}
-
-		constexpr explicit operator std::array<_T, _W * _H> const & () const & noexcept
-		{
-			return (std::array<_T, _W * _H> const &)m_data;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		constexpr auto operator*() & noexcept -> reference { return (*m_data); }
 
 		constexpr auto operator*() const & noexcept -> const_reference { return (*m_data); }

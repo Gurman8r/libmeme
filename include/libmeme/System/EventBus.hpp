@@ -20,7 +20,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// event system singleton
+	// event bus singleton
 	class ML_SYSTEM_API event_bus final : public singleton<event_bus>
 	{
 	public:

@@ -1,17 +1,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/System/ECS.hpp>
-#include <libmeme/System/Performance.hpp>
+
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/Plugin.hpp>
+#include <libmeme/Engine/ECS.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/System/Performance.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -291,24 +292,24 @@ namespace ml
 
 		demo(plugin_manager * mgr) noexcept : plugin{ mgr }
 		{
-			event_bus::add_listener<load_event		>(this);
-			event_bus::add_listener<update_event	>(this);
-			event_bus::add_listener<draw_event		>(this);
-			event_bus::add_listener<dock_gui_event	>(this);
-			event_bus::add_listener<draw_gui_event	>(this);
-			event_bus::add_listener<unload_event	>(this);
+			event_bus::add_listener<	load_event		>(this);
+			event_bus::add_listener<	update_event	>(this);
+			event_bus::add_listener<	draw_event		>(this);
+			event_bus::add_listener<	dock_gui_event	>(this);
+			event_bus::add_listener<	draw_gui_event	>(this);
+			event_bus::add_listener<	unload_event	>(this);
 		}
 
 		void on_event(event const & ev) override
 		{
 			switch (ev.ID)
 			{
-			case hashof_v<load_event	>: return on_load		(*ev.cast<load_event	>());
-			case hashof_v<update_event	>: return on_update		(*ev.cast<update_event	>());
-			case hashof_v<draw_event	>: return on_draw		(*ev.cast<draw_event	>());
-			case hashof_v<dock_gui_event>: return on_gui_dock	(*ev.cast<dock_gui_event>());
-			case hashof_v<draw_gui_event>: return on_gui_draw	(*ev.cast<draw_gui_event>());
-			case hashof_v<unload_event	>: return on_unload		(*ev.cast<unload_event	>());
+			case hashof_v<	load_event		>: return on_load		(*ev.cast<	load_event		>());
+			case hashof_v<	update_event	>: return on_update		(*ev.cast<	update_event	>());
+			case hashof_v<	draw_event		>: return on_draw		(*ev.cast<	draw_event		>());
+			case hashof_v<	dock_gui_event	>: return on_gui_dock	(*ev.cast<	dock_gui_event	>());
+			case hashof_v<	draw_gui_event	>: return on_gui_draw	(*ev.cast<	draw_gui_event	>());
+			case hashof_v<	unload_event	>: return on_unload		(*ev.cast<	unload_event	>());
 			}
 		}
 
@@ -1324,7 +1325,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("alpha"))
 			{
-				auto a{ ctx->get_alpha_state() };
+				gfx::alpha_state a{}; ctx->get_alpha_state(&a);
 				ImGui::Checkbox("enabled", &a.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a.pred], a.pred);
 				ImGui::Text("reference: %f", a.ref);
@@ -1333,7 +1334,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("blend"))
 			{
-				auto b{ ctx->get_blend_state() };
+				gfx::blend_state b{}; ctx->get_blend_state(&b);
 				ImGui::Checkbox("enabled", &b.enabled);
 				ImGui::ColorEdit4("color", b.color);
 				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b.color_equation], b.color_equation);
@@ -1347,7 +1348,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("cull"))
 			{
-				auto c{ ctx->get_cull_state() };
+				gfx::cull_state c{}; ctx->get_cull_state(&c);
 				ImGui::Checkbox("enabled", &c.enabled);
 				ImGui::Text("facet: %s (%u)", gfx::facet_names[c.facet], c.facet);
 				ImGui::Text("order: %s (%u)", gfx::order_names[c.order], c.order);
@@ -1356,7 +1357,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("depth"))
 			{
-				auto d{ ctx->get_depth_state() };
+				gfx::depth_state d{}; ctx->get_depth_state(&d);
 				ImGui::Checkbox("enabled", &d.enabled);
 				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
 				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
@@ -1365,7 +1366,7 @@ namespace ml
 
 			if (ImGui::CollapsingHeader("stencil"))
 			{
-				auto s{ ctx->get_stencil_state() };
+				gfx::stencil_state s{}; ctx->get_stencil_state(&s);
 				ImGui::Checkbox("enabled", &s.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s.pred], s.pred);
 				ImGui::Text("reference: %i", s.ref);

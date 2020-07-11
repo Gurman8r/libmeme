@@ -29,10 +29,12 @@ libmeme.json
 
 
 # Engine
-	@ Common
-		+ DS
-		+ debug
+	@ Core
+		~ DS
+		~ detail
+		~ util
 	@ System
+		+ debug
 		+ events
 		+ library
 		+ memory

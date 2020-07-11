@@ -143,20 +143,7 @@ namespace ml
 
 		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_instance().m_testres; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// set test resource
-		ML_NODISCARD static bool set_test_resource(util::test_resource * res) noexcept
-		{
-			if (!res)					{ return debug::error("resource cannot be null"); }
-			if (!res->upstream())		{ return debug::error("resource upstream cannot be null"); }
-			if (!res->buffer())			{ return debug::error("resource buffer cannot be null"); }
-			if (!res->is_valid_size())	{ return debug::error("resource capacity must be greater than zero"); }
-			if (!res->use_default())	{ return debug::error("resource is not the default memory resource"); }
-
-			get_instance().m_testres = res;
-			return true;
-		}
+		ML_NODISCARD static auto const & set_test_resource(util::test_resource * res) noexcept { return get_instance().m_testres = res; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		

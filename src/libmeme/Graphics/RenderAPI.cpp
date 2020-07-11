@@ -20,7 +20,7 @@ namespace ml::gfx
 
 	render_device * render_device::create() noexcept
 	{
-		render_device * temp{ new opengl_device{} };
+		render_device * temp{ new opengl_render_device{} };
 
 		if (!g_device) { set_default(temp); }
 

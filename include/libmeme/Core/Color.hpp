@@ -10,17 +10,17 @@ namespace ml
 	namespace util
 	{
 		template <class To, class From
-		> ML_NODISCARD constexpr tvec4<To> color_cast(const tvec4<From> & value)
+		> ML_NODISCARD constexpr tvec4<To> color_cast(const tvec4<From> & value) noexcept
 		{
 			return (tvec4<To>)value;
 		}
 
-		ML_NODISCARD constexpr vec4b color_cast(vec4f const & value)
+		ML_NODISCARD constexpr vec4b color_cast(vec4f const & value) noexcept
 		{
 			return (vec4b)(value * 255.f);
 		}
 
-		ML_NODISCARD constexpr vec4f color_cast(vec4b const & value)
+		ML_NODISCARD constexpr vec4f color_cast(vec4b const & value) noexcept
 		{
 			return ((vec4f)value) / 255.f;
 		}

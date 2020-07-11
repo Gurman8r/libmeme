@@ -3,6 +3,7 @@
 
 #include <libmeme/System/Memory.hpp>
 
+// duration
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,21 +65,27 @@ namespace ml
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// timer
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class _Clock
 	> struct basic_timer final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using self_type		= typename basic_timer<_Clock>;
-		using clock			= typename _Clock;
-		using time_point	= typename clock::time_point;
+		using clock_type	= typename _Clock;
+		using self_type		= typename basic_timer<clock_type>;
+		using time_point	= typename clock_type::time_point;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		basic_timer(bool running = true) noexcept
 			: m_running		{ running }
-			, m_start_time	{ clock::now() }
+			, m_start_time	{ clock_type::now() }
 			, m_stop_time	{ m_start_time }
 			, m_elapsed		{}
 		{
@@ -93,7 +100,7 @@ namespace ml
 
 		ML_NODISCARD duration elapsed() const noexcept
 		{
-			return m_running ? (clock::now() - m_start_time) : m_elapsed;
+			return m_running ? (clock_type::now() - m_start_time) : m_elapsed;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -106,7 +113,7 @@ namespace ml
 		self_type & restart() & noexcept
 		{
 			m_running = true;
-			m_start_time = m_stop_time = clock::now();
+			m_start_time = m_stop_time = clock_type::now();
 			m_elapsed = {};
 			return (*this);
 		}
@@ -116,7 +123,7 @@ namespace ml
 			if (m_running)
 			{
 				m_running = false;
-				m_elapsed = ((m_stop_time = clock::now()) - m_start_time);
+				m_elapsed = ((m_stop_time = clock_type::now()) - m_start_time);
 			}
 			return (*this);
 		}

@@ -48,9 +48,9 @@ namespace ml::gfx
 
 	// internal conversion helpers
 
-	struct to_impl : std::integral_constant<size_t, 0> {}; // frontend -> backend
+	struct to_impl : std::false_type	{}; // frontend -> backend
 	
-	struct to_user : std::integral_constant<size_t, 1> {}; // backend -> frontend
+	struct to_user : std::true_type		{}; // backend -> frontend
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -876,17 +876,17 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD virtual alpha_state get_alpha_state() const = 0;
+		ML_NODISCARD virtual alpha_state * get_alpha_state(alpha_state * value) const = 0;
 		
-		ML_NODISCARD virtual blend_state get_blend_state() const = 0;
+		ML_NODISCARD virtual blend_state * get_blend_state(blend_state * value) const = 0;
 
 		ML_NODISCARD virtual color get_clear_color() const = 0;
 
-		ML_NODISCARD virtual cull_state get_cull_state() const = 0;
+		ML_NODISCARD virtual cull_state * get_cull_state(cull_state * value) const = 0;
 
-		ML_NODISCARD virtual depth_state get_depth_state() const = 0;
+		ML_NODISCARD virtual depth_state * get_depth_state(depth_state * value) const = 0;
 
-		ML_NODISCARD virtual stencil_state get_stencil_state() const = 0;
+		ML_NODISCARD virtual stencil_state * get_stencil_state(stencil_state * value) const = 0;
 
 		ML_NODISCARD virtual int_rect get_viewport() const = 0;
 
@@ -904,7 +904,7 @@ namespace ml::gfx
 
 		virtual void set_stencil_state(stencil_state const & value) = 0;
 
-		virtual void set_viewport(int_rect const & bounds) = 0;
+		virtual void set_viewport(int_rect const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

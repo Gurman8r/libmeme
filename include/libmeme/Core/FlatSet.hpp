@@ -491,8 +491,10 @@ namespace ml::ds
 
 		// insert implementation
 		template <class Value
-		> auto impl_insert(Value && value) noexcept
-			-> std::conditional_t<traits_type::multi, iterator, std::pair<iterator, bool>>
+		> auto impl_insert(Value && value) noexcept -> std::conditional_t<traits_type::multi,
+			iterator,
+			std::pair<iterator, bool>
+		>
 		{
 			if constexpr (traits_type::multi)
 			{

@@ -666,12 +666,12 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device
+// render device
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_device::opengl_device() : render_device{}
+	opengl_render_device::opengl_render_device() : render_device{}
 	{
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
 		ML_assert("failed initializing opengl device" && opengl_init);
@@ -745,53 +745,53 @@ namespace ml::gfx
 #endif
 	}
 
-	opengl_device::~opengl_device()
+	opengl_render_device::~opengl_render_device()
 	{
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	shared<render_context> opengl_device::create_context(context_settings const & cs) noexcept
+	shared<render_context> opengl_render_device::create_context(context_settings const & cs) noexcept
 	{
-		return _ML make_shared<opengl_context>(this, cs);
+		return _ML make_shared<opengl_render_context>(this, cs);
 	}
 
-	shared<vertexarray> opengl_device::create_vertexarray(uint32_t prim) noexcept
+	shared<vertexarray> opengl_render_device::create_vertexarray(uint32_t prim) noexcept
 	{
 		return _ML make_shared<opengl_vertexarray>(this, prim);
 	}
 
-	shared<vertexbuffer> opengl_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<opengl_vertexbuffer>(this, usage, count, data);
 	}
 
-	shared<indexbuffer> opengl_device::create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept
 	{
 		return _ML make_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
-	shared<texture2d> opengl_device::create_texture2d(descriptor<texture2d> const & value, address_t data) noexcept
+	shared<texture2d> opengl_render_device::create_texture2d(descriptor<texture2d> const & value, address_t data) noexcept
 	{
 		return _ML make_shared<opengl_texture2d>(this, value, data);
 	}
 
-	shared<texturecube> opengl_device::create_texturecube(descriptor<texturecube> const & value) noexcept
+	shared<texturecube> opengl_render_device::create_texturecube(descriptor<texturecube> const & value) noexcept
 	{
 		return _ML make_shared<opengl_texturecube>(this, value);
 	}
 
-	shared<framebuffer> opengl_device::create_framebuffer(descriptor<framebuffer> const & value) noexcept
+	shared<framebuffer> opengl_render_device::create_framebuffer(descriptor<framebuffer> const & value) noexcept
 	{
 		return _ML make_shared<opengl_framebuffer>(this, value);
 	}
 
-	shared<program> opengl_device::create_program() noexcept
+	shared<program> opengl_render_device::create_program() noexcept
 	{
 		return _ML make_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_device::create_shader(descriptor<shader> const & value) noexcept
+	shared<shader> opengl_render_device::create_shader(descriptor<shader> const & value) noexcept
 	{
 		return _ML make_shared<opengl_shader>(this, value);
 	}
@@ -801,12 +801,12 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device context
+// render context
 namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_context::opengl_context(render_device * parent, context_settings const & cs)
+	opengl_render_context::opengl_render_context(render_device * parent, context_settings const & cs)
 		: render_context{ parent }, m_desc{ cs }
 	{
 		ML_assert(cs.api == context_api_opengl);
@@ -820,102 +820,102 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	alpha_state opengl_context::get_alpha_state() const
+	alpha_state * opengl_render_context::get_alpha_state(alpha_state * value) const
 	{
-		alpha_state temp{};
+		ML_assert("value cannot be null" && value);
 
-		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&temp.enabled));
+		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&value->enabled));
 
-		ML_glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&temp.pred));
-		temp.pred = _predicate<to_user>(temp.pred);
+		ML_glCheck(glGetIntegerv(GL_ALPHA_TEST_FUNC, (int32_t *)&value->pred));
+		value->pred = _predicate<to_user>(value->pred);
 
-		ML_glCheck(glGetFloatv(GL_ALPHA_TEST_REF, &temp.ref));
+		ML_glCheck(glGetFloatv(GL_ALPHA_TEST_REF, &value->ref));
 
-		return temp;
+		return value;
 	}
 
-	blend_state opengl_context::get_blend_state() const
+	blend_state * opengl_render_context::get_blend_state(blend_state * value) const
 	{
-		blend_state temp{};
+		ML_assert("value cannot be null" && value);
 
-		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&temp.enabled));
+		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&value->enabled));
 
-		ML_glCheck(glGetFloatv(GL_BLEND_COLOR, temp.color));
+		ML_glCheck(glGetFloatv(GL_BLEND_COLOR, value->color));
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&temp.color_equation));
-		temp.color_equation = _equation<to_user>(temp.color_equation);
+		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_RGB, (int32_t *)&value->color_equation));
+		value->color_equation = _equation<to_user>(value->color_equation);
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_RGB, (int32_t *)&temp.color_sfactor));
-		temp.color_sfactor = _factor<to_user>(temp.color_sfactor);
+		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_RGB, (int32_t *)&value->color_sfactor));
+		value->color_sfactor = _factor<to_user>(value->color_sfactor);
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_DST_RGB, (int32_t *)&temp.color_dfactor));
-		temp.color_dfactor = _factor<to_user>(temp.color_dfactor);
+		ML_glCheck(glGetIntegerv(GL_BLEND_DST_RGB, (int32_t *)&value->color_dfactor));
+		value->color_dfactor = _factor<to_user>(value->color_dfactor);
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&temp.alpha_equation));
-		temp.alpha_equation = _equation<to_user>(temp.alpha_equation);
+		ML_glCheck(glGetIntegerv(GL_BLEND_EQUATION_ALPHA, (int32_t *)&value->alpha_equation));
+		value->alpha_equation = _equation<to_user>(value->alpha_equation);
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&temp.alpha_sfactor));
-		temp.alpha_sfactor = _factor<to_user>(temp.alpha_sfactor);
+		ML_glCheck(glGetIntegerv(GL_BLEND_SRC_ALPHA, (int32_t *)&value->alpha_sfactor));
+		value->alpha_sfactor = _factor<to_user>(value->alpha_sfactor);
 
-		ML_glCheck(glGetIntegerv(GL_BLEND_DST_ALPHA, (int32_t *)&temp.alpha_dfactor));
-		temp.alpha_dfactor = _factor<to_user>(temp.alpha_dfactor);
+		ML_glCheck(glGetIntegerv(GL_BLEND_DST_ALPHA, (int32_t *)&value->alpha_dfactor));
+		value->alpha_dfactor = _factor<to_user>(value->alpha_dfactor);
 
-		return temp;
+		return value;
 	}
 
-	color opengl_context::get_clear_color() const
+	color opengl_render_context::get_clear_color() const
 	{
 		color temp{};
 		ML_glCheck(glGetFloatv(GL_COLOR_CLEAR_VALUE, temp));
 		return temp;
 	}
 
-	cull_state opengl_context::get_cull_state() const
+	cull_state * opengl_render_context::get_cull_state(cull_state * value) const
 	{
-		cull_state temp{};
+		ML_assert("value cannot be null" && value);
 
-		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&temp.enabled));
+		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&value->enabled));
 
-		ML_glCheck(glGetIntegerv(GL_CULL_FACE_MODE, (int32_t *)&temp.facet));
-		temp.facet = _facet<to_user>(temp.facet);
+		ML_glCheck(glGetIntegerv(GL_CULL_FACE_MODE, (int32_t *)&value->facet));
+		value->facet = _facet<to_user>(value->facet);
 
-		ML_glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&temp.order));
-		temp.order = _order<to_user>(temp.order);
+		ML_glCheck(glGetIntegerv(GL_FRONT_FACE, (int32_t *)&value->order));
+		value->order = _order<to_user>(value->order);
 
-		return temp;
+		return value;
 	}
 
-	depth_state opengl_context::get_depth_state() const
+	depth_state * opengl_render_context::get_depth_state(depth_state * value) const
 	{
-		depth_state temp{};
+		ML_assert("value cannot be null" && value);
 
-		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&temp.enabled));
+		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&value->enabled));
 
-		ML_glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&temp.pred));
-		temp.pred = _predicate<to_user>(temp.pred);
+		ML_glCheck(glGetIntegerv(GL_DEPTH_FUNC, (int32_t *)&value->pred));
+		value->pred = _predicate<to_user>(value->pred);
 		
-		ML_glCheck(glGetFloatv(GL_DEPTH_RANGE, temp.range));
+		ML_glCheck(glGetFloatv(GL_DEPTH_RANGE, value->range));
 		
-		return temp;
+		return value;
 	}
 
-	stencil_state opengl_context::get_stencil_state() const
+	stencil_state * opengl_render_context::get_stencil_state(stencil_state * value) const
 	{
-		stencil_state temp{};
+		ML_assert("value cannot be null" && value);
 
-		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&temp.enabled));
+		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&value->enabled));
 
-		ML_glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&temp.pred));
-		temp.pred = _predicate<to_user>(temp.pred);
+		ML_glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&value->pred));
+		value->pred = _predicate<to_user>(value->pred);
 
-		ML_glCheck(glGetIntegerv(GL_STENCIL_REF, &temp.ref));
+		ML_glCheck(glGetIntegerv(GL_STENCIL_REF, &value->ref));
 		
-		ML_glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&temp.mask));
+		ML_glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&value->mask));
 
-		return temp;
+		return value;
 	}
 
-	int_rect opengl_context::get_viewport() const
+	int_rect opengl_render_context::get_viewport() const
 	{
 		int_rect temp{};
 		ML_glCheck(glGetIntegerv(GL_VIEWPORT, temp));
@@ -924,14 +924,14 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::set_alpha_state(alpha_state const & value)
+	void opengl_render_context::set_alpha_state(alpha_state const & value)
 	{
 		ML_glCheck(ML_glEnable(GL_ALPHA_TEST, value.enabled));
 
 		ML_glCheck(glAlphaFunc(_predicate<to_impl>(value.pred), value.ref));
 	}
 
-	void opengl_context::set_blend_state(blend_state const & value)
+	void opengl_render_context::set_blend_state(blend_state const & value)
 	{
 		ML_glCheck(ML_glEnable(GL_BLEND, value.enabled));
 		
@@ -952,12 +952,12 @@ namespace ml::gfx
 			_equation<to_impl>(value.alpha_equation)));
 	}
 
-	void opengl_context::set_clear_color(color const & value)
+	void opengl_render_context::set_clear_color(color const & value)
 	{
 		ML_glCheck(glClearColor(value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_context::set_cull_state(cull_state const & value)
+	void opengl_render_context::set_cull_state(cull_state const & value)
 	{
 		ML_glCheck(ML_glEnable(GL_CULL_FACE, value.enabled));
 		
@@ -966,7 +966,7 @@ namespace ml::gfx
 		ML_glCheck(glFrontFace(_order<to_impl>(value.order)));
 	}
 
-	void opengl_context::set_depth_state(depth_state const & value)
+	void opengl_render_context::set_depth_state(depth_state const & value)
 	{
 		ML_glCheck(ML_glEnable(GL_DEPTH_TEST, value.enabled));
 		
@@ -975,7 +975,7 @@ namespace ml::gfx
 		ML_glCheck(glDepthRangef(value.range[0], value.range[1]));
 	}
 
-	void opengl_context::set_stencil_state(stencil_state const & value)
+	void opengl_render_context::set_stencil_state(stencil_state const & value)
 	{
 		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, value.enabled));
 
@@ -986,14 +986,14 @@ namespace ml::gfx
 			value.mask));
 	}
 
-	void opengl_context::set_viewport(int_rect const & bounds)
+	void opengl_render_context::set_viewport(int_rect const & bounds)
 	{
 		ML_glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::clear(uint32_t mask)
+	void opengl_render_context::clear(uint32_t mask)
 	{
 		uint32_t temp{};
 		ML_flag_map(temp, GL_COLOR_BUFFER_BIT	, mask, clear_color		);
@@ -1002,7 +1002,7 @@ namespace ml::gfx
 		ML_glCheck(glClear(temp));
 	}
 
-	void opengl_context::draw(shared<vertexarray> const & value)
+	void opengl_render_context::draw(shared<vertexarray> const & value)
 	{
 		// could be moved into header file
 
@@ -1033,44 +1033,44 @@ namespace ml::gfx
 		}
 	}
 
-	void opengl_context::draw_arrays(uint32_t prim, size_t first, size_t count)
+	void opengl_render_context::draw_arrays(uint32_t prim, size_t first, size_t count)
 	{
 		ML_glCheck(glDrawArrays(_primitive<to_impl>(prim), (uint32_t)first, (uint32_t)count));
 	}
 
-	void opengl_context::draw_indexed(uint32_t prim, size_t count)
+	void opengl_render_context::draw_indexed(uint32_t prim, size_t count)
 	{
 		ML_glCheck(glDrawElements(_primitive<to_impl>(prim), (uint32_t)count, GL_UNSIGNED_INT, nullptr));
 	}
 
-	void opengl_context::flush()
+	void opengl_render_context::flush()
 	{
 		ML_glCheck(glFlush());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::bind_vertexarray(vertexarray const * value)
+	void opengl_render_context::bind_vertexarray(vertexarray const * value)
 	{
 		ML_glCheck(glBindVertexArray(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
-	void opengl_context::bind_vertexbuffer(vertexbuffer const * value)
+	void opengl_render_context::bind_vertexbuffer(vertexbuffer const * value)
 	{
 		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
-	void opengl_context::bind_indexbuffer(indexbuffer const * value)
+	void opengl_render_context::bind_indexbuffer(indexbuffer const * value)
 	{
 		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
-	void opengl_context::bind_texture(texture const * value, uint32_t slot)
+	void opengl_render_context::bind_texture(texture const * value, uint32_t slot)
 	{
 		ML_glCheck(glBindTextureUnit(slot, value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
-	void opengl_context::bind_framebuffer(framebuffer const * value)
+	void opengl_render_context::bind_framebuffer(framebuffer const * value)
 	{
 		if (value)
 		{
@@ -1084,12 +1084,12 @@ namespace ml::gfx
 		}
 	}
 
-	void opengl_context::bind_program(program const * value)
+	void opengl_render_context::bind_program(program const * value)
 	{
 		ML_glCheck(ML_glUseProgram(value ? ML_handle(uint32_t, value->get_handle()) : NULL));
 	}
 
-	void opengl_context::bind_shader(shader const * value)
+	void opengl_render_context::bind_shader(shader const * value)
 	{
 		ML_glCheck(glUseProgramStages(
 			m_handle,
@@ -1099,47 +1099,47 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_context::upload(binding_id loc, bool value)
+	void opengl_render_context::upload(binding_id loc, bool value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_context::upload(binding_id loc, int32_t value)
+	void opengl_render_context::upload(binding_id loc, int32_t value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_context::upload(binding_id loc, float_t value)
+	void opengl_render_context::upload(binding_id loc, float_t value)
 	{
 		ML_glCheck(ML_glUniform1f(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_context::upload(binding_id loc, vec2f const & value)
+	void opengl_render_context::upload(binding_id loc, vec2f const & value)
 	{
 		ML_glCheck(ML_glUniform2f(ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
-	void opengl_context::upload(binding_id loc, vec3f const & value)
+	void opengl_render_context::upload(binding_id loc, vec3f const & value)
 	{
 		ML_glCheck(ML_glUniform3f(ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
-	void opengl_context::upload(binding_id loc, vec4f const & value)
+	void opengl_render_context::upload(binding_id loc, vec4f const & value)
 	{
 		ML_glCheck(ML_glUniform4f(ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_context::upload(binding_id loc, mat2f const & value)
+	void opengl_render_context::upload(binding_id loc, mat2f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix2fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_context::upload(binding_id loc, mat3f const & value)
+	void opengl_render_context::upload(binding_id loc, mat3f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix3fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_context::upload(binding_id loc, mat4f const & value)
+	void opengl_render_context::upload(binding_id loc, mat4f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix4fv(ML_handle(int32_t, loc), false, value));
 	}

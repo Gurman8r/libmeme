@@ -11,12 +11,12 @@
 // device
 namespace ml::gfx
 {
-	class opengl_device final : public render_device
+	class opengl_render_device final : public render_device
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr typeof<> s_self_type{ typeof_v<opengl_device> };
+		static constexpr typeof<> s_self_type{ typeof_v<opengl_render_device> };
 
 		descriptor<render_device>	m_desc	{}; // device settings
 		shared<render_context>		m_ctx	{}; // render context
@@ -24,9 +24,9 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		opengl_device();
+		opengl_render_device();
 
-		~opengl_device() override;
+		~opengl_render_device() override;
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -72,12 +72,12 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// opengl context
-	class opengl_context final : public render_context
+	class opengl_render_context final : public render_context
 	{
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr typeof<> s_self_type{ typeof_v<opengl_context> };
+		static constexpr typeof<> s_self_type{ typeof_v<opengl_render_context> };
 
 		context_settings	m_desc		{}; // context settings
 		uint32_t			m_handle	{}; // pipeline handle (WIP)
@@ -85,9 +85,9 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		opengl_context(render_device * parent, context_settings const & cs);
+		opengl_render_context(render_device * parent, context_settings const & cs);
 
-		~opengl_context() override = default;
+		~opengl_render_context() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -99,17 +99,17 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		alpha_state get_alpha_state() const override;
+		alpha_state * get_alpha_state(alpha_state * value) const override;
 		
-		blend_state get_blend_state() const override;
+		blend_state * get_blend_state(blend_state * value) const override;
 
 		color get_clear_color() const override;
 		
-		cull_state get_cull_state() const override;
+		cull_state * get_cull_state(cull_state * value) const override;
 
-		depth_state get_depth_state() const override;
+		depth_state * get_depth_state(depth_state * value) const override;
 
-		stencil_state get_stencil_state() const override;
+		stencil_state * get_stencil_state(stencil_state * value) const override;
 
 		int_rect get_viewport() const override;
 

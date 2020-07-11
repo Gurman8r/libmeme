@@ -58,7 +58,7 @@ namespace ml
 		m_path.clear();
 
 		// clear symbols
-		m_symbols.clear();
+		m_functions.clear();
 
 		// close library
 		return std::invoke([&]() noexcept
@@ -77,18 +77,18 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::read(cstring value)
+	void * shared_library::get_proc_address(cstring value)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
-		return m_symbols.find_or_add_fn(util::hash(value, util::strlen(value)), [&]() noexcept
+		return m_functions.find_or_add_fn(util::hash(value, util::strlen(value)), [&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return ::GetProcAddress((HINSTANCE)m_handle, value);
 
-#elif defined(ML_os_unix)
+#elif defined(ML_os_linux)
 			return ::dlsym(m_handle, value);
 
 #else

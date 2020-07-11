@@ -10,15 +10,13 @@ namespace ml::impl
     // invoke function in constructor
     template <class Fn> struct ML_NODISCARD scope_impl final
     {
-        constexpr scope_impl(Fn && fn) noexcept { ML_forward(fn)(); }
-
-        constexpr operator bool() const noexcept { return true; }
+        scope_impl(Fn && fn) noexcept { ML_forward(fn)(); }
     };
 
     enum class ML_NODISCARD scope_tag {};
 
     template <class Fn
-    > ML_NODISCARD constexpr auto operator+(scope_tag, Fn && fn) noexcept
+    > ML_NODISCARD auto operator+(scope_tag, Fn && fn) noexcept
     {
         return scope_impl<Fn>{ ML_forward(fn) };
     }
