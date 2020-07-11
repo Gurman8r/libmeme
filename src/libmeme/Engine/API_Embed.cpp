@@ -282,37 +282,6 @@ namespace ml::embed
 			.def_property_readonly_static("repeat", [](py::object) { return (int32_t)key_state_repeat; })
 			;
 
-		// WINDOW ATTRIBUTES
-		py::class_<window_attr_>(m, "window_attr")
-			.def(py::init<>())
-
-			.def_property_readonly_static("focused"					, [](py::object) { return (int32_t)window_attr_focused; })
-			.def_property_readonly_static("iconified"				, [](py::object) { return (int32_t)window_attr_iconified; })
-			.def_property_readonly_static("resizable"				, [](py::object) { return (int32_t)window_attr_resizable; })
-			.def_property_readonly_static("visible"					, [](py::object) { return (int32_t)window_attr_visible; })
-			.def_property_readonly_static("decorated"				, [](py::object) { return (int32_t)window_attr_decorated; })
-			.def_property_readonly_static("auto_iconify"			, [](py::object) { return (int32_t)window_attr_auto_iconify; })
-			.def_property_readonly_static("floating"				, [](py::object) { return (int32_t)window_attr_floating; })
-			.def_property_readonly_static("maximized"				, [](py::object) { return (int32_t)window_attr_maximized; })
-			.def_property_readonly_static("center_cursor"			, [](py::object) { return (int32_t)window_attr_center_cursor; })
-			.def_property_readonly_static("transparent_framebuffer"	, [](py::object) { return (int32_t)window_attr_transparent_framebuffer; })
-			.def_property_readonly_static("hovered"					, [](py::object) { return (int32_t)window_attr_hovered; })
-			.def_property_readonly_static("focus_on_show"			, [](py::object) { return (int32_t)window_attr_focus_on_show; })
-
-			.def_property_readonly_static("context_api"				, [](py::object) { return (int32_t)window_attr_client_api; })
-			.def_property_readonly_static("context_version_major"	, [](py::object) { return (int32_t)window_attr_context_version_major; })
-			.def_property_readonly_static("context_version_minor"	, [](py::object) { return (int32_t)window_attr_context_version_minor; })
-			.def_property_readonly_static("context_revision"		, [](py::object) { return (int32_t)window_attr_context_revision; })
-			.def_property_readonly_static("context_robustness"		, [](py::object) { return (int32_t)window_attr_context_robustness; })
-			.def_property_readonly_static("context_forward_compat"	, [](py::object) { return (int32_t)window_attr_backend_forward_compat; })
-			.def_property_readonly_static("context_debug_context"	, [](py::object) { return (int32_t)window_attr_backend_debug_context; })
-			.def_property_readonly_static("renderer_profile"		, [](py::object) { return (int32_t)window_attr_backend_profile; })
-			.def_property_readonly_static("context_release_behavior", [](py::object) { return (int32_t)window_attr_context_release_behavior; })
-			.def_property_readonly_static("context_no_error"		, [](py::object) { return (int32_t)window_attr_context_no_error; })
-			.def_property_readonly_static("context_creation_api"	, [](py::object) { return (int32_t)window_attr_context_creation_api; })
-			.def_property_readonly_static("scale_to_monitor"		, [](py::object) { return (int32_t)window_attr_scale_to_monitor; })
-			;
-
 		// WINDOW HINTS
 		py::class_<window_hints_>(m, "window_hints")
 			.def(py::init<>())
@@ -458,9 +427,8 @@ namespace ml::embed
 			.def_static("swap_buffers"			, []() { engine::window().swap_buffers(); })
 
 			.def_static("is_open"				, []() { return engine::window().is_open(); })
-			.def_static("get_attribute"			, [](int32_t v) { return engine::window().get_attribute(v); })
 			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
-			.def_static("get_clipboard_string"	, []() { return engine::window().get_clipboard_string(); })
+			.def_static("get_clipboard"			, []() { return engine::window().get_clipboard(); })
 			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
 			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
 			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
@@ -472,7 +440,7 @@ namespace ml::embed
 			.def_static("get_opacity"			, []() { return engine::window().get_opacity(); })
 			.def_static("get_position"			, []() { return engine::window().get_position(); })
 
-			.def_static("set_clipboard_string"	, [](cstring v) { engine::window().set_clipboard_string(v); })
+			.def_static("set_clipboard"			, [](cstring v) { engine::window().set_clipboard(v); })
 			.def_static("set_cursor"			, [](cursor_handle v) { engine::window().set_cursor(v); })
 			.def_static("set_cursor_mode"		, [](int32_t v) { engine::window().set_cursor_mode(v); })
 			.def_static("set_cursor_position"	, [](vec2d v) { engine::window().set_cursor_position(v); })

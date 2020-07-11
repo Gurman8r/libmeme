@@ -29,22 +29,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void iconify() override;
-		
+
 		void maximize() override;
-		
+
 		void restore() override;
-		
+
 		void swap_buffers() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool is_open() const override;
-
-		int32_t get_attribute(int32_t value) const override;
-
 		int_rect get_bounds() const override;
 
-		cstring get_clipboard_string() const override;
+		cstring get_clipboard() const override;
 
 		vec2 get_content_scale() const override;
 
@@ -74,13 +70,49 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_clipboard_string(cstring value) override;
+		bool is_auto_iconify() const override;
+
+		bool is_decorated() const override;
+
+		bool is_center_cursor() const override;
+
+		bool is_floating() const override;
+
+		bool is_focus_on_show() const override;
+
+		bool is_focused() const override;
+
+		bool is_hovered() const override;
+
+		bool is_iconified() const override;
+
+		bool is_maximized() const override;
+
+		bool is_open() const override;
+
+		bool is_resizable() const override;
+
+		bool is_transparent_framebuffer() const override;
+
+		bool is_visible() const override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_auto_iconify(bool value) override;
+
+		void set_clipboard(cstring value) override;
 		
 		void set_cursor(cursor_handle value) override;
 		
 		void set_cursor_mode(int32_t value) override;
 		
 		void set_cursor_position(vec2d const & value) override;
+
+		void set_decorated(bool value) override;
+
+		void set_floating(bool value) override;
+
+		void set_focus_on_show(bool value) override;
 		
 		void set_icon(size_t w, size_t h, byte_t const * p) override;
 
@@ -92,6 +124,8 @@ namespace ml
 		
 		void set_monitor(monitor_handle value, int_rect const & bounds = {}) override;
 
+		void set_resizable(bool value) override;
+
 		void set_size(vec2i const & value) override;
 		
 		void set_title(cstring value) override;
@@ -100,13 +134,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void poll_events();
+		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 
-		static void set_current_context(window_handle value);
-
-		static void set_swap_interval(int32_t value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static cursor_handle create_standard_cursor(int32_t value);
 
 		static int32_t extension_supported(cstring value);
 
@@ -120,13 +150,13 @@ namespace ml
 
 		static duration get_time();
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
-
-		static cursor_handle create_standard_cursor(int32_t value);
-
 		static void destroy_cursor(cursor_handle value);
+
+		static void poll_events();
+
+		static void set_current_context(window_handle value);
+
+		static void set_swap_interval(int32_t value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

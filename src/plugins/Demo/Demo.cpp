@@ -969,7 +969,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							engine::window().set_clipboard_string(buf);
+							engine::window().set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1129,7 +1129,7 @@ namespace ml
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= engine::window().get_attribute(window_attr_maximized) ? 32 : 16;
+				m_mem_editor.Cols				= engine::window().is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1323,18 +1323,18 @@ namespace ml
 
 			ImGui::Separator();
 
-			if (ImGui::CollapsingHeader("alpha"))
+			if (gfx::alpha_state a{}; ImGui::CollapsingHeader("alpha"))
 			{
-				gfx::alpha_state a{}; ctx->get_alpha_state(&a);
+				ctx->get_alpha_state(&a);
 				ImGui::Checkbox("enabled", &a.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a.pred], a.pred);
 				ImGui::Text("reference: %f", a.ref);
 			}
 			ImGui::Separator();
 
-			if (ImGui::CollapsingHeader("blend"))
+			if (gfx::blend_state b{}; ImGui::CollapsingHeader("blend"))
 			{
-				gfx::blend_state b{}; ctx->get_blend_state(&b);
+				ctx->get_blend_state(&b);
 				ImGui::Checkbox("enabled", &b.enabled);
 				ImGui::ColorEdit4("color", b.color);
 				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b.color_equation], b.color_equation);
@@ -1346,27 +1346,27 @@ namespace ml
 			}
 			ImGui::Separator();
 
-			if (ImGui::CollapsingHeader("cull"))
+			if (gfx::cull_state c{}; ImGui::CollapsingHeader("cull"))
 			{
-				gfx::cull_state c{}; ctx->get_cull_state(&c);
+				ctx->get_cull_state(&c);
 				ImGui::Checkbox("enabled", &c.enabled);
 				ImGui::Text("facet: %s (%u)", gfx::facet_names[c.facet], c.facet);
 				ImGui::Text("order: %s (%u)", gfx::order_names[c.order], c.order);
 			}
 			ImGui::Separator();
 
-			if (ImGui::CollapsingHeader("depth"))
+			if (gfx::depth_state d{}; ImGui::CollapsingHeader("depth"))
 			{
-				gfx::depth_state d{}; ctx->get_depth_state(&d);
+				ctx->get_depth_state(&d);
 				ImGui::Checkbox("enabled", &d.enabled);
 				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
 				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
 			}
 			ImGui::Separator();
 
-			if (ImGui::CollapsingHeader("stencil"))
+			if (gfx::stencil_state s{}; ImGui::CollapsingHeader("stencil"))
 			{
-				gfx::stencil_state s{}; ctx->get_stencil_state(&s);
+				ctx->get_stencil_state(&s);
 				ImGui::Checkbox("enabled", &s.enabled);
 				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s.pred], s.pred);
 				ImGui::Text("reference: %i", s.ref);

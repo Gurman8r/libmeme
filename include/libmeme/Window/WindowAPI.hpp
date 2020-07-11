@@ -258,38 +258,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// window attributes
-	enum window_attr_ : int32_t
-	{
-		window_attr_focused,
-		window_attr_iconified,
-		window_attr_resizable,
-		window_attr_visible,
-		window_attr_decorated,
-		window_attr_auto_iconify,
-		window_attr_floating,
-		window_attr_maximized,
-		window_attr_center_cursor,
-		window_attr_transparent_framebuffer,
-		window_attr_hovered,
-		window_attr_focus_on_show,
-
-		window_attr_client_api,
-		window_attr_context_version_major,
-		window_attr_context_version_minor,
-		window_attr_context_revision,
-		window_attr_context_robustness,
-		window_attr_backend_forward_compat,
-		window_attr_backend_debug_context,
-		window_attr_backend_profile,
-		window_attr_context_release_behavior,
-		window_attr_context_no_error,
-		window_attr_context_creation_api,
-		window_attr_scale_to_monitor,
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// window hints
 	enum window_hints_ : int32_t
 	{

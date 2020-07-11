@@ -31,8 +31,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		unique<gfx::render_device>	m_dev;
-		shared<gfx::render_context>	m_ctx;
+		unique<	gfx::render_device	>	m_dev;
+		shared<	gfx::render_context	>	m_ctx;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

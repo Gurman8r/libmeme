@@ -30,13 +30,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool is_open() const = 0;
-
-		virtual int32_t get_attribute(int32_t) const = 0;
-
 		virtual int_rect get_bounds() const = 0;
 
-		virtual cstring get_clipboard_string() const = 0;
+		virtual cstring get_clipboard() const = 0;
 
 		virtual vec2 get_content_scale() const = 0;
 
@@ -66,13 +62,49 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void set_clipboard_string(cstring) = 0;
+		virtual bool is_auto_iconify() const = 0;
+
+		virtual bool is_decorated() const = 0;
+
+		virtual bool is_center_cursor() const = 0;
+
+		virtual bool is_floating() const = 0;
+
+		virtual bool is_focused() const = 0;
+
+		virtual bool is_focus_on_show() const = 0;
+
+		virtual bool is_hovered() const = 0;
+
+		virtual bool is_iconified() const = 0;
+
+		virtual bool is_maximized() const = 0;
+
+		virtual bool is_open() const = 0;
+
+		virtual bool is_resizable() const = 0;
+
+		virtual bool is_transparent_framebuffer() const = 0;
+
+		virtual bool is_visible() const = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		virtual void set_auto_iconify(bool) = 0;
+
+		virtual void set_clipboard(cstring) = 0;
 
 		virtual void set_cursor(cursor_handle) = 0;
 
 		virtual void set_cursor_mode(int32_t) = 0;
 
 		virtual void set_cursor_position(vec2d const &) = 0;
+
+		virtual void set_decorated(bool) = 0;
+
+		virtual void set_floating(bool) = 0;
+
+		virtual void set_focus_on_show(bool) = 0;
 
 		virtual void set_icon(size_t, size_t, byte_t const *) = 0;
 
@@ -84,6 +116,8 @@ namespace ml
 
 		virtual void set_monitor(monitor_handle, int_rect const &) = 0;
 
+		virtual void set_resizable(bool) = 0;
+
 		virtual void set_size(vec2i const &) = 0;
 
 		virtual void set_title(cstring) = 0;
@@ -92,13 +126,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void poll_events() = delete;
+		static cursor_handle create_custom_cursor(size_t, size_t, byte_t const *) = delete;
 
-		static void set_current_context(window_handle) = delete;
-
-		static void set_swap_interval(int32_t) = delete;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static cursor_handle create_standard_cursor(int32_t) = delete;
 
 		static int32_t extension_supported(cstring) = delete;
 
@@ -112,13 +142,13 @@ namespace ml
 
 		static duration get_time() = delete;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		static cursor_handle create_custom_cursor(size_t, size_t, byte_t const *) = delete;
-
-		static cursor_handle create_standard_cursor(int32_t) = delete;
-
 		static void destroy_cursor(cursor_handle) = delete;
+
+		static void poll_events() = delete;
+
+		static void set_current_context(window_handle) = delete;
+
+		static void set_swap_interval(int32_t) = delete;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

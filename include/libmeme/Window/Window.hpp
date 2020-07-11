@@ -13,7 +13,7 @@ namespace ml
 
 		explicit window(window_settings const & ws) noexcept;
 
-		virtual ~window() noexcept = default;
+		virtual ~window() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -26,20 +26,16 @@ namespace ml
 		void iconify() noexcept;
 
 		void maximize() noexcept;
-		
+
 		void restore() noexcept;
-		
+
 		void swap_buffers() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool is_open() const noexcept;
-
-		ML_NODISCARD int32_t get_attribute(int32_t value) const noexcept;
-
 		ML_NODISCARD int_rect get_bounds() const noexcept;
 
-		ML_NODISCARD cstring get_clipboard_string() const noexcept;
+		ML_NODISCARD cstring get_clipboard() const noexcept;
 
 		ML_NODISCARD vec2 get_content_scale() const noexcept;
 
@@ -69,13 +65,49 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void set_clipboard_string(cstring value) noexcept;
+		ML_NODISCARD bool is_auto_iconify() const noexcept;
+
+		ML_NODISCARD bool is_decorated() const noexcept;
+
+		ML_NODISCARD bool is_center_cursor() const noexcept;
+
+		ML_NODISCARD bool is_floating() const noexcept;
+
+		ML_NODISCARD bool is_focus_on_show() const noexcept;
+
+		ML_NODISCARD bool is_focused() const noexcept;
+
+		ML_NODISCARD bool is_hovered() const noexcept;
+
+		ML_NODISCARD bool is_iconified() const noexcept;
+
+		ML_NODISCARD bool is_maximized() const noexcept;
+
+		ML_NODISCARD bool is_open() const noexcept;
+
+		ML_NODISCARD bool is_resizable() const noexcept;
+
+		ML_NODISCARD bool is_transparent_framebuffer() const noexcept;
+
+		ML_NODISCARD bool is_visible() const noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void set_auto_iconify(bool value) noexcept;
+
+		void set_clipboard(cstring value) noexcept;
 		
 		void set_cursor(cursor_handle value) noexcept;
 		
 		void set_cursor_mode(int32_t value) noexcept;
 		
 		void set_cursor_position(vec2d const & value) noexcept;
+
+		void set_decorated(bool value) noexcept;
+
+		void set_floating(bool value) noexcept;
+
+		void set_focus_on_show(bool value) noexcept;
 		
 		void set_icon(size_t w, size_t h, byte_t const * p) noexcept;
 
@@ -87,6 +119,8 @@ namespace ml
 		
 		void set_monitor(monitor_handle value, int_rect const & bounds = {}) noexcept;
 
+		void set_resizable(bool value) noexcept;
+
 		void set_size(vec2i const & value) noexcept;
 		
 		void set_title(cstring value) noexcept;
@@ -95,13 +129,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static void poll_events() noexcept;
+		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept;
 
-		static void set_current_context(window_handle value) noexcept;
-
-		static void set_swap_interval(int32_t value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value) noexcept;
 
 		ML_NODISCARD static int32_t extension_supported(cstring value) noexcept;
 
@@ -115,13 +145,13 @@ namespace ml
 
 		ML_NODISCARD static duration get_time() noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept;
-
-		ML_NODISCARD static cursor_handle create_standard_cursor(int32_t value) noexcept;
-
 		static void destroy_cursor(cursor_handle value) noexcept;
+
+		static void poll_events() noexcept;
+
+		static void set_current_context(window_handle value) noexcept;
+
+		static void set_swap_interval(int32_t value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -151,7 +181,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		window_settings m_wndcfg;
+		window_settings m_wndcfg; // store this somewhere else
 
 	private:
 		unique<struct window_base> m_window;

@@ -42,7 +42,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	glfw_window::glfw_window() noexcept : m_title{}, m_window {}, m_monitor{}
+	glfw_window::glfw_window() noexcept : m_title{}, m_window{}, m_monitor{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
 		ML_assert("failed initializing glfw window" && glfw_init);
@@ -50,7 +50,7 @@ namespace ml
 
 	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
 	{
-		ML_assert(this->open(ws));
+		ML_assert(open(ws));
 	}
 
 	glfw_window::~glfw_window() noexcept
@@ -138,7 +138,7 @@ namespace ml
 	{
 		glfwIconifyWindow(m_window);
 	}
-	
+
 	void glfw_window::maximize()
 	{
 		glfwMaximizeWindow(m_window);
@@ -156,48 +156,6 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool glfw_window::is_open() const
-	{
-		return m_window && !glfwWindowShouldClose(m_window);
-	}
-
-	int32_t glfw_window::get_attribute(int32_t value) const
-	{
-		return glfwGetWindowAttrib(m_window, std::invoke([&]() noexcept
-		{
-			switch (value)
-			{
-			default: return 0;
-
-			case window_attr_focused					: return GLFW_FOCUSED;
-			case window_attr_iconified					: return GLFW_ICONIFIED;
-			case window_attr_resizable					: return GLFW_RESIZABLE;
-			case window_attr_visible					: return GLFW_VISIBLE;
-			case window_attr_decorated					: return GLFW_DECORATED;
-			case window_attr_auto_iconify				: return GLFW_AUTO_ICONIFY;
-			case window_attr_floating					: return GLFW_FLOATING;
-			case window_attr_maximized					: return GLFW_MAXIMIZED;
-			case window_attr_center_cursor				: return GLFW_CENTER_CURSOR;
-			case window_attr_transparent_framebuffer	: return GLFW_TRANSPARENT_FRAMEBUFFER;
-			case window_attr_hovered					: return GLFW_HOVERED;
-			case window_attr_focus_on_show				: return GLFW_FOCUS_ON_SHOW;
-			
-			case window_attr_client_api					: return GLFW_CLIENT_API;
-			case window_attr_context_version_major		: return GLFW_CONTEXT_VERSION_MAJOR;
-			case window_attr_context_version_minor		: return GLFW_CONTEXT_VERSION_MINOR;
-			case window_attr_context_revision			: return GLFW_CONTEXT_REVISION;
-			case window_attr_context_robustness			: return GLFW_CONTEXT_ROBUSTNESS;
-			case window_attr_backend_forward_compat		: return GLFW_OPENGL_FORWARD_COMPAT;
-			case window_attr_backend_debug_context		: return GLFW_OPENGL_DEBUG_CONTEXT;
-			case window_attr_backend_profile			: return GLFW_OPENGL_PROFILE;
-			case window_attr_context_release_behavior	: return GLFW_CONTEXT_RELEASE_BEHAVIOR;
-			case window_attr_context_no_error			: return GLFW_CONTEXT_NO_ERROR;
-			case window_attr_context_creation_api		: return GLFW_CONTEXT_CREATION_API;
-			case window_attr_scale_to_monitor			: return GLFW_SCALE_TO_MONITOR;
-			}
-		}));
-	}
-
 	int_rect glfw_window::get_bounds() const
 	{
 		int_rect temp{};
@@ -205,7 +163,7 @@ namespace ml
 		return temp;
 	}
 
-	cstring glfw_window::get_clipboard_string() const
+	cstring glfw_window::get_clipboard() const
 	{
 		return glfwGetClipboardString(m_window);
 	}
@@ -291,7 +249,79 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void glfw_window::set_clipboard_string(cstring value)
+	bool glfw_window::is_auto_iconify() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_AUTO_ICONIFY);
+	}
+
+	bool glfw_window::is_decorated() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_DECORATED);
+	}
+
+	bool glfw_window::is_center_cursor() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_CENTER_CURSOR);
+	}
+
+	bool glfw_window::is_floating() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_FLOATING);
+	}
+
+	bool glfw_window::is_focus_on_show() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW);
+	}
+
+	bool glfw_window::is_focused() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_FOCUSED);
+	}
+
+	bool glfw_window::is_hovered() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_HOVERED);
+	}
+
+	bool glfw_window::is_iconified() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_ICONIFIED);
+	}
+
+	bool glfw_window::is_maximized() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_MAXIMIZED);
+	}
+
+	bool glfw_window::is_open() const
+	{
+		return m_window && !glfwWindowShouldClose(m_window);
+	}
+
+	bool glfw_window::is_resizable() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_RESIZABLE);
+	}
+
+	bool glfw_window::is_transparent_framebuffer() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_TRANSPARENT_FRAMEBUFFER);
+	}
+
+	bool glfw_window::is_visible() const
+	{
+		return m_window && glfwGetWindowAttrib(m_window, GLFW_VISIBLE);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void glfw_window::set_auto_iconify(bool value)
+	{
+		glfwSetWindowAttrib(m_window, GLFW_AUTO_ICONIFY, value);
+	}
+
+	void glfw_window::set_clipboard(cstring value)
 	{
 		glfwSetClipboardString(m_window, value);
 	}
@@ -318,6 +348,21 @@ namespace ml
 	void glfw_window::set_cursor_position(vec2d const & value)
 	{
 		glfwSetCursorPos(m_window, value[0], value[1]);
+	}
+
+	void glfw_window::set_decorated(bool value)
+	{
+		glfwSetWindowAttrib(m_window, GLFW_DECORATED, value);
+	}
+
+	void glfw_window::set_floating(bool value)
+	{
+		glfwSetWindowAttrib(m_window, GLFW_FLOATING, value);
+	}
+
+	void glfw_window::set_focus_on_show(bool value)
+	{
+		glfwSetWindowAttrib(m_window, GLFW_FOCUS_ON_SHOW, value);
 	}
 
 	void glfw_window::set_icon(size_t w, size_t h, byte_t const * p)
@@ -362,6 +407,11 @@ namespace ml
 				bounds.height(),
 				GLFW_DONT_CARE);
 		}
+	}
+
+	void glfw_window::set_resizable(bool value)
+	{
+		glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, value);
 	}
 
 	void glfw_window::set_size(vec2i const & value)
@@ -454,8 +504,6 @@ namespace ml
 	{
 		return duration{ glfwGetTime() };
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void glfw_window::destroy_cursor(cursor_handle value)
 	{

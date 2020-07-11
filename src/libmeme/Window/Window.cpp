@@ -34,6 +34,10 @@ namespace ml
 		ML_assert(open(ws));
 	}
 
+	window::~window() noexcept
+	{
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool window::open(window_settings const & ws)
@@ -145,25 +149,15 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool window::is_open() const noexcept
-	{
-		return m_window->is_open();
-	}
 	
-	int32_t window::get_attribute(int32_t value) const noexcept
-	{
-		return m_window->get_attribute(value);
-	}
-
 	int_rect window::get_bounds() const noexcept
 	{
 		return m_window->get_bounds();
 	}
 
-	cstring window::get_clipboard_string() const noexcept
+	cstring window::get_clipboard() const noexcept
 	{
-		return m_window->get_clipboard_string();
+		return m_window->get_clipboard();
 	}
 
 	vec2 window::get_content_scale() const noexcept
@@ -186,19 +180,19 @@ namespace ml
 		return m_window->get_handle();
 	}
 
-	int32_t window::get_input_mode(int32_t mode) const noexcept
+	int32_t window::get_input_mode(int32_t value) const noexcept
 	{
-		return m_window->get_input_mode(mode);
+		return m_window->get_input_mode(value);
 	}
 
-	int32_t	window::get_key(int32_t key) const noexcept
+	int32_t	window::get_key(int32_t value) const noexcept
 	{
-		return m_window->get_key(key);
+		return m_window->get_key(value);
 	}
 
-	int32_t	window::get_mouse_button(int32_t button) const noexcept
+	int32_t	window::get_mouse_button(int32_t value) const noexcept
 	{
-		return m_window->get_mouse_button(button);
+		return m_window->get_mouse_button(value);
 	}
 
 	window_handle window::get_native_handle() const noexcept
@@ -233,9 +227,81 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void window::set_clipboard_string(cstring value) noexcept
+	bool window::is_auto_iconify() const noexcept
 	{
-		m_window->set_clipboard_string(value);
+		return m_window->is_auto_iconify();
+	}
+
+	bool window::is_decorated() const noexcept
+	{
+		return m_window->is_decorated();
+	}
+
+	bool window::is_center_cursor() const noexcept
+	{
+		return m_window->is_center_cursor();
+	}
+
+	bool window::is_floating() const noexcept
+	{
+		return m_window->is_floating();
+	}
+
+	bool window::is_focus_on_show() const noexcept
+	{
+		return m_window->is_focus_on_show();
+	}
+
+	bool window::is_focused() const noexcept
+	{
+		return m_window->is_focused();
+	}
+
+	bool window::is_hovered() const noexcept
+	{
+		return m_window->is_hovered();
+	}
+
+	bool window::is_iconified() const noexcept
+	{
+		return m_window->is_iconified();
+	}
+
+	bool window::is_maximized() const noexcept
+	{
+		return m_window->is_maximized();
+	}
+
+	bool window::is_open() const noexcept
+	{
+		return m_window->is_open();
+	}
+
+	bool window::is_resizable() const noexcept
+	{
+		return m_window->is_resizable();
+	}
+
+	bool window::is_transparent_framebuffer() const noexcept
+	{
+		return m_window->is_transparent_framebuffer();
+	}
+
+	bool window::is_visible() const noexcept
+	{
+		return m_window->is_visible();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void window::set_auto_iconify(bool value) noexcept
+	{
+		return m_window->set_auto_iconify(value);
+	}
+
+	void window::set_clipboard(cstring value) noexcept
+	{
+		m_window->set_clipboard(value);
 	}
 
 	void window::set_cursor(cursor_handle value) noexcept
@@ -251,6 +317,21 @@ namespace ml
 	void window::set_cursor_position(vec2d const & value) noexcept
 	{
 		m_window->set_cursor_position(value);
+	}
+
+	void window::set_decorated(bool value) noexcept
+	{
+		return m_window->set_decorated(value);
+	}
+
+	void window::set_floating(bool value) noexcept
+	{
+		return m_window->set_floating(value);
+	}
+
+	void window::set_focus_on_show(bool value) noexcept
+	{
+		return m_window->set_focus_on_show(value);
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p) noexcept
@@ -276,6 +357,11 @@ namespace ml
 	void window::set_monitor(monitor_handle value, int_rect const & bounds) noexcept
 	{
 		m_window->set_monitor(value, bounds);
+	}
+
+	void window::set_resizable(bool value) noexcept
+	{
+		return m_window->set_resizable(value);
 	}
 
 	void window::set_size(vec2i const & value) noexcept
@@ -334,8 +420,6 @@ namespace ml
 	{
 		return impl_window::get_time();
 	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::destroy_cursor(cursor_handle value) noexcept
 	{
