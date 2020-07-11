@@ -2,7 +2,7 @@
 #define _ML_SCRIPT_MANAGER_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/System/Memory.hpp>
 
 namespace ml
 {

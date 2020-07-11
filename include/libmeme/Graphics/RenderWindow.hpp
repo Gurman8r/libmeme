@@ -1,7 +1,7 @@
 #ifndef _ML_RENDER_WINDOW_HPP_
 #define _ML_RENDER_WINDOW_HPP_
 
-#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Window/Window.hpp>
 #include <libmeme/Graphics/RenderAPI.hpp>
 
 namespace ml

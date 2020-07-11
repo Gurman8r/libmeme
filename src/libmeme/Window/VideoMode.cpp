@@ -1,4 +1,4 @@
-#include <libmeme/Platform/VideoMode.hpp>
+#include <libmeme/Window/VideoMode.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

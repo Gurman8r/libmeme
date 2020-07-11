@@ -3,9 +3,8 @@
 
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
-#include <libmeme/Platform/WindowAPI.hpp>
 #include <libmeme/Graphics/Image.hpp>
-#include <libmeme/Platform/ContextSettings.hpp>
+#include <libmeme/Window/ContextSettings.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

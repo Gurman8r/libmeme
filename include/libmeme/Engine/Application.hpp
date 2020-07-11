@@ -4,16 +4,16 @@
 // WIP
 
 #include <libmeme/Core/BatchVector.hpp>
-#include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Core/Performance.hpp>
+#include <libmeme/System/EventBus.hpp>
+#include <libmeme/System/Performance.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Platform/SharedLibrary.hpp>
+#include <libmeme/System/SharedLibrary.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API application : render_window, event_listener
+	struct ML_ENGINE_API application : event_listener
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -34,9 +34,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool open(window_settings const & ws) override;
+		virtual bool open(window_settings const & ws);
 
-		virtual void close() override;
+		virtual void close();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -60,6 +60,8 @@ namespace ml
 			fps_times_t	fps_times	{ 120, allocator_type{} };
 		}
 		m_perf;
+
+		render_window m_wnd;
 		
 		ImGuiContext * m_imgui{};
 

@@ -4,7 +4,7 @@
 // WIP
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/System/Memory.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 
 namespace ml

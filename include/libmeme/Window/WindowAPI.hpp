@@ -1,9 +1,9 @@
 #ifndef _ML_WINDOW_API_HPP_
 #define _ML_WINDOW_API_HPP_
 
-#include <libmeme/Core/Timer.hpp>
-#include <libmeme/Platform/ContextSettings.hpp>
-#include <libmeme/Platform/VideoMode.hpp>
+#include <libmeme/System/Timer.hpp>
+#include <libmeme/Window/ContextSettings.hpp>
+#include <libmeme/Window/VideoMode.hpp>
 
 namespace ml
 {

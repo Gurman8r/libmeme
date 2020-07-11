@@ -1,19 +1,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/ECS.hpp>
-#include <libmeme/Core/Performance.hpp>
+#include <libmeme/System/ECS.hpp>
+#include <libmeme/System/Performance.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -292,12 +291,12 @@ namespace ml
 
 		demo(plugin_manager * mgr) noexcept : plugin{ mgr }
 		{
-			event_system::add_listener<	load_event		>(this);
-			event_system::add_listener<	update_event	>(this);
-			event_system::add_listener<	draw_event		>(this);
-			event_system::add_listener<	dock_gui_event	>(this);
-			event_system::add_listener<	draw_gui_event	>(this);
-			event_system::add_listener<	unload_event	>(this);
+			event_bus::add_listener<	load_event		>(this);
+			event_bus::add_listener<	update_event	>(this);
+			event_bus::add_listener<	draw_event		>(this);
+			event_bus::add_listener<	dock_gui_event	>(this);
+			event_bus::add_listener<	draw_gui_event	>(this);
+			event_bus::add_listener<	unload_event	>(this);
 		}
 
 		void on_event(event const & ev) override

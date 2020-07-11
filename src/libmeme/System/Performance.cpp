@@ -1,10 +1,10 @@
-#include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/System/Performance.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	event_system::~event_system() noexcept {}
+	performance::~performance() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

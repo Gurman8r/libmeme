@@ -1,7 +1,7 @@
 #ifndef _ML_ENGINE_EVENTS_HPP_
 #define _ML_ENGINE_EVENTS_HPP_
 
-#include <libmeme/Core/Event.hpp>
+#include <libmeme/System/Event.hpp>
 
 namespace ml
 {

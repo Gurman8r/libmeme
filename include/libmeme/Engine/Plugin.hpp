@@ -2,8 +2,8 @@
 #define _ML_PLUGIN_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/System/Memory.hpp>
+#include <libmeme/System/EventBus.hpp>
 
 #ifndef ML_PLUGIN_API
 #define ML_PLUGIN_API ML_API_EXPORT

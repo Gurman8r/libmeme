@@ -10,51 +10,6 @@ object import settings
 refactor application framework (engine & window)
 separate shader objects
 
-
-core
-	+ files
-	+ generics
-	+ serialization
-	+ utility
-	+ events
-	+ memory
-	+ timers
-platform
-	+ library
-	+ context
-	+ window
-	+ input
-render_api
-	+ render_device
-	+ render_context
-	+ render_command
-	+ buffers
-	+ framebuffer
-	+ pipelines
-	+ render_pass
-	+ shader
-	+ states
-	+ swap_chain
-	+ texture
-renderer
-	+ renderer_2d
-	+ renderer_3d
-	+ animation
-	+ camera
-	+ font
-	+ material
-	+ model
-	+ scene
-	+ sprite
-	+ vfx
-sdk
-	+ application
-	+ gui
-	+ plugins
-	+ scripting
-launcher
-	+ main
-
 /bin
 /config
 /content
@@ -73,4 +28,49 @@ launcher
 libmeme.json
 
 
-
+# Engine
+	@ Common
+		+ DS
+		+ debug
+	@ System
+		+ events
+		+ library
+		+ memory
+		+ platform
+		+ timers
+	@ Window
+		+ context
+		+ cursor
+		+ device
+		+ keyboard
+		+ mouse
+		+ window
+		+ video_mode
+	@ Graphics
+		+ render_device
+		+ render_context
+		+ buffer
+		+ texture
+		+ framebuffer
+		+ program
+		+ shader
+		+ pipelines
+		+ render_pass
+		+ states
+		+ swap_chain
+	@ Renderer
+		+ render_window
+		+ renderer_2d
+		+ renderer_3d
+		+ animation
+		+ camera
+		+ font
+		+ material
+		+ model
+		+ scene
+		+ sprite
+		+ vfx
+	@ Runtime
+		+ application
+		+ plugin
+		+ plugin_manager

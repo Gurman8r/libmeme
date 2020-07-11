@@ -1,14 +1,14 @@
 #ifndef _ML_STREAM_SNIPER_HPP_
 #define _ML_STREAM_SNIPER_HPP_
 
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/NonCopyable.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Ch = char, class Al = pmr::polymorphic_allocator<Ch>
-	> struct basic_stream_sniper final : non_copyable, trackable
+	> struct basic_stream_sniper final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

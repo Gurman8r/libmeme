@@ -1,8 +1,8 @@
 #ifndef _ML_WINDOW_EVENTS_HPP_
 #define _ML_WINDOW_EVENTS_HPP_
 
-#include <libmeme/Core/Event.hpp>
-#include <libmeme/Platform/WindowAPI.hpp>
+#include <libmeme/System/Event.hpp>
+#include <libmeme/Window/WindowAPI.hpp>
 
 namespace ml
 {

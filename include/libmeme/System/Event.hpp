@@ -17,15 +17,10 @@ namespace ml
 	{
 		hash_t const ID;
 
-		template <class Ev> constexpr bool is() const noexcept
-		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			return (this->ID == hashof_v<Ev>);
-		}
-
 		template <class Ev> constexpr auto cast() const noexcept
 		{
-			return this->is<Ev>() ? static_cast<Ev const *>(this) : nullptr;
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+			return (this->ID == hashof_v<Ev>) ? static_cast<Ev const *>(this) : nullptr;
 		}
 
 	protected:
@@ -36,7 +31,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// template event interface
+	// event interface
 	template <class T> struct event_helper : event
 	{
 		constexpr event_helper() noexcept : event{ hashof_v<T> }

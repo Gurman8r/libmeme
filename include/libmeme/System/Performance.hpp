@@ -1,14 +1,12 @@
 #ifndef _ML_PERFORMANCE_HPP_
 #define _ML_PERFORMANCE_HPP_
 
-#include <libmeme/Core/Timer.hpp>
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+#include <libmeme/System/Timer.hpp>
 
 namespace ml
 {
 	// performance tracker singleton
-	struct ML_CORE_API performance final : public singleton<performance>
+	struct ML_SYSTEM_API performance final : public singleton<performance>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -1,8 +1,8 @@
-#ifndef _ML_EVENT_SYSTEM_HPP_
-#define _ML_EVENT_SYSTEM_HPP_
+#ifndef _ML_EVENT_BUS_HPP_
+#define _ML_EVENT_BUS_HPP_
 
-#include <libmeme/Core/Export.hpp>
-#include <libmeme/Core/Event.hpp>
+#include <libmeme/System/Export.hpp>
+#include <libmeme/System/Event.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
@@ -11,7 +11,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// base event listener
-	struct ML_CORE_API event_listener
+	struct ML_SYSTEM_API event_listener
 	{
 		virtual ~event_listener() noexcept;
 
@@ -21,7 +21,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// event system singleton
-	class ML_CORE_API event_system final : public singleton<event_system>
+	class ML_SYSTEM_API event_bus final : public singleton<event_bus>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -113,7 +113,7 @@ namespace ml
 	private:
 		friend singleton;
 
-		~event_system() noexcept;
+		~event_bus() noexcept;
 
 		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};
 
@@ -124,7 +124,7 @@ namespace ml
 
 	inline event_listener::~event_listener() noexcept
 	{
-		event_system::remove_listener(this); // remove listener from all events
+		event_bus::remove_listener(this); // remove listener from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

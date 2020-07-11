@@ -1,11 +1,11 @@
 #ifndef _ML_WINDOW_HPP_
 #define _ML_WINDOW_HPP_
 
-#include <libmeme/Platform/WindowAPI.hpp>
+#include <libmeme/Window/WindowAPI.hpp>
 
 namespace ml
 {
-	struct ML_PLATFORM_API window : non_copyable, trackable
+	struct ML_WINDOW_API window : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

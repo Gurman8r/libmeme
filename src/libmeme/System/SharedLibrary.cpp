@@ -1,4 +1,4 @@
-#include <libmeme/Platform/SharedLibrary.hpp>
+#include <libmeme/System/SharedLibrary.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

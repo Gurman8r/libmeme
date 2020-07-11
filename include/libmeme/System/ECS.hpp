@@ -7,7 +7,8 @@
 
 #include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/Core/BitSet.hpp>
-#include <libmeme/Core/Debug.hpp>
+#include <libmeme/System/Debug.hpp>
+#include <libmeme/System/Memory.hpp>
 
 // UTILITY
 namespace ml::ecs::detail

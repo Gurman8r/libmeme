@@ -1,6 +1,6 @@
 #include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/System/EventBus.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 
 namespace ml
@@ -33,13 +33,13 @@ namespace ml
 			, m_time	{ j, alloc }
 			, m_window	{}
 		{
-			event_system::add_listener<	begin_loop_event>(this);
-			event_system::add_listener<	begin_draw_event>(this);
-			event_system::add_listener<	begin_gui_event	>(this);
-			event_system::add_listener<	draw_gui_event	>(this);
-			event_system::add_listener<	end_gui_event	>(this);
-			event_system::add_listener<	end_draw_event	>(this);
-			event_system::add_listener<	end_loop_event	>(this);
+			event_bus::add_listener<	begin_loop_event>(this);
+			event_bus::add_listener<	begin_draw_event>(this);
+			event_bus::add_listener<	begin_gui_event	>(this);
+			event_bus::add_listener<	draw_gui_event	>(this);
+			event_bus::add_listener<	end_gui_event	>(this);
+			event_bus::add_listener<	end_draw_event	>(this);
+			event_bus::add_listener<	end_loop_event	>(this);
 		}
 
 		~engine_context() noexcept override

@@ -1,7 +1,7 @@
-#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Window/Window.hpp>
 #include <libmeme/Core/StringUtility.hpp>
-#include <libmeme/Core/EventSystem.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/System/EventBus.hpp>
+#include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -59,58 +59,58 @@ namespace ml
 		// install callbacks
 		{
 			set_char_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_char_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_event>(ML_forward(x)...); });
 
 			set_char_mods_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_char_mods_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_mods_event>(ML_forward(x)...); });
 
 			set_close_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_close_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_close_event>(ML_forward(x)...); });
 
 			set_cursor_enter_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
 
 			set_cursor_position_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_cursor_position_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_position_event>(ML_forward(x)...); });
 
 			set_content_scale_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_content_scale_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_content_scale_event>(ML_forward(x)...); });
 
 			set_drop_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_drop_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_drop_event>(ML_forward(x)...); });
 
 			set_error_callback([
-			](auto ... x) noexcept { event_system::fire_event<window_error_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { event_bus::fire_event<window_error_event>(ML_forward(x)...); });
 
 			set_focus_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_focus_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_focus_event>(ML_forward(x)...); });
 
 			set_framebuffer_size_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_framebuffer_size_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_framebuffer_size_event>(ML_forward(x)...); });
 
 			set_iconify_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_iconify_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_iconify_event>(ML_forward(x)...); });
 
 			set_key_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_key_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_key_event>(ML_forward(x)...); });
 
 			set_maximize_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_maximize_event>(ML_forward(x)...);  });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_maximize_event>(ML_forward(x)...);  });
 
 			set_mouse_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_mouse_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_mouse_event>(ML_forward(x)...); });
 
 			set_position_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_position_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_position_event>(ML_forward(x)...); });
 
 			set_refresh_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_refresh_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_refresh_event>(ML_forward(x)...); });
 
 			set_scroll_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_scroll_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_scroll_event>(ML_forward(x)...); });
 
 			set_size_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_size_event>(ML_forward(x)...); });
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_size_event>(ML_forward(x)...); });
 		}
 
 		// success

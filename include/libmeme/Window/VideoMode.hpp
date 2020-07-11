@@ -1,7 +1,7 @@
 #ifndef _ML_VIDEO_MODE_HPP_
 #define _ML_VIDEO_MODE_HPP_
 
-#include <libmeme/Platform/Export.hpp>
+#include <libmeme/Window/Export.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Core/FlatSet.hpp>
 
@@ -10,7 +10,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// video mode
-	struct ML_PLATFORM_API ML_NODISCARD video_mode final
+	struct ML_WINDOW_API ML_NODISCARD video_mode final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

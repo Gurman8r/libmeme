@@ -1,10 +1,10 @@
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Core/EventSystem.hpp>
+#include <libmeme/System/EventBus.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/Input.hpp>
-#include <libmeme/Platform/Window.hpp>
+#include <libmeme/Window/Window.hpp>
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -143,7 +143,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						event_system::fire_event<dock_gui_event>();
+						event_bus::fire_event<dock_gui_event>();
 					}
 
 					ImGui::DockSpace(

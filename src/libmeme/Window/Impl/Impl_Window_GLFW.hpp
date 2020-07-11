@@ -2,7 +2,7 @@
 #ifndef _ML_IMPL_WINDOW_GLFW_HPP_
 #define _ML_IMPL_WINDOW_GLFW_HPP_
 
-#include <libmeme/Platform/WindowBase.hpp>
+#include <libmeme/Window/WindowBase.hpp>
 
 struct GLFWwindow;
 struct GLFWmonitor;

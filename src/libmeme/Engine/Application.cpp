@@ -1,6 +1,6 @@
 #include <libmeme/Engine/Application.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Platform/WindowEvents.hpp>
+#include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -21,17 +21,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application::application(allocator_type alloc) noexcept : render_window{}
+	application::application(allocator_type alloc) noexcept : m_wnd{}
 	{
 		IMGUI_CHECKVERSION();
 
-		event_system::add_listener<	begin_loop_event>(this);
-		event_system::add_listener<	begin_draw_event>(this);
-		event_system::add_listener<	begin_gui_event	>(this);
-		event_system::add_listener<	draw_gui_event	>(this);
-		event_system::add_listener<	end_gui_event	>(this);
-		event_system::add_listener<	end_draw_event	>(this);
-		event_system::add_listener<	end_loop_event	>(this);
+		event_bus::add_listener<	begin_loop_event>(this);
+		event_bus::add_listener<	begin_draw_event>(this);
+		event_bus::add_listener<	begin_gui_event	>(this);
+		event_bus::add_listener<	draw_gui_event	>(this);
+		event_bus::add_listener<	end_gui_event	>(this);
+		event_bus::add_listener<	end_draw_event	>(this);
+		event_bus::add_listener<	end_loop_event	>(this);
 	}
 
 	application::application(window_settings const & ws, allocator_type alloc) noexcept : application{}
@@ -53,7 +53,7 @@ namespace ml
 		{
 			m_perf.loop_timer.restart();
 
-			m_perf.frame_rate = std::invoke([&, dt = m_perf.delta_time.count<float_t>()]() noexcept
+			m_perf.frame_rate = std::invoke([&, dt = (float_t)m_perf.delta_time.count()]() noexcept
 			{
 				m_perf.fps_accum += dt - m_perf.fps_times[m_perf.fps_index];
 				m_perf.fps_times[m_perf.fps_index] = dt;
@@ -61,7 +61,7 @@ namespace ml
 				return (0.f < m_perf.fps_accum) ? 1.f / (m_perf.fps_accum / (float_t)m_perf.fps_times.size()) : FLT_MAX;
 			});
 
-			poll_events();
+			window::poll_events();
 		}
 		break;
 
@@ -73,10 +73,10 @@ namespace ml
 
 				gfx::render_command::clear(gfx::clear_color),
 					
-				gfx::render_command::set_viewport(get_framebuffer_size()),
+				gfx::render_command::set_viewport(m_wnd.get_framebuffer_size()),
 			})
 			{
-				std::invoke(cmd, get_render_context().get());
+				std::invoke(cmd, m_wnd.get_render_context().get());
 			}
 		}
 		break;
@@ -100,19 +100,19 @@ namespace ml
 			ML_ImGui_RenderDrawData(ImGui::GetDrawData());
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
-				auto backup_context{ get_current_context() };
+				auto backup_context{ window::get_current_context() };
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
-				set_current_context(backup_context);
+				window::set_current_context(backup_context);
 			}
 		}
 		break;
 
 		case hashof_v<end_draw_event>: // END DRAW
 		{
-			if (has_hint(window_hints_double_buffer))
+			if (m_wnd.has_hint(window_hints_double_buffer))
 			{
-				swap_buffers();
+				m_wnd.swap_buffers();
 			}
 		}
 		break;
@@ -133,64 +133,61 @@ namespace ml
 
 	bool application::open(window_settings const & ws)
 	{
-		// check already open
-		if (is_open()) { return debug::error("application is already open"); }
-
 		// open render_window
-		if (!render_window::open(ws)) { return debug::error("failed opening application"); }
+		if (!m_wnd.open(ws)) { return debug::error("failed opening application"); }
 
 		// install callbacks
 		{
-			set_char_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_char_event>(ML_forward(x)...); });
+			m_wnd.set_char_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_event>(ML_forward(x)...); });
 
-			set_char_mods_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_char_mods_event>(ML_forward(x)...); });
+			m_wnd.set_char_mods_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_char_mods_event>(ML_forward(x)...); });
 
-			set_close_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_close_event>(ML_forward(x)...); });
+			m_wnd.set_close_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_close_event>(ML_forward(x)...); });
 
-			set_cursor_enter_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
+			m_wnd.set_cursor_enter_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_enter_event>(ML_forward(x)...); });
 
-			set_cursor_position_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_cursor_position_event>(ML_forward(x)...); });
+			m_wnd.set_cursor_position_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_cursor_position_event>(ML_forward(x)...); });
 
-			set_content_scale_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_content_scale_event>(ML_forward(x)...); });
+			m_wnd.set_content_scale_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_content_scale_event>(ML_forward(x)...); });
 
-			set_drop_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_drop_event>(ML_forward(x)...); });
+			m_wnd.set_drop_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_drop_event>(ML_forward(x)...); });
 
-			set_focus_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_focus_event>(ML_forward(x)...); });
+			m_wnd.set_focus_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_focus_event>(ML_forward(x)...); });
 
-			set_framebuffer_size_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_framebuffer_size_event>(ML_forward(x)...); });
+			m_wnd.set_framebuffer_size_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_framebuffer_size_event>(ML_forward(x)...); });
 
-			set_iconify_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_iconify_event>(ML_forward(x)...); });
+			m_wnd.set_iconify_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_iconify_event>(ML_forward(x)...); });
 
-			set_key_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_key_event>(ML_forward(x)...); });
+			m_wnd.set_key_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_key_event>(ML_forward(x)...); });
 
-			set_maximize_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_maximize_event>(ML_forward(x)...);  });
+			m_wnd.set_maximize_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_maximize_event>(ML_forward(x)...);  });
 
-			set_mouse_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_mouse_event>(ML_forward(x)...); });
+			m_wnd.set_mouse_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_mouse_event>(ML_forward(x)...); });
 
-			set_position_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_position_event>(ML_forward(x)...); });
+			m_wnd.set_position_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_position_event>(ML_forward(x)...); });
 
-			set_refresh_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_refresh_event>(ML_forward(x)...); });
+			m_wnd.set_refresh_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_refresh_event>(ML_forward(x)...); });
 
-			set_scroll_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_scroll_event>(ML_forward(x)...); });
+			m_wnd.set_scroll_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_scroll_event>(ML_forward(x)...); });
 
-			set_size_callback([
-			](auto, auto ... x) noexcept { event_system::fire_event<window_size_event>(ML_forward(x)...); });
+			m_wnd.set_size_callback([
+			](auto, auto ... x) noexcept { event_bus::fire_event<window_size_event>(ML_forward(x)...); });
 		}
 
 		// setup imgui
@@ -218,7 +215,7 @@ namespace ml
 			im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 			// imgui platform init
-			if (!ML_ImGui_Init_Platform(get_handle(), true))
+			if (!ML_ImGui_Init_Platform(m_wnd.get_handle(), true))
 			{
 				return debug::error("failed initializing ImGui platform");
 			}
@@ -239,7 +236,7 @@ namespace ml
 
 		ImGui::DestroyContext(m_imgui);
 
-		render_window::close();
+		m_wnd.close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

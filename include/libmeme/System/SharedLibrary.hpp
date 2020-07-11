@@ -1,14 +1,14 @@
 #ifndef _ML_SHARED_LIBRARY_HPP_
 #define _ML_SHARED_LIBRARY_HPP_
 
-#include <libmeme/Platform/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/System/Export.hpp>
+#include <libmeme/System/Memory.hpp>
 
 namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	struct ML_PLATFORM_API shared_library final : non_copyable, trackable
+	struct ML_SYSTEM_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -22,8 +22,10 @@ namespace ml
 		{
 #if defined(ML_os_windows)
 			L".dll"
-#else
+#elif defined(ML_os_unix)
 			L".so"
+#else
+			L""
 #endif
 		};
 

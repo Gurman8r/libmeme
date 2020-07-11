@@ -1,7 +1,7 @@
 #ifndef _ML_BATCH_VECTOR_HPP_
 #define _ML_BATCH_VECTOR_HPP_
 
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml::ds
 {
@@ -9,7 +9,7 @@ namespace ml::ds
 
 	// tuple< vector<T>... >
 	template <class ... _Ts
-	> struct batch_vector final : trackable
+	> struct batch_vector final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

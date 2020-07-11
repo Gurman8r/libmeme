@@ -1,7 +1,8 @@
 #ifndef _ML_MEMORY_HPP_
 #define _ML_MEMORY_HPP_
 
-#include <libmeme/Core/Debug.hpp>
+#include <libmeme/System/Export.hpp>
+#include <libmeme/System/Debug.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
@@ -120,7 +121,7 @@ namespace ml::util
 namespace ml
 {
 	// memory manager singleton
-	class ML_CORE_API memory final : public singleton<memory>
+	class ML_SYSTEM_API memory final : public singleton<memory>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -210,6 +211,7 @@ namespace ml
 			if (newsz == 0)
 			{
 				deallocate(addr);
+
 				return nullptr;
 			}
 			else if (addr == nullptr)
@@ -226,6 +228,7 @@ namespace ml
 				if (temp)
 				{
 					std::memcpy(temp, addr, oldsz);
+
 					deallocate(addr);
 				}
 				return temp;
@@ -251,7 +254,7 @@ namespace ml
 namespace ml
 {
 	// trackable base
-	struct ML_CORE_API trackable
+	struct ML_SYSTEM_API trackable
 	{
 		virtual ~trackable() noexcept = default;
 
