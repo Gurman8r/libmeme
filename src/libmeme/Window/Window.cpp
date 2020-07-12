@@ -24,9 +24,9 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_window{ new impl_window }, m_wndcfg{}
+	window::window() noexcept : m_impl{ new impl_window }
 	{
-		ML_assert("failed creating window implementation" && m_window);
+		ML_assert("failed creating window implementation" && m_impl);
 	}
 
 	window::window(window_settings const & ws) noexcept : window{}
@@ -43,8 +43,8 @@ namespace ml
 		// check already open
 		if (is_open()) { return debug::error("window is already open"); }
 
-		// open backend
-		if (!m_window->open(m_wndcfg = ws)) { return debug::error("failed opening window"); }
+		// open window
+		if (!m_impl->open(ws)) { return debug::error("failed opening window"); }
 		
 		// make current context
 		make_context_current(get_handle());
@@ -121,250 +121,260 @@ namespace ml
 
 	void window::close()
 	{
-		m_window->close();
+		m_impl->close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::iconify() noexcept
 	{
-		m_window->iconify();
+		m_impl->iconify();
 	}
 
 	void window::maximize() noexcept
 	{
-		m_window->maximize();
+		m_impl->maximize();
 	}
 
 	void window::restore() noexcept
 	{
-		m_window->restore();
+		m_impl->restore();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	int_rect window::get_bounds() const noexcept
 	{
-		return m_window->get_bounds();
+		return m_impl->get_bounds();
 	}
 
 	cstring window::get_clipboard() const noexcept
 	{
-		return m_window->get_clipboard();
+		return m_impl->get_clipboard();
 	}
 
 	vec2 window::get_content_scale() const noexcept
 	{
-		return m_window->get_content_scale();
+		return m_impl->get_content_scale();
 	}
 
 	vec2 window::get_cursor_position() const noexcept
 	{
-		return m_window->get_cursor_position();
+		return m_impl->get_cursor_position();
+	}
+
+	int32_t window::get_cursor_mode() const noexcept
+	{
+		return m_impl->get_cursor_mode();
 	}
 
 	vec2i window::get_framebuffer_size() const noexcept
 	{
-		return m_window->get_framebuffer_size();
+		return m_impl->get_framebuffer_size();
 	}
 
 	window_handle window::get_handle() const noexcept
 	{
-		return m_window->get_handle();
+		return m_impl->get_handle();
+	}
+
+	int32_t window::get_hints() const noexcept
+	{
+		return m_impl->get_hints();
 	}
 
 	int32_t window::get_input_mode(int32_t value) const noexcept
 	{
-		return m_window->get_input_mode(value);
+		return m_impl->get_input_mode(value);
 	}
 
 	int32_t	window::get_key(int32_t value) const noexcept
 	{
-		return m_window->get_key(value);
+		return m_impl->get_key(value);
 	}
 
 	int32_t	window::get_mouse_button(int32_t value) const noexcept
 	{
-		return m_window->get_mouse_button(value);
+		return m_impl->get_mouse_button(value);
 	}
 
 	window_handle window::get_native_handle() const noexcept
 	{
-		return m_window->get_native_handle();
+		return m_impl->get_native_handle();
 	}
 
 	float_t window::get_opacity() const noexcept
 	{
-		return m_window->get_opacity();
+		return m_impl->get_opacity();
 	}
 
 	vec2i window::get_position() const noexcept
 	{
-		return m_window->get_position();
+		return m_impl->get_position();
 	}
 
 	vec2i window::get_size() const noexcept
 	{
-		return m_window->get_size();
+		return m_impl->get_size();
 	}
 
 	cstring window::get_title() const noexcept
 	{
-		return m_window->get_title();
+		return m_impl->get_title();
 	}
 
 	void * window::get_user_pointer() const noexcept
 	{
-		return m_window->get_user_pointer();
+		return m_impl->get_user_pointer();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	bool window::is_auto_iconify() const noexcept
 	{
-		return m_window->is_auto_iconify();
+		return m_impl->is_auto_iconify();
 	}
 
 	bool window::is_decorated() const noexcept
 	{
-		return m_window->is_decorated();
+		return m_impl->is_decorated();
 	}
 
 	bool window::is_floating() const noexcept
 	{
-		return m_window->is_floating();
+		return m_impl->is_floating();
 	}
 
 	bool window::is_focus_on_show() const noexcept
 	{
-		return m_window->is_focus_on_show();
+		return m_impl->is_focus_on_show();
 	}
 
 	bool window::is_focused() const noexcept
 	{
-		return m_window->is_focused();
+		return m_impl->is_focused();
 	}
 
 	bool window::is_hovered() const noexcept
 	{
-		return m_window->is_hovered();
+		return m_impl->is_hovered();
 	}
 
 	bool window::is_iconified() const noexcept
 	{
-		return m_window->is_iconified();
+		return m_impl->is_iconified();
 	}
 
 	bool window::is_maximized() const noexcept
 	{
-		return m_window->is_maximized();
+		return m_impl->is_maximized();
 	}
 
 	bool window::is_open() const noexcept
 	{
-		return m_window->is_open();
+		return m_impl->is_open();
 	}
 
 	bool window::is_resizable() const noexcept
 	{
-		return m_window->is_resizable();
+		return m_impl->is_resizable();
 	}
 
 	bool window::is_transparent() const noexcept
 	{
-		return m_window->is_transparent();
+		return m_impl->is_transparent();
 	}
 
 	bool window::is_visible() const noexcept
 	{
-		return m_window->is_visible();
+		return m_impl->is_visible();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::set_auto_iconify(bool value) noexcept
 	{
-		return m_window->set_auto_iconify(value);
+		return m_impl->set_auto_iconify(value);
 	}
 
 	void window::set_clipboard(cstring value) noexcept
 	{
-		m_window->set_clipboard(value);
+		m_impl->set_clipboard(value);
 	}
 
 	void window::set_cursor(cursor_handle value) noexcept
 	{
-		m_window->set_cursor(value);
+		m_impl->set_cursor(value);
 	}
 	
 	void window::set_cursor_mode(int32_t value) noexcept
 	{
-		m_window->set_cursor_mode(value);
+		m_impl->set_cursor_mode(value);
 	}
 
 	void window::set_cursor_position(vec2d const & value) noexcept
 	{
-		m_window->set_cursor_position(value);
+		m_impl->set_cursor_position(value);
 	}
 
 	void window::set_decorated(bool value) noexcept
 	{
-		return m_window->set_decorated(value);
+		return m_impl->set_decorated(value);
 	}
 
 	void window::set_floating(bool value) noexcept
 	{
-		return m_window->set_floating(value);
+		return m_impl->set_floating(value);
 	}
 
 	void window::set_focus_on_show(bool value) noexcept
 	{
-		return m_window->set_focus_on_show(value);
+		return m_impl->set_focus_on_show(value);
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p) noexcept
 	{
-		m_window->set_icon(w, h, p);
+		m_impl->set_icon(w, h, p);
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value) noexcept
 	{
-		m_window->set_input_mode(mode, value);
+		m_impl->set_input_mode(mode, value);
 	}
 
 	void window::set_opacity(float_t value) noexcept
 	{
-		m_window->set_opacity(value);
+		m_impl->set_opacity(value);
 	}
 
 	void window::set_position(vec2i const & value) noexcept
 	{
-		m_window->set_position(value);
+		m_impl->set_position(value);
 	}
 
 	void window::set_monitor(monitor_handle value, int_rect const & bounds) noexcept
 	{
-		m_window->set_monitor(value, bounds);
+		m_impl->set_monitor(value, bounds);
 	}
 
 	void window::set_resizable(bool value) noexcept
 	{
-		return m_window->set_resizable(value);
+		return m_impl->set_resizable(value);
 	}
 
 	void window::set_size(vec2i const & value) noexcept
 	{
-		m_window->set_size(value);
+		m_impl->set_size(value);
 	}
 
 	void window::set_title(cstring value) noexcept
 	{
-		m_window->set_title(value);
+		m_impl->set_title(value);
 	}
 
 	void window::set_user_pointer(void * value) noexcept
 	{
-		m_window->set_user_pointer(value);
+		m_impl->set_user_pointer(value);
 	}
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -440,92 +450,92 @@ namespace ml
 
 	window_char_callback window::set_char_callback(window_char_callback fn) noexcept
 	{
-		return m_window->set_char_callback(fn);
+		return m_impl->set_char_callback(fn);
 	}
 
 	window_char_mods_callback window::set_char_mods_callback(window_char_mods_callback fn) noexcept
 	{
-		return m_window->set_char_mods_callback(fn);
+		return m_impl->set_char_mods_callback(fn);
 	}
 
 	window_close_callback window::set_close_callback(window_close_callback fn) noexcept
 	{
-		return m_window->set_close_callback(fn);
+		return m_impl->set_close_callback(fn);
 	}
 
 	window_content_scale_callback window::set_content_scale_callback(window_content_scale_callback fn) noexcept
 	{
-		return m_window->set_content_scale_callback(fn);
+		return m_impl->set_content_scale_callback(fn);
 	}
 	
 	window_cursor_enter_callback window::set_cursor_enter_callback(window_cursor_enter_callback fn) noexcept
 	{
-		return m_window->set_cursor_enter_callback(fn);
+		return m_impl->set_cursor_enter_callback(fn);
 	}
 
 	window_cursor_position_callback window::set_cursor_position_callback(window_cursor_position_callback fn) noexcept
 	{
-		return m_window->set_cursor_position_callback(fn);
+		return m_impl->set_cursor_position_callback(fn);
 	}
 
 	window_drop_callback window::set_drop_callback(window_drop_callback fn) noexcept
 	{
-		return m_window->set_drop_callback(fn);
+		return m_impl->set_drop_callback(fn);
 	}
 
 	window_error_callback window::set_error_callback(window_error_callback fn) noexcept
 	{
-		return m_window->set_error_callback(fn);
+		return m_impl->set_error_callback(fn);
 	}
 
 	window_focus_callback window::set_focus_callback(window_focus_callback fn) noexcept
 	{
-		return m_window->set_focus_callback(fn);
+		return m_impl->set_focus_callback(fn);
 	}
 
 	window_framebuffer_size_callback window::set_framebuffer_size_callback(window_framebuffer_size_callback fn) noexcept
 	{
-		return m_window->set_framebuffer_size_callback(fn);
+		return m_impl->set_framebuffer_size_callback(fn);
 	}
 
 	window_iconify_callback window::set_iconify_callback(window_iconify_callback fn) noexcept
 	{
-		return m_window->set_iconify_callback(fn);
+		return m_impl->set_iconify_callback(fn);
 	}
 	
 	window_key_callback window::set_key_callback(window_key_callback fn) noexcept
 	{
-		return m_window->set_key_callback(fn);
+		return m_impl->set_key_callback(fn);
 	}
 
 	window_maximize_callback window::set_maximize_callback(window_maximize_callback fn) noexcept
 	{
-		return m_window->set_maximize_callback(fn);
+		return m_impl->set_maximize_callback(fn);
 	}
 	
 	window_mouse_callback window::set_mouse_callback(window_mouse_callback fn) noexcept
 	{
-		return m_window->set_mouse_callback(fn);
+		return m_impl->set_mouse_callback(fn);
 	}
 	
 	window_position_callback window::set_position_callback(window_position_callback fn) noexcept
 	{
-		return m_window->set_position_callback(fn);
+		return m_impl->set_position_callback(fn);
 	}
 
 	window_refresh_callback window::set_refresh_callback(window_refresh_callback fn) noexcept
 	{
-		return m_window->set_refresh_callback(fn);
+		return m_impl->set_refresh_callback(fn);
 	}
 
 	window_scroll_callback window::set_scroll_callback(window_scroll_callback fn) noexcept
 	{
-		return m_window->set_scroll_callback(fn);
+		return m_impl->set_scroll_callback(fn);
 	}
 	
 	window_size_callback window::set_size_callback(window_size_callback fn) noexcept
 	{
-		return m_window->set_size_callback(fn);
+		return m_impl->set_size_callback(fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -110,7 +110,7 @@ namespace ml
 
 		case hashof_v<end_draw_event>: // END DRAW
 		{
-			if (m_wnd.has_hint(window_hints_doublebuffer))
+			if (m_wnd.get_hints() & window_hints_doublebuffer)
 			{
 				window::swap_buffers(m_wnd.get_handle());
 			}

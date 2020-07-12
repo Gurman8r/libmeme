@@ -18,6 +18,7 @@ assert(engine.window.open(ml.window_settings(
         True,                       # multisample
         False),                     # sRGB capable
     ml.window_hints.default_max     # hints
+    & ~ml.window_hints.doublebuffer
     )))
 
 # initialize gui

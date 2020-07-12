@@ -33,13 +33,13 @@ namespace ml
 			, m_time	{ j, alloc }
 			, m_window	{}
 		{
-			event_bus::add_listener<	begin_loop_event>(this);
-			event_bus::add_listener<	begin_draw_event>(this);
-			event_bus::add_listener<	begin_gui_event	>(this);
-			event_bus::add_listener<	draw_gui_event	>(this);
-			event_bus::add_listener<	end_gui_event	>(this);
-			event_bus::add_listener<	end_draw_event	>(this);
-			event_bus::add_listener<	end_loop_event	>(this);
+			event_bus::add_listener<begin_loop_event>(this);
+			event_bus::add_listener<begin_draw_event>(this);
+			event_bus::add_listener<begin_gui_event	>(this);
+			event_bus::add_listener<draw_gui_event	>(this);
+			event_bus::add_listener<end_gui_event	>(this);
+			event_bus::add_listener<end_draw_event	>(this);
+			event_bus::add_listener<end_loop_event	>(this);
 		}
 
 		~engine_context() noexcept override
@@ -84,7 +84,7 @@ namespace ml
 			} break;
 
 			case hashof_v<end_draw_event>: {
-				if (m_window.has_hint(window_hints_doublebuffer))
+				if (m_window.get_hints() & window_hints_doublebuffer)
 				{
 					window::swap_buffers(m_window.get_handle());
 				}

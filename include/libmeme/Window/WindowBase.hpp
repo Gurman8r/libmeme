@@ -6,7 +6,7 @@
 namespace ml
 {
 	// window implementation base
-	struct window_base : non_copyable, trackable
+	struct ML_WINDOW_API window_base : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -34,11 +34,15 @@ namespace ml
 
 		virtual vec2 get_content_scale() const = 0;
 
+		virtual int32_t get_cursor_mode() const = 0;
+
 		virtual vec2 get_cursor_position() const = 0;
 
 		virtual vec2i get_framebuffer_size() const = 0;
 
 		virtual window_handle get_handle() const = 0;
+
+		virtual int32_t get_hints() const = 0;
 
 		virtual int32_t get_input_mode(int32_t) const = 0;
 

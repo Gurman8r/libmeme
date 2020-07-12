@@ -42,7 +42,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	glfw_window::glfw_window() noexcept : m_title{}, m_window{}, m_monitor{}
+	glfw_window::glfw_window() noexcept : m_title{}, m_hints{}, m_window{}, m_monitor{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
 		ML_assert("failed initializing glfw window" && glfw_init);
@@ -67,11 +67,13 @@ namespace ml
 		// check already open
 		if (is_open()) { return debug::error("glfw_window is already open"); }
 
-		glfwDefaultWindowHints();
+		// hints
+		m_hints = ws.hints;
 
+		// context hints
 		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
 		{
-			switch (ws.ctx.api)
+			switch (ws.context.api)
 			{
 			case context_api_opengl	: return GLFW_OPENGL_API;
 			case context_api_vulkan	:
@@ -82,7 +84,7 @@ namespace ml
 		}));
 		glfwWindowHint(GLFW_OPENGL_PROFILE, std::invoke([&]() noexcept
 		{
-			switch (ws.ctx.profile)
+			switch (ws.context.profile)
 			{
 			case context_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
 			case context_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
@@ -91,37 +93,40 @@ namespace ml
 			default						: return GLFW_OPENGL_ANY_PROFILE;
 			}
 		}));
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.ctx.major);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	ws.ctx.minor);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,	ws.context.major);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,	ws.context.minor);
 
-		glfwWindowHint(GLFW_DEPTH_BITS,		ws.ctx.depth_bits);
-		glfwWindowHint(GLFW_STENCIL_BITS,	ws.ctx.stencil_bits);
-		glfwWindowHint(GLFW_SRGB_CAPABLE,	ws.ctx.srgb_capable);
-
+		// window hints
+		glfwWindowHint(GLFW_AUTO_ICONIFY,	ws.hints & window_hints_auto_iconify);
+		glfwWindowHint(GLFW_CENTER_CURSOR,	ws.hints & window_hints_center_cursor);
+		glfwWindowHint(GLFW_DECORATED,		ws.hints & window_hints_decorated);
+		glfwWindowHint(GLFW_DOUBLEBUFFER,	ws.hints & window_hints_doublebuffer);
+		glfwWindowHint(GLFW_FLOATING,		ws.hints & window_hints_floating);
+		glfwWindowHint(GLFW_FOCUS_ON_SHOW,	ws.hints & window_hints_focus_on_show);
+		glfwWindowHint(GLFW_FOCUSED,		ws.hints & window_hints_focused);
+		glfwWindowHint(GLFW_MAXIMIZED,		ws.hints & window_hints_maximized);
 		glfwWindowHint(GLFW_RESIZABLE,		ws.hints & window_hints_resizable);
 		glfwWindowHint(GLFW_VISIBLE,		ws.hints & window_hints_visible);
-		glfwWindowHint(GLFW_DECORATED,		ws.hints & window_hints_decorated);
-		glfwWindowHint(GLFW_FOCUSED,		ws.hints & window_hints_focused);
-		glfwWindowHint(GLFW_AUTO_ICONIFY,	ws.hints & window_hints_auto_iconify);
-		glfwWindowHint(GLFW_FLOATING,		ws.hints & window_hints_floating);
-		glfwWindowHint(GLFW_MAXIMIZED,		ws.hints & window_hints_maximized);
-		glfwWindowHint(GLFW_DOUBLEBUFFER,	ws.hints & window_hints_doublebuffer);
-		glfwWindowHint(GLFW_CENTER_CURSOR,	ws.hints & window_hints_center_cursor);
-		glfwWindowHint(GLFW_FOCUS_ON_SHOW,	ws.hints & window_hints_focus_on_show);
 
+		// monitor hints
+		glfwWindowHint(GLFW_REFRESH_RATE,	ws.video.refresh_rate);
+
+		// framebuffer hints
 		glfwWindowHint(GLFW_RED_BITS,		ws.video.bits_per_pixel[0]);
 		glfwWindowHint(GLFW_GREEN_BITS,		ws.video.bits_per_pixel[1]);
 		glfwWindowHint(GLFW_BLUE_BITS,		ws.video.bits_per_pixel[2]);
 		glfwWindowHint(GLFW_ALPHA_BITS,		ws.video.bits_per_pixel[3]);
-		glfwWindowHint(GLFW_REFRESH_RATE,	ws.video.refresh_rate);
+		glfwWindowHint(GLFW_DEPTH_BITS,		ws.context.depth_bits);
+		glfwWindowHint(GLFW_STENCIL_BITS,	ws.context.stencil_bits);
+		glfwWindowHint(GLFW_SRGB_CAPABLE,	ws.context.srgb_capable);
 
 		// create window
 		return (m_window = glfwCreateWindow(
 			ws.video.resolution[0],
 			ws.video.resolution[1],
 			ws.title.c_str(),
-			nullptr,
-			nullptr
+			nullptr, // monitor
+			nullptr // share
 		)) || debug::error("failed opening glfw_window");
 	}
 
@@ -168,6 +173,11 @@ namespace ml
 		return temp;
 	}
 
+	int32_t glfw_window::get_cursor_mode() const
+	{
+		return glfwGetInputMode(m_window, GLFW_CURSOR);
+	}
+
 	vec2 glfw_window::get_cursor_position() const
 	{
 		vec2d temp{};
@@ -185,6 +195,11 @@ namespace ml
 	window_handle glfw_window::get_handle() const
 	{
 		return (window_handle)m_window;
+	}
+
+	int32_t glfw_window::get_hints() const
+	{
+		return m_hints;
 	}
 
 	int32_t glfw_window::get_input_mode(int32_t mode) const

@@ -42,11 +42,15 @@ namespace ml
 
 		vec2 get_content_scale() const override;
 
+		int32_t get_cursor_mode() const override;
+
 		vec2 get_cursor_position() const override;
 
 		vec2i get_framebuffer_size() const override;
 
 		window_handle get_handle() const override;
+
+		int32_t get_hints() const override;
 
 		int32_t get_input_mode(int32_t mode) const override;
 
@@ -161,28 +165,29 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		window_char_callback				set_char_callback				(window_char_callback				fn) override;
-		window_char_mods_callback			set_char_mods_callback			(window_char_mods_callback		fn) override;
-		window_close_callback				set_close_callback				(window_close_callback			fn) override;
-		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback	fn) override;
+		window_char_mods_callback			set_char_mods_callback			(window_char_mods_callback			fn) override;
+		window_close_callback				set_close_callback				(window_close_callback				fn) override;
+		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback		fn) override;
 		window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback		fn) override;
 		window_cursor_position_callback		set_cursor_position_callback	(window_cursor_position_callback	fn) override;
 		window_drop_callback				set_drop_callback				(window_drop_callback				fn) override;
-		window_error_callback				set_error_callback				(window_error_callback			fn) override;
-		window_focus_callback				set_focus_callback				(window_focus_callback			fn) override;
+		window_error_callback				set_error_callback				(window_error_callback				fn) override;
+		window_focus_callback				set_focus_callback				(window_focus_callback				fn) override;
 		window_framebuffer_size_callback	set_framebuffer_size_callback	(window_framebuffer_size_callback	fn) override;
 		window_iconify_callback				set_iconify_callback			(window_iconify_callback			fn) override;
 		window_key_callback					set_key_callback				(window_key_callback				fn) override;
 		window_maximize_callback			set_maximize_callback			(window_maximize_callback			fn) override;
-		window_mouse_callback				set_mouse_callback				(window_mouse_callback			fn) override;
+		window_mouse_callback				set_mouse_callback				(window_mouse_callback				fn) override;
 		window_position_callback			set_position_callback			(window_position_callback			fn) override;
 		window_refresh_callback				set_refresh_callback			(window_refresh_callback			fn) override;
-		window_scroll_callback				set_scroll_callback				(window_scroll_callback			fn) override;
+		window_scroll_callback				set_scroll_callback				(window_scroll_callback				fn) override;
 		window_size_callback				set_size_callback				(window_size_callback				fn) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		pmr::string		m_title		;
+		int32_t			m_hints		;
 		GLFWwindow	*	m_window	;
 		GLFWmonitor	*	m_monitor	;
 

@@ -85,7 +85,7 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		opengl_render_context(render_device * parent, context_settings const & cs);
+		opengl_render_context(render_device * parent, context_settings const & desc);
 
 		~opengl_render_context() override = default;
 
@@ -99,17 +99,17 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		alpha_state * get_alpha_state(alpha_state * value) const override;
+		alpha_state * get_alpha_state(alpha_state * value = {}) const override;
 		
-		blend_state * get_blend_state(blend_state * value) const override;
+		blend_state * get_blend_state(blend_state * value = {}) const override;
 
 		color get_clear_color() const override;
 		
-		cull_state * get_cull_state(cull_state * value) const override;
+		cull_state * get_cull_state(cull_state * value = {}) const override;
 
-		depth_state * get_depth_state(depth_state * value) const override;
+		depth_state * get_depth_state(depth_state * value = {}) const override;
 
-		stencil_state * get_stencil_state(stencil_state * value) const override;
+		stencil_state * get_stencil_state(stencil_state * value = {}) const override;
 
 		int_rect get_viewport() const override;
 

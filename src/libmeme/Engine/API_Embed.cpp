@@ -293,7 +293,7 @@ namespace ml::embed
 			.def_property_readonly_static("is_auto_iconify"	, [](py::object) { return (int32_t)window_hints_auto_iconify; })
 			.def_property_readonly_static("floating"		, [](py::object) { return (int32_t)window_hints_floating; })
 			.def_property_readonly_static("maximized"		, [](py::object) { return (int32_t)window_hints_maximized; })
-			.def_property_readonly_static("double_buffer"	, [](py::object) { return (int32_t)window_hints_doublebuffer; })
+			.def_property_readonly_static("doublebuffer"	, [](py::object) { return (int32_t)window_hints_doublebuffer; })
 			.def_property_readonly_static("center_cursor"	, [](py::object) { return (int32_t)window_hints_center_cursor; })
 			.def_property_readonly_static("focus_on_show"	, [](py::object) { return (int32_t)window_hints_focus_on_show; })
 			.def_property_readonly_static("default"			, [](py::object) { return (int32_t)window_hints_default; })
@@ -335,7 +335,7 @@ namespace ml::embed
 			.def(py::init<pmr::string const &, video_mode const &, context_settings const &, int32_t>())
 			.def_readwrite("title"	, &window_settings::title)
 			.def_readwrite("video"	, &window_settings::video)
-			.def_readwrite("ctx"	, &window_settings::ctx)
+			.def_readwrite("context", &window_settings::context)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
 

@@ -886,17 +886,17 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual alpha_state * get_alpha_state(alpha_state * value) const = 0;
+		virtual alpha_state * get_alpha_state(alpha_state * value = {}) const = 0;
 		
-		virtual blend_state * get_blend_state(blend_state * value) const = 0;
+		virtual blend_state * get_blend_state(blend_state * value = {}) const = 0;
 
 		virtual color get_clear_color() const = 0;
 
-		virtual cull_state * get_cull_state(cull_state * value) const = 0;
+		virtual cull_state * get_cull_state(cull_state * value = {}) const = 0;
 
-		virtual depth_state * get_depth_state(depth_state * value) const = 0;
+		virtual depth_state * get_depth_state(depth_state * value = {}) const = 0;
 
-		virtual stencil_state * get_stencil_state(stencil_state * value) const = 0;
+		virtual stencil_state * get_stencil_state(stencil_state * value = {}) const = 0;
 
 		virtual int_rect get_viewport() const = 0;
 

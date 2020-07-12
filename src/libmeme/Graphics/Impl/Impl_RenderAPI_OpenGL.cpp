@@ -805,15 +805,15 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_render_context::opengl_render_context(render_device * parent, context_settings const & cs)
-		: render_context{ parent }, m_desc{ cs }
+	opengl_render_context::opengl_render_context(render_device * dev, context_settings const & desc)
+		: render_context{ dev }, m_desc{ desc }
 	{
-		ML_assert(cs.api == context_api_opengl);
-		ML_assert(cs.major == parent->get_info().major_version);
-		ML_assert(cs.minor == parent->get_info().minor_version);
+		ML_assert("" && desc.api == context_api_opengl);
+		ML_assert("" && dev->get_info().major_version >= desc.major);
+		ML_assert("" && dev->get_info().minor_version >= desc.minor);
 
-		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, cs.multisample));
-		ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, cs.srgb_capable));
+		ML_glCheck(ML_glEnable(GL_MULTISAMPLE, desc.multisample));
+		ML_glCheck(ML_glEnable(GL_FRAMEBUFFER_SRGB, desc.srgb_capable));
 		ML_glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 	}
 
@@ -836,7 +836,8 @@ namespace ml::gfx
 
 	blend_state * opengl_render_context::get_blend_state(blend_state * value) const
 	{
-		ML_assert("value cannot be null" && value);
+		static blend_state temp{
+		}; if (!value) { value = &temp; }
 
 		ML_glCheck(glGetBooleanv(GL_BLEND, (uint8_t *)&value->enabled));
 
@@ -1176,8 +1177,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexarray::opengl_vertexarray(render_device * parent, uint32_t prim)
-		: vertexarray{ parent }, m_prim{ prim }
+	opengl_vertexarray::opengl_vertexarray(render_device * dev, uint32_t prim)
+		: vertexarray{ dev }, m_prim{ prim }
 	{
 		ML_glCheck(glGenVertexArrays(1, &m_handle));
 		ML_glCheck(glBindVertexArray(m_handle));
@@ -1260,8 +1261,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(render_device * parent, uint32_t usage, size_t count, address_t data)
-		: vertexbuffer{ parent }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
+	opengl_vertexbuffer::opengl_vertexbuffer(render_device * dev, uint32_t usage, size_t count, address_t data)
+		: vertexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
 		ML_glCheck(glBindBuffer(GL_ARRAY_BUFFER, m_handle));
@@ -1308,8 +1309,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_indexbuffer::opengl_indexbuffer(render_device * parent, uint32_t usage, size_t count, address_t data)
-		: indexbuffer{ parent }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
+	opengl_indexbuffer::opengl_indexbuffer(render_device * dev, uint32_t usage, size_t count, address_t data)
+		: indexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
 		ML_glCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_handle));
@@ -1356,8 +1357,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(render_device * parent, descriptor<texture2d> const & value, address_t data)
-		: texture2d{ parent }, m_desc{ value }
+	opengl_texture2d::opengl_texture2d(render_device * dev, descriptor<texture2d> const & value, address_t data)
+		: texture2d{ dev }, m_desc{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 		ML_glCheck(glBindTexture(GL_TEXTURE_2D, m_handle));
@@ -1543,8 +1544,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(render_device * parent, descriptor<texturecube> const & value)
-		: texturecube{ parent }, m_desc{ value }
+	opengl_texturecube::opengl_texturecube(render_device * dev, descriptor<texturecube> const & value)
+		: texturecube{ dev }, m_desc{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
 	}
@@ -1589,8 +1590,8 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(render_device * parent, descriptor<framebuffer> const & value)
-		: framebuffer{ parent }, m_desc{ value }
+	opengl_framebuffer::opengl_framebuffer(render_device * dev, descriptor<framebuffer> const & value)
+		: framebuffer{ dev }, m_desc{ value }
 	{
 		resize(m_desc.size);
 	}
@@ -1736,8 +1737,8 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_program::opengl_program(render_device * parent)
-		: program{ parent }
+	opengl_program::opengl_program(render_device * dev)
+		: program{ dev }
 	{
 		ML_glCheck(m_handle = ML_glCreateProgram());
 	}
@@ -1856,8 +1857,8 @@ namespace ml::gfx
 		}
 	}
 
-	opengl_shader::opengl_shader(render_device * parent, descriptor<shader> const & value)
-		: shader{ parent }
+	opengl_shader::opengl_shader(render_device * dev, descriptor<shader> const & value)
+		: shader{ dev }
 	{
 		cstring temp_addr{ value.code.front().data() };
 		compile(value.type, value.code.size(), &temp_addr);

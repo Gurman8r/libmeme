@@ -44,7 +44,7 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct window_context final // testing
+	struct context_config final // testing
 	{
 		int32_t	client		{ 0 };
 		int32_t major		{ 0 },
@@ -57,8 +57,6 @@ ml::int32_t main()
 		bool	forward		{ 0 },
 				debug		{ 0 },
 				noerror		{ 0 };
-
-
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
