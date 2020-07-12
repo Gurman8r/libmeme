@@ -5,7 +5,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, m_dev{}
+	render_window::render_window() noexcept : window{}, m_dev{}, m_ctx{}
 	{
 	}
 
@@ -36,12 +36,12 @@ namespace ml
 		}
 
 		// validate version
-		m_wndcfg.ctxconfig.major = m_dev->get_info().major_version;
-		m_wndcfg.ctxconfig.minor = m_dev->get_info().minor_version;
-		debug::info("using renderer version: {0}.{1}", m_wndcfg.ctxconfig.major, m_wndcfg.ctxconfig.minor);
+		m_wndcfg.ctx.major = m_dev->get_info().major_version;
+		m_wndcfg.ctx.minor = m_dev->get_info().minor_version;
+		debug::info("using renderer version: {0}.{1}", m_wndcfg.ctx.major, m_wndcfg.ctx.minor);
 
 		// create context
-		m_dev->set_context(m_ctx = m_dev->create_context(m_wndcfg.ctxconfig));
+		m_dev->set_context(m_ctx = m_dev->create_context(m_wndcfg.ctx));
 		
 		// setup states
 		for (auto const & cmd :

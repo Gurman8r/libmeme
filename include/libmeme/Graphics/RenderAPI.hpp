@@ -31,7 +31,7 @@ namespace ml::gfx
 	> struct descriptor;
 
 	ML_decl_handle(	object_id	); // object handle
-	ML_decl_handle(	binding_id	); // binding handle
+	ML_decl_handle(	uniform_id	); // binding handle
 
 	ML_alias address_t	= typename void const *			; // data address
 	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
@@ -259,8 +259,8 @@ namespace ml::gfx
 
 	constexpr cstring order_names[] =
 	{
-		"clockwise",
-		"counter-clockwise",
+		"cw",
+		"ccw",
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -734,10 +734,10 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// render context
+// render states
 namespace ml::gfx
 {
-	// clear flags
+	// clear mask
 	enum clear_ : uint32_t
 	{
 		clear_none		= 0,		// none
@@ -755,50 +755,60 @@ namespace ml::gfx
 	// alpha state
 	struct ML_NODISCARD alpha_state final
 	{
-		bool		enabled	{ true };
-		uint32_t	pred	{ predicate_greater };
-		float_t		ref		{ 0.001f };
+		bool		enabled		{ true }						; // enable alpha test
+		uint32_t	pred		{ predicate_greater }			; // alpha test predicate
+		float_t		ref			{ 0.001f }						; // alpha test reference
 	};
 
 	// blend state
 	struct ML_NODISCARD blend_state final
 	{
-		bool		enabled	{ true };
-		color		color	{ colors::white };
+		bool		enabled		{ true }						; // enable blend
+		color		color		{ colors::white }				; // blend color
 		uint32_t
-			color_equation	{ equation_add },
-			color_sfactor	{ factor_src_alpha },
-			color_dfactor	{ factor_one_minus_src_alpha },
-			alpha_equation	{ color_equation },
-			alpha_sfactor	{ color_sfactor },
-			alpha_dfactor	{ color_dfactor };
+				color_equation	{ equation_add }				, // color equation
+				color_sfactor	{ factor_src_alpha }			, // color src factor
+				color_dfactor	{ factor_one_minus_src_alpha }	, // color dst factor
+				alpha_equation	{ color_equation }				, // alpha equation
+				alpha_sfactor	{ color_sfactor }				, // alpha src factor
+				alpha_dfactor	{ color_dfactor }				; // alpha dst factor
 	};
 
 	// cull state
 	struct ML_NODISCARD cull_state final
 	{
-		bool		enabled	{ true };
-		uint32_t	facet	{ facet_back };
-		uint32_t	order	{ order_ccw };
+		bool			enabled	{ true }						; // enable face culling
+		uint32_t		facet	{ facet_back }					; // front / back / front&back
+		uint32_t		order	{ order_ccw }					; // cull order
 	};
 
 	// depth state
 	struct ML_NODISCARD depth_state final
 	{
-		bool		enabled	{ true };
-		uint32_t	pred	{ predicate_less };
-		vec2		range	{ 0.f, 1.f };
+		bool			enabled	{ true }						; // enable depth test
+		uint32_t		pred	{ predicate_less }				; // depth test predicate
+		vec2			range	{ 0.f, 1.f }					; // depth test range
 	};
 
-	// stencil state (WIP)
+	// stencil state
 	struct ML_NODISCARD stencil_state final
 	{
-		bool		enabled	{ true };
-		uint32_t	pred	{ predicate_always };
-		int32_t		ref		{ 0 };
-		uint32_t	mask	{ 0xffffffff };
+		bool			enabled	{ true }						; // enable stencil test
+		struct
+		{
+			uint32_t	pred	{ predicate_always }			; // stencil test predicate
+			int32_t		ref		{ 0 }							; // stencil test reference
+			uint32_t	mask	{ 0xffffffff }					; // stencil test mask
+		}
+		front, back{ front };
 	};
+}
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// render context
+namespace ml::gfx
+{
 	// render context import settings
 	template <> struct ML_NODISCARD descriptor<render_context> final
 	{
@@ -936,23 +946,23 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void upload(binding_id loc, bool value) = 0;
+		virtual void upload(uniform_id loc, bool value) = 0;
 
-		virtual void upload(binding_id loc, int32_t value) = 0;
+		virtual void upload(uniform_id loc, int32_t value) = 0;
 
-		virtual void upload(binding_id loc, float_t value) = 0;
+		virtual void upload(uniform_id loc, float_t value) = 0;
 
-		virtual void upload(binding_id loc, vec2f const & value) = 0;
+		virtual void upload(uniform_id loc, vec2f const & value) = 0;
 
-		virtual void upload(binding_id loc, vec3f const & value) = 0;
+		virtual void upload(uniform_id loc, vec3f const & value) = 0;
 
-		virtual void upload(binding_id loc, vec4f const & value) = 0;
+		virtual void upload(uniform_id loc, vec4f const & value) = 0;
 
-		virtual void upload(binding_id loc, mat2f const & value) = 0;
+		virtual void upload(uniform_id loc, mat2f const & value) = 0;
 
-		virtual void upload(binding_id loc, mat3f const & value) = 0;
+		virtual void upload(uniform_id loc, mat3f const & value) = 0;
 
-		virtual void upload(binding_id loc, mat4f const & value) = 0;
+		virtual void upload(uniform_id loc, mat4f const & value) = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -1183,14 +1193,29 @@ namespace ml::gfx
 	{
 		texture_flags_none		= 0 << 0, // none
 		texture_flags_smooth	= 1 << 0, // smooth
-		texture_flags_repeat	= 1 << 1, // repeated
-		texture_flags_mipmap = 1 << 2, // mipmapped
+		texture_flags_repeat	= 1 << 1, // repeat
+		texture_flags_mipmap	= 1 << 2, // mipmap
 
-		// smooth / repeated
+		// smooth / repeat
 		texture_flags_default
 			= texture_flags_smooth
 			| texture_flags_repeat,
 	};
+
+	static void from_json(json const & j, texture_flags_ & v)
+	{
+		ML_flag_write((int32_t &)v, texture_flags_repeat, j["repeat"].get<bool>());
+		ML_flag_write((int32_t &)v, texture_flags_smooth, j["smooth"].get<bool>());
+		ML_flag_write((int32_t &)v, texture_flags_mipmap, j["mipmap"].get<bool>());
+	}
+
+	static void to_json(json & j, texture_flags_ const & v)
+	{
+		j["repeat"] = ML_flag_read(v, texture_flags_repeat);
+		j["smooth"] = ML_flag_read(v, texture_flags_smooth);
+		j["mipmap"] = ML_flag_read(v, texture_flags_mipmap);
+	}
+
 
 	// texture format
 	struct ML_NODISCARD tex_format final
@@ -1267,26 +1292,20 @@ namespace ml::gfx
 
 	static void from_json(json const & j, descriptor<texture2d> & v)
 	{
-		j["name"		].get_to(v.name);
-		j["path"		].get_to(v.path);
-		j["size"		].get_to(v.size);
-		j["format"		].get_to(v.format);
-
-		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
+		j["name"	].get_to(v.name);
+		j["path"	].get_to(v.path);
+		j["size"	].get_to(v.size);
+		j["format"	].get_to(v.format);
+		j["flags"	].get_to((texture_flags_ &)v.flags);
 	}
 
 	static void to_json(json & j, descriptor<texture2d> const & v)
 	{
-		j["name"		] = v.name;
-		j["path"		] = v.path;
-		j["size"		] = v.size;
-		j["format"		] = v.format;
-
-		j["repeat"		] = ML_flag_read(v.flags, texture_flags_repeat);
-		j["smooth"		] = ML_flag_read(v.flags, texture_flags_smooth);
-		j["mipmap"		] = ML_flag_read(v.flags, texture_flags_mipmap);
+		j["name"	] = v.name;
+		j["path"	] = v.path;
+		j["size"	] = v.size;
+		j["format"	] = v.format;
+		j["flags"	] = (texture_flags_)v.flags;
 	}
 
 
@@ -1372,26 +1391,21 @@ namespace ml::gfx
 
 	static void from_json(json const & j, descriptor<texturecube> & v)
 	{
-		j["name"		].get_to(v.name);
-		j["paths"		].get_to(v.paths);
-		j["size"		].get_to(v.size);
-		j["format"		].get_to(v.format);
-
-		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
+		j["name"	].get_to(v.name);
+		j["paths"	].get_to(v.paths);
+		j["size"	].get_to(v.size);
+		j["format"	].get_to(v.format);
+		j["flags"	].get_to((texture_flags_ &)v.flags);
+		
 	}
 
 	static void to_json(json & j, descriptor<texturecube> const & v)
 	{
-		j["name"		] = v.name;
-		j["paths"		] = v.paths;
-		j["size"		] = v.size;
-		j["format"		] = v.format;
-
-		j["repeat"		] = ML_flag_read(v.flags, texture_flags_repeat);
-		j["smooth"		] = ML_flag_read(v.flags, texture_flags_smooth);
-		j["mipmap"		] = ML_flag_read(v.flags, texture_flags_mipmap);
+		j["name"	] = v.name;
+		j["paths"	] = v.paths;
+		j["size"	] = v.size;
+		j["format"	] = v.format;
+		j["flags"	] = (texture_flags_)v.flags;
 	}
 
 
@@ -1452,11 +1466,7 @@ namespace ml::gfx
 		j["name"			].get_to(v.name);
 		j["size"			].get_to(v.size);
 		j["format"			].get_to(v.format);
-
-		ML_flag_write(v.flags, texture_flags_repeat, j["repeat"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_smooth, j["smooth"].get<bool>());
-		ML_flag_write(v.flags, texture_flags_mipmap, j["mipmap"].get<bool>());
-
+		j["flags"			].get_to((texture_flags_ &)v.flags);
 		j["bits_per_pixel"	].get_to(v.bits_per_pixel);
 		j["stencil_bits"	].get_to(v.stencil_bits);
 		j["depth_bits"		].get_to(v.depth_bits);
@@ -1469,11 +1479,7 @@ namespace ml::gfx
 		j["name"			] = v.name;
 		j["size"			] = v.size;
 		j["format"			] = v.format;
-
-		j["repeat"			] = ML_flag_read(v.flags, texture_flags_repeat);
-		j["smooth"			] = ML_flag_read(v.flags, texture_flags_smooth);
-		j["mipmap"			] = ML_flag_read(v.flags, texture_flags_mipmap);
-
+		j["flags"			] = (texture_flags_)v.flags;
 		j["bits_per_pixel"	] = v.bits_per_pixel;
 		j["stencil_bits"	] = v.stencil_bits;
 		j["depth_bits"		] = v.depth_bits;
@@ -1566,27 +1572,27 @@ namespace ml::gfx
 		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
-		virtual bool attach(uint32_t type, size_t count, cstring * str) = 0;
+		virtual bool attach(uint32_t type, size_t count, cstring * str, int32_t const * len = {}) = 0;
 
 		inline bool attach(uint32_t type, pmr::string const & str) noexcept
 		{
 			if (str.empty()) { return false; }
 			cstring temp{ str.c_str() };
-			return attach(type, 1, &temp);
+			return attach(type, 1, &temp, nullptr);
 		}
 
 		inline bool attach(uint32_t type, pmr::vector<pmr::string> const & str) noexcept
 		{
 			if (str.empty()) { return false; }
 			cstring temp{ str.front().c_str() };
-			return attach(type, str.size(), &temp);
+			return attach(type, str.size(), &temp, nullptr);
 		}
 
 		virtual bool detach(uint32_t type) = 0;
 
 		ML_NODISCARD virtual bool link() = 0;
 
-		virtual bool bind_uniform(cstring name, std::function<void(binding_id)> const & fn) = 0;
+		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
 
 		ML_NODISCARD virtual pmr::string const & get_error_log() const noexcept = 0;
 
@@ -1594,9 +1600,9 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual ds::map<uint32_t, pmr::vector<pmr::string>> const & get_source() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<binding_id, shared<texture>> const & get_textures() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<hash_t, binding_id> const & get_uniforms() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
@@ -1613,7 +1619,7 @@ namespace ml::gfx
 		{
 			uint32_t slot{};
 			get_textures().for_each([&, &ctx = get_device()->get_context()
-			](binding_id loc, shared<texture> const & tex) noexcept
+			](uniform_id loc, shared<texture> const & tex) noexcept
 			{
 				ctx->bind_texture(tex.get(), slot);
 
@@ -1623,7 +1629,7 @@ namespace ml::gfx
 
 		template <class T> bool set_uniform(cstring name, T && value) noexcept
 		{
-			return bind_uniform(name, [&](binding_id loc) noexcept
+			return bind_uniform(name, [&](uniform_id loc) noexcept
 			{
 				if constexpr (std::is_convertible_v<T, shared<texture>>)
 				{
@@ -1637,7 +1643,7 @@ namespace ml::gfx
 		}
 
 	protected:
-		virtual void do_cache_texture(binding_id loc, shared<texture> const & value) noexcept = 0;
+		virtual void do_cache_texture(uniform_id loc, shared<texture> const & value) noexcept = 0;
 	};
 }
 
@@ -1695,15 +1701,15 @@ namespace ml::gfx
 		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept override = 0;
 
 	public:
-		virtual bool compile(uint32_t type, size_t count, cstring * str) = 0;
+		virtual bool compile(uint32_t type, size_t count, cstring * str, int32_t const * len = {}) = 0;
 
-		virtual bool bind_uniform(cstring name, std::function<void(binding_id)> const & fn) = 0;
+		virtual bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) = 0;
 
 		ML_NODISCARD virtual pmr::string const & get_info_log() const noexcept = 0;
 
 		ML_NODISCARD virtual pmr::vector<pmr::string> const & get_source() const noexcept = 0;
 
-		ML_NODISCARD virtual ds::map<binding_id, shared<texture>> const & get_textures() const noexcept = 0;
+		ML_NODISCARD virtual ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept = 0;
 
 		ML_NODISCARD virtual uint32_t get_type() const noexcept = 0;
 
@@ -1721,7 +1727,7 @@ namespace ml::gfx
 		inline void bind_textures() noexcept
 		{
 			uint32_t slot{};
-			get_textures().for_each([&](binding_id loc, shared<texture> const & tex) noexcept
+			get_textures().for_each([&](uniform_id loc, shared<texture> const & tex) noexcept
 			{
 				do_upload(loc, tex, slot++);
 			});
@@ -1730,7 +1736,7 @@ namespace ml::gfx
 		template <class T, class ... Extra
 		> bool set_uniform(cstring name, T && value, Extra && ... extra) noexcept
 		{
-			return bind_uniform(name, [&](binding_id loc) noexcept
+			return bind_uniform(name, [&](uniform_id loc) noexcept
 			{
 				if constexpr (std::is_convertible_v<T, shared<texture>>)
 				{
@@ -1744,29 +1750,29 @@ namespace ml::gfx
 		}
 
 	protected:
-		virtual void do_cache(binding_id loc, shared<texture> const & value) = 0;
+		virtual void do_cache(uniform_id loc, shared<texture> const & value) = 0;
 
-		virtual void do_upload(binding_id loc, bool value) = 0;
+		virtual void do_upload(uniform_id loc, bool value) = 0;
 
-		virtual void do_upload(binding_id loc, int32_t value) = 0;
+		virtual void do_upload(uniform_id loc, int32_t value) = 0;
 
-		virtual void do_upload(binding_id loc, uint32_t value) = 0;
+		virtual void do_upload(uniform_id loc, uint32_t value) = 0;
 
-		virtual void do_upload(binding_id loc, float_t value) = 0;
+		virtual void do_upload(uniform_id loc, float_t value) = 0;
 
-		virtual void do_upload(binding_id loc, vec2f const & value) = 0;
+		virtual void do_upload(uniform_id loc, vec2f const & value) = 0;
 
-		virtual void do_upload(binding_id loc, vec3f const & value) = 0;
+		virtual void do_upload(uniform_id loc, vec3f const & value) = 0;
 
-		virtual void do_upload(binding_id loc, vec4f const & value) = 0;
+		virtual void do_upload(uniform_id loc, vec4f const & value) = 0;
 
-		virtual void do_upload(binding_id loc, mat2f const & value, bool transpose = false) = 0;
+		virtual void do_upload(uniform_id loc, mat2f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(binding_id loc, mat3f const & value, bool transpose = false) = 0;
+		virtual void do_upload(uniform_id loc, mat3f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(binding_id loc, mat4f const & value, bool transpose = false) = 0;
+		virtual void do_upload(uniform_id loc, mat4f const & value, bool transpose = false) = 0;
 
-		virtual void do_upload(binding_id loc, shared<texture> const & value, uint32_t slot = 0) = 0;
+		virtual void do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot = 0) = 0;
 	};
 }
 

@@ -56,7 +56,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// helpers / custom stuff
+// helpers / disambiguation
 
 // get error
 #define ML_glGetError() _ML gfx::_error<_ML gfx::to_user>( glGetError() )
@@ -73,22 +73,22 @@
 
 // shader functions
 #define ML_glCreateShader(type)						glCreateShaderObjectARB( type )
-#define ML_glDeleteShader(obj)						glDeleteObjectARB( obj )
-#define ML_glShaderSource(obj, count, str, len)		glShaderSourceARB( obj, count, str, len )
-#define ML_glCompileShader(obj)						glCompileShaderARB( obj )
-#define ML_glGetShaderCompileStatus(obj, out)		glGetObjectParameterivARB( obj, GL_OBJECT_COMPILE_STATUS_ARB, out )
+#define ML_glDeleteShader(s)						glDeleteObjectARB( s )
+#define ML_glShaderSource(s, count, src, len)		glShaderSourceARB( s, count, src, len )
+#define ML_glCompileShader(s)						glCompileShaderARB( s )
+#define ML_glGetShaderCompileStatus(s, i)			glGetObjectParameterivARB( s, GL_OBJECT_COMPILE_STATUS_ARB, i )
 
 // program functions
 #define ML_glCreateProgram()						glCreateProgramObjectARB()
-#define ML_glDeleteProgram(obj)						glDeleteObjectARB( obj )
+#define ML_glDeleteProgram(p)						glDeleteObjectARB( p )
 #define ML_glGetProgram()							glGetHandleARB( GL_PROGRAM_OBJECT_ARB )
-#define ML_glUseProgram(obj)						glUseProgramObjectARB( obj )
-#define ML_glAttachShader(obj, x)					glAttachObjectARB( obj, x )
-#define ML_glDetachShader(obj, x)					glDetachObjectARB( obj, x )
-#define ML_glLinkProgram(obj)						glLinkProgramARB( obj )
-#define ML_glGetProgramLinkStatus(obj, out)			glGetObjectParameterivARB( obj, GL_OBJECT_LINK_STATUS_ARB, out )
-#define ML_glValidateProgram(obj)					glValidateProgramARB( obj )
-#define ML_glGetProgramValidateStatus(obj, out)		glGetObjectParameterivARB( obj, GL_OBJECT_VALIDATE_STATUS_ARB, out )
+#define ML_glUseProgram(p)							glUseProgramObjectARB( p )
+#define ML_glAttachShader(p, s)						glAttachObjectARB( p, s )
+#define ML_glDetachShader(p, s)						glDetachObjectARB( p, s )
+#define ML_glLinkProgram(p)							glLinkProgramARB( p )
+#define ML_glGetProgramLinkStatus(p, i)				glGetObjectParameterivARB( p, GL_OBJECT_LINK_STATUS_ARB, i )
+#define ML_glValidateProgram(p)						glValidateProgramARB( p )
+#define ML_glGetProgramValidateStatus(p, i)			glGetObjectParameterivARB( p, GL_OBJECT_VALIDATE_STATUS_ARB, i )
 
 // uniform functions
 #define ML_glGetUniformLocation(obj, name)			glGetUniformLocationARB( obj, name )
@@ -653,14 +653,13 @@ namespace ml::gfx
 	}
 
 	// get program info log
-	static auto & gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
+	static void gl_get_program_info_log(uint32_t obj, pmr::string & buf) noexcept
 	{
 		int32_t max_len{};
 		ML_glCheck(glGetShaderiv(obj, GL_INFO_LOG_LENGTH, &max_len));
 		buf.resize((size_t)max_len);
 		ML_glCheck(glGetProgramInfoLog(obj, max_len, &max_len, buf.data()));
 		buf.push_back(0);
-		return buf;
 	}
 }
 
@@ -822,7 +821,8 @@ namespace ml::gfx
 
 	alpha_state * opengl_render_context::get_alpha_state(alpha_state * value) const
 	{
-		ML_assert("value cannot be null" && value);
+		static alpha_state temp{
+		}; if (!value) { value = &temp; }
 
 		ML_glCheck(glGetBooleanv(GL_ALPHA_TEST, (uint8_t *)&value->enabled));
 
@@ -866,13 +866,16 @@ namespace ml::gfx
 	color opengl_render_context::get_clear_color() const
 	{
 		color temp{};
+
 		ML_glCheck(glGetFloatv(GL_COLOR_CLEAR_VALUE, temp));
+
 		return temp;
 	}
 
 	cull_state * opengl_render_context::get_cull_state(cull_state * value) const
 	{
-		ML_assert("value cannot be null" && value);
+		static cull_state temp{
+		}; if (!value) { value = &temp; }
 
 		ML_glCheck(glGetBooleanv(GL_CULL_FACE, (uint8_t *)&value->enabled));
 
@@ -887,7 +890,8 @@ namespace ml::gfx
 
 	depth_state * opengl_render_context::get_depth_state(depth_state * value) const
 	{
-		ML_assert("value cannot be null" && value);
+		static depth_state temp{
+		}; if (!value) { value = &temp; }
 
 		ML_glCheck(glGetBooleanv(GL_DEPTH_TEST, (uint8_t *)&value->enabled));
 
@@ -901,16 +905,26 @@ namespace ml::gfx
 
 	stencil_state * opengl_render_context::get_stencil_state(stencil_state * value) const
 	{
-		ML_assert("value cannot be null" && value);
+		static stencil_state temp{
+		}; if (!value) { value = &temp; }
 
 		ML_glCheck(glGetBooleanv(GL_STENCIL_TEST, (uint8_t *)&value->enabled));
+		{
+			ML_glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&value->front.pred));
+			value->front.pred = _predicate<to_user>(value->front.pred);
 
-		ML_glCheck(glGetIntegerv(GL_STENCIL_FUNC, (int32_t *)&value->pred));
-		value->pred = _predicate<to_user>(value->pred);
+			ML_glCheck(glGetIntegerv(GL_STENCIL_REF, &value->front.ref));
 
-		ML_glCheck(glGetIntegerv(GL_STENCIL_REF, &value->ref));
-		
-		ML_glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&value->mask));
+			ML_glCheck(glGetIntegerv(GL_STENCIL_VALUE_MASK, (int32_t *)&value->front.mask));
+		}
+		{
+			ML_glCheck(glGetIntegerv(GL_STENCIL_BACK_FUNC, (int32_t *)&value->back.pred));
+			value->back.pred = _predicate<to_user>(value->back.pred);
+
+			ML_glCheck(glGetIntegerv(GL_STENCIL_BACK_REF, &value->back.ref));
+
+			ML_glCheck(glGetIntegerv(GL_STENCIL_BACK_VALUE_MASK, (int32_t *)&value->back.mask));
+		}
 
 		return value;
 	}
@@ -918,7 +932,9 @@ namespace ml::gfx
 	int_rect opengl_render_context::get_viewport() const
 	{
 		int_rect temp{};
+
 		ML_glCheck(glGetIntegerv(GL_VIEWPORT, temp));
+
 		return temp;
 	}
 
@@ -980,10 +996,16 @@ namespace ml::gfx
 		ML_glCheck(ML_glEnable(GL_STENCIL_TEST, value.enabled));
 
 		ML_glCheck(glStencilFuncSeparate(
-			GL_FRONT_AND_BACK,
-			_predicate<to_impl>(value.pred),
-			value.ref,
-			value.mask));
+			GL_FRONT,
+			_predicate<to_impl>(value.front.pred),
+			value.front.ref,
+			value.front.mask));
+		
+		ML_glCheck(glStencilFuncSeparate(
+			GL_BACK,
+			_predicate<to_impl>(value.back.pred),
+			value.back.ref,
+			value.back.mask));
 	}
 
 	void opengl_render_context::set_viewport(int_rect const & bounds)
@@ -1099,47 +1121,47 @@ namespace ml::gfx
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void opengl_render_context::upload(binding_id loc, bool value)
+	void opengl_render_context::upload(uniform_id loc, bool value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_render_context::upload(binding_id loc, int32_t value)
+	void opengl_render_context::upload(uniform_id loc, int32_t value)
 	{
 		ML_glCheck(ML_glUniform1i(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_render_context::upload(binding_id loc, float_t value)
+	void opengl_render_context::upload(uniform_id loc, float_t value)
 	{
 		ML_glCheck(ML_glUniform1f(ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_render_context::upload(binding_id loc, vec2f const & value)
+	void opengl_render_context::upload(uniform_id loc, vec2f const & value)
 	{
 		ML_glCheck(ML_glUniform2f(ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
-	void opengl_render_context::upload(binding_id loc, vec3f const & value)
+	void opengl_render_context::upload(uniform_id loc, vec3f const & value)
 	{
 		ML_glCheck(ML_glUniform3f(ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
-	void opengl_render_context::upload(binding_id loc, vec4f const & value)
+	void opengl_render_context::upload(uniform_id loc, vec4f const & value)
 	{
 		ML_glCheck(ML_glUniform4f(ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_render_context::upload(binding_id loc, mat2f const & value)
+	void opengl_render_context::upload(uniform_id loc, mat2f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix2fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_render_context::upload(binding_id loc, mat3f const & value)
+	void opengl_render_context::upload(uniform_id loc, mat3f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix3fv(ML_handle(int32_t, loc), false, value));
 	}
 
-	void opengl_render_context::upload(binding_id loc, mat4f const & value)
+	void opengl_render_context::upload(uniform_id loc, mat4f const & value)
 	{
 		ML_glCheck(ML_glUniformMatrix4fv(ML_handle(int32_t, loc), false, value));
 	}
@@ -1700,7 +1722,7 @@ namespace ml::gfx
 		{
 			int32_t temp{};
 			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
-			return ML_handle(binding_id, temp);
+			return ML_handle(uniform_id, temp);
 		});
 	}
 
@@ -1736,7 +1758,7 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	bool opengl_program::attach(uint32_t type, size_t count, cstring * str)
+	bool opengl_program::attach(uint32_t type, size_t count, cstring * str, int32_t const * len)
 	{
 		if (!count || !str || !*str || m_shaders.contains(type)) { return false; }
 
@@ -1745,7 +1767,7 @@ namespace ml::gfx
 		ML_glCheck(temp = ML_glCreateShader(_shader_type<to_impl>(type)));
 
 		// compile shader
-		ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, nullptr));
+		ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, len));
 		ML_glCheck(ML_glCompileShader(temp));
 
 		// check compile errors
@@ -1822,7 +1844,7 @@ namespace ml::gfx
 		{
 			int32_t temp{};
 			ML_glCheck(temp = ML_glGetUniformLocation(self, name));
-			return ML_handle(binding_id, temp);
+			return ML_handle(uniform_id, temp);
 		});
 	}
 
@@ -1846,7 +1868,7 @@ namespace ml::gfx
 		ML_glCheck(ML_glDeleteProgram(m_handle));
 	}
 
-	bool opengl_shader::compile(uint32_t type, size_t count, cstring * str)
+	bool opengl_shader::compile(uint32_t type, size_t count, cstring * str, int32_t const * len)
 	{
 		if (!count || !str || !*str) { return false; }
 
@@ -1863,7 +1885,7 @@ namespace ml::gfx
 		ML_glCheck(temp = ML_glCreateShader(_shader_type<to_impl>(type)));
 		if (temp)
 		{
-			ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, nullptr));
+			ML_glCheck(ML_glShaderSource(temp, (uint32_t)count, str, len));
 			ML_glCheck(ML_glCompileShader(temp));
 
 			ML_glCheck(m_handle = ML_glCreateProgram());
@@ -1893,57 +1915,57 @@ namespace ml::gfx
 		}
 	}
 
-	void opengl_shader::do_upload(binding_id loc, bool value)
+	void opengl_shader::do_upload(uniform_id loc, bool value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, int32_t value)
+	void opengl_shader::do_upload(uniform_id loc, int32_t value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, uint32_t value)
+	void opengl_shader::do_upload(uniform_id loc, uint32_t value)
 	{
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, float_t value)
+	void opengl_shader::do_upload(uniform_id loc, float_t value)
 	{
 		ML_glCheck(glProgramUniform1f(m_handle, ML_handle(int32_t, loc), value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, vec2f const & value)
+	void opengl_shader::do_upload(uniform_id loc, vec2f const & value)
 	{
 		ML_glCheck(glProgramUniform2f(m_handle, ML_handle(int32_t, loc), value[0], value[1]));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, vec3f const & value)
+	void opengl_shader::do_upload(uniform_id loc, vec3f const & value)
 	{
 		ML_glCheck(glProgramUniform3f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2]));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, vec4f const & value)
+	void opengl_shader::do_upload(uniform_id loc, vec4f const & value)
 	{
 		ML_glCheck(glProgramUniform4f(m_handle, ML_handle(int32_t, loc), value[0], value[1], value[2], value[3]));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, mat2f const & value, bool transpose)
+	void opengl_shader::do_upload(uniform_id loc, mat2f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix2fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, mat3f const & value, bool transpose)
+	void opengl_shader::do_upload(uniform_id loc, mat3f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix3fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 
-	void opengl_shader::do_upload(binding_id loc, mat4f const & value, bool transpose)
+	void opengl_shader::do_upload(uniform_id loc, mat4f const & value, bool transpose)
 	{
 		ML_glCheck(glProgramUniformMatrix4fv(m_handle, ML_handle(int32_t, loc), 1, transpose, value));
 	}
 	
-	void opengl_shader::do_upload(binding_id loc, shared<texture> const & value, uint32_t slot)
+	void opengl_shader::do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot)
 	{
 		get_device()->get_context()->bind_texture(value.get(), slot);
 

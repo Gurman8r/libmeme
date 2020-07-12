@@ -1327,8 +1327,8 @@ namespace ml
 			{
 				ctx->get_alpha_state(&a);
 				ImGui::Checkbox("enabled", &a.enabled);
-				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[a.pred], a.pred);
-				ImGui::Text("reference: %f", a.ref);
+				ImGui::Text("pred: %s (%u)", gfx::predicate_names[a.pred], a.pred);
+				ImGui::Text("ref: %f", a.ref);
 			}
 			ImGui::Separator();
 
@@ -1359,7 +1359,7 @@ namespace ml
 			{
 				ctx->get_depth_state(&d);
 				ImGui::Checkbox("enabled", &d.enabled);
-				ImGui::Text("predicate: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
+				ImGui::Text("pred: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
 				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
 			}
 			ImGui::Separator();
@@ -1368,9 +1368,12 @@ namespace ml
 			{
 				ctx->get_stencil_state(&s);
 				ImGui::Checkbox("enabled", &s.enabled);
-				ImGui::Text("predicate: %s (%u)", gfx::predicate_names[s.pred], s.pred);
-				ImGui::Text("reference: %i", s.ref);
-				ImGui::Text("mask: %u", s.mask);
+				ImGui::Text("front pred: %s (%u)", gfx::predicate_names[s.front.pred], s.front.pred);
+				ImGui::Text("front ref: %i", s.front.ref);
+				ImGui::Text("front mask: %u", s.front.mask);
+				ImGui::Text("back pred: %s (%u)", gfx::predicate_names[s.back.pred], s.back.pred);
+				ImGui::Text("back ref: %i", s.back.ref);
+				ImGui::Text("back mask: %u", s.back.mask);
 			}
 			ImGui::Separator();
 		}

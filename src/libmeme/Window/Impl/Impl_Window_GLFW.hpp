@@ -18,7 +18,7 @@ namespace ml
 
 		explicit glfw_window(window_settings const & ws) noexcept;
 
-		~glfw_window() noexcept;
+		~glfw_window() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -33,8 +33,6 @@ namespace ml
 		void maximize() override;
 
 		void restore() override;
-
-		void swap_buffers() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -74,8 +72,6 @@ namespace ml
 
 		bool is_decorated() const override;
 
-		bool is_center_cursor() const override;
-
 		bool is_floating() const override;
 
 		bool is_focus_on_show() const override;
@@ -92,7 +88,7 @@ namespace ml
 
 		bool is_resizable() const override;
 
-		bool is_transparent_framebuffer() const override;
+		bool is_transparent() const override;
 
 		bool is_visible() const override;
 
@@ -134,13 +130,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
-
-		static cursor_handle create_standard_cursor(int32_t value);
-
 		static int32_t extension_supported(cstring value);
 
-		static window_handle get_current_context();
+		static window_handle get_context_current();
 
 		static void * get_proc_address(cstring value);
 		
@@ -150,34 +142,42 @@ namespace ml
 
 		static duration get_time();
 
-		static void destroy_cursor(cursor_handle value);
+		static void make_context_current(window_handle value);
 
 		static void poll_events();
 
-		static void set_current_context(window_handle value);
+		static void swap_buffers(window_handle value);
 
-		static void set_swap_interval(int32_t value);
+		static void swap_interval(int32_t value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window_char_fn				set_char_callback				(window_char_fn				fn) override;
-		window_char_mods_fn			set_char_mods_callback			(window_char_mods_fn		fn) override;
-		window_close_fn				set_close_callback				(window_close_fn			fn) override;
-		window_content_scale_fn		set_content_scale_callback		(window_content_scale_fn	fn) override;
-		window_cursor_enter_fn		set_cursor_enter_callback		(window_cursor_enter_fn		fn) override;
-		window_cursor_position_fn	set_cursor_position_callback	(window_cursor_position_fn	fn) override;
-		window_drop_fn				set_drop_callback				(window_drop_fn				fn) override;
-		window_error_fn				set_error_callback				(window_error_fn			fn) override;
-		window_focus_fn				set_focus_callback				(window_focus_fn			fn) override;
-		window_framebuffer_size_fn	set_framebuffer_size_callback	(window_framebuffer_size_fn	fn) override;
-		window_iconify_fn			set_iconify_callback			(window_iconify_fn			fn) override;
-		window_key_fn				set_key_callback				(window_key_fn				fn) override;
-		window_maximize_fn			set_maximize_callback			(window_maximize_fn			fn) override;
-		window_mouse_fn				set_mouse_callback				(window_mouse_fn			fn) override;
-		window_position_fn			set_position_callback			(window_position_fn			fn) override;
-		window_refresh_fn			set_refresh_callback			(window_refresh_fn			fn) override;
-		window_scroll_fn			set_scroll_callback				(window_scroll_fn			fn) override;
-		window_size_fn				set_size_callback				(window_size_fn				fn) override;
+		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
+
+		static cursor_handle create_standard_cursor(int32_t value);
+
+		static void destroy_cursor(cursor_handle value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		window_char_callback				set_char_callback				(window_char_callback				fn) override;
+		window_char_mods_callback			set_char_mods_callback			(window_char_mods_callback		fn) override;
+		window_close_callback				set_close_callback				(window_close_callback			fn) override;
+		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback	fn) override;
+		window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback		fn) override;
+		window_cursor_position_callback		set_cursor_position_callback	(window_cursor_position_callback	fn) override;
+		window_drop_callback				set_drop_callback				(window_drop_callback				fn) override;
+		window_error_callback				set_error_callback				(window_error_callback			fn) override;
+		window_focus_callback				set_focus_callback				(window_focus_callback			fn) override;
+		window_framebuffer_size_callback	set_framebuffer_size_callback	(window_framebuffer_size_callback	fn) override;
+		window_iconify_callback				set_iconify_callback			(window_iconify_callback			fn) override;
+		window_key_callback					set_key_callback				(window_key_callback				fn) override;
+		window_maximize_callback			set_maximize_callback			(window_maximize_callback			fn) override;
+		window_mouse_callback				set_mouse_callback				(window_mouse_callback			fn) override;
+		window_position_callback			set_position_callback			(window_position_callback			fn) override;
+		window_refresh_callback				set_refresh_callback			(window_refresh_callback			fn) override;
+		window_scroll_callback				set_scroll_callback				(window_scroll_callback			fn) override;
+		window_size_callback				set_size_callback				(window_size_callback				fn) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

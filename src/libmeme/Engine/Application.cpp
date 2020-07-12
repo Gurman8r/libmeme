@@ -100,19 +100,19 @@ namespace ml
 			ML_ImGui_RenderDrawData(ImGui::GetDrawData());
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
-				auto backup_context{ window::get_current_context() };
+				auto backup_context{ window::get_context_current() };
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
-				window::set_current_context(backup_context);
+				window::make_context_current(backup_context);
 			}
 		}
 		break;
 
 		case hashof_v<end_draw_event>: // END DRAW
 		{
-			if (m_wnd.has_hint(window_hints_double_buffer))
+			if (m_wnd.has_hint(window_hints_doublebuffer))
 			{
-				m_wnd.swap_buffers();
+				window::swap_buffers(m_wnd.get_handle());
 			}
 		}
 		break;

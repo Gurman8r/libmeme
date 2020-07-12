@@ -34,9 +34,7 @@ namespace ml
 		ML_assert(open(ws));
 	}
 
-	window::~window() noexcept
-	{
-	}
+	window::~window() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -49,7 +47,7 @@ namespace ml
 		if (!m_window->open(m_wndcfg = ws)) { return debug::error("failed opening window"); }
 		
 		// make current context
-		set_current_context(get_handle());
+		make_context_current(get_handle());
 
 		// user pointer
 		set_user_pointer(this);
@@ -143,13 +141,8 @@ namespace ml
 		m_window->restore();
 	}
 
-	void window::swap_buffers() noexcept
-	{
-		m_window->swap_buffers();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
+
 	int_rect window::get_bounds() const noexcept
 	{
 		return m_window->get_bounds();
@@ -237,11 +230,6 @@ namespace ml
 		return m_window->is_decorated();
 	}
 
-	bool window::is_center_cursor() const noexcept
-	{
-		return m_window->is_center_cursor();
-	}
-
 	bool window::is_floating() const noexcept
 	{
 		return m_window->is_floating();
@@ -282,9 +270,9 @@ namespace ml
 		return m_window->is_resizable();
 	}
 
-	bool window::is_transparent_framebuffer() const noexcept
+	bool window::is_transparent() const noexcept
 	{
-		return m_window->is_transparent_framebuffer();
+		return m_window->is_transparent();
 	}
 
 	bool window::is_visible() const noexcept
@@ -381,24 +369,14 @@ namespace ml
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept
-	{
-		return impl_window::create_custom_cursor(w, h, p);
-	}
-
-	cursor_handle window::create_standard_cursor(int32_t value) noexcept
-	{
-		return impl_window::create_standard_cursor(value);
-	}
-
 	int32_t window::extension_supported(cstring value) noexcept
 	{
 		return impl_window::extension_supported(value);
 	}
 
-	window_handle window::get_current_context() noexcept
+	window_handle window::get_context_current() noexcept
 	{
-		return impl_window::get_current_context();
+		return impl_window::get_context_current();
 	}
 
 	void * window::get_proc_address(cstring value) noexcept
@@ -421,9 +399,9 @@ namespace ml
 		return impl_window::get_time();
 	}
 
-	void window::destroy_cursor(cursor_handle value) noexcept
+	void window::make_context_current(window_handle value) noexcept
 	{
-		impl_window::destroy_cursor(value);
+		impl_window::make_context_current(value);
 	}
 
 	void window::poll_events() noexcept
@@ -431,104 +409,121 @@ namespace ml
 		impl_window::poll_events();
 	}
 
-	void window::set_current_context(window_handle value) noexcept
+	void window::swap_buffers(window_handle value) noexcept
 	{
-		impl_window::set_current_context(value);
+		impl_window::swap_buffers(value);
 	}
 
-	void window::set_swap_interval(int32_t value) noexcept
+	void window::swap_interval(int32_t value) noexcept
 	{
-		impl_window::set_swap_interval(value);
+		impl_window::swap_interval(value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window_char_fn window::set_char_callback(window_char_fn fn) noexcept
+	cursor_handle window::create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept
+	{
+		return impl_window::create_custom_cursor(w, h, p);
+	}
+
+	cursor_handle window::create_standard_cursor(int32_t value) noexcept
+	{
+		return impl_window::create_standard_cursor(value);
+	}
+
+	void window::destroy_cursor(cursor_handle value) noexcept
+	{
+		impl_window::destroy_cursor(value);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	window_char_callback window::set_char_callback(window_char_callback fn) noexcept
 	{
 		return m_window->set_char_callback(fn);
 	}
 
-	window_char_mods_fn window::set_char_mods_callback(window_char_mods_fn fn) noexcept
+	window_char_mods_callback window::set_char_mods_callback(window_char_mods_callback fn) noexcept
 	{
 		return m_window->set_char_mods_callback(fn);
 	}
 
-	window_close_fn window::set_close_callback(window_close_fn fn) noexcept
+	window_close_callback window::set_close_callback(window_close_callback fn) noexcept
 	{
 		return m_window->set_close_callback(fn);
 	}
 
-	window_content_scale_fn window::set_content_scale_callback(window_content_scale_fn fn) noexcept
+	window_content_scale_callback window::set_content_scale_callback(window_content_scale_callback fn) noexcept
 	{
 		return m_window->set_content_scale_callback(fn);
 	}
 	
-	window_cursor_enter_fn window::set_cursor_enter_callback(window_cursor_enter_fn fn) noexcept
+	window_cursor_enter_callback window::set_cursor_enter_callback(window_cursor_enter_callback fn) noexcept
 	{
 		return m_window->set_cursor_enter_callback(fn);
 	}
 
-	window_cursor_position_fn window::set_cursor_position_callback(window_cursor_position_fn fn) noexcept
+	window_cursor_position_callback window::set_cursor_position_callback(window_cursor_position_callback fn) noexcept
 	{
 		return m_window->set_cursor_position_callback(fn);
 	}
 
-	window_drop_fn window::set_drop_callback(window_drop_fn fn) noexcept
+	window_drop_callback window::set_drop_callback(window_drop_callback fn) noexcept
 	{
 		return m_window->set_drop_callback(fn);
 	}
 
-	window_error_fn window::set_error_callback(window_error_fn fn) noexcept
+	window_error_callback window::set_error_callback(window_error_callback fn) noexcept
 	{
 		return m_window->set_error_callback(fn);
 	}
 
-	window_focus_fn window::set_focus_callback(window_focus_fn fn) noexcept
+	window_focus_callback window::set_focus_callback(window_focus_callback fn) noexcept
 	{
 		return m_window->set_focus_callback(fn);
 	}
 
-	window_framebuffer_size_fn window::set_framebuffer_size_callback(window_framebuffer_size_fn fn) noexcept
+	window_framebuffer_size_callback window::set_framebuffer_size_callback(window_framebuffer_size_callback fn) noexcept
 	{
 		return m_window->set_framebuffer_size_callback(fn);
 	}
 
-	window_iconify_fn window::set_iconify_callback(window_iconify_fn fn) noexcept
+	window_iconify_callback window::set_iconify_callback(window_iconify_callback fn) noexcept
 	{
 		return m_window->set_iconify_callback(fn);
 	}
 	
-	window_key_fn window::set_key_callback(window_key_fn fn) noexcept
+	window_key_callback window::set_key_callback(window_key_callback fn) noexcept
 	{
 		return m_window->set_key_callback(fn);
 	}
 
-	window_maximize_fn window::set_maximize_callback(window_maximize_fn fn) noexcept
+	window_maximize_callback window::set_maximize_callback(window_maximize_callback fn) noexcept
 	{
 		return m_window->set_maximize_callback(fn);
 	}
 	
-	window_mouse_fn window::set_mouse_callback(window_mouse_fn fn) noexcept
+	window_mouse_callback window::set_mouse_callback(window_mouse_callback fn) noexcept
 	{
 		return m_window->set_mouse_callback(fn);
 	}
 	
-	window_position_fn window::set_position_callback(window_position_fn fn) noexcept
+	window_position_callback window::set_position_callback(window_position_callback fn) noexcept
 	{
 		return m_window->set_position_callback(fn);
 	}
 
-	window_refresh_fn window::set_refresh_callback(window_refresh_fn fn) noexcept
+	window_refresh_callback window::set_refresh_callback(window_refresh_callback fn) noexcept
 	{
 		return m_window->set_refresh_callback(fn);
 	}
 
-	window_scroll_fn window::set_scroll_callback(window_scroll_fn fn) noexcept
+	window_scroll_callback window::set_scroll_callback(window_scroll_callback fn) noexcept
 	{
 		return m_window->set_scroll_callback(fn);
 	}
 	
-	window_size_fn window::set_size_callback(window_size_fn fn) noexcept
+	window_size_callback window::set_size_callback(window_size_callback fn) noexcept
 	{
 		return m_window->set_size_callback(fn);
 	}

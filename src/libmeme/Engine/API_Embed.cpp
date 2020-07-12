@@ -275,11 +275,11 @@ namespace ml::embed
 			;
 
 		// KEY STATE
-		py::class_<key_state_>(m, "key_state")
+		py::class_<input_state_>(m, "key_state")
 			.def(py::init<>())
-			.def_property_readonly_static("release", [](py::object) { return (int32_t)key_state_release; })
-			.def_property_readonly_static("press", [](py::object) { return (int32_t)key_state_press; })
-			.def_property_readonly_static("repeat", [](py::object) { return (int32_t)key_state_repeat; })
+			.def_property_readonly_static("release", [](py::object) { return (int32_t)input_state_release; })
+			.def_property_readonly_static("press", [](py::object) { return (int32_t)input_state_press; })
+			.def_property_readonly_static("repeat", [](py::object) { return (int32_t)input_state_repeat; })
 			;
 
 		// WINDOW HINTS
@@ -290,10 +290,10 @@ namespace ml::embed
 			.def_property_readonly_static("visible"			, [](py::object) { return (int32_t)window_hints_visible; })
 			.def_property_readonly_static("decorated"		, [](py::object) { return (int32_t)window_hints_decorated; })
 			.def_property_readonly_static("focused"			, [](py::object) { return (int32_t)window_hints_focused; })
-			.def_property_readonly_static("auto_iconify"	, [](py::object) { return (int32_t)window_hints_auto_iconify; })
+			.def_property_readonly_static("is_auto_iconify"	, [](py::object) { return (int32_t)window_hints_auto_iconify; })
 			.def_property_readonly_static("floating"		, [](py::object) { return (int32_t)window_hints_floating; })
 			.def_property_readonly_static("maximized"		, [](py::object) { return (int32_t)window_hints_maximized; })
-			.def_property_readonly_static("double_buffer"	, [](py::object) { return (int32_t)window_hints_double_buffer; })
+			.def_property_readonly_static("double_buffer"	, [](py::object) { return (int32_t)window_hints_doublebuffer; })
 			.def_property_readonly_static("center_cursor"	, [](py::object) { return (int32_t)window_hints_center_cursor; })
 			.def_property_readonly_static("focus_on_show"	, [](py::object) { return (int32_t)window_hints_focus_on_show; })
 			.def_property_readonly_static("default"			, [](py::object) { return (int32_t)window_hints_default; })
@@ -335,7 +335,7 @@ namespace ml::embed
 			.def(py::init<pmr::string const &, video_mode const &, context_settings const &, int32_t>())
 			.def_readwrite("title"	, &window_settings::title)
 			.def_readwrite("video"	, &window_settings::video)
-			.def_readwrite("context", &window_settings::ctxconfig)
+			.def_readwrite("ctx"	, &window_settings::ctx)
 			.def_readwrite("hints"	, &window_settings::hints)
 			;
 
@@ -424,7 +424,7 @@ namespace ml::embed
 			.def_static("iconify"				, []() { engine::window().iconify(); })
 			.def_static("maximize"				, []() { engine::window().maximize(); })
 			.def_static("restore"				, []() { engine::window().restore(); })
-			.def_static("swap_buffers"			, []() { engine::window().swap_buffers(); })
+			.def_static("swap_buffers"			, [](intptr_t v) { engine::window().swap_buffers((window_handle)v); })
 
 			.def_static("is_open"				, []() { return engine::window().is_open(); })
 			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
@@ -432,11 +432,11 @@ namespace ml::embed
 			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
 			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
 			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
-			.def_static("get_handle"			, []() { return engine::window().get_handle(); })
+			.def_static("get_handle"			, []() { return (intptr_t)engine::window().get_handle(); })
 			.def_static("get_input_mode"		, [](int32_t v) { return engine::window().get_input_mode(v); })
 			.def_static("get_key"				, [](int32_t v) { return engine::window().get_key(v); })
 			.def_static("get_mouse_button"		, [](int32_t v) { return engine::window().get_mouse_button(v); })
-			.def_static("get_native_handle"		, []() { return engine::window().get_native_handle(); })
+			.def_static("get_native_handle"		, []() { return (intptr_t)engine::window().get_native_handle(); })
 			.def_static("get_opacity"			, []() { return engine::window().get_opacity(); })
 			.def_static("get_position"			, []() { return engine::window().get_position(); })
 
@@ -452,18 +452,19 @@ namespace ml::embed
 			.def_static("set_size"				, [](vec2i v) { engine::window().set_size(v); })
 			.def_static("set_title"				, [](cstring v) { engine::window().set_title(v); })
 
-			.def_static("destroy_cursor"		, [](cursor_handle v) { window::destroy_cursor(v); })
-			.def_static("poll_events"			, []() { window::poll_events(); })
-			.def_static("set_current_context"	, [](window_handle v) { window::set_current_context(v); })
-			.def_static("set_swap_interval"		, [](int32_t v) { window::set_swap_interval(v); })
 
-			.def_static("create_custom_cursor"	, [](size_t w, size_t h, byte_t const * p) { return window::create_custom_cursor(w, h, p); })
-			.def_static("create_standard_cursor", [](int32_t v) { return window::create_standard_cursor(v); })
 			.def_static("extension_supported"	, [](cstring v) { return window::extension_supported(v); })
-			.def_static("get_current_context"	, []() { return window::get_current_context(); })
-			.def_static("get_proc_address"		, [](cstring v) { return window::get_proc_address(v); })
-			.def_static("get_monitors"			, []() { return window::get_monitors(); })
+			.def_static("get_context_current"	, []() { return (intptr_t)window::get_context_current(); })
+			.def_static("get_proc_address"		, [](cstring v) { return (intptr_t)window::get_proc_address(v); })
+			.def_static("get_monitors"			, []() { return *(pmr::vector<intptr_t> const *)&window::get_monitors(); })
 			.def_static("get_time"				, []() { return window::get_time(); })
+			.def_static("make_context_current"	, [](intptr_t v) { window::make_context_current((window_handle)v); })
+			.def_static("poll_events"			, []() { window::poll_events(); })
+			.def_static("swap_interval"			, [](int32_t v) { window::swap_interval(v); })
+
+			.def_static("create_custom_cursor"	, [](size_t w, size_t h, byte_t const * p) { return (intptr_t)window::create_custom_cursor(w, h, p); })
+			.def_static("create_standard_cursor", [](int32_t v) { return (intptr_t)window::create_standard_cursor(v); })
+			.def_static("destroy_cursor"		, [](intptr_t v) { window::destroy_cursor((cursor_handle)v); })
 			;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

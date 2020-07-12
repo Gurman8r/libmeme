@@ -127,7 +127,7 @@ namespace ml::gfx
 
 		void set_stencil_state(stencil_state const & value) override;
 
-		void set_viewport(int_rect const & bounds) override;
+		void set_viewport(int_rect const & value) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -159,23 +159,23 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void upload(binding_id loc, bool value) override;
+		void upload(uniform_id loc, bool value) override;
 
-		void upload(binding_id loc, int32_t value) override;
+		void upload(uniform_id loc, int32_t value) override;
 
-		void upload(binding_id loc, float_t value) override;
+		void upload(uniform_id loc, float_t value) override;
 
-		void upload(binding_id loc, vec2f const & value) override;
+		void upload(uniform_id loc, vec2f const & value) override;
 
-		void upload(binding_id loc, vec3f const & value) override;
+		void upload(uniform_id loc, vec3f const & value) override;
 
-		void upload(binding_id loc, vec4f const & value) override;
+		void upload(uniform_id loc, vec4f const & value) override;
 
-		void upload(binding_id loc, mat2f const & value) override;
+		void upload(uniform_id loc, mat2f const & value) override;
 
-		void upload(binding_id loc, mat3f const & value)  override;
+		void upload(uniform_id loc, mat3f const & value)  override;
 
-		void upload(binding_id loc, mat4f const & value) override;
+		void upload(uniform_id loc, mat4f const & value) override;
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -440,13 +440,13 @@ namespace ml::gfx
 		pmr::string									m_error_log		{}; // error log
 		ds::map<uint32_t, object_id>				m_shaders		{}; // shader cache
 		ds::map<uint32_t, pmr::vector<pmr::string>>	m_source		{}; // source cache
-		ds::map<binding_id, shared<texture>>		m_textures		{}; // texture cache
-		ds::map<hash_t, binding_id>				m_uniforms		{}; // uniform cache
+		ds::map<uniform_id, shared<texture>>		m_textures		{}; // texture cache
+		ds::map<hash_t, uniform_id>				m_uniforms		{}; // uniform cache
 
 		// uniform binder
 		struct ML_NODISCARD opengl_uniform_binder final
 		{
-			binding_id location{ ML_handle(binding_id, -1) };
+			uniform_id location{ ML_handle(uniform_id, -1) };
 
 			uint32_t self{}, last{};
 
@@ -469,13 +469,13 @@ namespace ml::gfx
 		typeof<> const & get_self_type() const noexcept override { return s_self_type; }
 
 	public:
-		bool attach(uint32_t type, size_t count, cstring * str) override;
+		bool attach(uint32_t type, size_t count, cstring * str, int32_t const * len = {}) override;
 
 		bool detach(uint32_t type) override;
 
 		bool link() override;
 
-		bool bind_uniform(cstring name, std::function<void(binding_id)> const & fn) override
+		bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) override
 		{
 			opengl_uniform_binder u{ *this, name };
 			if (u) { std::invoke(fn, u.location); }
@@ -488,12 +488,12 @@ namespace ml::gfx
 
 		ds::map<uint32_t, pmr::vector<pmr::string>> const & get_source() const noexcept override { return m_source; }
 
-		ds::map<binding_id, shared<texture>> const & get_textures() const noexcept override { return m_textures; }
+		ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept override { return m_textures; }
 
-		ds::map<hash_t, binding_id> const & get_uniforms() const noexcept override { return m_uniforms; }
+		ds::map<hash_t, uniform_id> const & get_uniforms() const noexcept override { return m_uniforms; }
 
 	public:
-		void do_cache_texture(binding_id loc, shared<texture> const & value) noexcept override
+		void do_cache_texture(uniform_id loc, shared<texture> const & value) noexcept override
 		{
 			static auto const max_texture_slots
 			{
@@ -527,13 +527,13 @@ namespace ml::gfx
 		pmr::string								m_log		{}; // error log
 		uint32_t								m_type		{}; // shader type
 		pmr::vector<pmr::string>				m_source	{}; // source
-		ds::map<hash_t, binding_id>			m_attribs	{}; // attributes
-		ds::map<hash_t, binding_id>			m_uniforms	{}; // uniforms
-		ds::map<binding_id, shared<texture>>	m_textures	{}; // textures
+		ds::map<hash_t, uniform_id>				m_attribs	{}; // attributes
+		ds::map<hash_t, uniform_id>				m_uniforms	{}; // uniforms
+		ds::map<uniform_id, shared<texture>>	m_textures	{}; // textures
 
 		struct ML_NODISCARD uniform_binder final
 		{
-			binding_id loc{ (binding_id)-1 };
+			uniform_id loc{ (uniform_id)-1 };
 
 			uint32_t self{}, last{};
 
@@ -554,9 +554,9 @@ namespace ml::gfx
 		typeof<> const & get_self_type() const noexcept override { return s_self_type; }
 
 	public:
-		bool compile(uint32_t type, size_t count, cstring * str) override;
+		bool compile(uint32_t type, size_t count, cstring * str, int32_t const * len = {}) override;
 
-		bool bind_uniform(cstring name, std::function<void(binding_id)> const & fn) override
+		bool bind_uniform(cstring name, std::function<void(uniform_id)> const & fn) override
 		{
 			uniform_binder u{ *this, name };
 			if (u) { std::invoke(fn, u.loc); }
@@ -567,12 +567,12 @@ namespace ml::gfx
 
 		pmr::vector<pmr::string> const & get_source() const noexcept override { return m_source; }
 
-		ds::map<binding_id, shared<texture>> const & get_textures() const noexcept override { return m_textures; }
+		ds::map<uniform_id, shared<texture>> const & get_textures() const noexcept override { return m_textures; }
 
 		uint32_t get_type() const noexcept override { return m_type; }
 
 	protected:
-		void do_cache(binding_id loc, shared<texture> const & value) override
+		void do_cache(uniform_id loc, shared<texture> const & value) override
 		{
 			static auto const max_texture_slots
 			{
@@ -588,27 +588,27 @@ namespace ml::gfx
 			}
 		}
 
-		void do_upload(binding_id loc, bool value) override;
+		void do_upload(uniform_id loc, bool value) override;
 
-		void do_upload(binding_id loc, int32_t value) override;
+		void do_upload(uniform_id loc, int32_t value) override;
 
-		void do_upload(binding_id loc, uint32_t value) override;
+		void do_upload(uniform_id loc, uint32_t value) override;
 
-		void do_upload(binding_id loc, float_t value) override;
+		void do_upload(uniform_id loc, float_t value) override;
 
-		void do_upload(binding_id loc, vec2f const & value) override;
+		void do_upload(uniform_id loc, vec2f const & value) override;
 
-		void do_upload(binding_id loc, vec3f const & value) override;
+		void do_upload(uniform_id loc, vec3f const & value) override;
 
-		void do_upload(binding_id loc, vec4f const & value) override;
+		void do_upload(uniform_id loc, vec4f const & value) override;
 
-		void do_upload(binding_id loc, mat2f const & value, bool transpose = false) override;
+		void do_upload(uniform_id loc, mat2f const & value, bool transpose = false) override;
 
-		void do_upload(binding_id loc, mat3f const & value, bool transpose = false) override;
+		void do_upload(uniform_id loc, mat3f const & value, bool transpose = false) override;
 
-		void do_upload(binding_id loc, mat4f const & value, bool transpose = false) override;
+		void do_upload(uniform_id loc, mat4f const & value, bool transpose = false) override;
 
-		void do_upload(binding_id loc, shared<texture> const & value, uint32_t slot = 0) override;
+		void do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot = 0) override;
 	};
 }
 

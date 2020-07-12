@@ -47,25 +47,25 @@ namespace ml
 
 	inline void from_json(json const & j, context_settings & value)
 	{
-		j.at("api").get_to(value.api);
-		j.at("major").get_to(value.major);
-		j.at("minor").get_to(value.minor);
-		j.at("profile").get_to(value.profile);
-		j.at("depth_bits").get_to(value.depth_bits);
-		j.at("stencil_bits").get_to(value.stencil_bits);
-		j.at("multisample").get_to(value.multisample);
-		j.at("srgb_capable").get_to(value.srgb_capable);
+		j["api"			].get_to(value.api);
+		j["major"		].get_to(value.major);
+		j["minor"		].get_to(value.minor);
+		j["profile"		].get_to(value.profile);
+		j["depth_bits"	].get_to(value.depth_bits);
+		j["stencil_bits"].get_to(value.stencil_bits);
+		j["multisample"	].get_to(value.multisample);
+		j["srgb_capable"].get_to(value.srgb_capable);
 	}
 
 	inline void to_json(json & j, context_settings const & value)
 	{
-		j["api"] = value.api;
-		j["major"] = value.major;
-		j["minor"] = value.minor;
-		j["profile"] = value.profile;
-		j["depth_bits"] = value.depth_bits;
+		j["api"			] = value.api;
+		j["major"		] = value.major;
+		j["minor"		] = value.minor;
+		j["profile"		] = value.profile;
+		j["depth_bits"	] = value.depth_bits;
 		j["stencil_bits"] = value.stencil_bits;
-		j["multisample"] = value.multisample;
+		j["multisample"	] = value.multisample;
 		j["srgb_capable"] = value.srgb_capable;
 	}
 

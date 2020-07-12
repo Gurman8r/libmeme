@@ -54,7 +54,7 @@ namespace ml
 			switch (ev.ID)
 			{
 			case hashof_v<begin_loop_event>: {
-				m_window.poll_events();
+				window::poll_events();
 			} break;
 
 			case hashof_v<begin_draw_event>: {
@@ -84,9 +84,9 @@ namespace ml
 			} break;
 
 			case hashof_v<end_draw_event>: {
-				if (m_window.has_hint(window_hints_double_buffer))
+				if (m_window.has_hint(window_hints_doublebuffer))
 				{
-					m_window.swap_buffers();
+					window::swap_buffers(m_window.get_handle());
 				}
 			} break;
 

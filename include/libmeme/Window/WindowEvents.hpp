@@ -151,9 +151,9 @@ namespace ml
 		constexpr bool is_mods		(int32_t m) const noexcept { return (mods == m); }
 		constexpr bool has_mods		(int32_t m) const noexcept { return (mods & m); }
 		
-		constexpr bool is_release	(int32_t k) const noexcept { return is_key(k) && is_action(key_state_release); }
-		constexpr bool is_press		(int32_t k) const noexcept { return is_key(k) && is_action(key_state_press); }
-		constexpr bool is_repeat	(int32_t k) const noexcept { return is_key(k) && is_action(key_state_repeat); }
+		constexpr bool is_release	(int32_t k) const noexcept { return is_key(k) && is_action(input_state_release); }
+		constexpr bool is_press		(int32_t k) const noexcept { return is_key(k) && is_action(input_state_press); }
+		constexpr bool is_repeat	(int32_t k) const noexcept { return is_key(k) && is_action(input_state_repeat); }
 
 		constexpr bool is_release	(int32_t k, int32_t m) const noexcept { return is_release(k) && is_mods(m); }
 		constexpr bool is_press		(int32_t k, int32_t m) const noexcept { return is_press(k) && is_mods(m); }
@@ -211,9 +211,9 @@ namespace ml
 		constexpr bool is_mods		(int32_t m) const noexcept { return (mods == m); }
 		constexpr bool has_mods		(int32_t m) const noexcept { return (mods & m); }
 		
-		constexpr bool is_release	(int32_t b) const noexcept { return is_button(b) && is_action(key_state_release); }
-		constexpr bool is_press		(int32_t b) const noexcept { return is_button(b) && is_action(key_state_press); }
-		constexpr bool is_repeat	(int32_t b) const noexcept { return is_button(b) && is_action(key_state_repeat); }
+		constexpr bool is_release	(int32_t b) const noexcept { return is_button(b) && is_action(input_state_release); }
+		constexpr bool is_press		(int32_t b) const noexcept { return is_button(b) && is_action(input_state_press); }
+		constexpr bool is_repeat	(int32_t b) const noexcept { return is_button(b) && is_action(input_state_repeat); }
 
 		constexpr bool is_release	(int32_t b, int32_t m) const noexcept { return is_release(b) && is_mods(m); }
 		constexpr bool is_press		(int32_t b, int32_t m) const noexcept { return is_press(b) && is_mods(m); }
