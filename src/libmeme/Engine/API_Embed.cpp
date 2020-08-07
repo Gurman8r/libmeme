@@ -1,4 +1,4 @@
-#include <libmeme/Engine/Engine.hpp>
+#include <libmeme/Engine/Application.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
 
 // LIBMEME
@@ -98,8 +98,8 @@ namespace ml::embed
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// CONTEXT API
-		py::class_<context_api_>(m, "context_api")
+		// CONTEXT CLIENT
+		py::class_<context_client_>(m, "ctx_client")
 			.def(py::init<>())
 			.def_property_readonly_static("unknown", [](py::object) { return (int32_t)context_api_unknown; })
 			.def_property_readonly_static("opengl", [](py::object) { return (int32_t)context_api_opengl; })
@@ -108,7 +108,7 @@ namespace ml::embed
 			;
 
 		// CONTEXT PROFILE
-		py::class_<context_profile_>(m, "context_profile")
+		py::class_<context_profile_>(m, "ctx_profile")
 			.def(py::init<>())
 			.def_property_readonly_static("any", [](py::object) { return (int32_t)context_profile_any; })
 			.def_property_readonly_static("core", [](py::object) { return (int32_t)context_profile_core; })
@@ -355,129 +355,128 @@ namespace ml::embed
 }
 
 // LIBMEME_ENGINE
-namespace ml::embed
-{
-	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// FS
-		struct ml_engine_fs {};
-		py::class_<ml_engine_fs>(m, "fs")
-			.def(py::init<>())
-			.def_static("path2", [](cstring s) { return engine::fs().path2(s).string(); })
-			.def_property_readonly_static("program_path", [](py::object) { return engine::fs().program_path(); })
-			.def_property_readonly_static("content_home", [](py::object) { return engine::fs().content_home(); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// GUI
-		struct ml_engine_gui {};
-		py::class_<ml_engine_gui>(m, "gui")
-			.def(py::init<>())
-			.def_static("initialize"	, []() { return engine::gui().initialize(engine::window()); })
-			.def_static("load_style"	, [](cstring s) { return engine::gui().load_style(s); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// PLUGINS
-		struct ml_engine_plugins {};
-		py::class_<ml_engine_plugins>(m, "plugins")
-			.def(py::init<>())
-			.def_static("clear"			, []() { engine::plugins().clear(); })
-			.def_static("free"			, [](intptr_t s) { return engine::plugins().free((plugin_handle)s); })
-			.def_static("load"			, [](cstring s) { return (intptr_t)engine::plugins().load(s); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// SCRIPTS
-		struct ml_engine_scripts {};
-		py::class_<ml_engine_scripts>(m, "scripts")
-			.def(py::init<>())
-			.def_static("do_file"		, [](cstring s) { return engine::scripts().do_file(s); })
-			.def_static("do_string"		, [](cstring s) { return engine::scripts().do_string(s); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// TIME
-		struct ml_engine_time {};
-		py::class_<ml_engine_time>(m, "time")
-			.def(py::init<>())
-			.def_property_readonly_static("total_time"	, [](py::object) { return engine::time().total_time().count(); })
-			.def_property_readonly_static("delta_time"	, [](py::object) { return engine::time().delta_time().count(); })
-			.def_property_readonly_static("frame_count"	, [](py::object) { return engine::time().frame_count(); })
-			.def_property_readonly_static("frame_rate"	, [](py::object) { return engine::time().frame_rate(); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// WINDOW
-		struct ml_engine_window {};
-		py::class_<ml_engine_window>(m, "window")
-			.def(py::init<>())
-			.def_static("open"					, [](window_settings const & ws) { return engine::window().open(ws); })
-			.def_static("close"					, []() { engine::window().close(); })
-			.def_static("iconify"				, []() { engine::window().iconify(); })
-			.def_static("maximize"				, []() { engine::window().maximize(); })
-			.def_static("restore"				, []() { engine::window().restore(); })
-			.def_static("swap_buffers"			, [](intptr_t v) { engine::window().swap_buffers((window_handle)v); })
-
-			.def_static("is_open"				, []() { return engine::window().is_open(); })
-			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
-			.def_static("get_clipboard"			, []() { return engine::window().get_clipboard(); })
-			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
-			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
-			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
-			.def_static("get_handle"			, []() { return (intptr_t)engine::window().get_handle(); })
-			.def_static("get_input_mode"		, [](int32_t v) { return engine::window().get_input_mode(v); })
-			.def_static("get_key"				, [](int32_t v) { return engine::window().get_key(v); })
-			.def_static("get_mouse_button"		, [](int32_t v) { return engine::window().get_mouse_button(v); })
-			.def_static("get_native_handle"		, []() { return (intptr_t)engine::window().get_native_handle(); })
-			.def_static("get_opacity"			, []() { return engine::window().get_opacity(); })
-			.def_static("get_position"			, []() { return engine::window().get_position(); })
-
-			.def_static("set_clipboard"			, [](cstring v) { engine::window().set_clipboard(v); })
-			.def_static("set_cursor"			, [](cursor_handle v) { engine::window().set_cursor(v); })
-			.def_static("set_cursor_mode"		, [](int32_t v) { engine::window().set_cursor_mode(v); })
-			.def_static("set_cursor_position"	, [](vec2d v) { engine::window().set_cursor_position(v); })
-			.def_static("set_icon"				, [](size_t w, size_t h, byte_t const * p) { engine::window().set_icon(w, h, p); })
-			.def_static("set_input_mode"		, [](int32_t m, int32_t v) { engine::window().set_input_mode(m, v); })
-			.def_static("set_opacity"			, [](float_t v) { engine::window().set_opacity(v); })
-			.def_static("set_position"			, [](vec2i v) { engine::window().set_position(v); })
-			.def_static("set_monitor"			, [](monitor_handle v, vec4i b) { engine::window().set_monitor(v, b); })
-			.def_static("set_size"				, [](vec2i v) { engine::window().set_size(v); })
-			.def_static("set_title"				, [](cstring v) { engine::window().set_title(v); })
-
-
-			.def_static("extension_supported"	, [](cstring v) { return window::extension_supported(v); })
-			.def_static("get_context_current"	, []() { return (intptr_t)window::get_context_current(); })
-			.def_static("get_proc_address"		, [](cstring v) { return (intptr_t)window::get_proc_address(v); })
-			.def_static("get_monitors"			, []() { return *(pmr::vector<intptr_t> const *)&window::get_monitors(); })
-			.def_static("get_time"				, []() { return window::get_time(); })
-			.def_static("make_context_current"	, [](intptr_t v) { window::make_context_current((window_handle)v); })
-			.def_static("poll_events"			, []() { window::poll_events(); })
-			.def_static("swap_interval"			, [](int32_t v) { window::swap_interval(v); })
-
-			.def_static("create_custom_cursor"	, [](size_t w, size_t h, byte_t const * p) { return (intptr_t)window::create_custom_cursor(w, h, p); })
-			.def_static("create_standard_cursor", [](int32_t v) { return (intptr_t)window::create_standard_cursor(v); })
-			.def_static("destroy_cursor"		, [](intptr_t v) { window::destroy_cursor((cursor_handle)v); })
-			;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// SETUP
-		([&m, builtins = py::module::import("builtins"), sys = py::module::import("sys")
-		]()
-		{
-			m.def("exit", [](py::args) { engine::window().close(); });
-			builtins.attr("exit") = m.attr("exit");
-			sys.attr("exit") = m.attr("exit");
-		})();
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	}
-}
+//namespace ml::embed
+//{
+//	PYBIND11_EMBEDDED_MODULE(libmeme_engine, m)
+//	{
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//		
+//		// FS
+//		struct ml_engine_fs {};
+//		py::class_<ml_engine_fs>(m, "fs")
+//			.def(py::init<>())
+//			.def_static("path2", [](cstring s) { return engine::fs().path2(s).string(); })
+//			.def_property_readonly_static("program_path", [](py::object) { return engine::fs().program_path(); })
+//			.def_property_readonly_static("content_path", [](py::object) { return engine::fs().content_path(); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//		
+//		// GUI
+//		struct ml_engine_gui {};
+//		py::class_<ml_engine_gui>(m, "gui")
+//			.def(py::init<>())
+//			.def_static("load_style", [](cstring s) { return engine::gui().load_style(s); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//
+//		// PLUGINS
+//		struct ml_engine_plugins {};
+//		py::class_<ml_engine_plugins>(m, "plugins")
+//			.def(py::init<>())
+//			.def_static("clear"			, []() { engine::plugins().clear(); })
+//			.def_static("free"			, [](intptr_t s) { return engine::plugins().free((plugin_handle)s); })
+//			.def_static("load"			, [](cstring s) { return (intptr_t)engine::plugins().load(s); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//
+//		// SCRIPTS
+//		struct ml_engine_scripts {};
+//		py::class_<ml_engine_scripts>(m, "scripts")
+//			.def(py::init<>())
+//			.def_static("do_file"		, [](cstring s) { return engine::scripts().do_file(s); })
+//			.def_static("do_string"		, [](cstring s) { return engine::scripts().do_string(s); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//
+//		// TIME
+//		struct ml_engine_time {};
+//		py::class_<ml_engine_time>(m, "time")
+//			.def(py::init<>())
+//			.def_property_readonly_static("total_time"	, [](py::object) { return engine::time().total_time().count(); })
+//			.def_property_readonly_static("delta_time"	, [](py::object) { return engine::time().delta_time().count(); })
+//			.def_property_readonly_static("frame_count"	, [](py::object) { return engine::time().frame_count(); })
+//			.def_property_readonly_static("frame_rate"	, [](py::object) { return engine::time().frame_rate(); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//
+//		// WINDOW
+//		struct ml_engine_window {};
+//		py::class_<ml_engine_window>(m, "window")
+//			.def(py::init<>())
+//			.def_static("open"					, [](window_settings const & ws) { return engine::window().open(ws); })
+//			.def_static("close"					, []() { engine::window().close(); })
+//			.def_static("iconify"				, []() { engine::window().iconify(); })
+//			.def_static("maximize"				, []() { engine::window().maximize(); })
+//			.def_static("restore"				, []() { engine::window().restore(); })
+//			.def_static("swap_buffers"			, [](intptr_t v) { engine::window().swap_buffers((window_handle)v); })
+//
+//			.def_static("is_open"				, []() { return engine::window().is_open(); })
+//			.def_static("get_bounds"			, []() { return (vec4i)engine::window().get_bounds(); })
+//			.def_static("get_clipboard"			, []() { return engine::window().get_clipboard(); })
+//			.def_static("get_content_scale"		, []() { return engine::window().get_content_scale(); })
+//			.def_static("get_cursor_position"	, []() { return engine::window().get_cursor_position(); })
+//			.def_static("get_framebuffer_size"	, []() { return engine::window().get_framebuffer_size(); })
+//			.def_static("get_handle"			, []() { return (intptr_t)engine::window().get_handle(); })
+//			.def_static("get_input_mode"		, [](int32_t v) { return engine::window().get_input_mode(v); })
+//			.def_static("get_key"				, [](int32_t v) { return engine::window().get_key(v); })
+//			.def_static("get_mouse_button"		, [](int32_t v) { return engine::window().get_mouse_button(v); })
+//			.def_static("get_native_handle"		, []() { return (intptr_t)engine::window().get_native_handle(); })
+//			.def_static("get_opacity"			, []() { return engine::window().get_opacity(); })
+//			.def_static("get_position"			, []() { return engine::window().get_position(); })
+//
+//			.def_static("set_clipboard"			, [](cstring v) { engine::window().set_clipboard(v); })
+//			.def_static("set_cursor"			, [](cursor_handle v) { engine::window().set_cursor(v); })
+//			.def_static("set_cursor_mode"		, [](int32_t v) { engine::window().set_cursor_mode(v); })
+//			.def_static("set_cursor_position"	, [](vec2d v) { engine::window().set_cursor_position(v); })
+//			.def_static("set_icon"				, [](size_t w, size_t h, byte_t const * p) { engine::window().set_icon(w, h, p); })
+//			.def_static("set_input_mode"		, [](int32_t m, int32_t v) { engine::window().set_input_mode(m, v); })
+//			.def_static("set_opacity"			, [](float_t v) { engine::window().set_opacity(v); })
+//			.def_static("set_position"			, [](vec2i v) { engine::window().set_position(v); })
+//			.def_static("set_monitor"			, [](monitor_handle v, vec4i b) { engine::window().set_monitor(v, b); })
+//			.def_static("set_size"				, [](vec2i v) { engine::window().set_size(v); })
+//			.def_static("set_title"				, [](cstring v) { engine::window().set_title(v); })
+//
+//
+//			.def_static("extension_supported"	, [](cstring v) { return window::extension_supported(v); })
+//			.def_static("get_context_current"	, []() { return (intptr_t)window::get_context_current(); })
+//			.def_static("get_proc_address"		, [](cstring v) { return (intptr_t)window::get_proc_address(v); })
+//			.def_static("get_monitors"			, []() { return *(pmr::vector<intptr_t> const *)&window::get_monitors(); })
+//			.def_static("get_time"				, []() { return window::get_time(); })
+//			.def_static("make_context_current"	, [](intptr_t v) { window::make_context_current((window_handle)v); })
+//			.def_static("poll_events"			, []() { window::poll_events(); })
+//			.def_static("swap_interval"			, [](int32_t v) { window::swap_interval(v); })
+//
+//			.def_static("create_custom_cursor"	, [](size_t w, size_t h, byte_t const * p) { return (intptr_t)window::create_custom_cursor(w, h, p); })
+//			.def_static("create_standard_cursor", [](int32_t v) { return (intptr_t)window::create_standard_cursor(v); })
+//			.def_static("destroy_cursor"		, [](intptr_t v) { window::destroy_cursor((cursor_handle)v); })
+//			;
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//
+//		// SETUP
+//		([&m, builtins = py::module::import("builtins"), sys = py::module::import("sys")
+//		]()
+//		{
+//			m.def("exit", [](py::args) { engine::window().close(); });
+//			builtins.attr("exit") = m.attr("exit");
+//			sys.attr("exit") = m.attr("exit");
+//		})();
+//
+//		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+//	}
+//}

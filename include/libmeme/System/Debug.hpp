@@ -5,9 +5,27 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifndef ML_IMPL_DEBUG_MSG_I
+#define ML_IMPL_DEBUG_MSG_I "[i] " // info message
+#endif
+
+#ifndef ML_IMPL_DEBUG_MSG_E
+#define ML_IMPL_DEBUG_MSG_E "[e] " // error message
+#endif
+
+#ifndef ML_IMPL_DEBUG_MSG_W
+#define ML_IMPL_DEBUG_MSG_W "[w] " // warning message
+#endif
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 // assert
 #ifndef ML_assert
-#	define ML_assert(expr) assert(expr)
+#	ifdef assert
+#		define ML_assert(expr)	assert(expr)
+#	else
+#		define ML_assert(expr)	(void)(expr)
+#	endif
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,20 +43,6 @@
 #		define ML_breakpoint()	::raise(SIGTRAP)
 
 #	endif
-#endif
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#ifndef ML_IMPL_DEBUG_MSG_I
-#define ML_IMPL_DEBUG_MSG_I "[i] " // info message
-#endif
-
-#ifndef ML_IMPL_DEBUG_MSG_E
-#define ML_IMPL_DEBUG_MSG_E "[e] " // error message
-#endif
-
-#ifndef ML_IMPL_DEBUG_MSG_W
-#define ML_IMPL_DEBUG_MSG_W "[w] " // warning message
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

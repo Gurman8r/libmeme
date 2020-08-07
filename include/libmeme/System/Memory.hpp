@@ -137,20 +137,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto const & get_allocator() noexcept { return get_instance().m_allocator; }
+		ML_NODISCARD static auto const & get_allocator() noexcept { return get_singleton().m_allocator; }
 
-		ML_NODISCARD static auto const & get_records() noexcept { return get_instance().m_records; }
+		ML_NODISCARD static auto const & get_records() noexcept { return get_singleton().m_records; }
 
-		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_instance().m_testres; }
+		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_singleton().m_testres; }
 
-		ML_NODISCARD static auto const & set_test_resource(util::test_resource * res) noexcept { return get_instance().m_testres = res; }
+		ML_NODISCARD static auto const & set_test_resource(util::test_resource * res) noexcept { return get_singleton().m_testres = res; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// malloc
 		ML_NODISCARD static void * allocate(size_t size) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 
 			// allocate the requested bytes
 			byte_t * const data{ self.m_allocator.allocate(size) };
@@ -171,7 +171,7 @@ namespace ml
 		// free
 		static void deallocate(void * addr) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 
 			// find the record
 			if (auto const it{ self.m_records.find(addr) })
@@ -243,8 +243,10 @@ namespace ml
 	// trackable base
 	struct ML_SYSTEM_API trackable
 	{
+	protected:
 		virtual ~trackable() noexcept = default;
 
+	public:
 		ML_NODISCARD void * operator new(size_t size) noexcept { return memory::allocate(size); }
 
 		ML_NODISCARD void * operator new[](size_t size) noexcept { return memory::allocate(size); }
@@ -280,39 +282,48 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// shared pointer
+	// scoped pointer ( unique_ptr )
+	template <class T, class Dx = default_delete<T>
+	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
+
+	// shared pointer ( shared_ptr )
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
 
-	// unique pointer
-	template <class T, class Dx = default_delete<T>
-	> ML_alias unique = typename std::unique_ptr<T, Dx>;
-
-	// weak pointer
+	// temporary pointer ( weak_ptr )
 	template <class T
 	> ML_alias weak = typename std::weak_ptr<T>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// make new
+	// allocate new
 	template <class T, class ... Args
-	> ML_NODISCARD T * make_new(Args && ... args) noexcept
+	> ML_NODISCARD T * alloc_new(Args && ... args) noexcept
 	{
-		return ::new (memory::allocate(sizeof(T))) T{ ML_forward(args)... };
+		return ::new (memory::allocate(sizeof(T))) T
+		{
+			ML_forward(args)...
+		};
 	}
 
-	// make shared
-	template <class T, class ... Args
-	> ML_NODISCARD shared<T> make_shared(Args && ... args) noexcept
-	{
-		return std::allocate_shared<T>(memory::get_allocator(), ML_forward(args)...);
-	}
-
-	// make unique
+	// allocate scoped
 	template <class T, class Dx = default_delete<T>, class ... Args
-	> ML_NODISCARD unique<T, Dx> make_unique(Args && ... args) noexcept
+	> ML_NODISCARD scoped<T, Dx> alloc_scoped(Args && ... args) noexcept
 	{
-		return unique<T, Dx>{ _ML make_new<T>(ML_forward(args)...), Dx{} };
+		return scoped<T, Dx>
+		{
+			_ML alloc_new<T>(ML_forward(args)...), Dx{}
+		};
+	}
+
+	// allocate shared
+	template <class T, class ... Args
+	> ML_NODISCARD shared<T> alloc_shared(Args && ... args) noexcept
+	{
+		return std::allocate_shared<T>
+		(
+			memory::get_allocator(), ML_forward(args)...
+		);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

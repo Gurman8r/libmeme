@@ -208,12 +208,14 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <template <class, size_t ...> class A, class T, size_t ... N
-	> ML_NODISCARD constexpr auto dot(A<T, N...> const & lhs, A<T, N...> const & rhs)
+	template <template <class, size_t, size_t> class M, class T, size_t X, size_t Y
+	> ML_NODISCARD constexpr auto dot(M<T, X, Y> const & a, M<T, X, Y> const & b) noexcept
 	{
 		T temp{};
-		for (size_t d = 0; d < lhs.size(); ++d)
-			temp += (lhs[d] * rhs[d]);
+		for (size_t i = 0; i < X * Y; ++i)
+		{
+			temp += a[i] * b[i];
+		}
 		return temp;
 	}
 
@@ -317,7 +319,10 @@ namespace ml::util
 	template <template <class, size_t, size_t> class M, class T
 	> ML_NODISCARD constexpr auto cross(M<T, 2, 1> const & a, M<T, 2, 1> const & b)
 	{
-		return a[0] * b[1] - b[0] * a[1];
+		return T
+		{
+			a[0] * b[1] - b[0] * a[1]
+		};
 	}
 
 	template <template <class, size_t, size_t> class M, class T
@@ -325,9 +330,9 @@ namespace ml::util
 	{
 		return M<T, 3, 1>
 		{
-			a[1] * b[2] - b[1] * a[2],
-			a[2] * b[0] - b[2] * a[0],
-			a[0] * b[1] - b[0] * a[1]
+			a[1] * b[2] - a[2] * b[1],
+			a[2] * b[0] - a[0] * b[2],
+			a[0] * b[1] - a[1] * b[0]
 		};
 	}
 

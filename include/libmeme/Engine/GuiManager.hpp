@@ -5,6 +5,8 @@
 #include <libmeme/System/Memory.hpp>
 #include <libmeme/Core/Matrix.hpp>
 
+struct ImGuiContext;
+
 namespace ml
 {
 	struct window;
@@ -17,15 +19,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit gui_manager(json const & j, allocator_type alloc) noexcept;
+		explicit gui_manager(allocator_type alloc) noexcept;
+
+		gui_manager(window const & wnd, allocator_type alloc = {}) noexcept;
 
 		~gui_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool initialize(window const & wnd);
+		ML_NODISCARD bool startup(window const & wnd);
 
-		ML_NODISCARD bool finalize();
+		void shutdown();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -137,8 +141,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		auto get_context() const noexcept -> ImGuiContext * { return m_imgui; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
-		void * m_gui_context;
+		ImGuiContext * m_imgui;
 		dockspace_data m_dockspace;
 		main_menu_bar_data m_main_menu;
 

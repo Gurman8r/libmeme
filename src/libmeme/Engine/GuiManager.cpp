@@ -24,26 +24,32 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gui_manager::gui_manager(json const & j, allocator_type alloc) noexcept
-		: m_gui_context	{}
+	gui_manager::gui_manager(allocator_type alloc) noexcept
+		: m_imgui		{}
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }
 	{
 		IMGUI_CHECKVERSION();
+	}
 
-		ML_assert(!ImGui::GetCurrentContext());
+	gui_manager::gui_manager(window const & wnd, allocator_type alloc) noexcept
+		: gui_manager{ alloc }
+	{
+		ML_assert(startup(wnd));
 	}
 
 	gui_manager::~gui_manager() noexcept
 	{
-		ML_assert(finalize());
+		shutdown();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	
-	bool gui_manager::initialize(window const & wnd)
+
+	bool gui_manager::startup(window const & wnd)
 	{
-		if (ImGui::GetCurrentContext()) { return false; }
+		if (m_imgui) { return debug::error("imgui already initialized"); }
+		
+		if (!wnd.is_open()) { return debug::error("window is not open"); }
 
 		// allocators
 		ImGui::SetAllocatorFunctions
@@ -54,12 +60,12 @@ namespace ml
 		);
 
 		// create context
-		if (!(m_gui_context = ImGui::CreateContext()))
+		if (!(m_imgui = ImGui::CreateContext()))
 		{
-			return debug::error("failed creating ImGuiContext");
+			return debug::error("failed creating imgui context");
 		}
 
-		// config
+		// configure
 		auto & im_io{ ImGui::GetIO() };
 		im_io.LogFilename = nullptr;
 		im_io.IniFilename = nullptr;
@@ -79,18 +85,19 @@ namespace ml
 			return debug::error("failed initializing ImGui renderer");
 		}
 
-		return ImGui::GetCurrentContext();
+		return true;
 	}
 
-	bool gui_manager::finalize()
+	void gui_manager::shutdown()
 	{
-		if (!ImGui::GetCurrentContext()) { return false; }
+		if (m_imgui)
+		{
+			ML_ImGui_Shutdown();
 
-		ML_ImGui_Shutdown();
-		
-		ImGui::DestroyContext();
-		
-		return !(m_gui_context = nullptr);
+			ImGui::DestroyContext((ImGuiContext *)m_imgui);
+
+			m_imgui = nullptr;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

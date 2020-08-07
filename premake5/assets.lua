@@ -20,6 +20,7 @@ files{
 	"%{sln_dir}premake5.lua",
 	"%{sln_dir}README.md",
 	"%{sln_dir}TODO.txt",
+	"%{sln_dir}libmeme.json",
 }
 
 prebuildcommands{

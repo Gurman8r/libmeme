@@ -37,6 +37,9 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <ImGuizmo/ImGuizmo.h>
+#include <ImGuizmo/ImSequencer.h>
+#include <ImGuizmo/ImCurveEdit.h>
 #include <ImGuiColorTextEdit/TextEditor.h>
 #include <imgui_club/imgui_memory_editor/imgui_memory_editor.h>
 #include <imgui-node-editor/NodeEditor/Include/imgui_node_editor.h>

@@ -29,6 +29,7 @@ includedirs{
 	"%{sln_dir}include",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
+	"%{ext_dir}imgui",
 }
 
 files{

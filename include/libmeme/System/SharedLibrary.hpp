@@ -76,14 +76,14 @@ namespace ml
 
 		bool close();
 
-		void * get_proc_address(cstring value);
+		void * get_function(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> auto call(cstring method_name, Args && ... args) noexcept
+		> decltype(auto) call(cstring name, Args && ... args) noexcept
 		{
-			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_proc_address(method_name)) })
+			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_function(name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{
@@ -177,16 +177,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class ... Args
-	> ML_NODISCARD inline auto make_shared_library(Args && ... args)
-	{
-		return shared_library{ ML_forward(args)... };
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_SHARED_LIBRARY_HPP_

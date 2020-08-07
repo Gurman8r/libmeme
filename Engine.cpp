@@ -15,31 +15,31 @@ namespace ml
 
 		friend class		engine		;
 		json				m_config	; // config
+		time_manager		m_time		; // timers
 		file_manager		m_fs		; // files
+		render_window		m_window	; // window
 		gui_manager			m_gui		; // gui
 		plugin_manager		m_plugins	; // plugins
 		script_manager		m_scripts	; // scripts
-		time_manager		m_time		; // timers
-		render_window		m_window	; // window
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		engine_context(json const & j, allocator_type alloc) noexcept
 			: m_config	{ json{ j } }
-			, m_fs		{ j, alloc }
-			, m_gui		{ j, alloc }
-			, m_plugins	{ j, alloc }
-			, m_scripts	{ j, alloc }
 			, m_time	{ j, alloc }
-			, m_window	{}
+			, m_fs		{ j, alloc }
+			, m_window	{ j["window"].get<window_settings>() }
+			, m_gui		{ m_window, j, alloc }
+			, m_scripts	{ j, alloc }
+			, m_plugins	{ j, alloc }
 		{
-			event_bus::add_listener<begin_loop_event>(this);
-			event_bus::add_listener<begin_draw_event>(this);
-			event_bus::add_listener<begin_gui_event	>(this);
-			event_bus::add_listener<draw_gui_event	>(this);
-			event_bus::add_listener<end_gui_event	>(this);
-			event_bus::add_listener<end_draw_event	>(this);
-			event_bus::add_listener<end_loop_event	>(this);
+			event_bus::add_listener< begin_loop_event	>(this);
+			event_bus::add_listener< begin_draw_event	>(this);
+			event_bus::add_listener< begin_gui_event	>(this);
+			event_bus::add_listener< draw_gui_event		>(this);
+			event_bus::add_listener< end_gui_event		>(this);
+			event_bus::add_listener< end_draw_event		>(this);
+			event_bus::add_listener< end_loop_event		>(this);
 		}
 
 		~engine_context() noexcept override
@@ -112,7 +112,12 @@ namespace ml
 		{
 			debug::info("initializing engine context...");
 
-			g_engine = new engine_context{ j, alloc };
+			ML_assert((g_engine = new engine_context{ j, alloc }));
+
+			for (auto const & scr : j["path"]["scripts"])
+			{
+				scripts().do_file(fs().path2(scr));
+			}
 
 			return is_initialized();
 		}
@@ -135,43 +140,43 @@ namespace ml
 
 	json & engine::config() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::config" && g_engine);
 		return g_engine->m_config;
 	}
 
 	file_manager & engine::fs() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::fs" && g_engine);
 		return g_engine->m_fs;
 	}
 
 	gui_manager & engine::gui() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::gui" && g_engine);
 		return g_engine->m_gui;
 	}
 
 	plugin_manager & engine::plugins() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::plugins" && g_engine);
 		return g_engine->m_plugins;
 	}
 
 	script_manager & engine::scripts() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::scripts" && g_engine);
 		return g_engine->m_scripts;
 	}
 
 	time_manager & engine::time() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::time" && g_engine);
 		return g_engine->m_time;
 	}
 
 	render_window & engine::window() noexcept
 	{
-		ML_assert(g_engine);
+		ML_assert("engine::window" && g_engine);
 		return g_engine->m_window;
 	}
 

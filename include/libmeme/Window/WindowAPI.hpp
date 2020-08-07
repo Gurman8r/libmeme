@@ -75,12 +75,12 @@ namespace ml
 
 	inline void from_json(json const & j, window_hints_ & v)
 	{
-		ML_flag_write((int32_t &)v, window_hints_auto_iconify	, j["auto iconify"	].get<bool>());
-		ML_flag_write((int32_t &)v, window_hints_center_cursor	, j["center cursor"	].get<bool>());
+		ML_flag_write((int32_t &)v, window_hints_auto_iconify	, j["auto_iconify"	].get<bool>());
+		ML_flag_write((int32_t &)v, window_hints_center_cursor	, j["center_cursor"	].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_decorated		, j["decorated"		].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_doublebuffer	, j["doublebuffer"	].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_floating		, j["floating"		].get<bool>());
-		ML_flag_write((int32_t &)v, window_hints_focus_on_show	, j["focus on show"	].get<bool>());
+		ML_flag_write((int32_t &)v, window_hints_focus_on_show	, j["focus_on_show"	].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_focused		, j["focused"		].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_maximized		, j["maximized"		].get<bool>());
 		ML_flag_write((int32_t &)v, window_hints_resizable		, j["resizable"		].get<bool>());
@@ -89,12 +89,12 @@ namespace ml
 
 	inline void to_json(json & j, window_hints_ const & v)
 	{
-		j["auto iconify"	] = ML_flag_read(v, window_hints_auto_iconify	);
+		j["auto_iconify"	] = ML_flag_read(v, window_hints_auto_iconify	);
 		j["decorated"		] = ML_flag_read(v, window_hints_decorated		);
 		j["doublebuffer"	] = ML_flag_read(v, window_hints_doublebuffer	);
-		j["center cursor"	] = ML_flag_read(v, window_hints_center_cursor	);
+		j["center_cursor"	] = ML_flag_read(v, window_hints_center_cursor	);
 		j["floating"		] = ML_flag_read(v, window_hints_floating		);
-		j["focus on show"	] = ML_flag_read(v, window_hints_focus_on_show	);
+		j["focus_on_show"	] = ML_flag_read(v, window_hints_focus_on_show	);
 		j["focused"			] = ML_flag_read(v, window_hints_focused		);
 		j["maximized"		] = ML_flag_read(v, window_hints_maximized		);
 		j["resizable"		] = ML_flag_read(v, window_hints_resizable		);

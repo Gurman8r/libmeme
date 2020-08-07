@@ -1,9 +1,9 @@
--- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
+-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
 group			"plugins"
 project			"demo"
 targetname 		"%{prj.name}"
-targetdir		"%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/"
+targetdir		"%{bin_lib}%{cfg.platform}/%{cfg.buildcfg}/plugins/"
 objdir			"%{bin_obj}"
 location		"%{prj_dir}plugins/%{prj.name}/"
 kind			"SharedLib"
@@ -37,8 +37,7 @@ includedirs{
 }
 
 files{
-	"%{sln_dir}premake5/%{prj.name}.lua",
-	"%{sln_dir}src/plugins/%{prj.name}/**.**",
+	"%{sln_dir}plugins/%{prj.name}/**.**",
 }
 
 libdirs{
@@ -51,7 +50,7 @@ links{
 }
 
 postbuildcommands{
-	"%{ml_copy} %{lib_in}%{prj.name}%{ml_dll} %{bin_out}",
+	"%{ml_copy} %{lib_in}plugins\\%{prj.name}%{ml_dll} %{bin_out}\\plugins\\",
 }
 
 filter{ "configurations:Debug" }
@@ -60,16 +59,18 @@ filter{ "configurations:Debug" }
 filter{ "configurations:Release" }
 	optimize "Speed"
 
+-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
+
 -- WINDOWS
 
 filter{ "system:Windows", "configurations:Debug" }
 	linkoptions{ 
-		"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib"
+		"/NODEFAULTLIB:MSVCRT.lib", "/NODEFAULTLIB:LIBCMT.lib", "/NODEFAULTLIB:LIBCMTD.lib",
 	}
 
 filter{ "system:Windows", "configurations:Release" }
 	linkoptions{
-		"/NODEFAULTLIB:LIBCMT.lib"
+		"/NODEFAULTLIB:LIBCMT.lib",
 	}
 
--- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
+-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

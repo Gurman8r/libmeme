@@ -67,6 +67,6 @@ dofile "./premake5/libmeme.lua"
 dofile "./premake5/main.lua"
 
 -- PLUGINS
-dofile "./premake5/demo.lua"
+dofile "./plugins/demo/demo.lua"
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

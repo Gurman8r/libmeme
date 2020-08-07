@@ -21,21 +21,21 @@ namespace ml
 		// get previous frame
 		ML_NODISCARD static auto const & get_previous() noexcept
 		{
-			return get_instance().m_previous;
+			return get_singleton().m_previous;
 		}
 
 		// add to current frame
 		template <class ... Args
 		> static void push_sample(Args && ... args) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 			self.m_current.emplace_back(sample{ ML_forward(args)... });
 		}
 
 		// swap frames and clear current
 		static void refresh_samples() noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 			self.m_previous.swap(self.m_current);
 			self.m_current.clear();
 		}

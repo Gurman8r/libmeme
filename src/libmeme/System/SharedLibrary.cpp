@@ -77,7 +77,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::get_proc_address(cstring value)
+	void * shared_library::get_function(cstring value)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }

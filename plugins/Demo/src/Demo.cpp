@@ -1,13 +1,13 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
+#include <libmeme/Engine/Application.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Core/Wrapper.hpp>
-#include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/ECS.hpp>
+#include <libmeme/Graphics/Camera.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
@@ -23,43 +23,119 @@
 // CAMERA (WIP)
 namespace ml
 {
-	struct perspective_camera final
+	void frustum(float_t l, float_t r, float_t b, float_t t, float_t near, float_t far, mat4 & m16)
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		vec3	position	{ 0, 0, 3 };
-		vec3	forward		{ 0, 0, -1 };
-		vec3	up			{ 0, 1, 0 };
-		vec3	right		{ 1, 0, 0 };
-		vec3	world_up	{ 0, 1, 0 };
-		float_t pitch		{ 0.f };
-		float_t yaw			{ -90.f };
-		float_t zoom		{ 45.f };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(perspective_camera & other) noexcept
+		vec4 const temp
 		{
-			if (this != std::addressof(other))
-			{
-				position.swap(other.position);
-				forward	.swap(other.forward);
-				up		.swap(other.up);
-				right	.swap(other.right);
-				world_up.swap(other.world_up);
-				
-				std::swap(pitch	, other.pitch);
-				std::swap(yaw	, other.yaw);
-				std::swap(zoom	, other.zoom);
-			}
-		}
+			2.0f * near,
+			r - l,
+			t - b,
+			far - near
+		};
+		m16[0] = temp[0] / temp[1];
+		m16[1] = 0.f;
+		m16[2] = 0.f;
+		m16[3] = 0.f;
+		m16[4] = 0.f;
+		m16[5] = temp[0] / temp[2];
+		m16[6] = 0.f;
+		m16[7] = 0.f;
+		m16[8] = (r + l) / temp[1];
+		m16[9] = (t + b) / temp[2];
+		m16[10] = (-far - near) / temp[3];
+		m16[11] = -1.0f;
+		m16[12] = 0.f;
+		m16[13] = 0.f;
+		m16[14] = (-temp[0] * far) / temp[3];
+		m16[15] = 0.f;
+	}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	void perspective(float_t fovyInDegrees, float_t aspectRatio, float_t znear, float_t zfar, mat4 & m16)
+	{
+		float_t ymax = znear * std::tanf(fovyInDegrees * 3.141592f / 180.0f);
+		float_t xmax = ymax * aspectRatio;
+		frustum(-xmax, xmax, -ymax, ymax, znear, zfar, m16);
+	}
 
-	private:
+	void cross(float_t const* a, float_t const* b, float_t* r)
+	{
+		r[0] = a[1] * b[2] - a[2] * b[1];
+		r[1] = a[2] * b[0] - a[0] * b[2];
+		r[2] = a[0] * b[1] - a[1] * b[0];
+	}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
+	float_t dot(float_t const* a, float_t const* b)
+	{
+		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+	}
+
+	void normalize(float_t const* a, float_t *r)
+	{
+		float_t il = 1.f / (std::sqrtf(dot(a, a)) + FLT_EPSILON);
+		r[0] = a[0] * il;
+		r[1] = a[1] * il;
+		r[2] = a[2] * il;
+	}
+
+	void look_at(float_t const* eye, float_t const* at, float_t const* up, float_t *m16)
+	{
+		float_t X[3], Y[3], Z[3], tmp[3];
+
+		tmp[0] = eye[0] - at[0];
+		tmp[1] = eye[1] - at[1];
+		tmp[2] = eye[2] - at[2];
+		//Z = util::normalize(eye - at);
+		normalize(tmp, Z);
+		normalize(up, Y);
+		//Y = util::normalize(up);
+
+		cross(Y, Z, tmp);
+		//tmp.cross(Y, Z);
+		normalize(tmp, X);
+		//X = util::normalize(tmp);
+
+		cross(Z, X, tmp);
+		//tmp.cross(Z, X);
+		normalize(tmp, Y);
+		//Y = util::normalize(tmp);
+
+		m16[0] = X[0];
+		m16[1] = Y[0];
+		m16[2] = Z[0];
+		m16[3] = 0.f;
+		m16[4] = X[1];
+		m16[5] = Y[1];
+		m16[6] = Z[1];
+		m16[7] = 0.f;
+		m16[8] = X[2];
+		m16[9] = Y[2];
+		m16[10] = Z[2];
+		m16[11] = 0.f;
+		m16[12] = -dot(X, eye);
+		m16[13] = -dot(Y, eye);
+		m16[14] = -dot(Z, eye);
+		m16[15] = 1.0f;
+	}
+
+	void orthographic(float_t const l, float_t r, float_t b, float_t const t, float_t zn, float_t const zf, float_t *m16)
+	{
+		m16[0] = 2 / (r - l);
+		m16[1] = 0.f;
+		m16[2] = 0.f;
+		m16[3] = 0.f;
+		m16[4] = 0.f;
+		m16[5] = 2.f / (t - b);
+		m16[6] = 0.f;
+		m16[7] = 0.f;
+		m16[8] = 0.f;
+		m16[9] = 0.f;
+		m16[10] = 1.0f / (zf - zn);
+		m16[11] = 0.f;
+		m16[12] = (l + r) / (l - r);
+		m16[13] = (t + b) / (b - t);
+		m16[14] = zn / (zn - zf);
+		m16[15] = 1.0f;
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -225,7 +301,7 @@ namespace ml
 
 		vec2 m_resolution{ 1280, 720 };
 
-		ds::array<shared<gfx::framebuffer>, 1> m_fbo{};
+		pmr::vector<shared<gfx::framebuffer>> m_fbo{};
 
 
 		// GUI
@@ -258,7 +334,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, []() noexcept { return 1000.f / engine::time().frame_rate(); }
+				, [&]() noexcept { return 1000.f / get_app()->frame_rate(); }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -266,7 +342,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, []() noexcept { return engine::time().frame_rate(); }
+				, [&]() noexcept { return get_app()->frame_rate(); }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -290,14 +366,14 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(plugin_manager * mgr) noexcept : plugin{ mgr }
+		demo(application * app) noexcept : plugin{ app }
 		{
-			event_bus::add_listener<	load_event		>(this);
-			event_bus::add_listener<	update_event	>(this);
-			event_bus::add_listener<	draw_event		>(this);
-			event_bus::add_listener<	dock_gui_event	>(this);
-			event_bus::add_listener<	draw_gui_event	>(this);
-			event_bus::add_listener<	unload_event	>(this);
+			event_bus::add_listener< load_event		>(this);
+			event_bus::add_listener< update_event	>(this);
+			event_bus::add_listener< draw_event		>(this);
+			event_bus::add_listener< dock_gui_event	>(this);
+			event_bus::add_listener< draw_gui_event	>(this);
+			event_bus::add_listener< unload_event	>(this);
 		}
 
 		void on_event(event const & ev) override
@@ -319,38 +395,40 @@ namespace ml
 		{
 			// load stuff, etc...
 
+			//ML_defer(&) { m_cout.update(&std::cout); };
+
 			// ICON
-			if (image const icon{ engine::fs().path2("assets/textures/icon.png"), 0, false })
+			if (image const icon{ get_app()->path2("assets/textures/icon.png"), 0, false })
 			{
-				engine::window().set_icon(icon.width(), icon.height(), icon.data());
+				get_app()->window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// FRAMEBUFFERS
 			{
-				m_fbo[0] = gfx::framebuffer::create({ "FrameBuffer", m_resolution });
+				m_fbo.push_back(gfx::framebuffer::create({ "FBO_0", m_resolution }));
 			}
 
 			// IMAGES
 			{
-				m_images["default"] = make_shared<image>(image::get_default_rgba());
+				m_images["default"] = alloc_shared<image>(image::get_default_rgba());
 			}
 
 			// TEXTURES
 			{
-				m_textures["default"]		= gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"]			= gfx::texture2d::create(engine::fs().path2("assets/textures/doot.png"));
-				m_textures["navball"]		= gfx::texture2d::create(engine::fs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"]	= gfx::texture2d::create(engine::fs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
+				m_textures["doot"		] = gfx::texture2d::create(get_app()->path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(get_app()->path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(get_app()->path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(get_app()->path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(get_app()->path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"]			= make_shared<font>(engine::fs().path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"]			= make_shared<font>(engine::fs().path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"]	= make_shared<font>(engine::fs().path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"]		= make_shared<font>(engine::fs().path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(get_app()->path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(get_app()->path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(get_app()->path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(get_app()->path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -358,13 +436,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					engine::fs().path2("assets/shaders/2D.vs.shader"));
+					get_app()->path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					engine::fs().path2("assets/shaders/3D.vs.shader"));
+					get_app()->path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					engine::fs().path2("assets/shaders/basic.fs.shader"));
+					get_app()->path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -384,8 +462,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, []() { return (float_t)engine::time().total_time().count(); }),
-					make_uniform<float_t>("u_delta"	, []() { return (float_t)engine::time().delta_time().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)get_app()->total_time().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)get_app()->delta_time().count(); })
 				};
 
 				// camera
@@ -416,21 +494,21 @@ namespace ml
 				+ _timers + _camera + _tf;
 
 				// earth
-				auto & earth{ m_uniforms["earth"] = make_shared<uniform_buffer>(_3d) };
+				auto & earth{ m_uniforms["earth"] = alloc_shared<uniform_buffer>(_3d) };
 				earth->set<gfx::texture2d>("u_texture0", m_textures["earth_dm_2k"]);
 
 				// moon
-				auto & moon{ m_uniforms["moon"] = make_shared<uniform_buffer>(_3d) };
+				auto & moon{ m_uniforms["moon"] = alloc_shared<uniform_buffer>(_3d) };
 				moon->set<gfx::texture2d>("u_texture0", m_textures["moon_dm_2k"]);
 			}
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"]	= make_shared<mesh>(engine::fs().path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"] = make_shared<mesh>(engine::fs().path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"]		= make_shared<mesh>(engine::fs().path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"]	= alloc_shared<mesh>(get_app()->path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"] = alloc_shared<mesh>(get_app()->path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"]		= alloc_shared<mesh>(get_app()->path2("assets/models/monkey.obj"));
 
-				m_meshes["triangle"] = make_shared<mesh>(mesh
+				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
 					{
 						vertex{ {  0.0f,  0.5f, 0.0f }, vec3::one(), { 0.5f, 1.0f } },
@@ -442,7 +520,7 @@ namespace ml
 					}
 				});
 
-				m_meshes["quad"] = make_shared<mesh>(mesh
+				m_meshes["quad"] = alloc_shared<mesh>(mesh
 				{
 					{
 						vertex{ { +1.0f, +1.0f, 0.0f }, vec3::one(), { 1.0f, 1.0f } },
@@ -456,7 +534,7 @@ namespace ml
 					}
 				});
 
-				m_meshes["skybox"] = make_shared<mesh>(mesh
+				m_meshes["skybox"] = alloc_shared<mesh>(mesh
 				{
 					{
 						vertex{ { -1.0f,  1.0f, -1.0f }, vec3::one(), vec2::zero() },
@@ -543,7 +621,7 @@ namespace ml
 			}
 
 			// plots
-			m_plots.update(engine::time().total_time().count());
+			m_plots.update(get_app()->total_time().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -576,13 +654,15 @@ namespace ml
 				gfx::render_command::bind_framebuffer(nullptr),
 			})
 			{
-				std::invoke(cmd, engine::window().get_render_context().get());
+				std::invoke(cmd, get_app()->window().get_render_context().get());
 			}
 		}
 
 		void on_gui_dock(dock_gui_event const &)
 		{
 			// gui docking
+
+			//ImGui::SetCurrentContext(get_app()->gui().get_context());
 
 			enum : int32_t // node ids
 			{
@@ -592,7 +672,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ engine::gui().dockspace() };
+			auto & d{ get_app()->gui().dockspace() };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -631,16 +711,18 @@ namespace ml
 		{
 			// gui stuff, etc...
 
+			ImGui::SetCurrentContext(get_app()->gui().get_context());
+
 			static ML_scope(&) // setup main menu bar
 			{
-				auto & mmb{ engine::gui().main_menu_bar() };
+				auto & mmb{ get_app()->gui().main_menu_bar() };
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
 					ML_ImGui_ScopeID(this);
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
-						engine::window().close();
+						get_app()->window().close();
 					}
 				});
 				mmb.add("view", [&]()
@@ -659,10 +741,10 @@ namespace ml
 				//mmb.add("settings", [&]()
 				//{
 				//	ML_scoped_imgui_id(this);
-				//	bool fullscreen{ engine::window().is_fullscreen() };
+				//	bool fullscreen{ get_app()->window().is_fullscreen() };
 				//	if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
 				//	{
-				//		engine::window().set_fullscreen(fullscreen);
+				//		get_app()->window().set_fullscreen(fullscreen);
 				//	}
 				//});
 				mmb.add("help", [&]()
@@ -678,9 +760,9 @@ namespace ml
 				ML_ImGui_ScopeID(this);
 
 				// IMGUI
-				if (m_imgui_demo.open)		{ engine::gui().show_imgui_demo(&m_imgui_demo.open); }
-				if (m_imgui_metrics.open)	{ engine::gui().show_imgui_metrics(&m_imgui_metrics.open); }
-				if (m_imgui_about.open)		{ engine::gui().show_imgui_about(&m_imgui_about.open); }
+				if (m_imgui_demo.open)		{ get_app()->gui().show_imgui_demo(&m_imgui_demo.open); }
+				if (m_imgui_metrics.open)	{ get_app()->gui().show_imgui_metrics(&m_imgui_metrics.open); }
+				if (m_imgui_about.open)		{ get_app()->gui().show_imgui_about(&m_imgui_about.open); }
 
 				// WIDGETS
 				m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
@@ -786,7 +868,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				engine::window().close();
+				get_app()->window().close();
 			},
 			{
 				"shutdown the application",
@@ -845,13 +927,13 @@ namespace ml
 
 					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
 				}
-				else if ((args.front() == "\\") && (!std::strcmp("py", m_console.command_lock)))
+				else if ((args[0][0] == '\\') && (0 == std::strcmp(m_console.command_lock, "py")))
 				{
 					m_console.command_lock = nullptr;
 				}
 				else
 				{
-					engine::scripts().do_string(util::detokenize(args));
+					get_app()->execute_string(util::detokenize(args));
 				}
 			},
 			{
@@ -969,7 +1051,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							engine::window().set_clipboard(buf);
+							get_app()->window().set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1115,7 +1197,7 @@ namespace ml
 			}
 
 			// file list
-			static gui::file_tree file_tree{ engine::fs().path2() };
+			static gui::file_tree file_tree{ get_app()->path2() };
 			file_tree.render();
 		}
 
@@ -1129,7 +1211,7 @@ namespace ml
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= engine::window().is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= get_app()->window().is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1267,7 +1349,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", engine::time().total_time().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", get_app()->total_time().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1307,7 +1389,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & wnd{ engine::window() };
+			static auto const & wnd{ get_app()->window() };
 			static auto const & dev{ wnd.get_render_device() };
 			static auto const & ctx	{ dev->get_context() };
 			static auto const & info{ dev->get_info() };
@@ -1386,7 +1468,7 @@ namespace ml
 
 			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
 			preview.tex_addr = tex->get_handle();
-			preview.tex_size = tex->get_desc().size;
+			preview.tex_size = tex->get_data().size;
 
 			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
 
@@ -1399,9 +1481,9 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::plugin_manager * mgr)
+extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::application * app)
 {
-	return ml::make_new<ml::demo>(mgr);
+	return ml::alloc_new<ml::demo>(app);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

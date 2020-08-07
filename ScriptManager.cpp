@@ -24,7 +24,14 @@ namespace ml
 
 		Py_SetProgramName(fs::path{ __argv[0] }.filename().c_str());
 
-		Py_SetPythonHome(j["library_home"].get<fs::path>().c_str());
+#if 0
+		Py_SetPythonHome((
+			j["path"]["content"].get<fs::path>().native() +
+			j["path"]["library"].get<fs::path>().native()
+		).c_str());
+#else
+		Py_SetPythonHome(j["path"]["library"].get<fs::path>().c_str());
+#endif
 
 		Py_InitializeEx(1);
 

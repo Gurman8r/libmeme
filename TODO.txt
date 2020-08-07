@@ -44,13 +44,13 @@ libmeme.json
 		+ context
 		+ cursor
 		+ device
-		+ keyboard
-		+ mouse
+		+ input
 		+ window
 		+ video_mode
 	@ Graphics
 		+ render_device
 		+ render_context
+		+ render_window
 		+ buffer
 		+ texture
 		+ framebuffer
@@ -60,8 +60,7 @@ libmeme.json
 		+ render_pass
 		+ states
 		+ swap_chain
-	@ Renderer
-		+ render_window
+	@ Scene
 		+ renderer_2d
 		+ renderer_3d
 		+ animation
@@ -69,10 +68,19 @@ libmeme.json
 		+ font
 		+ material
 		+ model
-		+ scene
 		+ sprite
 		+ vfx
 	@ Runtime
 		+ application
 		+ plugin
 		+ plugin_manager
+
+
+
+# libmeme
+	@ core		| 
+	@ editor	| 
+	@ platform	| 
+	@ scene		| 
+	@ main		| 
+	

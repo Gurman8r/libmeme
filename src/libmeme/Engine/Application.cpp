@@ -1,10 +1,12 @@
 #include <libmeme/Engine/Application.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
+#include <libmeme/Engine/ImGui.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 // GLFW / OpenGL3
+#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 #include <imgui/examples/imgui_impl_glfw.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
 #define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
@@ -21,26 +23,80 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application::application(allocator_type alloc) noexcept : m_wnd{}
+	application::application(json const & j, allocator_type alloc) noexcept
+		: m_sys		{ memory::get_singleton(), event_bus::get_singleton(), performance::get_singleton() }
+		, m_time	{}
+		, m_config	{ json{ j } }
+		, m_path	{ fs::current_path(), j["path"]["content"].get<fs::path>() }
+		, m_window	{ j["window"].get<window_settings>() }
+		, m_gui		{ m_window, alloc }
+		, m_plugins	{ alloc }
 	{
-		IMGUI_CHECKVERSION();
+		// EVENTS
+		event_bus::add_listener< begin_loop_event	>(this);
+		event_bus::add_listener< begin_draw_event	>(this);
+		event_bus::add_listener< begin_gui_event	>(this);
+		event_bus::add_listener< draw_gui_event		>(this);
+		event_bus::add_listener< end_gui_event		>(this);
+		event_bus::add_listener< end_draw_event		>(this);
+		event_bus::add_listener< end_loop_event		>(this);
 
-		event_bus::add_listener<	begin_loop_event>(this);
-		event_bus::add_listener<	begin_draw_event>(this);
-		event_bus::add_listener<	begin_gui_event	>(this);
-		event_bus::add_listener<	draw_gui_event	>(this);
-		event_bus::add_listener<	end_gui_event	>(this);
-		event_bus::add_listener<	end_draw_event	>(this);
-		event_bus::add_listener<	end_loop_event	>(this);
-	}
+		// PYTHON
+		{
+			ML_assert(!Py_IsInitialized());
 
-	application::application(window_settings const & ws, allocator_type alloc) noexcept : application{}
-	{
-		ML_assert(open(ws));
+			PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]() noexcept
+			{
+				temp.alloc = [](auto, size_t s) noexcept
+				{
+					return pmr::get_default_resource()->allocate(s);
+				};
+				temp.free = [](auto, void * p, size_t s) noexcept
+				{
+					return pmr::get_default_resource()->deallocate(p, s);
+				};
+				return &temp;
+			}));
+
+			Py_SetProgramName(fs::path{ __argv[0] }.filename().c_str());
+
+			Py_SetPythonHome(j["scripts"]["library"].get<fs::path>().c_str());
+
+			Py_InitializeEx(1);
+
+			ML_assert(Py_IsInitialized());
+		}
+
+		// STYLE
+		if (j.contains("path") && j["path"].contains("style"))
+		{
+			m_gui.load_style(path2(j["path"]["style"].get<fs::path>()));
+		}
+
+		// PLUGINS
+		for (auto const & e : j["plugins"]["files"])
+		{
+			install_plugin(e.get<fs::path>());
+		}
+
+		// SCRIPTS
+		for (auto const & e : j["scripts"]["files"])
+		{
+			execute_file(path2(e.get<fs::path>()));
+		}
 	}
 
 	application::~application() noexcept
 	{
+		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
+
+		ML_assert(!Py_IsInitialized());
+
+		m_gui.main_menu_bar().menus.clear();
+
+		m_gui.shutdown();
+
+		m_window.close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,199 +105,89 @@ namespace ml
 	{
 		switch (ev.ID)
 		{
-		case hashof_v<begin_loop_event>: // BEGIN LOOP
-		{
-			m_perf.loop_timer.restart();
+		case hashof_v<begin_loop_event>: {
+			m_time.loop_timer.restart();
 
-			m_perf.frame_rate = std::invoke([&, dt = (float_t)m_perf.delta_time.count()]() noexcept
+			m_time.frame_rate = std::invoke([&, dt = (float_t)m_time.delta_time.count()]() noexcept
 			{
-				m_perf.fps_accum += dt - m_perf.fps_times[m_perf.fps_index];
-				m_perf.fps_times[m_perf.fps_index] = dt;
-				m_perf.fps_index = (m_perf.fps_index + 1) % m_perf.fps_times.size();
-				return (0.f < m_perf.fps_accum) ? 1.f / (m_perf.fps_accum / (float_t)m_perf.fps_times.size()) : FLT_MAX;
+				m_time.fps_accum += dt - m_time.fps_times[m_time.fps_index];
+				m_time.fps_times[m_time.fps_index] = dt;
+				m_time.fps_index = (m_time.fps_index + 1) % m_time.fps_times.size();
+				return (0.f < m_time.fps_accum) ? 1.f / (m_time.fps_accum / (float_t)m_time.fps_times.size()) : FLT_MAX;
 			});
 
 			window::poll_events();
-		}
-		break;
+		}break;
 
-		case hashof_v<begin_draw_event>: // BEGIN DRAW
-		{
+		case hashof_v<begin_draw_event>: {
 			for (auto const & cmd :
 			{
 				gfx::render_command::set_clear_color(colors::black),
 
 				gfx::render_command::clear(gfx::clear_color),
 					
-				gfx::render_command::set_viewport(m_wnd.get_framebuffer_size()),
+				gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 			})
 			{
-				std::invoke(cmd, m_wnd.get_render_context().get());
+				std::invoke(cmd, m_window.get_render_context().get());
 			}
-		}
-		break;
+		} break;
 
-		case hashof_v<begin_gui_event>: // BEGIN GUI
-		{
-			ML_ImGui_NewFrame();
+		case hashof_v<begin_gui_event>: {
+			m_gui.begin_frame();
+		} break;
 
-			ImGui::NewFrame();
-		}
-		break;
+		case hashof_v<draw_gui_event>: {
+			m_gui.draw_default();
+		} break;
 
-		case hashof_v<draw_gui_event>: // DRAW GUI
-		{
-		}
-		break;
+		case hashof_v<end_gui_event>: {
+			m_gui.end_frame();
+		} break;
 
-		case hashof_v<end_gui_event>: // END GUI
-		{
-			ImGui::Render();
-			ML_ImGui_RenderDrawData(ImGui::GetDrawData());
-			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		case hashof_v<end_draw_event>: {
+			if (m_window.get_hints() & window_hints_doublebuffer)
 			{
-				auto backup_context{ window::get_context_current() };
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				window::make_context_current(backup_context);
+				window::swap_buffers(m_window.get_handle());
 			}
-		}
-		break;
+		} break;
 
-		case hashof_v<end_draw_event>: // END DRAW
-		{
-			if (m_wnd.get_hints() & window_hints_doublebuffer)
-			{
-				window::swap_buffers(m_wnd.get_handle());
-			}
-		}
-		break;
-
-		case hashof_v<end_loop_event>: // END LOOP
-		{
-			++m_perf.frame_count;
-
+		case hashof_v<end_loop_event>: {
+			++m_time.frame_count;
 			performance::refresh_samples();
-
-			m_perf.delta_time = m_perf.loop_timer.elapsed();
-		}
-		break;
+			m_time.delta_time = m_time.loop_timer.elapsed();
+		}break;
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool application::open(window_settings const & ws)
+	plugin_handle application::install_plugin(fs::path const & path)
 	{
-		// open render_window
-		if (!m_wnd.open(ws)) { return debug::error("failed opening application"); }
+		// path empty
+		if (path.empty()) { return 0; }
 
-		// install callbacks
+		// lookup file
+		if (auto const code{ util::hash(path.filename().string()) }
+		; m_plugins.find<hash_t>(code) == m_plugins.end<hash_t>())
 		{
-			m_wnd.set_char_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_char_event>(ML_forward(x)...); });
-
-			m_wnd.set_char_mods_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_char_mods_event>(ML_forward(x)...); });
-
-			m_wnd.set_close_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_close_event>(ML_forward(x)...); });
-
-			m_wnd.set_cursor_enter_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_cursor_enter_event>(ML_forward(x)...); });
-
-			m_wnd.set_cursor_position_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_cursor_position_event>(ML_forward(x)...); });
-
-			m_wnd.set_content_scale_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_content_scale_event>(ML_forward(x)...); });
-
-			m_wnd.set_drop_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_drop_event>(ML_forward(x)...); });
-
-			m_wnd.set_focus_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_focus_event>(ML_forward(x)...); });
-
-			m_wnd.set_framebuffer_size_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_framebuffer_size_event>(ML_forward(x)...); });
-
-			m_wnd.set_iconify_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_iconify_event>(ML_forward(x)...); });
-
-			m_wnd.set_key_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_key_event>(ML_forward(x)...); });
-
-			m_wnd.set_maximize_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_maximize_event>(ML_forward(x)...);  });
-
-			m_wnd.set_mouse_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_mouse_event>(ML_forward(x)...); });
-
-			m_wnd.set_position_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_position_event>(ML_forward(x)...); });
-
-			m_wnd.set_refresh_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_refresh_event>(ML_forward(x)...); });
-
-			m_wnd.set_scroll_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_scroll_event>(ML_forward(x)...); });
-
-			m_wnd.set_size_callback([
-			](auto, auto ... x) noexcept { event_bus::fire<window_size_event>(ML_forward(x)...); });
-		}
-
-		// setup imgui
-		{
-			// set imgui allocators
-			ImGui::SetAllocatorFunctions
-			(
-				[](size_t s, auto) noexcept { return memory::allocate(s); },
-				[](void * p, auto) noexcept { return memory::deallocate(p); },
-				nullptr
-			);
-
-			// create imgui context
-			if (!(m_imgui = ImGui::CreateContext()))
+			// load library
+			if (shared_library lib{ path })
 			{
-				return debug::error("failed creating ImGuiContext");
-			}
+				// load plugin
+				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN, this) })
+				{
+					m_plugins.push_back(code, path, std::move(lib), optl.value());
 
-			// imgui config flags
-			auto & im_io{ ImGui::GetIO() };
-			im_io.LogFilename = nullptr;
-			im_io.IniFilename = nullptr;
-			im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-			im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-			im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-			// imgui platform init
-			if (!ML_ImGui_Init_Platform(m_wnd.get_handle(), true))
-			{
-				return debug::error("failed initializing ImGui platform");
-			}
-
-			// imgui renderer init
-			if (!ML_ImGui_Init_Renderer())
-			{
-				return debug::error("failed initializing ImGui renderer");
+					return ML_handle(plugin_handle, code);
+				}
 			}
 		}
 
-		return true;
+		return nullptr;
 	}
 
-	void application::close()
-	{
-		ML_ImGui_Shutdown();
-
-		ImGui::DestroyContext(m_imgui);
-
-		m_wnd.close();
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool application::free_plugin(plugin_handle value)
+	bool application::uninstall_plugin(plugin_handle value)
 	{
 		if (!value) { return false; }
 
@@ -258,30 +204,24 @@ namespace ml
 		}
 	}
 
-	plugin_handle application::load_plugin(fs::path const & path)
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t application::execute_file(fs::path const & value)
 	{
-		// path empty
-		if (path.empty()) { return 0; }
+		ML_assert(Py_IsInitialized());
 
-		// lookup file
-		if (auto const code{ util::hash(path.filename().string()) }
-		; m_plugins.find<hash_t>(code) == m_plugins.end<hash_t>())
-		{
-			// load library
-			if (shared_library lib{ path })
-			{
-				// load plugin
-				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN) }
-				; optl.has_value())
-				{
-					m_plugins.push_back(code, path, std::move(lib), optl.value());
+		return PyRun_SimpleFileExFlags(
+			std::fopen(value.string().c_str(), "r"),
+			value.string().c_str(),
+			true,
+			nullptr);
+	}
 
-					return ML_handle(plugin_handle, code);
-				}
-			}
-		}
+	int32_t application::execute_string(pmr::string const & value)
+	{
+		ML_assert(Py_IsInitialized());
 
-		return nullptr;
+		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -69,14 +69,14 @@
 // global typedef
 #define ML_alias				using
 
-// macro array size
+// fixed array size
 #define ML_arraysize(arr)		(sizeof(arr) / sizeof(*arr))
 
-// macro comparison
+// ternary comparison
 #define ML_compare(lhs, rhs)	(((lhs) != (rhs)) ? (((lhs) < (rhs)) ? -1 : 1) : 0)
 
-// macro forward
-#define ML_forward(x)			std::forward<decltype(x)>(x)
+// automatic forward
+#define ML_forward(expr)		std::forward<decltype(expr)>(expr)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

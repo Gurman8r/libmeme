@@ -28,7 +28,7 @@ namespace ml
 
 		static bool add_listener(hash_t type, event_listener * value) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 			
 			// insert listener into category
 			return value && self.m_listeners[type].insert(value).second;
@@ -45,7 +45,7 @@ namespace ml
 
 		static void fire(event const & ev) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 
 			// get category
 			if (auto const c{ self.m_listeners.find(ev.ID) })
@@ -70,7 +70,7 @@ namespace ml
 
 		static void remove_listener(hash_t type, event_listener * value) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 
 			if (!value) { return; }
 
@@ -90,7 +90,7 @@ namespace ml
 
 		static void remove_listener(event_listener * value) noexcept
 		{
-			static auto & self{ get_instance() };
+			static auto & self{ get_singleton() };
 
 			if (!value) { return; }
 

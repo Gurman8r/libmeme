@@ -1,6 +1,6 @@
 #include <libmeme/System/EventBus.hpp>
-#include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
+#include <libmeme/Engine/Application.hpp>
 
 using namespace ml;
 using namespace ml::size_literals;
@@ -22,19 +22,61 @@ static class memcfg : public singleton<memcfg>
 		ML_assert(memory::set_test_resource(&test));
 	}
 
-} &ML_anon{ memcfg::get_instance() };
+} const & ML_anon{ memcfg::get_singleton() };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef CONFIG_FILE
-#define CONFIG_FILE "../../../../assets/libmeme.json"
+#define CONFIG_FILE "../../../../libmeme.json"
 #endif
-
+ 
 static auto const default_settings{ R"(
 {
-	"content_home"	: "../../../../",
-	"library_home"	: "../../../../",
-	"setup_script"	: "assets/scripts/setup.py"
+    "path": {
+        "content": "../../../../",
+        "style": "assets/styles/obsidian.style"
+    },
+    "plugins": {
+        "files": [
+            "plugins/demo"
+        ]
+    },
+    "scripts": {
+        "library": "../../../../",
+        "files": [
+            "assets/scripts/setup.py"
+        ]
+    },
+    "window": {
+        "title": "libmeme",
+        "video": {
+            "resolution": [ 1280, 720 ],
+            "bits_per_pixel": [ 8, 8, 8, 8 ],
+            "refresh_rate": -1
+        },
+        "context": {
+            "client": "opengl",
+            "major": 4,
+            "minor": 6,
+            "profile": "compat",
+            "depth_bits": 24,
+            "stencil_bits": 8,
+            "multisample": true,
+            "srgb_capable": false
+        },
+        "hints": {
+            "auto_iconify": true,
+            "decorated": true,
+            "doublebuffer": false,
+            "center_cursor": false,
+            "floating": false,
+            "focus_on_show": true,
+            "focused": true,
+            "maximized": true,
+            "resizable": true,
+            "visible": false
+        }
+    }
 }
 )"_json };
 
@@ -44,56 +86,19 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct context_config final // testing
-	{
-		int32_t	client		{ 0 };
-		int32_t major		{ 0 },
-				minor		{ 0 },
-				revision	{ 0 };
-		int32_t profile		{ 0 };
-		int32_t source		{ 0 },
-				robustness	{ 0 },
-				release		{ 0 };
-		bool	forward		{ 0 },
-				debug		{ 0 },
-				noerror		{ 0 };
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// setup engine
-	ML_assert(engine::initialize(std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
+	application app{ std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
 	{
 		ML_defer(&){ f.close(); };
 		if (f) { f >> j; } else { j = default_settings; }
 		return j;
-	})));
-	
-	ML_defer(&){ engine::finalize(); };
-
-	if (engine::config().contains("setup_script"))
-	{
-		engine::scripts().do_file(
-			engine::fs().path2(
-				engine::config()["setup_script"]));
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// application sequence
-	if (!engine::window().is_open())
-	{
-		return EXIT_FAILURE;
-	}
+	}) };
 	
 	event_bus::fire<load_event>();
 	
 	ML_defer(&){ event_bus::fire<unload_event>(); };
 	
-	while (engine::window().is_open())
+	while (app.window().is_open())
 	{
-		engine::time().begin_loop(); ML_defer(&){ engine::time().end_loop(); };
-
 		ML_benchmark_L("| begin loop")	{ event_bus::fire<	begin_loop_event	>(); };
 		ML_benchmark_L("|  update")		{ event_bus::fire<	update_event		>(); };
 		ML_benchmark_L("|  begin draw")	{ event_bus::fire<	begin_draw_event	>(); };
