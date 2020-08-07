@@ -334,7 +334,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [&]() noexcept { return 1000.f / get_app()->frame_rate(); }
+				, [&]() noexcept { return 1000.f / app().frame_rate(); }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -342,7 +342,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [&]() noexcept { return get_app()->frame_rate(); }
+				, [&]() noexcept { return app().frame_rate(); }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -398,9 +398,9 @@ namespace ml
 			//ML_defer(&) { m_cout.update(&std::cout); };
 
 			// ICON
-			if (image const icon{ get_app()->path2("assets/textures/icon.png"), 0, false })
+			if (image const icon{ app().path2("assets/textures/icon.png"), 0, false })
 			{
-				get_app()->window().set_icon(icon.width(), icon.height(), icon.data());
+				app().window().set_icon(icon.width(), icon.height(), icon.data());
 			}
 
 			// FRAMEBUFFERS
@@ -416,19 +416,19 @@ namespace ml
 			// TEXTURES
 			{
 				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"		] = gfx::texture2d::create(get_app()->path2("assets/textures/doot.png"));
-				m_textures["navball"	] = gfx::texture2d::create(get_app()->path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"] = gfx::texture2d::create(get_app()->path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"] = gfx::texture2d::create(get_app()->path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"	] = gfx::texture2d::create(get_app()->path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["doot"		] = gfx::texture2d::create(app().path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(app().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(app().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(app().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(app().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"		] = alloc_shared<font>(get_app()->path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"		] = alloc_shared<font>(get_app()->path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"] = alloc_shared<font>(get_app()->path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"		] = alloc_shared<font>(get_app()->path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(app().path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(app().path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(app().path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(app().path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -436,13 +436,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					get_app()->path2("assets/shaders/2D.vs.shader"));
+					app().path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					get_app()->path2("assets/shaders/3D.vs.shader"));
+					app().path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					get_app()->path2("assets/shaders/basic.fs.shader"));
+					app().path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -462,8 +462,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)get_app()->total_time().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)get_app()->delta_time().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)app().total_time().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)app().delta_time().count(); })
 				};
 
 				// camera
@@ -504,9 +504,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"]	= alloc_shared<mesh>(get_app()->path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"] = alloc_shared<mesh>(get_app()->path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"]		= alloc_shared<mesh>(get_app()->path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"]	= alloc_shared<mesh>(app().path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"] = alloc_shared<mesh>(app().path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"]		= alloc_shared<mesh>(app().path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -621,7 +621,7 @@ namespace ml
 			}
 
 			// plots
-			m_plots.update(get_app()->total_time().count());
+			m_plots.update(app().total_time().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -654,7 +654,7 @@ namespace ml
 				gfx::render_command::bind_framebuffer(nullptr),
 			})
 			{
-				std::invoke(cmd, get_app()->window().get_render_context().get());
+				std::invoke(cmd, app().window().get_render_context().get());
 			}
 		}
 
@@ -662,7 +662,7 @@ namespace ml
 		{
 			// gui docking
 
-			//ImGui::SetCurrentContext(get_app()->gui().get_context());
+			//ImGui::SetCurrentContext(app().gui().get_context());
 
 			enum : int32_t // node ids
 			{
@@ -672,7 +672,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ get_app()->gui().dockspace() };
+			auto & d{ app().gui().dockspace() };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -711,18 +711,18 @@ namespace ml
 		{
 			// gui stuff, etc...
 
-			ImGui::SetCurrentContext(get_app()->gui().get_context());
+			ImGui::SetCurrentContext(app().gui().get_context());
 
 			static ML_scope(&) // setup main menu bar
 			{
-				auto & mmb{ get_app()->gui().main_menu_bar() };
+				auto & mmb{ app().gui().main_menu_bar() };
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
 					ML_ImGui_ScopeID(this);
 					if (ImGui::MenuItem("quit", "alt+f4"))
 					{
-						get_app()->window().close();
+						app().window().close();
 					}
 				});
 				mmb.add("view", [&]()
@@ -741,10 +741,10 @@ namespace ml
 				//mmb.add("settings", [&]()
 				//{
 				//	ML_scoped_imgui_id(this);
-				//	bool fullscreen{ get_app()->window().is_fullscreen() };
+				//	bool fullscreen{ app().window().is_fullscreen() };
 				//	if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
 				//	{
-				//		get_app()->window().set_fullscreen(fullscreen);
+				//		app().window().set_fullscreen(fullscreen);
 				//	}
 				//});
 				mmb.add("help", [&]()
@@ -760,9 +760,9 @@ namespace ml
 				ML_ImGui_ScopeID(this);
 
 				// IMGUI
-				if (m_imgui_demo.open)		{ get_app()->gui().show_imgui_demo(&m_imgui_demo.open); }
-				if (m_imgui_metrics.open)	{ get_app()->gui().show_imgui_metrics(&m_imgui_metrics.open); }
-				if (m_imgui_about.open)		{ get_app()->gui().show_imgui_about(&m_imgui_about.open); }
+				if (m_imgui_demo.open)		{ app().gui().show_imgui_demo(&m_imgui_demo.open); }
+				if (m_imgui_metrics.open)	{ app().gui().show_imgui_metrics(&m_imgui_metrics.open); }
+				if (m_imgui_about.open)		{ app().gui().show_imgui_about(&m_imgui_about.open); }
 
 				// WIDGETS
 				m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
@@ -868,7 +868,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				get_app()->window().close();
+				app().window().close();
 			},
 			{
 				"shutdown the application",
@@ -933,7 +933,7 @@ namespace ml
 				}
 				else
 				{
-					get_app()->execute_string(util::detokenize(args));
+					app().execute_string(util::detokenize(args));
 				}
 			},
 			{
@@ -1051,7 +1051,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							get_app()->window().set_clipboard(buf);
+							app().window().set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1197,7 +1197,7 @@ namespace ml
 			}
 
 			// file list
-			static gui::file_tree file_tree{ get_app()->path2() };
+			static gui::file_tree file_tree{ app().path2() };
 			file_tree.render();
 		}
 
@@ -1211,7 +1211,7 @@ namespace ml
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= get_app()->window().is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= app().window().is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1349,7 +1349,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", get_app()->total_time().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", app().total_time().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1389,7 +1389,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & wnd{ get_app()->window() };
+			static auto const & wnd{ app().window() };
 			static auto const & dev{ wnd.get_render_device() };
 			static auto const & ctx	{ dev->get_context() };
 			static auto const & info{ dev->get_info() };

@@ -5,27 +5,12 @@
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 
-// GLFW / OpenGL3
-#if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
-#include <imgui/examples/imgui_impl_glfw.h>
-#include <imgui/examples/imgui_impl_opengl3.h>
-#define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
-#define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
-#define ML_ImGui_Shutdown()				ML_scope(&){ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
-#define ML_ImGui_NewFrame()				ML_scope(&){ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
-#define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
-
-#else
-#	error "imgui is unavailable"
-#endif
-
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	application::application(json const & j, allocator_type alloc) noexcept
-		: m_sys		{ memory::get_singleton(), event_bus::get_singleton(), performance::get_singleton() }
-		, m_time	{}
+		: m_time	{}
 		, m_config	{ json{ j } }
 		, m_path	{ fs::current_path(), j["path"]["content"].get<fs::path>() }
 		, m_window	{ j["window"].get<window_settings>() }

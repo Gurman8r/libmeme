@@ -86,18 +86,20 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application app{ std::invoke([&j = json{}, &f = std::ifstream{ CONFIG_FILE }]()
-	{
-		ML_defer(&){ f.close(); };
-		if (f) { f >> j; } else { j = default_settings; }
-		return j;
-	}) };
+	auto app = alloc_new<application>(std::invoke([&f = std::ifstream{ CONFIG_FILE }]()
+    {
+        ML_defer(&) { f.close(); };
+
+        return f ? json::parse(f) : default_settings;
+    }));
+
+    ML_defer(&) { delete app; };
 	
 	event_bus::fire<load_event>();
 	
 	ML_defer(&){ event_bus::fire<unload_event>(); };
 	
-	while (app.window().is_open())
+	while (app->window().is_open())
 	{
 		ML_benchmark_L("| begin loop")	{ event_bus::fire<	begin_loop_event	>(); };
 		ML_benchmark_L("|  update")		{ event_bus::fire<	update_event		>(); };

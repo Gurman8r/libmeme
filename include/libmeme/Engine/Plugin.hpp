@@ -31,7 +31,9 @@ namespace ml
 
 		virtual void on_event(event const &) override = 0;
 
-		auto get_app() const noexcept -> application * const { return m_app; }
+		auto app() & noexcept -> application & { return *m_app; }
+
+		auto app() const & noexcept -> application const & { return *m_app; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

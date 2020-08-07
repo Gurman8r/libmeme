@@ -54,9 +54,9 @@ namespace ml
 
 		auto config() const & noexcept -> json const & { return m_config; }
 
-		auto path() -> fs::path const & { return m_path.program; }
+		auto path() const & noexcept -> fs::path const & { return m_path.program; }
 
-		auto path2(fs::path const & value = {}) -> fs::path { return m_path.content.native() + value.native(); }
+		auto path2(fs::path const & value = {}) const -> fs::path { return m_path.content.native() + value.native(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -67,14 +67,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		struct // system
-		{
-			memory & mem;
-			event_bus & bus;
-			performance & perf;
-		}
-		m_sys;
-
 		struct // time
 		{
 			using fps_times_t = pmr::vector<float_t>;
@@ -98,9 +90,9 @@ namespace ml
 		}
 		m_path;
 
-		render_window	m_window; // window
+		render_window m_window; // window
 
-		gui_manager		m_gui	; // imgui
+		gui_manager m_gui; // imgui
 
 		ds::batch_vector
 		<
