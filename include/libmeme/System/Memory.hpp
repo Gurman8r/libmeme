@@ -120,6 +120,23 @@ namespace ml::util
 
 namespace ml
 {
+	// no delete
+	struct no_delete { template <class T> void operator()(T *) const noexcept {} };
+
+	// default delete
+	template <class ...> struct default_delete;
+
+	// scoped pointer ( std::unique_ptr<T, Dx> )
+	template <class T, class Dx = default_delete<T>
+	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
+
+	// shared pointer ( std::shared_ptr<T> )
+	template <class T
+	> ML_alias shared = typename std::shared_ptr<T>;
+}
+
+namespace ml
+{
 	// memory manager singleton
 	class ML_SYSTEM_API memory final : public singleton<memory>
 	{
@@ -137,13 +154,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto const & get_allocator() noexcept { return get_singleton().m_allocator; }
+		ML_NODISCARD static decltype(auto) get_allocator() noexcept { return get_singleton().m_allocator; }
 
-		ML_NODISCARD static auto const & get_records() noexcept { return get_singleton().m_records; }
+		ML_NODISCARD static decltype(auto) get_records() noexcept { return get_singleton().m_records; }
 
-		ML_NODISCARD static auto const & get_test_resource() noexcept { return get_singleton().m_testres; }
+		ML_NODISCARD static decltype(auto) get_test_resource() noexcept { return get_singleton().m_testres; }
 
-		ML_NODISCARD static auto const & set_test_resource(util::test_resource * res) noexcept { return get_singleton().m_testres = res; }
+		ML_NODISCARD static decltype(auto) set_test_resource(util::test_resource * res) noexcept { return get_singleton().m_testres = res; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -224,6 +241,35 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// placement new
+		template <class T, class ... Args
+		> ML_NODISCARD static T * alloc_new(Args && ... args) noexcept
+		{
+			return ::new (memory::allocate(sizeof(T))) T{ ML_forward(args)... };
+		}
+
+		// allocate scoped
+		template <class T, class Dx, class ... Args
+		> ML_NODISCARD static scoped<T, Dx> alloc_scoped(Args && ... args) noexcept
+		{
+			return scoped<T, Dx>
+			{
+				memory::alloc_new<T>(ML_forward(args)...), Dx{}
+			};
+		}
+
+		// allocate shared
+		template <class T, class ... Args
+		> ML_NODISCARD static shared<T> alloc_shared(Args && ... args) noexcept
+		{
+			return std::allocate_shared<T>
+			(
+				memory::get_allocator(), ML_forward(args)...
+			);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		friend singleton;
 
@@ -261,9 +307,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class ...
-	> struct default_delete;
-
 	template <> struct default_delete<>
 	{
 		void operator()(void * addr) const noexcept
@@ -282,48 +325,37 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// scoped pointer ( unique_ptr )
-	template <class T, class Dx = default_delete<T>
-	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
-
-	// shared pointer ( shared_ptr )
-	template <class T
-	> ML_alias shared = typename std::shared_ptr<T>;
-
-	// temporary pointer ( weak_ptr )
-	template <class T
-	> ML_alias weak = typename std::weak_ptr<T>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// allocate new
 	template <class T, class ... Args
 	> ML_NODISCARD T * alloc_new(Args && ... args) noexcept
 	{
-		return ::new (memory::allocate(sizeof(T))) T
-		{
-			ML_forward(args)...
-		};
+		return memory::alloc_new<T>(ML_forward(args)...);
 	}
 
 	// allocate scoped
 	template <class T, class Dx = default_delete<T>, class ... Args
 	> ML_NODISCARD scoped<T, Dx> alloc_scoped(Args && ... args) noexcept
 	{
-		return scoped<T, Dx>
-		{
-			_ML alloc_new<T>(ML_forward(args)...), Dx{}
-		};
+		return memory::alloc_scoped<T, Dx>(ML_forward(args)...);
 	}
 
 	// allocate shared
 	template <class T, class ... Args
 	> ML_NODISCARD shared<T> alloc_shared(Args && ... args) noexcept
 	{
-		return std::allocate_shared<T>
-		(
-			memory::get_allocator(), ML_forward(args)...
-		);
+		return memory::alloc_shared<T>(ML_forward(args)...);
+	}
+
+	// allocate widget
+	template <class T, class Key = int32_t, class ... Args
+	> static shared<T> alloc_widget(Key && id, Args && ... args)
+	{
+		static ds::map<Key, std::weak_ptr<T>> cache{};
+		static std::mutex mut_cache{};
+		std::lock_guard<std::mutex> hold{ mut_cache };
+		auto sp{ cache[ML_forward(id)].lock() };
+		if (!sp) cache[ML_forward(id)] = sp = _ML alloc_shared<T>(ML_forward(args)...);
+		return sp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

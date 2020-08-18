@@ -23,13 +23,15 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit plugin(application * app) noexcept : m_app{ app }
-		{
-		}
+		explicit plugin(application * app) noexcept : m_app{ app } { ML_assert(app); }
 
-		virtual ~plugin() noexcept = default;
+		virtual ~plugin() noexcept override = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void on_event(event const &) override = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		auto app() & noexcept -> application & { return *m_app; }
 

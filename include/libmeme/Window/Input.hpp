@@ -130,6 +130,8 @@ namespace ml
 		key_code_right_alt		= 346,	// right alt
 		key_code_right_super	= 347,	// right super
 		key_code_menu			= 348,	// menu
+
+		key_code_MAX
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -137,13 +139,13 @@ namespace ml
 	// key modifiers
 	enum key_mods_ : int32_t
 	{
-		key_mods_none		= (0 << 0),	// none
-		key_mods_shift		= (0 << 1),	// shift
-		key_mods_ctrl		= (1 << 1),	// ctrl
-		key_mods_alt		= (1 << 2),	// alt
-		key_mods_super		= (1 << 3),	// super
-		key_mods_caps_lock	= (1 << 4),	// caps
-		key_mods_num_lock	= (1 << 5)	// numlock
+		key_mods_none		= 0 << 0,	// none
+		key_mods_shift		= 0 << 1,	// shift
+		key_mods_ctrl		= 1 << 1,	// ctrl
+		key_mods_alt		= 1 << 2,	// alt
+		key_mods_super		= 1 << 3,	// super
+		key_mods_caps_lock	= 1 << 4,	// caps
+		key_mods_num_lock	= 1 << 5	// numlock
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -159,6 +161,8 @@ namespace ml
 		mouse_button_5, // mouse button 5
 		mouse_button_6, // mouse button 6
 		mouse_button_7, // mouse button 7
+
+		mouse_button_MAX
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -169,6 +173,8 @@ namespace ml
 		input_state_release	, // release | hi -> lo
 		input_state_press	, // press   | lo -> hi
 		input_state_repeat	, // repeat  | hi -> hi
+
+		input_state_MAX
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

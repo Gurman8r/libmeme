@@ -8,92 +8,104 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_char_event)
+	ML_decl_event(char_event)
 	{
+		void * const user;
 		uint32_t const value;
 
-		constexpr window_char_event(uint32_t value) noexcept
-			: value{ value }
+		constexpr char_event(void * user, uint32_t value) noexcept
+			: user{ user }, value{ value }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_char_mods_event)
+	ML_decl_event(char_mods_event)
 	{
+		void * const user;
 		uint32_t const value;
 		int32_t const mods;
 
-		constexpr window_char_mods_event(uint32_t value, int32_t mods) noexcept
-			: value{ value }, mods{ mods }
+		constexpr char_mods_event(void * user, uint32_t value, int32_t mods) noexcept
+			: user{ user }, value{ value }, mods{ mods }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_close_event)
+	ML_decl_event(close_event)
 	{
+		void * const user;
+
+		constexpr close_event(void * user) noexcept
+			: user{ user }
+		{
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_content_scale_event)
+	ML_decl_event(content_scale_event)
 	{
+		void * const user;
 		float_t const x, y;
 
-		constexpr window_content_scale_event(float_t x, float_t y) noexcept
-			: x{ x }, y{ y }
+		constexpr content_scale_event(void * user, float_t x, float_t y) noexcept
+			: user{ user }, x{ x }, y{ y }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_drop_event)
+	ML_decl_event(drop_event)
 	{
+		void * const user;
 		int32_t const count;
 		cstring const * const paths;
 
-		constexpr window_drop_event(int32_t count, cstring const * paths) noexcept
-			: count{ count }, paths{ paths }
+		constexpr drop_event(void * user, int32_t count, cstring const * paths) noexcept
+			: user{ user }, count{ count }, paths{ paths }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_cursor_enter_event)
+	ML_decl_event(cursor_enter_event)
 	{
+		void * const user;
 		int32_t const entered;
 
-		constexpr window_cursor_enter_event(int32_t entered) noexcept
-			: entered{ entered }
+		constexpr cursor_enter_event(void * user, int32_t entered) noexcept
+			: user{ user }, entered{ entered }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_cursor_position_event)
+	ML_decl_event(cursor_position_event)
 	{
+		void * const user;
 		float64_t const x, y;
 
-		constexpr window_cursor_position_event(float64_t x, float64_t y) noexcept
-			: x{ x }, y{ y }
+		constexpr cursor_position_event(void * user, float64_t x, float64_t y) noexcept
+			: user{ user }, x{ x }, y{ y }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_error_event)
+	ML_decl_event(error_event)
 	{
 		int32_t const code;
 		cstring const desc;
 
-		constexpr window_error_event(int32_t code, cstring desc) noexcept
+		constexpr error_event(int32_t code, cstring desc) noexcept
 			: code{ code }, desc{ desc }
 		{
 		}
@@ -101,55 +113,59 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_focus_event)
+	ML_decl_event(focus_event)
 	{
+		void * const user;
 		int32_t const focused;
 
-		constexpr window_focus_event(int32_t focused) noexcept
-			: focused{ focused }
+		constexpr focus_event(void * user, int32_t focused) noexcept
+			: user{ user }, focused{ focused }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_framebuffer_size_event)
+	ML_decl_event(framebuffer_size_event)
 	{
+		void * const user;
 		int32_t const width, height;
 
-		constexpr window_framebuffer_size_event(int32_t width, int32_t height) noexcept
-			: width{ width }, height{ height }
+		constexpr framebuffer_size_event(void * user, int32_t width, int32_t height) noexcept
+			: user{ user }, width{ width }, height{ height }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_iconify_event)
+	ML_decl_event(iconify_event)
 	{
+		void * const user;
 		int32_t const iconified;
 
-		constexpr window_iconify_event(int32_t iconified) noexcept
-			: iconified{ iconified }
+		constexpr iconify_event(void * user, int32_t iconified) noexcept
+			: user{ user }, iconified{ iconified }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_key_event)
+	ML_decl_event(key_event)
 	{
+		void * const user;
 		int32_t const key, scan, action, mods;
 
-		constexpr window_key_event(int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
-			: key{ key }, scan{ scan }, action{ action }, mods{ mods }
+		constexpr key_event(void * user, int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
+			: user{ user }, key{ key }, scan{ scan }, action{ action }, mods{ mods }
 		{
 		}
 
 		constexpr bool is_action	(int32_t a) const noexcept { return (action == a); }
 		constexpr bool is_key		(int32_t k) const noexcept { return (key == k); }
 		constexpr bool is_mods		(int32_t m) const noexcept { return (mods == m); }
-		constexpr bool has_mods		(int32_t m) const noexcept { return (mods & m); }
+		constexpr bool has_mods		(int32_t m) const noexcept { return (m & mods) == m; }
 		
 		constexpr bool is_release	(int32_t k) const noexcept { return is_key(k) && is_action(input_state_release); }
 		constexpr bool is_press		(int32_t k) const noexcept { return is_key(k) && is_action(input_state_press); }
@@ -185,24 +201,26 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_maximize_event)
+	ML_decl_event(maximize_event)
 	{
+		void * const user;
 		int32_t const maximized;
 
-		constexpr window_maximize_event(int32_t maximized) noexcept
-			: maximized{ maximized }
+		constexpr maximize_event(void * user, int32_t maximized) noexcept
+			: user{ user }, maximized{ maximized }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_mouse_event)
+	ML_decl_event(mouse_event)
 	{
+		void * const user;
 		int32_t const button, action, mods;
 
-		constexpr window_mouse_event(int32_t button, int32_t action, int32_t mods) noexcept
-			: button{ button }, action{ action }, mods{ mods }
+		constexpr mouse_event(void * user, int32_t button, int32_t action, int32_t mods) noexcept
+			: user{ user }, button{ button }, action{ action }, mods{ mods }
 		{
 		}
 
@@ -222,42 +240,51 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_position_event)
+	ML_decl_event(position_event)
 	{
+		void * const user;
 		int32_t const x, y;
 
-		constexpr window_position_event(int32_t x, int32_t y) noexcept
-			: x{ x }, y{ y }
+		constexpr position_event(void * user, int32_t x, int32_t y) noexcept
+			: user{ user }, x{ x }, y{ y }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_refresh_event)
+	ML_decl_event(refresh_event)
 	{
+		void * const user;
+
+		constexpr refresh_event(void * user) noexcept
+			: user{ user }
+		{
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_scroll_event)
+	ML_decl_event(scroll_event)
 	{
+		void * const user;
 		float64_t const x, y;
 
-		constexpr window_scroll_event(float64_t x, float64_t y) noexcept
-			: x{ x }, y{ y }
+		constexpr scroll_event(void * user, float64_t x, float64_t y) noexcept
+			: user{ user }, x{ x }, y{ y }
 		{
 		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(window_size_event)
+	ML_decl_event(size_event)
 	{
+		void * const user;
 		int32_t const width, height;
 
-		constexpr window_size_event(int32_t width, int32_t height) noexcept
-			: width{ width }, height{ height }
+		constexpr size_event(void * user, int32_t width, int32_t height) noexcept
+			: user{ user }, width{ width }, height{ height }
 		{
 		}
 	};

@@ -9,27 +9,100 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	application * application::g_app{};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	application::application(json const & j, allocator_type alloc) noexcept
-		: m_time	{}
+		: m_running	{}
+		, m_sys		{}
+		, m_time	{}
 		, m_config	{ json{ j } }
-		, m_path	{ fs::current_path(), j["path"]["content"].get<fs::path>() }
-		, m_window	{ j["window"].get<window_settings>() }
-		, m_gui		{ m_window, alloc }
+		, m_path	{ fs::current_path(), j["path"]["content"] }
+		, m_window	{}
+		, m_gui		{ alloc }
+		, m_input	{}
 		, m_plugins	{ alloc }
 	{
+		ML_assert("another application is already running" && (!g_app && (g_app = this)));
+
 		// EVENTS
-		event_bus::add_listener< begin_loop_event	>(this);
-		event_bus::add_listener< begin_draw_event	>(this);
-		event_bus::add_listener< begin_gui_event	>(this);
-		event_bus::add_listener< draw_gui_event		>(this);
-		event_bus::add_listener< end_gui_event		>(this);
-		event_bus::add_listener< end_draw_event		>(this);
-		event_bus::add_listener< end_loop_event		>(this);
+		event_bus::add_listener< draw_begin_event		>(this);
+		event_bus::add_listener< gui_begin_event		>(this);
+		event_bus::add_listener< gui_draw_event			>(this);
+		event_bus::add_listener< gui_end_event			>(this);
+		event_bus::add_listener< draw_end_event			>(this);
+		event_bus::add_listener< key_event				>(this);
+		event_bus::add_listener< mouse_event			>(this);
+		event_bus::add_listener< cursor_position_event	>(this);
+
+		// WINDOW
+		ML_assert(m_window.open(j["window"]));
+		{
+			m_window.set_char_callback([
+			](auto ... x) noexcept { event_bus::fire<char_event>(ML_forward(x)...); });
+
+			m_window.set_char_mods_callback([
+			](auto ... x) noexcept { event_bus::fire<char_mods_event>(ML_forward(x)...); });
+
+			m_window.set_close_callback([
+			](auto ... x) noexcept { event_bus::fire<close_event>(ML_forward(x)...); });
+
+			m_window.set_cursor_enter_callback([
+			](auto ... x) noexcept { event_bus::fire<cursor_enter_event>(ML_forward(x)...); });
+
+			m_window.set_cursor_position_callback([
+			](auto ... x) noexcept { event_bus::fire<cursor_position_event>(ML_forward(x)...); });
+
+			m_window.set_content_scale_callback([
+			](auto ... x) noexcept { event_bus::fire<content_scale_event>(ML_forward(x)...); });
+
+			m_window.set_drop_callback([
+			](auto ... x) noexcept { event_bus::fire<drop_event>(ML_forward(x)...); });
+
+			m_window.set_error_callback([
+			](auto ... x) noexcept { event_bus::fire<error_event>(ML_forward(x)...); });
+
+			m_window.set_focus_callback([
+			](auto ... x) noexcept { event_bus::fire<focus_event>(ML_forward(x)...); });
+
+			m_window.set_framebuffer_size_callback([
+			](auto ... x) noexcept { event_bus::fire<framebuffer_size_event>(ML_forward(x)...); });
+
+			m_window.set_iconify_callback([
+			](auto ... x) noexcept { event_bus::fire<iconify_event>(ML_forward(x)...); });
+
+			m_window.set_key_callback([
+			](auto ... x) noexcept { event_bus::fire<key_event>(ML_forward(x)...); });
+
+			m_window.set_maximize_callback([
+			](auto ... x) noexcept { event_bus::fire<maximize_event>(ML_forward(x)...);  });
+
+			m_window.set_mouse_callback([
+			](auto ... x) noexcept { event_bus::fire<mouse_event>(ML_forward(x)...); });
+
+			m_window.set_position_callback([
+			](auto ... x) noexcept { event_bus::fire<position_event>(ML_forward(x)...); });
+
+			m_window.set_refresh_callback([
+			](auto ... x) noexcept { event_bus::fire<refresh_event>(ML_forward(x)...); });
+
+			m_window.set_scroll_callback([
+			](auto ... x) noexcept { event_bus::fire<scroll_event>(ML_forward(x)...); });
+
+			m_window.set_size_callback([
+			](auto ... x) noexcept { event_bus::fire<size_event>(ML_forward(x)...); });
+		}
+
+		// GUI
+		ML_assert(m_gui.startup(m_window));
+		if (j["path"].contains("guistyle"))
+		{
+			m_gui.load_style(path2(j["path"]["guistyle"]));
+		}
 
 		// PYTHON
 		{
-			ML_assert(!Py_IsInitialized());
-
 			PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]() noexcept
 			{
 				temp.alloc = [](auto, size_t s) noexcept
@@ -42,20 +115,10 @@ namespace ml
 				};
 				return &temp;
 			}));
-
 			Py_SetProgramName(fs::path{ __argv[0] }.filename().c_str());
-
-			Py_SetPythonHome(j["scripts"]["library"].get<fs::path>().c_str());
-
+			Py_SetPythonHome(j["path"]["library"].get<fs::path>().c_str());
 			Py_InitializeEx(1);
-
 			ML_assert(Py_IsInitialized());
-		}
-
-		// STYLE
-		if (j.contains("path") && j["path"].contains("style"))
-		{
-			m_gui.load_style(path2(j["path"]["style"].get<fs::path>()));
 		}
 
 		// PLUGINS
@@ -67,7 +130,7 @@ namespace ml
 		// SCRIPTS
 		for (auto const & e : j["scripts"]["files"])
 		{
-			execute_file(path2(e.get<fs::path>()));
+			do_file(path2(e.get<fs::path>()));
 		}
 	}
 
@@ -75,22 +138,23 @@ namespace ml
 	{
 		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
 
-		ML_assert(!Py_IsInitialized());
-
-		m_gui.main_menu_bar().menus.clear();
-
 		m_gui.shutdown();
 
 		m_window.close();
+
+		g_app = nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void application::on_event(event const & ev)
+	int32_t application::run(std::function<void()> const & callback)
 	{
-		switch (ev.ID)
+		if (m_running || !m_window.is_open()) { return EXIT_FAILURE; }
+
+		m_running = true;
+
+		do
 		{
-		case hashof_v<begin_loop_event>: {
 			m_time.loop_timer.restart();
 
 			m_time.frame_rate = std::invoke([&, dt = (float_t)m_time.delta_time.count()]() noexcept
@@ -102,15 +166,33 @@ namespace ml
 			});
 
 			window::poll_events();
-		}break;
 
-		case hashof_v<begin_draw_event>: {
+			std::invoke(callback);
+
+			++m_time.frame_count;
+
+			performance::refresh_samples();
+
+			m_time.delta_time = m_time.loop_timer.elapsed();
+		}
+		while (m_window.is_open());
+
+		m_running = false;
+
+		return EXIT_SUCCESS;
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void application::on_event(event const & ev)
+	{
+		switch (ev.id)
+		{
+		case hashof_v<draw_begin_event>: {
 			for (auto const & cmd :
 			{
 				gfx::render_command::set_clear_color(colors::black),
-
 				gfx::render_command::clear(gfx::clear_color),
-					
 				gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 			})
 			{
@@ -118,31 +200,60 @@ namespace ml
 			}
 		} break;
 
-		case hashof_v<begin_gui_event>: {
+		case hashof_v<gui_begin_event>: {
 			m_gui.begin_frame();
 		} break;
 
-		case hashof_v<draw_gui_event>: {
+		case hashof_v<gui_draw_event>: {
 			m_gui.draw_default();
 		} break;
 
-		case hashof_v<end_gui_event>: {
+		case hashof_v<gui_end_event>: {
 			m_gui.end_frame();
 		} break;
 
-		case hashof_v<end_draw_event>: {
+		case hashof_v<draw_end_event>: {
 			if (m_window.get_hints() & window_hints_doublebuffer)
 			{
 				window::swap_buffers(m_window.get_handle());
 			}
 		} break;
 
-		case hashof_v<end_loop_event>: {
-			++m_time.frame_count;
-			performance::refresh_samples();
-			m_time.delta_time = m_time.loop_timer.elapsed();
-		}break;
+		case hashof_v<key_event>: {
+			auto const & k{ (key_event const &)ev };
+			m_input.keyboard[k.key] = k.action;
+		} break;
+
+		case hashof_v<mouse_event>: {
+			auto const & m{ (mouse_event const &)ev };
+			m_input.mouse[m.button] = m.action;
+		} break;
+
+		case hashof_v<cursor_position_event>: {
+			auto const & c{ (cursor_position_event const &)ev };
+			m_input.cursor = { c.x, c.y };
+		} break;
 		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t application::do_file(fs::path const & value)
+	{
+		ML_assert(Py_IsInitialized());
+
+		return PyRun_SimpleFileExFlags(
+			std::fopen(value.string().c_str(), "r"),
+			value.string().c_str(),
+			true,
+			nullptr);
+	}
+
+	int32_t application::do_string(pmr::string const & value)
+	{
+		ML_assert(Py_IsInitialized());
+
+		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -160,9 +271,11 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const optl{ lib.call<plugin *>(ML_PLUGIN_MAIN, this) })
+				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, this) })
 				{
-					m_plugins.push_back(code, path, std::move(lib), optl.value());
+					ML_assert((intptr_t)this < (intptr_t)*p);
+
+					m_plugins.push_back(code, path, std::move(lib), *p);
 
 					return ML_handle(plugin_handle, code);
 				}
@@ -187,26 +300,6 @@ namespace ml
 		{
 			return false;
 		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	int32_t application::execute_file(fs::path const & value)
-	{
-		ML_assert(Py_IsInitialized());
-
-		return PyRun_SimpleFileExFlags(
-			std::fopen(value.string().c_str(), "r"),
-			value.string().c_str(),
-			true,
-			nullptr);
-	}
-
-	int32_t application::execute_string(pmr::string const & value)
-	{
-		ML_assert(Py_IsInitialized());
-
-		return PyRun_SimpleStringFlags(value.c_str(), nullptr);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

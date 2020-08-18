@@ -48,7 +48,7 @@ namespace ml
 			static auto & self{ get_singleton() };
 
 			// get category
-			if (auto const c{ self.m_listeners.find(ev.ID) })
+			if (auto const c{ self.m_listeners.find(ev.id) })
 			{
 				// for each listener
 				for (auto const & l : (*c->second))

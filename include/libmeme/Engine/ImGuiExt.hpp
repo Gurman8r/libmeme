@@ -372,7 +372,7 @@ namespace ml::gui
 		ImGuiTextFilter				filter			{}		; // text filter
 		bool						auto_scroll		{ true }; // auto-scroll
 		bool						scroll_to_bot	{}		; // scroll-to-bottom
-		cstring						command_lock	{}		; // forced command
+		cstring						cmd_lock		{}		; // forced command
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -441,11 +441,11 @@ namespace ml::gui
 				if (auto const it{ std::find_if(commands.begin(), commands.end(), [&
 				](auto & cmd) noexcept
 				{
-					return cmd.name == (command_lock ? command_lock : toks.front());
+					return cmd.name == (cmd_lock ? cmd_lock : toks.front());
 				}) }
 				; it != commands.end())
 				{
-					if (!command_lock) { toks.erase(toks.begin()); }
+					if (!cmd_lock) { toks.erase(toks.begin()); }
 
 					std::invoke(it->clbk, std::move(toks));
 				}
@@ -467,7 +467,7 @@ namespace ml::gui
 			filter.Draw("filter", 180); ImGui::SameLine();
 			ImGui::Checkbox("auto-scroll", &auto_scroll); ImGui::SameLine();
 			if (ImGui::Button("clear")) clear(); ImGui::SameLine();
-			ImGui::Text("lock: %s", command_lock ? command_lock : "-"); //ImGui::SameLine();
+			ImGui::Text("lock: %s", cmd_lock ? cmd_lock : "-"); //ImGui::SameLine();
 			ImGui::Separator();
 
 			float_t const footer_height{ ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing() };

@@ -188,23 +188,21 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// get name of type
-	template <class T
-	> constexpr pretty_function::string nameof_v
+	// name of type
+	template <class T> constexpr auto nameof_v
 	{
-		nameof<T>::value
+		pretty_function::string{ nameof<T>::value }
 	};
 
-	// get hash of type
-	template <class T
-	> constexpr hash_t hashof_v
+	// hash of type
+	template <class T> constexpr auto hashof_v
 	{
 		util::hash(pretty_function::string{ nameof<T>::value })
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static_assert("tests"
+	static_assert("test type info"
 		&& nameof_v<bool>			== "bool"
 		&& nameof_v<int8_t>			== "signed char"
 		&& nameof_v<int16_t>		== "short"
@@ -225,12 +223,13 @@ namespace ml
 		&& nameof_v<cwstring>		== "const wchar_t*"
 		&& nameof_v<c16string>		== "const char16_t*"
 		&& nameof_v<c32string>		== "const char32_t*"
+#if ML_has_cxx17
 		&& nameof_v<std::string>	== "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >"
 		&& nameof_v<std::wstring>	== "class std::basic_string<wchar_t,struct std::char_traits<wchar_t>,class std::allocator<wchar_t> >"
 		&& nameof_v<std::u16string> == "class std::basic_string<char16_t,struct std::char_traits<char16_t>,class std::allocator<char16_t> >"
 		&& nameof_v<std::u32string> == "class std::basic_string<char32_t,struct std::char_traits<char32_t>,class std::allocator<char32_t> >"
-	
-		, "test nameof<>");
+#endif
+		, "test type info");
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

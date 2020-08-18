@@ -64,7 +64,7 @@ namespace ml::gfx
 		action_invert,
 	};
 
-	constexpr cstring action_names[] =
+	constexpr cstring action_NAMES[] =
 	{
 		"keep",
 		"zero",
@@ -91,7 +91,7 @@ namespace ml::gfx
 		error_context_lost,
 	};
 
-	constexpr cstring error_names[] = // error names
+	constexpr cstring error_NAMES[] = // error names
 	{
 		"no error",
 		"invalid enum",
@@ -104,7 +104,7 @@ namespace ml::gfx
 		"context lost",
 	};
 
-	constexpr cstring error_descriptions[] = // error descriptions
+	constexpr cstring error_DESCS[] = // error descriptions
 	{
 		"no description",
 		"an unacceptable value has been specified for an enumerated argument",
@@ -128,7 +128,7 @@ namespace ml::gfx
 		equation_max,
 	};
 
-	constexpr cstring equation_names[] =
+	constexpr cstring equation_NAMES[] =
 	{
 		"add",
 		"subtract",
@@ -152,7 +152,7 @@ namespace ml::gfx
 		facet_front_and_back,
 	};
 
-	constexpr cstring facet_names[] =
+	constexpr cstring facet_NAMES[] =
 	{
 		"front left",
 		"front right",
@@ -182,7 +182,7 @@ namespace ml::gfx
 		factor_src_alpha_saturate,
 	};
 
-	constexpr cstring factor_names[] =
+	constexpr cstring factor_NAMES[] =
 	{
 		"zero",
 		"one",
@@ -223,7 +223,7 @@ namespace ml::gfx
 		format_depth24_stencil8,
 	};
 
-	constexpr cstring format_names[] =
+	constexpr cstring format_NAMES[] =
 	{
 		"red",
 		"green",
@@ -255,7 +255,7 @@ namespace ml::gfx
 		order_ccw,
 	};
 
-	constexpr cstring order_names[] =
+	constexpr cstring order_NAMES[] =
 	{
 		"cw",
 		"ccw",
@@ -275,7 +275,7 @@ namespace ml::gfx
 		predicate_always,
 	};
 
-	constexpr cstring predicate_names[] =
+	constexpr cstring predicate_NAMES[] =
 	{
 		"never",
 		"less",
@@ -301,7 +301,7 @@ namespace ml::gfx
 		primitive_fill,
 	};
 
-	constexpr cstring primitive_names[] =
+	constexpr cstring primitive_NAMES[] =
 	{
 		"points",
 		"lines",
@@ -324,7 +324,7 @@ namespace ml::gfx
 		shader_type_MAX,
 	};
 
-	constexpr cstring shader_type_names[] =
+	constexpr cstring shader_type_NAMES[] =
 	{
 		"vertex shader",
 		"fragment shader",
@@ -345,7 +345,7 @@ namespace ml::gfx
 	};
 
 	// texture type names
-	constexpr cstring texture_type_names[] =
+	constexpr cstring texture_type_NAMES[] =
 	{
 		"texture 1d",
 		"texture 2d",
@@ -368,7 +368,7 @@ namespace ml::gfx
 		type_uint_24_8,
 	};
 
-	constexpr cstring type_names[] =
+	constexpr cstring type_NAMES[] =
 	{
 		"byte",
 		"unsigned byte",
@@ -390,7 +390,7 @@ namespace ml::gfx
 		usage_dynamic,
 	};
 
-	constexpr cstring usage_names[] =
+	constexpr cstring usage_NAMES[] =
 	{
 		"stream",
 		"static",
@@ -810,7 +810,7 @@ namespace ml::gfx
 	// render context settings
 	template <> struct ML_NODISCARD data_desc<render_context> final
 	{
-		pmr::string	name		{ "Device Context" };
+		pmr::string	name		{ "RenderContext" };
 		int32_t		client		{ context_api_unknown };
 		int32_t		source		{};
 		int32_t		major		{},

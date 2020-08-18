@@ -43,7 +43,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// expression to string
+// macro to string
 #define ML_to_string(expr)		#expr
 
 // macro contents to string

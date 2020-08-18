@@ -646,8 +646,8 @@ namespace ml::gfx
 				<< "|  expression:\n"
 				<< "|    " << expr << "\n"
 				<< "|  description:\n"
-				<< "|    " << error_names[code] << "\n"
-				<< "|    " << error_descriptions[code] << "\n"
+				<< "|    " << error_NAMES[code] << "\n"
+				<< "|    " << error_DESCS[code] << "\n"
 				<< "\n";
 		}
 	}
@@ -752,47 +752,47 @@ namespace ml::gfx
 
 	shared<render_context> opengl_render_device::create_context(context_settings const & cs) noexcept
 	{
-		return _ML alloc_shared<opengl_render_context>(this, cs);
+		return alloc_shared<opengl_render_context>(this, cs);
 	}
 
 	shared<vertexarray> opengl_render_device::create_vertexarray(uint32_t prim) noexcept
 	{
-		return _ML alloc_shared<opengl_vertexarray>(this, prim);
+		return alloc_shared<opengl_vertexarray>(this, prim);
 	}
 
 	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
 	{
-		return _ML alloc_shared<opengl_vertexbuffer>(this, usage, count, data);
+		return alloc_shared<opengl_vertexbuffer>(this, usage, count, data);
 	}
 
 	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept
 	{
-		return _ML alloc_shared<opengl_indexbuffer>(this, usage, count, data);
+		return alloc_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
 	shared<texture2d> opengl_render_device::create_texture2d(data_desc<texture2d> const & value, address_t data) noexcept
 	{
-		return _ML alloc_shared<opengl_texture2d>(this, value, data);
+		return alloc_shared<opengl_texture2d>(this, value, data);
 	}
 
 	shared<texturecube> opengl_render_device::create_texturecube(data_desc<texturecube> const & value) noexcept
 	{
-		return _ML alloc_shared<opengl_texturecube>(this, value);
+		return alloc_shared<opengl_texturecube>(this, value);
 	}
 
 	shared<framebuffer> opengl_render_device::create_framebuffer(data_desc<framebuffer> const & value) noexcept
 	{
-		return _ML alloc_shared<opengl_framebuffer>(this, value);
+		return alloc_shared<opengl_framebuffer>(this, value);
 	}
 
 	shared<program> opengl_render_device::create_program() noexcept
 	{
-		return _ML alloc_shared<opengl_program>(this);
+		return alloc_shared<opengl_program>(this);
 	}
 
 	shared<shader> opengl_render_device::create_shader(data_desc<shader> const & value) noexcept
 	{
-		return _ML alloc_shared<opengl_shader>(this, value);
+		return alloc_shared<opengl_shader>(this, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

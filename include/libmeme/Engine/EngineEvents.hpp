@@ -13,31 +13,25 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(begin_loop_event) {};
-
-	ML_decl_event(end_loop_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_decl_event(begin_draw_event) {};
-
-	ML_decl_event(end_draw_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_decl_event(begin_gui_event) {};
-
-	ML_decl_event(end_gui_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	ML_decl_event(update_event) {};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_decl_event(draw_begin_event) {};
 
 	ML_decl_event(draw_event) {};
 
-	ML_decl_event(dock_gui_event) {};
+	ML_decl_event(draw_end_event) {};
 
-	ML_decl_event(draw_gui_event) {};
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_decl_event(gui_begin_event) {};
+
+	ML_decl_event(gui_dock_event) {};
+
+	ML_decl_event(gui_draw_event) {};
+
+	ML_decl_event(gui_end_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

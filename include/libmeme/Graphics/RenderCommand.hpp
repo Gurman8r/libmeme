@@ -5,6 +5,8 @@
 
 namespace ml::gfx
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// command
 	struct command final : public std::function< void(render_context *) >
 	{
@@ -17,6 +19,23 @@ namespace ml::gfx
 	{
 		return std::bind(ML_forward(fn), std::placeholders::_1, ML_forward(args)...);
 	}
+
+	// execute command
+	template <class Cmd, class Ctx
+	> static void execute(Cmd && cmd, Ctx && ctx) noexcept
+	{
+		using T = std::decay_t<decltype(ctx)>;
+		if constexpr (std::is_same_v<T, shared<render_context>>)
+		{
+			return std::invoke(ML_forward(cmd), ML_forward(ctx).get());
+		}
+		else if constexpr (std::is_convertible_v<T, render_context const *>)
+		{
+			return std::invoke(ML_forward(cmd), ML_forward(ctx));
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// builtin commands
 	class render_command final
@@ -88,34 +107,102 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto bind_vertexarray(vertexarray const * value) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_vertexarray(Value && value) noexcept
 		{
-			return make_command(&render_context::bind_vertexarray, value);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<vertexarray>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, vertexarray const *>)
+			{
+				return make_command(&render_context::bind_vertexarray, ML_forward(value));
+			}
 		}
 
-		ML_NODISCARD static auto bind_vertexbuffer(vertexbuffer const * value) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_vertexbuffer(Value && value) noexcept
 		{
-			return make_command(&render_context::bind_vertexbuffer, value);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<vertexbuffer>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, vertexbuffer const *>)
+			{
+				return make_command(&render_context::bind_vertexbuffer, ML_forward(value));
+			}
 		}
 
-		ML_NODISCARD static auto bind_indexbuffer(indexbuffer const * value) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_indexbuffer(Value && value) noexcept
 		{
-			return make_command(&render_context::bind_indexbuffer, value);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<indexbuffer>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, indexbuffer const *>)
+			{
+				return make_command(&render_context::bind_indexbuffer, ML_forward(value));
+			}
 		}
 
-		ML_NODISCARD static auto bind_texture(texture const * value, uint32_t slot = 0) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_texture(Value && value, uint32_t slot = 0) noexcept
 		{
-			return make_command(&render_context::bind_texture, value, slot);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<texture>>)
+			{
+				return bind_framebuffer(ML_forward(value).get(), slot);
+			}
+			else if constexpr (std::is_convertible_v<T, texture const *>)
+			{
+				return make_command(&render_context::bind_texture, ML_forward(value), slot);
+			}
 		}
 
-		ML_NODISCARD static auto bind_framebuffer(framebuffer const * value) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_framebuffer(Value && value) noexcept
 		{
-			return make_command(&render_context::bind_framebuffer, value);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<framebuffer>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, framebuffer const *>)
+			{
+				return make_command(&render_context::bind_framebuffer, ML_forward(value));
+			}
 		}
 
-		ML_NODISCARD static auto bind_program(program const * value) noexcept
+		template <class Value
+		> ML_NODISCARD static auto bind_program(Value && value) noexcept
 		{
-			return make_command(&render_context::bind_program, value);
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<program>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, program const *>)
+			{
+				return make_command(&render_context::bind_program, ML_forward(value));
+			}
+		}
+
+		template <class Value
+		> ML_NODISCARD static auto bind_shader(Value && value) noexcept
+		{
+			using T = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<T, shared<shader>>)
+			{
+				return bind_framebuffer(ML_forward(value).get());
+			}
+			else if constexpr (std::is_convertible_v<T, shader const *>)
+			{
+				return make_command(&render_context::bind_shader, ML_forward(value));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -136,6 +223,8 @@ namespace ml::gfx
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_RENDER_COMMAND_HPP_

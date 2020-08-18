@@ -92,6 +92,8 @@ namespace ml
 	{
 		if (m_imgui)
 		{
+			m_main_menu.menus.clear();
+
 			ML_ImGui_Shutdown();
 
 			ImGui::DestroyContext((ImGuiContext *)m_imgui);
@@ -150,7 +152,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						event_bus::fire<dock_gui_event>();
+						event_bus::fire<gui_dock_event>();
 					}
 
 					ImGui::DockSpace(

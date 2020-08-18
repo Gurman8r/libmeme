@@ -8,7 +8,11 @@
 // perspective
 namespace ml
 {
-	struct perspective_camera final : trackable
+	struct camera : trackable
+	{
+	};
+
+	struct perspective_camera final : camera
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -24,7 +28,38 @@ namespace ml
 		{
 		}
 
+		perspective_camera(perspective_camera const & other)
+			: m_position{ other.m_position	}
+			, m_forward	{ other.m_forward	}
+			, m_up		{ other.m_up		}
+			, m_right	{ other.m_right		}
+			, m_world_up{ other.m_world_up	}
+			, m_pitch	{ other.m_pitch		}
+			, m_yaw		{ other.m_yaw		}
+			, m_zoom	{ other.m_zoom		}
+		{
+		}
+
+		perspective_camera(perspective_camera && other) noexcept
+			: perspective_camera{}
+		{
+			swap(std::move(other));
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		perspective_camera & operator=(perspective_camera const & other)
+		{
+			perspective_camera temp{ other };
+			swap(temp);
+			return (*this);
+		}
+
+		perspective_camera & operator=(perspective_camera && other) noexcept
+		{
+			swap(std::move(other));
+			return (*this);
+		}
 
 		void swap(perspective_camera & other) noexcept
 		{
@@ -43,6 +78,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		vec3	m_position	;
 		vec3	m_forward	;
@@ -52,31 +89,6 @@ namespace ml
 		float_t m_pitch		;
 		float_t m_yaw		;
 		float_t m_zoom		;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-
-// orthographic
-namespace ml
-{
-	struct orthographic_camera final : trackable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void swap(orthographic_camera & other) noexcept
-		{
-			if (this != std::addressof(other))
-			{
-			}
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

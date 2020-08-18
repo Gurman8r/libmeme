@@ -19,14 +19,14 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// get previous frame
-		ML_NODISCARD static auto const & get_previous() noexcept
+		ML_NODISCARD static auto const & last_frame() noexcept
 		{
 			return get_singleton().m_previous;
 		}
 
 		// add to current frame
 		template <class ... Args
-		> static void push_sample(Args && ... args) noexcept
+		> static void add_sample(Args && ... args) noexcept
 		{
 			static auto & self{ get_singleton() };
 			self.m_current.emplace_back(sample{ ML_forward(args)... });
@@ -62,7 +62,7 @@ namespace ml::impl
 	{
 		explicit scope_benchmark(cstring id) noexcept : id{ id } {}
 
-		~scope_benchmark() noexcept { performance::push_sample(id, t.elapsed()); }
+		~scope_benchmark() noexcept { performance::add_sample(id, t.elapsed()); }
 
 	private: cstring const id; timer t{};
 	};
@@ -85,7 +85,7 @@ namespace ml::impl
 		{
 			timer t{};
 			std::invoke(ML_forward(fn));
-			performance::push_sample(id, t.elapsed());
+			performance::add_sample(id, t.elapsed());
 			return (*this);
 		}
 

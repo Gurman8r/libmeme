@@ -124,7 +124,7 @@ namespace ml
 		return (m_window = glfwCreateWindow(
 			ws.video.resolution[0],
 			ws.video.resolution[1],
-			ws.title.c_str(),
+			(m_title = ws.title).c_str(), // title
 			nullptr, // monitor
 			nullptr // share
 		)) || debug::error("failed opening glfw_window");

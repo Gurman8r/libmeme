@@ -19,7 +19,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit gui_manager(allocator_type alloc) noexcept;
+		gui_manager(allocator_type alloc = {}) noexcept;
 
 		gui_manager(window const & wnd, allocator_type alloc = {}) noexcept;
 

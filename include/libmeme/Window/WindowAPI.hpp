@@ -18,24 +18,24 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// callbacks
-	ML_alias window_char_callback				= typename void(*)(window_handle, uint32_t);
-	ML_alias window_char_mods_callback			= typename void(*)(window_handle, uint32_t, int32_t);
-	ML_alias window_close_callback				= typename void(*)(window_handle);
-	ML_alias window_content_scale_callback		= typename void(*)(window_handle, float_t, float_t);
-	ML_alias window_cursor_enter_callback		= typename void(*)(window_handle, int32_t);
-	ML_alias window_cursor_position_callback	= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_drop_callback				= typename void(*)(window_handle, int32_t, cstring[]);
-	ML_alias window_error_callback				= typename void(*)(int32_t, cstring);
-	ML_alias window_focus_callback				= typename void(*)(window_handle, int32_t);
-	ML_alias window_framebuffer_size_callback	= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_iconify_callback			= typename void(*)(window_handle, int32_t);
-	ML_alias window_key_callback				= typename void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
-	ML_alias window_maximize_callback			= typename void(*)(window_handle, int32_t);
-	ML_alias window_mouse_callback				= typename void(*)(window_handle, int32_t, int32_t, int32_t);
-	ML_alias window_position_callback			= typename void(*)(window_handle, int32_t, int32_t);
-	ML_alias window_refresh_callback			= typename void(*)(window_handle);
-	ML_alias window_scroll_callback				= typename void(*)(window_handle, float64_t, float64_t);
-	ML_alias window_size_callback				= typename void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_char_callback				= void(*)(window_handle, uint32_t);
+	ML_alias window_char_mods_callback			= void(*)(window_handle, uint32_t, int32_t);
+	ML_alias window_close_callback				= void(*)(window_handle);
+	ML_alias window_content_scale_callback		= void(*)(window_handle, float_t, float_t);
+	ML_alias window_cursor_enter_callback		= void(*)(window_handle, int32_t);
+	ML_alias window_cursor_position_callback	= void(*)(window_handle, float64_t, float64_t);
+	ML_alias window_drop_callback				= void(*)(window_handle, int32_t, cstring[]);
+	ML_alias window_error_callback				= void(*)(int32_t, cstring);
+	ML_alias window_focus_callback				= void(*)(window_handle, int32_t);
+	ML_alias window_framebuffer_size_callback	= void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_iconify_callback			= void(*)(window_handle, int32_t);
+	ML_alias window_key_callback				= void(*)(window_handle, int32_t, int32_t, int32_t, int32_t);
+	ML_alias window_maximize_callback			= void(*)(window_handle, int32_t);
+	ML_alias window_mouse_callback				= void(*)(window_handle, int32_t, int32_t, int32_t);
+	ML_alias window_position_callback			= void(*)(window_handle, int32_t, int32_t);
+	ML_alias window_refresh_callback			= void(*)(window_handle);
+	ML_alias window_scroll_callback				= void(*)(window_handle, float64_t, float64_t);
+	ML_alias window_size_callback				= void(*)(window_handle, int32_t, int32_t);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -21,120 +21,120 @@
 #include <glm/glm/gtc/matrix_transform.hpp>
 
 // CAMERA (WIP)
-namespace ml
+namespace ml::testing
 {
-	void frustum(float_t l, float_t r, float_t b, float_t t, float_t near, float_t far, mat4 & m16)
+	mat4 frustum(float_t l, float_t r, float_t b, float_t t, float_t near, float_t far)
 	{
-		vec4 const temp
+		vec4 const temp{ 2.0f * near, r - l, t - b, far - near };
+		return
 		{
-			2.0f * near,
-			r - l,
-			t - b,
-			far - near
+			temp[0] / temp[1],
+			0.f,
+			0.f,
+			0.f,
+			0.f,
+			temp[0] / temp[2],
+			0.f,
+			0.f,
+			(r + l) / temp[1],
+			(t + b) / temp[2],
+			(-far - near) / temp[3],
+			-1.0f,
+			0.f,
+			0.f,
+			(-temp[0] * far) / temp[3],
+			0.f
 		};
-		m16[0] = temp[0] / temp[1];
-		m16[1] = 0.f;
-		m16[2] = 0.f;
-		m16[3] = 0.f;
-		m16[4] = 0.f;
-		m16[5] = temp[0] / temp[2];
-		m16[6] = 0.f;
-		m16[7] = 0.f;
-		m16[8] = (r + l) / temp[1];
-		m16[9] = (t + b) / temp[2];
-		m16[10] = (-far - near) / temp[3];
-		m16[11] = -1.0f;
-		m16[12] = 0.f;
-		m16[13] = 0.f;
-		m16[14] = (-temp[0] * far) / temp[3];
-		m16[15] = 0.f;
 	}
 
-	void perspective(float_t fovyInDegrees, float_t aspectRatio, float_t znear, float_t zfar, mat4 & m16)
+	mat4 perspective(float_t fovyInDegrees, float_t aspectRatio, float_t znear, float_t zfar)
 	{
 		float_t ymax = znear * std::tanf(fovyInDegrees * 3.141592f / 180.0f);
 		float_t xmax = ymax * aspectRatio;
-		frustum(-xmax, xmax, -ymax, ymax, znear, zfar, m16);
+		return frustum(-xmax, xmax, -ymax, ymax, znear, zfar);
 	}
 
-	void cross(float_t const* a, float_t const* b, float_t* r)
+	vec3 cross(vec3 const & a, vec3 const & b)
 	{
-		r[0] = a[1] * b[2] - a[2] * b[1];
-		r[1] = a[2] * b[0] - a[0] * b[2];
-		r[2] = a[0] * b[1] - a[1] * b[0];
+		return
+		{
+			a[1] * b[2] - a[2] * b[1],
+			a[2] * b[0] - a[0] * b[2],
+			a[0] * b[1] - a[1] * b[0]
+		};
 	}
 
-	float_t dot(float_t const* a, float_t const* b)
+	float_t dot(vec3 const & a, vec3 const & b)
 	{
 		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 	}
 
-	void normalize(float_t const* a, float_t *r)
+	vec3 normalize(vec3 const & a)
 	{
-		float_t il = 1.f / (std::sqrtf(dot(a, a)) + FLT_EPSILON);
-		r[0] = a[0] * il;
-		r[1] = a[1] * il;
-		r[2] = a[2] * il;
+		float_t const il{ 1.f / (std::sqrtf(dot(a, a)) + FLT_EPSILON) };
+		return
+		{
+			a[0] * il,
+			a[1] * il,
+			a[2] * il
+		};
 	}
 
-	void look_at(float_t const* eye, float_t const* at, float_t const* up, float_t *m16)
+	mat4 look_at(vec3 const & eye, vec3 const & at, vec3 const & up)
 	{
-		float_t X[3], Y[3], Z[3], tmp[3];
+		vec3 X, Y, Z, temp{ eye[0] - at[0], eye[1] - at[1], eye[2] - at[2] };
 
-		tmp[0] = eye[0] - at[0];
-		tmp[1] = eye[1] - at[1];
-		tmp[2] = eye[2] - at[2];
-		//Z = util::normalize(eye - at);
-		normalize(tmp, Z);
-		normalize(up, Y);
-		//Y = util::normalize(up);
+		Z = normalize(temp);
+		Y = normalize(up);
 
-		cross(Y, Z, tmp);
-		//tmp.cross(Y, Z);
-		normalize(tmp, X);
-		//X = util::normalize(tmp);
+		temp = cross(Y, Z);
+		X = normalize(temp);
 
-		cross(Z, X, tmp);
-		//tmp.cross(Z, X);
-		normalize(tmp, Y);
-		//Y = util::normalize(tmp);
+		temp = cross(Z, X);
+		Y = normalize(temp);
 
-		m16[0] = X[0];
-		m16[1] = Y[0];
-		m16[2] = Z[0];
-		m16[3] = 0.f;
-		m16[4] = X[1];
-		m16[5] = Y[1];
-		m16[6] = Z[1];
-		m16[7] = 0.f;
-		m16[8] = X[2];
-		m16[9] = Y[2];
-		m16[10] = Z[2];
-		m16[11] = 0.f;
-		m16[12] = -dot(X, eye);
-		m16[13] = -dot(Y, eye);
-		m16[14] = -dot(Z, eye);
-		m16[15] = 1.0f;
+		return
+		{
+			X[0],
+			Y[0],
+			Z[0],
+			0.f,
+			X[1],
+			Y[1],
+			Z[1],
+			0.f,
+			X[2],
+			Y[2],
+			Z[2],
+			0.f,
+			-dot(X, eye),
+			-dot(Y, eye),
+			-dot(Z, eye),
+			1.0f,
+		};
 	}
 
-	void orthographic(float_t const l, float_t r, float_t b, float_t const t, float_t zn, float_t const zf, float_t *m16)
+	mat4 orthographic(float_t l, float_t r, float_t b, float_t t, float_t zn, float_t zf)
 	{
-		m16[0] = 2 / (r - l);
-		m16[1] = 0.f;
-		m16[2] = 0.f;
-		m16[3] = 0.f;
-		m16[4] = 0.f;
-		m16[5] = 2.f / (t - b);
-		m16[6] = 0.f;
-		m16[7] = 0.f;
-		m16[8] = 0.f;
-		m16[9] = 0.f;
-		m16[10] = 1.0f / (zf - zn);
-		m16[11] = 0.f;
-		m16[12] = (l + r) / (l - r);
-		m16[13] = (t + b) / (b - t);
-		m16[14] = zn / (zn - zf);
-		m16[15] = 1.0f;
+		return
+		{
+			2 / (r - l),
+			0.f,
+			0.f,
+			0.f,
+			0.f,
+			2.f / (t - b),
+			0.f,
+			0.f,
+			0.f,
+			0.f,
+			1.0f / (zf - zn),
+			0.f,
+			(l + r) / (l - r),
+			(t + b) / (b - t),
+			zn / (zn - zf),
+			1.0f
+		};
 	}
 }
 
@@ -351,7 +351,8 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const & testres{ memory::get_test_resource() };
+
+			static auto const testres{ app().mem().get_test_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -368,24 +369,57 @@ namespace ml
 
 		demo(application * app) noexcept : plugin{ app }
 		{
-			event_bus::add_listener< load_event		>(this);
-			event_bus::add_listener< update_event	>(this);
-			event_bus::add_listener< draw_event		>(this);
-			event_bus::add_listener< dock_gui_event	>(this);
-			event_bus::add_listener< draw_gui_event	>(this);
-			event_bus::add_listener< unload_event	>(this);
+			app->bus().add_listener< load_event				>(this);
+			app->bus().add_listener< unload_event			>(this);
+
+			app->bus().add_listener< update_event			>(this);
+			app->bus().add_listener< draw_event				>(this);
+			app->bus().add_listener< gui_dock_event			>(this);
+			app->bus().add_listener< gui_draw_event			>(this);
+
+			app->bus().add_listener< key_event				>(this);
+			app->bus().add_listener< mouse_event			>(this);
+			app->bus().add_listener< cursor_position_event	>(this);
 		}
 
 		void on_event(event const & ev) override
 		{
-			switch (ev.ID)
+			switch (ev.id)
 			{
-			case hashof_v<	load_event		>: return on_load		(*ev.cast<	load_event		>());
-			case hashof_v<	update_event	>: return on_update		(*ev.cast<	update_event	>());
-			case hashof_v<	draw_event		>: return on_draw		(*ev.cast<	draw_event		>());
-			case hashof_v<	dock_gui_event	>: return on_gui_dock	(*ev.cast<	dock_gui_event	>());
-			case hashof_v<	draw_gui_event	>: return on_gui_draw	(*ev.cast<	draw_gui_event	>());
-			case hashof_v<	unload_event	>: return on_unload		(*ev.cast<	unload_event	>());
+			case hashof_v<load_event	>: return on_load		((load_event	 const &)ev);
+			case hashof_v<unload_event	>: return on_unload		((unload_event	 const &)ev);
+			case hashof_v<update_event	>: return on_update		((update_event	 const &)ev);
+			case hashof_v<draw_event	>: return on_draw		((draw_event	 const &)ev);
+			case hashof_v<gui_dock_event>: return on_gui_dock	((gui_dock_event const &)ev);
+			case hashof_v<gui_draw_event>: return on_gui_draw	((gui_draw_event const &)ev);
+			
+			case hashof_v<key_event>: {
+				switch (auto const & k{ (key_event const &)ev }; k.key)
+				{
+				case key_code_w: {
+					switch (k.action)
+					{
+					case input_state_release: { std::cout << "w released\n"; } break;
+					case input_state_press	: { std::cout << "w pressed\n"; } break;
+					case input_state_repeat	: { std::cout << "w repeated\n"; } break;
+					}
+				} break;
+				}
+			} break;
+
+			case hashof_v<mouse_event>: {
+				switch (auto const & m{ (mouse_event const &)ev }; m.button)
+				{
+				case mouse_button_0: {} break;
+				case mouse_button_1: {} break;
+				case mouse_button_2: {} break;
+				}
+			} break;
+
+			case hashof_v<cursor_position_event>: {
+				auto const & c{ (cursor_position_event const &)ev };
+				float64_t const x = c.x, y = c.y;
+			} break;
 			}
 		}
 
@@ -457,7 +491,7 @@ namespace ml
 				);
 			}
 
-			// MATERIALS
+			// UNIFORMS
 			{
 				// timers
 				auto const _timers = uniform_buffer
@@ -504,9 +538,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"]	= alloc_shared<mesh>(app().path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"] = alloc_shared<mesh>(app().path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"]		= alloc_shared<mesh>(app().path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"	] = alloc_shared<mesh>(app().path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"	] = alloc_shared<mesh>(app().path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"		] = alloc_shared<mesh>(app().path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -581,12 +615,12 @@ namespace ml
 			{
 				ML_defer(&){ m_ecs.apply(); };
 
-				auto make_renderer = [&](auto shd, auto mat, auto msh, auto tf) noexcept
+				auto make_renderer = [&](auto shd, auto uni, auto msh, auto tf) noexcept
 				{
 					auto & h{ m_ecs.create_handle() };
 					h.add_tag<t_default>();
 					h.add_component<c_shader>	(m_shaders	[shd]);
-					h.add_component<c_uniforms>	(m_uniforms[mat]);
+					h.add_component<c_uniforms>	(m_uniforms	[uni]);
 					h.add_component<c_mesh>		(m_meshes	[msh]);
 					h.add_component<c_transform>(tf);
 					return h;
@@ -605,6 +639,23 @@ namespace ml
 					});
 			}
 		}
+
+		void on_unload(unload_event const &)
+		{
+			// unload stuff, etc...
+
+			m_ecs.clear();
+			m_images.clear();
+			m_meshes.clear();
+			m_shaders.clear();
+			m_uniforms.clear();
+			m_fonts.clear();
+			m_textures.clear();
+
+			ax::NodeEditor::DestroyEditor(m_node_editor);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void on_update(update_event const &)
 		{
@@ -640,7 +691,7 @@ namespace ml
 
 			for (auto const & cmd :
 			{
-				gfx::render_command::bind_framebuffer(m_fbo[0].get()),
+				gfx::render_command::bind_framebuffer(m_fbo[0]),
 
 				gfx::render_command::set_clear_color(colors::magenta),
 
@@ -654,15 +705,13 @@ namespace ml
 				gfx::render_command::bind_framebuffer(nullptr),
 			})
 			{
-				std::invoke(cmd, app().window().get_render_context().get());
+				gfx::execute(cmd, app().window().get_render_context());
 			}
 		}
 
-		void on_gui_dock(dock_gui_event const &)
+		void on_gui_dock(gui_dock_event const &)
 		{
 			// gui docking
-
-			//ImGui::SetCurrentContext(app().gui().get_context());
 
 			enum : int32_t // node ids
 			{
@@ -707,11 +756,9 @@ namespace ml
 			}
 		}
 
-		void on_gui_draw(draw_gui_event const &)
+		void on_gui_draw(gui_draw_event const &)
 		{
 			// gui stuff, etc...
-
-			ImGui::SetCurrentContext(app().gui().get_context());
 
 			static ML_scope(&) // setup main menu bar
 			{
@@ -776,21 +823,6 @@ namespace ml
 				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
 				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
 			}
-		}
-
-		void on_unload(unload_event const &)
-		{
-			// unload stuff, etc...
-
-			m_ecs.clear();
-			m_images.clear();
-			m_shaders.clear();
-			m_uniforms.clear();
-			m_meshes.clear();
-			m_textures.clear();
-			m_fonts.clear();
-
-			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -921,19 +953,23 @@ namespace ml
 
 			m_console.commands.push_back({ "py", [&](auto && args) noexcept
 			{
-				if (!m_console.command_lock && args.empty())
+				if (!m_console.cmd_lock && args.empty())
 				{
-					m_console.command_lock = "py";
+					m_console.cmd_lock = "py";
 
 					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
 				}
-				else if ((args[0][0] == '\\') && (0 == std::strcmp(m_console.command_lock, "py")))
+				else if (
+					(args[0][0] == '\\') &&
+					m_console.cmd_lock &&
+					(0 == std::strcmp(m_console.cmd_lock, "py"))
+				)
 				{
-					m_console.command_lock = nullptr;
+					m_console.cmd_lock = nullptr;
 				}
 				else
 				{
-					app().execute_string(util::detokenize(args));
+					app().do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -1205,7 +1241,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto const & testres{ memory::get_test_resource() };
+			static auto const testres{ app().mem().get_test_resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
@@ -1261,7 +1297,7 @@ namespace ml
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
-					for (auto const & rec : memory::get_records().values())
+					for (auto const & rec : app().mem().get_records().values())
 					{
 						ML_ImGui_ScopeID(&rec);
 						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
@@ -1369,7 +1405,7 @@ namespace ml
 			// benchmarks
 			ImGui::Columns(2);
 			
-			if (static auto const & prev{ performance::get_previous() }; !prev.empty())
+			if (static auto const & prev{ app().perf().last_frame() }; !prev.empty())
 			{
 				ImGui::Separator();
 				for (auto const & e : prev)
@@ -1389,71 +1425,66 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & wnd{ app().window() };
-			static auto const & dev{ wnd.get_render_device() };
+			static auto const & wnd	{ app().window() };
+			static auto const & dev	{ wnd.get_render_device() };
+			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
-			static auto const & info{ dev->get_info() };
 
 			if (ImGui::BeginMenuBar())
 			{
-				ImGui::Text("%s", info.vendor.c_str()); gui::tooltip("vendor"); ImGui::Separator();
-				ImGui::Text("%s", info.renderer.c_str()); gui::tooltip("renderer"); ImGui::Separator();
-				ImGui::Text("%s", info.version.c_str()); gui::tooltip("version"); ImGui::Separator();
-				ImGui::Text("%s", info.shading_language_version.c_str()); gui::tooltip("shading language version"); ImGui::Separator();
+				ImGui::Text("%s", inf.vendor.c_str()); gui::tooltip("vendor"); ImGui::Separator();
+				ImGui::Text("%s", inf.renderer.c_str()); gui::tooltip("renderer"); ImGui::Separator();
+				ImGui::Text("%s", inf.version.c_str()); gui::tooltip("version"); ImGui::Separator();
+				ImGui::Text("%s", inf.shading_language_version.c_str()); gui::tooltip("shading language version"); ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
 
 			ImGui::Separator();
 
-			if (gfx::alpha_state a{}; ImGui::CollapsingHeader("alpha"))
+			if (gfx::alpha_state a{}; ImGui::CollapsingHeader("alpha") && ctx->get_alpha_state(&a))
 			{
-				ctx->get_alpha_state(&a);
 				ImGui::Checkbox("enabled", &a.enabled);
-				ImGui::Text("pred: %s (%u)", gfx::predicate_names[a.pred], a.pred);
+				ImGui::Text("pred: %s (%u)", gfx::predicate_NAMES[a.pred], a.pred);
 				ImGui::Text("ref: %f", a.ref);
 			}
 			ImGui::Separator();
 
-			if (gfx::blend_state b{}; ImGui::CollapsingHeader("blend"))
+			if (gfx::blend_state b{}; ImGui::CollapsingHeader("blend") && ctx->get_blend_state(&b))
 			{
-				ctx->get_blend_state(&b);
 				ImGui::Checkbox("enabled", &b.enabled);
 				ImGui::ColorEdit4("color", b.color);
-				ImGui::Text("color equation: %s (%u)", gfx::equation_names[b.color_equation], b.color_equation);
-				ImGui::Text("color sfactor: %s (%u)", gfx::factor_names[b.color_sfactor], b.color_sfactor);
-				ImGui::Text("color dfactor: %s (%u)", gfx::factor_names[b.color_dfactor], b.color_dfactor);
-				ImGui::Text("alpha equation: %s (%u)", gfx::equation_names[b.alpha_equation], b.alpha_equation);
-				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_names[b.alpha_sfactor], b.alpha_sfactor);
-				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_names[b.alpha_dfactor], b.alpha_dfactor);
+				ImGui::Text("color equation: %s (%u)", gfx::equation_NAMES[b.color_equation], b.color_equation);
+				ImGui::Text("color sfactor: %s (%u)", gfx::factor_NAMES[b.color_sfactor], b.color_sfactor);
+				ImGui::Text("color dfactor: %s (%u)", gfx::factor_NAMES[b.color_dfactor], b.color_dfactor);
+				ImGui::Text("alpha equation: %s (%u)", gfx::equation_NAMES[b.alpha_equation], b.alpha_equation);
+				ImGui::Text("alpha sfactor: %s (%u)", gfx::factor_NAMES[b.alpha_sfactor], b.alpha_sfactor);
+				ImGui::Text("alpha dfactor: %s (%u)", gfx::factor_NAMES[b.alpha_dfactor], b.alpha_dfactor);
 			}
 			ImGui::Separator();
 
-			if (gfx::cull_state c{}; ImGui::CollapsingHeader("cull"))
+			if (gfx::cull_state c{}; ImGui::CollapsingHeader("cull") && ctx->get_cull_state(&c))
 			{
-				ctx->get_cull_state(&c);
 				ImGui::Checkbox("enabled", &c.enabled);
-				ImGui::Text("facet: %s (%u)", gfx::facet_names[c.facet], c.facet);
-				ImGui::Text("order: %s (%u)", gfx::order_names[c.order], c.order);
+				ImGui::Text("facet: %s (%u)", gfx::facet_NAMES[c.facet], c.facet);
+				ImGui::Text("order: %s (%u)", gfx::order_NAMES[c.order], c.order);
 			}
 			ImGui::Separator();
 
-			if (gfx::depth_state d{}; ImGui::CollapsingHeader("depth"))
+			if (gfx::depth_state d{}; ImGui::CollapsingHeader("depth") && ctx->get_depth_state(&d))
 			{
-				ctx->get_depth_state(&d);
 				ImGui::Checkbox("enabled", &d.enabled);
-				ImGui::Text("pred: %s (%u) ", gfx::predicate_names[d.pred], d.pred);
+				ImGui::Text("pred: %s (%u) ", gfx::predicate_NAMES[d.pred], d.pred);
 				ImGui::Text("range: %f, %f", d.range[0], d.range[1]);
 			}
 			ImGui::Separator();
 
-			if (gfx::stencil_state s{}; ImGui::CollapsingHeader("stencil"))
+			if (gfx::stencil_state s{}; ImGui::CollapsingHeader("stencil") && ctx->get_stencil_state(&s))
 			{
-				ctx->get_stencil_state(&s);
 				ImGui::Checkbox("enabled", &s.enabled);
-				ImGui::Text("front pred: %s (%u)", gfx::predicate_names[s.front.pred], s.front.pred);
+				ImGui::Text("front pred: %s (%u)", gfx::predicate_NAMES[s.front.pred], s.front.pred);
 				ImGui::Text("front ref: %i", s.front.ref);
 				ImGui::Text("front mask: %u", s.front.mask);
-				ImGui::Text("back pred: %s (%u)", gfx::predicate_names[s.back.pred], s.back.pred);
+				ImGui::Text("back pred: %s (%u)", gfx::predicate_NAMES[s.back.pred], s.back.pred);
 				ImGui::Text("back ref: %i", s.back.ref);
 				ImGui::Text("back mask: %u", s.back.mask);
 			}
@@ -1483,7 +1514,7 @@ namespace ml
 
 extern "C" ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::application * app)
 {
-	return ml::alloc_new<ml::demo>(app);
+	return app->mem().alloc_new<ml::demo>(app);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
