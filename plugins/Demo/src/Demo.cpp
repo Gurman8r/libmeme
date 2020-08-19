@@ -384,16 +384,16 @@ namespace ml
 
 		void on_event(event const & ev) override
 		{
-			switch (ev.id)
+			switch (ev)
 			{
-			case hashof_v<load_event	>: return on_load		((load_event	 const &)ev);
-			case hashof_v<unload_event	>: return on_unload		((unload_event	 const &)ev);
-			case hashof_v<update_event	>: return on_update		((update_event	 const &)ev);
-			case hashof_v<draw_event	>: return on_draw		((draw_event	 const &)ev);
-			case hashof_v<gui_dock_event>: return on_gui_dock	((gui_dock_event const &)ev);
-			case hashof_v<gui_draw_event>: return on_gui_draw	((gui_draw_event const &)ev);
+			case load_event		::ID: return on_load		((load_event	 const &)ev);
+			case unload_event	::ID: return on_unload		((unload_event	 const &)ev);
+			case update_event	::ID: return on_update		((update_event	 const &)ev);
+			case draw_event		::ID: return on_draw		((draw_event	 const &)ev);
+			case gui_dock_event	::ID: return on_gui_dock	((gui_dock_event const &)ev);
+			case gui_draw_event	::ID: return on_gui_draw	((gui_draw_event const &)ev);
 			
-			case hashof_v<key_event>: {
+			case key_event::ID: {
 				switch (auto const & k{ (key_event const &)ev }; k.key)
 				{
 				case key_code_w: {
@@ -407,7 +407,7 @@ namespace ml
 				}
 			} break;
 
-			case hashof_v<mouse_event>: {
+			case mouse_event::ID: {
 				switch (auto const & m{ (mouse_event const &)ev }; m.button)
 				{
 				case mouse_button_0: {} break;
@@ -416,7 +416,7 @@ namespace ml
 				}
 			} break;
 
-			case hashof_v<cursor_position_event>: {
+			case cursor_position_event::ID: {
 				auto const & c{ (cursor_position_event const &)ev };
 				float64_t const x = c.x, y = c.y;
 			} break;
@@ -744,12 +744,12 @@ namespace ml
 				d.dock(m_gui_ecs.title			, d[left_dn]);
 				d.dock(m_gui_assets.title		, d[left_dn]);
 				d.dock(m_gui_files.title		, d[left_dn]);
-				d.dock(m_gui_console.title		, d[left_dn]);
+				d.dock(m_gui_renderer.title		, d[left_dn]);
 				d.dock(m_gui_profiler.title		, d[left_dn2]);
 				d.dock(m_gui_memory.title		, d[right]);
 				d.dock(m_gui_docs.title			, d[right]);
 				d.dock(m_gui_nodes.title		, d[right]);
-				d.dock(m_gui_renderer.title		, d[right]);
+				d.dock(m_gui_console.title		, d[right]);
 
 				// end builder
 				d.end_builder(root);
@@ -816,12 +816,12 @@ namespace ml
 				m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
 				m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
 				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
-				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
+				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
 				m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
 				m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
 				m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
 				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
-				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
+				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
 			}
 		}
 
@@ -1276,11 +1276,12 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				static memory::record const * selected_record{};
+				auto const & records{ app().mem().get_records().values() };
+				static auto selected_record{ &records.front() };
 				char selected_address[20] = "highlight";
 				if (selected_record)
 				{
-					std::sprintf(selected_address, "%p", selected_record->data);
+					std::sprintf(selected_address, "%p", selected_record->addr);
 				}
 				if (ImGui::BeginCombo("##records", selected_address, 0))
 				{
@@ -1297,17 +1298,17 @@ namespace ml
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
-					for (auto const & rec : app().mem().get_records().values())
+					for (auto const & rec : records)
 					{
 						ML_ImGui_ScopeID(&rec);
-						char addr[20] = ""; std::sprintf(addr, "%p", rec.data);
+						char addr[20] = ""; std::sprintf(addr, "%p", rec.addr);
 						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
 						ImGui::TextDisabled("%u", rec.size); ImGui::NextColumn();
 						if (pressed)
 						{
 							selected_record = &rec;
-							highlight_memory(rec.data, rec.size);
+							highlight_memory(rec.addr, rec.size);
 						}
 					}
 					ImGui::Columns(1);

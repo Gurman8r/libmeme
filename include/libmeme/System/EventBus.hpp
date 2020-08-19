@@ -38,7 +38,7 @@ namespace ml
 		> static bool add_listener(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			return add_listener(hashof_v<Ev>, value);
+			return add_listener(Ev::ID, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,7 +48,7 @@ namespace ml
 			static auto & self{ get_singleton() };
 
 			// get category
-			if (auto const c{ self.m_listeners.find(ev.id) })
+			if (auto const c{ self.m_listeners.find(ev) })
 			{
 				// for each listener
 				for (auto const & l : (*c->second))

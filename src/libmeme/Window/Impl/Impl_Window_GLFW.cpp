@@ -589,7 +589,8 @@ namespace ml
 	window_error_callback glfw_window::set_error_callback(window_error_callback fn)
 	{
 		return reinterpret_cast<window_error_callback>(
-			glfwSetErrorCallback(reinterpret_cast<GLFWerrorfun>(fn)));
+			glfwSetErrorCallback(
+				reinterpret_cast<GLFWerrorfun>(fn)));
 	}
 
 	window_focus_callback glfw_window::set_focus_callback(window_focus_callback fn)

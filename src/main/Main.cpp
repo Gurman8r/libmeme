@@ -38,7 +38,7 @@ static auto const default_settings{ R"(
 		"guistyle"	: "assets/styles/obsidian.style"
 	},
 	"window": {
-		"title": "libmeme",
+		"title": "libmeme <3",
 		"video": {
 			"resolution"	: [ 1280, 720 ],
 			"bits_per_pixel": [ 8, 8, 8, 8 ],
@@ -86,15 +86,13 @@ ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	auto app = alloc_new<application>(std::invoke([&f = std::ifstream{ CONFIG_FILE }]()
+	auto app = alloc_shared<application>(std::invoke([&f = std::ifstream{ CONFIG_FILE }]()
 	{
 		ML_defer(&f) { f.close(); };
 
 		return f ? json::parse(f) : default_settings;
 	}));
 
-	ML_defer(&app) { delete app; };
-	
 	event_bus::fire<load_event>();
 	
 	ML_defer(){ event_bus::fire<unload_event>(); };

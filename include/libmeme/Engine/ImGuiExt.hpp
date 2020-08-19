@@ -517,7 +517,7 @@ namespace ml::gui
 
 			// COMMAND LINE
 			bool reclaim_focus{};
-			ImGui::TextDisabled("$:"); ImGui::SameLine();
+			ImGui::TextDisabled("%s:~$", cmd_lock ? cmd_lock : ""); ImGui::SameLine();
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth());
 			if (ImGui::InputText("##input", &input[0], ML_arraysize(input),
 				ImGuiInputTextFlags_EnterReturnsTrue |

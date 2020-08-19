@@ -186,9 +186,9 @@ namespace ml
 
 	void application::on_event(event const & ev)
 	{
-		switch (ev.id)
+		switch (ev)
 		{
-		case hashof_v<draw_begin_event>: {
+		case draw_begin_event::ID: {
 			for (auto const & cmd :
 			{
 				gfx::render_command::set_clear_color(colors::black),
@@ -200,36 +200,36 @@ namespace ml
 			}
 		} break;
 
-		case hashof_v<gui_begin_event>: {
+		case gui_begin_event::ID: {
 			m_gui.begin_frame();
 		} break;
 
-		case hashof_v<gui_draw_event>: {
+		case gui_draw_event::ID: {
 			m_gui.draw_default();
 		} break;
 
-		case hashof_v<gui_end_event>: {
+		case gui_end_event::ID: {
 			m_gui.end_frame();
 		} break;
 
-		case hashof_v<draw_end_event>: {
+		case draw_end_event::ID: {
 			if (m_window.get_hints() & window_hints_doublebuffer)
 			{
 				window::swap_buffers(m_window.get_handle());
 			}
 		} break;
 
-		case hashof_v<key_event>: {
+		case key_event::ID: {
 			auto const & k{ (key_event const &)ev };
 			m_input.keyboard[k.key] = k.action;
 		} break;
 
-		case hashof_v<mouse_event>: {
+		case mouse_event::ID: {
 			auto const & m{ (mouse_event const &)ev };
 			m_input.mouse[m.button] = m.action;
 		} break;
 
-		case hashof_v<cursor_position_event>: {
+		case cursor_position_event::ID: {
 			auto const & c{ (cursor_position_event const &)ev };
 			m_input.cursor = { c.x, c.y };
 		} break;
