@@ -42,7 +42,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	glfw_window::glfw_window() noexcept : m_title{}, m_hints{}, m_window{}, m_monitor{}
+	glfw_window::glfw_window() noexcept : m_hints{}, m_window{}, m_monitor{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
 		ML_assert("failed initializing glfw window" && glfw_init);
@@ -124,7 +124,7 @@ namespace ml
 		return (m_window = glfwCreateWindow(
 			ws.video.resolution[0],
 			ws.video.resolution[1],
-			(m_title = ws.title).c_str(), // title
+			ws.title.c_str(), // title
 			nullptr, // monitor
 			nullptr // share
 		)) || debug::error("failed opening glfw_window");
@@ -243,11 +243,6 @@ namespace ml
 		vec2i temp{};
 		glfwGetWindowSize((GLFWwindow *)m_window, &temp[0], &temp[1]);
 		return temp;
-	}
-
-	cstring glfw_window::get_title() const
-	{
-		return m_title.c_str();
 	}
 
 	void * glfw_window::get_user_pointer() const
@@ -424,7 +419,7 @@ namespace ml
 
 	void glfw_window::set_title(cstring value)
 	{
-		glfwSetWindowTitle(m_window, (m_title = value).c_str());
+		glfwSetWindowTitle(m_window, value);
 	}
 
 	void glfw_window::set_user_pointer(void * value)

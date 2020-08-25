@@ -85,7 +85,7 @@ namespace ml
 			}),
 		})
 		{
-			std::invoke(cmd, m_ctx.get());
+			gfx::execute(cmd, m_ctx);
 		}
 
 		return true;

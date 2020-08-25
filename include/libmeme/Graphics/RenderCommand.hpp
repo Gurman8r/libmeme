@@ -22,7 +22,7 @@ namespace ml::gfx
 
 	// execute command
 	template <class Cmd, class Ctx
-	> static void execute(Cmd && cmd, Ctx && ctx) noexcept
+	> static decltype(auto) execute(Cmd && cmd, Ctx && ctx) noexcept
 	{
 		using T = std::decay_t<decltype(ctx)>;
 		if constexpr (std::is_same_v<T, shared<render_context>>)

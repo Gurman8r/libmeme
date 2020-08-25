@@ -24,16 +24,17 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gui_manager::gui_manager(allocator_type alloc) noexcept
+	gui_manager::gui_manager(event_bus * bus, allocator_type alloc) noexcept
 		: m_imgui		{}
+		, m_bus			{ bus }
 		, m_main_menu	{ alloc }
 		, m_dockspace	{ alloc }
 	{
 		IMGUI_CHECKVERSION();
 	}
 
-	gui_manager::gui_manager(window const & wnd, allocator_type alloc) noexcept
-		: gui_manager{ alloc }
+	gui_manager::gui_manager(window const & wnd, event_bus * bus, allocator_type alloc) noexcept
+		: gui_manager{ bus, alloc }
 	{
 		ML_assert(startup(wnd));
 	}
@@ -54,8 +55,8 @@ namespace ml
 		// allocators
 		ImGui::SetAllocatorFunctions
 		(
-			[](size_t s, auto) noexcept { return memory::allocate(s); },
-			[](void * p, auto) noexcept { return memory::deallocate(p); },
+			[](size_t s, auto) noexcept { return memory::get()->mallocate(s); },
+			[](void * p, auto) noexcept { return memory::get()->deallocate(p); },
 			nullptr
 		);
 
@@ -152,7 +153,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						event_bus::fire<gui_dock_event>();
+						m_bus->fire<gui_dock_event>();
 					}
 
 					ImGui::DockSpace(

@@ -31,8 +31,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		scoped<	gfx::render_device	>	m_dev;
-		shared<	gfx::render_context	>	m_ctx;
+		scoped<	gfx::render_device	> m_dev; // device
+		shared<	gfx::render_context	> m_ctx; // context
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

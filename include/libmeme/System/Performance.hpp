@@ -6,7 +6,7 @@
 namespace ml
 {
 	// performance tracker singleton
-	struct ML_SYSTEM_API performance final : public singleton<performance>
+	class ML_SYSTEM_API performance final : public singleton<performance>
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,6 +42,36 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// scope benchmark
+		struct ML_NODISCARD scope_benchmark final
+		{
+			explicit scope_benchmark(cstring id) noexcept : id{ id } {}
+
+			~scope_benchmark() noexcept { add_sample(id, t.elapsed()); }
+
+		private: cstring const id; timer t{};
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		// lambda benchmark
+		struct ML_NODISCARD lambda_benchmark final
+		{
+			explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
+
+			template <class Fn> auto const & operator+(Fn && fn) const & noexcept
+			{
+				timer t{};
+				std::invoke(ML_forward(fn));
+				add_sample(id, t.elapsed());
+				return (*this);
+			}
+
+		private: cstring const id;
+		};
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
 		friend singleton;
 
@@ -55,47 +85,13 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml::impl
-{
-	// scope benchmark
-	struct ML_NODISCARD scope_benchmark final
-	{
-		explicit scope_benchmark(cstring id) noexcept : id{ id } {}
-
-		~scope_benchmark() noexcept { performance::add_sample(id, t.elapsed()); }
-
-	private: cstring const id; timer t{};
-	};
-}
-
 // scope benchmark
 #define ML_benchmark_S(id) \
-	auto ML_anon = _ML impl::scope_benchmark{ id }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml::impl
-{
-	// lambda benchmark
-	struct ML_NODISCARD lambda_benchmark final
-	{
-		explicit lambda_benchmark(cstring id) noexcept : id{ id } {}
-
-		template <class Fn> auto const & operator+(Fn && fn) const & noexcept
-		{
-			timer t{};
-			std::invoke(ML_forward(fn));
-			performance::add_sample(id, t.elapsed());
-			return (*this);
-		}
-
-	private: cstring const id;
-	};
-}
+	auto ML_anon = _ML performance::scope_benchmark{ id }
 
 // lambda benchmark
-#define ML_benchmark_L(id) \
-	auto ML_anon = _ML impl::lambda_benchmark{ id } + [&]() noexcept
+#define ML_benchmark_L(id, ...) \
+	auto ML_anon = _ML performance::lambda_benchmark{ id } + [##__VA_ARGS__]() noexcept
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

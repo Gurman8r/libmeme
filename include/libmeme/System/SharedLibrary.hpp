@@ -76,14 +76,14 @@ namespace ml
 
 		bool close();
 
-		void * get_function(cstring value);
+		void * proc(cstring value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
 		> decltype(auto) call(cstring name, Args && ... args) noexcept
 		{
-			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(get_function(name)) })
+			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(proc(name)) })
 			{
 				if constexpr (!std::is_same_v<Ret, void>)
 				{

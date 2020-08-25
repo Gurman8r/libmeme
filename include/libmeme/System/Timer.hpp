@@ -64,6 +64,16 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
+	static void to_json(json & j, duration const & v)
+	{
+		j = v.count();
+	}
+
+	static void from_json(json const & j, duration & v)
+	{
+		j.get_to((float64_t &)v);
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 

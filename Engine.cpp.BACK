@@ -1,4 +1,4 @@
-#include <libmeme/Engine/Application.hpp>
+#include <libmeme/Engine/Engine.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -9,89 +9,91 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application * application::g_app{};
+	engine * engine::g_app{};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application::application(json const & j, allocator_type alloc) noexcept
-		: m_running	{}
-		, m_sys		{}
+	engine::engine(json const & j, allocator_type alloc) noexcept : event_listener{ &m_bus }
+		, m_running	{}
 		, m_time	{}
 		, m_config	{ json{ j } }
 		, m_path	{ fs::current_path(), j["path"]["content"] }
+		, m_bus		{}
 		, m_window	{}
-		, m_gui		{ alloc }
+		, m_gui		{ &m_bus, alloc }
 		, m_input	{}
 		, m_plugins	{ alloc }
 	{
 		ML_assert("another application is already running" && (!g_app && (g_app = this)));
 
 		// EVENTS
-		event_bus::add_listener< draw_begin_event		>(this);
-		event_bus::add_listener< gui_begin_event		>(this);
-		event_bus::add_listener< gui_draw_event			>(this);
-		event_bus::add_listener< gui_end_event			>(this);
-		event_bus::add_listener< draw_end_event			>(this);
-		event_bus::add_listener< key_event				>(this);
-		event_bus::add_listener< mouse_event			>(this);
-		event_bus::add_listener< cursor_position_event	>(this);
+		m_bus.add_listener< draw_begin_event		>(this);
+		m_bus.add_listener< gui_begin_event			>(this);
+		m_bus.add_listener< gui_draw_event			>(this);
+		m_bus.add_listener< gui_end_event			>(this);
+		m_bus.add_listener< draw_end_event			>(this);
+		m_bus.add_listener< key_event				>(this);
+		m_bus.add_listener< mouse_event				>(this);
+		m_bus.add_listener< cursor_position_event	>(this);
 
 		// WINDOW
 		ML_assert(m_window.open(j["window"]));
 		{
+			static auto b{ &m_bus };
+
 			m_window.set_char_callback([
-			](auto ... x) noexcept { event_bus::fire<char_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<char_event>(ML_forward(x)...); });
 
 			m_window.set_char_mods_callback([
-			](auto ... x) noexcept { event_bus::fire<char_mods_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<char_mods_event>(ML_forward(x)...); });
 
 			m_window.set_close_callback([
-			](auto ... x) noexcept { event_bus::fire<close_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<close_event>(ML_forward(x)...); });
 
 			m_window.set_cursor_enter_callback([
-			](auto ... x) noexcept { event_bus::fire<cursor_enter_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<cursor_enter_event>(ML_forward(x)...); });
 
 			m_window.set_cursor_position_callback([
-			](auto ... x) noexcept { event_bus::fire<cursor_position_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<cursor_position_event>(ML_forward(x)...); });
 
 			m_window.set_content_scale_callback([
-			](auto ... x) noexcept { event_bus::fire<content_scale_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<content_scale_event>(ML_forward(x)...); });
 
 			m_window.set_drop_callback([
-			](auto ... x) noexcept { event_bus::fire<drop_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<drop_event>(ML_forward(x)...); });
 
 			m_window.set_error_callback([
-			](auto ... x) noexcept { event_bus::fire<error_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<error_event>(ML_forward(x)...); });
 
 			m_window.set_focus_callback([
-			](auto ... x) noexcept { event_bus::fire<focus_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<focus_event>(ML_forward(x)...); });
 
 			m_window.set_framebuffer_size_callback([
-			](auto ... x) noexcept { event_bus::fire<framebuffer_size_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<framebuffer_size_event>(ML_forward(x)...); });
 
 			m_window.set_iconify_callback([
-			](auto ... x) noexcept { event_bus::fire<iconify_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<iconify_event>(ML_forward(x)...); });
 
 			m_window.set_key_callback([
-			](auto ... x) noexcept { event_bus::fire<key_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<key_event>(ML_forward(x)...); });
 
 			m_window.set_maximize_callback([
-			](auto ... x) noexcept { event_bus::fire<maximize_event>(ML_forward(x)...);  });
+			](auto ... x) noexcept { b->fire<maximize_event>(ML_forward(x)...);  });
 
 			m_window.set_mouse_callback([
-			](auto ... x) noexcept { event_bus::fire<mouse_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<mouse_event>(ML_forward(x)...); });
 
 			m_window.set_position_callback([
-			](auto ... x) noexcept { event_bus::fire<position_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<position_event>(ML_forward(x)...); });
 
 			m_window.set_refresh_callback([
-			](auto ... x) noexcept { event_bus::fire<refresh_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<refresh_event>(ML_forward(x)...); });
 
 			m_window.set_scroll_callback([
-			](auto ... x) noexcept { event_bus::fire<scroll_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<scroll_event>(ML_forward(x)...); });
 
 			m_window.set_size_callback([
-			](auto ... x) noexcept { event_bus::fire<size_event>(ML_forward(x)...); });
+			](auto ... x) noexcept { b->fire<size_event>(ML_forward(x)...); });
 		}
 
 		// GUI
@@ -134,7 +136,7 @@ namespace ml
 		}
 	}
 
-	application::~application() noexcept
+	engine::~engine() noexcept
 	{
 		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
 
@@ -147,7 +149,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t application::run(std::function<void()> const & callback)
+	int32_t engine::run(std::function<void()> const & callback)
 	{
 		if (m_running || !m_window.is_open()) { return EXIT_FAILURE; }
 
@@ -184,7 +186,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void application::on_event(event const & ev)
+	void engine::on_event(event const & ev)
 	{
 		switch (ev)
 		{
@@ -196,7 +198,7 @@ namespace ml
 				gfx::render_command::set_viewport(m_window.get_framebuffer_size()),
 			})
 			{
-				std::invoke(cmd, m_window.get_render_context().get());
+				gfx::execute(cmd, m_window.get_render_context());
 			}
 		} break;
 
@@ -238,7 +240,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	int32_t application::do_file(fs::path const & value)
+	int32_t engine::do_file(fs::path const & value)
 	{
 		ML_assert(Py_IsInitialized());
 
@@ -249,7 +251,7 @@ namespace ml
 			nullptr);
 	}
 
-	int32_t application::do_string(pmr::string const & value)
+	int32_t engine::do_string(pmr::string const & value)
 	{
 		ML_assert(Py_IsInitialized());
 
@@ -258,8 +260,17 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin_handle application::install_plugin(fs::path const & path)
+	plugin_handle engine::install_plugin(fs::path const & path)
 	{
+		static engine_context ctx
+		{
+			&m_bus,
+			&m_config,
+			&m_gui,
+			memory::get(),
+			&m_window
+		};
+
 		// path empty
 		if (path.empty()) { return 0; }
 
@@ -271,7 +282,7 @@ namespace ml
 			if (shared_library lib{ path })
 			{
 				// load plugin
-				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, this) })
+				if (auto const p{ lib.call<plugin *>(ML_PLUGIN_MAIN, &ctx) })
 				{
 					ML_assert((intptr_t)this < (intptr_t)*p);
 
@@ -285,7 +296,7 @@ namespace ml
 		return nullptr;
 	}
 
-	bool application::uninstall_plugin(plugin_handle value)
+	bool engine::uninstall_plugin(plugin_handle value)
 	{
 		if (!value) { return false; }
 

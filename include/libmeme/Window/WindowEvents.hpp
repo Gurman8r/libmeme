@@ -1,7 +1,7 @@
 #ifndef _ML_WINDOW_EVENTS_HPP_
 #define _ML_WINDOW_EVENTS_HPP_
 
-#include <libmeme/System/Event.hpp>
+#include <libmeme/System/EventBus.hpp>
 #include <libmeme/Window/WindowAPI.hpp>
 
 namespace ml
@@ -10,11 +10,11 @@ namespace ml
 
 	ML_decl_event(char_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		uint32_t const value;
 
-		constexpr char_event(void * user, uint32_t value) noexcept
-			: user{ user }, value{ value }
+		constexpr char_event(window_handle wnd, uint32_t value) noexcept
+			: wnd{ wnd }, value{ value }
 		{
 		}
 	};
@@ -23,12 +23,12 @@ namespace ml
 
 	ML_decl_event(char_mods_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		uint32_t const value;
 		int32_t const mods;
 
-		constexpr char_mods_event(void * user, uint32_t value, int32_t mods) noexcept
-			: user{ user }, value{ value }, mods{ mods }
+		constexpr char_mods_event(window_handle wnd, uint32_t value, int32_t mods) noexcept
+			: wnd{ wnd }, value{ value }, mods{ mods }
 		{
 		}
 	};
@@ -37,10 +37,10 @@ namespace ml
 
 	ML_decl_event(close_event)
 	{
-		void * const user;
+		window_handle const wnd;
 
-		constexpr close_event(void * user) noexcept
-			: user{ user }
+		constexpr close_event(window_handle wnd) noexcept
+			: wnd{ wnd }
 		{
 		}
 	};
@@ -49,11 +49,11 @@ namespace ml
 
 	ML_decl_event(content_scale_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		float_t const x, y;
 
-		constexpr content_scale_event(void * user, float_t x, float_t y) noexcept
-			: user{ user }, x{ x }, y{ y }
+		constexpr content_scale_event(window_handle wnd, float_t x, float_t y) noexcept
+			: wnd{ wnd }, x{ x }, y{ y }
 		{
 		}
 	};
@@ -62,12 +62,12 @@ namespace ml
 
 	ML_decl_event(drop_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const count;
 		cstring const * const paths;
 
-		constexpr drop_event(void * user, int32_t count, cstring const * paths) noexcept
-			: user{ user }, count{ count }, paths{ paths }
+		constexpr drop_event(window_handle wnd, int32_t count, cstring const * paths) noexcept
+			: wnd{ wnd }, count{ count }, paths{ paths }
 		{
 		}
 	};
@@ -76,11 +76,11 @@ namespace ml
 
 	ML_decl_event(cursor_enter_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const entered;
 
-		constexpr cursor_enter_event(void * user, int32_t entered) noexcept
-			: user{ user }, entered{ entered }
+		constexpr cursor_enter_event(window_handle wnd, int32_t entered) noexcept
+			: wnd{ wnd }, entered{ entered }
 		{
 		}
 	};
@@ -89,11 +89,11 @@ namespace ml
 
 	ML_decl_event(cursor_position_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		float64_t const x, y;
 
-		constexpr cursor_position_event(void * user, float64_t x, float64_t y) noexcept
-			: user{ user }, x{ x }, y{ y }
+		constexpr cursor_position_event(window_handle wnd, float64_t x, float64_t y) noexcept
+			: wnd{ wnd }, x{ x }, y{ y }
 		{
 		}
 	};
@@ -115,11 +115,11 @@ namespace ml
 
 	ML_decl_event(focus_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const focused;
 
-		constexpr focus_event(void * user, int32_t focused) noexcept
-			: user{ user }, focused{ focused }
+		constexpr focus_event(window_handle wnd, int32_t focused) noexcept
+			: wnd{ wnd }, focused{ focused }
 		{
 		}
 	};
@@ -128,11 +128,11 @@ namespace ml
 
 	ML_decl_event(framebuffer_size_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const width, height;
 
-		constexpr framebuffer_size_event(void * user, int32_t width, int32_t height) noexcept
-			: user{ user }, width{ width }, height{ height }
+		constexpr framebuffer_size_event(window_handle wnd, int32_t width, int32_t height) noexcept
+			: wnd{ wnd }, width{ width }, height{ height }
 		{
 		}
 	};
@@ -141,11 +141,11 @@ namespace ml
 
 	ML_decl_event(iconify_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const iconified;
 
-		constexpr iconify_event(void * user, int32_t iconified) noexcept
-			: user{ user }, iconified{ iconified }
+		constexpr iconify_event(window_handle wnd, int32_t iconified) noexcept
+			: wnd{ wnd }, iconified{ iconified }
 		{
 		}
 	};
@@ -154,11 +154,11 @@ namespace ml
 
 	ML_decl_event(key_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const key, scan, action, mods;
 
-		constexpr key_event(void * user, int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
-			: user{ user }, key{ key }, scan{ scan }, action{ action }, mods{ mods }
+		constexpr key_event(window_handle wnd, int32_t key, int32_t scan, int32_t action, int32_t mods) noexcept
+			: wnd{ wnd }, key{ key }, scan{ scan }, action{ action }, mods{ mods }
 		{
 		}
 
@@ -203,11 +203,11 @@ namespace ml
 
 	ML_decl_event(maximize_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const maximized;
 
-		constexpr maximize_event(void * user, int32_t maximized) noexcept
-			: user{ user }, maximized{ maximized }
+		constexpr maximize_event(window_handle wnd, int32_t maximized) noexcept
+			: wnd{ wnd }, maximized{ maximized }
 		{
 		}
 	};
@@ -216,11 +216,11 @@ namespace ml
 
 	ML_decl_event(mouse_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const button, action, mods;
 
-		constexpr mouse_event(void * user, int32_t button, int32_t action, int32_t mods) noexcept
-			: user{ user }, button{ button }, action{ action }, mods{ mods }
+		constexpr mouse_event(window_handle wnd, int32_t button, int32_t action, int32_t mods) noexcept
+			: wnd{ wnd }, button{ button }, action{ action }, mods{ mods }
 		{
 		}
 
@@ -242,11 +242,11 @@ namespace ml
 
 	ML_decl_event(position_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const x, y;
 
-		constexpr position_event(void * user, int32_t x, int32_t y) noexcept
-			: user{ user }, x{ x }, y{ y }
+		constexpr position_event(window_handle wnd, int32_t x, int32_t y) noexcept
+			: wnd{ wnd }, x{ x }, y{ y }
 		{
 		}
 	};
@@ -255,10 +255,10 @@ namespace ml
 
 	ML_decl_event(refresh_event)
 	{
-		void * const user;
+		window_handle const wnd;
 
-		constexpr refresh_event(void * user) noexcept
-			: user{ user }
+		constexpr refresh_event(window_handle wnd) noexcept
+			: wnd{ wnd }
 		{
 		}
 	};
@@ -267,11 +267,11 @@ namespace ml
 
 	ML_decl_event(scroll_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		float64_t const x, y;
 
-		constexpr scroll_event(void * user, float64_t x, float64_t y) noexcept
-			: user{ user }, x{ x }, y{ y }
+		constexpr scroll_event(window_handle wnd, float64_t x, float64_t y) noexcept
+			: wnd{ wnd }, x{ x }, y{ y }
 		{
 		}
 	};
@@ -280,11 +280,11 @@ namespace ml
 
 	ML_decl_event(size_event)
 	{
-		void * const user;
+		window_handle const wnd;
 		int32_t const width, height;
 
-		constexpr size_event(void * user, int32_t width, int32_t height) noexcept
-			: user{ user }, width{ width }, height{ height }
+		constexpr size_event(window_handle wnd, int32_t width, int32_t height) noexcept
+			: wnd{ wnd }, width{ width }, height{ height }
 		{
 		}
 	};

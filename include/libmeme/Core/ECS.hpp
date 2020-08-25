@@ -7,8 +7,7 @@
 
 #include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/Core/BitSet.hpp>
-#include <libmeme/System/Debug.hpp>
-#include <libmeme/System/Memory.hpp>
+#include <libmeme/Core/Debug.hpp>
 
 // UTILITY
 namespace ml::ecs::detail
@@ -387,7 +386,7 @@ namespace ml::ecs
 namespace ml::ecs
 {
 	template <class U = traits<>
-	> struct manager final : trackable
+	> struct manager final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

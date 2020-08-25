@@ -47,7 +47,7 @@ namespace ml
 	ML_decl_handle(	font_library	); // font library handle
 	ML_decl_handle(	font_stroker	); // font stroker handle
 
-	struct ML_GRAPHICS_API font final
+	struct ML_GRAPHICS_API font final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -10,6 +10,7 @@ struct ImGuiContext;
 namespace ml
 {
 	struct window;
+	struct event_bus;
 
 	struct ML_ENGINE_API gui_manager final : non_copyable, trackable
 	{
@@ -19,9 +20,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui_manager(allocator_type alloc = {}) noexcept;
+		gui_manager(event_bus * bus, allocator_type alloc = {}) noexcept;
 
-		gui_manager(window const & wnd, allocator_type alloc = {}) noexcept;
+		gui_manager(window const & wnd, event_bus * bus, allocator_type alloc = {}) noexcept;
 
 		~gui_manager() noexcept;
 
@@ -147,6 +148,7 @@ namespace ml
 
 	private:
 		ImGuiContext * m_imgui;
+		event_bus * m_bus;
 		dockspace_data m_dockspace;
 		main_menu_bar_data m_main_menu;
 

@@ -58,8 +58,6 @@ namespace ml
 
 		virtual vec2i get_size() const = 0;
 
-		virtual cstring get_title() const = 0;
-
 		virtual void * get_user_pointer() const = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -158,11 +158,6 @@ namespace ml
 		return m_impl->get_size();
 	}
 
-	cstring window::get_title() const noexcept
-	{
-		return m_impl->get_title();
-	}
-
 	void * window::get_user_pointer() const noexcept
 	{
 		return m_impl->get_user_pointer();
@@ -299,7 +294,7 @@ namespace ml
 
 	void window::set_resizable(bool value) noexcept
 	{
-		return m_impl->set_resizable(value);
+		m_impl->set_resizable(value);
 	}
 
 	void window::set_size(vec2i const & value) noexcept

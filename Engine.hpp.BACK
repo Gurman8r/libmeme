@@ -1,18 +1,17 @@
-#ifndef _ML_APPLICATION_HPP_
-#define _ML_APPLICATION_HPP_
+#ifndef _ML_ENGINE_HPP_
+#define _ML_ENGINE_HPP_
 
 #include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/System/EventBus.hpp>
 #include <libmeme/System/Performance.hpp>
 #include <libmeme/System/SharedLibrary.hpp>
-#include <libmeme/System/Registry.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API application final : trackable, event_listener
+	struct ML_ENGINE_API engine final : trackable, event_listener
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,9 +20,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		application(json const & j, allocator_type alloc = {}) noexcept;
+		engine(json const & j, allocator_type alloc = {}) noexcept;
 
-		~application() noexcept override;
+		~engine() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -47,17 +46,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static application * const get() noexcept { return g_app; }
+		ML_NODISCARD static engine * const get() noexcept { return g_app; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		ML_NODISCARD auto gui() noexcept { return std::addressof(m_gui); }
 
-		ML_NODISCARD decltype(auto) bus() const noexcept { return m_sys.bus; }
-
-		ML_NODISCARD decltype(auto) mem() const noexcept { return m_sys.mem; }
-
-		ML_NODISCARD decltype(auto) perf() const noexcept { return m_sys.perf; }
-
-		ML_NODISCARD decltype(auto) reg() const noexcept { return m_sys.reg; }
+		ML_NODISCARD auto win() noexcept { return std::addressof(m_window); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -65,23 +58,11 @@ namespace ml
 
 		ML_NODISCARD auto config() const & noexcept -> json const & { return m_config; }
 
-		template <class Key
-		> ML_NODISCARD auto config(Key && key) & noexcept -> json & { return m_config[ML_forward(key)]; }
-
-		template <class Key
-		> ML_NODISCARD auto config(Key && key) const & noexcept -> json const & { return m_config[ML_forward(key)]; }
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD auto path() const & noexcept -> fs::path const & { return m_path.program; }
 
 		ML_NODISCARD auto path2(fs::path const & value = {}) const -> fs::path { return m_path.content.native() + value.native(); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD auto gui() & noexcept -> gui_manager & { return m_gui; }
-
-		ML_NODISCARD auto window() & noexcept -> render_window & { return m_window; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,21 +77,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static application * g_app;
+		static engine * g_app;
 
-		bool m_running; // running
-
-		struct // system
-		{
-			event_bus	& bus	{ event_bus::get_singleton() };
-			memory		& mem	{ memory::get_singleton() };
-			performance & perf	{ performance::get_singleton() };
-			registry	& reg	{ registry::get_singleton() };
-		}
-		m_sys;
-
-		struct // time
-		{
+		struct { // time
 			using fps_times_t = pmr::vector<float_t>;
 
 			timer		main_timer	{};
@@ -121,40 +90,30 @@ namespace ml
 			float_t		fps_accum	{};
 			size_t		fps_index	{};
 			fps_times_t	fps_times	{ 120, allocator_type{} };
-		}
-		m_time;
+		} m_time;
 
-		json m_config; // config
+		json			m_config	; // config
+		event_bus		m_bus		; // bus
+		render_window	m_window	; // window
+		gui_manager		m_gui		; // gui
+		bool			m_running	; // running
 
-		struct // paths
-		{
-			fs::path program, content;
-		}
-		m_path;
-
-		render_window m_window; // window
-
-		gui_manager m_gui; // gui
-
-		struct // input
-		{
+		struct { // input
 			vec2d cursor{};
 			ds::array<int32_t, mouse_button_MAX> mouse{};
 			ds::array<int32_t, key_code_MAX> keyboard{};
-		}
-		m_input;
+		} m_input;
 
-		ds::batch_vector // plugins
-		<
-			hash_t,			// file hash
-			fs::path,		// file path
-			shared_library,	// library instance
-			scoped<plugin>	// plugin instance
-		>
-		m_plugins;
+		struct { // paths
+			fs::path program, content;
+		} m_path;
+
+		ds::batch_vector< // plugins
+			hash_t, fs::path, shared_library, scoped<plugin>
+		> m_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 
-#endif // !_ML_APPLICATION_HPP_
+#endif // !_ML_ENGINE_HPP_

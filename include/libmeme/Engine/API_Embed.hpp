@@ -7,6 +7,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <regex>
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
@@ -18,11 +19,6 @@
 namespace ml
 {
 	namespace py = pybind11;
-
-	static auto py_json_dumps(py::object o)
-	{
-		return py::str(py::module::import("json").attr("dumps")(o.attr("__dict__")));
-	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -44,42 +40,14 @@ namespace pybind11::detail
 
 namespace pybind11
 {
-	static void to_json(_ML json & j, none const & v) { j = nullptr; }
-	static void from_json(_ML json const & j, none & v) {}
-
-	static void to_json(_ML json & j, bool_ const & v) { j = (bool)v; }
-	static void from_json(_ML json const & j, bool_ & v) { v = j.get<bool>(); }
-
-	static void to_json(_ML json & j, int_ const & v) { j = (int)v; }
-	static void from_json(_ML json const & j, int_ & v) { v = j.get<int32_t>(); }
-
-	static void to_json(_ML json & j, float_ const & v) { j = (float)v; }
-	static void from_json(_ML json const & j, float_ & v) { v = j.get<float>(); }
-
-	static void to_json(_ML json & j, str const & v) { j = (std::string)v; }
-	static void from_json(_ML json const & j, str & v) { v = j.get<std::string>(); }
-
-	static void to_json(_ML json & j, list const & v) {}
-	static void from_json(_ML json const & j, list & v) {}
-
-	static void to_json(_ML json & j, dict const & v) {}
-	static void from_json(_ML json const & j, dict & v) {}
-
-	static void to_json(_ML json & j, object const & v)
+	static void to_json(_ML json & j, handle const & v)
 	{
-		j = _ML json::parse((std::string)_ML py_json_dumps(v));
+		j = _ML json::parse((std::string)(str)module::import("json").attr("dumps")(v));
 	}
 
-	static void from_json(_ML json const & j, object & v) {}
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-namespace ml
-{
-	template <class T> static auto py_json_str(T o) noexcept
+	static void from_json(_ML json const & j, handle & v)
 	{
-		return py::str(py::str(json{ o }.dump()).attr("strip")("[]"));
+		v = module::import("json").attr("loads")(j.dump());
 	}
 }
 

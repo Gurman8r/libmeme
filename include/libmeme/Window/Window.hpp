@@ -61,8 +61,6 @@ namespace ml
 
 		ML_NODISCARD vec2i get_size() const noexcept final;
 
-		ML_NODISCARD cstring get_title() const noexcept final;
-
 		ML_NODISCARD void * get_user_pointer() const noexcept final;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

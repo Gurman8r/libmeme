@@ -23,7 +23,7 @@ namespace ml::gfx
 	class	texturecube		; // 
 	class	framebuffer		; // 
 	class	program			; // 
-	class	shader			; // 
+	class	shader			; // WIP
 
 	ML_decl_handle(	object_id	)						; // object handle
 	ML_decl_handle(	uniform_id	)						; // register handle
