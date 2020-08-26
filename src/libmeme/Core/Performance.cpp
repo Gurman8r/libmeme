@@ -1,9 +1,10 @@
-#include <libmeme/System/EventBus.hpp>
+#include <libmeme/Core/Performance.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	performance::~performance() noexcept {}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

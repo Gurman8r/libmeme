@@ -71,9 +71,9 @@ namespace ml
 		m_hints = ws.hints;
 
 		// context hints
-		glfwWindowHint(GLFW_CLIENT_API, std::invoke([&]() noexcept
+		glfwWindowHint(GLFW_CLIENT_API, std::invoke([api = ws.context.api]() noexcept
 		{
-			switch (ws.context.api)
+			switch (api)
 			{
 			case context_api_opengl	: return GLFW_OPENGL_API;
 			case context_api_vulkan	:
@@ -82,9 +82,9 @@ namespace ml
 			default					: return GLFW_NO_API;
 			}
 		}));
-		glfwWindowHint(GLFW_OPENGL_PROFILE, std::invoke([&]() noexcept
+		glfwWindowHint(GLFW_OPENGL_PROFILE, std::invoke([profile = ws.context.profile]() noexcept
 		{
-			switch (ws.context.profile)
+			switch (profile)
 			{
 			case context_profile_core	: return GLFW_OPENGL_CORE_PROFILE;
 			case context_profile_compat	: return GLFW_OPENGL_COMPAT_PROFILE;
@@ -331,7 +331,7 @@ namespace ml
 	
 	void glfw_window::set_cursor_mode(int32_t value)
 	{
-		set_input_mode(GLFW_CURSOR, std::invoke([&]() noexcept
+		set_input_mode(GLFW_CURSOR, std::invoke([value]() noexcept
 		{
 			switch (value)
 			{
@@ -385,6 +385,8 @@ namespace ml
 
 	void glfw_window::set_monitor(monitor_handle value, int_rect const & bounds)
 	{
+		// WIP
+
 		m_monitor = (GLFWmonitor *)value;
 		if (m_monitor)
 		{
@@ -501,7 +503,7 @@ namespace ml
 
 	cursor_handle glfw_window::create_standard_cursor(int32_t value)
 	{
-		return (cursor_handle)glfwCreateStandardCursor(std::invoke([&]() noexcept
+		return (cursor_handle)glfwCreateStandardCursor(std::invoke([value]() noexcept
 		{
 			switch (value)
 			{

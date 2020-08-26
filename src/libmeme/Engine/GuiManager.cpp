@@ -1,7 +1,7 @@
 #include <libmeme/Engine/GuiManager.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/System/EventBus.hpp>
+#include <libmeme/Core/EventBus.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
 #include <libmeme/Window/Window.hpp>
@@ -25,10 +25,8 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	gui_manager::gui_manager(event_bus * bus, allocator_type alloc) noexcept
-		: m_imgui		{}
-		, m_bus			{ bus }
-		, m_main_menu	{ alloc }
-		, m_dockspace	{ alloc }
+		: m_imgui	{}
+		, m_bus		{ bus }
 	{
 		IMGUI_CHECKVERSION();
 	}
@@ -93,7 +91,7 @@ namespace ml
 	{
 		if (m_imgui)
 		{
-			m_main_menu.menus.clear();
+			dockspace.main_menu.menus.clear();
 
 			ML_ImGui_Shutdown();
 
@@ -117,7 +115,7 @@ namespace ml
 		ML_ImGui_ScopeID(this);
 
 		// DOCKSPACE
-		if (auto & d{ m_dockspace }; d.visible)
+		if (auto & d{ this->dockspace }; d.visible)
 		{
 			ML_ImGui_ScopeID(&d);
 			
@@ -145,7 +143,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(m_main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
+					(d.main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -166,30 +164,30 @@ namespace ml
 					ImGui::End();
 				}
 			}
-		}
 
-		// MAIN MENU BAR
-		if (auto & m{ m_main_menu }; m.visible)
-		{
-			ML_ImGui_ScopeID(&m);
-
-			if (ImGui::BeginMainMenuBar())
+			// MAIN MENU BAR
+			if (auto & m{ d.main_menu }; m.visible)
 			{
-				for (auto const & pair : m.menus)
+				ML_ImGui_ScopeID(&m);
+
+				if (ImGui::BeginMainMenuBar())
 				{
-					if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
+					for (auto const & pair : m.menus)
 					{
-						for (auto const & fn : pair.second)
+						if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
 						{
-							if (fn)
+							for (auto const & fn : pair.second)
 							{
-								std::invoke(fn);
+								if (fn)
+								{
+									std::invoke(fn);
+								}
 							}
+							ImGui::EndMenu();
 						}
-						ImGui::EndMenu();
 					}
+					ImGui::EndMainMenuBar();
 				}
-				ImGui::EndMainMenuBar();
 			}
 		}
 	}

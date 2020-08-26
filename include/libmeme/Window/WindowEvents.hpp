@@ -1,7 +1,7 @@
 #ifndef _ML_WINDOW_EVENTS_HPP_
 #define _ML_WINDOW_EVENTS_HPP_
 
-#include <libmeme/System/EventBus.hpp>
+#include <libmeme/Core/EventBus.hpp>
 #include <libmeme/Window/WindowAPI.hpp>
 
 namespace ml

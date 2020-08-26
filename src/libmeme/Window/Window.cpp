@@ -229,7 +229,7 @@ namespace ml
 
 	void window::set_auto_iconify(bool value) noexcept
 	{
-		return m_impl->set_auto_iconify(value);
+		m_impl->set_auto_iconify(value);
 	}
 
 	void window::set_clipboard(cstring value) noexcept
@@ -254,17 +254,17 @@ namespace ml
 
 	void window::set_decorated(bool value) noexcept
 	{
-		return m_impl->set_decorated(value);
+		m_impl->set_decorated(value);
 	}
 
 	void window::set_floating(bool value) noexcept
 	{
-		return m_impl->set_floating(value);
+		m_impl->set_floating(value);
 	}
 
 	void window::set_focus_on_show(bool value) noexcept
 	{
-		return m_impl->set_focus_on_show(value);
+		m_impl->set_focus_on_show(value);
 	}
 
 	void window::set_icon(size_t w, size_t h, byte_t const * p) noexcept

@@ -165,11 +165,11 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def("set_default_resource", [](intptr_t p) { return (intptr_t)pmr::set_default_resource((pmr::memory_resource *)p); })
 
 		// test resource
-		.def("arena_base"	, []() { return memory::get()->testres()->base_addr(); })
-		.def("arena_count"	, []() { return memory::get()->testres()->num_allocations(); })
-		.def("arena_free"	, []() { return memory::get()->testres()->free_bytes(); })
-		.def("arena_size"	, []() { return memory::get()->testres()->capacity(); })
-		.def("arena_used"	, []() { return memory::get()->testres()->used_bytes(); })
+		.def("arena_base"	, []() { return memory::get()->resource()->base_addr(); })
+		.def("arena_count"	, []() { return memory::get()->resource()->num_allocations(); })
+		.def("arena_free"	, []() { return memory::get()->resource()->free_bytes(); })
+		.def("arena_size"	, []() { return memory::get()->resource()->capacity(); })
+		.def("arena_used"	, []() { return memory::get()->resource()->used_bytes(); })
 
 		// allocation
 		.def("malloc"	, [](size_t s) { return (intptr_t)memory::get()->mallocate(s); })

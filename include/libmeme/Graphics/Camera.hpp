@@ -3,7 +3,7 @@
 
 #include <libmeme/Graphics/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
-#include <libmeme/System/Memory.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 // perspective
 namespace ml

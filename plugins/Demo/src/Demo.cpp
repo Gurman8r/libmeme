@@ -348,7 +348,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ getmem().testres() };
+			static auto const testres{ getmem().resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -717,7 +717,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ getgui().dockspace() };
+			auto & d{ getgui().dockspace };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -758,7 +758,7 @@ namespace ml
 
 			static ML_scope(&) // setup main menu bar
 			{
-				auto & mmb{ getgui().main_menu_bar() };
+				auto & mmb{ getgui().dockspace.main_menu };
 				mmb.visible = true;
 				mmb.add("file", [&]()
 				{
@@ -1237,7 +1237,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static test_resource * const testres{ getmem().testres() };
+			static test_resource * const testres{ getmem().resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
@@ -1510,11 +1510,6 @@ namespace ml
 
 extern "C"
 {
-	ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::engine_context * ctx)
-	{
-		return ctx->mem->new_object<ml::demo>(ctx);
-	}
-
 	ML_PLUGIN_API void ml_plugin_attach(ml::engine_context * ctx, ml::plugin * ptr)
 	{
 		ptr = ctx->mem->new_object<ml::demo>(ctx);

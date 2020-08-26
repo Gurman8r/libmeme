@@ -121,6 +121,22 @@ namespace ml::util
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// constructor
+	template <class T, class ... Args
+	> inline T * construct(T * ptr, Args && ... args) noexcept
+	{
+		return ::new (ptr) T{ ML_forward(args)... };
+	}
+
+	// destructor
+	template <class T
+	> inline void destruct(T * ptr) noexcept
+	{
+		ptr->~T();
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 // Comparison

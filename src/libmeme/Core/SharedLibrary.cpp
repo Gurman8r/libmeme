@@ -1,4 +1,4 @@
-#include <libmeme/System/SharedLibrary.hpp>
+#include <libmeme/Core/SharedLibrary.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -58,7 +58,7 @@ namespace ml
 		m_path.clear();
 
 		// clear symbols
-		m_functions.clear();
+		m_syms.clear();
 
 		// close library
 		return std::invoke([&]() noexcept
@@ -77,19 +77,19 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::proc(cstring value)
+	void * shared_library::getsym(cstring name)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
-		return m_functions.find_or_add_fn(util::hash(value, util::strlen(value)), [&]() noexcept
+		return m_syms.find_or_add_fn(util::hash(name, util::strlen(name)), [&]() noexcept
 		{
 #if defined(ML_os_windows)
-			return ::GetProcAddress((HINSTANCE)m_handle, value);
+			return ::GetProcAddress((HINSTANCE)m_handle, name);
 
 #elif defined(ML_os_linux)
-			return ::dlsym(m_handle, value);
+			return ::dlsym(m_handle, name);
 
 #else
 			return nullptr;

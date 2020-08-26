@@ -2,7 +2,7 @@
 #define _ML_GUI_MANAGER_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/System/Memory.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Matrix.hpp>
 
 struct ImGuiContext;
@@ -59,6 +59,8 @@ namespace ml
 		// DOCKSPACE
 		struct ML_ENGINE_API dockspace_data final : non_copyable
 		{
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 			using nodes_t = typename pmr::vector<uint32_t>;
 
 			static constexpr auto title{ "dockspace##libmeme" };
@@ -69,7 +71,7 @@ namespace ml
 			float_t		rounding{};
 			vec2		size	{};
 			float_t		alpha	{};
-			nodes_t		nodes;
+			nodes_t		nodes	{};
 
 			uint32_t begin_builder(int32_t flags = {});
 
@@ -87,58 +89,46 @@ namespace ml
 
 			auto const & operator[](size_t const i) const & noexcept { return nodes[i]; }
 
-		private:
-			friend gui_manager;
-			
-			explicit dockspace_data(allocator_type alloc) noexcept : nodes{ alloc }
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			struct // main menu
 			{
-			}
+				bool visible{};
+				
+				pmr::vector<std::pair<
+					cstring,
+					pmr::vector<std::function<void()>>
+				>> menus{};
 
-			~dockspace_data() noexcept {}
-		};
-
-		auto & dockspace() & noexcept { return m_dockspace; }
-
-		auto const & dockspace() const & noexcept { return m_dockspace; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// MAIN MENU BAR
-		struct ML_ENGINE_API main_menu_bar_data final : non_copyable
-		{
-			using menus_t = pmr::vector<std::pair<
-				cstring,
-				pmr::vector<std::function<void()>
-			>>>;
-			
-			bool		visible;
-			menus_t		menus;
-
-			template <class Fn> auto & add(cstring label, Fn && fn) & noexcept
-			{
-				auto it{ std::find_if(menus.begin(), menus.end(), [&
-				](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
-				if (it == menus.end())
+				template <class Fn> auto & add(cstring label, Fn && fn) & noexcept
 				{
-					menus.push_back({ label, {} });
-					it = (menus.end() - 1);
+					auto it{ std::find_if(menus.begin(), menus.end(), [&
+					](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
+					if (it == menus.end())
+					{
+						menus.push_back({ label, {} });
+						it = (menus.end() - 1);
+					}
+					return it->second.emplace_back(ML_forward(fn));
 				}
-				return it->second.emplace_back(ML_forward(fn));
+
+				auto del(cstring label) noexcept
+				{
+					auto it{ std::find_if(menus.begin(), menus.end(), [&
+					](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
+					if (it != menus.end())
+					{
+						menus.erase(it);
+						return true;
+					}
+					return false;
+				}
 			}
+			main_menu;
 
-		private:
-			friend gui_manager;
-
-			explicit main_menu_bar_data(allocator_type alloc) noexcept : menus{ alloc }
-			{
-			}
-
-			~main_menu_bar_data() noexcept { this->menus.clear(); }
-		};
-
-		auto & main_menu_bar() & noexcept { return m_main_menu; }
-
-		auto const & main_menu_bar() const & noexcept { return m_main_menu; }
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		}
+		dockspace{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -149,8 +139,6 @@ namespace ml
 	private:
 		ImGuiContext * m_imgui;
 		event_bus * m_bus;
-		dockspace_data m_dockspace;
-		main_menu_bar_data m_main_menu;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

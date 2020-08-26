@@ -1,19 +1,18 @@
 #ifndef _ML_SHARED_LIBRARY_HPP_
 #define _ML_SHARED_LIBRARY_HPP_
 
-#include <libmeme/System/Export.hpp>
-#include <libmeme/System/Memory.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	struct ML_SYSTEM_API shared_library final : non_copyable, trackable
+	struct ML_CORE_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using function_table	= typename ds::map<hash_t, void *>;
+		using symbol_table		= typename ds::map<hash_t, void *>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -31,7 +30,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		shared_library(allocator_type alloc = {}) noexcept
-			: m_handle{}, m_path{}, m_functions{ alloc }
+			: m_handle{}, m_path{}, m_syms{ alloc }
 		{
 		}
 
@@ -66,7 +65,7 @@ namespace ml
 			{
 				std::swap(m_handle, value.m_handle);
 				m_path.swap(value.m_path);
-				m_functions.swap(value.m_functions);
+				m_syms.swap(value.m_syms);
 			}
 		}
 
@@ -76,16 +75,24 @@ namespace ml
 
 		bool close();
 
-		void * proc(cstring value);
+		void * getsym(cstring name);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
+		> decltype(auto) getproc(cstring name) noexcept
+		{
+			return reinterpret_cast<Ret(*)(Args...)>(this->getsym(name));
+		}
+
+		template <class Ret, class ... Args
 		> decltype(auto) call(cstring name, Args && ... args) noexcept
 		{
-			if (auto const fn{ reinterpret_cast<Ret(*)(Args...)>(proc(name)) })
+			constexpr bool has_return{ !std::is_same_v<Ret, void> };
+
+			if (auto const fn{ this->getproc<Ret, Args...>(name) })
 			{
-				if constexpr (!std::is_same_v<Ret, void>)
+				if constexpr (has_return)
 				{
 					return std::make_optional<Ret>(std::invoke(fn, ML_forward(args)...));
 				}
@@ -94,7 +101,7 @@ namespace ml
 					std::invoke(fn, ML_forward(args)...);
 				}
 			}
-			else if constexpr (!std::is_same_v<Ret, void>)
+			else if constexpr (has_return)
 			{
 				return (std::optional<Ret>)std::nullopt;
 			}
@@ -106,11 +113,11 @@ namespace ml
 
 		ML_NODISCARD bool good() const noexcept { return m_handle; }
 
-		ML_NODISCARD auto get_handle() const noexcept -> library_handle const & { return m_handle; }
+		ML_NODISCARD auto handle() const noexcept -> library_handle const & { return m_handle; }
 
-		ML_NODISCARD auto get_path() const noexcept -> fs::path const & { return m_path; }
+		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
-		ML_NODISCARD auto get_functions() const noexcept -> function_table const & { return m_functions; }
+		ML_NODISCARD auto symbols() const noexcept -> symbol_table const & { return m_syms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -171,9 +178,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		library_handle	m_handle;
-		fs::path		m_path;
-		function_table	m_functions;
+		library_handle	m_handle; // 
+		fs::path		m_path	; // 
+		symbol_table	m_syms	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

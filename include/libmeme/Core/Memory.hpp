@@ -1,7 +1,6 @@
 #ifndef _ML_MEMORY_HPP_
 #define _ML_MEMORY_HPP_
 
-#include <libmeme/System/Export.hpp>
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
@@ -124,7 +123,10 @@ namespace ml
 	struct trackable;
 
 	// no delete
-	struct no_delete { template <class T> void operator()(T *) const noexcept {} };
+	struct no_delete final
+	{
+		template <class T> void operator()(T *) const noexcept {}
+	};
 
 	// default delete
 	template <class ...> struct default_delete;
@@ -133,29 +135,39 @@ namespace ml
 	template <class T, class Dx = default_delete<T>
 	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
 
+	// manual pointer ( std::unique_ptr<T, no_delete> )
+	template <class T
+	> ML_alias manual = typename scoped<T, no_delete>;
+
 	// shared pointer ( std::shared_ptr<T> )
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
+
+	// weak pointer ( std::weak_ptr<T> )
+	template <class T
+	> ML_alias weakref = typename std::weak_ptr<T>;
 }
 
 namespace ml
 {
 	// memory manager singleton
-	struct ML_SYSTEM_API memory final : non_copyable
+	struct ML_CORE_API memory final : non_copyable
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = pmr::polymorphic_allocator<byte_t>;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
 		static constexpr size_t max_align{ alignof(max_align_t) };
 
 		struct ML_NODISCARD record final
 		{
-			size_t index; size_t size; byte_t * addr;
+			byte_t * addr; size_t index; size_t size;
 
-			operator bool() const noexcept { return index && size && addr; }
+			operator bool() const noexcept { return addr && index && size; }
 		};
+
+		using record_table = typename ds::map<void *, record>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -163,15 +175,17 @@ namespace ml
 
 		~memory() noexcept;
 
-		static memory * const get() noexcept { return s_instance; }
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto const & allocator() const & noexcept { return m_allocator; }
+		ML_NODISCARD static memory * const get() noexcept { return s_instance; }
+
+		ML_NODISCARD auto allocator() const & noexcept -> allocator_type const & { return m_allocator; }
+
+		ML_NODISCARD auto counter() const noexcept -> size_t { return m_counter; }
+
+		ML_NODISCARD auto records() const & noexcept -> record_table const & { return m_records; }
 		
-		ML_NODISCARD auto const & records() const & noexcept { return m_records; }
-		
-		ML_NODISCARD auto const & testres() const & noexcept { return m_testres; }
+		ML_NODISCARD auto resource() const noexcept -> test_resource * const { return m_resource; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
@@ -179,17 +193,17 @@ namespace ml
 		ML_NODISCARD void * mallocate(size_t size) noexcept
 		{
 			// allocate the requested bytes
-			byte_t * const data{ m_allocator.allocate(size) };
+			byte_t * const addr{ this->do_allocate(size) };
 
 			// create the record
-			return m_records.insert(data, { ++m_counter, size, data }).second->addr;
+			return m_records.insert(addr, { addr, ++m_counter, size }).second->addr;
 		}
 
 		// calloc
 		ML_NODISCARD void * callocate(size_t count, size_t size) noexcept
 		{
-			// allocate (count * size) zeroed bytes
-			return std::memset(mallocate(count * size), 0, count * size);
+			// allocate (count * size) bytes
+			return this->mallocate(count * size);
 		}
 
 		// free
@@ -199,17 +213,11 @@ namespace ml
 			if (auto const it{ m_records.find(addr) })
 			{
 				// free the allocation
-				m_allocator.deallocate(it->second->addr, it->second->size);
+				this->do_deallocate(it->second->addr, it->second->size);
 
 				// erase the record
 				m_records.erase(it->first);
 			}
-		}
-
-		// realloc
-		ML_NODISCARD void * reallocate(void * addr, size_t size) noexcept
-		{
-			return reallocate(addr, size, size);
 		}
 
 		// realloc (sized)
@@ -217,13 +225,13 @@ namespace ml
 		{
 			if (newsz == 0)
 			{
-				deallocate(addr);
+				this->deallocate(addr);
 
 				return nullptr;
 			}
 			else if (addr == nullptr)
 			{
-				return mallocate(newsz);
+				return this->mallocate(newsz);
 			}
 			else if (newsz <= oldsz)
 			{
@@ -231,126 +239,118 @@ namespace ml
 			}
 			else
 			{
-				void * const temp{ mallocate(newsz) };
+				void * const temp{ this->mallocate(newsz) };
 				if (temp)
 				{
 					std::memcpy(temp, addr, oldsz);
 
-					deallocate(addr);
+					this->deallocate(addr);
 				}
 				return temp;
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		template <class T, class ... Args
-		> static T * construct(T * ptr, Args && ... args) noexcept
+		// realloc
+		ML_NODISCARD void * reallocate(void * addr, size_t size) noexcept
 		{
-			return ::new (ptr) T{ ML_forward(args)... };
-		}
-
-		template <class T
-		> static void destroy(T * ptr) noexcept
-		{
-			ptr->~T();
+			return this->reallocate(addr, size, size);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void * allocate_bytes(size_t bytes, size_t align = max_align)
-		{
-			return m_testres->allocate(bytes, align);
-		}
-
-		void deallocate_bytes(void * ptr, size_t bytes, size_t align = max_align)
-		{
-			m_testres->deallocate(ptr, bytes, align);
-		}
-
 		template <class T
-		> T * allocate_object(size_t count = 1) noexcept
+		> ML_NODISCARD T * allocate_object(size_t count = 1) noexcept
 		{
-			return (T *)allocate_bytes(count * sizeof(T), alignof(T));
+			return (T *)this->callocate(count, sizeof(T));
 		}
 
 		template <class T
 		> void deallocate_object(T * ptr) noexcept
 		{
-			deallocate_bytes(ptr, sizeof(T), alignof(T));
+			this->deallocate((byte_t *)ptr);
 		}
 
 		template <class T, class ... Args
-		> T * new_object(Args && ... args) noexcept
+		> ML_NODISCARD T * new_object(Args && ... args) noexcept
 		{
-			return construct(allocate_object<T>(), ML_forward(args)...);
+			return util::construct(this->allocate_object<T>(), ML_forward(args)...);
 		}
 
 		template <class T
 		> void delete_object(T * ptr) noexcept
 		{
-			destroy(ptr);
-			deallocate_object(ptr);
+			util::destruct(ptr);
+
+			this->deallocate_object(ptr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		// allocate scoped
-		template <class T, class Dx, class ... Args
-		> ML_NODISCARD scoped<T, Dx> alloc_scoped(Args && ... args) noexcept
-		{
-			return { get()->new_object<T>(ML_forward(args)...), Dx{} };
-		}
-
-		// allocate shared
-		template <class T, class ... Args
-		> ML_NODISCARD shared<T> alloc_shared(Args && ... args) noexcept
-		{
-			return std::allocate_shared<T>(get()->m_allocator, ML_forward(args)...);
-		}
 
 	private:
+		ML_NODISCARD byte_t * do_allocate(size_t count) noexcept
+		{
+			return m_allocator.allocate(count);
+		}
+
+		void do_deallocate(byte_t * addr, size_t count) noexcept
+		{
+			m_allocator.deallocate(addr, count);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static memory *			s_instance;		// instance
-		allocator_type			m_allocator	{};	// allocator
-		size_t					m_counter	{};	// record index
-		ds::map<void *, record>	m_records	{};	// memory records
-		test_resource *			m_testres	{};	// pointer to test resource
+	private:
+		static memory *			s_instance	; // singleton
+		allocator_type			m_allocator	; // allocator
+		size_t					m_counter	; // counter
+		ds::map<void *, record>	m_records	; // records
+		test_resource *			m_resource	; // resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	static void to_json(json & j, memory::record const & v)
 	{
-		j["index"] = v.index;
-		j["size"] = v.size;
-		j["addr"] = (intptr_t)v.addr;
+		j["addr"	] = (intptr_t)v.addr;
+		j["index"	] = v.index;
+		j["size"	] = v.size;
 	}
 
 	static void from_json(json const & j, memory::record & v)
 	{
-		j["index"].get_to(v.index);
-		j["size"].get_to(v.size);
-		j["addr"].get_to(*(intptr_t *)v.addr);
+		j["addr"	].get_to(*(intptr_t *)v.addr);
+		j["index"	].get_to(v.index);
+		j["size"	].get_to(v.size);
 	}
 }
 
 namespace ml
 {
 	// trackable base
-	struct ML_SYSTEM_API trackable
+	struct ML_CORE_API trackable
 	{
 	public:
 		virtual ~trackable() noexcept = default;
 
-		ML_NODISCARD void * operator new(size_t size) noexcept { return memory::get()->mallocate(size); }
+		ML_NODISCARD void * operator new(size_t size) noexcept
+		{
+			return memory::get()->mallocate(size);
+		}
 
-		ML_NODISCARD void * operator new[](size_t size) noexcept { return memory::get()->mallocate(size); }
+		ML_NODISCARD void * operator new[](size_t size) noexcept
+		{
+			return memory::get()->mallocate(size);
+		}
 
-		void operator delete(void * addr) noexcept { memory::get()->deallocate(addr); }
+		void operator delete(void * addr) noexcept
+		{
+			memory::get()->deallocate(addr);
+		}
 
-		void operator delete[](void * addr) noexcept { memory::get()->deallocate(addr); }
+		void operator delete[](void * addr) noexcept
+		{
+			memory::get()->deallocate(addr);
+		}
 	};
 }
 
@@ -385,16 +385,16 @@ namespace ml
 
 	// allocate scoped
 	template <class T, class Dx = default_delete<T>, class ... Args
-	> ML_NODISCARD auto alloc_scoped(Args && ... args) noexcept
+	> ML_NODISCARD scoped<T, Dx> alloc_scoped(Args && ... args) noexcept
 	{
-		return memory::get()->alloc_scoped<T, Dx>(ML_forward(args)...);
+		return { memory::get()->new_object<T>(ML_forward(args)...), Dx{} };
 	}
 
 	// allocate shared
 	template <class T, class ... Args
 	> ML_NODISCARD auto alloc_shared(Args && ... args) noexcept
 	{
-		return memory::get()->alloc_shared<T>(ML_forward(args)...);
+		return std::allocate_shared<T>(memory::get()->allocator(), ML_forward(args)...);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

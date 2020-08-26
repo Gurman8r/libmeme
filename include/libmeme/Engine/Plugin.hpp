@@ -1,8 +1,8 @@
 #ifndef _ML_PLUGIN_HPP_
 #define _ML_PLUGIN_HPP_
 
-#include <libmeme/System/EventBus.hpp>
-#include <libmeme/System/Performance.hpp>
+#include <libmeme/Core/EventBus.hpp>
+#include <libmeme/Core/Performance.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
 #include <libmeme/Engine/GuiManager.hpp>
 
@@ -18,7 +18,7 @@ namespace ml
 {
 	struct plugin;
 
-	ML_decl_handle(plugin_handle);
+	ML_decl_handle(plugin_id);
 
 	struct file_context final
 	{
@@ -50,10 +50,10 @@ namespace ml
 	{
 		event_bus		* const bus	; // bus
 		json			* const cfg	; // config
-		file_context	* const file; // filesystem
+		file_context	* const file; // files
 		gui_manager		* const gui	; // gui
 		memory			* const mem	; // memory
-		timer_context	* const time; // time
+		timer_context	* const time; // timers
 		render_window	* const win	; // window
 	};
 
@@ -63,7 +63,7 @@ namespace ml
 
 		explicit plugin(engine_context * ctx) : event_listener{ ctx->bus }, m_ctx{ ctx }
 		{
-			ML_assert("BUS MISMATCH" && (m_ctx->bus == event_listener::m_event_bus));
+			ML_assert("PLUGIN BUS MISMATCH" && (m_ctx->bus == event_listener::m_event_bus));
 		}
 
 		virtual ~plugin() noexcept override = default;

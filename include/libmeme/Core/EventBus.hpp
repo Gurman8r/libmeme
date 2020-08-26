@@ -1,10 +1,7 @@
 #ifndef _ML_EVENT_BUS_HPP_
 #define _ML_EVENT_BUS_HPP_
 
-#include <libmeme/System/Export.hpp>
-#include <libmeme/Core/FlatMap.hpp>
-#include <libmeme/Core/NonCopyable.hpp>
-#include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 // event declarator helper
 #define ML_decl_event(type) \
@@ -49,7 +46,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// EVENT LISTENER
-	struct ML_SYSTEM_API event_listener
+	struct ML_CORE_API event_listener
 	{
 		explicit event_listener(event_bus * bus) : m_event_bus{ bus } {}
 
@@ -167,6 +164,8 @@ namespace ml
 
 	inline event_listener::~event_listener() noexcept
 	{
+		ML_assert("event bus does not exist" && m_event_bus);
+
 		m_event_bus->remove_listener(this); // remove listener from all events
 	}
 

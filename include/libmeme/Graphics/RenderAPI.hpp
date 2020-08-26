@@ -974,7 +974,7 @@ namespace ml::gfx
 	// vertexarray settings
 	template <> struct ML_NODISCARD data_desc<vertexarray> final
 	{
-		pmr::string	name{ "VertexArray" };
+		pmr::string	name{ nameof_v<vertexarray> };
 	};
 
 	static void from_json(json const & j, data_desc<vertexarray> & v)
@@ -1044,7 +1044,7 @@ namespace ml::gfx
 	// vertexbuffer settings
 	template <> struct ML_NODISCARD data_desc<vertexbuffer> final
 	{
-		pmr::string	name	{ "VertexBuffer" };
+		pmr::string	name	{ nameof_v<vertexbuffer> };
 		uint32_t	usage	{ usage_static };
 	};
 
@@ -1118,7 +1118,7 @@ namespace ml::gfx
 	// indexbuffer settings
 	template <> struct ML_NODISCARD data_desc<indexbuffer> final
 	{
-		pmr::string	name{ "IndexBuffer" };
+		pmr::string	name{ nameof_v<indexbuffer> };
 	};
 
 	static void from_json(json const & j, data_desc<indexbuffer> & v)
