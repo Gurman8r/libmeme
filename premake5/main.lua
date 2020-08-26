@@ -51,11 +51,19 @@ postbuildcommands{
 }
 
 filter{ "configurations:Debug" }
-	symbols "On"
 	kind "ConsoleApp"
+	symbols "On"
+	links{
+		"glew32d",
+		"python39_d",
+	}
 
 filter{ "configurations:Release" }
-	optimize "Speed"
 	kind "WindowedApp"
+	optimize "Speed"
+	links{
+		"glew32",
+		"python39",
+	}
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

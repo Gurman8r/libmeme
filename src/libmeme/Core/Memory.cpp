@@ -6,7 +6,7 @@ namespace ml
 
 	memory * memory::s_instance{};
 
-	memory::memory(test_resource * res) noexcept
+	memory::memory(arena_test_resource * res) noexcept
 		: m_resource	{ res }
 		, m_allocator	{}
 		, m_counter		{}
@@ -21,33 +21,14 @@ namespace ml
 
 	memory::~memory() noexcept
 	{
-		ML_assert(this == s_instance);
-#if 0 && ML_is_debug
-		if (!m_records.empty())
+		ds::set<void *> const keys{ m_records.keys() };
+		for (auto addr = keys.rbegin(); addr != keys.rend(); ++addr)
 		{
-			debug::error("final allocations follow:");
-
-			enum : std::streamsize { W = 20 };
-
-			std::cout << std::left
-				<< std::setw(W) << "addr"
-				<< std::setw(W) << "indx"
-				<< std::setw(W) << "size"
-				<< '\n';
-
-			m_records.for_each([&](auto, auto const & rec)
-			{
-				std::cout << std::left
-					<< std::setw(W) << rec.addr
-					<< std::setw(W) << rec.index
-					<< std::setw(W) << rec.size
-					<< '\n';
-			});
-
-			debug::pause();
+			deallocate(*addr);
 		}
-#endif
-		//ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
+
+		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
+
 		s_instance = nullptr;
 	}
 

@@ -15,6 +15,8 @@ namespace ml
 
 	ML_decl_event(dockspace_event) {};
 
+	ML_decl_event(main_menu_bar_event) {};
+
 	ML_decl_event(gui_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

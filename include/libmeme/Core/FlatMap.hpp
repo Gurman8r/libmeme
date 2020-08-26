@@ -443,6 +443,14 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		template <class Fn, class ... Args
+		> auto replace_then(Fn && fn, Args && ... args)
+		{
+
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		template <class Fn
 		> void for_each(key_const_iterator first, key_const_iterator last, Fn && fn)
 		{

@@ -1,19 +1,34 @@
-#include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/Core/EventBus.hpp>
-#include <libmeme/Core/SharedLibrary.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Engine/ImGuiExt.hpp>
+#include <libmeme/Engine/PluginManager.hpp>
 
 using namespace ml;
 using namespace ml::size_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef CONFIG_FILE
-#define CONFIG_FILE "../../../../libmeme.json"
+// memory
+static class memcfg final : public singleton<memcfg>
+{
+	friend singleton;
+
+	ds::array<byte_t, 128_MiB>			data{};
+	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
+	pmr::unsynchronized_pool_resource	pool{ &mono };
+	arena_test_resource					test{ &pool, data.data(), data.size() };
+
+	memcfg() noexcept { pmr::set_default_resource(&test); }
+
+	~memcfg() noexcept { pmr::set_default_resource(nullptr); }
+
+} const & ML_anon{ memcfg::get_singleton() };
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifndef SETTINGS_PATH
+#define SETTINGS_PATH "../../../../libmeme.json"
 #endif
 
 static auto const default_settings{ R"(
@@ -66,117 +81,16 @@ static auto const default_settings{ R"(
 }
 )"_json };
 
-namespace ml
+static auto load_settings(fs::path const & path)
 {
-	static auto read_config_file(fs::path const & path)
-	{
-		std::ifstream f{ path };
-		ML_defer(&f) { f.close(); };
-		return f ? json::parse(f) : default_settings;
-	}
+	std::ifstream f{ path }; ML_defer(&f) { f.close(); };
+
+	return f ? json::parse(f) : default_settings;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml
-{
-	struct plugin_manager final : non_copyable
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		struct library_funcs final
-		{
-			std::function<void(engine_context *, plugin *)> attach;
-			std::function<void(engine_context *, plugin *)> detach;
-		};
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		plugin_manager(engine_context * ctx) noexcept
-			: m_ctx{ ctx }, m_data{ ctx->mem->allocator() }
-		{
-		}
-
-		~plugin_manager() noexcept
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		plugin_id install(fs::path path)
-		{
-			if (auto const id{ std::invoke([&]() -> plugin_id
-			{
-				if (path.empty()) { return nullptr; }
-				if (path.extension().empty() && !fs::exists(path))
-				{
-					path += shared_library::default_extension;
-				}
-				if (shared_library lib{ path })
-				{
-					return std::get<0>(m_data.push_back(
-						ML_handle(plugin_id, util::hash(path.string())),
-						path,
-						std::move(lib),
-						library_funcs
-						{
-							lib.getproc<void, engine_context *, plugin *>("ml_plugin_attach"),
-							lib.getproc<void, engine_context *, plugin *>("ml_plugin_detach")
-						},
-						nullptr
-					));
-				}
-				return nullptr;
-			}) })
-			{
-				plugin * ptr{};
-				if (m_data.back<library_funcs>().attach(m_ctx, ptr); ptr)
-				{
-					m_data.back<manual<plugin>>().reset(ptr);
-					return id;
-				}
-			}
-			return nullptr;
-		}
-
-		bool uninstall(plugin_id value)
-		{
-			if (!value) { return false; }
-			if (auto const it{ m_data.find<plugin_id>(ML_handle(plugin_id, value)) }
-			; it != m_data.end<plugin_id>())
-			{
-				auto const i{ m_data.index_of<plugin_id>(it) };
-
-				m_data.at<library_funcs>(i).detach
-				(
-					m_ctx, m_data.at<manual<plugin>>(i).release()
-				);
-
-				m_data.erase(i);
-
-				return true;
-			}
-			return false;
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		engine_context * const m_ctx;
-		ds::batch_vector<
-			plugin_id		,	// guid
-			fs::path		,	// path
-			shared_library	,	// library instance
-			library_funcs	,	// library functions
-			manual<plugin>		// plugin instance
-		> m_data;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+// gui window
 namespace ml
 {
 	struct gui_window : render_window
@@ -218,68 +132,66 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// main
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// memory
-	static ds::array<byte_t, 128_MiB>			data{};
-	static pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
-	static pmr::unsynchronized_pool_resource	pool{ &mono };
-	static test_resource						test{ &pool, data.data(), data.size() };
-	pmr::set_default_resource(&test);
-
 	// context
-	static memory			mem	{ &test };
-	static json				cfg	{ read_config_file(CONFIG_FILE) };
+	static memory			mem	{ pmr::get_default_resource() };
+	static json				cfg	{ load_settings(SETTINGS_PATH) };
 	static timer_context	time{};
-	static file_context		fsys{ fs::current_path(), cfg["path"]["content"] };
+	static file_context		fs	{ fs::current_path(), cfg["path"]["content"] };
 	static event_bus		bus	{};
 	static render_window	win	{};
 	static gui_manager		gui	{ &bus };
-	static engine_context	ctx	{ &bus, &cfg, &fsys, &gui, &mem, &time, &win };
-	static plugin_manager	pmgr{ &ctx };
+	static system_context	sys	{ &bus, &cfg, &fs, &gui, &mem, &time, &win };
+	static plugin_manager	mods{ &sys };
 	
 	// window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
 	{
-		win.set_char_callback([](auto ... x) noexcept { bus.fire<char_event>(ML_forward(x)...); });
-		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<char_mods_event>(ML_forward(x)...); });
-		win.set_close_callback([](auto ... x) noexcept { bus.fire<close_event>(ML_forward(x)...); });
-		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<cursor_enter_event>(ML_forward(x)...); });
-		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<cursor_position_event>(ML_forward(x)...); });
-		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<content_scale_event>(ML_forward(x)...); });
-		win.set_drop_callback([](auto ... x) noexcept { bus.fire<drop_event>(ML_forward(x)...); });
-		win.set_error_callback([](auto ... x) noexcept { bus.fire<error_event>(ML_forward(x)...); });
-		win.set_focus_callback([](auto ... x) noexcept { bus.fire<focus_event>(ML_forward(x)...); });
-		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<framebuffer_size_event>(ML_forward(x)...); });
-		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<iconify_event>(ML_forward(x)...); });
-		win.set_key_callback([](auto ... x) noexcept { bus.fire<key_event>(ML_forward(x)...); });
-		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<maximize_event>(ML_forward(x)...);  });
-		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<mouse_event>(ML_forward(x)...); });
-		win.set_position_callback([](auto ... x) noexcept { bus.fire<position_event>(ML_forward(x)...); });
-		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<refresh_event>(ML_forward(x)...); });
-		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<scroll_event>(ML_forward(x)...); });
-		win.set_size_callback([](auto ... x) noexcept { bus.fire<size_event>(ML_forward(x)...); });
+		win.set_char_callback([](auto ... x) noexcept { bus.dispatch<char_event>(ML_forward(x)...); });
+		win.set_char_mods_callback([](auto ... x) noexcept { bus.dispatch<char_mods_event>(ML_forward(x)...); });
+		win.set_close_callback([](auto ... x) noexcept { bus.dispatch<close_event>(ML_forward(x)...); });
+		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.dispatch<cursor_enter_event>(ML_forward(x)...); });
+		win.set_cursor_position_callback([](auto ... x) noexcept { bus.dispatch<cursor_position_event>(ML_forward(x)...); });
+		win.set_content_scale_callback([](auto ... x) noexcept { bus.dispatch<content_scale_event>(ML_forward(x)...); });
+		win.set_drop_callback([](auto ... x) noexcept { bus.dispatch<drop_event>(ML_forward(x)...); });
+		win.set_error_callback([](auto ... x) noexcept { bus.dispatch<error_event>(ML_forward(x)...); });
+		win.set_focus_callback([](auto ... x) noexcept { bus.dispatch<focus_event>(ML_forward(x)...); });
+		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.dispatch<framebuffer_size_event>(ML_forward(x)...); });
+		win.set_iconify_callback([](auto ... x) noexcept { bus.dispatch<iconify_event>(ML_forward(x)...); });
+		win.set_key_callback([](auto ... x) noexcept { bus.dispatch<key_event>(ML_forward(x)...); });
+		win.set_maximize_callback([](auto ... x) noexcept { bus.dispatch<maximize_event>(ML_forward(x)...);  });
+		win.set_mouse_callback([](auto ... x) noexcept { bus.dispatch<mouse_event>(ML_forward(x)...); });
+		win.set_position_callback([](auto ... x) noexcept { bus.dispatch<position_event>(ML_forward(x)...); });
+		win.set_refresh_callback([](auto ... x) noexcept { bus.dispatch<refresh_event>(ML_forward(x)...); });
+		win.set_scroll_callback([](auto ... x) noexcept { bus.dispatch<scroll_event>(ML_forward(x)...); });
+		win.set_size_callback([](auto ... x) noexcept { bus.dispatch<size_event>(ML_forward(x)...); });
 	}
 
 	// gui
 	ML_assert(gui.startup(win));
-	gui.dockspace.visible = true;
-	gui.dockspace.main_menu.visible = true;
-	gui.load_style(fsys.path2(cfg["path"]["guistyle"]));
+	{
+		gui.dockspace.visible = true;
+		gui.dockspace.menubar = true;
+		gui.load_style(fs.path2(cfg["path"]["guistyle"]));
+	}
 
 	// plugins
-	auto demo{ pmgr.install("plugins/demo") };
-	ML_defer(&) { pmgr.uninstall(demo); };
+	for (auto const & path : cfg["plugins"]["files"])
+	{
+		mods.install(path);
+	}
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
-	bus.fire<load_event>();
-	ML_defer(){ bus.fire<unload_event>(); };
+	bus.dispatch<load_event>();
+	ML_defer(&){ bus.dispatch<unload_event>(); };
 	do
 	{
-		time.loop.restart();
+		time.loop_timer.restart();
 		time.frame_rate = std::invoke([&, dt = (float_t)time.delta_time.count()]() noexcept
 		{
 			time.fps_accum += dt - time.fps_times[time.fps_index];
@@ -287,28 +199,25 @@ ml::int32_t main()
 			time.fps_index = (time.fps_index + 1) % time.fps_times.size();
 			return (0.f < time.fps_accum) ? 1.f / (time.fps_accum / (float_t)time.fps_times.size()) : FLT_MAX;
 		});
-
+		
 		window::poll_events();
 
 		for (auto const & cmd : {
 			gfx::render_command::set_viewport(win.get_framebuffer_size()),
 			gfx::render_command::set_clear_color(colors::black),
 			gfx::render_command::clear(gfx::clear_color),
-		}) gfx::execute(cmd, win.get_render_context());
+		})	gfx::execute(cmd, win.get_render_context());
 
-		bus.fire<update_event>();
-
+		bus.dispatch<update_event>();
+		
 		gui.begin_frame();
 		gui.draw_default();
-		bus.fire<gui_event>();
+		bus.dispatch<gui_event>();
 		gui.end_frame();
 
-		if ML_UNLIKELY(win.get_hints() & window_hints_doublebuffer)
-		{
-			window::swap_buffers(win.get_handle());
-		}
+		window::swap_buffers(win);
 
-		time.delta_time = time.loop.elapsed();
+		time.delta_time = time.loop_timer.elapsed();
 	}
 	while (win.is_open());
 	return EXIT_SUCCESS;

@@ -131,9 +131,9 @@ namespace ml::util
 
 	// destructor
 	template <class T
-	> inline void destruct(T * ptr) noexcept
+	> inline T * destruct(T * ptr) noexcept
 	{
-		ptr->~T();
+		ptr->~T(); return ptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

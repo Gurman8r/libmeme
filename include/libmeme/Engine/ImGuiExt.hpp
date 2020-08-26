@@ -239,9 +239,14 @@ namespace ml::gui
 			return (*this);
 		}
 
+		bool menu_item(bool * p_open) noexcept
+		{
+			return ImGui::MenuItem(title, shortcut, p_open);
+		}
+
 		bool menu_item() noexcept
 		{
-			return ImGui::MenuItem(title, shortcut, &open);
+			return menu_item(&open);
 		}
 
 		bool selectable(int32_t selectable_flags = 0, vec2 const & size = {}) noexcept

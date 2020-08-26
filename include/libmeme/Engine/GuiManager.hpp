@@ -66,6 +66,7 @@ namespace ml
 			static constexpr auto title{ "dockspace##libmeme" };
 
 			bool		visible	{ true };
+			bool		menubar	{ true };
 			float_t		border	{};
 			vec2		padding	{};
 			float_t		rounding{};
@@ -88,43 +89,6 @@ namespace ml
 			auto & operator[](size_t const i) & noexcept { return nodes[i]; }
 
 			auto const & operator[](size_t const i) const & noexcept { return nodes[i]; }
-
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			struct // main menu
-			{
-				bool visible{};
-				
-				pmr::vector<std::pair<
-					cstring,
-					pmr::vector<std::function<void()>>
-				>> menus{};
-
-				template <class Fn> auto & add(cstring label, Fn && fn) & noexcept
-				{
-					auto it{ std::find_if(menus.begin(), menus.end(), [&
-					](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
-					if (it == menus.end())
-					{
-						menus.push_back({ label, {} });
-						it = (menus.end() - 1);
-					}
-					return it->second.emplace_back(ML_forward(fn));
-				}
-
-				auto del(cstring label) noexcept
-				{
-					auto it{ std::find_if(menus.begin(), menus.end(), [&
-					](auto const & e) { return (0 == std::strcmp(e.first, label)); }) };
-					if (it != menus.end())
-					{
-						menus.erase(it);
-						return true;
-					}
-					return false;
-				}
-			}
-			main_menu;
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}

@@ -363,27 +363,33 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(engine_context * ctx) noexcept : plugin{ ctx }
+		demo(system_context * sys) noexcept : plugin{ sys }
 		{
-			getbus().add_listener<	load_event				>(this);
-			getbus().add_listener<	unload_event			>(this);
-			getbus().add_listener<	update_event			>(this);
-			getbus().add_listener<	dockspace_event			>(this);
-			getbus().add_listener<	gui_event				>(this);
-			getbus().add_listener<	key_event				>(this);
-			getbus().add_listener<	mouse_event				>(this);
-			getbus().add_listener<	cursor_position_event	>(this);
+			sys->bus->subscribe<	load_event				>(this);
+			sys->bus->subscribe<	unload_event			>(this);
+			sys->bus->subscribe<	update_event			>(this);
+			sys->bus->subscribe<	dockspace_event			>(this);
+			sys->bus->subscribe<	main_menu_bar_event		>(this);
+			sys->bus->subscribe<	gui_event				>(this);
+			sys->bus->subscribe<	key_event				>(this);
+			sys->bus->subscribe<	mouse_event				>(this);
+			sys->bus->subscribe<	cursor_position_event	>(this);
+		}
+
+		~demo() noexcept override
+		{
 		}
 
 		void on_event(event const & ev) override
 		{
 			switch (ev)
 			{
-			case load_event		::ID: return on_load		((load_event const &)ev);
-			case unload_event	::ID: return on_unload		((unload_event const &)ev);
-			case update_event	::ID: return on_update		((update_event const &)ev);
-			case dockspace_event::ID: return on_dockspace	((dockspace_event const &)ev);
-			case gui_event		::ID: return on_gui			((gui_event const &)ev);
+			case load_event			::ID: return on_load			((load_event const &)ev);
+			case unload_event		::ID: return on_unload			((unload_event const &)ev);
+			case update_event		::ID: return on_update			((update_event const &)ev);
+			case dockspace_event	::ID: return on_dockspace		((dockspace_event const &)ev);
+			case main_menu_bar_event::ID: return on_main_menu_bar	((main_menu_bar_event const &)ev);
+			case gui_event			::ID: return on_gui				((gui_event const &)ev);
 			
 			case key_event::ID: {
 				switch (auto const & k{ (key_event const &)ev }; k.key)
@@ -490,8 +496,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime().main.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime().loop.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime().main_timer.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime().loop_timer.elapsed().count(); })
 				};
 
 				// camera
@@ -649,6 +655,8 @@ namespace ml
 			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void on_update(update_event const &)
 		{
 			// update stuff, etc...
@@ -664,7 +672,7 @@ namespace ml
 			}
 
 			// plots
-			m_plots.update(gettime().main.elapsed().count());
+			m_plots.update(gettime().main_timer.elapsed().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -691,8 +699,6 @@ namespace ml
 
 		void on_dockspace(dockspace_event const &)
 		{
-			// gui docking
-
 			enum : int32_t // node ids
 			{
 				root,
@@ -736,74 +742,63 @@ namespace ml
 			}
 		}
 
+		void on_main_menu_bar(main_menu_bar_event const &)
+		{
+			ML_ImGui_ScopeID(this);
+
+			// FILE
+			if (ImGui::BeginMenu("file"))
+			{
+				if (ImGui::MenuItem("quit", "alt+f4"))
+				{
+					getwin().close();
+				}
+				ImGui::EndMenu();
+			}
+			// VIEW
+			if (ImGui::BeginMenu("view"))
+			{
+				m_gui_assets.menu_item();
+				m_gui_console.menu_item();
+				m_gui_docs.menu_item();
+				m_gui_ecs.menu_item();
+				m_gui_memory.menu_item();
+				m_gui_nodes.menu_item();
+				m_gui_profiler.menu_item();
+				m_gui_renderer.menu_item();
+				m_gui_viewport.menu_item();
+				ImGui::EndMenu();
+			}
+			// HELP
+			if (ImGui::BeginMenu("help"))
+			{
+				m_imgui_demo.menu_item();
+				m_imgui_metrics.menu_item();
+				m_imgui_about.menu_item();
+				ImGui::EndMenu();
+			}
+		}
+
 		void on_gui(gui_event const &)
 		{
-			// gui stuff, etc...
+			ML_ImGui_ScopeID(this);
 
-			static ML_scope(&) // setup main menu bar
-			{
-				return;
-				auto & mmb{ getgui().dockspace.main_menu };
-				mmb.visible = true;
-				mmb.add("file", [&]()
-				{
-					ML_ImGui_ScopeID(this);
-					if (ImGui::MenuItem("quit", "alt+f4"))
-					{
-						getwin().close();
-					}
-				});
-				mmb.add("view", [&]()
-				{
-					ML_ImGui_ScopeID(this);
-					m_gui_assets.menu_item();
-					m_gui_console.menu_item();
-					m_gui_docs.menu_item();
-					m_gui_ecs.menu_item();
-					m_gui_memory.menu_item();
-					m_gui_nodes.menu_item();
-					m_gui_profiler.menu_item();
-					m_gui_renderer.menu_item();
-					m_gui_viewport.menu_item();
-				});
-				//mmb.add("settings", [&]()
-				//{
-				//	ML_scoped_imgui_id(this);
-				//	bool fullscreen{ getwin().is_fullscreen() };
-				//	if (ImGui::MenuItem("fullscreen", "(FIXME)", &fullscreen))
-				//	{
-				//		getwin().set_fullscreen(fullscreen);
-				//	}
-				//});
-				mmb.add("help", [&]()
-				{
-					ML_ImGui_ScopeID(this);
-					m_imgui_demo.menu_item();
-					m_imgui_metrics.menu_item();
-					m_imgui_about.menu_item();
-				});
-			};
+			// IMGUI
+			if (m_imgui_demo.open)		{ getgui().show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ getgui().show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ getgui().show_imgui_about(&m_imgui_about.open); }
 
-			{
-				ML_ImGui_ScopeID(this);
-
-				// IMGUI
-				if (m_imgui_demo.open)		{ getgui().show_imgui_demo(&m_imgui_demo.open); }
-				if (m_imgui_metrics.open)	{ getgui().show_imgui_metrics(&m_imgui_metrics.open); }
-				if (m_imgui_about.open)		{ getgui().show_imgui_about(&m_imgui_about.open); }
-
-				// WIDGETS
-				m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
-				m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
-				m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
-				m_gui_files		.render(&demo::show_files_gui		, this); // FILES
-				m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
-				m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
-				m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
-				m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
-				m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
-				m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
-			}
+			// WIDGETS
+			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
+			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
+			m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
+			m_gui_files		.render(&demo::show_files_gui		, this); // FILES
+			m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
+			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
+			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
+			m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
+			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+			m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1222,7 +1217,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static test_resource * const testres{ getmem().resource() };
+			static arena_test_resource * const testres{ getmem().resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
@@ -1367,7 +1362,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", gettime().main.elapsed().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", gettime().main_timer.elapsed().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1476,15 +1471,17 @@ namespace ml
 
 		void show_viewport_gui()
 		{
-			static gui::texture_preview preview{};
+			static gui::texture_preview pview{};
 
 			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
-			preview.tex_addr = tex->get_handle();
-			preview.tex_size = tex->get_data().size;
+			
+			pview.tex_addr = tex->get_handle();
+			
+			pview.tex_size = tex->get_data().size;
 
 			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
 
-			preview.render();
+			pview.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1495,14 +1492,14 @@ namespace ml
 
 extern "C"
 {
-	ML_PLUGIN_API void ml_plugin_attach(ml::engine_context * ctx, ml::plugin * ptr)
+	ML_PLUGIN_API void ml_plugin_attach(ml::system_context * sys, ml::plugin * ptr)
 	{
-		ptr = ctx->mem->new_object<ml::demo>(ctx);
+		ptr = sys->mem->new_object<ml::demo>(sys);
 	}
 	
-	ML_PLUGIN_API void ml_plugin_detach(ml::engine_context * ctx, ml::plugin * ptr)
+	ML_PLUGIN_API void ml_plugin_detach(ml::system_context * sys, ml::plugin * ptr)
 	{
-		ctx->mem->delete_object((ml::demo *)ptr);
+		sys->mem->delete_object((ml::demo *)ptr);
 	}
 }
 

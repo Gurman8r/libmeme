@@ -69,23 +69,23 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		event_bus(allocator_type alloc = {}) noexcept : m_listeners{ alloc }
+		event_bus(allocator_type alloc = {}) noexcept : m_subs{ alloc }
 		{
 		}
 
 		event_bus(event_bus && other, allocator_type alloc = {}) noexcept : event_bus{ alloc }
 		{
-			m_listeners.swap(std::move(other.m_listeners));
+			m_subs.swap(std::move(other.m_subs));
 		}
 
 		virtual ~event_bus() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void fire(event const & ev) noexcept
+		void dispatch(event const & ev) noexcept
 		{
 			// get category
-			if (auto const c{ m_listeners.find(ev) })
+			if (auto const c{ m_subs.find(ev) })
 			{
 				// for each listener
 				for (auto const & l : (*c->second))
@@ -97,35 +97,37 @@ namespace ml
 		}
 
 		template <class Ev, class ... Args
-		> void fire(Args && ... args) noexcept
+		> void dispatch(Args && ... args) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			return fire(Ev{ ML_forward(args)... });
+			
+			return this->dispatch(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool add_listener(hash_t type, event_listener * value) noexcept
+		bool subscribe(hash_t type, event_listener * value) noexcept
 		{
 			// insert listener into category
-			return value && m_listeners[type].insert(value).second;
+			return value && m_subs[type].insert(value).second;
 		}
 		
 		template <class Ev
-		> bool add_listener(event_listener * value) noexcept
+		> bool subscribe(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			return add_listener(Ev::ID, value);
+			
+			return this->subscribe(Ev::ID, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void remove_listener(hash_t type, event_listener * value) noexcept
+		void unsubscribe(hash_t type, event_listener * value) noexcept
 		{
 			if (!value) { return; }
 
 			// get category
-			if (auto const c{ m_listeners.find(type) })
+			if (auto const c{ m_subs.find(type) })
 			{
 				// get listener
 				if (auto const l{ c->second->find(value) }; l != c->second->end())
@@ -136,12 +138,12 @@ namespace ml
 			}
 		}
 
-		void remove_listener(event_listener * value) noexcept
+		void unsubscribe(event_listener * value) noexcept
 		{
 			if (!value) { return; }
 
 			// for each category
-			m_listeners.for_each([&](auto, auto & c) noexcept
+			m_subs.for_each([&](auto, auto & c) noexcept
 			{
 				// get listener
 				if (auto const l{ c.find(value) }; l != c.end())
@@ -155,7 +157,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ds::map<hash_t, ds::set<event_listener *>> m_listeners{};
+		ds::map<hash_t, ds::set<event_listener *>> m_subs{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -166,7 +168,7 @@ namespace ml
 	{
 		ML_assert("event bus does not exist" && m_event_bus);
 
-		m_event_bus->remove_listener(this); // remove listener from all events
+		m_event_bus->unsubscribe(this); // remove listener from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

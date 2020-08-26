@@ -145,6 +145,14 @@ namespace ml
 
 		static void swap_buffers(window_handle value) noexcept;
 
+		static void swap_buffers(window const & value) noexcept
+		{
+			if (value.get_hints() & window_hints_doublebuffer)
+			{
+				swap_buffers(value.get_handle());
+			}
+		}
+
 		static void swap_interval(int32_t value) noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

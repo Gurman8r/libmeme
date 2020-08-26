@@ -172,8 +172,8 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def("arena_used"	, []() { return memory::get()->resource()->used_bytes(); })
 
 		// allocation
-		.def("malloc"	, [](size_t s) { return (intptr_t)memory::get()->mallocate(s); })
-		.def("calloc"	, [](size_t c, size_t s) { return (intptr_t)memory::get()->callocate(c, s); })
+		.def("malloc"	, [](size_t s) { return (intptr_t)memory::get()->allocate(s); })
+		.def("calloc"	, [](size_t c, size_t s) { return (intptr_t)memory::get()->allocate(c, s); })
 		.def("free"		, [](intptr_t p) { memory::get()->deallocate((void *)p); })
 		.def("realloc"	, [](intptr_t p, size_t s) { return (intptr_t)memory::get()->reallocate((void *)p, s); })
 		.def("realloc"	, [](intptr_t p, size_t o, size_t n) { return (intptr_t)memory::get()->reallocate((void *)p, o, n); })

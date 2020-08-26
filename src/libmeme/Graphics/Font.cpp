@@ -99,11 +99,12 @@ namespace ml
 			((FT_Face)m_face)->glyph->bitmap.rows
 		};
 
-		// only load a texture for characters requiring a graphic
+		// texture
 		g.graphic = gfx::texture2d::create(
 		{
 			{}, {}, (vec2i)g.size(), { gfx::format_rgba, gfx::format_red }
 		}
+		// only load a texture for characters requiring a graphic
 		, (!std::isspace(c, {}) && std::isgraph(c, {})
 			? ((FT_Face)m_face)->glyph->bitmap.buffer
 			: nullptr)

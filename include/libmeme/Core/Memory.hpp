@@ -5,10 +5,11 @@
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 
+// testres
 namespace ml
 {
 	// passthrough for testing an upstream resource
-	class test_resource final : public pmr::memory_resource, public non_copyable
+	class arena_test_resource final : public pmr::memory_resource, public non_copyable
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -20,7 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit test_resource(pmr::memory_resource * u, pointer const b, size_t c) noexcept
+		explicit arena_test_resource(pmr::memory_resource * u, pointer const b, size_t c) noexcept
 			: m_upstream{ u }, m_buffer{ b }, m_capacity{ c }
 		{
 		}
@@ -117,6 +118,7 @@ namespace ml
 	};
 }
 
+// types
 namespace ml
 {
 	// trackable
@@ -148,6 +150,7 @@ namespace ml
 	> ML_alias weakref = typename std::weak_ptr<T>;
 }
 
+// memory
 namespace ml
 {
 	// memory manager singleton
@@ -158,20 +161,24 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		static constexpr size_t max_align{ alignof(max_align_t) };
-
 		struct ML_NODISCARD record final
 		{
-			byte_t * addr; size_t index; size_t size;
+			size_t index; byte_t * addr; size_t count; size_t size;
 
-			operator bool() const noexcept { return addr && index && size; }
+			operator bool() const noexcept { return index && addr && count && size; }
 		};
 
-		using record_table = typename ds::map<void *, record>;
+		using record_map = typename ds::map<void *, record>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit memory(test_resource * res) noexcept;
+		explicit memory(arena_test_resource * res) noexcept;
+
+		explicit memory(pmr::memory_resource * res) noexcept : memory{
+			reinterpret_cast<arena_test_resource *>(res)
+		}
+		{
+		}
 
 		~memory() noexcept;
 
@@ -183,41 +190,44 @@ namespace ml
 
 		ML_NODISCARD auto counter() const noexcept -> size_t { return m_counter; }
 
-		ML_NODISCARD auto records() const & noexcept -> record_table const & { return m_records; }
+		ML_NODISCARD auto records() const & noexcept -> record_map const & { return m_records; }
 		
-		ML_NODISCARD auto resource() const noexcept -> test_resource * const { return m_resource; }
+		ML_NODISCARD auto resource() const noexcept -> arena_test_resource * const { return m_resource; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		// malloc
-		ML_NODISCARD void * mallocate(size_t size) noexcept
-		{
-			// allocate the requested bytes
-			byte_t * const addr{ this->do_allocate(size) };
 
-			// create the record
-			return m_records.insert(addr, { addr, ++m_counter, size }).second->addr;
+		// malloc
+		ML_NODISCARD void * allocate(size_t size) noexcept
+		{
+			return this->allocate(1, size);
 		}
 
 		// calloc
-		ML_NODISCARD void * callocate(size_t count, size_t size) noexcept
+		ML_NODISCARD void * allocate(size_t count, size_t size) noexcept
 		{
-			// allocate (count * size) bytes
-			return this->mallocate(count * size);
+			byte_t * const addr{ this->do_allocate(count * size) };
+
+			return m_records.insert(addr, { ++m_counter, addr, count, size }).second->addr;
 		}
 
 		// free
 		void deallocate(void * addr) noexcept
 		{
-			// find the record
 			if (auto const it{ m_records.find(addr) })
 			{
-				// free the allocation
-				this->do_deallocate(it->second->addr, it->second->size);
+				this->do_deallocate
+				(
+					it->second->addr, it->second->count * it->second->size
+				);
 
-				// erase the record
 				m_records.erase(it->first);
 			}
+		}
+
+		// realloc
+		void * reallocate(void * addr, size_t size) noexcept
+		{
+			return this->reallocate(addr, size, size);
 		}
 
 		// realloc (sized)
@@ -231,7 +241,7 @@ namespace ml
 			}
 			else if (addr == nullptr)
 			{
-				return this->mallocate(newsz);
+				return this->allocate(newsz);
 			}
 			else if (newsz <= oldsz)
 			{
@@ -239,7 +249,7 @@ namespace ml
 			}
 			else
 			{
-				void * const temp{ this->mallocate(newsz) };
+				void * const temp{ this->allocate(newsz) };
 				if (temp)
 				{
 					std::memcpy(temp, addr, oldsz);
@@ -250,52 +260,47 @@ namespace ml
 			}
 		}
 
-		// realloc
-		void * reallocate(void * addr, size_t size) noexcept
-		{
-			return this->reallocate(addr, size, size);
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+		// allocate object
 		template <class T
 		> ML_NODISCARD T * allocate_object(size_t count = 1) noexcept
 		{
-			return (T *)this->callocate(count, sizeof(T));
+			return (T *)this->allocate(count, sizeof(T));
 		}
 
+		// deallocate object
 		template <class T
-		> void deallocate_object(T * ptr) noexcept
+		> void deallocate_object(T * addr) noexcept
 		{
-			this->deallocate((byte_t *)ptr);
+			this->deallocate(addr);
 		}
 
+		// new object
 		template <class T, class ... Args
 		> ML_NODISCARD T * new_object(Args && ... args) noexcept
 		{
 			return util::construct(this->allocate_object<T>(), ML_forward(args)...);
 		}
 
+		// delete object
 		template <class T
-		> void delete_object(T * ptr) noexcept
+		> void delete_object(T * addr) noexcept
 		{
-			util::destruct(ptr);
-
-			this->deallocate_object(ptr);
+			if constexpr (std::is_base_of_v<trackable, T>)
+			{
+				T::operator delete(addr);
+			}
+			else
+			{
+				this->deallocate_object(util::destruct(addr));
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ML_NODISCARD byte_t * do_allocate(size_t count) noexcept
-		{
-			return m_allocator.allocate(count);
-		}
+		auto do_allocate(size_t count) noexcept -> byte_t * { return m_allocator.allocate(count); }
 
-		void do_deallocate(byte_t * addr, size_t count) noexcept
-		{
-			m_allocator.deallocate(addr, count);
-		}
+		void do_deallocate(byte_t * addr, size_t count) noexcept { m_allocator.deallocate(addr, count); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -304,54 +309,43 @@ namespace ml
 		allocator_type			m_allocator	; // allocator
 		size_t					m_counter	; // counter
 		ds::map<void *, record>	m_records	; // records
-		test_resource *			m_resource	; // resource
+		arena_test_resource *	m_resource	; // resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	static void to_json(json & j, memory::record const & v)
 	{
-		j["addr"	] = (intptr_t)v.addr;
 		j["index"	] = v.index;
+		j["addr"	] = (intptr_t)v.addr;
+		j["count"	] = v.count;
 		j["size"	] = v.size;
 	}
 
 	static void from_json(json const & j, memory::record & v)
 	{
-		j["addr"	].get_to(*(intptr_t *)v.addr);
 		j["index"	].get_to(v.index);
+		j["addr"	].get_to(*(intptr_t *)v.addr);
+		j["count"	].get_to(v.count);
 		j["size"	].get_to(v.size);
 	}
 }
 
+// cstd memory interface
 namespace ml
 {
-	inline void * ml_malloc(size_t size) noexcept
-	{
-		return memory::get()->mallocate(size);
-	}
+	inline auto ml_malloc(size_t size) noexcept { return memory::get()->allocate(size); }
 
-	inline void * ml_calloc(size_t count, size_t size) noexcept
-	{
-		return memory::get()->callocate(count, size);
-	}
+	inline auto ml_calloc(size_t count, size_t size) noexcept { return memory::get()->allocate(count, size); }
 
-	inline void ml_free(void * addr) noexcept
-	{
-		memory::get()->deallocate(addr);
-	}
+	inline void ml_free(void * addr) noexcept { memory::get()->deallocate(addr); }
 
-	inline void * ml_realloc(void * addr, size_t oldsz, size_t newsz)
-	{
-		return memory::get()->reallocate(addr, oldsz, newsz);
-	}
+	inline auto ml_realloc(void * addr, size_t size) { return memory::get()->reallocate(addr, size); }
 
-	inline void * ml_realloc(void * addr, size_t size)
-	{
-		return memory::get()->reallocate(addr, size);
-	}
+	inline auto ml_realloc(void * addr, size_t oldsz, size_t newsz) { return memory::get()->reallocate(addr, oldsz, newsz); }
 }
 
+// trackable
 namespace ml
 {
 	// trackable base
@@ -386,14 +380,7 @@ namespace ml
 	{
 		void operator()(T * addr) const noexcept
 		{
-			if constexpr (std::is_base_of_v<trackable, T>)
-			{
-				T::operator delete(addr);
-			}
-			else
-			{
-				memory::get()->deallocate(addr);
-			}
+			memory::get()->delete_object<T>(addr);
 		}
 	};
 
@@ -408,7 +395,7 @@ namespace ml
 
 	// allocate shared
 	template <class T, class ... Args
-	> ML_NODISCARD auto alloc_shared(Args && ... args) noexcept
+	> ML_NODISCARD shared<T> alloc_shared(Args && ... args) noexcept
 	{
 		return std::allocate_shared<T>(memory::get()->allocator(), ML_forward(args)...);
 	}

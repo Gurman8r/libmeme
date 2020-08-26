@@ -16,15 +16,16 @@
 
 namespace ml
 {
-	struct plugin;
-
 	ML_decl_handle(plugin_id);
 
 	struct file_context final
 	{
 		fs::path const program_path, content_path;
 
-		fs::path const & path() const & noexcept { return program_path; }
+		fs::path path(fs::path const & path = {}) const noexcept
+		{
+			return program_path.native() + path.native();
+		}
 
 		fs::path path2(fs::path const & path = {}) const noexcept
 		{
@@ -36,8 +37,8 @@ namespace ml
 	{
 		using fps_times_t = pmr::vector<float_t>;
 
-		timer		main		{};
-		timer		loop		{ false };
+		timer		main_timer	{};
+		timer		loop_timer	{ false };
 		duration	delta_time	{};
 		uint64_t	frame_count	{};
 		float_t		frame_rate	{};
@@ -46,11 +47,11 @@ namespace ml
 		fps_times_t	fps_times	{ 120, fps_times_t::allocator_type{} };
 	};
 
-	struct engine_context final
+	struct system_context final
 	{
 		event_bus		* const bus	; // bus
 		json			* const cfg	; // config
-		file_context	* const file; // files
+		file_context	* const fs	; // files
 		gui_manager		* const gui	; // gui
 		memory			* const mem	; // memory
 		timer_context	* const time; // timers
@@ -61,9 +62,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit plugin(engine_context * ctx) : event_listener{ ctx->bus }, m_ctx{ ctx }
+		explicit plugin(system_context * sys) noexcept : event_listener{ sys->bus }, m_sys{ sys }
 		{
-			ML_assert("PLUGIN BUS MISMATCH" && (m_ctx->bus == event_listener::m_event_bus));
+			ML_assert("BUS MISMATCH" && (event_listener::m_event_bus == m_sys->bus));
 		}
 
 		virtual ~plugin() noexcept override = default;
@@ -74,24 +75,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto getbus() const noexcept -> event_bus & { return *m_ctx->bus; }
-		
-		auto getcfg() const noexcept -> json & { return *m_ctx->cfg; }
-
-		auto getfs() const noexcept -> file_context & { return *m_ctx->file; }
-
-		auto getgui() const noexcept -> gui_manager & { return *m_ctx->gui; }
-		
-		auto getmem() const noexcept -> memory & { return *m_ctx->mem; }
-
-		auto gettime() const noexcept -> timer_context & { return *m_ctx->time; }
-		
-		auto getwin() const noexcept -> render_window & { return *m_ctx->win; }
+		auto getbus	() const noexcept	-> event_bus		& { return *m_sys->bus	; }
+		auto getcfg	() const noexcept	-> json				& { return *m_sys->cfg	; }
+		auto getfs	() const noexcept	-> file_context		& { return *m_sys->fs	; }
+		auto getgui	() const noexcept	-> gui_manager		& { return *m_sys->gui	; }
+		auto getmem	() const noexcept	-> memory			& { return *m_sys->mem	; }
+		auto gettime() const noexcept	-> timer_context	& { return *m_sys->time	; }
+		auto getwin	() const noexcept	-> render_window	& { return *m_sys->win	; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		engine_context * const m_ctx;
+		system_context * const m_sys;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

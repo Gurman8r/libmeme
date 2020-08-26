@@ -91,8 +91,6 @@ namespace ml
 	{
 		if (m_imgui)
 		{
-			dockspace.main_menu.menus.clear();
-
 			ML_ImGui_Shutdown();
 
 			ImGui::DestroyContext((ImGuiContext *)m_imgui);
@@ -143,7 +141,7 @@ namespace ml
 					ImGuiWindowFlags_NoNavFocus |
 					ImGuiWindowFlags_NoDocking |
 					ImGuiWindowFlags_NoBackground |
-					(d.main_menu.visible ? ImGuiWindowFlags_MenuBar : 0)
+					(d.menubar ? ImGuiWindowFlags_MenuBar : 0)
 				))
 				{
 					ImGui::PopStyleVar(3);
@@ -151,41 +149,26 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						m_bus->fire<dockspace_event>();
+						m_bus->dispatch<dockspace_event>();
 					}
 
 					ImGui::DockSpace(
 						ImGui::GetID(d.title),
 						d.size,
 						ImGuiDockNodeFlags_PassthruCentralNode |
-						ImGuiDockNodeFlags_AutoHideTabBar
-					);
+						ImGuiDockNodeFlags_AutoHideTabBar);
 
 					ImGui::End();
 				}
 			}
 
 			// MAIN MENU BAR
-			if (auto & m{ d.main_menu }; m.visible)
+			if (d.menubar)
 			{
-				ML_ImGui_ScopeID(&m);
-
 				if (ImGui::BeginMainMenuBar())
 				{
-					for (auto const & pair : m.menus)
-					{
-						if (!pair.second.empty() && ImGui::BeginMenu(pair.first))
-						{
-							for (auto const & fn : pair.second)
-							{
-								if (fn)
-								{
-									std::invoke(fn);
-								}
-							}
-							ImGui::EndMenu();
-						}
-					}
+					m_bus->dispatch<main_menu_bar_event>();
+
 					ImGui::EndMainMenuBar();
 				}
 			}
