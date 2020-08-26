@@ -80,49 +80,6 @@ namespace ml
 
 namespace ml
 {
-	static ds::batch_vector<
-		hash_t, fs::path, shared_library, scoped<plugin>
-	> m_plugins;
-
-	static plugin_id attach_plugin(fs::path const & path, engine_context * ctx)
-	{
-		if (path.empty()) { return nullptr; }
-		if (auto const code{ util::hash(path.filename().string()) }
-		; m_plugins.find<hash_t>(code) == m_plugins.end<hash_t>())
-		{
-			// load library
-			if (shared_library lib{ path })
-			{
-				// load plugin
-				if (auto const ptr{ lib.call<plugin *>(ML_PLUGIN_MAIN, ctx) })
-				{
-					debug::info("loaded library {0}", path);
-
-					m_plugins.push_back(code, path, std::move(lib), *ptr);
-
-					return ML_handle(plugin_id, code);
-				}
-			}
-		}
-		return nullptr;
-	}
-
-	static bool detach_plugin(plugin_id value)
-	{
-		if (!value) { return false; }
-		if (auto const it{ m_plugins.find<hash_t>(ML_handle(hash_t, value)) }
-		; it != m_plugins.end<hash_t>())
-		{
-			m_plugins.erase(m_plugins.index_of<hash_t>(it));
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
 	struct plugin_manager final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -157,17 +114,16 @@ namespace ml
 				}
 				if (shared_library lib{ path })
 				{
-					library_funcs fun
-					{
-						lib.getproc<void, engine_context *, plugin *>("ml_plugin_attach"),
-						lib.getproc<void, engine_context *, plugin *>("ml_plugin_detach")
-					};
 					return std::get<0>(m_data.push_back(
 						ML_handle(plugin_id, util::hash(path.string())),
 						path,
 						std::move(lib),
-						std::move(fun),
-						manual<plugin>{ nullptr }
+						library_funcs
+						{
+							lib.getproc<void, engine_context *, plugin *>("ml_plugin_attach"),
+							lib.getproc<void, engine_context *, plugin *>("ml_plugin_detach")
+						},
+						nullptr
 					));
 				}
 				return nullptr;
@@ -177,7 +133,6 @@ namespace ml
 				if (m_data.back<library_funcs>().attach(m_ctx, ptr); ptr)
 				{
 					m_data.back<manual<plugin>>().reset(ptr);
-
 					return id;
 				}
 			}
@@ -192,7 +147,10 @@ namespace ml
 			{
 				auto const i{ m_data.index_of<plugin_id>(it) };
 
-				m_data.at<library_funcs>(i).detach(m_ctx, m_data.at<manual<plugin>>(i).release());
+				m_data.at<library_funcs>(i).detach
+				(
+					m_ctx, m_data.at<manual<plugin>>(i).release()
+				);
 
 				m_data.erase(i);
 
@@ -280,8 +238,8 @@ ml::int32_t main()
 	static render_window	win	{};
 	static gui_manager		gui	{ &bus };
 	static engine_context	ctx	{ &bus, &cfg, &fsys, &gui, &mem, &time, &win };
-	static plugin_manager	man	{ &ctx };
-
+	static plugin_manager	pmgr{ &ctx };
+	
 	// window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
 	{
@@ -307,19 +265,18 @@ ml::int32_t main()
 
 	// gui
 	ML_assert(gui.startup(win));
-	{
-		gui.dockspace.visible = true;
-		gui.dockspace.main_menu.visible = true;
-	}
+	gui.dockspace.visible = true;
+	gui.dockspace.main_menu.visible = true;
+	gui.load_style(fsys.path2(cfg["path"]["guistyle"]));
 
 	// plugins
-	auto demo{ man.install("plugins/demo") };
-	ML_defer(demo) { man.uninstall(demo); };
+	auto demo{ pmgr.install("plugins/demo") };
+	ML_defer(&) { pmgr.uninstall(demo); };
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
 	bus.fire<load_event>();
-	ML_defer(&){ bus.fire<unload_event>(); };
+	ML_defer(){ bus.fire<unload_event>(); };
 	do
 	{
 		time.loop.restart();
@@ -332,26 +289,25 @@ ml::int32_t main()
 		});
 
 		window::poll_events();
-		bus.fire<update_event>();
 
-		for (auto const & cmd :
-		{
+		for (auto const & cmd : {
+			gfx::render_command::set_viewport(win.get_framebuffer_size()),
 			gfx::render_command::set_clear_color(colors::black),
 			gfx::render_command::clear(gfx::clear_color),
-			gfx::render_command::set_viewport(win.get_framebuffer_size()),
-		})
-		gfx::execute(cmd, win.get_render_context());
-		bus.fire<draw_event>();
+		}) gfx::execute(cmd, win.get_render_context());
+
+		bus.fire<update_event>();
 
 		gui.begin_frame();
 		gui.draw_default();
-		bus.fire<gui_draw_event>();
+		bus.fire<gui_event>();
 		gui.end_frame();
 
 		if ML_UNLIKELY(win.get_hints() & window_hints_doublebuffer)
 		{
 			window::swap_buffers(win.get_handle());
 		}
+
 		time.delta_time = time.loop.elapsed();
 	}
 	while (win.is_open());

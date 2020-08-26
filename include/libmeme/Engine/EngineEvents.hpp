@@ -11,27 +11,11 @@ namespace ml
 
 	ML_decl_event(unload_event) {};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	ML_decl_event(update_event) {};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	ML_decl_event(dockspace_event) {};
 
-	ML_decl_event(draw_begin_event) {};
-
-	ML_decl_event(draw_event) {};
-
-	ML_decl_event(draw_end_event) {};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_decl_event(gui_begin_event) {};
-
-	ML_decl_event(gui_dock_event) {};
-
-	ML_decl_event(gui_draw_event) {};
-
-	ML_decl_event(gui_end_event) {};
+	ML_decl_event(gui_event) {};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

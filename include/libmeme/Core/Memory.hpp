@@ -221,7 +221,7 @@ namespace ml
 		}
 
 		// realloc (sized)
-		ML_NODISCARD void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
+		void * reallocate(void * addr, size_t oldsz, size_t newsz) noexcept
 		{
 			if (newsz == 0)
 			{
@@ -251,7 +251,7 @@ namespace ml
 		}
 
 		// realloc
-		ML_NODISCARD void * reallocate(void * addr, size_t size) noexcept
+		void * reallocate(void * addr, size_t size) noexcept
 		{
 			return this->reallocate(addr, size, size);
 		}
@@ -326,31 +326,47 @@ namespace ml
 
 namespace ml
 {
+	inline void * ml_malloc(size_t size) noexcept
+	{
+		return memory::get()->mallocate(size);
+	}
+
+	inline void * ml_calloc(size_t count, size_t size) noexcept
+	{
+		return memory::get()->callocate(count, size);
+	}
+
+	inline void ml_free(void * addr) noexcept
+	{
+		memory::get()->deallocate(addr);
+	}
+
+	inline void * ml_realloc(void * addr, size_t oldsz, size_t newsz)
+	{
+		return memory::get()->reallocate(addr, oldsz, newsz);
+	}
+
+	inline void * ml_realloc(void * addr, size_t size)
+	{
+		return memory::get()->reallocate(addr, size);
+	}
+}
+
+namespace ml
+{
 	// trackable base
 	struct ML_CORE_API trackable
 	{
 	public:
 		virtual ~trackable() noexcept = default;
 
-		ML_NODISCARD void * operator new(size_t size) noexcept
-		{
-			return memory::get()->mallocate(size);
-		}
+		ML_NODISCARD void * operator new(size_t size) noexcept { return ml_malloc(size); }
 
-		ML_NODISCARD void * operator new[](size_t size) noexcept
-		{
-			return memory::get()->mallocate(size);
-		}
+		ML_NODISCARD void * operator new[](size_t size) noexcept { return ml_malloc(size); }
 
-		void operator delete(void * addr) noexcept
-		{
-			memory::get()->deallocate(addr);
-		}
+		void operator delete(void * addr) noexcept { ml_free(addr); }
 
-		void operator delete[](void * addr) noexcept
-		{
-			memory::get()->deallocate(addr);
-		}
+		void operator delete[](void * addr) noexcept { ml_free(addr); }
 	};
 }
 

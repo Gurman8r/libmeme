@@ -1,9 +1,9 @@
 #include <libmeme/Graphics/Image.hpp>
 
-#define STBI_MALLOC(s)				_ML memory::get()->mallocate(s)
-#define STBI_FREE(p)				_ML memory::get()->deallocate(p)
-#define STBI_REALLOC(p, s)			_ML memory::get()->reallocate(p, s)
-#define STBI_REALLOC_SIZED(p, o, n) _ML memory::get()->reallocate(p, o, n)
+#define STBI_MALLOC(s)				_ML ml_malloc(s)
+#define STBI_FREE(p)				_ML ml_free(p)
+#define STBI_REALLOC(p, s)			_ML ml_realloc(p, s)
+#define STBI_REALLOC_SIZED(p, o, n) _ML ml_realloc(p, o, n)
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>

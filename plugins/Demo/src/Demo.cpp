@@ -368,9 +368,8 @@ namespace ml
 			getbus().add_listener<	load_event				>(this);
 			getbus().add_listener<	unload_event			>(this);
 			getbus().add_listener<	update_event			>(this);
-			getbus().add_listener<	draw_event				>(this);
-			getbus().add_listener<	gui_dock_event			>(this);
-			getbus().add_listener<	gui_draw_event			>(this);
+			getbus().add_listener<	dockspace_event			>(this);
+			getbus().add_listener<	gui_event				>(this);
 			getbus().add_listener<	key_event				>(this);
 			getbus().add_listener<	mouse_event				>(this);
 			getbus().add_listener<	cursor_position_event	>(this);
@@ -380,12 +379,11 @@ namespace ml
 		{
 			switch (ev)
 			{
-			case load_event		::ID: return on_load		((load_event	 const &)ev);
-			case unload_event	::ID: return on_unload		((unload_event	 const &)ev);
-			case update_event	::ID: return on_update		((update_event	 const &)ev);
-			case draw_event		::ID: return on_draw		((draw_event	 const &)ev);
-			case gui_dock_event	::ID: return on_gui_dock	((gui_dock_event const &)ev);
-			case gui_draw_event	::ID: return on_gui_draw	((gui_draw_event const &)ev);
+			case load_event		::ID: return on_load		((load_event const &)ev);
+			case unload_event	::ID: return on_unload		((unload_event const &)ev);
+			case update_event	::ID: return on_update		((update_event const &)ev);
+			case dockspace_event::ID: return on_dockspace	((dockspace_event const &)ev);
+			case gui_event		::ID: return on_gui			((gui_event const &)ev);
 			
 			case key_event::ID: {
 				switch (auto const & k{ (key_event const &)ev }; k.key)
@@ -651,8 +649,6 @@ namespace ml
 			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void on_update(update_event const &)
 		{
 			// update stuff, etc...
@@ -679,33 +675,21 @@ namespace ml
 			{
 				fbo->resize(m_resolution);
 			}
-		}
 
-		void on_draw(draw_event const &)
-		{
-			// draw stuff, etc...
-
-			for (auto const & cmd :
-			{
+			// render
+			for (auto const & cmd : {
 				gfx::render_command::bind_framebuffer(m_fbo[0]),
-
 				gfx::render_command::set_clear_color(colors::magenta),
-
 				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
-
 				gfx::make_command([&](gfx::render_context * ctx) noexcept
 				{
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
-
 				gfx::render_command::bind_framebuffer(nullptr),
-			})
-			{
-				gfx::execute(cmd, getwin().get_render_context());
-			}
+			}) gfx::execute(cmd, getwin().get_render_context());
 		}
 
-		void on_gui_dock(gui_dock_event const &)
+		void on_dockspace(dockspace_event const &)
 		{
 			// gui docking
 
@@ -752,12 +736,13 @@ namespace ml
 			}
 		}
 
-		void on_gui_draw(gui_draw_event const &)
+		void on_gui(gui_event const &)
 		{
 			// gui stuff, etc...
 
 			static ML_scope(&) // setup main menu bar
 			{
+				return;
 				auto & mmb{ getgui().dockspace.main_menu };
 				mmb.visible = true;
 				mmb.add("file", [&]()

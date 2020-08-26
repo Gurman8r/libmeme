@@ -53,8 +53,8 @@ namespace ml
 		// allocators
 		ImGui::SetAllocatorFunctions
 		(
-			[](size_t s, auto) noexcept { return memory::get()->mallocate(s); },
-			[](void * p, auto) noexcept { return memory::get()->deallocate(p); },
+			[](size_t s, auto) noexcept { return ml_malloc(s); },
+			[](void * p, auto) noexcept { return ml_free(p); },
 			nullptr
 		);
 
@@ -151,7 +151,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						m_bus->fire<gui_dock_event>();
+						m_bus->fire<dockspace_event>();
 					}
 
 					ImGui::DockSpace(

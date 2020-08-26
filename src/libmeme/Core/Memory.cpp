@@ -22,18 +22,16 @@ namespace ml
 	memory::~memory() noexcept
 	{
 		ML_assert(this == s_instance);
-#if (ML_is_debug)
+#if 0 && ML_is_debug
 		if (!m_records.empty())
 		{
 			debug::error("final allocations follow:");
 
-			debug::pause();
-
 			enum : std::streamsize { W = 20 };
 
 			std::cout << std::left
-				<< std::setw(W) << "address"
-				<< std::setw(W) << "index"
+				<< std::setw(W) << "addr"
+				<< std::setw(W) << "indx"
 				<< std::setw(W) << "size"
 				<< '\n';
 
@@ -49,7 +47,7 @@ namespace ml
 			debug::pause();
 		}
 #endif
-		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
+		//ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
 		s_instance = nullptr;
 	}
 
