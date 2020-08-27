@@ -365,15 +365,15 @@ namespace ml
 
 		demo(system_context * sys) noexcept : plugin{ sys }
 		{
-			sys->bus->subscribe<	load_event				>(this);
-			sys->bus->subscribe<	unload_event			>(this);
-			sys->bus->subscribe<	update_event			>(this);
-			sys->bus->subscribe<	dockspace_event			>(this);
-			sys->bus->subscribe<	main_menu_bar_event		>(this);
-			sys->bus->subscribe<	gui_event				>(this);
-			sys->bus->subscribe<	key_event				>(this);
-			sys->bus->subscribe<	mouse_event				>(this);
-			sys->bus->subscribe<	cursor_position_event	>(this);
+			sys->bus->sub<	load_event				>(this);
+			sys->bus->sub<	unload_event			>(this);
+			sys->bus->sub<	update_event			>(this);
+			sys->bus->sub<	dockspace_event			>(this);
+			sys->bus->sub<	main_menu_bar_event		>(this);
+			sys->bus->sub<	gui_event				>(this);
+			sys->bus->sub<	key_event				>(this);
+			sys->bus->sub<	mouse_event				>(this);
+			sys->bus->sub<	cursor_position_event	>(this);
 		}
 
 		~demo() noexcept override

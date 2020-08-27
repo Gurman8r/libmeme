@@ -149,7 +149,7 @@ namespace ml
 					// fire docking event if nodes are empty
 					if (d.nodes.empty())
 					{
-						m_bus->dispatch<dockspace_event>();
+						m_bus->fire<dockspace_event>();
 					}
 
 					ImGui::DockSpace(
@@ -167,7 +167,7 @@ namespace ml
 			{
 				if (ImGui::BeginMainMenuBar())
 				{
-					m_bus->dispatch<main_menu_bar_event>();
+					m_bus->fire<main_menu_bar_event>();
 
 					ImGui::EndMainMenuBar();
 				}

@@ -151,33 +151,31 @@ ml::int32_t main()
 	// window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
 	{
-		win.set_char_callback([](auto ... x) noexcept { bus.dispatch<char_event>(ML_forward(x)...); });
-		win.set_char_mods_callback([](auto ... x) noexcept { bus.dispatch<char_mods_event>(ML_forward(x)...); });
-		win.set_close_callback([](auto ... x) noexcept { bus.dispatch<close_event>(ML_forward(x)...); });
-		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.dispatch<cursor_enter_event>(ML_forward(x)...); });
-		win.set_cursor_position_callback([](auto ... x) noexcept { bus.dispatch<cursor_position_event>(ML_forward(x)...); });
-		win.set_content_scale_callback([](auto ... x) noexcept { bus.dispatch<content_scale_event>(ML_forward(x)...); });
-		win.set_drop_callback([](auto ... x) noexcept { bus.dispatch<drop_event>(ML_forward(x)...); });
-		win.set_error_callback([](auto ... x) noexcept { bus.dispatch<error_event>(ML_forward(x)...); });
-		win.set_focus_callback([](auto ... x) noexcept { bus.dispatch<focus_event>(ML_forward(x)...); });
-		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.dispatch<framebuffer_size_event>(ML_forward(x)...); });
-		win.set_iconify_callback([](auto ... x) noexcept { bus.dispatch<iconify_event>(ML_forward(x)...); });
-		win.set_key_callback([](auto ... x) noexcept { bus.dispatch<key_event>(ML_forward(x)...); });
-		win.set_maximize_callback([](auto ... x) noexcept { bus.dispatch<maximize_event>(ML_forward(x)...);  });
-		win.set_mouse_callback([](auto ... x) noexcept { bus.dispatch<mouse_event>(ML_forward(x)...); });
-		win.set_position_callback([](auto ... x) noexcept { bus.dispatch<position_event>(ML_forward(x)...); });
-		win.set_refresh_callback([](auto ... x) noexcept { bus.dispatch<refresh_event>(ML_forward(x)...); });
-		win.set_scroll_callback([](auto ... x) noexcept { bus.dispatch<scroll_event>(ML_forward(x)...); });
-		win.set_size_callback([](auto ... x) noexcept { bus.dispatch<size_event>(ML_forward(x)...); });
+		win.set_char_callback([](auto ... x) noexcept { bus.fire<char_event>(ML_forward(x)...); });
+		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<char_mods_event>(ML_forward(x)...); });
+		win.set_close_callback([](auto ... x) noexcept { bus.fire<close_event>(ML_forward(x)...); });
+		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<cursor_enter_event>(ML_forward(x)...); });
+		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<cursor_position_event>(ML_forward(x)...); });
+		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<content_scale_event>(ML_forward(x)...); });
+		win.set_drop_callback([](auto ... x) noexcept { bus.fire<drop_event>(ML_forward(x)...); });
+		win.set_error_callback([](auto ... x) noexcept { bus.fire<error_event>(ML_forward(x)...); });
+		win.set_focus_callback([](auto ... x) noexcept { bus.fire<focus_event>(ML_forward(x)...); });
+		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<framebuffer_size_event>(ML_forward(x)...); });
+		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<iconify_event>(ML_forward(x)...); });
+		win.set_key_callback([](auto ... x) noexcept { bus.fire<key_event>(ML_forward(x)...); });
+		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<maximize_event>(ML_forward(x)...);  });
+		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<mouse_event>(ML_forward(x)...); });
+		win.set_position_callback([](auto ... x) noexcept { bus.fire<position_event>(ML_forward(x)...); });
+		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<refresh_event>(ML_forward(x)...); });
+		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<scroll_event>(ML_forward(x)...); });
+		win.set_size_callback([](auto ... x) noexcept { bus.fire<size_event>(ML_forward(x)...); });
 	}
 
 	// gui
 	ML_assert(gui.startup(win));
-	{
-		gui.dockspace.visible = true;
-		gui.dockspace.menubar = true;
-		gui.load_style(fs.path2(cfg["path"]["guistyle"]));
-	}
+	gui.dockspace.visible = true;
+	gui.dockspace.menubar = true;
+	gui.load_style(fs.path2(cfg["path"]["guistyle"]));
 
 	// plugins
 	for (auto const & path : cfg["plugins"]["files"])
@@ -187,10 +185,11 @@ ml::int32_t main()
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
-	bus.dispatch<load_event>();
-	ML_defer(&){ bus.dispatch<unload_event>(); };
+	bus.fire<load_event>();
+	ML_defer(){ bus.fire<unload_event>(); };
 	do
 	{
+		// begin
 		time.loop_timer.restart();
 		time.frame_rate = std::invoke([&, dt = (float_t)time.delta_time.count()]() noexcept
 		{
@@ -200,23 +199,23 @@ ml::int32_t main()
 			return (0.f < time.fps_accum) ? 1.f / (time.fps_accum / (float_t)time.fps_times.size()) : FLT_MAX;
 		});
 		
+		// update
 		window::poll_events();
-
 		for (auto const & cmd : {
 			gfx::render_command::set_viewport(win.get_framebuffer_size()),
 			gfx::render_command::set_clear_color(colors::black),
 			gfx::render_command::clear(gfx::clear_color),
-		})	gfx::execute(cmd, win.get_render_context());
-
-		bus.dispatch<update_event>();
+		}) gfx::execute(cmd, win.get_render_context());
+		bus.fire<update_event>();
 		
+		// gui
 		gui.begin_frame();
 		gui.draw_default();
-		bus.dispatch<gui_event>();
+		bus.fire<gui_event>();
 		gui.end_frame();
 
+		// end
 		window::swap_buffers(win);
-
 		time.delta_time = time.loop_timer.elapsed();
 	}
 	while (win.is_open());

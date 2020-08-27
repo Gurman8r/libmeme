@@ -82,7 +82,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void dispatch(event const & ev) noexcept
+		template <class Ev, class ... Args
+		> void fire(Args && ... args) noexcept
+		{
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+
+			return this->fire(Ev{ ML_forward(args)... });
+		}
+
+		void fire(event const & ev) noexcept
 		{
 			// get category
 			if (auto const c{ m_subs.find(ev) })
@@ -96,38 +104,28 @@ namespace ml
 			}
 		}
 
-		template <class Ev, class ... Args
-		> void dispatch(Args && ... args) noexcept
-		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			
-			return this->dispatch(Ev{ ML_forward(args)... });
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		bool subscribe(hash_t type, event_listener * value) noexcept
-		{
-			// insert listener into category
-			return value && m_subs[type].insert(value).second;
-		}
 		
 		template <class Ev
-		> bool subscribe(event_listener * value) noexcept
+		> bool sub(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
-			
-			return this->subscribe(Ev::ID, value);
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+
+			return this->sub(value, Ev::ID);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		bool sub(event_listener * value, hash_t id) noexcept
+		{
+			// insert listener into category
+			return value && m_subs[id].insert(value).second;
+		}
 
-		void unsubscribe(hash_t type, event_listener * value) noexcept
+		void unsub(event_listener * value, hash_t id) noexcept
 		{
 			if (!value) { return; }
 
 			// get category
-			if (auto const c{ m_subs.find(type) })
+			if (auto const c{ m_subs.find(id) })
 			{
 				// get listener
 				if (auto const l{ c->second->find(value) }; l != c->second->end())
@@ -138,7 +136,7 @@ namespace ml
 			}
 		}
 
-		void unsubscribe(event_listener * value) noexcept
+		void unsub(event_listener * value) noexcept
 		{
 			if (!value) { return; }
 
@@ -168,7 +166,7 @@ namespace ml
 	{
 		ML_assert("event bus does not exist" && m_event_bus);
 
-		m_event_bus->unsubscribe(this); // remove listener from all events
+		m_event_bus->unsub(this); // remove listener from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

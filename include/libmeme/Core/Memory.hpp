@@ -147,7 +147,7 @@ namespace ml
 
 	// weak pointer ( std::weak_ptr<T> )
 	template <class T
-	> ML_alias weakref = typename std::weak_ptr<T>;
+	> ML_alias unowned = typename std::weak_ptr<T>;
 }
 
 // memory
@@ -308,7 +308,7 @@ namespace ml
 		static memory *			s_instance	; // singleton
 		allocator_type			m_allocator	; // allocator
 		size_t					m_counter	; // counter
-		ds::map<void *, record>	m_records	; // records
+		record_map				m_records	; // records
 		arena_test_resource *	m_resource	; // resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
