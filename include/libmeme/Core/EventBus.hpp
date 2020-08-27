@@ -120,6 +120,8 @@ namespace ml
 			return value && m_subs[id].insert(value).second;
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void unsub(event_listener * value, hash_t id) noexcept
 		{
 			if (!value) { return; }

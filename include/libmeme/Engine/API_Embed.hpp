@@ -7,7 +7,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <regex>
 #include <Python.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
@@ -19,6 +18,25 @@
 namespace ml
 {
 	namespace py = pybind11;
+
+	static bool initialize_python(
+		fs::path const & name,
+		fs::path const & home,
+		PyObjectArenaAllocator && alloc
+	)
+	{
+		if (Py_IsInitialized()) { return false; }
+		PyObject_SetArenaAllocator(std::addressof(alloc));
+		Py_SetProgramName(name.c_str());
+		Py_SetPythonHome(home.c_str());
+		Py_InitializeEx(1);
+		return Py_IsInitialized();
+	}
+
+	static bool finalize_python()
+	{
+		return Py_IsInitialized() && (Py_FinalizeEx() == EXIT_SUCCESS);
+	}
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

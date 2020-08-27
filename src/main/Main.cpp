@@ -3,13 +3,14 @@
 #include <libmeme/Graphics/RenderCommand.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 
 using namespace ml;
 using namespace ml::size_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// memory
+// memcfg
 static class memcfg final : public singleton<memcfg>
 {
 	friend singleton;
@@ -90,7 +91,7 @@ static auto load_settings(fs::path const & path)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// gui window
+// gui window (WIP)
 namespace ml
 {
 	struct gui_window : render_window
@@ -141,11 +142,11 @@ ml::int32_t main()
 	static memory			mem	{ pmr::get_default_resource() };
 	static json				cfg	{ load_settings(SETTINGS_PATH) };
 	static timer_context	time{};
-	static file_context		fs	{ fs::current_path(), cfg["path"]["content"] };
+	static file_context		fsys{ __argv[0], fs::current_path(), cfg["path"]["content"] };
 	static event_bus		bus	{};
 	static render_window	win	{};
 	static gui_manager		gui	{ &bus };
-	static system_context	sys	{ &bus, &cfg, &fs, &gui, &mem, &time, &win };
+	static system_context	sys	{ &bus, &cfg, &fsys, &gui, &mem, &time, &win };
 	static plugin_manager	mods{ &sys };
 	
 	// window
@@ -175,12 +176,35 @@ ml::int32_t main()
 	ML_assert(gui.startup(win));
 	gui.dockspace.visible = true;
 	gui.dockspace.menubar = true;
-	gui.load_style(fs.path2(cfg["path"]["guistyle"]));
+	gui.load_style(fsys.path2(cfg["path"]["guistyle"]));
+
+	// python
+	initialize_python(fsys.program_name, cfg["path"]["library"],
+	{
+		nullptr,
+		[](auto, size_t size) noexcept
+		{
+			return pmr::get_default_resource()->allocate(size);
+		},
+		[](auto, void * addr, size_t size) noexcept
+		{
+			return pmr::get_default_resource()->deallocate(addr, size);
+		}
+	});
+	ML_defer() { ML_assert(finalize_python()); };
 
 	// plugins
 	for (auto const & path : cfg["plugins"]["files"])
 	{
 		mods.install(path);
+	}
+
+	// scripts
+	for (auto const & path : cfg["scripts"]["files"])
+	{
+		pmr::string const s{ fsys.path2(path).string() };
+
+		PyRun_SimpleFileExFlags(std::fopen(s.c_str(), "r"), s.c_str(), true, nullptr);
 	}
 
 	// loop

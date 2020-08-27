@@ -10,17 +10,16 @@
 #define ML_PLUGIN_API	ML_API_EXPORT
 #endif
 
-#ifndef ML_PLUGIN_MAIN
-#define ML_PLUGIN_MAIN	"ml_plugin_main"
-#endif
-
 namespace ml
 {
 	ML_decl_handle(plugin_id);
 
 	struct file_context final
 	{
-		fs::path const program_path, content_path;
+		fs::path const
+			program_name,
+			program_path,
+			content_path;
 
 		fs::path path(fs::path const & path = {}) const noexcept
 		{

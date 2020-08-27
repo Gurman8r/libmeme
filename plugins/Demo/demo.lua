@@ -30,8 +30,9 @@ includedirs{
 	"%{sln_dir}src/plugins",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
-
-	-- imgui
+	"%{ext_dir}pybind11/include",
+	"%{ext_dir}cpython/Include",
+	"%{ext_dir}cpython/Include/internal",
 	"%{ext_dir}imgui",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include",
 }
@@ -55,13 +56,24 @@ postbuildcommands{
 
 filter{ "configurations:Debug" }
 	symbols "On"
+	links{
+		"python39_d",
+	}
 
 filter{ "configurations:Release" }
 	optimize "Speed"
+	links{
+		"python39",
+	}
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
 
 -- WINDOWS
+
+filter{ "system:Windows" }
+	includedirs{
+		"%{ext_dir}cpython/PC",
+	}
 
 filter{ "system:Windows", "configurations:Debug" }
 	linkoptions{ 

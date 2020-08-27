@@ -29,7 +29,11 @@ includedirs{
 	"%{sln_dir}include",
 	"%{ext_dir}",
 	"%{ext_dir}json/include",
+	"%{ext_dir}pybind11/include",
+	"%{ext_dir}cpython/Include",
+	"%{ext_dir}cpython/Include/internal",
 	"%{ext_dir}imgui",
+	"%{ext_dir}imgui-node-editor/NodeEditor/Include",
 }
 
 files{
@@ -64,6 +68,15 @@ filter{ "configurations:Release" }
 	links{
 		"glew32",
 		"python39",
+	}
+
+-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --
+
+-- WINDOWS
+
+filter{ "system:Windows" }
+	includedirs{
+		"%{ext_dir}cpython/PC",
 	}
 
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

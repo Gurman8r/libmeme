@@ -21,10 +21,9 @@ namespace ml
 
 	memory::~memory() noexcept
 	{
-		ds::set<void *> const keys{ m_records.keys() };
-		for (auto addr = keys.rbegin(); addr != keys.rend(); ++addr)
+		for (auto addr : ds::set<void *>{ m_records.keys() })
 		{
-			deallocate(*addr);
+			deallocate(addr);
 		}
 
 		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());

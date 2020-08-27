@@ -145,9 +145,9 @@ namespace ml
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
 
-	// weak pointer ( std::weak_ptr<T> )
+	// unowned pointer ( std::weak_ptr<T> )
 	template <class T
-	> ML_alias unowned = typename std::weak_ptr<T>;
+	> ML_alias unown = typename std::weak_ptr<T>;
 }
 
 // memory
@@ -215,10 +215,7 @@ namespace ml
 		{
 			if (auto const it{ m_records.find(addr) })
 			{
-				this->do_deallocate
-				(
-					it->second->addr, it->second->count * it->second->size
-				);
+				this->do_deallocate(it->second->addr, it->second->count * it->second->size);
 
 				m_records.erase(it->first);
 			}

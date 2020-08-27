@@ -5,6 +5,7 @@
 #include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
+#include <libmeme/Engine/API_Embed.hpp>
 #include <libmeme/Graphics/Camera.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
@@ -945,7 +946,7 @@ namespace ml
 				}
 				else
 				{
-					//getapp().do_string(util::detokenize(args));
+					PyRun_SimpleStringFlags(util::detokenize(args).c_str(), nullptr);
 				}
 			},
 			{

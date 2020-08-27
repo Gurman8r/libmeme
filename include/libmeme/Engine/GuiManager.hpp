@@ -74,7 +74,7 @@ namespace ml
 			float_t		alpha	{};
 			nodes_t		nodes	{};
 
-			uint32_t begin_builder(int32_t flags = {});
+			uint32_t begin_builder(int32_t flags = 0);
 
 			uint32_t end_builder(uint32_t root);
 
@@ -96,13 +96,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		auto get_bus() const noexcept -> event_bus * { return m_bus; }
+
 		auto get_context() const noexcept -> ImGuiContext * { return m_imgui; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ImGuiContext * m_imgui;
-		event_bus * m_bus;
+		ImGuiContext *	m_imgui;
+		event_bus *		m_bus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

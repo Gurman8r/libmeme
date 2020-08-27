@@ -13,8 +13,7 @@ namespace ml
 
 		struct plugin_abi final
 		{
-			std::function<void(system_context *, plugin *)> attach;
-			std::function<void(system_context *, plugin *)> detach;
+			std::function<void(system_context *, plugin *)> attach, detach;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
