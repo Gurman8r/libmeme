@@ -110,7 +110,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		;
 	m	// json
 		.def("to_json"	, [](py::handle h) { return json{ h }.dump(); })
-		.def("from_json", [](py::str s) { return json{ (std::string)s }.get<py::handle>(); })
+		.def("from_json", [](cstring s) { return json{ s }.get<py::handle>(); })
 		;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -142,6 +142,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		}))
 		.def_property_readonly("addr", [](memory::record const & o) { return (intptr_t)o.addr; })
 		.def_readonly("index", &memory::record::index)
+		.def_readonly("count", &memory::record::count)
 		.def_readonly("size", &memory::record::size)
 		.def("__nonzero__", &memory::record::operator bool)
 		.def("__repr__", [](memory::record const & o) { return json{ o }.dump(); })
@@ -472,6 +473,9 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def_readwrite("context", &window_settings::context)
 		.def_readwrite("hints"	, &window_settings::hints)
 		;
+
+	py::module::import("builtins").attr("exit") = py::none();
+	py::module::import("sys").attr("exit") = py::none();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

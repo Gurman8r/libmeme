@@ -75,14 +75,14 @@ namespace ml
 
 		bool close();
 
-		void * getsym(cstring name);
+		void * read(cstring name);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> decltype(auto) getproc(cstring name) noexcept
+		> decltype(auto) proc(cstring name) noexcept
 		{
-			return reinterpret_cast<Ret(*)(Args...)>(this->getsym(name));
+			return reinterpret_cast<Ret(*)(Args...)>(this->read(name));
 		}
 
 		template <class Ret, class ... Args
@@ -90,7 +90,7 @@ namespace ml
 		{
 			constexpr bool has_return{ !std::is_same_v<Ret, void> };
 
-			if (auto const fn{ this->getproc<Ret, Args...>(name) })
+			if (auto const fn{ this->proc<Ret, Args...>(name) })
 			{
 				if constexpr (has_return)
 				{

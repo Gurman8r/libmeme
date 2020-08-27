@@ -106,10 +106,7 @@ namespace ml
 		ML_ImGui_NewFrame();
 
 		ImGui::NewFrame();
-	}
 
-	void gui_manager::draw_default()
-	{
 		ML_ImGui_ScopeID(this);
 
 		// DOCKSPACE

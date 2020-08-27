@@ -1,8 +1,6 @@
 {
-	"path": {
-		"content"	: "../../../../",
-		"library"	: "../../../../",
-		"guistyle"	: "assets/styles/obsidian.style"
+	"content": {
+		"path": "../../../../"
 	},
 	"window": {
 		"title": "libmeme <3",
@@ -34,15 +32,14 @@
 			"visible"		: false
 		}
 	},
+	"gui": {
+		"style": "assets/styles/obsidian.style"
+	},
 	"plugins": {
-		"files": [
-			"plugins/demo"
-		]
+		"files": [ "plugins/demo" ]
 	},
 	"scripts": {
-		"files": [
-			"assets/scripts/setup.py"
-		]
+		"files": [ "assets/scripts/setup.py" ]
 	},
 	
 	"testing": {

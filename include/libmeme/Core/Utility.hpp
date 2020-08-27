@@ -103,7 +103,7 @@ namespace ml::util
 		ptr->~T(); return ptr;
 	}
 
-	// duplicate
+	// duplicate / force copy
 	template <class T
 	> ML_NODISCARD T dup(T const & copy) noexcept
 	{

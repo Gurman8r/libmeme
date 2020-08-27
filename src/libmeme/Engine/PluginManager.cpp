@@ -22,8 +22,8 @@ namespace ml
 					std::move(lib),
 					plugin_abi
 					{
-						lib.getproc<void, system_context *, plugin *>("ml_plugin_attach"),
-						lib.getproc<void, system_context *, plugin *>("ml_plugin_detach")
+						lib.proc<void, system_context *, plugin *>("ml_plugin_attach"),
+						lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
 					},
 					nullptr
 				));

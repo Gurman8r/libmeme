@@ -186,7 +186,7 @@ namespace ml
 
 		ML_NODISCARD static memory * const get() noexcept { return s_instance; }
 
-		ML_NODISCARD auto allocator() const & noexcept -> allocator_type const & { return m_allocator; }
+		ML_NODISCARD auto allocator() const noexcept -> allocator_type { return m_allocator; }
 
 		ML_NODISCARD auto counter() const noexcept -> size_t { return m_counter; }
 
@@ -369,7 +369,7 @@ namespace ml
 	{
 		void operator()(void * addr) const noexcept
 		{
-			memory::get()->deallocate(addr);
+			ml_free(addr);
 		}
 	};
 

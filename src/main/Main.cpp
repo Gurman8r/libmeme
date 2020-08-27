@@ -29,10 +29,8 @@ static class memcfg final : public singleton<memcfg>
 
 static auto const default_settings{ R"(
 {
-	"path": {
-		"content"	: "../../../../",
-		"library"	: "../../../../",
-		"guistyle"	: "assets/styles/obsidian.style"
+	"content": {
+		"path": "../../../../"
 	},
 	"window": {
 		"title": "libmeme <3",
@@ -64,15 +62,14 @@ static auto const default_settings{ R"(
 			"visible"		: false
 		}
 	},
+	"gui": {
+		"style": "assets/styles/obsidian.style"
+	},
 	"plugins": {
-		"files": [
-			"plugins/demo"
-		]
+		"files": [ "plugins/demo" ]
 	},
 	"scripts": {
-		"files": [
-			"assets/scripts/setup.py"
-		]
+		"files": [ "assets/scripts/setup.py" ]
 	}
 }
 )"_json };
@@ -94,12 +91,12 @@ ml::int32_t main()
 	static memory			mem	{ pmr::get_default_resource() };
 	static json				cfg	{ load_settings() };
 	static timer_context	time{};
-	static file_context		fsys{ __argv[0], fs::current_path(), cfg["path"]["content"] };
+	static file_context		fs	{ __argv[0], fs::current_path(), cfg["content"]["path"] };
 	static event_bus		bus	{};
 	static render_window	win	{};
 	static gui_manager		gui	{ &bus };
-	static script_context	scr	{ fsys.program_name, cfg["path"]["library"] };
-	static system_context	sys	{ &bus, &cfg, &fsys, &gui, &mem, &scr, &time, &win };
+	static script_context	scr	{ fs.program_name, fs.content_path };
+	static system_context	sys	{ &bus, &cfg, &fs, &gui, &mem, &scr, &time, &win };
 	static plugin_manager	mods{ &sys };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -131,7 +128,7 @@ ml::int32_t main()
 	ML_assert(gui.startup(win));
 	gui.dockspace.visible = true;
 	gui.dockspace.menubar = true;
-	gui.load_style(fsys.path2(cfg["path"]["guistyle"]));
+	gui.load_style(fs.path2(cfg["gui"]["style"]));
 
 	// plugins
 	for (auto const & path : cfg["plugins"]["files"])
@@ -142,7 +139,7 @@ ml::int32_t main()
 	// scripts
 	for (auto const & path : cfg["scripts"]["files"])
 	{
-		scr.do_file(fsys.path2(path));
+		scr.do_file(fs.path2(path));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -165,17 +162,16 @@ ml::int32_t main()
 		
 		// update
 		window::poll_events();
+		bus.fire<update_event>();
+		
+		// gui
+		gui.begin_frame();
+		bus.fire<gui_event>();
 		for (auto const & cmd : {
 			gfx::render_command::set_viewport(win.get_framebuffer_size()),
 			gfx::render_command::set_clear_color(colors::black),
 			gfx::render_command::clear(gfx::clear_color),
 		}) gfx::execute(cmd, win.get_render_context());
-		bus.fire<update_event>();
-		
-		// gui
-		gui.begin_frame();
-		gui.draw_default();
-		bus.fire<gui_event>();
 		gui.end_frame();
 
 		// end

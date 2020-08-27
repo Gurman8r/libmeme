@@ -36,8 +36,6 @@ namespace ml
 
 		void begin_frame();
 
-		void draw_default();
-
 		void end_frame();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

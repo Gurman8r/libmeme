@@ -21,6 +21,8 @@ namespace ml
 
 	struct script_context final : non_copyable
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		script_context(fs::path const & name, fs::path const & home)
 		{
 			ML_assert(!Py_IsInitialized());
@@ -48,18 +50,37 @@ namespace ml
 			ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
 		}
 
-		int32_t do_file(fs::path const & path) const
+		script_context(script_context &&) noexcept = default;
+
+		script_context & operator=(script_context &&) noexcept = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t do_file(cstring path) const noexcept
 		{
 			ML_assert(Py_IsInitialized());
-			pmr::string const str{ path.string() };
-			return PyRun_SimpleFileExFlags(std::fopen(str.c_str(), "r"), str.c_str(), true, nullptr);
+			return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
 		}
 
-		int32_t do_string(pmr::string const & str) const
+		int32_t do_file(fs::path const & path) const noexcept
+		{
+			return do_file(path.string().c_str());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t do_string(cstring str) const noexcept
 		{
 			ML_assert(Py_IsInitialized());
-			return PyRun_SimpleStringFlags(str.c_str(), nullptr);
+			return PyRun_SimpleStringFlags(str, nullptr);
 		}
+
+		int32_t do_string(pmr::string const & str) const noexcept
+		{
+			return do_string(str.c_str());
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }
 

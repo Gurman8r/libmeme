@@ -15,129 +15,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <glm/glm/glm.hpp>
-#include <glm/glm/gtc/matrix_transform.hpp>
-
-// CAMERA (WIP)
-namespace ml::testing
-{
-	mat4 frustum(float_t l, float_t r, float_t b, float_t t, float_t near, float_t far)
-	{
-		vec4 const temp{ 2.0f * near, r - l, t - b, far - near };
-		return
-		{
-			temp[0] / temp[1],
-			0.f,
-			0.f,
-			0.f,
-			0.f,
-			temp[0] / temp[2],
-			0.f,
-			0.f,
-			(r + l) / temp[1],
-			(t + b) / temp[2],
-			(-far - near) / temp[3],
-			-1.0f,
-			0.f,
-			0.f,
-			(-temp[0] * far) / temp[3],
-			0.f
-		};
-	}
-
-	mat4 perspective(float_t fovyInDegrees, float_t aspectRatio, float_t znear, float_t zfar)
-	{
-		float_t ymax = znear * std::tanf(fovyInDegrees * 3.141592f / 180.0f);
-		float_t xmax = ymax * aspectRatio;
-		return frustum(-xmax, xmax, -ymax, ymax, znear, zfar);
-	}
-
-	vec3 cross(vec3 const & a, vec3 const & b)
-	{
-		return
-		{
-			a[1] * b[2] - a[2] * b[1],
-			a[2] * b[0] - a[0] * b[2],
-			a[0] * b[1] - a[1] * b[0]
-		};
-	}
-
-	float_t dot(vec3 const & a, vec3 const & b)
-	{
-		return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-	}
-
-	vec3 normalize(vec3 const & a)
-	{
-		float_t const il{ 1.f / (std::sqrtf(dot(a, a)) + FLT_EPSILON) };
-		return
-		{
-			a[0] * il,
-			a[1] * il,
-			a[2] * il
-		};
-	}
-
-	mat4 look_at(vec3 const & eye, vec3 const & at, vec3 const & up)
-	{
-		vec3 X, Y, Z, temp{ eye[0] - at[0], eye[1] - at[1], eye[2] - at[2] };
-
-		Z = normalize(temp);
-		Y = normalize(up);
-
-		temp = cross(Y, Z);
-		X = normalize(temp);
-
-		temp = cross(Z, X);
-		Y = normalize(temp);
-
-		return
-		{
-			X[0],
-			Y[0],
-			Z[0],
-			0.f,
-			X[1],
-			Y[1],
-			Z[1],
-			0.f,
-			X[2],
-			Y[2],
-			Z[2],
-			0.f,
-			-dot(X, eye),
-			-dot(Y, eye),
-			-dot(Z, eye),
-			1.0f,
-		};
-	}
-
-	mat4 orthographic(float_t l, float_t r, float_t b, float_t t, float_t zn, float_t zf)
-	{
-		return
-		{
-			2 / (r - l),
-			0.f,
-			0.f,
-			0.f,
-			0.f,
-			2.f / (t - b),
-			0.f,
-			0.f,
-			0.f,
-			0.f,
-			1.0f / (zf - zn),
-			0.f,
-			(l + r) / (l - r),
-			(t + b) / (b - t),
-			zn / (zn - zf),
-			1.0f
-		};
-	}
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // CBUFFER (WIP)
 namespace ml
 {
@@ -313,7 +190,6 @@ namespace ml
 			m_gui_console	{ "console##demo"		, 1, "", ImGuiWindowFlags_None },
 			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
-			m_gui_files		{ "files##demo"			, 0, "", ImGuiWindowFlags_MenuBar },
 			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
 			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
 			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
@@ -656,8 +532,6 @@ namespace ml
 			ax::NodeEditor::DestroyEditor(m_node_editor);
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void on_update(update_event const &)
 		{
 			// update stuff, etc...
@@ -725,7 +599,6 @@ namespace ml
 				d.dock(m_gui_viewport.title		, d[left_up]);
 				d.dock(m_gui_ecs.title			, d[left_dn]);
 				d.dock(m_gui_assets.title		, d[left_dn]);
-				d.dock(m_gui_files.title		, d[left_dn]);
 				d.dock(m_gui_renderer.title		, d[left_dn]);
 				d.dock(m_gui_profiler.title		, d[left_dn2]);
 				d.dock(m_gui_memory.title		, d[right]);
@@ -788,7 +661,6 @@ namespace ml
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
 			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
 			m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
-			m_gui_files		.render(&demo::show_files_gui		, this); // FILES
 			m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
 			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
 			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
@@ -1195,22 +1067,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_files_gui()
-		{
-			// menu bar
-			if (ImGui::BeginMenuBar())
-			{
-				gui::help_marker("WIP");
-				ImGui::EndMenuBar();
-			}
-
-			// file list
-			static gui::file_tree file_tree{ getfs().path2() };
-			file_tree.render();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void show_memory_gui()
 		{
 			static passthrough_resource * const testres{ getmem().resource() };
@@ -1410,7 +1266,6 @@ namespace ml
 				ImGui::Text("%s", inf.shading_language_version.c_str()); gui::tooltip("shading language version"); ImGui::Separator();
 				ImGui::EndMenuBar();
 			}
-
 			ImGui::Separator();
 
 			if (gfx::alpha_state a{}; ImGui::CollapsingHeader("alpha") && ctx->get_alpha_state(&a))
