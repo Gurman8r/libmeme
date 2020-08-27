@@ -87,29 +87,28 @@ namespace ml::util
 		std::is_same_v<T, std::byte>
 	};
 
-	// requires To is trivially default constructible and is copy or move constructible
-	template <class To, class From
-	> static constexpr bool is_trivial_conversion_v
-	{
-		(sizeof(To) == sizeof(From))		&&
-		std::is_trivially_copyable_v<From>	&&
-		std::is_trivial_v<To>				&&
-		(std::is_copy_constructible_v<To> || std::is_move_constructible_v<To>)
-	};
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// bit cast
-	template <class To, class From
-	> To bit_cast(From const & value) noexcept
+	// constructor
+	template <class T, class ... Args
+	> T * construct(T * ptr, Args && ... args) noexcept
 	{
-		static_assert(is_trivial_conversion_v<To, From>, "invalid bit_cast");
-		To temp{};
-		std::memcpy(&temp, &value, sizeof(To));
-		return temp;
+		return ::new (ptr) T{ ML_forward(args)... };
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	// destructor
+	template <class T
+	> T * destruct(T * ptr) noexcept
+	{
+		ptr->~T(); return ptr;
+	}
+
+	// duplicate
+	template <class T
+	> ML_NODISCARD T dup(T const & copy) noexcept
+	{
+		return T{ copy };
+	}
 
 	// constexpr swap
 	template <class T
@@ -120,20 +119,20 @@ namespace ml::util
 		rhs = std::move(temp);
 	}
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// constructor
-	template <class T, class ... Args
-	> inline T * construct(T * ptr, Args && ... args) noexcept
+	// bit cast
+	template <class To, class From
+	> To bit_cast(From const & value) noexcept
 	{
-		return ::new (ptr) T{ ML_forward(args)... };
-	}
-
-	// destructor
-	template <class T
-	> inline T * destruct(T * ptr) noexcept
-	{
-		ptr->~T(); return ptr;
+		static_assert(
+			(sizeof(To) == sizeof(From)) &&
+			std::is_trivially_copyable_v<From> &&
+			std::is_trivial_v<To> &&
+			(std::is_copy_constructible_v<To> || std::is_move_constructible_v<To>),
+			"requires To is trivially default constructible and is copy or move constructible"
+			);
+		To temp{};
+		std::memcpy(&temp, &value, sizeof(To));
+		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -6,7 +6,7 @@ namespace ml
 
 	memory * memory::s_instance{};
 
-	memory::memory(arena_test_resource * res) noexcept
+	memory::memory(passthrough_resource * res) noexcept
 		: m_resource	{ res }
 		, m_allocator	{}
 		, m_counter		{}
@@ -21,9 +21,9 @@ namespace ml
 
 	memory::~memory() noexcept
 	{
-		for (auto addr : ds::set<void *>{ m_records.keys() })
+		for (auto const addr : util::dup(m_records.keys()))
 		{
-			deallocate(addr);
+			deallocate(addr); // cleanup any remaining allocations
 		}
 
 		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());

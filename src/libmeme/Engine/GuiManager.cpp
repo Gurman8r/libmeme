@@ -115,8 +115,6 @@ namespace ml
 		// DOCKSPACE
 		if (auto & d{ this->dockspace }; d.visible)
 		{
-			ML_ImGui_ScopeID(&d);
-			
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 			{
 				// viewport
@@ -163,14 +161,11 @@ namespace ml
 			}
 
 			// MAIN MENU BAR
-			if (d.menubar)
+			if (d.menubar && ImGui::BeginMainMenuBar())
 			{
-				if (ImGui::BeginMainMenuBar())
-				{
-					m_bus->fire<main_menu_bar_event>();
+				m_bus->fire<main_menu_bar_event>();
 
-					ImGui::EndMainMenuBar();
-				}
+				ImGui::EndMainMenuBar();
 			}
 		}
 	}

@@ -8,8 +8,8 @@
 // testres
 namespace ml
 {
-	// passthrough for testing an upstream resource
-	class arena_test_resource final : public pmr::memory_resource, public non_copyable
+	// proxy for testing an upstream resource
+	class passthrough_resource final : public pmr::memory_resource, public non_copyable
 	{
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,7 +21,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		explicit arena_test_resource(pmr::memory_resource * u, pointer const b, size_t c) noexcept
+		explicit passthrough_resource(pmr::memory_resource * u, pointer const b, size_t c) noexcept
 			: m_upstream{ u }, m_buffer{ b }, m_capacity{ c }
 		{
 		}
@@ -172,10 +172,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit memory(arena_test_resource * res) noexcept;
+		explicit memory(passthrough_resource * res) noexcept;
 
 		explicit memory(pmr::memory_resource * res) noexcept : memory{
-			reinterpret_cast<arena_test_resource *>(res)
+			reinterpret_cast<passthrough_resource *>(res)
 		}
 		{
 		}
@@ -192,7 +192,7 @@ namespace ml
 
 		ML_NODISCARD auto records() const & noexcept -> record_map const & { return m_records; }
 		
-		ML_NODISCARD auto resource() const noexcept -> arena_test_resource * const { return m_resource; }
+		ML_NODISCARD auto resource() const noexcept -> passthrough_resource * const { return m_resource; }
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -306,7 +306,7 @@ namespace ml
 		allocator_type			m_allocator	; // allocator
 		size_t					m_counter	; // counter
 		record_map				m_records	; // records
-		arena_test_resource *	m_resource	; // resource
+		passthrough_resource *	m_resource	; // resource
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

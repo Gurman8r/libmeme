@@ -1,6 +1,5 @@
 import memelib          as ml
 import memelib.memory   as mem
-import memelib.graphics as gfx
 
 # messages  
 print(f'# {ml.info.name} | {ml.info.arch!r}-bit | {ml.info.config}')

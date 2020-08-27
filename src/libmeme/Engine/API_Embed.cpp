@@ -474,26 +474,4 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// APPLICATION
-	//struct ml_app {};
-	//py::class_<ml_app>(m, "app")
-	//	.def("exit", [](py::args) { engine::get()->window()->close(); })
-	//	.def_property_static("config",
-	//		[](py::object) -> json & { return engine::get()->config(); },
-	//		[](json const & j) { engine::get()->config() = j; })
-	//	;
-	//{
-	//	py::module::import("builtins").attr("exit") = m.attr("app").attr("exit");
-	//	py::module::import("sys").attr("exit") = m.attr("app").attr("exit");
-	//}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	auto py_gfx{ m.def_submodule("graphics") };
-	py_gfx //
-		.def("test", []() {})
-		;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

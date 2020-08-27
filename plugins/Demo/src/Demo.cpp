@@ -679,13 +679,8 @@ namespace ml
 			m_ecs.invoke_system<x_update_uniforms>();
 			m_ecs.invoke_system<x_upload_uniforms>();
 
-			// pipeline
-			for (auto & fbo : m_fbo)
-			{
-				fbo->resize(m_resolution);
-			}
-
 			// render
+			for (auto & fbo : m_fbo) { fbo->resize(m_resolution); }
 			for (auto const & cmd : {
 				gfx::render_command::bind_framebuffer(m_fbo[0]),
 				gfx::render_command::set_clear_color(colors::magenta),
@@ -946,7 +941,7 @@ namespace ml
 				}
 				else
 				{
-					PyRun_SimpleStringFlags(util::detokenize(args).c_str(), nullptr);
+					getscr().do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -1218,7 +1213,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static arena_test_resource * const testres{ getmem().resource() };
+			static passthrough_resource * const testres{ getmem().resource() };
 
 			static ML_scope(&) // setup memory editor
 			{

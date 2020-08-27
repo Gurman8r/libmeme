@@ -10,7 +10,6 @@ using namespace ml::size_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// memcfg
 static class memcfg final : public singleton<memcfg>
 {
 	friend singleton;
@@ -18,7 +17,7 @@ static class memcfg final : public singleton<memcfg>
 	ds::array<byte_t, 128_MiB>			data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 	pmr::unsynchronized_pool_resource	pool{ &mono };
-	arena_test_resource					test{ &pool, data.data(), data.size() };
+	passthrough_resource				test{ &pool, data.data(), data.size() };
 
 	memcfg() noexcept { pmr::set_default_resource(&test); }
 
@@ -27,10 +26,6 @@ static class memcfg final : public singleton<memcfg>
 } const & ML_anon{ memcfg::get_singleton() };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#ifndef SETTINGS_PATH
-#define SETTINGS_PATH "../../../../libmeme.json"
-#endif
 
 static auto const default_settings{ R"(
 {
@@ -82,7 +77,7 @@ static auto const default_settings{ R"(
 }
 )"_json };
 
-static auto load_settings(fs::path const & path)
+static auto load_settings(fs::path const & path = "../../../../libmeme.json")
 {
 	std::ifstream f{ path }; ML_defer(&f) { f.close(); };
 
@@ -91,63 +86,23 @@ static auto load_settings(fs::path const & path)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// gui window (WIP)
-namespace ml
-{
-	struct gui_window : render_window
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		gui_window() noexcept : render_window{}
-		{
-		}
-
-		explicit gui_window(window_settings const & ws) noexcept : gui_window{}
-		{
-			ML_assert(open(ws));
-		}
-
-		virtual ~gui_window() noexcept override
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		virtual bool open(window_settings const & ws) override
-		{
-			if (is_open()) { return debug::error("gui_window is already open"); }
-
-			if (!render_window::open(ws)) { return debug::error("failed opening gui_window"); }
-
-			return true;
-		}
-
-		virtual void close() override
-		{
-			render_window::close();
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// main
 ml::int32_t main()
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// context
 	static memory			mem	{ pmr::get_default_resource() };
-	static json				cfg	{ load_settings(SETTINGS_PATH) };
+	static json				cfg	{ load_settings() };
 	static timer_context	time{};
 	static file_context		fsys{ __argv[0], fs::current_path(), cfg["path"]["content"] };
 	static event_bus		bus	{};
 	static render_window	win	{};
 	static gui_manager		gui	{ &bus };
-	static system_context	sys	{ &bus, &cfg, &fsys, &gui, &mem, &time, &win };
+	static script_context	scr	{ fsys.program_name, cfg["path"]["library"] };
+	static system_context	sys	{ &bus, &cfg, &fsys, &gui, &mem, &scr, &time, &win };
 	static plugin_manager	mods{ &sys };
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
@@ -178,21 +133,6 @@ ml::int32_t main()
 	gui.dockspace.menubar = true;
 	gui.load_style(fsys.path2(cfg["path"]["guistyle"]));
 
-	// python
-	initialize_python(fsys.program_name, cfg["path"]["library"],
-	{
-		nullptr,
-		[](auto, size_t size) noexcept
-		{
-			return pmr::get_default_resource()->allocate(size);
-		},
-		[](auto, void * addr, size_t size) noexcept
-		{
-			return pmr::get_default_resource()->deallocate(addr, size);
-		}
-	});
-	ML_defer() { ML_assert(finalize_python()); };
-
 	// plugins
 	for (auto const & path : cfg["plugins"]["files"])
 	{
@@ -202,10 +142,10 @@ ml::int32_t main()
 	// scripts
 	for (auto const & path : cfg["scripts"]["files"])
 	{
-		pmr::string const s{ fsys.path2(path).string() };
-
-		PyRun_SimpleFileExFlags(std::fopen(s.c_str(), "r"), s.c_str(), true, nullptr);
+		scr.do_file(fsys.path2(path));
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }

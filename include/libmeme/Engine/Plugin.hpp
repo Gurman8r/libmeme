@@ -46,13 +46,16 @@ namespace ml
 		fps_times_t	fps_times	{ 120, fps_times_t::allocator_type{} };
 	};
 
+	struct script_context;
+
 	struct system_context final
 	{
 		event_bus		* const bus	; // bus
 		json			* const cfg	; // config
-		file_context	* const fs	; // files
+		file_context	* const fsys; // filesystem
 		gui_manager		* const gui	; // gui
 		memory			* const mem	; // memory
+		script_context	* const scr	; // scripts
 		timer_context	* const time; // timers
 		render_window	* const win	; // window
 	};
@@ -74,13 +77,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto getbus	() const noexcept	-> event_bus		& { return *m_sys->bus	; }
-		auto getcfg	() const noexcept	-> json				& { return *m_sys->cfg	; }
-		auto getfs	() const noexcept	-> file_context		& { return *m_sys->fs	; }
-		auto getgui	() const noexcept	-> gui_manager		& { return *m_sys->gui	; }
-		auto getmem	() const noexcept	-> memory			& { return *m_sys->mem	; }
-		auto gettime() const noexcept	-> timer_context	& { return *m_sys->time	; }
-		auto getwin	() const noexcept	-> render_window	& { return *m_sys->win	; }
+		auto getbus	() const noexcept -> event_bus		& { return *m_sys->bus	; }
+		auto getcfg	() const noexcept -> json			& { return *m_sys->cfg	; }
+		auto getfs	() const noexcept -> file_context	& { return *m_sys->fsys	; }
+		auto getgui	() const noexcept -> gui_manager	& { return *m_sys->gui	; }
+		auto getmem	() const noexcept -> memory			& { return *m_sys->mem	; }
+		auto getscr	() const noexcept -> script_context & { return *m_sys->scr; }
+		auto gettime() const noexcept -> timer_context	& { return *m_sys->time	; }
+		auto getwin	() const noexcept -> render_window	& { return *m_sys->win	; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

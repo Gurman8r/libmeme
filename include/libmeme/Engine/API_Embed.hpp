@@ -19,24 +19,48 @@ namespace ml
 {
 	namespace py = pybind11;
 
-	static bool initialize_python(
-		fs::path const & name,
-		fs::path const & home,
-		PyObjectArenaAllocator && alloc
-	)
+	struct script_context final : non_copyable
 	{
-		if (Py_IsInitialized()) { return false; }
-		PyObject_SetArenaAllocator(std::addressof(alloc));
-		Py_SetProgramName(name.c_str());
-		Py_SetPythonHome(home.c_str());
-		Py_InitializeEx(1);
-		return Py_IsInitialized();
-	}
+		script_context(fs::path const & name, fs::path const & home)
+		{
+			ML_assert(!Py_IsInitialized());
+			PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]()
+			{
+				temp.alloc = [](auto, size_t size) noexcept
+				{
+					return pmr::get_default_resource()->allocate(size);
+				};
+				temp.free = [](auto, void * addr, size_t size) noexcept
+				{
+					return pmr::get_default_resource()->deallocate(addr, size);
+				};
+				return std::addressof(temp);
+			}));
+			Py_SetProgramName(name.c_str());
+			Py_SetPythonHome(home.c_str());
+			Py_InitializeEx(1);
+			ML_assert(Py_IsInitialized());
+		}
 
-	static bool finalize_python()
-	{
-		return Py_IsInitialized() && (Py_FinalizeEx() == EXIT_SUCCESS);
-	}
+		~script_context() noexcept
+		{
+			ML_assert(Py_IsInitialized());
+			ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
+		}
+
+		int32_t do_file(fs::path const & path) const
+		{
+			ML_assert(Py_IsInitialized());
+			pmr::string const str{ path.string() };
+			return PyRun_SimpleFileExFlags(std::fopen(str.c_str(), "r"), str.c_str(), true, nullptr);
+		}
+
+		int32_t do_string(pmr::string const & str) const
+		{
+			ML_assert(Py_IsInitialized());
+			return PyRun_SimpleStringFlags(str.c_str(), nullptr);
+		}
+	};
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
