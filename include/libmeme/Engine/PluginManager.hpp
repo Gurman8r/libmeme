@@ -11,26 +11,33 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct plugin_abi final
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		struct plugin_iface final
 		{
 			std::function<void(system_context *, plugin *)> attach, detach;
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit plugin_manager(system_context * sys) noexcept : m_sys{ sys }, m_data{}
+		plugin_manager(system_context * sys, allocator_type alloc = {}) noexcept
+			: m_sys	{ sys }
+			, m_data{ alloc }
 		{
 			ML_assert(!s_instance);
+
 			s_instance = this;
 		}
 
 		~plugin_manager() noexcept override
 		{
 			ML_assert(s_instance == this);
-			for (auto const id : util::dup(m_data.get<plugin_id>()))
+
+			while (!m_data.get<plugin_id>().empty())
 			{
-				this->uninstall(id);
+				this->uninstall(m_data.get<plugin_id>().front());
 			}
+
 			s_instance = nullptr;
 		}
 
@@ -57,7 +64,7 @@ namespace ml
 			plugin_id		,	// id
 			fs::path		,	// path
 			shared_library	,	// library
-			plugin_abi		,	// interface
+			plugin_iface	,	// interface
 			manual<plugin>		// instance
 		> m_data;
 

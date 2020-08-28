@@ -408,7 +408,7 @@ namespace ml
 		return m_impl->set_cursor_enter_callback(fn);
 	}
 
-	window_cursor_position_callback window::set_cursor_position_callback(window_cursor_position_callback fn) noexcept
+	window_cursor_pos_callback window::set_cursor_position_callback(window_cursor_pos_callback fn) noexcept
 	{
 		return m_impl->set_cursor_position_callback(fn);
 	}
@@ -453,7 +453,7 @@ namespace ml
 		return m_impl->set_mouse_callback(fn);
 	}
 	
-	window_position_callback window::set_position_callback(window_position_callback fn) noexcept
+	window_pos_callback window::set_position_callback(window_pos_callback fn) noexcept
 	{
 		return m_impl->set_position_callback(fn);
 	}

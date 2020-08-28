@@ -282,14 +282,8 @@ namespace ml
 		template <class T
 		> void delete_object(T * addr) noexcept
 		{
-			if constexpr (std::is_base_of_v<trackable, T>)
-			{
-				T::operator delete(addr);
-			}
-			else
-			{
-				this->deallocate_object(util::destruct(addr));
-			}
+			util::destruct(addr);
+			this->deallocate_object(addr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

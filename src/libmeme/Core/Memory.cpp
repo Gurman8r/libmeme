@@ -21,12 +21,10 @@ namespace ml
 
 	memory::~memory() noexcept
 	{
-		for (auto const addr : util::dup(m_records.keys()))
+		while (!m_records.empty())
 		{
-			deallocate(addr); // cleanup any remaining allocations
+			deallocate(m_records.back().first); // cleanup any remaining allocations
 		}
-
-		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
 
 		s_instance = nullptr;
 	}

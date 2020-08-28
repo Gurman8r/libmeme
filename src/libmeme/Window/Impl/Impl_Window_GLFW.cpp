@@ -569,9 +569,9 @@ namespace ml
 				reinterpret_cast<GLFWcursorenterfun>(fn)));
 	}
 
-	window_cursor_position_callback glfw_window::set_cursor_position_callback(window_cursor_position_callback fn)
+	window_cursor_pos_callback glfw_window::set_cursor_position_callback(window_cursor_pos_callback fn)
 	{
-		return reinterpret_cast<window_cursor_position_callback>(
+		return reinterpret_cast<window_cursor_pos_callback>(
 			glfwSetCursorPosCallback(m_window,
 				reinterpret_cast<GLFWcursorposfun>(fn)));
 	}
@@ -632,9 +632,9 @@ namespace ml
 				reinterpret_cast<GLFWmousebuttonfun>(fn)));
 	}
 	
-	window_position_callback glfw_window::set_position_callback(window_position_callback fn)
+	window_pos_callback glfw_window::set_position_callback(window_pos_callback fn)
 	{
-		return reinterpret_cast<window_position_callback>(
+		return reinterpret_cast<window_pos_callback>(
 			glfwSetWindowPosCallback(m_window,
 				reinterpret_cast<GLFWwindowposfun>(fn)));
 	}

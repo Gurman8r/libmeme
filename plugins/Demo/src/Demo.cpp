@@ -148,7 +148,7 @@ namespace ml
 // DEMO
 namespace ml
 {
-	struct demo final : plugin
+	struct ML_PLUGIN_API demo final : plugin
 	{
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -208,7 +208,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [&]() noexcept { return 1000.f / gettime().frame_rate; }
+				, [&]() noexcept { return 1000.f / gettime()->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -216,7 +216,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [&]() noexcept { return gettime().frame_rate; }
+				, [&]() noexcept { return gettime()->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -225,7 +225,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ getmem().resource() };
+			static auto const testres{ getmem()->resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -248,9 +248,9 @@ namespace ml
 			sys->bus->sub<	dockspace_event			>(this);
 			sys->bus->sub<	main_menu_bar_event		>(this);
 			sys->bus->sub<	gui_event				>(this);
-			sys->bus->sub<	key_event				>(this);
-			sys->bus->sub<	mouse_event				>(this);
-			sys->bus->sub<	cursor_position_event	>(this);
+			sys->bus->sub<	window_key_event		>(this);
+			sys->bus->sub<	window_mouse_event		>(this);
+			sys->bus->sub<	window_cursor_pos_event	>(this);
 		}
 
 		void on_event(event const & ev) override
@@ -264,8 +264,8 @@ namespace ml
 			case main_menu_bar_event::ID: return on_main_menu_bar	((main_menu_bar_event const &)ev);
 			case gui_event			::ID: return on_gui				((gui_event const &)ev);
 			
-			case key_event::ID: {
-				switch (auto const & k{ (key_event const &)ev }; k.key)
+			case window_key_event::ID: {
+				switch (auto const & k{ (window_key_event const &)ev }; k.key)
 				{
 				case key_code_w: {
 					switch (k.action)
@@ -278,8 +278,8 @@ namespace ml
 				}
 			} break;
 
-			case mouse_event::ID: {
-				switch (auto const & m{ (mouse_event const &)ev }; m.button)
+			case window_mouse_event::ID: {
+				switch (auto const & m{ (window_mouse_event const &)ev }; m.button)
 				{
 				case mouse_button_0: {} break;
 				case mouse_button_1: {} break;
@@ -287,8 +287,8 @@ namespace ml
 				}
 			} break;
 
-			case cursor_position_event::ID: {
-				auto const & c{ (cursor_position_event const &)ev };
+			case window_cursor_pos_event::ID: {
+				auto const & c{ (window_cursor_pos_event const &)ev };
 				float64_t const x = c.x, y = c.y;
 			} break;
 			}
@@ -303,9 +303,9 @@ namespace ml
 			//ML_defer(&) { m_cout.update(&std::cout); };
 
 			// ICON
-			if (image const icon{ getfs().path2("assets/textures/icon.png"), 0, false })
+			if (image const ico{ getfs()->path2("assets/textures/ico.png"), 0, false })
 			{
-				getwin().set_icon(icon.width(), icon.height(), icon.data());
+				getwin()->set_icon(ico.width(), ico.height(), ico.data());
 			}
 
 			// FRAMEBUFFERS
@@ -320,21 +320,20 @@ namespace ml
 
 			// TEXTURES
 			{
-				
 				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"		] = gfx::texture2d::create(getfs().path2("assets/textures/doot.png"));
-				m_textures["navball"	] = gfx::texture2d::create(getfs().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"] = gfx::texture2d::create(getfs().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"] = gfx::texture2d::create(getfs().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"	] = gfx::texture2d::create(getfs().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["doot"		] = gfx::texture2d::create(getfs()->path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(getfs()->path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(getfs()->path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(getfs()->path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(getfs()->path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"		] = alloc_shared<font>(getfs().path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"		] = alloc_shared<font>(getfs().path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"] = alloc_shared<font>(getfs().path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"		] = alloc_shared<font>(getfs().path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(getfs()->path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(getfs()->path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(getfs()->path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(getfs()->path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -342,13 +341,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					getfs().path2("assets/shaders/2D.vs.shader"));
+					getfs()->path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					getfs().path2("assets/shaders/3D.vs.shader"));
+					getfs()->path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					getfs().path2("assets/shaders/basic.fs.shader"));
+					getfs()->path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -365,12 +364,11 @@ namespace ml
 
 			// UNIFORMS
 			{
-				
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime().main.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime().loop.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime()->main.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime()->loop.elapsed().count(); })
 				};
 
 				// camera
@@ -411,9 +409,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"	] = alloc_shared<mesh>(getfs().path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"	] = alloc_shared<mesh>(getfs().path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"		] = alloc_shared<mesh>(getfs().path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"	] = alloc_shared<mesh>(getfs()->path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"	] = alloc_shared<mesh>(getfs()->path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"		] = alloc_shared<mesh>(getfs()->path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -540,7 +538,7 @@ namespace ml
 			m_cout.sstr().str({});
 
 			// plots
-			m_plots.update(gettime().main.elapsed().count());
+			m_plots.update(gettime()->main.elapsed().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -557,7 +555,7 @@ namespace ml
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
 				gfx::render_command::bind_framebuffer(nullptr),
-			}) gfx::execute(cmd, getwin().get_render_context());
+			}) gfx::execute(cmd, getwin()->get_render_context());
 		}
 
 		void on_dockspace(dockspace_event const &)
@@ -570,7 +568,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ getgui().dockspace };
+			auto & d{ getgui()->dockspace };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -613,7 +611,7 @@ namespace ml
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					getwin().close();
+					getwin()->close();
 				}
 				ImGui::EndMenu();
 			}
@@ -646,9 +644,9 @@ namespace ml
 			ML_ImGui_ScopeID(this);
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ getgui().show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ getgui().show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ getgui().show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ getgui()->show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ getgui()->show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ getgui()->show_imgui_about(&m_imgui_about.open); }
 
 			// WIDGETS
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
@@ -737,7 +735,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				getwin().close();
+				getwin()->close();
 			},
 			{
 				"shutdown the application",
@@ -806,7 +804,7 @@ namespace ml
 				}
 				else
 				{
-					getscr().do_string(util::detokenize(args));
+					getscr()->do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -924,7 +922,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							getwin().set_clipboard(buf);
+							getwin()->set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1062,13 +1060,13 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static passthrough_resource * const testres{ getmem().resource() };
+			static passthrough_resource * const testres{ getmem()->resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= getwin().is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= getwin()->is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1097,7 +1095,7 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				auto const & records{ getmem().records().values() };
+				auto const & records{ getmem()->records().values() };
 				static auto selected_record{ &records.front() };
 				char selected_address[20] = "highlight";
 				if (selected_record)
@@ -1207,7 +1205,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", gettime().main.elapsed().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", gettime()->main.elapsed().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1247,7 +1245,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev	{ getwin().get_render_device() };
+			static auto const & dev	{ getwin()->get_render_device() };
 			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
 
@@ -1343,7 +1341,7 @@ extern "C"
 	
 	ML_PLUGIN_API void ml_plugin_detach(ml::system_context * sys, ml::plugin * ptr)
 	{
-		sys->mem->delete_object((ml::demo *)ptr);
+		sys->mem->deallocate((ml::demo *)ptr);
 	}
 }
 

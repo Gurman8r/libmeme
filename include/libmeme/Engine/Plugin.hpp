@@ -76,13 +76,12 @@ namespace ml
 
 	ML_decl_handle(plugin_id);
 
-	struct plugin : non_copyable, trackable, event_listener
+	struct ML_PLUGIN_API plugin : non_copyable, trackable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit plugin(system_context * sys) noexcept : event_listener{ sys->bus }, m_sys{ sys }
 		{
-			ML_assert("BUS MISMATCH" && (event_listener::m_event_bus == m_sys->bus));
 		}
 
 		virtual ~plugin() noexcept override = default;
@@ -93,14 +92,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto getbus()	const noexcept -> event_bus			& { return *m_sys->bus; }
-		ML_NODISCARD auto getcfg()	const noexcept -> json				& { return *m_sys->cfg; }
-		ML_NODISCARD auto getfs()	const noexcept -> file_context		& { return *m_sys->fs; }
-		ML_NODISCARD auto getgui()	const noexcept -> gui_manager		& { return *m_sys->gui; }
-		ML_NODISCARD auto getmem()	const noexcept -> memory			& { return *m_sys->mem; }
-		ML_NODISCARD auto getscr()	const noexcept -> script_context	& { return *m_sys->scr; }
-		ML_NODISCARD auto gettime()	const noexcept -> timer_context		& { return *m_sys->time; }
-		ML_NODISCARD auto getwin()	const noexcept -> render_window		& { return *m_sys->win; }
+		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus; }
+		ML_NODISCARD auto getcfg()	const noexcept -> json				* { return m_sys->cfg; }
+		ML_NODISCARD auto getfs()	const noexcept -> file_context		* { return m_sys->fs; }
+		ML_NODISCARD auto getgui()	const noexcept -> gui_manager		* { return m_sys->gui; }
+		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem; }
+		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr; }
+		ML_NODISCARD auto gettime()	const noexcept -> timer_context		* { return m_sys->time; }
+		ML_NODISCARD auto getwin()	const noexcept -> render_window		* { return m_sys->win; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

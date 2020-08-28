@@ -96,12 +96,10 @@ namespace ml
 		if (m_imgui)
 		{
 			ML_ImGui_Shutdown();
-
+			
 			ImGui::DestroyContext((ImGuiContext *)m_imgui);
-
+			
 			m_imgui = nullptr;
-			m_bus = nullptr;
-			m_win = nullptr;
 		}
 	}
 
@@ -110,65 +108,10 @@ namespace ml
 	void gui_manager::begin_frame()
 	{
 		ML_ImGui_NewFrame();
+		
 		ImGui::NewFrame();
 
-		// DOCKSPACE
-		if (!dockspace.visible) { return; }
-
-		ML_ImGui_ScopeID(this);
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			// viewport
-			ImGuiViewport const * v{ ImGui::GetMainViewport() };
-			ImGui::SetNextWindowPos(v->Pos);
-			ImGui::SetNextWindowSize(v->Size);
-			ImGui::SetNextWindowViewport(v->ID);
-
-			// style
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, dockspace.rounding);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, dockspace.border);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, dockspace.padding);
-			ImGui::SetNextWindowBgAlpha(dockspace.alpha);
-
-			// begin
-			if (ImGui::Begin(dockspace.title, &dockspace.visible,
-				ImGuiWindowFlags_NoTitleBar |
-				ImGuiWindowFlags_NoCollapse |
-				ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoMove |
-				ImGuiWindowFlags_NoBringToFrontOnFocus |
-				ImGuiWindowFlags_NoNavFocus |
-				ImGuiWindowFlags_NoDocking |
-				ImGuiWindowFlags_NoBackground |
-				(dockspace.menubar ? ImGuiWindowFlags_MenuBar : 0)
-			))
-			{
-				ImGui::PopStyleVar(3);
-
-				// fire docking event if nodes are empty
-				if (dockspace.nodes.empty())
-				{
-					m_bus->fire<dockspace_event>();
-				}
-
-				ImGui::DockSpace(
-					ImGui::GetID(dockspace.title),
-					dockspace.size,
-					ImGuiDockNodeFlags_PassthruCentralNode |
-					ImGuiDockNodeFlags_AutoHideTabBar);
-
-				ImGui::End();
-			}
-		}
-
-		// MAIN MENU BAR
-		if (dockspace.menubar && ImGui::BeginMainMenuBar())
-		{
-			m_bus->fire<main_menu_bar_event>();
-
-			ImGui::EndMainMenuBar();
-		}
+		dockspace.render(m_bus);
 	}
 
 	void gui_manager::end_frame()
@@ -333,22 +276,22 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::show_imgui_demo(bool * p_open)
+	void gui_manager::show_imgui_demo(bool * p_open) const
 	{
 		ImGui::ShowDemoWindow(p_open);
 	}
 
-	void gui_manager::show_imgui_metrics(bool * p_open)
+	void gui_manager::show_imgui_metrics(bool * p_open) const
 	{
 		ImGui::ShowMetricsWindow(p_open);
 	}
 
-	void gui_manager::show_imgui_about(bool * p_open)
+	void gui_manager::show_imgui_about(bool * p_open) const
 	{
 		ImGui::ShowAboutWindow(p_open);
 	}
 
-	void gui_manager::show_imgui_style_editor(void * ref)
+	void gui_manager::show_imgui_style_editor(void * ref) const
 	{
 		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
 	}
@@ -400,6 +343,66 @@ namespace ml
 	uint32_t gui_manager::dockspace_data::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
+	}
+
+	void gui_manager::dockspace_data::render(event_bus * bus)
+	{
+		if (!visible) { return; }
+
+		ML_ImGui_ScopeID(this);
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			// viewport
+			ImGuiViewport const * v{ ImGui::GetMainViewport() };
+			ImGui::SetNextWindowPos(v->Pos);
+			ImGui::SetNextWindowSize(v->Size);
+			ImGui::SetNextWindowViewport(v->ID);
+
+			// style
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, rounding);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+			ImGui::SetNextWindowBgAlpha(alpha);
+
+			// begin
+			if (ImGui::Begin(title, &visible,
+				ImGuiWindowFlags_NoTitleBar |
+				ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoMove |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_NoNavFocus |
+				ImGuiWindowFlags_NoDocking |
+				ImGuiWindowFlags_NoBackground |
+				(menubar ? ImGuiWindowFlags_MenuBar : 0)
+			))
+			{
+				ImGui::PopStyleVar(3);
+
+				// fire docking event if nodes are empty
+				if (nodes.empty())
+				{
+					bus->fire<dockspace_event>();
+				}
+
+				ImGui::DockSpace(
+					ImGui::GetID(title),
+					size,
+					ImGuiDockNodeFlags_PassthruCentralNode |
+					ImGuiDockNodeFlags_AutoHideTabBar);
+
+				ImGui::End();
+			}
+		}
+
+		// main menu bar
+		if (menubar && ImGui::BeginMainMenuBar())
+		{
+			bus->fire<main_menu_bar_event>();
+
+			ImGui::EndMainMenuBar();
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

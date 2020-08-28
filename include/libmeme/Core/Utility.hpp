@@ -98,9 +98,9 @@ namespace ml::util
 
 	// destructor
 	template <class T
-	> T * destruct(T * ptr) noexcept
+	> void destruct(T * ptr) noexcept
 	{
-		ptr->~T(); return ptr;
+		ptr->~T();
 	}
 
 	// duplicate / force copy

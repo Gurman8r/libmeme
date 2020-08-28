@@ -44,13 +44,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_imgui_demo(bool * p_open = nullptr);
+		void show_imgui_demo(bool * p_open = nullptr) const;
 
-		void show_imgui_metrics(bool * p_open = nullptr);
+		void show_imgui_metrics(bool * p_open = nullptr) const;
 
-		void show_imgui_about(bool * p_open = nullptr);
+		void show_imgui_about(bool * p_open = nullptr) const;
 
-		void show_imgui_style_editor(void * ref = nullptr);
+		void show_imgui_style_editor(void * ref = nullptr) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -94,6 +94,8 @@ namespace ml
 			friend gui_manager;
 
 			dockspace_data() noexcept = default;
+
+			void render(event_bus * bus);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}

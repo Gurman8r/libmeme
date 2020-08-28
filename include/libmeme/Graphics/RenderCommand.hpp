@@ -22,16 +22,16 @@ namespace ml::gfx
 
 	// execute command
 	template <class Cmd, class Ctx
-	> static decltype(auto) execute(Cmd && cmd, Ctx && ctx) noexcept
+	> static void execute(Cmd && cmd, Ctx && ctx) noexcept
 	{
 		using T = std::decay_t<decltype(ctx)>;
 		if constexpr (std::is_same_v<T, shared<render_context>>)
 		{
-			return std::invoke(ML_forward(cmd), ML_forward(ctx).get());
+			std::invoke(ML_forward(cmd), ML_forward(ctx).get());
 		}
 		else if constexpr (std::is_convertible_v<T, render_context const *>)
 		{
-			return std::invoke(ML_forward(cmd), ML_forward(ctx));
+			std::invoke(ML_forward(cmd), ML_forward(ctx));
 		}
 	}
 

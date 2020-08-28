@@ -20,11 +20,12 @@ namespace ml
 			}
 			if (shared_library lib{ path })
 			{
-				return std::get<0>(m_data.push_back(
+				return std::get<0>(m_data.push_back
+				(
 					ML_handle(plugin_id, util::hash(path.string())),
 					path,
 					std::move(lib),
-					plugin_abi
+					plugin_iface
 					{
 						lib.proc<void, system_context *, plugin *>("ml_plugin_attach"),
 						lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
@@ -37,7 +38,7 @@ namespace ml
 		// load plugin
 		{
 			plugin * ptr{};
-			if (m_data.back<plugin_abi>().attach(m_sys, ptr); ptr)
+			if (m_data.back<plugin_iface>().attach(m_sys, ptr); ptr)
 			{
 				m_data.back<manual<plugin>>().reset(ptr);
 
@@ -58,7 +59,7 @@ namespace ml
 		{
 			auto const i{ m_data.index_of<plugin_id>(it) };
 
-			m_data.at<plugin_abi>(i).detach
+			m_data.at<plugin_iface>(i).detach
 			(
 				m_sys, m_data.at<manual<plugin>>(i).release()
 			);

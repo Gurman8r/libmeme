@@ -30,9 +30,9 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// EVENT HELPER
 	namespace impl
 	{
-		// EVENT HELPER
 		template <class T> struct event_helper : event
 		{
 			enum : hash_t { ID = hashof_v<T> };
@@ -54,9 +54,7 @@ namespace ml
 
 		virtual void on_event(event const &) = 0;
 
-	protected:
-		friend event_bus;
-
+	private:
 		event_bus * const m_event_bus;
 	};
 
@@ -82,14 +80,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class Ev, class ... Args
-		> void fire(Args && ... args) noexcept
-		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
-
-			return this->fire(Ev{ ML_forward(args)... });
-		}
-
+		// fire
 		void fire(event const & ev) noexcept
 		{
 			// get category
@@ -104,24 +95,36 @@ namespace ml
 			}
 		}
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-		
-		template <class Ev
-		> bool sub(event_listener * value) noexcept
+		// fire templated
+		template <class Ev, class ... Args
+		> void fire(Args && ... args) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			return this->sub(value, Ev::ID);
+			return this->fire(Ev{ ML_forward(args)... });
 		}
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		// subscribe
 		bool sub(event_listener * value, hash_t id) noexcept
 		{
 			// insert listener into category
 			return value && m_subs[id].insert(value).second;
 		}
 
+		// subscribe templated
+		template <class Ev
+		> bool sub(event_listener * value) noexcept
+		{
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+
+			return this->sub(value, Ev::ID);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// unsubscribe
 		void unsub(event_listener * value, hash_t id) noexcept
 		{
 			if (!value) { return; }
@@ -138,6 +141,16 @@ namespace ml
 			}
 		}
 
+		// unsubscribe templated
+		template <class Ev
+		> void unsub(event_listener * value) noexcept
+		{
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+
+			this->unsub(value, Ev::ID);
+		}
+
+		// unsubscribe all
 		void unsub(event_listener * value) noexcept
 		{
 			if (!value) { return; }

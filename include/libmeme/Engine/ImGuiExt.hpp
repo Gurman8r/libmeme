@@ -488,7 +488,12 @@ namespace ml::gui
 				if (!filter.PassFilter(str)) continue;
 
 				bool pop_color{};
-				if (std::strstr(str, ML_IMPL_DEBUG_MSG_I))
+				if (0 == std::strncmp(str, "# ", 2))
+				{
+					// # (orange)
+					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
+				}
+				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_I))
 				{
 					// [ info ] (green)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 1.0f, 0.0f, 1.0f }); pop_color = true;
@@ -502,11 +507,6 @@ namespace ml::gui
 				{
 					// [ warning ] (yellow)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.75f, 0.0f, 1.0f }); pop_color = true;
-				}
-				else if (0 == std::strncmp(str, "# ", 2))
-				{
-					// # (orange)
-					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
 				}
 				ImGui::TextUnformatted(str);
 				if (pop_color) { ImGui::PopStyleColor(); }
