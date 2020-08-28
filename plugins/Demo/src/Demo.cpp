@@ -253,10 +253,6 @@ namespace ml
 			sys->bus->sub<	cursor_position_event	>(this);
 		}
 
-		~demo() noexcept override
-		{
-		}
-
 		void on_event(event const & ev) override
 		{
 			switch (ev)
@@ -274,9 +270,9 @@ namespace ml
 				case key_code_w: {
 					switch (k.action)
 					{
-					case input_state_release: { std::cout << "w released\n"; } break;
-					case input_state_press	: { std::cout << "w pressed\n"; } break;
-					case input_state_repeat	: { std::cout << "w repeated\n"; } break;
+					case 0: { std::cout << "w released\n"; } break;
+					case 1: { std::cout << "w pressed\n"; } break;
+					case 2: { std::cout << "w repeated\n"; } break;
 					}
 				} break;
 				}
@@ -373,8 +369,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime().main_timer.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime().loop_timer.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime().main.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime().loop.elapsed().count(); })
 				};
 
 				// camera
@@ -537,17 +533,14 @@ namespace ml
 			// update stuff, etc...
 
 			// console
-			if (pmr::string const str{ m_cout.sstr().str() }; size_t const imax{ str.size() })
+			for (char c : m_cout.sstr().str())
 			{
-				for (size_t i = 0; i < imax; ++i)
-				{
-					m_console.write(str[i]);
-				}
-				m_cout.sstr().str({});
+				m_console.write(c);
 			}
+			m_cout.sstr().str({});
 
 			// plots
-			m_plots.update(gettime().main_timer.elapsed().count());
+			m_plots.update(gettime().main.elapsed().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -1214,7 +1207,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", gettime().main_timer.elapsed().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", gettime().main.elapsed().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 

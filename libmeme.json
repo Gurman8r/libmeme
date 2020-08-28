@@ -33,7 +33,11 @@
 		}
 	},
 	"gui": {
-		"style": "assets/styles/obsidian.style"
+		"style": "assets/styles/obsidian.style",
+		"dockspace": {
+			"visible": true,
+			"menubar": true
+		}
 	},
 	"plugins": {
 		"files": [ "plugins/demo" ]

@@ -4,7 +4,8 @@
 #include <libmeme/Core/EventBus.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
-#include <libmeme/Window/Window.hpp>
+#include <libmeme/Graphics/RenderCommand.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -27,11 +28,12 @@ namespace ml
 	gui_manager::gui_manager(event_bus * bus, allocator_type alloc) noexcept
 		: m_imgui	{}
 		, m_bus		{ bus }
+		, m_win		{}
 	{
 		IMGUI_CHECKVERSION();
 	}
 
-	gui_manager::gui_manager(window const & wnd, event_bus * bus, allocator_type alloc) noexcept
+	gui_manager::gui_manager(render_window const & wnd, event_bus * bus, allocator_type alloc) noexcept
 		: gui_manager{ bus, alloc }
 	{
 		ML_assert(startup(wnd));
@@ -44,11 +46,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_manager::startup(window const & wnd)
+	bool gui_manager::startup(render_window const & wnd)
 	{
 		if (m_imgui) { return debug::error("imgui already initialized"); }
+
+		m_win = &wnd;
 		
-		if (!wnd.is_open()) { return debug::error("window is not open"); }
+		if (!m_win->is_open()) { return debug::error("render_window is not open"); }
 
 		// allocators
 		ImGui::SetAllocatorFunctions
@@ -73,7 +77,7 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// init platform
-		if (!ML_ImGui_Init_Platform(wnd.get_handle(), true))
+		if (!ML_ImGui_Init_Platform(m_win->get_handle(), true))
 		{
 			return debug::error("failed initializing ImGui platform");
 		}
@@ -96,6 +100,8 @@ namespace ml
 			ImGui::DestroyContext((ImGuiContext *)m_imgui);
 
 			m_imgui = nullptr;
+			m_bus = nullptr;
+			m_win = nullptr;
 		}
 	}
 
@@ -104,72 +110,76 @@ namespace ml
 	void gui_manager::begin_frame()
 	{
 		ML_ImGui_NewFrame();
-
 		ImGui::NewFrame();
+
+		// DOCKSPACE
+		if (!dockspace.visible) { return; }
 
 		ML_ImGui_ScopeID(this);
 
-		// DOCKSPACE
-		if (auto & d{ this->dockspace }; d.visible)
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+			// viewport
+			ImGuiViewport const * v{ ImGui::GetMainViewport() };
+			ImGui::SetNextWindowPos(v->Pos);
+			ImGui::SetNextWindowSize(v->Size);
+			ImGui::SetNextWindowViewport(v->ID);
+
+			// style
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, dockspace.rounding);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, dockspace.border);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, dockspace.padding);
+			ImGui::SetNextWindowBgAlpha(dockspace.alpha);
+
+			// begin
+			if (ImGui::Begin(dockspace.title, &dockspace.visible,
+				ImGuiWindowFlags_NoTitleBar |
+				ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoMove |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_NoNavFocus |
+				ImGuiWindowFlags_NoDocking |
+				ImGuiWindowFlags_NoBackground |
+				(dockspace.menubar ? ImGuiWindowFlags_MenuBar : 0)
+			))
 			{
-				// viewport
-				ImGuiViewport const * v{ ImGui::GetMainViewport() };
-				ImGui::SetNextWindowPos(v->Pos);
-				ImGui::SetNextWindowSize(v->Size);
-				ImGui::SetNextWindowViewport(v->ID);
+				ImGui::PopStyleVar(3);
 
-				// style
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, d.rounding);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, d.border);
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, d.padding);
-				ImGui::SetNextWindowBgAlpha(d.alpha);
-
-				// begin
-				if (ImGui::Begin(d.title, &d.visible,
-					ImGuiWindowFlags_NoTitleBar |
-					ImGuiWindowFlags_NoCollapse |
-					ImGuiWindowFlags_NoResize |
-					ImGuiWindowFlags_NoMove |
-					ImGuiWindowFlags_NoBringToFrontOnFocus |
-					ImGuiWindowFlags_NoNavFocus |
-					ImGuiWindowFlags_NoDocking |
-					ImGuiWindowFlags_NoBackground |
-					(d.menubar ? ImGuiWindowFlags_MenuBar : 0)
-				))
+				// fire docking event if nodes are empty
+				if (dockspace.nodes.empty())
 				{
-					ImGui::PopStyleVar(3);
-
-					// fire docking event if nodes are empty
-					if (d.nodes.empty())
-					{
-						m_bus->fire<dockspace_event>();
-					}
-
-					ImGui::DockSpace(
-						ImGui::GetID(d.title),
-						d.size,
-						ImGuiDockNodeFlags_PassthruCentralNode |
-						ImGuiDockNodeFlags_AutoHideTabBar);
-
-					ImGui::End();
+					m_bus->fire<dockspace_event>();
 				}
-			}
 
-			// MAIN MENU BAR
-			if (d.menubar && ImGui::BeginMainMenuBar())
-			{
-				m_bus->fire<main_menu_bar_event>();
+				ImGui::DockSpace(
+					ImGui::GetID(dockspace.title),
+					dockspace.size,
+					ImGuiDockNodeFlags_PassthruCentralNode |
+					ImGuiDockNodeFlags_AutoHideTabBar);
 
-				ImGui::EndMainMenuBar();
+				ImGui::End();
 			}
+		}
+
+		// MAIN MENU BAR
+		if (dockspace.menubar && ImGui::BeginMainMenuBar())
+		{
+			m_bus->fire<main_menu_bar_event>();
+
+			ImGui::EndMainMenuBar();
 		}
 	}
 
 	void gui_manager::end_frame()
 	{
 		ImGui::Render();
+
+		for (auto const & cmd : {
+			gfx::render_command::set_viewport(m_win->get_framebuffer_size()),
+			gfx::render_command::set_clear_color(colors::black),
+			gfx::render_command::clear(gfx::clear_color),
+		}) gfx::execute(cmd, m_win->get_render_context());
 
 		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
 
@@ -197,11 +207,10 @@ namespace ml
 			switch (hash(to_lower(path.string())))
 			{
 			default				: return false;
-			case hash("classic"): ImGui::StyleColorsClassic();
-			case hash("dark")	: ImGui::StyleColorsDark();
-			case hash("light")	: ImGui::StyleColorsLight(); 
+			case hash("classic"): ImGui::StyleColorsClassic(); break;
+			case hash("dark")	: ImGui::StyleColorsDark(); break;
+			case hash("light")	: ImGui::StyleColorsLight(); break;
 			}
-			return true;
 		}
 
 		// open file

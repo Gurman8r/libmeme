@@ -105,7 +105,7 @@ namespace ml::util
 
 	// duplicate / force copy
 	template <class T
-	> ML_NODISCARD T dup(T const & copy) noexcept
+	> ML_NODISCARD constexpr T dup(T const & copy) noexcept
 	{
 		return T{ copy };
 	}

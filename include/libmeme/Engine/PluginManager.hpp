@@ -20,14 +20,18 @@ namespace ml
 
 		explicit plugin_manager(system_context * sys) noexcept : m_sys{ sys }, m_data{}
 		{
+			ML_assert(!s_instance);
+			s_instance = this;
 		}
 
 		~plugin_manager() noexcept override
 		{
-			for (auto const id : pmr::vector<plugin_id>{ m_data.get<plugin_id>() })
+			ML_assert(s_instance == this);
+			for (auto const id : util::dup(m_data.get<plugin_id>()))
 			{
 				this->uninstall(id);
 			}
+			s_instance = nullptr;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,8 +42,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static plugin_manager * const get() noexcept { return s_instance; }
+
+		ML_NODISCARD auto sys() const noexcept -> system_context * const { return m_sys; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	private:
-		system_context * const m_sys;
+		static plugin_manager * s_instance; // singleton
+
+		system_context * const m_sys; // system
+
 		ds::batch_vector<
 			plugin_id		,	// id
 			fs::path		,	// path

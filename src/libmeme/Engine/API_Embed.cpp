@@ -1,5 +1,5 @@
-#include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
+#include <libmeme/Engine/PluginManager.hpp>
 
 // memelib
 PYBIND11_EMBEDDED_MODULE(memelib, m)
@@ -8,9 +8,16 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	py::class_<non_copyable, scoped<non_copyable, no_delete>>(m, "non_copyable");
+	// exit
+	m.def("exit", [](py::args) { plugin_manager::get()->sys()->win->close(); });
+	py::module::import("builtins").attr("exit") = m.attr("exit");
+	py::module::import("sys").attr("exit") = m.attr("exit");
 
-	py::class_<trackable, scoped<trackable, no_delete>>(m, "trackable");
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	py::class_<non_copyable, manual<non_copyable>>(m, "non_copyable");
+
+	py::class_<trackable, manual<trackable>>(m, "trackable");
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -473,9 +480,6 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def_readwrite("context", &window_settings::context)
 		.def_readwrite("hints"	, &window_settings::hints)
 		;
-
-	py::module::import("builtins").attr("exit") = py::none();
-	py::module::import("sys").attr("exit") = py::none();
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

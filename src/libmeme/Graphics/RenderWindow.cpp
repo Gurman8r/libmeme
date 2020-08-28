@@ -83,7 +83,10 @@ namespace ml
 				0,
 				0xffffffff
 			}),
-		}) gfx::execute(cmd, m_ctx);
+		})
+		{
+			gfx::execute(cmd, m_ctx);
+		}
 
 		return true;
 	}

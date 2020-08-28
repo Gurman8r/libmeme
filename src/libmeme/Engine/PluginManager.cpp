@@ -4,6 +4,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	plugin_manager * plugin_manager::s_instance{};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	plugin_id plugin_manager::install(fs::path path)
 	{
 		// load library

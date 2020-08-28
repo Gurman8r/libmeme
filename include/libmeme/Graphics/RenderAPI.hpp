@@ -638,7 +638,7 @@ namespace ml::gfx
 		static render_device * g_device; // pointer to default device
 
 	protected:
-		friend class std::unique_ptr<render_device, default_delete<render_device>>;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual ~render_device() override = default;
 

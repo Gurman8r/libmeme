@@ -63,7 +63,11 @@ static auto const default_settings{ R"(
 		}
 	},
 	"gui": {
-		"style": "assets/styles/obsidian.style"
+		"style": "assets/styles/obsidian.style",
+		"dockspace": {
+			"visible": true,
+			"menubar": true
+		}
 	},
 	"plugins": {
 		"files": [ "plugins/demo" ]
@@ -102,7 +106,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// window
-	ML_assert(win.open(cfg["window"].get<window_settings>()));
+	ML_assert(win.open(cfg["window"]));
 	{
 		win.set_char_callback([](auto ... x) noexcept { bus.fire<char_event>(ML_forward(x)...); });
 		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<char_mods_event>(ML_forward(x)...); });
@@ -126,8 +130,8 @@ ml::int32_t main()
 
 	// gui
 	ML_assert(gui.startup(win));
-	gui.dockspace.visible = true;
-	gui.dockspace.menubar = true;
+	cfg["gui"]["dockspace"]["visible"].get_to(gui.dockspace.visible);
+	cfg["gui"]["dockspace"]["menubar"].get_to(gui.dockspace.menubar);
 	gui.load_style(fs.path2(cfg["gui"]["style"]));
 
 	// plugins
@@ -151,14 +155,7 @@ ml::int32_t main()
 	do
 	{
 		// begin
-		time.loop_timer.restart();
-		time.frame_rate = std::invoke([&, dt = (float_t)time.delta_time.count()]() noexcept
-		{
-			time.fps_accum += dt - time.fps_times[time.fps_index];
-			time.fps_times[time.fps_index] = dt;
-			time.fps_index = (time.fps_index + 1) % time.fps_times.size();
-			return (0.f < time.fps_accum) ? 1.f / (time.fps_accum / (float_t)time.fps_times.size()) : FLT_MAX;
-		});
+		time.begin_step();
 		
 		// update
 		window::poll_events();
@@ -167,16 +164,11 @@ ml::int32_t main()
 		// gui
 		gui.begin_frame();
 		bus.fire<gui_event>();
-		for (auto const & cmd : {
-			gfx::render_command::set_viewport(win.get_framebuffer_size()),
-			gfx::render_command::set_clear_color(colors::black),
-			gfx::render_command::clear(gfx::clear_color),
-		}) gfx::execute(cmd, win.get_render_context());
 		gui.end_frame();
 
 		// end
 		window::swap_buffers(win);
-		time.delta_time = time.loop_timer.elapsed();
+		time.end_step();
 	}
 	while (win.is_open());
 	return EXIT_SUCCESS;

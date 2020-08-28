@@ -80,13 +80,15 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
-		> decltype(auto) proc(cstring name) noexcept
+		> auto proc(cstring name) noexcept
 		{
 			return reinterpret_cast<Ret(*)(Args...)>(this->read(name));
 		}
 
 		template <class Ret, class ... Args
-		> decltype(auto) call(cstring name, Args && ... args) noexcept
+		> auto call(cstring name, Args && ... args) noexcept -> std::conditional_t<
+			std::is_same_v<Ret, void>, void, std::optional<Ret>
+		>
 		{
 			constexpr bool has_return{ !std::is_same_v<Ret, void> };
 
@@ -94,7 +96,7 @@ namespace ml
 			{
 				if constexpr (has_return)
 				{
-					return std::make_optional<Ret>(std::invoke(fn, ML_forward(args)...));
+					return std::invoke(fn, ML_forward(args)...);
 				}
 				else
 				{
@@ -103,7 +105,7 @@ namespace ml
 			}
 			else if constexpr (has_return)
 			{
-				return (std::optional<Ret>)std::nullopt;
+				return std::nullopt;
 			}
 		}
 

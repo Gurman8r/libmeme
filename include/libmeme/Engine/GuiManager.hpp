@@ -9,7 +9,7 @@ struct ImGuiContext;
 
 namespace ml
 {
-	struct window;
+	struct render_window;
 	struct event_bus;
 
 	struct ML_ENGINE_API gui_manager final : non_copyable, trackable
@@ -22,13 +22,13 @@ namespace ml
 
 		gui_manager(event_bus * bus, allocator_type alloc = {}) noexcept;
 
-		gui_manager(window const & wnd, event_bus * bus, allocator_type alloc = {}) noexcept;
+		gui_manager(render_window const & wnd, event_bus * bus, allocator_type alloc = {}) noexcept;
 
 		~gui_manager() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool startup(window const & wnd);
+		ML_NODISCARD bool startup(render_window const & wnd);
 
 		void shutdown();
 
@@ -89,20 +89,22 @@ namespace ml
 			auto const & operator[](size_t const i) const & noexcept { return nodes[i]; }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		private:
+			friend gui_manager;
+
+			dockspace_data() noexcept = default;
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}
 		dockspace{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		auto get_bus() const noexcept -> event_bus * { return m_bus; }
-
-		auto get_context() const noexcept -> ImGuiContext * { return m_imgui; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
-		ImGuiContext *	m_imgui;
-		event_bus *		m_bus;
+		ImGuiContext		* m_imgui	; // 
+		event_bus			* m_bus		; // 
+		render_window const * m_win		; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

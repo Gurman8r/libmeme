@@ -369,7 +369,7 @@ namespace ml
 	{
 		void operator()(void * addr) const noexcept
 		{
-			ml_free(addr);
+			memory::get()->deallocate(addr);
 		}
 	};
 

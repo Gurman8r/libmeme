@@ -7,7 +7,6 @@ constant buffer / uniform buffer
 cameras w/ controller gui
 template basic_vertex to do variations of vertex at CT
 object import settings
-refactor application framework (engine & window)
 separate shader objects
 
 /bin
@@ -28,59 +27,5 @@ separate shader objects
 libmeme.json
 
 
-# Engine
-	@ Core
-		~ DS
-		~ detail
-		~ util
-	@ System
-		+ debug
-		+ events
-		+ library
-		+ memory
-		+ platform
-		+ timers
-	@ Window
-		+ context
-		+ cursor
-		+ device
-		+ input
-		+ window
-		+ video_mode
-	@ Graphics
-		+ render_device
-		+ render_context
-		+ render_window
-		+ buffer
-		+ texture
-		+ framebuffer
-		+ program
-		+ shader
-		+ pipelines
-		+ render_pass
-		+ states
-		+ swap_chain
-	@ Scene
-		+ renderer_2d
-		+ renderer_3d
-		+ animation
-		+ camera
-		+ font
-		+ material
-		+ model
-		+ sprite
-		+ vfx
-	@ Runtime
-		+ application
-		+ plugin
-		+ plugin_manager
 
-
-
-# libmeme
-	@ core		| 
-	@ editor	| 
-	@ platform	| 
-	@ scene		| 
-	@ main		| 
 	

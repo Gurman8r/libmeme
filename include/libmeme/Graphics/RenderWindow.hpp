@@ -24,14 +24,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_render_device() const & noexcept -> scoped<gfx::render_device> const & { return m_dev; }
+		ML_NODISCARD auto get_render_device() const & noexcept -> manual<gfx::render_device> const & { return m_dev; }
 
 		ML_NODISCARD auto get_render_context() const & noexcept -> shared<gfx::render_context> const & { return m_ctx; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		scoped<	gfx::render_device	> m_dev; // device
+		manual<	gfx::render_device	> m_dev; // device
 		shared<	gfx::render_context	> m_ctx; // context
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
