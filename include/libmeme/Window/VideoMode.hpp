@@ -60,16 +60,16 @@ namespace ml
 
 	inline void from_json(json const & j, video_mode & value)
 	{
-		j.at("resolution").get_to(value.resolution);
-		j.at("bits_per_pixel").get_to(value.bits_per_pixel);
-		j.at("refresh_rate").get_to(value.refresh_rate);
+		j.at("resolution"		).get_to(value.resolution);
+		j.at("bits_per_pixel"	).get_to(value.bits_per_pixel);
+		j.at("refresh_rate"		).get_to(value.refresh_rate);
 	}
 
 	inline void to_json(json & j, video_mode const & value)
 	{
-		j["resolution"] = value.resolution;
-		j["bits_per_pixel"] = value.bits_per_pixel;
-		j["refresh_rate"] = value.refresh_rate;
+		j["resolution"		] = value.resolution;
+		j["bits_per_pixel"	] = value.bits_per_pixel;
+		j["refresh_rate"	] = value.refresh_rate;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

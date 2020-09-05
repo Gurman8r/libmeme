@@ -4,10 +4,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin_manager * plugin_manager::s_instance{};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	plugin_id plugin_manager::install(fs::path path)
 	{
 		// load library
@@ -59,10 +55,7 @@ namespace ml
 		{
 			auto const i{ m_data.index_of<plugin_id>(it) };
 
-			m_data.at<plugin_iface>(i).detach
-			(
-				m_sys, m_data.at<manual<plugin>>(i).release()
-			);
+			m_data.at<plugin_iface>(i).detach(m_sys, m_data.at<manual<plugin>>(i).release());
 
 			m_data.erase(i);
 

@@ -44,13 +44,12 @@ namespace ml
 // ECS
 namespace ml
 {
-	// (T) TAGS
+	// tags
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct	t_default {};
 
-
-	// (C) COMPONENTS
+	// components
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
@@ -58,21 +57,11 @@ namespace ml
 	using	c_uniforms	= shared<uniform_buffer>;
 	using	c_mesh		= shared<mesh>;
 
-
-	// (S) SIGNATURES
+	// systems
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	using s_update_uniforms = meta::list<c_uniforms, c_transform
 	>;
-	using s_upload_uniforms = meta::list<c_shader, c_uniforms
-	>;
-	using s_render_meshes = meta::list<c_shader, c_mesh
-	>;
-
-
-	// (X) SYSTEMS
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class> struct x_update_uniforms final : ecs::detail::x_base<s_update_uniforms>
 	{
 		void operator()(c_uniforms & ufm, c_transform const & tf)
@@ -83,6 +72,8 @@ namespace ml
 		}
 	};
 
+	using s_upload_uniforms = meta::list<c_shader, c_uniforms
+	>;
 	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
 	{
 		void operator()(c_shader & shd, c_uniforms const & ufm)
@@ -96,6 +87,8 @@ namespace ml
 		}
 	};
 
+	using s_render_meshes = meta::list<c_shader, c_mesh
+	>;
 	template <class> struct x_render_meshes final : ecs::detail::x_base<s_render_meshes>
 	{
 		void operator()(c_shader const & shd, c_mesh const & msh, gfx::render_context * ctx)
@@ -107,10 +100,9 @@ namespace ml
 		}
 	};
 
-
-	// (U) TRAITS
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// traits
 	using entity_traits = ecs::traits<
 
 		// tags
@@ -134,10 +126,7 @@ namespace ml
 		>
 	>;
 
-
-	// (M) MANAGER
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	// manager
 	using entity_manager = ecs::manager<entity_traits>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -208,7 +197,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [&]() noexcept { return 1000.f / gettime()->frame_rate; }
+				, [&]() noexcept { return 1000.f / get_time().frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -216,7 +205,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [&]() noexcept { return gettime()->frame_rate; }
+				, [&]() noexcept { return get_time().frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -225,7 +214,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ getmem()->resource() };
+			static auto const testres{ get_memory().resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.set_focused();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -303,9 +292,9 @@ namespace ml
 			//ML_defer(&) { m_cout.update(&std::cout); };
 
 			// ICON
-			if (image const ico{ getfs()->path2("assets/textures/ico.png"), 0, false })
+			if (image const ico{ get_io().path2("assets/textures/ico.png"), 0, false })
 			{
-				getwin()->set_icon(ico.width(), ico.height(), ico.data());
+				get_window().set_icon(ico.width(), ico.height(), ico.data());
 			}
 
 			// FRAMEBUFFERS
@@ -321,19 +310,19 @@ namespace ml
 			// TEXTURES
 			{
 				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"		] = gfx::texture2d::create(getfs()->path2("assets/textures/doot.png"));
-				m_textures["navball"	] = gfx::texture2d::create(getfs()->path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"] = gfx::texture2d::create(getfs()->path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"] = gfx::texture2d::create(getfs()->path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"	] = gfx::texture2d::create(getfs()->path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["doot"		] = gfx::texture2d::create(get_io().path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(get_io().path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(get_io().path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(get_io().path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(get_io().path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"		] = alloc_shared<font>(getfs()->path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"		] = alloc_shared<font>(getfs()->path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"] = alloc_shared<font>(getfs()->path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"		] = alloc_shared<font>(getfs()->path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(get_io().path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(get_io().path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(get_io().path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(get_io().path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -341,13 +330,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					getfs()->path2("assets/shaders/2D.vs.shader"));
+					get_io().path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					getfs()->path2("assets/shaders/3D.vs.shader"));
+					get_io().path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					getfs()->path2("assets/shaders/basic.fs.shader"));
+					get_io().path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -367,8 +356,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)gettime()->main.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)gettime()->loop.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)get_time().main.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)get_time().loop.elapsed().count(); })
 				};
 
 				// camera
@@ -409,9 +398,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"	] = alloc_shared<mesh>(getfs()->path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"	] = alloc_shared<mesh>(getfs()->path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"		] = alloc_shared<mesh>(getfs()->path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"	] = alloc_shared<mesh>(get_io().path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"	] = alloc_shared<mesh>(get_io().path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"		] = alloc_shared<mesh>(get_io().path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -538,7 +527,7 @@ namespace ml
 			m_cout.sstr().str({});
 
 			// plots
-			m_plots.update(gettime()->main.elapsed().count());
+			m_plots.update(get_time().main.elapsed().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -555,7 +544,7 @@ namespace ml
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
 				gfx::render_command::bind_framebuffer(nullptr),
-			}) gfx::execute(cmd, getwin()->get_render_context());
+			}) gfx::execute(cmd, get_window().get_render_context());
 		}
 
 		void on_dockspace(dockspace_event const &)
@@ -568,7 +557,7 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ getgui()->dockspace };
+			auto & d{ get_window().get_dockspace() };
 			if (!d.nodes.empty()) { return; }
 			d.nodes.resize(MAX_DOCK_NODE);
 			
@@ -611,7 +600,7 @@ namespace ml
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					getwin()->close();
+					get_window().close();
 				}
 				ImGui::EndMenu();
 			}
@@ -644,9 +633,9 @@ namespace ml
 			ML_ImGui_ScopeID(this);
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ getgui()->show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ getgui()->show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ getgui()->show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ get_window().show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ get_window().show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ get_window().show_imgui_about(&m_imgui_about.open); }
 
 			// WIDGETS
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
@@ -735,7 +724,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				getwin()->close();
+				get_window().close();
 			},
 			{
 				"shutdown the application",
@@ -788,23 +777,17 @@ namespace ml
 
 			m_console.commands.push_back({ "py", [&](auto && args) noexcept
 			{
-				if (!m_console.cmd_lock && args.empty())
+				if (args.empty() && m_console.lock("py"))
 				{
-					m_console.cmd_lock = "py";
-
 					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
 				}
-				else if (
-					(args[0][0] == '\\') &&
-					m_console.cmd_lock &&
-					(0 == std::strcmp(m_console.cmd_lock, "py"))
-				)
+				else if (args.front() == "\\" && m_console.unlock("py"))
 				{
 					m_console.cmd_lock = nullptr;
 				}
 				else
 				{
-					getscr()->do_string(util::detokenize(args));
+					get_scripts().do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -922,7 +905,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							getwin()->set_clipboard(buf);
+							get_window().set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1060,13 +1043,13 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static passthrough_resource * const testres{ getmem()->resource() };
+			static passthrough_resource * const testres{ get_memory().resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= getwin()->is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= get_window().is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1095,7 +1078,7 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				auto const & records{ getmem()->records().values() };
+				auto const & records{ get_memory().records().values() };
 				static auto selected_record{ &records.front() };
 				char selected_address[20] = "highlight";
 				if (selected_record)
@@ -1205,7 +1188,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", gettime()->main.elapsed().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", get_time().main.elapsed().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1245,7 +1228,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev	{ getwin()->get_render_device() };
+			static auto const & dev	{ get_window().get_render_device() };
 			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
 

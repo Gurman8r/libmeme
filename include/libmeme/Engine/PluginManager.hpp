@@ -2,7 +2,7 @@
 #define _ML_PLUGIN_MANAGER_HPP_
 
 #include <libmeme/Core/BatchVector.hpp>
-#include <libmeme/Core/SharedLibrary.hpp>
+#include <libmeme/Engine/SharedLibrary.hpp>
 #include <libmeme/Engine/Plugin.hpp>
 
 namespace ml
@@ -24,21 +24,14 @@ namespace ml
 			: m_sys	{ sys }
 			, m_data{ alloc }
 		{
-			ML_assert(!s_instance);
-
-			s_instance = this;
 		}
 
 		~plugin_manager() noexcept override
 		{
-			ML_assert(s_instance == this);
-
 			while (!m_data.get<plugin_id>().empty())
 			{
 				this->uninstall(m_data.get<plugin_id>().front());
 			}
-
-			s_instance = nullptr;
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,15 +42,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static plugin_manager * const get() noexcept { return s_instance; }
-
-		ML_NODISCARD auto sys() const noexcept -> system_context * const { return m_sys; }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	private:
-		static plugin_manager * s_instance; // singleton
-
 		system_context * const m_sys; // system
 
 		ds::batch_vector<

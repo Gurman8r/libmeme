@@ -1,11 +1,10 @@
-#include <libmeme/Engine/GuiManager.hpp>
+#include <libmeme/Engine/GuiWindow.hpp>
 #include <libmeme/Engine/ImGui.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/EventBus.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
-#include <libmeme/Graphics/RenderWindow.hpp>
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -13,46 +12,150 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #define ML_ImGui_Init_Platform(wh, ic)	ImGui_ImplGlfw_InitForOpenGL((struct GLFWwindow *)wh, ic)
 #define ML_ImGui_Init_Renderer()		ImGui_ImplOpenGL3_Init("#version 130")
-#define ML_ImGui_Shutdown()				ML_scope(&){ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
-#define ML_ImGui_NewFrame()				ML_scope(&){ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
+#define ML_ImGui_Shutdown()				ML_scope(){ ImGui_ImplOpenGL3_Shutdown(); ImGui_ImplGlfw_Shutdown(); }
+#define ML_ImGui_NewFrame()				ML_scope(){ ImGui_ImplOpenGL3_NewFrame(); ImGui_ImplGlfw_NewFrame(); }
 #define ML_ImGui_RenderDrawData(x)		ImGui_ImplOpenGL3_RenderDrawData(x)
 
 #else
 #	error "imgui is unavailable"
 #endif
 
+// DOCKSPACE
+namespace ml
+{
+	uint32_t dockspace::begin_builder(int32_t flags)
+	{
+		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
+		{
+			ImGui::DockBuilderRemoveNode(root);
+
+			ImGui::DockBuilderAddNode(root, flags);
+
+			return root;
+		}
+		return NULL;
+	}
+
+	uint32_t dockspace::end_builder(uint32_t root)
+	{
+		if (root)
+		{
+			ImGui::DockBuilderFinish(root);
+		}
+		return root;
+	}
+
+	uint32_t dockspace::dock(cstring name, uint32_t id)
+	{
+		if (name && id)
+		{
+			ImGui::DockBuilderDockWindow(name, id);
+			return id;
+		}
+		return NULL;
+	}
+
+	uint32_t dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return this->nodes[(size_t)i] = split(id, dir, ratio, value);
+	}
+
+	uint32_t dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return split(id, dir, ratio, nullptr, value);
+	}
+
+	uint32_t dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
+	{
+		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
+	}
+
+	void dockspace::render(event_bus * bus)
+	{
+		if (!bus || !visible) { return; }
+
+		ML_ImGui_ScopeID(this);
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			// viewport
+			ImGuiViewport const * v{ ImGui::GetMainViewport() };
+			ImGui::SetNextWindowPos(v->Pos);
+			ImGui::SetNextWindowSize(v->Size);
+			ImGui::SetNextWindowViewport(v->ID);
+
+			// style
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, rounding);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+			ImGui::SetNextWindowBgAlpha(alpha);
+
+			// begin
+			if (ImGui::Begin(title, &visible,
+				ImGuiWindowFlags_NoTitleBar |
+				ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoResize |
+				ImGuiWindowFlags_NoMove |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_NoNavFocus |
+				ImGuiWindowFlags_NoDocking |
+				ImGuiWindowFlags_NoBackground |
+				(menubar ? ImGuiWindowFlags_MenuBar : 0)
+			))
+			{
+				ImGui::PopStyleVar(3);
+
+				// fire docking event if nodes are empty
+				if (nodes.empty()) { bus->fire<dockspace_event>(); }
+
+				ImGui::DockSpace(
+					ImGui::GetID(title),
+					size,
+					ImGuiDockNodeFlags_PassthruCentralNode |
+					ImGuiDockNodeFlags_AutoHideTabBar);
+
+				ImGui::End();
+			}
+		}
+
+		// main menu bar
+		if (menubar && ImGui::BeginMainMenuBar())
+		{
+			bus->fire<main_menu_bar_event>();
+
+			ImGui::EndMainMenuBar();
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
+// GUI WINDOW
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gui_manager::gui_manager(event_bus * bus, allocator_type alloc) noexcept
-		: m_imgui	{}
-		, m_bus		{ bus }
-		, m_win		{}
+	gui_window::gui_window() noexcept : render_window{}, m_imgui{}, m_dockspace{}
 	{
 		IMGUI_CHECKVERSION();
 	}
 
-	gui_manager::gui_manager(render_window const & wnd, event_bus * bus, allocator_type alloc) noexcept
-		: gui_manager{ bus, alloc }
+	gui_window::gui_window(window_settings const & ws) noexcept : gui_window{}
 	{
-		ML_assert(startup(wnd));
+		ML_assert(open(ws));
 	}
 
-	gui_manager::~gui_manager() noexcept
+	gui_window::~gui_window() noexcept
 	{
-		shutdown();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_manager::startup(render_window const & wnd)
+	bool gui_window::open(window_settings const & ws)
 	{
-		if (m_imgui) { return debug::error("imgui already initialized"); }
+		if (is_open()) { return debug::error("gui_window is already open"); }
 
-		m_win = &wnd;
-		
-		if (!m_win->is_open()) { return debug::error("render_window is not open"); }
+		if (!render_window::open(ws)) { return debug::error("failed opening gui_window"); }
 
 		// allocators
 		ImGui::SetAllocatorFunctions
@@ -77,7 +180,7 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// init platform
-		if (!ML_ImGui_Init_Platform(m_win->get_handle(), true))
+		if (!ML_ImGui_Init_Platform(get_handle(), true))
 		{
 			return debug::error("failed initializing ImGui platform");
 		}
@@ -91,38 +194,37 @@ namespace ml
 		return true;
 	}
 
-	void gui_manager::shutdown()
+	void gui_window::close()
 	{
-		if (m_imgui)
-		{
-			ML_ImGui_Shutdown();
-			
-			ImGui::DestroyContext((ImGuiContext *)m_imgui);
-			
-			m_imgui = nullptr;
-		}
+		ML_ImGui_Shutdown();
+
+		ImGui::DestroyContext((ImGuiContext *)m_imgui);
+
+		m_imgui = nullptr;
+
+		render_window::close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::begin_frame()
+	void gui_window::new_frame(event_bus * bus)
 	{
 		ML_ImGui_NewFrame();
-		
+
 		ImGui::NewFrame();
 
-		dockspace.render(m_bus);
+		m_dockspace.render(bus);
 	}
 
-	void gui_manager::end_frame()
+	void gui_window::render_frame()
 	{
 		ImGui::Render();
 
 		for (auto const & cmd : {
-			gfx::render_command::set_viewport(m_win->get_framebuffer_size()),
+			gfx::render_command::set_viewport(get_framebuffer_size()),
 			gfx::render_command::set_clear_color(colors::black),
 			gfx::render_command::clear(gfx::clear_color),
-		}) gfx::execute(cmd, m_win->get_render_context());
+		}) gfx::execute(cmd, get_render_context());
 
 		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
 
@@ -133,17 +235,44 @@ namespace ml
 			ImGui::RenderPlatformWindowsDefault();
 			window::make_context_current(backup_context);
 		}
+
+		if (has_hints(window_hints_doublebuffer))
+		{
+			swap_buffers(get_handle());
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_manager::load_style(fs::path const & path)
+	void gui_window::show_imgui_demo(bool * p_open) const
+	{
+		ImGui::ShowDemoWindow(p_open);
+	}
+	
+	void gui_window::show_imgui_metrics(bool * p_open) const
+	{
+		ImGui::ShowMetricsWindow(p_open);
+	}
+	
+	void gui_window::show_imgui_about(bool * p_open) const
+	{
+		ImGui::ShowAboutWindow(p_open);
+	}
+	
+	void gui_window::show_imgui_style_editor(void * ref) const
+	{
+		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool gui_window::load_style(fs::path const & path)
 	{
 		using namespace util;
-
+	
 		// empty
 		if (path.empty()) return false;
-
+	
 		// builtins
 		if (!fs::exists(path))
 		{
@@ -155,15 +284,15 @@ namespace ml
 			case hash("light")	: ImGui::StyleColorsLight(); break;
 			}
 		}
-
+	
 		// open file
 		std::ifstream file{ path };
 		ML_defer(&){ file.close(); };
 		if (!file) return false;
-
+	
 		// style ref
 		auto & style{ ImGui::GetStyle() };
-
+	
 		// scan file
 		pmr::string line;
 		while (std::getline(file, line))
@@ -173,7 +302,7 @@ namespace ml
 			
 			// skip line
 			if (line.empty() || line.front() == '#') { continue; }
-
+	
 			// scan line
 			pmr::stringstream ss{}; ss << line;
 			switch (hash(parse<pmr::string>(ss)))
@@ -272,137 +401,6 @@ namespace ml
 			}
 		}
 		return true;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void gui_manager::show_imgui_demo(bool * p_open) const
-	{
-		ImGui::ShowDemoWindow(p_open);
-	}
-
-	void gui_manager::show_imgui_metrics(bool * p_open) const
-	{
-		ImGui::ShowMetricsWindow(p_open);
-	}
-
-	void gui_manager::show_imgui_about(bool * p_open) const
-	{
-		ImGui::ShowAboutWindow(p_open);
-	}
-
-	void gui_manager::show_imgui_style_editor(void * ref) const
-	{
-		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	uint32_t gui_manager::dockspace_data::begin_builder(int32_t flags)
-	{
-		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
-		{
-			ImGui::DockBuilderRemoveNode(root);
-
-			ImGui::DockBuilderAddNode(root, flags);
-
-			return root;
-		}
-		return NULL;
-	}
-
-	uint32_t gui_manager::dockspace_data::end_builder(uint32_t root)
-	{
-		if (root)
-		{
-			ImGui::DockBuilderFinish(root);
-		}
-		return root;
-	}
-
-	uint32_t gui_manager::dockspace_data::dock(cstring name, uint32_t id)
-	{
-		if (name && id)
-		{
-			ImGui::DockBuilderDockWindow(name, id);
-			return id;
-		}
-		return NULL;
-	}
-
-	uint32_t gui_manager::dockspace_data::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
-	{
-		return this->nodes[(size_t)i] = split(id, dir, ratio, value);
-	}
-
-	uint32_t gui_manager::dockspace_data::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
-	{
-		return split(id, dir, ratio, nullptr, value);
-	}
-
-	uint32_t gui_manager::dockspace_data::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
-	{
-		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
-	}
-
-	void gui_manager::dockspace_data::render(event_bus * bus)
-	{
-		if (!visible) { return; }
-
-		ML_ImGui_ScopeID(this);
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			// viewport
-			ImGuiViewport const * v{ ImGui::GetMainViewport() };
-			ImGui::SetNextWindowPos(v->Pos);
-			ImGui::SetNextWindowSize(v->Size);
-			ImGui::SetNextWindowViewport(v->ID);
-
-			// style
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, rounding);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
-			ImGui::SetNextWindowBgAlpha(alpha);
-
-			// begin
-			if (ImGui::Begin(title, &visible,
-				ImGuiWindowFlags_NoTitleBar |
-				ImGuiWindowFlags_NoCollapse |
-				ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoMove |
-				ImGuiWindowFlags_NoBringToFrontOnFocus |
-				ImGuiWindowFlags_NoNavFocus |
-				ImGuiWindowFlags_NoDocking |
-				ImGuiWindowFlags_NoBackground |
-				(menubar ? ImGuiWindowFlags_MenuBar : 0)
-			))
-			{
-				ImGui::PopStyleVar(3);
-
-				// fire docking event if nodes are empty
-				if (nodes.empty())
-				{
-					bus->fire<dockspace_event>();
-				}
-
-				ImGui::DockSpace(
-					ImGui::GetID(title),
-					size,
-					ImGuiDockNodeFlags_PassthruCentralNode |
-					ImGuiDockNodeFlags_AutoHideTabBar);
-
-				ImGui::End();
-			}
-		}
-
-		// main menu bar
-		if (menubar && ImGui::BeginMainMenuBar())
-		{
-			bus->fire<main_menu_bar_event>();
-
-			ImGui::EndMainMenuBar();
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

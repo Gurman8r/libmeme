@@ -6,7 +6,12 @@
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Memory.hpp>
 
+namespace ml { struct script_context; }
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#ifdef ML_EMBED_PYTHON
+#define HAVE_SNPRINTF
 
 #include <Python.h>
 #include <pybind11/embed.h>
@@ -87,23 +92,21 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace pybind11::detail
-{
-	// array caster
-	template <class T, size_t N
-	> struct type_caster<_ML ds::array<T, N>>
-		: array_caster<_ML ds::array<T, N>, T, false, N> {};
-
-	// matrix caster
-	template <class T, size_t W, size_t H
-	> struct type_caster<_ML ds::matrix<T, W, H>>
-		: array_caster<_ML ds::matrix<T, W, H>, T, false, W * H> {};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 namespace pybind11
 {
+	namespace detail
+	{
+		// array caster
+		template <class T, size_t N
+		> struct type_caster<_ML ds::array<T, N>>
+			: array_caster<_ML ds::array<T, N>, T, false, N> {};
+
+		// matrix caster
+		template <class T, size_t W, size_t H
+		> struct type_caster<_ML ds::matrix<T, W, H>>
+			: array_caster<_ML ds::matrix<T, W, H>, T, false, W * H> {};
+	}
+
 	static void to_json(_ML json & j, handle const & v)
 	{
 		j = _ML json::parse((std::string)(str)module::import("json").attr("dumps")(v));
@@ -114,6 +117,10 @@ namespace pybind11
 		v = module::import("json").attr("loads")(j.dump());
 	}
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#endif // ML_EMBED_PYTHON
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

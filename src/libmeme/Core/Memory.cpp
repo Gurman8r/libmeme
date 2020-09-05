@@ -21,9 +21,11 @@ namespace ml
 
 	memory::~memory() noexcept
 	{
-		while (!m_records.empty())
+		ML_assert(s_instance == this);
+
+		while (!m_records.empty()) // cleanup remaining allocations
 		{
-			deallocate(m_records.back().first); // cleanup any remaining allocations
+			deallocate(m_records.back().first);
 		}
 
 		s_instance = nullptr;

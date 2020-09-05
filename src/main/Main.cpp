@@ -4,6 +4,7 @@
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
+#include <libmeme/Engine/Application.hpp>
 
 using namespace ml;
 using namespace ml::size_literals;
@@ -95,17 +96,16 @@ ml::int32_t main()
 	static memory			mem	{ pmr::get_default_resource() };
 	static json				cfg	{ load_settings() };
 	static timer_context	time{};
-	static file_context		fs	{ __argv[0], fs::current_path(), cfg["content"]["path"] };
 	static event_bus		bus	{};
-	static render_window	win	{};
-	static gui_manager		gui	{ &bus };
-	static script_context	scr	{ fs.program_name, fs.content_path };
-	static system_context	sys	{ &bus, &cfg, &fs, &gui, &mem, &scr, &time, &win };
-	static plugin_manager	mods{ &sys };
+	static io_context		io	{ __argv[0], fs::current_path(), cfg["content"]["path"] };
+	static gui_window		win	{};
+	static script_context	scr	{ io.program_name, io.content_path };
+	static system_context	sys	{ &bus, &cfg, &io, &mem, &scr, &time, &win };
+	static application		app	{ &sys };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// window
+	// open window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
 	{
 		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(ML_forward(x)...); });
@@ -128,22 +128,21 @@ ml::int32_t main()
 		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(ML_forward(x)...); });
 	}
 
-	// gui
-	ML_assert(gui.startup(win));
-	gui.load_style(fs.path2(cfg["gui"]["style"]));
-	cfg["gui"]["dockspace"]["visible"].get_to(gui.dockspace.visible);
-	cfg["gui"]["dockspace"]["menubar"].get_to(gui.dockspace.menubar);
+	// configure gui
+	win.load_style(io.path2(cfg["gui"]["style"]));
+	cfg["gui"]["dockspace"]["visible"].get_to(win.get_dockspace().visible);
+	cfg["gui"]["dockspace"]["menubar"].get_to(win.get_dockspace().menubar);
 
-	// plugins
+	// load plugins
 	for (auto const & path : cfg["plugins"]["files"])
 	{
-		mods.install(path);
+		app.get_mods().install(path);
 	}
 
-	// scripts
+	// run scripts
 	for (auto const & path : cfg["scripts"]["files"])
 	{
-		scr.do_file(fs.path2(path));
+		scr.do_file(io.path2(path));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -154,22 +153,12 @@ ml::int32_t main()
 	ML_defer(){ bus.fire<unload_event>(); };
 	do
 	{
-		// begin
-		time.begin_step();
-		ML_benchmark_L("poll_events") { window::poll_events(); };
-		
-		// update
+		time.begin_step(); ML_defer() { time.end_step(); };
+		ML_benchmark_L("poll") { window::poll_events(); };
 		ML_benchmark_L("update event") { bus.fire<update_event>(); };
-		
-		// gui
-		ML_benchmark_L("begin gui") { gui.begin_frame(); };
-		ML_benchmark_L("gui_event") { bus.fire<gui_event>(); };
-		ML_benchmark_L("end gui") { gui.end_frame(); };
-
-		// end
-		ML_benchmark_L("swap_buffers") { window::swap_buffers(win); };
-		performance::refresh_samples();
-		time.end_step();
+		ML_benchmark_L("begin gui") { win.new_frame(&bus); };
+		ML_benchmark_L("gui event") { bus.fire<gui_event>(); };
+		ML_benchmark_L("end gui") { win.render_frame(); };
 	}
 	while (win.is_open());
 	return EXIT_SUCCESS;

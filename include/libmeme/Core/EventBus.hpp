@@ -11,10 +11,6 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct event_bus;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// EVENT
 	struct ML_NODISCARD event : non_copyable
 	{
@@ -48,14 +44,14 @@ namespace ml
 	// EVENT LISTENER
 	struct ML_CORE_API event_listener
 	{
-		explicit event_listener(event_bus * bus) : m_event_bus{ bus } {}
+		explicit event_listener(struct event_bus * bus) : m_event_bus{ bus } {}
 
 		virtual ~event_listener() noexcept;
 
 		virtual void on_event(event const &) = 0;
 
 	private:
-		event_bus * const m_event_bus;
+		struct event_bus * const m_event_bus;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -80,7 +76,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// fire
+		// fire event
 		void fire(event const & ev) noexcept
 		{
 			// get category
@@ -106,7 +102,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// subscribe
+		// subscribe to type
 		bool sub(event_listener * value, hash_t id) noexcept
 		{
 			// insert listener into category
@@ -124,7 +120,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// unsubscribe
+		// unsubscribe from type
 		void unsub(event_listener * value, hash_t id) noexcept
 		{
 			if (!value) { return; }
@@ -150,7 +146,7 @@ namespace ml
 			this->unsub(value, Ev::ID);
 		}
 
-		// unsubscribe all
+		// unsubscribe from all
 		void unsub(event_listener * value) noexcept
 		{
 			if (!value) { return; }

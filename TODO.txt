@@ -27,5 +27,6 @@ separate shader objects
 libmeme.json
 
 
-
-	
+/bin/.../**.dll
+/plugins/demo
+/main.exe

@@ -133,19 +133,19 @@ namespace ml
 	// default delete
 	template <class ...> struct default_delete;
 
-	// scoped pointer ( std::unique_ptr<T, Dx> )
+	// scoped pointer object ( std::unique_ptr<T, Dx> )
 	template <class T, class Dx = default_delete<T>
 	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
 
-	// manual pointer ( std::unique_ptr<T, no_delete> )
+	// manual pointer object ( std::unique_ptr<T, no_delete> )
 	template <class T
 	> ML_alias manual = typename scoped<T, no_delete>;
 
-	// shared pointer ( std::shared_ptr<T> )
+	// shared pointer object ( std::shared_ptr<T> )
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
 
-	// unowned pointer ( std::weak_ptr<T> )
+	// unowned pointer object ( std::weak_ptr<T> )
 	template <class T
 	> ML_alias unown = typename std::weak_ptr<T>;
 }

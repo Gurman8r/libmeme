@@ -47,6 +47,11 @@ namespace ml
 
 		ML_NODISCARD int32_t get_hints() const noexcept final;
 
+		ML_NODISCARD bool has_hints(int32_t value) const noexcept
+		{
+			return (value & get_hints()) == value;
+		}
+
 		ML_NODISCARD int32_t get_input_mode(int32_t value) const noexcept final;
 
 		ML_NODISCARD int32_t get_key(int32_t value) const noexcept final;
@@ -144,14 +149,6 @@ namespace ml
 		static void poll_events() noexcept;
 
 		static void swap_buffers(window_handle value) noexcept;
-
-		static void swap_buffers(window const & value) noexcept
-		{
-			if (value.get_hints() & window_hints_doublebuffer)
-			{
-				swap_buffers(value.get_handle());
-			}
-		}
 
 		static void swap_interval(int32_t value) noexcept;
 

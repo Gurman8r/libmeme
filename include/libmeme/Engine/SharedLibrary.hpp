@@ -1,13 +1,14 @@
 #ifndef _ML_SHARED_LIBRARY_HPP_
 #define _ML_SHARED_LIBRARY_HPP_
 
+#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	struct ML_CORE_API shared_library final : non_copyable, trackable
+	struct ML_ENGINE_API shared_library final : non_copyable, trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -90,20 +91,11 @@ namespace ml
 			std::is_same_v<Ret, void>, void, std::optional<Ret>
 		>
 		{
-			constexpr bool has_return{ !std::is_same_v<Ret, void> };
-
 			if (auto const fn{ this->proc<Ret, Args...>(name) })
 			{
-				if constexpr (has_return)
-				{
-					return std::invoke(fn, ML_forward(args)...);
-				}
-				else
-				{
-					std::invoke(fn, ML_forward(args)...);
-				}
+				return std::invoke(fn, ML_forward(args)...);
 			}
-			else if constexpr (has_return)
+			else if constexpr (!std::is_same_v<Ret, void>)
 			{
 				return std::nullopt;
 			}

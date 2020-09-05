@@ -45,6 +45,7 @@ namespace ml
 	glfw_window::glfw_window() noexcept : m_hints{}, m_window{}, m_monitor{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
+
 		ML_assert("failed initializing glfw window" && glfw_init);
 	}
 

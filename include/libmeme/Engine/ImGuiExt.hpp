@@ -2,7 +2,6 @@
 #define _ML_IMGUI_EXT_HPP_
 
 #include <libmeme/Engine/ImGui.hpp>
-#include <libmeme/Core/StringUtility.hpp>
 
 // TOOLTIP
 namespace ml::gui
@@ -165,7 +164,9 @@ namespace ml::gui
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pmr::vector<plot> plots{}; float_t ref_time{};
+		pmr::vector<plot> plots{};
+		
+		float_t ref_time{};
 
 		plot_controller(std::initializer_list<plot> init) noexcept
 			: plots{ init.begin(), init.end() }, ref_time{}
@@ -377,9 +378,19 @@ namespace ml::gui
 		ImGuiTextFilter				filter			{}		; // text filter
 		bool						auto_scroll		{ true }; // auto-scroll
 		bool						scroll_to_bot	{}		; // scroll-to-bottom
-		cstring						cmd_lock		{}		; // forced command
+		cstring						cmd_lock		{}		; // forced command prefix
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		bool lock(cstring value) noexcept
+		{
+			return value && !cmd_lock && (cmd_lock = value);
+		}
+
+		bool unlock(cstring value) noexcept
+		{
+			return value && cmd_lock && (0 == std::strcmp(cmd_lock, value));
+		}
 
 		self_type & clear() noexcept
 		{

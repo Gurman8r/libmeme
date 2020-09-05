@@ -24,14 +24,13 @@ namespace ml::gfx
 	template <class Cmd, class Ctx
 	> static void execute(Cmd && cmd, Ctx && ctx) noexcept
 	{
-		using T = std::decay_t<decltype(ctx)>;
-		if constexpr (std::is_same_v<T, shared<render_context>>)
-		{
-			std::invoke(ML_forward(cmd), ML_forward(ctx).get());
-		}
-		else if constexpr (std::is_convertible_v<T, render_context const *>)
+		if constexpr (std::is_pointer_v<std::decay_t<decltype(ctx)>>)
 		{
 			std::invoke(ML_forward(cmd), ML_forward(ctx));
+		}
+		else
+		{
+			std::invoke(ML_forward(cmd), ML_forward(ctx).get());
 		}
 	}
 

@@ -15,18 +15,18 @@ namespace std::pmr
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // std string template
-#define ML_STD_STRING_TEMPLATE(C, T, A, S)		\
-	class C = char,								\
-	class T = std::char_traits<C>,				\
-	class A = std::allocator<C>,				\
-	class S = std::basic_string<C, T, A>
+#define ML_STD_STRING_TEMPLATE(Ch, Tr, Al, St)	\
+	class Ch = char,							\
+	class Tr = std::char_traits<Ch>,			\
+	class Al = std::allocator<Ch>,				\
+	class St = std::basic_string<Ch, Tr, Al>
 
 // pmr string template
-#define ML_PMR_STRING_TEMPLATE(C, T, A, S)		\
-	class C = char,								\
-	class T = std::char_traits<C>,				\
-	class A = pmr::polymorphic_allocator<C>,	\
-	class S = pmr::basic_string<C, T>
+#define ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, St)	\
+	class Ch = char,							\
+	class Tr = std::char_traits<Ch>,			\
+	class Al = pmr::polymorphic_allocator<Ch>,	\
+	class St = pmr::basic_string<Ch, Tr>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

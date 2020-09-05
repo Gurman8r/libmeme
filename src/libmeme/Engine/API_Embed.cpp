@@ -1,5 +1,4 @@
-#include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Engine/PluginManager.hpp>
+#include <libmeme/Engine/Application.hpp>
 
 // memelib
 PYBIND11_EMBEDDED_MODULE(memelib, m)
@@ -9,7 +8,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// exit
-	m.def("exit", [](py::args) { plugin_manager::get()->sys()->win->close(); });
+	m.def("exit", [](py::args) { application::get_window().close(); });
 	py::module::import("builtins").attr("exit") = m.attr("exit");
 	py::module::import("sys").attr("exit") = m.attr("exit");
 

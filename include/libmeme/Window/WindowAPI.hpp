@@ -2,11 +2,11 @@
 #define _ML_WINDOW_API_HPP_
 
 #include <libmeme/Core/Timer.hpp>
-#include <libmeme/Window/ContextSettings.hpp>
 #include <libmeme/Window/Cursor.hpp>
 #include <libmeme/Window/Input.hpp>
 #include <libmeme/Window/Monitor.hpp>
 #include <libmeme/Window/VideoMode.hpp>
+#include <libmeme/Window/WindowContext.hpp>
 
 namespace ml
 {

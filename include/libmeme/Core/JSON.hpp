@@ -8,7 +8,16 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-namespace ml { ML_alias json = typename nlohmann::json; }
+namespace ml
+{
+	ML_alias json = typename nlohmann::basic_json
+	<
+		std::map,
+		std::vector, std::string, bool, int64_t, uint64_t, float64_t,
+		std::allocator,
+		nlohmann::adl_serializer
+	>;
+}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

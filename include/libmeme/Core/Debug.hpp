@@ -76,15 +76,15 @@ namespace ml::debug
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Str
-	> void puts(Str && str) noexcept
+	> decltype(auto) puts(Str && str) noexcept
 	{
-		std::cout << ML_forward(str) << '\n';
+		return std::cout << ML_forward(str) << '\n';
 	}
 
 	template <class Fmt, class Arg0, class ... Args
-	> void puts(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
+	> decltype(auto) puts(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		_ML debug::puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
+		return _ML debug::puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -12,7 +12,7 @@ using impl_window = _ML glfw_window;
 // etc...
 
 #else
-#	error ""
+#	error "window implementation not defined"
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,7 +53,7 @@ namespace ml
 		set_position((video_mode::get_desktop_mode().resolution - ws.video.resolution) / 2);
 
 		// maximized
-		if (ws.hints & window_hints_maximized) { maximize(); }
+		if (get_hints() & window_hints_maximized) { maximize(); }
 
 		// success
 		return is_open();

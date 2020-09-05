@@ -1,5 +1,5 @@
-#ifndef _ML_CONTEXT_SETTINGS_HPP_
-#define _ML_CONTEXT_SETTINGS_HPP_
+#ifndef _ML_WINDOW_CONTEXT_HPP_
+#define _ML_WINDOW_CONTEXT_HPP_
 
 #include <libmeme/Core/StringUtility.hpp>
 
@@ -129,4 +129,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_CONTEXT_SETTINGS_HPP_
+#endif // !_ML_WINDOW_CONTEXT_HPP_

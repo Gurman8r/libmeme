@@ -4,7 +4,7 @@
 #include <libmeme/Core/Color.hpp>
 #include <libmeme/Core/Rect.hpp>
 #include <libmeme/Graphics/Image.hpp>
-#include <libmeme/Window/ContextSettings.hpp>
+#include <libmeme/Window/WindowContext.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -735,6 +735,8 @@ namespace ml::gfx
 // render states
 namespace ml::gfx
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// clear mask
 	enum clear_ : uint32_t
 	{
@@ -750,6 +752,8 @@ namespace ml::gfx
 			| clear_stencil,
 	};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// alpha state
 	struct ML_NODISCARD alpha_state final
 	{
@@ -757,6 +761,8 @@ namespace ml::gfx
 		uint32_t	pred		{ predicate_greater }			; // alpha test predicate
 		float_t		ref			{ 0.001f }						; // alpha test reference
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// blend state
 	struct ML_NODISCARD blend_state final
@@ -772,6 +778,8 @@ namespace ml::gfx
 				alpha_dfactor	{ color_dfactor }				; // alpha dst factor
 	};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// cull state
 	struct ML_NODISCARD cull_state final
 	{
@@ -780,6 +788,8 @@ namespace ml::gfx
 		uint32_t		order	{ order_ccw }					; // cull order
 	};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	// depth state
 	struct ML_NODISCARD depth_state final
 	{
@@ -787,6 +797,8 @@ namespace ml::gfx
 		uint32_t		pred	{ predicate_less }				; // depth test predicate
 		vec2			range	{ 0.f, 1.f }					; // depth test range
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// stencil state
 	struct ML_NODISCARD stencil_state final
@@ -800,6 +812,8 @@ namespace ml::gfx
 		}
 		front, back{ front };
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
