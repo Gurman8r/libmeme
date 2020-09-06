@@ -108,24 +108,24 @@ ml::int32_t main()
 	// open window
 	ML_assert(win.open(cfg["window"].get<window_settings>()));
 	{
-		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(ML_forward(x)...); });
-		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(ML_forward(x)...); });
-		win.set_close_callback([](auto ... x) noexcept { bus.fire<window_close_event>(ML_forward(x)...); });
-		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<window_cursor_enter_event>(ML_forward(x)...); });
-		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<window_cursor_pos_event>(ML_forward(x)...); });
-		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<window_content_scale_event>(ML_forward(x)...); });
-		win.set_drop_callback([](auto ... x) noexcept { bus.fire<window_drop_event>(ML_forward(x)...); });
-		win.set_error_callback([](auto ... x) noexcept { bus.fire<window_error_event>(ML_forward(x)...); });
-		win.set_focus_callback([](auto ... x) noexcept { bus.fire<window_focus_event>(ML_forward(x)...); });
-		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<window_framebuffer_size_event>(ML_forward(x)...); });
-		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<window_iconify_event>(ML_forward(x)...); });
-		win.set_key_callback([](auto ... x) noexcept { bus.fire<window_key_event>(ML_forward(x)...); });
-		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<window_maximize_event>(ML_forward(x)...);  });
-		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<window_mouse_event>(ML_forward(x)...); });
-		win.set_position_callback([](auto ... x) noexcept { bus.fire<window_pos_event>(ML_forward(x)...); });
-		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<window_refresh_event>(ML_forward(x)...); });
-		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<window_scroll_event>(ML_forward(x)...); });
-		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(ML_forward(x)...); });
+		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
+		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(x...); });
+		win.set_close_callback([](auto ... x) noexcept { bus.fire<window_close_event>(x...); });
+		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<window_cursor_enter_event>(x...); });
+		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<window_cursor_pos_event>(x...); });
+		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<window_content_scale_event>(x...); });
+		win.set_drop_callback([](auto ... x) noexcept { bus.fire<window_drop_event>(x...); });
+		win.set_error_callback([](auto ... x) noexcept { bus.fire<window_error_event>(x...); });
+		win.set_focus_callback([](auto ... x) noexcept { bus.fire<window_focus_event>(x...); });
+		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<window_framebuffer_size_event>(x...); });
+		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<window_iconify_event>(x...); });
+		win.set_key_callback([](auto ... x) noexcept { bus.fire<window_key_event>(x...); });
+		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<window_maximize_event>(x...);  });
+		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<window_mouse_event>(x...); });
+		win.set_position_callback([](auto ... x) noexcept { bus.fire<window_pos_event>(x...); });
+		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<window_refresh_event>(x...); });
+		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<window_scroll_event>(x...); });
+		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(x...); });
 	}
 
 	// configure gui
