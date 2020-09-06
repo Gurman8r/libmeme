@@ -153,12 +153,17 @@ ml::int32_t main()
 	ML_defer(){ bus.fire<unload_event>(); };
 	do
 	{
+		// timers
 		time.begin_step(); ML_defer() { time.end_step(); };
-		ML_benchmark_L("poll") { window::poll_events(); };
-		ML_benchmark_L("update event") { bus.fire<update_event>(); };
-		ML_benchmark_L("begin gui") { win.new_frame(&bus); };
-		ML_benchmark_L("gui event") { bus.fire<gui_event>(); };
-		ML_benchmark_L("end gui") { win.render_frame(); };
+
+		// update
+		ML_benchmark_L("poll")			{ window::poll_events(); };
+		ML_benchmark_L("update event")	{ bus.fire<update_event>(); };
+		
+		// gui
+		ML_benchmark_L("begin gui")		{ win.new_frame(&bus); };
+		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(); };
+		ML_benchmark_L("end gui")		{ win.render_frame(); };
 	}
 	while (win.is_open());
 	return EXIT_SUCCESS;

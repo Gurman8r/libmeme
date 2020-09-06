@@ -43,13 +43,11 @@ namespace ml
 		void begin_step() noexcept
 		{
 			loop.restart();
-			frame_rate = std::invoke([&, dt = (float_t)delta_time.count()]() noexcept
-			{
-				fps_accum += dt - fps_times[fps_index];
-				fps_times[fps_index] = dt;
-				fps_index = (fps_index + 1) % fps_times.size();
-				return (0.f < fps_accum) ? 1.f / (fps_accum / (float_t)fps_times.size()) : FLT_MAX;
-			});
+			auto const dt{ (float_t)delta_time.count() };
+			fps_accum += dt - fps_times[fps_index];
+			fps_times[fps_index] = dt;
+			fps_index = (fps_index + 1) % fps_times.size();
+			frame_rate = (0.f < fps_accum) ? 1.f / (fps_accum / (float_t)fps_times.size()) : FLT_MAX;
 		}
 
 		void end_step() noexcept

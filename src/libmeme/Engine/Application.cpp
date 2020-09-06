@@ -6,7 +6,7 @@ namespace ml
 
 	application * application::s_instance{};
 
-	application::application(system_context * sys) : m_sys{ sys }, m_mods{ sys }
+	application::application(system_context * sys) : m_sys{ sys }, m_plugins{ sys }
 	{
 		ML_assert(!s_instance);
 		s_instance = this;

@@ -78,6 +78,9 @@
 // automatic forward
 #define ML_forward(expr)		std::forward<decltype(expr)>(expr)
 
+// unused expression
+#define ML_unused(expr)			((void)expr);
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle
@@ -116,6 +119,7 @@ namespace ml
 	ML_alias	uint32_t	= typename ML_uint32	;
 	ML_alias	uint64_t	= typename ML_uint64	;
 
+	ML_alias	char_t		= typename ML_char		;
 	ML_alias	byte_t		= typename ML_byte		;
 	ML_alias	intmax_t	= typename ML_intmax	;
 	ML_alias	uintmax_t	= typename ML_uintmax	;
@@ -138,7 +142,7 @@ namespace ml
 	// c-string types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	cstring		= typename char const *		;
+	ML_alias	cstring		= typename char_t const *	;
 	ML_alias	cwstring	= typename wchar_t const *	;
 #if (ML_has_cxx20)
 	ML_alias	c8string	= typename char8_t const *	;

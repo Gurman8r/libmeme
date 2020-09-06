@@ -17,14 +17,14 @@ namespace ml
 
 		static constexpr auto title{ "dockspace##libmeme" };
 
-		bool		visible	{ true };
-		bool		menubar	{ true };
-		float_t		border	{};
-		vec2		padding	{};
-		float_t		rounding{};
-		vec2		size	{};
-		float_t		alpha	{};
-		nodes_t		nodes	{};
+		bool	visible	{ true };
+		bool	menubar	{ true };
+		float_t	border	{};
+		vec2	padding	{};
+		float_t	rounding{};
+		vec2	size	{};
+		float_t	alpha	{};
+		nodes_t	nodes	{};
 
 		uint32_t begin_builder(int32_t flags = 0);
 
@@ -64,8 +64,6 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual bool open(window_settings const & ws) override;
-
-		virtual void close() override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

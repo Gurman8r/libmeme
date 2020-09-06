@@ -19,8 +19,6 @@ namespace ml
 
 		virtual bool open(window_settings const & ws) override;
 		
-		virtual void close() override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void iconify() noexcept final;
@@ -123,6 +121,8 @@ namespace ml
 		void set_monitor(monitor_handle value, int_rect const & bounds = {}) noexcept final;
 
 		void set_resizable(bool value) noexcept final;
+
+		void set_should_close(bool value) noexcept final;
 
 		void set_size(vec2i const & value) noexcept final;
 		

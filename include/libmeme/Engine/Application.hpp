@@ -22,7 +22,7 @@ namespace ml
 		ML_NODISCARD static auto get_config()	noexcept -> json			& { return *s_instance->m_sys->cfg; }
 		ML_NODISCARD static auto get_io()		noexcept -> io_context		& { return *s_instance->m_sys->io; }
 		ML_NODISCARD static auto get_memory()	noexcept -> memory			& { return *s_instance->m_sys->mem; }
-		ML_NODISCARD static auto get_mods()		noexcept -> plugin_manager	& { return s_instance->m_mods; }
+		ML_NODISCARD static auto get_mods()		noexcept -> plugin_manager	& { return s_instance->m_plugins; }
 		ML_NODISCARD static auto get_scripts()	noexcept -> script_context	& { return *s_instance->m_sys->scr; }
 		ML_NODISCARD static auto get_time()		noexcept -> timer_context	& { return *s_instance->m_sys->time; }
 		ML_NODISCARD static auto get_window()	noexcept -> gui_window		& { return *s_instance->m_sys->win; }
@@ -32,7 +32,7 @@ namespace ml
 	private:
 		static application *	s_instance	; // 
 		system_context * const	m_sys		; // 
-		plugin_manager			m_mods		; // 
+		plugin_manager			m_plugins	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

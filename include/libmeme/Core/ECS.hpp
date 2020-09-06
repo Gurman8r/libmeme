@@ -231,58 +231,58 @@ namespace ml::ecs::detail
 }
 
 // (U) TRAITS
-namespace ml::ecs
+namespace ml::ecs::detail
 {
 	template <
-		class T = detail::tags			<>,	// tags
-		class C = detail::components	<>,	// components
-		class S = detail::signatures	<>,	// signatures
-		class X = detail::systems		<>,	// systems
-		class O = detail::options		<>	// options
+		class T = tags			<>,	// tags
+		class C = components	<>,	// components
+		class S = signatures	<>,	// signatures
+		class X = systems		<>,	// systems
+		class O = options		<>	// options
 	> struct ML_NODISCARD traits final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		using self_type		= typename traits<T, C, S, X, O>;
-		using tags			= typename T;
-		using components	= typename C;
-		using signatures	= typename S;
-		using systems		= typename X;
-		using options		= typename O;
+		using self_type			= typename traits<T, C, S, X, O>;
+		using tags_type			= typename T;
+		using components_type	= typename C;
+		using signatures_type	= typename S;
+		using systems_type		= typename X;
+		using options_type		= typename O;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr size_t tag_count		{ tags::count() };
-		static constexpr size_t component_count	{ components::count() };
-		static constexpr size_t signature_count	{ signatures::count() };
-		static constexpr size_t system_count	{ systems::count() };
+		static constexpr size_t tag_count		{ tags_type::count() };
+		static constexpr size_t component_count	{ components_type::count() };
+		static constexpr size_t signature_count	{ signatures_type::count() };
+		static constexpr size_t system_count	{ systems_type::count() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using component_list	= typename components::type_list;
-		using tag_list			= typename tags::type_list;
-		using signature_list	= typename signatures::type_list;
-		using system_list		= typename systems::type_list;
+		using component_list	= typename components_type::type_list;
+		using tag_list			= typename tags_type::type_list;
+		using signature_list	= typename signatures_type::type_list;
+		using system_list		= typename systems_type::type_list;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using component_storage = typename components::storage_type;
-		using system_storage	= typename systems::template storage_type<self_type>;
-		using signature			= typename ds::bitset<component_count + tag_count>;
-		using signature_storage	= typename meta::array<signature, signature_count>;
+		using component_storage = typename components_type::storage_type;
+		using system_storage	= typename systems_type::template storage_type<self_type>;
+		using signature_type	= typename ds::bitset<component_count + tag_count>;
+		using signature_storage	= typename meta::array<signature_type, signature_count>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class C
 		> static constexpr bool has_component() noexcept
 		{
-			return components::template contains<C>();
+			return components_type::template contains<C>();
 		}
 
 		template <class C
 		> static constexpr size_t component_id() noexcept
 		{
-			return components::template index<C>();
+			return components_type::template index<C>();
 		}
 
 		template <class C
@@ -296,13 +296,13 @@ namespace ml::ecs
 		template <class T
 		> static constexpr bool has_tag() noexcept
 		{
-			return tags::template contains<T>();
+			return tags_type::template contains<T>();
 		}
 
 		template <class T
 		> static constexpr size_t tag_id() noexcept
 		{
-			return tags::template index<T>();
+			return tags_type::template index<T>();
 		}
 
 		template <class T
@@ -316,17 +316,17 @@ namespace ml::ecs
 		template <class S
 		> static constexpr bool has_signature() noexcept
 		{
-			return signatures::template contains<S>();
+			return signatures_type::template contains<S>();
 		}
 
 		template <class S
 		> static constexpr size_t signature_id() noexcept
 		{
-			return signatures::template index<S>();
+			return signatures_type::template index<S>();
 		}
 
 		template <class S
-		> static constexpr signature const & signature_bitset() noexcept
+		> static constexpr signature_type const & signature_bitset() noexcept
 		{
 			return std::get<self_type::signature_id<S>()>(m_signature_bitsets);
 		}
@@ -336,47 +336,44 @@ namespace ml::ecs
 		template <template <class> class X
 		> static constexpr bool has_system() noexcept
 		{
-			return systems::template contains<X>();
+			return systems_type::template contains<X>();
 		}
 
 		template <template <class> class X
 		> static constexpr size_t system_id() noexcept
 		{
-			return systems::template index<X>();
+			return systems_type::template index<X>();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static constexpr signature_storage m_signature_bitsets
+		static constexpr auto m_signature_bitsets{ ([&]() noexcept -> signature_storage
 		{
-			([&]() noexcept -> signature_storage
+			// generate bitsets for each signature_type
+			signature_storage temp{};
+			meta::for_types<typename signatures_type::type_list
+			>([&temp](auto s)
 			{
-				// generate bitsets for each signature
-				signature_storage temp{};
-				meta::for_types<typename signatures::type_list
-				>([&temp](auto s)
+				// get the signature_type's bitset
+				auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
+
+				// enable component bits
+				meta::for_types<components_type::template filter<decltype(s)::type>
+				>([&b](auto c)
 				{
-					// get the signature's bitset
-					auto & b{ std::get<self_type::signature_id<decltype(s)::type>()>(temp) };
-
-					// enable component bits
-					meta::for_types<components::template filter<decltype(s)::type>
-					>([&b](auto c)
-					{
-						b.set(self_type::component_bit<decltype(c)::type>());
-					});
-
-					// enable tag bits
-					meta::for_types<tags::template filter<decltype(s)::type>
-					>([&b](auto t)
-					{
-						b.set(self_type::tag_bit<decltype(t)::type>());
-					});
+					b.set(self_type::component_bit<decltype(c)::type>());
 				});
-				return temp;
-			})()
-		};
+
+				// enable tag bits
+				meta::for_types<tags_type::template filter<decltype(s)::type>
+				>([&b](auto t)
+				{
+					b.set(self_type::tag_bit<decltype(t)::type>());
+				});
+			});
+			return temp;
+		})() };
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -385,25 +382,26 @@ namespace ml::ecs
 // (M) MANAGER
 namespace ml::ecs
 {
-	template <class U = traits<>
+	template <class U = detail::traits<>
 	> struct manager final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using traits_type		= typename U;
-		using self_type			= typename manager<traits_type>;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using tags				= typename traits_type::tags;
-		using components		= typename traits_type::components;
-		using signatures		= typename traits_type::signatures;
-		using signature			= typename traits_type::signature;
-		using systems			= typename traits_type::systems;
-		using options			= typename traits_type::options;
-		using component_storage	= typename traits_type::component_storage;
-		using system_storage	= typename traits_type::system_storage;
+		using traits			= typename U;
+		using self_type			= typename manager<traits>;
+		using tags				= typename traits::tags_type;
+		using tag_list			= typename traits::tag_list;
+		using components		= typename traits::components_type;
+		using component_list	= typename traits::component_list;
+		using component_storage	= typename traits::component_storage;
+		using signatures		= typename traits::signatures_type;
+		using signature			= typename traits::signature_type;
+		using signature_list	= typename traits::signature_list;
+		using systems			= typename traits::systems_type;
+		using system_list		= typename traits::system_list;
+		using system_storage	= typename traits::system_storage;
+		using options			= typename traits::options_type;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -816,7 +814,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & add_tag(size_t const i) noexcept
 		{
-			m_entities.at<id_bitset>(i).set(traits_type::template tag_bit<T>());
+			m_entities.at<id_bitset>(i).set(traits::template tag_bit<T>());
 			return (*this);
 		}
 
@@ -831,7 +829,7 @@ namespace ml::ecs
 		template <class T
 		> self_type & del_tag(size_t const i) noexcept
 		{
-			m_entities.at<id_bitset>(i).clear(traits_type::template tag_bit<T>());
+			m_entities.at<id_bitset>(i).clear(traits::template tag_bit<T>());
 			return (*this);
 		}
 
@@ -846,7 +844,7 @@ namespace ml::ecs
 		template <class T
 		> ML_NODISCARD bool has_tag(size_t const i) const noexcept
 		{
-			return m_entities.at<id_bitset>(i).read(traits_type::template tag_bit<T>());
+			return m_entities.at<id_bitset>(i).read(traits::template tag_bit<T>());
 		}
 
 		template <class T
@@ -860,7 +858,7 @@ namespace ml::ecs
 		template <class C, class ... Args
 		> auto & add_component(size_t const i, Args && ... args) noexcept
 		{
-			m_entities.at<id_bitset>(i).set(traits_type::template component_bit<C>());
+			m_entities.at<id_bitset>(i).set(traits::template component_bit<C>());
 
 			auto & c{ m_components.at<C>(m_entities.at<id_index>(i)) };
 			c = C{ ML_forward(args)... };
@@ -890,7 +888,7 @@ namespace ml::ecs
 		template <class C
 		> self_type & del_component(size_t const i) noexcept
 		{
-			m_entities.at<id_bitset>(i).clear(traits_type::template component_bit<C>());
+			m_entities.at<id_bitset>(i).clear(traits::template component_bit<C>());
 			return (*this);
 		}
 
@@ -931,7 +929,7 @@ namespace ml::ecs
 		template <class C
 		> ML_NODISCARD bool has_component(size_t const i) const noexcept
 		{
-			return this->get_signature(i).read(traits_type::template component_bit<C>());
+			return this->get_signature(i).read(traits::template component_bit<C>());
 		}
 
 		template <class C
@@ -962,7 +960,7 @@ namespace ml::ecs
 		template <class S
 		> ML_NODISCARD bool matches_signature(size_t const i) const noexcept
 		{
-			return this->matches_signature(i, traits_type::template signature_bitset<S>());
+			return this->matches_signature(i, traits::template signature_bitset<S>());
 		}
 
 		template <class S
@@ -976,7 +974,7 @@ namespace ml::ecs
 		template <template <class> class X
 		> ML_NODISCARD bool matches_system(size_t const i) const noexcept
 		{
-			return this->matches_signature<typename X<traits_type>::signature_type>(i);
+			return this->matches_signature<typename X<traits>::signature_type>(i);
 		}
 
 		template <template <class> class X
@@ -1030,8 +1028,8 @@ namespace ml::ecs
 		template <template <class> class X, class Fn
 		> self_type & for_system(Fn && fn) noexcept
 		{
-			return this->for_matching<typename X<traits_type>::signature_type
-			>([&, &x = std::get<traits_type::template system_id<X>()>(m_systems)
+			return this->for_matching<typename X<traits>::signature_type
+			>([&, &x = std::get<traits::template system_id<X>()>(m_systems)
 			](size_t, auto && ... req_comp) noexcept
 			{
 				std::invoke(ML_forward(fn), x, ML_forward(req_comp)...);
@@ -1118,11 +1116,12 @@ namespace ml::ecs::tests
 	using S3 = meta::list<C1, T0, C3, T2>;	// 01010101
 
 	// traits
-	using U = traits<
+	using U = detail::traits<
 		detail::tags		<T0, T1, T2>,
 		detail::components	<C0, C1, C2, C3, C4>,
 		detail::signatures	<S0, S1, S2, S3>,
-		detail::systems		<>
+		detail::systems		<>,
+		detail::options		<>
 	>;
 
 	// tests

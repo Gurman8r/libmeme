@@ -2,7 +2,7 @@
 
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
-#include <libmeme/Engine/Plugin.hpp>
+#include <libmeme/Engine/Application.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -44,22 +44,22 @@ namespace ml
 // ECS
 namespace ml
 {
-	// tags
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// tags
 	struct	t_default {};
 
-	// components
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// components
 	struct	c_transform	{ vec3 pos; vec4 rot; vec3 scl; };
 	using	c_shader	= shader_asset;
 	using	c_uniforms	= shared<uniform_buffer>;
 	using	c_mesh		= shared<mesh>;
 
-	// systems
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// update uniforms
 	using s_update_uniforms = meta::list<c_uniforms, c_transform
 	>;
 	template <class> struct x_update_uniforms final : ecs::detail::x_base<s_update_uniforms>
@@ -72,6 +72,7 @@ namespace ml
 		}
 	};
 
+	// upload uniforms
 	using s_upload_uniforms = meta::list<c_shader, c_uniforms
 	>;
 	template <class> struct x_upload_uniforms final : ecs::detail::x_base<s_upload_uniforms>
@@ -87,6 +88,7 @@ namespace ml
 		}
 	};
 
+	// render meshes
 	using s_render_meshes = meta::list<c_shader, c_mesh
 	>;
 	template <class> struct x_render_meshes final : ecs::detail::x_base<s_render_meshes>
@@ -102,8 +104,8 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// traits
-	using entity_traits = ecs::traits<
+	// manager
+	using demo_ecs = ecs::manager<ecs::detail::traits<
 
 		// tags
 		ecs::detail::tags<
@@ -123,11 +125,11 @@ namespace ml
 		// systems
 		ecs::detail::systems<
 		x_update_uniforms, x_upload_uniforms, x_render_meshes
-		>
-	>;
+		>,
 
-	// manager
-	using entity_manager = ecs::manager<entity_traits>;
+		// options
+		ecs::detail::options<>
+	>>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
@@ -153,7 +155,7 @@ namespace ml
 		// ECS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		entity_manager m_ecs{};
+		demo_ecs m_ecs{};
 
 
 		// RENDERING
@@ -197,7 +199,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [&]() noexcept { return 1000.f / get_time().frame_rate; }
+				, []() noexcept { return 1000.f / application::get_time().frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -205,7 +207,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [&]() noexcept { return get_time().frame_rate; }
+				, []() noexcept { return application::get_time().frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -533,18 +535,20 @@ namespace ml
 			m_ecs.invoke_system<x_update_uniforms>();
 			m_ecs.invoke_system<x_upload_uniforms>();
 
-			// render
+			// resize fbs
 			for (auto & fbo : m_fbo) { fbo->resize(m_resolution); }
+
+			// render
 			for (auto const & cmd : {
-				gfx::render_command::bind_framebuffer(m_fbo[0]),
-				gfx::render_command::set_clear_color(colors::magenta),
-				gfx::render_command::clear(gfx::clear_color | gfx::clear_depth),
-				gfx::make_command([&](gfx::render_context * ctx) noexcept
+				gfx::command::bind_framebuffer(m_fbo[0]),
+				gfx::command::set_clear_color(colors::magenta),
+				gfx::command::clear(gfx::clear_color | gfx::clear_depth),
+				gfx::command([&](gfx::render_context * ctx) noexcept
 				{
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
-				gfx::render_command::bind_framebuffer(nullptr),
-			}) gfx::execute(cmd, get_window().get_render_context());
+				gfx::command::bind_framebuffer(nullptr),
+			})	gfx::execute(cmd, get_window().get_render_context());
 		}
 
 		void on_dockspace(dockspace_event const &)
@@ -600,7 +604,7 @@ namespace ml
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					get_window().close();
+					get_window().set_should_close(true);
 				}
 				ImGui::EndMenu();
 			}
@@ -724,7 +728,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				get_window().close();
+				get_window().set_should_close(true);
 			},
 			{
 				"shutdown the application",
@@ -927,7 +931,7 @@ namespace ml
 					);
 				}
 				// SIGNATURE
-				else if constexpr (std::is_same_v<T, entity_traits::signature>)
+				else if constexpr (std::is_same_v<T, demo_ecs::signature>)
 				{
 					auto const & style			{ ImGui::GetStyle() };
 					auto const button_width		{ ImGui::GetFrameHeight() };
@@ -935,14 +939,16 @@ namespace ml
 					auto const window_visible	{ ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x };
 
 					int32_t i{};
-					meta::for_types<meta::concat<entity_traits::component_list, entity_traits::tag_list>
+					meta::for_types<meta::concat<
+						demo_ecs::component_list,
+						demo_ecs::tag_list>
 					>([&](auto type)
 					{
 						ML_ImGui_ScopeID(i);
 						bool temp{ value.read((size_t)i) };
 						ImGui::Checkbox("##value", &temp);
 
-						using U = typename entity_traits;
+						using U = typename demo_ecs::traits;
 						using T = typename decltype(type)::type;
 						using S = typename U::signature;
 						static constexpr bool
@@ -1011,7 +1017,7 @@ namespace ml
 
 						bool const c_open{ ImGui::TreeNode(
 							"component node", "[%u] %.*s",
-							entity_traits::component_id<C>(),
+							demo_ecs::traits::component_id<C>(),
 							cname.size(), cname.data()
 						) }; ImGui::NextColumn();
 
@@ -1324,7 +1330,7 @@ extern "C"
 	
 	ML_PLUGIN_API void ml_plugin_detach(ml::system_context * sys, ml::plugin * ptr)
 	{
-		sys->mem->deallocate((ml::demo *)ptr);
+		if (ptr) { ml::util::destruct((ml::demo *)ptr); }
 	}
 }
 

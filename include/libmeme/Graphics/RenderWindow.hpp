@@ -20,8 +20,6 @@ namespace ml
 
 		virtual bool open(window_settings const & ws) override;
 
-		virtual void close() override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD auto get_render_device() const & noexcept -> manual<gfx::render_device> const & { return m_dev; }

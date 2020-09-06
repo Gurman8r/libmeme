@@ -760,17 +760,17 @@ namespace ml::gfx
 		return alloc_shared<opengl_vertexarray>(this, prim);
 	}
 
-	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
 		return alloc_shared<opengl_vertexbuffer>(this, usage, count, data);
 	}
 
-	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept
+	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
 		return alloc_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
-	shared<texture2d> opengl_render_device::create_texture2d(data_desc<texture2d> const & value, address_t data) noexcept
+	shared<texture2d> opengl_render_device::create_texture2d(data_desc<texture2d> const & value, addr_t data) noexcept
 	{
 		return alloc_shared<opengl_texture2d>(this, value, data);
 	}
@@ -1228,7 +1228,7 @@ namespace ml::gfx
 					e.get_component_count(),
 					type,
 					m_layout.stride(),
-					reinterpret_cast<address_t>(e.offset)));
+					reinterpret_cast<addr_t>(e.offset)));
 			}
 			else
 			{
@@ -1238,7 +1238,7 @@ namespace ml::gfx
 					type,
 					e.normalized,
 					m_layout.stride(),
-					reinterpret_cast<address_t>(e.offset)));
+					reinterpret_cast<addr_t>(e.offset)));
 			}
 			ML_glCheck(glEnableVertexAttribArray((uint32_t)i));
 		}
@@ -1261,7 +1261,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_vertexbuffer::opengl_vertexbuffer(render_device * dev, uint32_t usage, size_t count, address_t data)
+	opengl_vertexbuffer::opengl_vertexbuffer(render_device * dev, uint32_t usage, size_t count, addr_t data)
 		: vertexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<float_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1289,7 +1289,7 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	void opengl_vertexbuffer::set_data(size_t count, address_t data, size_t offset)
+	void opengl_vertexbuffer::set_data(size_t count, addr_t data, size_t offset)
 	{
 		m_buffer = bufcpy<float_t>(count, data);
 		ML_glCheck(glBufferSubData(
@@ -1309,7 +1309,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_indexbuffer::opengl_indexbuffer(render_device * dev, uint32_t usage, size_t count, address_t data)
+	opengl_indexbuffer::opengl_indexbuffer(render_device * dev, uint32_t usage, size_t count, addr_t data)
 		: indexbuffer{ dev }, m_usage{ usage }, m_buffer{ bufcpy<uint32_t>(count, data) }
 	{
 		ML_glCheck(glGenBuffers(1, &m_handle));
@@ -1337,7 +1337,7 @@ namespace ml::gfx
 		return (bool)m_handle;
 	}
 
-	void opengl_indexbuffer::set_data(size_t count, address_t data, size_t offset)
+	void opengl_indexbuffer::set_data(size_t count, addr_t data, size_t offset)
 	{
 		m_buffer = bufcpy<uint32_t>(count, data);
 		ML_glCheck(glBufferSubData(
@@ -1357,7 +1357,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(render_device * dev, data_desc<texture2d> const & value, address_t data)
+	opengl_texture2d::opengl_texture2d(render_device * dev, data_desc<texture2d> const & value, addr_t data)
 		: texture2d{ dev }, m_data{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
@@ -1407,7 +1407,7 @@ namespace ml::gfx
 		debug::warning("texture lock/unlock NYI");
 	}
 
-	void opengl_texture2d::update(vec2i const & size, address_t data)
+	void opengl_texture2d::update(vec2i const & size, addr_t data)
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
@@ -1432,7 +1432,7 @@ namespace ml::gfx
 		set_mipmapped(m_data.flags & texture_flags_mipmap);
 	}
 
-	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, address_t data)
+	void opengl_texture2d::update(vec2i const & pos, vec2i const & size, addr_t data)
 	{
 		if (!m_locked) { return (void)debug::error("texture2d is not locked"); }
 
@@ -1968,7 +1968,7 @@ namespace ml::gfx
 	
 	void opengl_shader::do_upload(uniform_id loc, shared<texture> const & value, uint32_t slot)
 	{
-		get_device()->get_context()->bind_texture(value.get(), slot);
+		get_context()->bind_texture(value.get(), slot);
 
 		ML_glCheck(glProgramUniform1i(m_handle, ML_handle(int32_t, loc), (int32_t)slot));
 	}

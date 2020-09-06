@@ -42,7 +42,7 @@ namespace ml
 		for (auto const & cmd :
 		{
 			// alpha state
-			gfx::render_command::set_alpha_state
+			gfx::command::set_alpha_state
 			({
 				true,
 				gfx::predicate_greater,
@@ -50,7 +50,7 @@ namespace ml
 			}),
 
 			// blend state
-			gfx::render_command::set_blend_state
+			gfx::command::set_blend_state
 			({
 				true,
 				colors::white,
@@ -60,7 +60,7 @@ namespace ml
 			}),
 
 			// cull state
-			gfx::render_command::set_cull_state
+			gfx::command::set_cull_state
 			({
 				false,
 				gfx::facet_back,
@@ -68,7 +68,7 @@ namespace ml
 			}),
 
 			// depth state
-			gfx::render_command::set_depth_state
+			gfx::command::set_depth_state
 			({
 				true,
 				gfx::predicate_less,
@@ -76,26 +76,17 @@ namespace ml
 			}),
 
 			// stencil state
-			gfx::render_command::set_stencil_state
+			gfx::command::set_stencil_state
 			({
 				true,
 				gfx::predicate_always,
 				0,
 				0xffffffff
 			}),
-		})
-		{
-			gfx::execute(cmd, m_ctx);
-		}
+
+		})	gfx::execute(cmd, m_ctx);
 
 		return true;
-	}
-
-	void render_window::close()
-	{
-		gfx::render_device::destroy(m_dev.release());
-
-		window::close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

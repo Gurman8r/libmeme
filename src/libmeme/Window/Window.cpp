@@ -59,11 +59,6 @@ namespace ml
 		return is_open();
 	}
 
-	void window::close()
-	{
-		m_impl->close();
-	}
-
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	void window::iconify() noexcept
@@ -295,6 +290,11 @@ namespace ml
 	void window::set_resizable(bool value) noexcept
 	{
 		m_impl->set_resizable(value);
+	}
+
+	void window::set_should_close(bool value) noexcept
+	{
+		m_impl->set_should_close(value);
 	}
 
 	void window::set_size(vec2i const & value) noexcept

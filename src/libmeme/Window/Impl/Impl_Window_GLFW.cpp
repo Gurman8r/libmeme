@@ -56,7 +56,7 @@ namespace ml
 
 	glfw_window::~glfw_window()
 	{
-		static ML_defer(&){ glfwTerminate(); };
+		static ML_defer(){ glfwTerminate(); };
 
 		glfwDestroyWindow(m_window);
 	}
@@ -129,11 +129,6 @@ namespace ml
 			nullptr, // monitor
 			nullptr // share
 		)) || debug::error("failed opening glfw_window");
-	}
-
-	void glfw_window::close()
-	{
-		glfwSetWindowShouldClose(m_window, true);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -413,6 +408,11 @@ namespace ml
 	void glfw_window::set_resizable(bool value)
 	{
 		glfwSetWindowAttrib(m_window, GLFW_RESIZABLE, value);
+	}
+
+	void glfw_window::set_should_close(bool value)
+	{
+		glfwSetWindowShouldClose(m_window, value);
 	}
 
 	void glfw_window::set_size(vec2i const & value)

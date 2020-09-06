@@ -55,7 +55,11 @@ namespace ml
 		{
 			auto const i{ m_data.index_of<plugin_id>(it) };
 
-			m_data.at<plugin_iface>(i).detach(m_sys, m_data.at<manual<plugin>>(i).release());
+			plugin * ptr{ m_data.at<manual<plugin>>(i).release() };
+
+			m_data.at<plugin_iface>(i).detach(m_sys, ptr);
+
+			delete ptr;
 
 			m_data.erase(i);
 

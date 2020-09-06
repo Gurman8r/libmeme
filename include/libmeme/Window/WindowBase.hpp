@@ -16,8 +16,6 @@ namespace ml
 
 		virtual bool open(window_settings const &) = 0;
 		
-		virtual void close() = 0;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void iconify() = 0;
@@ -115,6 +113,8 @@ namespace ml
 		virtual void set_monitor(monitor_handle, int_rect const &) = 0;
 
 		virtual void set_resizable(bool) = 0;
+
+		virtual void set_should_close(bool) = 0;
 
 		virtual void set_size(vec2i const &) = 0;
 

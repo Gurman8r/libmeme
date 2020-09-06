@@ -48,11 +48,11 @@ namespace ml::gfx
 
 		shared<vertexarray> create_vertexarray(uint32_t prim = primitive_triangles) noexcept override;
 
-		shared<vertexbuffer> create_vertexbuffer(uint32_t usage, size_t count, address_t data) noexcept override;
+		shared<vertexbuffer> create_vertexbuffer(uint32_t usage, size_t count, addr_t data) noexcept override;
 
-		shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, address_t data) noexcept override;
+		shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept override;
 
-		shared<texture2d> create_texture2d(data_desc<texture2d> const & value, address_t data) noexcept override;
+		shared<texture2d> create_texture2d(data_desc<texture2d> const & value, addr_t data) noexcept override;
 
 		shared<texturecube> create_texturecube(data_desc<texturecube> const & value) noexcept override;
 
@@ -242,7 +242,7 @@ namespace ml::gfx
 		buffer_t		m_buffer	{}; // local data
 
 	public:
-		opengl_vertexbuffer(render_device * parent, uint32_t usage, size_t count, address_t data);
+		opengl_vertexbuffer(render_device * parent, uint32_t usage, size_t count, addr_t data);
 
 		~opengl_vertexbuffer() override;
 
@@ -253,7 +253,7 @@ namespace ml::gfx
 		typeof<> const & get_self_type() const noexcept override { return s_self_type; }
 
 	public:
-		void set_data(size_t count, address_t data, size_t offset = 0) override;
+		void set_data(size_t count, addr_t data, size_t offset = 0) override;
 
 		buffer_t const & get_buffer() const noexcept override { return m_buffer; }
 
@@ -279,7 +279,7 @@ namespace ml::gfx
 		buffer_t		m_buffer	{}; // local data
 
 	public:
-		opengl_indexbuffer(render_device * parent, uint32_t usage, size_t count, address_t data);
+		opengl_indexbuffer(render_device * parent, uint32_t usage, size_t count, addr_t data);
 
 		~opengl_indexbuffer() override;
 
@@ -290,7 +290,7 @@ namespace ml::gfx
 		typeof<> const & get_self_type() const noexcept override { return s_self_type; }
 
 	public:
-		void set_data(size_t count, address_t data, size_t offset = 0) override;
+		void set_data(size_t count, addr_t data, size_t offset = 0) override;
 
 		buffer_t const & get_buffer() const noexcept override { return m_buffer; }
 
@@ -316,7 +316,7 @@ namespace ml::gfx
 		bool			m_locked	{ true }	; // locked
 
 	public:
-		opengl_texture2d(render_device * parent, data_desc<texture2d> const & value, address_t data);
+		opengl_texture2d(render_device * parent, data_desc<texture2d> const & value, addr_t data);
 
 		~opengl_texture2d() override;
 
@@ -331,9 +331,9 @@ namespace ml::gfx
 
 		void unlock() override;
 
-		void update(vec2i const & size, address_t data = {}) override;
+		void update(vec2i const & size, addr_t data = {}) override;
 
-		void update(vec2i const & pos, vec2i const & size, address_t data) override;
+		void update(vec2i const & pos, vec2i const & size, addr_t data) override;
 
 		void set_mipmapped(bool value) override;
 

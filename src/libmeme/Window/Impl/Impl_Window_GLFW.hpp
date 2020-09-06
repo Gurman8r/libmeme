@@ -24,8 +24,6 @@ namespace ml
 
 		bool open(window_settings const & ws) override;
 		
-		void close() override;
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void iconify() override;
@@ -123,6 +121,8 @@ namespace ml
 		void set_monitor(monitor_handle value, int_rect const & bounds = {}) override;
 
 		void set_resizable(bool value) override;
+
+		void set_should_close(bool value) override;
 
 		void set_size(vec2i const & value) override;
 		

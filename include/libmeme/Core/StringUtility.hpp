@@ -600,48 +600,48 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
-	> ML_NODISCARD pmr::string format(pmr::string const & fmt, Arg0 const & arg0, Args && ... args) noexcept
+	> ML_NODISCARD pmr::string format(pmr::string const & str, Arg0 const & arg0, Args && ... args) noexcept
 	{
 		pmr::stringstream ss{};
 		ss << ML_forward(arg0) << '\n';
-		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)sink;
-		return format(fmt, ss);
+		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; ML_unused(sink);
+		return format(str, ss);
 	}
 
-	ML_NODISCARD inline pmr::string format(pmr::string fmt, pmr::stringstream & ss) noexcept
+	ML_NODISCARD inline pmr::string format(pmr::string str, pmr::stringstream & ss) noexcept
 	{
 		for (size_t i = 0; ss.good(); ++i)
 		{
 			if (pmr::string line; std::getline(ss, line))
 			{
-				pmr::string const token{ "{" + to_string(i) + "}" };
+				pmr::string const fmt{ "{" + to_string(i) + "}" };
 
-				for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
+				for (size_t j = 0; (j = str.find(fmt, j)) != str.npos;)
 				{
-					fmt.replace(j, token.size(), line);
+					str.replace(j, fmt.size(), line);
 
 					j += line.size();
 				}
 			}
 		}
-		return fmt;
+		return str;
 	}
 
 	template <class Str
-	> ML_NODISCARD pmr::string format(pmr::string fmt, pmr::vector<Str> const & v) noexcept
+	> ML_NODISCARD pmr::string format(pmr::string str, pmr::vector<Str> const & values) noexcept
 	{
-		for (size_t i = 0, imax = v.size(); i < imax; ++i)
+		for (size_t i = 0; i < values.size(); ++i)
 		{
-			pmr::string const token{ "{" + to_string(i) + "}" };
+			pmr::string const fmt{ "{" + to_string(i) + "}" };
 
-			for (size_t j = 0; (j = fmt.find(token, j)) != fmt.npos;)
+			for (size_t j = 0; (j = str.find(fmt, j)) != str.npos;)
 			{
-				fmt.replace(j, token.size(), v[i]);
+				str.replace(j, fmt.size(), values[i]);
 
-				j += v[i].size();
+				j += values[i].size();
 			}
 		}
-		return fmt;
+		return str;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

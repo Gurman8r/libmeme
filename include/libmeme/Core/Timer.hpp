@@ -67,10 +67,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		bool		m_running	; // 
 		time_point	m_start_time; // 
 		time_point	m_stop_time	; // 
 		duration	m_elapsed	; // 
+		bool		m_running	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

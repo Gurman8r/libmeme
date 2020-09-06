@@ -78,16 +78,20 @@ namespace ml::util
 		std::disjunction_v<std::is_same<T, Ts>...>
 	};
 
-	// requires T is integral or floating point
-	template <class T
-	> constexpr bool is_integral_or_floating_point_v
+	// bit cast
+	template <class To, class From
+	> ML_NODISCARD To bit_cast(From const & value) noexcept
 	{
-		std::is_integral_v<T> ||
-		std::is_floating_point_v<T> ||
-		std::is_same_v<T, std::byte>
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		static_assert(sizeof(To) == sizeof(From)
+			&& std::is_trivially_copyable_v<From>
+			&& std::is_trivial_v<To>
+			&& (std::is_copy_constructible_v<To> || std::is_move_constructible_v<To>)
+			, "requires To is trivially default constructible and is copy or move constructible"
+			);
+		To temp{};
+		std::memcpy(&temp, &value, sizeof(To));
+		return temp;
+	}
 
 	// constructor
 	template <class T, class ... Args
@@ -117,22 +121,6 @@ namespace ml::util
 		T temp{ std::move(lhs) };
 		lhs = std::move(rhs);
 		rhs = std::move(temp);
-	}
-
-	// bit cast
-	template <class To, class From
-	> To bit_cast(From const & value) noexcept
-	{
-		static_assert(
-			(sizeof(To) == sizeof(From)) &&
-			std::is_trivially_copyable_v<From> &&
-			std::is_trivial_v<To> &&
-			(std::is_copy_constructible_v<To> || std::is_move_constructible_v<To>),
-			"requires To is trivially default constructible and is copy or move constructible"
-			);
-		To temp{};
-		std::memcpy(&temp, &value, sizeof(To));
-		return temp;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

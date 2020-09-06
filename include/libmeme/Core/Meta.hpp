@@ -270,14 +270,6 @@ namespace ml::meta
 	template <size_t N, class T
 	> ML_alias repeat = typename impl_repeat<N, T>::type;
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// ARRAY - a tuple containing N Ts
-namespace ml::meta
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	template <class T, size_t N
 	> ML_alias array = typename tuple<repeat<N, T>>;
 

@@ -1,5 +1,5 @@
 #include <libmeme/Engine/GuiWindow.hpp>
-#include <libmeme/Engine/ImGui.hpp>
+#include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/EventBus.hpp>
 #include <libmeme/Core/FileUtility.hpp>
@@ -138,24 +138,6 @@ namespace ml
 	gui_window::gui_window() noexcept : render_window{}, m_imgui{}, m_dockspace{}
 	{
 		IMGUI_CHECKVERSION();
-	}
-
-	gui_window::gui_window(window_settings const & ws) noexcept : gui_window{}
-	{
-		ML_assert(open(ws));
-	}
-
-	gui_window::~gui_window() noexcept
-	{
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool gui_window::open(window_settings const & ws)
-	{
-		if (is_open()) { return debug::error("gui_window is already open"); }
-
-		if (!render_window::open(ws)) { return debug::error("failed opening gui_window"); }
 
 		// allocators
 		ImGui::SetAllocatorFunctions
@@ -166,10 +148,7 @@ namespace ml
 		);
 
 		// create context
-		if (!(m_imgui = ImGui::CreateContext()))
-		{
-			return debug::error("failed creating imgui context");
-		}
+		ML_assert(m_imgui = ImGui::CreateContext());
 
 		// configure
 		auto & im_io{ ImGui::GetIO() };
@@ -178,6 +157,27 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	}
+
+	gui_window::gui_window(window_settings const & ws) noexcept : gui_window{}
+	{
+		ML_assert(open(ws));
+	}
+
+	gui_window::~gui_window() noexcept
+	{
+		ML_ImGui_Shutdown();
+
+		ImGui::DestroyContext((ImGuiContext *)m_imgui);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool gui_window::open(window_settings const & ws)
+	{
+		if (is_open()) { return debug::error("gui_window is already open"); }
+
+		if (!render_window::open(ws)) { return debug::error("failed opening gui_window"); }
 
 		// init platform
 		if (!ML_ImGui_Init_Platform(get_handle(), true))
@@ -192,17 +192,6 @@ namespace ml
 		}
 
 		return true;
-	}
-
-	void gui_window::close()
-	{
-		ML_ImGui_Shutdown();
-
-		ImGui::DestroyContext((ImGuiContext *)m_imgui);
-
-		m_imgui = nullptr;
-
-		render_window::close();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -221,19 +210,19 @@ namespace ml
 		ImGui::Render();
 
 		for (auto const & cmd : {
-			gfx::render_command::set_viewport(get_framebuffer_size()),
-			gfx::render_command::set_clear_color(colors::black),
-			gfx::render_command::clear(gfx::clear_color),
-		}) gfx::execute(cmd, get_render_context());
+			gfx::command::set_viewport(get_framebuffer_size()),
+			gfx::command::set_clear_color(colors::black),
+			gfx::command::clear(gfx::clear_color),
+		})	gfx::execute(cmd, get_render_context());
 
 		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
 
 		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
-			auto backup_context{ window::get_context_current() };
+			auto backup_context{ get_context_current() };
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			window::make_context_current(backup_context);
+			make_context_current(backup_context);
 		}
 
 		if (has_hints(window_hints_doublebuffer))

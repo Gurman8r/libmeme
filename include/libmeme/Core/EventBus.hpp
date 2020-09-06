@@ -4,8 +4,8 @@
 #include <libmeme/Core/Memory.hpp>
 
 // event declarator helper
-#define ML_decl_event(type) \
-	struct type final : _ML impl::event_helper<type>
+#define ML_decl_event(Ev) \
+	struct Ev final : _ML impl::event_helper<Ev>
 
 namespace ml
 {
@@ -46,11 +46,13 @@ namespace ml
 	{
 		explicit event_listener(struct event_bus * bus) : m_event_bus{ bus } {}
 
-		virtual ~event_listener() noexcept;
+		virtual ~event_listener() noexcept; // EOF
 
 		virtual void on_event(event const &) = 0;
 
-	private:
+	protected:
+		friend struct event_bus;
+
 		struct event_bus * const m_event_bus;
 	};
 
@@ -91,7 +93,7 @@ namespace ml
 			}
 		}
 
-		// fire templated
+		// fire type
 		template <class Ev, class ... Args
 		> void fire(Args && ... args) noexcept
 		{
@@ -102,26 +104,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// subscribe to type
-		bool sub(event_listener * value, hash_t id) noexcept
+		// subscribe to id
+		bool sub(hash_t id, event_listener * value) noexcept
 		{
 			// insert listener into category
 			return value && m_subs[id].insert(value).second;
 		}
 
-		// subscribe templated
+		// subscribe to type
 		template <class Ev
 		> bool sub(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			return this->sub(value, Ev::ID);
+			return this->sub(Ev::ID, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// unsubscribe from type
-		void unsub(event_listener * value, hash_t id) noexcept
+		// unsubscribe from id
+		void unsub(hash_t id, event_listener * value) noexcept
 		{
 			if (!value) { return; }
 
@@ -137,13 +139,13 @@ namespace ml
 			}
 		}
 
-		// unsubscribe templated
+		// unsubscribe from type
 		template <class Ev
 		> void unsub(event_listener * value) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			this->unsub(value, Ev::ID);
+			this->unsub(Ev::ID, value);
 		}
 
 		// unsubscribe from all
@@ -173,11 +175,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// remove listener from all events
 	inline event_listener::~event_listener() noexcept
 	{
 		ML_assert("event bus does not exist" && m_event_bus);
 
-		m_event_bus->unsub(this); // remove listener from all events
+		m_event_bus->unsub(this);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
