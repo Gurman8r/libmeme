@@ -11,12 +11,13 @@ namespace ml
 {
 	ML_decl_handle(plugin_id);
 
-	struct ML_ENGINE_API plugin : non_copyable, trackable, event_listener
+	struct ML_ENGINE_API plugin : trackable, non_copyable, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit plugin(system_context * sys) noexcept : event_listener{ sys->bus }, m_sys{ sys }
 		{
+			ML_assert("BUS MISMATCH" && (event_listener::m_event_bus == m_sys->bus));
 		}
 
 		virtual ~plugin() noexcept override = default;
@@ -27,13 +28,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_bus()		const noexcept -> event_bus			& { return *m_sys->bus; }
-		ML_NODISCARD auto get_config()	const noexcept -> json				& { return *m_sys->cfg; }
-		ML_NODISCARD auto get_io()		const noexcept -> io_context		& { return *m_sys->io; }
-		ML_NODISCARD auto get_memory()	const noexcept -> memory			& { return *m_sys->mem; }
-		ML_NODISCARD auto get_scripts()	const noexcept -> script_context	& { return *m_sys->scr; }
-		ML_NODISCARD auto get_time()	const noexcept -> timer_context		& { return *m_sys->time; }
-		ML_NODISCARD auto get_window()	const noexcept -> gui_window		& { return *m_sys->win; }
+		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus; }
+		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io; }
+		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem; }
+		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr; }
+		ML_NODISCARD auto getwin()	const noexcept -> editor_window		* { return m_sys->win; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

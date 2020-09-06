@@ -181,7 +181,7 @@ namespace ml
 // SHADER CACHE
 namespace ml
 {
-	struct shader_cache final : non_copyable, trackable
+	struct shader_cache final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

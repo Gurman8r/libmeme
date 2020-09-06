@@ -13,7 +13,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		struct plugin_iface final
+		struct plugin_api final
 		{
 			std::function<void(system_context *, plugin *)> attach, detach;
 		};
@@ -49,8 +49,8 @@ namespace ml
 			plugin_id		,	// id
 			fs::path		,	// path
 			shared_library	,	// library
-			plugin_iface	,	// interface
-			manual<plugin>		// instance
+			plugin_api		,	// interface
+			plugin *			// instance
 		> m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

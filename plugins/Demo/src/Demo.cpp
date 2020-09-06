@@ -174,18 +174,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		gui::widget
-			m_imgui_demo	{ "Dear ImGui Demo"		, 0, "", ImGuiWindowFlags_None },
-			m_imgui_metrics	{ "Dear ImGui Metrics"	, 0, "", ImGuiWindowFlags_None },
-			m_imgui_about	{ "About Dear ImGui"	, 0, "", ImGuiWindowFlags_None },
-			m_gui_assets	{ "assets##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_console	{ "console##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_docs		{ "documents##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_ecs		{ "ecs##demo"			, 1, "", ImGuiWindowFlags_None },
-			m_gui_memory	{ "memory##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_nodes		{ "node editor##demo"	, 1, "", ImGuiWindowFlags_None },
-			m_gui_profiler	{ "profiler##demo"		, 1, "", ImGuiWindowFlags_None },
-			m_gui_renderer	{ "renderer##demo"		, 1, "", ImGuiWindowFlags_MenuBar },
-			m_gui_viewport	{ "viewport##demo"		, 1, "", ImGuiWindowFlags_NoScrollbar };
+			m_imgui_demo	{ "Dear ImGui Demo"		, 0, ImGuiWindowFlags_None },
+			m_imgui_metrics	{ "Dear ImGui Metrics"	, 0, ImGuiWindowFlags_None },
+			m_imgui_about	{ "About Dear ImGui"	, 0, ImGuiWindowFlags_None },
+			m_gui_assets	{ "assets##demo"		, 1, ImGuiWindowFlags_None },
+			m_gui_console	{ "console##demo"		, 1, ImGuiWindowFlags_None },
+			m_gui_docs		{ "documents##demo"		, 1, ImGuiWindowFlags_MenuBar },
+			m_gui_ecs		{ "ecs##demo"			, 1, ImGuiWindowFlags_None },
+			m_gui_memory	{ "memory##demo"		, 1, ImGuiWindowFlags_MenuBar },
+			m_gui_nodes		{ "node editor##demo"	, 1, ImGuiWindowFlags_None },
+			m_gui_profiler	{ "profiler##demo"		, 1, ImGuiWindowFlags_None },
+			m_gui_renderer	{ "renderer##demo"		, 1, ImGuiWindowFlags_MenuBar },
+			m_gui_viewport	{ "viewport##demo"		, 1, ImGuiWindowFlags_NoScrollbar };
 
 		stream_sniper m_cout{ &std::cout };
 
@@ -199,7 +199,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, []() noexcept { return 1000.f / application::get_time().frame_rate; }
+				, [&]() noexcept { return 1000.f / getio()->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -207,7 +207,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, []() noexcept { return application::get_time().frame_rate; }
+				, [&]() noexcept { return getio()->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -216,9 +216,9 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ get_memory().resource() };
+			static auto const testres{ getmem()->resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
-			m_gui_memory.set_focused();
+			m_gui_memory.focus();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
 		}
 
@@ -261,9 +261,9 @@ namespace ml
 				case key_code_w: {
 					switch (k.action)
 					{
-					case 0: { std::cout << "w released\n"; } break;
-					case 1: { std::cout << "w pressed\n"; } break;
-					case 2: { std::cout << "w repeated\n"; } break;
+					case 0: { debug::puts("w released"); } break;
+					case 1: { debug::puts("w pressed"); } break;
+					case 2: { debug::puts("w repeated"); } break;
 					}
 				} break;
 				}
@@ -294,9 +294,9 @@ namespace ml
 			//ML_defer(&) { m_cout.update(&std::cout); };
 
 			// ICON
-			if (image const ico{ get_io().path2("assets/textures/ico.png"), 0, false })
+			if (image const ico{ getio()->path2("assets/textures/ico.png"), 0, false })
 			{
-				get_window().set_icon(ico.width(), ico.height(), ico.data());
+				getwin()->set_icon(ico.width(), ico.height(), ico.data());
 			}
 
 			// FRAMEBUFFERS
@@ -312,19 +312,19 @@ namespace ml
 			// TEXTURES
 			{
 				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"		] = gfx::texture2d::create(get_io().path2("assets/textures/doot.png"));
-				m_textures["navball"	] = gfx::texture2d::create(get_io().path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"] = gfx::texture2d::create(get_io().path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"] = gfx::texture2d::create(get_io().path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"	] = gfx::texture2d::create(get_io().path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["doot"		] = gfx::texture2d::create(getio()->path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(getio()->path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(getio()->path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(getio()->path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(getio()->path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"		] = alloc_shared<font>(get_io().path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"		] = alloc_shared<font>(get_io().path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"] = alloc_shared<font>(get_io().path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"		] = alloc_shared<font>(get_io().path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(getio()->path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(getio()->path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(getio()->path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(getio()->path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -332,13 +332,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					get_io().path2("assets/shaders/2D.vs.shader"));
+					getio()->path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					get_io().path2("assets/shaders/3D.vs.shader"));
+					getio()->path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					get_io().path2("assets/shaders/basic.fs.shader"));
+					getio()->path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -358,8 +358,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)get_time().main.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)get_time().loop.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)getio()->main_timer.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)getio()->loop_timer.elapsed().count(); })
 				};
 
 				// camera
@@ -400,9 +400,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"	] = alloc_shared<mesh>(get_io().path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"	] = alloc_shared<mesh>(get_io().path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"		] = alloc_shared<mesh>(get_io().path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"	] = alloc_shared<mesh>(getio()->path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"	] = alloc_shared<mesh>(getio()->path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"		] = alloc_shared<mesh>(getio()->path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -529,7 +529,7 @@ namespace ml
 			m_cout.sstr().str({});
 
 			// plots
-			m_plots.update(get_time().main.elapsed().count());
+			m_plots.update(getio()->main_timer.elapsed().count());
 			
 			// systems
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -548,12 +548,12 @@ namespace ml
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
 				gfx::command::bind_framebuffer(nullptr),
-			})	gfx::execute(cmd, get_window().get_render_context());
+			})	gfx::execute(cmd, getwin()->get_render_context());
 		}
 
 		void on_dockspace(dockspace_event const &)
 		{
-			enum : int32_t // node ids
+			enum : int32_t // nodes
 			{
 				root,
 				left, left_up, left_dn, left_dn2,
@@ -561,38 +561,33 @@ namespace ml
 				MAX_DOCK_NODE
 			};
 
-			auto & d{ get_window().get_dockspace() };
-			if (!d.nodes.empty()) { return; }
-			d.nodes.resize(MAX_DOCK_NODE);
-			
-			// begin builder
-			if (d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))
-			{
-				constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
+			// setup dockspace
+			auto & d{ getwin()->get_dockspace() };
+			if (!d.nodes.empty()) { return; } else { d.nodes.resize(MAX_DOCK_NODE); }
+			if (!(d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))) { return; }
+			ML_defer(&) { d.end_builder(root); };
 
-				// split nodes
-				d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
-				d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-				d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-				d.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
-				d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
-				d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-				d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+			constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
 
-				// dock windows
-				d.dock(m_gui_viewport.title		, d[left_up]);
-				d.dock(m_gui_ecs.title			, d[left_dn]);
-				d.dock(m_gui_assets.title		, d[left_dn]);
-				d.dock(m_gui_renderer.title		, d[left_dn]);
-				d.dock(m_gui_profiler.title		, d[left_dn2]);
-				d.dock(m_gui_memory.title		, d[right]);
-				d.dock(m_gui_docs.title			, d[right]);
-				d.dock(m_gui_nodes.title		, d[right]);
-				d.dock(m_gui_console.title		, d[right]);
+			// split nodes
+			d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
+			d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
+			d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
+			d.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+			d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
+			d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
+			d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
 
-				// end builder
-				d.end_builder(root);
-			}
+			// dock windows
+			d.dock(m_gui_viewport	, d[left_up]);
+			d.dock(m_gui_ecs		, d[left_dn]);
+			d.dock(m_gui_assets		, d[left_dn]);
+			d.dock(m_gui_renderer	, d[left_dn]);
+			d.dock(m_gui_profiler	, d[left_dn2]);
+			d.dock(m_gui_memory		, d[right]);
+			d.dock(m_gui_docs		, d[right]);
+			d.dock(m_gui_nodes		, d[right]);
+			d.dock(m_gui_console	, d[right]);
 		}
 
 		void on_main_menu_bar(main_menu_bar_event const &)
@@ -604,7 +599,7 @@ namespace ml
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					get_window().set_should_close(true);
+					getwin()->set_should_close(true);
 				}
 				ImGui::EndMenu();
 			}
@@ -637,9 +632,9 @@ namespace ml
 			ML_ImGui_ScopeID(this);
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ get_window().show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ get_window().show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ get_window().show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ getwin()->show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ getwin()->show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ getwin()->show_imgui_about(&m_imgui_about.open); }
 
 			// WIDGETS
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
@@ -728,7 +723,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				get_window().set_should_close(true);
+				getwin()->set_should_close(true);
 			},
 			{
 				"shutdown the application",
@@ -791,7 +786,7 @@ namespace ml
 				}
 				else
 				{
-					get_scripts().do_string(util::detokenize(args));
+					getscr()->do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -805,7 +800,7 @@ namespace ml
 		{
 			static ImGui::TextEditor text{};
 
-			static ML_scope(&) // setup text editor
+			static ML_scope() // setup text editor
 			{
 				text.SetLanguageDefinition(ImGui::TextEditor::LanguageDefinition::CPlusPlus());
 				text.SetText("// work in progress\n\nint main()\n{\n\treturn 0;\n}");
@@ -909,7 +904,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							get_window().set_clipboard(buf);
+							getwin()->set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1049,13 +1044,13 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static passthrough_resource * const testres{ get_memory().resource() };
+			static passthrough_resource * const testres{ getmem()->resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= get_window().is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= getwin()->is_maximized() ? 32 : 16;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1084,7 +1079,7 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				auto const & records{ get_memory().records().values() };
+				auto const & records{ getmem()->records().values() };
 				static auto selected_record{ &records.front() };
 				char selected_address[20] = "highlight";
 				if (selected_record)
@@ -1194,7 +1189,7 @@ namespace ml
 			// total time
 			ImGui::Columns(2);
 			ImGui::Selectable("total time"); ImGui::NextColumn();
-			ImGui::Text("%.3fs", get_time().main.elapsed().count()); ImGui::NextColumn();
+			ImGui::Text("%.3fs", getio()->main_timer.elapsed().count()); ImGui::NextColumn();
 			ImGui::Columns(1);
 			ImGui::Separator();
 
@@ -1234,7 +1229,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev	{ get_window().get_render_device() };
+			static auto const & dev	{ getwin()->get_render_device() };
 			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
 
@@ -1323,6 +1318,11 @@ namespace ml
 
 extern "C"
 {
+	ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::system_context * sys)
+	{
+		return sys->mem->new_object<ml::demo>(sys);
+	}
+
 	ML_PLUGIN_API void ml_plugin_attach(ml::system_context * sys, ml::plugin * ptr)
 	{
 		ptr = sys->mem->new_object<ml::demo>(sys);

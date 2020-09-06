@@ -1,7 +1,7 @@
-#include <libmeme/Engine/GuiWindow.hpp>
+#include <libmeme/Engine/EditorWindow.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Core/EventBus.hpp>
+#include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
@@ -20,122 +20,11 @@
 #	error "imgui is unavailable"
 #endif
 
-// DOCKSPACE
-namespace ml
-{
-	uint32_t dockspace::begin_builder(int32_t flags)
-	{
-		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
-		{
-			ImGui::DockBuilderRemoveNode(root);
-
-			ImGui::DockBuilderAddNode(root, flags);
-
-			return root;
-		}
-		return NULL;
-	}
-
-	uint32_t dockspace::end_builder(uint32_t root)
-	{
-		if (root)
-		{
-			ImGui::DockBuilderFinish(root);
-		}
-		return root;
-	}
-
-	uint32_t dockspace::dock(cstring name, uint32_t id)
-	{
-		if (name && id)
-		{
-			ImGui::DockBuilderDockWindow(name, id);
-			return id;
-		}
-		return NULL;
-	}
-
-	uint32_t dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
-	{
-		return this->nodes[(size_t)i] = split(id, dir, ratio, value);
-	}
-
-	uint32_t dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
-	{
-		return split(id, dir, ratio, nullptr, value);
-	}
-
-	uint32_t dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
-	{
-		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
-	}
-
-	void dockspace::render(event_bus * bus)
-	{
-		if (!bus || !visible) { return; }
-
-		ML_ImGui_ScopeID(this);
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			// viewport
-			ImGuiViewport const * v{ ImGui::GetMainViewport() };
-			ImGui::SetNextWindowPos(v->Pos);
-			ImGui::SetNextWindowSize(v->Size);
-			ImGui::SetNextWindowViewport(v->ID);
-
-			// style
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, rounding);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
-			ImGui::SetNextWindowBgAlpha(alpha);
-
-			// begin
-			if (ImGui::Begin(title, &visible,
-				ImGuiWindowFlags_NoTitleBar |
-				ImGuiWindowFlags_NoCollapse |
-				ImGuiWindowFlags_NoResize |
-				ImGuiWindowFlags_NoMove |
-				ImGuiWindowFlags_NoBringToFrontOnFocus |
-				ImGuiWindowFlags_NoNavFocus |
-				ImGuiWindowFlags_NoDocking |
-				ImGuiWindowFlags_NoBackground |
-				(menubar ? ImGuiWindowFlags_MenuBar : 0)
-			))
-			{
-				ImGui::PopStyleVar(3);
-
-				// fire docking event if nodes are empty
-				if (nodes.empty()) { bus->fire<dockspace_event>(); }
-
-				ImGui::DockSpace(
-					ImGui::GetID(title),
-					size,
-					ImGuiDockNodeFlags_PassthruCentralNode |
-					ImGuiDockNodeFlags_AutoHideTabBar);
-
-				ImGui::End();
-			}
-		}
-
-		// main menu bar
-		if (menubar && ImGui::BeginMainMenuBar())
-		{
-			bus->fire<main_menu_bar_event>();
-
-			ImGui::EndMainMenuBar();
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
-// GUI WINDOW
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	gui_window::gui_window() noexcept : render_window{}, m_imgui{}, m_dockspace{}
+	editor_window::editor_window() noexcept : render_window{}, m_imgui{}, m_dockspace{}
 	{
 		IMGUI_CHECKVERSION();
 
@@ -159,12 +48,12 @@ namespace ml
 		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	}
 
-	gui_window::gui_window(window_settings const & ws) noexcept : gui_window{}
+	editor_window::editor_window(window_settings const & ws) noexcept : editor_window{}
 	{
 		ML_assert(open(ws));
 	}
 
-	gui_window::~gui_window() noexcept
+	editor_window::~editor_window() noexcept
 	{
 		ML_ImGui_Shutdown();
 
@@ -173,11 +62,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_window::open(window_settings const & ws)
+	bool editor_window::open(window_settings const & ws)
 	{
-		if (is_open()) { return debug::error("gui_window is already open"); }
+		if (is_open()) { return debug::error("editor_window is already open"); }
 
-		if (!render_window::open(ws)) { return debug::error("failed opening gui_window"); }
+		if (!render_window::open(ws)) { return debug::error("failed opening editor_window"); }
 
 		// init platform
 		if (!ML_ImGui_Init_Platform(get_handle(), true))
@@ -196,7 +85,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_window::new_frame(event_bus * bus)
+	void editor_window::new_frame(event_bus * bus)
 	{
 		ML_ImGui_NewFrame();
 
@@ -205,7 +94,7 @@ namespace ml
 		m_dockspace.render(bus);
 	}
 
-	void gui_window::render_frame()
+	void editor_window::render_frame()
 	{
 		ImGui::Render();
 
@@ -233,29 +122,136 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_window::show_imgui_demo(bool * p_open) const
+	void editor_window::show_imgui_demo(bool * p_open) const
 	{
 		ImGui::ShowDemoWindow(p_open);
 	}
-	
-	void gui_window::show_imgui_metrics(bool * p_open) const
+
+	void editor_window::show_imgui_metrics(bool * p_open) const
 	{
 		ImGui::ShowMetricsWindow(p_open);
 	}
-	
-	void gui_window::show_imgui_about(bool * p_open) const
+
+	void editor_window::show_imgui_about(bool * p_open) const
 	{
 		ImGui::ShowAboutWindow(p_open);
 	}
-	
-	void gui_window::show_imgui_style_editor(void * ref) const
+
+	void editor_window::show_imgui_style_editor(void * ref) const
 	{
 		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	uint32_t editor_window::dockspace::begin_builder(int32_t flags)
+	{
+		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
+		{
+			ImGui::DockBuilderRemoveNode(root);
 
-	bool gui_window::load_style(fs::path const & path)
+			ImGui::DockBuilderAddNode(root, flags);
+
+			return root;
+		}
+		return NULL;
+	}
+
+	uint32_t editor_window::dockspace::end_builder(uint32_t root)
+	{
+		if (root)
+		{
+			ImGui::DockBuilderFinish(root);
+		}
+		return root;
+	}
+
+	uint32_t editor_window::dockspace::dock(cstring name, uint32_t id)
+	{
+		if (name && id)
+		{
+			ImGui::DockBuilderDockWindow(name, id);
+			return id;
+		}
+		return NULL;
+	}
+
+	uint32_t editor_window::dockspace::dock(gui::widget const & w, uint32_t id)
+	{
+		return dock(w.title, id);
+	}
+
+	uint32_t editor_window::dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return this->nodes[(size_t)i] = split(id, dir, ratio, value);
+	}
+
+	uint32_t editor_window::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	{
+		return split(id, dir, ratio, nullptr, value);
+	}
+
+	uint32_t editor_window::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
+	{
+		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
+	}
+
+	void editor_window::dockspace::render(event_bus * bus)
+	{
+		if (!bus || !visible || !(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)) { return; }
+
+		ML_ImGui_ScopeID(this);
+
+		// viewport
+		ImGuiViewport const * v{ ImGui::GetMainViewport() };
+		ImGui::SetNextWindowPos(v->Pos);
+		ImGui::SetNextWindowSize(v->Size);
+		ImGui::SetNextWindowViewport(v->ID);
+
+		// style
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, rounding);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, border);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+		ImGui::SetNextWindowBgAlpha(alpha);
+
+		// begin
+		if (ImGui::Begin(title, &visible,
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_NoNavFocus |
+			ImGuiWindowFlags_NoDocking |
+			ImGuiWindowFlags_NoBackground |
+			(menubar ? ImGuiWindowFlags_MenuBar : 0)
+		))
+		{
+			ImGui::PopStyleVar(3);
+
+			// fire docking event if nodes are empty
+			if (nodes.empty()) { bus->fire<dockspace_event>(); }
+
+			ImGui::DockSpace(
+				ImGui::GetID(title),
+				size,
+				ImGuiDockNodeFlags_PassthruCentralNode |
+				ImGuiDockNodeFlags_AutoHideTabBar);
+
+			ImGui::End();
+		}
+
+		// main menu bar
+		if (menubar && ImGui::BeginMainMenuBar())
+		{
+			bus->fire<main_menu_bar_event>();
+
+			ImGui::EndMainMenuBar();
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool editor_window::load_style(fs::path const & path)
 	{
 		using namespace util;
 	

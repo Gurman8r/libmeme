@@ -21,7 +21,7 @@ namespace ml
 					ML_handle(plugin_id, util::hash(path.string())),
 					path,
 					std::move(lib),
-					plugin_iface
+					plugin_api
 					{
 						lib.proc<void, system_context *, plugin *>("ml_plugin_attach"),
 						lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
@@ -34,9 +34,9 @@ namespace ml
 		// load plugin
 		{
 			plugin * ptr{};
-			if (m_data.back<plugin_iface>().attach(m_sys, ptr); ptr)
+			if (m_data.back<plugin_api>().attach(m_sys, ptr); ptr)
 			{
-				m_data.back<manual<plugin>>().reset(ptr);
+				m_data.back<plugin *>() = ptr;
 
 				return id;
 			}
@@ -55,11 +55,11 @@ namespace ml
 		{
 			auto const i{ m_data.index_of<plugin_id>(it) };
 
-			plugin * ptr{ m_data.at<manual<plugin>>(i).release() };
+			plugin * ptr{ m_data.at<plugin *>(i) };
 
-			m_data.at<plugin_iface>(i).detach(m_sys, ptr);
+			m_data.at<plugin_api>(i).detach(m_sys, ptr);
 
-			delete ptr;
+			ml_free(ptr);
 
 			m_data.erase(i);
 

@@ -1,5 +1,5 @@
-#ifndef _ML_EVENT_BUS_HPP_
-#define _ML_EVENT_BUS_HPP_
+#ifndef _ML_EVENTS_HPP_
+#define _ML_EVENTS_HPP_
 
 #include <libmeme/Core/Memory.hpp>
 
@@ -11,7 +11,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// EVENT
+	// EVENT BASE
 	struct ML_NODISCARD event : non_copyable
 	{
 		constexpr operator hash_t() const noexcept { return m_id; }
@@ -29,7 +29,8 @@ namespace ml
 	// EVENT HELPER
 	namespace impl
 	{
-		template <class T> struct event_helper : event
+		template <class T
+		> struct event_helper : event
 		{
 			enum : hash_t { ID = hashof_v<T> };
 
@@ -65,13 +66,15 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		event_bus(allocator_type alloc = {}) noexcept : m_subs{ alloc }
+		using category = typename ds::set<event_listener *>;
+
+		event_bus(allocator_type alloc = {}) noexcept : m_categories{ alloc }
 		{
 		}
 
 		event_bus(event_bus && other, allocator_type alloc = {}) noexcept : event_bus{ alloc }
 		{
-			m_subs.swap(std::move(other.m_subs));
+			m_categories.swap(std::move(other.m_categories));
 		}
 
 		virtual ~event_bus() noexcept = default;
@@ -82,10 +85,10 @@ namespace ml
 		void fire(event const & ev) noexcept
 		{
 			// get category
-			if (auto const c{ m_subs.find(ev) })
+			if (auto const cat{ m_categories.find(ev) })
 			{
 				// for each listener
-				for (auto const & l : (*c->second))
+				for (auto const & l : (*cat->second))
 				{
 					// handle event
 					l->on_event(ev);
@@ -99,68 +102,68 @@ namespace ml
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			return this->fire(Ev{ ML_forward(args)... });
+			this->fire(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
 		// subscribe to id
-		bool sub(hash_t id, event_listener * value) noexcept
+		bool sub(hash_t type, event_listener * listener) noexcept
 		{
 			// insert listener into category
-			return value && m_subs[id].insert(value).second;
+			return listener && m_categories[type].insert(listener).second;
 		}
 
 		// subscribe to type
 		template <class Ev
-		> bool sub(event_listener * value) noexcept
+		> bool sub(event_listener * listener) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			return this->sub(Ev::ID, value);
+			return this->sub(Ev::ID, listener);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// unsubscribe from id
-		void unsub(hash_t id, event_listener * value) noexcept
+		void unsub(hash_t type, event_listener * listener) noexcept
 		{
-			if (!value) { return; }
+			if (!listener) { return; }
 
 			// get category
-			if (auto const c{ m_subs.find(id) })
+			if (auto const cat{ m_categories.find(type) })
 			{
 				// get listener
-				if (auto const l{ c->second->find(value) }; l != c->second->end())
+				if (auto const l{ cat->second->find(listener) }; l != cat->second->end())
 				{
 					// remove listener
-					c->second->erase(l);
+					cat->second->erase(l);
 				}
 			}
 		}
 
 		// unsubscribe from type
 		template <class Ev
-		> void unsub(event_listener * value) noexcept
+		> void unsub(event_listener * listener) noexcept
 		{
 			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
-			this->unsub(Ev::ID, value);
+			this->unsub(Ev::ID, listener);
 		}
 
 		// unsubscribe from all
-		void unsub(event_listener * value) noexcept
+		void unsub(event_listener * listener) noexcept
 		{
-			if (!value) { return; }
+			if (!listener) { return; }
 
 			// for each category
-			m_subs.for_each([&](auto, auto & c) noexcept
+			m_categories.for_each([&](hash_t, category & cat) noexcept
 			{
 				// get listener
-				if (auto const l{ c.find(value) }; l != c.end())
+				if (auto const l{ cat.find(listener) }; l != cat.end())
 				{
 					// remove listener
-					c.erase(l);
+					cat.erase(l);
 				}
 			});
 		}
@@ -168,7 +171,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ds::map<hash_t, ds::set<event_listener *>> m_subs{};
+		ds::map<hash_t, category> m_categories{}; // categories
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -186,4 +189,4 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_EVENT_SYSTEM_HPP_
+#endif // !_ML_EVENTS_HPP_

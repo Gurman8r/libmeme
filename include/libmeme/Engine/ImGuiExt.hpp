@@ -209,7 +209,6 @@ namespace ml::gui
 
 		cstring		title		{};
 		bool		open		{};
-		cstring		shortcut	{};
 		int32_t		flags		{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -228,31 +227,26 @@ namespace ml::gui
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		uint32_t get_id() const noexcept
-		{
-			return ImGui::GetID(title);
-		}
-
-		widget & set_focused() noexcept
+		widget & focus() noexcept
 		{
 			open = true;
 			ImGui::SetWindowFocus(title);
 			return (*this);
 		}
 
-		bool menu_item(bool * p_open) noexcept
+		uint32_t getid() const noexcept
 		{
-			return ImGui::MenuItem(title, shortcut, p_open);
+			return ImGui::GetID(title);
 		}
 
-		bool menu_item() noexcept
+		bool menu_item(cstring shortcut = "") noexcept
 		{
-			return menu_item(&open);
+			return ImGui::MenuItem(title, shortcut, &open);
 		}
 
-		bool selectable(int32_t selectable_flags = 0, vec2 const & size = {}) noexcept
+		bool selectable(int32_t f = ImGuiSelectableFlags_None, vec2 const & size = {}) noexcept
 		{
-			return ImGui::Selectable(title, &open, selectable_flags, size);
+			return ImGui::Selectable(title, &open, f, size);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

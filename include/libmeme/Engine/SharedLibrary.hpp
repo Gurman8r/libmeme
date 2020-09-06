@@ -8,7 +8,7 @@ namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	struct ML_ENGINE_API shared_library final : non_copyable, trackable
+	struct ML_ENGINE_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -21,10 +21,8 @@ namespace ml
 		{
 #if defined(ML_os_windows)
 			L".dll"
-#elif defined(ML_os_unix)
-			L".so"
 #else
-			L""
+			L".so"
 #endif
 		};
 

@@ -770,17 +770,17 @@ namespace ml::gfx
 		return alloc_shared<opengl_indexbuffer>(this, usage, count, data);
 	}
 
-	shared<texture2d> opengl_render_device::create_texture2d(data_desc<texture2d> const & value, addr_t data) noexcept
+	shared<texture2d> opengl_render_device::create_texture2d(desc_<texture2d> const & value, addr_t data) noexcept
 	{
 		return alloc_shared<opengl_texture2d>(this, value, data);
 	}
 
-	shared<texturecube> opengl_render_device::create_texturecube(data_desc<texturecube> const & value) noexcept
+	shared<texturecube> opengl_render_device::create_texturecube(desc_<texturecube> const & value) noexcept
 	{
 		return alloc_shared<opengl_texturecube>(this, value);
 	}
 
-	shared<framebuffer> opengl_render_device::create_framebuffer(data_desc<framebuffer> const & value) noexcept
+	shared<framebuffer> opengl_render_device::create_framebuffer(desc_<framebuffer> const & value) noexcept
 	{
 		return alloc_shared<opengl_framebuffer>(this, value);
 	}
@@ -790,7 +790,7 @@ namespace ml::gfx
 		return alloc_shared<opengl_program>(this);
 	}
 
-	shared<shader> opengl_render_device::create_shader(data_desc<shader> const & value) noexcept
+	shared<shader> opengl_render_device::create_shader(desc_<shader> const & value) noexcept
 	{
 		return alloc_shared<opengl_shader>(this, value);
 	}
@@ -1357,7 +1357,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texture2d::opengl_texture2d(render_device * dev, data_desc<texture2d> const & value, addr_t data)
+	opengl_texture2d::opengl_texture2d(render_device * dev, desc_<texture2d> const & value, addr_t data)
 		: texture2d{ dev }, m_data{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
@@ -1544,7 +1544,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_texturecube::opengl_texturecube(render_device * dev, data_desc<texturecube> const & value)
+	opengl_texturecube::opengl_texturecube(render_device * dev, desc_<texturecube> const & value)
 		: texturecube{ dev }, m_data{ value }
 	{
 		ML_glCheck(glGenTextures(1, &m_handle));
@@ -1590,7 +1590,7 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_framebuffer::opengl_framebuffer(render_device * dev, data_desc<framebuffer> const & value)
+	opengl_framebuffer::opengl_framebuffer(render_device * dev, desc_<framebuffer> const & value)
 		: framebuffer{ dev }, m_data{ value }
 	{
 		resize(m_data.size);
@@ -1857,7 +1857,7 @@ namespace ml::gfx
 		}
 	}
 
-	opengl_shader::opengl_shader(render_device * dev, data_desc<shader> const & value)
+	opengl_shader::opengl_shader(render_device * dev, desc_<shader> const & value)
 		: shader{ dev }
 	{
 		cstring temp_addr{ value.code.front().data() };

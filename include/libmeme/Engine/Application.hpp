@@ -17,15 +17,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto get()			noexcept -> application		& { return *s_instance; }
-		ML_NODISCARD static auto get_bus()		noexcept -> event_bus		& { return *s_instance->m_sys->bus; }
-		ML_NODISCARD static auto get_config()	noexcept -> json			& { return *s_instance->m_sys->cfg; }
-		ML_NODISCARD static auto get_io()		noexcept -> io_context		& { return *s_instance->m_sys->io; }
-		ML_NODISCARD static auto get_memory()	noexcept -> memory			& { return *s_instance->m_sys->mem; }
-		ML_NODISCARD static auto get_mods()		noexcept -> plugin_manager	& { return s_instance->m_plugins; }
-		ML_NODISCARD static auto get_scripts()	noexcept -> script_context	& { return *s_instance->m_sys->scr; }
-		ML_NODISCARD static auto get_time()		noexcept -> timer_context	& { return *s_instance->m_sys->time; }
-		ML_NODISCARD static auto get_window()	noexcept -> gui_window		& { return *s_instance->m_sys->win; }
+		ML_NODISCARD static auto get()		noexcept -> application		* { return s_instance; }
+		ML_NODISCARD static auto getbus()	noexcept -> event_bus		* { return s_instance->m_sys->bus; }
+		ML_NODISCARD static auto getio()	noexcept -> io_context		* { return s_instance->m_sys->io; }
+		ML_NODISCARD static auto getmem()	noexcept -> memory			* { return s_instance->m_sys->mem; }
+		ML_NODISCARD static auto getmods()	noexcept -> plugin_manager	* { return &s_instance->m_plugins; }
+		ML_NODISCARD static auto getscr()	noexcept -> script_context	* { return s_instance->m_sys->scr; }
+		ML_NODISCARD static auto getwin()	noexcept -> editor_window	* { return s_instance->m_sys->win; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -6,7 +6,7 @@
 
 namespace ml
 {
-	struct mesh final : non_copyable, trackable
+	struct mesh final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

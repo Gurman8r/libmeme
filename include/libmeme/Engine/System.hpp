@@ -3,10 +3,10 @@
 
 // WIP
 
-#include <libmeme/Core/EventBus.hpp>
+#include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Engine/GuiWindow.hpp>
+#include <libmeme/Engine/EditorWindow.hpp>
 
 namespace ml
 {
@@ -14,25 +14,30 @@ namespace ml
 
 	struct ML_NODISCARD io_context final
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t const	argc;
+		char ** const	argv;
+		json			conf{ R"({"path":""})"_json };
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		fs::path const
-			program_name,
-			program_path,
-			content_path;
+			program_name{ argv[0] },
+			program_path{ fs::current_path() },
+			content_path{ conf.at("path").get<fs::path>() };
 
 		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
 		{
 			return content_path.native() + path.native();
 		}
-	};
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_NODISCARD timer_context final
-	{
 		using fps_times_t = pmr::vector<float_t>;
 
-		timer const	main		{};
-		timer		loop		{ false };
+		timer const	main_timer	{};
+		timer		loop_timer	{ false };
 		duration	delta_time	{};
 		uint64_t	frame_count	{};
 		float_t		frame_rate	{};
@@ -42,7 +47,7 @@ namespace ml
 
 		void begin_step() noexcept
 		{
-			loop.restart();
+			loop_timer.restart();
 			auto const dt{ (float_t)delta_time.count() };
 			fps_accum += dt - fps_times[fps_index];
 			fps_times[fps_index] = dt;
@@ -53,8 +58,10 @@ namespace ml
 		void end_step() noexcept
 		{
 			performance::refresh_samples();
-			delta_time = loop.elapsed();
+			delta_time = loop_timer.elapsed();
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -62,12 +69,10 @@ namespace ml
 	struct ML_NODISCARD system_context final
 	{
 		event_bus		* const bus	; // bus
-		json			* const cfg	; // config
 		io_context		* const io	; // io
 		memory			* const mem	; // memory
 		script_context	* const scr	; // scripts
-		timer_context	* const time; // timers
-		gui_window		* const win	; // window
+		editor_window	* const win	; // window
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

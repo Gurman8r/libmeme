@@ -28,8 +28,7 @@ namespace ml::gfx
 	ML_decl_handle(	object_id	)	; // object handle
 	ML_decl_handle(	uniform_id	)	; // register handle
 
-	template <class ...> struct init_desc	; // object startup descriptor
-	template <class ...> struct data_desc	; // object runtime descriptor
+	template <class ...> struct desc_; // object runtime descriptor
 
 	ML_alias addr_t		= typename void const *			; // data address
 	ML_alias buffer_t	= typename pmr::vector<byte_t>	; // byte buffer
@@ -607,7 +606,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// device data_desc settings
-	template <> struct ML_NODISCARD data_desc<render_device> final
+	template <> struct ML_NODISCARD desc_<render_device> final
 	{
 		// version
 		pmr::string renderer, vendor, version;
@@ -662,7 +661,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
 
-		ML_NODISCARD virtual data_desc<render_device> const & get_info() const noexcept = 0;
+		ML_NODISCARD virtual desc_<render_device> const & get_info() const noexcept = 0;
 
 		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept = 0;
 
@@ -677,15 +676,15 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept = 0;
 
-		ML_NODISCARD virtual shared<texture2d> create_texture2d(data_desc<texture2d> const & value, addr_t data = {}) noexcept = 0;
+		ML_NODISCARD virtual shared<texture2d> create_texture2d(desc_<texture2d> const & value, addr_t data = {}) noexcept = 0;
 
-		ML_NODISCARD virtual shared<texturecube> create_texturecube(data_desc<texturecube> const & value) noexcept = 0;
+		ML_NODISCARD virtual shared<texturecube> create_texturecube(desc_<texturecube> const & value) noexcept = 0;
 
-		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(data_desc<framebuffer> const & value) noexcept = 0;
+		ML_NODISCARD virtual shared<framebuffer> create_framebuffer(desc_<framebuffer> const & value) noexcept = 0;
 
 		ML_NODISCARD virtual shared<program> create_program() noexcept = 0;
 
-		ML_NODISCARD virtual shared<shader> create_shader(data_desc<shader> const & value) noexcept = 0;
+		ML_NODISCARD virtual shared<shader> create_shader(desc_<shader> const & value) noexcept = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -824,7 +823,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// render context settings
-	template <> struct ML_NODISCARD data_desc<render_context> final
+	template <> struct ML_NODISCARD desc_<render_context> final
 	{
 		pmr::string	name		{ "RenderContext" };
 		int32_t		client		{ context_api_unknown };
@@ -839,7 +838,7 @@ namespace ml::gfx
 		int32_t		release		{};
 	};
 
-	static void from_json(json const & j, data_desc<render_context> & v)
+	static void from_json(json const & j, desc_<render_context> & v)
 	{
 		j["name"		].get_to(v.name);
 		j["client"		].get_to(v.client);
@@ -854,7 +853,7 @@ namespace ml::gfx
 		j["release"		].get_to(v.release);
 	}
 
-	static void to_json(json & j, data_desc<render_context> const & v)
+	static void to_json(json & j, desc_<render_context> const & v)
 	{
 		j["name"		] = v.name;
 		j["client"		] = v.client;
@@ -988,17 +987,17 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// vertexarray settings
-	template <> struct ML_NODISCARD data_desc<vertexarray> final
+	template <> struct ML_NODISCARD desc_<vertexarray> final
 	{
 		pmr::string	name{ nameof_v<vertexarray> };
 	};
 
-	static void from_json(json const & j, data_desc<vertexarray> & v)
+	static void from_json(json const & j, desc_<vertexarray> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, data_desc<vertexarray> const & v)
+	static void to_json(json & j, desc_<vertexarray> const & v)
 	{
 		j["name"] = v.name;
 	}
@@ -1058,19 +1057,19 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// vertexbuffer settings
-	template <> struct ML_NODISCARD data_desc<vertexbuffer> final
+	template <> struct ML_NODISCARD desc_<vertexbuffer> final
 	{
 		pmr::string	name	{ nameof_v<vertexbuffer> };
 		uint32_t	usage	{ usage_static };
 	};
 
-	static void from_json(json const & j, data_desc<vertexbuffer> & v)
+	static void from_json(json const & j, desc_<vertexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 		j["usage"].get_to(v.usage);
 	}
 
-	static void to_json(json & j, data_desc<vertexbuffer> const & v)
+	static void to_json(json & j, desc_<vertexbuffer> const & v)
 	{
 		j["name"] = v.name;
 		j["usage"] = v.usage;
@@ -1132,17 +1131,17 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// indexbuffer settings
-	template <> struct ML_NODISCARD data_desc<indexbuffer> final
+	template <> struct ML_NODISCARD desc_<indexbuffer> final
 	{
 		pmr::string	name{ nameof_v<indexbuffer> };
 	};
 
-	static void from_json(json const & j, data_desc<indexbuffer> & v)
+	static void from_json(json const & j, desc_<indexbuffer> & v)
 	{
 		j["name"].get_to(v.name);
 	}
 
-	static void to_json(json & j, data_desc<indexbuffer> const & v)
+	static void to_json(json & j, desc_<indexbuffer> const & v)
 	{
 		j["name"] = v.name;
 	}
@@ -1295,7 +1294,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// texture2d settings
-	template <> struct ML_NODISCARD data_desc<texture2d> final
+	template <> struct ML_NODISCARD desc_<texture2d> final
 	{
 		pmr::string	name		{ "Texture2D" };
 		fs::path	path		{};
@@ -1304,7 +1303,7 @@ namespace ml::gfx
 		int32_t		flags		{ texture_flags_default };
 	};
 
-	static void from_json(json const & j, data_desc<texture2d> & v)
+	static void from_json(json const & j, desc_<texture2d> & v)
 	{
 		j["name"	].get_to(v.name);
 		j["path"	].get_to(v.path);
@@ -1313,7 +1312,7 @@ namespace ml::gfx
 		j["flags"	].get_to((texture_flags_ &)v.flags);
 	}
 
-	static void to_json(json & j, data_desc<texture2d> const & v)
+	static void to_json(json & j, desc_<texture2d> const & v)
 	{
 		j["name"	] = v.name;
 		j["path"	] = v.path;
@@ -1327,7 +1326,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texture2d : public texture
 	{
 	public:
-		ML_NODISCARD static auto create(data_desc<texture2d> const & value, addr_t data = {}) noexcept
+		ML_NODISCARD static auto create(desc_<texture2d> const & value, addr_t data = {}) noexcept
 		{
 			return render_device::get_default()->create_texture2d(value, data);
 		}
@@ -1380,7 +1379,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual image copy_to_image() const = 0;
 
-		ML_NODISCARD virtual data_desc<texture2d> const & get_data() const noexcept = 0;
+		ML_NODISCARD virtual desc_<texture2d> const & get_data() const noexcept = 0;
 
 		ML_NODISCARD inline uint32_t get_type() const noexcept { return texture_type_2d; }
 	};
@@ -1392,7 +1391,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// texturecube settings
-	template <> struct ML_NODISCARD data_desc<texturecube> final
+	template <> struct ML_NODISCARD desc_<texturecube> final
 	{
 		using paths_t = ds::array<fs::path, 6>;
 
@@ -1403,7 +1402,7 @@ namespace ml::gfx
 		int32_t		flags		{ texture_flags_default };
 	};
 
-	static void from_json(json const & j, data_desc<texturecube> & v)
+	static void from_json(json const & j, desc_<texturecube> & v)
 	{
 		j["name"	].get_to(v.name);
 		j["paths"	].get_to(v.paths);
@@ -1413,7 +1412,7 @@ namespace ml::gfx
 		
 	}
 
-	static void to_json(json & j, data_desc<texturecube> const & v)
+	static void to_json(json & j, desc_<texturecube> const & v)
 	{
 		j["name"	] = v.name;
 		j["paths"	] = v.paths;
@@ -1427,7 +1426,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API texturecube : public texture
 	{
 	public:
-		ML_NODISCARD static auto create(data_desc<texturecube> const & value) noexcept
+		ML_NODISCARD static auto create(desc_<texturecube> const & value) noexcept
 		{
 			return render_device::get_default()->create_texturecube(value);
 		}
@@ -1450,7 +1449,7 @@ namespace ml::gfx
 
 		virtual void unlock() override = 0;
 
-		ML_NODISCARD virtual data_desc<texturecube> const & get_data() const noexcept = 0;
+		ML_NODISCARD virtual desc_<texturecube> const & get_data() const noexcept = 0;
 
 		ML_NODISCARD inline uint32_t get_type() const noexcept override { return texture_type_cube; }
 	};
@@ -1462,7 +1461,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// framebuffer settings
-	template <> struct ML_NODISCARD data_desc<framebuffer> final
+	template <> struct ML_NODISCARD desc_<framebuffer> final
 	{
 		pmr::string	name			{ "FrameBuffer" };
 		vec2i		size			{};
@@ -1475,7 +1474,7 @@ namespace ml::gfx
 		bool		stereo			{};
 	};
 
-	static void from_json(json const & j, data_desc<framebuffer> & v)
+	static void from_json(json const & j, desc_<framebuffer> & v)
 	{
 		j["name"			].get_to(v.name);
 		j["size"			].get_to(v.size);
@@ -1488,7 +1487,7 @@ namespace ml::gfx
 		j["stereo"			].get_to(v.stereo);
 	}
 
-	static void to_json(json & j, data_desc<framebuffer> const & v)
+	static void to_json(json & j, desc_<framebuffer> const & v)
 	{
 		j["name"			] = v.name;
 		j["size"			] = v.size;
@@ -1506,7 +1505,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API framebuffer : public render_object<framebuffer>
 	{
 	public:
-		ML_NODISCARD static auto create(data_desc<framebuffer> const & value) noexcept
+		ML_NODISCARD static auto create(desc_<framebuffer> const & value) noexcept
 		{
 			return render_device::get_default()->create_framebuffer(value);
 		}
@@ -1535,7 +1534,7 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual shared<texture2d> const & get_depth_attachment() const noexcept = 0;
 
-		ML_NODISCARD virtual data_desc<framebuffer> const & get_data() const noexcept = 0;
+		ML_NODISCARD virtual desc_<framebuffer> const & get_data() const noexcept = 0;
 
 	public:
 		inline void bind() const noexcept
@@ -1667,7 +1666,7 @@ namespace ml::gfx
 namespace ml::gfx
 {
 	// shader settings
-	template <> struct ML_NODISCARD data_desc<shader> final
+	template <> struct ML_NODISCARD desc_<shader> final
 	{
 		using source_t = pmr::vector<pmr::string>;
 
@@ -1677,7 +1676,7 @@ namespace ml::gfx
 		source_t	code	{};
 	};
 
-	static void from_json(json const & j, data_desc<shader> & v)
+	static void from_json(json const & j, desc_<shader> & v)
 	{
 		j["name"].get_to(v.name);
 		j["path"].get_to(v.path);
@@ -1685,7 +1684,7 @@ namespace ml::gfx
 		j["code"].get_to(v.code);
 	}
 
-	static void to_json(json & j, data_desc<shader> const & v)
+	static void to_json(json & j, desc_<shader> const & v)
 	{
 		j["name"] = v.name;
 		j["path"] = v.path;
@@ -1698,7 +1697,7 @@ namespace ml::gfx
 	class ML_GRAPHICS_API shader : public render_object<shader>
 	{
 	public:
-		ML_NODISCARD static auto create(data_desc<shader> const & value) noexcept
+		ML_NODISCARD static auto create(desc_<shader> const & value) noexcept
 		{
 			return render_device::get_default()->create_shader(value);
 		}

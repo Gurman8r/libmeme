@@ -18,7 +18,7 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_render_device> };
 
-		data_desc<render_device>	m_data	{}; // device settings
+		desc_<render_device>	m_data	{}; // device settings
 		shared<render_context>		m_ctx	{}; // render context
 
 	public:
@@ -37,7 +37,7 @@ namespace ml::gfx
 
 		shared<render_context> const & get_context() const noexcept override { return m_ctx; }
 
-		data_desc<render_device> const & get_info() const noexcept override { return m_data; }
+		desc_<render_device> const & get_info() const noexcept override { return m_data; }
 
 		typeof<> const & get_self_type() const noexcept override { return s_self_type; }
 
@@ -52,15 +52,15 @@ namespace ml::gfx
 
 		shared<indexbuffer> create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept override;
 
-		shared<texture2d> create_texture2d(data_desc<texture2d> const & value, addr_t data) noexcept override;
+		shared<texture2d> create_texture2d(desc_<texture2d> const & value, addr_t data) noexcept override;
 
-		shared<texturecube> create_texturecube(data_desc<texturecube> const & value) noexcept override;
+		shared<texturecube> create_texturecube(desc_<texturecube> const & value) noexcept override;
 
-		shared<framebuffer> create_framebuffer(data_desc<framebuffer> const & value) noexcept override;
+		shared<framebuffer> create_framebuffer(desc_<framebuffer> const & value) noexcept override;
 
 		shared<program> create_program() noexcept override;
 
-		shared<shader> create_shader(data_desc<shader> const & value) noexcept override;
+		shared<shader> create_shader(desc_<shader> const & value) noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -311,12 +311,12 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_texture2d> };
 
-		data_desc<texture2d>	m_data		{}			; // 
+		desc_<texture2d>m_data		{}			; // 
 		uint32_t		m_handle	{}			; // handle
 		bool			m_locked	{ true }	; // locked
 
 	public:
-		opengl_texture2d(render_device * parent, data_desc<texture2d> const & value, addr_t data);
+		opengl_texture2d(render_device * parent, desc_<texture2d> const & value, addr_t data);
 
 		~opengl_texture2d() override;
 
@@ -343,7 +343,7 @@ namespace ml::gfx
 
 		image copy_to_image() const override;
 
-		data_desc<texture2d> const & get_data() const noexcept { return m_data; }
+		desc_<texture2d> const & get_data() const noexcept { return m_data; }
 	};
 }
 
@@ -358,12 +358,12 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_texturecube> };
 
-		data_desc<texturecube>	m_data		{}			; // data_desc
-		uint32_t				m_handle	{}			; // handle
-		bool					m_locked	{ true }	; // locked
+		desc_<texturecube>	m_data		{}			; // data_desc
+		uint32_t			m_handle	{}			; // handle
+		bool				m_locked	{ true }	; // locked
 
 	public:
-		opengl_texturecube(render_device * parent, data_desc<texturecube> const & value);
+		opengl_texturecube(render_device * parent, desc_<texturecube> const & value);
 
 		~opengl_texturecube() override;
 
@@ -378,7 +378,7 @@ namespace ml::gfx
 
 		void unlock() override;
 
-		data_desc<texturecube> const & get_data() const noexcept { return m_data; }
+		desc_<texturecube> const & get_data() const noexcept { return m_data; }
 	};
 }
 
@@ -393,14 +393,14 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_framebuffer> };
 
-		data_desc<framebuffer>			m_data			{}	; // data_desc
+		desc_<framebuffer>				m_data			{}	; // data_desc
 		uint32_t						m_handle		{}	; // handle
 		pmr::vector<shared<texture2d>>	m_attachments	{}	; // color attachments
 		shared<texture2d>				m_depth			{}	; // depth attachment
 
 		
 	public:
-		opengl_framebuffer(render_device * parent, data_desc<framebuffer> const & value);
+		opengl_framebuffer(render_device * parent, desc_<framebuffer> const & value);
 
 		~opengl_framebuffer() override;
 
@@ -421,7 +421,7 @@ namespace ml::gfx
 
 		shared<texture2d> const & get_depth_attachment() const noexcept override { return m_depth; }
 
-		data_desc<framebuffer> const & get_data() const noexcept override { return m_data; }
+		desc_<framebuffer> const & get_data() const noexcept override { return m_data; }
 	};
 }
 
@@ -522,7 +522,7 @@ namespace ml::gfx
 	private:
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_shader> };
 
-		data_desc<shader>						m_data		{}; // data_desc
+		desc_<shader>							m_data		{}; // data_desc
 		uint32_t								m_handle	{}; // handle
 		pmr::string								m_log		{}; // error log
 		uint32_t								m_type		{}; // shader type
@@ -545,7 +545,7 @@ namespace ml::gfx
 		};
 
 	public:
-		opengl_shader(render_device * parent, data_desc<shader> const & value);
+		opengl_shader(render_device * parent, desc_<shader> const & value);
 
 		~opengl_shader() override;
 

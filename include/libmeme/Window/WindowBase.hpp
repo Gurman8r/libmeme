@@ -6,7 +6,7 @@
 namespace ml
 {
 	// window implementation base
-	struct ML_WINDOW_API window_base : non_copyable, trackable
+	struct ML_WINDOW_API window_base : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

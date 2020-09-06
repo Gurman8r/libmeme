@@ -1,4 +1,4 @@
-#include <libmeme/Core/EventBus.hpp>
+#include <libmeme/Core/Events.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
@@ -30,9 +30,7 @@ static class memcfg final : public singleton<memcfg>
 
 static auto const default_settings{ R"(
 {
-	"content": {
-		"path": "../../../../"
-	},
+	"path": "../../../../",
 	"window": {
 		"title": "libmeme <3",
 		"video": {
@@ -94,19 +92,17 @@ ml::int32_t main()
 
 	// context
 	static memory			mem	{ pmr::get_default_resource() };
-	static json				cfg	{ load_settings() };
-	static timer_context	time{};
+	static io_context		io	{ __argc, __argv, load_settings() };
 	static event_bus		bus	{};
-	static io_context		io	{ __argv[0], fs::current_path(), cfg["content"]["path"] };
-	static gui_window		win	{};
+	static editor_window	win	{};
 	static script_context	scr	{ io.program_name, io.content_path };
-	static system_context	sys	{ &bus, &cfg, &io, &mem, &scr, &time, &win };
+	static system_context	sys	{ &bus, &io, &mem, &scr, &win };
 	static application		app	{ &sys };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// open window
-	ML_assert(win.open(cfg["window"].get<window_settings>()));
+	ML_assert(win.open(io.conf["window"].get<window_settings>()));
 	{
 		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
 		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(x...); });
@@ -129,18 +125,18 @@ ml::int32_t main()
 	}
 
 	// configure gui
-	win.load_style(io.path2(cfg["gui"]["style"]));
-	cfg["gui"]["dockspace"]["visible"].get_to(win.get_dockspace().visible);
-	cfg["gui"]["dockspace"]["menubar"].get_to(win.get_dockspace().menubar);
+	win.load_style(io.path2(io.conf["gui"]["style"]));
+	io.conf["gui"]["dockspace"]["visible"].get_to(win.get_dockspace().visible);
+	io.conf["gui"]["dockspace"]["menubar"].get_to(win.get_dockspace().menubar);
 
 	// load plugins
-	for (auto const & path : cfg["plugins"]["files"])
+	for (auto const & path : io.conf["plugins"]["files"])
 	{
-		app.get_mods().install(path);
+		app.getmods()->install(path);
 	}
 
 	// run scripts
-	for (auto const & path : cfg["scripts"]["files"])
+	for (auto const & path : io.conf["scripts"]["files"])
 	{
 		scr.do_file(io.path2(path));
 	}
@@ -149,23 +145,19 @@ ml::int32_t main()
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
-	bus.fire<load_event>();
-	ML_defer(){ bus.fire<unload_event>(); };
-	do
+	
+	bus.fire<load_event>(); ML_defer() { bus.fire<unload_event>(); };
+	
+	while (win.is_open())
 	{
-		// timers
-		time.begin_step(); ML_defer() { time.end_step(); };
+		io.begin_step(); ML_defer() { io.end_step(); };
 
-		// update
 		ML_benchmark_L("poll")			{ window::poll_events(); };
 		ML_benchmark_L("update event")	{ bus.fire<update_event>(); };
-		
-		// gui
 		ML_benchmark_L("begin gui")		{ win.new_frame(&bus); };
 		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(); };
 		ML_benchmark_L("end gui")		{ win.render_frame(); };
 	}
-	while (win.is_open());
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

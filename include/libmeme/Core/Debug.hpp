@@ -51,6 +51,16 @@ namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	static struct // io
+	{
+		std::ostream & out	{ std::cout };
+		std::ostream & err	{ std::cerr };
+		std::istream & in	{ std::cin };
+	}
+	const io;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	inline int32_t clear(int32_t exit_code = EXIT_SUCCESS) noexcept
 	{
 #ifdef ML_os_windows
@@ -68,77 +78,77 @@ namespace ml::debug
 #ifdef ML_os_windows
 		std::system("pause");
 #else
-		std::cin.get();
+		io.in.get();
 #endif
 		return exit_code;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Str
-	> auto & puts(Str && str) noexcept
+	template <class Fmt
+	> auto & puts(Fmt && fmt) noexcept
 	{
-		return std::cout << ML_forward(str) << '\n';
+		return io.out << ML_forward(fmt) << '\n';
 	}
 
-	template <class Str, class Arg0, class ... Args
-	> auto & puts(Str && str, Arg0 && arg0, Args && ... args) noexcept
+	template <class Fmt, class Arg0, class ... Args
+	> auto & puts(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return debug::puts(util::format(ML_forward(str), ML_forward(arg0), ML_forward(args)...));
+		return debug::puts(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr int32_t info() noexcept { return 1; } // true
 
-	template <class Str
-	> int32_t info(Str && str) noexcept
+	template <class Fmt
+	> int32_t info(Fmt && fmt) noexcept
 	{
-		std::cout << ML_IMPL_DEBUG_MSG_I << ML_forward(str) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
 
 		return debug::info();
 	}
 
-	template <class Str, class Arg0, class ... Args
-	> int32_t info(Str && str, Arg0 && arg0, Args && ... args) noexcept
+	template <class Fmt, class Arg0, class ... Args
+	> int32_t info(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return debug::info(util::format(ML_forward(str), ML_forward(arg0), ML_forward(args)...));
+		return debug::info(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr int32_t error() noexcept { return 0; } // false
 
-	template <class Str
-	> int32_t error(Str && str) noexcept
+	template <class Fmt
+	> int32_t error(Fmt && fmt) noexcept
 	{
-		std::cout << ML_IMPL_DEBUG_MSG_E << ML_forward(str) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
 
 		return debug::error();
 	}
 
-	template <class Str, class Arg0, class ... Args
-	> int32_t error(Str && str, Arg0 && arg0, Args && ... args) noexcept
+	template <class Fmt, class Arg0, class ... Args
+	> int32_t error(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return debug::error(util::format(ML_forward(str), ML_forward(arg0), ML_forward(args)...));
+		return debug::error(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	constexpr int32_t warning() noexcept { return -1; } // true
 
-	template <class Str
-	> int32_t warning(Str && str) noexcept
+	template <class Fmt
+	> int32_t warning(Fmt && fmt) noexcept
 	{
-		std::cout << ML_IMPL_DEBUG_MSG_W << ML_forward(str) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
 
 		return debug::warning();
 	}
 
-	template <class Str, class Arg0, class ... Args
-	> int32_t warning(Str && str, Arg0 && arg0, Args && ... args) noexcept
+	template <class Fmt, class Arg0, class ... Args
+	> int32_t warning(Fmt && fmt, Arg0 && arg0, Args && ... args) noexcept
 	{
-		return debug::warning(util::format(ML_forward(str), ML_forward(arg0), ML_forward(args)...));
+		return debug::warning(util::format(ML_forward(fmt), ML_forward(arg0), ML_forward(args)...));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
