@@ -181,9 +181,10 @@ namespace ml
 	// remove listener from all events
 	inline event_listener::~event_listener() noexcept
 	{
-		ML_assert("event bus does not exist" && m_event_bus);
-
-		m_event_bus->unsub(this);
+		if (m_event_bus)
+		{
+			m_event_bus->unsub(this);
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

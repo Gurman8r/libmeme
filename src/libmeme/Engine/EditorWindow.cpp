@@ -85,7 +85,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void editor_window::new_frame(event_bus * bus)
+	void editor_window::begin_gui_frame(event_bus * bus)
 	{
 		ML_ImGui_NewFrame();
 
@@ -94,7 +94,7 @@ namespace ml
 		m_dockspace.render(bus);
 	}
 
-	void editor_window::render_frame()
+	void editor_window::end_gui_frame()
 	{
 		ImGui::Render();
 
@@ -197,7 +197,10 @@ namespace ml
 
 	void editor_window::dockspace::render(event_bus * bus)
 	{
-		if (!bus || !visible || !(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)) { return; }
+		if (!bus ||
+			!visible ||
+			!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		) { return; }
 
 		ML_ImGui_ScopeID(this);
 

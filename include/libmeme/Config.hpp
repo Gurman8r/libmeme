@@ -272,6 +272,11 @@
 #    define ML_bool             bool
 #endif
 
+// byte
+#ifndef ML_byte
+#   define ML_byte              unsigned char
+#endif
+
 // char
 #ifndef ML_char
 #   if (!ML_has_cxx20)
@@ -279,11 +284,6 @@
 #   else
 #       define ML_char          char8_t
 #   endif
-#endif
-
-// byte
-#ifndef ML_byte
-#   define ML_byte              unsigned char
 #endif
 
 // intmax

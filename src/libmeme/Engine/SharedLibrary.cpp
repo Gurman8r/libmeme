@@ -77,7 +77,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::read(cstring name)
+	void * shared_library::addr(cstring name)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }

@@ -23,7 +23,7 @@ namespace ml
 					std::move(lib),
 					plugin_api
 					{
-						lib.proc<void, system_context *, plugin *>("ml_plugin_attach"),
+						lib.proc<plugin *, system_context *>("ml_plugin_attach"),
 						lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
 					},
 					nullptr
@@ -33,8 +33,7 @@ namespace ml
 		}) })
 		// load plugin
 		{
-			plugin * ptr{};
-			if (m_data.back<plugin_api>().attach(m_sys, ptr); ptr)
+			if (plugin * ptr{ m_data.back<plugin_api>().attach(m_sys) })
 			{
 				m_data.back<plugin *>() = ptr;
 

@@ -144,12 +144,12 @@ namespace ml
 		// ASSETS
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ds::map< pmr::string, shared<font>			> m_fonts		{};
-		ds::map< pmr::string, shared<image>			> m_images		{};
-		ds::map< pmr::string, shared<uniform_buffer>> m_uniforms	{};
-		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
-		ds::map< pmr::string, shader_asset			> m_shaders		{};
 		ds::map< pmr::string, shared<gfx::texture2d>> m_textures	{};
+		ds::map< pmr::string, shared<font>			> m_fonts		{};
+		ds::map< pmr::string, shared<uniform_buffer>> m_uniforms	{};
+		ds::map< pmr::string, shader_asset			> m_shaders		{};
+		ds::map< pmr::string, shared<image>			> m_images		{};
+		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
 
 
 		// ECS
@@ -191,7 +191,7 @@ namespace ml
 
 		gui::console m_console{};
 
-		ax::NodeEditor::EditorContext * m_node_editor{ ax::NodeEditor::CreateEditor() };
+		scoped<ax::NodeEditor::EditorContext> m_node_editor{ ax::NodeEditor::CreateEditor() };
 
 		gui::plot_controller m_plots
 		{
@@ -231,10 +231,9 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(system_context * sys) noexcept : plugin{ sys }
+		demo(system_context * sys) noexcept : plugin{ sys, nullptr }
 		{
 			sys->bus->sub<	load_event				>(this);
-			sys->bus->sub<	unload_event			>(this);
 			sys->bus->sub<	update_event			>(this);
 			sys->bus->sub<	dockspace_event			>(this);
 			sys->bus->sub<	main_menu_bar_event		>(this);
@@ -244,12 +243,13 @@ namespace ml
 			sys->bus->sub<	window_cursor_pos_event	>(this);
 		}
 
+		~demo() noexcept override {}
+
 		void on_event(event const & ev) override
 		{
 			switch (ev)
 			{
 			case load_event			::ID: return on_load			((load_event const &)ev);
-			case unload_event		::ID: return on_unload			((unload_event const &)ev);
 			case update_event		::ID: return on_update			((update_event const &)ev);
 			case dockspace_event	::ID: return on_dockspace		((dockspace_event const &)ev);
 			case main_menu_bar_event::ID: return on_main_menu_bar	((main_menu_bar_event const &)ev);
@@ -294,7 +294,7 @@ namespace ml
 			//ML_defer(&) { m_cout.update(&std::cout); };
 
 			// ICON
-			if (image const ico{ getio()->path2("assets/textures/ico.png"), 0, false })
+			if (image const ico{ getio()->path2("assets/textures/icon.png"), 0, false })
 			{
 				getwin()->set_icon(ico.width(), ico.height(), ico.data());
 			}
@@ -502,31 +502,12 @@ namespace ml
 			}
 		}
 
-		void on_unload(unload_event const &)
-		{
-			// unload stuff, etc...
-
-			m_ecs.clear();
-			m_images.clear();
-			m_meshes.clear();
-			m_shaders.clear();
-			m_uniforms.clear();
-			m_fonts.clear();
-			m_textures.clear();
-
-			ax::NodeEditor::DestroyEditor(m_node_editor);
-		}
-
 		void on_update(update_event const &)
 		{
 			// update stuff, etc...
 
 			// console
-			for (char c : m_cout.sstr().str())
-			{
-				m_console.write(c);
-			}
-			m_cout.sstr().str({});
+			m_console.dump(m_cout.sstr());
 
 			// plots
 			m_plots.update(getio()->main_timer.elapsed().count());
@@ -1154,7 +1135,7 @@ namespace ml
 			
 			ImGui::Separator();
 			
-			ed::SetCurrentEditor(m_node_editor);
+			ed::SetCurrentEditor(m_node_editor.get());
 			ed::Begin("My Editor", { 0.f, 0.f });
 			
 			int32_t uniqueId{ 1 };
@@ -1318,19 +1299,14 @@ namespace ml
 
 extern "C"
 {
-	ML_PLUGIN_API ml::plugin * ml_plugin_main(ml::system_context * sys)
+	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::system_context * sys)
 	{
 		return sys->mem->new_object<ml::demo>(sys);
-	}
-
-	ML_PLUGIN_API void ml_plugin_attach(ml::system_context * sys, ml::plugin * ptr)
-	{
-		ptr = sys->mem->new_object<ml::demo>(sys);
 	}
 	
 	ML_PLUGIN_API void ml_plugin_detach(ml::system_context * sys, ml::plugin * ptr)
 	{
-		if (ptr) { ml::util::destruct((ml::demo *)ptr); }
+		sys->mem->delete_object((ml::demo *)ptr);
 	}
 }
 

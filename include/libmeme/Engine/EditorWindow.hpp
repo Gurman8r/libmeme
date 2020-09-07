@@ -28,9 +28,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void new_frame(event_bus * bus = {});
+		void begin_gui_frame(event_bus * bus = {});
 
-		void render_frame();
+		void end_gui_frame();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -69,6 +69,8 @@ namespace ml
 
 		private:
 			friend editor_window;
+
+			dockspace() noexcept = default;
 
 			void render(event_bus * bus);
 		};

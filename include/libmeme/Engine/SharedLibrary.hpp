@@ -74,14 +74,12 @@ namespace ml
 
 		bool close();
 
-		void * read(cstring name);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		void * addr(cstring name);
 
 		template <class Ret, class ... Args
 		> auto proc(cstring name) noexcept
 		{
-			return reinterpret_cast<Ret(*)(Args...)>(this->read(name));
+			return reinterpret_cast<Ret(*)(Args...)>(this->addr(name));
 		}
 
 		template <class Ret, class ... Args
@@ -109,7 +107,7 @@ namespace ml
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
-		ML_NODISCARD auto symbols() const noexcept -> symbol_table const & { return m_syms; }
+		ML_NODISCARD auto syms() const noexcept -> symbol_table const & { return m_syms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

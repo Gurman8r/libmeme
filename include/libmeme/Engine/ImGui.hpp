@@ -56,14 +56,21 @@ namespace ml::impl
 	struct ML_NODISCARD imgui_scope_id final
 	{
 		template <class ... Args
-		> imgui_scope_id(Args && ... args) noexcept
-		{
-			ImGui::PushID(ML_forward(args)...);
-		}
+		> imgui_scope_id(Args && ... args) noexcept { ImGui::PushID(ML_forward(args)...); }
 
-		~imgui_scope_id() noexcept
+		~imgui_scope_id() noexcept { ImGui::PopID(); }
+	};
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+namespace ml
+{
+	template <> struct default_delete<ax::NodeEditor::EditorContext>
+	{
+		void operator()(ax::NodeEditor::EditorContext * ptr)
 		{
-			ImGui::PopID();
+			ax::NodeEditor::DestroyEditor(ptr);
 		}
 	};
 }

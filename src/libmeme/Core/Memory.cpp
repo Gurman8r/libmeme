@@ -23,10 +23,7 @@ namespace ml
 	{
 		ML_assert(s_instance == this);
 
-		while (!m_records.empty()) // cleanup remaining allocations
-		{
-			deallocate(m_records.back().first);
-		}
+		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
 
 		s_instance = nullptr;
 	}

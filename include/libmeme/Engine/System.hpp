@@ -34,7 +34,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using fps_times_t = pmr::vector<float_t>;
+		using fps_t = pmr::vector<float_t>;
 
 		timer const	main_timer	{};
 		timer		loop_timer	{ false };
@@ -43,7 +43,7 @@ namespace ml
 		float_t		frame_rate	{};
 		float_t		fps_accum	{};
 		size_t		fps_index	{};
-		fps_times_t	fps_times	{ 120, fps_times_t::allocator_type{} };
+		fps_t		fps_times	{ 120, fps_t::allocator_type{} };
 
 		void begin_step() noexcept
 		{
@@ -68,11 +68,11 @@ namespace ml
 
 	struct ML_NODISCARD system_context final
 	{
-		event_bus		* const bus	; // bus
-		io_context		* const io	; // io
-		memory			* const mem	; // memory
-		script_context	* const scr	; // scripts
-		editor_window	* const win	; // window
+		event_bus		* const bus	; // event bus
+		io_context		* const io	; // io context
+		memory			* const mem	; // memory manager
+		script_context	* const scr	; // script context
+		editor_window	* const win	; // editor window
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

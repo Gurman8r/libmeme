@@ -407,6 +407,13 @@ namespace ml::gui
 			return (*this);
 		}
 
+		self_type & dump(pmr::stringstream & ss)
+		{
+			for (char c : ss.str()) { write(c); }
+			ss.str({});
+			return (*this);
+		}
+
 		self_type & print(pmr::string const & value) noexcept
 		{
 			for (char const & c : value)

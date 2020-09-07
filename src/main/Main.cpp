@@ -102,7 +102,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// open window
-	ML_assert(win.open(io.conf["window"].get<window_settings>()));
+	ML_assert(win.open(io.conf["window"]));
 	{
 		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
 		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(x...); });
@@ -146,17 +146,17 @@ ml::int32_t main()
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
 	
-	bus.fire<load_event>(); ML_defer() { bus.fire<unload_event>(); };
+	bus.fire<load_event>();
 	
 	while (win.is_open())
 	{
 		io.begin_step(); ML_defer() { io.end_step(); };
 
-		ML_benchmark_L("poll")			{ window::poll_events(); };
-		ML_benchmark_L("update event")	{ bus.fire<update_event>(); };
-		ML_benchmark_L("begin gui")		{ win.new_frame(&bus); };
-		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(); };
-		ML_benchmark_L("end gui")		{ win.render_frame(); };
+		ML_benchmark_L("window poll")	{ window::poll_events();		};
+		ML_benchmark_L("update event")	{ bus.fire<update_event>();		};
+		ML_benchmark_L("begin gui")		{ win.begin_gui_frame(&bus);	};
+		ML_benchmark_L("gui event")		{ bus.fire<gui_event>();		};
+		ML_benchmark_L("end gui")		{ win.end_gui_frame();			};
 	}
 	return EXIT_SUCCESS;
 

@@ -19,7 +19,7 @@ namespace ml::gfx
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_render_device> };
 
 		desc_<render_device>	m_data	{}; // device settings
-		shared<render_context>		m_ctx	{}; // render context
+		shared<render_context>	m_ctx	{}; // render context
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

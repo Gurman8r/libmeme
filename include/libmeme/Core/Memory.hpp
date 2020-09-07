@@ -205,7 +205,7 @@ namespace ml
 		// calloc
 		ML_NODISCARD void * allocate(size_t count, size_t size) noexcept
 		{
-			byte_t * const addr{ this->do_allocate(count * size) };
+			byte_t * const addr{ m_allocator.allocate(count * size) };
 
 			return m_records.insert(addr, { ++m_counter, addr, count, size }).second->addr;
 		}
@@ -215,7 +215,7 @@ namespace ml
 		{
 			if (auto const it{ m_records.find(addr) })
 			{
-				this->do_deallocate(it->second->addr, it->second->count * it->second->size);
+				m_allocator.deallocate(it->second->addr, it->second->count * it->second->size);
 
 				m_records.erase(it->first);
 			}
@@ -285,13 +285,6 @@ namespace ml
 			util::destruct(addr);
 			this->deallocate_object(addr);
 		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	private:
-		auto do_allocate(size_t count) noexcept -> byte_t * { return m_allocator.allocate(count); }
-
-		void do_deallocate(byte_t * addr, size_t count) noexcept { m_allocator.deallocate(addr, count); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -119,8 +119,8 @@ namespace ml
 	ML_alias	uint32_t	= typename ML_uint32	;
 	ML_alias	uint64_t	= typename ML_uint64	;
 
-	ML_alias	char_t		= typename ML_char		;
 	ML_alias	byte_t		= typename ML_byte		;
+	ML_alias	char_t		= typename ML_char		;
 	ML_alias	intmax_t	= typename ML_intmax	;
 	ML_alias	uintmax_t	= typename ML_uintmax	;
 	ML_alias	ulong_t		= typename ML_ulong		;
@@ -142,10 +142,10 @@ namespace ml
 	// c-string types
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias	cstring		= typename char_t const *	;
-	ML_alias	cwstring	= typename wchar_t const *	;
+	ML_alias	cstring		= typename char		const *	;
+	ML_alias	cwstring	= typename wchar_t	const *	;
 #if (ML_has_cxx20)
-	ML_alias	c8string	= typename char8_t const *	;
+	ML_alias	c8string	= typename char8_t	const *	;
 #endif
 	ML_alias	c16string	= typename char16_t const *	;
 	ML_alias	c32string	= typename char32_t const *	;

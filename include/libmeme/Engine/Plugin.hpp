@@ -15,9 +15,12 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit plugin(system_context * sys) noexcept : event_listener{ sys->bus }, m_sys{ sys }
+		explicit plugin(system_context * sys, void * user) noexcept
+			: event_listener{ sys->bus }
+			, m_sys			{ sys }
+			, m_user		{ user }
 		{
-			ML_assert("BUS MISMATCH" && (event_listener::m_event_bus == m_sys->bus));
+			ML_assert("PLUGIN BUS MISMATCH" && (event_listener::m_event_bus == m_sys->bus));
 		}
 
 		virtual ~plugin() noexcept override = default;
@@ -32,12 +35,14 @@ namespace ml
 		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io; }
 		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem; }
 		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr; }
+		ML_NODISCARD auto getuser()	const noexcept -> void				* { return m_user; }
 		ML_NODISCARD auto getwin()	const noexcept -> editor_window		* { return m_sys->win; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		system_context * const m_sys;
+		system_context * const	m_sys	; // system pointer
+		void * const			m_user	; // user pointer
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

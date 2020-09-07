@@ -51,13 +51,13 @@ namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static struct // io
+	static struct // stdio
 	{
 		std::ostream & out	{ std::cout };
 		std::ostream & err	{ std::cerr };
 		std::istream & in	{ std::cin };
 	}
-	const io;
+	const stdio;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -78,7 +78,7 @@ namespace ml::debug
 #ifdef ML_os_windows
 		std::system("pause");
 #else
-		io.in.get();
+		stdio.in.get();
 #endif
 		return exit_code;
 	}
@@ -88,7 +88,7 @@ namespace ml::debug
 	template <class Fmt
 	> auto & puts(Fmt && fmt) noexcept
 	{
-		return io.out << ML_forward(fmt) << '\n';
+		return stdio.out << ML_forward(fmt) << '\n';
 	}
 
 	template <class Fmt, class Arg0, class ... Args
@@ -104,7 +104,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t info(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
+		stdio.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
 
 		return debug::info();
 	}
@@ -122,7 +122,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t error(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
+		stdio.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
 
 		return debug::error();
 	}
@@ -140,7 +140,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t warning(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
+		stdio.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
 
 		return debug::warning();
 	}

@@ -7,18 +7,18 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Ch = char, class Al = pmr::polymorphic_allocator<Ch>
+	template <class Ch = char, class Tr = std::char_traits<Ch>, class Al = pmr::polymorphic_allocator<Ch>
 	> struct basic_stream_sniper final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using char_type			= typename Ch;
+		using traits_type		= typename Tr;
 		using allocator_type	= typename Al;
-		using self_type			= typename _ML basic_stream_sniper	<char_type, allocator_type>;
-		using traits_type		= typename std::char_traits			<char_type>;
-		using sstream_type		= typename std::basic_stringstream	<char_type, traits_type, allocator_type>;
-		using ostream_type		= typename std::basic_ostream		<char_type, traits_type>;
-		using streambuf_type	= typename std::basic_streambuf		<char_type, traits_type>;
+		using self_type			= typename basic_stream_sniper<Ch, Tr, Al>;
+		using sstream_type		= typename std::basic_stringstream<Ch, Tr, Al>;
+		using ostream_type		= typename std::basic_ostream<Ch, Tr>;
+		using streambuf_type	= typename std::basic_streambuf<Ch, Tr>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,7 +93,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_alias stream_sniper = typename basic_stream_sniper<char>;
+	ML_alias stream_sniper = typename basic_stream_sniper<>;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

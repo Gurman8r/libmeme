@@ -15,7 +15,9 @@ namespace ml
 
 		struct plugin_api final
 		{
-			std::function<void(system_context *, plugin *)> attach, detach;
+			plugin * (*attach)(system_context *);
+
+			void (*detach)(system_context *, plugin *);
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
