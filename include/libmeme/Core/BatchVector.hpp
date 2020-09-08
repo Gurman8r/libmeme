@@ -5,8 +5,6 @@
 
 namespace ml::ds
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	// tuple< vector<T>... >
 	template <class ... _Ts
 	> struct batch_vector final
@@ -1082,8 +1080,6 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BATCH_VECTOR_HPP_

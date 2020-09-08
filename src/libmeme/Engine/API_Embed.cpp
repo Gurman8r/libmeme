@@ -1,6 +1,51 @@
 #include <libmeme/Engine/Application.hpp>
 
-// memelib
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	script_context::script_context(fs::path const & name, fs::path const & home)
+	{
+		ML_assert(!Py_IsInitialized());
+		PyObject_SetArenaAllocator(std::invoke([&temp = PyObjectArenaAllocator{}]()
+		{
+			temp.alloc = [](auto, size_t size) noexcept
+			{
+				return memory::get()->resource()->allocate(size);
+			};
+			temp.free = [](auto, void * addr, size_t size) noexcept
+			{
+				return memory::get()->resource()->deallocate(addr, size);
+			};
+			return std::addressof(temp);
+		}));
+		Py_SetProgramName(name.c_str());
+		Py_SetPythonHome(home.c_str());
+		Py_InitializeEx(1);
+		ML_assert(Py_IsInitialized());
+	}
+
+	script_context::~script_context() noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
+	}
+
+	int32_t script_context::do_file(cstring path) const noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
+	}
+
+	int32_t script_context::do_string(cstring str) const noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		return PyRun_SimpleStringFlags(str, nullptr);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 PYBIND11_EMBEDDED_MODULE(memelib, m)
 {
 	using namespace ml;

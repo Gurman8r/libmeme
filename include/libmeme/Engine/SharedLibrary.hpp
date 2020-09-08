@@ -8,6 +8,12 @@ namespace ml
 {
 	ML_decl_handle(library_handle);
 
+	template <class Fn
+	> ML_alias funtion_result = Fn;
+
+	template <class Fn
+	> ML_alias funtion_tesult = Fn;
+
 	struct ML_ENGINE_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -72,7 +78,7 @@ namespace ml
 
 		bool open(fs::path const & path);
 
-		bool close();
+		bool close(bool wipe = true);
 
 		void * addr(cstring name);
 
@@ -84,7 +90,7 @@ namespace ml
 
 		template <class Ret, class ... Args
 		> auto call(cstring name, Args && ... args) noexcept -> std::conditional_t<
-			std::is_same_v<Ret, void>, void, std::optional<Ret>
+			!std::is_same_v<Ret, void>, std::optional<Ret>, void
 		>
 		{
 			if (auto const fn{ this->proc<Ret, Args...>(name) })
@@ -107,6 +113,8 @@ namespace ml
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
+		ML_NODISCARD auto hash() const noexcept -> hash_t { return util::hash(m_path.string()); }
+
 		ML_NODISCARD auto syms() const noexcept -> symbol_table const & { return m_syms; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -120,12 +128,12 @@ namespace ml
 			}
 			else if constexpr (std::is_same_v<U, fs::path>)
 			{
-				return compare(util::hash(value.filename().string()));
+				return compare(util::hash(value.string()));
 			}
 			else
 			{
 				static_assert(std::is_same_v<U, hash_t>);
-				return util::compare(util::hash(m_path.filename().string()), value);
+				return util::compare(hash(), value);
 			}
 		}
 

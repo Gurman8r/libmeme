@@ -26,6 +26,12 @@ namespace ml::ds
 
 		static constexpr size_type thresh{ _Th };
 
+		template <class T = key_type
+		> using key_storage = typename ds::set<T, thresh, compare_type>;
+
+		template <class T = value_type
+		> using value_storage = typename pmr::vector<T>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
@@ -45,8 +51,9 @@ namespace ml::ds
 		using allocator_type					= typename traits_type::allocator_type;
 		using difference_type					= typename traits_type::difference_type;
 		using size_type							= typename traits_type::size_type;
+		using key_storage						= typename traits_type::template key_storage<>;
+		using value_storage						= typename traits_type::template value_storage<>;
 
-		using key_storage						= typename _ML ds::set<key_type, traits_type::thresh, compare_type>;
 		using key_pointer						= typename key_storage::pointer;
 		using key_const_pointer					= typename key_storage::const_pointer;
 		using key_reference						= typename key_storage::reference;
@@ -58,7 +65,6 @@ namespace ml::ds
 		using key_reverse_iterator				= typename key_storage::reverse_iterator;
 		using key_const_reverse_iterator		= typename key_storage::const_reverse_iterator;
 
-		using value_storage						= typename pmr::vector<value_type>;
 		using value_pointer						= typename value_storage::pointer;
 		using value_const_pointer				= typename value_storage::const_pointer;
 		using value_reference					= typename value_storage::reference;
@@ -96,6 +102,15 @@ namespace ml::ds
 		basic_flat_map(allocator_type alloc = {})
 			: m_pair{ key_storage{ alloc }, value_storage{ alloc } }
 		{
+		}
+
+		basic_flat_map(pmr::vector<key_type> && k, pmr::vector<value_type> && v, allocator_type alloc = {}) noexcept
+			: self_type{ alloc }
+		{
+			for (size_t i = 0, imax = ML_min(k.size(), v.size()); i < imax; ++i)
+			{
+				this->insert(ML_forward(k[i]), ML_forward(v[i]));
+			}
 		}
 
 		basic_flat_map(init_type value, allocator_type alloc = {})
@@ -616,10 +631,29 @@ namespace ml::ds
 		class	_Vt,					// value type
 		size_t	_Th = 42,				// search heuristic
 		class	_Pr = std::less<_Kt>	// key comparator predicate type
-	> ML_alias map = typename basic_flat_map
+	> ML_alias map = basic_flat_map
 	<
 		flat_map_traits<_Kt, _Vt, _Pr, _Th>
 	>;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class K, class V, size_t T = 42, class P = std::less<K>
+	> void to_json(json & j, ds::map<K, V, T, P> const & v)
+	{
+		j["keys"	] = v.keys();
+		j["values"	] = v.values();
+	}
+
+	template <class K, class V, size_t T = 42, class P = std::less<K>
+	> void from_json(json const & j, ds::map<K, V, T, P> & v)
+	{
+		using M = typename ds::map<K, V, T, P>;
+		using K = typename M::key_storage;
+		using V = typename M::value_storage;
+
+		v = M{ (K)j["keys"], (V)j["values"] };
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

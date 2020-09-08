@@ -15,9 +15,8 @@ namespace ml
 
 		struct plugin_api final
 		{
-			plugin * (*attach)(system_context *);
-
-			void (*detach)(system_context *, plugin *);
+			plugin *	(*attach)(system_context *);
+			void		(*detach)(system_context *, plugin *);
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,7 +37,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plugin_id install(fs::path path);
+		plugin_id install(fs::path const & path);
 
 		bool uninstall(plugin_id value);
 
@@ -51,8 +50,8 @@ namespace ml
 			plugin_id		,	// id
 			fs::path		,	// path
 			shared_library	,	// library
-			plugin_api		,	// interface
-			plugin *			// instance
+			plugin *		,	// instance
+			plugin_api			// interface
 		> m_data;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

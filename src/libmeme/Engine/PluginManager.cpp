@@ -4,32 +4,20 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin_id plugin_manager::install(fs::path path)
+	plugin_id plugin_manager::install(fs::path const & path)
 	{
 		// load library
-		if (auto const id{ std::invoke([&]() -> plugin_id
+		if (auto const id{ std::invoke([&, &lib = shared_library{ path }]() -> plugin_id
 		{
-			if (path.empty()) { return nullptr; }
-			if (path.extension().empty() && !fs::exists(path))
-			{
-				path += shared_library::default_extension;
-			}
-			if (shared_library lib{ path })
-			{
-				return std::get<0>(m_data.push_back
-				(
-					ML_handle(plugin_id, util::hash(path.string())),
-					path,
-					std::move(lib),
-					plugin_api
-					{
-						lib.proc<plugin *, system_context *>("ml_plugin_attach"),
-						lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
-					},
-					nullptr
-				));
-			}
-			return nullptr;
+			return !lib ? nullptr : std::get<plugin_id &>(m_data.push_back
+			(
+				ML_handle(plugin_id, lib.hash()), lib.path(), std::move(lib), nullptr,
+				plugin_api
+				{
+					lib.proc<plugin *, system_context *>("ml_plugin_attach"),
+					lib.proc<void, system_context *, plugin *>("ml_plugin_detach")
+				}
+			));
 		}) })
 		// load plugin
 		{
@@ -49,8 +37,7 @@ namespace ml
 	bool plugin_manager::uninstall(plugin_id value)
 	{
 		if (!value) { return false; }
-		if (auto const it{ m_data.find<plugin_id>(value) }
-		; it != m_data.end<plugin_id>())
+		if (auto const it{ m_data.find<plugin_id>(value) }; it != m_data.end<plugin_id>())
 		{
 			auto const i{ m_data.index_of<plugin_id>(it) };
 

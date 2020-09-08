@@ -153,7 +153,7 @@ namespace ml
 // memory
 namespace ml
 {
-	// memory manager singleton
+	// memory manager
 	struct ML_CORE_API memory final : non_copyable
 	{
 	public:
@@ -174,7 +174,7 @@ namespace ml
 
 		explicit memory(passthrough_resource * res) noexcept;
 
-		explicit memory(pmr::memory_resource * res) noexcept : memory{
+		explicit memory(pmr::memory_resource * res) : memory{
 			reinterpret_cast<passthrough_resource *>(res)
 		}
 		{
@@ -216,7 +216,6 @@ namespace ml
 			if (auto const it{ m_records.find(addr) })
 			{
 				m_allocator.deallocate(it->second->addr, it->second->count * it->second->size);
-
 				m_records.erase(it->first);
 			}
 		}

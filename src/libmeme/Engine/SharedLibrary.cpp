@@ -23,16 +23,13 @@ namespace ml
 
 	bool shared_library::open(fs::path const & path)
 	{
-		// already open
-		if (m_handle) { return false; }
+		if (m_handle || path.empty()) { return false; }
 
-		// set path
 		if ((m_path = path).extension().empty())
 		{
 			m_path += default_extension; // no extension provided
 		}
 
-		// open library
 		return m_handle = (library_handle)std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
@@ -49,18 +46,12 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::close()
+	bool shared_library::close(bool wipe)
 	{
-		// not open
 		if (!m_handle) { return false; }
 
-		// clear path
-		m_path.clear();
+		if (wipe) { m_path.clear(); m_syms.clear(); }
 
-		// clear symbols
-		m_syms.clear();
-
-		// close library
 		return std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)

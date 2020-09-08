@@ -261,9 +261,9 @@ namespace ml
 				case key_code_w: {
 					switch (k.action)
 					{
-					case 0: { debug::puts("w released"); } break;
-					case 1: { debug::puts("w pressed"); } break;
-					case 2: { debug::puts("w repeated"); } break;
+					case 0: { debug::puts("w up"); } break;
+					case 1: { debug::puts("w down"); } break;
+					case 2: { debug::puts("w hold"); } break;
 					}
 				} break;
 				}
@@ -291,7 +291,7 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			//ML_defer(&) { m_cout.update(&std::cout); };
+			getio()->fps_times.resize(256);
 
 			// ICON
 			if (image const ico{ getio()->path2("assets/textures/icon.png"), 0, false })
@@ -537,7 +537,7 @@ namespace ml
 			enum : int32_t // nodes
 			{
 				root,
-				left, left_up, left_dn, left_dn2,
+				left, left_up, left_dn,
 				right, right_up, right_dn,
 				MAX_DOCK_NODE
 			};
@@ -553,8 +553,7 @@ namespace ml
 			// split nodes
 			d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
 			d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-			d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.71f	, &d[left]);	// left-down
-			d.split(left_dn2, d[left_dn], ImGuiDir_Right, 0.29f	, &d[left_dn]);	// left-down2
+			d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.5f	, &d[left]);	// left-down
 			d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
 			d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
 			d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
@@ -564,7 +563,7 @@ namespace ml
 			d.dock(m_gui_ecs		, d[left_dn]);
 			d.dock(m_gui_assets		, d[left_dn]);
 			d.dock(m_gui_renderer	, d[left_dn]);
-			d.dock(m_gui_profiler	, d[left_dn2]);
+			d.dock(m_gui_profiler	, d[left_dn]);
 			d.dock(m_gui_memory		, d[right]);
 			d.dock(m_gui_docs		, d[right]);
 			d.dock(m_gui_nodes		, d[right]);
