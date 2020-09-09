@@ -4,6 +4,7 @@
 // WIP
 
 #include <libmeme/Engine/PluginManager.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {
@@ -17,20 +18,20 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto get()		noexcept -> application		* { return s_instance; }
-		ML_NODISCARD static auto getbus()	noexcept -> event_bus		* { return s_instance->m_sys->bus; }
-		ML_NODISCARD static auto getio()	noexcept -> io_context		* { return s_instance->m_sys->io; }
-		ML_NODISCARD static auto getmem()	noexcept -> memory			* { return s_instance->m_sys->mem; }
+		ML_NODISCARD static auto getbus()	noexcept -> event_bus		* { return s_instance->m_system->bus; }
+		ML_NODISCARD static auto geted()	noexcept -> editor_context	* { return s_instance->m_system->ed; }
+		ML_NODISCARD static auto getio()	noexcept -> io_context		* { return s_instance->m_system->io; }
+		ML_NODISCARD static auto getmem()	noexcept -> memory			* { return s_instance->m_system->mem; }
 		ML_NODISCARD static auto getmods()	noexcept -> plugin_manager	* { return &s_instance->m_plugins; }
-		ML_NODISCARD static auto getscr()	noexcept -> script_context	* { return s_instance->m_sys->scr; }
-		ML_NODISCARD static auto getwin()	noexcept -> editor_window	* { return s_instance->m_sys->win; }
+		ML_NODISCARD static auto getscr()	noexcept -> script_context	* { return s_instance->m_system->scr; }
+		ML_NODISCARD static auto getwin()	noexcept -> render_window	* { return s_instance->m_system->win; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static application *	s_instance	; // 
-		system_context * const	m_sys		; // 
-		plugin_manager			m_plugins	; // 
+		static application *	s_instance	; // instance
+		system_context * const	m_system	; // system pointer
+		plugin_manager			m_plugins	; // plugins
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

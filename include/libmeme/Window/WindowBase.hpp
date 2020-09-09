@@ -42,6 +42,11 @@ namespace ml
 
 		virtual int32_t get_hints() const = 0;
 
+		ML_NODISCARD bool has_hints(int32_t value) const noexcept
+		{
+			return (value & get_hints()) == value;
+		}
+
 		virtual int32_t get_input_mode(int32_t) const = 0;
 
 		virtual int32_t get_key(int32_t) const = 0;
@@ -55,6 +60,8 @@ namespace ml
 		virtual vec2i get_position() const = 0;
 
 		virtual vec2i get_size() const = 0;
+
+		virtual cstring get_title() const = 0;
 
 		virtual void * get_user_pointer() const = 0;
 

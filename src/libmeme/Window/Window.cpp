@@ -31,7 +31,9 @@ namespace ml
 		ML_assert(open(ws));
 	}
 
-	window::~window() noexcept {}
+	window::~window() noexcept
+	{
+	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -151,6 +153,11 @@ namespace ml
 	vec2i window::get_size() const noexcept
 	{
 		return m_impl->get_size();
+	}
+
+	cstring window::get_title() const noexcept
+	{
+		return m_impl->get_title();
 	}
 
 	void * window::get_user_pointer() const noexcept

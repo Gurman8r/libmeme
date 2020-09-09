@@ -59,7 +59,8 @@
 #else
 #	define ML_make_anon(expr)	ML_cat(_, ML_cat(expr, _))
 #endif
-#define ML_anon					ML_make_anon(anonymous) // _anonymous_#_
+
+#define ML_anon					ML_make_anon(anonymous) // anonymous variable
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

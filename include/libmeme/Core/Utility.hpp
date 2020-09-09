@@ -6,6 +6,7 @@
 #include <libmeme/Core/JSON.hpp>
 #include <libmeme/Core/Meta.hpp>
 #include <libmeme/Core/TypeInfo.hpp>
+#include <libmeme/Core/Wrapper.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -291,8 +291,6 @@ namespace ml
 		{
 			// load stuff, etc...
 
-			getio()->fps_times.resize(256);
-
 			// ICON
 			if (image const ico{ getio()->path2("assets/textures/icon.png"), 0, false })
 			{
@@ -532,7 +530,7 @@ namespace ml
 			})	gfx::execute(cmd, getwin()->get_render_context());
 		}
 
-		void on_dockspace(dockspace_event const &)
+		void on_dockspace(dockspace_event const & ev)
 		{
 			enum : int32_t // nodes
 			{
@@ -541,9 +539,9 @@ namespace ml
 				right, right_up, right_dn,
 				MAX_DOCK_NODE
 			};
-
+			
 			// setup dockspace
-			auto & d{ getwin()->get_dockspace() };
+			auto & d{ *ev.dockspace };
 			if (!d.nodes.empty()) { return; } else { d.nodes.resize(MAX_DOCK_NODE); }
 			if (!(d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))) { return; }
 			ML_defer(&) { d.end_builder(root); };
@@ -612,9 +610,9 @@ namespace ml
 			ML_ImGui_ScopeID(this);
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ getwin()->show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ getwin()->show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ getwin()->show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ geted()->show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ geted()->show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ geted()->show_imgui_about(&m_imgui_about.open); }
 
 			// WIDGETS
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT

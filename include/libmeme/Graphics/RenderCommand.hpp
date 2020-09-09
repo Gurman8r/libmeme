@@ -7,15 +7,15 @@ namespace ml::gfx
 {
 	// command executor helper
 	template <class Cmd, class Ctx
-	> static void execute(Cmd && cmd, Ctx && ctx) noexcept
+	> static auto execute(Cmd && cmd, Ctx && ctx) noexcept
 	{
 		if constexpr (std::is_scalar_v<std::decay_t<decltype(ctx)>>)
 		{
-			std::invoke(ML_forward(cmd), ML_forward(ctx));
+			return std::invoke(ML_forward(cmd), ML_forward(ctx));
 		}
 		else
 		{
-			execute(ML_forward(cmd), ML_forward(ctx).get());
+			return execute(ML_forward(cmd), ML_forward(ctx).get());
 		}
 	}
 

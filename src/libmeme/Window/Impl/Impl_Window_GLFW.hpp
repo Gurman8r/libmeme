@@ -64,6 +64,8 @@ namespace ml
 
 		vec2i get_size() const override;
 
+		cstring get_title() const override;
+
 		void * get_user_pointer() const override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -184,9 +186,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		int32_t			m_hints		;
 		GLFWwindow	*	m_window	;
 		GLFWmonitor	*	m_monitor	;
+		cstring			m_title		;
+		int32_t			m_hints		;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

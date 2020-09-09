@@ -1,6 +1,5 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
-#include <libmeme/Graphics/RenderCommand.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
@@ -18,9 +17,9 @@ static class memcfg final : public singleton<memcfg>
 	ds::array<byte_t, 128_MiB>			data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 	pmr::unsynchronized_pool_resource	pool{ &mono };
-	passthrough_resource				test{ &pool, data.data(), data.size() };
+	passthrough_resource				view{ &pool, data.data(), data.size() };
 
-	memcfg() noexcept { pmr::set_default_resource(&test); }
+	memcfg() noexcept { pmr::set_default_resource(&view); }
 
 	~memcfg() noexcept { pmr::set_default_resource(nullptr); }
 
@@ -94,14 +93,15 @@ ml::int32_t main()
 	static memory			mem	{ pmr::get_default_resource() };
 	static io_context		io	{ __argc, __argv, load_settings() };
 	static event_bus		bus	{};
-	static editor_window	win	{};
+	static render_window	win	{};
+	static editor_context	ed	{ &bus, &win, mem.allocator() };
 	static script_context	scr	{ io.program_name, io.content_path };
-	static system_context	sys	{ &bus, &io, &mem, &scr, &win };
+	static system_context	sys	{ &bus, &ed, &io, &mem, &scr, &win };
 	static application		app	{ &sys };
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	// open window
+	// setup window
 	ML_assert(win.open(io.conf["window"]));
 	{
 		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
@@ -124,10 +124,11 @@ ml::int32_t main()
 		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(x...); });
 	}
 
-	// configure gui
-	win.load_style(io.path2(io.conf["gui"]["style"]));
-	io.conf["gui"]["dockspace"]["visible"].get_to(win.get_dockspace().visible);
-	io.conf["gui"]["dockspace"]["menubar"].get_to(win.get_dockspace().menubar);
+	// setup gui
+	ML_assert(ed.startup());
+	ed.load_style(io.path2(io.conf["gui"]["style"]));
+	io.conf["gui"]["dockspace"]["visible"].get_to(ed.get_dock().visible);
+	io.conf["gui"]["dockspace"]["menubar"].get_to(ed.get_dock().menubar);
 
 	// load plugins
 	for (auto const & path : io.conf["plugins"]["files"])
@@ -144,20 +145,18 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// loop
-	if (!win.is_open()) { return EXIT_FAILURE; }
-	
-	bus.fire<load_event>();
-	
-	while (win.is_open())
+	bus.fire<load_event>(); ML_defer() { bus.fire<unload_event>(); };
+	do
 	{
 		io.begin_step(); ML_defer() { io.end_step(); };
 
-		ML_benchmark_L("window poll")	{ window::poll_events();		};
-		ML_benchmark_L("update event")	{ bus.fire<update_event>();		};
-		ML_benchmark_L("begin gui")		{ win.begin_gui_frame(&bus);	};
-		ML_benchmark_L("gui event")		{ bus.fire<gui_event>();		};
-		ML_benchmark_L("end gui")		{ win.end_gui_frame();			};
+		ML_benchmark_L("window poll")	{ window::poll_events();	};
+		ML_benchmark_L("update event")	{ bus.fire<update_event>();	};
+		ML_benchmark_L("gui begin")		{ ed.new_frame();			};
+		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(&ed);	};
+		ML_benchmark_L("gui end")		{ ed.render_frame();		};
 	}
+	while (win.is_open());
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

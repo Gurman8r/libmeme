@@ -13,11 +13,38 @@ namespace ml
 
 	ML_decl_event(update_event) {};
 
-	ML_decl_event(dockspace_event) {};
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ML_decl_event(main_menu_bar_event) {};
+	ML_decl_event(dockspace_event)
+	{
+		struct editor_dockspace * const dockspace;
 
-	ML_decl_event(gui_event) {};
+		constexpr dockspace_event(struct editor_dockspace * dockspace) noexcept
+			: dockspace{ dockspace }
+		{
+		}
+
+	};
+
+	ML_decl_event(main_menu_bar_event)
+	{
+		struct editor_dockspace * const dockspace;
+
+		constexpr main_menu_bar_event(struct editor_dockspace * dockspace) noexcept
+			: dockspace{ dockspace }
+		{
+		}
+	};
+
+	ML_decl_event(gui_event)
+	{
+		struct editor_context * const context;
+
+		constexpr gui_event(struct editor_context * const context) noexcept
+			: context{ context }
+		{
+		}
+	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

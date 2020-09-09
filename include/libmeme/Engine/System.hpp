@@ -6,7 +6,7 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Engine/EditorWindow.hpp>
+#include <libmeme/Engine/EditorContext.hpp>
 
 namespace ml
 {
@@ -69,10 +69,11 @@ namespace ml
 	struct ML_NODISCARD system_context final
 	{
 		event_bus		* const bus	; // event bus
+		editor_context	* const ed	; // editor context
 		io_context		* const io	; // io context
 		memory			* const mem	; // memory manager
 		script_context	* const scr	; // script context
-		editor_window	* const win	; // editor window
+		render_window	* const win	; // render window
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

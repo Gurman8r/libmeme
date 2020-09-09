@@ -6,9 +6,13 @@
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Memory.hpp>
 
+namespace pybind11 {}
+
 namespace ml
 {
-	struct ML_ENGINE_API script_context final : non_copyable
+	namespace py = pybind11;
+
+	struct ML_ENGINE_API script_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -44,8 +48,6 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef ML_EMBED_PYTHON
-
 // python
 #define HAVE_SNPRINTF
 #include <Python.h>
@@ -55,8 +57,6 @@ namespace ml
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <pybind11/iostream.h>
-
-namespace ml { namespace py = pybind11; }
 
 namespace pybind11
 {
@@ -83,10 +83,6 @@ namespace pybind11
 		v = module::import("json").attr("loads")(j.dump());
 	}
 }
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#endif // ML_EMBED_PYTHON
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

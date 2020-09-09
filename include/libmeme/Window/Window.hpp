@@ -45,11 +45,6 @@ namespace ml
 
 		ML_NODISCARD int32_t get_hints() const noexcept final;
 
-		ML_NODISCARD bool has_hints(int32_t value) const noexcept
-		{
-			return (value & get_hints()) == value;
-		}
-
 		ML_NODISCARD int32_t get_input_mode(int32_t value) const noexcept final;
 
 		ML_NODISCARD int32_t get_key(int32_t value) const noexcept final;
@@ -63,6 +58,8 @@ namespace ml
 		ML_NODISCARD vec2i get_position() const noexcept final;
 
 		ML_NODISCARD vec2i get_size() const noexcept final;
+
+		ML_NODISCARD cstring get_title() const noexcept final;
 
 		ML_NODISCARD void * get_user_pointer() const noexcept final;
 

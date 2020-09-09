@@ -133,19 +133,19 @@ namespace ml
 	// default delete
 	template <class ...> struct default_delete;
 
-	// scoped pointer object ( std::unique_ptr<T, Dx> )
+	// scoped pointer class ( std::unique_ptr<T, Dx> )
 	template <class T, class Dx = default_delete<T>
 	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
 
-	// manual pointer object ( std::unique_ptr<T, no_delete> )
+	// manual pointer class ( std::unique_ptr<T, no_delete> )
 	template <class T
 	> ML_alias manual = typename scoped<T, no_delete>;
 
-	// shared pointer object ( std::shared_ptr<T> )
+	// shared pointer class ( std::shared_ptr<T> )
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
 
-	// unowned pointer object ( std::weak_ptr<T> )
+	// unowned pointer class ( std::weak_ptr<T> )
 	template <class T
 	> ML_alias unown = typename std::weak_ptr<T>;
 }
@@ -216,6 +216,7 @@ namespace ml
 			if (auto const it{ m_records.find(addr) })
 			{
 				m_allocator.deallocate(it->second->addr, it->second->count * it->second->size);
+
 				m_records.erase(it->first);
 			}
 		}
@@ -347,6 +348,7 @@ namespace ml
 	};
 }
 
+// impl
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

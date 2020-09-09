@@ -1,10 +1,11 @@
-#include <libmeme/Engine/EditorWindow.hpp>
+#include <libmeme/Engine/EditorContext.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
 #include <libmeme/Graphics/RenderCommand.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -24,126 +25,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor_window::editor_window() noexcept : render_window{}, m_imgui{}, m_dockspace{}
-	{
-		IMGUI_CHECKVERSION();
-
-		// allocators
-		ImGui::SetAllocatorFunctions
-		(
-			[](size_t s, auto) noexcept { return ml_malloc(s); },
-			[](void * p, auto) noexcept { return ml_free(p); },
-			nullptr
-		);
-
-		// create context
-		ML_assert(m_imgui = ImGui::CreateContext());
-
-		// configure
-		auto & im_io{ ImGui::GetIO() };
-		im_io.LogFilename = nullptr;
-		im_io.IniFilename = nullptr;
-		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-	}
-
-	editor_window::editor_window(window_settings const & ws) noexcept : editor_window{}
-	{
-		ML_assert(open(ws));
-	}
-
-	editor_window::~editor_window() noexcept
-	{
-		ML_ImGui_Shutdown();
-
-		ImGui::DestroyContext((ImGuiContext *)m_imgui);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	bool editor_window::open(window_settings const & ws)
-	{
-		if (is_open()) { return debug::error("editor_window is already open"); }
-
-		if (!render_window::open(ws)) { return debug::error("failed opening editor_window"); }
-
-		// init platform
-		if (!ML_ImGui_Init_Platform(get_handle(), true))
-		{
-			return debug::error("failed initializing ImGui platform");
-		}
-
-		// init renderer
-		if (!ML_ImGui_Init_Renderer())
-		{
-			return debug::error("failed initializing ImGui renderer");
-		}
-
-		return true;
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void editor_window::begin_gui_frame(event_bus * bus)
-	{
-		ML_ImGui_NewFrame();
-
-		ImGui::NewFrame();
-
-		m_dockspace.render(bus);
-	}
-
-	void editor_window::end_gui_frame()
-	{
-		ImGui::Render();
-
-		for (auto const & cmd : {
-			gfx::command::set_viewport(get_framebuffer_size()),
-			gfx::command::set_clear_color(colors::black),
-			gfx::command::clear(gfx::clear_color),
-		})	gfx::execute(cmd, get_render_context());
-
-		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			auto backup_context{ get_context_current() };
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			make_context_current(backup_context);
-		}
-
-		if (has_hints(window_hints_doublebuffer))
-		{
-			swap_buffers(get_handle());
-		}
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	void editor_window::show_imgui_demo(bool * p_open) const
-	{
-		ImGui::ShowDemoWindow(p_open);
-	}
-
-	void editor_window::show_imgui_metrics(bool * p_open) const
-	{
-		ImGui::ShowMetricsWindow(p_open);
-	}
-
-	void editor_window::show_imgui_about(bool * p_open) const
-	{
-		ImGui::ShowAboutWindow(p_open);
-	}
-
-	void editor_window::show_imgui_style_editor(void * ref) const
-	{
-		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	uint32_t editor_window::dockspace::begin_builder(int32_t flags)
+	uint32_t editor_dockspace::begin_builder(int32_t flags)
 	{
 		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
 		{
@@ -156,7 +38,7 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor_window::dockspace::end_builder(uint32_t root)
+	uint32_t editor_dockspace::end_builder(uint32_t root)
 	{
 		if (root)
 		{
@@ -165,7 +47,7 @@ namespace ml
 		return root;
 	}
 
-	uint32_t editor_window::dockspace::dock(cstring name, uint32_t id)
+	uint32_t editor_dockspace::dock(cstring name, uint32_t id)
 	{
 		if (name && id)
 		{
@@ -175,30 +57,30 @@ namespace ml
 		return NULL;
 	}
 
-	uint32_t editor_window::dockspace::dock(gui::widget const & w, uint32_t id)
+	uint32_t editor_dockspace::dock(gui::widget const & w, uint32_t id)
 	{
 		return dock(w.title, id);
 	}
 
-	uint32_t editor_window::dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	uint32_t editor_dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		return this->nodes[(size_t)i] = split(id, dir, ratio, value);
 	}
 
-	uint32_t editor_window::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	uint32_t editor_dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		return split(id, dir, ratio, nullptr, value);
 	}
 
-	uint32_t editor_window::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
+	uint32_t editor_dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
 	}
 
-	void editor_window::dockspace::render(event_bus * bus)
+	void editor_dockspace::render(event_bus * bus)
 	{
-		if (!bus ||
-			!visible ||
+		if (!bus		||
+			!visible	||
 			!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		) { return; }
 
@@ -232,7 +114,7 @@ namespace ml
 			ImGui::PopStyleVar(3);
 
 			// fire docking event if nodes are empty
-			if (nodes.empty()) { bus->fire<dockspace_event>(); }
+			if (nodes.empty()) { bus->fire<dockspace_event>(this); }
 
 			ImGui::DockSpace(
 				ImGui::GetID(title),
@@ -246,36 +128,160 @@ namespace ml
 		// main menu bar
 		if (menubar && ImGui::BeginMainMenuBar())
 		{
-			bus->fire<main_menu_bar_event>();
+			bus->fire<main_menu_bar_event>(this);
 
 			ImGui::EndMainMenuBar();
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
-	bool editor_window::load_style(fs::path const & path)
+namespace ml
+{
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	editor_context::editor_context(event_bus * bus, render_window * win, allocator_type alloc)
+		: m_bus		{ bus }
+		, m_win		{ win }
+		, m_dock	{ alloc }
+		, m_imgui	{}
+	{
+		ML_assert(m_bus && m_win);
+
+		// check version
+		ML_assert("failed validating imgui version" && IMGUI_CHECKVERSION());
+
+		// set allocators
+		ImGui::SetAllocatorFunctions
+		(
+			[](size_t s, auto) noexcept { return ml_malloc(s); },
+			[](void * p, auto) noexcept { return ml_free(p); },
+			nullptr
+		);
+
+		// create context
+		ML_assert("failed creating imgui context" && (m_imgui = ImGui::CreateContext()));
+
+		// configure context
+		auto & im_io{ ImGui::GetIO() };
+		im_io.LogFilename = nullptr;
+		im_io.IniFilename = nullptr;
+		im_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		im_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		im_io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+		if (win->is_open())
+		{
+			ML_assert(startup());
+		}
+	}
+
+	editor_context::~editor_context()
+	{
+		shutdown();
+
+		ImGui::DestroyContext((ImGuiContext *)m_imgui);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool editor_context::startup()
+	{
+		return
+			(ML_ImGui_Init_Platform(m_win->get_handle(), true)
+				|| debug::error("failed initializing imgui platform")) &&
+			
+			(ML_ImGui_Init_Renderer()
+				|| debug::error("failed initializing imgui renderer"))
+			;
+	}
+
+	void editor_context::shutdown()
+	{
+		ML_ImGui_Shutdown();
+	}
+
+	void editor_context::new_frame()
+	{
+		ML_assert(m_imgui && m_win);
+
+		ML_ImGui_NewFrame();
+
+		ImGui::NewFrame();
+
+		m_dock.render(m_bus);
+	}
+
+	void editor_context::render_frame()
+	{
+		ML_assert(m_imgui && m_win);
+
+		ImGui::Render();
+
+		for (auto const & cmd : {
+			gfx::command::set_viewport(m_win->get_framebuffer_size()),
+			gfx::command::set_clear_color(colors::black),
+			gfx::command::clear(gfx::clear_color),
+		})	gfx::execute(cmd, m_win->get_render_context());
+
+		ML_ImGui_RenderDrawData(ImGui::GetDrawData());
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			auto backup_context{ window::get_context_current() };
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			window::make_context_current(backup_context);
+		}
+
+		if (m_win->has_hints(window_hints_doublebuffer))
+		{
+			window::swap_buffers(m_win->get_handle());
+		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	void editor_context::show_imgui_demo(bool * p_open) const
+	{
+		ImGui::ShowDemoWindow(p_open);
+	}
+
+	void editor_context::show_imgui_metrics(bool * p_open) const
+	{
+		ImGui::ShowMetricsWindow(p_open);
+	}
+
+	void editor_context::show_imgui_about(bool * p_open) const
+	{
+		ImGui::ShowAboutWindow(p_open);
+	}
+
+	void editor_context::show_imgui_style_editor(void * ref) const
+	{
+		ImGui::ShowStyleEditor((ImGuiStyle *)ref);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	bool editor_context::load_style(fs::path const & path)
 	{
 		using namespace util;
 	
 		// empty
 		if (path.empty()) return false;
-	
-		// builtins
-		if (!fs::exists(path))
+
+		// builtin
+		switch (hash(to_lower(path.string())))
 		{
-			switch (hash(to_lower(path.string())))
-			{
-			default				: return false;
-			case hash("classic"): ImGui::StyleColorsClassic(); break;
-			case hash("dark")	: ImGui::StyleColorsDark(); break;
-			case hash("light")	: ImGui::StyleColorsLight(); break;
-			}
+		case hash("classic"): ImGui::StyleColorsClassic()	; return true;
+		case hash("dark")	: ImGui::StyleColorsDark()		; return true;
+		case hash("light")	: ImGui::StyleColorsLight()		; return true;
 		}
 	
 		// open file
-		std::ifstream file{ path };
-		ML_defer(&file) { file.close(); };
+		std::ifstream file{ path }; ML_defer(&file) { file.close(); };
 		if (!file) return false;
 	
 		// style ref
@@ -285,11 +291,7 @@ namespace ml
 		pmr::string line;
 		while (std::getline(file, line))
 		{
-			// trim line
-			line = trim(line);
-			
-			// skip line
-			if (line.empty() || line.front() == '#') { continue; }
+			if ((line = trim(line)).empty() || line.front() == '#') { continue; }
 	
 			// scan line
 			pmr::stringstream ss{}; ss << line;

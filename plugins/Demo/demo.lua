@@ -19,8 +19,6 @@ dependson{
 
 defines{
 	"_CRT_SECURE_NO_WARNINGS", "NOMINMAX",
-	
-	"ML_EMBED_PYTHON",
 }
 
 undefines{

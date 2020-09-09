@@ -31,7 +31,7 @@ namespace ml
 		{
 			while (!m_data.get<plugin_id>().empty())
 			{
-				this->uninstall(m_data.get<plugin_id>().front());
+				this->uninstall(m_data.get<plugin_id>().back());
 			}
 		}
 
