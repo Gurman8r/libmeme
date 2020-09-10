@@ -3,7 +3,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Core/Debug.hpp>
+#include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Color.hpp>
 
 #ifndef IM_VEC2_CLASS_EXTRA

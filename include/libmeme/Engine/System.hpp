@@ -85,19 +85,20 @@ namespace ml
 
 		explicit system_object(system_context * sys) noexcept : m_sys{ sys }
 		{
+			ML_assert(m_sys);
 		}
 
 		virtual ~system_object() noexcept override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus; }
-		ML_NODISCARD auto geted()	const noexcept -> editor_context	* { return m_sys->ed ; }
-		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io ; }
-		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem; }
-		ML_NODISCARD auto getsys()	const noexcept -> system_context	* { return m_sys; }
-		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr; }
-		ML_NODISCARD auto getwin()	const noexcept -> render_window		* { return m_sys->win; }
+		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus	; }
+		ML_NODISCARD auto geted()	const noexcept -> editor_context	* { return m_sys->ed	; }
+		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io	; }
+		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem	; }
+		ML_NODISCARD auto getsys()	const noexcept -> system_context	* { return m_sys		; }
+		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr	; }
+		ML_NODISCARD auto getwin()	const noexcept -> render_window		* { return m_sys->win	; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -45,16 +45,54 @@ namespace ml
 	// EVENT LISTENER
 	struct ML_CORE_API event_listener
 	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		explicit event_listener(struct event_bus * bus) : m_event_bus{ bus } {}
 
 		virtual ~event_listener() noexcept; // EOF
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual void on_event(event const &) = 0;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <class Ev
+		> bool subscribe() noexcept
+		{
+			ML_assert(m_event_bus);
+			return m_event_bus->sub<Ev>(this);
+		}
+
+		template <class ... Args
+		> bool subscribe(Args && ... args) noexcept
+		{
+			ML_assert(m_event_bus);
+			return m_event_bus->sub(ML_forward(args)..., this);
+		}
+
+		template <class Ev
+		> void unsubscribe() noexcept
+		{
+			ML_assert(m_event_bus);
+			return m_event_bus->unsub<Ev>(this);
+		}
+
+		template <class ... Args
+		> void unsubscribe(Args && ... args) noexcept
+		{
+			ML_assert(m_event_bus);
+			return m_event_bus->unsub(ML_forward(args)..., this);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
 		friend struct event_bus;
 
 		struct event_bus * const m_event_bus;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -111,7 +149,9 @@ namespace ml
 		bool sub(hash_t type, event_listener * listener) noexcept
 		{
 			// insert listener into category
-			return listener && m_categories[type].insert(listener).second;
+			return listener
+				&& (this == listener->m_event_bus)
+				&& m_categories[type].insert(listener).second;
 		}
 
 		// subscribe to type
@@ -128,7 +168,7 @@ namespace ml
 		// unsubscribe from id
 		void unsub(hash_t type, event_listener * listener) noexcept
 		{
-			if (!listener) { return; }
+			if (!listener || (this != listener->m_event_bus)) { return; }
 
 			// get category
 			if (auto const cat{ m_categories.find(type) })
@@ -178,13 +218,10 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	// remove listener from all events
+	// ~event_listener
 	inline event_listener::~event_listener() noexcept
 	{
-		if (m_event_bus)
-		{
-			m_event_bus->unsub(this);
-		}
+		unsubscribe(); // remove listener from all events
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

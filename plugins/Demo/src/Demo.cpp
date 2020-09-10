@@ -233,14 +233,14 @@ namespace ml
 
 		demo(application * app, void * user) noexcept : plugin{ app, user }
 		{
-			getbus()->sub<	load_event				>(this);
-			getbus()->sub<	update_event			>(this);
-			getbus()->sub<	dockspace_event			>(this);
-			getbus()->sub<	main_menu_bar_event		>(this);
-			getbus()->sub<	gui_event				>(this);
-			getbus()->sub<	window_key_event		>(this);
-			getbus()->sub<	window_mouse_event		>(this);
-			getbus()->sub<	window_cursor_pos_event	>(this);
+			subscribe<	load_event				>();
+			subscribe<	update_event			>();
+			subscribe<	dockspace_event			>();
+			subscribe<	main_menu_bar_event		>();
+			subscribe<	gui_event				>();
+			subscribe<	window_key_event		>();
+			subscribe<	window_mouse_event		>();
+			subscribe<	window_cursor_pos_event	>();
 		}
 
 		~demo() noexcept override {}
