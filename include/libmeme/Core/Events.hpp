@@ -10,7 +10,7 @@
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
+	
 	// EVENT BASE
 	struct ML_NODISCARD event : non_copyable
 	{
@@ -61,28 +61,28 @@ namespace ml
 		> bool subscribe() noexcept
 		{
 			ML_assert(m_event_bus);
-			return m_event_bus->sub<Ev>(this);
+			return m_event_bus->add_listener<Ev>(this);
 		}
 
 		template <class ... Args
 		> bool subscribe(Args && ... args) noexcept
 		{
 			ML_assert(m_event_bus);
-			return m_event_bus->sub(ML_forward(args)..., this);
+			return m_event_bus->add_listener(ML_forward(args)..., this);
 		}
 
 		template <class Ev
 		> void unsubscribe() noexcept
 		{
 			ML_assert(m_event_bus);
-			return m_event_bus->unsub<Ev>(this);
+			return m_event_bus->remove_listener<Ev>(this);
 		}
 
 		template <class ... Args
 		> void unsubscribe(Args && ... args) noexcept
 		{
 			ML_assert(m_event_bus);
-			return m_event_bus->unsub(ML_forward(args)..., this);
+			return m_event_bus->remove_listener(ML_forward(args)..., this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -98,7 +98,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// EVENT BUS
-	struct event_bus : non_copyable
+	struct event_bus final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -115,94 +115,77 @@ namespace ml
 			m_categories.swap(std::move(other.m_categories));
 		}
 
-		virtual ~event_bus() noexcept = default;
+		~event_bus() noexcept = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// fire event
 		void fire(event const & ev) noexcept
 		{
-			// get category
 			if (auto const cat{ m_categories.find(ev) })
 			{
-				// for each listener
 				for (auto const & l : (*cat->second))
 				{
-					// handle event
 					l->on_event(ev);
 				}
 			}
 		}
 
-		// fire type
 		template <class Ev, class ... Args
 		> void fire(Args && ... args) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
 
 			this->fire(Ev{ ML_forward(args)... });
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		// subscribe to id
-		bool sub(hash_t type, event_listener * listener) noexcept
+		bool add_listener(hash_t id, event_listener * value) noexcept
 		{
-			// insert listener into category
-			return listener
-				&& (this == listener->m_event_bus)
-				&& m_categories[type].insert(listener).second;
+			return value
+				&& (this == value->m_event_bus)
+				&& m_categories[id].insert(value).second;
 		}
 
-		// subscribe to type
 		template <class Ev
-		> bool sub(event_listener * listener) noexcept
+		> bool add_listener(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
 
-			return this->sub(Ev::ID, listener);
+			return this->add_listener(Ev::ID, value);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		// unsubscribe from id
-		void unsub(hash_t type, event_listener * listener) noexcept
+		void remove_listener(hash_t id, event_listener * value) noexcept
 		{
-			if (!listener || (this != listener->m_event_bus)) { return; }
+			if (!value || (this != value->m_event_bus)) { return; }
 
-			// get category
-			if (auto const cat{ m_categories.find(type) })
+			if (auto const cat{ m_categories.find(id) })
 			{
-				// get listener
-				if (auto const l{ cat->second->find(listener) }; l != cat->second->end())
+				if (auto const l{ cat->second->find(value) }; l != cat->second->end())
 				{
-					// remove listener
 					cat->second->erase(l);
 				}
 			}
 		}
 
-		// unsubscribe from type
 		template <class Ev
-		> void unsub(event_listener * listener) noexcept
+		> void remove_listener(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
 
-			this->unsub(Ev::ID, listener);
+			this->remove_listener(Ev::ID, value);
 		}
 
-		// unsubscribe from all
-		void unsub(event_listener * listener) noexcept
+		void remove_listener(event_listener * value) noexcept
 		{
-			if (!listener) { return; }
+			if (!value) { return; }
 
-			// for each category
 			m_categories.for_each([&](hash_t, category & cat) noexcept
 			{
-				// get listener
-				if (auto const l{ cat.find(listener) }; l != cat.end())
+				if (auto const l{ cat.find(value) }; l != cat.end())
 				{
-					// remove listener
 					cat.erase(l);
 				}
 			});

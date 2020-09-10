@@ -12,24 +12,13 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct ML_NODISCARD io_context final
+	struct ML_NODISCARD io_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		int32_t const	argc;
-		char ** const	argv;
-		json			conf{ R"({"path":""})"_json };
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		fs::path const
-			program_name{ argv[0] },
-			program_path{ fs::current_path() },
-			content_path{ conf.at("path").get<fs::path>() };
-
-		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
+		explicit io_context(int32_t argc, char ** argv, json && conf) noexcept
+			: argc{ argc }, argv{ argv }, conf{ json{ std::move(conf) } }
 		{
-			return content_path.native() + path.native();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,8 +36,8 @@ namespace ml
 
 		void begin_step() noexcept
 		{
-			loop_timer.restart();
 			auto const dt{ (float_t)delta_time.count() };
+			loop_timer.restart();
 			fps_accum += dt - fps_times[fps_index];
 			fps_times[fps_index] = dt;
 			fps_index = (fps_index + 1) % fps_times.size();
@@ -62,18 +51,34 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t const	argc;
+		char ** const	argv;
+		json			conf;
+
+		fs::path const
+			program_name{ argv[0] },
+			program_path{ fs::current_path() },
+			content_path{ conf.at("path").get<fs::path>() };
+
+		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
+		{
+			return content_path.native() + path.native();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct ML_NODISCARD system_context final
 	{
-		event_bus		* const bus	; // event bus
-		editor_context	* const ed	; // editor context
-		io_context		* const io	; // io context
-		memory			* const mem	; // memory manager
-		script_context	* const scr	; // script context
-		render_window	* const win	; // render window
+		event_bus		* const bus	; // bus
+		editor_context	* const ed	; // editor
+		io_context		* const io	; // io
+		memory			* const mem	; // memory
+		script_context	* const scr	; // scripts
+		render_window	* const win	; // window
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -83,22 +88,23 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	protected:
 		explicit system_object(system_context * sys) noexcept : m_sys{ sys }
 		{
-			ML_assert(m_sys);
 		}
 
 		virtual ~system_object() noexcept override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus	; }
-		ML_NODISCARD auto geted()	const noexcept -> editor_context	* { return m_sys->ed	; }
-		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io	; }
-		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem	; }
-		ML_NODISCARD auto getsys()	const noexcept -> system_context	* { return m_sys		; }
-		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr	; }
-		ML_NODISCARD auto getwin()	const noexcept -> render_window		* { return m_sys->win	; }
+	public:
+		ML_NODISCARD auto get_bus		() const noexcept -> event_bus		* { return m_sys->bus	; }
+		ML_NODISCARD auto get_editor	() const noexcept -> editor_context	* { return m_sys->ed	; }
+		ML_NODISCARD auto get_io		() const noexcept -> io_context		* { return m_sys->io	; }
+		ML_NODISCARD auto get_memory	() const noexcept -> memory			* { return m_sys->mem	; }
+		ML_NODISCARD auto get_scripts	() const noexcept -> script_context	* { return m_sys->scr	; }
+		ML_NODISCARD auto get_system	() const noexcept -> system_context	* { return m_sys		; }
+		ML_NODISCARD auto get_window	() const noexcept -> render_window	* { return m_sys->win	; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

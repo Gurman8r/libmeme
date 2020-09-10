@@ -8,6 +8,8 @@ namespace ml
 
 	application * application::g_app{};
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	application::application(system_context * sys) noexcept
 		: system_object	{ sys }
 		, m_plugins		{ sys->mem->allocator() }
@@ -21,18 +23,18 @@ namespace ml
 
 		while (!m_plugins.get<plugin_id>().empty())
 		{
-			this->uninstall(m_plugins.get<plugin_id>().back());
+			this->uninstall_plugin(m_plugins.get<plugin_id>().back());
 		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin_id application::install(fs::path const & path, void * user)
+	plugin_id application::install_plugin(fs::path const & path, void * user)
 	{
 		// load library
-		if (auto const id{ std::invoke([&, &lib = shared_library{ path }]()
+		if (plugin_id const id{ std::invoke([&, &lib = shared_library{ path }]()
 		{
-			return !lib ? plugin_id{} : std::get<plugin_id &>(m_plugins.push_back
+			return !lib ? nullptr : std::get<plugin_id &>(m_plugins.push_back
 			(
 				ML_handle(plugin_id, lib.hash()), lib.path(), std::move(lib), nullptr,
 				plugin_api
@@ -55,10 +57,12 @@ namespace ml
 		return nullptr;
 	}
 
-	bool application::uninstall(plugin_id value)
+	bool application::uninstall_plugin(plugin_id value)
 	{
 		if (!value) { return false; }
-		if (auto const it{ m_plugins.find<plugin_id>(value) }; it != m_plugins.end<plugin_id>())
+		if (auto const it{ m_plugins.find<plugin_id>(value) }
+		; it == m_plugins.end<plugin_id>()) { return false; }
+		else
 		{
 			auto const i{ m_plugins.index_of<plugin_id>(it) };
 
@@ -66,13 +70,12 @@ namespace ml
 
 			m_plugins.at<plugin_api>(i).detach(this, ptr);
 
-			ml_free(ptr);
+			get_memory()->deallocate_object(ptr);
 
 			m_plugins.erase(i);
 
 			return true;
 		}
-		return false;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -9,6 +9,11 @@
 #include <libmeme/Core/BitSet.hpp>
 #include <libmeme/Core/Debug.hpp>
 
+// system declarator helper
+#define ML_decl_ecs_sx(S, X, ...)									\
+	using S = typename _ML meta::list<##__VA_ARGS__>;				\
+	template <class> struct X final : _ML ecs::detail::x_base<S>	\
+
 // UTILITY
 namespace ml::ecs::detail
 {
@@ -695,7 +700,7 @@ namespace ml::ecs
 		{
 			for (size_t i = 0; i < m_capacity; ++i)
 			{
-				m_entities.expand_all(i, [&](auto & a, auto & e, auto & h, auto & b)
+				m_entities.expand_all(i, [i](auto & a, auto & e, auto & h, auto & b)
 				{
 					a = false;	// alive
 					e = i;		// index

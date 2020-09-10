@@ -42,21 +42,26 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
-	glfw_window::glfw_window() noexcept : m_window{}, m_monitor{}, m_title{}, m_hints{}
+	glfw_window::glfw_window(allocator_type alloc) noexcept
+		: m_title	{ alloc }
+		, m_window	{}
+		, m_monitor	{}
+		, m_hints	{}
 	{
 		static bool const glfw_init{ glfwInit() == GLFW_TRUE };
 
 		ML_assert("failed initializing glfw window" && glfw_init);
 	}
 
-	glfw_window::glfw_window(window_settings const & ws) noexcept : glfw_window{}
+	glfw_window::glfw_window(window_settings const & ws, allocator_type alloc) noexcept
+		: glfw_window{ alloc }
 	{
 		ML_assert(open(ws));
 	}
 
 	glfw_window::~glfw_window()
 	{
-		static ML_defer() { glfwTerminate(); };
+		static ML_defer(&) { glfwTerminate(); };
 
 		glfwDestroyWindow(m_window);
 	}
@@ -69,7 +74,7 @@ namespace ml
 		if (is_open()) { return debug::error("glfw_window is already open"); }
 
 		// title
-		m_title = !ws.title.empty() ? ws.title.c_str() : "GLFW";
+		if ((m_title = ws.title).empty()) { m_title = "GLFW"; }
 
 		// hints
 		m_hints = ws.hints;
@@ -128,7 +133,7 @@ namespace ml
 		return (m_window = glfwCreateWindow(
 			ws.video.resolution[0],
 			ws.video.resolution[1],
-			m_title, // title
+			m_title.c_str(), // title
 			nullptr, // monitor
 			nullptr // share
 		)) || debug::error("failed opening glfw_window");
@@ -244,7 +249,7 @@ namespace ml
 		return temp;
 	}
 
-	cstring glfw_window::get_title() const
+	pmr::string const & glfw_window::get_title() const
 	{
 		return m_title;
 	}
@@ -428,9 +433,9 @@ namespace ml
 		glfwSetWindowSize(m_window, value[0], value[1]);
 	}
 
-	void glfw_window::set_title(cstring value)
+	void glfw_window::set_title(pmr::string const & value)
 	{
-		glfwSetWindowTitle(m_window, (m_title = value));
+		glfwSetWindowTitle(m_window, (m_title = value).c_str());
 	}
 
 	void glfw_window::set_user_pointer(void * value)

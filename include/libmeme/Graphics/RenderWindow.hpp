@@ -10,9 +10,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		render_window() noexcept;
+		render_window(allocator_type alloc = {}) noexcept;
 
-		explicit render_window(window_settings const & ws) noexcept;
+		render_window(window_settings const & ws, allocator_type alloc = {}) noexcept;
 
 		virtual ~render_window() noexcept override;
 

@@ -27,8 +27,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto getapp()	const noexcept -> application *	{ return m_app; }
-		ML_NODISCARD auto getuser() const noexcept -> void *		{ return m_user; }
+		ML_NODISCARD auto get_app()	const noexcept -> application * { return m_app; }
+
+		ML_NODISCARD auto get_user() const noexcept -> void * { return m_user; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

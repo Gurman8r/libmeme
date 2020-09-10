@@ -9,9 +9,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window() noexcept;
+		window(allocator_type alloc = {}) noexcept;
 
-		explicit window(window_settings const & ws) noexcept;
+		window(window_settings const & ws, allocator_type alloc = {}) noexcept;
 
 		virtual ~window() noexcept override;
 
@@ -59,7 +59,7 @@ namespace ml
 
 		ML_NODISCARD vec2i get_size() const noexcept final;
 
-		ML_NODISCARD cstring get_title() const noexcept final;
+		ML_NODISCARD pmr::string const & get_title() const noexcept final;
 
 		ML_NODISCARD void * get_user_pointer() const noexcept final;
 
@@ -123,7 +123,7 @@ namespace ml
 
 		void set_size(vec2i const & value) noexcept final;
 		
-		void set_title(cstring value) noexcept final;
+		void set_title(pmr::string const & value) noexcept final;
 
 		void set_user_pointer(void * value) noexcept final;
 

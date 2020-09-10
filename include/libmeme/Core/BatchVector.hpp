@@ -895,7 +895,10 @@ namespace ml::ds
 			return this->get<T>().emplace_back(ML_forward(value));
 		}
 
-		template <class Tpl, size_t I, size_t N = std::tuple_size_v<Tpl>
+		template <
+			class Tpl	= value_tuple,
+			size_t I	= tuple_size,
+			size_t N	= std::tuple_size_v<Tpl>
 		> decltype(auto) push_back(Tpl && value)
 		{
 			static_assert(tuple_size <= N);

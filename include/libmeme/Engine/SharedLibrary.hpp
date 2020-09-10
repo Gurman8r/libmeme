@@ -72,18 +72,21 @@ namespace ml
 
 		bool open(fs::path const & path);
 
-		bool close(bool wipe = true);
+		bool close();
 
-		void * addr(cstring name);
+		void * get_proc_address(cstring name);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class Ret, class ... Args
 		> auto proc(cstring name) noexcept
 		{
-			return reinterpret_cast<Ret(*)(Args...)>(this->addr(name));
+			return reinterpret_cast<Ret(*)(Args...)>(this->get_proc_address(name));
 		}
 
 		template <class Ret, class ... Args
-		> auto call(cstring name, Args && ... args) noexcept -> std::conditional_t<
+		> auto call(cstring name, Args && ... args) noexcept -> std::conditional_t
+		<
 			std::is_same_v<Ret, void>, void, std::optional<Ret>
 		>
 		{
@@ -103,11 +106,11 @@ namespace ml
 
 		ML_NODISCARD bool good() const noexcept { return m_handle; }
 
-		ML_NODISCARD auto handle() const noexcept -> library_handle const & { return m_handle; }
-
-		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
+		ML_NODISCARD auto handle() const noexcept -> library_handle { return m_handle; }
 
 		ML_NODISCARD auto hash() const noexcept -> hash_t { return util::hash(m_path.string()); }
+
+		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
 		ML_NODISCARD auto syms() const noexcept -> symbol_table const & { return m_syms; }
 

@@ -21,12 +21,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	window::window() noexcept : m_impl{ new impl_window }
+	window::window(allocator_type alloc) noexcept
+		: m_impl{ new impl_window{ alloc } }
 	{
 		ML_assert("failed creating window implementation" && m_impl);
 	}
 
-	window::window(window_settings const & ws) noexcept : window{}
+	window::window(window_settings const & ws, allocator_type alloc) noexcept
+		: window{ alloc }
 	{
 		ML_assert(open(ws));
 	}
@@ -155,7 +157,7 @@ namespace ml
 		return m_impl->get_size();
 	}
 
-	cstring window::get_title() const noexcept
+	pmr::string const & window::get_title() const noexcept
 	{
 		return m_impl->get_title();
 	}
@@ -309,7 +311,7 @@ namespace ml
 		m_impl->set_size(value);
 	}
 
-	void window::set_title(cstring value) noexcept
+	void window::set_title(pmr::string const & value) noexcept
 	{
 		m_impl->set_title(value);
 	}

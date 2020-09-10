@@ -7,7 +7,7 @@
 
 struct ImGuiContext;
 struct ImFontAtlas;
-struct ImGuiStyleRef;
+struct ImGuiStyle;
 
 namespace ml
 {
@@ -58,7 +58,7 @@ namespace ml
 
 		uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
 
-		void render(event_bus * bus);
+		void render(event_bus * get_bus);
 	};
 }
 
@@ -71,7 +71,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		editor_context(event_bus * bus, render_window * win, allocator_type alloc = {});
+		editor_context(event_bus * get_bus, render_window * win, allocator_type alloc = {});
 
 		~editor_context() noexcept;
 
@@ -93,7 +93,7 @@ namespace ml
 
 		void show_imgui_about(bool * p_open = {}) const;
 
-		void show_imgui_style_editor(void * ref = {}) const;
+		void show_imgui_style_editor(ImGuiStyle * ref = {}) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -103,7 +103,7 @@ namespace ml
 
 		ML_NODISCARD auto get_bus() const noexcept -> event_bus * { return m_bus; }
 
-		ML_NODISCARD auto get_dock() noexcept -> editor_dockspace & { return m_dock; }
+		ML_NODISCARD auto get_dockspace() noexcept -> editor_dockspace & { return m_dock; }
 
 		ML_NODISCARD auto get_imgui() const noexcept -> ImGuiContext * { return m_imgui; }
 

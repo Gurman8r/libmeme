@@ -409,7 +409,10 @@ namespace ml::gui
 
 		self_type & dump(pmr::stringstream & ss)
 		{
-			for (char c : ss.str()) { write(c); }
+			for (char c : ss.str())
+			{
+				this->write(c);
+			}
 			ss.str({});
 			return (*this);
 		}

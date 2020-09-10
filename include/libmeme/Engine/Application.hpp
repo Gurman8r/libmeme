@@ -19,6 +19,15 @@ namespace ml
 			void (*detach)(application *, plugin *);
 		};
 
+		using plugin_manager = typename ds::batch_vector
+		<
+			plugin_id		,	// id
+			fs::path		,	// path
+			shared_library	,	// library
+			manual<plugin>	,	// instance
+			plugin_api			// interface
+		>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		explicit application(system_context * sys) noexcept;
@@ -27,26 +36,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		plugin_id install(fs::path const & path, void * user = nullptr);
+		plugin_id install_plugin(fs::path const & path, void * user = {});
 
-		bool uninstall(plugin_id value);
+		bool uninstall_plugin(plugin_id value);
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		
-		ML_NODISCARD static application * get() noexcept { return g_app; }
+		ML_NODISCARD static auto get() noexcept -> application * { return g_app; }
+
+		ML_NODISCARD auto get_plugins() const noexcept -> plugin_manager const & { return m_plugins; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static application * g_app; // instance
-
-		ds::batch_vector<
-			plugin_id		,	// id
-			fs::path		,	// path
-			shared_library	,	// library
-			manual<plugin>	,	// instance
-			plugin_api			// interface
-		> m_plugins;
+		static application *	g_app		; // instance
+		plugin_manager			m_plugins	; // plugins
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

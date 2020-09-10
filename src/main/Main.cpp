@@ -91,8 +91,8 @@ ml::int32_t main()
 	// context
 	static memory			mem	{ pmr::get_default_resource() };
 	static io_context		io	{ __argc, __argv, load_settings() };
-	static event_bus		bus	{};
-	static render_window	win	{};
+	static event_bus		bus	{ mem.allocator() };
+	static render_window	win	{ mem.allocator() };
 	static editor_context	ed	{ &bus, &win, mem.allocator() };
 	static script_context	scr	{ io.program_name, io.content_path };
 	static system_context	sys	{ &bus, &ed, &io, &mem, &scr, &win };
@@ -126,15 +126,15 @@ ml::int32_t main()
 	// setup gui
 	ML_assert(ed.startup());
 	ed.load_style(io.path2(io.conf["gui"]["style"]));
-	io.conf["gui"]["dockspace"]["visible"].get_to(ed.get_dock().visible);
-	io.conf["gui"]["dockspace"]["menubar"].get_to(ed.get_dock().menubar);
+	io.conf["gui"]["dockspace"]["visible"].get_to(ed.get_dockspace().visible);
+	io.conf["gui"]["dockspace"]["menubar"].get_to(ed.get_dockspace().menubar);
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// install plugins
 	for (auto const & path : io.conf["plugins"]["files"])
 	{
-		app.install(path);
+		app.install_plugin(path);
 	}
 
 	// execute scripts
@@ -147,18 +147,19 @@ ml::int32_t main()
 
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
-	bus.fire<load_event>(); ML_defer() { bus.fire<unload_event>(); };
-	do
+
+	bus.fire<load_event>(&app); ML_defer() { bus.fire<unload_event>(&app); };
+
+	while(win.is_open())
 	{
 		io.begin_step(); ML_defer() { io.end_step(); };
 
-		ML_benchmark_L("window poll")	{ window::poll_events();	};
-		ML_benchmark_L("update event")	{ bus.fire<update_event>();	};
-		ML_benchmark_L("gui begin")		{ ed.new_frame();			};
-		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(&ed);	};
-		ML_benchmark_L("gui end")		{ ed.render_frame();		};
+		ML_benchmark_L("window poll")	{ window::poll_events();		};
+		ML_benchmark_L("update event")	{ bus.fire<update_event>(&app);	};
+		ML_benchmark_L("gui begin")		{ ed.new_frame();				};
+		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(&ed);		};
+		ML_benchmark_L("gui end")		{ ed.render_frame();			};
 	}
-	while (win.is_open());
 	return EXIT_SUCCESS;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

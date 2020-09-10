@@ -5,11 +5,15 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_window::render_window() noexcept : window{}, m_dev{}, m_ctx{}
+	render_window::render_window(allocator_type alloc) noexcept
+		: window{ alloc }
+		, m_dev	{}
+		, m_ctx	{}
 	{
 	}
 
-	render_window::render_window(window_settings const & ws) noexcept : render_window{}
+	render_window::render_window(window_settings const & ws, allocator_type alloc) noexcept
+		: render_window{ alloc }
 	{
 		ML_assert(open(ws));
 	}

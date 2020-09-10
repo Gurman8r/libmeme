@@ -46,11 +46,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool shared_library::close(bool wipe)
+	bool shared_library::close()
 	{
 		if (!m_handle) { return false; }
 
-		if (wipe) { m_path.clear(); m_syms.clear(); }
+		m_path.clear(); m_syms.clear();
 
 		return std::invoke([&]() noexcept
 		{
@@ -68,7 +68,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void * shared_library::addr(cstring name)
+	void * shared_library::get_proc_address(cstring name)
 	{
 		// not open
 		if (!m_handle) { return nullptr; }

@@ -14,9 +14,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		glfw_window() noexcept;
+		explicit glfw_window(allocator_type alloc) noexcept;
 
-		explicit glfw_window(window_settings const & ws) noexcept;
+		explicit glfw_window(window_settings const & ws, allocator_type alloc) noexcept;
 
 		~glfw_window() override;
 
@@ -64,7 +64,7 @@ namespace ml
 
 		vec2i get_size() const override;
 
-		cstring get_title() const override;
+		pmr::string const & get_title() const override;
 
 		void * get_user_pointer() const override;
 
@@ -128,7 +128,7 @@ namespace ml
 
 		void set_size(vec2i const & value) override;
 		
-		void set_title(cstring value) override;
+		void set_title(pmr::string const & value) override;
 
 		void set_user_pointer(void * value) override;
 
@@ -186,9 +186,9 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
+		pmr::string		m_title		;
 		GLFWwindow	*	m_window	;
 		GLFWmonitor	*	m_monitor	;
-		cstring			m_title		;
 		int32_t			m_hints		;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

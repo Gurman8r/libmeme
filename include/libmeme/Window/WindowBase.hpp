@@ -10,6 +10,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		virtual ~window_base() override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -61,7 +65,7 @@ namespace ml
 
 		virtual vec2i get_size() const = 0;
 
-		virtual cstring get_title() const = 0;
+		virtual pmr::string const & get_title() const = 0;
 
 		virtual void * get_user_pointer() const = 0;
 
@@ -125,7 +129,7 @@ namespace ml
 
 		virtual void set_size(vec2i const &) = 0;
 
-		virtual void set_title(cstring) = 0;
+		virtual void set_title(pmr::string const &) = 0;
 
 		virtual void set_user_pointer(void *) = 0;
 
