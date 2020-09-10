@@ -8,12 +8,6 @@ namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	template <class Fn
-	> ML_alias funtion_result = Fn;
-
-	template <class Fn
-	> ML_alias funtion_tesult = Fn;
-
 	struct ML_ENGINE_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -90,7 +84,7 @@ namespace ml
 
 		template <class Ret, class ... Args
 		> auto call(cstring name, Args && ... args) noexcept -> std::conditional_t<
-			!std::is_same_v<Ret, void>, std::optional<Ret>, void
+			std::is_same_v<Ret, void>, void, std::optional<Ret>
 		>
 		{
 			if (auto const fn{ this->proc<Ret, Args...>(name) })

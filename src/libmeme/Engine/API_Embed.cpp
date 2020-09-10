@@ -53,7 +53,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// exit
-	m.def("exit", [](py::args) { application::getwin()->set_should_close(true); });
+	m.def("exit", [](py::args) { application::get()->getwin()->set_should_close(true); });
 	py::module::import("builtins").attr("exit") = m.attr("exit");
 	py::module::import("sys").attr("exit") = m.attr("exit");
 

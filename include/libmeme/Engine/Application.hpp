@@ -1,37 +1,52 @@
 #ifndef _ML_APPLICATION_HPP_
 #define _ML_APPLICATION_HPP_
 
-// WIP
-
-#include <libmeme/Engine/PluginManager.hpp>
+#include <libmeme/Core/BatchVector.hpp>
+#include <libmeme/Engine/SharedLibrary.hpp>
+#include <libmeme/Engine/Plugin.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API application final : trackable, non_copyable
+	struct ML_ENGINE_API application final : system_object<application>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		application(system_context * sys);
+		struct ML_NODISCARD plugin_api final
+		{
+			plugin * (*attach)(application *, void *);
 
-		~application();
+			void (*detach)(application *, plugin *);
+		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto getbus()	noexcept -> event_bus		* { return s_instance->m_system->bus; }
-		ML_NODISCARD static auto geted()	noexcept -> editor_context	* { return s_instance->m_system->ed; }
-		ML_NODISCARD static auto getio()	noexcept -> io_context		* { return s_instance->m_system->io; }
-		ML_NODISCARD static auto getmem()	noexcept -> memory			* { return s_instance->m_system->mem; }
-		ML_NODISCARD static auto getmods()	noexcept -> plugin_manager	* { return &s_instance->m_plugins; }
-		ML_NODISCARD static auto getscr()	noexcept -> script_context	* { return s_instance->m_system->scr; }
-		ML_NODISCARD static auto getwin()	noexcept -> render_window	* { return s_instance->m_system->win; }
+		explicit application(system_context * sys) noexcept;
+
+		~application() noexcept override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		plugin_id install(fs::path const & path, void * user = nullptr);
+
+		bool uninstall(plugin_id value);
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		
+		ML_NODISCARD static application * get() noexcept { return g_app; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static application *	s_instance	; // instance
-		system_context * const	m_system	; // system pointer
-		plugin_manager			m_plugins	; // plugins
+		static application * g_app; // instance
+
+		ds::batch_vector<
+			plugin_id		,	// id
+			fs::path		,	// path
+			shared_library	,	// library
+			manual<plugin>	,	// instance
+			plugin_api			// interface
+		> m_plugins;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

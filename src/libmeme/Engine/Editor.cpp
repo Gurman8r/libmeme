@@ -1,4 +1,4 @@
-#include <libmeme/Engine/EditorContext.hpp>
+#include <libmeme/Engine/Editor.hpp>
 #include <libmeme/Engine/ImGuiExt.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
 #include <libmeme/Core/Events.hpp>

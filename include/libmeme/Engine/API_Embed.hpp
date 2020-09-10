@@ -3,6 +3,7 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Memory.hpp>
 

@@ -6,7 +6,7 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Engine/EditorContext.hpp>
+#include <libmeme/Engine/Editor.hpp>
 
 namespace ml
 {
@@ -74,6 +74,37 @@ namespace ml
 		memory			* const mem	; // memory manager
 		script_context	* const scr	; // script context
 		render_window	* const win	; // render window
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	template <class Derived
+	> struct system_object : trackable, non_copyable
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit system_object(system_context * sys) noexcept : m_sys{ sys }
+		{
+		}
+
+		virtual ~system_object() noexcept override = default;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto getbus()	const noexcept -> event_bus			* { return m_sys->bus; }
+		ML_NODISCARD auto geted()	const noexcept -> editor_context	* { return m_sys->ed ; }
+		ML_NODISCARD auto getio()	const noexcept -> io_context		* { return m_sys->io ; }
+		ML_NODISCARD auto getmem()	const noexcept -> memory			* { return m_sys->mem; }
+		ML_NODISCARD auto getsys()	const noexcept -> system_context	* { return m_sys; }
+		ML_NODISCARD auto getscr()	const noexcept -> script_context	* { return m_sys->scr; }
+		ML_NODISCARD auto getwin()	const noexcept -> render_window		* { return m_sys->win; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	private:
+		system_context * const m_sys;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

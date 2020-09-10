@@ -1,7 +1,6 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Engine/PluginManager.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
 #include <libmeme/Engine/Application.hpp>
 
@@ -130,13 +129,15 @@ ml::int32_t main()
 	io.conf["gui"]["dockspace"]["visible"].get_to(ed.get_dock().visible);
 	io.conf["gui"]["dockspace"]["menubar"].get_to(ed.get_dock().menubar);
 
-	// load plugins
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// install plugins
 	for (auto const & path : io.conf["plugins"]["files"])
 	{
-		app.getmods()->install(path);
+		app.install(path);
 	}
 
-	// run scripts
+	// execute scripts
 	for (auto const & path : io.conf["scripts"]["files"])
 	{
 		scr.do_file(io.path2(path));
@@ -145,6 +146,7 @@ ml::int32_t main()
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// loop
+	if (!win.is_open()) { return EXIT_FAILURE; }
 	bus.fire<load_event>(); ML_defer() { bus.fire<unload_event>(); };
 	do
 	{

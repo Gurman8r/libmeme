@@ -231,35 +231,35 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(system_context * sys) noexcept : plugin{ sys, nullptr }
+		demo(application * app, void * user) : plugin{ app, user }
 		{
-			sys->bus->sub<	load_event				>(this);
-			sys->bus->sub<	update_event			>(this);
-			sys->bus->sub<	dockspace_event			>(this);
-			sys->bus->sub<	main_menu_bar_event		>(this);
-			sys->bus->sub<	gui_event				>(this);
-			sys->bus->sub<	window_key_event		>(this);
-			sys->bus->sub<	window_mouse_event		>(this);
-			sys->bus->sub<	window_cursor_pos_event	>(this);
+			getbus()->sub<	load_event				>(this);
+			getbus()->sub<	update_event			>(this);
+			getbus()->sub<	dockspace_event			>(this);
+			getbus()->sub<	main_menu_bar_event		>(this);
+			getbus()->sub<	gui_event				>(this);
+			getbus()->sub<	window_key_event		>(this);
+			getbus()->sub<	window_mouse_event		>(this);
+			getbus()->sub<	window_cursor_pos_event	>(this);
 		}
 
 		~demo() noexcept override {}
 
-		void on_event(event const & ev) override
+		void on_event(event const & value) override
 		{
-			switch (ev)
+			switch (value)
 			{
-			case load_event			::ID: return on_load			((load_event const &)ev);
-			case update_event		::ID: return on_update			((update_event const &)ev);
-			case dockspace_event	::ID: return on_dockspace		((dockspace_event const &)ev);
-			case main_menu_bar_event::ID: return on_main_menu_bar	((main_menu_bar_event const &)ev);
-			case gui_event			::ID: return on_gui				((gui_event const &)ev);
+			case load_event			::ID: return on_load			((load_event const &)value);
+			case update_event		::ID: return on_update			((update_event const &)value);
+			case dockspace_event	::ID: return on_dockspace		((dockspace_event const &)value);
+			case main_menu_bar_event::ID: return on_main_menu_bar	((main_menu_bar_event const &)value);
+			case gui_event			::ID: return on_gui				((gui_event const &)value);
 			
 			case window_key_event::ID: {
-				switch (auto const & k{ (window_key_event const &)ev }; k.key)
+				switch (auto const & ev{ (window_key_event const &)value }; ev.key)
 				{
 				case key_code_w: {
-					switch (k.action)
+					switch (ev.action)
 					{
 					case 0: { debug::puts("w up"); } break;
 					case 1: { debug::puts("w down"); } break;
@@ -270,7 +270,7 @@ namespace ml
 			} break;
 
 			case window_mouse_event::ID: {
-				switch (auto const & m{ (window_mouse_event const &)ev }; m.button)
+				switch (auto const & ev{ (window_mouse_event const &)value }; ev.button)
 				{
 				case mouse_button_0: {} break;
 				case mouse_button_1: {} break;
@@ -279,8 +279,8 @@ namespace ml
 			} break;
 
 			case window_cursor_pos_event::ID: {
-				auto const & c{ (window_cursor_pos_event const &)ev };
-				float64_t const x = c.x, y = c.y;
+				auto const & ev{ (window_cursor_pos_event const &)value };
+				float64_t const x = ev.x, y = ev.y;
 			} break;
 			}
 		}
@@ -1296,14 +1296,14 @@ namespace ml
 
 extern "C"
 {
-	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::system_context * sys)
+	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::application * app, void * user)
 	{
-		return sys->mem->new_object<ml::demo>(sys);
+		return app->getmem()->new_object<ml::demo>(app, user);
 	}
 	
-	ML_PLUGIN_API void ml_plugin_detach(ml::system_context * sys, ml::plugin * ptr)
+	ML_PLUGIN_API void ml_plugin_detach(ml::application * app, ml::plugin * ptr)
 	{
-		sys->mem->delete_object((ml::demo *)ptr);
+		app->getmem()->delete_object((ml::demo *)ptr);
 	}
 }
 

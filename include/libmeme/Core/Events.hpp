@@ -4,8 +4,8 @@
 #include <libmeme/Core/Memory.hpp>
 
 // event declarator helper
-#define ML_decl_event(Ev) \
-	struct Ev final : _ML impl::event_helper<Ev>
+#define ML_decl_event(Type) \
+	struct Type final : _ML impl::event_helper<Type>
 
 namespace ml
 {

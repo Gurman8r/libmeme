@@ -4,7 +4,7 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory * memory::s_instance{};
+	memory * memory::g_memory{};
 
 	memory::memory(passthrough_resource * res) noexcept
 		: m_resource	{ res }
@@ -12,20 +12,16 @@ namespace ml
 		, m_counter		{}
 		, m_records		{}
 	{
-		ML_assert("memory manager already exists" && !s_instance);
+		ML_assert(!g_memory && (g_memory = this));
 
 		ML_assert(m_resource == pmr::get_default_resource());
-
-		s_instance = this;
 	}
 
 	memory::~memory() noexcept
 	{
-		ML_assert(s_instance == this);
+		ML_assert(g_memory == this && !(g_memory = nullptr));
 
 		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
-
-		s_instance = nullptr;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

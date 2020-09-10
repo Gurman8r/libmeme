@@ -1,5 +1,5 @@
-#ifndef _ML_EDITOR_CONTEXT_HPP_
-#define _ML_EDITOR_CONTEXT_HPP_
+#ifndef _ML_EDITOR_HPP_
+#define _ML_EDITOR_HPP_
 
 #include <libmeme/Engine/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
@@ -121,4 +121,4 @@ namespace ml
 	};
 }
 
-#endif // !_ML_EDITOR_CONTEXT_HPP_
+#endif // !_ML_EDITOR_HPP_

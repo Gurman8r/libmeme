@@ -184,7 +184,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static memory * const get() noexcept { return s_instance; }
+		ML_NODISCARD static memory * const get() noexcept { return g_memory; }
 
 		ML_NODISCARD auto allocator() const noexcept -> allocator_type { return m_allocator; }
 
@@ -289,7 +289,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static memory *			s_instance	; // singleton
+		static memory *			g_memory	; // singleton
 		allocator_type			m_allocator	; // allocator
 		size_t					m_counter	; // counter
 		record_map				m_records	; // records
