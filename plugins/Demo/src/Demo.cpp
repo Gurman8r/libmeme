@@ -231,7 +231,7 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(application * app, void * user) : plugin{ app, user }
+		demo(application * app, void * user) noexcept : plugin{ app, user }
 		{
 			getbus()->sub<	load_event				>(this);
 			getbus()->sub<	update_event			>(this);
