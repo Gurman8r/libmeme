@@ -77,9 +77,9 @@ namespace ml
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
 	}
 
-	void editor_dockspace::render(event_bus * get_bus)
+	void editor_dockspace::render(event_bus * bus)
 	{
-		if (!get_bus		||
+		if (!bus		||
 			!visible	||
 			!(ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		) { return; }
@@ -114,7 +114,7 @@ namespace ml
 			ImGui::PopStyleVar(3);
 
 			// fire docking event if nodes are empty
-			if (nodes.empty()) { get_bus->fire<dockspace_event>(this); }
+			if (nodes.empty()) { bus->fire<dockspace_event>(this); }
 
 			ImGui::DockSpace(
 				ImGui::GetID(title),
@@ -128,7 +128,7 @@ namespace ml
 		// main menu bar
 		if (menubar && ImGui::BeginMainMenuBar())
 		{
-			get_bus->fire<main_menu_bar_event>(this);
+			bus->fire<main_menu_bar_event>(this);
 
 			ImGui::EndMainMenuBar();
 		}
@@ -141,8 +141,8 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor_context::editor_context(event_bus * get_bus, render_window * win, allocator_type alloc)
-		: m_bus		{ get_bus }
+	editor_context::editor_context(event_bus * bus, render_window * win, allocator_type alloc)
+		: m_bus		{ bus }
 		, m_win		{ win }
 		, m_dock	{ alloc }
 		, m_imgui	{}

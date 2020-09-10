@@ -57,7 +57,7 @@ namespace ml
 		set_position((video_mode::get_desktop_mode().resolution - ws.video.resolution) / 2);
 
 		// maximized
-		if (get_hints() & window_hints_maximized) { maximize(); }
+		if (has_hints(window_hints_maximized)) { maximize(); }
 
 		// success
 		return is_open();

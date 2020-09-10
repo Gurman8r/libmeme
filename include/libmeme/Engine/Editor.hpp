@@ -58,7 +58,7 @@ namespace ml
 
 		uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
 
-		void render(event_bus * get_bus);
+		void render(event_bus * bus);
 	};
 }
 
@@ -71,7 +71,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		editor_context(event_bus * get_bus, render_window * win, allocator_type alloc = {});
+		editor_context(event_bus * bus, render_window * win, allocator_type alloc = {});
 
 		~editor_context() noexcept;
 

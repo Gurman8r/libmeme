@@ -281,14 +281,14 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_load(load_event const &)
+		void on_load(load_event const & ev)
 		{
 			// load stuff, etc...
 
 			// ICON
-			if (image const ico{ get_io()->path2("assets/textures/icon.png"), 0, false })
+			if (image const ico{ ev->io->path2("assets/textures/icon.png"), 0, false })
 			{
-				get_window()->set_icon(ico.width(), ico.height(), ico.data());
+				ev->win->set_icon(ico.width(), ico.height(), ico.data());
 			}
 
 			// FRAMEBUFFERS
@@ -304,19 +304,19 @@ namespace ml
 			// TEXTURES
 			{
 				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
-				m_textures["doot"		] = gfx::texture2d::create(get_io()->path2("assets/textures/doot.png"));
-				m_textures["navball"	] = gfx::texture2d::create(get_io()->path2("assets/textures/navball.png"));
-				m_textures["earth_dm_2k"] = gfx::texture2d::create(get_io()->path2("assets/textures/earth/earth_dm_2k.png"));
-				m_textures["earth_sm_2k"] = gfx::texture2d::create(get_io()->path2("assets/textures/earth/earth_sm_2k.png"));
-				m_textures["moon_dm_2k"	] = gfx::texture2d::create(get_io()->path2("assets/textures/moon/moon_dm_2k.png"));
+				m_textures["doot"		] = gfx::texture2d::create(ev->io->path2("assets/textures/doot.png"));
+				m_textures["navball"	] = gfx::texture2d::create(ev->io->path2("assets/textures/navball.png"));
+				m_textures["earth_dm_2k"] = gfx::texture2d::create(ev->io->path2("assets/textures/earth/earth_dm_2k.png"));
+				m_textures["earth_sm_2k"] = gfx::texture2d::create(ev->io->path2("assets/textures/earth/earth_sm_2k.png"));
+				m_textures["moon_dm_2k"	] = gfx::texture2d::create(ev->io->path2("assets/textures/moon/moon_dm_2k.png"));
 			}
 
 			// FONTS
 			{
-				m_fonts["clacon"		] = alloc_shared<font>(get_io()->path2("assets/fonts/clacon.ttf"));
-				m_fonts["consolas"		] = alloc_shared<font>(get_io()->path2("assets/fonts/consolas.ttf"));
-				m_fonts["lucida_console"] = alloc_shared<font>(get_io()->path2("assets/fonts/lucida_console.ttf"));
-				m_fonts["minecraft"		] = alloc_shared<font>(get_io()->path2("assets/fonts/minecraft.ttf"));
+				m_fonts["clacon"		] = alloc_shared<font>(ev->io->path2("assets/fonts/clacon.ttf"));
+				m_fonts["consolas"		] = alloc_shared<font>(ev->io->path2("assets/fonts/consolas.ttf"));
+				m_fonts["lucida_console"] = alloc_shared<font>(ev->io->path2("assets/fonts/lucida_console.ttf"));
+				m_fonts["minecraft"		] = alloc_shared<font>(ev->io->path2("assets/fonts/minecraft.ttf"));
 			}
 
 			// SHADERS
@@ -324,13 +324,13 @@ namespace ml
 				using namespace gfx;
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_2D",
-					get_io()->path2("assets/shaders/2D.vs.shader"));
+					ev->io->path2("assets/shaders/2D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_vertex, "vs_3D",
-					get_io()->path2("assets/shaders/3D.vs.shader"));
+					ev->io->path2("assets/shaders/3D.vs.shader"));
 
 				m_cache.read_file(gfx::shader_type_fragment, "fs_basic",
-					get_io()->path2("assets/shaders/basic.fs.shader"));
+					ev->io->path2("assets/shaders/basic.fs.shader"));
 
 				m_shaders["basic_2D"].load_from_memory
 				(
@@ -350,8 +350,8 @@ namespace ml
 				// timers
 				auto const _timers = uniform_buffer
 				{
-					make_uniform<float_t>("u_time"	, [&]() { return (float_t)get_io()->main_timer.elapsed().count(); }),
-					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)get_io()->loop_timer.elapsed().count(); })
+					make_uniform<float_t>("u_time"	, [&]() { return (float_t)ev->io->main_timer.elapsed().count(); }),
+					make_uniform<float_t>("u_delta"	, [&]() { return (float_t)ev->io->loop_timer.elapsed().count(); })
 				};
 
 				// camera
@@ -392,9 +392,9 @@ namespace ml
 
 			// MESHES
 			{
-				m_meshes["sphere8x6"	] = alloc_shared<mesh>(get_io()->path2("assets/models/sphere8x6.obj"));
-				m_meshes["sphere32x24"	] = alloc_shared<mesh>(get_io()->path2("assets/models/sphere32x24.obj"));
-				m_meshes["monkey"		] = alloc_shared<mesh>(get_io()->path2("assets/models/monkey.obj"));
+				m_meshes["sphere8x6"	] = alloc_shared<mesh>(ev->io->path2("assets/models/sphere8x6.obj"));
+				m_meshes["sphere32x24"	] = alloc_shared<mesh>(ev->io->path2("assets/models/sphere32x24.obj"));
+				m_meshes["monkey"		] = alloc_shared<mesh>(ev->io->path2("assets/models/monkey.obj"));
 
 				m_meshes["triangle"] = alloc_shared<mesh>(mesh
 				{
@@ -494,7 +494,7 @@ namespace ml
 			}
 		}
 
-		void on_update(update_event const &)
+		void on_update(update_event const & ev)
 		{
 			// update stuff, etc...
 
@@ -502,7 +502,7 @@ namespace ml
 			m_console.dump(m_cout.sstr());
 
 			// plots
-			m_plots.update(get_io()->main_timer.elapsed().count());
+			m_plots.update(ev->io->main_timer.elapsed().count());
 			
 			// uniforms
 			m_ecs.invoke_system<x_update_uniforms>();
@@ -521,10 +521,10 @@ namespace ml
 					m_ecs.invoke_system<x_render_meshes>(ctx);
 				}),
 				gfx::command::bind_framebuffer(nullptr),
-			})	gfx::execute(cmd, get_window()->get_render_context());
+			})	gfx::execute(cmd, ev->win->get_render_context());
 		}
 
-		void on_dockspace(dockspace_event const &)
+		void on_dockspace(dockspace_event const & ev)
 		{
 			enum : int32_t // nodes
 			{
@@ -535,34 +535,33 @@ namespace ml
 			};
 			
 			// setup dockspace
-			auto & d{ get_editor()->get_dockspace() };
-			if (!d.nodes.empty()) { return; } else { d.nodes.resize(MAX_DOCK_NODE); }
-			if (!(d[root] = d.begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))) { return; }
-			ML_defer(&) { d.end_builder(root); };
+			if (!ev->nodes.empty()) { return; } else { ev->nodes.resize(MAX_DOCK_NODE); }
+			if (!((*ev)[root] = ev->begin_builder(ImGuiDockNodeFlags_AutoHideTabBar))) { return; }
+			ML_defer(&ev) { ev->end_builder(root); };
 
 			constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
 
 			// split nodes
-			d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
-			d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-			d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.5f	, &d[left]);	// left-down
-			d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
-			d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-			d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+			ev->split(left		, (*ev)[root]	, ImGuiDir_Left	, lhs	, &(*ev)[root]);	// left
+			ev->split(left_up	, (*ev)[left]	, ImGuiDir_Up	, 0.5f	, &(*ev)[left]);	// left-up
+			ev->split(left_dn	, (*ev)[left]	, ImGuiDir_Down	, 0.5f	, &(*ev)[left]);	// left-down
+			ev->split(right		, (*ev)[root]	, ImGuiDir_Right, rhs	, &(*ev)[root]);	// right
+			ev->split(right_up	, (*ev)[right]	, ImGuiDir_Up	, 0.5f	, &(*ev)[right]);	// right-up
+			ev->split(right_dn	, (*ev)[right]	, ImGuiDir_Down	, 0.5f	, &(*ev)[right]);	// right-down
 
 			// dock windows
-			d.dock(m_gui_viewport	, d[left_up]);
-			d.dock(m_gui_ecs		, d[left_dn]);
-			d.dock(m_gui_assets		, d[left_dn]);
-			d.dock(m_gui_renderer	, d[left_dn]);
-			d.dock(m_gui_profiler	, d[left_dn]);
-			d.dock(m_gui_memory		, d[right]);
-			d.dock(m_gui_docs		, d[right]);
-			d.dock(m_gui_nodes		, d[right]);
-			d.dock(m_gui_console	, d[right]);
+			ev->dock(m_gui_viewport	, (*ev)[left_up]);
+			ev->dock(m_gui_ecs		, (*ev)[left_dn]);
+			ev->dock(m_gui_assets	, (*ev)[left_dn]);
+			ev->dock(m_gui_renderer	, (*ev)[left_dn]);
+			ev->dock(m_gui_profiler	, (*ev)[left_dn]);
+			ev->dock(m_gui_memory	, (*ev)[right]);
+			ev->dock(m_gui_docs		, (*ev)[right]);
+			ev->dock(m_gui_nodes	, (*ev)[right]);
+			ev->dock(m_gui_console	, (*ev)[right]);
 		}
 
-		void on_main_menu_bar(main_menu_bar_event const &)
+		void on_main_menu_bar(main_menu_bar_event const & ev)
 		{
 			ML_ImGui_ScopeID(this);
 
@@ -604,9 +603,9 @@ namespace ml
 			ML_ImGui_ScopeID(this);
 
 			// IMGUI
-			if (m_imgui_demo.open)		{ get_editor()->show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ get_editor()->show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ get_editor()->show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)		{ ev->show_imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)	{ ev->show_imgui_metrics(&m_imgui_metrics.open); }
+			if (m_imgui_about.open)		{ ev->show_imgui_about(&m_imgui_about.open); }
 
 			// WIDGETS
 			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT

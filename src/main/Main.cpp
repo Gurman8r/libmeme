@@ -148,14 +148,14 @@ ml::int32_t main()
 	// loop
 	if (!win.is_open()) { return EXIT_FAILURE; }
 
-	bus.fire<load_event>(&app); ML_defer() { bus.fire<unload_event>(&app); };
+	bus.fire<load_event>(&sys); ML_defer() { bus.fire<unload_event>(&sys); };
 
 	while(win.is_open())
 	{
 		io.begin_step(); ML_defer() { io.end_step(); };
 
 		ML_benchmark_L("window poll")	{ window::poll_events();		};
-		ML_benchmark_L("update event")	{ bus.fire<update_event>(&app);	};
+		ML_benchmark_L("update event")	{ bus.fire<update_event>(&sys);	};
 		ML_benchmark_L("gui begin")		{ ed.new_frame();				};
 		ML_benchmark_L("gui event")		{ bus.fire<gui_event>(&ed);		};
 		ML_benchmark_L("gui end")		{ ed.render_frame();			};

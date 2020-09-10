@@ -5,10 +5,10 @@
 
 namespace ml
 {
+	struct system_context;
 	struct application;
 	struct editor_context;
 	struct editor_dockspace;
-	struct system_context;
 }
 
 namespace ml
@@ -18,37 +18,28 @@ namespace ml
 	// LOAD
 	ML_decl_event(load_event)
 	{
-		application * const app;
-
-		auto operator->() const noexcept { return app; }
-
-		constexpr load_event(application * app) noexcept : app{ app }
-		{
-		}
+		system_context * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr load_event(system_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UNLOAD
 	ML_decl_event(unload_event)
 	{
-		application * const app;
-
-		auto operator->() const noexcept { return app; }
-
-		constexpr unload_event(application * app) noexcept : app{ app }
-		{
-		}
+		system_context * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr unload_event(system_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UPDATE
 	ML_decl_event(update_event)
 	{
-		application * const app;
-
-		auto operator->() const noexcept { return app; }
-
-		constexpr update_event(application * app) noexcept : app{ app }
-		{
-		}
+		system_context * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr update_event(system_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -56,40 +47,28 @@ namespace ml
 	// GUI
 	ML_decl_event(gui_event)
 	{
-		editor_context * const context;
-
-		auto operator->() const noexcept { return context; }
-
-		constexpr gui_event(editor_context * const context) noexcept
-			: context{ context }
-		{
-		}
+		editor_context * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr gui_event(editor_context * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// DOCKSPACE
 	ML_decl_event(dockspace_event)
 	{
-		editor_dockspace * const dockspace;
-
-		auto operator->() const noexcept { return dockspace; }
-
-		constexpr dockspace_event(editor_dockspace * dockspace) noexcept
-			: dockspace{ dockspace }
-		{
-		}
+		editor_dockspace * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr dockspace_event(editor_dockspace * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// MAIN MENU BAR
 	ML_decl_event(main_menu_bar_event)
 	{
-		editor_dockspace * const dockspace;
-
-		auto operator->() const noexcept { return dockspace; }
-
-		constexpr main_menu_bar_event(editor_dockspace * dockspace) noexcept
-			: dockspace{ dockspace }
-		{
-		}
+		editor_dockspace * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr main_menu_bar_event(editor_dockspace * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
