@@ -47,7 +47,7 @@ namespace ml
 		win.set_framebuffer_size_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_framebuffer_size_event>(x...); });
 		win.set_iconify_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_iconify_event>(x...); });
 		win.set_key_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_key_event>(x...); });
-		win.set_maximize_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_maximize_event>(x...);  });
+		win.set_maximize_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_maximize_event>(x...); });
 		win.set_mouse_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_mouse_event>(x...); });
 		win.set_position_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_pos_event>(x...); });
 		win.set_refresh_callback([](auto ... x) noexcept { g_app->get_bus()->fire<window_refresh_event>(x...); });
