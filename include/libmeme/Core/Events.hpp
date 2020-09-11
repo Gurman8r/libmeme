@@ -106,13 +106,10 @@ namespace ml
 
 		using category = typename ds::set<event_listener *>;
 
-		event_bus(allocator_type alloc = {}) noexcept : m_categories{ alloc }
-		{
-		}
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		event_bus(event_bus && other, allocator_type alloc = {}) noexcept : event_bus{ alloc }
+		explicit event_bus(allocator_type alloc) noexcept : m_categories{ alloc }
 		{
-			m_categories.swap(std::move(other.m_categories));
 		}
 
 		~event_bus() noexcept = default;
@@ -133,7 +130,7 @@ namespace ml
 		template <class Ev, class ... Args
 		> void fire(Args && ... args) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
 			this->fire(Ev{ ML_forward(args)... });
 		}
@@ -150,7 +147,7 @@ namespace ml
 		template <class Ev
 		> bool add_listener(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
 			return this->add_listener(Ev::ID, value);
 		}
@@ -173,10 +170,12 @@ namespace ml
 		template <class Ev
 		> void remove_listener(event_listener * value) noexcept
 		{
-			static_assert(std::is_base_of_v<event, Ev>, "invalid event id");
+			static_assert(std::is_base_of_v<event, Ev>, "invalid event type");
 
 			this->remove_listener(Ev::ID, value);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		void remove_listener(event_listener * value) noexcept
 		{

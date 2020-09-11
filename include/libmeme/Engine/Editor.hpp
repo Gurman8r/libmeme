@@ -6,6 +6,7 @@
 #include <libmeme/Core/Color.hpp>
 
 struct ImGuiContext;
+struct ImFont;
 struct ImFontAtlas;
 struct ImGuiStyle;
 
@@ -96,6 +97,8 @@ namespace ml
 		void show_imgui_style_editor(ImGuiStyle * ref = {}) const;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ImFont * load_font(fs::path const & path, float_t size = 14.f);
 
 		bool load_style(fs::path const & path);
 

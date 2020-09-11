@@ -30,9 +30,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit application(system_context * sys) noexcept;
+		explicit application(system_context * sys);
 
 		~application() noexcept override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		int32_t run();
+
+		int32_t operator()() noexcept { return run(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -50,6 +56,7 @@ namespace ml
 
 	private:
 		static application *	g_app		; // instance
+		bool					m_running	; // running
 		plugin_manager			m_plugins	; // plugins
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

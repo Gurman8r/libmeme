@@ -16,22 +16,22 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	render_device * render_device::g_device{};
+	render_device * render_device::g_dev{};
 
 	render_device * render_device::create() noexcept
 	{
 		render_device * temp{ new opengl_render_device{} };
 
-		if (!g_device) { set_default(temp); }
+		if (!g_dev) { set_default(temp); }
 
 		return temp;
 	}
 
 	void render_device::destroy(render_device * value) noexcept
 	{
-		if (!value) { value = g_device; }
+		if (!value) { value = g_dev; }
 
-		if (g_device == value) { set_default(nullptr); }
+		if (g_dev == value) { set_default(nullptr); }
 
 		delete value;
 	}

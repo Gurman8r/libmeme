@@ -6,48 +6,21 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/Performance.hpp>
 #include <libmeme/Engine/API_Embed.hpp>
+#include <libmeme/Engine/Content.hpp>
 #include <libmeme/Engine/Editor.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// io context
 	struct ML_NODISCARD io_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit io_context(int32_t argc, char ** argv, json && conf) noexcept
-			: argc{ argc }, argv{ argv }, conf{ json{ std::move(conf) } }
+		explicit io_context(int32_t argc, char ** argv, json const & conf) noexcept
+			: argc{ argc }, argv{ argv }, conf{ json{ conf } }
 		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		using fps_t = pmr::vector<float_t>;
-
-		timer const	main_timer	{};
-		timer		loop_timer	{ false };
-		duration	delta_time	{};
-		uint64_t	frame_count	{};
-		float_t		frame_rate	{};
-		float_t		fps_accum	{};
-		size_t		fps_index	{};
-		fps_t		fps_times	{ 120, fps_t::allocator_type{} };
-
-		void begin_step() noexcept
-		{
-			auto const dt{ (float_t)delta_time.count() };
-			loop_timer.restart();
-			fps_accum += dt - fps_times[fps_index];
-			fps_times[fps_index] = dt;
-			fps_index = (fps_index + 1) % fps_times.size();
-			frame_rate = (0.f < fps_accum) ? 1.f / (fps_accum / (float_t)fps_times.size()) : FLT_MAX;
-		}
-
-		void end_step() noexcept
-		{
-			performance::refresh_samples();
-			delta_time = loop_timer.elapsed();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -67,10 +40,40 @@ namespace ml
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using fps_t = pmr::vector<float_t>;
+
+		timer const	main_timer	{};
+		timer		loop_timer	{ false };
+		duration	delta_time	{};
+		uint64_t	frame_count	{};
+		float_t		frame_rate	{};
+		float_t		fps_accum	{};
+		size_t		fps_index	{};
+		fps_t		fps_times	{ 120, fps_t::allocator_type{} };
+
+		void begin_step() noexcept
+		{
+			loop_timer.restart();
+			auto const dt{ (float_t)delta_time.count() };
+			fps_accum += dt - fps_times[fps_index];
+			fps_times[fps_index] = dt;
+			fps_index = (fps_index + 1) % fps_times.size();
+			frame_rate = (0.f < fps_accum) ? 1.f / (fps_accum / (float_t)fps_times.size()) : FLT_MAX;
+		}
+
+		void end_step() noexcept
+		{
+			performance::refresh_samples();
+			delta_time = loop_timer.elapsed();
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// system context
 	struct ML_NODISCARD system_context final
 	{
 		event_bus		* const bus	; // bus
@@ -83,6 +86,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	// system object
 	template <class Derived
 	> struct system_object : trackable, non_copyable
 	{

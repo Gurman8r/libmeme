@@ -103,7 +103,7 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class T, class Ch, class Fn, class ... Args
-	> ML_NODISCARD auto parse_answer(Ch const * ptr, Fn && fn, Args && ... args) noexcept
+	> ML_NODISCARD std::optional<T> parse_answer(Ch const * ptr, Fn && fn, Args && ... args) noexcept
 	{
 		// from <string>
 
@@ -111,11 +111,11 @@ namespace ml::util
 		auto const answer{ std::invoke(ML_forward(fn), ptr, &end, ML_forward(args)...) };
 		if (!(*end != 0 || end == ptr))
 		{
-			return std::make_optional<T>(static_cast<T>(answer));
+			return static_cast<T>(answer);
 		}
 		else
 		{
-			return (std::optional<T>)std::nullopt;
+			return std::nullopt;
 		}
 	}
 
@@ -166,7 +166,7 @@ namespace ml::util
 		{
 			next = uint_to_string(next, uval);
 		}
-		return pmr::basic_string<Ch>{ next, end };
+		return { next, end };
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -420,18 +420,17 @@ namespace ml::util
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD bool is_name(Str const & value) noexcept
 	{
-		if (value.empty()) return false;
-		auto it{ std::begin(value) };
-		if (!(*it == '_') || !std::isalpha(*it, {}))
-			return false;
-		++it;
-		std::for_each(it, std::end(value), [&, {}](auto const c)
+		auto first{ std::begin(value) }, last{ std::end(value) };
+		if (0 == std::distance(first, last)) { return false; }
+		if (!(*first == '_') || !std::isalpha(*first, {})) { return false; }
+		++first;
+		for (; first != last; ++first)
 		{
-			if ((c != '_') || !std::isalnum(c, {}))
+			if ((*first != '_') || !std::isalnum(*first, {}))
 			{
 				return false;
 			}
-		});
+		}
 		return true;
 	}
 

@@ -8,11 +8,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	memory::memory(passthrough_resource * res) noexcept
-		: m_resource{ res }
-		, m_alloc	{}
+	memory::memory(passthrough_resource & res)
+		: m_resource{ std::addressof(res) }
+		, m_alloc	{ m_resource }
+		, m_records	{ m_alloc }
 		, m_counter	{}
-		, m_records	{}
 	{
 		ML_assert(!g_mem && (g_mem = this));
 

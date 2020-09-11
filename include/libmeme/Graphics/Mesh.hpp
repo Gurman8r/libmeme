@@ -114,13 +114,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		shared<gfx::vertexarray> const & get_vao() const & noexcept { return m_vao; }
+		auto get_vao() const & noexcept -> shared<gfx::vertexarray> const & { return m_vao; }
 
-		gfx::buffer_layout const & get_layout() const & noexcept { return m_vao->get_layout(); }
+		auto get_layout() const & noexcept -> gfx::buffer_layout const & { return m_vao->get_layout(); }
 
-		shared<gfx::indexbuffer> const & get_indices() const & noexcept { return m_vao->get_indices(); }
+		auto get_indices() const & noexcept -> shared<gfx::indexbuffer> const & { return m_vao->get_indices(); }
 
-		pmr::vector<shared<gfx::vertexbuffer>> const & get_vertices() const & noexcept { return m_vao->get_vertices(); }
+		auto get_vertices() const & noexcept -> pmr::vector<shared<gfx::vertexbuffer>> const & { return m_vao->get_vertices(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

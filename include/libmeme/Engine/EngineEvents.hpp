@@ -18,40 +18,31 @@ namespace ml
 	// LOAD
 	ML_decl_event(load_event)
 	{
-		system_context * const ptr;
+		application * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr load_event(system_context * ptr) noexcept : ptr{ ptr } {}
+		constexpr load_event(application * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UNLOAD
 	ML_decl_event(unload_event)
 	{
-		system_context * const ptr;
+		application * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr unload_event(system_context * ptr) noexcept : ptr{ ptr } {}
+		constexpr unload_event(application * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UPDATE
 	ML_decl_event(update_event)
 	{
-		system_context * const ptr;
+		application * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr update_event(system_context * ptr) noexcept : ptr{ ptr } {}
+		constexpr update_event(application * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// GUI
-	ML_decl_event(gui_event)
-	{
-		editor_context * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr gui_event(editor_context * const ptr) noexcept : ptr{ ptr } {}
-	};
 
 	// DOCKSPACE
 	ML_decl_event(dockspace_event)
@@ -69,6 +60,15 @@ namespace ml
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
 		constexpr main_menu_bar_event(editor_dockspace * const ptr) noexcept : ptr{ ptr } {}
+	};
+
+	// GUI
+	ML_decl_event(gui_event)
+	{
+		editor_context * const ptr;
+		auto operator->() const noexcept { return ptr; }
+		auto & operator*() const noexcept { return *ptr; }
+		constexpr gui_event(editor_context * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

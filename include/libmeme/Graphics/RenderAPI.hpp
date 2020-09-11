@@ -634,7 +634,7 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static render_device * g_device; // pointer to default device
+		static render_device * g_dev; // pointer to default device
 
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -648,9 +648,9 @@ namespace ml::gfx
 
 		static void destroy(render_device * value) noexcept;
 
-		ML_NODISCARD static render_device * get_default() noexcept { return g_device; }
+		ML_NODISCARD static render_device * get_default() noexcept { return g_dev; }
 
-		static render_device * set_default(render_device * value) noexcept { return g_device = value; }
+		static render_device * set_default(render_device * value) noexcept { return g_dev = value; }
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

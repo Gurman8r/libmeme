@@ -830,6 +830,20 @@ namespace ml::ds
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <size_t I, class U = value_i<I>
+		> ML_NODISCARD bool contains(U && value) const noexcept
+		{
+			return std::binary_search(this->cbegin<I>(), this->cend<I>(), ML_forward(value));
+		}
+
+		template <class T, class U = T
+		> ML_NODISCARD bool contains(U && value) const noexcept
+		{
+			return std::binary_search(this->cbegin<T>(), this->cend<T>(), ML_forward(value));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class U = value_i<I>
 		> ML_NODISCARD iterator_i<I> find(U && value) noexcept
 		{
 			return std::find(this->begin<I>(), this->end<I>(), ML_forward(value));

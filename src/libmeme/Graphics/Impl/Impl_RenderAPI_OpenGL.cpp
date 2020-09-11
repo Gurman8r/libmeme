@@ -752,47 +752,47 @@ namespace ml::gfx
 
 	shared<render_context> opengl_render_device::create_context(context_settings const & cs) noexcept
 	{
-		return alloc_shared<opengl_render_context>(this, cs);
+		return memory::make_ref<opengl_render_context>(this, cs);
 	}
 
 	shared<vertexarray> opengl_render_device::create_vertexarray(uint32_t prim) noexcept
 	{
-		return alloc_shared<opengl_vertexarray>(this, prim);
+		return memory::make_ref<opengl_vertexarray>(this, prim);
 	}
 
 	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
-		return alloc_shared<opengl_vertexbuffer>(this, usage, count, data);
+		return memory::make_ref<opengl_vertexbuffer>(this, usage, count, data);
 	}
 
 	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
-		return alloc_shared<opengl_indexbuffer>(this, usage, count, data);
+		return memory::make_ref<opengl_indexbuffer>(this, usage, count, data);
 	}
 
 	shared<texture2d> opengl_render_device::create_texture2d(desc_<texture2d> const & value, addr_t data) noexcept
 	{
-		return alloc_shared<opengl_texture2d>(this, value, data);
+		return memory::make_ref<opengl_texture2d>(this, value, data);
 	}
 
 	shared<texturecube> opengl_render_device::create_texturecube(desc_<texturecube> const & value) noexcept
 	{
-		return alloc_shared<opengl_texturecube>(this, value);
+		return memory::make_ref<opengl_texturecube>(this, value);
 	}
 
 	shared<framebuffer> opengl_render_device::create_framebuffer(desc_<framebuffer> const & value) noexcept
 	{
-		return alloc_shared<opengl_framebuffer>(this, value);
+		return memory::make_ref<opengl_framebuffer>(this, value);
 	}
 
 	shared<program> opengl_render_device::create_program() noexcept
 	{
-		return alloc_shared<opengl_program>(this);
+		return memory::make_ref<opengl_program>(this);
 	}
 
 	shared<shader> opengl_render_device::create_shader(desc_<shader> const & value) noexcept
 	{
-		return alloc_shared<opengl_shader>(this, value);
+		return memory::make_ref<opengl_shader>(this, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

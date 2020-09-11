@@ -10,11 +10,58 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	application::application(system_context * sys) noexcept
+	application::application(system_context * sys)
 		: system_object	{ sys }
 		, m_plugins		{ sys->mem->allocator() }
 	{
 		ML_assert(!g_app && (g_app = this));
+
+		// systems
+		static auto & mem	{ *get_memory() };
+		static auto & io	{ *get_io() };
+		static auto & bus	{ *get_bus() };
+		static auto & win	{ *get_window() };
+		static auto & ed	{ *get_editor() };
+		static auto & scr	{ *get_scripts() };
+
+		// setup window
+		ML_assert(win.open(sys->io->conf["window"]));
+		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
+		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(x...); });
+		win.set_close_callback([](auto ... x) noexcept { bus.fire<window_close_event>(x...); });
+		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<window_cursor_enter_event>(x...); });
+		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<window_cursor_pos_event>(x...); });
+		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<window_content_scale_event>(x...); });
+		win.set_drop_callback([](auto ... x) noexcept { bus.fire<window_drop_event>(x...); });
+		win.set_error_callback([](auto ... x) noexcept { bus.fire<window_error_event>(x...); });
+		win.set_focus_callback([](auto ... x) noexcept { bus.fire<window_focus_event>(x...); });
+		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<window_framebuffer_size_event>(x...); });
+		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<window_iconify_event>(x...); });
+		win.set_key_callback([](auto ... x) noexcept { bus.fire<window_key_event>(x...); });
+		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<window_maximize_event>(x...);  });
+		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<window_mouse_event>(x...); });
+		win.set_position_callback([](auto ... x) noexcept { bus.fire<window_pos_event>(x...); });
+		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<window_refresh_event>(x...); });
+		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<window_scroll_event>(x...); });
+		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(x...); });
+
+		// setup editor
+		ML_assert(ed.startup());
+		ed.load_style(io.path2(io.conf["editor"]["style"]));
+		io.conf["editor"]["dockspace"]["visible"].get_to(ed.get_dockspace().visible);
+		io.conf["editor"]["dockspace"]["menubar"].get_to(ed.get_dockspace().menubar);
+
+		// install plugins
+		for (auto const & path : io.conf["plugins"]["files"])
+		{
+			install_plugin(path);
+		}
+
+		// execute scripts
+		for (auto const & path : io.conf["scripts"]["files"])
+		{
+			scr.do_file(io.path2(path));
+		}
 	}
 
 	application::~application() noexcept
@@ -23,8 +70,48 @@ namespace ml
 
 		while (!m_plugins.get<plugin_id>().empty())
 		{
-			this->uninstall_plugin(m_plugins.get<plugin_id>().back());
+			uninstall_plugin(m_plugins.get<plugin_id>().back());
 		}
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t application::run()
+	{
+		auto const sys{ get_system() }; ML_assert(sys);
+		auto & io{ *sys->io };
+
+		// run check
+		if (!m_running && sys->win->is_open()) { m_running = true; }
+		else { return EXIT_FAILURE; } ML_defer(&) { m_running = false; };
+
+		// loading
+		sys->bus->fire<load_event>(this);
+		ML_defer(&) { sys->bus->fire<unload_event>(this); };
+
+		// loop
+		while (sys->win->is_open())
+		{
+			// timers
+			sys->io->begin_step(); ML_defer(&) { sys->io->end_step(); };
+
+			// update
+			window::poll_events();
+			sys->bus->fire<update_event>(this);
+
+			// gui
+			sys->ed->new_frame();
+			sys->bus->fire<gui_event>(sys->ed);
+			sys->ed->render_frame();
+
+			// swap buffers
+			if (sys->win->has_hints(window_hints_doublebuffer))
+			{
+				window::swap_buffers(sys->win->get_handle());
+			}
+		}
+
+		return EXIT_SUCCESS;
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -32,17 +119,18 @@ namespace ml
 	plugin_id application::install_plugin(fs::path const & path, void * user)
 	{
 		// load library
-		if (plugin_id const id{ std::invoke([&, &lib = shared_library{ path }]()
+		if (auto const id{ std::invoke([&, &lib = shared_library{ path }]() -> plugin_id
 		{
-			return !lib ? nullptr : std::get<plugin_id &>(m_plugins.push_back
-			(
-				ML_handle(plugin_id, lib.hash()), lib.path(), std::move(lib), nullptr,
-				plugin_api
-				{
-					lib.proc<plugin *, application *, void *>("ml_plugin_attach"),
-					lib.proc<void, application *, plugin *>("ml_plugin_detach"),
-				}
-			));
+			return (!lib || m_plugins.contains<shared_library>(lib)) ? nullptr :
+				std::get<plugin_id &>(m_plugins.push_back
+				(
+					ML_handle(plugin_id, lib.hash()), lib.path(), std::move(lib), nullptr,
+					plugin_api
+					{
+						lib.proc<plugin *, application *, void *>("ml_plugin_attach"),
+						lib.proc<void, application *, plugin *>("ml_plugin_detach"),
+					}
+				));
 		}) })
 		// load plugin
 		{
@@ -60,7 +148,7 @@ namespace ml
 	bool application::uninstall_plugin(plugin_id value)
 	{
 		if (!value) { return false; }
-		if (auto const it{ m_plugins.find<plugin_id>(value) }
+		else if (auto const it{ m_plugins.find<plugin_id>(value) }
 		; it == m_plugins.end<plugin_id>()) { return false; }
 		else
 		{
@@ -69,8 +157,6 @@ namespace ml
 			plugin * ptr{ m_plugins.at<manual<plugin>>(i).release() };
 
 			m_plugins.at<plugin_api>(i).detach(this, ptr);
-
-			get_memory()->deallocate_object(ptr);
 
 			m_plugins.erase(i);
 

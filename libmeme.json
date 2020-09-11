@@ -30,7 +30,7 @@
 			"visible"		: false
 		}
 	},
-	"gui": {
+	"editor": {
 		"style": "assets/styles/obsidian.style",
 		"dockspace": {
 			"visible": true,

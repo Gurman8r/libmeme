@@ -579,7 +579,7 @@ namespace ml::ecs
 		manager(size_t const cap, allocator_type alloc = {})
 			: self_type{ alloc }
 		{
-			this->grow(cap);
+			this->grow_to(cap);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -647,7 +647,7 @@ namespace ml::ecs
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void apply() noexcept
+		void apply_changes() noexcept
 		{
 			if (m_size_next == 0)
 			{
@@ -715,7 +715,7 @@ namespace ml::ecs
 			m_size = m_size_next = 0;
 		}
 
-		void grow(size_t const cap)
+		void grow_to(size_t const cap)
 		{
 			if (cap <= m_capacity) { return; }
 
@@ -742,7 +742,7 @@ namespace ml::ecs
 			// grow if needed
 			if (m_capacity <= m_size_next)
 			{
-				this->grow(options::calc_growth(m_capacity));
+				this->grow_to(options::calc_growth(m_capacity));
 			}
 
 			size_t const i{ m_size_next++ };
@@ -1043,7 +1043,7 @@ namespace ml::ecs
 
 		// invoke system on all alive entities
 		template <template <class> class X, class ... Extra
-		> self_type & invoke_system(Extra && ... extra) noexcept
+		> self_type & run_system(Extra && ... extra) noexcept
 		{
 			return this->for_system<X>([&](auto & x, auto && ... req_comp) noexcept
 			{

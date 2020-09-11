@@ -29,7 +29,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		shared_library(allocator_type alloc = {}) noexcept
-			: m_handle{}, m_path{}, m_syms{ alloc }
+			: m_handle{}, m_path{}, m_hash{}, m_proc{ alloc }
 		{
 		}
 
@@ -63,8 +63,9 @@ namespace ml
 			if (this != std::addressof(value))
 			{
 				std::swap(m_handle, value.m_handle);
+				std::swap(m_hash, value.m_hash);
 				m_path.swap(value.m_path);
-				m_syms.swap(value.m_syms);
+				m_proc.swap(value.m_proc);
 			}
 		}
 
@@ -108,11 +109,11 @@ namespace ml
 
 		ML_NODISCARD auto handle() const noexcept -> library_handle { return m_handle; }
 
-		ML_NODISCARD auto hash() const noexcept -> hash_t { return util::hash(m_path.string()); }
+		ML_NODISCARD auto hash() const noexcept -> hash_t { return m_hash; }
 
 		ML_NODISCARD auto path() const noexcept -> fs::path const & { return m_path; }
 
-		ML_NODISCARD auto syms() const noexcept -> symbol_table const & { return m_syms; }
+		ML_NODISCARD auto procedures() const noexcept -> symbol_table const & { return m_proc; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -173,9 +174,10 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		library_handle	m_handle; // 
-		fs::path		m_path	; // 
-		symbol_table	m_syms	; // 
+		library_handle	m_handle; // handle
+		fs::path		m_path	; // path
+		hash_t			m_hash	; // hash
+		symbol_table	m_proc	; // procedures
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

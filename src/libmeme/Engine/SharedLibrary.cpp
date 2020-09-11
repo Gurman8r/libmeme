@@ -30,6 +30,8 @@ namespace ml
 			m_path += default_extension; // no extension provided
 		}
 
+		m_hash = util::hash(m_path.string());
+
 		return m_handle = (library_handle)std::invoke([&]() noexcept
 		{
 #if defined(ML_os_windows)
@@ -50,7 +52,7 @@ namespace ml
 	{
 		if (!m_handle) { return false; }
 
-		m_path.clear(); m_syms.clear();
+		m_path.clear(); m_proc.clear(); m_hash = {};
 
 		return std::invoke([&]() noexcept
 		{
@@ -74,7 +76,7 @@ namespace ml
 		if (!m_handle) { return nullptr; }
 
 		// load symbol
-		return m_syms.find_or_add_fn(util::hash(name, util::strlen(name)), [&]() noexcept
+		return m_proc.find_or_add_fn(util::hash(name, util::strlen(name)), [&]() noexcept
 		{
 #if defined(ML_os_windows)
 			return ::GetProcAddress((HINSTANCE)m_handle, name);

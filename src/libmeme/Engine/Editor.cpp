@@ -234,11 +234,6 @@ namespace ml
 			ImGui::RenderPlatformWindowsDefault();
 			window::make_context_current(backup_context);
 		}
-
-		if (m_win->has_hints(window_hints_doublebuffer))
-		{
-			window::swap_buffers(m_win->get_handle());
-		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -264,6 +259,13 @@ namespace ml
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ImFont * editor_context::load_font(fs::path const & path, float_t size)
+	{
+		if (path.empty() || !fs::exists(path) || (size <= 0.f)) { return false; }
+
+		return ImGui::GetIO().Fonts->AddFontFromFileTTF(path.string().c_str(), size);
+	}
 
 	bool editor_context::load_style(fs::path const & path)
 	{
