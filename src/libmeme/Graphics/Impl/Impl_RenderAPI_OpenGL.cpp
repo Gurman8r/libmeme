@@ -1009,9 +1009,9 @@ namespace ml::gfx
 			value.back.mask));
 	}
 
-	void opengl_render_context::set_viewport(int_rect const & bounds)
+	void opengl_render_context::set_viewport(int_rect const & value)
 	{
-		ML_glCheck(glViewport(bounds[0], bounds[1], bounds[2], bounds[3]));
+		ML_glCheck(glViewport(value[0], value[1], value[2], value[3]));
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

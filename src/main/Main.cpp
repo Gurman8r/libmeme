@@ -5,7 +5,7 @@
 #include <libmeme/Engine/Application.hpp>
 
 using namespace ml;
-using namespace ml::size_literals;
+using namespace ml::byte_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -86,8 +86,6 @@ static auto load_settings(fs::path const & path = "../../../../libmeme.json")
 
 ml::int32_t main()
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 	static memory			mem	{ pmr::get_default_resource() };
 	static io_context		io	{ __argc, __argv, load_settings() };
 	static event_bus		bus	{ mem.allocator() };
@@ -98,6 +96,6 @@ ml::int32_t main()
 	static application		app	{ &sys };
 	
 	return app();
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

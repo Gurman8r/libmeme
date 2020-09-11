@@ -173,26 +173,28 @@ namespace ml::gui
 		{
 		}
 
-		template <class Fn> auto for_each(Fn && fn) noexcept
-		{
-			return std::for_each(plots.begin(), plots.end(), ML_forward(fn));
-		}
-
 		template <class Delta = float_t
 		> void update(Delta const tt, Delta const dt = (Delta)(1.f / 60.f)) noexcept
 		{
 			if (ref_time == 0.f)
 			{
-				return (void)(ref_time = static_cast<float_t>(tt));
+				ref_time = static_cast<float_t>(tt);
+				return;
 			}
 			while (ref_time < static_cast<float_t>(tt))
 			{
-				this->for_each([&](auto & p) { p.update(); });
+				for (auto & p : plots) { p.update(); }
 
 				ref_time += static_cast<float_t>(dt);
 			}
-			return;
 		}
+
+		auto begin() noexcept { return plots.begin(); }
+		auto begin() const noexcept { return plots.begin(); }
+		auto cbegin() const noexcept { return plots.cbegin(); }
+		auto end() noexcept { return plots.end(); }
+		auto end() const noexcept { return plots.end(); }
+		auto cend() const noexcept { return plots.cend(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

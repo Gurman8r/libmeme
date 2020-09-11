@@ -17,33 +17,33 @@ namespace ml
 		ML_assert(!g_app && (g_app = this));
 
 		// systems
-		static auto & mem	{ *get_memory() };
-		static auto & io	{ *get_io() };
-		static auto & bus	{ *get_bus() };
-		static auto & win	{ *get_window() };
-		static auto & ed	{ *get_editor() };
-		static auto & scr	{ *get_scripts() };
+		auto & mem	{ *sys->mem	};
+		auto & io	{ *sys->io	};
+		auto & bus	{ *sys->bus	};
+		auto & win	{ *sys->win	};
+		auto & ed	{ *sys->ed	};
+		auto & scr	{ *sys->scr	};
 
 		// setup window
-		ML_assert(win.open(sys->io->conf["window"]));
-		win.set_char_callback([](auto ... x) noexcept { bus.fire<window_char_event>(x...); });
-		win.set_char_mods_callback([](auto ... x) noexcept { bus.fire<window_char_mods_event>(x...); });
-		win.set_close_callback([](auto ... x) noexcept { bus.fire<window_close_event>(x...); });
-		win.set_cursor_enter_callback([](auto ... x) noexcept { bus.fire<window_cursor_enter_event>(x...); });
-		win.set_cursor_position_callback([](auto ... x) noexcept { bus.fire<window_cursor_pos_event>(x...); });
-		win.set_content_scale_callback([](auto ... x) noexcept { bus.fire<window_content_scale_event>(x...); });
-		win.set_drop_callback([](auto ... x) noexcept { bus.fire<window_drop_event>(x...); });
-		win.set_error_callback([](auto ... x) noexcept { bus.fire<window_error_event>(x...); });
-		win.set_focus_callback([](auto ... x) noexcept { bus.fire<window_focus_event>(x...); });
-		win.set_framebuffer_size_callback([](auto ... x) noexcept { bus.fire<window_framebuffer_size_event>(x...); });
-		win.set_iconify_callback([](auto ... x) noexcept { bus.fire<window_iconify_event>(x...); });
-		win.set_key_callback([](auto ... x) noexcept { bus.fire<window_key_event>(x...); });
-		win.set_maximize_callback([](auto ... x) noexcept { bus.fire<window_maximize_event>(x...);  });
-		win.set_mouse_callback([](auto ... x) noexcept { bus.fire<window_mouse_event>(x...); });
-		win.set_position_callback([](auto ... x) noexcept { bus.fire<window_pos_event>(x...); });
-		win.set_refresh_callback([](auto ... x) noexcept { bus.fire<window_refresh_event>(x...); });
-		win.set_scroll_callback([](auto ... x) noexcept { bus.fire<window_scroll_event>(x...); });
-		win.set_size_callback([](auto ... x) noexcept { bus.fire<window_size_event>(x...); });
+		ML_assert(win.open(io.conf["window"]));
+		win.set_char_callback([](auto ... x)			{ g_app->get_bus()->fire<window_char_event>(x...); });
+		win.set_char_mods_callback([](auto ... x)		{ g_app->get_bus()->fire<window_char_mods_event>(x...); });
+		win.set_close_callback([](auto ... x)			{ g_app->get_bus()->fire<window_close_event>(x...); });
+		win.set_cursor_enter_callback([](auto ... x)	{ g_app->get_bus()->fire<window_cursor_enter_event>(x...); });
+		win.set_cursor_position_callback([](auto ... x) { g_app->get_bus()->fire<window_cursor_pos_event>(x...); });
+		win.set_content_scale_callback([](auto ... x)	{ g_app->get_bus()->fire<window_content_scale_event>(x...); });
+		win.set_drop_callback([](auto ... x)			{ g_app->get_bus()->fire<window_drop_event>(x...); });
+		win.set_error_callback([](auto ... x)			{ g_app->get_bus()->fire<window_error_event>(x...); });
+		win.set_focus_callback([](auto ... x)			{ g_app->get_bus()->fire<window_focus_event>(x...); });
+		win.set_framebuffer_size_callback([](auto ... x){ g_app->get_bus()->fire<window_framebuffer_size_event>(x...); });
+		win.set_iconify_callback([](auto ... x)			{ g_app->get_bus()->fire<window_iconify_event>(x...); });
+		win.set_key_callback([](auto ... x)				{ g_app->get_bus()->fire<window_key_event>(x...); });
+		win.set_maximize_callback([](auto ... x)		{ g_app->get_bus()->fire<window_maximize_event>(x...);  });
+		win.set_mouse_callback([](auto ... x)			{ g_app->get_bus()->fire<window_mouse_event>(x...); });
+		win.set_position_callback([](auto ... x)		{ g_app->get_bus()->fire<window_pos_event>(x...); });
+		win.set_refresh_callback([](auto ... x)			{ g_app->get_bus()->fire<window_refresh_event>(x...); });
+		win.set_scroll_callback([](auto ... x)			{ g_app->get_bus()->fire<window_scroll_event>(x...); });
+		win.set_size_callback([](auto ... x)			{ g_app->get_bus()->fire<window_size_event>(x...); });
 
 		// setup editor
 		ML_assert(ed.startup());
@@ -78,36 +78,51 @@ namespace ml
 
 	int32_t application::run()
 	{
-		auto const sys{ get_system() }; ML_assert(sys);
-		auto & io{ *sys->io };
+		// systems
+		auto const	sys	{ get_system()	};
+		auto &		mem	{ *sys->mem		};
+		auto &		io	{ *sys->io		};
+		auto &		bus	{ *sys->bus		};
+		auto &		win	{ *sys->win		};
+		auto &		ed	{ *sys->ed		};
+		auto &		scr	{ *sys->scr		};
 
 		// run check
-		if (!m_running && sys->win->is_open()) { m_running = true; }
+		if (!m_running && win.is_open()) { m_running = true; }
 		else { return EXIT_FAILURE; } ML_defer(&) { m_running = false; };
 
 		// loading
-		sys->bus->fire<load_event>(this);
-		ML_defer(&) { sys->bus->fire<unload_event>(this); };
+		bus.fire<load_event>(this); ML_defer(&) { bus.fire<unload_event>(this); };
 
 		// loop
-		while (sys->win->is_open())
+		while (win.is_open())
 		{
 			// timers
-			sys->io->begin_step(); ML_defer(&) { sys->io->end_step(); };
-
+			io.loop_timer.restart();
+			auto const dt{ (float_t)io.delta_time.count() };
+			io.fps_accum += dt - io.fps_times[io.fps_index];
+			io.fps_times[io.fps_index] = dt;
+			io.fps_index = (io.fps_index + 1) % io.fps_times.size();
+			io.frame_rate = (0.f < io.fps_accum) ? 1.f / (io.fps_accum / (float_t)io.fps_times.size()) : FLT_MAX;
+			ML_defer(&io)
+			{
+				performance::refresh_samples();
+				io.delta_time = io.loop_timer.elapsed();
+			};
+			
 			// update
 			window::poll_events();
-			sys->bus->fire<update_event>(this);
+			bus.fire<update_event>(this);
 
 			// gui
-			sys->ed->new_frame();
-			sys->bus->fire<gui_event>(sys->ed);
-			sys->ed->render_frame();
+			ed.new_frame();
+			bus.fire<gui_event>(&ed);
+			ed.render_frame();
 
-			// swap buffers
-			if (sys->win->has_hints(window_hints_doublebuffer))
+			// end frame
+			if (win.has_hints(window_hints_doublebuffer))
 			{
-				window::swap_buffers(sys->win->get_handle());
+				window::swap_buffers(win.get_handle());
 			}
 		}
 

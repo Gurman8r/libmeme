@@ -26,8 +26,7 @@ namespace ml
 	{
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		static constexpr auto title{ "dockspace##libmeme" };
-
+		static constexpr auto	title		{ "dockspace##libmeme" };
 		bool					visible		{ true };
 		bool					menubar		{ true };
 		float_t					border		{};
@@ -36,10 +35,6 @@ namespace ml
 		vec2					size		{};
 		float_t					alpha		{};
 		pmr::vector<uint32_t>	nodes		{};
-
-		explicit editor_dockspace(allocator_type alloc) noexcept : nodes{ alloc }
-		{
-		}
 
 		auto & operator[](size_t const i) & noexcept { return nodes[i]; }
 
@@ -59,7 +54,14 @@ namespace ml
 
 		uint32_t split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value);
 
+	private:
+		friend struct editor_context;
+
 		void render(event_bus * bus);
+
+		explicit editor_dockspace(allocator_type alloc) noexcept : nodes{ alloc }
+		{
+		}
 	};
 }
 
@@ -98,7 +100,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ImFont * load_font(fs::path const & path, float_t size = 14.f);
+		ImFont * load_font(fs::path const & path, float_t size);
 
 		bool load_style(fs::path const & path);
 

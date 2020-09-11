@@ -430,7 +430,7 @@ namespace ml::util
 }
 
 // Size Literals
-namespace ml::size_literals
+namespace ml::byte_literals
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

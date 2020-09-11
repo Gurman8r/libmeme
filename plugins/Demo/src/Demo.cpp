@@ -188,9 +188,11 @@ namespace ml
 
 		scoped<ax::NodeEditor::EditorContext> m_node_editor{ ax::NodeEditor::CreateEditor() };
 
+		static constexpr size_t FPS_MAX{ 240 };
+
 		gui::plot_controller m_plots
 		{
-			gui::plot::create(120
+			gui::plot::create(FPS_MAX
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
@@ -198,7 +200,7 @@ namespace ml
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
-			gui::plot::create(120
+			gui::plot::create(FPS_MAX
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
@@ -289,6 +291,8 @@ namespace ml
 			auto const mem	{ sys->mem };
 			auto const io	{ sys->io };
 			auto const win	{ sys->win };
+
+			io->fps_times.resize(FPS_MAX);
 
 			// ICON
 			if (image const icon{ io->path2("assets/textures/icon.png"), 0, false })
@@ -608,7 +612,8 @@ namespace ml
 			}
 
 			ImGui::Separator();
-			ImGui::TextDisabled("%.1f fps (%.3f ms/frame)", get_io()->frame_rate, 1000.f / get_io()->frame_rate);
+			ImGui::TextDisabled("%.1f fps", get_io()->frame_rate);
+			ImGui::Separator();
 		}
 
 		void on_gui(gui_event const & ev)
@@ -1186,7 +1191,7 @@ namespace ml
 			ImGui::Separator();
 
 			// plots
-			m_plots.for_each([&](gui::plot & p)
+			for (gui::plot & p : m_plots)
 			{
 				ML_ImGui_ScopeID(&p);
 				p.render();
@@ -1196,7 +1201,7 @@ namespace ml
 					ImGui::Combo("##mode", &p.mode, "lines\0histogram\0");
 					ImGui::EndPopup();
 				}
-			});
+			};
 
 			// benchmarks
 			ImGui::Columns(2);

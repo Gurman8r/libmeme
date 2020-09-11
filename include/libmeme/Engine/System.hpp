@@ -18,16 +18,16 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		int32_t const	argc;
+		char ** const	argv;
+		json			conf;
+
 		explicit io_context(int32_t argc, char ** argv, json const & conf) noexcept
 			: argc{ argc }, argv{ argv }, conf{ json{ conf } }
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		int32_t const	argc;
-		char ** const	argv;
-		json			conf;
 
 		fs::path const
 			program_name{ argv[0] },
@@ -52,22 +52,6 @@ namespace ml
 		size_t		fps_index	{};
 		fps_t		fps_times	{ 120, fps_t::allocator_type{} };
 
-		void begin_step() noexcept
-		{
-			loop_timer.restart();
-			auto const dt{ (float_t)delta_time.count() };
-			fps_accum += dt - fps_times[fps_index];
-			fps_times[fps_index] = dt;
-			fps_index = (fps_index + 1) % fps_times.size();
-			frame_rate = (0.f < fps_accum) ? 1.f / (fps_accum / (float_t)fps_times.size()) : FLT_MAX;
-		}
-
-		void end_step() noexcept
-		{
-			performance::refresh_samples();
-			delta_time = loop_timer.elapsed();
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
@@ -82,6 +66,11 @@ namespace ml
 		memory			* const mem	; // memory
 		script_context	* const scr	; // scripts
 		render_window	* const win	; // window
+
+		constexpr operator bool() const noexcept
+		{
+			return bus && ed && io && mem && scr && win;
+		}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,6 +84,7 @@ namespace ml
 	protected:
 		explicit system_object(system_context * sys) noexcept : m_sys{ sys }
 		{
+			ML_assert("BAD SYSTEM CONTEXT" && sys && *sys);
 		}
 
 		virtual ~system_object() noexcept override = default;
