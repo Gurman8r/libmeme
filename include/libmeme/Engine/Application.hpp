@@ -41,10 +41,7 @@ namespace ml
 
 		int32_t run();
 
-		template <class ... Args> int32_t operator()(Args && ... args) noexcept
-		{
-			return run(ML_forward(args)...);
-		}
+		int32_t operator()() noexcept { return run(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
