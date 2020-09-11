@@ -87,12 +87,12 @@ static auto load_settings(fs::path const & path = "../../../../libmeme.json")
 ml::int32_t main()
 {
 	static memory			mem	{ pmr::get_default_resource() };
-	static io_context		io	{ __argc, __argv, load_settings() };
+	static io_context		io	{ __argc, __argv, mem.allocator(), load_settings() };
+	static script_context	scr	{ io.program_name, io.content_path };
 	static event_bus		bus	{ mem.allocator() };
 	static render_window	win	{ mem.allocator() };
-	static editor_context	ed	{ &bus, &win, mem.allocator() };
-	static script_context	scr	{ io.program_name, io.content_path };
-	static system_context	sys	{ &bus, &ed, &io, &mem, &scr, &win };
+	static editor_context	gui	{ &bus, &win, io.conf, mem.allocator() };
+	static system_context	sys	{ &bus, &gui, &io, &mem, &scr, &win };
 	static application		app	{ &sys };
 	
 	return app();

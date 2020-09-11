@@ -4,11 +4,10 @@
 #include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/Engine/SharedLibrary.hpp>
 #include <libmeme/Engine/Plugin.hpp>
-#include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API application final : system_object<application>
+	struct ML_ENGINE_API application final : system_object<application>, event_listener
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -36,9 +35,16 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void on_event(event const & value) override;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		int32_t run();
 
-		int32_t operator()() noexcept { return run(); }
+		template <class ... Args> int32_t operator()(Args && ... args) noexcept
+		{
+			return run(ML_forward(args)...);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -55,7 +61,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static application *	g_app		; // instance
+		static application *	g_app		; // singleton
 		bool					m_running	; // running
 		plugin_manager			m_plugins	; // plugins
 

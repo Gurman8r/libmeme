@@ -15,32 +15,6 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// CBUFFER (WIP)
-namespace ml
-{
-	template <class ...
-	> struct cbuffer;
-
-	template <class T, class Update
-	> struct cbuffer<T, Update> final
-	{
-		explicit cbuffer(Update && fn) noexcept : m_update{ ML_forward(fn) }
-		{
-		}
-
-		template <class ... Args
-		> ML_NODISCARD decltype(auto) operator()(Args && ... args) noexcept
-		{
-			return std::invoke(m_update, ML_forward(args)...);
-		}
-
-	private:
-		Update const m_update;
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 // ECS
 namespace ml
 {
@@ -192,7 +166,7 @@ namespace ml
 
 		gui::plot_controller m_plots
 		{
-			gui::plot::create(FPS_MAX
+			gui::plot::create(120
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
@@ -200,7 +174,7 @@ namespace ml
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
-			gui::plot::create(FPS_MAX
+			gui::plot::create(120
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
@@ -255,6 +229,8 @@ namespace ml
 			case window_key_event::ID: {
 				switch (auto const & ev{ (window_key_event const &)value }; ev.key)
 				{
+				default:
+					get_io()->keyboard[ev.key] = ev.action;
 				case key_code_w: {
 					switch (ev.action)
 					{
@@ -291,8 +267,6 @@ namespace ml
 			auto const mem	{ sys->mem };
 			auto const io	{ sys->io };
 			auto const win	{ sys->win };
-
-			io->fps_times.resize(FPS_MAX);
 
 			// ICON
 			if (image const icon{ io->path2("assets/textures/icon.png"), 0, false })
@@ -1145,36 +1119,36 @@ namespace ml
 
 		void show_nodes_gui()
 		{
-			namespace ed = ax::NodeEditor;
+			namespace gui = ax::NodeEditor;
 
 			auto & io{ ImGui::GetIO() };
 			
 			ImGui::Separator();
 			
-			ed::SetCurrentEditor(m_node_editor.get());
-			ed::Begin("My Editor", { 0.f, 0.f });
+			gui::SetCurrentEditor(m_node_editor.get());
+			gui::Begin("My Editor", { 0.f, 0.f });
 			
 			int32_t uniqueId{ 1 };
 
-			ed::BeginNode(uniqueId++);
+			gui::BeginNode(uniqueId++);
 			{
 				ImGui::Text("Node A");
-				ed::BeginPin(uniqueId++, ed::PinKind::Input);
+				gui::BeginPin(uniqueId++, gui::PinKind::Input);
 				{
 					ImGui::Text("-> In");
 				}
-				ed::EndPin();
+				gui::EndPin();
 				ImGui::SameLine();
-				ed::BeginPin(uniqueId++, ed::PinKind::Output);
+				gui::BeginPin(uniqueId++, gui::PinKind::Output);
 				{
 					ImGui::Text("Out ->");
 				}
-				ed::EndPin();
+				gui::EndPin();
 			}
-			ed::EndNode();
+			gui::EndNode();
 
-			ed::End();
-			ed::SetCurrentEditor(nullptr);
+			gui::End();
+			gui::SetCurrentEditor(nullptr);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1204,20 +1178,20 @@ namespace ml
 			};
 
 			// benchmarks
-			ImGui::Columns(2);
-			
-			if (static auto const & prev{ performance::last_frame() }; !prev.empty())
-			{
-				ImGui::Separator();
-				for (auto const & e : prev)
-				{
-					char time_str[20] = ""; std::sprintf(time_str, "%.7fs", e.time.count());
-					ImGui::Selectable(e.name); gui::tooltip(time_str); ImGui::NextColumn();
-					ImGui::Selectable(time_str); gui::tooltip(e.name); ImGui::NextColumn();
-				}
-			}
-			ImGui::Separator();
 			ImGui::Columns(1);
+			
+			//if (static auto const & prev{ performance::last_frame() }; !prev.empty())
+			//{
+			//	ImGui::Separator();
+			//	for (auto const & e : prev)
+			//	{
+			//		char time_str[20] = ""; std::sprintf(time_str, "%.7fs", e.time.count());
+			//		ImGui::Selectable(e.name); gui::tooltip(time_str); ImGui::NextColumn();
+			//		ImGui::Selectable(time_str); gui::tooltip(e.name); ImGui::NextColumn();
+			//	}
+			//}
+			//ImGui::Separator();
+			//ImGui::Columns(1);
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		}

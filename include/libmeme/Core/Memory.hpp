@@ -322,7 +322,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		static memory *					g_mem		; // instance
+		static memory *					g_mem		; // singleton
 		passthrough_resource * const	m_resource	; // resource
 		allocator_type					m_alloc		; // allocator
 		record_map						m_records	; // records

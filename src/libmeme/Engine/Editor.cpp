@@ -25,6 +25,14 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+	editor_dockspace::editor_dockspace(json const & j, allocator_type alloc)
+	{
+		j["editor"]["dockspace"]["visible"].get_to(visible);
+		j["editor"]["dockspace"]["menubar"].get_to(menubar);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	uint32_t editor_dockspace::begin_builder(int32_t flags)
 	{
 		if (uint32_t root{ ImGui::GetID(this->title) }; !ImGui::DockBuilderGetNode(root))
@@ -141,10 +149,10 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	editor_context::editor_context(event_bus * bus, render_window * win, allocator_type alloc)
+	editor_context::editor_context(event_bus * bus, render_window * win, json const & j, allocator_type alloc)
 		: m_bus		{ bus }
 		, m_win		{ win }
-		, m_dock	{ alloc }
+		, m_dock	{ j, alloc }
 		, m_imgui	{}
 	{
 		ML_assert(m_bus && m_win);
@@ -260,11 +268,11 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ImFont * editor_context::load_font(fs::path const & path, float_t size)
+	ImFont * editor_context::load_font(fs::path const & path, float_t size, ImFontConfig const * cfg, uint16_t const * ranges)
 	{
 		if (path.empty() || !fs::exists(path) || (size <= 0.f)) { return false; }
 
-		return ImGui::GetIO().Fonts->AddFontFromFileTTF(path.string().c_str(), size);
+		return ImGui::GetIO().Fonts->AddFontFromFileTTF(path.string().c_str(), size, cfg, ranges);
 	}
 
 	bool editor_context::load_style(fs::path const & path)

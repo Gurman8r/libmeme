@@ -2,22 +2,16 @@
 #define _ML_EDITOR_HPP_
 
 #include <libmeme/Engine/Export.hpp>
-#include <libmeme/Core/Memory.hpp>
-#include <libmeme/Core/Color.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 struct ImGuiContext;
 struct ImFont;
 struct ImFontAtlas;
+struct ImFontConfig;
 struct ImGuiStyle;
 
-namespace ml
-{
-	struct event_bus;
-
-	struct render_window;
-
-	namespace gui { struct widget; }
-}
+namespace ml { struct event_bus; }
+namespace ml::gui { struct widget; }
 
 // EDITOR DOCKSPACE
 namespace ml
@@ -59,9 +53,7 @@ namespace ml
 
 		void render(event_bus * bus);
 
-		explicit editor_dockspace(allocator_type alloc) noexcept : nodes{ alloc }
-		{
-		}
+		editor_dockspace(json const & j, allocator_type alloc);
 	};
 }
 
@@ -74,7 +66,7 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		editor_context(event_bus * bus, render_window * win, allocator_type alloc = {});
+		editor_context(event_bus * bus, render_window * win, json const & j, allocator_type alloc);
 
 		~editor_context() noexcept;
 
@@ -100,7 +92,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ImFont * load_font(fs::path const & path, float_t size);
+		ImFont * load_font(fs::path const & path, float_t size, ImFontConfig const * cfg = 0, uint16_t const * ranges = 0);
 
 		bool load_style(fs::path const & path);
 

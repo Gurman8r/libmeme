@@ -634,7 +634,7 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static render_device * g_dev; // pointer to default device
+		static render_device * g_dev; // default device
 
 	protected:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
