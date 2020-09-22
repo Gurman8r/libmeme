@@ -69,8 +69,6 @@ namespace ml
 
 		const_reference back() const & noexcept { return m_buffer[m_capacity - 1]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		pointer begin() noexcept { return m_buffer; }
 
 		const_pointer begin() const noexcept { return m_buffer; }
@@ -128,25 +126,26 @@ namespace ml
 	// no delete
 	struct no_delete final
 	{
-		template <class T> void operator()(T *) const noexcept {}
+		template <class T
+		> void operator()(T *) const noexcept {}
 	};
 
 	// default delete
 	template <class ...> struct default_delete;
 
-	// scoped pointer class ( std::unique_ptr<T, Dx> )
+	// scoped pointer ( std::unique_ptr<T, Dx> )
 	template <class T, class Dx = default_delete<T>
 	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
 
-	// manual pointer class ( std::unique_ptr<T, no_delete> )
+	// manual pointer ( std::unique_ptr<T, no_delete> )
 	template <class T
 	> ML_alias manual = typename scoped<T, no_delete>;
 
-	// shared pointer class ( std::shared_ptr<T> )
+	// shared pointer ( std::shared_ptr<T> )
 	template <class T
 	> ML_alias shared = typename std::shared_ptr<T>;
 
-	// unowned pointer class ( std::weak_ptr<T> )
+	// unowned pointer ( std::weak_ptr<T> )
 	template <class T
 	> ML_alias unown = typename std::weak_ptr<T>;
 }
@@ -186,22 +185,22 @@ namespace ml
 
 		ML_NODISCARD static auto allocator() noexcept -> allocator_type
 		{
-			ML_assert(g_mem); return g_mem->m_alloc;
+			return ML_check(g_mem)->m_alloc;
 		}
 
 		ML_NODISCARD static auto counter() noexcept -> size_t
 		{
-			ML_assert(g_mem); return g_mem->m_counter;
+			return ML_check(g_mem)->m_counter;
 		}
 
 		ML_NODISCARD static auto records() noexcept -> record_map const &
 		{
-			ML_assert(g_mem); return g_mem->m_records;
+			return ML_check(g_mem)->m_records;
 		}
 
 		ML_NODISCARD static auto resource() noexcept -> passthrough_resource *
 		{
-			ML_assert(g_mem); return g_mem->m_resource;
+			return ML_check(g_mem)->m_resource;
 		}
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -215,15 +214,13 @@ namespace ml
 		// calloc
 		ML_NODISCARD static void * allocate(size_t count, size_t size) noexcept
 		{
-			ML_assert(g_mem);
-			return g_mem->do_allocate(count, size);
+			return ML_check(g_mem)->do_allocate(count, size);
 		}
 
 		// free
 		static void deallocate(void * addr) noexcept
 		{
-			ML_assert(g_mem);
-			g_mem->do_deallocate(addr);
+			ML_check(g_mem)->do_deallocate(addr);
 		}
 
 		// realloc
@@ -348,35 +345,6 @@ namespace ml
 	}
 }
 
-// c-like interface
-namespace ml
-{
-	inline void * ml_malloc(size_t size) noexcept
-	{
-		return memory::allocate(size);
-	}
-
-	inline void * ml_calloc(size_t count, size_t size) noexcept
-	{
-		return memory::allocate(count, size);
-	}
-
-	inline void ml_free(void * addr) noexcept
-	{
-		memory::deallocate(addr);
-	}
-
-	inline void * ml_realloc(void * addr, size_t size) noexcept
-	{
-		return memory::reallocate(addr, size);
-	}
-
-	inline void * ml_realloc(void * addr, size_t oldsz, size_t newsz) noexcept
-	{
-		return memory::reallocate(addr, oldsz, newsz);
-	}
-}
-
 // trackable
 namespace ml
 {
@@ -385,20 +353,20 @@ namespace ml
 	{
 		virtual ~trackable() noexcept = default;
 
-		ML_NODISCARD void * operator new(size_t size) noexcept { return ml_malloc(size); }
+		ML_NODISCARD void * operator new(size_t size) noexcept { return memory::allocate(size); }
 
-		ML_NODISCARD void * operator new[](size_t size) noexcept { return ml_malloc(size); }
+		ML_NODISCARD void * operator new[](size_t size) noexcept { return memory::allocate(size); }
 
-		void operator delete(void * addr) noexcept { ml_free(addr); }
+		void operator delete(void * addr) noexcept { memory::deallocate(addr); }
 
-		void operator delete[](void * addr) noexcept { ml_free(addr); }
+		void operator delete[](void * addr) noexcept { memory::deallocate(addr); }
 	};
 }
 
 // default delete
 namespace ml
 {
-	template <> struct default_delete<>
+	template <> struct default_delete<> final
 	{
 		void operator()(void * addr) const noexcept
 		{
@@ -406,7 +374,15 @@ namespace ml
 		}
 	};
 
-	template <class T> struct default_delete<T>
+	template <> struct default_delete<void> final
+	{
+		void operator()(void * addr) const noexcept
+		{
+			memory::deallocate(addr);
+		}
+	};
+
+	template <class T> struct default_delete<T> final
 	{
 		void operator()(T * addr) const noexcept
 		{

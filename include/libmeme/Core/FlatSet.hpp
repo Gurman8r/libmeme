@@ -27,6 +27,9 @@ namespace ml::ds
 
 		static constexpr size_type thresh{ _Th };
 
+		template <class T = value_type
+		> using storage_type = typename pmr::vector<T>;
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 
@@ -45,10 +48,9 @@ namespace ml::ds
 		using allocator_type				= typename traits_type::allocator_type;
 		using difference_type				= typename traits_type::difference_type;
 		using size_type						= typename traits_type::size_type;
+		using storage_type					= typename traits_type::template storage_type<>;
 
-		using storage_type					= typename pmr::vector<value_type>;
 		using init_type						= typename std::initializer_list<value_type>;
-		
 		using pointer						= typename storage_type::pointer;
 		using const_pointer					= typename storage_type::const_pointer;
 		using reference						= typename storage_type::reference;

@@ -6,27 +6,41 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ML_IMPL_DEBUG_MSG_I
-#define ML_IMPL_DEBUG_MSG_I "[i] " // info message
+#define ML_IMPL_DEBUG_MSG_I "[info] " // info message
 #endif
 
 #ifndef ML_IMPL_DEBUG_MSG_E
-#define ML_IMPL_DEBUG_MSG_E "[e] " // error message
+#define ML_IMPL_DEBUG_MSG_E "[error] " // error message
 #endif
 
 #ifndef ML_IMPL_DEBUG_MSG_W
-#define ML_IMPL_DEBUG_MSG_W "[w] " // warning message
+#define ML_IMPL_DEBUG_MSG_W "[warn] " // warning message
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// assert
-#ifndef ML_assert
-#	ifdef assert
-#		define ML_assert(expr)	assert(expr)
+// assert ex
+#ifndef ML_assert_ex
+
+#	ifdef ML_cc_msvc
+#		define ML_assert_ex(expr, msg, file, line) (void)((!!(expr)) || (_wassert(_CRT_WIDE(msg), _CRT_WIDE(file), (unsigned)(line)), 0))
+
+#	elif defined(assert)
+#		define ML_assert_ex(expr, msg, file, line) assert(expr)
+
 #	else
-#		define ML_assert(expr)	((void)0)
+#		define ML_assert_ex(expr, msg, file, line) ((void)expr)
+
 #	endif
 #endif
+
+// assert
+#define ML_assert(expr) \
+	ML_assert_ex(expr, #expr, __FILE__, __LINE__)
+
+// check
+#define ML_check(expr) \
+	([](auto p) noexcept { ML_assert_ex(p, "CHECK FAILED: " #expr, __FILE__, __LINE__); return p; })(expr)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -51,13 +65,13 @@ namespace ml::debug
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	static struct // stdio
+	static struct // io
 	{
 		std::ostream & out	{ std::cout };
 		std::ostream & err	{ std::cerr };
 		std::istream & in	{ std::cin };
 	}
-	const stdio;
+	const io;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -78,7 +92,7 @@ namespace ml::debug
 #ifdef ML_os_windows
 		std::system("pause");
 #else
-		stdio.in.get();
+		io.in.get();
 #endif
 		return exit_code;
 	}
@@ -88,7 +102,7 @@ namespace ml::debug
 	template <class Fmt
 	> auto & puts(Fmt && fmt) noexcept
 	{
-		return stdio.out << ML_forward(fmt) << '\n';
+		return io.out << ML_forward(fmt) << '\n';
 	}
 
 	template <class Fmt, class Arg0, class ... Args
@@ -104,7 +118,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t info(Fmt && fmt) noexcept
 	{
-		stdio.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
 
 		return debug::info();
 	}
@@ -122,7 +136,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t error(Fmt && fmt) noexcept
 	{
-		stdio.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
 
 		return debug::error();
 	}
@@ -140,7 +154,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t warning(Fmt && fmt) noexcept
 	{
-		stdio.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
 
 		return debug::warning();
 	}

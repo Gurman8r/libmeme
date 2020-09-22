@@ -2,15 +2,15 @@
 
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
-#include <libmeme/Engine/Application.hpp>
-#include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Engine/ImGuiExt.hpp>
-#include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Graphics/Camera.hpp>
-#include <libmeme/Graphics/Font.hpp>
-#include <libmeme/Graphics/Mesh.hpp>
-#include <libmeme/Graphics/Shader.hpp>
-#include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Client/Application.hpp>
+#include <libmeme/Client/ClientEvents.hpp>
+#include <libmeme/Client/ImGui.hpp>
+#include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Renderer/Camera.hpp>
+#include <libmeme/Renderer/Font.hpp>
+#include <libmeme/Renderer/Mesh.hpp>
+#include <libmeme/Renderer/Shader.hpp>
+#include <libmeme/Renderer/Renderer.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -141,28 +141,28 @@ namespace ml
 		// GUI
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		gui::widget
+		gui::form
 			m_imgui_demo	{ "Dear ImGui Demo"		, 0, ImGuiWindowFlags_None },
 			m_imgui_metrics	{ "Dear ImGui Metrics"	, 0, ImGuiWindowFlags_None },
+			m_imgui_style	{ "Style Editor"		, 0, ImGuiWindowFlags_None },
 			m_imgui_about	{ "About Dear ImGui"	, 0, ImGuiWindowFlags_None },
+			m_gui_about		{ "about##demo"			, 0, ImGuiWindowFlags_None },
 			m_gui_assets	{ "assets##demo"		, 1, ImGuiWindowFlags_None },
 			m_gui_console	{ "console##demo"		, 1, ImGuiWindowFlags_None },
 			m_gui_docs		{ "documents##demo"		, 1, ImGuiWindowFlags_MenuBar },
 			m_gui_ecs		{ "ecs##demo"			, 1, ImGuiWindowFlags_None },
-			m_gui_json		{ "json editor##demo"	, 1, ImGuiWindowFlags_None },
-			m_gui_memory	{ "memory##demo"		, 1, ImGuiWindowFlags_MenuBar },
-			m_gui_nodes		{ "node editor##demo"	, 1, ImGuiWindowFlags_None },
-			m_gui_profiler	{ "profiler##demo"		, 1, ImGuiWindowFlags_None },
+			m_gui_objects	{ "objects##demo"		, 1, ImGuiWindowFlags_MenuBar },
+			m_gui_memory	{ "memory##demo"		, 0, ImGuiWindowFlags_MenuBar },
+			m_gui_nodes		{ "node editor##demo"	, 0, ImGuiWindowFlags_None },
+			m_gui_profiler	{ "profiler##demo"		, 0, ImGuiWindowFlags_None },
 			m_gui_renderer	{ "renderer##demo"		, 1, ImGuiWindowFlags_MenuBar },
-			m_gui_viewport	{ "viewport##demo"		, 1, ImGuiWindowFlags_NoScrollbar };
+			m_gui_viewport	{ "viewport##demo"		, 1, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar };
 
-		stream_sniper m_cout{ &std::cout };
+		basic_stream_sniper<> m_cout{ &std::cout };
 
 		gui::console m_console{};
 
 		scoped<ax::NodeEditor::EditorContext> m_node_editor{ ax::NodeEditor::CreateEditor() };
-
-		static constexpr size_t FPS_MAX{ 240 };
 
 		gui::plot_controller m_plots
 		{
@@ -170,7 +170,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [&]() noexcept { return 1000.f / get_io()->frame_rate; }
+				, [io = get_io()]() noexcept { return 1000.f / io->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -178,7 +178,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [&]() noexcept { return get_io()->frame_rate; }
+				, [io = get_io()]() noexcept { return io->frame_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -187,7 +187,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ get_memory()->resource() };
+			static auto const testres{ get_mem()->resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.focus();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -204,10 +204,10 @@ namespace ml
 
 		demo(application * app, void * user) noexcept : plugin{ app, user }
 		{
-			subscribe<	load_event				>();
-			subscribe<	update_event			>();
-			subscribe<	dockspace_event			>();
-			subscribe<	main_menu_bar_event		>();
+			subscribe<	app_load_event			>();
+			subscribe<	app_update_event		>();
+			subscribe<	gui_dockspace_event		>();
+			subscribe<	gui_main_menu_bar_event	>();
 			subscribe<	gui_event				>();
 			subscribe<	window_key_event		>();
 			subscribe<	window_mouse_event		>();
@@ -220,17 +220,15 @@ namespace ml
 		{
 			switch (value)
 			{
-			case load_event			::ID: return on_load	((load_event const &)value);
-			case update_event		::ID: return on_update	((update_event const &)value);
-			case dockspace_event	::ID: return on_dock	((dockspace_event const &)value);
-			case main_menu_bar_event::ID: return on_menu	((main_menu_bar_event const &)value);
-			case gui_event			::ID: return on_gui		((gui_event const &)value);
+			case app_load_event			::ID: return on_load	((app_load_event const &)value);
+			case app_update_event		::ID: return on_update	((app_update_event const &)value);
+			case gui_dockspace_event	::ID: return on_dock	((gui_dockspace_event const &)value);
+			case gui_main_menu_bar_event::ID: return on_menubar	((gui_main_menu_bar_event const &)value);
+			case gui_event				::ID: return on_gui		((gui_event const &)value);
 			
 			case window_key_event::ID: {
 				switch (auto const & ev{ (window_key_event const &)value }; ev.key)
 				{
-				default:
-					get_io()->keyboard[ev.key] = ev.action;
 				case key_code_w: {
 					switch (ev.action)
 					{
@@ -260,10 +258,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_load(load_event const & ev)
+		void on_load(app_load_event const & ev)
 		{
 			// load stuff, etc...
-			auto const sys	{ ev->get_system() };
+			auto const sys	{ ev->get_sys() };
 			auto const mem	{ sys->mem };
 			auto const io	{ sys->io };
 			auto const win	{ sys->win };
@@ -345,7 +343,7 @@ namespace ml
 					make_uniform<float_t>("u_cam.fov"	, 45.f * util::deg2rag_v<float_t>),
 					make_uniform<float_t>("u_cam.near"	, 0.0001f),
 					make_uniform<float_t>("u_cam.far"	, 1000.0f),
-					make_uniform<vec2	>("u_cam.view"	, vec2{ 1280.f, 720.f })
+					make_uniform<vec2	>("u_cam.view"	, [&]() { return m_resolution; })
 				};
 
 				// transform
@@ -477,10 +475,10 @@ namespace ml
 			}
 		}
 
-		void on_update(update_event const & ev)
+		void on_update(app_update_event const & ev)
 		{
 			// update stuff, etc...
-			auto const sys	{ ev->get_system() };
+			auto const sys	{ ev->get_sys() };
 			auto const io	{ sys->io };
 
 			// console
@@ -509,55 +507,56 @@ namespace ml
 			})	gfx::execute(cmd, sys->win->get_render_context());
 		}
 
-		void on_dock(dockspace_event const & ev)
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void on_dock(gui_dockspace_event const & ev)
 		{
 			enum : int32_t // nodes
 			{
-				root,
+				center, center_up, center_dn,
 				left, left_up, left_dn,
 				right, right_up, right_dn,
 				MAX_DOCK_NODE
 			};
 			
 			// setup dockspace
-			auto & d{ *ev };
-			if (!d.nodes.empty()) { return; } else { d.nodes.resize(MAX_DOCK_NODE); }
-			if (!(d[root] = d.begin_builder(ImGuiDockNodeFlags_None))) { return; }
-			ML_defer(&d) { d.end_builder(root); };
+			auto & d{ ev->get_docker() };
+			if (d.nodes.empty()) { d.nodes.resize(MAX_DOCK_NODE); } else { return; }
+			if (!(d[center] = d.begin_builder())) { return; }
+			ML_defer(&d) { d.end_builder(center); };
 
-			constexpr float_t lhs{ 0.465f }, rhs{ 1.f - lhs };
+			constexpr float_t lhs{ .25f }, rhs{ 1.f - lhs };
 
 			// split nodes
-			d.split(left	, d[root]	, ImGuiDir_Left	, lhs	, &d[root]);	// left
-			d.split(left_up	, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);	// left-up
-			d.split(left_dn	, d[left]	, ImGuiDir_Down	, 0.5f	, &d[left]);	// left-down
-			d.split(right	, d[root]	, ImGuiDir_Right, rhs	, &d[root]);	// right
-			d.split(right_up, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);	// right-up
-			d.split(right_dn, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);	// right-down
+			d.split(left		, d[center]	, ImGuiDir_Left	, 0.2f	, &d[center]);
+			d.split(right		, d[center]	, ImGuiDir_Right, 0.22f	, &d[center]);
+			d.split(left_up		, d[left]	, ImGuiDir_Up	, 0.5f	, &d[left]);
+			d.split(left_dn		, d[left]	, ImGuiDir_Down	, 0.5f	, &d[left]);
+			d.split(right_up	, d[right]	, ImGuiDir_Up	, 0.5f	, &d[right]);
+			d.split(right_dn	, d[right]	, ImGuiDir_Down	, 0.5f	, &d[right]);
+			d.split(center_up	, d[center]	, ImGuiDir_Up	, 0.71f	, &d[center]);
+			d.split(center_dn	, d[center]	, ImGuiDir_Down	, 0.29f	, &d[center]);
 
-			// dock windows
-			d.dock(m_gui_viewport	, d[left_up]);
-			d.dock(m_gui_ecs		, d[left_dn]);
-			d.dock(m_gui_assets		, d[left_dn]);
-			d.dock(m_gui_renderer	, d[left_dn]);
-			d.dock(m_gui_profiler	, d[left_dn]);
-			d.dock(m_gui_json		, d[left_dn]);
-			d.dock(m_gui_memory		, d[right]);
-			d.dock(m_gui_docs		, d[right]);
-			d.dock(m_gui_nodes		, d[right]);
-			d.dock(m_gui_console	, d[right]);
+			// dock widgets
+			d.dock(m_gui_viewport	, d[center_up]);
+			d.dock(m_gui_console	, d[center_dn]);
+			d.dock(m_gui_objects	, d[left]);
+			d.dock(m_gui_renderer	, d[right_up]);
+			d.dock(m_gui_assets		, d[right_up]);
+			d.dock(m_gui_memory		, d[right_up]);
+			d.dock(m_gui_docs		, d[right_up]);
+			d.dock(m_gui_nodes		, d[right_up]);
+			d.dock(m_gui_ecs		, d[right_dn]);
 		}
 
-		void on_menu(main_menu_bar_event const & ev)
+		void on_menubar(gui_main_menu_bar_event const & ev)
 		{
-			ML_ImGui_ScopeID(this);
-
 			// FILE
 			if (ImGui::BeginMenu("file"))
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					get_window()->set_should_close(true);
+					get_win()->set_should_close(true);
 				}
 				ImGui::EndMenu();
 			}
@@ -568,7 +567,7 @@ namespace ml
 				m_gui_console.menu_item();
 				m_gui_docs.menu_item();
 				m_gui_ecs.menu_item();
-				m_gui_json.menu_item();
+				m_gui_objects.menu_item();
 				m_gui_memory.menu_item();
 				m_gui_nodes.menu_item();
 				m_gui_profiler.menu_item();
@@ -576,40 +575,57 @@ namespace ml
 				m_gui_viewport.menu_item();
 				ImGui::EndMenu();
 			}
+			// SETTINGS
+			if (ImGui::BeginMenu("settings"))
+			{
+				ImGui::EndMenu();
+			}
 			// HELP
 			if (ImGui::BeginMenu("help"))
 			{
+				m_gui_about.menu_item();
+				ImGui::Separator();
 				m_imgui_demo.menu_item();
 				m_imgui_metrics.menu_item();
+				m_imgui_style.menu_item();
 				m_imgui_about.menu_item();
 				ImGui::EndMenu();
 			}
 
+			// FPS
+			auto const fps{ get_io()->frame_rate };
 			ImGui::Separator();
-			ImGui::TextDisabled("%.1f fps", get_io()->frame_rate);
+			ImGui::TextDisabled("%.3f ms/frame ( %.1f fps )", 1000.f / fps, fps);
 			ImGui::Separator();
 		}
 
 		void on_gui(gui_event const & ev)
 		{
-			ML_ImGui_ScopeID(this);
-
 			// IMGUI
-			if (m_imgui_demo.open)		{ ev->show_imgui_demo(&m_imgui_demo.open); }
-			if (m_imgui_metrics.open)	{ ev->show_imgui_metrics(&m_imgui_metrics.open); }
-			if (m_imgui_about.open)		{ ev->show_imgui_about(&m_imgui_about.open); }
+			if (m_imgui_about.open)			{ ev->imgui_about(&m_imgui_about.open); }
+			if (m_imgui_demo.open)			{ ev->imgui_demo(&m_imgui_demo.open); }
+			if (m_imgui_metrics.open)		{ ev->imgui_metrics(&m_imgui_metrics.open); }
+			m_imgui_style.render([&ev]()	{ ev->imgui_style_editor(); });
 
 			// WIDGETS
-			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
-			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
+			m_gui_about		.render(&demo::show_about_gui		, this); // ABOUT
 			m_gui_assets	.render(&demo::show_assets_gui		, this); // ASSETS
-			m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
-			m_gui_json		.render(&demo::show_json_gui		, this); // JSON
 			m_gui_profiler	.render(&demo::show_profiler_gui	, this); // PROFILER
 			m_gui_nodes		.render(&demo::show_nodes_gui		, this); // NODES
 			m_gui_memory	.render(&demo::show_memory_gui		, this); // MEMORY
 			m_gui_docs		.render(&demo::show_documents_gui	, this); // DOCS
+			m_gui_objects	.render(&demo::show_objects_gui		, this); // OBJECTS
+			m_gui_ecs		.render(&demo::show_ecs_gui			, this); // ECS
+			m_gui_renderer	.render(&demo::show_renderer_gui	, this); // RENDERER
 			m_gui_console	.render(&demo::show_console_gui		, this); // CONSOLE
+			m_gui_viewport	.render(&demo::show_viewport_gui	, this); // VIEWPORT
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void show_about_gui()
+		{
+			gui::help_marker("WIP");
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -687,7 +703,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				get_window()->set_should_close(true);
+				get_win()->set_should_close(true);
 			},
 			{
 				"shutdown the application",
@@ -750,7 +766,7 @@ namespace ml
 				}
 				else
 				{
-					get_scripts()->do_string(util::detokenize(args));
+					get_py()->do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -868,7 +884,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							get_window()->set_clipboard(buf);
+							get_win()->set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1006,22 +1022,15 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void show_json_gui()
-		{
-
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		void show_memory_gui()
 		{
-			static passthrough_resource * const testres{ get_memory()->resource() };
+			static passthrough_resource * const testres{ get_mem()->resource() };
 
 			static ML_scope(&) // setup memory editor
 			{
 				m_mem_editor.Open				= true;
 				m_mem_editor.ReadOnly			= true;
-				m_mem_editor.Cols				= get_window()->is_maximized() ? 32 : 16;
+				m_mem_editor.Cols				= 32;
 				m_mem_editor.OptShowOptions		= true;
 				m_mem_editor.OptShowDataPreview	= true;
 				m_mem_editor.OptShowHexII		= false;
@@ -1050,7 +1059,7 @@ namespace ml
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				auto const & records{ get_memory()->records().values() };
+				auto const & records{ get_mem()->records().values() };
 				static auto selected_record{ &records.front() };
 				char selected_address[20] = "highlight";
 				if (selected_record)
@@ -1153,6 +1162,48 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		void show_objects_gui()
+		{
+			if (ImGui::BeginMenuBar())
+			{
+				gui::help_marker("WIP");
+				ImGui::EndMenuBar();
+			}
+			ImGui::Columns(2, "tree", true);
+			for (int x = 0; x < 3; x++)
+			{
+				bool open1 = ImGui::TreeNode((void *)(intptr_t)x, "Node%d", x);
+				ImGui::NextColumn();
+				ImGui::Text("Node contents");
+				ImGui::NextColumn();
+				if (open1)
+				{
+					for (int y = 0; y < 3; y++)
+					{
+						bool open2 = ImGui::TreeNode((void *)(intptr_t)y, "Node%d.%d", x, y);
+						ImGui::NextColumn();
+						ImGui::Text("Node contents");
+						if (open2)
+						{
+							ImGui::Text("Even more contents");
+							if (ImGui::TreeNode("Tree in column"))
+							{
+								ImGui::Text("The quick brown fox jumps over the lazy dog");
+								ImGui::TreePop();
+							}
+						}
+						ImGui::NextColumn();
+						if (open2)
+							ImGui::TreePop();
+					}
+					ImGui::TreePop();
+				}
+			}
+			ImGui::Columns(1);
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void show_profiler_gui()
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1200,7 +1251,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev	{ get_window()->get_render_device() };
+			static auto const & dev	{ get_win()->get_render_device() };
 			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
 
@@ -1268,17 +1319,65 @@ namespace ml
 
 		void show_viewport_gui()
 		{
-			static gui::texture_preview pview{};
-
+			static gui::texture_preview tpv{};
 			auto const & tex{ m_fbo.back()->get_color_attachments().front() };
+			tpv.tex_addr = tex->get_handle();
 			
-			pview.tex_addr = tex->get_handle();
+			static auto const & modes{ video_mode::get_fullscreen_modes() };
+			static size_t		index{};
+			static bool			fixed{};
+			auto const &		video{ modes[index] };
+
+			if (ImGui::BeginMenuBar())
+			{
+				ML_defer() { ImGui::EndMenuBar(); };
+
+				char label[32]{};
+
+				constexpr auto
+					fmt_fa{ "free aspect" },
+					fmt_vm{ "%i x %i @ %iHz" };
+
+				if (!fixed) std::sprintf(label, fmt_fa);
+				else std::sprintf(label, fmt_vm,
+					video.resolution[0],
+					video.resolution[1],
+					video.refresh_rate);
+				ImGui::SetNextItemWidth(200);
+				if (ImGui::BeginCombo("##resolution", label))
+				{
+					ML_defer() { ImGui::EndCombo(); };
+
+					if (ImGui::Selectable(fmt_fa, !fixed)) { fixed = false; }
+					ImGui::Separator();
+
+					for (size_t i = 0; i < modes.size(); ++i)
+					{
+						std::sprintf(label, fmt_vm,
+							modes[i].resolution[0],
+							modes[i].resolution[1],
+							modes[i].refresh_rate);
+						if (ImGui::Selectable(label, fixed && (i == index)))
+						{
+							index = i; fixed = true;
+						}
+					}
+				}
+				gui::tooltip("resolution");
+			}
+
+			if (!fixed)
+			{
+				m_resolution = ImGui::GetContentRegionAvail();
+				tpv.tex_size = m_resolution;
+			}
+			else
+			{
+				m_resolution = util::scale_to_fit((vec2)modes[index].resolution, (vec2)ImGui::GetContentRegionAvail());
+				tpv.tex_size = tex->get_data().size;
+			}
 			
-			pview.tex_size = tex->get_data().size;
-
-			m_resolution = util::maintain(m_resolution, ImGui::GetContentRegionAvail());
-
-			pview.render();
+			tpv.render();
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1291,12 +1390,12 @@ extern "C"
 {
 	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::application * app, void * user)
 	{
-		return app->get_memory()->new_object<ml::demo>(app, user);
+		return app->get_mem()->new_object<ml::demo>(app, user);
 	}
 	
 	ML_PLUGIN_API void ml_plugin_detach(ml::application * app, ml::plugin * ptr)
 	{
-		app->get_memory()->delete_object((ml::demo *)ptr);
+		app->get_mem()->delete_object((ml::demo *)ptr);
 	}
 }
 

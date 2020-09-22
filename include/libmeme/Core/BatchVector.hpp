@@ -872,7 +872,7 @@ namespace ml::ds
 		template <size_t I, class It = const_iterator_i<I>, class U = value_i<I>
 		> iterator_i<I> insert(It it, U && value) noexcept
 		{
-			if constexpr (std::is_integral_v<It>)
+			if constexpr (std::is_scalar_v<It>)
 			{
 				return this->get<I>().emplace(this->begin<I>() + it, ML_forward(value));
 			}
@@ -885,7 +885,7 @@ namespace ml::ds
 		template <class T, class It = const_iterator_t<T>, class U = value_t<T>
 		> iterator_t<T> insert(It it, U && value) noexcept
 		{
-			if constexpr (std::is_integral_v<It>)
+			if constexpr (std::is_scalar_v<It>)
 			{
 				return this->get<T>().emplace(this->begin<T>() + it, ML_forward(value));
 			}

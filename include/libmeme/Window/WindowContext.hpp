@@ -92,7 +92,7 @@ namespace ml
 	// context settings
 	struct ML_NODISCARD context_settings final
 	{
-		int32_t		api				{ context_api_unknown };
+		int32_t		client			{ context_api_unknown };
 		int32_t		major			{};
 		int32_t		minor			{};
 		int32_t		profile			{ context_profile_any };
@@ -104,7 +104,7 @@ namespace ml
 
 	inline void from_json(json const & j, context_settings & v)
 	{
-		j["client"		].get_to((context_client_ & )v.api);
+		j["client"		].get_to((context_client_ & )v.client);
 		j["major"		].get_to(v.major);
 		j["minor"		].get_to(v.minor);
 		j["profile"		].get_to((context_profile_ &)v.profile);
@@ -116,7 +116,7 @@ namespace ml
 
 	inline void to_json(json & j, context_settings const & v)
 	{
-		j["client"		] = (context_client_)v.api;
+		j["client"		] = (context_client_)v.client;
 		j["major"		] = v.major;
 		j["minor"		] = v.minor;
 		j["profile"		] = (context_profile_)v.profile;

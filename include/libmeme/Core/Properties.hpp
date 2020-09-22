@@ -7,7 +7,13 @@
 
 namespace ml
 {
+	struct field {};
 
+	struct method {};
+
+	struct clazz {};
+
+	struct properties {};
 }
 
 #endif // !_ML_PROPERTIES_HPP_

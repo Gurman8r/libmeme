@@ -10,6 +10,13 @@
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// TYPES
+	struct event;
+	struct event_listener;
+	struct event_bus;
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// EVENT BASE
 	struct ML_NODISCARD event : non_copyable
@@ -29,10 +36,10 @@ namespace ml
 	// EVENT HELPER
 	namespace impl
 	{
-		template <class T
+		template <class Derived
 		> struct event_helper : event
 		{
-			enum : hash_t { ID = hashof_v<T> };
+			enum : hash_t { ID = hashof_v<Derived> };
 
 			constexpr event_helper() noexcept : event{ ID }
 			{
@@ -47,7 +54,10 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit event_listener(struct event_bus * bus) : m_event_bus{ bus } {}
+		explicit event_listener(event_bus * bus) : m_bus{ bus }
+		{
+			ML_assert("INVALID EVENT BUS" && bus);
+		}
 
 		virtual ~event_listener() noexcept; // EOF
 
@@ -60,37 +70,34 @@ namespace ml
 		template <class Ev
 		> bool subscribe() noexcept
 		{
-			ML_assert(m_event_bus);
-			return m_event_bus->add_listener<Ev>(this);
+			return ML_check(m_bus)->add_listener<Ev>(this);
 		}
 
 		template <class ... Args
 		> bool subscribe(Args && ... args) noexcept
 		{
-			ML_assert(m_event_bus);
-			return m_event_bus->add_listener(ML_forward(args)..., this);
+			return ML_check(m_bus)->add_listener(ML_forward(args)..., this);
 		}
 
 		template <class Ev
 		> void unsubscribe() noexcept
 		{
-			ML_assert(m_event_bus);
-			return m_event_bus->remove_listener<Ev>(this);
+			return ML_check(m_bus)->remove_listener<Ev>(this);
 		}
 
 		template <class ... Args
 		> void unsubscribe(Args && ... args) noexcept
 		{
-			ML_assert(m_event_bus);
-			return m_event_bus->remove_listener(ML_forward(args)..., this);
+			return ML_check(m_bus)->remove_listener(ML_forward(args)..., this);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	protected:
-		friend struct event_bus;
+		event_bus * const m_bus;
 
-		struct event_bus * const m_event_bus;
+	private:
+		friend event_bus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -120,9 +127,9 @@ namespace ml
 		{
 			if (auto const cat{ m_categories.find(ev) })
 			{
-				for (auto const & l : (*cat->second))
+				for (auto const & listener : (*cat->second))
 				{
-					l->on_event(ev);
+					listener->on_event(ev);
 				}
 			}
 		}
@@ -140,7 +147,7 @@ namespace ml
 		bool add_listener(hash_t id, event_listener * value) noexcept
 		{
 			return value
-				&& (this == value->m_event_bus)
+				&& this == value->m_bus
 				&& m_categories[id].insert(value).second;
 		}
 
@@ -156,13 +163,13 @@ namespace ml
 
 		void remove_listener(hash_t id, event_listener * value) noexcept
 		{
-			if (!value || (this != value->m_event_bus)) { return; }
+			if (!value || (this != value->m_bus)) { return; }
 
 			if (auto const cat{ m_categories.find(id) })
 			{
-				if (auto const l{ cat->second->find(value) }; l != cat->second->end())
+				if (auto const listener{ cat->second->find(value) }; listener != cat->second->end())
 				{
-					cat->second->erase(l);
+					cat->second->erase(listener);
 				}
 			}
 		}
@@ -183,9 +190,9 @@ namespace ml
 
 			m_categories.for_each([&](hash_t, category & cat) noexcept
 			{
-				if (auto const l{ cat.find(value) }; l != cat.end())
+				if (auto const listener{ cat.find(value) }; listener != cat.end())
 				{
-					cat.erase(l);
+					cat.erase(listener);
 				}
 			});
 		}

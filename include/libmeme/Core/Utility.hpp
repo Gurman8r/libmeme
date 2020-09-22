@@ -22,7 +22,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // read flag at index
-#define ML_flag_read(val, i)		(bool)((val) & (i))
+#define ML_flag_read(val, i)		(((i) & (val)) == (i))
 
 // set flag at index
 #define ML_flag_set(val, i)			((val) |= (i))

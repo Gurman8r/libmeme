@@ -525,12 +525,6 @@ namespace ml::util
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
-	> ML_NODISCARD decltype(auto) to_string(Str && str) noexcept
-	{
-		return ML_forward(str);
-	}
-
-	template <ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
 	> ML_NODISCARD Str to_string(int8_t const value) noexcept
 	{
 		return _ML util::integral_to_string<Ch>(value);
@@ -596,6 +590,14 @@ namespace ml::util
 		return _ML util::floating_point_to_string<Ch>(value);
 	}
 
+	template <class T, ML_PMR_STRING_TEMPLATE(Ch, Tr, Al, Str)
+	> ML_NODISCARD Str to_string(T && value) noexcept
+	{
+		std::basic_stringstream<Ch, Tr, Al> ss{};
+		ss << ML_forward(value);
+		return ss.str();
+	}
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	template <class Arg0, class ... Args
@@ -603,7 +605,7 @@ namespace ml::util
 	{
 		pmr::stringstream ss{};
 		ss << ML_forward(arg0) << '\n';
-		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; ML_unused(sink);
+		int32_t sink[] = { 0, ((void)(ss << args << '\n'), 0)... }; (void)sink;
 		return format(str, ss);
 	}
 

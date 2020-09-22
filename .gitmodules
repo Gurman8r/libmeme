@@ -53,3 +53,6 @@
 	path = ext/imgui
 	url = https://github.com/Gurman8r/imgui.git
 	branch = docking
+[submodule "ext/entt"]
+	path = ext/entt
+	url = https://github.com/skypjack/entt.git

@@ -79,9 +79,6 @@
 // automatic forward
 #define ML_forward(expr)		std::forward<decltype(expr)>(expr)
 
-// unused expression
-#define ML_unused(expr)			((void)expr);
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle

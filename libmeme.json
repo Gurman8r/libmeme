@@ -30,28 +30,16 @@
 			"visible"		: false
 		}
 	},
-	"editor": {
-		"style": "assets/styles/obsidian.style",
-		"dockspace": {
-			"visible": true,
-			"menubar": true
-		}
+	"gui": {
+		"instclbk"	: true,
+		"style"		: "assets/styles/obsidian.style",
+		"menubar"	: { "enabled": true },
+		"dockspace"	: { "enabled": true }
 	},
 	"plugins": {
 		"files": [ "plugins/demo" ]
 	},
 	"scripts": {
 		"files": [ "assets/scripts/setup.py" ]
-	},
-	
-	"testing": {
-		"obj0": {
-			"type": "lib.class",
-			"args": {
-				"enabled"	: true,
-				"somelist"	: [ 1, 2, 3 ],
-				"somedict"	: { "a": 4, "b": 5, "c": 6 }
-			}
-		}
 	}
 }

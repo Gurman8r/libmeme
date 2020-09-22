@@ -5,9 +5,10 @@
 
 namespace ml
 {
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	template <class Ch = char, class Tr = std::char_traits<Ch>, class Al = pmr::polymorphic_allocator<Ch>
+	template <
+		class Ch = char,
+		class Tr = std::char_traits<Ch>,
+		class Al = pmr::polymorphic_allocator<Ch>
 	> struct basic_stream_sniper final : non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -90,12 +91,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	ML_alias stream_sniper = typename basic_stream_sniper<>;
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_STREAM_SNIPER_HPP_

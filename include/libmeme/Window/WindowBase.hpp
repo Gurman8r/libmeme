@@ -184,6 +184,28 @@ namespace ml
 		virtual window_scroll_callback				set_scroll_callback				(window_scroll_callback) = 0;
 		virtual window_size_callback				set_size_callback				(window_size_callback) = 0;
 
+		void clear_callbacks() noexcept
+		{
+			set_char_callback				(nullptr);
+			set_char_mods_callback			(nullptr);
+			set_close_callback				(nullptr);
+			set_cursor_enter_callback		(nullptr);
+			set_cursor_position_callback	(nullptr);
+			set_content_scale_callback		(nullptr);
+			set_drop_callback				(nullptr);
+			set_error_callback				(nullptr);
+			set_focus_callback				(nullptr);
+			set_framebuffer_size_callback	(nullptr);
+			set_iconify_callback			(nullptr);
+			set_key_callback				(nullptr);
+			set_maximize_callback			(nullptr);
+			set_mouse_callback				(nullptr);
+			set_position_callback			(nullptr);
+			set_refresh_callback			(nullptr);
+			set_scroll_callback				(nullptr);
+			set_size_callback				(nullptr);
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
 }

@@ -5,73 +5,7 @@
 
 namespace ml
 {
-	struct system_context;
-	struct application;
-	struct editor_context;
-	struct editor_dockspace;
-}
 
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// LOAD
-	ML_decl_event(load_event)
-	{
-		application * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr load_event(application * ptr) noexcept : ptr{ ptr } {}
-	};
-
-	// UNLOAD
-	ML_decl_event(unload_event)
-	{
-		application * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr unload_event(application * ptr) noexcept : ptr{ ptr } {}
-	};
-
-	// UPDATE
-	ML_decl_event(update_event)
-	{
-		application * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr update_event(application * ptr) noexcept : ptr{ ptr } {}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	// DOCKSPACE
-	ML_decl_event(dockspace_event)
-	{
-		editor_dockspace * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr dockspace_event(editor_dockspace * const ptr) noexcept : ptr{ ptr } {}
-	};
-
-	// MAIN MENU BAR
-	ML_decl_event(main_menu_bar_event)
-	{
-		editor_dockspace * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr main_menu_bar_event(editor_dockspace * const ptr) noexcept : ptr{ ptr } {}
-	};
-
-	// GUI
-	ML_decl_event(gui_event)
-	{
-		editor_context * const ptr;
-		auto operator->() const noexcept { return ptr; }
-		auto & operator*() const noexcept { return *ptr; }
-		constexpr gui_event(editor_context * const ptr) noexcept : ptr{ ptr } {}
-	};
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_ENGINE_EVENTS_HPP_

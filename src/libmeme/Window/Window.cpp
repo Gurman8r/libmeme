@@ -35,6 +35,7 @@ namespace ml
 
 	window::~window() noexcept
 	{
+		clear_callbacks();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

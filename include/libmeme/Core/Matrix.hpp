@@ -650,7 +650,7 @@ namespace ml::ds
 	{
 		for (auto const & e : value)
 			if (out.good())
-				out << value << ' ';
+				out << e << ' ';
 		return out;
 	}
 

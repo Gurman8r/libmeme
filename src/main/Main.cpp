@@ -1,19 +1,17 @@
-#include <libmeme/Core/Events.hpp>
-#include <libmeme/Window/WindowEvents.hpp>
-#include <libmeme/Engine/EngineEvents.hpp>
-#include <libmeme/Engine/API_Embed.hpp>
-#include <libmeme/Engine/Application.hpp>
+#include <libmeme/Client/Application.hpp>
 
 using namespace ml;
 using namespace ml::byte_literals;
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define RESERVE_MEMORY 128_MiB
+
 static class memcfg final : public singleton<memcfg>
 {
 	friend singleton;
 
-	ds::array<byte_t, 128_MiB>			data{};
+	ds::array<byte_t, RESERVE_MEMORY>	data{};
 	pmr::monotonic_buffer_resource		mono{ data.data(), data.size() };
 	pmr::unsynchronized_pool_resource	pool{ &mono };
 	passthrough_resource				view{ &pool, data.data(), data.size() };
@@ -25,6 +23,8 @@ static class memcfg final : public singleton<memcfg>
 } const & ML_anon{ memcfg::get_singleton() };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#define SETTINGS_PATH "../../../../libmeme.json"
 
 static auto const default_settings{ R"(
 {
@@ -59,12 +59,11 @@ static auto const default_settings{ R"(
 			"visible"		: false
 		}
 	},
-	"editor": {
-		"style": "assets/styles/obsidian.style",
-		"dockspace": {
-			"visible": true,
-			"menubar": true
-		}
+	"gui": {
+		"instclbk"	: true,
+		"style"		: "assets/styles/obsidian.style",
+		"menubar"	: { "enabled": true },
+		"dockspace"	: { "enabled": true }
 	},
 	"plugins": {
 		"files": [ "plugins/demo" ]
@@ -75,7 +74,7 @@ static auto const default_settings{ R"(
 }
 )"_json };
 
-static auto load_settings(fs::path const & path = "../../../../libmeme.json")
+static auto load_settings(fs::path const & path = SETTINGS_PATH)
 {
 	std::ifstream f{ path }; ML_defer(&f) { f.close(); };
 
@@ -87,13 +86,16 @@ static auto load_settings(fs::path const & path = "../../../../libmeme.json")
 ml::int32_t main()
 {
 	static memory			mem	{ pmr::get_default_resource() };
-	static io_context		io	{ __argc, __argv, mem.allocator(), load_settings() };
-	static script_context	scr	{ io.program_name, io.content_path };
-	static event_bus		bus	{ mem.allocator() };
-	static render_window	win	{ mem.allocator() };
-	static editor_context	gui	{ &bus, &win, io.conf, mem.allocator() };
-	static system_context	sys	{ &bus, &gui, &io, &mem, &scr, &win };
+	static io_context		io	{ __argc, __argv, load_settings(), mem.allocator() };
+	static event_bus		bus	{ io.alloc };
+	static python_context	scr	{ &bus, { io.program_name, io.content_path } };
+	static render_window	win	{ io.alloc };
+	static gui_manager		gui	{ &bus, &win, io.alloc };
+	static system_context	sys	{ &mem, &io, &bus, &scr, &win, &gui };
 	static application		app	{ &sys };
+
+	for (auto const & path : io.prefs["plugins"]["files"]) { app.install_plugin(path); }
+	for (auto const & path : io.prefs["scripts"]["files"]) { scr.do_file(io.path2(path)); }
 	
 	return app();
 }
