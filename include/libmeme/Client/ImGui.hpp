@@ -582,17 +582,17 @@ namespace ml::gui
 					// # (orange)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.8f, 0.6f, 1.0f }); pop_color = true;
 				}
-				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_I))
+				else if (std::strstr(str, ML_IMPL_DEBUG_INFO))
 				{
 					// [ info ] (green)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 0.0f, 1.0f, 0.0f, 1.0f }); pop_color = true;
 				}
-				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_E))
+				else if (std::strstr(str, ML_IMPL_DEBUG_ERROR))
 				{
 					// [ error ] (red)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.2f, 0.4f, 1.0f }); pop_color = true;
 				}
-				else if (std::strstr(str, ML_IMPL_DEBUG_MSG_W))
+				else if (std::strstr(str, ML_IMPL_DEBUG_WARNING))
 				{
 					// [ warning ] (yellow)
 					ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.75f, 0.0f, 1.0f }); pop_color = true;

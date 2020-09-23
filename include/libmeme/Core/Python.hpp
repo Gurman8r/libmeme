@@ -3,25 +3,18 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <libmeme/Client/Export.hpp>
 #include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
-	struct event_bus;
-
-	struct ML_CLIENT_API python_context final : trackable, non_copyable
+	struct ML_CORE_API python_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		struct ML_NODISCARD path_info final
-		{
-			fs::path const
-				name, // program name
-				home; // library home
-		};
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		python_context(event_bus * bus, path_info const & paths);
+		python_context(fs::path const & name, fs::path const & home, allocator_type alloc);
 
 		~python_context() noexcept;
 
@@ -50,8 +43,11 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		event_bus * const m_bus;
-		path_info m_paths;
+		static python_context *			g_py	; // 
+		allocator_type m_alloc;
+		fs::path const
+			m_name, // program name
+			m_home; // library path
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -59,9 +55,11 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// python
 #define HAVE_SNPRINTF
-
 #include <Python.h>
+
+// pybind11
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>

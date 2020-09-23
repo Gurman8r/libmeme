@@ -1,14 +1,13 @@
 #ifndef _ML_SHARED_LIBRARY_HPP_
 #define _ML_SHARED_LIBRARY_HPP_
 
-#include <libmeme/Client/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 
 namespace ml
 {
 	ML_decl_handle(library_handle);
 
-	struct ML_CLIENT_API shared_library final : trackable, non_copyable
+	struct ML_CORE_API shared_library final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

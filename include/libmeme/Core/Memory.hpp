@@ -4,14 +4,14 @@
 #include <libmeme/Core/Debug.hpp>
 #include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
+#include <libmeme/Core/BatchVector.hpp>
 
 // testres
 namespace ml
 {
 	// proxy for testing an upstream resource
-	class passthrough_resource final : public pmr::memory_resource, public non_copyable
+	struct passthrough_resource final : public pmr::memory_resource, non_copyable
 	{
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using pointer			= typename byte_t *;
@@ -29,72 +29,64 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		pointer buffer() noexcept { return m_buffer; }
+		ML_NODISCARD auto base() const noexcept -> size_t { return (size_t)m_buffer; }
 
-		const_pointer buffer() const noexcept { return m_buffer; }
+		ML_NODISCARD auto capacity() const noexcept -> size_t { return m_capacity; }
 
-		pmr::memory_resource * upstream() const noexcept { return m_upstream; }
+		ML_NODISCARD auto count() const noexcept -> size_t { return m_count; }
+		
+		ML_NODISCARD auto data() const noexcept -> pointer const { return m_buffer; }
+
+		ML_NODISCARD auto free() const noexcept -> size_t { return m_capacity - m_used; }
+
+		ML_NODISCARD auto resource() const noexcept -> pmr::memory_resource * const { return m_upstream; }
+
+		ML_NODISCARD auto used() const noexcept -> size_t { return m_used; }
+		
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD auto fraction() const noexcept -> float_t { return (float_t)m_used / (float_t)m_capacity; }
+
+		ML_NODISCARD auto percentage() const noexcept -> float_t { return fraction() * 100.f; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool use_default() const noexcept { return (this == pmr::get_default_resource()); }
+		ML_NODISCARD auto front() & noexcept -> reference { return m_buffer[0]; }
 
-		bool in_range(void * addr) const noexcept { return ((pointer)addr >= begin()) && ((pointer)addr < end()); }
+		ML_NODISCARD auto front() const & noexcept -> const_reference { return m_buffer[0]; }
 
-		bool is_valid_size() const noexcept { return (0 < m_capacity); }
+		ML_NODISCARD auto back() & noexcept -> reference { return m_buffer[m_capacity - 1]; }
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		size_t base_addr() const noexcept { return (size_t)m_buffer; }
-
-		size_t capacity() const noexcept { return m_capacity; }
-
-		size_t used_bytes() const noexcept { return m_bytes_used; }
-
-		size_t free_bytes() const noexcept { return m_capacity - m_bytes_used; }
-
-		float_t fraction_used() const noexcept { return (float_t)m_bytes_used / (float_t)m_capacity; }
-
-		size_t num_allocations() const noexcept { return m_num_alloc; }
-
-		float_t percent_used() const noexcept { return fraction_used() * 100.f; }
+		ML_NODISCARD auto back() const & noexcept -> const_reference { return m_buffer[m_capacity - 1]; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		reference front() & noexcept { return m_buffer[0]; }
+		ML_NODISCARD auto begin() noexcept -> pointer { return m_buffer; }
 
-		const_reference front() const & noexcept { return m_buffer[0]; }
+		ML_NODISCARD auto begin() const noexcept -> const_pointer { return m_buffer; }
 
-		reference back() & noexcept { return m_buffer[m_capacity - 1]; }
+		ML_NODISCARD auto cbegin() const noexcept -> const_pointer { return begin(); }
 
-		const_reference back() const & noexcept { return m_buffer[m_capacity - 1]; }
+		ML_NODISCARD auto end() noexcept -> pointer { return m_buffer + m_capacity; }
 
-		pointer begin() noexcept { return m_buffer; }
+		ML_NODISCARD auto end() const noexcept -> const_pointer { return m_buffer + m_capacity; }
 
-		const_pointer begin() const noexcept { return m_buffer; }
-
-		const_pointer cbegin() const noexcept { return begin(); }
-
-		pointer end() noexcept { return m_buffer + m_capacity; }
-
-		const_pointer end() const noexcept { return m_buffer + m_capacity; }
-
-		const_pointer cend() const noexcept { return end(); }
+		ML_NODISCARD auto cend() const noexcept -> const_pointer { return end(); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	protected:
+	private:
 		void * do_allocate(size_t bytes, size_t align) override
 		{
-			++m_num_alloc;
-			m_bytes_used += bytes;
+			++m_count;
+			m_used += bytes;
 			return m_upstream->allocate(bytes, align);
 		}
 
 		void do_deallocate(void * ptr, size_t bytes, size_t align) override
 		{
-			--m_num_alloc;
-			m_bytes_used -= bytes;
+			--m_count;
+			m_used -= bytes;
 			return m_upstream->deallocate(ptr, bytes, align);
 		}
 
@@ -110,8 +102,8 @@ namespace ml
 		pointer const m_buffer;
 		size_t const m_capacity;
 
-		size_t m_num_alloc{};
-		size_t m_bytes_used{};
+		size_t m_count{};
+		size_t m_used{};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -150,6 +142,34 @@ namespace ml
 	> ML_alias unown = typename std::weak_ptr<T>;
 }
 
+// record
+namespace ml
+{
+	// memory record
+	struct ML_NODISCARD memory_record final
+	{
+		size_t index; byte_t * addr; size_t count; size_t size;
+
+		operator bool() const noexcept { return addr && index && count && size; }
+	};
+
+	static void to_json(json & j, memory_record const & v)
+	{
+		j["index"	] = v.index;
+		j["addr"	] = (intptr_t)v.addr;
+		j["count"	] = v.count;
+		j["size"	] = v.size;
+	}
+
+	static void from_json(json const & j, memory_record & v)
+	{
+		j["index"	].get_to(v.index);
+		j["addr"	].get_to(*(intptr_t *)v.addr);
+		j["count"	].get_to(v.count);
+		j["size"	].get_to(v.size);
+	}
+}
+
 // memory
 namespace ml
 {
@@ -160,14 +180,15 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		struct ML_NODISCARD record final
-		{
-			size_t index; size_t count; size_t size; byte_t * addr;
+		enum : size_t { id_index, id_addr, id_count, id_size };
 
-			operator bool() const noexcept { return index && count && size && addr; }
-		};
-
-		using record_map = typename ds::map<void *, record>;
+		using record_manager = typename ds::batch_vector
+		<
+			size_t	,	// index
+			byte_t *,	// addr
+			size_t	,	// count
+			size_t		// size
+		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -181,28 +202,6 @@ namespace ml
 
 		~memory() noexcept;
 
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD static auto allocator() noexcept -> allocator_type
-		{
-			return ML_check(g_mem)->m_alloc;
-		}
-
-		ML_NODISCARD static auto counter() noexcept -> size_t
-		{
-			return ML_check(g_mem)->m_counter;
-		}
-
-		ML_NODISCARD static auto records() noexcept -> record_map const &
-		{
-			return ML_check(g_mem)->m_records;
-		}
-
-		ML_NODISCARD static auto resource() noexcept -> passthrough_resource *
-		{
-			return ML_check(g_mem)->m_resource;
-		}
-		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// malloc
@@ -284,16 +283,68 @@ namespace ml
 
 		// allocate shared
 		template <class T, class ... Args
-		> ML_NODISCARD static shared<T> make_ref(Args && ... args) noexcept
+		> ML_NODISCARD static shared<T> alloc_ref(allocator_type alloc, Args && ... args) noexcept
 		{
-			return std::allocate_shared<T>(memory::allocator(), ML_forward(args)...);
+			return std::allocate_shared<T>(alloc, ML_forward(args)...);
 		}
 
-		// allocate scoped
+		// make ref
+		template <class T, class ... Args
+		> ML_NODISCARD static shared<T> make_ref(Args && ... args) noexcept
+		{
+			return memory::alloc_ref<T>(ML_check(g_mem)->m_alloc, ML_forward(args)...);
+		}
+
+		// make scope
 		template <class T, class Dx = default_delete<T>, class ... Args
 		> ML_NODISCARD static scoped<T, Dx> make_scope(Args && ... args) noexcept
 		{
 			return { memory::new_object<T>(ML_forward(args)...), Dx{} };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto get() noexcept -> memory * const { return g_mem; }
+
+		ML_NODISCARD static auto get_allocator() noexcept -> allocator_type { return ML_check(g_mem)->m_alloc; }
+
+		ML_NODISCARD static auto get_counter() noexcept -> size_t { return ML_check(g_mem)->m_counter; }
+
+		ML_NODISCARD static auto get_records() noexcept -> record_manager const & { return ML_check(g_mem)->m_records; }
+
+		ML_NODISCARD static auto get_resource() noexcept -> passthrough_resource * { return ML_check(g_mem)->m_resource; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD static auto get_record(size_t i) noexcept -> memory_record
+		{
+			ML_assert(g_mem);
+			return {
+				g_mem->m_records.at<id_index>(i),
+				g_mem->m_records.at<id_addr>(i),
+				g_mem->m_records.at<id_index>(i),
+				g_mem->m_records.at<id_index>(i)
+			};
+		}
+
+		ML_NODISCARD static auto get_record_addr(size_t i) noexcept -> byte_t *
+		{
+			return ML_check(g_mem)->m_records.at<id_addr>(i);
+		}
+
+		ML_NODISCARD static auto get_record_count(size_t i) noexcept -> size_t
+		{
+			return ML_check(g_mem)->m_records.at<id_count>(i);
+		}
+
+		ML_NODISCARD static auto get_record_index(size_t i) noexcept -> size_t
+		{
+			return ML_check(g_mem)->m_records.at<id_index>(i);
+		}
+
+		ML_NODISCARD static auto get_record_size(size_t i) noexcept -> size_t
+		{
+			return ML_check(g_mem)->m_records.at<id_size>(i);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -303,16 +354,19 @@ namespace ml
 		{
 			auto const addr{ m_alloc.allocate(count * size) };
 
-			return m_records.insert(addr, { ++m_counter, count, size, addr }).second->addr;
+			return std::get<id_addr>(m_records.push_back(++m_counter, addr, count, size));
 		}
 
 		void do_deallocate(void * addr) noexcept
 		{
-			if (auto const it{ m_records.find(addr) })
+			if (auto const i{ m_records.lookup<id_addr>(addr) }; i != m_records.npos)
 			{
-				m_alloc.deallocate(it->second->addr, it->second->count * it->second->size);
+				m_alloc.deallocate
+				(
+					(byte_t *)addr, m_records.at<id_count>(i) * m_records.at<id_size>(i)
+				);
 
-				m_records.erase(it->first);
+				m_records.erase(i);
 			}
 		}
 
@@ -322,27 +376,11 @@ namespace ml
 		static memory *					g_mem		; // singleton
 		passthrough_resource * const	m_resource	; // resource
 		allocator_type					m_alloc		; // allocator
-		record_map						m_records	; // records
+		record_manager					m_records	; // records
 		size_t							m_counter	; // counter
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-
-	static void to_json(json & j, memory::record const & v)
-	{
-		j["index"	] = v.index;
-		j["addr"	] = (intptr_t)v.addr;
-		j["count"	] = v.count;
-		j["size"	] = v.size;
-	}
-
-	static void from_json(json const & j, memory::record & v)
-	{
-		j["index"	].get_to(v.index);
-		j["addr"	].get_to(*(intptr_t *)v.addr);
-		j["count"	].get_to(v.count);
-		j["size"	].get_to(v.size);
-	}
 }
 
 // trackable

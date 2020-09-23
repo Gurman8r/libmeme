@@ -1,18 +1,18 @@
-#ifndef _ML_ENGINE_EXPORT_HPP_
-#define _ML_ENGINE_EXPORT_HPP_
+#ifndef _ML_SCENE_EXPORT_HPP_
+#define _ML_SCENE_EXPORT_HPP_
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <libmeme/Config.hpp>
 
 #if defined(ML_API)
-#	define ML_ENGINE_API ML_API
-#elif defined(ML_ENGINE_EXPORTS)
-#	define ML_ENGINE_API ML_API_EXPORT
+#	define ML_SCENE_API ML_API
+#elif defined(ML_SCENE_EXPORTS)
+#	define ML_SCENE_API ML_API_EXPORT
 #else
-#	define ML_ENGINE_API ML_API_IMPORT
+#	define ML_SCENE_API ML_API_IMPORT
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_ENGINE_EXPORT_HPP_
+#endif // !_ML_SCENE_EXPORT_HPP_

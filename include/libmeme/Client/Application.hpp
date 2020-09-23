@@ -2,7 +2,7 @@
 #define _ML_APPLICATION_HPP_
 
 #include <libmeme/Core/BatchVector.hpp>
-#include <libmeme/Client/SharedLibrary.hpp>
+#include <libmeme/Core/SharedLibrary.hpp>
 #include <libmeme/Client/Plugin.hpp>
 
 namespace ml
@@ -22,8 +22,8 @@ namespace ml
 		<
 			plugin_id		,	// id
 			fs::path		,	// path
-			shared_library	,	// library
-			manual<plugin>	,	// instance
+			shared_library	,	// library instance
+			manual<plugin>	,	// plugin instance
 			plugin_api			// interface
 		>;
 

@@ -1,9 +1,9 @@
-#ifndef _ML_SYSTEM_API_HPP_
-#define _ML_SYSTEM_API_HPP_
+#ifndef _ML_CLIENT_API_HPP_
+#define _ML_CLIENT_API_HPP_
 
 #include <libmeme/Core/Events.hpp>
+#include <libmeme/Core/Python.hpp>
 #include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Client/Python.hpp>
 #include <libmeme/Renderer/RenderWindow.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,8 +18,8 @@ namespace ml
 
 		using allocator_type = pmr::polymorphic_allocator<byte_t>;
 
-		io_context(int32_t argc, char ** argv, json const & j, allocator_type alloc) noexcept
-			: argc{ argc }, argv{ argv }, prefs{ json{ j } }, alloc{ alloc }
+		io_context(int32_t argc, char ** argv, allocator_type alloc, json const & j) noexcept
+			: argc{ argc }, argv{ argv }, alloc{ alloc }, prefs{ json{ j } }
 		{
 		}
 
@@ -27,14 +27,21 @@ namespace ml
 
 		int32_t const	argc	; // 
 		char ** const	argv	; // 
-		json			prefs	; // 
 		allocator_type	alloc	; // 
+		json			prefs	; // 
 
+		// paths
 		fs::path const
 			program_name{ argv[0] }							, // 
 			program_path{ fs::current_path() }				, // 
 			content_path{ prefs["path"].get<fs::path>() }	; // 
 
+		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
+		{
+			return content_path.native() + path.native();
+		}
+
+		// timers
 		timer const				main_timer	{}				; // 
 		timer					loop_timer	{ false }		; // 
 		duration				frame_time	{}				; // 
@@ -44,16 +51,10 @@ namespace ml
 		size_t					fps_index	{}				; // 
 		pmr::vector<float_t>	fps_times	{ 120, alloc }	; // 
 
-		vec2d	cursor						{}				; // 
-		int32_t	mouse	[mouse_button_MAX]	{}				; // 
-		int32_t	keys	[key_code_MAX]		{}				; // 
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
-		{
-			return content_path.native() + path.native();
-		}
+		// input
+		vec2d									cursor	{}	; // 
+		ds::array<int32_t, mouse_button_MAX>	mouse	{}	; // 
+		ds::array<int32_t, key_code_MAX>		keys	{}	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -100,7 +101,7 @@ namespace ml
 		ML_NODISCARD auto get_gui	() const noexcept -> gui_manager	* { return m_sys->gui;	}
 		ML_NODISCARD auto get_io	() const noexcept -> io_context		* { return m_sys->io;	}
 		ML_NODISCARD auto get_mem	() const noexcept -> memory			* { return m_sys->mem;	}
-		ML_NODISCARD auto get_py	() const noexcept -> python_context	* { return m_sys->scr;	}
+		ML_NODISCARD auto get_scr	() const noexcept -> python_context	* { return m_sys->scr;	}
 		ML_NODISCARD auto get_sys	() const noexcept -> system_context	* { return m_sys;		}
 		ML_NODISCARD auto get_win	() const noexcept -> render_window	* { return m_sys->win;	}
 
@@ -115,4 +116,4 @@ namespace ml
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#endif // !_ML_SYSTEM_API_HPP_
+#endif // !_ML_CLIENT_API_HPP_

@@ -56,7 +56,7 @@ namespace ml
 
 		explicit event_listener(event_bus * bus) : m_bus{ bus }
 		{
-			ML_assert("INVALID EVENT BUS" && bus);
+			ML_assert_msg(bus, "INVALID EVENT BUS");
 		}
 
 		virtual ~event_listener() noexcept; // EOF

@@ -18,13 +18,14 @@ namespace ml::gfx
 
 		static constexpr typeof<> s_self_type{ typeof_v<opengl_render_device> };
 
+		allocator_type			m_alloc	{}; // allocator
 		desc_<render_device>	m_data	{}; // device settings
 		shared<render_context>	m_ctx	{}; // render context
 
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		opengl_render_device();
+		explicit opengl_render_device(allocator_type alloc);
 
 		~opengl_render_device() override;
 
@@ -341,7 +342,7 @@ namespace ml::gfx
 
 		void set_smooth(bool value) override;
 
-		image copy_to_image() const override;
+		bitmap copy_to_image() const override;
 
 		desc_<texture2d> const & get_data() const noexcept { return m_data; }
 	};

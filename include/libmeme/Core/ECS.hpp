@@ -1043,7 +1043,7 @@ namespace ml::ecs
 
 		// invoke system on all alive entities
 		template <template <class> class X, class ... Extra
-		> self_type & run_system(Extra && ... extra) noexcept
+		> self_type & update(Extra && ... extra) noexcept
 		{
 			return this->for_system<X>([&](auto & x, auto && ... req_comp) noexcept
 			{

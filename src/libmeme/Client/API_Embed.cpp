@@ -1,67 +1,5 @@
 #include <libmeme/Client/Application.hpp>
 
-namespace ml
-{
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	python_context::python_context(event_bus * bus, path_info const & paths)
-		: m_bus		{ bus }
-		, m_paths	{ paths }
-	{
-		ML_assert(!Py_IsInitialized());
-		
-		PyObject_SetArenaAllocator(std::invoke([]() noexcept
-		{
-			static PyObjectArenaAllocator temp
-			{
-				nullptr,
-				[](auto, size_t size) noexcept
-				{
-					return memory::resource()->allocate(size);
-				},
-				[](auto, void * addr, size_t size) noexcept
-				{
-					return memory::resource()->deallocate(addr, size);
-				}
-			};
-			return &temp;
-		}));
-		
-		Py_SetProgramName(m_paths.name.c_str());
-		
-		Py_SetPythonHome(m_paths.home.c_str());
-		
-		Py_InitializeEx(1);
-		
-		ML_assert(Py_IsInitialized());
-	}
-
-	python_context::~python_context() noexcept
-	{
-		ML_assert(Py_IsInitialized());
-
-		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	int32_t python_context::do_file(cstring path) const noexcept
-	{
-		ML_assert(Py_IsInitialized());
-
-		return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
-	}
-
-	int32_t python_context::do_string(cstring str) const noexcept
-	{
-		ML_assert(Py_IsInitialized());
-
-		return PyRun_SimpleStringFlags(str, nullptr);
-	}
-
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-}
-
 PYBIND11_EMBEDDED_MODULE(memelib, m)
 {
 	using namespace ml;
@@ -196,24 +134,24 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def("deallocate", [](pmr_allocator & o, intptr_t p, size_t s) { o.deallocate((byte_t *)p, s); })
 		;
 
-	py::class_<memory::record>(py_mem, "record")
+	py::class_<memory_record>(py_mem, "record")
 		.def(py::init<>())
-		.def(py::init<memory::record const &>())
-		.def(py::init([](intptr_t p)
+		.def(py::init<memory_record const &>())
+		.def(py::init([&rec = memory::get_records()](intptr_t p)
 		{
-			if (auto const it{ memory::records().find((void *)p) }) {
-				return *it->second;
+			if (auto const i{ rec.lookup<memory::id_addr>((byte_t *)p) }; i != rec.npos) {
+				return memory::get_record(i);
 			} else {
-				return memory::record{};
+				return memory_record{};
 			}
 		}))
-		.def_property_readonly("addr", [](memory::record const & o) { return (intptr_t)o.addr; })
-		.def_readonly("index", &memory::record::index)
-		.def_readonly("count", &memory::record::count)
-		.def_readonly("size", &memory::record::size)
-		.def("__nonzero__", &memory::record::operator bool)
-		.def("__repr__", [](memory::record const & o) { return json{ o }.dump(); })
-		.def("__str__", [](memory::record const & o) { return json{ o }.dump(); })
+		.def_property_readonly("addr", [](memory_record const & o) { return (intptr_t)o.addr; })
+		.def_readonly("index", &memory_record::index)
+		.def_readonly("count", &memory_record::count)
+		.def_readonly("size", &memory_record::size)
+		.def("__nonzero__", &memory_record::operator bool)
+		.def("__repr__", [](memory_record const & o) { return json{ o }.dump(); })
+		.def("__str__", [](memory_record const & o) { return json{ o }.dump(); })
 		;
 
 	auto memget = [](intptr_t p, size_t s) -> py::int_
@@ -233,11 +171,11 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 		.def("set_default_resource", [](intptr_t p) { return (intptr_t)pmr::set_default_resource((pmr::memory_resource *)p); })
 
 		// test resource
-		.def("arena_base"	, []() { return memory::resource()->base_addr(); })
-		.def("arena_count"	, []() { return memory::resource()->num_allocations(); })
-		.def("arena_free"	, []() { return memory::resource()->free_bytes(); })
-		.def("arena_size"	, []() { return memory::resource()->capacity(); })
-		.def("arena_used"	, []() { return memory::resource()->used_bytes(); })
+		.def("arena_base"	, []() { return memory::get_resource()->base(); })
+		.def("arena_count"	, []() { return memory::get_resource()->count(); })
+		.def("arena_free"	, []() { return memory::get_resource()->free(); })
+		.def("arena_size"	, []() { return memory::get_resource()->capacity(); })
+		.def("arena_used"	, []() { return memory::get_resource()->used(); })
 
 		// allocation
 		.def("malloc"	, [](size_t s) { return (intptr_t)memory::allocate(s); })

@@ -79,6 +79,9 @@
 // automatic forward
 #define ML_forward(expr)		std::forward<decltype(expr)>(expr)
 
+// crt wide string
+#define ML_wide(str)			ML_cat(L, str)
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 // declare handle

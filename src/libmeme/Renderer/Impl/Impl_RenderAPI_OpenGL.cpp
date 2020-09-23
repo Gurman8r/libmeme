@@ -670,10 +670,10 @@ namespace ml::gfx
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	opengl_render_device::opengl_render_device() : render_device{}
+	opengl_render_device::opengl_render_device(allocator_type alloc) : render_device{}, m_alloc{ alloc }
 	{
 		static bool const opengl_init{ ML_IMPL_OPENGL_INIT() };
-		ML_assert("failed initializing opengl device" && opengl_init);
+		ML_assert_msg(opengl_init, "failed initializing opengl device");
 
 		// renderer
 		ML_glCheck(m_data.renderer = (cstring)glGetString(GL_RENDERER));
@@ -752,47 +752,47 @@ namespace ml::gfx
 
 	shared<render_context> opengl_render_device::create_context(context_settings const & cs) noexcept
 	{
-		return memory::make_ref<opengl_render_context>(this, cs);
+		return memory::alloc_ref<opengl_render_context>(m_alloc, this, cs);
 	}
 
 	shared<vertexarray> opengl_render_device::create_vertexarray(uint32_t prim) noexcept
 	{
-		return memory::make_ref<opengl_vertexarray>(this, prim);
+		return memory::alloc_ref<opengl_vertexarray>(m_alloc, this, prim);
 	}
 
 	shared<vertexbuffer> opengl_render_device::create_vertexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
-		return memory::make_ref<opengl_vertexbuffer>(this, usage, count, data);
+		return memory::alloc_ref<opengl_vertexbuffer>(m_alloc, this, usage, count, data);
 	}
 
 	shared<indexbuffer> opengl_render_device::create_indexbuffer(uint32_t usage, size_t count, addr_t data) noexcept
 	{
-		return memory::make_ref<opengl_indexbuffer>(this, usage, count, data);
+		return memory::alloc_ref<opengl_indexbuffer>(m_alloc, this, usage, count, data);
 	}
 
 	shared<texture2d> opengl_render_device::create_texture2d(desc_<texture2d> const & value, addr_t data) noexcept
 	{
-		return memory::make_ref<opengl_texture2d>(this, value, data);
+		return memory::alloc_ref<opengl_texture2d>(m_alloc, this, value, data);
 	}
 
 	shared<texturecube> opengl_render_device::create_texturecube(desc_<texturecube> const & value) noexcept
 	{
-		return memory::make_ref<opengl_texturecube>(this, value);
+		return memory::alloc_ref<opengl_texturecube>(m_alloc, this, value);
 	}
 
 	shared<framebuffer> opengl_render_device::create_framebuffer(desc_<framebuffer> const & value) noexcept
 	{
-		return memory::make_ref<opengl_framebuffer>(this, value);
+		return memory::alloc_ref<opengl_framebuffer>(m_alloc, this, value);
 	}
 
 	shared<program> opengl_render_device::create_program() noexcept
 	{
-		return memory::make_ref<opengl_program>(this);
+		return memory::alloc_ref<opengl_program>(m_alloc, this);
 	}
 
 	shared<shader> opengl_render_device::create_shader(desc_<shader> const & value) noexcept
 	{
-		return memory::make_ref<opengl_shader>(this, value);
+		return memory::alloc_ref<opengl_shader>(m_alloc, this, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1515,11 +1515,11 @@ namespace ml::gfx
 			: value ? GL_LINEAR : GL_NEAREST));
 	}
 
-	image opengl_texture2d::copy_to_image() const
+	bitmap opengl_texture2d::copy_to_image() const
 	{
-		if (!m_locked) { debug::error("texture2d is not locked"); return image{}; }
+		if (!m_locked) { debug::error("texture2d is not locked"); return bitmap{}; }
 
-		image temp{ m_data.size, calc_bits_per_pixel(m_data.format.color) };
+		bitmap temp{ m_data.size, calc_bits_per_pixel(m_data.format.color) };
 		if (m_handle)
 		{
 			bind();

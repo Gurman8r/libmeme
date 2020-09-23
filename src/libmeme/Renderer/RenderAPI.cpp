@@ -18,9 +18,9 @@ namespace ml::gfx
 
 	render_device * render_device::g_dev{};
 
-	render_device * render_device::create() noexcept
+	render_device * render_device::create(allocator_type alloc) noexcept
 	{
-		render_device * temp{ new opengl_render_device{} };
+		render_device * temp{ new opengl_render_device{ alloc } };
 
 		if (!g_dev) { set_default(temp); }
 

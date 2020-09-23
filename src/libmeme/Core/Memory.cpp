@@ -27,7 +27,7 @@ namespace ml
 		ML_assert(g_mem == this && !(g_mem = nullptr));
 
 		// check for leaks
-		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty());
+		ML_assert("MEMORY LEAKS DETECTED" && m_records.empty<0>());
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

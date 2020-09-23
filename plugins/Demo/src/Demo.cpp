@@ -116,7 +116,7 @@ namespace ml
 		ds::map< pmr::string, shared<font>			> m_fonts		{};
 		ds::map< pmr::string, shared<uniform_buffer>> m_uniforms	{};
 		ds::map< pmr::string, shader_asset			> m_shaders		{};
-		ds::map< pmr::string, shared<image>			> m_images		{};
+		ds::map< pmr::string, shared<bitmap>		> m_images		{};
 		ds::map< pmr::string, shared<mesh>			> m_meshes		{};
 
 
@@ -187,7 +187,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ get_mem()->resource() };
+			static auto const testres{ get_mem()->get_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.focus();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -267,7 +267,7 @@ namespace ml
 			auto const win	{ sys->win };
 
 			// ICON
-			if (image const icon{ io->path2("assets/textures/icon.png"), 0, false })
+			if (bitmap const icon{ io->path2("assets/textures/icon.png"), false })
 			{
 				win->set_icon(icon.width(), icon.height(), icon.data());
 			}
@@ -279,12 +279,12 @@ namespace ml
 
 			// IMAGES
 			{
-				m_images["default"] = mem->make_ref<image>(image::get_default_rgba());
+				//m_images["default"] = mem->make_ref<bitmap>(image::get_default_rgba());
 			}
 
 			// TEXTURES
 			{
-				m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
+				//m_textures["default"	] = gfx::texture2d::create(*m_images["default"]);
 				m_textures["doot"		] = gfx::texture2d::create(io->path2("assets/textures/doot.png"));
 				m_textures["navball"	] = gfx::texture2d::create(io->path2("assets/textures/navball.png"));
 				m_textures["earth_dm_2k"] = gfx::texture2d::create(io->path2("assets/textures/earth/earth_dm_2k.png"));
@@ -488,8 +488,8 @@ namespace ml
 			m_plots.update(io->main_timer.elapsed().count());
 			
 			// uniforms
-			m_ecs.run_system<x_update_uniforms>();
-			m_ecs.run_system<x_upload_uniforms>();
+			m_ecs.update<x_update_uniforms>();
+			m_ecs.update<x_upload_uniforms>();
 
 			// resize fb
 			for (auto & fbo : m_fbo) { fbo->resize(m_resolution); }
@@ -501,7 +501,7 @@ namespace ml
 				gfx::command::clear(gfx::clear_color | gfx::clear_depth),
 				gfx::command([&](gfx::render_context * ctx) noexcept
 				{
-					m_ecs.run_system<x_render_meshes>(ctx);
+					m_ecs.update<x_render_meshes>(ctx);
 				}),
 				gfx::command::bind_framebuffer(nullptr),
 			})	gfx::execute(cmd, sys->win->get_render_context());
@@ -766,7 +766,7 @@ namespace ml
 				}
 				else
 				{
-					get_py()->do_string(util::detokenize(args));
+					get_scr()->do_string(util::detokenize(args));
 				}
 			},
 			{
@@ -1024,7 +1024,9 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static passthrough_resource * const testres{ get_mem()->resource() };
+			static auto const	mem		{ get_mem() };
+			static auto const	view	{ mem->get_resource() };
+			static auto const &	records	{ mem->get_records() };
 
 			static ML_scope(&) // setup memory editor
 			{
@@ -1053,47 +1055,51 @@ namespace ml
 				ImGui::Separator();
 
 				// begin / end
-				if (ImGui::Button("begin")) highlight_memory(testres->begin());
-				if (ImGui::Button("end")) highlight_memory(testres->end() - sizeof(void *));
+				if (ImGui::Button("begin")) highlight_memory(view->begin());
+				if (ImGui::Button("end")) highlight_memory(view->end() - sizeof(void *));
 				ImGui::Separator();
 
 				// highlight
 				ImGui::PushItemWidth(256);
-				auto const & records{ get_mem()->records().values() };
-				static auto selected_record{ &records.front() };
-				char selected_address[20] = "highlight";
-				if (selected_record)
-				{
-					std::sprintf(selected_address, "%p", selected_record->addr);
-				}
+				static size_t selected_record{};
+				char selected_address[20] = "";
+				std::sprintf(selected_address, "%p", mem->get_record_addr(selected_record));
 				if (ImGui::BeginCombo("##records", selected_address, 0))
 				{
 					static auto const initial_width{ ImGui::GetContentRegionAvailWidth() };
-					ImGui::Columns(3);
+					ImGui::Columns(4);
 
-					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.50f); };
-					ImGui::Text("address"); ImGui::NextColumn();
-
-					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope(w = initial_width) { ImGui::SetColumnWidth(-1, w * 0.2f); };
 					ImGui::Text("index"); ImGui::NextColumn();
 
-					static ML_scope(&){ ImGui::SetColumnWidth(-1, initial_width * 0.25f); };
+					static ML_scope(w = initial_width) { ImGui::SetColumnWidth(-1, w * 0.3f); };
+					ImGui::Text("address"); ImGui::NextColumn();
+
+					static ML_scope(w = initial_width) { ImGui::SetColumnWidth(-1, w * 0.2f); };
+					ImGui::Text("count"); ImGui::NextColumn();
+
+					static ML_scope(w = initial_width) { ImGui::SetColumnWidth(-1, w * 0.3f); };
 					ImGui::Text("size"); ImGui::NextColumn();
 
 					ImGui::Separator();
-					for (auto const & rec : records)
+					for (size_t i = 0; i < records.size<0>(); ++i)
 					{
-						ML_ImGui_ScopeID(&rec);
-						char addr[20] = ""; std::sprintf(addr, "%p", rec.addr);
-						bool const pressed{ ImGui::Selectable(addr) }; ImGui::NextColumn();
-						ImGui::TextDisabled("%u", rec.index); ImGui::NextColumn();
-						ImGui::TextDisabled("%u", rec.size); ImGui::NextColumn();
-						if (pressed)
+						records.expand_all(i, [&](auto index, auto addr, auto count, auto size)
 						{
-							selected_record = &rec;
-							highlight_memory((byte_t *)rec.addr, rec.size);
-						}
+							ML_ImGui_ScopeID(addr);
+							ImGui::TextDisabled("%u", index); ImGui::NextColumn();
+							char buf[20] = ""; std::sprintf(buf, "%p", addr);
+							bool const pressed{ ImGui::Selectable(buf) }; ImGui::NextColumn();
+							ImGui::TextDisabled("%u", count); ImGui::NextColumn();
+							ImGui::TextDisabled("%u", size); ImGui::NextColumn();
+							if (pressed)
+							{
+								selected_record = i;
+								highlight_memory(addr, size);
+							}
+						});
 					}
+
 					ImGui::Columns(1);
 					ImGui::EndCombo();
 				}
@@ -1103,17 +1109,17 @@ namespace ml
 				// progress
 				char progress[32] = ""; std::sprintf(progress,
 					"%u / %u (%.2f%%)",
-					(uint32_t)testres->used_bytes(),
-					(uint32_t)testres->capacity(),
-					testres->percent_used()
+					(uint32_t)view->used(),
+					(uint32_t)view->capacity(),
+					view->percentage()
 				);
-				ImGui::ProgressBar(testres->fraction_used(), { 256.f, 0.f }, progress);
+				ImGui::ProgressBar(view->fraction(), { 256.f, 0.f }, progress);
 				gui::tooltip_ex([&]() noexcept
 				{
-					ImGui::Text("allocations: %u", testres->num_allocations());
-					ImGui::Text("total:       %u", testres->capacity());
-					ImGui::Text("in use:      %u", testres->used_bytes());
-					ImGui::Text("available:   %u", testres->free_bytes());
+					ImGui::Text("allocations: %u", view->count());
+					ImGui::Text("total:       %u", view->capacity());
+					ImGui::Text("in use:      %u", view->used());
+					ImGui::Text("available:   %u", view->free());
 				});
 				ImGui::Separator();
 
@@ -1121,7 +1127,7 @@ namespace ml
 			}
 
 			// memory content
-			m_mem_editor.DrawContents(testres->buffer(), testres->capacity(), testres->base_addr());
+			m_mem_editor.DrawContents(view->data(), view->capacity(), view->base());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1332,19 +1338,19 @@ namespace ml
 			{
 				ML_defer() { ImGui::EndMenuBar(); };
 
-				char label[32]{};
+				char res_label[32]{};
 
 				constexpr auto
 					fmt_fa{ "free aspect" },
 					fmt_vm{ "%i x %i @ %iHz" };
 
-				if (!fixed) std::sprintf(label, fmt_fa);
-				else std::sprintf(label, fmt_vm,
+				if (!fixed) std::sprintf(res_label, fmt_fa);
+				else std::sprintf(res_label, fmt_vm,
 					video.resolution[0],
 					video.resolution[1],
 					video.refresh_rate);
 				ImGui::SetNextItemWidth(200);
-				if (ImGui::BeginCombo("##resolution", label))
+				if (ImGui::BeginCombo("##resolution", res_label))
 				{
 					ML_defer() { ImGui::EndCombo(); };
 
@@ -1353,11 +1359,11 @@ namespace ml
 
 					for (size_t i = 0; i < modes.size(); ++i)
 					{
-						std::sprintf(label, fmt_vm,
+						std::sprintf(res_label, fmt_vm,
 							modes[i].resolution[0],
 							modes[i].resolution[1],
 							modes[i].refresh_rate);
-						if (ImGui::Selectable(label, fixed && (i == index)))
+						if (ImGui::Selectable(res_label, fixed && (i == index)))
 						{
 							index = i; fixed = true;
 						}

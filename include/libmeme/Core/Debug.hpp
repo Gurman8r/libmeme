@@ -5,42 +5,57 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ML_IMPL_DEBUG_MSG_I
-#define ML_IMPL_DEBUG_MSG_I "[info] " // info message
+// info message
+#ifndef ML_IMPL_DEBUG_INFO
+#define ML_IMPL_DEBUG_INFO		"[info] "
 #endif
 
-#ifndef ML_IMPL_DEBUG_MSG_E
-#define ML_IMPL_DEBUG_MSG_E "[error] " // error message
+// error message
+#ifndef ML_IMPL_DEBUG_ERROR
+#define ML_IMPL_DEBUG_ERROR		"[error] "
 #endif
 
-#ifndef ML_IMPL_DEBUG_MSG_W
-#define ML_IMPL_DEBUG_MSG_W "[warn] " // warning message
+// warning message
+#ifndef ML_IMPL_DEBUG_WARNING
+#define ML_IMPL_DEBUG_WARNING	"[warn] "
 #endif
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// assert ex
-#ifndef ML_assert_ex
+// assert extended
+#ifndef ML_assert_ext
 
 #	ifdef ML_cc_msvc
-#		define ML_assert_ex(expr, msg, file, line) (void)((!!(expr)) || (_wassert(_CRT_WIDE(msg), _CRT_WIDE(file), (unsigned)(line)), 0))
+#		define ML_assert_ext(expr, msg, file, line) (void)((!!(expr)) || (_wassert(ML_wide(msg), ML_wide(file), (unsigned)(line)), 0))
 
 #	elif defined(assert)
-#		define ML_assert_ex(expr, msg, file, line) assert(expr)
+#		define ML_assert_ext(expr, msg, file, line) assert(expr)
 
 #	else
-#		define ML_assert_ex(expr, msg, file, line) ((void)expr)
+#		define ML_assert_ext(expr, msg, file, line) ((void)expr)
 
 #	endif
 #endif
 
+// assert message
+#define ML_assert_msg(expr, msg) \
+	ML_assert_ext(expr, msg, __FILE__, __LINE__)
+
 // assert
 #define ML_assert(expr) \
-	ML_assert_ex(expr, #expr, __FILE__, __LINE__)
+	ML_assert_msg(expr, #expr)
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+// check message
+#define ML_check_msg(expr, msg) ([](auto x) noexcept {	\
+		ML_assert_ext(x, msg, __FILE__, __LINE__);		\
+		return x;										\
+	})(expr)
 
 // check
 #define ML_check(expr) \
-	([](auto p) noexcept { ML_assert_ex(p, "CHECK FAILED: " #expr, __FILE__, __LINE__); return p; })(expr)
+	ML_check_msg(expr, "CHECK FAILED: " #expr)
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -118,7 +133,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t info(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_I << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_INFO << ML_forward(fmt) << '\n';
 
 		return debug::info();
 	}
@@ -136,7 +151,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t error(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_E << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_ERROR << ML_forward(fmt) << '\n';
 
 		return debug::error();
 	}
@@ -154,7 +169,7 @@ namespace ml::debug
 	template <class Fmt
 	> int32_t warning(Fmt && fmt) noexcept
 	{
-		io.out << ML_IMPL_DEBUG_MSG_W << ML_forward(fmt) << '\n';
+		io.out << ML_IMPL_DEBUG_WARNING << ML_forward(fmt) << '\n';
 
 		return debug::warning();
 	}

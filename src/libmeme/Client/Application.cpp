@@ -13,7 +13,7 @@ namespace ml
 	application::application(system_context * sys)
 		: system_object	{ sys }
 		, m_running		{}
-		, m_mods		{ sys->mem->allocator() }
+		, m_mods		{ sys->mem->get_allocator() }
 	{
 		// singleton
 		ML_assert(!g_app && (g_app = this));
@@ -124,8 +124,10 @@ namespace ml
 			io.frame_rate = (0.f < io.fps_accum) ? 1.f / (io.fps_accum / (float_t)io.fps_times.size()) : FLT_MAX;
 			ML_defer(&io) { io.frame_time = io.loop_timer.elapsed(); };
 
-			// update
+			// poll events
 			window::poll_events();
+
+			// update
 			bus.fire<app_update_event>(this);
 
 			// gui

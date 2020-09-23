@@ -1,9 +1,8 @@
 #ifndef _ML_RENDER_API_HPP_
 #define _ML_RENDER_API_HPP_
 
-#include <libmeme/Core/Color.hpp>
-#include <libmeme/Core/Rect.hpp>
-#include <libmeme/Renderer/Image.hpp>
+#include <libmeme/Renderer/Export.hpp>
+#include <libmeme/Core/Bitmap.hpp>
 #include <libmeme/Window/WindowContext.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -644,7 +643,9 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static render_device * create() noexcept;
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
+		ML_NODISCARD static render_device * create(allocator_type alloc = {}) noexcept;
 
 		static void destroy(render_device * value) noexcept;
 
@@ -1332,12 +1333,12 @@ namespace ml::gfx
 			return render_device::get_default()->create_texture2d(value, data);
 		}
 
-		ML_NODISCARD static auto create(image const & img, int32_t flags = texture_flags_default) noexcept
+		ML_NODISCARD static auto create(bitmap const & img, int32_t flags = texture_flags_default) noexcept
 		{
 			return create(
 			{
 				"Texture2D",
-				fs::path{},
+				img.path(),
 				img.size(),
 				{ calc_channel_format(img.channels()) },
 				flags
@@ -1347,7 +1348,7 @@ namespace ml::gfx
 
 		ML_NODISCARD static auto create(fs::path const & path, int32_t flags = texture_flags_default) noexcept
 		{
-			return create(image{ path }, flags);
+			return create(bitmap{ path }, flags);
 		}
 
 	public:
@@ -1378,7 +1379,7 @@ namespace ml::gfx
 
 		virtual void set_smooth(bool value) = 0;
 
-		ML_NODISCARD virtual image copy_to_image() const = 0;
+		ML_NODISCARD virtual bitmap copy_to_image() const = 0;
 
 		ML_NODISCARD virtual desc_<texture2d> const & get_data() const noexcept = 0;
 

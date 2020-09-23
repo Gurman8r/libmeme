@@ -48,6 +48,7 @@ includedirs{
 	"%{ext_dir}pybind11/include",
 	"%{ext_dir}cpython/Include",
 	"%{ext_dir}cpython/Include/internal",
+	"%{ext_dir}entt/src",
 	-- imgui
 	"%{ext_dir}imgui",
 	"%{ext_dir}imgui-node-editor/NodeEditor/Include",

@@ -86,9 +86,9 @@ static auto load_settings(fs::path const & path = SETTINGS_PATH)
 ml::int32_t main()
 {
 	static memory			mem	{ pmr::get_default_resource() };
-	static io_context		io	{ __argc, __argv, load_settings(), mem.allocator() };
+	static io_context		io	{ __argc, __argv, mem.get_allocator(), load_settings() };
 	static event_bus		bus	{ io.alloc };
-	static python_context	scr	{ &bus, { io.program_name, io.content_path } };
+	static python_context	scr	{ io.program_name, io.content_path, mem.get_resource() };
 	static render_window	win	{ io.alloc };
 	static gui_manager		gui	{ &bus, &win, io.alloc };
 	static system_context	sys	{ &mem, &io, &bus, &scr, &win, &gui };

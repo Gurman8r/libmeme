@@ -21,6 +21,11 @@ namespace ml::ds
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static constexpr size_t npos
+		{
+			static_cast<size_t>(-1)
+		};
+
 		static constexpr size_t tuple_size
 		{
 			std::tuple_size_v<value_tuple>
@@ -865,6 +870,34 @@ namespace ml::ds
 		> ML_NODISCARD const_iterator_t<T> find(U && value) const noexcept
 		{
 			return std::find(this->cbegin<T>(), this->cend<T>(), ML_forward(value));
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		template <size_t I, class U = value_i<I>
+		> ML_NODISCARD size_t lookup(U && value) const noexcept
+		{
+			if (auto const it{ this->find<I>(ML_forward(value)) }; it != this->end<I>())
+			{
+				return this->index_of<I>(it);
+			}
+			else
+			{
+				return npos;
+			}
+		}
+
+		template <class T, class U = value_t<T>
+		> ML_NODISCARD size_t lookup(U && value) const noexcept
+		{
+			if (auto const it{ this->find<T>(ML_forward(value)) }; it != this->end<T>())
+			{
+				return this->index_of<T>(it);
+			}
+			else
+			{
+				return npos;
+			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
