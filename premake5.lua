@@ -68,5 +68,6 @@ dofile "./premake5/main.lua"
 
 -- PLUGINS
 dofile "./plugins/demo/demo.lua"
+dofile "./plugins/studio/studio.lua"
 		
 -- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * --

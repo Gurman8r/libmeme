@@ -251,6 +251,11 @@ namespace ml::ds
 			return m_pair.first.size();
 		}
 
+		ML_NODISCARD allocator_type get_allocator() const noexcept
+		{
+			return m_pair.first.get_allocator();
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD reference_pair back() noexcept

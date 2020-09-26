@@ -184,10 +184,10 @@ namespace ml
 
 		using record_manager = typename ds::batch_vector
 		<
-			size_t	,	// index
-			byte_t *,	// addr
-			size_t	,	// count
-			size_t		// size
+			size_t		,	// index
+			byte_t *	,	// address
+			size_t		,	// count
+			size_t			// size
 		>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -288,14 +288,14 @@ namespace ml
 			return std::allocate_shared<T>(alloc, ML_forward(args)...);
 		}
 
-		// make ref
+		// make shared
 		template <class T, class ... Args
 		> ML_NODISCARD static shared<T> make_ref(Args && ... args) noexcept
 		{
 			return memory::alloc_ref<T>(ML_check(g_mem)->m_alloc, ML_forward(args)...);
 		}
 
-		// make scope
+		// make unique
 		template <class T, class Dx = default_delete<T>, class ... Args
 		> ML_NODISCARD static scoped<T, Dx> make_scope(Args && ... args) noexcept
 		{
@@ -304,8 +304,6 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD static auto get() noexcept -> memory * const { return g_mem; }
-
 		ML_NODISCARD static auto get_allocator() noexcept -> allocator_type { return ML_check(g_mem)->m_alloc; }
 
 		ML_NODISCARD static auto get_counter() noexcept -> size_t { return ML_check(g_mem)->m_counter; }
@@ -313,6 +311,8 @@ namespace ml
 		ML_NODISCARD static auto get_records() noexcept -> record_manager const & { return ML_check(g_mem)->m_records; }
 
 		ML_NODISCARD static auto get_resource() noexcept -> passthrough_resource * { return ML_check(g_mem)->m_resource; }
+
+		ML_NODISCARD static auto get_singleton() noexcept -> memory * const { return g_mem; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -401,7 +401,7 @@ namespace ml
 	};
 }
 
-// default delete
+// deleters
 namespace ml
 {
 	template <> struct default_delete<> final

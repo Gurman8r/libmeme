@@ -170,41 +170,19 @@ namespace ml
 		virtual window_close_callback				set_close_callback				(window_close_callback) = 0;
 		virtual window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback) = 0;
 		virtual window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback) = 0;
-		virtual window_cursor_pos_callback			set_cursor_position_callback	(window_cursor_pos_callback) = 0;
+		virtual window_cursor_position_callback		set_cursor_position_callback	(window_cursor_position_callback) = 0;
 		virtual window_drop_callback				set_drop_callback				(window_drop_callback) = 0;
 		virtual window_error_callback				set_error_callback				(window_error_callback) = 0;
 		virtual window_focus_callback				set_focus_callback				(window_focus_callback) = 0;
-		virtual window_framebuffer_size_callback	set_framebuffer_size_callback	(window_framebuffer_size_callback) = 0;
+		virtual window_framebuffer_resize_callback	set_framebuffer_resize_callback	(window_framebuffer_resize_callback) = 0;
 		virtual window_iconify_callback				set_iconify_callback			(window_iconify_callback) = 0;
 		virtual window_key_callback					set_key_callback				(window_key_callback) = 0;
 		virtual window_maximize_callback			set_maximize_callback			(window_maximize_callback) = 0;
 		virtual window_mouse_callback				set_mouse_callback				(window_mouse_callback) = 0;
-		virtual window_pos_callback					set_position_callback			(window_pos_callback) = 0;
+		virtual window_position_callback			set_position_callback			(window_position_callback) = 0;
 		virtual window_refresh_callback				set_refresh_callback			(window_refresh_callback) = 0;
+		virtual window_resize_callback				set_resize_callback				(window_resize_callback) = 0;
 		virtual window_scroll_callback				set_scroll_callback				(window_scroll_callback) = 0;
-		virtual window_size_callback				set_size_callback				(window_size_callback) = 0;
-
-		void clear_callbacks() noexcept
-		{
-			set_char_callback				(nullptr);
-			set_char_mods_callback			(nullptr);
-			set_close_callback				(nullptr);
-			set_cursor_enter_callback		(nullptr);
-			set_cursor_position_callback	(nullptr);
-			set_content_scale_callback		(nullptr);
-			set_drop_callback				(nullptr);
-			set_error_callback				(nullptr);
-			set_focus_callback				(nullptr);
-			set_framebuffer_size_callback	(nullptr);
-			set_iconify_callback			(nullptr);
-			set_key_callback				(nullptr);
-			set_maximize_callback			(nullptr);
-			set_mouse_callback				(nullptr);
-			set_position_callback			(nullptr);
-			set_refresh_callback			(nullptr);
-			set_scroll_callback				(nullptr);
-			set_size_callback				(nullptr);
-		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

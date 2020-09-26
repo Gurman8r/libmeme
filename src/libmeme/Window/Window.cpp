@@ -23,14 +23,15 @@ namespace ml
 
 	window::window(allocator_type alloc) noexcept
 		: m_impl{ new impl_window{ alloc } }
+		, m_clbk{}
 	{
 		ML_assert("failed creating window implementation" && m_impl);
 	}
 
-	window::window(window_settings const & ws, allocator_type alloc) noexcept
+	window::window(window_settings const & settings, allocator_type alloc) noexcept
 		: window{ alloc }
 	{
-		ML_assert(open(ws));
+		ML_assert(open(settings));
 	}
 
 	window::~window() noexcept
@@ -40,13 +41,13 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool window::open(window_settings const & ws)
+	bool window::open(window_settings const & settings)
 	{
 		// check already open
 		if (is_open()) { return debug::error("window is already open"); }
 
 		// open window
-		if (!m_impl->open(ws)) { return debug::error("failed opening window"); }
+		if (!m_impl->open(settings)) { return debug::error("failed opening window"); }
 		
 		// make current context
 		make_context_current(get_handle());
@@ -55,7 +56,7 @@ namespace ml
 		set_user_pointer(this);
 
 		// centered
-		set_position((video_mode::get_desktop_mode().resolution - ws.video.resolution) / 2);
+		set_position((video_mode::get_desktop_mode().resolution - settings.video.resolution) / 2);
 
 		// maximized
 		if (has_hints(window_hints_maximized)) { maximize(); }
@@ -395,92 +396,92 @@ namespace ml
 
 	window_char_callback window::set_char_callback(window_char_callback fn) noexcept
 	{
-		return m_impl->set_char_callback(fn);
+		return m_clbk.on_char = m_impl->set_char_callback(fn);
 	}
 
 	window_char_mods_callback window::set_char_mods_callback(window_char_mods_callback fn) noexcept
 	{
-		return m_impl->set_char_mods_callback(fn);
+		return m_clbk.on_char_mods = m_impl->set_char_mods_callback(fn);
 	}
 
 	window_close_callback window::set_close_callback(window_close_callback fn) noexcept
 	{
-		return m_impl->set_close_callback(fn);
+		return m_clbk.on_close = m_impl->set_close_callback(fn);
 	}
 
 	window_content_scale_callback window::set_content_scale_callback(window_content_scale_callback fn) noexcept
 	{
-		return m_impl->set_content_scale_callback(fn);
+		return m_clbk.on_content_scale = m_impl->set_content_scale_callback(fn);
 	}
 	
 	window_cursor_enter_callback window::set_cursor_enter_callback(window_cursor_enter_callback fn) noexcept
 	{
-		return m_impl->set_cursor_enter_callback(fn);
+		return m_clbk.on_cursor_enter = m_impl->set_cursor_enter_callback(fn);
 	}
 
-	window_cursor_pos_callback window::set_cursor_position_callback(window_cursor_pos_callback fn) noexcept
+	window_cursor_position_callback window::set_cursor_position_callback(window_cursor_position_callback fn) noexcept
 	{
-		return m_impl->set_cursor_position_callback(fn);
+		return m_clbk.on_cursor_position = m_impl->set_cursor_position_callback(fn);
 	}
 
 	window_drop_callback window::set_drop_callback(window_drop_callback fn) noexcept
 	{
-		return m_impl->set_drop_callback(fn);
+		return m_clbk.on_drop = m_impl->set_drop_callback(fn);
 	}
 
 	window_error_callback window::set_error_callback(window_error_callback fn) noexcept
 	{
-		return m_impl->set_error_callback(fn);
+		return m_clbk.on_error = m_impl->set_error_callback(fn);
 	}
 
 	window_focus_callback window::set_focus_callback(window_focus_callback fn) noexcept
 	{
-		return m_impl->set_focus_callback(fn);
+		return m_clbk.on_focus = m_impl->set_focus_callback(fn);
 	}
 
-	window_framebuffer_size_callback window::set_framebuffer_size_callback(window_framebuffer_size_callback fn) noexcept
+	window_framebuffer_resize_callback window::set_framebuffer_resize_callback(window_framebuffer_resize_callback fn) noexcept
 	{
-		return m_impl->set_framebuffer_size_callback(fn);
+		return m_clbk.on_framebuffer_resize = m_impl->set_framebuffer_resize_callback(fn);
 	}
 
 	window_iconify_callback window::set_iconify_callback(window_iconify_callback fn) noexcept
 	{
-		return m_impl->set_iconify_callback(fn);
+		return m_clbk.on_iconify = m_impl->set_iconify_callback(fn);
 	}
 	
 	window_key_callback window::set_key_callback(window_key_callback fn) noexcept
 	{
-		return m_impl->set_key_callback(fn);
+		return m_clbk.on_key = m_impl->set_key_callback(fn);
 	}
 
 	window_maximize_callback window::set_maximize_callback(window_maximize_callback fn) noexcept
 	{
-		return m_impl->set_maximize_callback(fn);
+		return m_clbk.on_maximize = m_impl->set_maximize_callback(fn);
 	}
 	
 	window_mouse_callback window::set_mouse_callback(window_mouse_callback fn) noexcept
 	{
-		return m_impl->set_mouse_callback(fn);
+		return m_clbk.on_mouse = m_impl->set_mouse_callback(fn);
 	}
 	
-	window_pos_callback window::set_position_callback(window_pos_callback fn) noexcept
+	window_position_callback window::set_position_callback(window_position_callback fn) noexcept
 	{
-		return m_impl->set_position_callback(fn);
+		return m_clbk.on_position = m_impl->set_position_callback(fn);
 	}
 
 	window_refresh_callback window::set_refresh_callback(window_refresh_callback fn) noexcept
 	{
-		return m_impl->set_refresh_callback(fn);
+		return m_clbk.on_refresh = m_impl->set_refresh_callback(fn);
+	}
+
+	window_resize_callback window::set_resize_callback(window_resize_callback fn) noexcept
+	{
+		return m_clbk.on_resize = m_impl->set_resize_callback(fn);
 	}
 
 	window_scroll_callback window::set_scroll_callback(window_scroll_callback fn) noexcept
 	{
-		return m_impl->set_scroll_callback(fn);
-	}
-	
-	window_size_callback window::set_size_callback(window_size_callback fn) noexcept
-	{
-		return m_impl->set_size_callback(fn);
+		return m_clbk.on_scroll = m_impl->set_scroll_callback(fn);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

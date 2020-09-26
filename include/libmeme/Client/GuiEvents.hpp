@@ -8,34 +8,36 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct gui_manager;
+	struct gui_manager::menubar;
+	struct gui_manager::dockspace;
 	
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// DOCKSPACE
 	ML_decl_event(gui_dockspace_event)
 	{
-		gui_manager * const ptr;
+		gui_manager::dockspace * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr gui_dockspace_event(gui_manager * const ptr) noexcept : ptr{ ptr } {}
+		constexpr gui_dockspace_event(gui_manager::dockspace * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// MAIN MENU BAR
-	ML_decl_event(gui_main_menu_bar_event)
+	ML_decl_event(gui_menubar_event)
 	{
-		gui_manager * const ptr;
+		gui_manager::menubar * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr gui_main_menu_bar_event(gui_manager * const ptr) noexcept : ptr{ ptr } {}
+		constexpr gui_menubar_event(gui_manager::menubar * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// GUI
-	ML_decl_event(gui_event)
+	ML_decl_event(gui_render_event)
 	{
 		gui_manager * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr gui_event(gui_manager * const ptr) noexcept : ptr{ ptr } {}
+		constexpr gui_render_event(gui_manager * const ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

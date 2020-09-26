@@ -1,29 +1,21 @@
-#ifndef _ML_CLIENT_API_HPP_
-#define _ML_CLIENT_API_HPP_
+#ifndef _ML_CLIENT_CONTEXT_HPP_
+#define _ML_CLIENT_CONTEXT_HPP_
 
 #include <libmeme/Core/Events.hpp>
-#include <libmeme/Core/Python.hpp>
+#include <libmeme/Client/DataManager.hpp>
 #include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Client/LoopSystem.hpp>
+#include <libmeme/Client/Python.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// I/O
 namespace ml
 {
-	// io context
-	struct ML_NODISCARD io_context final : trackable, non_copyable
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// client io
+	struct ML_NODISCARD client_io final
 	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 		using allocator_type = pmr::polymorphic_allocator<byte_t>;
-
-		io_context(int32_t argc, char ** argv, allocator_type alloc, json const & j) noexcept
-			: argc{ argc }, argv{ argv }, alloc{ alloc }, prefs{ json{ j } }
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		int32_t const	argc	; // 
 		char ** const	argv	; // 
@@ -41,54 +33,61 @@ namespace ml
 			return content_path.native() + path.native();
 		}
 
-		// timers
-		timer const				main_timer	{}				; // 
-		timer					loop_timer	{ false }		; // 
-		duration				frame_time	{}				; // 
-		uint64_t				frame_count	{}				; // 
-		float_t					frame_rate	{}				; // 
-		float_t					fps_accum	{}				; // 
-		size_t					fps_index	{}				; // 
-		pmr::vector<float_t>	fps_times	{ 120, alloc }	; // 
+		// timing
+		timer const	main_timer	{}			; // 
+		timer		loop_timer	{ false }	; // 
+		duration	delta_time	{}			; // 
+		uint64_t	frame_index	{}			; // 
 
-		// input
-		vec2d									cursor	{}	; // 
-		ds::array<int32_t, mouse_button_MAX>	mouse	{}	; // 
-		ds::array<int32_t, key_code_MAX>		keys	{}	; // 
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-	};
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-// SYSTEM
-namespace ml
-{
-	// system context
-	struct ML_NODISCARD system_context final
-	{
-		memory			* const mem	; // memory manager
-		io_context		* const io	; // io context
-		event_bus		* const bus	; // event bus
-		python_context	* const scr	; // interpreter
-		render_window	* const win	; // render window
-		gui_manager		* const gui	; // gui manager
-	};
-
-	// system object
-	template <class Derived
-	> struct system_object : trackable, non_copyable, event_listener
-	{
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-	protected:
-		explicit system_object(system_context * sys) : event_listener{ sys->bus }, m_sys{ sys }
+		struct ML_NODISCARD // fps
 		{
-			ML_assert("BUS MISMATCH" && event_listener::m_bus == m_sys->bus);
+			float_t					rate	{}; // 
+			float_t					accum	{}; // 
+			size_t					index	{}; // 
+			pmr::vector<float_t>	times	{ 120, allocator_type{} }; // 
+		}
+		fps;
+
+		struct ML_NODISCARD // input
+		{
+			vec2d									cursor	{}	; // 
+			ds::array<int32_t, mouse_button_MAX>	mouse	{}	; // 
+			ds::array<int32_t, key_code_MAX>		keys	{}	; // 
+		}
+		input;
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// client context
+	struct ML_NODISCARD client_context final
+	{
+		memory			* const mem		; // memory
+		client_io		* const io		; // io
+		data_manager	* const data	; // content
+		event_bus		* const bus		; // bus
+		render_window	* const window	; // window
+		gui_manager		* const imgui	; // imgui
+		py_interpreter	* const python	; // python
+		loop_system		* const loop	; // loop
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	// client object
+	template <class Derived
+	> struct client_object : trackable, non_copyable, event_listener
+	{
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		explicit client_object(client_context * context) noexcept
+			: event_listener{ ML_check(context)->bus }
+			, m_context		{ context }
+		{
+			ML_assert_msg(m_context->bus == get_bus(), "BUS MISMATCH");
 		}
 
-		virtual ~system_object() noexcept override = default;
+		virtual ~client_object() noexcept override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,24 +95,26 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	public:
-		ML_NODISCARD auto get_bus	() const noexcept -> event_bus		* { return m_sys->bus;	}
-		ML_NODISCARD auto get_gui	() const noexcept -> gui_manager	* { return m_sys->gui;	}
-		ML_NODISCARD auto get_io	() const noexcept -> io_context		* { return m_sys->io;	}
-		ML_NODISCARD auto get_mem	() const noexcept -> memory			* { return m_sys->mem;	}
-		ML_NODISCARD auto get_scr	() const noexcept -> python_context	* { return m_sys->scr;	}
-		ML_NODISCARD auto get_sys	() const noexcept -> system_context	* { return m_sys;		}
-		ML_NODISCARD auto get_win	() const noexcept -> render_window	* { return m_sys->win;	}
+		using event_listener::get_bus;
+
+		ML_NODISCARD auto get_context	() const noexcept -> client_context	* { return m_context; }
+		ML_NODISCARD auto get_data		() const noexcept -> data_manager	* { return m_context->data; }
+		ML_NODISCARD auto get_imgui		() const noexcept -> gui_manager	* { return m_context->imgui; }
+		ML_NODISCARD auto get_io		() const noexcept -> client_io		* { return m_context->io; }
+		ML_NODISCARD auto get_loop		() const noexcept -> loop_system	* { return m_context->loop; }
+		ML_NODISCARD auto get_memory	() const noexcept -> memory			* { return m_context->mem; }
+		ML_NODISCARD auto get_python	() const noexcept -> py_interpreter * { return m_context->python; }
+		ML_NODISCARD auto get_window	() const noexcept -> render_window	* { return m_context->window; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		system_context * const m_sys;
+		client_context * const m_context;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
-}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
 
 #endif // !_ML_CLIENT_API_HPP_

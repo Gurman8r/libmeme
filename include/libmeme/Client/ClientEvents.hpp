@@ -7,35 +7,35 @@ namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	struct application;
+	struct client_context;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// LOAD
-	ML_decl_event(app_load_event)
+	ML_decl_event(client_enter_event)
 	{
-		application * const ptr;
+		client_context * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr app_load_event(application * ptr) noexcept : ptr{ ptr } {}
+		constexpr client_enter_event(client_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UNLOAD
-	ML_decl_event(app_unload_event)
+	ML_decl_event(client_exit_event)
 	{
-		application * const ptr;
+		client_context * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr app_unload_event(application * ptr) noexcept : ptr{ ptr } {}
+		constexpr client_exit_event(client_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	// UPDATE
-	ML_decl_event(app_update_event)
+	ML_decl_event(client_update_event)
 	{
-		application * const ptr;
+		client_context * const ptr;
 		auto operator->() const noexcept { return ptr; }
 		auto & operator*() const noexcept { return *ptr; }
-		constexpr app_update_event(application * ptr) noexcept : ptr{ ptr } {}
+		constexpr client_update_event(client_context * ptr) noexcept : ptr{ ptr } {}
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -2,15 +2,15 @@
 
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
-#include <libmeme/Client/Application.hpp>
+#include <libmeme/Client/PluginManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
 #include <libmeme/Client/ImGui.hpp>
 #include <libmeme/Client/GuiEvents.hpp>
-#include <libmeme/Renderer/Camera.hpp>
-#include <libmeme/Renderer/Font.hpp>
-#include <libmeme/Renderer/Mesh.hpp>
-#include <libmeme/Renderer/Shader.hpp>
-#include <libmeme/Renderer/Renderer.hpp>
+#include <libmeme/Graphics/Font.hpp>
+#include <libmeme/Graphics/Mesh.hpp>
+#include <libmeme/Graphics/Shader.hpp>
+#include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Engine/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -129,8 +129,6 @@ namespace ml
 		// RENDERING
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		perspective_camera m_camera{};
-		
 		shader_cache m_cache{};
 
 		vec2 m_resolution{ 1280, 720 };
@@ -170,7 +168,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [io = get_io()]() noexcept { return 1000.f / io->frame_rate; }
+				, [io = get_io()]() noexcept { return 1000.f / io->fps.rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -178,7 +176,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [io = get_io()]() noexcept { return io->frame_rate; }
+				, [io = get_io()]() noexcept { return io->fps.rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -187,7 +185,7 @@ namespace ml
 
 		void highlight_memory(byte_t * ptr, size_t const size)
 		{
-			static auto const testres{ get_mem()->get_resource() };
+			static auto const testres{ get_memory()->get_resource() };
 			auto const addr{ std::distance(testres->begin(), ptr) };
 			m_gui_memory.focus();
 			m_mem_editor.GotoAddrAndHighlight((size_t)addr, (size_t)addr + size);
@@ -202,16 +200,18 @@ namespace ml
 		// DEMO
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		demo(application * app, void * user) noexcept : plugin{ app, user }
+		demo(plugin_manager * manager, void * user) noexcept : plugin{ manager, user }
 		{
-			subscribe<	app_load_event			>();
-			subscribe<	app_update_event		>();
+			subscribe<	client_enter_event		>();
+			subscribe<	client_update_event		>();
+
 			subscribe<	gui_dockspace_event		>();
-			subscribe<	gui_main_menu_bar_event	>();
-			subscribe<	gui_event				>();
+			subscribe<	gui_menubar_event	>();
+			subscribe<	gui_render_event		>();
+
 			subscribe<	window_key_event		>();
 			subscribe<	window_mouse_event		>();
-			subscribe<	window_cursor_pos_event	>();
+			subscribe<	window_cursor_position_event	>();
 		}
 
 		~demo() noexcept override {}
@@ -220,11 +220,12 @@ namespace ml
 		{
 			switch (value)
 			{
-			case app_load_event			::ID: return on_load	((app_load_event const &)value);
-			case app_update_event		::ID: return on_update	((app_update_event const &)value);
-			case gui_dockspace_event	::ID: return on_dock	((gui_dockspace_event const &)value);
-			case gui_main_menu_bar_event::ID: return on_menubar	((gui_main_menu_bar_event const &)value);
-			case gui_event				::ID: return on_gui		((gui_event const &)value);
+			case client_enter_event	::ID: return on_client_enter	((client_enter_event const &)value);
+			case client_update_event::ID: return on_client_update	((client_update_event const &)value);
+			
+			case gui_dockspace_event::ID: return on_imgui_dockspace	((gui_dockspace_event const &)value);
+			case gui_menubar_event	::ID: return on_imgui_menubar	((gui_menubar_event const &)value);
+			case gui_render_event	::ID: return on_imgui_render	((gui_render_event const &)value);
 			
 			case window_key_event::ID: {
 				switch (auto const & ev{ (window_key_event const &)value }; ev.key)
@@ -249,8 +250,8 @@ namespace ml
 				}
 			} break;
 
-			case window_cursor_pos_event::ID: {
-				auto const & ev{ (window_cursor_pos_event const &)value };
+			case window_cursor_position_event::ID: {
+				auto const & ev{ (window_cursor_position_event const &)value };
 				float64_t const x = ev.x, y = ev.y;
 			} break;
 			}
@@ -258,13 +259,12 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_load(app_load_event const & ev)
+		void on_client_enter(client_enter_event const & ev)
 		{
 			// load stuff, etc...
-			auto const sys	{ ev->get_sys() };
-			auto const mem	{ sys->mem };
-			auto const io	{ sys->io };
-			auto const win	{ sys->win };
+			auto const mem	{ ev->mem };
+			auto const io	{ ev->io };
+			auto const win	{ ev->window };
 
 			// ICON
 			if (bitmap const icon{ io->path2("assets/textures/icon.png"), false })
@@ -475,11 +475,10 @@ namespace ml
 			}
 		}
 
-		void on_update(app_update_event const & ev)
+		void on_client_update(client_update_event const & ev)
 		{
 			// update stuff, etc...
-			auto const sys	{ ev->get_sys() };
-			auto const io	{ sys->io };
+			auto const io{ ev->io };
 
 			// console
 			m_console.dump(m_cout.sstr());
@@ -504,12 +503,12 @@ namespace ml
 					m_ecs.update<x_render_meshes>(ctx);
 				}),
 				gfx::command::bind_framebuffer(nullptr),
-			})	gfx::execute(cmd, sys->win->get_render_context());
+			})	gfx::execute(cmd, ev->window->get_render_context());
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_dock(gui_dockspace_event const & ev)
+		void on_imgui_dockspace(gui_dockspace_event const & ev)
 		{
 			enum : int32_t // nodes
 			{
@@ -520,7 +519,7 @@ namespace ml
 			};
 			
 			// setup dockspace
-			auto & d{ ev->get_docker() };
+			auto & d{ *ev };
 			if (d.nodes.empty()) { d.nodes.resize(MAX_DOCK_NODE); } else { return; }
 			if (!(d[center] = d.begin_builder())) { return; }
 			ML_defer(&d) { d.end_builder(center); };
@@ -549,14 +548,14 @@ namespace ml
 			d.dock(m_gui_ecs		, d[right_dn]);
 		}
 
-		void on_menubar(gui_main_menu_bar_event const & ev)
+		void on_imgui_menubar(gui_menubar_event const & ev)
 		{
 			// FILE
 			if (ImGui::BeginMenu("file"))
 			{
 				if (ImGui::MenuItem("quit", "alt+f4"))
 				{
-					get_win()->set_should_close(true);
+					get_window()->set_should_close(true);
 				}
 				ImGui::EndMenu();
 			}
@@ -591,15 +590,9 @@ namespace ml
 				m_imgui_about.menu_item();
 				ImGui::EndMenu();
 			}
-
-			// FPS
-			auto const fps{ get_io()->frame_rate };
-			ImGui::Separator();
-			ImGui::TextDisabled("%.3f ms/frame ( %.1f fps )", 1000.f / fps, fps);
-			ImGui::Separator();
 		}
 
-		void on_gui(gui_event const & ev)
+		void on_imgui_render(gui_render_event const & ev)
 		{
 			// IMGUI
 			if (m_imgui_about.open)			{ ev->imgui_about(&m_imgui_about.open); }
@@ -703,7 +696,7 @@ namespace ml
 
 			m_console.commands.push_back({ "exit", [&](auto && args) noexcept
 			{
-				get_win()->set_should_close(true);
+				get_window()->set_should_close(true);
 			},
 			{
 				"shutdown the application",
@@ -758,7 +751,7 @@ namespace ml
 			{
 				if (args.empty() && m_console.lock("py"))
 				{
-					static ML_scope(&){ std::cout << "# type \'\\\' to stop using python\n"; };
+					static ML_scope(&){ std::cout << "# type \'\\\' to stop using py\n"; };
 				}
 				else if (args.front() == "\\" && m_console.unlock("py"))
 				{
@@ -766,11 +759,11 @@ namespace ml
 				}
 				else
 				{
-					get_scr()->do_string(util::detokenize(args));
+					get_python()->do_string(util::detokenize(args));
 				}
 			},
 			{
-				"execute python code",
+				"execute py code",
 			} });
 		}
 
@@ -884,7 +877,7 @@ namespace ml
 					{
 						if (ImGui::MenuItem("copy"))
 						{
-							get_win()->set_clipboard(buf);
+							get_window()->set_clipboard(buf);
 						}
 						ImGui::EndPopup();
 					}
@@ -1024,7 +1017,7 @@ namespace ml
 
 		void show_memory_gui()
 		{
-			static auto const	mem		{ get_mem() };
+			static auto const	mem		{ get_memory() };
 			static auto const	view	{ mem->get_resource() };
 			static auto const &	records	{ mem->get_records() };
 
@@ -1257,7 +1250,7 @@ namespace ml
 
 		void show_renderer_gui()
 		{
-			static auto const & dev	{ get_win()->get_render_device() };
+			static auto const & dev	{ get_window()->get_render_device() };
 			static auto const & inf	{ dev->get_info() };
 			static auto const & ctx	{ dev->get_context() };
 
@@ -1370,6 +1363,12 @@ namespace ml
 					}
 				}
 				gui::tooltip("resolution");
+
+				// FPS
+				auto const fps{ get_io()->fps.rate };
+				ImGui::Separator();
+				ImGui::TextDisabled("%.3f ms/frame ( %.1f fps )", 1000.f / fps, fps);
+				ImGui::Separator();
 			}
 
 			if (!fixed)
@@ -1394,14 +1393,14 @@ namespace ml
 
 extern "C"
 {
-	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::application * app, void * user)
+	ML_PLUGIN_API ml::plugin * ml_plugin_attach(ml::plugin_manager * manager, void * user)
 	{
-		return app->get_mem()->new_object<ml::demo>(app, user);
+		return manager->get_memory()->new_object<ml::demo>(manager, user);
 	}
 	
-	ML_PLUGIN_API void ml_plugin_detach(ml::application * app, ml::plugin * ptr)
+	ML_PLUGIN_API void ml_plugin_detach(ml::plugin_manager * manager, ml::plugin * ptr)
 	{
-		app->get_mem()->delete_object((ml::demo *)ptr);
+		manager->get_memory()->delete_object((ml::demo *)ptr);
 	}
 }
 

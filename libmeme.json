@@ -31,15 +31,31 @@
 		}
 	},
 	"gui": {
-		"instclbk"	: true,
-		"style"		: "assets/styles/obsidian.style",
-		"menubar"	: { "enabled": true },
-		"dockspace"	: { "enabled": true }
+		"callbacks": true,
+		"style_path": "assets/styles/obsidian.style",
+		"main_menubar": {
+			"enabled": true
+		},
+		"main_dockspace": {
+			"enabled"	: true,
+			"title"		: "dockspace##libmeme",
+			"border"	: 0,
+			"rounding"	: 0,
+			"alpha"		: 0,
+			"padding"	: [ 0, 0 ],
+			"size"		: [ 0, 0 ],
+			"nodes"		: []
+		}
 	},
 	"plugins": {
-		"files": [ "plugins/demo" ]
+		"files": [
+			"plugins/demo",
+			"plugins/studio"
+		]
 	},
 	"scripts": {
-		"files": [ "assets/scripts/setup.py" ]
+		"files": [
+			"assets/scripts/setup.py"
+		]
 	}
 }

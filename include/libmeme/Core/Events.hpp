@@ -12,9 +12,9 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// TYPES
-	struct event;
-	struct event_listener;
-	struct event_bus;
+	struct event			; // event base
+	struct event_listener	; // event listener
+	struct event_bus		; // event bus
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
@@ -54,7 +54,7 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit event_listener(event_bus * bus) : m_bus{ bus }
+		explicit event_listener(event_bus * bus) noexcept : m_bus{ bus }
 		{
 			ML_assert_msg(bus, "INVALID EVENT BUS");
 		}
@@ -64,6 +64,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		virtual void on_event(event const &) = 0;
+
+		ML_NODISCARD event_bus * get_bus() const noexcept { return m_bus; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -93,11 +95,10 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	protected:
-		event_bus * const m_bus;
-
 	private:
 		friend event_bus;
+
+		event_bus * const m_bus;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -115,7 +116,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit event_bus(allocator_type alloc) noexcept : m_categories{ alloc }
+		event_bus(allocator_type alloc = {}) noexcept : m_categories{ alloc }
 		{
 		}
 

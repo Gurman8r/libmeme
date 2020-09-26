@@ -32,8 +32,8 @@ namespace ml
 			else
 			{
 				return resolution		== other.resolution
-					|| bits_per_pixel	== other.bits_per_pixel
-					|| refresh_rate		== other.refresh_rate;
+					&& bits_per_pixel	== other.bits_per_pixel
+					&& refresh_rate		== other.refresh_rate;
 			}
 		}
 

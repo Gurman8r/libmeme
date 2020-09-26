@@ -349,6 +349,8 @@ namespace ml::ds
 		ML_NODISCARD auto front() noexcept -> reference { return m_data.front(); }
 
 		ML_NODISCARD auto front() const noexcept -> const_reference { return m_data.front(); }
+		
+		ML_NODISCARD auto get_allocator() const noexcept -> allocator_type { return m_data.get_allocator(); }
 
 		ML_NODISCARD auto max_size() const noexcept -> size_type { return m_data.max_size(); }
 

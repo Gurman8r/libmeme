@@ -16,7 +16,7 @@ namespace ml
 
 		explicit glfw_window(allocator_type alloc) noexcept;
 
-		explicit glfw_window(window_settings const & ws, allocator_type alloc) noexcept;
+		explicit glfw_window(window_settings const & settings, allocator_type alloc) noexcept;
 
 		~glfw_window() override;
 
@@ -169,19 +169,19 @@ namespace ml
 		window_close_callback				set_close_callback				(window_close_callback				fn) override;
 		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback		fn) override;
 		window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback		fn) override;
-		window_cursor_pos_callback			set_cursor_position_callback	(window_cursor_pos_callback			fn) override;
+		window_cursor_position_callback		set_cursor_position_callback	(window_cursor_position_callback	fn) override;
 		window_drop_callback				set_drop_callback				(window_drop_callback				fn) override;
 		window_error_callback				set_error_callback				(window_error_callback				fn) override;
 		window_focus_callback				set_focus_callback				(window_focus_callback				fn) override;
-		window_framebuffer_size_callback	set_framebuffer_size_callback	(window_framebuffer_size_callback	fn) override;
+		window_framebuffer_resize_callback	set_framebuffer_resize_callback	(window_framebuffer_resize_callback	fn) override;
 		window_iconify_callback				set_iconify_callback			(window_iconify_callback			fn) override;
 		window_key_callback					set_key_callback				(window_key_callback				fn) override;
 		window_maximize_callback			set_maximize_callback			(window_maximize_callback			fn) override;
 		window_mouse_callback				set_mouse_callback				(window_mouse_callback				fn) override;
-		window_pos_callback					set_position_callback			(window_pos_callback				fn) override;
+		window_position_callback			set_position_callback			(window_position_callback			fn) override;
 		window_refresh_callback				set_refresh_callback			(window_refresh_callback			fn) override;
+		window_resize_callback				set_resize_callback				(window_resize_callback				fn) override;
 		window_scroll_callback				set_scroll_callback				(window_scroll_callback				fn) override;
-		window_size_callback				set_size_callback				(window_size_callback				fn) override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

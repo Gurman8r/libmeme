@@ -3,8 +3,8 @@
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
-#include <libmeme/Renderer/RenderCommand.hpp>
-#include <libmeme/Renderer/RenderWindow.hpp>
+#include <libmeme/Graphics/RenderCommand.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 // GLFW / OpenGL3
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -15,11 +15,11 @@
 namespace ml
 {
 	gui_manager::gui_manager(event_bus * bus, render_window * win, allocator_type alloc)
-		: m_win		{ win }
-		, m_bus		{ bus }
-		, m_ctx		{}
-		, m_menubar	{ alloc }
-		, m_docker	{ alloc }
+		: m_win			{ win }
+		, m_bus			{ bus }
+		, m_ctx			{}
+		, m_menubar		{ alloc }
+		, m_dockspace	{ alloc }
 	{
 		ML_assert(m_bus && m_win);
 
@@ -76,6 +76,8 @@ namespace ml
 #endif
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 	void gui_manager::new_frame()
 	{
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -86,8 +88,8 @@ namespace ml
 
 		ML_ImGui_ScopeID(this);
 
-		// DOCKER
-		if (m_docker.enabled && (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable))
+		// DOCKSPACE
+		if (m_dockspace.enabled && (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable))
 		{
 			// viewport
 			ImGuiViewport const * v{ ImGui::GetMainViewport() };
@@ -96,13 +98,13 @@ namespace ml
 			ImGui::SetNextWindowViewport(v->ID);
 
 			// style
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_docker.rounding);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_docker.border);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_docker.padding);
-			ImGui::SetNextWindowBgAlpha(m_docker.alpha);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, m_dockspace.rounding);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, m_dockspace.border);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, m_dockspace.padding);
+			ImGui::SetNextWindowBgAlpha(m_dockspace.alpha);
 
 			// begin
-			if (ImGui::Begin(m_docker.title, &m_docker.enabled,
+			if (ImGui::Begin(m_dockspace.title.c_str(), &m_dockspace.enabled,
 				ImGuiWindowFlags_NoTitleBar |
 				ImGuiWindowFlags_NoCollapse |
 				ImGuiWindowFlags_NoResize |
@@ -117,13 +119,16 @@ namespace ml
 				ImGui::PopStyleVar(3);
 
 				// fire docking event if nodes are empty
-				if (m_docker.nodes.empty()) { m_bus->fire<gui_dockspace_event>(this); }
+				if (m_dockspace.nodes.empty())
+				{
+					m_bus->fire<gui_dockspace_event>(&m_dockspace);
+				}
 
 				ImGui::DockSpace(
-					ImGui::GetID(m_docker.title),
-					m_docker.size,
+					ImGui::GetID(m_dockspace.title.c_str()),
+					m_dockspace.size,
 					ImGuiDockNodeFlags_PassthruCentralNode |
-					m_docker.flags);
+					m_dockspace.flags);
 
 				ImGui::End();
 			}
@@ -132,13 +137,13 @@ namespace ml
 		// MENUBAR
 		if (m_menubar.enabled && ImGui::BeginMainMenuBar())
 		{
-			m_bus->fire<gui_main_menu_bar_event>(this);
+			m_bus->fire<gui_menubar_event>(&m_menubar);
 
 			ImGui::EndMainMenuBar();
 		}
 
 		// MAIN GUI
-		m_bus->fire<gui_event>(this);
+		m_bus->fire<gui_render_event>(this);
 	}
 
 	void gui_manager::render_frame()
@@ -190,7 +195,7 @@ namespace ml
 
 	uint32_t gui_manager::dockspace::begin_builder()
 	{
-		if (uint32_t root{ ImGui::GetID(title) }
+		if (uint32_t root{ ImGui::GetID(title.c_str()) }
 		; ImGui::DockBuilderGetNode(root)) { return NULL; }
 		else
 		{

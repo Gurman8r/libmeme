@@ -1,14 +1,14 @@
 #include <libmeme/Client/Plugin.hpp>
-#include <libmeme/Client/Application.hpp>
+#include <libmeme/Client/PluginManager.hpp>
 
 namespace ml
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	plugin::plugin(application * app, void * user)
-		: system_object	{ app->get_sys() }
-		, m_app			{ app }
-		, m_user		{ user }
+	plugin::plugin(plugin_manager * manager, void * user) noexcept
+		: client_object	{ ML_check(manager)->get_context() }
+		, m_manager		{ manager }
+		, m_userptr		{ user }
 	{
 	}
 

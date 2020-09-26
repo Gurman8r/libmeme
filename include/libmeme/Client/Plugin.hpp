@@ -9,15 +9,15 @@
 
 namespace ml
 {
-	struct application;
+	struct plugin_manager;
 
 	ML_decl_handle(plugin_id);
 
-	struct ML_CLIENT_API plugin : system_object<plugin>
+	struct ML_CLIENT_API plugin : client_object<plugin>
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit plugin(application * app, void * user);
+		explicit plugin(plugin_manager * manager, void * user = nullptr) noexcept;
 
 		virtual ~plugin() noexcept override = default;
 
@@ -27,15 +27,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_app()	const noexcept -> application * { return m_app; }
+		ML_NODISCARD auto get_manager() const noexcept -> plugin_manager * { return m_manager; }
 
-		ML_NODISCARD auto get_user() const noexcept -> void * { return m_user; }
+		ML_NODISCARD auto get_user_pointer() const noexcept -> void * { return m_userptr; }
+
+		void set_user_pointer(void * value) noexcept { m_userptr = value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		application * const	m_app	; // application pointer
-		void * const		m_user	; // user pointer
+		plugin_manager * const	m_manager	; // manager pointer
+		void *					m_userptr	; // user pointer
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -26,9 +26,22 @@ namespace ml
 
 		void shutdown();
 
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		void new_frame();
 
 		void render_frame();
+
+		template <class ... Args
+		> void do_frame(Args && ... args)
+		{
+			new_frame();
+			if constexpr (0 < sizeof...(args))
+			{
+				std::invoke(ML_forward(args));
+			}
+			render_frame();
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -43,11 +56,16 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		// main menu bar
-		struct main_menu_bar final : trackable, non_copyable
+		struct ML_CLIENT_API menubar final : trackable, non_copyable
 		{
 			bool enabled{ true };
 
-			explicit main_menu_bar(allocator_type alloc) noexcept {}
+			explicit menubar(allocator_type alloc) noexcept {}
+
+			void configure(json const & j)
+			{
+				j["enabled"].get_to(enabled);
+			}
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,17 +73,29 @@ namespace ml
 		// dockspace
 		struct ML_CLIENT_API dockspace final : trackable, non_copyable
 		{
-			cstring					title		{ "dockspace##libmeme" };
 			bool					enabled		{ true };
+			pmr::string				title		{ "dockspace##libmeme" };
 			float_t					border		{};
-			vec2					padding		{};
 			float_t					rounding	{};
-			vec2					size		{};
 			float_t					alpha		{};
+			vec2					padding		{};
+			vec2					size		{};
 			int32_t					flags		{ ImGuiDockNodeFlags_AutoHideTabBar };
 			pmr::vector<uint32_t>	nodes		{};
 
 			explicit dockspace(allocator_type alloc) noexcept : nodes{ alloc } {}
+
+			void configure(json const & j)
+			{
+				j["enabled"	].get_to(enabled);
+				j["title"	].get_to(title);
+				j["border"	].get_to(border);
+				j["rounding"].get_to(rounding);
+				j["alpha"	].get_to(alpha);
+				j["padding"	].get_to(padding);
+				j["size"	].get_to(size);
+				j["nodes"	].get_to(nodes);
+			}
 
 			ML_NODISCARD auto & operator[](size_t i) noexcept { return nodes[i]; }
 
@@ -92,18 +122,18 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto get_docker() noexcept -> dockspace & { return m_docker; }
+		ML_NODISCARD auto get_dockspace() noexcept -> dockspace & { return m_dockspace; }
 
-		ML_NODISCARD auto get_menubar() noexcept -> main_menu_bar & { return m_menubar; }
+		ML_NODISCARD auto get_menubar() noexcept -> menubar & { return m_menubar; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		render_window * const	m_win		; // 
-		event_bus * const		m_bus		; // 
-		ImGuiContext *			m_ctx		; // 
-		main_menu_bar			m_menubar	; // 
-		dockspace				m_docker	; // 
+		render_window * const	m_win			; // 
+		event_bus * const		m_bus			; // 
+		ImGuiContext *			m_ctx			; // 
+		menubar					m_menubar		; // 
+		dockspace				m_dockspace		; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

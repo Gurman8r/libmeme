@@ -11,13 +11,13 @@ namespace ml
 
 		window(allocator_type alloc = {}) noexcept;
 
-		window(window_settings const & ws, allocator_type alloc = {}) noexcept;
+		window(window_settings const & settings, allocator_type alloc = {}) noexcept;
 
 		virtual ~window() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual bool open(window_settings const & ws) override;
+		virtual bool open(window_settings const & settings) override;
 		
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -159,29 +159,54 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		window_char_callback				set_char_callback				(window_char_callback				fn) noexcept;
-		window_char_mods_callback			set_char_mods_callback			(window_char_mods_callback			fn) noexcept;
-		window_close_callback				set_close_callback				(window_close_callback				fn) noexcept;
-		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback		fn) noexcept;
-		window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback		fn) noexcept;
-		window_cursor_pos_callback			set_cursor_position_callback	(window_cursor_pos_callback			fn) noexcept;
-		window_drop_callback				set_drop_callback				(window_drop_callback				fn) noexcept;
-		window_error_callback				set_error_callback				(window_error_callback				fn) noexcept;
-		window_focus_callback				set_focus_callback				(window_focus_callback				fn) noexcept;
-		window_framebuffer_size_callback	set_framebuffer_size_callback	(window_framebuffer_size_callback	fn) noexcept;
-		window_iconify_callback				set_iconify_callback			(window_iconify_callback			fn) noexcept;
-		window_key_callback					set_key_callback				(window_key_callback				fn) noexcept;
-		window_maximize_callback			set_maximize_callback			(window_maximize_callback			fn) noexcept;
-		window_mouse_callback				set_mouse_callback				(window_mouse_callback				fn) noexcept;
-		window_pos_callback					set_position_callback			(window_pos_callback				fn) noexcept;
-		window_refresh_callback				set_refresh_callback			(window_refresh_callback			fn) noexcept;
-		window_scroll_callback				set_scroll_callback				(window_scroll_callback				fn) noexcept;
-		window_size_callback				set_size_callback				(window_size_callback				fn) noexcept;
+		window_char_callback				set_char_callback				(window_char_callback				fn) noexcept final;
+		window_char_mods_callback			set_char_mods_callback			(window_char_mods_callback			fn) noexcept final;
+		window_close_callback				set_close_callback				(window_close_callback				fn) noexcept final;
+		window_content_scale_callback		set_content_scale_callback		(window_content_scale_callback		fn) noexcept final;
+		window_cursor_enter_callback		set_cursor_enter_callback		(window_cursor_enter_callback		fn) noexcept final;
+		window_cursor_position_callback		set_cursor_position_callback	(window_cursor_position_callback	fn) noexcept final;
+		window_drop_callback				set_drop_callback				(window_drop_callback				fn) noexcept final;
+		window_error_callback				set_error_callback				(window_error_callback				fn) noexcept final;
+		window_focus_callback				set_focus_callback				(window_focus_callback				fn) noexcept final;
+		window_framebuffer_resize_callback	set_framebuffer_resize_callback	(window_framebuffer_resize_callback	fn) noexcept final;
+		window_iconify_callback				set_iconify_callback			(window_iconify_callback			fn) noexcept final;
+		window_key_callback					set_key_callback				(window_key_callback				fn) noexcept final;
+		window_maximize_callback			set_maximize_callback			(window_maximize_callback			fn) noexcept final;
+		window_mouse_callback				set_mouse_callback				(window_mouse_callback				fn) noexcept final;
+		window_position_callback			set_position_callback			(window_position_callback			fn) noexcept final;
+		window_refresh_callback				set_refresh_callback			(window_refresh_callback			fn) noexcept final;
+		window_resize_callback				set_resize_callback				(window_resize_callback				fn) noexcept final;
+		window_scroll_callback				set_scroll_callback				(window_scroll_callback				fn) noexcept final;
+
+		ML_NODISCARD auto get_callbacks() noexcept -> window_callbacks const & { return m_clbk; }
+
+		void clear_callbacks() noexcept
+		{
+			set_char_callback				(nullptr);
+			set_char_mods_callback			(nullptr);
+			set_close_callback				(nullptr);
+			set_cursor_enter_callback		(nullptr);
+			set_cursor_position_callback	(nullptr);
+			set_content_scale_callback		(nullptr);
+			set_drop_callback				(nullptr);
+			set_error_callback				(nullptr);
+			set_focus_callback				(nullptr);
+			set_framebuffer_resize_callback	(nullptr);
+			set_iconify_callback			(nullptr);
+			set_key_callback				(nullptr);
+			set_maximize_callback			(nullptr);
+			set_mouse_callback				(nullptr);
+			set_position_callback			(nullptr);
+			set_refresh_callback			(nullptr);
+			set_resize_callback				(nullptr);
+			set_scroll_callback				(nullptr);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		scoped<	window_base	> m_impl;
+		scoped<	window_base	>	m_impl	; // window implementation
+		window_callbacks		m_clbk	; // window callbacks
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
