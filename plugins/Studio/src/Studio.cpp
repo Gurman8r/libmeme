@@ -61,10 +61,12 @@ namespace ml
 
 		void on_client_enter(client_enter_event const & ev)
 		{
+			get_vars()->emplace<pmr::vector<shared<gfx::texture>>>("textures");
 		}
 
 		void on_client_exit(client_exit_event const & ev)
 		{
+			get_vars()->erase<pmr::vector<shared<gfx::texture>>>("textures");
 		}
 
 		void on_client_update(client_update_event const & ev)
@@ -89,14 +91,17 @@ namespace ml
 
 		void on_window_key(window_key_event const & ev)
 		{
+			get_io()->input.keys[ev.key] = ev.action;
 		}
 
 		void on_window_mouse(window_mouse_event const & ev)
 		{
+			get_io()->input.mouse[ev.button] = ev.action;
 		}
 
 		void on_window_cursor_position(window_cursor_position_event const & ev)
 		{
+			get_io()->input.cursor = { ev.x, ev.y };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

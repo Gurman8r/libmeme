@@ -1,7 +1,6 @@
 #ifndef _ML_PLUGIN_MANAGER_HPP_
 #define _ML_PLUGIN_MANAGER_HPP_
 
-#include <libmeme/Core/BatchVector.hpp>
 #include <libmeme/Client/SharedLibrary.hpp>
 #include <libmeme/Client/Plugin.hpp>
 

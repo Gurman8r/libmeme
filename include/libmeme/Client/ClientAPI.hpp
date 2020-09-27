@@ -2,7 +2,7 @@
 #define _ML_CLIENT_CONTEXT_HPP_
 
 #include <libmeme/Core/Events.hpp>
-#include <libmeme/Client/DataManager.hpp>
+#include <libmeme/Core/Blackboard.hpp>
 #include <libmeme/Client/GuiManager.hpp>
 #include <libmeme/Client/LoopSystem.hpp>
 #include <libmeme/Client/Python.hpp>
@@ -64,7 +64,7 @@ namespace ml
 	{
 		memory			* const mem		; // memory
 		client_io		* const io		; // io
-		data_manager	* const data	; // content
+		blackboard		* const data	; // content
 		event_bus		* const bus		; // bus
 		render_window	* const window	; // window
 		gui_manager		* const imgui	; // imgui
@@ -98,13 +98,13 @@ namespace ml
 		using event_listener::get_bus;
 
 		ML_NODISCARD auto get_context	() const noexcept -> client_context	* { return m_context; }
-		ML_NODISCARD auto get_data		() const noexcept -> data_manager	* { return m_context->data; }
 		ML_NODISCARD auto get_imgui		() const noexcept -> gui_manager	* { return m_context->imgui; }
 		ML_NODISCARD auto get_io		() const noexcept -> client_io		* { return m_context->io; }
 		ML_NODISCARD auto get_loop		() const noexcept -> loop_system	* { return m_context->loop; }
 		ML_NODISCARD auto get_memory	() const noexcept -> memory			* { return m_context->mem; }
 		ML_NODISCARD auto get_python	() const noexcept -> py_interpreter * { return m_context->python; }
 		ML_NODISCARD auto get_window	() const noexcept -> render_window	* { return m_context->window; }
+		ML_NODISCARD auto get_vars		() const noexcept -> blackboard		* { return m_context->data; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
