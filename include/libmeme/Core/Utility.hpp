@@ -132,8 +132,8 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Lhs, class Rhs
-	> ML_NODISCARD constexpr auto compare(Lhs && lhs, Rhs && rhs) noexcept
+	template <class LHS, class RHS
+	> ML_NODISCARD constexpr auto compare(LHS && lhs, RHS && rhs) noexcept
 	{
 		return ML_compare(ML_forward(lhs), ML_forward(rhs));
 	}
@@ -166,8 +166,8 @@ namespace ml::util
 {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Lhs, class Rhs, class ... Rest
-	> constexpr decltype(auto) min(Lhs && lhs, Rhs && rhs, Rest && ... rest)
+	template <class LHS, class RHS, class ... Rest
+	> constexpr decltype(auto) min(LHS && lhs, RHS && rhs, Rest && ... rest)
 	{
 		return lhs < rhs
 			? _ML util::min(ML_forward(lhs), ML_forward(rest)...)
@@ -182,8 +182,8 @@ namespace ml::util
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	template <class Lhs, class Rhs, class ... Rest
-	> constexpr decltype(auto) max(Lhs && lhs, Rhs && rhs, Rest && ... rest)
+	template <class LHS, class RHS, class ... Rest
+	> constexpr decltype(auto) max(LHS && lhs, RHS && rhs, Rest && ... rest)
 	{
 		return lhs > rhs
 			? _ML util::max(ML_forward(lhs), ML_forward(rest)...)

@@ -5,6 +5,7 @@
 
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Memory.hpp>
+#include <libmeme/Client/Export.hpp>
 
 // python
 #define HAVE_SNPRINTF
@@ -48,48 +49,17 @@ namespace ml
 {
 	namespace py = pybind11;
 
-	struct py_interpreter final
+	struct ML_CLIENT_API py_interpreter final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		py_interpreter(pmr::memory_resource * mres, fs::path const & name, fs::path const & home)
-		{
-			ML_assert(!Py_IsInitialized());
-			PyObject_SetArenaAllocator(std::invoke([&mres]() noexcept
-			{
-				static PyObjectArenaAllocator temp
-				{
-					mres,
-					[](auto mres, size_t size) noexcept
-					{
-						return ((pmr::memory_resource *)mres)->allocate(size);
-					},
-					[](auto mres, void * addr, size_t size) noexcept
-					{
-						return ((pmr::memory_resource *)mres)->deallocate(addr, size);
-					}
-				};
-				return &temp;
-			}));
-			Py_SetProgramName(name.c_str());
-			Py_SetPythonHome(home.c_str());
-			Py_InitializeEx(1);
-			ML_assert(Py_IsInitialized());
-		}
+		py_interpreter(pmr::memory_resource * mres, fs::path const & name, fs::path const & home);
 
-		~py_interpreter() noexcept
-		{
-			ML_assert(Py_IsInitialized());
-			ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
-		}
+		~py_interpreter() noexcept;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t do_file(cstring path) noexcept
-		{
-			ML_assert(Py_IsInitialized());
-			return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
-		}
+		static int32_t do_file(cstring path) noexcept;
 
 		static int32_t do_file(fs::path const & path) noexcept
 		{
@@ -98,11 +68,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t do_string(cstring str) noexcept
-		{
-			ML_assert(Py_IsInitialized());
-			return PyRun_SimpleStringFlags(str, nullptr);
-		}
+		static int32_t do_string(cstring str) noexcept;
 
 		static int32_t do_string(pmr::string const & str) noexcept
 		{

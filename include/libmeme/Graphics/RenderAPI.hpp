@@ -630,6 +630,11 @@ namespace ml::gfx
 	// base device
 	class ML_GRAPHICS_API render_device : public non_copyable, public trackable
 	{
+	public:
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
+
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -643,22 +648,25 @@ namespace ml::gfx
 	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		ML_NODISCARD static render_device * create(allocator_type alloc = {}) noexcept;
+		ML_NODISCARD static render_device * create(int32_t api, allocator_type alloc = {}) noexcept;
 
 		static void destroy(render_device * value) noexcept;
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static render_device * get_default() noexcept { return g_dev; }
 
 		static render_device * set_default(render_device * value) noexcept { return g_dev = value; }
 
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD virtual shared<render_context> const & get_context() const noexcept = 0;
 
 		virtual void set_context(shared<render_context> const & value) noexcept = 0;
 
-		ML_NODISCARD virtual shared<render_context> const & get_context() const noexcept = 0;
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		ML_NODISCARD virtual allocator_type get_allocator() const noexcept = 0;
 
 		ML_NODISCARD virtual object_id get_handle() const noexcept = 0;
 
@@ -666,7 +674,6 @@ namespace ml::gfx
 
 		ML_NODISCARD virtual typeof<> const & get_self_type() const noexcept = 0;
 
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD virtual shared<render_context> create_context(context_settings const & cs) noexcept = 0;
@@ -703,7 +710,7 @@ namespace ml::gfx
 	private:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static constexpr typeof<> s_base_type{ typeof_v<render_object<Derived>> };
+		static constexpr typeof<> s_base_type{ typeof_v<Derived> };
 
 		render_device * const m_parent;
 
@@ -712,7 +719,7 @@ namespace ml::gfx
 		
 		explicit render_object(render_device * parent) noexcept : m_parent{ parent }
 		{
-			ML_assert("BAD RENDER DEVICE" && m_parent);
+			ML_assert_msg(m_parent, "BAD RENDER DEVICE");
 		}
 
 		virtual ~render_object() override = default;
@@ -1337,7 +1344,7 @@ namespace ml::gfx
 		{
 			return create(
 			{
-				"Texture2D",
+				(pmr::string)img.path().string(),
 				img.path(),
 				img.size(),
 				{ calc_channel_format(img.channels()) },

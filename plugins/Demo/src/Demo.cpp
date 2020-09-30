@@ -1077,7 +1077,7 @@ namespace ml
 					ImGui::Separator();
 					for (size_t i = 0; i < records.size<0>(); ++i)
 					{
-						records.expand_all(i, [&](auto index, auto addr, auto count, auto size)
+						records.expand_all(i, [&](auto addr, auto index, auto count, auto size)
 						{
 							ML_ImGui_ScopeID(addr);
 							ImGui::TextDisabled("%u", index); ImGui::NextColumn();

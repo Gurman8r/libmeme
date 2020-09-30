@@ -61,12 +61,16 @@ namespace ml
 
 		void on_client_enter(client_enter_event const & ev)
 		{
-			get_vars()->emplace<pmr::vector<shared<gfx::texture>>>("textures");
+			auto & tex = get_vars()->new_map<pmr::string, shared<gfx::texture>>("textures");
+
+			get_vars()->new_batch<int>(get_memory()->get_allocator(), "foo");
 		}
 
 		void on_client_exit(client_exit_event const & ev)
 		{
-			get_vars()->erase<pmr::vector<shared<gfx::texture>>>("textures");
+			get_vars()->del_batch<int>("foo");
+
+			get_vars()->del_map<pmr::string, shared<gfx::texture>>("textures");
 		}
 
 		void on_client_update(client_update_event const & ev)

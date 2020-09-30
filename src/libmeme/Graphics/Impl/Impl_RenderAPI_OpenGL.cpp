@@ -808,7 +808,7 @@ namespace ml::gfx
 	opengl_render_context::opengl_render_context(render_device * dev, context_settings const & desc)
 		: render_context{ dev }, m_data{ desc }
 	{
-		ML_assert("invalid context client" && desc.client == context_api_opengl);
+		ML_assert("invalid context api" && desc.api == context_api_opengl);
 		ML_assert("major version mismatch" && dev->get_info().major_version >= desc.major);
 		ML_assert("minor version mismatch" && dev->get_info().minor_version >= desc.minor);
 

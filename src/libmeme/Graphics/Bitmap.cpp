@@ -10,28 +10,41 @@
 
 namespace ml
 {
-	bool bitmap::load_from_file(fs::path const & path, bool flip_v, size_t req)
-	{
-		if ((m_path = path).empty()) { return false; }
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		m_pix.clear();
+	bool bitmap::load_from_file(
+		fs::path const	&	path,
+		pixels			&	pix,
+		vec2s			&	size,
+		size_t			&	channels,
+		bool				flip_v,
+		size_t				req
+	)
+	{
+		pix.clear();
+		size = {};
+		channels = 0;
+
+		if (path.empty()) { return false; }
 
 		stbi_set_flip_vertically_on_load(flip_v);
 
 		if (byte_t * const temp
 		{
 			stbi_load(path.string().c_str(),
-				(int32_t *)&m_size[0],
-				(int32_t *)&m_size[1],
-				(int32_t *)&m_channels,
+				(int32_t *)&size[0],
+				(int32_t *)&size[1],
+				(int32_t *)&channels,
 				(int32_t)req)
 		})
 		{
-			m_pix = { temp, temp + capacity() };
+			pix = { temp, temp + size[0] * size[1] * channels };
 
 			stbi_image_free(temp);
 		}
 
-		return !m_pix.empty();
+		return !pix.empty();
 	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }

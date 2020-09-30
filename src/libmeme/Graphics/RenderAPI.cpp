@@ -18,9 +18,21 @@ namespace ml::gfx
 
 	render_device * render_device::g_dev{};
 
-	render_device * render_device::create(allocator_type alloc) noexcept
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	render_device * render_device::create(int32_t api, allocator_type alloc) noexcept
 	{
-		render_device * temp{ new opengl_render_device{ alloc } };
+		render_device * temp{ std::invoke([&]() noexcept -> render_device *
+		{
+			switch (api)
+			{
+			default					: return nullptr;
+			case context_api_unknown: return nullptr;
+			case context_api_opengl	: return new opengl_render_device{ alloc };
+			case context_api_vulkan	: return nullptr;
+			case context_api_directx: return nullptr;
+			}
+		}) };
 
 		if (!g_dev) { set_default(temp); }
 
@@ -33,7 +45,14 @@ namespace ml::gfx
 
 		if (g_dev == value) { set_default(nullptr); }
 
-		delete value;
+		switch (value->get_self_type())
+		{
+		default:
+			return delete value;
+
+		case hashof_v<opengl_render_device>:
+			return delete (opengl_render_device *)value;
+		}
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

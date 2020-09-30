@@ -80,7 +80,7 @@ namespace ml
 		m_hints = settings.hints;
 
 		// context hints
-		glfwWindowHint(GLFW_CLIENT_API, std::invoke([api = settings.context.client]() noexcept
+		glfwWindowHint(GLFW_CLIENT_API, std::invoke([api = settings.context.api]() noexcept
 		{
 			switch (api)
 			{

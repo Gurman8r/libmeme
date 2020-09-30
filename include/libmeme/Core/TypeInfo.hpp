@@ -274,6 +274,8 @@ namespace ml
 
 		constexpr auto const & hash() const & noexcept { return m_hash; }
 
+		constexpr operator hash_t() const noexcept { return this->hash(); }
+
 		template <class ... U
 		> constexpr auto compare(typeof<U...> const & other) const noexcept
 		{

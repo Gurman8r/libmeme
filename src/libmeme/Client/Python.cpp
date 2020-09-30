@@ -1,6 +1,58 @@
 #include <libmeme/Client/Python.hpp>
 #include <libmeme/Client/PluginManager.hpp>
 
+namespace ml
+{
+	py_interpreter::py_interpreter(pmr::memory_resource * mres, fs::path const & name, fs::path const & home)
+	{
+		ML_assert(!Py_IsInitialized());
+		PyObject_SetArenaAllocator(std::invoke([&mres]() noexcept
+		{
+			static PyObjectArenaAllocator temp
+			{
+				mres,
+				[](auto mres, size_t size) noexcept
+				{
+					return ((pmr::memory_resource *)mres)->allocate(size);
+				},
+				[](auto mres, void * addr, size_t size) noexcept
+				{
+					return ((pmr::memory_resource *)mres)->deallocate(addr, size);
+				}
+			};
+			return &temp;
+		}));
+		Py_SetProgramName(name.c_str());
+		Py_SetPythonHome(home.c_str());
+		Py_InitializeEx(1);
+		ML_assert(Py_IsInitialized());
+	}
+
+	py_interpreter::~py_interpreter() noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		ML_assert(Py_FinalizeEx() == EXIT_SUCCESS);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t py_interpreter::do_file(cstring path) noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	int32_t py_interpreter::do_string(cstring str) noexcept
+	{
+		ML_assert(Py_IsInitialized());
+		return PyRun_SimpleStringFlags(str, nullptr);
+	}
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+}
+
 PYBIND11_EMBEDDED_MODULE(memelib, m)
 {
 	using namespace ml;
@@ -250,7 +302,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// CONTEXT CLIENT
-	py::class_<context_client_>(m, "context_client")
+	py::class_<context_api_>(m, "context_client")
 		.def_property_readonly_static("unknown"	, [](py::object) { return (int32_t)context_api_unknown; })
 		.def_property_readonly_static("opengl"	, [](py::object) { return (int32_t)context_api_opengl; })
 		.def_property_readonly_static("vulkan"	, [](py::object) { return (int32_t)context_api_vulkan; })
@@ -449,7 +501,7 @@ PYBIND11_EMBEDDED_MODULE(memelib, m)
 	py::class_<context_settings>(m, "context_settings")
 		.def(py::init<>())
 		.def(py::init<int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, bool, bool>())
-		.def_readwrite("client"			, &context_settings::client)
+		.def_readwrite("api"			, &context_settings::api)
 		.def_readwrite("major"			, &context_settings::major)
 		.def_readwrite("minor"			, &context_settings::minor)
 		.def_readwrite("profile"		, &context_settings::profile)

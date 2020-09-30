@@ -1,7 +1,7 @@
 #include <libmeme/Client/PluginManager.hpp>
+#include <libmeme/Engine/SceneManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
-#include <libmeme/Engine/SceneManager.hpp>
 
 using namespace ml;
 using namespace ml::byte_literals;
@@ -40,7 +40,7 @@ static auto const default_settings{ R"(
 			"refresh_rate"	: -1
 		},
 		"context": {
-			"client"		: "opengl",
+			"api"			: "opengl",
 			"major"			: 4,
 			"minor"			: 6,
 			"profile"		: "compat",

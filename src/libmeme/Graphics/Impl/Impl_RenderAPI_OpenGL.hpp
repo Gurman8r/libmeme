@@ -29,14 +29,17 @@ namespace ml::gfx
 
 		~opengl_render_device() override;
 
-	public:
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		object_id get_handle() const noexcept override { return ML_handle(object_id, this); }
 
 		void set_context(shared<render_context> const & value) noexcept override { m_ctx = value; }
 
 		shared<render_context> const & get_context() const noexcept override { return m_ctx; }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		allocator_type get_allocator() const noexcept override { return m_alloc; }
+
+		object_id get_handle() const noexcept override { return ML_handle(object_id, this); }
 
 		desc_<render_device> const & get_info() const noexcept override { return m_data; }
 

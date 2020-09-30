@@ -6,7 +6,7 @@
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/BatchVector.hpp>
 
-// testres
+// passthrough
 namespace ml
 {
 	// proxy for testing an upstream resource
@@ -148,9 +148,12 @@ namespace ml
 	// memory record
 	struct ML_NODISCARD memory_record final
 	{
-		size_t index; byte_t * addr; size_t count; size_t size;
+		byte_t * addr; size_t index; size_t count; size_t size;
 
-		operator bool() const noexcept { return addr && index && count && size; }
+		constexpr operator bool() const noexcept
+		{
+			return addr && index && count && size;
+		}
 	};
 
 	static void to_json(json & j, memory_record const & v)
@@ -180,12 +183,12 @@ namespace ml
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		enum : size_t { id_index, id_addr, id_count, id_size };
+		enum : size_t { id_addr, id_index, id_count, id_size };
 
 		using record_manager = typename ds::batch_vector
 		<
-			size_t		,	// index
 			byte_t *	,	// address
+			size_t		,	// index
 			size_t		,	// count
 			size_t			// size
 		>;
@@ -207,7 +210,7 @@ namespace ml
 		// malloc
 		ML_NODISCARD static void * allocate(size_t size) noexcept
 		{
-			return memory::allocate(1, size);
+			return ML_check(g_mem)->do_allocate(1, size);
 		}
 
 		// calloc
@@ -292,7 +295,7 @@ namespace ml
 		template <class T, class ... Args
 		> ML_NODISCARD static shared<T> make_ref(Args && ... args) noexcept
 		{
-			return memory::alloc_ref<T>(ML_check(g_mem)->m_alloc, ML_forward(args)...);
+			return memory::alloc_ref<T>(memory::get_allocator(), ML_forward(args)...);
 		}
 
 		// make unique
@@ -304,44 +307,54 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// get allocator
 		ML_NODISCARD static auto get_allocator() noexcept -> allocator_type { return ML_check(g_mem)->m_alloc; }
 
+		// get counter
 		ML_NODISCARD static auto get_counter() noexcept -> size_t { return ML_check(g_mem)->m_counter; }
 
+		// get records
 		ML_NODISCARD static auto get_records() noexcept -> record_manager const & { return ML_check(g_mem)->m_records; }
 
+		// get resource
 		ML_NODISCARD static auto get_resource() noexcept -> passthrough_resource * { return ML_check(g_mem)->m_resource; }
 
+		// get singleton
 		ML_NODISCARD static auto get_singleton() noexcept -> memory * const { return g_mem; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		// get record
 		ML_NODISCARD static auto get_record(size_t i) noexcept -> memory_record
 		{
 			ML_assert(g_mem);
 			return {
-				g_mem->m_records.at<id_index>(i),
 				g_mem->m_records.at<id_addr>(i),
+				g_mem->m_records.at<id_index>(i),
 				g_mem->m_records.at<id_index>(i),
 				g_mem->m_records.at<id_index>(i)
 			};
 		}
 
+		// get record address
 		ML_NODISCARD static auto get_record_addr(size_t i) noexcept -> byte_t *
 		{
 			return ML_check(g_mem)->m_records.at<id_addr>(i);
 		}
 
+		// get record count
 		ML_NODISCARD static auto get_record_count(size_t i) noexcept -> size_t
 		{
 			return ML_check(g_mem)->m_records.at<id_count>(i);
 		}
 
+		// get record index
 		ML_NODISCARD static auto get_record_index(size_t i) noexcept -> size_t
 		{
 			return ML_check(g_mem)->m_records.at<id_index>(i);
 		}
 
+		// get record size
 		ML_NODISCARD static auto get_record_size(size_t i) noexcept -> size_t
 		{
 			return ML_check(g_mem)->m_records.at<id_size>(i);
@@ -354,17 +367,19 @@ namespace ml
 		{
 			auto const addr{ m_alloc.allocate(count * size) };
 
-			return std::get<id_addr>(m_records.push_back(++m_counter, addr, count, size));
+			return std::get<id_addr>(m_records.push_back
+			(
+				addr, ++m_counter, count, size
+			));
 		}
 
 		void do_deallocate(void * addr) noexcept
 		{
 			if (auto const i{ m_records.lookup<id_addr>(addr) }; i != m_records.npos)
 			{
-				m_alloc.deallocate
-				(
-					(byte_t *)addr, m_records.at<id_count>(i) * m_records.at<id_size>(i)
-				);
+				m_alloc.deallocate(
+					(byte_t *)addr,
+					m_records.at<id_count>(i) * m_records.at<id_size>(i));
 
 				m_records.erase(i);
 			}

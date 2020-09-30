@@ -34,7 +34,7 @@ namespace ml
 		if (!window::open(settings)) { return debug::error("failed opening render_window"); }
 
 		// create device
-		if (m_dev.reset(gfx::render_device::create()); !m_dev)
+		if (m_dev.reset(gfx::render_device::create(settings.context.api)); !m_dev)
 		{
 			return debug::error("failed creating device");
 		}

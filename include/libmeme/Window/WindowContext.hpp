@@ -8,7 +8,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// context api
-	enum context_client_ : int32_t
+	enum context_api_ : int32_t
 	{
 		context_api_unknown		, // unknown
 		context_api_opengl		, // opengl
@@ -16,11 +16,11 @@ namespace ml
 		context_api_directx		, // directx
 	};
 
-	inline void from_json(json const & j, context_client_ & v)
+	inline void from_json(json const & j, context_api_ & v)
 	{
 		if (j.is_number())
 		{
-			v = (context_client_)j.get<int32_t>();
+			v = (context_api_)j.get<int32_t>();
 		}
 		else if (j.is_string())
 		{
@@ -35,7 +35,7 @@ namespace ml
 		}
 	}
 
-	inline void to_json(json & j, context_client_ const & v)
+	inline void to_json(json & j, context_api_ const & v)
 	{
 		switch (v)
 		{
@@ -92,7 +92,7 @@ namespace ml
 	// context settings
 	struct ML_NODISCARD context_settings final
 	{
-		int32_t		client			{ context_api_unknown };
+		int32_t		api				{ context_api_unknown };
 		int32_t		major			{};
 		int32_t		minor			{};
 		int32_t		profile			{ context_profile_any };
@@ -104,7 +104,7 @@ namespace ml
 
 	inline void from_json(json const & j, context_settings & v)
 	{
-		j["client"		].get_to((context_client_ & )v.client);
+		j["api"			].get_to((context_api_ & )v.api);
 		j["major"		].get_to(v.major);
 		j["minor"		].get_to(v.minor);
 		j["profile"		].get_to((context_profile_ &)v.profile);
@@ -116,7 +116,7 @@ namespace ml
 
 	inline void to_json(json & j, context_settings const & v)
 	{
-		j["client"		] = (context_client_)v.client;
+		j["api"			] = (context_api_)v.api;
 		j["major"		] = v.major;
 		j["minor"		] = v.minor;
 		j["profile"		] = (context_profile_)v.profile;
