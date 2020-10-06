@@ -10,19 +10,24 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
-		using variable			= typename std::any;
-		using element			= typename shared<variable>;
-		using category			= typename ds::map<hash_t, element>;
-		using catagories		= typename ds::map<hash_t, category>;
+		using variable_type		= typename std::any;
+		using element_type		= typename shared<variable_type>;
+		using id_type			= typename hash_t;
+		using category_type		= typename ds::map<id_type, element_type>;
+		using catagories_type	= typename ds::map<id_type, category_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		template <class ID
-		> ML_NODISCARD static constexpr hash_t getid(ID && id) noexcept
+		template <class T> ML_NODISCARD static constexpr id_type make_id() noexcept
+		{
+			return hashof_v<T>;
+		}
+
+		template <class T> ML_NODISCARD static constexpr id_type make_id(T && id) noexcept
 		{
 			if constexpr (std::is_integral_v<std::decay_t<decltype(id)>>)
 			{
-				return static_cast<hash_t>(id);
+				return static_cast<id_type>(id);
 			}
 			else
 			{
@@ -33,64 +38,106 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> struct ref final : trackable
+		> struct handle final
 		{
-			using wrapper = typename std::reference_wrapper<T>;
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			template <class ID> ref(blackboard * parent, ID && id, allocator_type alloc = {})
-				: m_parent	{ ML_check(parent) }
-				, m_id		{ getid(ML_forward(id)) }
-				, m_ref		{ m_parent->get<T>(m_id, alloc) }
+			using value_type		= typename T;
+			using self_type			= typename blackboard::handle<value_type>;
+			using wrapper_type		= typename std::reference_wrapper<value_type>;
+			using pointer			= typename value_type *;
+			using const_pointer		= typename value_type const *;
+			using reference			= typename value_type &;
+			using const_reference	= typename value_type const &;
+
+			template <class ID
+			> handle(blackboard * bb, ID && id, allocator_type alloc = {})
+				: m_bb	{ ML_check(bb) }
+				, m_id	{ make_id(ML_forward(id)) }
+				, m_ref	{ m_bb->emplace<value_type>(alloc, m_id) }
 			{
 			}
 
-			ref(ref const & other)
-				: m_parent	{ other.m_parent }
-				, m_id		{ other.m_id }
-				, m_ref		{ other.m_ref }
+			~handle() noexcept
 			{
+				ML_check(m_bb)->erase<value_type>(m_id);
 			}
 
-			~ref() noexcept
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			variable_type & update(allocator_type alloc = {}) noexcept
 			{
-				ML_check(m_parent)->erase<T>(m_id);
+				ML_assert_msg(m_bb, "BAD PARENT BLACKBOARD");
+				return (m_ref = m_bb->load<value_type>(m_id, alloc));
 			}
 
-			ML_NODISCARD auto parent() const noexcept -> blackboard * { return m_parent; }
-			ML_NODISCARD auto id() const noexcept -> hash_t { return m_id; }
-			ML_NODISCARD operator bool() const noexcept { return ML_check(m_parent)->contains<T>(m_id); }
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD auto get() & noexcept -> T & { return m_ref.get(); }
-			ML_NODISCARD auto get() && noexcept -> T && { return std::move(m_ref.get()); }
-			ML_NODISCARD auto get() const & noexcept -> T const & { return m_ref.get(); }
-			ML_NODISCARD auto get() const && noexcept -> T const && { return std::move(m_ref.get()); }
+			auto id		() const noexcept	-> id_type				{ return m_id; }
+			auto parent	() const noexcept	-> blackboard *			{ return m_bb; }
+			auto ref	() & noexcept		-> reference			{ return m_ref.get(); }
+			auto ref	() const & noexcept	-> const_reference		{ return m_ref.get(); }
+			auto cref	() const & noexcept	-> const_reference		{ return ref(); }
+			auto ptr	() noexcept			-> pointer				{ return &ref(); }
+			auto ptr	() const noexcept	-> const_pointer		{ return &ref(); }
+			auto cptr	() const noexcept	-> const_pointer		{ return ptr(); }
 
-			ML_NODISCARD operator T & () & noexcept -> T & { return get(); }
-			ML_NODISCARD operator T && () && noexcept -> T && { return std::move(get()); }
-			ML_NODISCARD operator T const & () const & noexcept -> T const & { return get(); }
-			ML_NODISCARD operator T const && () const && noexcept -> T const && { return std::move(get()); }
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD auto operator*() & noexcept -> T & { return get(); }
-			ML_NODISCARD auto operator*() && noexcept -> T & { return std::move(get()); }
-			ML_NODISCARD auto operator*() const & noexcept -> T const & { return get(); }
-			ML_NODISCARD auto operator*() const && noexcept -> T const & { return std::move(get()); }
+			ML_NODISCARD pointer operator->() noexcept { return ptr(); }
 
-			ML_NODISCARD auto operator->() noexcept -> T * { return std::addressof(get()); }
-			ML_NODISCARD auto operator->() const noexcept -> T const * { return std::addressof(get()); }
+			ML_NODISCARD const_pointer operator->() const noexcept { return cptr(); }
+
+			ML_NODISCARD reference operator*() & noexcept { return ref(); }
+
+			ML_NODISCARD const_reference operator*() const & noexcept { return cref(); }
+
+			ML_NODISCARD operator reference () & noexcept { return ref(); }
+
+			ML_NODISCARD operator const_reference () const & noexcept { return cref(); }
 			
-			template <class I
-			> ML_NODISCARD decltype(auto) operator[](I && i) noexcept { return get()[ML_forward(i)]; }
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			template <class I
-			> ML_NODISCARD decltype(auto) operator[](I && i) const noexcept { return get()[ML_forward(i)]; }
+			> decltype(auto) operator[](I && i) noexcept
+			{
+				return ref()[ML_forward(i)];
+			}
+
+			template <class I
+			> decltype(auto) operator[](I && i) const noexcept
+			{
+				return cref()[ML_forward(i)];
+			}
 
 			template <class ... Args
-			> decltype(auto) operator()(Args && ... args) noexcept { return std::invoke(get(), ML_forward(args)...); }
+			> decltype(auto) operator()(Args && ... args) noexcept
+			{
+				return std::invoke(ref(), ML_forward(args)...);
+			}
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+			ML_NODISCARD auto begin() noexcept { return ref().begin(); }
+			
+			ML_NODISCARD auto begin() const noexcept { return ref().begin(); }
+			
+			ML_NODISCARD auto cbegin() const noexcept { return cref().cbegin(); }
+
+			ML_NODISCARD auto end() noexcept { return ref().end(); }
+			
+			ML_NODISCARD auto end() const noexcept { return ref().end(); }
+			
+			ML_NODISCARD auto cend() const noexcept { return cref().cend(); }
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		private:
-			blackboard * const	m_parent	; // 
-			hash_t const		m_id		; // 
-			wrapper				m_ref		; // 
+			blackboard *	m_bb	; // 
+			id_type			m_id	; // 
+			wrapper_type	m_ref	; // 
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -100,12 +147,12 @@ namespace ml
 		{
 		}
 
-		explicit blackboard(catagories const & data, allocator_type alloc = {})
+		explicit blackboard(catagories_type const & data, allocator_type alloc = {})
 			: m_vars{ data, alloc }
 		{
 		}
 
-		explicit blackboard(catagories && data, allocator_type alloc = {}) noexcept
+		explicit blackboard(catagories_type && data, allocator_type alloc = {}) noexcept
 			: m_vars{ std::move(data), alloc }
 		{
 		}
@@ -135,9 +182,9 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD auto data() & noexcept -> catagories & { return m_vars; }
+		ML_NODISCARD auto data() & noexcept -> catagories_type & { return m_vars; }
 
-		ML_NODISCARD auto data() const & noexcept -> catagories const & { return m_vars; }
+		ML_NODISCARD auto data() const & noexcept -> catagories_type const & { return m_vars; }
 
 		ML_NODISCARD auto capacity() const noexcept -> size_t { return m_vars.capacity(); }
 
@@ -151,117 +198,81 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void clear() noexcept { m_vars.clear(); }
-
-		void clear(hash_t type) noexcept { m_vars[type].clear(); }
-
-		template <class T>
-		void clear() { this->clear(hashof_v<T>); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void resize(size_t const count) { m_vars.resize(count); }
-		
-		void resize(hash_t type, size_t const count) { m_vars[type].resize(count); }
-
-		template <class T>
-		void resize(size_t const count) { this->resize(hashof_v<T>, count); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void reserve(size_t const count) { m_vars.reserve(count); }
-
-		void reserve(hash_t type, size_t const count) { m_vars[type].reserve(count); }
-		
-		template <class T>
-		void reserve(size_t const count) { this->reserve(hashof_v<T>, count); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void shrink_to_fit() noexcept { m_vars.shrink_to_fit(); }
-
-		void shrink_to_fit(hash_t type) noexcept { m_vars[type].shrink_to_fit(); }
-
-		template <class T>
-		void shrink_to_fit() { this->shrink_to_fit(hashof_v<T>); }
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		ML_NODISCARD auto find(hash_t type) noexcept -> catagories::optl_iterator_pair
+		ML_NODISCARD auto find(id_type type) noexcept -> catagories_type::optl_iterator_pair
 		{
 			return m_vars.find(type);
 		}
 
-		ML_NODISCARD auto find(hash_t type) const noexcept -> catagories::optl_const_iterator_pair
+		ML_NODISCARD auto find(id_type type) const noexcept -> catagories_type::optl_const_iterator_pair
 		{
 			return m_vars.find(type);
 		}
 
 		template <class T
-		> ML_NODISCARD auto find() noexcept -> catagories::optl_iterator_pair
+		> ML_NODISCARD auto find() noexcept -> catagories_type::optl_iterator_pair
 		{
-			return this->find(hashof_v<T>);
+			return this->find(make_id<T>());
 		}
 
 		template <class T
-		> ML_NODISCARD auto find() const noexcept -> catagories::optl_const_iterator_pair
+		> ML_NODISCARD auto find() const noexcept -> catagories_type::optl_const_iterator_pair
 		{
-			return this->find(hashof_v<T>);
+			return this->find(make_id<T>());
 		}
 
 		template <class ID
-		> ML_NODISCARD auto find(hash_t type, ID && id) noexcept -> category::optl_iterator_pair
+		> ML_NODISCARD auto find(id_type type, ID && id) noexcept -> category_type::optl_iterator_pair
 		{
-			return m_vars[type].find(getid(ML_forward(id)));
+			return m_vars[type].find(make_id(ML_forward(id)));
 		}
 
 		template <class ID
-		> ML_NODISCARD auto find(hash_t type, ID && id) const noexcept -> category::optl_const_iterator_pair
+		> ML_NODISCARD auto find(id_type type, ID && id) const noexcept -> category_type::optl_const_iterator_pair
 		{
 			if (auto const it{ this->find(type) }; !it) { return std::nullopt; }
-			else { return it->second->find(getid(ML_forward(id))); }
+			else { return it->second->find(make_id(ML_forward(id))); }
 		}
 
 		template <class T, class ID
-		> ML_NODISCARD auto find(ID && id) noexcept -> category::optl_iterator_pair
+		> ML_NODISCARD auto find(ID && id) noexcept -> category_type::optl_iterator_pair
 		{
-			return this->find(hashof_v<T>, ML_forward(id));
+			return this->find(make_id<T>(), ML_forward(id));
 		}
 
 		template <class T, class ID
-		> ML_NODISCARD auto find(ID && id) const noexcept -> category::optl_const_iterator_pair
+		> ML_NODISCARD auto find(ID && id) const noexcept -> category_type::optl_const_iterator_pair
 		{
-			return this->find(hashof_v<T>, ML_forward(id));
+			return this->find(make_id<T>(), ML_forward(id));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		ML_NODISCARD bool contains(hash_t type) const noexcept
+		ML_NODISCARD bool contains(id_type type) const noexcept
 		{
 			return m_vars.contains(type);
 		}
 
 		template <class T> ML_NODISCARD bool contains() const noexcept
 		{
-			return this->contains(hashof_v<T>);
+			return this->contains(make_id<T>());
 		}
 
 		template <class ID
-		> ML_NODISCARD bool contains(hash_t type, ID && id) const noexcept
+		> ML_NODISCARD bool contains(id_type type, ID && id) const noexcept
 		{
 			if (auto const it{ this->find(type) }; !it) { return false; }
-			else { return it->second->contains(getid(ML_forward(id))); }
+			else { return it->second->contains(make_id(ML_forward(id))); }
 		}
 
 		template <class T, class ID
 		> ML_NODISCARD bool contains(ID && id) const noexcept
 		{
-			return this->contains(hashof_v<T>, ML_forward(id));
+			return this->contains(make_id<T>(), ML_forward(id));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void erase(hash_t type) noexcept
+		void erase(id_type type) noexcept
 		{
 			if (auto const cat{ this->find(type) })
 			{
@@ -272,15 +283,15 @@ namespace ml
 		template <class T
 		> void erase() noexcept
 		{
-			this->erase(hashof_v<T>);
+			this->erase(make_id<T>());
 		}
 
 		template <class ID
-		> void erase(hash_t type, ID && id) noexcept
+		> void erase(id_type type, ID && id) noexcept
 		{
 			if (auto const cat{ this->find(type) })
 			{
-				if (auto const var{ cat->second->find(getid(ML_forward(id))) })
+				if (auto const var{ cat->second->find(make_id(ML_forward(id))) })
 				{
 					cat->second->erase(var->first);
 				}
@@ -290,24 +301,24 @@ namespace ml
 		template <class T, class ID
 		> void erase(ID && id) noexcept
 		{
-			this->erase(hashof_v<T>, ML_forward(id));
+			this->erase(make_id<T>(), ML_forward(id));
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ID
-		> ML_NODISCARD element & load(hash_t type, ID && id, allocator_type alloc = {}) noexcept
+		> ML_NODISCARD element_type & load(id_type type, ID && id, allocator_type alloc = {}) noexcept
 		{
-			return m_vars[type].find_or_add_fn(getid(ML_forward(id)), [&]() noexcept
+			return m_vars[type].find_or_add_fn(make_id(ML_forward(id)), [&]() noexcept
 			{
-				return memory::alloc_ref<variable>(alloc);
+				return memory::alloc_ref<variable_type>(alloc);
 			});
 		}
 
 		template <class T, class ID
-		> ML_NODISCARD element & load(ID && id, allocator_type alloc = {}) noexcept
+		> ML_NODISCARD element_type & load(ID && id, allocator_type alloc = {}) noexcept
 		{
-			return this->load(hashof_v<T>, ML_forward(id), alloc);
+			return this->load(make_id<T>(), ML_forward(id), alloc);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -341,7 +352,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class ID
-		> void reset(hash_t type, ID && id, allocator_type alloc = {}) noexcept
+		> void reset(id_type type, ID && id, allocator_type alloc = {}) noexcept
 		{
 			this->load(type, ML_forward(id), alloc)->reset();
 		}
@@ -349,7 +360,7 @@ namespace ml
 		template <class T, class ID
 		> void reset(ID && id, allocator_type alloc = {}) noexcept
 		{
-			this->reset(hashof_v<T>, ML_forward(id), alloc);
+			this->reset(make_id<T>(), ML_forward(id), alloc);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -363,7 +374,7 @@ namespace ml
 		}
 
 		template <class LHS, class RHS = LHS
-		> void swap(hash_t type, LHS && lhs, RHS && rhs, allocator_type alloc = {}) noexcept
+		> void swap(id_type type, LHS && lhs, RHS && rhs, allocator_type alloc = {}) noexcept
 		{
 			this->load(type, ML_forward(lhs), alloc)
 				->swap(*this->load(type, ML_forward(rhs), alloc));
@@ -372,14 +383,50 @@ namespace ml
 		template <class T, class LHS, class RHS = LHS
 		> void swap(LHS && lhs, RHS && rhs, allocator_type alloc = {}) noexcept
 		{
-			this->swap(hashof_v<T>, ML_forward(lhs), ML_forward(rhs), alloc);
+			this->swap(make_id<T>(), ML_forward(lhs), ML_forward(rhs), alloc);
 		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void clear() noexcept { m_vars.clear(); }
+
+		void clear(id_type type) noexcept { m_vars[type].clear(); }
+
+		template <class T
+		> void clear() { this->clear(make_id<T>()); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void resize(size_t const count) { m_vars.resize(count); }
+		
+		void resize(id_type type, size_t const count) { m_vars[type].resize(count); }
+
+		template <class T
+		> void resize(size_t const count) { this->resize(make_id<T>(), count); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void reserve(size_t const count) { m_vars.reserve(count); }
+
+		void reserve(id_type type, size_t const count) { m_vars[type].reserve(count); }
+		
+		template <class T
+		> void reserve(size_t const count) { this->reserve(make_id<T>(), count); }
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void shrink_to_fit() noexcept { m_vars.shrink_to_fit(); }
+
+		void shrink_to_fit(id_type type) noexcept { m_vars[type].shrink_to_fit(); }
+
+		template <class T
+		> void shrink_to_fit() { this->shrink_to_fit(make_id<T>()); }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
 		std::mutex m_mutex	; // 
-		catagories m_vars	; // 
+		catagories_type m_vars	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

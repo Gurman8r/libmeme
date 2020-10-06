@@ -205,7 +205,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		scoped<	window_base	>	m_impl	; // window implementation
+		unique<	window_base	>	m_impl	; // window implementation
 		window_callbacks		m_clbk	; // window callbacks
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

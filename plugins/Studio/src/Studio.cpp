@@ -25,11 +25,11 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		blackboard::ref<	ds::map<pmr::string, shared<font>>			> m_fonts		; // 
-		blackboard::ref<	ds::map<pmr::string, shared<bitmap>>		> m_images		; // 
-		blackboard::ref<	ds::map<pmr::string, shared<mesh>>			> m_meshes		; // 
-		blackboard::ref<	ds::map<pmr::string, shared<gfx::shader>>	> m_shaders		; // 
-		blackboard::ref<	ds::map<pmr::string, shared<gfx::texture>>	> m_textures	; // 
+		blackboard::handle<	ds::map<pmr::string, shared<font>>			> m_fonts		; // 
+		blackboard::handle<	ds::map<pmr::string, shared<bitmap>>		> m_images		; // 
+		blackboard::handle<	ds::map<pmr::string, shared<mesh>>			> m_meshes		; // 
+		blackboard::handle<	ds::map<pmr::string, shared<gfx::shader>>	> m_shaders		; // 
+		blackboard::handle<	ds::map<pmr::string, shared<gfx::texture>>	> m_textures	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -79,10 +79,13 @@ namespace ml
 
 		void on_client_enter(client_enter_event const & ev)
 		{
-			auto const mem	{ get_memory() };
-			auto const io	{ get_io() };
-
-			m_fonts["consolas"] = mem->make_ref<font>(io->path2("assets/fonts/clacon.ttf"));
+			if (auto icon = m_images["icon"] = get_memory()->make_ref<bitmap>
+			(
+				get_io()->path2("assets/textures/icon.png"))
+			)
+			{
+				get_window()->set_icon(icon->width(), icon->height(), icon->data());
+			}
 		}
 
 		void on_client_exit(client_exit_event const & ev)

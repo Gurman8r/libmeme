@@ -165,7 +165,7 @@ namespace ml
 
 		gui::console m_console{};
 
-		scoped<ax::NodeEditor::EditorContext> m_node_editor{ ax::NodeEditor::CreateEditor() };
+		unique<ax::NodeEditor::EditorContext> m_node_editor{ ax::NodeEditor::CreateEditor() };
 
 		gui::plot_controller m_plots
 		{
@@ -269,13 +269,6 @@ namespace ml
 			// load stuff, etc...
 			auto const mem	{ ev->mem };
 			auto const io	{ ev->io };
-			auto const win	{ ev->window };
-
-			// ICON
-			if (bitmap const icon{ io->path2("assets/textures/icon.png"), false })
-			{
-				win->set_icon(icon.width(), icon.height(), icon.data());
-			}
 
 			// FRAMEBUFFERS
 			{

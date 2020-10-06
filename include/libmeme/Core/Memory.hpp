@@ -127,11 +127,11 @@ namespace ml
 
 	// scoped pointer ( std::unique_ptr<T, Dx> )
 	template <class T, class Dx = default_delete<T>
-	> ML_alias scoped = typename std::unique_ptr<T, Dx>;
+	> ML_alias unique = typename std::unique_ptr<T, Dx>;
 
 	// manual pointer ( std::unique_ptr<T, no_delete> )
 	template <class T
-	> ML_alias manual = typename scoped<T, no_delete>;
+	> ML_alias manual = typename unique<T, no_delete>;
 
 	// shared pointer ( std::shared_ptr<T> )
 	template <class T
@@ -300,7 +300,7 @@ namespace ml
 
 		// make unique
 		template <class T, class Dx = default_delete<T>, class ... Args
-		> ML_NODISCARD static scoped<T, Dx> make_scope(Args && ... args) noexcept
+		> ML_NODISCARD static unique<T, Dx> make_scope(Args && ... args) noexcept
 		{
 			return { memory::new_object<T>(ML_forward(args)...), Dx{} };
 		}
