@@ -1,15 +1,22 @@
 #ifndef _ML_CLIENT_CONTEXT_HPP_
 #define _ML_CLIENT_CONTEXT_HPP_
 
+#include <libmeme/Client/Export.hpp>
 #include <libmeme/Core/Events.hpp>
-#include <libmeme/Core/Blackboard.hpp>
-#include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Client/LoopSystem.hpp>
-#include <libmeme/Client/Python.hpp>
-#include <libmeme/Graphics/RenderWindow.hpp>
+#include <libmeme/Core/Timer.hpp>
+#include <libmeme/Core/Matrix.hpp>
+#include <libmeme/Window/Input.hpp>
 
 namespace ml
 {
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	struct blackboard;
+	struct gui_manager;
+	struct loop_system;
+	struct py_interpreter;
+	struct render_window;
+
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// client io
@@ -84,7 +91,7 @@ namespace ml
 			: event_listener{ ML_check(context)->bus }
 			, m_context		{ context }
 		{
-			ML_assert_msg(m_context->bus == get_bus(), "BUS MISMATCH");
+			ML_assert_msg(get_bus() == m_context->bus, "BUS MISMATCH");
 		}
 
 		virtual ~client_object() noexcept override = default;

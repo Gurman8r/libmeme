@@ -3,7 +3,7 @@
 
 #include <libmeme/Client/Export.hpp>
 #include <libmeme/Core/Events.hpp>
-#include <libmeme/Core/Duration.hpp>
+#include <libmeme/Core/Timer.hpp>
 
 // WIP
 

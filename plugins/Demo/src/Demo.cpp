@@ -1,15 +1,20 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/Blackboard.hpp>
 #include <libmeme/Core/ECS.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Client/PluginManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
-#include <libmeme/Client/ImGui.hpp>
+#include <libmeme/Client/GuiManager.hpp>
 #include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Client/ImGui.hpp>
+#include <libmeme/Client/LoopSystem.hpp>
+#include <libmeme/Client/Python.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 #include <libmeme/Engine/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
@@ -759,7 +764,7 @@ namespace ml
 				}
 				else
 				{
-					get_python()->do_string(util::detokenize(args));
+					py::eval(util::detokenize(args).c_str());
 				}
 			},
 			{

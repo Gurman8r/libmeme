@@ -1,14 +1,19 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <libmeme/Core/Blackboard.hpp>
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Client/PluginManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
-#include <libmeme/Client/ImGui.hpp>
+#include <libmeme/Client/GuiManager.hpp>
 #include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Client/ImGui.hpp>
+#include <libmeme/Client/LoopSystem.hpp>
+#include <libmeme/Client/Python.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 #include <libmeme/Engine/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
@@ -20,7 +25,20 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		blackboard::ref<	ds::map<pmr::string, shared<font>>			> m_fonts		; // 
+		blackboard::ref<	ds::map<pmr::string, shared<bitmap>>		> m_images		; // 
+		blackboard::ref<	ds::map<pmr::string, shared<mesh>>			> m_meshes		; // 
+		blackboard::ref<	ds::map<pmr::string, shared<gfx::shader>>	> m_shaders		; // 
+		blackboard::ref<	ds::map<pmr::string, shared<gfx::texture>>	> m_textures	; // 
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		studio(plugin_manager * manager, void * user) noexcept : plugin{ manager, user }
+			, m_fonts	{ get_vars(), "fonts" }
+			, m_images	{ get_vars(), "images" }
+			, m_meshes	{ get_vars(), "meshes" }
+			, m_shaders	{ get_vars(), "shaders" }
+			, m_textures{ get_vars(), "textures" }
 		{
 			subscribe<client_enter_event>();
 			subscribe<client_exit_event>();
@@ -61,16 +79,14 @@ namespace ml
 
 		void on_client_enter(client_enter_event const & ev)
 		{
-			auto & tex = get_vars()->new_map<pmr::string, shared<gfx::texture>>("textures");
+			auto const mem	{ get_memory() };
+			auto const io	{ get_io() };
 
-			get_vars()->new_batch<int>(get_memory()->get_allocator(), "foo");
+			m_fonts["consolas"] = mem->make_ref<font>(io->path2("assets/fonts/clacon.ttf"));
 		}
 
 		void on_client_exit(client_exit_event const & ev)
 		{
-			get_vars()->del_batch<int>("foo");
-
-			get_vars()->del_map<pmr::string, shared<gfx::texture>>("textures");
 		}
 
 		void on_client_update(client_update_event const & ev)

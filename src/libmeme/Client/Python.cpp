@@ -1,5 +1,5 @@
 #include <libmeme/Client/Python.hpp>
-#include <libmeme/Client/PluginManager.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 namespace ml
 {

@@ -1,7 +1,12 @@
-#include <libmeme/Client/PluginManager.hpp>
-#include <libmeme/Engine/SceneManager.hpp>
+#include <libmeme/Core/Blackboard.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
+#include <libmeme/Client/LoopSystem.hpp>
+#include <libmeme/Client/GuiManager.hpp>
+#include <libmeme/Client/PluginManager.hpp>
+#include <libmeme/Client/Python.hpp>
+#include <libmeme/Engine/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
+#include <libmeme/Graphics/RenderWindow.hpp>
 
 using namespace ml;
 using namespace ml::byte_literals;
