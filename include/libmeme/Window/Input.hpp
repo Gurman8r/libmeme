@@ -1,7 +1,7 @@
 #ifndef _ML_INPUT_HPP_
 #define _ML_INPUT_HPP_
 
-#include <libmeme/Common.hpp>
+#include <libmeme/Core/Array.hpp>
 
 namespace ml
 {
@@ -175,6 +175,17 @@ namespace ml
 		input_state_repeat	, // repeat  | hi -> hi
 
 		input_state_MAX
+	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	ML_alias keyboard_state = typename ds::array<int32_t, key_code_MAX>;
+
+	ML_alias mouse_state = typename ds::array<int32_t, mouse_button_MAX>;
+
+	struct input_axis final
+	{
+		// WIP
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

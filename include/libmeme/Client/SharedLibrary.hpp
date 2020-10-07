@@ -2,6 +2,7 @@
 #define _ML_SHARED_LIBRARY_HPP_
 
 #include <libmeme/Client/Export.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Memory.hpp>
 
 namespace ml

@@ -24,16 +24,16 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void plugin_manager::on_event(event const & value)
+	void plugin_manager::on_event(event && value)
 	{
 		switch (value)
 		{
 		case client_enter_event::ID: {
-			auto const & ev{ (client_enter_event const &)value };
+			auto && ev{ (client_enter_event &&)value };
 		} break;
 
 		case client_exit_event::ID: {
-			auto const & ev{ (client_exit_event const &)value };
+			auto && ev{ (client_exit_event &&)value };
 		} break;
 		}
 	}

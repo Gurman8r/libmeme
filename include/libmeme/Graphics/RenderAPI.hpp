@@ -1,9 +1,10 @@
 #ifndef _ML_RENDER_API_HPP_
 #define _ML_RENDER_API_HPP_
 
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Graphics/Export.hpp>
 #include <libmeme/Graphics/Bitmap.hpp>
-#include <libmeme/Window/WindowContext.hpp>
+#include <libmeme/Window/WindowAPI.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -601,7 +602,7 @@ namespace ml::gfx
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// device
+// render device
 namespace ml::gfx
 {
 	// device data_desc settings

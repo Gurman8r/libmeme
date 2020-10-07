@@ -34,7 +34,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		allocator_type get_allocator() const override;
+
 		int_rect get_bounds() const override;
+
+		window_callbacks const & get_callbacks() const override;
 
 		cstring get_clipboard() const override;
 
@@ -112,7 +116,7 @@ namespace ml
 
 		void set_focus_on_show(bool value) override;
 		
-		void set_icon(size_t w, size_t h, size_t n, byte_t const * p) override;
+		void set_icons(size_t w, size_t h, size_t n, byte_t const * p) override;
 
 		void set_input_mode(int32_t mode, int32_t value) override;
 
@@ -134,6 +138,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static context_manager const & default_manager();
+
 		static int32_t extension_supported(cstring value);
 
 		static window_handle get_context_current();
@@ -153,8 +159,6 @@ namespace ml
 		static void swap_buffers(window_handle value);
 
 		static void swap_interval(int32_t value);
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p);
 
@@ -186,10 +190,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		pmr::string		m_title		;
-		GLFWwindow	*	m_window	;
-		GLFWmonitor	*	m_monitor	;
-		int32_t			m_hints		;
+		allocator_type		m_alloc		; // 
+		pmr::string			m_title		; // 
+		GLFWwindow	*		m_window	; // 
+		GLFWmonitor	*		m_monitor	; // 
+		int32_t				m_hints		; // 
+		window_callbacks	m_clbk		; //
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

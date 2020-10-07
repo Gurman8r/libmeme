@@ -1,5 +1,5 @@
-#include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Client/ImGuiContext.hpp>
+#include <libmeme/Client/ImGuiEvents.hpp>
 #include <libmeme/Core/Events.hpp>
 #include <libmeme/Core/FileUtility.hpp>
 #include <libmeme/Core/ParserUtil.hpp>
@@ -14,7 +14,7 @@
 
 namespace ml
 {
-	gui_manager::gui_manager(event_bus * bus, render_window * win, allocator_type alloc)
+	imgui_context::imgui_context(event_bus * bus, render_window * win, allocator_type alloc)
 		: m_win			{ win }
 		, m_bus			{ bus }
 		, m_ctx			{}
@@ -46,7 +46,7 @@ namespace ml
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	}
 	
-	gui_manager::~gui_manager()
+	imgui_context::~imgui_context()
 	{
 		shutdown();
 
@@ -55,7 +55,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_manager::startup(bool install_callbacks)
+	bool imgui_context::startup(bool install_callbacks)
 	{
 		return
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
@@ -68,7 +68,7 @@ namespace ml
 			;
 	}
 
-	void gui_manager::shutdown()
+	void imgui_context::shutdown()
 	{
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_Shutdown();
@@ -78,7 +78,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::new_frame()
+	void imgui_context::new_frame()
 	{
 #if defined(ML_IMPL_WINDOW_GLFW) && defined(ML_IMPL_RENDERER_OPENGL)
 		ImGui_ImplOpenGL3_NewFrame();
@@ -121,7 +121,7 @@ namespace ml
 				// fire docking event if nodes are empty
 				if (m_dockspace.nodes.empty())
 				{
-					m_bus->fire<gui_dockspace_event>(&m_dockspace);
+					m_bus->fire<imgui_dockspace_event>(&m_dockspace);
 				}
 
 				ImGui::DockSpace(
@@ -137,16 +137,16 @@ namespace ml
 		// MENUBAR
 		if (m_menubar.enabled && ImGui::BeginMainMenuBar())
 		{
-			m_bus->fire<gui_menubar_event>(&m_menubar);
+			m_bus->fire<imgui_menubar_event>(&m_menubar);
 
 			ImGui::EndMainMenuBar();
 		}
 
 		// MAIN GUI
-		m_bus->fire<gui_render_event>(this);
+		m_bus->fire<imgui_render_event>(this);
 	}
 
-	void gui_manager::render_frame()
+	void imgui_context::render_frame()
 	{
 		ImGui::Render();
 
@@ -171,29 +171,29 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	void gui_manager::imgui_demo(bool * p_open)
+	void imgui_context::imgui_demo(bool * p_open)
 	{
 		ImGui::ShowDemoWindow(p_open);
 	}
 
-	void gui_manager::imgui_metrics(bool * p_open)
+	void imgui_context::imgui_metrics(bool * p_open)
 	{
 		ImGui::ShowMetricsWindow(p_open);
 	}
 
-	void gui_manager::imgui_about(bool * p_open)
+	void imgui_context::imgui_about(bool * p_open)
 	{
 		ImGui::ShowAboutWindow(p_open);
 	}
 
-	void gui_manager::imgui_style_editor(ImGuiStyle * ref)
+	void imgui_context::imgui_style_editor(ImGuiStyle * ref)
 	{
 		ImGui::ShowStyleEditor(ref);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	uint32_t gui_manager::dockspace::begin_builder()
+	uint32_t imgui_context::dockspace::begin_builder()
 	{
 		if (uint32_t root{ ImGui::GetID(title.c_str()) }
 		; ImGui::DockBuilderGetNode(root)) { return NULL; }
@@ -205,13 +205,13 @@ namespace ml
 		}
 	}
 
-	uint32_t gui_manager::dockspace::end_builder(uint32_t root)
+	uint32_t imgui_context::dockspace::end_builder(uint32_t root)
 	{
 		if (root) { ImGui::DockBuilderFinish(root); }
 		return root;
 	}
 
-	uint32_t gui_manager::dockspace::dock(cstring name, uint32_t id)
+	uint32_t imgui_context::dockspace::dock(cstring name, uint32_t id)
 	{
 		if (!name || !id) { return NULL; }
 		else
@@ -221,29 +221,29 @@ namespace ml
 		}
 	}
 
-	uint32_t gui_manager::dockspace::dock(gui::form const & w, uint32_t id)
+	uint32_t imgui_context::dockspace::dock(gui::form const & w, uint32_t id)
 	{
 		return dock(w.title, id);
 	}
 
-	uint32_t gui_manager::dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	uint32_t imgui_context::dockspace::split(uint32_t i, uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		return nodes[(size_t)i] = split(id, dir, ratio, value);
 	}
 
-	uint32_t gui_manager::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
+	uint32_t imgui_context::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * value)
 	{
 		return split(id, dir, ratio, nullptr, value);
 	}
 
-	uint32_t gui_manager::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
+	uint32_t imgui_context::dockspace::split(uint32_t id, int32_t dir, float_t ratio, uint32_t * out, uint32_t * value)
 	{
 		return ImGui::DockBuilderSplitNode(id, dir, ratio, out, value);
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	bool gui_manager::load_style(fs::path const & path)
+	bool imgui_context::load_style(fs::path const & path)
 	{
 		using namespace util;
 	

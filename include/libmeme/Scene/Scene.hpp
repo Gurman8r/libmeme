@@ -1,7 +1,7 @@
 #ifndef _ML_SCENE_HPP_
 #define _ML_SCENE_HPP_
 
-#include <libmeme/Engine/Export.hpp>
+#include <libmeme/Scene/Export.hpp>
 #include <libmeme/Core/Memory.hpp>
 #include <libmeme/Core/Matrix.hpp>
 #include <entt/entt.hpp>
@@ -11,7 +11,7 @@ namespace ml
 	struct entity;
 	struct scene_manager;
 
-	struct ML_ENGINE_API scene final : trackable, non_copyable
+	struct ML_SCENE_API scene final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

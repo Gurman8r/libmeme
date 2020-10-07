@@ -38,7 +38,7 @@ namespace ml
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-	ds::set<video_mode> const & video_mode::get_fullscreen_modes()
+	pmr::vector<video_mode> const & video_mode::get_fullscreen_modes()
 	{
 		static auto temp{ std::invoke([&temp = ds::set<video_mode>{}]()
 		{
@@ -58,7 +58,7 @@ namespace ml
 #endif
 			return temp;
 		}) };
-		return temp;
+		return temp.elements();
 	}
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

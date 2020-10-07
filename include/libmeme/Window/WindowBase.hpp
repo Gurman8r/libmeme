@@ -14,7 +14,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual ~window_base() override = default;
+		virtual ~window_base() noexcept override = default;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -30,7 +30,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		virtual allocator_type get_allocator() const = 0;
+
 		virtual int_rect get_bounds() const = 0;
+
+		virtual window_callbacks const & get_callbacks() const = 0;
 
 		virtual cstring get_clipboard() const = 0;
 
@@ -113,7 +117,12 @@ namespace ml
 
 		virtual void set_focus_on_show(bool) = 0;
 
-		virtual void set_icon(size_t, size_t, size_t, byte_t const *) = 0;
+		virtual void set_icons(size_t, size_t, size_t, byte_t const *) = 0;
+
+		void set_icon(size_t w, size_t h, byte_t const * p) noexcept
+		{
+			set_icons(w, h, 1, p);
+		}
 
 		virtual void set_input_mode(int32_t, int32_t) = 0;
 
@@ -135,6 +144,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		static context_manager const & default_manager() = delete;
+
 		static int32_t extension_supported(cstring) = delete;
 
 		static window_handle get_context_current() = delete;
@@ -154,8 +165,6 @@ namespace ml
 		static void swap_buffers(window_handle) = delete;
 
 		static void swap_interval(int32_t) = delete;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		static cursor_handle create_custom_cursor(size_t, size_t, byte_t const *) = delete;
 
@@ -183,6 +192,28 @@ namespace ml
 		virtual window_refresh_callback				set_refresh_callback			(window_refresh_callback) = 0;
 		virtual window_resize_callback				set_resize_callback				(window_resize_callback) = 0;
 		virtual window_scroll_callback				set_scroll_callback				(window_scroll_callback) = 0;
+
+		void clear_callbacks() noexcept
+		{
+			set_char_callback				(nullptr);
+			set_char_mods_callback			(nullptr);
+			set_close_callback				(nullptr);
+			set_content_scale_callback		(nullptr);
+			set_cursor_enter_callback		(nullptr);
+			set_cursor_position_callback	(nullptr);
+			set_drop_callback				(nullptr);
+			set_error_callback				(nullptr);
+			set_focus_callback				(nullptr);
+			set_framebuffer_resize_callback	(nullptr);
+			set_iconify_callback			(nullptr);
+			set_key_callback				(nullptr);
+			set_maximize_callback			(nullptr);
+			set_mouse_callback				(nullptr);
+			set_position_callback			(nullptr);
+			set_refresh_callback			(nullptr);
+			set_resize_callback				(nullptr);
+			set_scroll_callback				(nullptr);
+		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

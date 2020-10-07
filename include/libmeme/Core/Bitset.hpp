@@ -1,5 +1,5 @@
-#ifndef _ML_BIT_SET_HPP_
-#define _ML_BIT_SET_HPP_
+#ifndef _ML_BITSET_HPP_
+#define _ML_BITSET_HPP_
 
 #include <libmeme/Core/Array.hpp>
 
@@ -249,4 +249,4 @@ namespace ml::ds
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
-#endif // !_ML_BIT_SET_HPP_
+#endif // !_ML_BITSET_HPP_

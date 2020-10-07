@@ -4,17 +4,16 @@
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Client/PluginManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
-#include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Client/ImGuiContext.hpp>
+#include <libmeme/Client/ImGuiEvents.hpp>
 #include <libmeme/Client/ImGui.hpp>
-#include <libmeme/Client/LoopSystem.hpp>
-#include <libmeme/Client/Python.hpp>
+#include <libmeme/Embed/Python.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Engine/SceneManager.hpp>
+#include <libmeme/Scene/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -44,9 +43,9 @@ namespace ml
 			subscribe<client_exit_event>();
 			subscribe<client_update_event>();
 
-			subscribe<gui_dockspace_event>();
-			subscribe<gui_menubar_event>();
-			subscribe<gui_render_event>();
+			subscribe<imgui_dockspace_event>();
+			subscribe<imgui_menubar_event>();
+			subscribe<imgui_render_event>();
 
 			subscribe<window_key_event>();
 			subscribe<window_mouse_event>();
@@ -57,74 +56,75 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_event(event const & value) override
+		void on_event(event && value) override
 		{
 			switch (value)
 			{
-			case client_enter_event				::ID: return on_client_enter((client_enter_event const &)value);
-			case client_exit_event				::ID: return on_client_exit((client_exit_event const &)value);
-			case client_update_event			::ID: return on_client_update((client_update_event const &)value);
+			case client_enter_event				::ID: return on_client_enter((client_enter_event &&)value);
+			case client_exit_event				::ID: return on_client_exit((client_exit_event &&)value);
+			case client_update_event			::ID: return on_client_update((client_update_event &&)value);
 			
-			case gui_dockspace_event			::ID: return on_imgui_dockspace((gui_dockspace_event const &)value);
-			case gui_menubar_event				::ID: return on_imgui_menubar((gui_menubar_event const &)value);
-			case gui_render_event				::ID: return on_imgui_render((gui_render_event const &)value);
+			case imgui_dockspace_event			::ID: return on_imgui_dockspace((imgui_dockspace_event &&)value);
+			case imgui_menubar_event			::ID: return on_imgui_menubar((imgui_menubar_event &&)value);
+			case imgui_render_event				::ID: return on_imgui_render((imgui_render_event &&)value);
 			
-			case window_key_event				::ID: return on_window_key((window_key_event const &)value);
-			case window_mouse_event				::ID: return on_window_mouse((window_mouse_event const &)value);
-			case window_cursor_position_event	::ID: return on_window_cursor_position((window_cursor_position_event const &)value);
+			case window_key_event				::ID: return on_window_key((window_key_event &&)value);
+			case window_mouse_event				::ID: return on_window_mouse((window_mouse_event &&)value);
+			case window_cursor_position_event	::ID: return on_window_cursor_position((window_cursor_position_event &&)value);
 			}
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_client_enter(client_enter_event const & ev)
+		void on_client_enter(client_enter_event && ev)
 		{
-			if (auto & icon = (m_images["icon"] = get_memory()->make_ref<bitmap>
+			// set icon
+			if (auto & i = m_images["icon"] = get_memory()->make_ref<bitmap>
 			(
 				get_io()->path2("assets/textures/icon.png")
-			)))
+			))
 			{
-				get_window()->set_icon(icon->width(), icon->height(), 1, icon->data());
+				get_window()->set_icon(i->width(), i->height(), i->data());
 			}
 		}
 
-		void on_client_exit(client_exit_event const & ev)
+		void on_client_exit(client_exit_event && ev)
 		{
 		}
 
-		void on_client_update(client_update_event const & ev)
-		{
-		}
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		void on_imgui_dockspace(gui_dockspace_event const & ev)
-		{
-		}
-
-		void on_imgui_menubar(gui_menubar_event const & ev)
-		{
-		}
-
-		void on_imgui_render(gui_render_event const & ev)
+		void on_client_update(client_update_event && ev)
 		{
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_window_key(window_key_event const & ev)
+		void on_imgui_dockspace(imgui_dockspace_event && ev)
 		{
-			get_io()->input.keys[ev.key] = ev.action;
 		}
 
-		void on_window_mouse(window_mouse_event const & ev)
+		void on_imgui_menubar(imgui_menubar_event && ev)
 		{
-			get_io()->input.mouse[ev.button] = ev.action;
 		}
 
-		void on_window_cursor_position(window_cursor_position_event const & ev)
+		void on_imgui_render(imgui_render_event && ev)
 		{
-			get_io()->input.cursor = { ev.x, ev.y };
+		}
+
+		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+		void on_window_key(window_key_event && ev)
+		{
+			get_io()->keyboard[ev.key] = ev.action;
+		}
+
+		void on_window_mouse(window_mouse_event && ev)
+		{
+			get_io()->mouse[ev.button] = ev.action;
+		}
+
+		void on_window_cursor_position(window_cursor_position_event && ev)
+		{
+			get_io()->cursor = { ev.x, ev.y };
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -139,7 +139,7 @@ extern "C"
 	{
 		return manager->get_memory()->new_object<ml::studio>(manager, user);
 	}
-	
+
 	ML_PLUGIN_API void ml_plugin_detach(ml::plugin_manager * manager, ml::plugin * ptr)
 	{
 		manager->get_memory()->delete_object((ml::studio *)ptr);

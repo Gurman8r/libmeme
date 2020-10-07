@@ -12,7 +12,7 @@ namespace ml
 		window(allocator_type alloc = {}) noexcept;
 
 		window(window_settings const & settings, allocator_type alloc = {}) noexcept;
-
+		
 		virtual ~window() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -29,7 +29,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD allocator_type get_allocator() const noexcept final;
+
 		ML_NODISCARD int_rect get_bounds() const noexcept final;
+
+		ML_NODISCARD window_callbacks const & get_callbacks() const noexcept final;
 
 		ML_NODISCARD cstring get_clipboard() const noexcept final;
 
@@ -107,7 +111,7 @@ namespace ml
 
 		void set_focus_on_show(bool value) noexcept final;
 		
-		void set_icon(size_t w, size_t h, size_t n, byte_t const * p) noexcept final;
+		void set_icons(size_t w, size_t h, size_t n, byte_t const * p) noexcept final;
 
 		void set_input_mode(int32_t mode, int32_t value) noexcept final;
 		
@@ -129,6 +133,8 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+		ML_NODISCARD static context_manager const & default_manager() noexcept;
+
 		ML_NODISCARD static int32_t extension_supported(cstring value) noexcept;
 
 		ML_NODISCARD static window_handle get_context_current() noexcept;
@@ -148,8 +154,6 @@ namespace ml
 		static void swap_buffers(window_handle value) noexcept;
 
 		static void swap_interval(int32_t value) noexcept;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		ML_NODISCARD static cursor_handle create_custom_cursor(size_t w, size_t h, byte_t const * p) noexcept;
 
@@ -178,35 +182,10 @@ namespace ml
 		window_resize_callback				set_resize_callback				(window_resize_callback				fn) noexcept final;
 		window_scroll_callback				set_scroll_callback				(window_scroll_callback				fn) noexcept final;
 
-		ML_NODISCARD auto get_callbacks() noexcept -> window_callbacks const & { return m_clbk; }
-
-		void clear_callbacks() noexcept
-		{
-			set_char_callback				(nullptr);
-			set_char_mods_callback			(nullptr);
-			set_close_callback				(nullptr);
-			set_cursor_enter_callback		(nullptr);
-			set_cursor_position_callback	(nullptr);
-			set_content_scale_callback		(nullptr);
-			set_drop_callback				(nullptr);
-			set_error_callback				(nullptr);
-			set_focus_callback				(nullptr);
-			set_framebuffer_resize_callback	(nullptr);
-			set_iconify_callback			(nullptr);
-			set_key_callback				(nullptr);
-			set_maximize_callback			(nullptr);
-			set_mouse_callback				(nullptr);
-			set_position_callback			(nullptr);
-			set_refresh_callback			(nullptr);
-			set_resize_callback				(nullptr);
-			set_scroll_callback				(nullptr);
-		}
-
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		unique<	window_base	>	m_impl	; // window implementation
-		window_callbacks		m_clbk	; // window callbacks
+		unique<	window_base	> m_impl; // window implementation
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

@@ -1,6 +1,7 @@
 #ifndef _ML_EVENTS_HPP_
 #define _ML_EVENTS_HPP_
 
+#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Memory.hpp>
 
 // event declarator helper
@@ -19,16 +20,23 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	
 	// EVENT BASE
-	struct ML_NODISCARD event : non_copyable
+	struct event : non_copyable
 	{
-		constexpr operator hash_t() const noexcept { return m_id; }
+		ML_NODISCARD bool consume() noexcept { return !m_used && (m_used = true); }
+
+		ML_NODISCARD bool used() const noexcept { return m_used; }
+
+		ML_NODISCARD explicit constexpr operator bool() const noexcept { return !m_used; }
+
+		ML_NODISCARD constexpr operator hash_t() const noexcept { return m_id; }
 
 	protected:
-		constexpr explicit event(hash_t id) noexcept : m_id{ id }
+		constexpr explicit event(hash_t id) noexcept : m_id{ id }, m_used{}
 		{
 		}
 
-		hash_t const m_id;
+		hash_t const	m_id	; // 
+		bool			m_used	; // 
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -54,7 +62,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		explicit event_listener(event_bus * bus) noexcept : m_bus{ bus }
+		explicit event_listener(event_bus * bus, bool enabled = true) noexcept
+			: m_bus		{ bus }
+			, m_enabled	{ enabled }
 		{
 			ML_assert_msg(bus, "INVALID EVENT BUS");
 		}
@@ -63,9 +73,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void on_event(event const &) = 0;
+		virtual void on_event(event &&) = 0;
 
 		ML_NODISCARD event_bus * get_bus() const noexcept { return m_bus; }
+
+		ML_NODISCARD bool is_listening() const noexcept { return m_enabled; }
+
+		bool enable_listening(bool value) noexcept { return m_enabled = value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -96,9 +110,8 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		friend event_bus;
-
-		event_bus * const m_bus;
+		event_bus * const	m_bus		; // 
+		bool				m_enabled	; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
@@ -110,9 +123,9 @@ namespace ml
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
-
-		using category = typename ds::set<event_listener *>;
+		using allocator_type	= typename pmr::polymorphic_allocator<byte_t>;
+		using category_type		= typename ds::set<event_listener *>;
+		using categories_type	= typename ds::map<hash_t, category_type>;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -124,13 +137,17 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void fire(event const & ev) noexcept
+		void fire(event && ev) noexcept
 		{
 			if (auto const cat{ m_categories.find(ev) })
 			{
 				for (auto const & listener : (*cat->second))
 				{
-					listener->on_event(ev);
+					if (!ev) { return; }
+					else if (listener->is_listening())
+					{
+						listener->on_event(ML_forward(ev));
+					}
 				}
 			}
 		}
@@ -148,7 +165,7 @@ namespace ml
 		bool add_listener(hash_t id, event_listener * value) noexcept
 		{
 			return value
-				&& this == value->m_bus
+				&& this == value->get_bus()
 				&& m_categories[id].insert(value).second;
 		}
 
@@ -164,7 +181,7 @@ namespace ml
 
 		void remove_listener(hash_t id, event_listener * value) noexcept
 		{
-			if (!value || (this != value->m_bus)) { return; }
+			if (!value || (this != value->get_bus())) { return; }
 
 			if (auto const cat{ m_categories.find(id) })
 			{
@@ -189,7 +206,7 @@ namespace ml
 		{
 			if (!value) { return; }
 
-			m_categories.for_each([&](hash_t, category & cat) noexcept
+			m_categories.for_each([&](hash_t, category_type & cat) noexcept
 			{
 				if (auto const listener{ cat.find(value) }; listener != cat.end())
 				{
@@ -201,7 +218,7 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		ds::map<hash_t, category> m_categories{}; // categories
+		categories_type m_categories{}; // categories
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

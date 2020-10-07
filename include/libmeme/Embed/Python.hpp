@@ -5,7 +5,7 @@
 
 #include <libmeme/Core/Matrix.hpp>
 #include <libmeme/Core/Memory.hpp>
-#include <libmeme/Client/Export.hpp>
+#include <libmeme/Embed/Export.hpp>
 
 // python
 #define HAVE_SNPRINTF
@@ -49,17 +49,23 @@ namespace ml
 {
 	namespace py = pybind11;
 
-	struct ML_CLIENT_API py_interpreter final : trackable, non_copyable
+	struct client_context;
+
+	struct ML_EMBED_API python_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		py_interpreter(pmr::memory_resource * mres, fs::path const & name, fs::path const & home);
+		python_context(client_context * context);
 
-		~py_interpreter() noexcept;
+		~python_context() noexcept override;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t do_file(cstring path) noexcept;
+		static int32_t do_file(cstring path) noexcept
+		{
+			ML_assert(Py_IsInitialized());
+			return PyRun_SimpleFileExFlags(std::fopen(path, "r"), path, true, nullptr);
+		}
 
 		static int32_t do_file(fs::path const & path) noexcept
 		{
@@ -68,7 +74,11 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static int32_t do_string(cstring str) noexcept;
+		static int32_t do_string(cstring str) noexcept
+		{
+			ML_assert(Py_IsInitialized());
+			return PyRun_SimpleStringFlags(str, nullptr);
+		}
 
 		static int32_t do_string(pmr::string const & str) noexcept
 		{

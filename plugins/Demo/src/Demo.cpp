@@ -5,17 +5,16 @@
 #include <libmeme/Core/StreamSniper.hpp>
 #include <libmeme/Client/PluginManager.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
-#include <libmeme/Client/GuiManager.hpp>
-#include <libmeme/Client/GuiEvents.hpp>
+#include <libmeme/Client/ImGuiContext.hpp>
+#include <libmeme/Client/ImGuiEvents.hpp>
 #include <libmeme/Client/ImGui.hpp>
-#include <libmeme/Client/LoopSystem.hpp>
-#include <libmeme/Client/Python.hpp>
+#include <libmeme/Embed/Python.hpp>
 #include <libmeme/Graphics/Font.hpp>
 #include <libmeme/Graphics/Mesh.hpp>
 #include <libmeme/Graphics/Shader.hpp>
 #include <libmeme/Graphics/Renderer.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
-#include <libmeme/Engine/SceneManager.hpp>
+#include <libmeme/Scene/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -173,7 +172,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame time"
 				, []() noexcept { return "%.3f ms/frame"; }
-				, [io = get_io()]() noexcept { return 1000.f / io->fps.rate; }
+				, [io = get_io()]() noexcept { return 1000.f / io->fps_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 
@@ -181,7 +180,7 @@ namespace ml
 				, gui::plot::histogram
 				, "##frame rate"
 				, []() noexcept { return "%.1f fps"; }
-				, [io = get_io()]() noexcept { return io->fps.rate; }
+				, [io = get_io()]() noexcept { return io->fps_rate; }
 				, vec2{ 0.f, 64.f }
 				, vec2{ FLT_MAX, FLT_MAX }),
 		};
@@ -207,33 +206,33 @@ namespace ml
 
 		demo(plugin_manager * manager, void * user) noexcept : plugin{ manager, user }
 		{
-			subscribe<	client_enter_event		>();
-			subscribe<	client_update_event		>();
+			subscribe<client_enter_event>();
+			subscribe<client_update_event>();
 
-			subscribe<	gui_dockspace_event		>();
-			subscribe<	gui_menubar_event	>();
-			subscribe<	gui_render_event		>();
+			subscribe<imgui_dockspace_event>();
+			subscribe<imgui_menubar_event>();
+			subscribe<imgui_render_event>();
 
-			subscribe<	window_key_event		>();
-			subscribe<	window_mouse_event		>();
-			subscribe<	window_cursor_position_event	>();
+			subscribe<window_key_event>();
+			subscribe<window_mouse_event>();
+			subscribe<window_cursor_position_event>();
 		}
 
 		~demo() noexcept override {}
 
-		void on_event(event const & value) override
+		void on_event(event && value) override
 		{
 			switch (value)
 			{
-			case client_enter_event	::ID: return on_client_enter	((client_enter_event const &)value);
-			case client_update_event::ID: return on_client_update	((client_update_event const &)value);
+			case client_enter_event		::ID: return on_client_enter	((client_enter_event &&)value);
+			case client_update_event	::ID: return on_client_update	((client_update_event &&)value);
 			
-			case gui_dockspace_event::ID: return on_imgui_dockspace	((gui_dockspace_event const &)value);
-			case gui_menubar_event	::ID: return on_imgui_menubar	((gui_menubar_event const &)value);
-			case gui_render_event	::ID: return on_imgui_render	((gui_render_event const &)value);
+			case imgui_dockspace_event	::ID: return on_imgui_dockspace	((imgui_dockspace_event &&)value);
+			case imgui_menubar_event	::ID: return on_imgui_menubar	((imgui_menubar_event &&)value);
+			case imgui_render_event		::ID: return on_imgui_render	((imgui_render_event &&)value);
 			
 			case window_key_event::ID: {
-				switch (auto const & ev{ (window_key_event const &)value }; ev.key)
+				switch (auto && ev{ (window_key_event &&)value }; ev.key)
 				{
 				case key_code_w: {
 					switch (ev.action)
@@ -247,7 +246,7 @@ namespace ml
 			} break;
 
 			case window_mouse_event::ID: {
-				switch (auto const & ev{ (window_mouse_event const &)value }; ev.button)
+				switch (auto && ev{ (window_mouse_event &&)value }; ev.button)
 				{
 				case mouse_button_0: {} break;
 				case mouse_button_1: {} break;
@@ -256,7 +255,7 @@ namespace ml
 			} break;
 
 			case window_cursor_position_event::ID: {
-				auto const & ev{ (window_cursor_position_event const &)value };
+				auto && ev{ (window_cursor_position_event &&)value };
 				float64_t const x = ev.x, y = ev.y;
 			} break;
 			}
@@ -264,7 +263,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_client_enter(client_enter_event const & ev)
+		void on_client_enter(client_enter_event && ev)
 		{
 			// load stuff, etc...
 			auto const mem	{ ev->mem };
@@ -473,7 +472,7 @@ namespace ml
 			}
 		}
 
-		void on_client_update(client_update_event const & ev)
+		void on_client_update(client_update_event && ev)
 		{
 			// update stuff, etc...
 			auto const io{ ev->io };
@@ -506,7 +505,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		void on_imgui_dockspace(gui_dockspace_event const & ev)
+		void on_imgui_dockspace(imgui_dockspace_event && ev)
 		{
 			enum : int32_t // nodes
 			{
@@ -546,7 +545,7 @@ namespace ml
 			d.dock(m_gui_ecs		, d[right_dn]);
 		}
 
-		void on_imgui_menubar(gui_menubar_event const & ev)
+		void on_imgui_menubar(imgui_menubar_event && ev)
 		{
 			// FILE
 			if (ImGui::BeginMenu("file"))
@@ -590,7 +589,7 @@ namespace ml
 			}
 		}
 
-		void on_imgui_render(gui_render_event const & ev)
+		void on_imgui_render(imgui_render_event && ev)
 		{
 			// IMGUI
 			if (m_imgui_about.open)			{ ev->imgui_about(&m_imgui_about.open); }
@@ -1363,7 +1362,7 @@ namespace ml
 				gui::tooltip("resolution");
 
 				// FPS
-				auto const fps{ get_io()->fps.rate };
+				auto const fps{ get_io()->fps_rate };
 				ImGui::Separator();
 				ImGui::TextDisabled("%.3f ms/frame ( %.1f fps )", 1000.f / fps, fps);
 				ImGui::Separator();

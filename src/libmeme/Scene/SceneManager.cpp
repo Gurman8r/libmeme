@@ -1,5 +1,5 @@
-#include <libmeme/Engine/SceneManager.hpp>
-#include <libmeme/Engine/Components.hpp>
+#include <libmeme/Scene/SceneManager.hpp>
+#include <libmeme/Scene/Components.hpp>
 
 namespace ml
 {

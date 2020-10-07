@@ -1,7 +1,7 @@
 #ifndef _ML_BLACKBOARD_HPP_
 #define _ML_BLACKBOARD_HPP_
 
-#include <libmeme/Core/Memory.hpp>
+#include <libmeme/Core/FlatMap.hpp>
 
 namespace ml
 {
@@ -38,17 +38,18 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T
-		> struct handle final
+		> struct handle final : trackable, non_copyable
 		{
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			using value_type		= typename T;
-			using self_type			= typename blackboard::handle<value_type>;
 			using wrapper_type		= typename unown<variable_type>;
 			using pointer			= typename value_type *;
 			using const_pointer		= typename value_type const *;
 			using reference			= typename value_type &;
 			using const_reference	= typename value_type const &;
+
+			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 			template <class ID
 			> handle(blackboard * bb, ID && id, allocator_type alloc = {})
@@ -56,7 +57,10 @@ namespace ml
 				, m_id	{ make_id(ML_forward(id)) }
 				, m_ptr	{ m_bb->load<value_type>(m_id, alloc) }
 			{
-				lock()->emplace<value_type>();
+				if (auto const v{ lock() }; !v->has_value())
+				{
+					v->emplace<value_type>();
+				}
 			}
 
 			~handle() noexcept
@@ -69,15 +73,14 @@ namespace ml
 			auto id		() const noexcept -> id_type			{ return m_id; }
 			auto parent	() const noexcept -> blackboard *		{ return m_bb; }
 			auto lock	() const noexcept -> element_type		{ return m_ptr.lock(); }
-			auto any	() const noexcept -> variable_type *	{ return lock().get(); }
-			auto ptr	() const noexcept -> pointer			{ return std::any_cast<value_type>(any()); }
-			auto ref	() const noexcept -> reference			{ return *ptr(); }
+			auto ptr	() const noexcept -> pointer			{ return std::any_cast<value_type>(lock().get()); }
 			auto cptr	() const noexcept -> const_pointer		{ return ptr(); }
+			auto ref	() const noexcept -> reference			{ return *ptr(); }
 			auto cref	() const noexcept -> const_reference	{ return ref(); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			ML_NODISCARD auto operator->() const noexcept -> pointer { return cptr(); }
+			ML_NODISCARD auto operator->() const noexcept -> pointer { return ptr(); }
 
 			ML_NODISCARD auto operator*() const noexcept -> reference { return ref(); }
 
@@ -316,6 +319,12 @@ namespace ml
 			return *this->cast<T>(ML_forward(id), alloc);
 		}
 
+		template <class T, class ID
+		> T & get_to(ID && id, T & out, allocator_type alloc = {}) noexcept
+		{
+			return (out = this->get<T>(ML_forward(id), alloc));
+		}
+
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		template <class T, class ID, class ... Args
@@ -406,11 +415,12 @@ namespace ml
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		std::mutex m_mutex	; // 
-		catagories_type m_vars	; // 
+		catagories_type m_vars; // 
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};
+
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 }
 
 #endif // !_ML_BLACKBOARD_HPP_

@@ -1,11 +1,11 @@
 #ifndef _ML_SCENE_MANAGER_HPP_
 #define _ML_SCENE_MANAGER_HPP_
 
-#include <libmeme/Engine/Entity.hpp>
+#include <libmeme/Scene/Entity.hpp>
 
 namespace ml
 {
-	struct ML_ENGINE_API scene_manager final : trackable, non_copyable
+	struct ML_SCENE_API scene_manager final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

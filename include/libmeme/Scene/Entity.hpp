@@ -1,7 +1,7 @@
 #ifndef _ML_ENTITY_HPP_
 #define _ML_ENTITY_HPP_
 
-#include <libmeme/Engine/Scene.hpp>
+#include <libmeme/Scene/Scene.hpp>
 
 namespace ml
 {

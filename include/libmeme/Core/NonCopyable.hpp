@@ -1,8 +1,8 @@
 #ifndef _ML_NON_COPYABLE_HPP_
 #define _ML_NON_COPYABLE_HPP_
 
-#include <libmeme/Common.hpp>
 #include <libmeme/Core/Export.hpp>
+#include <libmeme/Core/Utility.hpp>
 
 namespace ml
 {

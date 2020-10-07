@@ -1,5 +1,5 @@
-#ifndef _ML_GUI_MANAGER_HPP_
-#define _ML_GUI_MANAGER_HPP_
+#ifndef _ML_IMGUI_CONTEXT_HPP_
+#define _ML_IMGUI_CONTEXT_HPP_
 
 #include <libmeme/Client/Export.hpp>
 #include <libmeme/Client/ImGui.hpp>
@@ -8,17 +8,16 @@ namespace ml
 {
 	struct event_bus;
 	struct render_window;
-	namespace gui { struct form; }
 
-	struct ML_CLIENT_API gui_manager final : trackable, non_copyable
+	struct ML_CLIENT_API imgui_context final : trackable, non_copyable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		using allocator_type = typename pmr::polymorphic_allocator<byte_t>;
 
-		gui_manager(event_bus * bus, render_window * win, allocator_type alloc);
+		imgui_context(event_bus * bus, render_window * win, allocator_type alloc);
 
-		~gui_manager();
+		~imgui_context();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -139,4 +138,4 @@ namespace ml
 	};
 }
 
-#endif // !_ML_GUI_MANAGER_HPP_
+#endif // !_ML_IMGUI_CONTEXT_HPP_

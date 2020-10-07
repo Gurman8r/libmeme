@@ -1,10 +1,9 @@
 #include <libmeme/Core/Blackboard.hpp>
 #include <libmeme/Client/ClientEvents.hpp>
-#include <libmeme/Client/LoopSystem.hpp>
-#include <libmeme/Client/GuiManager.hpp>
+#include <libmeme/Client/ImGuiContext.hpp>
 #include <libmeme/Client/PluginManager.hpp>
-#include <libmeme/Client/Python.hpp>
-#include <libmeme/Engine/SceneManager.hpp>
+#include <libmeme/Embed/Python.hpp>
+#include <libmeme/Scene/SceneManager.hpp>
 #include <libmeme/Window/WindowEvents.hpp>
 #include <libmeme/Graphics/RenderWindow.hpp>
 
@@ -109,17 +108,18 @@ static auto load_settings(fs::path const & path = SETTINGS_PATH)
 
 ml::int32_t main()
 {
+	// context
 	static memory			mem		{ pmr::get_default_resource() };
-	static client_io		io		{ __argc, __argv, mem.get_allocator(), load_settings() };
+	static client_io		io		{ __argc, __argv, load_settings(), mem.get_allocator() };
 	static blackboard		vars	{ io.alloc };
 	static event_bus		bus		{ io.alloc };
 	static render_window	win		{ io.alloc };
-	static gui_manager		gui		{ &bus, &win, io.alloc };
-	static py_interpreter	python	{ mem.get_resource(), io.program_name, io.content_path };
-	static loop_system		loopsys	{ io.alloc };
-	static client_context	context	{ &mem, &io, &vars, &bus, &win, &gui, &python, &loopsys };
-	static plugin_manager	plugins	{ &context };
+	static imgui_context	imgui	{ &bus, &win, io.alloc };
+	static client_context	context	{ &mem, &io, &vars, &bus, &win, &imgui };
+	static plugin_manager	mods	{ &context };
+	static python_context	python	{ &context };
 
+	// window
 	ML_assert(win.open(io.prefs["window"].get<window_settings>()));
 	win.set_char_callback([](auto ... x) { bus.fire<window_char_event>(x...); });
 	win.set_char_mods_callback([](auto ... x) { bus.fire<window_char_mods_event>(x...); });
@@ -140,35 +140,46 @@ ml::int32_t main()
 	win.set_resize_callback([](auto ... x) { bus.fire<window_resize_event>(x...); });
 	win.set_scroll_callback([](auto ... x) { bus.fire<window_scroll_event>(x...); });
 
-	ML_assert(gui.startup(io.prefs["gui"]["callbacks"]));
-	gui.load_style(io.path2(io.prefs["gui"]["style_path"]));
-	gui.get_menubar().configure(io.prefs["gui"]["main_menubar"]);
-	gui.get_dockspace().configure(io.prefs["gui"]["main_dockspace"]);
+	// imgui
+	ML_assert(imgui.startup(io.prefs["gui"]["callbacks"]));
+	imgui.load_style(io.path2(io.prefs["gui"]["style_path"]));
+	imgui.get_menubar().configure(io.prefs["gui"]["main_menubar"]);
+	imgui.get_dockspace().configure(io.prefs["gui"]["main_dockspace"]);
 
-	for (auto const & path : io.prefs["plugins"]["files"]) { plugins.install(path); }
-	for (auto const & path : io.prefs["scripts"]["files"]) { python.do_file(io.path2(path)); }
+	// plugins
+	for (auto const & path : io.prefs["plugins"]["files"])
+	{
+		mods.install(path);
+	}
 
+	// scripts
+	for (auto const & path : io.prefs["scripts"]["files"])
+	{
+		py::eval_file(io.path2(path).string());
+	}
+
+	// main loop
 	bus.fire<client_enter_event>(&context);
 	ML_defer() { bus.fire<client_exit_event>(&context); };
 	if (!win.is_open()) { return EXIT_FAILURE; }
 	do
 	{
 		io.loop_timer.restart();
-		auto const dt{ (float_t)io.delta_time.count() };
-		io.fps.accum += dt - io.fps.times[io.fps.index];
-		io.fps.times[io.fps.index] = dt;
-		io.fps.index = (io.fps.index + 1) % io.fps.times.size();
-		io.fps.rate = (0.f < io.fps.accum) ? 1.f / (io.fps.accum / (float_t)io.fps.times.size()) : FLT_MAX;
+		auto const dt{ (float_t)io.frame_time.count() };
+		io.fps_accum += dt - io.fps_times[io.fps_index];
+		io.fps_times[io.fps_index] = dt;
+		io.fps_index = (io.fps_index + 1) % io.fps_times.size();
+		io.fps_rate = (0.f < io.fps_accum) ? 1.f / (io.fps_accum / (float_t)io.fps_times.size()) : FLT_MAX;
 		ML_defer(&) {
-			io.frame_index++;
-			io.delta_time = io.loop_timer.elapsed();
+			io.frame_count++;
+			io.frame_time = io.loop_timer.elapsed();
 		};
 
 		window::poll_events();
 
 		bus.fire<client_update_event>(&context);
 
-		gui.do_frame();
+		imgui.do_frame();
 
 		if (win.has_hints(window_hints_doublebuffer))
 		{

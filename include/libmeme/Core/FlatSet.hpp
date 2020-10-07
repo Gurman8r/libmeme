@@ -1,7 +1,7 @@
 #ifndef _ML_FLAT_SET_HPP_
 #define _ML_FLAT_SET_HPP_
 
-#include <libmeme/Core/Utility.hpp>
+#include <libmeme/Core/Memory.hpp>
 
 namespace ml::ds
 {
@@ -37,7 +37,7 @@ namespace ml::ds
 
 	// BASIC FLAT SET
 	template <class _Traits
-	> struct basic_flat_set final
+	> struct basic_flat_set final : trackable
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -339,6 +339,8 @@ namespace ml::ds
 		ML_NODISCARD auto data() noexcept -> pointer { return m_data.data(); }
 
 		ML_NODISCARD auto data() const noexcept -> const_pointer { return m_data.data(); }
+
+		ML_NODISCARD auto elements() const noexcept -> storage_type const & { return m_data; }
 
 		ML_NODISCARD bool empty() const noexcept { return m_data.empty(); }
 

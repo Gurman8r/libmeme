@@ -1,7 +1,7 @@
 #ifndef _COMPONENTS_HPP_
 #define _COMPONENTS_HPP_
 
-#include <libmeme/Engine/SceneCamera.hpp>
+#include <libmeme/Scene/SceneCamera.hpp>
 
 namespace ml
 {

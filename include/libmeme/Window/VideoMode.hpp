@@ -10,7 +10,7 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// video mode
-	struct ML_WINDOW_API ML_NODISCARD video_mode final
+	struct ML_WINDOW_API video_mode final
 	{
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -20,13 +20,13 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		static video_mode const & get_desktop_mode();
+		ML_NODISCARD static video_mode const & get_desktop_mode();
 
-		static ds::set<video_mode> const & get_fullscreen_modes();
+		ML_NODISCARD static pmr::vector<video_mode> const & get_fullscreen_modes();
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		bool operator==(video_mode const & other) const noexcept
+		ML_NODISCARD constexpr bool operator==(video_mode const & other) const noexcept
 		{
 			if (this == std::addressof(other)) { return true; }
 			else
@@ -37,7 +37,7 @@ namespace ml
 			}
 		}
 
-		bool operator<(video_mode const & other) const noexcept
+		ML_NODISCARD constexpr bool operator<(video_mode const & other) const noexcept
 		{
 			if (this == std::addressof(other)) { return false; }
 			else
@@ -48,7 +48,7 @@ namespace ml
 			}
 		}
 
-		bool operator!=(video_mode const & other) const noexcept
+		ML_NODISCARD constexpr bool operator!=(video_mode const & other) const noexcept
 		{
 			return !(*this == other);
 		}

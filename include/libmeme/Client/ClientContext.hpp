@@ -12,56 +12,48 @@ namespace ml
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	struct blackboard;
-	struct gui_manager;
-	struct loop_system;
-	struct py_interpreter;
+	struct imgui_context;
 	struct render_window;
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	// client io
-	struct ML_NODISCARD client_io final
+	struct ML_NODISCARD client_io final : trackable, non_copyable
 	{
 		using allocator_type = pmr::polymorphic_allocator<byte_t>;
 
-		int32_t const	argc	; // 
-		char ** const	argv	; // 
-		allocator_type	alloc	; // 
-		json			prefs	; // 
+		client_io(int32_t argc, char ** argv, json prefs, allocator_type alloc)
+			: argc{ argc }, argv{ argv }, prefs{ json{ prefs } }, alloc{ alloc }
+		{
+		}
 
-		// paths
+		int32_t const			argc						; // 
+		char ** const			argv						; // 
+		json					prefs						; // 
+		allocator_type			alloc						; // 
+
 		fs::path const
 			program_name{ argv[0] }							, // 
 			program_path{ fs::current_path() }				, // 
 			content_path{ prefs["path"].get<fs::path>() }	; // 
 
+		timer const				main_timer	{}				; // 
+		timer					loop_timer	{ false }		; // 
+		duration				frame_time	{}				; // 
+		uint64_t				frame_count	{}				; // 
+		float_t					fps_rate	{}				; // 
+		float_t					fps_accum	{}				; // 
+		size_t					fps_index	{}				; // 
+		pmr::vector<float_t>	fps_times	{ 120, alloc }	; // 
+
+		vec2d					cursor		{}				; // 
+		mouse_state				mouse		{}				; // 
+		keyboard_state			keyboard	{}				; // 
+
 		ML_NODISCARD fs::path path2(fs::path const & path) const noexcept
 		{
 			return content_path.native() + path.native();
 		}
-
-		// timing
-		timer const	main_timer	{}			; // 
-		timer		loop_timer	{ false }	; // 
-		duration	delta_time	{}			; // 
-		uint64_t	frame_index	{}			; // 
-
-		struct ML_NODISCARD // fps
-		{
-			float_t					rate	{}; // 
-			float_t					accum	{}; // 
-			size_t					index	{}; // 
-			pmr::vector<float_t>	times	{ 120, allocator_type{} }; // 
-		}
-		fps;
-
-		struct ML_NODISCARD // input
-		{
-			vec2d									cursor	{}	; // 
-			ds::array<int32_t, mouse_button_MAX>	mouse	{}	; // 
-			ds::array<int32_t, key_code_MAX>		keys	{}	; // 
-		}
-		input;
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -71,12 +63,10 @@ namespace ml
 	{
 		memory			* const mem		; // memory
 		client_io		* const io		; // io
-		blackboard		* const data	; // content
+		blackboard		* const vars	; // vars
 		event_bus		* const bus		; // bus
 		render_window	* const window	; // window
-		gui_manager		* const imgui	; // imgui
-		py_interpreter	* const python	; // python
-		loop_system		* const loop	; // loop
+		imgui_context	* const imgui	; // imgui
 	};
 
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -98,25 +88,21 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void on_event(event const &) override = 0;
-
-		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+		virtual void on_event(event &&) override = 0;
 
 		using event_listener::get_bus;
 
 		ML_NODISCARD auto get_context	() const noexcept -> client_context	* { return m_context; }
-		ML_NODISCARD auto get_imgui		() const noexcept -> gui_manager	* { return m_context->imgui; }
+		ML_NODISCARD auto get_imgui		() const noexcept -> imgui_context	* { return m_context->imgui; }
 		ML_NODISCARD auto get_io		() const noexcept -> client_io		* { return m_context->io; }
-		ML_NODISCARD auto get_loop		() const noexcept -> loop_system	* { return m_context->loop; }
 		ML_NODISCARD auto get_memory	() const noexcept -> memory			* { return m_context->mem; }
-		ML_NODISCARD auto get_python	() const noexcept -> py_interpreter * { return m_context->python; }
 		ML_NODISCARD auto get_window	() const noexcept -> render_window	* { return m_context->window; }
-		ML_NODISCARD auto get_vars		() const noexcept -> blackboard		* { return m_context->data; }
+		ML_NODISCARD auto get_vars		() const noexcept -> blackboard		* { return m_context->vars; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	private:
-		client_context * const m_context;
+		client_context * const m_context; // context
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 	};

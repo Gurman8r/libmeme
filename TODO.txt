@@ -30,3 +30,12 @@ libmeme.json
 /bin/.../**.dll
 /plugins/demo
 /main.exe
+
+core
+	ds
+	util
+	window
+	graphics
+client
+	imgui
+	plugin

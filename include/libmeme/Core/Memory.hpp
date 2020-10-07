@@ -2,7 +2,6 @@
 #define _ML_MEMORY_HPP_
 
 #include <libmeme/Core/Debug.hpp>
-#include <libmeme/Core/FlatMap.hpp>
 #include <libmeme/Core/Singleton.hpp>
 #include <libmeme/Core/BatchVector.hpp>
 

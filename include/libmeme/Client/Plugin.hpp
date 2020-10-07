@@ -1,7 +1,7 @@
 #ifndef _ML_PLUGIN_HPP_
 #define _ML_PLUGIN_HPP_
 
-#include <libmeme/Client/ClientAPI.hpp>
+#include <libmeme/Client/ClientContext.hpp>
 
 #ifndef ML_PLUGIN_API
 #define ML_PLUGIN_API ML_API_EXPORT
@@ -23,7 +23,7 @@ namespace ml
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		virtual void on_event(event const &) override = 0;
+		virtual void on_event(event &&) override = 0;
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -31,7 +31,7 @@ namespace ml
 
 		ML_NODISCARD auto get_user_pointer() const noexcept -> void * { return m_userptr; }
 
-		void set_user_pointer(void * value) noexcept { m_userptr = value; }
+		void * set_user_pointer(void * value) noexcept { return m_userptr = value; }
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

@@ -12,10 +12,28 @@ namespace ml
 
 		using self_type = typename Derived;
 
-		ML_NODISCARD static self_type * get_singleton() noexcept
+		template <class ... Args
+		> ML_NODISCARD static self_type * get_singleton(Args && ... args) noexcept
 		{
-			static self_type self{};
-			return std::addressof(self);
+			static auto buf{ get_buffer() };
+
+			if constexpr (0 < sizeof...(args))
+			{
+				::new (buf) self_type{ ML_forward(args)... };
+			}
+			else
+			{
+				static ML_scope() { ::new (buf) self_type{}; };
+			}
+
+			return buf;
+		}
+
+	private:
+		static self_type * get_buffer() noexcept
+		{
+			static byte_t buf[sizeof(self_type)]{};
+			return reinterpret_cast<self_type *>(buf);
 		}
 
 		/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
