@@ -79,12 +79,12 @@ namespace ml
 
 		void on_client_enter(client_enter_event const & ev)
 		{
-			if (auto icon = m_images["icon"] = get_memory()->make_ref<bitmap>
+			if (auto & icon = (m_images["icon"] = get_memory()->make_ref<bitmap>
 			(
-				get_io()->path2("assets/textures/icon.png"))
-			)
+				get_io()->path2("assets/textures/icon.png")
+			)))
 			{
-				get_window()->set_icon(icon->width(), icon->height(), icon->data());
+				get_window()->set_icon(icon->width(), icon->height(), 1, icon->data());
 			}
 		}
 

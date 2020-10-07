@@ -23,15 +23,15 @@ namespace ml
 			return hashof_v<T>;
 		}
 
-		template <class T> ML_NODISCARD static constexpr id_type make_id(T && id) noexcept
+		template <class T> ML_NODISCARD static constexpr id_type make_id(T && value) noexcept
 		{
-			if constexpr (std::is_integral_v<std::decay_t<decltype(id)>>)
+			if constexpr (std::is_integral_v<std::decay_t<decltype(value)>>)
 			{
-				return static_cast<id_type>(id);
+				return static_cast<id_type>(value);
 			}
 			else
 			{
-				return util::hash(ML_forward(id));
+				return util::hash(ML_forward(value));
 			}
 		}
 
@@ -44,7 +44,7 @@ namespace ml
 
 			using value_type		= typename T;
 			using self_type			= typename blackboard::handle<value_type>;
-			using wrapper_type		= typename std::reference_wrapper<value_type>;
+			using wrapper_type		= typename unown<variable_type>;
 			using pointer			= typename value_type *;
 			using const_pointer		= typename value_type const *;
 			using reference			= typename value_type &;
@@ -54,8 +54,9 @@ namespace ml
 			> handle(blackboard * bb, ID && id, allocator_type alloc = {})
 				: m_bb	{ ML_check(bb) }
 				, m_id	{ make_id(ML_forward(id)) }
-				, m_ref	{ m_bb->emplace<value_type>(alloc, m_id) }
+				, m_ptr	{ m_bb->load<value_type>(m_id, alloc) }
 			{
+				lock()->emplace<value_type>();
 			}
 
 			~handle() noexcept
@@ -65,49 +66,29 @@ namespace ml
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			variable_type & update(allocator_type alloc = {}) noexcept
-			{
-				ML_assert_msg(m_bb, "BAD PARENT BLACKBOARD");
-				return (m_ref = m_bb->load<value_type>(m_id, alloc));
-			}
+			auto id		() const noexcept -> id_type			{ return m_id; }
+			auto parent	() const noexcept -> blackboard *		{ return m_bb; }
+			auto lock	() const noexcept -> element_type		{ return m_ptr.lock(); }
+			auto any	() const noexcept -> variable_type *	{ return lock().get(); }
+			auto ptr	() const noexcept -> pointer			{ return std::any_cast<value_type>(any()); }
+			auto ref	() const noexcept -> reference			{ return *ptr(); }
+			auto cptr	() const noexcept -> const_pointer		{ return ptr(); }
+			auto cref	() const noexcept -> const_reference	{ return ref(); }
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-			auto id		() const noexcept	-> id_type				{ return m_id; }
-			auto parent	() const noexcept	-> blackboard *			{ return m_bb; }
-			auto ref	() & noexcept		-> reference			{ return m_ref.get(); }
-			auto ref	() const & noexcept	-> const_reference		{ return m_ref.get(); }
-			auto cref	() const & noexcept	-> const_reference		{ return ref(); }
-			auto ptr	() noexcept			-> pointer				{ return &ref(); }
-			auto ptr	() const noexcept	-> const_pointer		{ return &ref(); }
-			auto cptr	() const noexcept	-> const_pointer		{ return ptr(); }
+			ML_NODISCARD auto operator->() const noexcept -> pointer { return cptr(); }
 
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+			ML_NODISCARD auto operator*() const noexcept -> reference { return ref(); }
 
-			ML_NODISCARD pointer operator->() noexcept { return ptr(); }
+			ML_NODISCARD operator bool() const noexcept { return (bool)m_ptr; }
 
-			ML_NODISCARD const_pointer operator->() const noexcept { return cptr(); }
-
-			ML_NODISCARD reference operator*() & noexcept { return ref(); }
-
-			ML_NODISCARD const_reference operator*() const & noexcept { return cref(); }
-
-			ML_NODISCARD operator reference () & noexcept { return ref(); }
-
-			ML_NODISCARD operator const_reference () const & noexcept { return cref(); }
-			
-			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-			template <class I
-			> decltype(auto) operator[](I && i) noexcept
-			{
-				return ref()[ML_forward(i)];
-			}
+			ML_NODISCARD operator reference () const noexcept { return ref(); }
 
 			template <class I
 			> decltype(auto) operator[](I && i) const noexcept
 			{
-				return cref()[ML_forward(i)];
+				return ref()[ML_forward(i)];
 			}
 
 			template <class ... Args
@@ -135,7 +116,7 @@ namespace ml
 		private:
 			blackboard *	m_bb	; // 
 			id_type			m_id	; // 
-			wrapper_type	m_ref	; // 
+			wrapper_type	m_ptr	; // 
 
 			/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 		};

@@ -273,9 +273,9 @@ namespace ml
 		m_impl->set_focus_on_show(value);
 	}
 
-	void window::set_icon(size_t w, size_t h, byte_t const * p) noexcept
+	void window::set_icon(size_t w, size_t h, size_t n, byte_t const * p) noexcept
 	{
-		m_impl->set_icon(w, h, p);
+		m_impl->set_icon(w, h, n, p);
 	}
 
 	void window::set_input_mode(int32_t mode, int32_t value) noexcept

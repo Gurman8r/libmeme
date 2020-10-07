@@ -107,7 +107,7 @@ namespace ml
 
 		void set_focus_on_show(bool value) noexcept final;
 		
-		void set_icon(size_t w, size_t h, byte_t const * p) noexcept final;
+		void set_icon(size_t w, size_t h, size_t n, byte_t const * p) noexcept final;
 
 		void set_input_mode(int32_t mode, int32_t value) noexcept final;
 		

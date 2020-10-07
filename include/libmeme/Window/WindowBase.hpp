@@ -113,7 +113,7 @@ namespace ml
 
 		virtual void set_focus_on_show(bool) = 0;
 
-		virtual void set_icon(size_t, size_t, byte_t const *) = 0;
+		virtual void set_icon(size_t, size_t, size_t, byte_t const *) = 0;
 
 		virtual void set_input_mode(int32_t, int32_t) = 0;
 
